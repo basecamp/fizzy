@@ -1,0 +1,8 @@
+#!/bin/bash -e
+BIN=$(pg_config --bindir)
+
+if [[ ! -d $PGDATA ]]; then
+  $BIN/initdb
+fi
+
+$BIN/postgres

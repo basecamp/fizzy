@@ -1,0 +1,6 @@
+#!/bin/bash -e
+
+while ! pg_isready -h /var/run/postgresql -d postgres > /dev/null; do
+  echo "Waiting for database to be ready..."
+  sleep 1
+done

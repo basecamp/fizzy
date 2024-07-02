@@ -5,4 +5,4 @@ test:
   adapter: test
 
 production:
-  adapter: async
+  adapter: postgresql

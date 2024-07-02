@@ -19,7 +19,7 @@ FROM --platform=$TARGETPLATFORM base AS build
 
 # Install packages needed to build gems
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential git libvips pkg-config
+    apt-get install --no-install-recommends -y build-essential git libvips pkg-config libpq-dev
 
 # Install application gems
 COPY Gemfile Gemfile.lock .ruby-version ./
@@ -41,8 +41,10 @@ RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 FROM base
 
 # Install packages needed for deployment
+RUN mkdir -p /etc/postgresql-common
+RUN echo "create_main_cluster = false" > /etc/postgresql-common/createcluster.conf
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl libjemalloc2 libsqlite3-0 libvips redis && \
+    apt-get install --no-install-recommends -y curl libjemalloc2 libvips postgresql && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Copy built artifacts: gems, application
@@ -51,8 +53,11 @@ COPY --from=build /rails /rails
 
 # Run and own only the runtime files as a non-root user for security
 RUN useradd rails --create-home --shell /bin/bash && \
-    chown -R rails:rails db log storage tmp
+    chown -R rails:rails db log storage tmp /var/run/postgresql
 USER rails:rails
+
+# Specify where the database will be kept
+ENV PGDATA=/rails/storage/db
 
 # Entrypoint prepares the application.
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]

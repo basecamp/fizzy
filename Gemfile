@@ -12,7 +12,7 @@ gem "turbo-rails"
 # Deployment and drivers
 gem "bootsnap", require: false
 gem "puma", ">= 5.0"
-gem "sqlite3", ">= 2.0"
+gem "pg"
 gem "thruster"
 
 # Features
