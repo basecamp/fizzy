@@ -5,4 +5,6 @@ if [[ ! -d $PGDATA ]]; then
   $BIN/initdb
 fi
 
+# TODO: if there's a backup file waiting to be restored, do it here.
+
 $BIN/postgres
