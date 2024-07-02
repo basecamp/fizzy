@@ -1,0 +1,54 @@
+#!/usr/bin/env ruby
+
+require "json"
+require "yaml"
+
+class ProcessMonitor
+  SIGNALS = %w[ INT TERM CLD ]
+
+  def initialize(procfile)
+    @procs = process_list(procfile)
+    handle_signals
+
+    @procs.each &:start
+    @procs.each &:wait
+  end
+
+  private
+    def process_list(procfile)
+      config = YAML.load_file(procfile)
+      config.map { |name, cmd| MonitoredProcess.new(name, cmd) }
+    end
+
+    def handle_signals
+      SIGNALS.each do |signal|
+        Signal.trap(signal) do
+          @procs.each &:terminate
+        end
+      end
+    end
+end
+
+class MonitoredProcess
+  def initialize(name, cmd)
+    @name, @cmd = name, cmd
+  end
+
+  def start
+    @pid = Process.spawn(@cmd)
+  end
+
+  def wait
+    Process.wait @pid
+  rescue Errno::ECHILD
+    nil
+  end
+
+  def terminate
+    Process.kill "TERM", @pid
+  rescue Errno::ESRCH
+    nil
+  end
+end
+
+ProcessMonitor.new("Procfile")

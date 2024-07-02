@@ -13,6 +13,7 @@ gem "turbo-rails"
 gem "bootsnap", require: false
 gem "puma", ">= 5.0"
 gem "sqlite3", ">= 2.0"
+gem "thruster"
 
 # Features
 gem "bcrypt", "~> 3.1.7"

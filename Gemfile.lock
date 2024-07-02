@@ -269,6 +269,11 @@ GEM
     stringio (3.1.1)
     strscan (3.1.0)
     thor (1.3.1)
+    thruster (0.1.4)
+    thruster (0.1.4-aarch64-linux)
+    thruster (0.1.4-arm64-darwin)
+    thruster (0.1.4-x86_64-darwin)
+    thruster (0.1.4-x86_64-linux)
     timeout (0.4.1)
     turbo-rails (2.0.5)
       actionpack (>= 6.0.0)
@@ -317,6 +322,7 @@ DEPENDENCIES
   selenium-webdriver
   sqlite3 (>= 2.0)
   stimulus-rails
+  thruster
   turbo-rails
 
 RUBY VERSION
