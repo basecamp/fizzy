@@ -6,5 +6,9 @@ if [[ ! -d $PGDATA ]]; then
 fi
 
 # TODO: if there's a backup file waiting to be restored, do it here.
+# ...
+
+# Remove any stale pid file
+rm -f $PGDATA/postmaster.pid
 
 $BIN/postgres
