@@ -1,0 +1,4 @@
+#!/bin/bash -e
+
+bin/wait-db
+bin/rake solid_queue:start

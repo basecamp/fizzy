@@ -130,6 +130,11 @@ GEM
     date (3.3.4)
     drb (2.2.1)
     erubi (1.13.0)
+    et-orbi (1.2.11)
+      tzinfo
+    fugit (1.11.0)
+      et-orbi (~> 1, >= 1.2.11)
+      raabro (~> 1.4)
     globalid (1.2.1)
       activesupport (>= 6.1)
     i18n (1.14.5)
@@ -193,6 +198,7 @@ GEM
     public_suffix (6.0.0)
     puma (6.4.2)
       nio4r (~> 2.0)
+    raabro (1.4.0)
     racc (1.8.0)
     rack (3.1.3)
     rack-session (2.0.0)
@@ -255,6 +261,12 @@ GEM
       rexml (~> 3.2, >= 3.2.5)
       rubyzip (>= 1.2.2, < 3.0)
       websocket (~> 1.0)
+    solid_queue (0.3.3)
+      activejob (>= 7.1)
+      activerecord (>= 7.1)
+      concurrent-ruby (>= 1.3.1)
+      fugit (~> 1.11.0)
+      railties (>= 7.1)
     stimulus-rails (1.3.3)
       railties (>= 6.0.0)
     stringio (3.1.1)
@@ -312,6 +324,7 @@ DEPENDENCIES
   rails!
   rubocop-rails-omakase
   selenium-webdriver
+  solid_queue
   stimulus-rails
   thruster
   turbo-rails

@@ -15,6 +15,9 @@ gem "puma", ">= 5.0"
 gem "pg"
 gem "thruster"
 
+# Jobs
+gem "solid_queue"
+
 # Features
 gem "bcrypt", "~> 3.1.7"
 
