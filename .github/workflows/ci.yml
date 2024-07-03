@@ -56,15 +56,21 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    # services:
-    #  redis:
-    #    image: redis
-    #    ports:
-    #      - 6379:6379
-    #    options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: secret
+        ports:
+          - 5432:5432
+        options:
+          --health-cmd pg_isready
+          --health-interval 1s
+          --health-retries 30
+
     steps:
       - name: Install packages
-        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y google-chrome-stable curl libjemalloc2 libsqlite3-0 libvips 
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y google-chrome-stable curl libjemalloc2 libpq-dev libvips
 
       - name: Checkout code
         uses: actions/checkout@v4
@@ -77,8 +83,8 @@ jobs:
 
       - name: Run tests
         env:
+          DATABASE_URL: postgres://postgres:secret@localhost:5432/splat_test
           RAILS_ENV: test
-          # REDIS_URL: redis://localhost:6379/0
         run: bin/rails db:setup test test:system
 
       - name: Keep screenshots from failed system tests
