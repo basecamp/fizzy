@@ -1,4 +1,4 @@
 #!/bin/bash -e
 
-bin/wait-db
+bin/wait-app
 bin/rake solid_queue:start

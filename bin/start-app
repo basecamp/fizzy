@@ -3,4 +3,5 @@
 rm -f tmp/pids/server.pid
 
 bin/wait-db
+bin/rails db:prepare
 bin/rails server

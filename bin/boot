@@ -45,6 +45,7 @@ class MonitoredProcess
   end
 
   def terminate
+    # TODO: pg needs an INT here, not a TERM
     Process.kill "TERM", @pid
   rescue Errno::ESRCH
     nil

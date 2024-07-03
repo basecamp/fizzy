@@ -1,0 +1,8 @@
+#!/bin/bash -e
+
+PORT="${PORT:-3000}"
+
+while ! curl --output /dev/null --silent --head --fail http://localhost:$PORT/up; do
+  echo "Waiting for application to start..."
+  sleep 1
+done

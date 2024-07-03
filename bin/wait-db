@@ -4,6 +4,3 @@ while ! pg_isready -h /var/run/postgresql -d postgres > /dev/null; do
   echo "Waiting for database to be ready..."
   sleep 1
 done
-
-# TODO: need to ensure this only happens one, if multiple processes are starting up at the same time
-bin/rails db:prepare
