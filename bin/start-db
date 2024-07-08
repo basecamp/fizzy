@@ -1,12 +1,18 @@
 #!/bin/bash -e
 PGBIN=$(pg_config --bindir)
 
+
 if [[ ! -d $PGDATA ]]; then
-  $PGBIN/initdb
+  $PGBIN/initdb --auth-local=trust --auth-host=reject
+
+  # TODO: configure database, ensure we have no listen_addresses set, etc.
+  echo "listen_addresses = ''" >> $PGDATA/postgresql.conf
 fi
 
 # TODO: if there's a backup file waiting to be restored, do it here.
 # ...
+
+# TODO: trap SIGTERM and do a clean shutdown
 
 # Remove any stale pid file
 rm -f $PGDATA/postmaster.pid
