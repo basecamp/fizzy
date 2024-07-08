@@ -12,17 +12,18 @@
 
 ActiveRecord::Schema[8.0].define(version: 2024_07_02_140523) do
   # These are extensions that must be enabled in order to support this database
+  enable_extension "citext"
   enable_extension "plpgsql"
 
   create_table "organizations", force: :cascade do |t|
-    t.string "name", null: false
+    t.citext "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["name"], name: "index_organizations_on_name", unique: true
   end
 
   create_table "sessions", force: :cascade do |t|
-    t.integer "user_id", null: false
+    t.bigint "user_id", null: false
     t.string "token", null: false
     t.string "ip_address"
     t.string "user_agent"
@@ -137,9 +138,9 @@ ActiveRecord::Schema[8.0].define(version: 2024_07_02_140523) do
   end
 
   create_table "users", force: :cascade do |t|
-    t.integer "organization_id", null: false
-    t.string "name", null: false
-    t.string "email_address", null: false
+    t.bigint "organization_id", null: false
+    t.citext "name", null: false
+    t.citext "email_address", null: false
     t.string "password_digest", null: false
     t.boolean "active", default: true, null: false
     t.datetime "created_at", null: false
