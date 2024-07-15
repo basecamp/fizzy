@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/rails/rails.git
-  revision: 16d8b82d5e2aca4780c5d10b1fe9a90b33a0e84e
+  revision: 099776069c4be64be8be7e3fdb0232d7824a38a9
   branch: main
   specs:
     actioncable (8.0.0.alpha)
@@ -69,7 +69,7 @@ GIT
       connection_pool (>= 2.2.5)
       drb
       i18n (>= 1.6, < 2)
-      logger
+      logger (>= 1.4.2)
       minitest (>= 5.1)
       tzinfo (~> 2.0, >= 2.0.5)
     rails (8.0.0.alpha)
@@ -139,7 +139,7 @@ GEM
       activesupport (>= 6.0.0)
       railties (>= 6.0.0)
     io-console (0.7.2)
-    irb (1.13.2)
+    irb (1.14.0)
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
     json (2.7.2)
@@ -156,9 +156,9 @@ GEM
     marcel (1.0.4)
     matrix (0.4.2)
     mini_mime (1.1.5)
-    minitest (5.24.0)
+    minitest (5.24.1)
     msgpack (1.7.2)
-    net-imap (0.4.13)
+    net-imap (0.4.14)
       date
       net-protocol
     net-protocol (0.2.2)
@@ -193,7 +193,7 @@ GEM
     puma (6.4.2)
       nio4r (~> 2.0)
     racc (1.8.0)
-    rack (3.1.3)
+    rack (3.1.7)
     rack-session (2.0.0)
       rack (>= 3.0.0)
     rack-test (2.1.0)
