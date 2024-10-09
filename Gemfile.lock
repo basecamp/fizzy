@@ -185,7 +185,7 @@ GEM
     parser (3.3.3.0)
       ast (~> 2.4.1)
       racc
-    propshaft (1.0.0)
+    propshaft (1.1.0)
       actionpack (>= 7.0.0)
       activesupport (>= 7.0.0)
       rack
