@@ -19,6 +19,7 @@ class View < ApplicationRecord
   def bubbles
     @bubbles ||= begin
       result = account.bubbles
+      result = result.active unless indexed_by.popped?
       result = result.indexed_by(indexed_by || self.class.default_indexed_by)
       result = result.in_bucket(bucket) if bucket.present?
       result = result.tagged_with(tags) if tags.present?

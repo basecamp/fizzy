@@ -25,11 +25,11 @@ class Bubble < ApplicationRecord
 
   scope :indexed_by, ->(index) do
     case index
-    when "most_active"    then active.ordered_by_activity
-    when "most_discussed" then active.ordered_by_comments
-    when "most_boosted"   then active.ordered_by_boosts
-    when "newest"         then active.reverse_chronologically
-    when "oldest"         then active.chronologically
+    when "most_active"    then ordered_by_activity
+    when "most_discussed" then ordered_by_comments
+    when "most_boosted"   then ordered_by_boosts
+    when "newest"         then reverse_chronologically
+    when "oldest"         then chronologically
     when "popped"         then popped
     end
   end

@@ -1,6 +1,4 @@
 module View::Assignment
-  extend ActiveSupport::Concern
-
   def assignment
     filters["assignment"].to_s.inquiry
   end
