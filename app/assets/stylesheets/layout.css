@@ -59,3 +59,17 @@ body {
     display: none;
   }
 }
+
+.skip-navigation {
+  --left-offset: -999em;
+
+  inset-block-start: 4rem;
+  inset-inline-start: var(--left-offset);
+  position: absolute;
+  white-space: nowrap;
+  z-index: 11;
+
+  &:focus {
+    --left-offset: var(--inline-space);
+  }
+}

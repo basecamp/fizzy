@@ -29,14 +29,16 @@
   75% { transform: translateX(1rem); }
 }
 
-@keyframes shimmy {
-  0%  { transform: translateX(-0.5rem); }
-  25% { transform: translateX(0.5rem); }
-  50% { transform: translateX(-0.2rem); }
-  75% { transform: translateX(0.2rem); }
-}
-
 @keyframes appear-then-fade {
   0%,100% { opacity: 0; }
   5%,60%  { opacity: 1; }
+}
+
+@keyframes wobble {
+  15%  { border-radius: 66% 34% 72% 28% / 39% 63% 37% 61%; }
+  25%  { border-radius: 55% 47% 62% 40% / 58% 50% 52% 44%; }
+  33%  { border-radius: 46% 54% 61% 39% / 50% 51% 49% 50%; }
+  50%  { border-radius: 54% 46% 61% 39% / 57% 49% 51% 43%; }
+  75%  { border-radius: 53% 45% 60% 38% / 56% 48% 50% 42%; }
+  100% { transform: rotate(180deg); }
 }

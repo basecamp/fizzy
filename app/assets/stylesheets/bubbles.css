@@ -5,6 +5,7 @@
   --bubble-size-four: 20cqi;
   --bubble-size-five: 22cqi;
   --bubble-shift: 10deg;
+  --bubble-shape: 54% 46% 61% 39% / 57% 49% 51% 43%;
 }
 
 .windshield {
@@ -30,7 +31,7 @@
   max-inline-size: 100%;
   place-items: center;
   position: relative;
-  transition: all 0.2s ease;
+  transition: 0.2s ease;
 
   &:nth-child(1)  { order: 5; }
   &:nth-child(2)  { order: 3; }
@@ -43,19 +44,6 @@
   &:nth-child(9)  { order: 3; }
   &:nth-child(10) { order: 7; }
 
-  .windshield & {
-    animation: float-up-left 400ms normal forwards ease-out;
-
-    &:nth-of-type(2n+1) {
-      animation-delay: 50ms;
-      animation: float-down-right 400ms normal forwards ease-out;
-    }
-
-    &:nth-of-type(3n+1) {
-      animation-delay: 150ms;
-    }
-  }
-
   .windshield &:nth-of-type(n+6) {
     align-self: start;
   }
@@ -64,16 +52,8 @@
 
   @media (hover: hover) {
     .windshield &:hover {
-      animation: shimmy 400ms normal forwards ease-out;
-      scale: 1.1;
-      z-index: 999;
-
-      .bubble__svg {
-        transform: rotate(calc(var(--bubble-rotate) + var(--bubble-shift)));
-      }
-
-      .bubble__image {
-        transform: rotate(calc(var(--bubble-rotate) + var(--bubble-shift)));
+      .bubble__shape {
+        animation: wobble 1200ms normal forwards ease-out;
       }
     }
   }
@@ -92,7 +72,7 @@
 .bubble__bubble {
   background-color: var(--color-bg);
   border: max(3px, 0.2em) solid var(--bubble-color);
-  border-radius: 50%;
+  border-radius: var(--bubble-shape);
   position: absolute;
   z-index: -1;
 
@@ -335,19 +315,18 @@
 }
 
 .bubble__image {
-  mask-image: url(blob.svg);
-  mask-position: center;
-  mask-repeat: no-repeat;
-
+  border: none;
+  border-radius: var(--bubble-shape);
   block-size: 100cqi;
   inline-size: 100cqi;
+  overflow: clip;
   pointer-events: none;
-  transform: rotate(var(--bubble-rotate));
-  transition: all 0.2s ease;
+  transform: rotate(var(--bubble-rotate)) scale(0.9);
+  transition: 0.2s ease;
 
   @media (hover: hover) {
     .windshield .bubble:hover & {
-      transform: rotate(calc(var(--bubble-rotate) + var(--bubble-shift)));
+      transform: rotate(calc(var(--bubble-rotate) + var(--bubble-shift))) scale(0.9);
     }
   }
 
@@ -356,6 +335,10 @@
     inline-size: 100cqi;
     object-fit: cover;
     transform: rotate(calc(var(--bubble-rotate) * -1));
+
+    &:is([src=""]) {
+      display: none;
+    }
   }
 }
 
@@ -373,31 +356,6 @@
 .bubble__perma {
   block-size: 65cqb;
   max-inline-size: 100%;
-}
-
-.bubble__svg {
-  fill: color(from var(--bubble-color) srgb r g b / 0.15);
-  pointer-events: none;
-  position: relative;
-  scale: 1.1;
-  stroke: var(--bubble-color);
-  stroke-width: 1.1em;
-  transform: rotate(var(--bubble-rotate));
-  transition: all 200ms ease-out;
-
-  .bubble:has(.bubble__link) & {
-    z-index: -1;
-  }
-
-  .bubble__perma & {
-    stroke-width: 0.6em;
-  }
-}
-
-.bubble__svg--popped {
-  .bubble:has(.bubble__link) & {
-    z-index: -1;
-  }
 }
 
 .bubble__title {
@@ -471,8 +429,9 @@
         border: 0;
         border-radius: 0.6em;
 
-        .bubble__svg {
-          transform: rotate(calc(var(--bubble-rotate) + var(--bubble-shift))) scale(1.2);
+        .bubble__shape {
+          animation: wobble 1200ms normal forwards ease-out;
+          transform: rotate(var(--bubble-rotate)) scale(1.2);
         }
       }
     }
@@ -510,4 +469,30 @@
   font-size: 200%;
   border-radius: 4px;
   transform: rotate(-35deg) translate(-25%, -50%);
+}
+
+.bubble__shape {
+  background-color: var(--bubble-color);
+  block-size: 1.2em;
+  border-radius: var(--bubble-shape);
+  inline-size: 1.2em;
+  pointer-events: none;
+  position: relative;
+  transform: rotate(var(--bubble-rotate));
+  transition: 200ms ease-out;
+
+  .bubble & {
+    background-color: color(from var(--bubble-color) srgb r g b / 0.15);
+    border: 0.2em solid var(--bubble-color);
+    block-size: 100%;
+    inline-size: 100%;
+  }
+
+  .bubble:has(.bubble__link) & {
+    z-index: -1;
+  }
+
+  .bubble__perma & {
+    stroke-width: 0.6em;
+  }
 }
