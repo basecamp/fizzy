@@ -31,8 +31,6 @@ module View::Summarized
         "assigned to <mark>#{assignees.pluck(:name).to_choice_sentence}</mark>"
       elsif assignment.unassigned?
         "assigned to no one"
-      else
-        "assigned to anyone"
       end
     end
 
