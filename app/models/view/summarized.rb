@@ -12,11 +12,11 @@ module View::Summarized
 
     def filter_summary
       unless default?
-        [ indexed_by_summary, tag_summary, assignee_summary ].compact.to_sentence
+        [ index_summary, tag_summary, assignee_summary ].compact.to_sentence
       end
     end
 
-    def indexed_by_summary
+    def index_summary
       if index = indexed_by.presence_in(View::INDEXES)
         "<mark>#{index.humanize}</mark>"
       end
