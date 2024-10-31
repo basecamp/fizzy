@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2024_10_28_183212) do
+ActiveRecord::Schema[8.0].define(version: 2024_10_28_221134) do
   create_table "accesses", force: :cascade do |t|
     t.integer "bucket_id", null: false
     t.integer "user_id", null: false
@@ -80,16 +80,6 @@ ActiveRecord::Schema[8.0].define(version: 2024_10_28_183212) do
     t.integer "stage_id"
     t.index ["bucket_id"], name: "index_bubbles_on_bucket_id"
     t.index ["stage_id"], name: "index_bubbles_on_stage_id"
-  end
-
-  create_table "bucket_views", force: :cascade do |t|
-    t.integer "creator_id", null: false
-    t.integer "bucket_id", null: false
-    t.json "filters", default: {}, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["bucket_id", "creator_id", "filters"], name: "index_bucket_views_on_bucket_id_and_creator_id_and_filters", unique: true
-    t.index ["creator_id"], name: "index_bucket_views_on_creator_id"
   end
 
   create_table "buckets", force: :cascade do |t|
@@ -180,6 +170,15 @@ ActiveRecord::Schema[8.0].define(version: 2024_10_28_183212) do
     t.datetime "updated_at", null: false
     t.index ["account_id"], name: "index_users_on_account_id"
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
+  end
+
+  create_table "views", force: :cascade do |t|
+    t.integer "creator_id", null: false
+    t.integer "bucket_id"
+    t.json "filters", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["creator_id", "filters", "bucket_id"], name: "index_views_on_creator_id_and_filters_and_bucket_id", unique: true
   end
 
   create_table "workflow_stages", force: :cascade do |t|

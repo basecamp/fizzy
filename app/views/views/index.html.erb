@@ -1,4 +1,4 @@
-<% @page_title = "Buckets" %>
+<% @page_title = "Projects" %>
 
 <% content_for :header do %>
   <nav>
@@ -15,11 +15,5 @@
 <% end %>
 
 <menu class="buckets margin-none unpad align-center justify-center flex flex-wrap gap">
-  <% @buckets.each do |bucket| %>
-    <% if bucket.is_a? Bucket %>
-      <%= render partial: "buckets/bucket", locals: { bucket: bucket } %>
-    <% elsif bucket.is_a? Bucket::View %>
-      <%= render partial: "buckets/view", locals: { view: bucket } %>
-    <% end %>
-  <% end %>
+  <%= render @views, cached: true %>
 </menu>

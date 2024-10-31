@@ -1,0 +1,9 @@
+writebook_default:
+  creator: david
+  bucket: writebook
+  filters: <%= { indexed_by: :most_active }.to_json %>
+
+assigned_to_jz:
+  creator: david
+  bucket: writebook
+  filters: <%= { indexed_by: :most_discussed, assignment: ActiveRecord::FixtureSet.identify(:jz).to_s, tag_ids: ActiveRecord::FixtureSet.identify(:mobile).to_s }.to_json %>

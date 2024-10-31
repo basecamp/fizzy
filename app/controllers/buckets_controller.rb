@@ -1,9 +1,5 @@
 class BucketsController < ApplicationController
-  before_action :set_bucket, except: %i[ index new create ]
-
-  def index
-    @buckets = (Current.user.buckets.all + Current.user.bucket_views.all).sort_by(&:updated_at).reverse!
-  end
+  before_action :set_bucket, except: %i[ new create ]
 
   def new
     @bucket = Current.account.buckets.build
@@ -11,7 +7,7 @@ class BucketsController < ApplicationController
 
   def create
     @bucket = Current.account.buckets.create! bucket_params
-    redirect_to bucket_bubbles_path(@bucket)
+    redirect_to bubbles_path(bucket_id: @bucket)
   end
 
   def edit
@@ -23,12 +19,12 @@ class BucketsController < ApplicationController
     @bucket.update! bucket_params
     @bucket.accesses.revise granted: grantees, revoked: revokees
 
-    redirect_to bucket_bubbles_path(@bucket)
+    redirect_to bubbles_path(bucket_id: @bucket)
   end
 
   def destroy
     @bucket.destroy
-    redirect_to buckets_path
+    redirect_to views_path
   end
 
   private

@@ -1,24 +1,30 @@
-<% @page_title = @bucket.name %>
+<% @page_title = @view.plain_summary %>
 
 <% content_for :header do %>
   <nav>
-    <%= link_to buckets_path, class: "btn btn--plain flex-item-justify-start" do %>
+    <%= link_to views_path, class: "btn btn--plain flex-item-justify-start" do %>
       <%= image_tag "bubbles.svg", aria: { hidden: true }, size: 24 %>
-      <span class="for-screen-reader">All Buckets</span>
+      <span class="for-screen-reader">All Projects</span>
     <% end %>
 
     <header class="txt-align-center">
-      <%= render "bubbles/filters", bucket: @bucket, view: @view, filter: @filter %>
+      <%= render "bubbles/filters", view: @view %>
     </header>
 
-    <%= button_to bucket_bubbles_path(@bucket), method: :post, class: "btn btn--plain", form_class: "flex-item-justify-end" do %>
-      <%= image_tag "bubble-add.svg", aria: { hidden: true }, size: 24 %>
-      <span class="for-screen-reader">Create a new bubble</span>
+    <% if @view.bucket %>
+      <%= button_to bucket_bubbles_path(@view.bucket), method: :post, class: "btn btn--plain", form_class: "flex-item-justify-end" do %>
+        <%= image_tag "bubble-add.svg", aria: { hidden: true }, size: 24 %>
+        <span class="for-screen-reader">Create a new bubble</span>
+      <% end %>
+    <% else %>
+      <span class="flex-item-justify-end" style="height: var(--btn-size); width: var(--btn-size);">
+        <%# FIXME: This is a placeholder to keep the same layout without a "new bubble" button %>
+      </span>
     <% end %>
   </nav>
 <% end %>
 
-<section class="windshield flex-inline flex-wrap gap justify-center align-end" style="view-transition-name: windshield_<%= @bucket.id %>">
+<section class="windshield flex-inline flex-wrap gap justify-center align-end" style="view-transition-name: windshield_<%= @view.id %>">
   <% if @bubbles.any? %>
     <%= render partial: "bubbles/bubble", collection: @bubbles.limit(10), cached: true %>
   <% else %>
@@ -28,7 +34,7 @@
 
 <section class="bubbles-list unpad-inline center margin-block-start">
   <header class="flex-inline align-center gap txt-small margin-block-end-half center">
-    <%= bubble_filter_form_tag bucket_bubbles_path(@bucket), method: :get do %>
+    <%= form_tag bubbles_path(view_filter_params(@view)), method: :get do %>
       <%= search_field_tag :term, params[:term], class: "input center flex-inline", placeholder: "Type to filter…" %>
     <% end %>
   </header>

@@ -2,9 +2,9 @@
 
 <% content_for :header do %>
   <nav>
-    <%= link_to bucket_bubbles_path(@bubble.bucket), class: "btn flex-item-justify-start" do %>
+    <%= link_to :back, class: "btn flex-item-justify-start" do %>
       <%= image_tag "arrow-left.svg", aria: { hidden: true }, size: 24 %>
-      <span class="for-screen-reader">All Bubbles</span>
+      <span class="for-screen-reader">Back</span>
     <% end %>
 
     <section class="flex flex-column align-end gap">

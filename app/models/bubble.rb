@@ -10,6 +10,7 @@ class Bubble < ApplicationRecord
 
   scope :reverse_chronologically, -> { order created_at: :desc, id: :desc }
   scope :chronologically, -> { order created_at: :asc, id: :asc }
+  scope :in_bucket, ->(bucket) { where bucket: bucket }
 
   # FIXME: Compute activity and comment count at write time so it's easier to query for.
   scope :left_joins_comments, -> do
@@ -22,29 +23,14 @@ class Bubble < ApplicationRecord
     left_joins_comments.select("bubbles.*, COUNT(comments.id) AS comment_count").group(:id).order("comment_count DESC")
   end
 
-  # FIXME: `status` implies an enum. Consider a name change.
-  scope :with_status, ->(status) do
-    status = status.presence_in %w[ popped active unassigned ]
-    public_send(status) if status
-  end
-
-  scope :ordered_by, ->(order) do
-    case order
-    when "most_active"    then ordered_by_activity
-    when "most_discussed" then ordered_by_comments
-    when "most_boosted"   then ordered_by_boosts
-    when "newest"         then reverse_chronologically
-    when "oldest"         then chronologically
-    end
-  end
-
-  class << self
-    def default_order_by
-      "most_active"
-    end
-
-    def default_status
-      "active"
+  scope :indexed_by, ->(index) do
+    case index
+    when "most_active"    then active.ordered_by_activity
+    when "most_discussed" then active.ordered_by_comments
+    when "most_boosted"   then active.ordered_by_boosts
+    when "newest"         then active.reverse_chronologically
+    when "oldest"         then active.chronologically
+    when "popped"         then popped
     end
   end
 

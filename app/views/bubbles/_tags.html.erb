@@ -1,5 +1,5 @@
 <% bubble.tags.each do |tag| %>
-  <%= link_to "##{tag.title}", bucket_bubbles_path(bubble.bucket, tag_id: tag), class: "bubble__bubble bubble__meta bubble__tag" %>
+  <%= link_to tag.hashtag, bubbles_path(bucket_id: bubble.bucket, tag_ids: tag), class: "bubble__bubble bubble__meta bubble__tag" %>
 <% end %>
 
 <% if bubble.tags.size < 3 %>

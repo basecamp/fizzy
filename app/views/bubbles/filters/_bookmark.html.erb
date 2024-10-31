@@ -1,0 +1,19 @@
+<% unless view.default? %>
+  <% if view.persisted? %>
+    <%= button_to view_path(view), method: :delete, class: "btn txt-small borderless" do %>
+      <%= image_tag "bookmark.svg", aria: { hidden: true }, size: 24 %>
+      <span class="for-screen-reader">Delete this filter</span>
+    <% end %>
+  <% else %>
+    <%= form_with url: views_path, method: :post do %>
+      <% View::KNOWN_FILTERS.each do |filter| %>
+        <%= hidden_field_tag filter, params[filter] %>
+      <% end %>
+
+      <%= button_tag type: :submit, class: "btn txt-small borderless" do %>
+        <%= image_tag "bookmark-outline.svg", aria: { hidden: true }, size: 24 %>
+        <span class="for-screen-reader">Save this filter</span>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>

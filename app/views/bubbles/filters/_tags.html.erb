@@ -1,18 +1,18 @@
 <div class="filter align-center gap-half" data-controller="dialog" data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside">
   <button class="btn btn--plain filter__button" data-action="click->dialog#toggle" data-dialog-modal-value="true">
-    <%= tag_filter_text filter %>
+    <%= tag_filter_text view %>
   </button>
 
   <dialog class="filter__popup panel fill-white shadow" data-dialog-target="dialog">
     <menu class="filter__menu unpad margin-none">
-      <% bucket.tags.order(:title).each do |tag| %>
-        <li><%= link_to tag.title, bucket_bubbles_path(bucket, view_filter_params.merge(tag_ids: [ tag.id ])) %></li>
+      <% filterable_tags(view).order(:title).each do |tag| %>
+        <li><%= link_to tag.title, bubbles_path(view_filter_params(view).merge(tag_ids: tag.id)) %></li>
       <% end %>
     </menu>
   </dialog>
 
-  <% if filter.tags %>
-    <%= link_to bucket_bubbles_path(bucket, view_filter_params.without(:tag_ids)), class: "btn", style: "font-size: 0.4em;" do %>
+  <% if view.tags.present? %>
+    <%= link_to bubbles_path(view_filter_params(view).without(:tag_ids)), class: "btn", style: "font-size: 0.4em;" do %>
       <%= image_tag "remove.svg", aria: { hidden: true }, size: 24 %>
       <span class="for-screen-reader">Clear</span>
     <% end %>

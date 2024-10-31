@@ -1,28 +1,16 @@
 <div class="flex flex-column gap-half align-center">
-  <h1 class="txt-large flex align-center gap-half" style="margin-inline-end: calc(var(--btn-size) / -2);">
-    <%= render "bubbles/filters/main", bucket: bucket %>
+  <%= bubble_filters_heading view do %>
+    <%= render "bubbles/filters/index", view: view %>
     in
-    <%= render "bubbles/filters/bucket", bucket: bucket %>
+    <%= render "bubbles/filters/bucket", view: view %>
 
-  <% if false %>
-    <%= button_tag type: :submit, class: "btn txt-small borderless" do %>
-      <%= image_tag "bookmark.svg", aria: { hidden: true }, size: 24 %>
-      <span class="for-screen-reader">Save this filter</span>
-    <% end %>
-  <% else %>
-    <%= button_tag type: :submit, class: "btn txt-small borderless" do %>
-        <%= image_tag "bookmark-outline.svg", aria: { hidden: true }, size: 24 %>
-        <span class="for-screen-reader">Save this filter</span>
-      <% end %>
+    <%= render "bubbles/filters/bookmark", view: view %>
   <% end %>
-  </h1>
 
   <h2 class="txt-medium flex align-center justify-center gap-half">
-    <%= filter.tags ? "Tagged" : "with" %>
-    <%= render "bubbles/filters/tags", bucket: bucket, filter: filter %>
+    <%= view.tags.present? ? "Tagged" : "with" %>
+    <%= render "bubbles/filters/tags", view: view %>
 
-    <% unless unassigned_filter_activated? %>
-      and <%= render "bubbles/filters/assignees", bucket: bucket, filter: filter %>
-    <% end %>
+    and <%= render "bubbles/filters/assignees", view: view %>
   </h2>
 </div>

@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  root "buckets#index"
+  root "views#index"
 
   resource :account do
     scope module: :accounts do
@@ -8,9 +8,7 @@ Rails.application.routes.draw do
     end
   end
 
-  resolve "Bubble" do |bubble, options|
-    route_for :bucket_bubble, bubble.bucket, bubble, options
-  end
+  resources :bubbles
 
   resources :buckets do
     resources :bubbles do
@@ -28,10 +26,6 @@ Rails.application.routes.draw do
     end
 
     resources :tags, only: :index
-
-    scope module: :buckets do
-      resources :views
-    end
   end
 
   resource :first_run
@@ -42,6 +36,8 @@ Rails.application.routes.draw do
       resource :avatar
     end
   end
+
+  resources :views
 
   resources :workflows do
     resources :stages, module: :workflows

@@ -1,18 +1,12 @@
 <div class="filter align-center gap-half" data-controller="dialog" data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside">
   <button class="btn btn--plain filter__button" data-action="click->dialog#toggle" data-dialog-modal-value="true">
-    <% if view.bucket %>
-      <%= view.bucket.name %>
-    <% else %>
-      all projects
-    <% end %>
+    <%= index_filter_text view %>
   </button>
 
   <dialog class="filter__popup panel fill-white shadow" data-dialog-target="dialog">
     <menu class="filter__menu unpad margin-none">
-      <li><%= link_to "all projects", bubbles_path(view_filter_params(view).merge(bucket_id: nil)), class: "filter__button" %></li>
-
-      <% Current.user.buckets.order(:name).each do |bucket| %>
-        <li><%= link_to bucket.name, bubbles_path(view_filter_params(view).merge(bucket_id: bucket.id)), class: "filter__button" %></li>
+      <% View::INDEXES.each do |index| %>
+        <li><%= link_to index.humanize, bubbles_path(view_filter_params(view).merge(indexed_by: index)), class: "filter__button" %></li>
       <% end %>
     </menu>
   </dialog>
