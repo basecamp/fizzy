@@ -8,7 +8,7 @@ class Bucket < ApplicationRecord
   has_many :tags, -> { distinct }, through: :bubbles
   has_many :views, dependent: :destroy
 
-  after_create -> { views.create! filters: View.default_filters }
+  after_create -> { views.create! }
 
   validates_presence_of :name
 end

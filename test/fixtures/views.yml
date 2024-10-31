@@ -1,7 +1,7 @@
 writebook_default:
   creator: david
   bucket: writebook
-  filters: <%= { indexed_by: :most_active }.to_json %>
+  filters: <%= {}.to_json %>
 
 assigned_to_jz:
   creator: david

@@ -11,10 +11,6 @@ class View < ApplicationRecord
   scope :reverse_chronologically, -> { order created_at: :desc, id: :desc }
 
   class << self
-    def default_filters
-      { "indexed_by" => default_indexed_by }
-    end
-
     def default_indexed_by
       "most_active"
     end
@@ -37,6 +33,6 @@ class View < ApplicationRecord
   end
 
   def bucket_default?
-    bucket && filters == self.class.default_filters
+    bucket && filters.empty?
   end
 end
