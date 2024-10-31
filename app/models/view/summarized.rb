@@ -27,7 +27,13 @@ module View::Summarized
     end
 
     def assignee_summary
-      "assigned to <mark>#{assignees.pluck(:name).to_choice_sentence}</mark>" if assignees.any?
+      if assignees.any?
+        "assigned to <mark>#{assignees.pluck(:name).to_choice_sentence}</mark>"
+      elsif assignment.unassigned?
+        "assigned to no one"
+      else
+        "assigned to anyone"
+      end
     end
 
     def bucket_summary

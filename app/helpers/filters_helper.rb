@@ -8,15 +8,14 @@ module FiltersHelper
     (view.indexed_by&.presence_in(View::INDEXES) || View.default_indexed_by).humanize
   end
 
+  # FIXME: This is repeated in `View::Summarized#assignee_summary`
   def assignee_filter_text(view)
     if view.assignees.present?
       "assigned to #{view.assignees.pluck(:name).to_choice_sentence}"
     elsif view.assignment.unassigned?
       "assigned to no one"
-    elsif view.assignment.assigned?
-      "assigned to anyone"
     else
-      "assigned or not"
+      "assigned to anyone"
     end
   end
 
