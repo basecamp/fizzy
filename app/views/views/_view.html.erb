@@ -17,7 +17,7 @@
       <strong class="txt-x-large"><%= view.summary.html_safe %></strong>
     <% end %>
 
-    <% unless view.default? %>
+    <% unless view.bucket_default? %>
       <%= button_to view_path(view), method: :delete, class: "btn btn--negative", data: { turbo_confirm: "Are you sure you want to delete this filter?" } do %>
         <%= image_tag "minus.svg", aria: { hidden: true }, size: 24 %>
         <span class="for-screen-reader">Delete</span>

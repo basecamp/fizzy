@@ -1,7 +1,7 @@
 module FiltersHelper
   def bubble_filters_heading(view, &)
     tag.h1 class: "txt-large flex align-center gap-half",
-      style: view.default? ? "" : "margin-inline-end: calc(var(--btn-size) / -2);", &
+      style: view.bucket_default? ? "" : "margin-inline-end: calc(var(--btn-size) / -2);", &
   end
 
   def index_filter_text(view)

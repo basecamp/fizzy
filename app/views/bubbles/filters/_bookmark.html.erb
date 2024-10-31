@@ -1,4 +1,4 @@
-<% unless view.default? %>
+<% unless view.bucket_default? %>
   <% if view.persisted? %>
     <%= button_to view_path(view), method: :delete, class: "btn txt-small borderless" do %>
       <%= image_tag "bookmark.svg", aria: { hidden: true }, size: 24 %>

@@ -11,7 +11,7 @@ module View::Summarized
     delegate :to_sentence, to: "ApplicationController.helpers", private: true
 
     def filter_summary
-      unless default?
+      unless bucket_default?
         [ index_summary, tag_summary, assignee_summary ].compact.to_sentence
       end
     end

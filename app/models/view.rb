@@ -36,7 +36,7 @@ class View < ApplicationRecord
     ActionController::Parameters.new(filters.merge(bucket_id: bucket_id).compact).permit(*KNOWN_FILTERS)
   end
 
-  def default?
-    filters.empty? || filters == self.class.default_filters
+  def bucket_default?
+    bucket && filters == self.class.default_filters
   end
 end
