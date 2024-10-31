@@ -13,8 +13,10 @@ module FiltersHelper
       "assigned to #{view.assignees.pluck(:name).to_choice_sentence}"
     elsif view.assignment.unassigned?
       "assigned to no one"
-    else
+    elsif view.assignment.assigned?
       "assigned to anyone"
+    else
+      "assigned or not"
     end
   end
 

@@ -1,5 +1,5 @@
 class View < ApplicationRecord
-  include Assignees, Indexes, Summarized, Tags
+  include Assignment, Indexes, Summarized, Tags
 
   KNOWN_FILTERS = %i[ indexed_by bucket_id assignment tag_ids ]
 
@@ -26,6 +26,8 @@ class View < ApplicationRecord
       result = result.indexed_by(indexed_by || self.class.default_indexed_by)
       result = result.in_bucket(bucket) if bucket.present?
       result = result.tagged_with(tags) if tags.present?
+      result = result.assigned if assignment.assigned?
+      result = result.unassigned if assignment.unassigned?
       result = result.assigned_to(assignees) if assignees.present?
       result
     end

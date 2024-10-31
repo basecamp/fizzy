@@ -14,7 +14,7 @@
     </menu>
   </dialog>
 
-  <% if view.assignees.present? %>
+  <% if view.assignment.present? %>
     <%= link_to bubbles_path(view_filter_params(view).without(:assignment)), class: "btn", style: "font-size: 0.4em;" do %>
       <%= image_tag "remove.svg", aria: { hidden: true }, size: 24 %>
       <span class="for-screen-reader">Clear</span>
