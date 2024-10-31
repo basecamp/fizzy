@@ -3,7 +3,7 @@
     <%= tag_filter_text view %>
   </button>
 
-  <dialog class="filter__popup panel fill-white shadow" data-dialog-target="dialog">
+  <dialog class="filter__popup panel fill-white shadow" data-dialog-target="dialog" data-turbo-temporary>
     <menu class="filter__menu unpad margin-none">
       <% filterable_tags(view).order(:title).each do |tag| %>
         <li><%= link_to tag.title, bubbles_path(view_filter_params(view).merge(tag_ids: tag.id)) %></li>

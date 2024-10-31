@@ -7,7 +7,7 @@
     <% end %>
   </button>
 
-  <dialog class="filter__popup panel fill-white shadow" data-dialog-target="dialog">
+  <dialog class="filter__popup panel fill-white shadow" data-dialog-target="dialog" data-turbo-temporary>
     <menu class="filter__menu unpad margin-none">
       <li><%= link_to "all projects", bubbles_path(view_filter_params(view).merge(bucket_id: nil)), class: "filter__button" %></li>
 

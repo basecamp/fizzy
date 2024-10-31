@@ -3,9 +3,8 @@
     <%= assignee_filter_text view %>
   </button>
 
-  <dialog class="filter__popup panel fill-white shadow" data-dialog-target="dialog">
+  <dialog class="filter__popup panel fill-white shadow" data-dialog-target="dialog" data-turbo-temporary>
     <menu class="filter__menu unpad margin-none">
-      <li><%= link_to "Anyone", bubbles_path(view_filter_params(view).merge(assignment: :assigned)), class: "filter__button" %></li>
       <li><%= link_to "No one", bubbles_path(view_filter_params(view).merge(assignment: :unassigned)), class: "filter__button" %></li>
 
       <% filterable_users(view).active.order(:name).each do |user| %>

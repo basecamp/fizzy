@@ -3,7 +3,7 @@
     <%= index_filter_text view %>
   </button>
 
-  <dialog class="filter__popup panel fill-white shadow" data-dialog-target="dialog">
+  <dialog class="filter__popup panel fill-white shadow" data-dialog-target="dialog" data-turbo-temporary>
     <menu class="filter__menu unpad margin-none">
       <% View::INDEXES.each do |index| %>
         <li><%= link_to index.humanize, bubbles_path(view_filter_params(view).merge(indexed_by: index)), class: "filter__button" %></li>
