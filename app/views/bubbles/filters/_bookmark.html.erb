@@ -7,7 +7,7 @@
   <% else %>
     <%= form_with url: views_path, method: :post do %>
       <% View::KNOWN_FILTERS.each do |filter| %>
-        <%= hidden_field_tag filter, params[filter] %>
+        <%= hidden_field_tag filter, params[filter] if params[filter].present? %>
       <% end %>
 
       <%= button_tag type: :submit, class: "btn txt-small borderless" do %>

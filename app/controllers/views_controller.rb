@@ -26,7 +26,7 @@ class ViewsController < ApplicationController
     end
 
     def filter_params
-      helpers.view_filter_params.to_h.except(:bucket_id)
+      helpers.view_filter_params.to_h.except(:bucket_id).compact
     end
 
     def redirect_after_destroy
