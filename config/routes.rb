@@ -8,6 +8,10 @@ Rails.application.routes.draw do
     end
   end
 
+  resolve "Bubble" do |bubble, options|
+    route_for :bucket_bubble, bubble.bucket, bubble, options
+  end
+
   resources :bubbles
 
   resources :buckets do
