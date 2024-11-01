@@ -2,7 +2,7 @@
 
 <% content_for :header do %>
   <nav>
-    <%= link_to :back, class: "btn flex-item-justify-start" do %>
+    <%= link_to "#", class: "btn flex-item-justify-start", data: { controller: "back-navigation", back_navigation_fallback_destination_value: bubbles_path(bucket_id: @bubble.bucket) } do %>
       <%= image_tag "arrow-left.svg", aria: { hidden: true }, size: 24 %>
       <span class="for-screen-reader">Back</span>
     <% end %>
