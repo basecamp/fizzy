@@ -18,7 +18,7 @@ class View < ApplicationRecord
 
   def bubbles
     @bubbles ||= begin
-      result = account.bubbles
+      result = creator.visible_bubbles
       result = result.active unless indexed_by.popped?
       result = result.indexed_by(indexed_by.presence || self.class.default_indexed_by)
       result = result.in_bucket(bucket) if bucket.present?
