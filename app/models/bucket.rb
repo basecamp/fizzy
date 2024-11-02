@@ -9,8 +9,6 @@ class Bucket < ApplicationRecord
   has_many :views, dependent: :destroy
 
   after_create -> { views.create! }
-  after_update -> { views.touch_all }
-  after_touch -> { views.touch_all }
 
   validates_presence_of :name
 end

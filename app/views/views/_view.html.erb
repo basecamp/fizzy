@@ -1,4 +1,4 @@
-<% cache_unless view.global?, view do %>
+<% cache_unless view.global?, view.bucket do %>
   <li class="bucket flex flex-column txt-align-center max-width position-relative">
     <%= link_to bubbles_path(view_id: view), class: "windshield__container flex justify-center align-center position-relative" do %>
       <div class="windshield bucket__windshield flex flex-wrap gap justify-center align-end" style="view-transition-name: windshield_<%= view.id %>">
