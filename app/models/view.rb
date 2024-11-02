@@ -36,4 +36,8 @@ class View < ApplicationRecord
   def bucket_default?
     bucket && filters.empty?
   end
+
+  def global?
+    bucket.blank?
+  end
 end

@@ -4,6 +4,7 @@ class ViewsController < ApplicationController
 
   def index
     @views = Current.user.views.reverse_chronologically
+    fresh_when @views
   end
 
   def create
