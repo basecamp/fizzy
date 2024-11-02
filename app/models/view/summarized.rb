@@ -17,9 +17,7 @@ module View::Summarized
     end
 
     def index_summary
-      if index = indexed_by.presence_in(View::INDEXES)
-        "<mark>#{index.humanize}</mark>"
-      end
+      "<mark>#{indexed_by.humanize}</mark>"
     end
 
     def tag_summary

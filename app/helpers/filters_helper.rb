@@ -4,10 +4,6 @@ module FiltersHelper
       style: view.bucket_default? ? "" : "margin-inline-end: calc(var(--btn-size) / -2);", &
   end
 
-  def index_filter_text(view)
-    (view.indexed_by&.presence_in(View::INDEXES) || View.default_indexed_by).humanize
-  end
-
   def assignee_filter_text(view)
     if view.assignees.present?
       "assigned to #{view.assignees.pluck(:name).to_choice_sentence}"
