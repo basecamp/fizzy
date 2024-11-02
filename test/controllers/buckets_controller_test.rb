@@ -5,11 +5,6 @@ class BucketsControllerTest < ActionDispatch::IntegrationTest
     sign_in_as :kevin
   end
 
-  test "index" do
-    get buckets_url
-    assert_response :success
-  end
-
   test "new" do
     get new_bucket_url
     assert_response :success
@@ -21,7 +16,7 @@ class BucketsControllerTest < ActionDispatch::IntegrationTest
     end
 
     bucket = Bucket.last
-    assert_redirected_to bucket_bubbles_url(bucket)
+    assert_redirected_to bubbles_url(bucket_id: bucket)
     assert_includes bucket.users, users(:kevin)
     assert_equal "Remodel Punch List", bucket.name
   end
@@ -34,7 +29,7 @@ class BucketsControllerTest < ActionDispatch::IntegrationTest
   test "update" do
     patch bucket_url(buckets(:writebook)), params: { bucket: { name: "Writebook bugs" }, user_ids: users(:david, :jz).pluck(:id) }
 
-    assert_redirected_to bucket_bubbles_url(buckets(:writebook))
+    assert_redirected_to bubbles_url(bucket_id: buckets(:writebook))
     assert_equal "Writebook bugs", buckets(:writebook).reload.name
     assert_equal users(:david, :jz), buckets(:writebook).users
   end
@@ -42,7 +37,7 @@ class BucketsControllerTest < ActionDispatch::IntegrationTest
   test "destroy" do
     assert_difference -> { Bucket.count }, -1 do
       delete bucket_url(buckets(:writebook))
-      assert_redirected_to buckets_url
+      assert_redirected_to root_url
     end
   end
 end
