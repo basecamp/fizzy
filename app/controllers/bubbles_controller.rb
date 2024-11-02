@@ -9,6 +9,7 @@ class BubblesController < ApplicationController
   def index
     @bubbles = @view.bubbles
     @bubbles = @bubbles.mentioning(params[:term]) if params[:term].present?
+    fresh_when etag: @bubbles
   end
 
   def new

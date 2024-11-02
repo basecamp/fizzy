@@ -19,8 +19,10 @@
 
   <small class="flex align-center gap flex-item-no-shrink">
     <% bubble.tags.each do |tag| %>
-      <%# FIXME: This is not going to work, this partial must be cacheable, so it can't mutate a changeable view filter live. Need a JS solution. %>
-      <%= link_to tag.hashtag, bubbles_path(view_filter_params.merge(tag_ids: tag.id, bucket_id: bubble.bucket)), style: "color: #{bubble.color}" %>
+      <%= button_tag tag.hashtag, type: :button,
+            class: "btn btn--plain", style: "color: #{bubble.color}", data: {
+            controller: "query-merger", action: "query-merger#merge",
+            query_merger_key_param: "tag_ids", query_merger_value_param: tag.id } %>
     <% end %>
 
     <%= tag.time bubble.created_at, class: "txt-nowrap flex-item-justify-end" do %>
