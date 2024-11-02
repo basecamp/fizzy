@@ -24,7 +24,7 @@ class BucketsController < ApplicationController
 
   def destroy
     @bucket.destroy
-    redirect_to views_path
+    redirect_to root_path
   end
 
   private

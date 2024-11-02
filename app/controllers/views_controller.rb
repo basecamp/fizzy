@@ -31,8 +31,8 @@ class ViewsController < ApplicationController
     end
 
     def redirect_after_destroy
-      if request.referer == views_url
-        redirect_to views_path
+      if request.referer == root_url
+        redirect_to root_path
       else
         redirect_to bubbles_path(@view.to_params)
       end
