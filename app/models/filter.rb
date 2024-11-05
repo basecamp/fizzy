@@ -40,7 +40,7 @@ class Filter < ApplicationRecord
   end
 
   def cache_key
-    ActiveSupport::Cache.expand_cache_key buckets.cache_key_with_version
+    ActiveSupport::Cache.expand_cache_key buckets.cache_key_with_version, super
   end
 
   private
