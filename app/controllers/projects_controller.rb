@@ -29,7 +29,7 @@ class ProjectsController < ApplicationController
     end
 
     def project_params
-      params.expect(project: [ :name ])
+      params.expect project: [ :name ]
     end
 
     def grantees
