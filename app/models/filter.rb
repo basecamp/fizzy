@@ -15,8 +15,7 @@ class Filter < ApplicationRecord
 
   def bubbles
     @bubbles ||= begin
-      result = creator.accessible_bubbles
-      result = result.indexed_by(indexed_by)
+      result = creator.accessible_bubbles.indexed_by(indexed_by)
       result = result.active unless indexed_by.popped?
       result = result.in_bucket(buckets) if buckets.present?
       result = result.tagged_with(tags) if tags.present?
