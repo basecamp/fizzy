@@ -8,7 +8,7 @@ class Bucket < ApplicationRecord
 
   delegated_type :bucketable, types: Bucketable::TYPES, inverse_of: :bucket, dependent: :destroy
 
-  scope :reverse_chronologically, -> { order created_at: :desc, id: :desc }
+  scope :by_recency, -> { order updated_at: :desc }
 
   delegate :title, :creator, to: :bucketable
 end
