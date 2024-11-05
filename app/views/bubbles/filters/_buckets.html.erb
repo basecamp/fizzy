@@ -1,10 +1,6 @@
 <div class="filter align-center gap-half" data-controller="dialog" data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside">
   <button class="btn btn--plain filter__button" data-action="click->dialog#toggle" data-dialog-modal-value="true">
-    <% if filter.buckets.any? %>
-      <%= filter.buckets.map(&:title).to_choice_sentence %>
-    <% else %>
-      all projects
-    <% end %>
+    <%= buckets_filter_text filter %>
   </button>
 
   <dialog class="filter__popup panel fill-white shadow" data-dialog-target="dialog" data-turbo-temporary>
