@@ -7,7 +7,7 @@
     <menu class="filter__menu unpad margin-none">
       <li><%= link_to "No one", bubbles_path(filter.to_params.merge(assignments: :unassigned)), class: "filter__button" %></li>
 
-      <% filterable_users(filter).active.order(:name).each do |user| %>
+      <% Current.account.users.active.order(:name).each do |user| %>
         <li><%= link_to user.name, bubbles_path(filter.to_params.merge(assignments: user.id)) %></li>
       <% end %>
     </menu>

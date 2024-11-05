@@ -29,12 +29,4 @@ module FiltersHelper
       "any tag"
     end
   end
-
-  def filterable_users(filter)
-    filter.bucket ? filter.bucket.users : filter.account.users
-  end
-
-  def filterable_tags(filter)
-    filter.bucket ? filter.bucket.tags : filter.account.tags
-  end
 end
