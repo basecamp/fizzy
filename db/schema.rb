@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2024_10_28_221134) do
+ActiveRecord::Schema[8.0].define(version: 2024_11_04_194233) do
   create_table "accesses", force: :cascade do |t|
     t.integer "bucket_id", null: false
     t.integer "user_id", null: false
@@ -84,12 +84,12 @@ ActiveRecord::Schema[8.0].define(version: 2024_10_28_221134) do
 
   create_table "buckets", force: :cascade do |t|
     t.integer "account_id", null: false
-    t.integer "creator_id", null: false
-    t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "bucketable_type", null: false
+    t.integer "bucketable_id", null: false
     t.index ["account_id"], name: "index_buckets_on_account_id"
-    t.index ["creator_id"], name: "index_buckets_on_creator_id"
+    t.index ["bucketable_type", "bucketable_id"], name: "index_buckets_on_bucketable"
   end
 
   create_table "comments", force: :cascade do |t|
@@ -115,6 +115,14 @@ ActiveRecord::Schema[8.0].define(version: 2024_10_28_221134) do
     t.index ["summary_id", "action"], name: "index_events_on_summary_id_and_action"
   end
 
+  create_table "filters", force: :cascade do |t|
+    t.integer "creator_id", null: false
+    t.json "params", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["creator_id", "params"], name: "index_filters_on_creator_id_and_params", unique: true
+  end
+
   create_table "messages", force: :cascade do |t|
     t.integer "bubble_id", null: false
     t.string "messageable_type", null: false
@@ -132,6 +140,14 @@ ActiveRecord::Schema[8.0].define(version: 2024_10_28_221134) do
     t.datetime "updated_at", null: false
     t.index ["bubble_id"], name: "index_pops_on_bubble_id", unique: true
     t.index ["user_id"], name: "index_pops_on_user_id"
+  end
+
+  create_table "projects", force: :cascade do |t|
+    t.integer "creator_id", null: false
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["creator_id"], name: "index_projects_on_creator_id"
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -170,15 +186,6 @@ ActiveRecord::Schema[8.0].define(version: 2024_10_28_221134) do
     t.datetime "updated_at", null: false
     t.index ["account_id"], name: "index_users_on_account_id"
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
-  end
-
-  create_table "views", force: :cascade do |t|
-    t.integer "creator_id", null: false
-    t.integer "bucket_id"
-    t.json "filters", default: {}, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["creator_id", "filters", "bucket_id"], name: "index_views_on_creator_id_and_filters_and_bucket_id", unique: true
   end
 
   create_table "workflow_stages", force: :cascade do |t|

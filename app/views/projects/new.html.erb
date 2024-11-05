@@ -1,4 +1,4 @@
-<% @page_title = "Create a new bucket" %>
+<% @page_title = "Create a new project" %>
 
 <% content_for :header do %>
   <nav>
@@ -9,8 +9,8 @@
   </nav>
 <% end %>
 
-<div class="panel shadow center" style="--panel-size: 55ch; view-transition-name: new-bucket">
-  <%= form_with model: @bucket, class: "flex flex-column gap txt-large" do |form| %>
+<div class="panel shadow center" style="--panel-size: 55ch; view-transition-name: new-project">
+  <%= form_with model: @project, class: "flex flex-column gap txt-large" do |form| %>
     <%= image_tag "bubbles-add.svg", aria: { hidden: "true" }, size: 150, class: "colorize--black center" %>
     <label class="flex align-center gap">
       <%= form.text_field :name, required: true, class: "input full-width", autofocus: true, placeholder: "Give it a name…" %>

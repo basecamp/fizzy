@@ -1,20 +1,20 @@
 <div class="filter align-center gap-half" data-controller="dialog" data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside">
   <button class="btn btn--plain filter__button" data-action="click->dialog#toggle" data-dialog-modal-value="true">
-    <%= assignee_filter_text view %>
+    <%= assignee_filter_text filter %>
   </button>
 
   <dialog class="filter__popup panel fill-white shadow" data-dialog-target="dialog" data-turbo-temporary>
     <menu class="filter__menu unpad margin-none">
-      <li><%= link_to "No one", bubbles_path(view_filter_params(view).merge(assignment: :unassigned)), class: "filter__button" %></li>
+      <li><%= link_to "No one", bubbles_path(filter.to_params.merge(assignments: :unassigned)), class: "filter__button" %></li>
 
-      <% filterable_users(view).active.order(:name).each do |user| %>
-        <li><%= link_to user.name, bubbles_path(view_filter_params(view).merge(assignment: user.id)) %></li>
+      <% filterable_users(filter).active.order(:name).each do |user| %>
+        <li><%= link_to user.name, bubbles_path(filter.to_params.merge(assignments: user.id)) %></li>
       <% end %>
     </menu>
   </dialog>
 
-  <% if view.assignment.present? %>
-    <%= link_to bubbles_path(view_filter_params(view).without(:assignment)), class: "btn", style: "font-size: 0.4em;" do %>
+  <% if filter.assignments.present? %>
+    <%= link_to bubbles_path(filter.to_params.without(:assignments)), class: "btn", style: "font-size: 0.4em;" do %>
       <%= image_tag "remove.svg", aria: { hidden: true }, size: 24 %>
       <span class="for-screen-reader">Clear</span>
     <% end %>

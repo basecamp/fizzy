@@ -1,12 +1,12 @@
 <div class="filter align-center gap-half" data-controller="dialog" data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside">
   <button class="btn btn--plain filter__button" data-action="click->dialog#toggle" data-dialog-modal-value="true">
-    <%= view.indexed_by.humanize %>
+    <%= filter.indexed_by.humanize %>
   </button>
 
   <dialog class="filter__popup panel fill-white shadow" data-dialog-target="dialog" data-turbo-temporary>
     <menu class="filter__menu unpad margin-none">
-      <% View::INDEXES.each do |index| %>
-        <li><%= link_to index.humanize, bubbles_path(view_filter_params(view).merge(indexed_by: index)), class: "filter__button" %></li>
+      <% Filter::INDEXES.each do |index| %>
+        <li><%= link_to index.humanize, bubbles_path(filter.to_params.merge(indexed_by: index)), class: "filter__button" %></li>
       <% end %>
     </menu>
   </dialog>

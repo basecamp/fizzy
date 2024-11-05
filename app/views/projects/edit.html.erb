@@ -1,4 +1,4 @@
-<% @page_title = "Edit #{@bucket.name}" %>
+<% @page_title = "Edit #{@project.name}" %>
 
 <% content_for :header do %>
   <nav>
@@ -7,24 +7,24 @@
       <span class="for-screen-reader">Go back</span>
     <% end %>
 
-    <%= form_with model: @bucket, class: "flex align-center gap-half", method: :delete do |form| %>
+    <%= form_with model: @project, class: "flex align-center gap-half", method: :delete do |form| %>
       <%= form.button class: "btn btn--negative txt-small min-width", data: { turbo_confirm: "Are you sure you want to delete this?" } do %>
         <%= image_tag "minus.svg", aria: { hidden: true }, size: 24 %>
-        <span class="for-screen-reader">Delete <%= @bucket.name %></span>
+        <span class="for-screen-reader">Delete <%= @project.name %></span>
       <% end %>
     <% end %>
   </nav>
 <% end %>
 
 <div class="panel shadow center" style="--panel-size: 55ch;">
-  <%= form_with model: @bucket, class: "flex flex-column gap txt-large", controller: "form" do |form| %>
+  <%= form_with model: @project, url: project_path(@bucket), class: "flex flex-column gap txt-large", controller: "form" do |form| %>
     <%= image_tag "bubbles.svg", aria: { hidden: "true" }, size: 150, class: "colorize--black center" %>
 
     <div class="flex align-center gap">
-      <%= translation_button(:bucket_name) %>
+      <%= translation_button(:project_name) %>
 
       <label class="flex-item-grow txt-large">
-        <strong><%= form.text_field :name, name: "bucket[name]", class: "input full-width",
+        <strong><%= form.text_field :name, name: "project[name]", class: "input full-width",
               required: true, autofocus: true, placeholder: "Give it a name…",
               data: { action: "keydown.enter->form#submit:prevent" } %></strong>
       </label>
@@ -37,13 +37,13 @@
         <% end %>
 
         <div data-filter-target="list">
-          <%= render partial: "buckets/user_toggle", collection: @selected_users, as: :user, locals: { bucket: @bucket, selected: true } %>
+          <%= render partial: "projects/user_toggle", collection: @selected_users, as: :user, locals: { selected: true } %>
 
           <% if @selected_users.any? && @unselected_users.any? %>
             <hr class="separator full-width" style="--border-style: solid">
           <% end %>
 
-          <%= render partial: "buckets/user_toggle", collection: @unselected_users, as: :user, locals: { bucket: @bucket, selected: false } %>
+          <%= render partial: "projects/user_toggle", collection: @unselected_users, as: :user, locals: { selected: false } %>
         </div>
       </menu>
     </section>

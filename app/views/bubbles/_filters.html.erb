@@ -1,16 +1,16 @@
 <div class="flex flex-column gap-half align-center">
-  <%= bubble_filters_heading view do %>
-    <%= render "bubbles/filters/index", view: view %>
+  <%= bubble_filters_heading filter do %>
+    <%= render "bubbles/filters/index", filter: filter %>
     in
-    <%= render "bubbles/filters/bucket", view: view %>
+    <%= render "bubbles/filters/buckets", filter: filter %>
 
-    <%= render "bubbles/filters/bookmark", view: view %>
+    <%= render "bubbles/filters/bookmark", filter: filter if filter.savable? %>
   <% end %>
 
   <h2 class="txt-medium flex align-center justify-center gap-half">
-    <%= view.tags.present? ? "Tagged" : "with" %>
-    <%= render "bubbles/filters/tags", view: view %>
+    <%= filter.tags.present? ? "Tagged" : "with" %>
+    <%= render "bubbles/filters/tags", filter: filter %>
 
-    and <%= render "bubbles/filters/assignees", view: view %>
+    and <%= render "bubbles/filters/assignees", filter: filter %>
   </h2>
 </div>

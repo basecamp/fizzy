@@ -1,4 +1,4 @@
-<% @page_title = @view.plain_summary %>
+<% @page_title = @filter.plain_title %>
 
 <% content_for :header do %>
   <nav>
@@ -8,11 +8,11 @@
     <% end %>
 
     <header class="txt-align-center">
-      <%= render "bubbles/filters", view: @view %>
+      <%= render "bubbles/filters", filter: @filter %>
     </header>
 
-    <% if @view.bucket %>
-      <%= button_to bucket_bubbles_path(@view.bucket), method: :post, class: "btn btn--plain", form_class: "flex-item-justify-end" do %>
+    <% if @filter.buckets.any? %>
+      <%= button_to bucket_bubbles_path(@filter.buckets.first), method: :post, class: "btn btn--plain", form_class: "flex-item-justify-end" do %>
         <%= image_tag "bubble-add.svg", aria: { hidden: true }, size: 24 %>
         <span class="for-screen-reader">Create a new bubble</span>
       <% end %>
@@ -24,7 +24,7 @@
   </nav>
 <% end %>
 
-<section class="windshield flex-inline flex-wrap gap justify-center align-end" style="view-transition-name: windshield_<%= @view.id %>">
+<section class="windshield flex-inline flex-wrap gap justify-center align-end" style="view-transition-name: windshield_<%= params[:filter_id] %>">
   <% if @bubbles.any? %>
     <%= render partial: "bubbles/bubble", collection: @bubbles.limit(10), cached: true %>
   <% else %>
@@ -34,7 +34,7 @@
 
 <section class="bubbles-list unpad-inline center margin-block-start">
   <header class="flex-inline align-center gap txt-small margin-block-end-half center">
-    <%= form_tag bubbles_path(view_filter_params(@view)), method: :get do %>
+    <%= form_tag bubbles_path(@filter.to_params), method: :get do %>
       <%= search_field_tag :term, params[:term], class: "input center flex-inline", placeholder: "Type to filter…" %>
     <% end %>
   </header>

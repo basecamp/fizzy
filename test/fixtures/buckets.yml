@@ -1,4 +1,7 @@
 writebook:
-  name: Writebook
   account: 37s
-  creator: david
+  bucketable: writebook (Project)
+
+jz_assignments:
+  account: 37s
+  bucketable: jz_assignments (Filter)

@@ -9,3 +9,7 @@ writebook_jz:
 writebook_kevin:
   bucket: writebook
   user: kevin
+
+jz_assignments:
+  bucket: jz_assignments
+  user: david

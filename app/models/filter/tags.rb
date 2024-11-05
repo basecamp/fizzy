@@ -1,8 +1,8 @@
-module View::Tags
+module Filter::Tags
   extend ActiveSupport::Concern
 
   included do
-    store_accessor :filters, :tag_ids
+    store_accessor :params, :tag_ids
   end
 
   def tags

@@ -1,7 +1,7 @@
 <div class="filter align-center gap-half" data-controller="dialog" data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside">
   <button class="btn btn--plain filter__button" data-action="click->dialog#toggle" data-dialog-modal-value="true">
-    <% if view.bucket %>
-      <%= view.bucket.name %>
+    <% if filter.buckets.any? %>
+      <%= filter.buckets.map(&:title).to_choice_sentence %>
     <% else %>
       all projects
     <% end %>
@@ -9,10 +9,10 @@
 
   <dialog class="filter__popup panel fill-white shadow" data-dialog-target="dialog" data-turbo-temporary>
     <menu class="filter__menu unpad margin-none">
-      <li><%= link_to "all projects", bubbles_path(view_filter_params(view).merge(bucket_id: nil)), class: "filter__button" %></li>
+      <li><%= link_to "all projects", bubbles_path(filter.to_params.merge(bucket_ids: nil)), class: "filter__button" %></li>
 
-      <% Current.user.buckets.order(:name).each do |bucket| %>
-        <li><%= link_to bucket.name, bubbles_path(view_filter_params(view).merge(bucket_id: bucket.id)), class: "filter__button" %></li>
+      <% Current.user.buckets.projects.each do |bucket| %>
+        <li><%= link_to bucket.project.name, bubbles_path(filter.to_params.merge(bucket_ids: bucket.id)), class: "filter__button" %></li>
       <% end %>
     </menu>
   </dialog>

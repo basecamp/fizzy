@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  root "views#index"
+  root "buckets#index"
 
   resource :account do
     scope module: :accounts do
@@ -32,7 +32,9 @@ Rails.application.routes.draw do
     resources :tags, only: :index
   end
 
+  resources :filters
   resource :first_run
+  resources :projects
   resource :session
 
   resources :users do
@@ -40,8 +42,6 @@ Rails.application.routes.draw do
       resource :avatar
     end
   end
-
-  resources :views
 
   resources :workflows do
     resources :stages, module: :workflows

@@ -2,13 +2,13 @@ class Bucket < ApplicationRecord
   include Accessible
 
   belongs_to :account
-  belongs_to :creator, class_name: "User", default: -> { Current.user }
 
   has_many :bubbles, dependent: :destroy
   has_many :tags, -> { distinct }, through: :bubbles
-  has_many :views, dependent: :destroy
 
-  after_create -> { views.create! }
+  delegated_type :bucketable, types: Bucketable::TYPES, inverse_of: :bucket, dependent: :destroy
 
-  validates_presence_of :name
+  scope :reverse_chronologically, -> { order created_at: :desc, id: :desc }
+
+  delegate :title, :creator, :cacheable?, to: :bucketable
 end

@@ -1,19 +1,17 @@
-<% unless view.bucket_default? %>
-  <% if view.persisted? %>
-    <%= button_to view_path(view), method: :delete, class: "btn txt-small borderless" do %>
-      <%= image_tag "bookmark.svg", aria: { hidden: true }, size: 24 %>
-      <span class="for-screen-reader">Delete this filter</span>
+<% if params[:filter_id] %>
+  <%= button_to filter_path(params[:filter_id]), method: :delete, class: "btn txt-small borderless" do %>
+    <%= image_tag "bookmark.svg", aria: { hidden: true }, size: 24 %>
+    <span class="for-screen-reader">Delete this filter</span>
+  <% end %>
+<% else %>
+  <%= form_with url: filters_path, method: :post do %>
+    <% Filter::KNOWN_PARAMS.each do |param| %>
+      <%= hidden_field_tag param, params[param] if params[param].present? %>
     <% end %>
-  <% else %>
-    <%= form_with url: views_path, method: :post do %>
-      <% View::KNOWN_FILTERS.each do |filter| %>
-        <%= hidden_field_tag filter, params[filter] if params[filter].present? %>
-      <% end %>
 
-      <%= button_tag type: :submit, class: "btn txt-small borderless" do %>
-        <%= image_tag "bookmark-outline.svg", aria: { hidden: true }, size: 24 %>
-        <span class="for-screen-reader">Save this filter</span>
-      <% end %>
+    <%= button_tag type: :submit, class: "btn txt-small borderless" do %>
+      <%= image_tag "bookmark-outline.svg", aria: { hidden: true }, size: 24 %>
+      <span class="for-screen-reader">Save this filter</span>
     <% end %>
   <% end %>
 <% end %>

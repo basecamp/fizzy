@@ -7,13 +7,13 @@
       <span class="for-screen-reader">Account settings</span>
     <% end %>
 
-    <%= link_to new_bucket_path, class: "btn btn--plain flex-item-justify-end", style: "view-transition-name: new-bucket" do %>
+    <%= link_to new_project_path, class: "btn btn--plain flex-item-justify-end", style: "view-transition-name: new-project" do %>
       <%= image_tag "bubbles-add.svg", aria: { hidden: true }, size: 24 %>
-      <span class="for-screen-reader">Add a new bucket</span>
+      <span class="for-screen-reader">Add a new project</span>
     <% end %>
   </nav>
 <% end %>
 
 <menu class="buckets margin-none unpad align-center justify-center flex flex-wrap gap">
-  <%= render @views %>
+  <%= render @buckets %>
 </menu>
