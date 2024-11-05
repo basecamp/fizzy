@@ -31,12 +31,16 @@ class Filter < ApplicationRecord
     end
   end
 
+  def savable?
+    !bucket_default?
+  end
+
   def cacheable?
     buckets.exists?
   end
 
-  def savable?
-    !bucket_default?
+  def cache_key
+    ActiveSupport::Cache.expand_cache_key buckets.cache_key_with_version
   end
 
   private

@@ -10,5 +10,5 @@ class Bucket < ApplicationRecord
 
   scope :reverse_chronologically, -> { order created_at: :desc, id: :desc }
 
-  delegate :title, :creator, :cacheable?, to: :bucketable
+  delegate :title, :creator, to: :bucketable
 end

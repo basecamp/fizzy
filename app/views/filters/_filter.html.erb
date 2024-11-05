@@ -1,27 +1,29 @@
 <% filter = bucket.filter %>
 
-<li class="bucket flex flex-column txt-align-center max-width position-relative">
-  <%= link_to bubbles_path(**filter.to_params), class: "windshield__container flex justify-center align-center position-relative" do %>
-    <div class="windshield bucket__windshield flex flex-wrap gap justify-center align-end" style="view-transition-name: windshield_<%= bucket.id %>">
-      <% filter.bubbles.ordered_by_activity.limit(10).each do |bubble| %>
-        <div class="bubble" style="--bubble-color: <%= bubble.color %>; <%= bubble_rotation(bubble) %> <%= bubble_size(bubble) %>">
-          <svg class="bubble__svg" style="fill: <%= bubble.color %>; stroke: <%= bubble.color %>;" viewBox="0 0 990 990" xmlns="http://www.w3.org/2000/svg">
-            <path d="m0 0h990v990h-990z" fill="none" stroke="none" />
-            <path d="m391.65 879.47c-110.52-15.95-212.21-91.86-255.92-191.23-66.78-143.65-41.62-347.61 48.08-481.17 368.33-516.3 1252.97 520.2 451.03 660.78-44.07 8.84-88.98 13.49-133.01 15.68-36.69 2-73.37 1.91-109.99-4.03z"/>
-          </svg>
-        </div>
+<% cache_if filter.cacheable?, filter do %>
+  <li class="bucket flex flex-column txt-align-center max-width position-relative">
+    <%= link_to bubbles_path(**filter.to_params), class: "windshield__container flex justify-center align-center position-relative" do %>
+      <div class="windshield bucket__windshield flex flex-wrap gap justify-center align-end" style="view-transition-name: windshield_<%= bucket.id %>">
+        <% filter.bubbles.ordered_by_activity.limit(10).each do |bubble| %>
+          <div class="bubble" style="--bubble-color: <%= bubble.color %>; <%= bubble_rotation(bubble) %> <%= bubble_size(bubble) %>">
+            <svg class="bubble__svg" style="fill: <%= bubble.color %>; stroke: <%= bubble.color %>;" viewBox="0 0 990 990" xmlns="http://www.w3.org/2000/svg">
+              <path d="m0 0h990v990h-990z" fill="none" stroke="none" />
+              <path d="m391.65 879.47c-110.52-15.95-212.21-91.86-255.92-191.23-66.78-143.65-41.62-347.61 48.08-481.17 368.33-516.3 1252.97 520.2 451.03 660.78-44.07 8.84-88.98 13.49-133.01 15.68-36.69 2-73.37 1.91-109.99-4.03z"/>
+            </svg>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+
+    <div class="flex align-center justify-center flex-column flex-wrap center gap-half">
+      <%= link_to bubbles_path(**filter.to_params), class: "txt-ink flex flex-column" do %>
+        <strong class="txt-x-large"><%= bucket.title.html_safe %></strong>
+      <% end %>
+
+      <%= button_to bucket_path(bucket), method: :delete, class: "btn btn--negative", data: { turbo_confirm: "Are you sure you want to delete this filter?" } do %>
+        <%= image_tag "minus.svg", aria: { hidden: true }, size: 24 %>
+        <span class="for-screen-reader">Delete</span>
       <% end %>
     </div>
-  <% end %>
-
-  <div class="flex align-center justify-center flex-column flex-wrap center gap-half">
-    <%= link_to bubbles_path(**filter.to_params), class: "txt-ink flex flex-column" do %>
-      <strong class="txt-x-large"><%= bucket.title.html_safe %></strong>
-    <% end %>
-
-    <%= button_to bucket_path(bucket), method: :delete, class: "btn btn--negative", data: { turbo_confirm: "Are you sure you want to delete this filter?" } do %>
-      <%= image_tag "minus.svg", aria: { hidden: true }, size: 24 %>
-      <span class="for-screen-reader">Delete</span>
-    <% end %>
-  </div>
-</li>
+  </li>
+<% end %>

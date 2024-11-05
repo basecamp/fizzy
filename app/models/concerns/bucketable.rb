@@ -4,16 +4,12 @@ module Bucketable
   TYPES = %w[ Project Filter ]
 
   included do
-    has_one :bucket, as: :bucketable, dependent: :destroy
+    has_one :bucket, as: :bucketable, dependent: :destroy, touch: true
 
     after_create { create_bucket! account: account }
   end
 
   def title
     raise NotImplementedError
-  end
-
-  def cacheable?
-    true
   end
 end
