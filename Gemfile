@@ -9,6 +9,7 @@ gem "propshaft"
 gem "stimulus-rails"
 gem "turbo-rails"
 gem "hotwire_combobox", github: "josefarias/hotwire_combobox", branch: :main
+gem "rack-contrib"
 
 # Deployment and drivers
 gem "bootsnap", require: false

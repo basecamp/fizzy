@@ -11,14 +11,12 @@ module ActiveSupport
     fixtures :all
 
     include SessionTestHelper
-
-    parallelize_setup do |j|
-      dbname = "test-tenant-#{j}"
-      Tenant.create_with(dbname: dbname).find_or_create_by!(slug: "default")
-      ApplicationRecord.connecting_to(shard: dbname)
-    end
+    include TenantTestHelper::Unit
   end
 end
 
-Tenant.create_with(dbname: "test").find_or_create_by!(slug: "default")
-ApplicationRecord.connecting_to(shard: "test")
+module ActionDispatch
+  class IntegrationTest
+    include TenantTestHelper::Integration
+  end
+end

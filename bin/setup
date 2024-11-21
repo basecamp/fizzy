@@ -16,7 +16,7 @@ announce "Preparing database"
 if [[ $* == *--reset* ]]; then
   rails db:reset
 else
-  rails db:prepare
+  rails db:prepare db:seed
 fi
 
 announce "Removing old logs and tempfiles"

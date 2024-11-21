@@ -221,6 +221,8 @@ GEM
       nio4r (~> 2.0)
     racc (1.8.1)
     rack (3.1.8)
+    rack-contrib (2.5.0)
+      rack (< 4)
     rack-session (2.0.0)
       rack (>= 3.0.0)
     rack-test (2.1.0)
@@ -354,6 +356,7 @@ DEPENDENCIES
   importmap-rails
   propshaft
   puma (>= 5.0)
+  rack-contrib
   rails!
   rqrcode
   rubocop-rails-omakase
