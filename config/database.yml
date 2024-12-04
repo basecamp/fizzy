@@ -12,7 +12,8 @@ default: &default
 development:
   primary:
     <<: *default
-    database: storage/development.sqlite3
+    database: storage/development/%{tenant}.sqlite3
+    tenanted: true
   meta:
     <<: *default
     database: storage/development_meta.sqlite3
@@ -24,7 +25,8 @@ development:
 test:
   primary:
     <<: *default
-    database: storage/test.sqlite3
+    database: storage/test/%{tenant}.sqlite3
+    tenanted: true
   meta:
     <<: *default
     database: storage/test_meta.sqlite3
@@ -33,7 +35,8 @@ test:
 production:
   primary:
     <<: *default
-    database: storage/production.sqlite3
+    database: storage/production/%{tenant}.sqlite3
+    tenanted: true
   meta:
     <<: *default
     database: storage/production_meta.sqlite3

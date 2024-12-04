@@ -1,4 +1,13 @@
 GIT
+  remote: https://github.com/basecamp/active_record-tenanted.git
+  revision: 02fea4e7e4224b7ecbda3766e86d5a1d5ad3e262
+  branch: main
+  specs:
+    active_record-tenanted (0.1.0)
+      activerecord (>= 8.1.0.alpha)
+      railties (>= 8.1.0.alpha)
+
+GIT
   remote: https://github.com/josefarias/hotwire_combobox.git
   revision: 57ee6c9087320fab9383a07fa919fe75e0ea72ba
   branch: main
@@ -335,6 +344,7 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
+  active_record-tenanted!
   bcrypt (~> 3.1.7)
   bootsnap
   brakeman

@@ -5,6 +5,9 @@ on:
   push:
     branches: [ main ]
 
+env:
+  BUNDLE_GITHUB__COM: x-access-token:${{ secrets.GH_TOKEN }}
+
 jobs:
   scan_ruby:
     runs-on: ubuntu-latest

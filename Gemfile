@@ -19,6 +19,7 @@ gem "thruster", require: false
 # Features
 gem "bcrypt", "~> 3.1.7"
 gem "rqrcode"
+gem "active_record-tenanted", github: "basecamp/active_record-tenanted", branch: "main"
 
 # Telemetry
 gem "sentry-ruby"
