@@ -10,7 +10,7 @@
 
   <h1 class="margin-block-start-half margin-block-end-double">Fizzy</h1>
 
-  <%= form_with model: User.new, url: first_run_path, class: "flex flex-column gap txt-large" do |form| %>
+  <%= form_with model: User.new, url: first_run_path, class: "flex flex-column gap txt-large", data: { turbo: false } do |form| %>
     <div class="flex align-center gap">
       <%= translation_button :user_name %>
       <label class="flex align-center gap input input--actor txt-large">
@@ -34,6 +34,15 @@
         <%= image_tag "password.svg", aria: { hidden: "true" }, size: 30, class: "colorize--black" %>
       </label>
     </div>
+
+    <div class="flex align-center gap">
+      <%= translation_button :subdomain %>
+      <label class="flex align-center gap input input--actor txt-large">
+        <%= text_field_tag "tenant[slug]", nil, class: "input", placeholder: "Subdomain", pattern: "[\\-a-zA-Z0-9]{3,63}", required: true, data: { "1p-ignore": true } %>
+        <%= image_tag "everyone.svg", aria: { hidden: "true" }, size: 30, class: "colorize--black" %>
+      </label>
+    </div>
+
     <button type="submit" id="log_in" class="btn btn--reversed center">
       <%= image_tag "arrow-right.svg", aria: { hidden: true }, size: 24 %>
       <span class="for-screen-reader">Create your account</span>
