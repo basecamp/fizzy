@@ -31,6 +31,7 @@ DOCKER_TAGGED_IMAGE_NAME = [ DOCKER_IMAGE_NAME, GIT_SHA ].join(":")
 PORTS = [ "80:80", "443:443" ]
 ENVS = { TLS_DOMAIN: config["ssl_domain"] }
 ENV_FILE = ".fizzy-env"
+GITHUB_TOKEN = `gh config get -h github.com oauth_token`.strip
 
 SSHKit::Backend::Netssh.configure do |ssh|
   ssh.connection_timeout = 30
@@ -44,9 +45,10 @@ end
 
 announcing "Building and pushing image..." do
   versioning = "--build-arg APP_VERSION=#{GIT_SHA[...6]} --build-arg GIT_REVISION=#{GIT_SHA}"
+  private_gem_auth = "--build-arg GITHUB_TOKEN=#{GITHUB_TOKEN}"
 
   on(:local) do
-    execute :docker, :build, "-t", DOCKER_TAGGED_IMAGE_NAME, versioning, "--platform", ARCH, "."
+    execute :docker, :build, "-t", DOCKER_TAGGED_IMAGE_NAME, versioning, private_gem_auth, "--platform", ARCH, "."
     execute :docker, :push, DOCKER_TAGGED_IMAGE_NAME
   end
 end
