@@ -1,10 +1,11 @@
 GIT
   remote: https://github.com/basecamp/active_record-tenanted.git
-  revision: 02fea4e7e4224b7ecbda3766e86d5a1d5ad3e262
-  branch: main
+  revision: eb8fea8f744cce6cf1ec91b3aa70fa17fb72d101
+  branch: flavorjones-more-magic-please
   specs:
     active_record-tenanted (0.1.0)
       activerecord (>= 8.1.0.alpha)
+      rack-contrib (>= 2.5.0)
       railties (>= 8.1.0.alpha)
 
 GIT
@@ -255,6 +256,8 @@ GEM
     raabro (1.4.0)
     racc (1.8.1)
     rack (3.1.8)
+    rack-contrib (2.5.0)
+      rack (< 4)
     rack-session (2.1.0)
       base64 (>= 0.1.0)
       rack (>= 3.0.0)
@@ -433,4 +436,4 @@ RUBY VERSION
    ruby 3.4.1p0
 
 BUNDLED WITH
-   2.5.21
+   2.6.2

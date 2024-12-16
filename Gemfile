@@ -26,7 +26,7 @@ gem "rqrcode"
 gem "redcarpet"
 gem "rouge"
 gem "jbuilder"
-gem "active_record-tenanted", github: "basecamp/active_record-tenanted", branch: "main"
+gem "active_record-tenanted", github: "basecamp/active_record-tenanted", branch: "flavorjones-more-magic-please"
 
 # Telemetry
 gem "sentry-ruby"
