@@ -1,5 +1,5 @@
 class User < ApplicationRecord
-  include Avatar, Transferable
+  include Avatar, Transferable, Relayable
 
   belongs_to :account
 

@@ -51,6 +51,7 @@ Rails.application.routes.draw do
   resource :session do
     scope module: "sessions" do
       resources :transfers, only: %i[ show update ]
+      resources :relays, only: %i[ show update ]
     end
   end
 
