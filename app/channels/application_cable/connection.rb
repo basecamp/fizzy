@@ -1,6 +1,6 @@
 module ApplicationCable
   class Connection < ActionCable::Connection::Base
-    identified_by :current_user
+    identified_by :current_user, :current_tenant
 
     def connect
       set_current_user || reject_unauthorized_connection
@@ -8,8 +8,11 @@ module ApplicationCable
 
     private
       def set_current_user
-        if session = find_session_by_cookie
-          self.current_user = session.user
+        self.current_tenant = ::Tenant.requested_tenant(request)
+        Tenant.while_tenanted(current_tenant) do
+          if session = find_session_by_cookie
+            self.current_user = session.user
+          end
         end
       end
 
