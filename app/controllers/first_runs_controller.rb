@@ -8,7 +8,7 @@ class FirstRunsController < ApplicationController
   end
 
   def create
-    Tenant.create!(subdomain_param) do
+    Tenant.create(subdomain_param) do
       account = Account.create!(name: "Fizzy")
       user = account.users.create!(user_params)
 

@@ -43,7 +43,7 @@ class FirstRunsControllerTest < ActionDispatch::IntegrationTest
   test "create a duplicate" do
     integration_session.host = "example.com" # no subdomain
     tenant_name = "first-run-create-duplicate-test"
-    Tenant.create!(tenant_name)
+    Tenant.create(tenant_name)
 
     post(first_run_url, params: { user: { name: "New", email_address: "new@37signals.com", password: "secret123456" }, subdomain: tenant_name })
 
