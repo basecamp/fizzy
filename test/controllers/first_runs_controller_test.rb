@@ -27,7 +27,7 @@ class FirstRunsControllerTest < ActionDispatch::IntegrationTest
 
     post(first_run_url, params: { user: { name: "New", email_address: "new@37signals.com", password: "secret123456" }, subdomain: tenant_name })
 
-    Tenant.while_tenanted(tenant_name) do
+    ActiveRecord::Tenanted::Tenant.while_tenanted(tenant_name) do
       assert_equal(1, Account.count)
     end
 
@@ -37,19 +37,19 @@ class FirstRunsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :ok
   ensure
-    Tenant.destroy(tenant_name)
+    ActiveRecord::Tenanted::Tenant.destroy(tenant_name)
   end
 
   test "create a duplicate" do
     integration_session.host = "example.com" # no subdomain
     tenant_name = "first-run-create-duplicate-test"
-    Tenant.create(tenant_name)
+    ActiveRecord::Tenanted::Tenant.create(tenant_name)
 
     post(first_run_url, params: { user: { name: "New", email_address: "new@37signals.com", password: "secret123456" }, subdomain: tenant_name })
 
     assert_response :ok
     assert_select "div#alert", text: 'Subdomain "first-run-create-duplicate-test" is already taken.'
   ensure
-    Tenant.destroy(tenant_name)
+    ActiveRecord::Tenanted::Tenant.destroy(tenant_name)
   end
 end

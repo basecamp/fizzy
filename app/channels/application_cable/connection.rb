@@ -8,8 +8,8 @@ module ApplicationCable
 
     private
       def set_current_user
-        self.current_tenant = ::Tenant.requested_tenant(request)
-        Tenant.while_tenanted(current_tenant) do
+        self.current_tenant = ActiveRecord::Tenanted::Tenant.requested_tenant(request)
+        ActiveRecord::Tenanted::Tenant.while_tenanted(current_tenant) do
           if session = find_session_by_cookie
             self.current_user = session.user
           end

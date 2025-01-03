@@ -8,7 +8,7 @@ class FirstRunsController < ApplicationController
   end
 
   def create
-    Tenant.create(subdomain_param) do
+    ActiveRecord::Tenanted::Tenant.create(subdomain_param) do
       account = Account.create!(name: "Fizzy")
       user = account.users.create!(user_params)
 
@@ -18,11 +18,11 @@ class FirstRunsController < ApplicationController
 
   private
     def prevent_tenanted_access
-      redirect_to root_path unless Tenant.untenanted?
+      redirect_to root_path unless ActiveRecord::Tenanted::Tenant.untenanted?
     end
 
     def ensure_new_tenant
-      if Tenant.exist?(subdomain_param)
+      if ActiveRecord::Tenanted::Tenant.exist?(subdomain_param)
         flash[:alert] = "Subdomain #{subdomain_param.inspect} is already taken."
         @user = User.new(user_params)
 
