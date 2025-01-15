@@ -41,6 +41,10 @@ Rails.application.routes.draw do
         resources :toggles
       end
     end
+
+    scope module: :buckets do
+      resource :bubble_limit
+    end
   end
 
   resources :filters
@@ -64,6 +68,10 @@ Rails.application.routes.draw do
 
   resources :workflows do
     resources :stages, module: :workflows
+  end
+
+  direct :bubbles_in_bucket do |bucket|
+    bubbles_path(bucket_ids: [ bucket ], bubble_limit: bucket.bubble_limit)
   end
 
   get "join/:join_code", to: "users#new", as: :join

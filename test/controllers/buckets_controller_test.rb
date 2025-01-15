@@ -21,7 +21,7 @@ class BucketsControllerTest < ActionDispatch::IntegrationTest
     end
 
     bucket = Bucket.last
-    assert_redirected_to bubbles_path(bucket_ids: [ bucket ])
+    assert_redirected_to bubbles_in_bucket_path(bucket)
     assert_includes bucket.users, users(:kevin)
     assert_equal "Remodel Punch List", bucket.name
   end
@@ -34,7 +34,7 @@ class BucketsControllerTest < ActionDispatch::IntegrationTest
   test "update" do
     patch bucket_url(buckets(:writebook)), params: { bucket: { name: "Writebook bugs" }, user_ids: users(:david, :jz).pluck(:id) }
 
-    assert_redirected_to bubbles_path(bucket_ids: [ buckets(:writebook) ])
+    assert_redirected_to bubbles_in_bucket_path(buckets(:writebook))
     assert_equal "Writebook bugs", buckets(:writebook).reload.name
     assert_equal users(:david, :jz), buckets(:writebook).users
     assert_not buckets(:writebook).all_access?
@@ -48,7 +48,7 @@ class BucketsControllerTest < ActionDispatch::IntegrationTest
 
     patch bucket_url(bucket), params: { bucket: { name: "Bugs", all_access: true } }
 
-    assert_redirected_to bubbles_path(bucket_ids: [ bucket ])
+    assert_redirected_to bubbles_in_bucket_path(bucket)
     assert bucket.reload.all_access?
     assert_equal accounts("37s").users, bucket.users
   end

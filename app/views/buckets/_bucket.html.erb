@@ -1,8 +1,8 @@
 <% cache bucket do %>
   <li class="bucket flex flex-column txt-align-center max-width">
-    <%= link_to bubbles_path(bucket_ids: [ bucket ]), class: "border border-radius margin-block-end-half windshield__container flex justify-center align-center position-relative" do %>
+    <%= link_to bubbles_in_bucket_path(bucket), class: "border border-radius margin-block-end-half windshield__container flex justify-center align-center position-relative" do %>
       <div class="windshield bucket__windshield flex flex-wrap gap justify-center align-end" style="view-transition-name: windshield_<%= bucket.id %>">
-        <% bucket.bubbles.ordered_by_activity.limit(10).each do |bubble| %>
+        <% bucket.bubbles.ordered_by_activity.limit(bucket.bubble_limit).each do |bubble| %>
           <div class="bubble" style="--bubble-color: <%= bubble.color %>; <%= bubble_rotation(bubble) %> <%= bubble_size(bubble) %>">
             <span class="bubble__shape"></span>
           </div>
@@ -11,7 +11,7 @@
     <% end %>
 
     <div class="flex align-center justify-center flex-column flex-wrap center gap-half position-relative full-width">
-      <%= link_to bubbles_path(bucket_ids: [ bucket ]), class: "txt-ink flex flex-column" do %>
+      <%= link_to bubbles_in_bucket_path(bucket), class: "txt-ink flex flex-column" do %>
         <strong class="txt-x-large"><%= bucket.name %></strong>
       <% end %>
 
