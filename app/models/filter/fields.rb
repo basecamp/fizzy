@@ -3,21 +3,27 @@ module Filter::Fields
 
   INDEXES = %w[ most_discussed most_boosted newest oldest popped ]
 
+  delegate :default_fields, to: :class
+
   class_methods do
     def default_fields
-      { indexed_by: "most_active" }
+      { "indexed_by" => "most_active", "bubble_limit" => "10" }
     end
   end
 
   included do
-    store_accessor :fields, :indexed_by, :assignments, :terms
+    store_accessor :fields, :assignment_status, :indexed_by, :bubble_limit, :terms
 
-    def indexed_by
-      (super || default_indexed_by).inquiry
+    def assignment_status
+      super.to_s.inquiry
     end
 
-    def assignments
-      super.to_s.inquiry
+    def indexed_by
+      (super || default_fields["indexed_by"]).inquiry
+    end
+
+    def bubble_limit
+      super || default_fields["bubble_limit"]
     end
 
     def terms
@@ -25,14 +31,7 @@ module Filter::Fields
     end
   end
 
-  def default_indexed_by
-    default_fields[:indexed_by]
-  end
-
   def default_indexed_by?
-    indexed_by == default_indexed_by
+    indexed_by == default_fields["indexed_by"]
   end
-
-  private
-    delegate :default_fields, to: :class, private: true
 end

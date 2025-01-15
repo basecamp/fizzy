@@ -17,32 +17,32 @@
     </button>
 
     <div class="flex-inline center align-center gap-half">
-      <%= filter_chip_tag filter.indexed_by.humanize, filter.params_without(:indexed_by, filter.indexed_by) unless filter.default_indexed_by? %>
+      <%= filter_chip_tag filter.indexed_by.humanize, filter.to_query_without(:indexed_by, filter.indexed_by) unless filter.default_indexed_by? %>
 
       <% filter.tags.each do |tag| %>
-        <%= filter_chip_tag tag.hashtag, filter.params_without(:tag_ids, tag.id) %>
+        <%= filter_chip_tag tag.hashtag, filter.to_query_without(:tag_ids, tag.id) %>
       <% end %>
 
       <% filter.assignees.each do |assignee| %>
-        <%= filter_chip_tag "for #{assignee.name}", filter.params_without(:assignee_ids, assignee.id) %>
+        <%= filter_chip_tag "for #{assignee.name}", filter.to_query_without(:assignee_ids, assignee.id) %>
       <% end %>
 
-      <% if filter.assignments.present? %>
-        <%= filter_chip_tag filter.assignments.humanize, filter.params_without(:assignments, filter.assignments) %>
+      <% if filter.assignment_status.present? %>
+        <%= filter_chip_tag filter.assignment_status.humanize, filter.to_query_without(:assignment_status, filter.assignment_status) %>
       <% end %>
 
       <% filter.assigners.each do |assigner| %>
-        <%= filter_chip_tag "by #{assigner.name}", filter.params_without(:assigner_ids, assigner.id) %>
+        <%= filter_chip_tag "by #{assigner.name}", filter.to_query_without(:assigner_ids, assigner.id) %>
       <% end %>
 
       <% if filter.buckets.many? %>
         <% filter.buckets.each do |bucket| %>
-          <%= filter_chip_tag "in #{bucket.name}", filter.params_without(:bucket_ids, bucket.id) %>
+          <%= filter_chip_tag "in #{bucket.name}", filter.to_query_without(:bucket_ids, bucket.id) %>
         <% end %>
       <% end %>
 
       <% filter.terms.each do |term| %>
-        <%= filter_chip_tag %Q("#{term}"), filter.params_without(:terms, term) %>
+        <%= filter_chip_tag %Q("#{term}"), filter.to_query_without(:terms, term) %>
       <% end %>
     </div>
   </div>
@@ -67,7 +67,7 @@
 
       <div class="pad fill-shade border-radius margin-block-end">
         <%= form_tag bubbles_path, class: "flex align-center gap input input--actor txt-small fill-white border-radius", method: :get do %>
-          <% @filter.to_params.each do |key, value| %>
+          <% @filter.to_query.each do |key, value| %>
             <%= filter_hidden_field_tag key, value %>
           <% end %>
 
@@ -85,12 +85,14 @@
           <%= hidden_field_tag "terms[]", term, id: nil %>
         <% end %>
 
+        <%= hidden_field_tag "bubble_limit", filter.bubble_limit %>
+
         <div class="filter__columns flex gap">
           <menu class="filter__menu">
             <li class="filter__label"><strong>Sort by</strong></li>
             <li>
-              <%= label_tag "indexed_by_#{filter.default_indexed_by}", class: "btn filter__button" do %>
-                <%= radio_button_tag "indexed_by", filter.default_indexed_by, filter.default_indexed_by?, hidden: true %>
+              <%= label_tag "indexed_by_#{filter.default_fields["indexed_by"]}", class: "btn filter__button" do %>
+                <%= radio_button_tag "indexed_by", filter.default_fields["indexed_by"], filter.default_indexed_by?, hidden: true %>
                 <span>Most active</span>
                 <%= image_tag "close.svg", aria: { hidden: true }, size: 24 %>
               <% end %>
@@ -140,8 +142,8 @@
           <menu class="filter__menu">
             <li class="filter__label"><strong>Assigned to…</strong></li>
             <li>
-              <%= label_tag "assignments_unassigned", class: "btn filter__button" do %>
-                <%= check_box_tag "assignments", "unassigned", filter.assignments.unassigned?, id: "assignments_unassigned",
+              <%= label_tag "assignment_status_unassigned", class: "btn filter__button" do %>
+                <%= check_box_tag "assignment_status", "unassigned", filter.assignment_status.unassigned?, id: "assignment_status_unassigned",
                     hidden: true, data: { action: "filter-form#clearCategory", filter_form_name_param: "assignee_ids[],assigner_ids[]" } %>
                 <span>No one</span>
                 <%= image_tag "close.svg", aria: { hidden: true }, size: 24 %>
@@ -150,7 +152,7 @@
             <li>
               <%= label_tag "assignee_ids_me", class: "btn filter__button" do %>
                 <%= check_box_tag "assignee_ids[]", Current.user.id, filter.assignees.include?(Current.user), id: "assignee_ids_me",
-                    hidden: true, data: { action: "filter-form#clearCategory", filter_form_name_param: "assignments" } %>
+                    hidden: true, data: { action: "filter-form#clearCategory", filter_form_name_param: "assignment_status" } %>
                 <span>Me</span>
                 <%= image_tag "close.svg", aria: { hidden: true }, size: 24 %>
               <% end %>
@@ -159,7 +161,7 @@
               <li>
                 <%= label_tag "assignee_ids_#{user.id}", user.name, class: "btn filter__button" do %>
                   <%= check_box_tag "assignee_ids[]", user.id, filter.assignees.include?(user), id: "assignee_ids_#{user.id}",
-                      hidden: true, data: { action: "filter-form#clearCategory", filter_form_name_param: "assignments" } %>
+                      hidden: true, data: { action: "filter-form#clearCategory", filter_form_name_param: "assignment_status" } %>
                   <span><%= user.name %></span>
                   <%= image_tag "close.svg", aria: { hidden: true }, size: 24 %>
                 <% end %>
@@ -172,7 +174,7 @@
             <li>
               <%= label_tag "assigner_ids_me", class: "btn filter__button" do %>
                 <%= check_box_tag "assigner_ids[]", Current.user.id, filter.assigners.include?(Current.user), id: "assigner_ids_me",
-                    hidden: true, data: { action: "filter-form#clearCategory", filter_form_name_param: "assignments" } %>
+                    hidden: true, data: { action: "filter-form#clearCategory", filter_form_name_param: "assignment_status" } %>
                 <span>Me</span>
                 <%= image_tag "close.svg", aria: { hidden: true }, size: 24 %>
               <% end %>
@@ -181,7 +183,7 @@
               <li>
                 <%= label_tag "assigner_ids_#{user.id}", class: "btn filter__button" do %>
                   <%= check_box_tag "assigner_ids[]", user.id, filter.assigners.include?(user), id: "assigner_ids_#{user.id}",
-                      hidden: true, data: { action: "filter-form#clearCategory", filter_form_name_param: "assignments" } %>
+                      hidden: true, data: { action: "filter-form#clearCategory", filter_form_name_param: "assignment_status" } %>
                   <span><%= user.name %></span>
                   <%= image_tag "close.svg", aria: { hidden: true }, size: 24 %>
                 <% end %>

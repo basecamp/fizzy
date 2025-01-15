@@ -5,26 +5,22 @@ class Filter < ApplicationRecord
   has_one :account, through: :creator
 
   class << self
+    def from_params(params)
+      find_by_params(params) || build(params)
+    end
+
     def remember(attrs)
       create!(attrs)
     rescue ActiveRecord::RecordNotUnique
-      find_by!(params_digest: digest_params(attrs)).tap(&:touch)
+      find_by_params(attrs).tap(&:touch)
     end
-
-    def digest_params(params)
-      Digest::MD5.hexdigest params.to_h.sort.to_json
-    end
-  end
-
-  def empty?
-    as_params.blank?
   end
 
   def bubbles
     @bubbles ||= begin
       result = creator.accessible_bubbles.indexed_by(indexed_by)
       result = result.active unless indexed_by.popped?
-      result = result.unassigned if assignments.unassigned?
+      result = result.unassigned if assignment_status.unassigned?
       result = result.assigned_to(assignees.ids) if assignees.present?
       result = result.assigned_by(assigners.ids) if assigners.present?
       result = result.in_bucket(buckets.ids) if buckets.present?
@@ -35,6 +31,10 @@ class Filter < ApplicationRecord
 
       result
     end
+  end
+
+  def empty?
+    to_params.blank?
   end
 
   def cacheable?

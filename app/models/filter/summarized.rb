@@ -21,7 +21,7 @@ module Filter::Summarized
     def assignee_summary
       if assignees.any?
         "assigned to #{assignees.pluck(:name).to_choice_sentence}"
-      elsif assignments.unassigned?
+      elsif assignment_status.unassigned?
         "assigned to no one"
       end
     end
