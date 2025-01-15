@@ -24,16 +24,18 @@ module Filter::Params
     before_save { self.params_digest = digest_params(to_essential_params) }
   end
 
+  # +as_params+ uses `resource#ids` instead of `#resource_ids`
+  # because the latter won't work on unpersisted filters.
   def as_params
     {}.tap do |params|
       params[:bubble_limit]      = bubble_limit
       params[:terms]             = terms
       params[:indexed_by]        = indexed_by
       params[:assignment_status] = assignment_status
-      params[:tag_ids]           = resource_ids_for tags
-      params[:bucket_ids]        = resource_ids_for buckets
-      params[:assignee_ids]      = resource_ids_for assignees
-      params[:assigner_ids]      = resource_ids_for assigners
+      params[:tag_ids]           = tags.ids
+      params[:bucket_ids]        = buckets.ids
+      params[:assignee_ids]      = assignees.ids
+      params[:assigner_ids]      = assigners.ids
     end.then(&method(:normalize_params)).compact_blank
   end
 
