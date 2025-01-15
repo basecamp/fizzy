@@ -23,7 +23,7 @@ module FiltersHelper
     if filter.persisted? || filter.buckets.one?
       :patch
     else
-      :get
+      :get # Used when dividing a filter that's not saved to the home screen
     end
   end
 end
