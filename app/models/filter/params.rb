@@ -2,6 +2,7 @@ module Filter::Params
   extend ActiveSupport::Concern
 
   PERMITTED_PARAMS = [ :assignment_status, :bubble_limit, :indexed_by, assignee_ids: [], assigner_ids: [], bucket_ids: [], tag_ids: [], terms: [] ]
+  UNREMARKABLE_PARAMS = [ :bubble_limit ] # filters are essentially the same if they match on everything except unremarkable params
 
   class_methods do
     def find_by_params(params)
@@ -13,9 +14,10 @@ module Filter::Params
     end
 
     def normalize_params(params)
-      params.sort.to_h.compact_blank
-        .reject { |key, value| default_fields[key.to_s].eql?(value) }
-        .transform_values { |value| value.is_a?(Array) ? value.map(&:to_s) : value.to_s }
+      unremarkable = ->(key, value) { UNREMARKABLE_PARAMS.include?(key) || default_fields[key.to_s].eql?(value) }
+      stringify    = ->(value)      { value.is_a?(Array) ? value.map(&:to_s) : value.to_s }
+
+      params.sort.to_h.compact_blank.reject(&unremarkable).transform_values(&stringify)
     end
   end
 

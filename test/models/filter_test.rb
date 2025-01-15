@@ -11,6 +11,14 @@ class FilterTest < ActiveSupport::TestCase
     end
   end
 
+  test "remembering filters that are essentially the same" do
+    filter = users(:david).filters.remember(bubble_limit: 3, assignment_status: "unassigned", tag_ids: [ tags(:mobile).id.to_s ])
+
+    assert_changes "filter.reload.updated_at" do
+      assert_equal filter, users(:david).filters.remember(bubble_limit: 5, assignment_status: "unassigned", tag_ids: [ tags(:mobile).id.to_s ])
+    end
+  end
+
   test "bubbles" do
     Current.set session: sessions(:david) do
       @new_bucket = accounts("37s").buckets.create! name: "Inaccessible Bucket"
