@@ -23,7 +23,7 @@ module Filter::Params
     before_save { self.params_digest = digest_params(to_params) }
   end
 
-  def to_query
+  def as_params
     {}.tap do |params|
       params[:bubble_limit]      = bubble_limit
       params[:terms]             = terms
@@ -36,8 +36,8 @@ module Filter::Params
     end.then(&method(:normalize_params)).compact_blank
   end
 
-  def to_query_without(key, value)
-    to_query.tap do |params|
+  def as_params_without(key, value)
+    as_params.tap do |params|
       params[key].delete(value) if params[key].is_a?(Array)
       params.delete(key) if params[key] == value
     end
@@ -47,6 +47,6 @@ module Filter::Params
     delegate :digest_params, :normalize_params, to: :class, private: true
 
     def to_params
-      ActionController::Parameters.new(to_query).permit(*PERMITTED_PARAMS)
+      ActionController::Parameters.new(as_params).permit(*PERMITTED_PARAMS)
     end
 end

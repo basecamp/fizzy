@@ -14,7 +14,7 @@ class FiltersControllerTest < ActionDispatch::IntegrationTest
         assignee_ids: [ users(:jz).id ],
         bucket_ids: [ buckets(:writebook).id ] }
     end
-    assert_redirected_to bubbles_path(Filter.last.to_query)
+    assert_redirected_to bubbles_path(Filter.last.as_params)
 
     filter = Filter.last
     assert_predicate filter.indexed_by, :popped?
@@ -28,6 +28,6 @@ class FiltersControllerTest < ActionDispatch::IntegrationTest
     assert_difference "users(:david).filters.count", -1 do
       delete filter_url(filters(:jz_assignments))
     end
-    assert_redirected_to bubbles_path(filters(:jz_assignments).to_query)
+    assert_redirected_to bubbles_path(filters(:jz_assignments).as_params)
   end
 end

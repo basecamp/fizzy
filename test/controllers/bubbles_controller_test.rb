@@ -11,7 +11,7 @@ class BubblesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "filtered index" do
-    get bubbles_url(filters(:jz_assignments).to_query.merge(term: "haggis"))
+    get bubbles_url(filters(:jz_assignments).as_params.merge(term: "haggis"))
     assert_response :success
   end
 

@@ -16,7 +16,7 @@
 
   <div class="flex align-center gap-half flex-item-no-shrink">
     <% bubble.assignees.each do |assignee| %>
-      <%= link_to bubbles_path(@filter.to_query.merge(assignee_ids: [ assignee.id ])), class: "btn avatar txt-x-small" do %>
+      <%= link_to bubbles_path(@filter.as_params.merge(assignee_ids: [ assignee.id ])), class: "btn avatar txt-x-small" do %>
         <%= avatar_image_tag assignee, loading: :lazy %>
       <% end %>
     <% end %>

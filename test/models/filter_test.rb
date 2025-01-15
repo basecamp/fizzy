@@ -51,7 +51,7 @@ class FilterTest < ActiveSupport::TestCase
   test "turning into query" do
     filter = users(:david).filters.new indexed_by: "most_active", tag_ids: "", assignee_ids: [ users(:jz).id ], bucket_ids: [ buckets(:writebook).id ]
     expected = { assignee_ids: [ users(:jz).id.to_s ], bucket_ids: [ buckets(:writebook).id.to_s ] }
-    assert_equal expected, filter.to_query
+    assert_equal expected, filter.as_params
   end
 
   test "cacheable" do
@@ -79,15 +79,15 @@ class FilterTest < ActiveSupport::TestCase
   test "resource removal" do
     filter = users(:david).filters.create! tag_ids: [ tags(:mobile).id ], bucket_ids: [ buckets(:writebook).id ]
 
-    assert_includes filter.to_query[:tag_ids], tags(:mobile).id.to_s
+    assert_includes filter.as_params[:tag_ids], tags(:mobile).id.to_s
     assert_includes filter.tags, tags(:mobile)
-    assert_includes filter.to_query[:bucket_ids], buckets(:writebook).id.to_s
+    assert_includes filter.as_params[:bucket_ids], buckets(:writebook).id.to_s
     assert_includes filter.buckets, buckets(:writebook)
 
     assert_changes "filter.reload.updated_at" do
       tags(:mobile).destroy!
     end
-    assert_nil filter.reload.to_query[:tag_ids]
+    assert_nil filter.reload.as_params[:tag_ids]
 
     assert_changes "Filter.exists?(filter.id)" do
       buckets(:writebook).destroy!
@@ -115,15 +115,15 @@ class FilterTest < ActiveSupport::TestCase
     filter = users(:david).filters.new indexed_by: "most_discussed", assignee_ids: [ users(:jz).id, users(:kevin).id ]
 
     expected = { indexed_by: "most_discussed", assignee_ids: [ users(:kevin).id.to_s ] }
-    assert_equal expected, filter.to_query_without(:assignee_ids, users(:jz).id.to_s).to_h
+    assert_equal expected, filter.as_params_without(:assignee_ids, users(:jz).id.to_s).to_h
 
     expected = { assignee_ids: [ users(:jz).id.to_s, users(:kevin).id.to_s ] }
-    assert_equal expected, filter.to_query_without(:indexed_by, "most_discussed").to_h
+    assert_equal expected, filter.as_params_without(:indexed_by, "most_discussed").to_h
 
     expected = { indexed_by: "most_discussed", assignee_ids: [ users(:jz).id.to_s, users(:kevin).id.to_s ] }
-    assert_equal expected, filter.to_query_without(:indexed_by, "most_active").to_h
+    assert_equal expected, filter.as_params_without(:indexed_by, "most_active").to_h
 
     expected = { indexed_by: "most_discussed", assignee_ids: [ users(:jz).id.to_s, users(:kevin).id.to_s ] }
-    assert_equal expected, filter.to_query_without(:assignee_ids, users(:david).id.to_s).to_h
+    assert_equal expected, filter.as_params_without(:assignee_ids, users(:david).id.to_s).to_h
   end
 end
