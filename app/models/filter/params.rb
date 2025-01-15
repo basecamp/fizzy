@@ -6,7 +6,7 @@ module Filter::Params
 
   class_methods do
     def find_by_params(params)
-      find_by params_digest: digest_params(params)
+      find_by params_digest: digest_params(params.except(*UNREMARKABLE_PARAMS))
     end
 
     def digest_params(params)
@@ -14,15 +14,14 @@ module Filter::Params
     end
 
     def normalize_params(params)
-      unremarkable = ->(key, value) { UNREMARKABLE_PARAMS.include?(key) || default_fields[key.to_s].eql?(value) }
-      stringify    = ->(value)      { value.is_a?(Array) ? value.map(&:to_s) : value.to_s }
-
-      params.sort.to_h.compact_blank.reject(&unremarkable).transform_values(&stringify)
+      params.sort.to_h.compact_blank
+        .reject { |key, value| default_fields[key.to_s].eql?(value) }
+        .transform_values { |value| value.is_a?(Array) ? value.map(&:to_s) : value.to_s }
     end
   end
 
   included do
-    before_save { self.params_digest = digest_params(to_params) }
+    before_save { self.params_digest = digest_params(to_essential_params) }
   end
 
   def as_params
@@ -50,5 +49,9 @@ module Filter::Params
 
     def to_params
       ActionController::Parameters.new(as_params).permit(*PERMITTED_PARAMS)
+    end
+
+    def to_essential_params
+      to_params.except(*UNREMARKABLE_PARAMS)
     end
 end
