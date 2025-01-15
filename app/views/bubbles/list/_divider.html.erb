@@ -1,0 +1,18 @@
+<li class="bubbles-list__divider flex align-center gap-half full-width" draggable="true" data-divider-target="divider">
+  <div class="divider-drag-image" data-divider-target="dragImage">Drag up or down</div>
+
+  <button class="bubbles-list__handle btn btn--reversed">
+    <%= image_tag "drag.svg", aria: { hidden: true }, size: 16 %>
+    <span class="for-screen-reader">Drag to change number of bubbles shown above</span>
+  </button>
+
+  <hr class="separator--horizontal flex-item-grow">
+
+  <strong class="bubbles-list__count border-radius">
+    Top <span data-divider-target="count"><%= filter.bubble_limit %></span>
+  </strong>
+
+  <hr class="separator--horizontal flex-item-grow">
+
+  <span></span>
+</li>

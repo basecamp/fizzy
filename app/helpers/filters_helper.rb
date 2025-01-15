@@ -10,4 +10,20 @@ module FiltersHelper
     name = params[key].is_a?(Array) ? "#{key}[]" : key
     hidden_field_tag name, value, id: nil
   end
+
+  def divider_update_path(filter)
+    if filter.persisted?
+      filter_path(filter)
+    elsif filter.buckets.one?
+      bucket_bubble_limit_path(filter.buckets.first)
+    end
+  end
+
+  def divider_update_method(filter)
+    if filter.persisted? || filter.buckets.one?
+      :patch
+    else
+      :get
+    end
+  end
 end

@@ -25,29 +25,25 @@
   </nav>
 <% end %>
 
-<section class="windshield flex-inline flex-wrap gap justify-center align-end" style="view-transition-name: windshield_<%= params[:filter_id] %>">
+<section class="windshield flex-inline flex-wrap gap justify-center align-end" style="view-transition-name: windshield_<%= @filter.id %>">
   <% if @bubbles.any? %>
-    <%= render partial: "bubbles/bubble", collection: @bubbles.limit(10), cached: true %>
+    <%= render partial: "bubbles/bubble", collection: @bubbles.limit(@filter.bubble_limit), cached: true %>
   <% else %>
     <p><strong>Nothing here.</strong></p>
   <% end %>
 </section>
 
 <section class="bubbles-list unpad-inline center margin-block-start">
-  <ul class="unpad margin-none flex flex-column txt-align-start center">
-    <li class="bubbles-list__divider flex align-center gap-half full-width">
-      <button class="bubbles-list__handle btn btn--reversed">
-        <%= image_tag "drag.svg", aria: { hidden: true }, size: 16 %>
-        <span class="for-screen-reader">Drag to change number of bubbles shown above</span>
-      </button>
-      <hr class="separator--horizontal flex-item-grow">
-      <strong class="bubbles-list__count border-radius">
-        Top 10
-      </strong>
-      <hr class="separator--horizontal flex-item-grow">
-      <span></span>
-    </li>
+  <ul class="unpad margin-none flex flex-column txt-align-start center"
+      data-controller="divider"
+      data-divider-start-count-value="<%= @filter.bubble_limit %>"
+      data-divider-url-value="<%= divider_update_path(@filter) %>"
+      data-divider-method-value="<%= divider_update_method(@filter) %>"
+      data-divider-max-count-value="10"
+      data-divider-positioned-class="bubbles-list__divider--positioned"
+      data-action="turbo:morph@document->divider#install dragstart->divider#configureDrag dragenter->divider#acceptDrop dragover->divider#acceptDrop dragover->divider#moveDivider drop->divider#persist">
     <%= render partial: "bubbles/list/bubble", collection: @bubbles, cached: true %>
+    <%= render "bubbles/list/divider", filter: @filter %>
   </ul>
 </section>
 

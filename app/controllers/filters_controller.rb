@@ -1,9 +1,13 @@
 class FiltersController < ApplicationController
-  before_action :set_filter, only: :destroy
+  before_action :set_filter, except: :create
 
   def create
     @filter = Current.user.filters.remember filter_params
-    redirect_to bubbles_path(@filter.to_params)
+    redirect_to bubbles_path(@filter.to_query)
+  end
+
+  def update
+    @filter.update! filter_params
   end
 
   def destroy
@@ -24,7 +28,7 @@ class FiltersController < ApplicationController
       if request.referer == root_url
         redirect_to root_path
       else
-        redirect_to bubbles_path(@filter.to_params)
+        redirect_to bubbles_path(@filter.to_query)
       end
     end
 end

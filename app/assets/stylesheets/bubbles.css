@@ -397,13 +397,29 @@
   --divider-color: var(--color-subtle-dark);
 
   font-size: 1rem;
+  cursor: grab;
+  visibility: hidden;
+}
+
+.bubbles-list__divider--positioned {
+  visibility: visible;
+}
+
+.divider-drag-image {
+  background-color: var(--color-link);
+  border-radius: 1rem;
+  color: var(--color-ink-reversed);
+  inset: auto 100% 100% auto;
+  line-height: 2rem;
+  padding: 0 1rem;
+  position: fixed;
+  text-wrap: nowrap;
 }
 
 .btn--reversed.bubbles-list__handle {
   --btn-background: var(--divider-color);
 
   font-size: 0.9rem;
-  cursor: grab;
 }
 
 .bubbles-list__count {
