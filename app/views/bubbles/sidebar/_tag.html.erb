@@ -4,18 +4,32 @@
     <span>Tag</span>
   </button>
 
-  <dialog class="combox-popup panel align-center gap-half fill-white shadow" data-dialog-target="dialog">
-    <%= form_with url: bucket_bubble_tagging_toggles_path(bubble.bucket, bubble), class: "min-width", data: { controller: "form" } do |form| %>
-      <%= form.combobox :tag_id, tags, required: true, name_when_new: "tag_title",
-            render_in: { partial: "bubbles/tags/listbox_option", as: :tag, locals: { bubble: bubble } },
-            data: { controller: "autofocus", action: "hw-combobox:selection->form#submit" } %>
+  <dialog class="combox-popup panel flex-column align-start gap-half fill-white shadow" style="--panel-border-radius: 1em;" data-dialog-target="dialog">
+    <strong>Add tags…</strong>
+
+    <%= form_with url: bucket_bubble_tagging_toggles_path(bubble.bucket, bubble), class: "flex gap-half align-centerfull-width" do |form| %>
+      <%= form.text_field :tag_title, placeholder: "New tag name...", class: "input txt-small full-width", style: "min-inline-size: 15ch;" %>
+      <%= form.button "Add a tag…", type: "submit", class: "btn txt-small" do %>
+        <%= image_tag "add.svg", aria: { hidden: true }, size: 24 %>
+        <span class="for-screen-reader">Add a tag</span>
+      <% end %>
     <% end %>
 
-    <form method="dialog">
-      <button class="btn txt-small" title="Close (esc)">
-        <%= image_tag "remove.svg", aria: { hidden: true }, size: 24 %>
-        <span class="for-screen-reader">Close</span>
-      </button>
-    </form>
+    <hr class="separator--horizontal full-width">
+
+    <%= form_with url: bucket_bubble_tagging_toggles_path(bubble.bucket, bubble), class: "flex flex-column gap-half full-width", data: { controller: "form" } do |form| %>
+      <% tags.each do |tag| %>
+        <div class="btn full-width borderless justify-start overflow-ellipsis" style="--btn-border-radius: 0.3em;">
+          <%= form.check_box "tag_id[]", { 
+            checked: bubble.tagged_with?(tag),
+            data: { action: "change->form#submit" },
+            id: dom_id(tag, :tag),
+            include_hidden: false,
+          }, tag.id %>
+
+          <%= form.label "tag_id[]", tag.hashtag, for: dom_id(tag, :tag) %>
+        </div>
+      <% end %>
+    <% end %>
   </dialog>
 </div>
