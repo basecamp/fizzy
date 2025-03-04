@@ -11,7 +11,7 @@ class UploadsControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :success
-    assert_equal ActiveStorage::Attachment.last.slug_url(host: "www.example.com", port: nil), response.parsed_body["fileUrl"]
+    assert_equal ActiveStorage::Attachment.last.slug_url(host: "#{ApplicationRecord.current_tenant}.example.com", port: nil), response.parsed_body["fileUrl"]
     assert_equal "image/jpeg", response.parsed_body["mimetype"]
     assert_equal "moon.jpg", response.parsed_body["fileName"]
   end

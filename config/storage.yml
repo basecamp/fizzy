@@ -1,10 +1,12 @@
 test:
   service: Disk
-  root: <%= Rails.root.join("tmp/storage") %>
+  root: <%= Rails.root.join("tmp/storage/%{tenant}") %>
+  tenanted: true
 
 local:
   service: Disk
-  root: <%= Rails.root.join("storage", "files") %>
+  root: <%= Rails.root.join("storage", "files", "%{tenant}") %>
+  tenanted: true
 
 # Use bin/rails credentials:edit to set the AWS secrets (as aws:access_key_id|secret_access_key)
 # amazon:
