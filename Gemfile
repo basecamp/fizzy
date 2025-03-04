@@ -3,6 +3,7 @@ git_source(:bc) { |repo| "https://github.com/basecamp/#{repo}" }
 ruby file: ".ruby-version"
 
 gem "rails", github: "rails/rails", branch: "main"
+gem "active_record-tenanted", bc: "active_record-tenanted"
 
 # Assets & front end
 gem "importmap-rails"

@@ -7,6 +7,16 @@ GIT
       rails (>= 6.0.0)
 
 GIT
+  remote: https://github.com/basecamp/active_record-tenanted
+  revision: 21cb50856b7e74f3b5147adeee552832eafc5c98
+  specs:
+    active_record-tenanted (0.1.0)
+      activerecord (>= 8.1.alpha)
+      rack-contrib (>= 2.5.0)
+      railties (>= 8.1.alpha)
+      zeitwerk
+
+GIT
   remote: https://github.com/rails/rails.git
   revision: 5520bd835e3724ffafe3f719f9aafe951567f2f3
   branch: main
@@ -268,6 +278,8 @@ GEM
     raabro (1.4.0)
     racc (1.8.1)
     rack (3.1.11)
+    rack-contrib (2.5.0)
+      rack (< 4)
     rack-session (2.1.0)
       base64 (>= 0.1.0)
       rack (>= 3.0.0)
@@ -420,6 +432,7 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
+  active_record-tenanted!
   bcrypt (~> 3.1.7)
   bootsnap
   brakeman
