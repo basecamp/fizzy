@@ -7,7 +7,10 @@ servers:
       - once-fizzy-101
 
 proxy:
-  host: fizzy.37signals.com
+  hosts:
+    - 37s.fizzy.37signals.com
+    - dev.fizzy.37signals.com
+    - qa.fizzy.37signals.com
 
 ssh:
   user: app

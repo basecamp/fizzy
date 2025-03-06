@@ -1,0 +1,290 @@
+#!/usr/bin/env ruby
+
+require_relative "../config/environment"
+
+class EnactTenanting
+  CURRENT_DOMAIN = "https://fizzy.37signals.com"
+  TENANTED_DOMAIN = Rails.env.local? ? "http://%{tenant}.fizzy.localhost:3006" : "https://%{tenant}.fizzy.37signals.com"
+
+  PROJECT_MAPPING = {
+    693169841 => "37s", # Writebook improvements
+    693169850 => "37s", # Fizzy: Issues
+    693169853 => "37s", # Fizzy: 💡 IDEAS
+    693169858 => "37s", # Know It All: 💡 IDEAS
+    693169859 => "37s", # Cycle 1: BC4 Client access for templates
+    693169860 => "37s", # Know It All: Issues
+    693169862 => "37s", # Active Record Tenanting
+    693169863 => "37s", # Cycle 1: BC4 Hilltop View
+    693169864 => "37s", # Cycle1: [HEY] ContentFitler pipeline rewrite
+    693169865 => "37s", # [BC iOS] Search refactor
+    693169867 => "37s", # File icons refactor
+    693169870 => "37s", # HEY Preload Replies
+    693169872 => "37s", # [BC4 Android] Search Refactor
+    693169873 => "37s", # BC4
+    693169874 => "37s", # [HEY] ContentFilter pipeline rewrite
+    693169875 => "37s", # [Hey Calendar Android] Search
+    693169876 => "37s", # [HEY Calendar iOS] Search
+    693169877 => "37s", # [BC4] Turbo for comment and answer forms
+
+    693169842 => "dev", # Foobar
+    693169843 => "dev", # Test
+    693169851 => "dev", # Kevin
+    693169861 => "dev", # Testing space
+    693169869 => "dev", # Flower ideas
+    693169871 => "dev", # Mike's TODOs
+
+    693169856 => "qa", # QA Exploration
+  }
+
+  TENANTS = PROJECT_MAPPING.values.uniq
+
+  attr_reader :creation_counter, :update_counter
+
+  def initialize
+    @creation_counter = {}
+    @update_counter = {}
+  end
+
+  def up
+    setup
+    destroy_tenants
+
+    safety_check
+
+    copy_accounts_et_al
+    copy_buckets_et_al
+    copy_bubbles_et_al
+    copy_filters
+    copy_active_storage
+
+    cross_check
+
+    update_action_text_urls
+
+    pp ["updated:", update_counter]
+
+    hardlink_active_storage
+  end
+
+  def setup
+    ApplicationRecord.connects_to shards: { untenanted: { reading: :primary_original } }
+  end
+
+  def while_untenanted(&block)
+    ApplicationRecord.connected_to(role: :reading, shard: :untenanted, &block)
+  end
+
+  def safety_check
+    buckets = while_untenanted { Bucket.all.to_a }
+
+    unless buckets.map(&:id).sort == PROJECT_MAPPING.keys.sort
+      unknown_buckets = buckets.map(&:id) - PROJECT_MAPPING.keys
+      missing_buckets = PROJECT_MAPPING.keys - buckets.map(&:id)
+
+      raise "Surprising buckets. unknown #{unknown_buckets.inspect}, missing #{missing_buckets.inspect}"
+    end
+  end
+
+  def copy_accounts_et_al
+    account         = while_untenanted { Account.first }
+    users           = while_untenanted { User.all.to_a }
+    workflows       = while_untenanted { account.workflows.to_a }
+    workflow_stages = while_untenanted { workflows.flat_map(&:stages) }
+    tags            = while_untenanted { account.tags.to_a }
+
+    TENANTS.each do |tenant|
+      ApplicationRecord.while_tenanted(tenant) do
+        Account.create! name: tenant, id: account.id
+
+        upsert_all users
+        upsert_all workflows
+        upsert_all workflow_stages
+        upsert_all tags
+      end
+    end
+  end
+
+  def copy_buckets_et_al
+    PROJECT_MAPPING.each do |bucket_id, tenant|
+      bucket        = while_untenanted { Bucket.where(id: bucket_id).first }
+      accesses      = while_untenanted { bucket.accesses.to_a }
+      subscriptions = while_untenanted { bucket.subscriptions.to_a }
+
+      ApplicationRecord.while_tenanted(tenant) do
+        upsert_all bucket
+        upsert_all accesses
+        upsert_all subscriptions
+      end
+    end
+  end
+
+  def copy_bubbles_et_al
+    PROJECT_MAPPING.each do |bucket_id, tenant|
+      bubbles       = while_untenanted { Bucket.find(bucket_id).bubbles.to_a }
+      assignments   = while_untenanted { bubbles.flat_map(&:assignments) }
+      pops          = while_untenanted { bubbles.filter_map(&:pop) }
+      notifications = while_untenanted { bubbles.flat_map(&:notifications) }
+      events        = while_untenanted { bubbles.flat_map(&:events) }
+      taggings      = while_untenanted { bubbles.flat_map(&:taggings) }
+      watches       = while_untenanted { bubbles.flat_map(&:watches) }
+      messages      = while_untenanted { bubbles.flat_map(&:messages) }
+      messageables  = while_untenanted { messages.filter_map(&:messageable) }
+      comments      = messageables.select { _1.is_a?(Comment) }
+      markdowns     = while_untenanted { comments.map(&:markdown_body) }
+      reactions     = while_untenanted { comments.flat_map(&:reactions) }
+
+      ApplicationRecord.while_tenanted(tenant) do
+        upsert_all bubbles
+        upsert_all assignments
+        upsert_all pops
+        upsert_all taggings
+        upsert_all watches
+        messageables.group_by(&:class).each do |klass, klass_messageables|
+          upsert_all klass_messageables
+        end
+        upsert_all markdowns
+        upsert_all reactions
+        upsert_all messages
+        upsert_all events
+        upsert_all notifications
+      end
+    end
+  end
+
+  def copy_filters
+    creation_counter["Filter"] = 0
+    TENANTS.each do |tenant|
+      buckets = ApplicationRecord.while_tenanted(tenant) { Bucket.all.to_a }
+
+      filters = while_untenanted do
+        Filter.all.filter_map do |filter| # hah no pun intended
+          next unless filter.buckets.empty? || buckets.any? { |b| filter.buckets.include?(b) }
+
+          filter.attributes.merge(filter.as_params)
+        end
+      end
+
+      ApplicationRecord.while_tenanted(tenant) do
+        filters.each do |attr|
+          Filter.create! attr
+        end
+      end
+      creation_counter["Filter"] += filters.length
+    end
+  end
+
+  def copy_active_storage
+    attachments = while_untenanted { ActiveStorage::Attachment.all.to_a }
+    blobs       = while_untenanted { ActiveStorage::Blob.all.to_a }
+
+    TENANTS.each do |tenant|
+      ApplicationRecord.while_tenanted(tenant) do
+        upsert_all blobs
+        upsert_all attachments
+      end
+    end
+  end
+
+  def destroy_tenants
+    TENANTS.each do |tenant|
+      ApplicationRecord.destroy_tenant(tenant)
+    end
+    FileUtils.rm_rf "storage/tenants"
+  end
+
+  def cross_check
+    pp ["created:", creation_counter]
+
+    while_untenanted do
+      assert_count User, User.count * TENANTS.length
+      assert_count Workflow, Workflow.count * TENANTS.length
+      assert_count Workflow::Stage, Workflow::Stage.count * TENANTS.length
+      assert_count Tag, Tag.count * TENANTS.length
+
+      assert_count Bucket, Bucket.count
+      assert_count Access, Access.count
+      assert_count Subscription, Subscription.count
+
+      assert_count Bubble, Bubble.count
+      assert_count Assignment, Assignment.count
+      assert_count Pop, Pop.count
+      assert_count EventSummary, EventSummary.count
+      assert_count Comment, Comment.count
+      assert_count Reaction, Reaction.count
+      assert_count Message, Message.count
+      assert_count Tagging, Tagging.count
+      assert_count Watch, Watch.count
+
+      # we're only copying the markdown records that are still accessible.
+      assert_count ActionText::Markdown, Comment.count
+
+      assert_count Event, Event.count
+      assert_count Notification, Notification.count
+
+      assert_count ActiveStorage::Attachment, ActiveStorage::Attachment.count * TENANTS.length
+      assert_count ActiveStorage::Blob, ActiveStorage::Blob.count * TENANTS.length
+
+      raise "Filter count is off" unless creation_counter["Filter"] >= Filter.count
+    end
+  end
+
+  def update_action_text_urls
+    update_counter["ActionText::Markdown"] = 0
+    TENANTS.each do |tenant|
+      tenanted_domain = sprintf(TENANTED_DOMAIN, tenant: tenant)
+
+      ApplicationRecord.while_tenanted(tenant) do
+        ActionText::Markdown.all.each do |markdown|
+          content = markdown.content
+          next unless content =~ %r(#{CURRENT_DOMAIN}/u/)
+
+          content.gsub!(%r(#{CURRENT_DOMAIN}/u/), "#{tenanted_domain}/u/")
+
+          markdown.update_column :content, content
+          update_counter["ActionText::Markdown"] += 1
+        end
+      end
+    end
+  end
+
+  def hardlink_active_storage
+    files = Dir.glob("storage/files/*/*/*").map { _1.split("/")[2..].join("/") }
+
+    TENANTS.each do |tenant|
+      ApplicationRecord.while_tenanted(tenant) do
+        destdir = ActiveStorage::Blob.service.root
+
+        files.each do |file|
+          FileUtils.mkdir_p File.join(destdir, File.dirname(file))
+          FileUtils.ln File.join("storage/files", file), File.join(destdir, file)
+        end
+      end
+    end
+  end
+
+  def upsert_all(originals)
+    originals = Array(originals)
+    return if originals.empty?
+
+    klass = originals.first.class
+
+    result = klass.upsert_all(originals.collect(&:attributes))
+    raise "Error upserting" unless result.rows.length == originals.length
+
+    creation_counter[klass.name] ||= 0
+    creation_counter[klass.name] += originals.length
+
+    nil
+  end
+
+  def assert_count(klass, expected)
+    actual = creation_counter[klass.name]
+    unless actual == expected
+      raise "#{klass} count is off: expected #{expected}, got #{actual}"
+    end
+  end
+end
+
+EnactTenanting.new.up
+
+exit 0

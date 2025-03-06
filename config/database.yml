@@ -12,8 +12,13 @@ default: &default
 development:
   primary:
     <<: *default
-    database: storage/development-tenanted/%{tenant}/main.sqlite3
+    database: storage/tenants/%{tenant}/db/main.sqlite3
     tenanted: true
+  primary_original:
+    <<: *default
+    database: storage/storage-production-20250311-1725.sqlite3
+    replica: true
+    readonly: true
   cable:
     <<: *default
     database: storage/development_cable.sqlite3
@@ -32,14 +37,19 @@ development:
 # Do not set this db to the same as development or production.
 test:
   <<: *default
-  database: storage/test-tenanted/%{tenant}/main.sqlite3
+  database: storage/tenants/%{tenant}/db/main.sqlite3
   tenanted: true
 
 production:
   primary:
     <<: *default
-    database: storage/production-tenanted/%{tenant}/main.sqlite3
+    database: storage/tenants/%{tenant}/db/main.sqlite3
     tenanted: true
+  primary_original:
+    <<: *default
+    database: storage/production.sqlite3
+    replica: true
+    readonly: true
   cable:
     <<: *default
     database: storage/production_cable.sqlite3
