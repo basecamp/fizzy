@@ -53,4 +53,13 @@ class Bubble::ScorableTest < ActiveSupport::TestCase
       assert_equal [ bubble_new, bubble_mid, bubble_old ], Bubble.where(id: [ bubble_old, bubble_mid, bubble_new ]).ordered_by_activity
     end
   end
+
+  test "bubble with no scorable events has a score of 0 and an order of Float::MAX" do
+    bubble = Bubble.create! bucket: buckets(:writebook), creator: users(:kevin)
+
+    bubble.rescore
+
+    assert_equal(0, bubble.activity_score)
+    assert_equal(Float::MAX, bubble.activity_score_order)
+  end
 end

@@ -38,6 +38,8 @@ module Bubble::Scorable
     end
 
     def event_score_reference(score, activity_at)
+      return Float::MAX if score.zero?
+
       # The reference score is used to make the activity score comparable
       # across different bubbles, since it represents the bubble's activity
       # level at a consistent point in time.
