@@ -38,8 +38,6 @@ module Bubble::Scorable
     end
 
     def event_score_reference(score, activity_at)
-      return Float::MAX if score.zero?
-
       # The reference score is used to make the activity score comparable
       # across different bubbles, since it represents the bubble's activity
       # level at a consistent point in time.
@@ -47,7 +45,7 @@ module Bubble::Scorable
       # We store this as log2 to tame the huge/tiny numbers we'd otherwise get
       # when activity is far from the reference date.
       days_diff = (activity_at - REFERENCE_DATE) / 1.day
-      Math.log2(score) + days_diff
+      Math.log2(1.0 + score) + days_diff
     end
 
     def last_scorable_activity_at

@@ -54,12 +54,12 @@ class Bubble::ScorableTest < ActiveSupport::TestCase
     end
   end
 
-  test "bubble with no scorable events has a score of 0 and an order of Float::MAX" do
+  test "bubbles with no activity have a valid activity_score_order" do
     bubble = Bubble.create! bucket: buckets(:writebook), creator: users(:kevin)
 
     bubble.rescore
 
-    assert_equal(0, bubble.activity_score)
-    assert_equal(Float::MAX, bubble.activity_score_order)
+    assert bubble.activity_score.zero?
+    assert_not bubble.activity_score_order.infinite?
   end
 end
