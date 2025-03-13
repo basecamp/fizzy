@@ -4,8 +4,12 @@ module NotificationsHelper
 
     if notification.resource.is_a? Comment
       "RE: " + title
-    elsif notification_event_action(notification) == "assigned"
-      "Assigned to you: " + title
+    elsif (assignees = notification_event_assignees(notification))
+      if assignees.include?(Current.user)
+        "Assigned to you: " + title
+      else
+        "Assigned to #{assignees.first.name}: " + title
+      end
     else
       title
     end
@@ -60,5 +64,9 @@ module NotificationsHelper
 
     def notification_is_for_initial_assignement?(notification)
       notification.event.action == "published" && notification.bubble.assigned_to?(notification.user)
+    end
+
+    def notification_event_assignees(notification)
+      notification_event_action(notification) == "assigned" && notification.event.assignees.presence
     end
 end
