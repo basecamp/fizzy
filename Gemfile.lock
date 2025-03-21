@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/basecamp/active_record-tenanted
-  revision: 499a1d4ef76a50b3e479bbf882a15cabb21ee485
+  revision: 1486b64434bf5fb0a98ca7850ea4ab707965ffcb
   specs:
     active_record-tenanted (0.1.0)
       activerecord (>= 8.1.alpha)
