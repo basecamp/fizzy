@@ -1,0 +1,55 @@
+#!/usr/bin/env ruby
+
+require_relative "../config/environment"
+
+url_options = if ARGV.length == 1
+  { host: ARGV[0], port: nil }
+elsif Rails.env.development?
+  { host: "http://%{tenant}.fizzy.localhost", port: "3006" }
+else
+  raise "please provide a tenant domain"
+end
+pp url_options
+
+ApplicationRecord.with_each_tenant do |tenant|
+  ActiveStorage::Current.url_options = {
+    host: sprintf(url_options[:host], tenant: tenant),
+    port: url_options[:port]
+  }
+
+  next if Account.count == 0
+  raise "More than one account" if Account.count > 1
+
+  ActiveStorage::Attachment.where(record_type: "Account").each do |upload|
+    url = upload.slug_url
+    markdowns = ActionText::Markdown.where("content LIKE ?", "%#{url}%").all
+    next if markdowns.empty?
+
+    puts "#{markdowns.length} | #{tenant} | #{url}" 
+
+    raise "unexpected record type #{markdown.record_type}" unless markdowns.all? { _1.record_type == "Comment" }
+    raise "upload is on multiple bubbles" unless markdowns.map(&:record).map(&:bubble).uniq.length == 1
+
+    upload.update_columns record_type: "Bubble", record_id: markdowns.first.record.bubble.id
+  end
+end
+
+# who are the orphans?
+slugs_37s = []
+ApplicationRecord.with_tenant("37s") do
+  slugs_37s += ActiveStorage::Attachment.where(record_type: "Account").pluck(:slug)
+end
+
+slugs_migrated = []
+ApplicationRecord.with_each_tenant do |tenant|
+  slugs_migrated += ActiveStorage::Attachment.where(record_type: "Bubble").pluck(:slug)
+end
+
+orphaned_slugs = slugs_37s - slugs_migrated
+pp ["orphans:", orphaned_slugs]
+
+# final count
+ApplicationRecord.with_each_tenant do |tenant|
+  result = ActiveStorage::Attachment.connection.execute("select record_type, count(*) from 'active_storage_attachments' group by record_type")
+  pp [tenant, result]
+end
