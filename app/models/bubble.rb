@@ -8,6 +8,7 @@ class Bubble < ApplicationRecord
   has_many :notifications, dependent: :destroy
 
   has_one_attached :image, dependent: :purge_later
+  has_many_attached :uploads
 
   after_save :track_due_date_change, if: :saved_change_to_due_on?
   after_save :track_title_change, if: :saved_change_to_title?

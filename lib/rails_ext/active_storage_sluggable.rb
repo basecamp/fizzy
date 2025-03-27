@@ -6,7 +6,7 @@ module ActiveStorage::Sluggable
   end
 
   def slug_url(host: ActiveStorage::Current.url_options[:host], port: ActiveStorage::Current.url_options[:port])
-    Rails.application.routes.url_helpers.upload_url(slug, host: host, port: port)
+    Rails.application.routes.url_helpers.attachment_url(slug, host: host, port: port)
   end
 
   private

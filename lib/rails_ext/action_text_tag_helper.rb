@@ -3,7 +3,8 @@ module ActionText
     def markdown_area(record, name, value: nil, data: {}, **options)
       field_name = "#{record.class.model_name.param_key}[#{name}]"
       value = record.safe_markdown_attribute(name).content.to_s if value.nil?
-      data = data.reverse_merge! uploads_url: uploads_url(format: "json")
+      bubble = record.bubble
+      data = data.reverse_merge! uploads_url: bucket_bubble_uploads_url(bubble.bucket, bubble, format: "json")
 
       tag.house_md value, name: field_name, data: data, **options
     end

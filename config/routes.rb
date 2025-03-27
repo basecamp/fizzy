@@ -43,6 +43,7 @@ Rails.application.routes.draw do
         resources :reactions, module: :comments
       end
       resource :readings, only: :create
+      resources :uploads, only: :create
 
       scope module: :bubbles do
         resource :image
@@ -65,6 +66,8 @@ Rails.application.routes.draw do
     end
   end
 
+  get "/u/*slug" => "attachments#show", as: :attachment
+
   resources :events, only: :index
   namespace :events do
     resources :days
@@ -79,9 +82,6 @@ Rails.application.routes.draw do
       resources :transfers, only: %i[ show update ]
     end
   end
-
-  resources :uploads, only: :create
-  get "/u/*slug" => "uploads#show", as: :upload
 
   resources :users do
     scope module: :users do

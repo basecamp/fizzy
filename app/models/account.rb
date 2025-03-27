@@ -14,6 +14,4 @@ class Account < ApplicationRecord
   has_many :stages, through: :workflows, class_name: "Workflow::Stage"
 
   has_many :tags, dependent: :destroy
-
-  has_many_attached :uploads
 end

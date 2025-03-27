@@ -27,6 +27,13 @@ class BubblesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "show a draft" do
+    bubble = buckets(:writebook).bubbles.create!(creator: users(:kevin), status: :drafted)
+
+    get bucket_bubble_url(buckets(:writebook), bubble)
+    assert_response :success
+  end
+
   test "edit" do
     get edit_bucket_bubble_url(buckets(:writebook), bubbles(:logo))
     assert_response :success

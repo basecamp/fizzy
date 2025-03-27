@@ -78,7 +78,7 @@
               <%= tag.house_md @bubble.draft_comment, name: "bubble[draft_comment]", class: "input comment__input", 
                     form: "bubble_form", 
                     placeholder: new_comment_placeholder(@bubble),
-                    data: { action: "house-md:change->outlet-auto-save#change focusout->outlet-auto-save#submit", uploads_url: uploads_url(format: "json") } %>
+                    data: { action: "house-md:change->outlet-auto-save#change focusout->outlet-auto-save#submit", uploads_url: bucket_bubble_uploads_url(@bubble.bucket, @bubble, format: "json") } %>
             </form>
 
             <% if @bubble.creating? %>

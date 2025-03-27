@@ -1,25 +1,15 @@
 class UploadsController < ApplicationController
-  include ActiveStorage::SetCurrent
+  include ActiveStorage::SetCurrent, BubbleScoped, BucketScoped
 
   before_action :set_file, only: :create
-  before_action :set_attachment, only: :show
 
   def create
-    @upload = Current.account.uploads_attachments.create! blob: create_blob!
-  end
-
-  def show
-    expires_in 5.minutes, public: true
-    redirect_to @attachment.url
+    @upload = @bubble.uploads_attachments.create! blob: create_blob!
   end
 
   private
     def set_file
       @file = params[:file]
-    end
-
-    def set_attachment
-      @attachment = ActiveStorage::Attachment.find_by! slug: "#{params[:slug]}.#{params[:format]}"
     end
 
     def create_blob!
