@@ -18,7 +18,7 @@ GIT
 
 GIT
   remote: https://github.com/rails/rails.git
-  revision: e9d7ca5e0b834ff2ce3d43965deac670ff8ac790
+  revision: d61a69c629e256fd57b0b40177db885f187d9208
   branch: main
   specs:
     actioncable (8.1.0.alpha)
@@ -207,7 +207,7 @@ GEM
     listen (3.9.0)
       rb-fsevent (~> 0.10, >= 0.10.3)
       rb-inotify (~> 0.9, >= 0.9.10)
-    logger (1.6.6)
+    logger (1.7.0)
     loofah (2.24.0)
       crass (~> 1.0.2)
       nokogiri (>= 1.12.0)
