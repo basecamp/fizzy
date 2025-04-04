@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_04_04_074315) do
+ActiveRecord::Schema[8.1].define(version: 2025_04_04_083727) do
   create_table "accesses", force: :cascade do |t|
     t.integer "bucket_id", null: false
     t.datetime "created_at", null: false
@@ -235,9 +235,18 @@ ActiveRecord::Schema[8.1].define(version: 2025_04_04_074315) do
     t.index ["user_id"], name: "index_pins_on_user_id"
   end
 
+  create_table "pop_reasons", force: :cascade do |t|
+    t.integer "account_id"
+    t.datetime "created_at", null: false
+    t.string "label"
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_pop_reasons_on_account_id"
+  end
+
   create_table "pops", force: :cascade do |t|
     t.integer "bubble_id", null: false
     t.datetime "created_at", null: false
+    t.string "reason"
     t.datetime "updated_at", null: false
     t.integer "user_id"
     t.index ["bubble_id"], name: "index_pops_on_bubble_id", unique: true

@@ -40,10 +40,10 @@ module Bubble::Poppable
     pop&.created_at
   end
 
-  def pop!(user: Current.user)
+  def pop!(user: Current.user, reason: nil)
     unless popped?
       transaction do
-        create_pop!(user: user)
+        create_pop! user: user, reason: reason
         track_event :popped, creator: user
       end
     end

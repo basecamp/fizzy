@@ -470,6 +470,16 @@ columns:
     comment:
   - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
     auto_increment:
+    name: last_active_at
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
     name: stage_id
     cast_type: *1
     sql_type_metadata: *2
@@ -499,16 +509,6 @@ columns:
     collation:
     comment:
   - *9
-  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
-    auto_increment:
-    name: last_active_at
-    cast_type: *3
-    sql_type_metadata: *4
-    'null': true
-    default:
-    default_function:
-    collation:
-    comment:
   buckets:
   - *5
   - &32 !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
@@ -748,6 +748,30 @@ columns:
   - *6
   - *9
   - *30
+  pop_reasons:
+  - *5
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: account_id
+    cast_type: *1
+    sql_type_metadata: *2
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: label
+    cast_type: *7
+    sql_type_metadata: *8
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - *6
+  - *9
   pops:
   - *5
   - *25
@@ -758,6 +782,16 @@ columns:
     name: user_id
     cast_type: *1
     sql_type_metadata: *2
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: reason
+    cast_type: *7
+    sql_type_metadata: *8
     'null': true
     default:
     default_function:
@@ -963,6 +997,7 @@ primary_keys:
   messages: id
   notifications: id
   pins: id
+  pop_reasons: id
   pops: id
   reactions: id
   schema_migrations: version
@@ -998,6 +1033,7 @@ data_sources:
   messages: true
   notifications: true
   pins: true
+  pop_reasons: true
   pops: true
   reactions: true
   schema_migrations: true
@@ -1318,11 +1354,10 @@ indexes:
   bubbles:
   - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
     table: bubbles
-    name: index_bubbles_on_last_active_at_and_status
+    name: index_bubbles_on_stage_id
     unique: false
     columns:
-    - last_active_at
-    - status
+    - stage_id
     lengths: {}
     orders: {}
     opclasses: {}
@@ -1335,10 +1370,11 @@ indexes:
     valid: true
   - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
     table: bubbles
-    name: index_bubbles_on_stage_id
+    name: index_bubbles_on_last_active_at_and_status
     unique: false
     columns:
-    - stage_id
+    - last_active_at
+    - status
     lengths: {}
     orders: {}
     opclasses: {}
@@ -1802,6 +1838,23 @@ indexes:
     nulls_not_distinct:
     comment:
     valid: true
+  pop_reasons:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: pop_reasons
+    name: index_pop_reasons_on_account_id
+    unique: false
+    columns:
+    - account_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
   pops:
   - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
     table: pops
@@ -2053,4 +2106,4 @@ indexes:
     nulls_not_distinct:
     comment:
     valid: true
-version: 20250404074315
+version: 20250404083727

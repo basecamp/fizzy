@@ -51,7 +51,7 @@
 
     <% if bubble.popped? %>
       <div class="card__popped flex flex-column">
-        <span class="card__popped-title txt-uppercase"><%= bubble.popped_by.system? ? "Closed" : "Completed" %></span>
+        <span class="card__popped-title txt-uppercase"><%= bubble.popped_by.system? ? "Closed" : bubble.pop.reason %></span>
         <strong><%= bubble.popped_at.strftime("%b %d, %Y") %></strong>
         <span>by <span class="card__popped-by"><%= bubble.popped_by.name %></span></span>
       </div>

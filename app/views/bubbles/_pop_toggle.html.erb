@@ -14,18 +14,13 @@
           aria-label="Close as…" aria-description="Close this card and select a reason.."
           data-dialog-target="dialog" data-action="turbo:before-cache@document->dialog#close">
         <strong class="popup__title margin-block-start-half pad-inline-half">Close as…</strong>
-        <%= button_to bucket_bubble_pop_path(bubble.bucket, bubble), class: "btn popup__item full-width", form_class: "full-width" do %>
-          <span class="overflow-ellipsis">Completed</span>
+
+        <% Current.account.pop_reasons.labels.each do |label| %>
+          <%= button_to bucket_bubble_pop_path(bubble.bucket, bubble, reason: label), class: "btn popup__item full-width", form_class: "full-width" do %>
+            <span class="overflow-ellipsis"><%= label %></span>
+          <% end %>
         <% end %>
-        <%= button_to bucket_bubble_pop_path(bubble.bucket, bubble), class: "btn popup__item full-width", form_class: "full-width" do %>
-          <span class="overflow-ellipsis">Duplicate</span>
-        <% end %>
-        <%= button_to bucket_bubble_pop_path(bubble.bucket, bubble), class: "btn popup__item full-width", form_class: "full-width" do %>
-          <span class="overflow-ellipsis">Maybe later</span>
-        <% end %>
-        <%= button_to bucket_bubble_pop_path(bubble.bucket, bubble), class: "btn popup__item full-width", form_class: "full-width" do %>
-          <span class="overflow-ellipsis">Working as intended</span>
-        <% end %>
+
         <% if bubble.doing? %>
           <hr class="separator--horizontal full-width flex-item-grow" style="--border-color: var(--color-subtle)" aria-hidden="true">
           <%= button_to bucket_bubble_engagement_path(bubble.bucket, bubble), method: :delete, class: "btn popup__item full-width" do %>
