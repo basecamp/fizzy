@@ -88,6 +88,13 @@
     display: flex;
     inline-size: calc(var(--comment-padding-inline) * 0.75);
   }
+
+  .avatar {
+    --btn-size: 1lh;
+
+    display: inline-grid;
+    vertical-align: bottom;
+  }
 }
 
 .comment__input {

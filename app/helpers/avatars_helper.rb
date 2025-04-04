@@ -11,7 +11,7 @@ module AvatarsHelper
   end
 
   def avatar_tag(user, hidden_for_screen_reader: false, **options)
-    link_to user_path(user), title: user.name, class: "btn avatar", data: { turbo_frame: "_top" },
+    link_to Rails.application.routes.url_helpers.user_path(user), title: user.name, class: "btn avatar", data: { turbo_frame: "_top" },
         aria: { hidden: hidden_for_screen_reader, label: user.name },
         tabindex: hidden_for_screen_reader ? -1 : nil do
       avatar_image_tag(user, **options)
@@ -19,6 +19,6 @@ module AvatarsHelper
   end
 
   def avatar_image_tag(user, **options)
-    image_tag user_avatar_path(user), aria: { hidden: "true" }, size: 48, class: ("avatar__photo" if user.avatar.attached?), **options
+    image_tag Rails.application.routes.url_helpers.user_avatar_path(user), aria: { hidden: "true" }, size: 48, class: ("avatar__photo" if user.avatar.attached?), **options
   end
 end

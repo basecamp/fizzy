@@ -1,4 +1,6 @@
 module EventsHelper
+  include AvatarsHelper
+
   def event_day_title(day)
     case
     when day.today?
@@ -92,6 +94,38 @@ module EventsHelper
       "#{event.creator == Current.user ? "You" : event.creator.name} removed the date on <span style='color: var(--bubble-color)'>#{ bubble_title(event.bubble) }</span>"
     when "title_changed"
       "#{event.creator == Current.user ? "You" : event.creator.name} renamed  on <span style='color: var(--bubble-color)'>#{ bubble_title(event.bubble) }</span> (was: '#{event.particulars.dig('particulars', 'old_title')})'".html_safe
+    end
+  end
+
+  def summarize_event(event)
+    case event.action
+    when "published"
+      "Added by #{event_person_tag(event.creator)}."
+    when "assigned"
+      "Assigned to #{event.assignees.map { |assignee| event_person_tag(assignee) }.join(' ').html_safe}."
+    when "unassigned"
+      "Unassigned from #{event.assignees.map { |assignee| event_person_tag(assignee) }.join(' ').html_safe}."
+    when "staged"
+      "#{event_person_tag(event.creator)} moved this to '#{event.stage_name}'."
+    when "popped"
+      "Popped by #{event_person_tag(event.creator)}"
+    when "unstaged"
+      "#{event_person_tag(event.creator)} removed this from '#{event.stage_name}'."
+    when "due_date_added"
+      "#{event_person_tag(event.creator)} set due date to #{event.particulars.dig('particulars', 'due_date').to_date.strftime('%B %-d')}."
+    when "due_date_changed"
+      "#{event_person_tag(event.creator)} changed due date to #{event.particulars.dig('particulars', 'due_date').to_date.strftime('%B %-d')}."
+    when "due_date_removed"
+      "#{event_person_tag(event.creator)} removed the date."
+    when "title_changed"
+      "#{event_person_tag(event.creator)} changed title from '#{event.particulars.dig('particulars', 'old_title')}' to '#{event.particulars.dig('particulars', 'new_title')}'."
+    end
+  end
+
+  def event_person_tag(user)
+    content_tag(:span) do
+      concat avatar_tag(user)
+      concat " #{user.name}"
     end
   end
 

@@ -1,5 +1,5 @@
 class EventSummary < ApplicationRecord
-  include Messageable
+  include Messageable, EventsHelper
 
   has_many :events, -> { chronologically }, dependent: :delete_all, inverse_of: :summary
 
@@ -16,28 +16,7 @@ class EventSummary < ApplicationRecord
     end
 
     def summarize(event)
-      case event.action
-      when "published"
-        "Added by #{event.creator.name}."
-      when "assigned"
-        "Assigned to #{event.assignees.pluck(:name).to_sentence}."
-      when "unassigned"
-        "Unassigned from #{event.assignees.pluck(:name).to_sentence}."
-      when "staged"
-        "#{event.creator.name} moved this to '#{event.stage_name}'."
-      when "popped"
-        "Popped by #{ event.creator.name }"
-      when "unstaged"
-        "#{event.creator.name} removed this from '#{event.stage_name}'."
-      when "due_date_added"
-        "#{event.creator.name} set due date to #{event.particulars.dig('particulars', 'due_date').to_date.strftime('%B %-d')}."
-      when "due_date_changed"
-        "#{event.creator.name} changed due date to #{event.particulars.dig('particulars', 'due_date').to_date.strftime('%B %-d')}."
-      when "due_date_removed"
-        "#{event.creator.name} removed the date."
-      when "title_changed"
-        "#{event.creator.name} changed title from '#{event.particulars.dig('particulars', 'old_title')}' to '#{event.particulars.dig('particulars', 'new_title')}'."
-      end
+      ApplicationController.helpers.summarize_event(event)
     end
 
     def boosts_summary

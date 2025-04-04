@@ -1,7 +1,7 @@
 <% unless event_summary.body.blank? %>
   <div class="comment comment__event flex full-width">
     <div class="comment__content txt-tight-lines full-width" data-controller="event-summary">
-      <%= event_summary.body %>
+      <%= event_summary.body.html_safe %>
     </div>
   </div>
 <% end %>
