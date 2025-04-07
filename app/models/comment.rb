@@ -18,23 +18,26 @@ class Comment < ApplicationRecord
     bubble_comments.many? && bubble_comments_prior.last&.creator != creator
   end
 
-  private
+  def to_partial_path
+    "bubbles/#{super}"
+  end
 
-  def cleanup_events
-    # Delete events that reference through event_summary
-    if message&.event_summary.present?
-      Event.where(summary: message.event_summary).destroy_all
+  private
+    def cleanup_events
+      # Delete events that reference through event_summary
+      if message&.event_summary.present?
+        Event.where(summary: message.event_summary).destroy_all
+      end
+
+      # Delete events that reference directly in particulars
+      Event.where(particulars: { comment_id: id }).destroy_all
     end
 
-    # Delete events that reference directly in particulars
-    Event.where(particulars: { comment_id: id }).destroy_all
-  end
+    def bubble_comments_prior
+      bubble_comments.where(created_at: ...created_at)
+    end
 
-  def bubble_comments_prior
-    bubble_comments.where(created_at: ...created_at)
-  end
-
-  def bubble_comments
-    Comment.joins(:message).where(messages: { bubble: bubble })
-  end
+    def bubble_comments
+      Comment.joins(:message).where(messages: { bubble: bubble })
+    end
 end

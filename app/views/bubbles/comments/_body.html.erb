@@ -10,7 +10,7 @@
           <%= local_datetime_tag comment.created_at, style: :shortdate, class: "txt-ink translucent" %>
         <% end %>
 
-        <%= link_to edit_bucket_bubble_comment_path(comment.bubble.bucket, comment.bubble, comment),
+        <%= link_to edit_bubble_comment_path(comment.bubble, comment),
               class: "comment__edit btn btn--plain txt-xx-small fill-transparent translucent flex-item-justify-end" do %>
           <%= icon_tag "menu-dots-horizontal" %>
           <span class="for-screen-reader">Edit this comment</span>
@@ -20,7 +20,7 @@
         <%= sanitize comment.body_html %>
       </div>
 
-      <%= render "comments/reactions/reactions", comment: comment %>
+      <%= render "bubbles/comments/reactions/reactions", comment: comment %>
     </div>
   <% end %>
 <% end %>

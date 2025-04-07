@@ -8,6 +8,16 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :buckets do
+    scope module: :buckets do
+      resource :subscriptions
+      resource :workflow, only: :update
+      resource :involvement
+    end
+
+    resources :bubbles
+  end
+
   resources :bubbles do
     scope module: :bubbles do
       resource :engagement
@@ -23,6 +33,10 @@ Rails.application.routes.draw do
       resources :boosts
       resources :stagings
       resources :taggings
+
+      resources :comments do
+        resources :reactions, module: :comments
+      end
     end
   end
 
@@ -37,20 +51,6 @@ Rails.application.routes.draw do
   resources :notifications do
     member do
       post :mark_read
-    end
-  end
-
-  resources :buckets do
-    scope module: :buckets do
-      resource :subscriptions
-      resource :workflow, only: :update
-      resource :involvement
-    end
-
-    resources :bubbles do
-      resources :comments do
-        resources :reactions, module: :comments
-      end
     end
   end
 

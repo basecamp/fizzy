@@ -1,6 +1,6 @@
 <%= messages_tag(bubble) do %>
   <%= render partial: "messages/message", collection: bubble.messages, cached: true %>
-  <%= render "comments/new", bubble: bubble, cached: true %>
+  <%= render "bubbles/comments/new", bubble: bubble, cached: true %>
 
   <div class="comments__subscribers flex flex-column margin-block txt-align-start full-width">
     <strong class="txt-uppercase">Subscribers</strong>

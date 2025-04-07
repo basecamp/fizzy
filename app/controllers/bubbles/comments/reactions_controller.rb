@@ -1,4 +1,4 @@
-class Comments::ReactionsController < ApplicationController
+class Bubbles::Comments::ReactionsController < ApplicationController
   before_action :set_comment
 
   def index
@@ -12,7 +12,7 @@ class Comments::ReactionsController < ApplicationController
     @reaction = @comment.reactions.create!(reaction_params)
 
     broadcast_create
-    redirect_to bucket_bubble_comment_reactions_url(@comment.bubble.bucket, @comment.bubble, @comment)
+    redirect_to bubble_comment_reactions_url(@comment.bubble, @comment)
   end
 
   def destroy

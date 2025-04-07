@@ -21,13 +21,13 @@ class BubbleMessagesTest < ActionDispatch::IntegrationTest
     assert_equal "boosted", bubble.messages.last.messageable.events.last.action
 
     # Comment on it
-    post bucket_bubble_comments_url(buckets(:writebook), bubble), params: { comment: { body: "Agreed." } }
+    post bubble_comments_url(bubble), params: { comment: { body: "Agreed." } }
     assert_equal 2, bubble.messages.count
     assert_predicate bubble.messages.last, :comment?
     assert_equal "Agreed.", bubble.messages.last.messageable.body
 
     # Assign it
-    post bucket_bubble_assignments_url(buckets(:writebook), bubble), params: { assignee_id: users(:kevin).id }
+    post bubble_assignments_url(bubble), params: { assignee_id: users(:kevin).id }
     assert_equal 3, bubble.messages.count
     assert_predicate bubble.messages.last, :event_summary?
     assert_equal 1, bubble.messages.last.event_summary.events.count
