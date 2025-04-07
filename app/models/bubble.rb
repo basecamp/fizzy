@@ -1,5 +1,5 @@
 class Bubble < ApplicationRecord
-  include Assignable, Boostable, Colored, Commentable, Engageable, Eventable,
+  include Assignable, Boostable, Colored, Engageable, Eventable,
     Messages, Notifiable, Pinnable, Poppable, Scorable, Searchable, Staged, Statuses, Taggable, Watchable
 
   belongs_to :bucket, touch: true

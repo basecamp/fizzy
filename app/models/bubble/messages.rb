@@ -3,6 +3,7 @@ module Bubble::Messages
 
   included do
     has_many :messages, -> { chronologically }, dependent: :destroy
+    scope :ordered_by_comments, -> { order comments_count: :desc }
     after_save :capture_draft_comment
   end
 
@@ -20,6 +21,19 @@ module Bubble::Messages
     else
       messages.comments.destroy_all
     end
+  end
+
+  def comment_created(comment)
+    increment! :comments_count
+    watch_by comment.creator
+
+    track_event :commented, comment_id: comment.id
+    rescore
+  end
+
+  def comment_destroyed
+    decrement! :comments_count
+    rescore
   end
 
   private
