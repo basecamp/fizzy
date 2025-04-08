@@ -26,6 +26,10 @@ module Filter::Fields
       (super || default_indexed_by).inquiry
     end
 
+    def engagement_status
+      super&.inquiry
+    end
+
     def terms
       Array(super)
     end

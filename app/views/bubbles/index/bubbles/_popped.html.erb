@@ -3,9 +3,13 @@
     Recently closed
   </h2>
 
-  <section class="cards--grid">
+  <section id="popped-bubbles"  class="cards--grid">
     <% if page.used? %>
       <%= render partial: "bubbles/cards/preview", collection: page.records, as: :bubble, cached: true %>
+
+      <% unless page.last? %>
+        <%= bubbles_next_page_link "popped-bubbles", page: page, filter: filter, fetch_on_visible: true %>
+      <% end %>
     <% else %>
       <p class="txt-medium translucent">Nothing here</p>
     <% end %>

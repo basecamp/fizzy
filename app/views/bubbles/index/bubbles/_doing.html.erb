@@ -1,4 +1,4 @@
-<section class="cards gap position-relative" style="align-items: center; view-transition-name: cards-container;" data-controller="bubble-size" data-action="turbo:morph@window->bubble-size#resize">
+<section id="doing-bubbles" class="cards gap position-relative" style="align-items: center; view-transition-name: cards-container;" data-controller="bubble-size" data-action="turbo:morph@window->bubble-size#resize">
   <% if workflow = filter.single_workflow %>
     <%= render "bubbles/index/workflow_filter", workflow: workflow, filter: filter %>
   <% else %>
