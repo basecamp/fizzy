@@ -26,7 +26,7 @@ Rails.application.routes.draw do
     end
 
     collection do
-      get :listed, to: "bubbles/listed#index"
+      get :previews, to: "bubbles/previews#index"
     end
   end
 

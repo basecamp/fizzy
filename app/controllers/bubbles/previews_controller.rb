@@ -1,4 +1,4 @@
-class Bubbles::ListedController < ApplicationController
+class Bubbles::PreviewsController < ApplicationController
   include BucketScoped
 
   skip_before_action :set_bucket, only: :index
