@@ -9,6 +9,7 @@ class BubblesController < ApplicationController
   before_action :set_bubble, only: %i[ show edit update destroy ]
   before_action :handle_display_count, only: :index
 
+  DEFAULT_PARAMS = { indexed_by: "newest" }
   DISPLAY_COUNT_OPTIONS = [ 6, 12, 18, 24 ].freeze
   DEFAULT_DISPLAY_COUNT = 6
 
@@ -39,8 +40,6 @@ class BubblesController < ApplicationController
   end
 
   private
-    DEFAULT_PARAMS = { indexed_by: "newest" }
-
     def set_filter
       @filter = Current.user.filters.from_params params.reverse_merge(**DEFAULT_PARAMS).permit(*Filter::PERMITTED_PARAMS)
     end
