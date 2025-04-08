@@ -1,5 +1,5 @@
 class Bubbles::PreviewsController < ApplicationController
-  include BucketScoped
+  include BucketScoped, FilterScoped
 
   skip_before_action :set_bucket, only: :index
 
@@ -8,9 +8,4 @@ class Bubbles::PreviewsController < ApplicationController
   def index
     set_page_and_extract_portion_from @filter.bubbles.load_async
   end
-
-  private
-    def set_filter
-      @filter = Current.user.filters.from_params params.reverse_merge(**BubblesController::DEFAULT_PARAMS).permit(*Filter::PERMITTED_PARAMS)
-    end
 end
