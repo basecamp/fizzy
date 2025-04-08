@@ -23,6 +23,7 @@ BUBBLES_COUNT.times do |index|
 end
 
 # Completed
+
 BUBBLES_COUNT.times do |index|
   bubble = bucket.bubbles.create!(title: "Popped card #{index}", creator: user, status: :published)
   bubble.pop!
