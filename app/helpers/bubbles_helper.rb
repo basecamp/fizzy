@@ -23,7 +23,7 @@ module BubblesHelper
   end
 
   def bubbles_next_page_link(target, page:, filter:, fetch_on_visible: false, data: {}, **options)
-    url = previews_bubbles_path(target: target, page: page.next_param, **filter.as_params)
+    url = bubbles_previews_path(target: target, page: page.next_param, **filter.as_params)
 
     if fetch_on_visible
       data[:controller] = "#{data[:controller]} fetch-on-visible"

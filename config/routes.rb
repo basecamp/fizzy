@@ -8,6 +8,10 @@ Rails.application.routes.draw do
     end
   end
 
+  namespace :bubbles do
+    resources :previews
+  end
+
   resources :bubbles do
     scope module: :bubbles do
       resource :engagement
@@ -23,10 +27,6 @@ Rails.application.routes.draw do
       resources :boosts
       resources :stagings
       resources :taggings
-    end
-
-    collection do
-      get :previews, to: "bubbles/previews#index"
     end
   end
 
