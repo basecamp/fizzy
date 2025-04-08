@@ -21,4 +21,11 @@ module BubblesHelper
       }
     end
   end
+
+  def bubbles_next_page_link(target, page:, filter:)
+    link_to "Load more...",
+      listed_bubbles_path(target: target, page: page.next_param, **filter.as_params),
+      id: "#{target}-load-page-#{page.next_param}",
+      data: { turbo_stream: true }
+  end
 end

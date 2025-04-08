@@ -6,9 +6,6 @@
 
 <% unless @page.last? %>
   <%= turbo_stream.append params[:target] do %>
-    <%= link_to "Load more...",
-          listed_bubbles_path(target: params[:target], page: @page.next_param, **@filter.as_params),
-          id: "#{params[:target]}-load-page-#{@page.next_param}",
-          data: { turbo_stream: true } %>
+    <%= bubbles_next_page_link params[:target], page: @page, filter: @filter %>
   <% end %>
 <% end %>

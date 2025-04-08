@@ -7,10 +7,7 @@
     <%= render partial: "bubbles/cards/mini", collection: page.records, as: :bubble, cached: true %>
 
     <% unless page.last? %>
-      <%= link_to "Load more...",
-            listed_bubbles_path(target: "considering-bubbles", page: page.next_param, **filter.as_params),
-            id: "considering-bubbles-load-page-#{page.next_param}",
-            data: { turbo_stream: true } %>
+      <%= bubbles_next_page_link "considering-bubbles", page: page, filter: filter %>
     <% end %>
   <% else %>
     <p class="txt-medium translucent">Nothing here</p>

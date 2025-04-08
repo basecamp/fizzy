@@ -9,7 +9,11 @@
 
   <% if page.used? %>
     <%= render partial: "bubbles/cards/preview", collection: page.records, as: :bubble, cached: true %>
-  <% else %>
+
+    <% unless page.last? %>
+      <%= bubbles_next_page_link "doing-bubbles", page: page, filter: filter %>
+    <% end %>
+<% else %>
     <p class="txt-medium translucent">Nothing here</p>
   <% end %>
 </section>
