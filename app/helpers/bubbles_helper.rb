@@ -30,10 +30,11 @@ module BubblesHelper
       data[:fetch_on_visible_url_value] = url
     end
 
-    link_to "Load more...",
+    link_to "Load more",
       url,
       id: "#{target}-load-page-#{page.next_param}",
       data: { turbo_stream: true, **data },
+      class: "btn txt-small",
       **options
   end
 end
