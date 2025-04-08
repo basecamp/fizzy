@@ -1,3 +1,5 @@
+require "ostruct"
+
 class BubblesController < ApplicationController
   include BucketScoped
 
@@ -9,12 +11,11 @@ class BubblesController < ApplicationController
 
   DISPLAY_COUNT_OPTIONS = [ 6, 12, 18, 24 ].freeze
   DEFAULT_DISPLAY_COUNT = 6
-  RECENTLY_POPPED_LIMIT = 100
 
   def index
-    @considering_bubbles = @filter.bubbles.considering.load_async
-    @doing_bubbles = @filter.bubbles.doing.load_async
-    @popped_bubbles = @filter.with(indexed_by: "popped").bubbles.recently_popped_first.limit(RECENTLY_POPPED_LIMIT).load_async
+    @considering = page_and_filter_for @filter.with(engagement_status: "considering")
+    @doing = page_and_filter_for @filter.with(engagement_status: "doing")
+    @popped = page_and_filter_for @filter.with(indexed_by: "popped")
   end
 
   def create
@@ -46,6 +47,12 @@ class BubblesController < ApplicationController
 
     def set_bubble
       @bubble = @bucket.bubbles.find params[:id]
+    end
+
+    def page_and_filter_for(filter)
+      OpenStruct.new \
+        page: GearedPagination::Recordset.new(filter.bubbles).page(1),
+        filter: filter
     end
 
     def bubble_params

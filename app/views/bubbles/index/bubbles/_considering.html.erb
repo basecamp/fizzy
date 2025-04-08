@@ -1,10 +1,17 @@
-<section class="cards" style="align-items: center; border-inline-end: 1px solid var(--color-subtle);">
+<section id="considering-bubbles" class="cards" style="align-items: center; border-inline-end: 1px solid var(--color-subtle);">
   <h2 class="txt-align-center flex-inline center txt-uppercase txt-medium margin-none-block-start margin-block-end">
     Considering
   </h2>
 
-  <% if bubbles.any? %>
-    <%= render partial: "bubbles/cards/mini", collection: bubbles, as: :bubble, cached: true %>
+  <% if page.used? %>
+    <%= render partial: "bubbles/cards/mini", collection: page.records, as: :bubble, cached: true %>
+
+    <% unless page.last? %>
+      <%= link_to "Load more...",
+            listed_bubbles_path(target: "considering-bubbles", page: page.next_param, **filter.as_params),
+            id: "considering-bubbles-load-page-#{page.next_param}",
+            data: { turbo_stream: true } %>
+    <% end %>
   <% else %>
     <p class="txt-medium translucent">Nothing here</p>
   <% end %>

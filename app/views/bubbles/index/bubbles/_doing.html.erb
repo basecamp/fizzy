@@ -7,8 +7,8 @@
     </h2>
   <% end %>
 
-  <% if bubbles.any? %>
-    <%= render partial: "bubbles/cards/preview", collection: bubbles, as: :bubble, cached: true %>
+  <% if page.used? %>
+    <%= render partial: "bubbles/cards/preview", collection: page.records, as: :bubble, cached: true %>
   <% else %>
     <p class="txt-medium translucent">Nothing here</p>
   <% end %>

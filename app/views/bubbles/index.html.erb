@@ -7,8 +7,8 @@
 <% end %>
 
 <div class="cards--columns">
-  <%= render "bubbles/index/bubbles/considering", bubbles: @considering_bubbles %>
-  <%= render "bubbles/index/bubbles/doing", bubbles: @doing_bubbles, filter: @filter %>
+  <%= render "bubbles/index/bubbles/considering", **@considering.to_h %>
+  <%= render "bubbles/index/bubbles/doing", **@doing.to_h %>
 </div>
 
-<%= render "bubbles/index/bubbles/popped", bubbles: @popped_bubbles, filter: @filter %>
+<%= render "bubbles/index/bubbles/popped", **@popped.to_h %>

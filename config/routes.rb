@@ -24,6 +24,10 @@ Rails.application.routes.draw do
       resources :stagings
       resources :taggings
     end
+
+    collection do
+      get :listed, to: "bubbles/listed#index"
+    end
   end
 
   resources :notifications, only: :index

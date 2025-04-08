@@ -20,6 +20,7 @@ class Filter < ApplicationRecord
     @bubbles ||= begin
       result = creator.accessible_bubbles.indexed_by(indexed_by)
       result = result.active unless indexed_by.popped?
+      result = result.by_engagement_status(engagement_status) if engagement_status.present?
       result = result.unassigned if assignment_status.unassigned?
       result = result.assigned_to(assignees.ids) if assignees.present?
       result = result.where(creator_id: creators.ids) if creators.present?

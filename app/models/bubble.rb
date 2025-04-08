@@ -29,6 +29,13 @@ class Bubble < ApplicationRecord
     end
   end
 
+  scope :by_engagement_status, ->(status) do
+    case status.to_s
+    when "considering"    then considering
+    when "doing"          then doing
+    end
+  end
+
   def cache_key
     [ super, bucket&.name ].compact.join("/")
   end
