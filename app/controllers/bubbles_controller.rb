@@ -13,7 +13,7 @@ class BubblesController < ApplicationController
   DEFAULT_DISPLAY_COUNT = 6
 
   def index
-    @considering = page_and_filter_for @filter.with(engagement_status: "considering")
+    @considering = page_and_filter_for @filter.with(engagement_status: "considering"), per_page: 31
     @doing = page_and_filter_for @filter.with(engagement_status: "doing")
     @popped = page_and_filter_for @filter.with(indexed_by: "popped")
   end
@@ -49,9 +49,9 @@ class BubblesController < ApplicationController
       @bubble = @bucket.bubbles.find params[:id]
     end
 
-    def page_and_filter_for(filter)
+    def page_and_filter_for(filter, per_page: nil)
       OpenStruct.new \
-        page: GearedPagination::Recordset.new(filter.bubbles).page(1),
+        page: GearedPagination::Recordset.new(filter.bubbles, per_page:).page(1),
         filter: filter
     end
 
