@@ -4,6 +4,6 @@ class Bubbles::PreviewsController < ApplicationController
   before_action :set_filter, only: :index
 
   def index
-    set_page_and_extract_portion_from @filter.bubbles.load_async
+    set_page_and_extract_portion_from @filter.bubbles
   end
 end
