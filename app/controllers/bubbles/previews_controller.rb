@@ -1,7 +1,5 @@
 class Bubbles::PreviewsController < ApplicationController
-  include BucketScoped, FilterScoped
-
-  skip_before_action :set_bucket, only: :index
+  include FilterScoped
 
   before_action :set_filter, only: :index
 
