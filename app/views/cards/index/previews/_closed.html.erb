@@ -5,7 +5,7 @@
 
   <section class="cards--grid">
     <% if cards.any? %>
-      <%= render partial: "cards/cards/preview", collection: cards, as: :card, cached: true %>
+      <%= render partial: "cards/display/preview", collection: cards, as: :card, cached: true %>
     <% else %>
       <p class="txt-medium translucent">Nothing here</p>
     <% end %>

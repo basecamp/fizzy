@@ -6,7 +6,7 @@
       <%= link_to card.collection.name, cards_path(collection_ids: [card.collection]),
             class: "card__collection txt-uppercase overflow-ellipsis txt-reversed" %>
 
-      <%= render "cards/cards/perma/tags", card: card %>
+      <%= render "cards/display/perma/tags", card: card %>
     </header>
 
     <div class="card__body flex gap full-width flex-item-grow">
@@ -35,10 +35,10 @@
     </div>
 
     <footer class="card__footer full-width flex align-start gap">
-      <%= render "cards/cards/perma/people", card: card %>
-      <%= render "cards/cards/perma/meta", card: card %>
+      <%= render "cards/display/perma/people", card: card %>
+      <%= render "cards/display/perma/meta", card: card %>
     </footer>
 
-    <%= render "cards/cards/common/background", card: card %>
+    <%= render "cards/display/common/background", card: card %>
   </article>
 <% end %>

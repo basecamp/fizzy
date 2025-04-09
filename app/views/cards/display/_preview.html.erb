@@ -4,7 +4,7 @@
     id="<%= dom_id(card, :ticket) %>">
     <header class="card__header flex align-center gap min-width">
       <span class="card__collection txt-uppercase overflow-ellipsis txt-reversed"><%= card.collection.name %></span>
-      <%= render "cards/cards/preview/tags", card: card %>
+      <%= render "cards/display/preview/tags", card: card %>
     </header>
 
     <div class="card__body flex gap full-width flex-item-grow">
@@ -22,10 +22,10 @@
     </div>
 
     <footer class="card__footer full-width flex align-start gap">
-      <%= render "cards/cards/preview/people", card: card %>
-      <%= render "cards/cards/preview/meta", card: card %>
+      <%= render "cards/display/preview/people", card: card %>
+      <%= render "cards/display/preview/meta", card: card %>
     </footer>
 
-    <%= render "cards/cards/common/background", card: card %>
+    <%= render "cards/display/common/background", card: card %>
   </article>
 <% end %>

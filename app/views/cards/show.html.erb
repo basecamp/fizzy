@@ -52,7 +52,7 @@
 
 <div data-controller="beacon" data-beacon-url-value="<%= card_reading_url(@card) %>">
   <div class="card__container position-relative <%= "card__container--pointing" unless @card.published? %>" style="--card-color: <%= @card.color %>;">
-    <%= render "cards/cards/perma", card: @card %>
+    <%= render "cards/display/perma", card: @card %>
 
     <div class="card__actions flex flex-column gap-half">
       <button class="car__star-button btn">
