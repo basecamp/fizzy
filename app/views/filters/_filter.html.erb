@@ -1,25 +1,25 @@
 <% cache_if filter.cacheable?, filter do %>
-  <li class="bucket flex flex-column txt-align-center max-width position-relative">
-    <%= link_to bubbles_path(**filter.as_params),
-          class: "border border-radius margin-block-end-half bubbles__container flex justify-center align-center position-relative",
+  <li class="collection flex flex-column txt-align-center max-width position-relative">
+    <%= link_to cards_path(**filter.as_params),
+          class: "border border-radius margin-block-end-half cards__container flex justify-center align-center position-relative",
           aria: { hidden: true }, tabindex: -1 do %>
-      <div class="bubbles bucket__bubbles flex flex-wrap gap justify-center align-end" style="view-transition-name: bubbles_<%= filter.id %>">
-        <% filter.bubbles.ordered_by_activity.limit(10).each do |bubble| %>
-          <div class="<%= class_names("bubble", drafted: bubble.drafted?) %>" style="--bubble-color: <%= bubble.color %>; <%= bubble_rotation(bubble) %>"
-            data-bubble-size-target="bubble"
-            data-activity-score="<%= bubble.activity_score %>"
-            data-activity-score-at="<%= bubble.activity_score_at.to_i %>">
-            <span class="bubble__shape"></span>
+      <div class="cards collection__cards flex flex-wrap gap justify-center align-end" style="view-transition-name: cards_<%= filter.id %>">
+        <% filter.cards.ordered_by_activity.limit(10).each do |card| %>
+          <div class="<%= class_names("card", drafted: card.drafted?) %>" style="--card-color: <%= card.color %>; <%= card_rotation(card) %>"
+            data-card-size-target="card"
+            data-activity-score="<%= card.activity_score %>"
+            data-activity-score-at="<%= card.activity_score_at.to_i %>">
+            <span class="card__shape"></span>
           </div>
         <% end %>
       </div>
     <% end %>
 
     <div class="flex align-center justify-center flex-column flex-wrap center gap-half position-relative full-width">
-      <%= link_to bubbles_path(**filter.as_params), class: "txt-ink" do %>
+      <%= link_to cards_path(**filter.as_params), class: "txt-ink" do %>
         <strong class="txt-medium"><%= icon_tag "filter", class: "flex-inline", style: "vertical-align: bottom" %> <%= filter.summary %></strong>
       <% end %>
-      <%= button_to filter_path(filter), method: :delete, class: "btn txt-small btn--negative bucket__button", data: { turbo_confirm: "Are you sure you want to delete this filter?" } do %>
+      <%= button_to filter_path(filter), method: :delete, class: "btn txt-small btn--negative collection__button", data: { turbo_confirm: "Are you sure you want to delete this filter?" } do %>
         <%= icon_tag "minus" %>
         <span class="for-screen-reader">Delete</span>
       <% end %>

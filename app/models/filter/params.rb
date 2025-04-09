@@ -6,7 +6,7 @@ module Filter::Params
     :indexed_by,
     assignee_ids: [],
     creator_ids: [],
-    bucket_ids: [],
+    collection_ids: [],
     stage_ids: [],
     tag_ids: [],
     terms: []
@@ -38,7 +38,7 @@ module Filter::Params
       params[:assignment_status] = assignment_status
       params[:terms]             = terms
       params[:tag_ids]           = tags.ids
-      params[:bucket_ids]        = buckets.ids
+      params[:collection_ids]        = collections.ids
       params[:stage_ids]         = stages.ids
       params[:assignee_ids]      = assignees.ids
       params[:creator_ids]       = creators.ids

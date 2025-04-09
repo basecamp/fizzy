@@ -5,7 +5,7 @@
   <div class="btn btn--placeholder flex-item-justify-start"></div>
 
   <header class="flex flex-inline flex-column center flex-shrink">
-    <div class="card-bucket__filter flex-inline center position-relative" data-controller="dialog" data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside">
+    <div class="card-collection__filter flex-inline center position-relative" data-controller="dialog" data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside">
       <button class="txt-align-center input input--select borderless center txt-medium" data-action="click->dialog#open:stop">
         <h1 class="txt-large overflow-ellipsis margin-none">
           <%= filter_title filter %>
@@ -15,26 +15,26 @@
       <dialog class="events__popup popup panel flex-column align-start gap-half fill-white shadow" data-dialog-target="dialog" data-action="turbo:before-cache@document->dialog#close">
         <strong class="popup__title margin-block-start-half pad-inline-half">In Collection</strong>
 
-        <%= render "bubbles/index/buckets_filter", filter: filter %>
+        <%= render "cards/index/collections_filter", filter: filter %>
       </dialog>
     </div>
 
-    <%= render "bubbles/index/sorting_options", filter: filter %>
+    <%= render "cards/index/sorting_options", filter: filter %>
   </header>
 
-  <% if bucket = filter.single_bucket %>
+  <% if collection = filter.single_collection %>
     <div class="flex-item-justify-end">
-      <%= access_involvement_advance_button bucket, Current.user %>
+      <%= access_involvement_advance_button collection, Current.user %>
     </div>
 
-    <%= link_to edit_bucket_path(bucket), class: "btn" do %>
+    <%= link_to edit_collection_path(collection), class: "btn" do %>
       <%= icon_tag "settings" %>
-      <span class="for-screen-reader">Settings for <%= bucket.name %></span>
+      <span class="for-screen-reader">Settings for <%= collection.name %></span>
     <% end %>
 
-    <%= button_to bucket_bubbles_path(bucket), method: :post, class: "btn" do %>
+    <%= button_to collection_cards_path(collection), method: :post, class: "btn" do %>
       <%= icon_tag "add" %>
-      <span class="for-screen-reader">Create a new bubble</span>
+      <span class="for-screen-reader">Create a new card</span>
     <% end %>
   <% else %>
     <div class="btn btn--placeholder flex-item-justify-end"></div>

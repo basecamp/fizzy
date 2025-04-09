@@ -1,9 +1,9 @@
-class Bubble::AutoPopAllDueJob < ApplicationJob
+class Card::AutoPopAllDueJob < ApplicationJob
   queue_as :default
 
   def perform
     ApplicationRecord.with_each_tenant do |tenant|
-      Bubble.auto_pop_all_due
+      Card.auto_closure_all_due
     end
   end
 end

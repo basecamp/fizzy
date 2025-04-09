@@ -1,16 +1,16 @@
-module BubbleScoped
+module CardScoped
   extend ActiveSupport::Concern
 
   included do
-    before_action :set_bubble, :set_bucket
+    before_action :set_card, :set_collection
   end
 
   private
-    def set_bubble
-      @bubble = Current.user.accessible_bubbles.find(params[:bubble_id])
+    def set_card
+      @card = Current.user.accessible_cards.find(params[:card_id])
     end
 
-    def set_bucket
-      @bucket = Current.user.buckets.find(@bubble.bucket_id)
+    def set_collection
+      @collection = Current.user.collections.find(@card.collection_id)
     end
 end

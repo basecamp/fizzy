@@ -1,11 +1,11 @@
 writebook_david:
-  bucket: writebook
+  collection: writebook
   user: david
 
 writebook_jz:
-  bucket: writebook
+  collection: writebook
   user: jz
 
 writebook_kevin:
-  bucket: writebook
+  collection: writebook
   user: kevin

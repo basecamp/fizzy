@@ -2,7 +2,7 @@ module Filter::Params
   extend ActiveSupport::Concern
 
   PERMITTED_PARAMS = %i[
-    indexed_by assignment_status bucket_ids creator_ids
+    indexed_by assignment_status collection_ids creator_ids
     assignee_ids stage_ids tag_ids terms display_count
   ].freeze
 
@@ -10,7 +10,7 @@ module Filter::Params
     self.class.normalize_params(
       indexed_by: indexed_by,
       assignment_status: assignment_status,
-      bucket_ids: buckets.ids,
+      collection_ids: collections.ids,
       creator_ids: creators.ids,
       assignee_ids: assignees.ids,
       stage_ids: stages.ids,

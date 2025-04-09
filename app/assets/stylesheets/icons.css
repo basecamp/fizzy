@@ -30,8 +30,8 @@
   .icon--bolt { --svg: url("bolt.svg "); }
   .icon--bookmark-outline { --svg: url("bookmark-outline.svg "); }
   .icon--bookmark { --svg: url("bookmark.svg "); }
-  .icon--bubble-add { --svg: url("bubble-add.svg "); }
-  .icon--bubbles { --svg: url("bubbles.svg "); }
+  .icon--card-add { --svg: url("card-add.svg "); }
+  .icon--cards { --svg: url("cards.svg "); }
   .icon--calendar-add { --svg: url("calendar-add.svg "); }
   .icon--calendar { --svg: url("calendar.svg "); }
   .icon--camera { --svg: url("camera.svg "); }
@@ -65,7 +65,7 @@
   .icon--picture-double { --svg: url("picture-double.svg "); }
   .icon--picture-remove { --svg: url("picture-remove.svg "); }
   .icon--pinned { --svg: url("pinned.svg "); }
-  .icon--pop { --svg: url("pop.svg "); }
+  .icon--closure { --svg: url("closure.svg "); }
   .icon--qr-code { --svg: url("qr-code.svg "); }
   .icon--reaction { --svg: url("reaction.svg "); }
   .icon--refresh { --svg: url("refresh.svg "); }

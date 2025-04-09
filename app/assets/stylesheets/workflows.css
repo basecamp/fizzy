@@ -11,35 +11,35 @@
 
     @media (hover: hover) {
       &:hover {
-        background-color: color(from var(--bubble-color) srgb r g b / 0.15);
+        background-color: color(from var(--card-color) srgb r g b / 0.15);
       }
     }
 
-    .bubbles-list & {
+    .cards-list & {
       display: none;
     }
   }
 
   .workflow-stage--current {
-    --btn-background: var(--bubble-color);
+    --btn-background: var(--card-color);
 
     color: var(--color-ink-reversed);
 
     @media (hover: hover) {
       &:hover {
-        background-color: color(from var(--bubble-color) srgb r g b / 0.65);
+        background-color: color(from var(--card-color) srgb r g b / 0.65);
       }
     }
 
     .ticket & {
       --btn-background: var(--color-ink);
 
-      background: var(--bubble-color);
+      background: var(--card-color);
       border-radius: 0.2em;
       color: var(--color-ink-reversed);
     }
 
-    .bubbles-list & {
+    .cards-list & {
       display: flex;
       background: transparent;
       border-radius: 0.2em;

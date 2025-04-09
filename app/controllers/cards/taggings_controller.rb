@@ -1,12 +1,12 @@
-class Bubbles::TaggingsController < ApplicationController
-  include BubbleScoped
+class Cards::TaggingsController < ApplicationController
+  include CardScoped
 
   def new
     @tags = Current.account.tags.alphabetically
   end
 
   def create
-    @bubble.toggle_tag_with sanitized_tag_title_param
+    @card.toggle_tag_with sanitized_tag_title_param
   end
 
   private

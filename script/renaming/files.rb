@@ -4,7 +4,7 @@ require "fileutils"
 require "active_support/core_ext/string" # for camelize
 
 # Configuration
-EXCLUDED_DIRS = ["db", ".git", "script/renaming"].freeze
+EXCLUDED_DIRS = [ "db", ".git", "script/renaming" ].freeze
 
 RENAMES = {
   "bubble" => "card",
@@ -26,11 +26,11 @@ def rename_path(path)
   RENAMES.each do |from, to|
     # Replace snake_case, kebab-case, plain, and CamelCase versions
     patterns = [
-      [/(?<=\A|[^a-zA-Z0-9])#{from}(?=[^a-zA-Z0-9]|\z)/i, to],
-      [from.camelize, to.camelize],
-      [from.camelize(:lower), to.camelize(:lower)],
-      [from.underscore.dasherize, to.underscore.dasherize],
-      [from.underscore, to.underscore]
+      [ /(?<=\A|[^a-zA-Z0-9])#{from}(?=[^a-zA-Z0-9]|\z)/i, to ],
+      [ from.camelize, to.camelize ],
+      [ from.camelize(:lower), to.camelize(:lower) ],
+      [ from.underscore.dasherize, to.underscore.dasherize ],
+      [ from.underscore, to.underscore ]
     ]
 
     patterns.each do |pattern, replacement|

@@ -1,2 +1,2 @@
-class Notifier::Popped < Notifier
+class Notifier::Closed < Notifier
 end

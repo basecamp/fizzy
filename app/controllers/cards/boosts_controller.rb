@@ -1,12 +1,12 @@
-class Bubbles::BoostsController < ApplicationController
-  include BubbleScoped
+class Cards::BoostsController < ApplicationController
+  include CardScoped
 
   def create
-    count = if params[:boost_count].to_i == @bubble.boosts_count
-      @bubble.boosts_count + 1
+    count = if params[:boost_count].to_i == @card.boosts_count
+      @card.boosts_count + 1
     else
       params[:boost_count].to_i
     end
-    @bubble.boost!(count)
+    @card.boost!(count)
   end
 end

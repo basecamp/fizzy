@@ -11,8 +11,8 @@ ApplicationRecord.with_each_tenant do |tenant|
         to_keep, to_merge = tags.first, tags[1..]
 
         to_merge.each do |tag_to_merge|
-          tag_to_merge.bubbles.each do |bubble|
-            to_keep.bubbles << bubble unless to_keep.bubbles.include?(bubble)
+          tag_to_merge.cards.each do |card|
+            to_keep.cards << card unless to_keep.cards.include?(card)
           end
 
           tag_to_merge.destroy

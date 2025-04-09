@@ -1,5 +1,5 @@
 logo:
-  bucket: writebook
+  collection: writebook
   creator: david
   title: The logo isn't big enough
   color: "#ED8008"
@@ -12,7 +12,7 @@ logo:
   last_active_at: <%= Time.current %>
 
 layout:
-  bucket: writebook
+  collection: writebook
   creator: david
   title: Layout is broken
   color: "#698F9C"
@@ -23,7 +23,7 @@ layout:
   last_active_at: <%= Time.current %>
 
 text:
-  bucket: writebook
+  collection: writebook
   creator: kevin
   title: The text is too small
   color: "#3B4B59"
@@ -32,7 +32,7 @@ text:
   last_active_at: <%= Time.current %>
 
 shipping:
-  bucket: writebook
+  collection: writebook
   creator: kevin
   title: We need to ship the app
   color: "#ED8008"

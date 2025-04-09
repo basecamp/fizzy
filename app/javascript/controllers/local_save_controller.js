@@ -47,7 +47,7 @@ export default class extends Controller {
   #triggerChangeEvent(newValue) {
     if (this.inputTarget.tagName === "HOUSE-MD") {
       this.inputTarget.dispatchEvent(new CustomEvent('house-md:change', {
-        bubbles: true,
+        cards: true,
         detail: {
           previousContent: '',
           newContent: newValue

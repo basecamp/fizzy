@@ -1,10 +1,10 @@
 class CommentsController < ApplicationController
-  include BubbleScoped
+  include CardScoped
   before_action :set_comment, only: [ :show, :edit, :update, :destroy ]
   before_action :require_own_comment, only: [ :edit, :update, :destroy ]
 
   def create
-    @bubble.capture new_comment
+    @card.capture new_comment
   end
 
   def show
@@ -19,7 +19,7 @@ class CommentsController < ApplicationController
 
   def destroy
     @comment.destroy
-    redirect_to @bubble
+    redirect_to @card
   end
 
   private
@@ -33,7 +33,7 @@ class CommentsController < ApplicationController
 
     def set_comment
       @comment = Comment.joins(:message)
-                        .where(messages: { bubble_id: @bubble.id })
+                        .where(messages: { card_id: @card.id })
                         .find(params[:id])
     end
 

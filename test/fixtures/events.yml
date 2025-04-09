@@ -1,13 +1,13 @@
 logo_published:
   creator: david
-  bubble: logo
+  card: logo
   action: published
   summary: logo_initial_activity
   created_at: <%= 1.week.ago %>
 
 logo_assignment_jz:
   creator: david
-  bubble: logo
+  card: logo
   action: assigned
   summary: logo_initial_activity
   particulars: <%= { assignee_ids: [ ActiveRecord::FixtureSet.identify(:jz) ] }.to_json %>
@@ -15,14 +15,14 @@ logo_assignment_jz:
 
 logo_boost_dhh:
   creator: david
-  bubble: logo
+  card: logo
   action: boosted
   summary: logo_initial_activity
   created_at: <%= 1.week.ago + 2.hours %>
 
 logo_assignment_km:
   creator: david
-  bubble: logo
+  card: logo
   action: assigned
   summary: logo_second_activity
   particulars: <%= { assignee_ids: [ ActiveRecord::FixtureSet.identify(:kevin) ] }.to_json %>
@@ -30,42 +30,42 @@ logo_assignment_km:
 
 logo_boost_km1:
   creator: kevin
-  bubble: logo
+  card: logo
   action: boosted
   summary: logo_second_activity
   created_at: <%= 1.day.ago + 1.hour %>
 
 logo_boost_km2:
   creator: kevin
-  bubble: logo
+  card: logo
   action: boosted
   summary: logo_second_activity
   created_at: <%= 1.day.ago + 2.hours %>
 
 logo_boost_jz1:
   creator: jz
-  bubble: logo
+  card: logo
   action: boosted
   summary: logo_second_activity
   created_at: <%= 1.day.ago + 3.hours %>
 
 logo_boost_jz2:
   creator: jz
-  bubble: logo
+  card: logo
   action: boosted
   summary: logo_third_activity
   created_at: <%= 1.hour.ago %>
 
 layout_published:
   creator: david
-  bubble: layout
+  card: layout
   action: published
   summary: layout_initial_activity
   created_at: <%= 1.week.ago %>
 
 layout_commented:
   creator: david
-  bubble: layout
+  card: layout
   action: commented
   summary: layout_initial_activity
   particulars: <%= { comment_id: ActiveRecord::FixtureSet.identify(:layout_overflowing_david) }.to_json %>
@@ -73,7 +73,7 @@ layout_commented:
 
 layout_assignment_jz:
   creator: david
-  bubble: layout
+  card: layout
   action: assigned
   summary: layout_initial_activity
   particulars: <%= { assignee_ids: [ ActiveRecord::FixtureSet.identify(:jz) ] }.to_json %>
@@ -81,21 +81,21 @@ layout_assignment_jz:
 
 text_published:
   creator: kevin
-  bubble: text
+  card: text
   action: published
   summary: text_initial_activity
   created_at: <%= 1.week.ago %>
 
 shipping_published:
   creator: kevin
-  bubble: shipping
+  card: shipping
   action: published
   summary: shipping_initial_activity
   created_at: <%= 1.week.ago %>
 
-shipping_popped:
+shipping_closed:
   creator: kevin
-  bubble: shipping
-  action: popped
+  card: shipping
+  action: closed
   summary: shipping_initial_activity
   created_at: <%= 2.days.ago %>

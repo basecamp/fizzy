@@ -6,11 +6,11 @@
           <%= link_to comment.creator.name, user_path(comment.creator), class: "txt-ink btn btn--plain fill-transparent", data: { turbo_frame: "_top" } %>
         </strong>
 
-        <%= link_to bucket_bubble_path(comment.bubble.bucket, comment.bubble, anchor: "comment_#{comment.id}"), class: "txt-undecorated txt-uppercase" do %>
+        <%= link_to collection_card_path(comment.card.collection, comment.card, anchor: "comment_#{comment.id}"), class: "txt-undecorated txt-uppercase" do %>
           <%= local_datetime_tag comment.created_at, style: :shortdate, class: "txt-ink translucent" %>
         <% end %>
 
-        <%= link_to edit_bucket_bubble_comment_path(comment.bubble.bucket, comment.bubble, comment),
+        <%= link_to edit_collection_card_comment_path(comment.card.collection, comment.card, comment),
               class: "comment__edit btn btn--plain txt-xx-small fill-transparent translucent flex-item-justify-end" do %>
           <%= icon_tag "menu-dots-horizontal" %>
           <span class="for-screen-reader">Edit this comment</span>

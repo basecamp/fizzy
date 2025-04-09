@@ -1,24 +1,24 @@
 require "test_helper"
 
-class Bubble::SearchableTest < ActiveSupport::TestCase
+class Card::SearchableTest < ActiveSupport::TestCase
   setup do
-    Bubble.all.each(&:reindex)
+    Card.all.each(&:reindex)
     Comment.all.each(&:reindex)
   end
 
   test "searching by title" do
-    assert_includes Bubble.mentioning("layout is broken"), bubbles(:layout)
+    assert_includes Card.mentioning("layout is broken"), cards(:layout)
   end
 
   test "searching by comment" do
-    assert_includes Bubble.mentioning("overflowing"), bubbles(:layout)
+    assert_includes Card.mentioning("overflowing"), cards(:layout)
   end
 
   test "sanitizing search query" do
-    assert_includes Bubble.mentioning("broken \""), bubbles(:layout)
+    assert_includes Card.mentioning("broken \""), cards(:layout)
   end
 
   test "a search with no valid terms returns empty results" do
-    assert_empty Bubble.mentioning("\"")
+    assert_empty Card.mentioning("\"")
   end
 end

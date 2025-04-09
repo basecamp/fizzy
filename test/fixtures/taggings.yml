@@ -1,15 +1,15 @@
 logo_web:
-  bubble: logo
+  card: logo
   tag: web
 
 layout_web:
-  bubble: layout
+  card: layout
   tag: web
 
 layout_mobile:
-  bubble: layout
+  card: layout
   tag: mobile
 
 text_mobile:
-  bubble: text
+  card: text
   tag: mobile

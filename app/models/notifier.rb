@@ -12,7 +12,7 @@ class Notifier
   def generate
     if should_notify?
       recipients.map do |recipient|
-        Notification.create! user: recipient, event: event, bubble: bubble, resource: resource
+        Notification.create! user: recipient, event: event, card: card, resource: resource
       end
     end
   end
@@ -27,14 +27,14 @@ class Notifier
     end
 
     def recipients
-      bubble.watchers_and_subscribers.without(creator)
+      card.watchers_and_subscribers.without(creator)
     end
 
     def resource
-      bubble
+      card
     end
 
-    def bubble
-      event.summary.message.bubble
+    def card
+      event.summary.message.card
     end
 end

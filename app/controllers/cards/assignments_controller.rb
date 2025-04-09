@@ -1,10 +1,10 @@
-class Bubbles::AssignmentsController < ApplicationController
-  include BubbleScoped
+class Cards::AssignmentsController < ApplicationController
+  include CardScoped
 
   def new
   end
 
   def create
-    @bubble.toggle_assignment @bucket.users.active.find(params[:assignee_id])
+    @card.toggle_assignment @collection.users.active.find(params[:assignee_id])
   end
 end

@@ -1,4 +1,4 @@
-module Bubble::Assignable
+module Card::Assignable
   extend ActiveSupport::Concern
 
   included do

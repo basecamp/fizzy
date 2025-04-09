@@ -11,9 +11,9 @@ class User < ApplicationRecord
   has_many :notifications, dependent: :destroy
 
   has_many :filters, foreign_key: :creator_id, inverse_of: :creator, dependent: :destroy
-  has_many :pops, dependent: :nullify
+  has_many :closures, dependent: :nullify
   has_many :pins, dependent: :destroy
-  has_many :pinned_bubbles, through: :pins, source: :bubble
+  has_many :pinned_cards, through: :pins, source: :card
 
   normalizes :email_address, with: ->(value) { value.strip.downcase }
 

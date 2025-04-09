@@ -1,40 +1,40 @@
 logo_1:
-  bubble: logo
+  card: logo
   messageable: logo_initial_activity (EventSummary)
   created_at: <%= 1.week.ago %>
 
 logo_2:
-  bubble: logo
+  card: logo
   messageable: logo_agreement_jz (Comment)
   created_at: <%= 2.days.ago %>
 
 logo_3:
-  bubble: logo
+  card: logo
   messageable: logo_second_activity (EventSummary)
   created_at: <%= 1.day.ago %>
 
 logo_4:
-  bubble: logo
+  card: logo
   messageable: logo_agreement_kevin (Comment)
   created_at: <%= 2.hours.ago %>
 
 logo_5:
-  bubble: logo
+  card: logo
   messageable: logo_third_activity (EventSummary)
   created_at: <%= 1.hour.ago %>
 
 layout_1:
-  bubble: layout
+  card: layout
   messageable: layout_initial_activity (EventSummary)
 
 layout_2:
-  bubble: layout
+  card: layout
   messageable: layout_overflowing_david (Comment)
 
 text_1:
-  bubble: text
+  card: text
   messageable: text_initial_activity (EventSummary)
 
 shipping_1:
-  bubble: shipping
+  card: shipping
   messageable: shipping_initial_activity (EventSummary)

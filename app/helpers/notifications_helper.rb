@@ -1,6 +1,6 @@
 module NotificationsHelper
   def notification_title(notification)
-    title = bubble_title(notification.bubble)
+    title = card_title(notification.card)
 
     if notification.resource.is_a? Comment
       "RE: " + title
@@ -15,7 +15,7 @@ module NotificationsHelper
     name = notification.creator.name
 
     case notification_event_action(notification)
-    when "popped" then "Popped by #{name}"
+    when "closed" then "Closed by #{name}"
     when "published" then "Added by #{name}"
     else name
     end
@@ -59,6 +59,6 @@ module NotificationsHelper
     end
 
     def notification_is_for_initial_assignement?(notification)
-      notification.event.action == "published" && notification.bubble.assigned_to?(notification.user)
+      notification.event.action == "published" && notification.card.assigned_to?(notification.user)
     end
 end

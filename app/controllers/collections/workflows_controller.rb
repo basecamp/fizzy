@@ -1,16 +1,16 @@
-class Buckets::WorkflowsController < ApplicationController
-  include BucketScoped
+class Collections::WorkflowsController < ApplicationController
+  include CollectionScoped
 
   before_action :set_workflow
 
   def update
-    @bucket.update! workflow: @workflow
+    @collection.update! workflow: @workflow
 
-    redirect_to bubbles_path(bucket_ids: [ @bucket ])
+    redirect_to cards_path(collection_ids: [ @collection ])
   end
 
   private
     def set_workflow
-      @workflow = Current.account.workflows.find(params.expect(bucket: [ :workflow_id ]).require(:workflow_id))
+      @workflow = Current.account.workflows.find(params.expect(collection: [ :workflow_id ]).require(:workflow_id))
     end
 end

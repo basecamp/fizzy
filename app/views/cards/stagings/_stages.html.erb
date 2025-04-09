@@ -1,9 +1,9 @@
-<% workflow = bubble.bucket.workflow %>
+<% workflow = card.collection.workflow %>
 
 <% if workflow  %>
-  <div id="<%= dom_id(bubble, "stages") %>" class="card__stages flex flex-column max-width min-width pad-block">
+  <div id="<%= dom_id(card, "stages") %>" class="card__stages flex flex-column max-width min-width pad-block">
     <% workflow.stages.each do |stage| %>
-      <%= button_to_set_stage bubble, stage %>
+      <%= button_to_set_stage card, stage %>
     <% end %>
   </div>
 <% end %>

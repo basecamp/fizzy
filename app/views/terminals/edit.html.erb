@@ -1,5 +1,5 @@
 <%= turbo_frame_tag "terminal_form" do %>
-  <%= form_tag bubbles_path, class: "flex align-center gap-half", method: :get, data: { controller: "form", turbo_frame: "_top" } do %>
+  <%= form_tag cards_path, class: "flex align-center gap-half", method: :get, data: { controller: "form", turbo_frame: "_top" } do %>
     <% @filter.as_params.each do |key, value| %>
       <%= filter_hidden_field_tag key, value, autofocus: true %>
     <% end %>

@@ -1,15 +1,15 @@
 :root {
-  --bubble-shape: 54% 46% 61% 39% / 57% 49% 51% 43%;
-  --bubble-shift: 10deg;
-  --bubble-size-one: 14cqi;
-  --bubble-size-two: 16cqi;
-  --bubble-size-three: 18cqi;
-  --bubble-size-four: 20cqi;
-  --bubble-size-five: 22cqi;
+  --card-shape: 54% 46% 61% 39% / 57% 49% 51% 43%;
+  --card-shift: 10deg;
+  --card-size-one: 14cqi;
+  --card-size-two: 16cqi;
+  --card-size-three: 18cqi;
+  --card-size-four: 20cqi;
+  --card-size-five: 22cqi;
 }
 
 @layer components {
-  .bubbles {
+  .cards {
     --column-gap: 2cqi;
     --row-gap: 1cqi;
 
@@ -20,21 +20,21 @@
     }
   }
 
-  .bubble {
-    --bubble-background: radial-gradient(circle at center, color(from var(--bubble-color) srgb r g b / 0.25), color(from var(--bubble-color) srgb r g b / 0.05));
-    --bubble-border-width: 0.2rem;
+  .card {
+    --card-background: radial-gradient(circle at center, color(from var(--card-color) srgb r g b / 0.25), color(from var(--card-color) srgb r g b / 0.05));
+    --card-border-width: 0.2rem;
     --hover-size: 0;
 
     aspect-ratio: 1;
-    block-size: var(--bubble-size);
-    color: var(--bubble-color, currentColor);
+    block-size: var(--card-size);
+    color: var(--card-color, currentColor);
     container-type: inline-size;
     display: grid;
     place-items: center;
     position: relative;
     transition: 0.2s ease;
 
-    .bubbles & {
+    .cards & {
       &:nth-child(1)  { order: 5; }
       &:nth-child(2)  { order: 3; }
       &:nth-child(3)  { order: 3; }
@@ -56,22 +56,22 @@
       grid-area: 1/1;
     }
 
-    .bubble__perma & {
-      --bubble-border-width: 0.3rem;
-      --bubble-size: 40dvh !important;
+    .card__perma & {
+      --card-border-width: 0.3rem;
+      --card-size: 40dvh !important;
 
       z-index: 1;
     }
   }
-  .bubble__detail {
-    --bubble-border-color: color-mix(in srgb, var(--bubble-color) 30%, var(--color-bg));
-    --bubble-border-width: 0.15em;
+  .card__detail {
+    --card-border-color: color-mix(in srgb, var(--card-color) 30%, var(--color-bg));
+    --card-border-width: 0.15em;
 
     aspect-ratio: 1;
     background: var(--color-bg);
     block-size: auto;
-    border: var(--bubble-border-width) solid var(--bubble-border-color);
-    border-radius: var(--bubble-shape);
+    border: var(--card-border-width) solid var(--card-border-color);
+    border-radius: var(--card-shape);
     display: flex;
     font-size: 5cqi;
     font-weight: 800;
@@ -89,10 +89,10 @@
     z-index: 1;
 
     a {
-      color: var(--bubble-color);
+      color: var(--card-color);
     }
 
-    &.bubble__assignee {
+    &.card__assignee {
       font-size: 4.5cqi;
       inset: 8em auto auto -1.7em;
       padding: 0.2em;
@@ -106,19 +106,19 @@
       }
 
       .avatar {
-        border-radius: var(--bubble-shape);
+        border-radius: var(--card-shape);
       }
 
       @media (hover: hover) {
-        .bubbles .bubble:not(.popped):hover & {
+        .cards .card:not(.closed):hover & {
           transform: translate(0, -1rem);
         }
 
-        .bubbles .bubble:not(.popped):hover & + & {
+        .cards .card:not(.closed):hover & + & {
           transform: translate(1rem, -1rem);
         }
 
-        .bubbles .bubble:not(.popped):hover & + & + & {
+        .cards .card:not(.closed):hover & + & + & {
           transform: translate(1.5rem, -0.5rem);;
         }
       }
@@ -126,8 +126,8 @@
       .assignee__name {
         display: none;
 
-        .bubble__perma & {
-          color: var(--bubble-color);
+        .card__perma & {
+          color: var(--card-color);
           display: inline-block;
           font-size: 0.9em;
           font-weight: normal;
@@ -140,16 +140,16 @@
       }
     }
 
-    &.bubble__comments {
+    &.card__comments {
       --arrow-size: 1.5em;
-      --border-size: var(--bubble-border-width);
+      --border-size: var(--card-border-width);
 
       aspect-ratio: 9/6;
       inset: auto auto 2em -1em;
 
       &::before {
         aspect-ratio: 2;
-        background: var(--bubble-border-color);
+        background: var(--card-border-color);
         clip-path: polygon(50% 100%, 100% 0, 0 0);
         inline-size: var(--arrow-size);
         content: "";
@@ -176,13 +176,13 @@
       }
 
       @media (hover: hover) {
-        .bubbles .bubble:not(.popped):hover & {
+        .cards .card:not(.closed):hover & {
           transform: translate(-0.5rem, -2rem);
         }
       }
     }
 
-    &.bubble__date {
+    &.card__date {
       --rotation: -45deg;
 
       aspect-ratio: 5/7;
@@ -190,45 +190,45 @@
       inset: 1cqb 1cqi auto auto;
       transform: rotate(var(--rotation));
 
-      .bubble__date-text {
+      .card__date-text {
         transform: rotate(calc(var(--rotation) * -1));
       }
 
       @media (hover: hover) {
-        .bubbles .bubble:not(.popped):hover & {
-          transform: rotate(calc(var(--rotation) + var(--bubble-shift) * 1)) translate(0rem, 0.5rem);
+        .cards .card:not(.closed):hover & {
+          transform: rotate(calc(var(--rotation) + var(--card-shift) * 1)) translate(0rem, 0.5rem);
         }
       }
     }
 
     @media (hover: hover) {
-      .bubbles .bubble:not(.popped):hover & {
+      .cards .card:not(.closed):hover & {
         transform: translate(1rem, 1rem);
       }
 
-      .bubbles .bubble:not(.popped):hover & + & {
+      .cards .card:not(.closed):hover & + & {
         transform: translate(0, -1rem);
       }
 
-      .bubbles .bubble:not(.popped):hover & + & + & {
+      .cards .card:not(.closed):hover & + & + & {
         transform: translate(-1rem, -1rem);
       }
     }
   }
 
-  .bubble__image {
+  .card__image {
     border: none;
-    border-radius: var(--bubble-shape);
+    border-radius: var(--card-shape);
     block-size: 100cqi;
     inline-size: 100cqi;
     overflow: hidden;
     pointer-events: none;
-    transform: rotate(var(--bubble-rotate)) scale(0.92);
+    transform: rotate(var(--card-rotate)) scale(0.92);
     transition: 0.2s ease;
 
     @media (hover: hover) {
-      .bubbles .bubble:not(.popped):hover & {
-        transform: rotate(calc(var(--bubble-rotate) + var(--bubble-shift))) scale(0.9);
+      .cards .card:not(.closed):hover & {
+        transform: rotate(calc(var(--card-rotate) + var(--card-shift))) scale(0.9);
       }
     }
 
@@ -237,33 +237,33 @@
       inline-size: 100cqi;
       max-inline-size: none;
       object-fit: cover;
-      transform: rotate(calc(var(--bubble-rotate) * -1)) scale(1.1);
+      transform: rotate(calc(var(--card-rotate) * -1)) scale(1.1);
 
       &:is([src=""]) {
         display: none;
       }
     }
 
-    :is(.bubbles, .bubbles-list) .bubble--wobble & {
+    :is(.cards, .cards-list) .card--wobble & {
       animation: wobble-img 1200ms normal forwards ease-out;
     }
   }
 
-  .bubble__link {
+  .card__link {
     content: "";
     inset: 0;
     position: absolute;
     z-index: -1;
 
-    .bubbles & {
+    .cards & {
       z-index: 1;
     }
   }
 
-  .bubbles-list {
-    --bubble-border-width: 0.15rem;
-    --bubble-shift: 15deg;
-    --bubble-size: 1.8em;
+  .cards-list {
+    --card-border-width: 0.15rem;
+    --card-shift: 15deg;
+    --card-size: 1.8em;
     --divider-offset: 1.2em;
     --hover-size: 0;
 
@@ -273,11 +273,11 @@
       margin-inline: var(--tray-size);
     }
 
-    .bubble {
+    .card {
       order: 0;
     }
 
-    .bubble__title-link {
+    .card__title-link {
       color: var(--color-txt);
       text-decoration: none;
     }
@@ -295,7 +295,7 @@
         li {
           @media (hover: hover) {
             &:hover {
-              background-color: color(from var(--bubble-color) srgb r g b / 0.15);
+              background-color: color(from var(--card-color) srgb r g b / 0.15);
               border: 0;
             }
           }
@@ -312,7 +312,7 @@
     }
   }
 
-  .bubble__title-text {
+  .card__title-text {
     font-weight: 700;
     flex-grow: 1;
     letter-spacing: -0.015em;
@@ -330,7 +330,7 @@
     }
   }
 
-  .bubble__tags {
+  .card__tags {
     --row-gap: 0;
 
     font-size: var(--text-small);
@@ -340,17 +340,17 @@
     overflow: hidden;
     text-overflow: ellipsis;
 
-    .bubble__perma & {
+    .card__perma & {
       font-size: var(--text-medium);
     }
   }
 
-  .bubble__tag {
+  .card__tag {
     font-weight: 700;
     max-inline-size: 75cqi;
   }
 
-  .bubble__title {
+  .card__title {
     align-items: center;
     display: flex;
     flex-direction: column;
@@ -359,14 +359,14 @@
     max-block-size: 90cqi;
     max-inline-size: 70cqi;
 
-    .bubbles & {
+    .cards & {
       pointer-events: none;
     }
 
     a {
       color: var(--splat-color);
 
-      &.bubble__title-rendered {
+      &.card__title-rendered {
         -webkit-line-clamp: var(--lines, 4);
         -webkit-box-orient: vertical;
         display: -webkit-box;
@@ -380,7 +380,7 @@
     }
 
     textarea {
-      --input-color: var(--bubble-color);
+      --input-color: var(--card-color);
       --input-border-radius: 0;
 
       font-size: 9cqi;
@@ -388,103 +388,103 @@
       line-height: 1.2;
 
       &::selection {
-        background-color: var(--bubble-color);
+        background-color: var(--card-color);
         color: var(--color-ink-reversed);
       }
     }
 
     @media (hover: hover) {
-      .bubble:has(.bubble__image img:not([src=""])):hover & {
+      .card:has(.card__image img:not([src=""])):hover & {
         color: var(--color-ink-reversed);
-        text-shadow: 0 0 0.2em var(--bubble-color), 0 0 0.2em var(--bubble-color), 0 0 0.2em var(--bubble-color);
+        text-shadow: 0 0 0.2em var(--card-color), 0 0 0.2em var(--card-color), 0 0 0.2em var(--card-color);
         position: relative;
         z-index: 1;
       }
     }
   }
 
-  .bubble__shape {
-    background: var(--bubble-background);
-    block-size: var(--bubble-size, 1.2em);
-    border-color: var(--bubble-border-color, color-mix(in srgb, var(--bubble-color) 15%, var(--color-bg)));
-    border-radius: var(--bubble-shape);
-    border-style: var(--bubble-border-style, solid);
+  .card__shape {
+    background: var(--card-background);
+    block-size: var(--card-size, 1.2em);
+    border-color: var(--card-border-color, color-mix(in srgb, var(--card-color) 15%, var(--color-bg)));
+    border-radius: var(--card-shape);
+    border-style: var(--card-border-style, solid);
     border-width: 1px;
-    inline-size: var(--bubble-size, 1.2em);
+    inline-size: var(--card-size, 1.2em);
     pointer-events: none;
     position: relative;
-    transform: rotate(var(--bubble-rotate));
+    transform: rotate(var(--card-rotate));
     transition: 200ms ease-out;
     z-index: 0;
 
     @media (prefers-color-scheme: dark) {
-      --bubble-background: radial-gradient(circle at center, color(from var(--bubble-color) srgb r g b / 0.45), color(from var(--bubble-color) srgb r g b / 0.15));
-      --bubble-border-color: color-mix(in srgb, var(--bubble-color) 30%, var(--color-bg));
+      --card-background: radial-gradient(circle at center, color(from var(--card-color) srgb r g b / 0.45), color(from var(--card-color) srgb r g b / 0.15));
+      --card-border-color: color-mix(in srgb, var(--card-color) 30%, var(--color-bg));
     }
 
-    .bubble & {
-      --bubble-size: 100%;
+    .card & {
+      --card-size: 100%;
     }
 
     .drafted & {
-      --bubble-border-style: dashed;
+      --card-border-style: dashed;
     }
 
-    :is(.bubbles, .bubbles-list) .bubble--wobble & {
+    :is(.cards, .cards-list) .card--wobble & {
       animation: wobble 1200ms normal forwards ease-out;
     }
 
-    .bubble--wobble:nth-child(even) & {
+    .card--wobble:nth-child(even) & {
       animation-name: wobble-alt;
       animation-duration: 900ms;
     }
 
-    .popped & {
+    .closed & {
       display: none;
     }
 
     .event &,
-    .bucket &,
-    .bubbles-list & {
-      --bubble-background: color-mix(in srgb, var(--bubble-color) 30%, var(--color-bg));
-      --bubble-border-color: color-mix(in srgb, var(--bubble-color) 40%, var(--color-bg))
+    .collection &,
+    .cards-list & {
+      --card-background: color-mix(in srgb, var(--card-color) 30%, var(--color-bg));
+      --card-border-color: color-mix(in srgb, var(--card-color) 40%, var(--color-bg))
     }
   }
 
-  .bubble__actions-container {
-    background-color: color-mix(in srgb, var(--bubble-color) 20%, var(--color-bg));
+  .card__actions-container {
+    background-color: color-mix(in srgb, var(--card-color) 20%, var(--color-bg));
     margin-block-start: -0.7em;
     position: relative;
     z-index: 1;
 
     .btn--plain {
-      --btn-color: var(--bubble-color);
+      --btn-color: var(--card-color);
 
       text-decoration: underline;
     }
 
-    .bubble__pop-message {
-      color: var(--bubble-color);
+    .card__closure-message {
+      color: var(--card-color);
     }
   }
 
-  .bubble__splat {
+  .card__splat {
     display: none;
     pointer-events: none;
-    transform: rotate(var(--bubble-rotate));
+    transform: rotate(var(--card-rotate));
 
-    .popped & {
+    .closed & {
       display: block;
-      fill: color-mix(in srgb, var(--bubble-color) 20%, var(--color-bg));
+      fill: color-mix(in srgb, var(--card-color) 20%, var(--color-bg));
       position: absolute;
       scale: 130%;
       z-index: -1;
     }
 
-    .bubbles-list & {
-      block-size: var(--bubble-size);
-      fill: color-mix(in srgb, var(--bubble-color) 35%, var(--color-bg));
-      inline-size: var(--bubble-size);
+    .cards-list & {
+      block-size: var(--card-size);
+      fill: color-mix(in srgb, var(--card-color) 35%, var(--color-bg));
+      inline-size: var(--card-size);
       position: relative;
       scale: 1;
       z-index: 0;

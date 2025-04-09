@@ -1,3 +1,3 @@
-<%= turbo_stream.replace dom_id(@bubble, "stages") do %>
-  <%= render partial: "bubbles/stagings/stages", locals: { bubble: @bubble } %>
+<%= turbo_stream.replace dom_id(@card, "stages") do %>
+  <%= render partial: "cards/stagings/stages", locals: { card: @card } %>
 <% end %>

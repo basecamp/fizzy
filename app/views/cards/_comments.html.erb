@@ -1,6 +1,6 @@
-<% if bubble.messages.comments.any? %>
-  <div class="bubble__detail bubble__comments">
-    <span aria-hidden="true"><%= bubble.messages.comments.count %></span>
-    <span class="for-screen-reader"><%= pluralize(bubble.messages.comments.count, "comment") %></span>
+<% if card.messages.comments.any? %>
+  <div class="card__detail card__comments">
+    <span aria-hidden="true"><%= card.messages.comments.count %></span>
+    <span class="for-screen-reader"><%= pluralize(card.messages.comments.count, "comment") %></span>
   </div>
 <% end %>

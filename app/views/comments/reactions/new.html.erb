@@ -1,5 +1,5 @@
 <%= turbo_frame_tag dom_id(@comment, :new_reaction) do %>
-  <%= form_with url: bucket_bubble_comment_reactions_path(@comment.bubble.bucket, @comment.bubble, @comment),
+  <%= form_with url: collection_card_comment_reactions_path(@comment.card.collection, @comment.card, @comment),
         class: "reaction reaction__form flex-inline postion--relative max-width align-center fill-white gap expanded",
         html: { aria: { label: "New reaction" } },
         data: { controller: "form", turbo_frame: dom_id(@comment, :reacting), action: "keydown.esc->form#cancel" } do |form| %>
@@ -17,7 +17,7 @@
       <span class="for-screen-reader">Submit</span>
     <% end %>
 
-    <%= link_to bucket_bubble_comment_reactions_path(@comment.bubble.bucket, @comment.bubble, @comment), role: "button",
+    <%= link_to collection_card_comment_reactions_path(@comment.card.collection, @comment.card, @comment), role: "button",
           data: { turbo_frame: dom_id(@comment, :reactions), form_target: "cancel" }, class: "btn btn--negative" do %>
       <%= icon_tag "minus" %>
       <span class="for-screen-reader">Cancel</span>

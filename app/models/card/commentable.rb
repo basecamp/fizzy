@@ -1,4 +1,4 @@
-module Bubble::Commentable
+module Card::Commentable
   extend ActiveSupport::Concern
 
   included do

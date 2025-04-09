@@ -1,5 +1,5 @@
 <div class="card-sorting__filter flex-inline">
-  <%= form_with url: bubbles_path, method: :get do |form| %>
+  <%= form_with url: cards_path, method: :get do |form| %>
     <% filter.as_params.except(:indexed_by).each do |key, value| %>
       <%= filter_hidden_field_tag key, value %>
     <% end %>

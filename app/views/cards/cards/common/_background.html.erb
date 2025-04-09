@@ -1,11 +1,11 @@
 <div class="card__background">
-  <%= image_tag bubble.image.presence || "", size: 120, data: { upload_preview_target: "image" } %>
+  <%= image_tag card.image.presence || "", size: 120, data: { upload_preview_target: "image" } %>
 </div>
 
-<% if bubble.popped? %>
-  <div class="card__popped flex flex-column">
-    <span class="card__popped-title txt-uppercase"><%= bubble.pop.reason %></span>
-    <strong><%= bubble.popped_at.strftime("%b %d, %Y") %></strong>
-    <span>by <span class="card__popped-by"><%= bubble.popped_by.name %></span></span>
+<% if card.closed? %>
+  <div class="card__closed flex flex-column">
+    <span class="card__closed-title txt-uppercase"><%= card.closure.reason %></span>
+    <strong><%= card.closed_at.strftime("%b %d, %Y") %></strong>
+    <span>by <span class="card__closed-by"><%= card.closed_by.name %></span></span>
   </div>
 <% end %>

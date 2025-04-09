@@ -1,11 +1,11 @@
-<%= turbo_frame_tag dom_id(@bubble, :watch) do %>
-  <% if @bubble.watched_by? Current.user %>
-      <%= button_to bubble_watch_path(@bubble), method: :delete, class: "btn btn--reversed" do %>
+<%= turbo_frame_tag dom_id(@card, :watch) do %>
+  <% if @card.watched_by? Current.user %>
+      <%= button_to card_watch_path(@card), method: :delete, class: "btn btn--reversed" do %>
         <%= icon_tag "bell" %>
         <span class="for-screen-reader">Stop watching</span>
       <% end %>
   <% else %>
-      <%= button_to bubble_watch_path(@bubble), class: "btn" do %>
+      <%= button_to card_watch_path(@card), class: "btn" do %>
         <%= icon_tag "bell-off" %>
         <span class="for-screen-reader">Watch this</span>
       <% end %>

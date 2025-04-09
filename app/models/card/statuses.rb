@@ -1,4 +1,4 @@
-module Bubble::Statuses
+module Card::Statuses
   extend ActiveSupport::Concern
 
   included do
@@ -9,7 +9,7 @@ module Bubble::Statuses
 
   class_methods do
     def remove_abandoned_creations
-      Bubble.creating.where(updated_at: ..1.day.ago).destroy_all
+      Card.creating.where(updated_at: ..1.day.ago).destroy_all
     end
   end
 
@@ -18,8 +18,8 @@ module Bubble::Statuses
   end
 
   def recover_abandoned_creation
-    abandoned_creations.last.tap do |bubble|
-      Bubble.creating.where(creator: creator).excluding(bubble).destroy_all
+    abandoned_creations.last.tap do |card|
+      Card.creating.where(creator: creator).excluding(card).destroy_all
     end
   end
 
@@ -32,6 +32,6 @@ module Bubble::Statuses
 
   private
     def abandoned_creations
-      Bubble.creating.where(creator: creator).where("created_at != updated_at").excluding(self)
+      Card.creating.where(creator: creator).where("created_at != updated_at").excluding(self)
     end
 end

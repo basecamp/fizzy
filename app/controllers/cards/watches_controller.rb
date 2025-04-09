@@ -1,13 +1,13 @@
-class Bubbles::WatchesController < ApplicationController
-  include BubbleScoped
+class Cards::WatchesController < ApplicationController
+  include CardScoped
 
   def create
-    @bubble.watch_by Current.user
-    redirect_to bubble_watch_path(@bubble)
+    @card.watch_by Current.user
+    redirect_to card_watch_path(@card)
   end
 
   def destroy
-    @bubble.unwatch_by Current.user
-    redirect_to bubble_watch_path(@bubble)
+    @card.unwatch_by Current.user
+    redirect_to card_watch_path(@card)
   end
 end

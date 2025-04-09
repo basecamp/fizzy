@@ -12,7 +12,7 @@ module EventsHelper
 
   def event_column(event)
     case event.action
-    when "popped"
+    when "closed"
       3
     when "published"
       1
@@ -45,15 +45,15 @@ module EventsHelper
     start_time = day.beginning_of_day
     end_time = day.end_of_day
 
-    accessible_events = Event.joins(bubble: :bucket)
-      .merge(Current.user.buckets)
+    accessible_events = Event.joins(card: :collection)
+      .merge(Current.user.collections)
       .where(created_at: start_time..end_time)
-      .where(bubbles: { bucket_id: params[:bucket_ids].presence || Current.user.bucket_ids })
+      .where(cards: { collection_id: params[:collection_ids].presence || Current.user.collection_ids })
 
     headers = {
       "Added" => accessible_events.where(action: "published").count,
       "Updated" => nil,
-      "Closed" => accessible_events.where(action: "popped").count
+      "Closed" => accessible_events.where(action: "closed").count
     }
 
     headers.map do |header, count|
@@ -66,32 +66,32 @@ module EventsHelper
     case event.action
     when "assigned"
       if event.assignees.include?(Current.user)
-        "#{ event.creator == Current.user ? "You" : event.creator.name } will handle <span style='color: var(--bubble-color)'>#{ bubble_title(event.bubble) }</span>".html_safe
+        "#{ event.creator == Current.user ? "You" : event.creator.name } will handle <span style='color: var(--card-color)'>#{ card_title(event.card) }</span>".html_safe
       else
-        "#{ event.creator == Current.user ? "You" : event.creator.name } assigned #{ event.assignees.pluck(:name).to_sentence } to <span style='color: var(--bubble-color)'>#{ bubble_title(event.bubble) }</span>".html_safe
+        "#{ event.creator == Current.user ? "You" : event.creator.name } assigned #{ event.assignees.pluck(:name).to_sentence } to <span style='color: var(--card-color)'>#{ card_title(event.card) }</span>".html_safe
       end
     when "unassigned"
-      "#{ event.creator == Current.user ? "You" : event.creator.name } unassigned #{ event.assignees.pluck(:name).to_sentence } from <span style='color: var(--bubble-color)'>#{ bubble_title(event.bubble) }</span>".html_safe
+      "#{ event.creator == Current.user ? "You" : event.creator.name } unassigned #{ event.assignees.pluck(:name).to_sentence } from <span style='color: var(--card-color)'>#{ card_title(event.card) }</span>".html_safe
     when "boosted"
-      "#{ event.creator == Current.user ? "You" : event.creator.name } boosted <span style='color: var(--bubble-color)'>#{ bubble_title(event.bubble) }</span>".html_safe
+      "#{ event.creator == Current.user ? "You" : event.creator.name } boosted <span style='color: var(--card-color)'>#{ card_title(event.card) }</span>".html_safe
     when "commented"
-      "#{ event.creator == Current.user ? "You" : event.creator.name } commented on <span style='color: var(--bubble-color)'>#{ bubble_title(event.bubble) }</span>".html_safe
+      "#{ event.creator == Current.user ? "You" : event.creator.name } commented on <span style='color: var(--card-color)'>#{ card_title(event.card) }</span>".html_safe
     when "published"
-      "#{ event.creator == Current.user ? "You" : event.creator.name } added <span style='color: var(--bubble-color)'>#{ bubble_title(event.bubble) }</span>".html_safe
-    when "popped"
-      "#{ event.creator == Current.user ? "You" : event.creator.name } closed <span style='color: var(--bubble-color)'>#{ bubble_title(event.bubble) }</span>".html_safe
+      "#{ event.creator == Current.user ? "You" : event.creator.name } added <span style='color: var(--card-color)'>#{ card_title(event.card) }</span>".html_safe
+    when "closed"
+      "#{ event.creator == Current.user ? "You" : event.creator.name } closed <span style='color: var(--card-color)'>#{ card_title(event.card) }</span>".html_safe
     when "staged"
-      "#{event.creator == Current.user ? "You" : event.creator.name} changed the stage to #{event.stage_name} on <span style='color: var(--bubble-color)'>#{ bubble_title(event.bubble) }</span>".html_safe
+      "#{event.creator == Current.user ? "You" : event.creator.name} changed the stage to #{event.stage_name} on <span style='color: var(--card-color)'>#{ card_title(event.card) }</span>".html_safe
     when "unstaged"
-      "#{event.creator == Current.user ? "You" : event.creator.name} removed <span style='color: var(--bubble-color)'>#{ bubble_title(event.bubble) }</span> from the #{event.stage_name} stage".html_safe
+      "#{event.creator == Current.user ? "You" : event.creator.name} removed <span style='color: var(--card-color)'>#{ card_title(event.card) }</span> from the #{event.stage_name} stage".html_safe
     when "due_date_added"
-      "#{event.creator == Current.user ? "You" : event.creator.name} set the date to #{event.particulars.dig('particulars', 'due_date').to_date.strftime('%B %-d')} on <span style='color: var(--bubble-color)'>#{ bubble_title(event.bubble) }</span>".html_safe
+      "#{event.creator == Current.user ? "You" : event.creator.name} set the date to #{event.particulars.dig('particulars', 'due_date').to_date.strftime('%B %-d')} on <span style='color: var(--card-color)'>#{ card_title(event.card) }</span>".html_safe
     when "due_date_changed"
-      "#{event.creator == Current.user ? "You" : event.creator.name} changed the date to #{event.particulars.dig('particulars', 'due_date').to_date.strftime('%B %-d')} on <span style='color: var(--bubble-color)'>#{ bubble_title(event.bubble) }</span>".html_safe
+      "#{event.creator == Current.user ? "You" : event.creator.name} changed the date to #{event.particulars.dig('particulars', 'due_date').to_date.strftime('%B %-d')} on <span style='color: var(--card-color)'>#{ card_title(event.card) }</span>".html_safe
     when "due_date_removed"
-      "#{event.creator == Current.user ? "You" : event.creator.name} removed the date on <span style='color: var(--bubble-color)'>#{ bubble_title(event.bubble) }</span>"
+      "#{event.creator == Current.user ? "You" : event.creator.name} removed the date on <span style='color: var(--card-color)'>#{ card_title(event.card) }</span>"
     when "title_changed"
-      "#{event.creator == Current.user ? "You" : event.creator.name} renamed  on <span style='color: var(--bubble-color)'>#{ bubble_title(event.bubble) }</span> (was: '#{event.particulars.dig('particulars', 'old_title')})'".html_safe
+      "#{event.creator == Current.user ? "You" : event.creator.name} renamed  on <span style='color: var(--card-color)'>#{ card_title(event.card) }</span> (was: '#{event.particulars.dig('particulars', 'old_title')})'".html_safe
     end
   end
 

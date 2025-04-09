@@ -1,4 +1,4 @@
-module Bubble::Taggable
+module Card::Taggable
   extend ActiveSupport::Concern
 
   included do
@@ -9,7 +9,7 @@ module Bubble::Taggable
   end
 
   def toggle_tag_with(title)
-    tag = bucket.account.tags.find_or_create_by!(title: title)
+    tag = collection.account.tags.find_or_create_by!(title: title)
 
     transaction do
       if tagged_with?(tag)

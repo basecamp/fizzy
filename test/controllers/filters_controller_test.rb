@@ -8,26 +8,26 @@ class FiltersControllerTest < ActionDispatch::IntegrationTest
   test "create" do
     assert_difference "users(:david).filters.count", +1 do
       post filters_url, params: {
-        indexed_by: "popped",
+        indexed_by: "closed",
         assignment_status: "unassigned",
         tag_ids: [ tags(:mobile).id ],
         assignee_ids: [ users(:jz).id ],
-        bucket_ids: [ buckets(:writebook).id ] }
+        collection_ids: [ collections(:writebook).id ] }
     end
-    assert_redirected_to bubbles_path(Filter.last.as_params)
+    assert_redirected_to cards_path(Filter.last.as_params)
 
     filter = Filter.last
-    assert_predicate filter.indexed_by, :popped?
+    assert_predicate filter.indexed_by, :closed?
     assert_predicate filter.assignment_status, :unassigned?
     assert_equal [ tags(:mobile) ], filter.tags
     assert_equal [ users(:jz) ], filter.assignees
-    assert_equal [ buckets(:writebook) ], filter.buckets
+    assert_equal [ collections(:writebook) ], filter.collections
   end
 
   test "destroy" do
     assert_difference "users(:david).filters.count", -1 do
       delete filter_url(filters(:jz_assignments))
     end
-    assert_redirected_to bubbles_path(filters(:jz_assignments).as_params)
+    assert_redirected_to cards_path(filters(:jz_assignments).as_params)
   end
 end

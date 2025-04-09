@@ -86,7 +86,7 @@
   }
 
   .event--related {
-    --hover-color: var(--bubble-color);
+    --hover-color: var(--card-color);
     --hover-size: 0.15rem;
 
     box-shadow: 0 0 0 var(--hover-size) var(--hover-color);
@@ -138,7 +138,7 @@
 
   .event__icon {
     aspect-ratio: 1;
-    background-color: var(--bubble-color);
+    background-color: var(--card-color);
     block-size: 1.7em;
     border-radius: 1.7em;
     inline-size: 1.7em;

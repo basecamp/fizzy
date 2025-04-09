@@ -1,8 +1,8 @@
-class Bubble < ApplicationRecord
+class Card < ApplicationRecord
   include Assignable, Boostable, Colored, Commentable, Engageable, Eventable,
-    Messages, Notifiable, Pinnable, Poppable, Scorable, Searchable, Staged, Statuses, Taggable, Watchable
+    Messages, Notifiable, Pinnable, Closeable, Scorable, Searchable, Staged, Statuses, Taggable, Watchable
 
-  belongs_to :bucket, touch: true
+  belongs_to :collection, touch: true
   belongs_to :creator, class_name: "User", default: -> { Current.user }
 
   has_many :notifications, dependent: :destroy
@@ -15,7 +15,7 @@ class Bubble < ApplicationRecord
 
   scope :reverse_chronologically, -> { order created_at: :desc, id: :desc }
   scope :chronologically, -> { order created_at: :asc, id: :asc }
-  scope :in_bucket, ->(bucket) { where bucket: bucket }
+  scope :in_collection, ->(collection) { where collection: collection }
 
   scope :indexed_by, ->(index) do
     case index
@@ -25,12 +25,12 @@ class Bubble < ApplicationRecord
     when "newest"         then reverse_chronologically
     when "oldest"         then chronologically
     when "stalled"        then ordered_by_staleness
-    when "popped"         then popped
+    when "closed"         then closed
     end
   end
 
   def cache_key
-    [ super, bucket&.name ].compact.join("/")
+    [ super, collection&.name ].compact.join("/")
   end
 
   private
@@ -56,7 +56,7 @@ class Bubble < ApplicationRecord
     end
 
     def assign_initial_stage
-      if workflow_stage = bucket.workflow&.stages&.first
+      if workflow_stage = collection.workflow&.stages&.first
         self.stage = workflow_stage
         save! touch: false
         track_event :staged, stage_id: workflow_stage.id, stage_name: workflow_stage.name

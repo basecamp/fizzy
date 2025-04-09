@@ -1,7 +1,7 @@
-class Buckets::InvolvementsController < ApplicationController
-  include BucketScoped
+class Collections::InvolvementsController < ApplicationController
+  include CollectionScoped
 
   def update
-    @bucket.access_for(Current.user).update!(involvement: params[:involvement])
+    @collection.access_for(Current.user).update!(involvement: params[:involvement])
   end
 end

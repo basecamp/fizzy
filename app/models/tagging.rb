@@ -1,4 +1,4 @@
 class Tagging < ApplicationRecord
   belongs_to :tag
-  belongs_to :bubble, touch: true
+  belongs_to :card, touch: true
 end

@@ -1,7 +1,7 @@
 module EventsTimeline
   extend ActiveSupport::Concern
 
-  include BucketFilterable
+  include CollectionFilterable
 
   included do
     before_action :set_activity_day
@@ -23,7 +23,7 @@ module EventsTimeline
         group_by { |event| [ event.created_at.hour, helpers.event_column(event) ] }.
         map { |hour_col, events|
           [ hour_col,
-            events.uniq { |e| e.action == "boosted" ? [ e.creator_id, e.bubble_id ] : e.id }
+            events.uniq { |e| e.action == "boosted" ? [ e.creator_id, e.card_id ] : e.id }
           ]
         }
     end
@@ -33,12 +33,12 @@ module EventsTimeline
     end
 
     def user_events
-      Event.where(bubble: user_bubbles, creator: Current.account.users)
+      Event.where(card: user_cards, creator: Current.account.users)
     end
 
-    def user_bubbles
-      Current.user.accessible_bubbles
+    def user_cards
+      Current.user.accessible_cards
             .published_or_drafted_by(Current.user)
-            .where(bucket_id: bucket_filter)
+            .where(collection_id: collection_filter)
     end
 end

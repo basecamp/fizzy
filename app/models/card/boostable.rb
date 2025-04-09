@@ -1,4 +1,4 @@
-module Bubble::Boostable
+module Card::Boostable
   extend ActiveSupport::Concern
 
   included do

@@ -3,7 +3,7 @@ import { Controller } from "@hotwired/stimulus"
 const SIZES = [ "one", "two", "three", "four", "five" ]
 
 export default class extends Controller {
-  static targets = [ "bubble" ]
+  static targets = [ "card" ]
 
   connect() {
     this.resize()
@@ -12,19 +12,19 @@ export default class extends Controller {
   resize() {
     const [ min, max ] = this.#getScoreRange()
 
-    this.bubbleTargets.forEach(bubble => {
-      const score = this.#currentBubbleScore(bubble)
+    this.cardTargets.forEach(card => {
+      const score = this.#currentBubbleScore(card)
       const idx = Math.round((score - min) / (max - min) * (SIZES.length - 1))
 
-      bubble.style.setProperty("--bubble-size", `var(--bubble-size-${SIZES[idx]})`)
+      card.style.setProperty("--card-size", `var(--card-size-${SIZES[idx]})`)
     })
   }
 
   #getScoreRange() {
     var min = 0, max = 1;
 
-    this.bubbleTargets.forEach(bubble => {
-      const score = this.#currentBubbleScore(bubble)
+    this.cardTargets.forEach(card => {
+      const score = this.#currentBubbleScore(card)
 
       min = Math.min(min, score)
       max = Math.max(max, score)

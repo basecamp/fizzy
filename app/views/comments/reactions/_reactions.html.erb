@@ -7,7 +7,7 @@
 
     <%= turbo_frame_tag comment, :new_reaction do %>
       <div class="flex-inline" data-controller="soft-keyboard">
-        <%= link_to new_bucket_bubble_comment_reaction_path(comment.bubble.bucket, comment.bubble, comment), role: "button",
+        <%= link_to new_collection_card_comment_reaction_path(comment.card.collection, comment.card, comment), role: "button",
               class: "txt-small btn reaction__action", action: "soft-keyboard#open" do %>
           <%= icon_tag "reaction" %>
           <span class="for-screen-reader">Add a reaction</span>

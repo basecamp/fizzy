@@ -1,13 +1,13 @@
-class Bubbles::PopsController < ApplicationController
-  include BubbleScoped
+class Cards::ClosuresController < ApplicationController
+  include CardScoped
 
   def create
-    @bubble.pop!(user: Current.user, reason: params[:reason])
-    redirect_to @bubble
+    @card.closure!(user: Current.user, reason: params[:reason])
+    redirect_to @card
   end
 
   def destroy
-    @bubble.unpop
-    redirect_to @bubble
+    @card.unpop
+    redirect_to @card
   end
 end

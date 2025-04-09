@@ -3,12 +3,12 @@
 <%= render "filters/broadcasts", filter: @filter %>
 
 <% content_for :header do %>
-  <%= render "bubbles/index/header", filter: @filter %>
+  <%= render "cards/index/header", filter: @filter %>
 <% end %>
 
 <div class="cards--columns">
-  <%= render "bubbles/index/bubbles/considering", bubbles: @considering_bubbles %>
-  <%= render "bubbles/index/bubbles/doing", bubbles: @doing_bubbles, filter: @filter %>
+  <%= render "cards/index/cards/considering", cards: @considering_cards %>
+  <%= render "cards/index/cards/doing", cards: @doing_cards, filter: @filter %>
 </div>
 
-<%= render "bubbles/index/bubbles/popped", bubbles: @popped_bubbles, filter: @filter %>
+<%= render "cards/index/cards/closed", cards: @closed_cards, filter: @filter %>

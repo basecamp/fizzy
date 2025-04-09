@@ -1,12 +1,12 @@
-<%= turbo_frame_tag @bubble, :assignment do %>
+<%= turbo_frame_tag @card, :assignment do %>
   <dialog class="popup panel flex-column align-start gap-half fill-white shadow" data-dialog-target="dialog">
     <strong class="popup__title margin-block-start-half pad-inline-half txt-nowrap">Assign this to…</strong>
 
     <div class="flex flex-column full-width popup__list">
-      <% @bubble.bucket.users.active.alphabetically.each do |user| %>
-          <%= button_to bubble_assignments_path(@bubble, params: { assignee_id: user.id }), method: :post, class: "btn popup__item full-width" do %>
+      <% @card.collection.users.active.alphabetically.each do |user| %>
+          <%= button_to card_assignments_path(@card, params: { assignee_id: user.id }), method: :post, class: "btn popup__item full-width" do %>
             <span class="overflow-ellipsis"><%= user.name %></span>
-            <%= icon_tag "check", size: 18, class: "checked flex-item-justify-end" if @bubble.assignees.include?(user) %>
+            <%= icon_tag "check", size: 18, class: "checked flex-item-justify-end" if @card.assignees.include?(user) %>
           <% end %>
       <% end %>
     </div>

@@ -15,13 +15,13 @@
         aria-label="Added by…" aria-description="Added by…"
         data-dialog-target="dialog" data-action="turbo:before-cache@document->dialog#close">
       <strong class="popup__title margin-block-start-half pad-inline-half">Added by…</strong>
-      <%= form_with url: bubbles_path, method: :get, class: "flex flex-column full-width popup__list",
+      <%= form_with url: cards_path, method: :get, class: "flex flex-column full-width popup__list",
             data: { controller: "form" } do |form| %>
         <% filter.as_params.except(:creator_ids).each do |key, value| %>
           <%= filter_hidden_field_tag key, value %>
         <% end %>
 
-        <%= link_to bubbles_path(filter.as_params.except(:creator_ids)), class: "btn popup__item" do %>
+        <%= link_to cards_path(filter.as_params.except(:creator_ids)), class: "btn popup__item" do %>
           <span class="overflow-ellipsis">Clear all</span>
         <% end %>
 

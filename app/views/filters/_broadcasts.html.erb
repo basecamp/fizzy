@@ -1,7 +1,7 @@
-<% if filter.buckets.any? %>
-  <% filter.buckets.each do |bucket| %>
-    <%= turbo_stream_from bucket %>
+<% if filter.collections.any? %>
+  <% filter.collections.each do |collection| %>
+    <%= turbo_stream_from collection %>
   <% end %>
 <% else %>
-  <%= turbo_stream_from Current.account, :buckets %>
+  <%= turbo_stream_from Current.account, :collections %>
 <% end %>

@@ -17,7 +17,7 @@
     </div>
 
     <div class="pad fill-shade border-radius margin-block-end">
-      <%= form_tag bubbles_path, class: "flex align-center gap input input--actor txt-small fill-white border-radius", method: :get do %>
+      <%= form_tag cards_path, class: "flex align-center gap input input--actor txt-small fill-white border-radius", method: :get do %>
         <% @filter.as_params.each do |key, value| %>
           <%= filter_hidden_field_tag key, value %>
         <% end %>
@@ -31,7 +31,7 @@
       <% end %>
     </div>
 
-    <%= form_with url: bubbles_path, id: :filter_form, method: :get, class: "flex flex-column gap full-width", style: "--border-color: var(--color-subtle)" do %>
+    <%= form_with url: cards_path, id: :filter_form, method: :get, class: "flex flex-column gap full-width", style: "--border-color: var(--color-subtle)" do %>
       <% Array(params[:terms]).each do |term| %>
         <%= hidden_field_tag "terms[]", term, id: nil %>
       <% end %>
@@ -41,16 +41,16 @@
           <li class="filter__label"><strong>In Collection</strong></li>
 
           <li>
-            <%= button_tag type: :button, class: "btn filter__button", data: { action: "filter-form#clearCategory", filter_form_name_param: "bucket_ids[]" } do %>
+            <%= button_tag type: :button, class: "btn filter__button", data: { action: "filter-form#clearCategory", filter_form_name_param: "collection_ids[]" } do %>
               <span>All Collections</span>
             <% end %>
           </li>
 
-          <% Current.user.buckets.order(:name).each do |bucket| %>
+          <% Current.user.collections.order(:name).each do |collection| %>
             <li>
-              <%= label_tag "bucket_ids_#{bucket.id}", class: "btn filter__button" do %>
-                <%= check_box_tag "bucket_ids[]", bucket.id, filter.buckets.include?(bucket), id: "bucket_ids_#{bucket.id}", hidden: true %>
-                <span><%= bucket.name %></span>
+              <%= label_tag "collection_ids_#{collection.id}", class: "btn filter__button" do %>
+                <%= check_box_tag "collection_ids[]", collection.id, filter.collections.include?(collection), id: "collection_ids_#{collection.id}", hidden: true %>
+                <span><%= collection.name %></span>
                 <%= icon_tag "close" %>
               <% end %>
             </li>
@@ -173,7 +173,7 @@
 
   <div class="flex align-center txt-align-center justify-space-between gap-half margin-block-start">
     <%= tag.button class: "btn", form: :filter_form, formaction: filters_path, formmethod: :post do %>
-      <%= icon_tag "bubbles" %>
+      <%= icon_tag "cards" %>
       <span>Save collection</span>
     <% end %>
 

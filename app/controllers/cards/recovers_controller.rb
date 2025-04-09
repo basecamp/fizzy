@@ -1,7 +1,7 @@
-class Bubbles::RecoversController < ApplicationController
-  include BubbleScoped
+class Cards::RecoversController < ApplicationController
+  include CardScoped
 
   def create
-    redirect_to @bubble.recover_abandoned_creation
+    redirect_to @card.recover_abandoned_creation
   end
 end

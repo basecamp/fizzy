@@ -1,8 +1,8 @@
 module MessagesHelper
-  def messages_tag(bubble, &)
-    turbo_frame_tag dom_id(bubble, :messages),
+  def messages_tag(card, &)
+    turbo_frame_tag dom_id(card, :messages),
       class: "comments gap center",
-      style: "--bubble-color: <%= bubble.color %>",
+      style: "--card-color: <%= card.color %>",
       role: "group", aria: { label: "Messages" },
       data: {
         controller: "created-by-current-user",

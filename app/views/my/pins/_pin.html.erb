@@ -1,33 +1,33 @@
 <% cache pin do %>
   <%= tag.div id: dom_id(pin), class: "pin tray__item flex txt-normal" do %>
-    <%= link_to bucket_bubble_path(pin.bubble.bucket, pin.bubble),
+    <%= link_to collection_card_path(pin.card.collection, pin.card),
           class: "pin__content shadow fill-white flex align-start txt-align-start gap flex-item-grow max-width border border-radius txt-ink overflow-clip",
           data: { action: "click->dialog#close", turbo_frame: "_top" },
-          style: "--bubble-color: #{ pin.bubble.color };" do %>
+          style: "--card-color: #{ pin.card.color };" do %>
       <div class="flex flex-column min-width flex-item-grow">
         <div class="pin__header flex gap-half align-center txt-uppercase">
-          <div class="pin__bucket flex-inline flex-item-justify-start txt-reversed min-width txt-xx-small">
-            <span class="txt-xx-small overflow-ellipsis"><%= pin.bubble.bucket.name %></span>
+          <div class="pin__collection flex-inline flex-item-justify-start txt-reversed min-width txt-xx-small">
+            <span class="txt-xx-small overflow-ellipsis"><%= pin.card.collection.name %></span>
           </div>
 
-          <% if pin.bubble&.stage %>
+          <% if pin.card&.stage %>
             <strong class="pin__stage border txt-tight-lines flex-item-justify-end txt-xx-small">
-              <%= pin.bubble&.stage&.name %>
+              <%= pin.card&.stage&.name %>
             </strong>
           <% end %>
         </div>
 
-        <strong class="pin__title overflow-ellipsis txt-small"><%= bubble_title(pin.bubble) %></strong>
+        <strong class="pin__title overflow-ellipsis txt-small"><%= card_title(pin.card) %></strong>
 
         <div class="tray__item-meta flex align-end gap-half txt-tight-lines">
           <div class="translucent">
-            <span>Updated</span> <%= local_datetime_tag(pin.bubble.updated_at, style: :ago) -%>
+            <span>Updated</span> <%= local_datetime_tag(pin.card.updated_at, style: :ago) -%>
           </div>
 
-          <%= " · " if pin.bubble.tags.any? %>
+          <%= " · " if pin.card.tags.any? %>
           <div class="overflow-ellipsis pin__tags txt-uppercase">
-            <%= "#" if pin.bubble.tags.any? %>
-            <%= pin.bubble.tags.map(&:title).join(", ") %>
+            <%= "#" if pin.card.tags.any? %>
+            <%= pin.card.tags.map(&:title).join(", ") %>
           </div>
         </div>
       </div>

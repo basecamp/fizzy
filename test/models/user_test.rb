@@ -13,7 +13,7 @@ class UserTest < ActiveSupport::TestCase
     assert_equal user, User.authenticate_by(email_address: "victor@hey.com", password: "secret123456")
   end
 
-  test "creation gives access to all_access buckets" do
+  test "creation gives access to all_access collections" do
     user = User.create! \
       account: accounts("37s"),
       role: "member",
@@ -21,7 +21,7 @@ class UserTest < ActiveSupport::TestCase
       email_address: "victor@hey.com",
       password: "secret123456"
 
-    assert_equal [ buckets(:writebook) ], user.buckets
+    assert_equal [ collections(:writebook) ], user.collections
   end
 
   test "deactivate" do

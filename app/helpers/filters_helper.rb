@@ -1,16 +1,16 @@
 module FiltersHelper
   def filter_title(filter)
-    if filter.buckets.none?
+    if filter.collections.none?
       "All collections"
-    elsif filter.buckets.one?
-      filter.buckets.first.name
+    elsif filter.collections.one?
+      filter.collections.first.name
     else
-      filter.buckets.map(&:name).to_sentence
+      filter.collections.map(&:name).to_sentence
     end
   end
 
   def filter_chip_tag(text, params)
-    link_to bubbles_path(params), class: "btn txt-small btn--remove fill-selected" do
+    link_to cards_path(params), class: "btn txt-small btn--remove fill-selected" do
       concat tag.span(text)
       concat icon_tag("close")
     end

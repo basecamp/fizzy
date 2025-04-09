@@ -1,21 +1,21 @@
-class Bubbles::PinsController < ApplicationController
-  include BubbleScoped
+class Cards::PinsController < ApplicationController
+  include CardScoped
 
   def show
   end
 
   def create
-    pin = @bubble.pin_by Current.user
+    pin = @card.pin_by Current.user
 
     broadcast_my_new pin
-    redirect_to bubble_pin_path(@bubble)
+    redirect_to card_pin_path(@card)
   end
 
   def destroy
-    pin = @bubble.unpin_by Current.user
+    pin = @card.unpin_by Current.user
 
     broadcast_my_removed pin
-    redirect_to bubble_pin_path(@bubble)
+    redirect_to card_pin_path(@card)
   end
 
   private

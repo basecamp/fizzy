@@ -1,22 +1,22 @@
-<div id="<%= dom_id(bubble, :tags) %>" class="card__tags flex align-center flex-item-grow min-width">
+<div id="<%= dom_id(card, :tags) %>" class="card__tags flex align-center flex-item-grow min-width">
   <div class="overflow-ellipsis">
-    <% if bubble.tags.any? || bubble.creating? %>
+    <% if card.tags.any? || card.creating? %>
       <span># </span>
-      <% bubble.tags.each_with_index do |tag, index| %>
-        <%= link_to bubbles_path(bucket_ids: [ bubble.bucket ], tag_ids: [ tag.id ]),
+      <% card.tags.each_with_index do |tag, index| %>
+        <%= link_to cards_path(collection_ids: [ card.collection ], tag_ids: [ tag.id ]),
               class: "card__tag btn btn--plain min-width txt-uppercase fill-transparent" do %>
           <span class="overflow-ellipsis"><%= tag.title %></span>
-        <% end %><%= ", " unless index == bubble.tags.size - 1 %>
+        <% end %><%= ", " unless index == card.tags.size - 1 %>
       <% end %>
     <% end %>
   </div>
 
   <div class="position-relative" data-controller="dialog" data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside">
-    <button class="tag-picker__button btn card__hide-on-index <%= bubble.creating? || bubble.drafted? ? "fill-highlight" : "fill-transparent" %>" data-action="click->dialog#open:stop">
+    <button class="tag-picker__button btn card__hide-on-index <%= card.creating? || card.drafted? ? "fill-highlight" : "fill-transparent" %>" data-action="click->dialog#open:stop">
       <%= icon_tag "tag" %>
       <span class="for-screen-reader">Add a tag</span>
     </button>
 
-    <%= turbo_frame_tag bubble, :tagging, src: new_bubble_tagging_path(bubble) %>
+    <%= turbo_frame_tag card, :tagging, src: new_card_tagging_path(card) %>
   </div>
 </div>

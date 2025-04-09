@@ -13,7 +13,7 @@
           class: [ "txt-small", { "txt-medium": reaction.all_emoji? } ],
           data: { action: "click->reaction-delete#reveal keydown.enter->reaction-delete#reveal:prevent", reaction_delete_target: "content" } %>
 
-    <%= button_to bucket_bubble_comment_reaction_path(comment.bubble.bucket, comment.bubble, comment, reaction),
+    <%= button_to collection_card_comment_reaction_path(comment.card.collection, comment.card, comment, reaction),
           method: :delete,
           class: "btn btn--negative flex-item-justify-end reaction__delete",
           data: { action: "reaction-delete#perform", reaction_delete_target: "button" } do %>

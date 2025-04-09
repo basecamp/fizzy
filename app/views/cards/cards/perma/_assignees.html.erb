@@ -1,3 +1,3 @@
-<%= render "bubbles/cards/common/assignees", bubble: bubble do %>
-  <%= turbo_frame_tag bubble, :assignment, src: new_bubble_assignment_path(bubble) %>
+<%= render "cards/cards/common/assignees", card: card do %>
+  <%= turbo_frame_tag card, :assignment, src: new_card_assignment_path(card) %>
 <% end %>

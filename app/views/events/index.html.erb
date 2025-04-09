@@ -22,7 +22,7 @@
     <div style="border-block-start: 1px solid var(--color-subtle); padding-block-start: var(--block-space-half);">
       <% @filters.each do |filter| %>
         <h3 class="txt-small margin-block-end-half txt-tight-lines">
-          <%= link_to filter.summary, bubbles_path(**filter.as_params) %>
+          <%= link_to filter.summary, cards_path(**filter.as_params) %>
         </h3>
       <% end %>
     </div>
@@ -37,15 +37,15 @@
   <div class="txt-align-start">
     <div class="flex align-start gap min-width" >
       <h2 class="txt-normal txt-uppercase overflow-ellipsis">Collections</h2>
-      <%= link_to new_bucket_path, class: "btn txt-xx-small flex-item-justify-end flex-item-no-shrink", style: "view-transition-name: new-bucket" do %>
+      <%= link_to new_collection_path, class: "btn txt-xx-small flex-item-justify-end flex-item-no-shrink", style: "view-transition-name: new-collection" do %>
         <%= icon_tag "add" %>
         <span class="for-screen-reader">New</span>
       <% end %>
     </div>
 
     <div style="border-block-start: 1px solid var(--color-subtle); padding-block-start: var(--block-space-half);">
-      <% @buckets.each do |bucket| %>
-        <h3 class="txt-small margin-block-end-half txt-tight-lines"><%= link_to bucket.name, bubbles_path(bucket_ids: [ bucket ]) %></h3>
+      <% @collections.each do |collection| %>
+        <h3 class="txt-small margin-block-end-half txt-tight-lines"><%= link_to collection.name, cards_path(collection_ids: [ collection ]) %></h3>
       <% end %>
     </div>
   </div>

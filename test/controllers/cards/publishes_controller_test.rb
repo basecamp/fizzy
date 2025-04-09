@@ -1,18 +1,18 @@
 require "test_helper"
 
-class Bubbles::PublishesControllerTest < ActionDispatch::IntegrationTest
+class Cards::PublishesControllerTest < ActionDispatch::IntegrationTest
   setup do
     sign_in_as :kevin
   end
 
   test "create" do
-    bubble = bubbles(:logo)
-    bubble.drafted!
+    card = cards(:logo)
+    card.drafted!
 
-    assert_changes -> { bubble.reload.published? }, from: false, to: true do
-      post bubble_publish_path(bubble)
+    assert_changes -> { card.reload.published? }, from: false, to: true do
+      post card_publish_path(card)
     end
 
-    assert_redirected_to bubble
+    assert_redirected_to card
   end
 end

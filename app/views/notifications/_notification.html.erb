@@ -13,7 +13,7 @@
             <%= notification_body(notification) %>
           <% end %>
         </div>
-      <div class="tray__item-meta overflow-ellipsis translucent"><%= notification.bubble.bucket.name %> · <%= local_datetime_tag(notification.created_at, style: :ago) %></div>
+      <div class="tray__item-meta overflow-ellipsis translucent"><%= notification.card.collection.name %> · <%= local_datetime_tag(notification.created_at, style: :ago) %></div>
     </div>
   <% end %>
 <% end %>

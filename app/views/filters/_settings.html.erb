@@ -5,7 +5,7 @@
   </button>
 
   <div class="flex-inline center align-center gap-half">
-    <%= render "filters/buckets", filter: filter %>
+    <%= render "filters/collections", filter: filter %>
     <%= render "filters/indexed_by", filter: filter %>
     <%= render "filters/stages", filter: filter %>
     <%= render "filters/tags", filter: filter %>
@@ -17,7 +17,7 @@
     <% end %>
 
     <% if any_filters?(filter) %>
-      <%= link_to bubbles_path, class: "btn btn--remove txt-small" do %>
+      <%= link_to cards_path, class: "btn btn--remove txt-small" do %>
         <%= icon_tag "close" %>
         <span class="for-screen-reader">Clear all</span>
       <% end %>

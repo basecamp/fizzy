@@ -1,18 +1,18 @@
 <div class="card__meta flex txt-tight-lines txt-uppercase">
   <div class="flex flex-column gap txt-align-end">
-    <span class="pad-inline overflow-ellipsis"><%= bubble.creating? ? "Added" : "Updated" %>
-      <%= local_datetime_tag(bubble.updated_at, style: :daysago) %>
+    <span class="pad-inline overflow-ellipsis"><%= card.creating? ? "Added" : "Updated" %>
+      <%= local_datetime_tag(card.updated_at, style: :daysago) %>
     </span>
 
     <hr class="full-width separator--horizontal unpad margin-none">
 
-    <% if bubble.creating? %>
+    <% if card.creating? %>
       <span class="pad-inline overflow-ellipsis">Expires
-        <%= local_datetime_tag(bubble.auto_pop_at, style: :indays) %>
+        <%= local_datetime_tag(card.auto_closure_at, style: :indays) %>
       </span>
     <% else %>
       <span class="pad-inline overflow-ellipsis">Added
-        <%= local_datetime_tag(bubble.created_at, style: :daysago) %>
+        <%= local_datetime_tag(card.created_at, style: :daysago) %>
       </span>
     <% end %>
   </div>
@@ -21,7 +21,7 @@
 
   <div class="flex flex-column gap txt-align-start">
     <span class="pad-inline overflow-ellipsis">
-      <strong><%= bubble.comments_count %></strong> <%= bubble.comments_count == 1 ? "comment" : "comments" %>
+      <strong><%= card.comments_count %></strong> <%= card.comments_count == 1 ? "comment" : "comments" %>
     </span>
 
     <hr class="full-width separator--horizontal unpad margin-none">

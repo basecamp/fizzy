@@ -1,5 +1,5 @@
 @layer components {
-  .bucket {
+  .collection {
     inline-size: min(35ch, 40%);
     line-height: 1.2;
 
@@ -10,7 +10,7 @@
     }
   }
 
-  .buckets {
+  .collections {
     --gap: 2cqi;
     --hover-size: 0;
     --column-gap: var(--gap);
@@ -20,12 +20,12 @@
     padding: var(--gap);
   }
 
-  .bucket__button {
+  .collection__button {
     position: absolute;
     inset: calc((var(--btn-size) * -1) - 2cqi) 1cqi auto auto;
   }
 
-  .bucket__bubbles {
+  .collection__cards {
     --border-radius: 1.5em;
 
     margin-block: 0;
@@ -33,7 +33,7 @@
     padding: 1cqi;
   }
 
-  .bubbles__container {
+  .cards__container {
     aspect-ratio: 18 / 9;
     container-type: inline-size;
   }

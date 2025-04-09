@@ -1,13 +1,13 @@
 logo_published_kevin:
   user: kevin
   event: logo_published
-  bubble: logo
-  resource: logo (Bubble)
+  card: logo
+  resource: logo (Card)
   created_at: <%= 1.week.ago %>
 
 layout_commented_kevin:
   user: kevin
   event: layout_commented
-  bubble: layout
+  card: layout
   resource: layout_overflowing_david (Comment)
   created_at: <%= 1.week.ago %>

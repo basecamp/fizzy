@@ -12,7 +12,7 @@ class Comments::ReactionsController < ApplicationController
     @reaction = @comment.reactions.create!(reaction_params)
 
     broadcast_create
-    redirect_to bucket_bubble_comment_reactions_url(@comment.bubble.bucket, @comment.bubble, @comment)
+    redirect_to collection_card_comment_reactions_url(@comment.card.collection, @comment.card, @comment)
   end
 
   def destroy

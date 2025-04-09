@@ -1,44 +1,44 @@
-<% cache bubble do %>
+<% cache card do %>
   <article class="card shadow border flex flex-column position-relative txt-align-start border-radius"
-      style="--bubble-color: <%= bubble.color %>; view-transition-name: <%= dom_id(bubble, :ticket) %>;"
-      id="<%= dom_id(bubble, :ticket) %>">
+      style="--card-color: <%= card.color %>; view-transition-name: <%= dom_id(card, :ticket) %>;"
+      id="<%= dom_id(card, :ticket) %>">
     <header class="card__header flex align-center gap min-width">
-      <%= link_to bubble.bucket.name, bubbles_path(bucket_ids: [bubble.bucket]),
-            class: "card__bucket txt-uppercase overflow-ellipsis txt-reversed" %>
+      <%= link_to card.collection.name, cards_path(collection_ids: [card.collection]),
+            class: "card__collection txt-uppercase overflow-ellipsis txt-reversed" %>
 
-      <%= render "bubbles/cards/perma/tags", bubble: bubble %>
+      <%= render "cards/cards/perma/tags", card: card %>
     </header>
 
     <div class="card__body flex gap full-width flex-item-grow">
       <div class="card__body-header">
         <h1 class="card__title">
-          <% if bubble.published? %>
-            <%= turbo_frame_tag bubble, :edit do %>
-              <%= link_to bubble_title(bubble), edit_bucket_bubble_path(bubble.bucket, bubble), class: "card__title-link overflow-line-clamp" %>
+          <% if card.published? %>
+            <%= turbo_frame_tag card, :edit do %>
+              <%= link_to card_title(card), edit_collection_card_path(card.collection, card), class: "card__title-link overflow-line-clamp" %>
             <% end %>
           <% else %>
-            <%= form_with model: bubble, url: bucket_bubble_path(bubble.bucket, bubble), id: "bubble_form", data: { controller: "auto-save" } do |form| %>
+            <%= form_with model: card, url: collection_card_path(card.collection, card), id: "card_form", data: { controller: "auto-save" } do |form| %>
               <%= form.text_area :title, placeholder: "Name it…",
-                    class: "input input--textarea full-width borderless txt-align-start #{ "fill-highlight" if bubble.creating? }",
-                    autofocus: bubble.title.blank?,
+                    class: "input input--textarea full-width borderless txt-align-start #{ "fill-highlight" if card.creating? }",
+                    autofocus: card.title.blank?,
                     data: { action: "auto-save#change blur->auto-save#submit keydown.enter->auto-save#submit:prevent keydown.ctrl+enter->auto-save#submit:prevent" } %>
             <% end %>
           <% end %>
         </h1>
       </div>
 
-      <% if bubble.doing? %>
-        <%= turbo_frame_tag dom_id(@bubble, :stages) do %>
-          <%= render "bubbles/stagings/stages", bubble: bubble %>
+      <% if card.doing? %>
+        <%= turbo_frame_tag dom_id(@card, :stages) do %>
+          <%= render "cards/stagings/stages", card: card %>
         <% end %>
       <% end %>
     </div>
 
     <footer class="card__footer full-width flex align-start gap">
-      <%= render "bubbles/cards/perma/people", bubble: bubble %>
-      <%= render "bubbles/cards/perma/meta", bubble: bubble %>
+      <%= render "cards/cards/perma/people", card: card %>
+      <%= render "cards/cards/perma/meta", card: card %>
     </footer>
 
-    <%= render "bubbles/cards/common/background", bubble: bubble %>
+    <%= render "cards/cards/common/background", card: card %>
   </article>
 <% end %>

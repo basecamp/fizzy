@@ -8,12 +8,12 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :bubbles do
-    scope module: :bubbles do
+  resources :cards do
+    scope module: :cards do
       resource :engagement
       resource :image
       resource :pin
-      resource :pop
+      resource :closure
       resource :publish
       resource :reading
       resource :recover
@@ -40,14 +40,14 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :buckets do
-    scope module: :buckets do
+  resources :collections do
+    scope module: :collections do
       resource :subscriptions
       resource :workflow, only: :update
       resource :involvement
     end
 
-    resources :bubbles do
+    resources :cards do
       resources :comments do
         resources :reactions, module: :comments
       end
@@ -85,13 +85,13 @@ Rails.application.routes.draw do
   get "join/:join_code", to: "users#new", as: :join
   post "join/:join_code", to: "users#create"
 
-  resolve "Bubble" do |bubble, options|
-    route_for :bucket_bubble, bubble.bucket, bubble, options
+  resolve "Card" do |card, options|
+    route_for :collection_card, card.collection, card, options
   end
 
   resolve "Comment" do |comment, options|
     options[:anchor] = ActionView::RecordIdentifier.dom_id(comment)
-    route_for :bucket_bubble, comment.bubble.bucket, comment.bubble, options
+    route_for :collection_card, comment.card.collection, comment.card, options
   end
 
   get "up", to: "rails/health#show", as: :rails_health_check

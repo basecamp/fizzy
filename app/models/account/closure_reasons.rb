@@ -1,4 +1,4 @@
-module Account::PopReasons
+module Account::ClosureReasons
   extend ActiveSupport::Concern
 
   DEFAULT_LABELS = [
@@ -11,19 +11,19 @@ module Account::PopReasons
   FALLBACK_LABEL = "Done"
 
   included do
-    has_many :pop_reasons, dependent: :destroy, class_name: "Pop::Reason" do
+    has_many :closure_reasons, dependent: :destroy, class_name: "Closure::Reason" do
       def labels
         pluck(:label).presence || [ FALLBACK_LABEL ]
       end
     end
 
-    after_create :create_default_pop_reasons
+    after_create :create_default_closure_reasons
   end
 
   private
-    def create_default_pop_reasons
+    def create_default_closure_reasons
       DEFAULT_LABELS.each do |label|
-        pop_reasons.create! label: label
+        closure_reasons.create! label: label
       end
     end
 end

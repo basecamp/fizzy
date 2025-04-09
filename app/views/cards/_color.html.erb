@@ -5,8 +5,8 @@
   </button>
 
   <dialog class="color-picker panel fill-white shadow gap-half" data-dialog-target="dialog" data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside">
-    <%= form_with model: bubble, url: bucket_bubble_path(bubble.bucket, bubble), class: "flex gap-half", data: { controller: "form", action: "change->form#submit" } do |form| %>
-      <% Bubble::COLORS.each do |color| %>
+    <%= form_with model: card, url: collection_card_path(card.collection, card), class: "flex gap-half", data: { controller: "form", action: "change->form#submit" } do |form| %>
+      <% Card::COLORS.each do |color| %>
         <span class="color-picker__color">
           <label class="btn btn--circle" style="--btn-background: <%= color %>" title="<%= color %>">
             <%= form.radio_button :color, color %>

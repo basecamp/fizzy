@@ -1,4 +1,4 @@
-module Bubble::Scorable
+module Card::Scorable
   extend ActiveSupport::Concern
 
   REFERENCE_DATE = Time.utc(2025, 1, 1)
@@ -37,7 +37,7 @@ module Bubble::Scorable
     def event_weight(event)
       case
       when event.boosted? then 1
-      when event.comment&.first_by_author_on_bubble? then 20
+      when event.comment&.first_by_author_on_card? then 20
       when event.comment&.follows_comment_by_another_author? then 15
       when event.commented? then 10
       else 0
@@ -46,7 +46,7 @@ module Bubble::Scorable
 
     def event_score_reference(score, activity_at)
       # The reference score is used to make the activity score comparable
-      # across different bubbles, since it represents the bubble's activity
+      # across different cards, since it represents the card's activity
       # level at a consistent point in time.
       #
       # We store this as log2 to tame the huge/tiny numbers we'd otherwise get

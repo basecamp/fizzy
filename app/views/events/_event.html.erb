@@ -1,18 +1,18 @@
-<% bubble = event.summary.bubble %>
-<% link = event.action == "commented" ? bucket_bubble_path(bubble.bucket, bubble, anchor: dom_id(event.comment)) : bucket_bubble_path(bubble.bucket, bubble) %>
+<% card = event.summary.card %>
+<% link = event.action == "commented" ? collection_card_path(card.collection, card, anchor: dom_id(event.comment)) : collection_card_path(card.collection, card) %>
 
 <%= link_to link,
       class: "event panel center center-block flex-inline align-start justify-start gap position-relative",
-      style: "--bubble-color: #{ bubble.color }; background-color: color-mix(in srgb, var(--bubble-color) 10%, var(--color-bg));
-  color: color-mix(in srgb, var(--bubble-color) 40%, var(--color-ink));",
+      style: "--card-color: #{ card.color }; background-color: color-mix(in srgb, var(--card-color) 10%, var(--color-bg));
+  color: color-mix(in srgb, var(--card-color) 40%, var(--color-ink));",
       data: { related_element_target: "related",
-              related_element_group_value: bubble.id,
+              related_element_group_value: card.id,
               action: "mouseover->related-element#highlight mouseout->related-element#unhighlight" } do %>
   <div class="avatar txt-x-small flex-item-no-shrink">
     <%= avatar_image_tag(event.creator) %>
   </div>
 
-  <div class="flex flex-column min-width txt-small align-start txt-align-start" style="color: color-mix(in srgb, var(--bubble-color) 40%, var(--color-ink));">
+  <div class="flex flex-column min-width txt-small align-start txt-align-start" style="color: color-mix(in srgb, var(--card-color) 40%, var(--color-ink));">
     <div class="flex align-start gap full-width">
       <strong class="event__title txt-break overflow-line-clamp txt-tight-lines">
         <%= event_action_sentence(event) %>
@@ -31,6 +31,6 @@
       </span>
     <% end %>
 
-    <span class="event__bucket"><%= bubble.bucket.name %></span>
+    <span class="event__collection"><%= card.collection.name %></span>
   </div>
 <% end %>

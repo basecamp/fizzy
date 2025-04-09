@@ -1,4 +1,4 @@
-<% @page_title = "Create a new bucket" %>
+<% @page_title = "Create a new collection" %>
 
 <% content_for :header do %>
   <nav>
@@ -6,8 +6,8 @@
   </nav>
 <% end %>
 
-<div class="panel shadow center" style="--panel-size: 55ch; view-transition-name: new-bucket">
-  <%= form_with model: @bucket, class: "flex flex-column gap txt-large", data: { controller: "form" } do |form| %>
+<div class="panel shadow center" style="--panel-size: 55ch; view-transition-name: new-collection">
+  <%= form_with model: @collection, class: "flex flex-column gap txt-large", data: { controller: "form" } do |form| %>
     <h2 class="txt-x-large">Create a new collection</h2>
     <label class="flex align-center gap">
       <%= form.text_field :name, required: true, class: "input full-width", autofocus: true, placeholder: "Give it a name…", data: { action: "keydown.esc@document->form#cancel" } %>

@@ -1,31 +1,31 @@
-<% cache [ bubble ] do %>
+<% cache [ card ] do %>
   <article class="card shadow border flex flex-column position-relative txt-align-start full-width border-radius"
-    style="--bubble-color: <%= bubble.color %>; view-transition-name: <%= dom_id(bubble, :ticket) %>;"
-    id="<%= dom_id(bubble, :ticket) %>">
+    style="--card-color: <%= card.color %>; view-transition-name: <%= dom_id(card, :ticket) %>;"
+    id="<%= dom_id(card, :ticket) %>">
     <header class="card__header flex align-center gap min-width">
-      <span class="card__bucket txt-uppercase overflow-ellipsis txt-reversed"><%= bubble.bucket.name %></span>
-      <%= render "bubbles/cards/preview/tags", bubble: bubble %>
+      <span class="card__collection txt-uppercase overflow-ellipsis txt-reversed"><%= card.collection.name %></span>
+      <%= render "cards/cards/preview/tags", card: card %>
     </header>
 
     <div class="card__body flex gap full-width flex-item-grow">
       <div class="card__body-header">
         <h1 class="card__title">
-          <span class="card__title-link overflow-line-clamp"><%= bubble_title(bubble) %></span>
+          <span class="card__title-link overflow-line-clamp"><%= card_title(card) %></span>
         </h1>
       </div>
 
-      <%= link_to bucket_bubble_path(bubble.bucket, bubble), class: "card__link" do %>
-        <span class="for-screen-reader"><%= bubble_title(bubble) %></span>
+      <%= link_to collection_card_path(card.collection, card), class: "card__link" do %>
+        <span class="for-screen-reader"><%= card_title(card) %></span>
       <% end %>
 
-      <%= render "bubbles/stagings/stages", bubble: bubble if bubble.doing? %>
+      <%= render "cards/stagings/stages", card: card if card.doing? %>
     </div>
 
     <footer class="card__footer full-width flex align-start gap">
-      <%= render "bubbles/cards/preview/people", bubble: bubble %>
-      <%= render "bubbles/cards/preview/meta", bubble: bubble %>
+      <%= render "cards/cards/preview/people", card: card %>
+      <%= render "cards/cards/preview/meta", card: card %>
     </footer>
 
-    <%= render "bubbles/cards/common/background", bubble: bubble %>
+    <%= render "cards/cards/common/background", card: card %>
   </article>
 <% end %>

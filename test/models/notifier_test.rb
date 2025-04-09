@@ -14,7 +14,7 @@ class NotifierTest < ActiveSupport::TestCase
   end
 
   test "generate does not create notifications if the event was system-generated" do
-    bubbles(:logo).drafted!
+    cards(:logo).drafted!
     events(:logo_published).update!(creator: accounts("37s").users.system)
 
     assert_no_difference -> { Notification.count } do
@@ -29,7 +29,7 @@ class NotifierTest < ActiveSupport::TestCase
   end
 
   test "does not create a notification for access-only users" do
-    buckets(:writebook).access_for(users(:kevin)).access_only!
+    collections(:writebook).access_for(users(:kevin)).access_only!
 
     notifications = Notifier.for(events(:layout_commented)).generate
 
@@ -42,15 +42,15 @@ class NotifierTest < ActiveSupport::TestCase
     assert_equal users(:kevin, :jz).sort, notifications.map(&:user).sort
   end
 
-  test "links to the bubble" do
+  test "links to the card" do
     Notifier.for(events(:logo_published)).generate
 
-    assert_equal bubbles(:logo), Notification.last.resource
+    assert_equal cards(:logo), Notification.last.resource
   end
 
   test "assignment events only create a notification for the assignee" do
-    buckets(:writebook).access_for(users(:jz)).watching!
-    buckets(:writebook).access_for(users(:kevin)).everything!
+    collections(:writebook).access_for(users(:jz)).watching!
+    collections(:writebook).access_for(users(:kevin)).everything!
 
     notifications = Notifier.for(events(:logo_assignment_jz)).generate
 
@@ -58,7 +58,7 @@ class NotifierTest < ActiveSupport::TestCase
   end
 
   test "assignment events do not notify users who are access-only for the collection" do
-    buckets(:writebook).access_for(users(:jz)).access_only!
+    collections(:writebook).access_for(users(:jz)).access_only!
 
     notifications = Notifier.for(events(:logo_assignment_jz)).generate
 

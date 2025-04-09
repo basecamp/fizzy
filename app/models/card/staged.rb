@@ -1,4 +1,4 @@
-module Bubble::Staged
+module Card::Staged
   extend ActiveSupport::Concern
 
   included do

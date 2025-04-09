@@ -1,7 +1,7 @@
 class Notification < ApplicationRecord
   belongs_to :user
   belongs_to :event
-  belongs_to :bubble
+  belongs_to :card
   belongs_to :resource, polymorphic: true
 
   scope :unread, -> { where(read_at: nil) }

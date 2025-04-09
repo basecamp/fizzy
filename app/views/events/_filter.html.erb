@@ -1,4 +1,4 @@
-<% presenter = BucketFilterPresenter.new(@buckets, params, cookies) %>
+<% presenter = CollectionFilterPresenter.new(@collections, params, cookies) %>
 <div class="position-relative max-width margin-block-end-half"
 		data-controller="dialog" data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside">
 	<button class="events__filter-btn input input--select flex-inline center min-width max-width txt-small" data-action="click->dialog#open:stop">
@@ -13,15 +13,15 @@
 		<%= form_with url: events_path, method: :get, class: "flex flex-column full-width popup__list",
 					data: { controller: "form" } do |form| %>
 			<%= link_to "Show everything", events_path(clear_filter: true), class: "btn popup__item txt-nowrap" %>
-			<% @buckets.each do |bucket| %>
+			<% @collections.each do |collection| %>
 				<div class="btn popup__item">
-					<%= form.check_box "bucket_ids[]", {
-						checked: (params[:bucket_ids] || cookies[:bucket_filter]&.split(","))&.include?(bucket.id.to_s),
+					<%= form.check_box "collection_ids[]", {
+						checked: (params[:collection_ids] || cookies[:collection_filter]&.split(","))&.include?(collection.id.to_s),
 						data: { action: "change->form#submit" },
 						include_hidden: false,
-					}, bucket.id %>
+					}, collection.id %>
 
-					<%= form.label "bucket_ids[]", bucket.name, for: dom_id(bucket, :filter), class: "overflow-ellipsis" %>
+					<%= form.label "collection_ids[]", collection.name, for: dom_id(collection, :filter), class: "overflow-ellipsis" %>
 					<%= icon_tag "check", class: "checked flex-item-justify-end" %>
 				</div>
 			<% end %>

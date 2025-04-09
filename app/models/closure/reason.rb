@@ -1,3 +1,3 @@
-class Pop::Reason < ApplicationRecord
+class Closure::Reason < ApplicationRecord
   belongs_to :account
 end

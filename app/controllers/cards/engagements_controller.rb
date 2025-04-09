@@ -1,13 +1,13 @@
-class Bubbles::EngagementsController < ApplicationController
-  include BubbleScoped
+class Cards::EngagementsController < ApplicationController
+  include CardScoped
 
   def create
-    @bubble.engage
-    redirect_to @bubble
+    @card.engage
+    redirect_to @card
   end
 
   def destroy
-    @bubble.reconsider
-    redirect_to @bubble
+    @card.reconsider
+    redirect_to @card
   end
 end

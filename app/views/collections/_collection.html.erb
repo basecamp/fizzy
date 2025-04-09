@@ -1,27 +1,27 @@
-<li class="bucket flex flex-column txt-align-center max-width">
-  <%= link_to bubbles_path(bucket_ids: [ bucket ]),
-        class: "border border-radius margin-block-end-half bubbles__container flex justify-center align-center position-relative",
+<li class="collection flex flex-column txt-align-center max-width">
+  <%= link_to cards_path(collection_ids: [ collection ]),
+        class: "border border-radius margin-block-end-half cards__container flex justify-center align-center position-relative",
         aria: { hidden: true }, tabindex: -1 do %>
-    <div class="bubbles bucket__bubbles flex flex-wrap gap justify-center align-end" style="view-transition-name: bubbles_<%= bucket.id %>">
-      <% bucket.bubbles.active.published_or_drafted_by(Current.user).ordered_by_activity.limit(10).each do |bubble| %>
-        <div class="<%= class_names("bubble", drafted: bubble.drafted?) %>" style="--bubble-color: <%= bubble.color %>; <%= bubble_rotation(bubble) %>"
-          data-bubble-size-target="bubble"
-          data-activity-score="<%= bubble.activity_score %>"
-          data-activity-score-at="<%= bubble.activity_score_at.to_i %>">
-          <span class="bubble__shape"></span>
+    <div class="cards collection__cards flex flex-wrap gap justify-center align-end" style="view-transition-name: cards_<%= collection.id %>">
+      <% collection.cards.active.published_or_drafted_by(Current.user).ordered_by_activity.limit(10).each do |card| %>
+        <div class="<%= class_names("card", drafted: card.drafted?) %>" style="--card-color: <%= card.color %>; <%= card_rotation(card) %>"
+          data-card-size-target="card"
+          data-activity-score="<%= card.activity_score %>"
+          data-activity-score-at="<%= card.activity_score_at.to_i %>">
+          <span class="card__shape"></span>
         </div>
       <% end %>
     </div>
   <% end %>
 
   <div class="flex align-center justify-center flex-column flex-wrap center gap-half position-relative full-width">
-    <%= link_to bubbles_path(bucket_ids: [ bucket ]), class: "txt-ink flex flex-column" do %>
-      <strong class="txt-large"><%= bucket.name %></strong>
+    <%= link_to cards_path(collection_ids: [ collection ]), class: "txt-ink flex flex-column" do %>
+      <strong class="txt-large"><%= collection.name %></strong>
     <% end %>
 
-    <%= link_to edit_bucket_path(bucket), class: "btn txt-small bucket__button" do %>
+    <%= link_to edit_collection_path(collection), class: "btn txt-small collection__button" do %>
       <%= icon_tag "settings" %>
-      <span class="for-screen-reader">Settings for <%= bucket.name %></span>
+      <span class="for-screen-reader">Settings for <%= collection.name %></span>
     <% end %>
   </div>
 </li>

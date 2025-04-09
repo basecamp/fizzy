@@ -1,5 +1,5 @@
 class Message < ApplicationRecord
-  belongs_to :bubble, touch: true
+  belongs_to :card, touch: true
 
   delegated_type :messageable, types: Messageable::TYPES, inverse_of: :message, dependent: :destroy
 
@@ -10,10 +10,10 @@ class Message < ApplicationRecord
 
   private
     def created
-      bubble.comment_created(comment) if comment?
+      card.comment_created(comment) if comment?
     end
 
     def destroyed
-      bubble.comment_destroyed if comment?
+      card.comment_destroyed if comment?
     end
 end

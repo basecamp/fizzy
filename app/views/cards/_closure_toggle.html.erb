@@ -1,7 +1,7 @@
-<div class="card__actions-container center border-radius flex-inline align-center justify-center gap" style="--bubble-color: <%= @bubble.color %>">
-  <% if bubble.popped? %>
-    <span class="card__pop-message">Completed by <%= bubble.popped_by.name %> on <%= local_datetime_tag(bubble.popped_at, style: :shortdate) %>.</span>
-    <%= button_to bubble_pop_path(bubble), method: :delete, class: "btn btn--plain borderless fill-transparent" do %>
+<div class="card__actions-container center border-radius flex-inline align-center justify-center gap" style="--card-color: <%= @card.color %>">
+  <% if card.closed? %>
+    <span class="card__closure-message">Completed by <%= card.closed_by.name %> on <%= local_datetime_tag(card.closed_at, style: :shortdate) %>.</span>
+    <%= button_to card_closure_path(card), method: :delete, class: "btn btn--plain borderless fill-transparent" do %>
       <span>Un-do</span>
     <% end %>
   <% else %>
@@ -15,19 +15,19 @@
           data-dialog-target="dialog" data-action="turbo:before-cache@document->dialog#close">
         <strong class="popup__title margin-block-start-half pad-inline-half">Close as…</strong>
 
-        <% Current.account.pop_reasons.labels.each do |label| %>
-          <%= button_to bubble_pop_path(bubble, reason: label), class: "btn popup__item full-width", form_class: "full-width" do %>
+        <% Current.account.closure_reasons.labels.each do |label| %>
+          <%= button_to card_closure_path(card, reason: label), class: "btn popup__item full-width", form_class: "full-width" do %>
             <span class="overflow-ellipsis"><%= label %></span>
           <% end %>
         <% end %>
       </dialog>
     </div>
 
-    <span class="card__pop-message">
-      <% if bubble.doing? %>
-        Returns to <em>Considering</em> if no activity <%= local_datetime_tag(bubble.auto_reconsider_at, style: :indays) -%>.
+    <span class="card__closure-message">
+      <% if card.doing? %>
+        Returns to <em>Considering</em> if no activity <%= local_datetime_tag(card.auto_reconsider_at, style: :indays) -%>.
       <% else %>
-        Auto-closes if no activity <%= local_datetime_tag(bubble.auto_pop_at, style: :indays) -%>.
+        Auto-closes if no activity <%= local_datetime_tag(card.auto_closure_at, style: :indays) -%>.
       <% end %>
     </span>
   <% end %>

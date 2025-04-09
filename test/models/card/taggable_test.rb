@@ -1,19 +1,19 @@
 require "test_helper"
 
-class Bubble::TaggableTest < ActiveSupport::TestCase
+class Card::TaggableTest < ActiveSupport::TestCase
   setup do
-    @bubble = bubbles(:logo)
+    @card = cards(:logo)
   end
 
   test "toggle tag" do
-    assert_difference -> { @bubble.tags.count }, 1 do
-      @bubble.toggle_tag_with "ruby"
+    assert_difference -> { @card.tags.count }, 1 do
+      @card.toggle_tag_with "ruby"
     end
 
-    assert_equal "ruby", @bubble.tags.last.title
+    assert_equal "ruby", @card.tags.last.title
 
-    assert_difference -> { @bubble.tags.count }, -1 do
-      @bubble.toggle_tag_with "ruby"
+    assert_difference -> { @card.tags.count }, -1 do
+      @card.toggle_tag_with "ruby"
     end
   end
 end

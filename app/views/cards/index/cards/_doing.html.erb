@@ -1,14 +1,14 @@
-<section class="cards gap position-relative" style="align-items: center; view-transition-name: cards-container;" data-controller="bubble-size" data-action="turbo:morph@window->bubble-size#resize">
+<section class="cards gap position-relative" style="align-items: center; view-transition-name: cards-container;" data-controller="card-size" data-action="turbo:morph@window->card-size#resize">
   <% if workflow = filter.single_workflow %>
-    <%= render "bubbles/index/workflow_filter", workflow: workflow, filter: filter %>
+    <%= render "cards/index/workflow_filter", workflow: workflow, filter: filter %>
   <% else %>
     <h2 class="txt-align-center flex-inline center txt-uppercase txt-medium margin-none-block-start margin-block-end">
       Doing
     </h2>
   <% end %>
 
-  <% if bubbles.any? %>
-    <%= render partial: "bubbles/cards/preview", collection: bubbles, as: :bubble, cached: true %>
+  <% if cards.any? %>
+    <%= render partial: "cards/cards/preview", collection: cards, as: :card, cached: true %>
   <% else %>
     <p class="txt-medium translucent">Nothing here</p>
   <% end %>

@@ -1,9 +1,9 @@
-<% workflow = bubble.bucket.workflow %>
+<% workflow = card.collection.workflow %>
 
 <% if workflow %>
   <div class="card__stages flex flex-column max-width min-width pad-block">
     <% workflow.stages.each do |stage| %>
-      <%= tag.span stage.name, class: ["overflow-ellipsis btn full-width justify-start workflow-stage txt-uppercase", { "workflow-stage--current": stage == bubble.stage }] %>
+      <%= tag.span stage.name, class: ["overflow-ellipsis btn full-width justify-start workflow-stage txt-uppercase", { "workflow-stage--current": stage == card.stage }] %>
     <% end %>
   </div>
 <% end %>

@@ -1,4 +1,4 @@
-module Bubble::Watchable
+module Card::Watchable
   extend ActiveSupport::Concern
 
   included do
@@ -22,7 +22,7 @@ module Bubble::Watchable
 
   def watchers_and_subscribers(include_only_watching: false)
     involvements = include_only_watching ? [ :watching, :everything ] : :everything
-    subscribers = bucket.users.where(accesses: { involvement: involvements })
+    subscribers = collection.users.where(accesses: { involvement: involvements })
 
     User.where(id: subscribers.pluck(:id) +
       watches.watching.pluck(:user_id) - watches.not_watching.pluck(:user_id))

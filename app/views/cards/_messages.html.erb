@@ -1,16 +1,16 @@
-<%= messages_tag(bubble) do %>
-  <%= render partial: "messages/message", collection: bubble.messages, cached: true %>
-  <%= render "comments/new", bubble: bubble, cached: true %>
+<%= messages_tag(card) do %>
+  <%= render partial: "messages/message", collection: card.messages, cached: true %>
+  <%= render "comments/new", card: card, cached: true %>
 
   <div class="comments__subscribers flex flex-column margin-block txt-align-start full-width">
     <strong class="txt-uppercase">Subscribers</strong>
 
     <p class="margin-none-block-start margin-block-end-half">
-      <%= pluralize(@bubble.watchers.count, "person") %> will be notified when someone comments on this.
+      <%= pluralize(@card.watchers.count, "person") %> will be notified when someone comments on this.
     </p>
 
     <div class="flex align-center flex-wrap gap-half max-width txt-normal">
-      <% prepend_current_user_to(@bubble.watchers.alphabetically).each do |watcher| %>
+      <% prepend_current_user_to(@card.watchers.alphabetically).each do |watcher| %>
         <%= avatar_tag watcher %>
       <% end %>
     </div>

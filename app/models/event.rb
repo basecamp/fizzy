@@ -3,7 +3,7 @@ class Event < ApplicationRecord
 
   belongs_to :creator, class_name: "User"
   belongs_to :summary, touch: true, class_name: "EventSummary"
-  belongs_to :bubble
+  belongs_to :card
 
   has_one :account, through: :creator
   has_one :message, through: :summary
@@ -14,7 +14,7 @@ class Event < ApplicationRecord
   scope :boosts, -> { where action: :boosted }
   scope :comments, -> { where action: :commented }
 
-  after_create -> { bubble.touch_last_active_at }
+  after_create -> { card.touch_last_active_at }
 
   def boosted?
     action == "boosted"

@@ -1,43 +1,43 @@
 require "test_helper"
 
-class Bubble::WatchableTest < ActiveSupport::TestCase
+class Card::WatchableTest < ActiveSupport::TestCase
   setup do
     Watch.destroy_all
     Access.all.update!(involvement: :access_only)
   end
 
   test "watched_by?" do
-    assert_not bubbles(:logo).watched_by?(users(:kevin))
+    assert_not cards(:logo).watched_by?(users(:kevin))
 
-    bubbles(:logo).watch_by users(:kevin)
-    assert bubbles(:logo).watched_by?(users(:kevin))
+    cards(:logo).watch_by users(:kevin)
+    assert cards(:logo).watched_by?(users(:kevin))
 
-    bubbles(:logo).unwatch_by users(:kevin)
-    assert_not bubbles(:logo).watched_by?(users(:kevin))
+    cards(:logo).unwatch_by users(:kevin)
+    assert_not cards(:logo).watched_by?(users(:kevin))
   end
 
-  test "watched_by? when notifications are set on the bucket" do
-    buckets(:writebook).access_for(users(:kevin)).watching!
-    assert bubbles(:text).watched_by?(users(:kevin))
+  test "watched_by? when notifications are set on the collection" do
+    collections(:writebook).access_for(users(:kevin)).watching!
+    assert cards(:text).watched_by?(users(:kevin))
 
-    bubbles(:logo).unwatch_by users(:kevin)
-    assert_not bubbles(:logo).watched_by?(users(:kevin))
+    cards(:logo).unwatch_by users(:kevin)
+    assert_not cards(:logo).watched_by?(users(:kevin))
   end
 
-  test "bubbles are initially watched by their creator" do
-    bubble = buckets(:writebook).bubbles.create!(creator: users(:kevin))
+  test "cards are initially watched by their creator" do
+    card = collections(:writebook).cards.create!(creator: users(:kevin))
 
-    assert bubble.watched_by?(users(:kevin))
+    assert card.watched_by?(users(:kevin))
   end
 
   test "watchers_and_subscribers" do
-    buckets(:writebook).access_for(users(:kevin)).watching!
-    buckets(:writebook).access_for(users(:jz)).everything!
+    collections(:writebook).access_for(users(:kevin)).watching!
+    collections(:writebook).access_for(users(:jz)).everything!
 
-    bubbles(:logo).watch_by users(:kevin)
-    bubbles(:logo).unwatch_by users(:jz)
-    bubbles(:logo).watch_by users(:david)
+    cards(:logo).watch_by users(:kevin)
+    cards(:logo).unwatch_by users(:jz)
+    cards(:logo).watch_by users(:david)
 
-    assert_equal [ users(:kevin), users(:david) ].sort, bubbles(:logo).watchers_and_subscribers.sort
+    assert_equal [ users(:kevin), users(:david) ].sort, cards(:logo).watchers_and_subscribers.sort
   end
 end

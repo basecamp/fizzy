@@ -1,8 +1,8 @@
 require "test_helper"
 
-class PopReasonsTest < ActiveSupport::TestCase
-  test "create defaults pop reasons on creation" do
+class ClosureReasonsTest < ActiveSupport::TestCase
+  test "create defaults closure reasons on creation" do
     account = Account.create! name: "Rails"
-    assert_equal Account::PopReasons::DEFAULT_LABELS, account.pop_reasons.pluck(:label)
+    assert_equal Account::ClosureReasons::DEFAULT_LABELS, account.closure_reasons.pluck(:label)
   end
 end

@@ -4,8 +4,8 @@ module CommentsHelper
       data: { creator_id: comment.creator_id, created_by_current_user_target: "creation" }, &
   end
 
-  def new_comment_placeholder(bubble)
-    if bubble.creator == Current.user && bubble.messages.comments.empty?
+  def new_comment_placeholder(card)
+    if card.creator == Current.user && card.messages.comments.empty?
       "Next, add some notes, context, pictures, or video about this…"
     else
       "Type your comment…"

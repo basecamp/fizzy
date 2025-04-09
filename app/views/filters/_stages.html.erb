@@ -14,7 +14,7 @@
         aria-label="In stage…" aria-description="In stage…"
         data-dialog-target="dialog" data-action="turbo:before-cache@document->dialog#close">
       <strong class="popup__title margin-block-start-half pad-inline-half">In stage…</strong>
-      <%= form_with url: bubbles_path, method: :get, class: "flex flex-column full-width popup__list",
+      <%= form_with url: cards_path, method: :get, class: "flex flex-column full-width popup__list",
             data: { controller: "form" } do |form| %>
         <% filter.as_params.except(:stage_ids).each do |key, value| %>
           <%= filter_hidden_field_tag key, value %>

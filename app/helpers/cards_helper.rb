@@ -1,18 +1,18 @@
-module BubblesHelper
-  BUBBLE_ROTATION = %w[ 75 60 45 35 25 5 ]
+module CardsHelper
+  CARD_ROTATION = %w[ 75 60 45 35 25 5 ]
 
-  def bubble_title(bubble)
-    bubble.title.presence || "Untitled"
+  def card_title(card)
+    card.title.presence || "Untitled"
   end
 
-  def bubble_rotation(bubble)
-    value = BUBBLE_ROTATION[Zlib.crc32(bubble.to_param) % BUBBLE_ROTATION.size]
+  def card_rotation(card)
+    value = CARD_ROTATION[Zlib.crc32(card.to_param) % CARD_ROTATION.size]
 
-    "--bubble-rotate: #{value}deg;"
+    "--card-rotate: #{value}deg;"
   end
 
   def display_count_options
-    BubblesController::DISPLAY_COUNT_OPTIONS.map do |count|
+    CardsController::DISPLAY_COUNT_OPTIONS.map do |count|
       {
         value: count,
         label: count,

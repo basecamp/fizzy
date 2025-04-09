@@ -1,6 +1,6 @@
 class TerminalsController < ApplicationController
   def show
-    @events = Event.where(bubble: user_bubbles, creator: Current.user).chronologically.reverse_order.limit(20)
+    @events = Event.where(card: user_cards, creator: Current.user).chronologically.reverse_order.limit(20)
   end
 
   def edit
@@ -8,7 +8,7 @@ class TerminalsController < ApplicationController
   end
 
   private
-    def user_bubbles
-      Current.user.accessible_bubbles
+    def user_cards
+      Current.user.accessible_cards
     end
 end

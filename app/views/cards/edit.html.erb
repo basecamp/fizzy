@@ -1,5 +1,5 @@
-<%= turbo_frame_tag @bubble, :edit do %>
-  <%= form_with model: @bubble, url: bucket_bubble_path(@bubble.bucket, @bubble), class: "flex flex-column gap full-width", data: { controller: "form" } do |form| %>
+<%= turbo_frame_tag @card, :edit do %>
+  <%= form_with model: @card, url: collection_card_path(@card.collection, @card), class: "flex flex-column gap full-width", data: { controller: "form" } do |form| %>
     <%= form.label :title, class: "flex flex-column align-center" do %>
       <%= form.text_area :title, class: "input input--textarea full-width borderless txt-align-start card__title-field",
           required: true, autofocus: true, placeholder: "Name it…",
@@ -8,6 +8,6 @@
           style: "color: var(--spat-color); --input-border-radius: 0" %>
     <% end %>
     <%= form.button "Save", type: :submit, hidden: true %>
-    <%= link_to "Close editor and discard changes", bucket_bubble_path(@bubble.bucket, @bubble), data: { form_target: "cancel" }, hidden: true %>
+    <%= link_to "Close editor and discard changes", collection_card_path(@card.collection, @card), data: { form_target: "cancel" }, hidden: true %>
   <% end %>
 <% end %>

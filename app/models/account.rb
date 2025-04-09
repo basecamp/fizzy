@@ -1,8 +1,8 @@
 class Account < ApplicationRecord
-  include PopReasons, Joinable
+  include ClosureReasons, Joinable
 
-  has_many :buckets, dependent: :destroy
-  has_many :bubbles, through: :buckets
+  has_many :collections, dependent: :destroy
+  has_many :cards, through: :collections
 
   has_many :users, dependent: :destroy do
     def system

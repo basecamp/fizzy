@@ -38,7 +38,7 @@
   }
 
   @keyframes wobble {
-    0%  { transform: rotate(calc(var(--bubble-rotate) + 90deg)); }
+    0%  { transform: rotate(calc(var(--card-rotate) + 90deg)); }
     15% { border-radius: 66% 34% 72% 28% / 39% 63% 37% 61%; }
     25% { border-radius: 55% 47% 62% 40% / 58% 50% 52% 44%; }
     33% { border-radius: 46% 54% 61% 39% / 50% 51% 49% 50%; }
@@ -47,7 +47,7 @@
   }
 
   @keyframes wobble-alt {
-    0%  { transform: rotate(calc(var(--bubble-rotate) + -90deg)); }
+    0%  { transform: rotate(calc(var(--card-rotate) + -90deg)); }
     12% { border-radius: 66% 34% 72% 28% / 39% 63% 37% 61%; }
     25% { border-radius: 53% 45% 60% 38% / 56% 48% 50% 42%; }
     33% { border-radius: 55% 47% 62% 40% / 58% 50% 52% 44%; }

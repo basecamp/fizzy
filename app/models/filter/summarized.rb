@@ -1,6 +1,6 @@
 module Filter::Summarized
   def summary
-    [ index_summary, tag_summary, assignee_summary, creator_summary, stage_summary, terms_summary ].compact.to_sentence + " #{bucket_summary}"
+    [ index_summary, tag_summary, assignee_summary, creator_summary, stage_summary, terms_summary ].compact.to_sentence + " #{collection_summary}"
   end
 
   private
@@ -28,9 +28,9 @@ module Filter::Summarized
       end
     end
 
-    def bucket_summary
-      if buckets.any?
-        "in #{buckets.pluck(:name).to_choice_sentence}"
+    def collection_summary
+      if collections.any?
+        "in #{collections.pluck(:name).to_choice_sentence}"
       end
     end
 

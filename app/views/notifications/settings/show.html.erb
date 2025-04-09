@@ -11,5 +11,5 @@
 <% end %>
 
 <section class="panel center flex flex-column gap-half margin-block">
-  <%= render partial: "notifications/settings/bucket", collection: @buckets, locals: { user: Current.user } %>
+  <%= render partial: "notifications/settings/collection", collection: @collections, locals: { user: Current.user } %>
 </section>

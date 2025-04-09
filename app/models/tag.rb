@@ -4,7 +4,7 @@ class Tag < ApplicationRecord
   belongs_to :account, default: -> { Current.account }, touch: true
 
   has_many :taggings, dependent: :destroy
-  has_many :bubbles, through: :taggings
+  has_many :cards, through: :taggings
 
   validates :title, format: { without: /\A#/ }
   normalizes :title, with: -> { it.downcase }

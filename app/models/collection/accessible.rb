@@ -1,4 +1,4 @@
-module Bucket::Accessible
+module Collection::Accessible
   extend ActiveSupport::Concern
 
   included do
@@ -11,7 +11,7 @@ module Bucket::Accessible
       end
 
       def grant_to(users)
-        Access.insert_all Array(users).collect { |user| { bucket_id: proxy_association.owner.id, user_id: user.id } }
+        Access.insert_all Array(users).collect { |user| { collection_id: proxy_association.owner.id, user_id: user.id } }
       end
 
       def revoke_from(users)

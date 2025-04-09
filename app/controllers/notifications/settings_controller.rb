@@ -1,7 +1,7 @@
 module Notifications
   class SettingsController < ApplicationController
     def show
-      @buckets = Current.user.buckets.alphabetically
+      @collections = Current.user.collections.alphabetically
     end
   end
 end

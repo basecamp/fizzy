@@ -1,16 +1,16 @@
 logo_jz:
   assigner: david
   assignee: jz
-  bubble: logo
+  card: logo
   created_at: <%= 1.week.ago %>
 
 logo_kevin:
   assigner: david
   assignee: kevin
-  bubble: logo
+  card: logo
   created_at: <%= 1.day.ago %>
 
 layout_jz:
   assigner: david
   assignee: jz
-  bubble: layout
+  card: layout

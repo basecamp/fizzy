@@ -1,24 +1,24 @@
-module BucketFilterable
+module CollectionFilterable
   extend ActiveSupport::Concern
 
   included do
-    before_action :set_bucket_filter
+    before_action :set_collection_filter
   end
 
   private
-    def set_bucket_filter
-      params[:bucket_ids] ||= cookies[:bucket_filter]&.split(",") unless params[:clear_filter]
+    def set_collection_filter
+      params[:collection_ids] ||= cookies[:collection_filter]&.split(",") unless params[:clear_filter]
     end
 
-    def bucket_filter
-      params[:bucket_ids].presence || Current.user.bucket_ids
+    def collection_filter
+      params[:collection_ids].presence || Current.user.collection_ids
     end
 
-    def update_bucket_filter
+    def update_collection_filter
       if params[:clear_filter]
-        cookies.delete(:bucket_filter)
-      elsif params[:bucket_ids].present?
-        cookies[:bucket_filter] = params[:bucket_ids].join(",")
+        cookies.delete(:collection_filter)
+      elsif params[:collection_ids].present?
+        cookies[:collection_filter] = params[:collection_ids].join(",")
       end
     end
 end

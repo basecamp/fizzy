@@ -1,13 +1,13 @@
-<%= turbo_frame_tag dom_id(bucket, :involvement) do %>
+<%= turbo_frame_tag dom_id(collection, :involvement) do %>
   <div class="flex align-center gap-half pad-inline">
     <h2 class="txt-medium overflow-ellipsis">
-      <%= bucket.name %>
+      <%= collection.name %>
     </h2>
 
     <hr class="separator--horizontal flex-item-grow" style="--border-color: var(--color-subtle-dark); --border-style: dashed" aria-hidden="true">
 
     <label class="switch flex-item-no-shrink">
-      <%= access_involvement_advance_button(bucket, user) %>
+      <%= access_involvement_advance_button(collection, user) %>
     </label>
   </div>
 <% end %>

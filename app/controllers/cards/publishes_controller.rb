@@ -1,8 +1,8 @@
-class Bubbles::PublishesController < ApplicationController
-  include BubbleScoped
+class Cards::PublishesController < ApplicationController
+  include CardScoped
 
   def create
-    @bubble.publish
-    redirect_to @bubble
+    @card.publish
+    redirect_to @card
   end
 end

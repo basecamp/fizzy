@@ -3,7 +3,7 @@ module Filter::Resources
 
   included do
     has_and_belongs_to_many :tags
-    has_and_belongs_to_many :buckets
+    has_and_belongs_to_many :collections
     has_and_belongs_to_many :stages, class_name: "Workflow::Stage", join_table: "filters_stages"
     has_and_belongs_to_many :assignees, class_name: "User", join_table: "assignees_filters", association_foreign_key: "assignee_id"
     has_and_belongs_to_many :creators, class_name: "User", join_table: "creators_filters", association_foreign_key: "creator_id"
@@ -17,7 +17,7 @@ module Filter::Resources
     destroy!
   end
 
-  def buckets
-    creator.buckets.where id: super.ids
+  def collections
+    creator.collections.where id: super.ids
   end
 end

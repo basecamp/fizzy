@@ -1,22 +1,22 @@
-<div class="card card--mini shadow border flex gap position-relative txt-align-start full-width border-radius" style="view-transition-name: <%= dom_id(bubble, :ticket) %>;">
-  <%= avatar_image_tag bubble.creator, class: "avatar" %>
+<div class="card card--mini shadow border flex gap position-relative txt-align-start full-width border-radius" style="view-transition-name: <%= dom_id(card, :ticket) %>;">
+  <%= avatar_image_tag card.creator, class: "avatar" %>
 
   <div class="card__body flex flex-column gap-half full-width flex-item-grow min-width max-width">
     <h3 class="card__title">
-      <%= bubble_title(bubble) %>
+      <%= card_title(card) %>
     </h3>
 
-    <div class="txt-small overflow-ellipsis txt-uppercase"><%= "Added to #{bubble.bucket.name} by #{bubble.creator.name}" %>
-      <%= local_datetime_tag(bubble.created_at, style: :daysago) %>
+    <div class="txt-small overflow-ellipsis txt-uppercase"><%= "Added to #{card.collection.name} by #{card.creator.name}" %>
+      <%= local_datetime_tag(card.created_at, style: :daysago) %>
     </div>
 
     <div class="card__stuff flex align-center gap">
-      <%= render "bubbles/cards/mini/assignees", bubble: bubble %>
-      <div class="overflow-ellipsis"><%= render "bubbles/cards/mini/tags", bubble: bubble %></div>
+      <%= render "cards/cards/mini/assignees", card: card %>
+      <div class="overflow-ellipsis"><%= render "cards/cards/mini/tags", card: card %></div>
     </div>
   </div>
 
-  <%= link_to bucket_bubble_path(bubble.bucket, bubble), class: "card__link" do %>
-    <span class="for-screen-reader"><%= bubble_title(bubble) %></span>
+  <%= link_to collection_card_path(card.collection, card), class: "card__link" do %>
+    <span class="for-screen-reader"><%= card_title(card) %></span>
   <% end %>
 </div>

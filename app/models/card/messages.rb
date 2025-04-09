@@ -1,4 +1,4 @@
-module Bubble::Messages
+module Card::Messages
   extend ActiveSupport::Concern
 
   included do

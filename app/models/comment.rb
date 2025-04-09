@@ -10,12 +10,12 @@ class Comment < ApplicationRecord
 
   before_destroy :cleanup_events
 
-  def first_by_author_on_bubble?
-    bubble_comments.many? && bubble_comments_prior.where(creator_id: creator_id).none?
+  def first_by_author_on_card?
+    card_comments.many? && card_comments_prior.where(creator_id: creator_id).none?
   end
 
   def follows_comment_by_another_author?
-    bubble_comments.many? && bubble_comments_prior.last&.creator != creator
+    card_comments.many? && card_comments_prior.last&.creator != creator
   end
 
   private
@@ -30,11 +30,11 @@ class Comment < ApplicationRecord
     Event.where(particulars: { comment_id: id }).destroy_all
   end
 
-  def bubble_comments_prior
-    bubble_comments.where(created_at: ...created_at)
+  def card_comments_prior
+    card_comments.where(created_at: ...created_at)
   end
 
-  def bubble_comments
-    Comment.joins(:message).where(messages: { bubble: bubble })
+  def card_comments
+    Comment.joins(:message).where(messages: { card: card })
   end
 end

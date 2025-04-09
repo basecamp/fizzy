@@ -1,8 +1,8 @@
-<%= turbo_frame_tag @bubble, :tagging do %>
+<%= turbo_frame_tag @card, :tagging do %>
   <dialog class="popup panel flex-column align-start justify-start fill-white shadow" data-dialog-target="dialog">
     <strong class="popup__title margin-block-half pad-inline-half">Tag this…</strong>
 
-    <%= form_with url: bubble_taggings_path(@bubble), class: "flex gap-half align-center full-width pad-inline-half margin-block-end" do |form| %>
+    <%= form_with url: card_taggings_path(@card), class: "flex gap-half align-center full-width pad-inline-half margin-block-end" do |form| %>
       <%= form.text_field :tag_title, placeholder: "New tag name...", class: "input txt-small full-width" %>
       <%= form.button "Add a tag…", type: "submit", class: "btn txt-small" do %>
         <%= icon_tag "add" %>
@@ -12,9 +12,9 @@
 
     <div class="flex flex-column full-width popup__list">
       <% @tags.each do |tag| %>
-          <%= button_to bubble_taggings_path(@bubble, params: { tag_title: tag.title }), method: :post, class: "btn full-width popup__item" do %>
+          <%= button_to card_taggings_path(@card, params: { tag_title: tag.title }), method: :post, class: "btn full-width popup__item" do %>
             <span class="overflow-ellipsis"><%= tag.hashtag %></span>
-            <%= icon_tag "check", size: 18, class: "checked flex-item-justify-end" if @bubble.tagged_with?(tag) %>
+            <%= icon_tag "check", size: 18, class: "checked flex-item-justify-end" if @card.tagged_with?(tag) %>
         <% end %>
       <% end %>
     </div>

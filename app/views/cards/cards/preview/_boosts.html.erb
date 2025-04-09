@@ -1,8 +1,8 @@
-<%= turbo_frame_tag dom_id(bubble, :boosts) do %>
+<%= turbo_frame_tag dom_id(card, :boosts) do %>
   <%= tag.div class: "pad-inline flex align-center gap" do %>
     <span class="overflow-ellipsis">
-      <strong><%= bubble.boosts_count %></strong>
-      <span><%= bubble.boosts_count == 1 ? "boost" : "boosts" %></span>
+      <strong><%= card.boosts_count %></strong>
+      <span><%= card.boosts_count == 1 ? "boost" : "boosts" %></span>
     </span>
   <% end %>
 <% end %>

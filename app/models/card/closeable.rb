@@ -1,56 +1,56 @@
-module Bubble::Poppable
+module Card::Closeable
   extend ActiveSupport::Concern
 
-  AUTO_POP_AFTER = 30.days
+  AUTO_CLOSURE_AFTER = 30.days
 
   included do
-    has_one :pop, dependent: :destroy
+    has_one :closure, dependent: :destroy
 
-    scope :popped, -> { joins(:pop) }
-    scope :active, -> { where.missing(:pop) }
+    scope :closed, -> { joins(:closure) }
+    scope :active, -> { where.missing(:closure) }
 
-    scope :recently_popped_first, -> { popped.order("pops.created_at": :desc) }
-    scope :due_to_be_popped, -> { considering.where(last_active_at: ..AUTO_POP_AFTER.ago) }
+    scope :recently_closed_first, -> { closed.order("closures.created_at": :desc) }
+    scope :due_to_be_closed, -> { considering.where(last_active_at: ..AUTO_CLOSURE_AFTER.ago) }
   end
 
   class_methods do
-    def auto_pop_all_due
-      due_to_be_popped.find_each do |bubble|
-        bubble.pop!(user: bubble.bucket.account.users.system, reason: "Closed")
+    def auto_closure_all_due
+      due_to_be_closed.find_each do |card|
+        card.closure!(user: card.collection.account.users.system, reason: "Closed")
       end
     end
   end
 
-  def auto_pop_at
-    last_active_at + AUTO_POP_AFTER if last_active_at
+  def auto_closure_at
+    last_active_at + AUTO_CLOSURE_AFTER if last_active_at
   end
 
-  def popped?
-    pop.present?
+  def closed?
+    closure.present?
   end
 
   def active?
-    !popped?
+    !closed?
   end
 
-  def popped_by
-    pop&.user
+  def closed_by
+    closure&.user
   end
 
-  def popped_at
-    pop&.created_at
+  def closed_at
+    closure&.created_at
   end
 
-  def pop!(user: Current.user, reason: Account::PopReasons::FALLBACK_LABEL)
-    unless popped?
+  def closure!(user: Current.user, reason: Account::ClosureReasons::FALLBACK_LABEL)
+    unless closed?
       transaction do
-        create_pop! user: user, reason: reason
-        track_event :popped, creator: user
+        create_closure! user: user, reason: reason
+        track_event :closed, creator: user
       end
     end
   end
 
   def unpop
-    pop&.destroy
+    closure&.destroy
   end
 end

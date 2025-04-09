@@ -1,9 +1,9 @@
 production:
-  auto_pop_all_due:
-    class: Bubble::AutoPopAllDueJob
+  auto_closure_all_due:
+    class: Card::AutoPopAllDueJob
     schedule: every hour
   auto_reconsider_all_inactive:
-    class: Bubble::AutoReconsiderAllStagnatedJob
+    class: Card::AutoReconsiderAllStagnatedJob
     schedule: every hour
   remove_abandoned_creations:
     class: RemoveAbandonedCreationsJob

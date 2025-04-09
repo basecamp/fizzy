@@ -1,17 +1,17 @@
-module Bubble::Searchable
+module Card::Searchable
   extend ActiveSupport::Concern
 
   included do
     include ::Searchable
 
-    searchable_by :title, using: :bubbles_search_index
+    searchable_by :title, using: :cards_search_index
 
     scope :mentioning, ->(query) do
       if query = sanitize_query_syntax(query)
-        bubbles = Bubble.search(query).select(:id).to_sql
+        cards = Card.search(query).select(:id).to_sql
         comments = Comment.search(query).select(:id).to_sql
 
-        left_joins(:messages).where("bubbles.id in (#{bubbles}) or messages.messageable_id in (#{comments})").distinct
+        left_joins(:messages).where("cards.id in (#{cards}) or messages.messageable_id in (#{comments})").distinct
       else
         none
       end

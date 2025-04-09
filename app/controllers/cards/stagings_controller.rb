@@ -1,11 +1,11 @@
-class Bubbles::StagingsController < ApplicationController
-  include BubbleScoped
+class Cards::StagingsController < ApplicationController
+  include CardScoped
 
   def create
     if params[:stage_id].present?
-      @bubble.toggle_stage Current.account.stages.find(params[:stage_id])
+      @card.toggle_stage Current.account.stages.find(params[:stage_id])
     else
-      @bubble.update!(stage: nil)
+      @card.update!(stage: nil)
     end
   end
 end

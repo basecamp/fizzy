@@ -5,6 +5,6 @@ module Messageable
 
   included do
     has_one :message, as: :messageable, touch: true, dependent: :destroy
-    has_one :bubble, through: :message
+    has_one :card, through: :message
   end
 end

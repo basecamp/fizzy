@@ -1,32 +1,32 @@
-<% @page_title = bubble_title(@bubble) %>
+<% @page_title = card_title(@card) %>
 
 <% content_for :header do %>
-  <% if @bubble.creating? && @bubble.can_recover_abandoned_creation? %>
+  <% if @card.creating? && @card.can_recover_abandoned_creation? %>
     <div class="fill-selected position-sticky flex align-center gap-half justify-center border-block margin-block-end"
-          style="view-transition-name: draft-banner; --bubble-color: <%= @bubble.color %>;">
+          style="view-transition-name: draft-banner; --card-color: <%= @card.color %>;">
       You have an unsaved work. Would you like to continue where you left off?
-      <%= button_to bubble_recover_path(@bubble), class: "btn btn--reversed", data: { turbo_action: "replace" } do %>
+      <%= button_to card_recover_path(@card), class: "btn btn--reversed", data: { turbo_action: "replace" } do %>
         <span>Restore</span>
       <% end %>
     </div>
   <% end %>
 
-  <% if @bubble.drafted? %>
+  <% if @card.drafted? %>
     <div class="fill-selected position-sticky flex align-center gap-half fill-highlight justify-center border-block margin-block-end"
           style="view-transition-name: draft-banner;">
       This is a draft, it’s only visible to you.
-      <%= render "bubbles/publish", bubble: @bubble %>
+      <%= render "cards/publish", card: @card %>
     </div>
   <% end %>
 
   <nav class="align-start max-width">
     <%= link_to_home %>
-    <%= link_to_back fallback_path: bubbles_path(bucket_id: @bubble.bucket) %>
+    <%= link_to_back fallback_path: cards_path(collection_id: @card.collection) %>
 
-    <div class="card__actions-container card__actions-container--top center flex align-center gap border-radius" style="--bubble-color: <%= @bubble.color %>;">
+    <div class="card__actions-container card__actions-container--top center flex align-center gap border-radius" style="--card-color: <%= @card.color %>;">
       <strong class="txt-uppercase">Considering</strong>
-      <% if @bubble.doing? %>
-        <%= form_with url: bubble_engagement_path(@bubble), method: :delete, data: { controller: "form" }, class: "flex" do %>
+      <% if @card.doing? %>
+        <%= form_with url: card_engagement_path(@card), method: :delete, data: { controller: "form" }, class: "flex" do %>
           <label class="switch flex-item-no-shrink">
             <input type="checkbox" class="switch__input" data-action="form#submit" checked>
             <span class="switch__btn round"></span>
@@ -34,7 +34,7 @@
           </label>
         <% end %>
       <% else %>
-        <%= form_with url: bubble_engagement_path(@bubble), method: :post, data: { controller: "form" }, class: "flex" do %>
+        <%= form_with url: card_engagement_path(@card), method: :post, data: { controller: "form" }, class: "flex" do %>
           <label class="switch flex-item-no-shrink">
             <input type="checkbox" class="switch__input" data-action="form#submit">
             <span class="switch__btn round"></span>
@@ -50,9 +50,9 @@
   </nav>
 <% end %>
 
-<div data-controller="beacon" data-beacon-url-value="<%= bubble_reading_url(@bubble) %>">
-  <div class="card__container position-relative <%= "card__container--pointing" unless @bubble.published? %>" style="--bubble-color: <%= @bubble.color %>;">
-    <%= render "bubbles/cards/perma", bubble: @bubble %>
+<div data-controller="beacon" data-beacon-url-value="<%= card_reading_url(@card) %>">
+  <div class="card__container position-relative <%= "card__container--pointing" unless @card.published? %>" style="--card-color: <%= @card.color %>;">
+    <%= render "cards/cards/perma", card: @card %>
 
     <div class="card__actions flex flex-column gap-half">
       <button class="car__star-button btn">
@@ -61,9 +61,9 @@
         <input type="checkbox" class="card__star-input">
       </button>
 
-      <%= render "bubbles/color", bubble: @bubble %>
-      <%= render "bubbles/image", bubble: @bubble %>
-      <%= button_to bucket_bubble_path(@bubble.bucket, @bubble),
+      <%= render "cards/color", card: @card %>
+      <%= render "cards/image", card: @card %>
+      <%= button_to collection_card_path(@card.collection, @card),
             method: :delete,
             class: "btn",
             data: { turbo_confirm: "Are you sure you want to delete this?" } do %>
@@ -73,22 +73,22 @@
     </div>
 
 
-    <% if @bubble.published? %>
+    <% if @card.published? %>
       <div class="card__actions card__actions--right flex flex-column gap-half">
-        <%= turbo_frame_tag dom_id(@bubble, :watch), src: bubble_watch_path(@bubble), refresh: :morph %>
-        <%= turbo_frame_tag dom_id(@bubble, :pin), src: bubble_pin_path(@bubble), refresh: :morph %>
+        <%= turbo_frame_tag dom_id(@card, :watch), src: card_watch_path(@card), refresh: :morph %>
+        <%= turbo_frame_tag dom_id(@card, :pin), src: card_pin_path(@card), refresh: :morph %>
       </div>
     <% end %>
   </div>
 
-  <% unless @bubble.drafted? || @bubble.creating? %>
+  <% unless @card.drafted? || @card.creating? %>
     <div class="card__actions-wrapper">
-      <%= render "bubbles/pop_toggle", bubble: @bubble %>
+      <%= render "cards/closure_toggle", card: @card %>
     </div>
   <% end %>
 
-  <% if @bubble.published? %>
-    <%= render "bubbles/messages", bubble: @bubble %>
+  <% if @card.published? %>
+    <%= render "cards/messages", card: @card %>
   <% else %>
     <div class="comments pad-block">
       <div class="comment comment--new flex-inline align-start full-width">
@@ -100,18 +100,18 @@
           <div class="comment__body txt-align-start">
             <form data-controller="outlet-auto-save paste"
                 class="flex flex-column gap full-width"
-                data-outlet-auto-save-auto-save-outlet="#bubble_form"
+                data-outlet-auto-save-auto-save-outlet="#card_form"
                 data-action="paste->paste#pasteFiles">
-              <%= tag.house_md @bubble.draft_comment, name: "bubble[draft_comment]", class: "input comment__input",
-                    form: "bubble_form",
-                    placeholder: new_comment_placeholder(@bubble),
+              <%= tag.house_md @card.draft_comment, name: "card[draft_comment]", class: "input comment__input",
+                    form: "card_form",
+                    placeholder: new_comment_placeholder(@card),
                     data: { action: "house-md:change->outlet-auto-save#change focusout->outlet-auto-save#submit", uploads_url: uploads_url(format: "json") } %>
             </form>
 
-            <% if @bubble.creating? %>
+            <% if @card.creating? %>
               <div class="margin-block-start flex align-center gap">
-                <%= button_to "Create card", bubble_publish_path(@bubble), class: "btn btn--reversed" %>
-                <%= button_to "Save as draft", bucket_bubble_path(@bubble.bucket, @bubble), name: "bubble[status]", value: "drafted", method: :put, class: "btn" %>
+                <%= button_to "Create card", card_publish_path(@card), class: "btn btn--reversed" %>
+                <%= button_to "Save as draft", collection_card_path(@card.collection, @card), name: "card[status]", value: "drafted", method: :put, class: "btn" %>
               </div>
             <% end %>
           </div>

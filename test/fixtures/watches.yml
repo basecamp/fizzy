@@ -1,44 +1,44 @@
 logo_david:
-  bubble: logo
+  card: logo
   user: david
   watching: true
 
 logo_kevin:
-  bubble: logo
+  card: logo
   user: kevin
   watching: true
 
 layout_david:
-  bubble: layout
+  card: layout
   user: david
   watching: true
 
 layout_kevin:
-  bubble: layout
+  card: layout
   user: kevin
   watching: true
 
 text_david:
-  bubble: text
+  card: text
   user: david
   watching: true
 
 text_jz:
-  bubble: text
+  card: text
   user: jz
   watching: true
 
 shipping_david:
-  bubble: shipping
+  card: shipping
   user: david
   watching: true
 
 shipping_jz:
-  bubble: shipping
+  card: shipping
   user: jz
   watching: true
 
 shipping_kevin:
-  bubble: shipping
+  card: shipping
   user: kevin
   watching: true

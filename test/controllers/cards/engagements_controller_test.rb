@@ -1,27 +1,27 @@
 require "test_helper"
 
-class Bubbles::EngagementsControllerTest < ActionDispatch::IntegrationTest
+class Cards::EngagementsControllerTest < ActionDispatch::IntegrationTest
   setup do
     sign_in_as :kevin
   end
 
   test "create" do
-    bubble = bubbles(:text)
+    card = cards(:text)
 
-    assert_changes -> { bubble.reload.doing? }, from: false, to: true do
-      post bubble_engagement_url(bubble)
+    assert_changes -> { card.reload.doing? }, from: false, to: true do
+      post card_engagement_url(card)
     end
 
-    assert_redirected_to bucket_bubble_url(bubble.bucket, bubble)
+    assert_redirected_to collection_card_url(card.collection, card)
   end
 
   test "destroy" do
-    bubble = bubbles(:logo)
+    card = cards(:logo)
 
-    assert_changes -> { bubble.reload.doing? }, from: true, to: false do
-      delete bubble_engagement_url(bubble)
+    assert_changes -> { card.reload.doing? }, from: true, to: false do
+      delete card_engagement_url(card)
     end
 
-    assert_redirected_to bucket_bubble_url(bubble.bucket, bubble)
+    assert_redirected_to collection_card_url(card.collection, card)
   end
 end

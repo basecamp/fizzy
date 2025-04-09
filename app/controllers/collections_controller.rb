@@ -1,39 +1,39 @@
-class BucketsController < ApplicationController
-  before_action :set_bucket, except: %i[ new create ]
+class CollectionsController < ApplicationController
+  before_action :set_collection, except: %i[ new create ]
 
   def new
-    @bucket = Current.account.buckets.build
+    @collection = Current.account.collections.build
   end
 
   def create
-    @bucket = Current.account.buckets.create! bucket_params
-    redirect_to bubbles_path(bucket_ids: [ @bucket ])
+    @collection = Current.account.collections.create! collection_params
+    redirect_to cards_path(collection_ids: [ @collection ])
   end
 
   def edit
-    selected_user_ids = @bucket.users.pluck :id
+    selected_user_ids = @collection.users.pluck :id
     @selected_users, @unselected_users = User.active.alphabetically.partition { |user| selected_user_ids.include? user.id }
   end
 
   def update
-    @bucket.update! bucket_params
-    @bucket.accesses.revise granted: grantees, revoked: revokees
+    @collection.update! collection_params
+    @collection.accesses.revise granted: grantees, revoked: revokees
 
-    redirect_to bubbles_path(bucket_ids: [ @bucket ])
+    redirect_to cards_path(collection_ids: [ @collection ])
   end
 
   def destroy
-    @bucket.destroy
+    @collection.destroy
     redirect_to root_path
   end
 
   private
-    def set_bucket
-      @bucket = Current.user.buckets.find params[:id]
+    def set_collection
+      @collection = Current.user.collections.find params[:id]
     end
 
-    def bucket_params
-      params.expect(bucket: [ :name, :all_access ]).with_defaults(all_access: true)
+    def collection_params
+      params.expect(collection: [ :name, :all_access ]).with_defaults(all_access: true)
     end
 
     def grantees
@@ -41,7 +41,7 @@ class BucketsController < ApplicationController
     end
 
     def revokees
-      @bucket.users.where.not id: grantee_ids
+      @collection.users.where.not id: grantee_ids
     end
 
     def grantee_ids

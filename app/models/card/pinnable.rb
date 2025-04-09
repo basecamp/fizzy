@@ -1,4 +1,4 @@
-module Bubble::Pinnable
+module Card::Pinnable
   extend ActiveSupport::Concern
 
   included do
