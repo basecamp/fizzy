@@ -10,15 +10,15 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_04_07_093421) do
+ActiveRecord::Schema[8.1].define(version: 2025_04_09_043626) do
   create_table "accesses", force: :cascade do |t|
-    t.integer "bucket_id", null: false
+    t.integer "collection_id", null: false
     t.datetime "created_at", null: false
     t.string "involvement", default: "watching", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
-    t.index ["bucket_id", "user_id"], name: "index_accesses_on_bucket_id_and_user_id", unique: true
-    t.index ["bucket_id"], name: "index_accesses_on_bucket_id"
+    t.index ["collection_id", "user_id"], name: "index_accesses_on_collection_id_and_user_id", unique: true
+    t.index ["collection_id"], name: "index_accesses_on_collection_id"
     t.index ["user_id"], name: "index_accesses_on_user_id"
   end
 
@@ -88,26 +88,26 @@ ActiveRecord::Schema[8.1].define(version: 2025_04_07_093421) do
   create_table "assignments", force: :cascade do |t|
     t.integer "assignee_id", null: false
     t.integer "assigner_id", null: false
-    t.integer "bubble_id", null: false
+    t.integer "card_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["assignee_id", "bubble_id"], name: "index_assignments_on_assignee_id_and_bubble_id", unique: true
-    t.index ["bubble_id"], name: "index_assignments_on_bubble_id"
+    t.index ["assignee_id", "card_id"], name: "index_assignments_on_assignee_id_and_card_id", unique: true
+    t.index ["card_id"], name: "index_assignments_on_card_id"
   end
 
-  create_table "bubble_engagements", force: :cascade do |t|
-    t.integer "bubble_id"
+  create_table "card_engagements", force: :cascade do |t|
+    t.integer "card_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["bubble_id"], name: "index_bubble_engagements_on_bubble_id"
+    t.index ["card_id"], name: "index_card_engagements_on_card_id"
   end
 
-  create_table "bubbles", force: :cascade do |t|
+  create_table "cards", force: :cascade do |t|
     t.float "activity_score", default: 0.0, null: false
     t.datetime "activity_score_at"
     t.float "activity_score_order", default: 0.0, null: false
     t.integer "boosts_count", default: 0, null: false
-    t.integer "bucket_id", null: false
+    t.integer "collection_id", null: false
     t.string "color"
     t.integer "comments_count", default: 0, null: false
     t.datetime "created_at", null: false
@@ -118,13 +118,32 @@ ActiveRecord::Schema[8.1].define(version: 2025_04_07_093421) do
     t.text "status", default: "creating", null: false
     t.string "title"
     t.datetime "updated_at", null: false
-    t.index ["activity_score_order"], name: "index_bubbles_on_activity_score_order", order: :desc
-    t.index ["bucket_id"], name: "index_bubbles_on_bucket_id"
-    t.index ["last_active_at", "status"], name: "index_bubbles_on_last_active_at_and_status"
-    t.index ["stage_id"], name: "index_bubbles_on_stage_id"
+    t.index ["activity_score_order"], name: "index_cards_on_activity_score_order"
+    t.index ["collection_id"], name: "index_cards_on_collection_id"
+    t.index ["last_active_at", "status"], name: "index_cards_on_last_active_at_and_status"
+    t.index ["stage_id"], name: "index_cards_on_stage_id"
   end
 
-  create_table "buckets", force: :cascade do |t|
+  create_table "closure_reasons", force: :cascade do |t|
+    t.integer "account_id"
+    t.datetime "created_at", null: false
+    t.string "label"
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_closure_reasons_on_account_id"
+  end
+
+  create_table "closures", force: :cascade do |t|
+    t.integer "card_id", null: false
+    t.datetime "created_at", null: false
+    t.string "reason", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id"
+    t.index ["card_id", "created_at"], name: "index_closures_on_card_id_and_created_at"
+    t.index ["card_id"], name: "index_closures_on_card_id", unique: true
+    t.index ["user_id"], name: "index_closures_on_user_id"
+  end
+
+  create_table "collections", force: :cascade do |t|
     t.integer "account_id", null: false
     t.boolean "all_access", default: false, null: false
     t.datetime "created_at", null: false
@@ -132,16 +151,16 @@ ActiveRecord::Schema[8.1].define(version: 2025_04_07_093421) do
     t.string "name", null: false
     t.datetime "updated_at", null: false
     t.integer "workflow_id"
-    t.index ["account_id"], name: "index_buckets_on_account_id"
-    t.index ["creator_id"], name: "index_buckets_on_creator_id"
-    t.index ["workflow_id"], name: "index_buckets_on_workflow_id"
+    t.index ["account_id"], name: "index_collections_on_account_id"
+    t.index ["creator_id"], name: "index_collections_on_creator_id"
+    t.index ["workflow_id"], name: "index_collections_on_workflow_id"
   end
 
-  create_table "buckets_filters", id: false, force: :cascade do |t|
-    t.integer "bucket_id", null: false
+  create_table "collections_filters", id: false, force: :cascade do |t|
+    t.integer "collection_id", null: false
     t.integer "filter_id", null: false
-    t.index ["bucket_id"], name: "index_buckets_filters_on_bucket_id"
-    t.index ["filter_id"], name: "index_buckets_filters_on_filter_id"
+    t.index ["collection_id"], name: "index_collections_filters_on_collection_id"
+    t.index ["filter_id"], name: "index_collections_filters_on_filter_id"
   end
 
   create_table "comments", force: :cascade do |t|
@@ -164,14 +183,14 @@ ActiveRecord::Schema[8.1].define(version: 2025_04_07_093421) do
 
   create_table "events", force: :cascade do |t|
     t.string "action", null: false
-    t.integer "bubble_id", null: false
+    t.integer "card_id", null: false
     t.datetime "created_at", null: false
     t.integer "creator_id", null: false
     t.date "due_date"
     t.json "particulars", default: {}
     t.integer "summary_id", null: false
     t.datetime "updated_at", null: false
-    t.index ["bubble_id"], name: "index_events_on_bubble_id"
+    t.index ["card_id"], name: "index_events_on_card_id"
     t.index ["creator_id"], name: "index_events_on_creator_id"
     t.index ["summary_id", "action"], name: "index_events_on_summary_id_and_action"
   end
@@ -200,17 +219,17 @@ ActiveRecord::Schema[8.1].define(version: 2025_04_07_093421) do
   end
 
   create_table "messages", force: :cascade do |t|
-    t.integer "bubble_id", null: false
+    t.integer "card_id", null: false
     t.datetime "created_at", null: false
     t.integer "messageable_id", null: false
     t.string "messageable_type", null: false
     t.datetime "updated_at", null: false
-    t.index ["bubble_id"], name: "index_messages_on_bubble_id"
+    t.index ["card_id"], name: "index_messages_on_card_id"
     t.index ["messageable_type", "messageable_id"], name: "index_messages_on_messageable", unique: true
   end
 
   create_table "notifications", force: :cascade do |t|
-    t.integer "bubble_id", null: false
+    t.integer "card_id", null: false
     t.datetime "created_at", null: false
     t.integer "event_id", null: false
     t.datetime "read_at"
@@ -218,7 +237,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_04_07_093421) do
     t.string "resource_type", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
-    t.index ["bubble_id"], name: "index_notifications_on_bubble_id"
+    t.index ["card_id"], name: "index_notifications_on_card_id"
     t.index ["event_id"], name: "index_notifications_on_event_id"
     t.index ["resource_type", "resource_id"], name: "index_notifications_on_resource"
     t.index ["user_id", "read_at", "created_at"], name: "index_notifications_on_user_id_and_read_at_and_created_at", order: { read_at: :desc, created_at: :desc }
@@ -226,32 +245,13 @@ ActiveRecord::Schema[8.1].define(version: 2025_04_07_093421) do
   end
 
   create_table "pins", force: :cascade do |t|
-    t.integer "bubble_id", null: false
+    t.integer "card_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
-    t.index ["bubble_id", "user_id"], name: "index_pins_on_bubble_id_and_user_id", unique: true
-    t.index ["bubble_id"], name: "index_pins_on_bubble_id"
+    t.index ["card_id", "user_id"], name: "index_pins_on_card_id_and_user_id", unique: true
+    t.index ["card_id"], name: "index_pins_on_card_id"
     t.index ["user_id"], name: "index_pins_on_user_id"
-  end
-
-  create_table "pop_reasons", force: :cascade do |t|
-    t.integer "account_id"
-    t.datetime "created_at", null: false
-    t.string "label"
-    t.datetime "updated_at", null: false
-    t.index ["account_id"], name: "index_pop_reasons_on_account_id"
-  end
-
-  create_table "pops", force: :cascade do |t|
-    t.integer "bubble_id", null: false
-    t.datetime "created_at", null: false
-    t.string "reason", null: false
-    t.datetime "updated_at", null: false
-    t.integer "user_id"
-    t.index ["bubble_id", "created_at"], name: "index_pops_on_bubble_id_and_created_at"
-    t.index ["bubble_id"], name: "index_pops_on_bubble_id", unique: true
-    t.index ["user_id"], name: "index_pops_on_user_id"
   end
 
   create_table "reactions", force: :cascade do |t|
@@ -274,11 +274,11 @@ ActiveRecord::Schema[8.1].define(version: 2025_04_07_093421) do
   end
 
   create_table "taggings", force: :cascade do |t|
-    t.integer "bubble_id", null: false
+    t.integer "card_id", null: false
     t.datetime "created_at", null: false
     t.integer "tag_id", null: false
     t.datetime "updated_at", null: false
-    t.index ["bubble_id", "tag_id"], name: "index_taggings_on_bubble_id_and_tag_id", unique: true
+    t.index ["card_id", "tag_id"], name: "index_taggings_on_card_id_and_tag_id", unique: true
     t.index ["tag_id"], name: "index_taggings_on_tag_id"
   end
 
@@ -306,12 +306,12 @@ ActiveRecord::Schema[8.1].define(version: 2025_04_07_093421) do
   end
 
   create_table "watches", force: :cascade do |t|
-    t.integer "bubble_id", null: false
+    t.integer "card_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
     t.boolean "watching", default: true, null: false
-    t.index ["bubble_id"], name: "index_watches_on_bubble_id"
+    t.index ["card_id"], name: "index_watches_on_card_id"
     t.index ["user_id"], name: "index_watches_on_user_id"
   end
 
@@ -333,29 +333,29 @@ ActiveRecord::Schema[8.1].define(version: 2025_04_07_093421) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "bubbles", "workflow_stages", column: "stage_id"
-  add_foreign_key "buckets", "workflows"
-  add_foreign_key "events", "bubbles"
+  add_foreign_key "cards", "workflow_stages", column: "stage_id"
+  add_foreign_key "closures", "cards"
+  add_foreign_key "closures", "users"
+  add_foreign_key "collections", "workflows"
+  add_foreign_key "events", "cards"
   add_foreign_key "events", "event_summaries", column: "summary_id"
-  add_foreign_key "messages", "bubbles"
-  add_foreign_key "notifications", "bubbles"
+  add_foreign_key "messages", "cards"
+  add_foreign_key "notifications", "cards"
   add_foreign_key "notifications", "events"
   add_foreign_key "notifications", "users"
-  add_foreign_key "pins", "bubbles"
+  add_foreign_key "pins", "cards"
   add_foreign_key "pins", "users"
-  add_foreign_key "pops", "bubbles"
-  add_foreign_key "pops", "users"
   add_foreign_key "sessions", "users"
-  add_foreign_key "taggings", "bubbles"
+  add_foreign_key "taggings", "cards"
   add_foreign_key "taggings", "tags"
   add_foreign_key "users", "accounts"
-  add_foreign_key "watches", "bubbles"
+  add_foreign_key "watches", "cards"
   add_foreign_key "watches", "users"
   add_foreign_key "workflow_stages", "workflows"
   add_foreign_key "workflows", "accounts"
 
   # Virtual tables defined in this database.
   # Note that virtual tables may not work with other database engines. Be careful if changing database.
-  create_virtual_table "bubbles_search_index", "fts5", ["title"]
+  create_virtual_table "cards_search_index", "fts5", ["title"]
   create_virtual_table "comments_search_index", "fts5", ["body"]
 end
