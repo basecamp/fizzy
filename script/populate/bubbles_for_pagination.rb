@@ -1,6 +1,6 @@
 require_relative "../../config/environment"
 
-BUBBLES_COUNT = 100
+BUBBLES_COUNT = 200
 
 ApplicationRecord.current_tenant = "development-tenant"
 account = Account.first

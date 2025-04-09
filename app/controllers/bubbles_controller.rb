@@ -10,11 +10,12 @@ class BubblesController < ApplicationController
 
   DISPLAY_COUNT_OPTIONS = [ 6, 12, 18, 24 ].freeze
   DEFAULT_DISPLAY_COUNT = 6
+  PAGE_SIZE = 50
 
   def index
-    @considering = page_and_filter_for @filter.with(engagement_status: "considering"), per_page: 31
-    @doing = page_and_filter_for @filter.with(engagement_status: "doing")
-    @popped = page_and_filter_for @filter.with(indexed_by: "popped")
+    @considering = page_and_filter_for @filter.with(engagement_status: "considering"), per_page: PAGE_SIZE
+    @doing = page_and_filter_for @filter.with(engagement_status: "doing"), per_page: PAGE_SIZE
+    @popped = page_and_filter_for @filter.with(indexed_by: "popped"), per_page: PAGE_SIZE
   end
 
   def create
