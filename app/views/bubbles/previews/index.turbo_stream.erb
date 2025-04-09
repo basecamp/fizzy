@@ -3,10 +3,8 @@
 <%= turbo_stream.append params[:target] do %>
   <%= render partial: @filter.engagement_status&.considering? ? "bubbles/cards/mini" : "bubbles/cards/preview",
         collection: @page.records, as: :bubble, cached: true %>
-<% end %>
 
-<% unless @page.last? %>
-  <%= turbo_stream.append params[:target] do %>
+  <% unless @page.last? %>
     <%= bubbles_next_page_link params[:target], page: @page, filter: @filter, fetch_on_visible: @filter.indexed_by.popped? %>
   <% end %>
 <% end %>
