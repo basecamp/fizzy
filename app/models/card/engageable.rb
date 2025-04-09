@@ -35,7 +35,7 @@ module Card::Engageable
   def engage
     unless doing?
       transaction do
-        unpop
+        reopen
         create_engagement!
       end
     end
@@ -43,7 +43,7 @@ module Card::Engageable
 
   def reconsider
     transaction do
-      unpop
+      reopen
       engagement&.destroy
     end
   end

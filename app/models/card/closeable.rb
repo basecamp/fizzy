@@ -14,14 +14,14 @@ module Card::Closeable
   end
 
   class_methods do
-    def auto_closure_all_due
+    def auto_close_all_due
       due_to_be_closed.find_each do |card|
-        card.closure!(user: card.collection.account.users.system, reason: "Closed")
+        card.close(user: card.collection.account.users.system, reason: "Closed")
       end
     end
   end
 
-  def auto_closure_at
+  def auto_close_at
     last_active_at + AUTO_CLOSURE_AFTER if last_active_at
   end
 
@@ -41,7 +41,7 @@ module Card::Closeable
     closure&.created_at
   end
 
-  def closure!(user: Current.user, reason: Account::ClosureReasons::FALLBACK_LABEL)
+  def close(user: Current.user, reason: Account::ClosureReasons::FALLBACK_LABEL)
     unless closed?
       transaction do
         create_closure! user: user, reason: reason
@@ -50,7 +50,7 @@ module Card::Closeable
     end
   end
 
-  def unpop
+  def reopen
     closure&.destroy
   end
 end

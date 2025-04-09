@@ -1,6 +1,6 @@
 production:
-  auto_closure_all_due:
-    class: Card::AutoPopAllDueJob
+  auto_close_all_due:
+    class: Card::AutoCloseAllDueJob
     schedule: every hour
   auto_reconsider_all_inactive:
     class: Card::AutoReconsiderAllStagnatedJob

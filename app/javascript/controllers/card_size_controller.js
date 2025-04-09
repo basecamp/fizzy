@@ -13,7 +13,7 @@ export default class extends Controller {
     const [ min, max ] = this.#getScoreRange()
 
     this.cardTargets.forEach(card => {
-      const score = this.#currentBubbleScore(card)
+      const score = this.#currentCardScore(card)
       const idx = Math.round((score - min) / (max - min) * (SIZES.length - 1))
 
       card.style.setProperty("--card-size", `var(--card-size-${SIZES[idx]})`)
@@ -24,7 +24,7 @@ export default class extends Controller {
     var min = 0, max = 1;
 
     this.cardTargets.forEach(card => {
-      const score = this.#currentBubbleScore(card)
+      const score = this.#currentCardScore(card)
 
       min = Math.min(min, score)
       max = Math.max(max, score)
@@ -33,7 +33,7 @@ export default class extends Controller {
     return [ min, max ]
   }
 
-  #currentBubbleScore(el) {
+  #currentCardScore(el) {
     const score = el.dataset.activityScore
     const scoreAt = el.dataset.activityScoreAt
     const daysAgo = (Date.now() / 1000 - scoreAt) / (60 * 60 * 24)

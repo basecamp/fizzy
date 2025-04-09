@@ -8,7 +8,7 @@
 
     <% if card.creating? %>
       <span class="pad-inline overflow-ellipsis">Expires
-        <%= local_datetime_tag(card.auto_closure_at, style: :indays) %>
+        <%= local_datetime_tag(card.auto_close_at, style: :indays) %>
       </span>
     <% else %>
       <span class="pad-inline overflow-ellipsis">Added

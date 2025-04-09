@@ -24,7 +24,7 @@ class Card::EngageableTest < ActiveSupport::TestCase
   end
 
   test "engaging with closed cards" do
-    cards(:text).closure!
+    cards(:text).close
 
     assert_not cards(:text).considering?
     assert_not cards(:text).doing?
@@ -33,7 +33,7 @@ class Card::EngageableTest < ActiveSupport::TestCase
     assert_not cards(:text).reload.closed?
     assert cards(:text).doing?
 
-    cards(:text).closure!
+    cards(:text).close
     cards(:text).reconsider
     assert_not cards(:text).reload.closed?
     assert cards(:text).considering?

@@ -2,7 +2,7 @@
 
 <% content_for :header do %>
   <nav>
-    <%= link_to_back fallback_path: cards_path(collection_ids: [ @bbucket ]) %>
+    <%= link_to_back fallback_path: cards_path(collection_ids: [ @collection ]) %>
 
     <%= form_with model: @collection, class: "flex-item-justify-end", method: :delete do |form| %>
       <%= form.button class: "btn btn--negative", data: { turbo_confirm: "Are you sure you want to delete this?" } do %>

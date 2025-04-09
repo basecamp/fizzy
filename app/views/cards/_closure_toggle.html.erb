@@ -27,7 +27,7 @@
       <% if card.doing? %>
         Returns to <em>Considering</em> if no activity <%= local_datetime_tag(card.auto_reconsider_at, style: :indays) -%>.
       <% else %>
-        Auto-closes if no activity <%= local_datetime_tag(card.auto_closure_at, style: :indays) -%>.
+        Auto-closes if no activity <%= local_datetime_tag(card.auto_close_at, style: :indays) -%>.
       <% end %>
     </span>
   <% end %>
