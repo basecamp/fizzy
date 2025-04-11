@@ -50,26 +50,6 @@ columns:
     default_function:
     collation:
     comment:
-  - &9 !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
-    auto_increment:
-    name: updated_at
-    cast_type: *3
-    sql_type_metadata: *4
-    'null': false
-    default:
-    default_function:
-    collation:
-    comment:
-  - &30 !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
-    auto_increment:
-    name: user_id
-    cast_type: *1
-    sql_type_metadata: *2
-    'null': false
-    default:
-    default_function:
-    collation:
-    comment:
   - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
     auto_increment:
     name: involvement
@@ -87,6 +67,26 @@ columns:
       scale:
     'null': false
     default: watching
+    default_function:
+    collation:
+    comment:
+  - &9 !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: updated_at
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - &30 !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: user_id
+    cast_type: *1
+    sql_type_metadata: *2
+    'null': false
+    default:
     default_function:
     collation:
     comment:
@@ -465,6 +465,16 @@ columns:
     comment:
   - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
     auto_increment:
+    name: last_active_at
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
     name: stage_id
     cast_type: *1
     sql_type_metadata: *2
@@ -494,16 +504,6 @@ columns:
     collation:
     comment:
   - *9
-  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
-    auto_increment:
-    name: last_active_at
-    cast_type: *3
-    sql_type_metadata: *4
-    'null': false
-    default:
-    default_function:
-    collation:
-    comment:
   closure_reasons:
   - *5
   - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
@@ -516,6 +516,7 @@ columns:
     default_function:
     collation:
     comment:
+  - *6
   - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
     auto_increment:
     name: label
@@ -526,12 +527,21 @@ columns:
     default_function:
     collation:
     comment:
-  - *6
   - *9
   closures:
   - *5
   - *21
   - *6
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: reason
+    cast_type: *7
+    sql_type_metadata: *8
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
   - *9
   - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
     auto_increment:
@@ -539,16 +549,6 @@ columns:
     cast_type: *1
     sql_type_metadata: *2
     'null': true
-    default:
-    default_function:
-    collation:
-    comment:
-  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
-    auto_increment:
-    name: reason
-    cast_type: *7
-    sql_type_metadata: *8
-    'null': false
     default:
     default_function:
     collation:
@@ -1410,10 +1410,11 @@ indexes:
     valid: true
   - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
     table: cards
-    name: index_cards_on_stage_id
+    name: index_cards_on_last_active_at_and_status
     unique: false
     columns:
-    - stage_id
+    - last_active_at
+    - status
     lengths: {}
     orders: {}
     opclasses: {}
@@ -1426,11 +1427,10 @@ indexes:
     valid: true
   - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
     table: cards
-    name: index_cards_on_last_active_at_and_status
+    name: index_cards_on_stage_id
     unique: false
     columns:
-    - last_active_at
-    - status
+    - stage_id
     lengths: {}
     orders: {}
     opclasses: {}
@@ -1461,11 +1461,10 @@ indexes:
   closures:
   - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
     table: closures
-    name: index_closures_on_card_id_and_created_at
-    unique: false
+    name: index_closures_on_card_id
+    unique: true
     columns:
     - card_id
-    - created_at
     lengths: {}
     orders: {}
     opclasses: {}
@@ -1478,10 +1477,11 @@ indexes:
     valid: true
   - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
     table: closures
-    name: index_closures_on_card_id
-    unique: true
+    name: index_closures_on_card_id_and_created_at
+    unique: false
     columns:
     - card_id
+    - created_at
     lengths: {}
     orders: {}
     opclasses: {}
@@ -2017,11 +2017,10 @@ indexes:
   tags:
   - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
     table: tags
-    name: index_tags_on_account_id_and_title
-    unique: true
+    name: index_tags_on_account_id
+    unique: false
     columns:
     - account_id
-    - title
     lengths: {}
     orders: {}
     opclasses: {}
@@ -2034,10 +2033,11 @@ indexes:
     valid: true
   - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
     table: tags
-    name: index_tags_on_account_id
-    unique: false
+    name: index_tags_on_account_id_and_title
+    unique: true
     columns:
     - account_id
+    - title
     lengths: {}
     orders: {}
     opclasses: {}

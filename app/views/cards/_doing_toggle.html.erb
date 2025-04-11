@@ -1,21 +1,23 @@
-<div class="card-perma__cutout card-perma__cutout--top" style="--card-color: <%= @card.color %>;">
-  <strong class="txt-uppercase">Considering</strong>
-  <% if @card.doing? %>
-    <%= form_with url: card_engagement_path(@card), method: :delete, data: { controller: "form" }, class: "flex" do %>
-      <label class="switch flex-item-no-shrink">
-        <input type="checkbox" class="switch__input" data-action="form#submit" checked>
-        <span class="switch__btn round"></span>
-        <span class="for-screen-reader">Switch to Considering</span>
-      </label>
+<% if @card.published? %>
+  <div class="card-perma__cutout card-perma__cutout--top" style="--card-color: <%= @card.color %>;">
+    <strong class="txt-uppercase">Considering</strong>
+    <% if @card.doing? %>
+      <%= form_with url: card_engagement_path(@card), method: :delete, data: { controller: "form" }, class: "flex" do %>
+        <label class="switch flex-item-no-shrink">
+          <input type="checkbox" class="switch__input" data-action="form#submit" checked>
+          <span class="switch__btn round"></span>
+          <span class="for-screen-reader">Switch to Considering</span>
+        </label>
+      <% end %>
+    <% else %>
+      <%= form_with url: card_engagement_path(@card), method: :post, data: { controller: "form" }, class: "flex" do %>
+        <label class="switch flex-item-no-shrink">
+          <input type="checkbox" class="switch__input" data-action="form#submit">
+          <span class="switch__btn round"></span>
+          <span class="for-screen-reader">Switch to Doing</span>
+        </label>
+      <% end %>
     <% end %>
-  <% else %>
-    <%= form_with url: card_engagement_path(@card), method: :post, data: { controller: "form" }, class: "flex" do %>
-      <label class="switch flex-item-no-shrink">
-        <input type="checkbox" class="switch__input" data-action="form#submit">
-        <span class="switch__btn round"></span>
-        <span class="for-screen-reader">Switch to Doing</span>
-      </label>
-    <% end %>
-  <% end %>
-  <strong class="txt-uppercase">Doing</strong>
-</div>
+    <strong class="txt-uppercase">Doing</strong>
+  </div>
+<% end %>
