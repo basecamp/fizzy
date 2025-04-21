@@ -13,6 +13,10 @@ module Searchable
 
       scope :search, ->(query) { joins("join #{using} idx on #{table_name}.id = idx.rowid").where("idx.#{as} match ?", query) }
     end
+
+    def reindex_all
+      find_each(&:reindex)
+    end
   end
 
   def reindex
