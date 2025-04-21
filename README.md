@@ -6,9 +6,9 @@ First get everything installed and configured with:
 
     bin/setup
 
-If you'd like to load fixtures:
+If you'd like to load seed data:
 
-    bin/rails db:fixtures:load
+    bin/rails db:seed
 
 And then run the development server:
 
