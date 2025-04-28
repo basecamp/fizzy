@@ -18,7 +18,7 @@ GIT
 
 GIT
   remote: https://github.com/rails/rails.git
-  revision: 0ed3cd46d0038f8108ed92edb308c81fa6cc3730
+  revision: 58ecdf97bad960ad0ba9a3e588420f518faaa2bd
   branch: main
   specs:
     actioncable (8.1.0.alpha)
@@ -145,7 +145,7 @@ GEM
       xpath (~> 3.2)
     chunky_png (1.4.0)
     concurrent-ruby (1.3.5)
-    connection_pool (2.5.2)
+    connection_pool (2.5.3)
     crass (1.0.6)
     date (3.4.1)
     debug (1.10.0)
