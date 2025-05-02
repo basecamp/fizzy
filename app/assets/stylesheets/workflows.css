@@ -52,7 +52,7 @@
       max-inline-size: 100%;
       outline: 0;
       overflow: hidden;
-      padding: 1em;
+      padding: var(--inline-space);
       text-align: start;
     }
   }
