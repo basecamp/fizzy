@@ -1,6 +1,6 @@
 <div class="flex align-center gap">
   <label class="flex-item-grow">
-    <strong><%= form.text_field :name, name: "collection[name]", class: "input full-width",
+    <strong><%= form.text_field :name, name: "collection[name]", class: "input full-width txt-medium",
           required: true, autofocus: true, placeholder: "Give it a name…",
           data: { action: "keydown.enter->form#submit:prevent, keydown.esc->form#cancel" } %></strong>
   </label>
