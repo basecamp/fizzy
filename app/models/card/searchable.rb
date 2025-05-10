@@ -8,8 +8,8 @@ module Card::Searchable
 
     scope :mentioning, ->(query) do
       if query = sanitize_query_syntax(query)
-        cards = Card.search(query).select(:id).to_sql
-        comments = Comment.search(query).select(:id).to_sql
+        cards = Card.search_similar(query).select(:id).to_sql
+        comments = Comment.search_similar(query).select(:id).to_sql
 
         left_joins(:comments).where("cards.id in (#{cards}) or comments.id in (#{comments})").distinct
       else

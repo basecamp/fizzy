@@ -22,4 +22,12 @@ class Comment < ApplicationRecord
     def watch_card_by_creator
       card.watch_by creator
     end
+
+    def search_embedding_content
+      <<~CONTENT
+        Card title: #{card.title}
+        Content: #{body.to_plain_text}
+        Created by: #{creator.name}}
+      CONTENT
+    end
 end

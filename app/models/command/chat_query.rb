@@ -23,15 +23,16 @@ class Command::ChatQuery < Command
 
         Fizzy supports the following commands:
 
-        - Assign users to cards: /assign [user]
-        - Close cards: /close [optional reason]
-        - Tag cards: /tag [tag-name]
+        - Assign users to cards: /assign [user]. E.g: "/assign kevin"
+        - Close cards: /close [optional reason]. E.g: "/close" or "/close not now"
+        - Tag cards: /tag [tag-name]. E.g: "/tag performance"
         - Get insight about cards: /insight [query]. Use this as the default command to satisfy questions and requests
-            about cards. This relies on /search.
-        - Search cards based on certain keywords: /search. See how this works below.
+            about cards. This relies on /search. Example: "/insight summarize performance issues".
+        - Search cards based on certain keywords: /search. See how this works below. E.g: "/search meetup montreal"
 
-        asks for a certain set of cards, you can use the /search command to filter. The /search command (and only this
-        command) supports the following parameters:
+        If you need to filter a certain set of cards, you can use the /search command to filter.
+
+        The /search command (and only this command) supports the following parameters:
 
           - assignment_status: can be "unassigned". Only include if asking for unassigned cards explicitly
           - indexed_by: can be "newest", "oldest", "latest", "stalled", "closed"
@@ -45,41 +46,44 @@ class Command::ChatQuery < Command
           - terms: a list of terms to search for. Use this option to refine searches based on further keyword-based
              queries.
 
-        The output will be in JSON. It will contain a list of commands. Each command will be a JSON object like:
+        So each command will be a JSON object like:
 
         { command: "/close" }
 
-        For the case of the /search command, it can also contain additional params:
+        The /search command can also contain additional params:
 
         { command: "/search", indexed_by: "closed", collection_ids: [ "Writebook", "Design" ] }
 
         Notice that there are overlapping commands (filter by assignee or assign cards). Favor filtering/queries for
         commands like "cards assigned to someone".
 
-        Notice that only /search commands carry additional JSON params. For /tag, /close, /search, /insight and /assign just append the
-        param to the string command. This is important: notice that each of those commands receives a parameter (surrounded
-        by [] in the description above). Make sure if you invoke a given command you pass the params. Also, that you don't
-'       pass JSON params unless you are invoking a /search command.
+        For example, to assign a card, you invoke `assign kevin`. For insight about "something", you invoke "/insight something".
 
-        For example, to assign a card, you invoke `assign kevin` instead of:
+        Important: When using the /insight command, ALWAYS add first a /search command that filters out the relevant cards to answer 
+        the question. Then, reformulate pass the query itself to /insight as in "/insight query", no additional keys in the JSON.
 
-          {
-            "command": "/assign",
-            "assignee_ids": [
-              "kevin"
-            ]
-          }
+        For example, for "summarize largest features recently released", the JSON would be:
 
-        When using the /insight command, always add first a /search command that filters out the relevant cards to answer 
-        the question. Pass /search the main nouns in the query, ignoring the generic ones like issues.
+          [
+            {
+              "command": "/search",
+              "terms": ["performance"]
+            },
+            {
+              "command": "/insight performance issues"
+            }
+          ]
 
         Unless asking for explicit filtering, always prefer /insight over /search.
 
-        When passing terms to /search or the query to /insight, remove generigetc/common words such as "problem"" and "issue"" and keep
-        the more meaningful nouns only.
-
         Please combine commands to satisfy what the user needs. E.g: search with keywords and filters and then apply
         as many commands as needed. Make sure you don't leave actions mentioned in the query needs unattended.'
+
+        The output will be in JSON. It will contain a list of commands. The commands /tag, /close, /search, /insight and 
+        /assign don't support additional JSON keys, they will only contain the "command:" key". For /search, it can contain additional
+        JSON keys matching the /search params described above.
+
+        Avoid empty preambles like "Based on the provided cards". Also, prefer a natural a friendly language favoring active voice.
 
         Make sure to place into double quotes the strings in JSON values and that you generate valid JSON. I want a
         JSON list like [{}, {}...]

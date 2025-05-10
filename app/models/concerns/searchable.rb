@@ -23,8 +23,8 @@ module Searchable
       scope :search_similar, ->(query) do
         query_embedding = RubyLLM.embed(query)
         joins(:search_embedding)
-          .where("embedding MATCH ? AND k = ?", query_embedding.vectors.to_json, 3)
-          .order(created_at: :desc)
+          .where("embedding MATCH ? AND k = ?", query_embedding.vectors.to_json, 20)
+          .order(:distance)
       end
     end
   end
