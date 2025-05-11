@@ -48,29 +48,22 @@ class Command::GetInsight < Command
     end
 
     def cards_context
-      "".tap do |context|
-        cards.order("created_at desc").limit(25).collect do |card|
-          context << card_context_for(card)
-
-          card.comments.each do |comment|
-            context << comment_context_for(comment)
-          end
-        end
-      end
+      cards.order("created_at desc").limit(25).flat_map do |card|
+        [ card_context_for(card), *card.comments.collect { comment_context_for(it) } ]
+      end.join(" ")
     end
 
     def card_context_for(card)
       <<~CONTEXT
+        Title: #{card.title}
         Card created by: #{card.creator.name}}
         Id: #{card.id}
-        Title: #{card.title}
         Description: #{card.description.to_plain_text}
         Assigned to: #{card.assignees.map(&:name).join(", ")}}
         Created at: #{card.created_at}}
         Closed: #{card.closed?}
         Closed by: #{card.closed_by&.name}
         Closed at: #{card.closed_at}
-
       CONTEXT
     end
 
@@ -80,7 +73,6 @@ class Command::GetInsight < Command
         Id: #{comment.id}
         Content: #{comment.body.to_plain_text}}
         Comment created by: #{comment.creator.name}}
-
       CONTEXT
     end
 end
