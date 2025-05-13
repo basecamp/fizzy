@@ -11,9 +11,11 @@ class Command::Composite
   end
 
   def execute
+    result = nil
     ApplicationRecord.transaction do
-      commands.each(&:execute)
+      commands.each { result = it.execute }
     end
+    result
   end
 
   def undo

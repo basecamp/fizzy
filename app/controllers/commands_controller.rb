@@ -42,6 +42,8 @@ class CommandsController < ApplicationController
         redirect_to result.url
       when Command::Result::ChatResponse
         respond_with_chat_response(result)
+      when Command::Result::InsightResponse
+        respond_with_insight_response(result)
       else
         redirect_back_or_to root_path
       end
@@ -51,8 +53,8 @@ class CommandsController < ApplicationController
       command = chat_response_to_command(result)
 
       if confirmed?(command)
-        command.execute
-        redirect_back_or_to root_path
+        result = command.execute
+        respond_with_execution_result result
       else
         respond_with_needs_confirmation(command.commands, redirect_to: result.context_url)
       end
@@ -66,5 +68,9 @@ class CommandsController < ApplicationController
       context = Command::Parser::Context.new(Current.user, url: chat_response.context_url || request.referrer)
       parser = Command::Parser.new(context)
       Command::Composite.new(chat_response.command_lines.collect { parser.parse it })
+    end
+
+    def respond_with_insight_response(chat_response)
+      render json: { message: chat_response.content }, status: :accepted
     end
 end

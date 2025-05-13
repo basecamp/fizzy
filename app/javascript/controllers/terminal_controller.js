@@ -44,10 +44,16 @@ export default class extends Controller {
   }
 
   handleCommandResponse(event) {
+    const response = event.detail.fetchResponse?.response
+
     if (event.detail.success) {
+      if (response.headers.get("Content-Type")?.includes("application/json")) {
+        response.json().then((responseJson) => {
+          this.element.querySelector("#chat-insight").innerHTML = marked.parse(responseJson.message)
+        })
+      }
       this.#reset()
-    } else {
-      const response = event.detail.fetchResponse.response
+    } else if (response) {
       this.#handleErrorResponse(response)
     }
   }
@@ -88,7 +94,6 @@ export default class extends Controller {
   }
 
   #reset(inputValue = "") {
-    console.debug("RESET!")
     this.inputTarget.value = inputValue
     this.confirmationTarget.value = ""
     this.waitingForConfirmationValue = false
@@ -104,7 +109,6 @@ export default class extends Controller {
 
   async #requestConfirmation(jsonResponse) {
     const message = jsonResponse.commands[0]
-    console.debug("request confirmation", this.inputTarget.value);
     this.originalInputValue = this.inputTarget.value
 
 

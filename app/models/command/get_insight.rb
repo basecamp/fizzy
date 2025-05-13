@@ -9,7 +9,7 @@ class Command::GetInsight < Command
 
   def execute
     response = chat.ask query
-    Command::Result::InsightResponse.new({ reply: response.content })
+    Command::Result::InsightResponse.new(response.content)
   end
 
   def undoable?
@@ -59,6 +59,7 @@ class Command::GetInsight < Command
 
     def card_context_for(card)
       <<~CONTEXT
+        ==CARD==
         Title: #{card.title}
         Card created by: #{card.creator.name}}
         Id: #{card.id}
@@ -73,7 +74,7 @@ class Command::GetInsight < Command
 
     def comment_context_for(comment)
       <<~CONTEXT
-        Card: #{comment.card.id}
+        ==COMMENT==
         Id: #{comment.id}
         Content: #{comment.body.to_plain_text}}
         Comment created by: #{comment.creator.name}}

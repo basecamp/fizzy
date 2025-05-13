@@ -31,6 +31,8 @@ class Command::Parser
         Command::ClearFilters.new(params: filter.as_params)
       when "/close"
         Command::Close.new(card_ids: cards.ids, reason: command_arguments.join(" "))
+      when "/visit"
+        Command::VisitUrl.new(url: command_arguments.first)
       when "/tag"
         Command::Tag.new(tag_title: tag_title_from(command_arguments.join(" ")), card_ids: cards.ids)
       else
