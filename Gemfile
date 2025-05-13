@@ -66,3 +66,5 @@ group :test do
   gem "vcr"
   gem "mocha"
 end
+
+gem "movable_writer", path: "gems/movable_writer"

@@ -210,6 +210,12 @@ GIT
       thor (~> 1.0, >= 1.2.2)
       zeitwerk (~> 2.6)
 
+PATH
+  remote: gems/movable_writer
+  specs:
+    movable_writer (0.1.0)
+      rails (>= 8.1.0.alpha)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -597,6 +603,7 @@ DEPENDENCIES
   kamal!
   mission_control-jobs
   mocha
+  movable_writer!
   mysql2
   platform_agent
   portfolio (>= 4.6)!
