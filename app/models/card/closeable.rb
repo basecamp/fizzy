@@ -1,7 +1,6 @@
 module Card::Closeable
   extend ActiveSupport::Concern
 
-  AUTO_CLOSE_AFTER = 30.days
   AUTO_CLOSE_REMINDER_BEFORE = 7.days
 
   included do
