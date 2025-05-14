@@ -1,8 +1,8 @@
 import { Controller } from "@hotwired/stimulus"
-import { differenceInDays } from "helpers/date_helpers"
+import { differenceInDays, signedDifferenceInDays } from "helpers/date_helpers"
 
 export default class extends Controller {
-  static targets = [ "time", "date", "datetime", "shortdate", "ago", "indays", "daysago", "agoorweekday" ]
+  static targets = [ "time", "date", "datetime", "shortdate", "ago", "indays", "daysago", "agoorweekday", "closingsoonbubble" ]
   static values = { refreshInterval: Number }
   static classes = [ "local-time-value"]
 
@@ -19,6 +19,7 @@ export default class extends Controller {
     this.datewithweekdayFormatter = new Intl.DateTimeFormat(undefined, { weekday: "long", month: "long", day: "numeric" })
     this.indaysFormatter = new InDaysFormatter()
     this.agoorweekdayFormatter = new DaysAgoOrWeekdayFormatter()
+    this.closingsoonbubbleFormatter = new ClosingSoonBubbleFormatter()
   }
 
   connect() {
@@ -75,6 +76,10 @@ export default class extends Controller {
     this.#formatTime(this.agoorweekdayFormatter, target)
   }
 
+  closingsoonbubbleTargetConnected(target) {
+    this.#formatTime(this.closingsoonbubbleFormatter, target)
+  }
+
   #refreshRelativeTimes() {
     this.agoTargets.forEach(target => {
       this.#formatTime(this.agoFormatter, target)
@@ -83,7 +88,13 @@ export default class extends Controller {
 
   #formatTime(formatter, target) {
     const dt = new Date(target.getAttribute("datetime"))
-    target.innerHTML = formatter.format(dt)
+    const within = target.getAttribute("within")
+
+    if (within && differenceInDays(new Date(), dt) > within) {
+      target.innerHTML = ``
+    } else {
+      target.innerHTML = formatter.format(dt)
+    }
     target.title = this.datetimeFormatter.format(dt)
   }
 }
@@ -145,6 +156,44 @@ class InDaysFormatter {
     if (days <= 0) return styleableValue("today")
     if (days === 1) return styleableValue("tomorrow")
     return `in ${styleableValue(days)} days`
+  }
+}
+
+class ClosingSoonBubbleFormatter {
+  format(date) {
+    const days = signedDifferenceInDays(new Date(), date)
+    const top = days < 1 ? "Closes" : "Closes in"
+    const value = days < 1 ? styleableValue("!") : styleableValue(days)
+    const bottom = days < 1 ? "today" : this.#pluralize("day", days)
+
+    return this.#markup(top, value, bottom)
+  }
+
+  #markup(top, value, bottom) {
+    return `
+<div class="card__bubble">
+  <svg viewBox="0 0 200 100">
+    <path id="top-half" fill="transparent" d="M 20,100 A 80,80 0 0,1 180,100" />
+    <text text-anchor="middle" fill="currentColor">
+      <textPath href="#top-half" startOffset="50%" dominant-baseline="middle">${top}</textPath>
+    </text>
+  </svg>
+
+  <span class="circle-bubble__number">${value}</span>
+
+  <svg viewBox="0 0 200 100">
+    <path id="bottom-half" d="M 20,0 A 80,80 0 0,0 180,0" fill="transparent" />
+    <text text-anchor="middle" fill="currentColor">
+      <textPath href="#bottom-half" startOffset="50%" dominant-baseline="middle">${bottom}</textPath>
+    </text>
+  </svg>
+</div>`
+  }
+
+  #pluralize(word, quantity) {
+    quantity = Math.floor(quantity)
+    const suffix = (quantity === 1) ? "" : "s"
+    return `${word}${suffix}`
   }
 }
 
