@@ -25,7 +25,7 @@ class Command::Ai::Translator
 
     def chat
       chat = ::RubyLLM.chat
-      chat.with_instructions(prompt)
+      chat.with_instructions(prompt + custom_context)
     end
 
     def prompt
@@ -40,14 +40,8 @@ class Command::Ai::Translator
             * The new context properties, when a new context is needed.
             * A **single JSON array** of command objects to execute
 
-        The name of the user making requests is #{user.first_name.downcase}.
-
         Fizzy data includes cards and comments contained in those. A card can represent an issue, a feature,
         a bug, a task, etc. Cards are contained in collections.
-
-        ## Current view:
-
-        The user is currently #{context_description} }.
 
         ## Determine context
 
@@ -143,6 +137,17 @@ class Command::Ai::Translator
         * An unassigned card can be closed or not. "unassigned" and "closed" are different unrelated concepts.
         * An unassigned card can be "considering" or "doing". "unassigned" and "engagement_status" are different unrelated concepts.
         * Only use assignment_status asking for unassigned cards. Never use in other circumstances.
+
+      PROMPT
+    end
+
+    def custom_context
+      <<~PROMPT
+        The name of the user making requests is #{user.first_name.downcase}.
+
+        ## Current view:
+
+        The user is currently #{context_description} }.
       PROMPT
     end
 
