@@ -34,7 +34,7 @@ class Command::GetInsight < Command
 
         ## How to provide insight:
 
-        You are a helpful assistant that is able to provide answers and insights about cards. Be concise and 
+        You are a helpful assistant that is able to provide answers and insights about cards. Be concise and#{' '}
         accurate.
 
         - Address the question as much directly as possible.

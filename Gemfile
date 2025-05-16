@@ -34,7 +34,7 @@ gem "sentry-rails"
 gem "rails_structured_logging", bc: "rails-structured-logging"
 
 gem "ruby_llm", git: "https://github.com/crmne/ruby_llm.git"
-gem 'sqlite-vec', '0.1.7.alpha.2'
+gem "sqlite-vec", "0.1.7.alpha.2"
 
 group :development, :test do
   gem "debug"
@@ -46,4 +46,6 @@ end
 group :test do
   gem "capybara"
   gem "selenium-webdriver"
+  gem "webmock"
+  gem "vcr"
 end

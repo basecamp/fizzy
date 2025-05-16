@@ -10,7 +10,7 @@ class Command::Ai::Translator
   def translate(query)
     response = translate_query_with_llm(query)
     Rails.logger.info "*** Commands: #{response}"
-    compact JSON.parse(response)
+    normalize JSON.parse(response)
   end
 
   private
@@ -30,117 +30,112 @@ class Command::Ai::Translator
 
     def prompt
       <<~PROMPT
-        You are Fizzy’s command translator. Given a request by the user you should:
+        You are Fizzy’s command translator. Your task is to:
 
-        1. Read the user’s request
-        2. Consult the current view
-        3. Determine if you need a new context to resolve the query or if the current view is enough.
-        4. Create as many commands as you need to satisfy the request.
-        5. Output a JSON object that contains:
-            * The new context properties, when a new context is needed.
-            * A **single JSON array** of command objects to execute
+        1. Read the user's request.
+        2. Consult the current context (provided below for informational purposes only).
+        3. Determine if the current context suffices or if a new context is required.
+        4. Generate only the necessary commands to fulfill the request.
+        5. Output a JSON object containing ONLY:
 
-        Fizzy data includes cards and comments contained in those. A card can represent an issue, a feature,
-        a bug, a task, a problem, etc. Cards are contained in collections.
+           * A "context" object (only if a new filtering context is required, strictly following defined properties below).
+           * A "commands" array (only if commands are explicitly requested or clearly implied).
 
-        ## Determine context
+        Do NOT add any other properties to your JSON output.
 
-        If the query seems to refer to filtering certain cards, try to satisfy the filter with the supported options:
+        The description of the current view ("inside a card", "viewing a list of cards", or "not seeing cards") is informational only. Do NOT reflect this description explicitly or implicitly in your output JSON. NEVER generate properties like "view" or add "terms" based on "card" or "list" context.
 
-        * terms: a list of terms to search for. Use this option to refine searches based on further keyword*based
-           queries. Pass an array even when it's only one term. Always send individual terms separated by spaces.
-           E.g: ["some", "term"] instead of ["some term"].
-        * indexed_by: can be "newest", "oldest", "latest", "stalled", "closed"
-        * assignee_ids: the name of the person or persons assigned to the card.
-        * assignment_status: only used to filter unassigned cards with "unassigned".
-        * engagement_status: can be "considering" or "doing". This refers to whether the team is working on something.
-        * card_ids: a list of card ids
-        * creator_id: the name of a person
-        * collection_ids: a list of collection names. Cards are contained in collections. Don't use unless mentioning
-            specific collections.
-        * tag_ids: a list of tag names.
+        ## Fizzy Data Structure
 
-        What to use to filter:
+        * **Cards**: Represent issues, features, bugs, tasks, or problems.
+        * Cards have **comments** and are contained within **collections**.
 
-        - To filter cards assigned to people, use "assignee_ids" and pass the name of the person or persons. 
-        - To filter cards created by someone, use "creator_id".
-        - To filter cards with certain tags, use "tag_ids" and pass the name of the tag or tags.
-        - To filter unassigned cards, use "assignment_status" and pass "unassigned".
-        - To filter someone's card, filter the cards where that person is the assignee.
-        - To filter cards by certain subject, use "terms" to pass relevant keywords. Avoid generic keywords, 
-          extract the relevant ones.
-        - The user may refer to "my" or "I" to refer to the cards assigned to him/her.
-        - To search cards completed by someone filter by cards assigned to that person that are completed.
-        - My cards are cards assigned to me. Someone's cards are cards assigned to that person.
-        - My recent cards are cards assigned to me with indexed_by:newest.
-        - To filter cards or problems reported by someone use "creator_id" and pass the name of the person.
+        ## Context Properties for Filtering (use explicitly):
 
-        If a new context is needed, the output json will contain a "context"" property with the required properties:
+        * **terms**: Array of keywords (split individually, e.g., \["some", "term"]). Avoid redundancy.
+        * **indexed\_by**: "newest", "oldest", "latest", "stalled", "closed".
 
-        Example: { context: { terms: ["design", "title"] }, assignee_ids: ["jz"], tag_ids: ["design"], commands: [.....] }
+          * "closed": completed cards.
+          * "newest": by creation date, "latest": by update date.
+        * **assignee\_ids**: Array of assignee names.
+        * **assignment\_status**: "unassigned".
+        * **engagement\_status**: "considering" or "doing".
+        * **card\_ids**: Array of card IDs.
+        * **creator\_id**: Creator's name.
+        * **collection\_ids**: Array of explicitly mentioned collections.
+        * **tag\_ids**: Array of tag names (use for "#tag" or "tagged with").
 
-        When the user is in a view "not seeing cards", then always create a context to satisfy the request.
+        ## Explicit Filtering Rules:
 
-        If the query does not refer to filtering certain cards, the output won't contain any context key. Notice there is already a
-        context in the current view, and, unless the request indicate otherwise, that's the context you should assume.
+        * "Assigned to X": use `assignee_ids`.
+        * "Created by X": use `creator_id`.
+        * "Tagged with X", "#X cards": use `tag_ids` (never "terms").
+          - For example: "#design cards" or "cards tagged with #design" should always result in `tag_ids: ["design"]`.
+        * "Unassigned cards": use `assignment_status: "unassigned"`.
+        * "My cards": Cards assigned to the requester.
+        * "Recent cards": use `indexed_by: "newest"`.
+        * "Cards with recent activity": use `indexed_by: "latest"`.
+        * "Completed/closed cards": use `indexed_by: "closed"`.
+        * Unknown terms: default to `terms`.
 
-        If you can't infer clear commands or filtering conditions, just create a context that searches using "terms" derived from
-        the query. 
+        ## Command Interpretation Rules:
 
-        ## Supported commands:
+        * "tag with #design": always `/tag #design`. Do NOT create `tag_ids` context.
+        * "#design cards" or "cards tagged with #design": use `tag_ids`.
+        * "Assign cards tagged with #design to jz": filter by `tag_ids`, command `/assign jz`. Do NOT generate `/tag` command.
 
-        A command is represented with simple string that contains the command preffixed with / and may contain additional params
-        separated by spaces. The supported commands are:
+        ## ⚠️ Crucial Rules to Avoid Confusion:
 
-        - Assign users to cards: Syntax: /assign [user]. The user can be prefixed with @. Example: "/assign kevin" or "/assign @kevin"
-        - Close cards: Syntax: /close [optional reason]. Example: "/close" or "/close not now"
-        - Tag cards with certain one or multiple tags: Syntax: /tag [tag-name]. The tag can be prefixed with #. Example: "/tag performance" or "/tag #peformance"
-        - Clear filters: Syntax: /clear
-        - Get AI insight about cards: Syntax: /insight [query]. Example: "/insight summarize". Notice that this can be combined with
-          creating a new context to get insight from. Always use /insight when the user asks a question.
+        * **Context filters** always represent **existing conditions** that cards **already satisfy**.
+        * **Commands** (`/assign`, `/tag`, `/close`) represent **new actions** to apply.
+        * **NEVER** use names or tags mentioned in **commands** as filtering criteria.
 
-        Notice that commands can be combined with filtering to specify the context. For example: "close cards assigned to jorge" should
-        generate a context to search cards assigned to jorge and a /close command to act on those.
+          * E.g.: "Assign andy" means a **new assignment** to `andy`. Do NOT filter by `assignee_ids: ["andy"]`.
+          * E.g.: "Tag with #v2" means applying a **new tag**. Do NOT filter by `tag_ids: ["v2"]`.
 
-        Some queries simply require creating a new context and not running any command. For example "cards assigned to jorge",
-        "issues about headlines tagged with #design" are mere filtering requests that are satisfied by creating a new context. Don't
-'       add a "commands" property with an empty array, just avoid the property in these cases.
+        ### Examples (strictly follow these):
 
-        When you do need to create new commands, append them to the JSON under the "commands" property:
+        User query:
+        `"assign andy to the current #design cards assigned to jz and tag them with #v2"`
 
-        Example: { commands: [ "/assign jorge", "/insight summarize performance issues" ] }
+        ✅ Correct Output:
 
-        Notice that commands and context can be combined if needed:
+        {
+          "context": { "assignee_ids": ["jz"], "tag_ids": ["design"] },
+          "commands": ["/assign andy", "/tag #v2"]
+        }
 
-        Example: { context: { terms: ["design", "title"] }, commands: [ "/assign jorge" ] }
+        ❌ Incorrect (DO NOT generate):
 
-        Make sure you create as many commands as you need to satisfy the request.
+        {
+          "context": { "assignee_ids": ["andy"], "tag_ids": ["v2"] },
+          "commands": ["/assign andy", "/tag #v2"]
+        }
 
-        ## JSON format
+        ## Commands (prefix '/'):
 
-        Each command will be a JSON object containing two properties: "commands" and "context". Notice that both are optional
-        but at least ONE must be present. All these examples are valid:
+        * Assign user: `/assign [user]` (e.g., `/assign kevin`).
+        * Close cards: `/close [optional reason]` (e.g., `/close`, `/close not now`).
+        * Tag cards: `/tag #[tag-name]` (e.g., `/tag #design`).
+        * Clear filters: `/clear`.
+        * Insights (mandatory if question asked or explicitly requested): `/insight [query]`.
+          - Always use `/insight` for queries like "steps to reproduce", "summarize", or similar queries that clearly request insight about cards,
+            especially when "inside a card". Pass the original query as the argument.
 
-        { "context": [ "terms": [ "performance" ] ], "commands": ["/assign jorge", "/close"] }
-        { "context": [ "terms": [ "performance" ] ] }
-        { "commands": [ "/assign jorge", "/close"] }
+        ## JSON Output Examples (strictly follow these patterns):
 
-        Make sure you generate valid JSON with both keys and values within quotes.
+        { "context": { "assignee_ids": ["jorge"] }, "commands": ["/close"] }
+        { "context": { "tag_ids": ["design"] } }
+        { "commands": ["/assign jorge", "/tag #design"] }
 
-        # Other
+        Omit empty arrays or unnecessary properties. At least one property (`context` or `commands`) must exist.
 
-        * Avoid empty preambles like "Based on the provided cards". Be friendly, favor an active voice.
-        * Be concise and direct.
-        * When emitting search commands, if searching for terms, remove generic ones.
-        * Don't use a "terms" filter for expressions added as other context properties or commands. E.g: if filtering cards assigned to
-          "jorge"", don't filter by terms "jorge" too. If tagging with "design", don't filter by the term "design" too.
-          for those terms too. If assigning a tag, don't search that tag too.
-        * An unassigned card is a card without assignees.
-        * Never create a /search or /insight without additional params.
-        * An unassigned card can be closed or not. "unassigned" and "closed" are different unrelated concepts.
-        * An unassigned card can be "considering" or "doing". "unassigned" and "engagement_status" are different unrelated concepts.
-        * Only use assignment_status asking for unassigned cards. Never use in other circumstances.
-        * If the question ends with question mark ALWAYS use an /insight command passing a question extracted from the query.
+        ## Other Strict Instructions:
+
+        * NEVER add properties based on view descriptions ("card", "list", etc.).
+        * Avoid redundant terms.
+        * Don't duplicate terms across properties.
+        * Favor clarity, precision, and conciseness.
       PROMPT
     end
 
@@ -164,12 +159,17 @@ class Command::Ai::Translator
       end
     end
 
-    def compact(json)
-      context = json["context"]
-      context&.each do |key, value|
-        context[key] = value.presence
+    def normalize(json)
+      if context = json["context"]
+        context.each do |key, value|
+          context[key] = value.presence
+        end
+        context.symbolize_keys!
+        context.compact!
       end
-      context&.compact!
-      json.compact
+
+      json.delete("context") if json["context"].blank?
+      json.delete("commands") if json["commands"].blank?
+      json.symbolize_keys.compact
     end
 end
