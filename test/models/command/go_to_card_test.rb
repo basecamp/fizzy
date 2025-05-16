@@ -3,6 +3,10 @@ require "test_helper"
 class Command::GoToCardTest < ActionDispatch::IntegrationTest
   include CommandTestHelper
 
+  include VcrTestHelper
+
+  vcr_record!
+
   setup do
     @card = cards(:logo)
   end
@@ -15,6 +19,8 @@ class Command::GoToCardTest < ActionDispatch::IntegrationTest
 
   test "result in a regular search if the card does not exist" do
     command = parse_command "123"
+
+    puts command.commands.first.inspect
     assert command.valid?
 
     result = command.execute

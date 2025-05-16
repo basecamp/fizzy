@@ -63,6 +63,7 @@ class Command::Parser
       if cards = multiple_cards_from(string)
         Command::FilterCards.new(card_ids: cards.ids, params: filter.as_params)
       elsif card = single_card_from(string)
+        puts "ARRIVE!"
         Command::GoToCard.new(card_id: card.id)
       else
         Command::Ai::Parser.new(context).parse(string)

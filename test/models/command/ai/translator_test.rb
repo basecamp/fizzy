@@ -3,6 +3,8 @@ require "test_helper"
 class Command::Ai::TranslatorTest < ActionDispatch::IntegrationTest
   include VcrTestHelper
 
+  vcr_record!
+
   setup do
     @user= users(:david)
   end
@@ -37,6 +39,13 @@ class Command::Ai::TranslatorTest < ActionDispatch::IntegrationTest
 
     assert_command({ context: { indexed_by: "newest" } }, "recent cards")
     assert_command({ context: { indexed_by: "latest" } }, "cards with recent activity")
+  end
+
+  test "filter by card id" do
+    # List context
+    assert_command({ context: { card_ids: [ 123 ] } }, "card 123")
+    assert_command({ context: { card_ids: [ 123, 456 ] } }, "card 123, 456")
+    assert_command({ context: { terms: [ "123" ] } }, "123") # Notice existing cards will be intercepted earlier
   end
 
   test "getting insight on cards" do
