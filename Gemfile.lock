@@ -18,9 +18,9 @@ GIT
 
 GIT
   remote: https://github.com/crmne/ruby_llm.git
-  revision: 8412d51e869f1ee8e5229831a9a0bb5e9b8f3847
+  revision: cc8b0f0a1e4515098b82d625e52e8474a534e94f
   specs:
-    ruby_llm (1.2.0)
+    ruby_llm (1.3.0rc1)
       base64
       event_stream_parser (~> 1)
       faraday (~> 2)
@@ -207,7 +207,7 @@ GEM
     jbuilder (2.13.0)
       actionview (>= 5.0.0)
       activesupport (>= 5.0.0)
-    json (2.11.3)
+    json (2.12.0)
     kamal (2.6.0)
       activesupport (>= 7.0)
       base64 (~> 0.2)
