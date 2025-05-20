@@ -18,15 +18,16 @@ GIT
 
 GIT
   remote: https://github.com/crmne/ruby_llm.git
-  revision: 8412d51e869f1ee8e5229831a9a0bb5e9b8f3847
+  revision: 8b16d38d0914e47f8ad2636356c9cb0622f61087
   specs:
-    ruby_llm (1.2.0)
+    ruby_llm (1.3.0rc1)
       base64
       event_stream_parser (~> 1)
       faraday (~> 2)
       faraday-multipart (~> 1)
       faraday-net_http (~> 3)
       faraday-retry (~> 2)
+      marcel (~> 1.0)
       zeitwerk (~> 2)
 
 GIT
@@ -207,7 +208,7 @@ GEM
     jbuilder (2.13.0)
       actionview (>= 5.0.0)
       activesupport (>= 5.0.0)
-    json (2.11.3)
+    json (2.12.0)
     kamal (2.6.0)
       activesupport (>= 7.0)
       base64 (~> 0.2)
@@ -430,7 +431,7 @@ GEM
     websocket-extensions (0.1.5)
     xpath (3.2.0)
       nokogiri (~> 1.8)
-    zeitwerk (2.7.2)
+    zeitwerk (2.7.3)
 
 PLATFORMS
   arm64-darwin
