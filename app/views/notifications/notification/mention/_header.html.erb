@@ -1,4 +1,7 @@
 <div class="card__collection">
-  <span class="card__id"><%= notification.source.id %></span>
+  <span class="card__id"><%= notification.card.id %></span>
+  <span class="card__collection-name overflow-ellipsis">
+    <%= notification.card.collection.name %>
+  </span>
 </div>
 
