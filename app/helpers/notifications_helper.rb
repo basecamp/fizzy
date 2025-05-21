@@ -22,9 +22,9 @@ module NotificationsHelper
     tag.div id: dom_id(notification), class: "tray__item" do
       concat(
         link_to(notification,
-          class: [ "card card--notification", { "card--closed": notification_closed?(notification) } ],
+          class: [ "card card--notification", { "card--closed": notification.card.closed? } ],
           data: { action: "click->dialog#close", turbo_frame: "_top" },
-          style: { "--card-color:": notification_color(notification) },
+          style: { "--card-color:": notification.card.color },
           &)
       )
       concat(notification_mark_read_button(notification))
@@ -63,13 +63,5 @@ module NotificationsHelper
 
     def card_notification_title(card)
       card.title.presence || "Card #{card.id}"
-    end
-
-    def notification_closed?(notification)
-      notification.card.closed?
-    end
-
-    def notification_color(notification)
-      notification.card.color
     end
 end
