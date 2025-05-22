@@ -157,6 +157,7 @@
 
   .card__content {
     flex: 2 1 auto;
+    max-inline-size: 100%;
   }
 
   .card__title {
