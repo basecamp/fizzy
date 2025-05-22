@@ -67,6 +67,10 @@
     font: inherit;
   }
 
+  button {
+    cursor: pointer;
+  }
+
   /* Remove all animations and transitions for people that prefer not to see them */
   @media (prefers-reduced-motion: reduce) {
 
@@ -81,6 +85,16 @@
 
     html {
       scroll-behavior: initial;
+    }
+  }
+
+  dialog {
+    border: 0;
+    padding: 0;
+
+    &:where(:focus-visible):focus,
+    &:where(:focus-visible):active {
+      outline: 0;
     }
   }
 }

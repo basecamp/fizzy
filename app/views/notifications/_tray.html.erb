@@ -1,8 +1,8 @@
 <%= turbo_stream_from Current.user, :notifications %>
 
-<section class="tray tray--notifications">
+<section class="tray tray--notifications" data-controller="dialog">
   <dialog class="tray__dialog"
-      data-controller="dialog" data-dialog-modal-value="false" data-dialog-target="dialog"
+      data-dialog-modal-value="false" data-dialog-target="dialog"
       data-action="keydown.esc->dialog#close:stop click@document->dialog#closeOnClickOutside">
     <%= turbo_frame_tag "notifications", src: tray_notifications_path, refresh: "morph" %>
 

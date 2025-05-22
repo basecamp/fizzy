@@ -1,8 +1,8 @@
 <%= turbo_stream_from Current.user, :pins_tray %>
 
-<section class="tray tray--pins">
+<section class="tray tray--pins" data-controller="dialog">
   <%= tag.dialog id: "pin-tray", class: "tray__dialog",
-        data: { controller: "dialog", turbo_permanent: true, dialog_modal_value: false, dialog_target: "dialog", action: "keydown.esc->dialog#close:stop click@document->dialog#closeOnClickOutside" } do %>
+        data: { turbo_permanent: true, dialog_modal_value: false, dialog_target: "dialog", action: "keydown.esc->dialog#close:stop click@document->dialog#closeOnClickOutside" } do %>
     <%= turbo_frame_tag "pins", src: my_pins_path %>
   <% end %>
 
