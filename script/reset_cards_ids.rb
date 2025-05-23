@@ -100,9 +100,9 @@ ApplicationRecord.with_each_tenant do |tenant|
     end
 
     # Update action_text_markdowns table (polymorphic relationship)
-    ActionText::Markdown.where(record_type: "Card").find_each do |markdown|
-      if id_mapping[markdown.record_id]
-        markdown.update_column(:record_id, id_mapping[markdown.record_id])
+    ActionText::RichText.where(record_type: "Card").find_each do |rich_text|
+      if id_mapping[rich_text.record_id]
+        rich_text.update_column(:record_id, id_mapping[rich_text.record_id])
       end
     end
 

@@ -5,7 +5,7 @@
         <%= link_to card.title, edit_collection_card_path(card.collection, card), class: "card__title-link" %>
       </h1>
       <div class="card__description markdown-content margin-block-half">
-        <%= sanitize card.description_html %>
+        <%= card.description %>
       </div>
     </div>
   <% end %>
@@ -18,7 +18,9 @@
             data: { action: "auto-save#change blur->auto-save#submit keydown.enter->auto-save#submit:prevent keydown.ctrl+enter->auto-save#submit:prevent" } %>
     </h1>
     <div class="card__description markdown-content margin-block-start-half margin-block-end">
-      <%= form.markdown_area :description, class: "input input--textarea full-width borderless txt-align-start card-field__description",
+      <%= rich_textarea_toolbar "editor-toolbar" %>
+      <%= form.rich_textarea :description, class: "input input--textarea full-width borderless txt-align-start card-field__description",
+            toolbar: "the-toolbar",
             placeholder: "Add some notes, context, pictures, or video about this…",
             data: { action: "house-md:change->auto-save#change focusout->auto-save#submit keydown.ctrl+enter->form#submit:prevent keydown.meta+enter->form#submit:prevent keydown.esc->form#cancel:stop paste->paste#pasteFiles" } %>
     </div>

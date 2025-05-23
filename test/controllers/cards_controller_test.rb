@@ -46,7 +46,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "moon.jpg", card.image.filename.to_s
     assert_equal [ tags(:mobile) ], card.tags
 
-    assert_equal "Something more in-depth", card.description_plain_text.strip
+    assert_equal "Something more in-depth", card.description.to_plain_text.strip
   end
 
   test "users can only see cards in collections they have access to" do

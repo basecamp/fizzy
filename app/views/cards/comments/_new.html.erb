@@ -9,7 +9,8 @@
             data: { controller: "form paste local-save",
                     local_save_key_value: "comment-#{card.id}",
                     action: "turbo:submit-end->local-save#submit keydown.ctrl+enter->form#submit:prevent keydown.meta+enter->form#submit:prevent keydown.esc->form#cancel:stop paste->paste#pasteFiles" } do |form| %>
-        <%= form.markdown_area :body, class: "input comment__input", required: true, placeholder: new_comment_placeholder(card),
+        <%= rich_textarea_toolbar "editor-toolbar" %>
+        <%= form.rich_textarea :body, class: "input comment__input", toolbar: "editor-toolbar", required: true, placeholder: new_comment_placeholder(card),
               data: { local_save_target: "input", action: "house-md:change->local-save#save turbo:morph-element->local-save#restoreContent" } %>
         <%= form.button class: "comment__submit btn btn--reversed flex-item-justify-start" do %>
           <span>Post this comment</span>

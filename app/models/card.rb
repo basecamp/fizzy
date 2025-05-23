@@ -9,7 +9,7 @@ class Card < ApplicationRecord
   has_many :comments, dependent: :destroy
   has_one_attached :image, dependent: :purge_later
 
-  has_markdown :description
+  has_rich_text :description
 
   before_save :set_default_title, if: :published?
 

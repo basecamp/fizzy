@@ -8,10 +8,13 @@
               data: { action: "keydown.enter->form#submit:prevent keydown.ctrl+enter->form#submit:prevent keydown.meta+enter->form#submit:prevent keydown.esc->form#cancel focus->form#select" } %>
       <% end %>
     </h1>
-    <div class="card__description markdown-content margin-block-start-half margin-block-end">
-      <%= form.markdown_area :description, class: "input input--textarea full-width borderless txt-align-start card-field__description",
-            placeholder: "Add some notes, context, pictures, or video about this…",
-            data: { action: "keydown.ctrl+enter->form#submit:prevent keydown.meta+enter->form#submit:prevent keydown.esc->form#cancel:stop paste->paste#pasteFiles" } %>
+
+    <%= rich_textarea_toolbar "editor-toolbar" %>
+
+    <%= form.rich_textarea :description, class: "input input--textarea full-width borderless txt-align-start card-field__description",
+          toolbar: "editor-toolbar",
+          placeholder: "Add some notes, context, pictures, or video about this…",
+          data: { action: "keydown.ctrl+enter->form#submit:prevent keydown.meta+enter->form#submit:prevent keydown.esc->form#cancel:stop paste->paste#pasteFiles" } %>
     </div>
     <%= form.button "Save changes", type: :submit, class: "btn" %>
     <%= link_to "Close editor and discard changes", collection_card_path(@card.collection, @card), data: { form_target: "cancel" }, hidden: true %>

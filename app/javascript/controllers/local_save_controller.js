@@ -30,9 +30,11 @@ export default class extends Controller {
 
   async restoreContent() {
     await nextFrame()
-    const savedContent = localStorage.getItem(this.keyValue)
+    let savedContent = localStorage.getItem(this.keyValue)
 
     if (savedContent) {
+      savedContent = `<div>${savedContent}</div>` // temporary for old markdown saves
+      console.debug("Es", savedContent);
       this.inputTarget.value = savedContent
       this.#triggerChangeEvent(savedContent)
     }

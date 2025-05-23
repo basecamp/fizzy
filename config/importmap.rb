@@ -11,3 +11,6 @@ pin_all_from "app/javascript/controllers", under: "controllers"
 pin_all_from "app/javascript/helpers", under: "helpers"
 pin_all_from "app/javascript/initializers", under: "initializers"
 pin "marked" # @15.0.11
+pin "actiontext-lexical"
+pin "@rails/activestorage", to: "activestorage.esm.js"
+pin "@rails/actiontext", to: "actiontext.esm.js"

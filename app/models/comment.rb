@@ -5,7 +5,7 @@ class Comment < ApplicationRecord
   belongs_to :creator, class_name: "User", default: -> { Current.user }
   has_many :reactions, dependent: :delete_all
 
-  has_markdown :body
+  has_rich_text :body
   searchable_by :body_plain_text, using: :comments_search_index, as: :body
 
   scope :chronologically, -> { order created_at: :asc, id: :desc }
@@ -19,6 +19,10 @@ class Comment < ApplicationRecord
   end
 
   private
+    def body_plain_text
+      body.to_plain_text
+    end
+
     def watch_card_by_creator
       card.watch_by creator
     end

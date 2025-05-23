@@ -14,7 +14,7 @@ module Mentions
   end
 
   def mentionable_content
-    markdown_associations.collect { send(it.name)&.to_plain_text }.compact.join(" ")
+    rich_text_associations.collect { send(it.name)&.to_plain_text }.compact.join(" ")
   end
 
   private
@@ -32,12 +32,12 @@ module Mentions
       collection.users
     end
 
-    def markdown_associations
-      self.class.reflect_on_all_associations(:has_one).filter { it.klass == ActionText::Markdown }
+    def rich_text_associations
+      self.class.reflect_on_all_associations(:has_one).filter { it.klass == ActionText::RichText }
     end
 
     def mentionable_content_changed?
-      markdown_associations.any? { send(it.name).content_previously_changed? }
+      rich_text_associations.any? { send(it.name).body_previously_changed? }
     end
 
     def create_mentions_later

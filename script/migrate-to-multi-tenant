@@ -214,9 +214,6 @@ class EnactTenanting
       assert_count Tagging, Tagging.count
       assert_count Watch, Watch.count
 
-      # we're only copying the markdown records that are still accessible.
-      assert_count ActionText::Markdown, Comment.count
-
       assert_count Event, Event.count
       assert_count Notification, Notification.count
 
@@ -228,22 +225,7 @@ class EnactTenanting
   end
 
   def update_action_text_urls
-    update_counter["ActionText::Markdown"] = 0
-    TENANTS.each do |tenant|
-      tenanted_domain = sprintf(TENANTED_DOMAIN, tenant: tenant)
-
-      ApplicationRecord.with_tenant(tenant) do
-        ActionText::Markdown.all.each do |markdown|
-          content = markdown.content
-          next unless content =~ %r{#{CURRENT_DOMAIN}/u/}
-
-          content.gsub!(%r{#{CURRENT_DOMAIN}/u/}, "#{tenanted_domain}/u/")
-
-          markdown.update_column :content, content
-          update_counter["ActionText::Markdown"] += 1
-        end
-      end
-    end
+    raise "No more markdown"
   end
 
   def hardlink_active_storage

@@ -1,5 +1,5 @@
 <%= render "events/event/layout", card: event.eventable.card, event: event do %>
   <span class="txt-break overflow-line-clamp txt-tight-lines">
-    <%= strip_tags(event&.eventable.body_html).truncate(200) -%>
+    <%= strip_tags(event&.eventable.body.to_s).truncate(200) -%>
   </span>
 <% end %>

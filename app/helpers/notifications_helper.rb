@@ -58,7 +58,7 @@ module NotificationsHelper
 
     def comment_notification_body(event)
       comment = event.eventable
-      "#{strip_tags(comment.body_html).blank? ? "#{event.creator.name} replied" : "#{event.creator.name}:" } #{strip_tags(comment.body_html).truncate(200)}"
+      "#{strip_tags(comment.body.to_s).blank? ? "#{event.creator.name} replied" : "#{event.creator.name}:" } #{strip_tags(comment.body.to_s).truncate(200)}"
     end
 
     def card_notification_title(card)
