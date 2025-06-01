@@ -6,8 +6,9 @@ local:
   service: Disk
   root: <%= Rails.root.join("storage", "tenants", Rails.env, "%{tenant}", "files") %>
 
-# We have "development", "staging", and "production" buckets configured. Note that we don't have a
-# "beta" bucket. (As of 2025-06-01.)
+# We have "development", "staging", and "production" buckets configured.
+# Note that we don't have a "beta" bucket (as of 2025-06-01).
+<% unless Rails.env.beta? %>
 purestorage:
   service: S3
   bucket: fizzy-<%= Rails.env %>-activestorage
@@ -19,3 +20,4 @@ purestorage:
   region: us-east-1 # default region required for signer
   access_key_id: <%= Rails.application.credentials.dig(:active_storage, :purestorage_service, :access_key_id) %>
   secret_access_key: <%= Rails.application.credentials.dig(:active_storage, :purestorage_service, :secret_access_key) %>
+<% end %>
