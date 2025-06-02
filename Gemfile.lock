@@ -214,7 +214,7 @@ PATH
   remote: gems/movable_writer
   specs:
     movable_writer (0.1.0)
-      rails (>= 8.1.0.alpha)
+      rails (>= 8.0)
 
 GEM
   remote: https://rubygems.org/
