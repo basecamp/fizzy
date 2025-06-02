@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
 module MovableWriter
-  VERSION = "0.1.0"
+  class State < Record
+  end
 end

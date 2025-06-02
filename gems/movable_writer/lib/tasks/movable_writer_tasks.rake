@@ -1,4 +1,8 @@
-# desc "Explaining what the task does"
-# task :movable_writer do
-#   # Task goes here
-# end
+# frozen_string_literal: true
+
+namespace :movable_writer do
+  desc "Install Movable Writer"
+  task :install do
+    Rails::Command.invoke :generate, [ "movable_writer:install" ]
+  end
+end
