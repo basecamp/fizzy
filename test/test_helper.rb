@@ -19,6 +19,8 @@ VCR.configure do |config|
   }
 end
 
+ENV["KAMAL_HOST"] ||= "fizzy-test-101"
+
 module ActiveSupport
   class TestCase
     parallelize(workers: :number_of_processors)

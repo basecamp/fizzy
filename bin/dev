@@ -8,4 +8,9 @@ if [ -f tmp/solid-queue.txt ]; then
   export SOLID_QUEUE_IN_PUMA=1
 fi
 
+# to make MovableWriter happy
+if [ -z "$KAMAL_HOST" ]; then
+  export KAMAL_HOST=fizzy-dev-101
+fi
+
 exec ./bin/rails server -p 3006

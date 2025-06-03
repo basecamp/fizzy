@@ -810,6 +810,19 @@ columns:
     collation:
     comment:
   - *9
+  movable_writer_states:
+  - *6
+  - *9
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: writer
+    cast_type: *7
+    sql_type_metadata: *8
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
   notifications:
   - *5
   - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
@@ -1119,6 +1132,7 @@ primary_keys:
   filters_stages:
   filters_tags:
   mentions: id
+  movable_writer_states: id
   notifications: id
   pins: id
   reactions: id
@@ -1163,6 +1177,7 @@ data_sources:
   filters_stages: true
   filters_tags: true
   mentions: true
+  movable_writer_states: true
   notifications: true
   pins: true
   reactions: true
@@ -2124,6 +2139,7 @@ indexes:
     nulls_not_distinct:
     comment:
     valid: true
+  movable_writer_states: []
   notifications:
   - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
     table: notifications

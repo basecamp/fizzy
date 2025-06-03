@@ -275,6 +275,11 @@ ActiveRecord::Schema[8.1].define(version: 2025_07_03_193928) do
     t.index ["source_type", "source_id"], name: "index_mentions_on_source"
   end
 
+  create_table "movable_writer_states", force: :cascade do |t|
+    t.datetime "updated_at", null: false
+    t.string "writer"
+  end
+
   create_table "notifications", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "creator_id"
