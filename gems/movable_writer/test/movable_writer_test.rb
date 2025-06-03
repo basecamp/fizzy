@@ -134,13 +134,4 @@ class MovableWriterTest < ActiveSupport::TestCase
       assert_equal "fizzy-app-222", response[1]["X-Kamal-Writer"]
     end
   end
-
-  private
-    def with_localhost(writer)
-      @was_env = ENV.to_h
-      ENV["KAMAL_HOST"] = writer
-      yield
-    ensure
-      ENV.replace(@was_env)
-    end
 end

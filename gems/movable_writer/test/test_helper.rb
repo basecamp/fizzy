@@ -12,3 +12,13 @@ if ActiveSupport::TestCase.respond_to?(:fixture_paths=)
   ActiveSupport::TestCase.file_fixture_path = File.expand_path("fixtures", __dir__) + "/files"
   ActiveSupport::TestCase.fixtures :all
 end
+
+class ActiveSupport::TestCase
+  def with_localhost(writer)
+    @was_env = ENV.to_h
+    ENV["KAMAL_HOST"] = writer
+    yield
+  ensure
+    ENV.replace(@was_env)
+  end
+end
