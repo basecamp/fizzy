@@ -3,12 +3,26 @@
 <% height = blob.metadata["height"] %>
 
 <% if blob.video? %>
-  <%= tag.video \
+  <% if width && height %>
+    <% aspect_ratio = (width / height.to_f) %>
+    <%= tag.div class: "max-inline-size center flex overflow-clip", style: "inline-size: #{width / 2}px; aspect-ratio: #{aspect_ratio}" do %>
+      <%= tag.video \
             src: rails_blob_path(blob),
             controls: true,
             preload: :none,
-            width: width,
-            height: height %>
+            width: "100%",
+            height: "100%" %>
+    <% end %>
+  <% else %>
+    <%= tag.div class: "max-inline-size center overflow-clip" do %>
+      <%= tag.video \
+          src: rails_blob_path(blob),
+          controls: true,
+          preload: :none,
+          width: "100%",
+          height: "100%" %>
+    <% end %>
+  <% end %>
 <% elsif blob.audio? %>
   <audio controls="true" width="100%" preload="metadata">
     <source src="<%= rails_blob_url(blob) %>" type="<%= blob.content_type %>">
