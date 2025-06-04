@@ -1,3 +1,8 @@
+37s_account:
+  container: 37s (Account)
+  auto_reconsider_period: <%= 30.days.to_i %>
+  auto_close_period: <%= 30.days.to_i %>
+
 writebook_collection:
   container: writebook (Collection)
   auto_reconsider_period: <%= 30.days.to_i %>
