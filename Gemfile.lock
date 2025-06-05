@@ -345,7 +345,7 @@ GEM
       nio4r (~> 2.0)
     raabro (1.4.0)
     racc (1.8.1)
-    rack (3.1.15)
+    rack (3.1.16)
     rack-contrib (2.5.0)
       rack (< 4)
     rack-session (2.1.1)
