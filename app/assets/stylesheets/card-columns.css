@@ -13,6 +13,12 @@
 
     container-type: inline-size;
     max-inline-size: 1400px;
+
+    @media (max-width: 639px) {
+      --bubble-gap: -0.5rem;
+      --bubble-size: 3rem;
+      --reserved-bubble-space: calc(var(--bubble-size) / 2 + var(--bubble-gap));
+    }
   }
 
   .card-columns {
