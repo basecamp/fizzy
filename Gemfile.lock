@@ -111,7 +111,7 @@ GIT
 
 GIT
   remote: https://github.com/rails/rails.git
-  revision: fd49d6a3180244969fb5ab9768d0bc7d9e4df9fe
+  revision: aa66aece44f191e6330c04ce4942c3edf31d85d7
   branch: main
   specs:
     actioncable (8.1.0.alpha)
@@ -369,7 +369,7 @@ GEM
     mysql2 (0.5.6)
     net-http (0.6.0)
       uri
-    net-imap (0.5.8)
+    net-imap (0.5.9)
       date
       net-protocol
     net-pop (0.1.2)
@@ -443,7 +443,7 @@ GEM
     rainbow (3.1.1)
     rake (13.3.0)
     rb_sys (0.9.106)
-    rdoc (6.14.0)
+    rdoc (6.14.1)
       erb
       psych (>= 4.0.0)
     redcarpet (3.6.1)
