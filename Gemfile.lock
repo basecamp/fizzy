@@ -275,7 +275,7 @@ GEM
       rexml
     crass (1.0.6)
     date (3.4.1)
-    debug (1.10.0)
+    debug (1.11.0)
       irb (~> 1.10)
       reline (>= 0.3.8)
     dotenv (3.1.8)
@@ -443,7 +443,7 @@ GEM
     rainbow (3.1.1)
     rake (13.3.0)
     rb_sys (0.9.106)
-    rdoc (6.14.0)
+    rdoc (6.14.1)
       erb
       psych (>= 4.0.0)
     redcarpet (3.6.1)
