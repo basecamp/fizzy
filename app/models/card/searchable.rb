@@ -13,7 +13,7 @@ module Card::Searchable
       left_joins(:comments).where("cards.id in (#{cards}) or comments.id in (#{comments})").distinct
     end
 
-    scope :similar_to, -> (query) do
+    scope :similar_to, ->(query) do
       cards = Card.search_similar(query).select(:id).to_sql
       comments = Comment.search_similar(query).select(:id).to_sql
 
@@ -24,7 +24,7 @@ module Card::Searchable
   private
     # TODO: Temporary until we stabilize the search API
     def title_and_description
-      [title, description.to_plain_text].join(" ")
+      [ title, description.to_plain_text ].join(" ")
     end
 
     def search_embedding_content
