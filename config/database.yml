@@ -8,6 +8,8 @@ default: &default
   adapter: sqlite3
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
   timeout: 5000
+  extensions:
+    - <%= SqliteVec.loadable_path %>
 
 development:
   primary:
@@ -40,6 +42,8 @@ production: &production
     <<: *default
     database: file:storage/tenants/<%= Rails.env %>/%{tenant}/db/main.sqlite3?vfs=beamer
     tenanted: true
+    extensions:
+      - <%= SqliteVec.loadable_path %>
   primary_original:
     <<: *default
     database: storage/production.sqlite3

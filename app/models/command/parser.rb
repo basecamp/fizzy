@@ -18,7 +18,6 @@ class Command::Parser
   private
     def parse_command(string)
       command_name, *command_arguments = string.strip.split(" ")
-      combined_arguments = command_arguments.join(" ")
 
       case command_name
       when /^#/
@@ -27,18 +26,16 @@ class Command::Parser
         Command::GoToUser.new(user_id: assignee_from(command_name)&.id)
       when "/assign", "/assignto"
         Command::Assign.new(assignee_ids: assignees_from(command_arguments).collect(&:id), card_ids: cards.ids)
+      when "/insight"
+        Command::GetInsight.new(query: command_arguments.join(" "), card_ids: cards.ids)
       when "/clear"
         Command::ClearFilters.new(params: filter.as_params)
       when "/close"
-        Command::Close.new(card_ids: cards.ids, reason: combined_arguments)
-      when "/insight"
-        Command::GetInsight.new(query: combined_arguments, card_ids: cards.ids)
-      when "/search"
-        Command::Search.new(terms: combined_arguments)
+        Command::Close.new(card_ids: cards.ids, reason: command_arguments.join(" "))
       when "/visit"
         Command::VisitUrl.new(url: command_arguments.first)
       when "/tag"
-        Command::Tag.new(tag_title: tag_title_from(combined_arguments), card_ids: cards.ids)
+        Command::Tag.new(tag_title: tag_title_from(command_arguments.join(" ")), card_ids: cards.ids)
       else
         parse_free_string(string)
       end

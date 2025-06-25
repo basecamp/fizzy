@@ -1,6 +1,7 @@
 require_relative "boot"
 
 require "rails/all"
+require "sqlite_vec" # Referenced in database.yml
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.

@@ -9,6 +9,7 @@ class Command::Ai::Translator
 
   def translate(query)
     response = translate_query_with_llm(query)
+    Rails.logger.debug "Commands: #{response}"
     normalize JSON.parse(response)
   end
 
@@ -50,7 +51,7 @@ class Command::Ai::Translator
 
         ## Context Properties for Filtering (use explicitly):
 
-        * **terms**: Array of keywords (split individually, e.g., ["some", "term"]). Avoid redundancy. Only use if the query explicitly refers to cards.
+        * **terms**: Array of keywords (split individually, e.g., ["some", "term"]). Avoid redundancy.
         * **indexed_by**: "newest", "oldest", "latest", "stalled", "closed".
           * "closed": completed cards.
           * "newest": by creation date
@@ -66,7 +67,6 @@ class Command::Ai::Translator
 
         ## Explicit Filtering Rules:
 
-        * Only use "terms" if the query explicitly refers to cards. If just searching for an expression, ALWAYS use /search.
         * Numbers entered without explicit "card" or "cards" prefix should default to `terms`.
           * Examples:
             * "123": `terms: ["123"]`
@@ -83,18 +83,15 @@ class Command::Ai::Translator
         * "Recent cards": use `indexed_by: "newest"`.
         * "Cards with recent activity": use `indexed_by: "latest"`.
         * "Completed/closed cards": use `indexed_by: "closed"`.
+        * Unknown terms default to `terms`.
         * If cards are described as being “assigned to X” or “currently assigned to X”, treat X as an existing filter.
           - For example: “close cards assigned to andy and assign them to kevin” → `assignee_ids: ["andy"]` with `/assign kevin` as a command.
           - Only the first mention (“assigned to”) is a filter. The second (“assign”) is a new action.
 
         ## Command Interpretation Rules:
 
-        * Unless you can clearly match the query with a command, pass the expression verbatim to /search to perform a search with it.
-        * When searching for nouns (singular or plural), if they don't refer to a person, favor /search with them instead of using the "terms" filter.
-        * Respect strictly the order of commands as the appear in the user request.
-        * When using /search, pass the expression to search verbatim, don't interpret it.
         * "tag with #design": always `/tag #design`. Do NOT create `tag_ids` context.
-        * "#design cards" or "cards tagged with #design": use `tag_ids`. Do not use the /tag command in this case.
+        * "#design cards" or "cards tagged with #design": use `tag_ids`.
         * "Assign cards tagged with #design to jz": filter by `tag_ids`, command `/assign jz`. Do NOT generate `/tag` command.
         * "close as [reason]" or "close because [reason]": include the reason in the `/close` command, e.g., `/close not now`.
         * "close": always `/close`, even if no reason is given or no cards are explicitly described.
@@ -135,7 +132,15 @@ class Command::Ai::Translator
         * Close cards: `/close [optional reason]`
         * Tag cards: `/tag #[tag-name]`
         * Clear filters: `/clear`
-        * Search cards: `/search [terms]`
+        * Insights: `/insight [query]`.
+          - Always use `/insight` for user questions or requests like:
+            - “steps to reproduce”
+            - “summary” / “summarize”
+            - “what's the root cause”
+            - “can you explain…”
+          - These must be interpreted as requests for insight — **not** tagging.
+          - Pass the exact query as the /insight param.
+          - Especially when **inside a card**, interpret standalone phrases as insight commands even if they could be tags.#{'      '}
 
         ## JSON Output Examples (strictly follow these patterns):
 
@@ -144,8 +149,6 @@ class Command::Ai::Translator
         { "commands": ["/assign jorge", "/tag #design"] }
 
         Omit empty arrays or unnecessary properties. At least one property (`context` or `commands`) must exist.
-
-        Never include JSON outside of "context" or "commands".
 
         ## Other Strict Instructions:
 

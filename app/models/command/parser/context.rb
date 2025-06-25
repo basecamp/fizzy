@@ -33,9 +33,6 @@ class Command::Parser::Context
   private
     attr_reader :controller, :action, :params
 
-    MAX_CARDS = 20
-    MAX_CLOSED_CARDS = 10
-
     def extract_url_components
       uri = URI.parse(url || "")
       route = Rails.application.routes.recognize_path(uri.path)

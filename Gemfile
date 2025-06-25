@@ -50,6 +50,7 @@ gem "rails_structured_logging", bc: "rails-structured-logging"
 
 # AI
 gem "ruby_llm", git: "https://github.com/crmne/ruby_llm.git"
+gem "sqlite-vec", "0.1.7.alpha.2"
 gem "tiktoken_ruby"
 
 group :development, :test do

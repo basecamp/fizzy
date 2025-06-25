@@ -49,6 +49,14 @@ class Command::Ai::TranslatorTest < ActionDispatch::IntegrationTest
     assert_command({ context: { terms: [ "123" ] } }, "123") # Notice existing cards will be intercepted earlier
   end
 
+  test "getting insight on cards" do
+    # Card context
+    assert_command({ commands: [ "/insight summarize" ] }, "summarize", context: :card)
+    assert_command({ commands: [ "/insight steps to reproduce" ] }, "steps to reproduce", context: :card)
+    assert_command({ commands: [ "/insight create a table with the main participants and takeaways" ] }, "create a table with the main participants and takeaways", context: :card)
+    assert_command({ commands: [ "/insight what's the issue here?" ] }, "what's the issue here?", context: :card)
+  end
+
   test "filter by collections" do
     assert_command({ context: { collection_ids: [ "writebook" ] } }, "writebook collection")
   end
@@ -66,7 +74,7 @@ class Command::Ai::TranslatorTest < ActionDispatch::IntegrationTest
   test "assign cards" do
     # List context
     assert_command({ commands: [ "/assign jz" ] }, "assign to jz")
-    assert_command({ context: { tag_ids: [ "design" ] }, commands: [ "/assign jz" ] }, "assign cards agged with #design to jz", context: :card)
+    assert_command({ context: { tag_ids: [ "design" ] }, commands: [ "/assign jz" ] }, "assign cards tagged with #design to jz", context: :card)
   end
 
   test "tag cards" do
