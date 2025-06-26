@@ -81,7 +81,7 @@ GIT
 
 GIT
   remote: https://github.com/basecamp/signal_id
-  revision: 8908b2550ff55325b04c108146e00b4408a64e93
+  revision: 6ce0ff4d07a6e1994c7bdad10d965013a6e390ed
   branch: rails4
   specs:
     signal_id (4.3.2)
@@ -330,7 +330,7 @@ GEM
       activesupport (>= 5.0.0)
     jmespath (1.6.2)
     json (2.12.2)
-    jwt (2.10.1)
+    jwt (3.1.1)
       base64
     language_server-protocol (3.17.0.5)
     lint_roller (1.1.0)
