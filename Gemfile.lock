@@ -17,9 +17,9 @@ GIT
 
 GIT
   remote: https://github.com/basecamp/file_repository
-  revision: 17e90fc35ccb9f0a0dae1ed8623f01386696002d
+  revision: 8c8d1594f3ec7e8c0938e6a7f7def521692344e4
   specs:
-    file_repository (1.4.5)
+    file_repository (1.4.6)
 
 GIT
   remote: https://github.com/basecamp/kamal
@@ -588,7 +588,7 @@ DEPENDENCIES
   bundler-audit
   capybara
   debug
-  file_repository (~> 1.4.5)!
+  file_repository (~> 1.4.6)!
   geared_pagination (~> 1.2)
   image_processing (~> 1.14)
   importmap-rails
