@@ -157,6 +157,9 @@
     padding: var(--lexical-prompt-padding);
     visibility: hidden;
     z-index: var(--z-popup);
+
+    max-height: 200px;
+    overflow: scroll;
   }
 
   .lexical-prompt-menu--visible {
