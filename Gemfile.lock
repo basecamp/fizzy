@@ -40,7 +40,7 @@ GIT
 
 GIT
   remote: https://github.com/basecamp/portfolio
-  revision: 26dd0ccbe4aad5a5c539f90c00e82b6175443636
+  revision: 34b48dd3c6dc78abd162ef26481971a228084d04
   specs:
     portfolio (5.2.0)
       activesupport
