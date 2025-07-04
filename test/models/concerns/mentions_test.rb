@@ -5,19 +5,74 @@ class MentionsTest < ActiveSupport::TestCase
     Current.session = sessions(:david)
   end
 
-  test "create mentions from plain text mentions" do
-    assert_difference -> { Mention.count }, +1 do
+  test "don't create mentions when creating or updating drafts" do
+    assert_no_difference -> { Mention.count } do
       perform_enqueued_jobs only: Mention::CreateJob do
-        collections(:writebook).cards.create title: "Cleanup", description: "Did you finish up with the cleanup, @david?"
+        card = collections(:writebook).cards.create title: "Cleanup", description: "Did you finish up with the cleanup, @david?"
+        card.update description: "Any thoughts here @jz"
       end
     end
   end
 
-  test "create mentions from rich text mentions" do
-    assert_difference -> { Mention.count }, +1 do
-      perform_enqueued_jobs only: Mention::CreateJob do
+  test "create mentions from plain text mentions when publishing cards" do
+    perform_enqueued_jobs only: Mention::CreateJob do
+      card = assert_no_difference -> { Mention.count } do
+        collections(:writebook).cards.create title: "Cleanup", description: "Did you finish up with the cleanup, @david?"
+      end
+
+      assert_difference -> { Mention.count }, +1 do
+        card.published!
+      end
+    end
+  end
+
+  test "create mentions from rich text mentions when publishing cards" do
+    perform_enqueued_jobs only: Mention::CreateJob do
+      card = assert_no_difference -> { Mention.count } do
         attachment = ActionText::Attachment.from_attachable(users(:david))
         collections(:writebook).cards.create title: "Cleanup", description: "Did you finish up with the cleanup, #{attachment.to_html}?"
+      end
+
+      assert_difference -> { Mention.count }, +1 do
+        card.published!
+      end
+    end
+  end
+
+  test "don't create repeated mentions when updating cards" do
+    perform_enqueued_jobs only: Mention::CreateJob do
+      card = collections(:writebook).cards.create title: "Cleanup", description: "Did you finish up with the cleanup, @david?"
+
+      assert_difference -> { Mention.count }, +1 do
+        card.published!
+      end
+
+      assert_no_difference -> { Mention.count } do
+        card.update description: "Any thoughts here @david"
+      end
+
+      assert_difference -> { Mention.count }, +1 do
+        card.update description: "Any thoughts here @jz"
+      end
+    end
+  end
+
+  test "create mentions from plain text mentions when posting comments" do
+    perform_enqueued_jobs only: Mention::CreateJob do
+      card = collections(:writebook).cards.create title: "Cleanup", description: "Some initial content", status: :published
+
+      assert_difference -> { Mention.count }, +1 do
+        card.comments.create!(body: "Great work on this @david!")
+      end
+    end
+  end
+
+  test "don't create mentions from comments when belonging to unpublished cards" do
+    perform_enqueued_jobs only: Mention::CreateJob do
+      card = collections(:writebook).cards.create title: "Cleanup", description: "Some initial content"
+
+      assert_no_difference -> { Mention.count } do
+        card.comments.create!(body: "Great work on this @david!")
       end
     end
   end
@@ -37,6 +92,7 @@ class MentionsTest < ActiveSupport::TestCase
   test "mentionees are added as watchers of the card" do
     perform_enqueued_jobs only: Mention::CreateJob do
       card = collections(:writebook).cards.create title: "Cleanup", description: "Did you finish up with the cleanup @kevin?"
+      card.published!
       assert card.watchers.include?(users(:kevin))
     end
   end

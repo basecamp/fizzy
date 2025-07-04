@@ -4,7 +4,7 @@ module Mentions
   included do
     has_many :mentions, as: :source, dependent: :destroy
     has_many :mentionees, through: :mentions
-    after_save_commit :create_mentions_later, if: :mentionable_content_changed?
+    after_save_commit :create_mentions_later, if: :should_create_mentions?
   end
 
   def create_mentions(mentioner: Current.user)
@@ -48,11 +48,20 @@ module Mentions
       self.class.reflect_on_all_associations(:has_one).filter { it.klass == ActionText::RichText }
     end
 
+    def should_create_mentions?
+      mentionable? && mentionable_content_changed?
+    end
+
     def mentionable_content_changed?
       rich_text_associations.any? { send(it.name)&.body_previously_changed? }
     end
 
     def create_mentions_later
       Mention::CreateJob.perform_later(self, mentioner: Current.user)
+    end
+
+    # Template method
+    def mentionable?
+      true
     end
 end
