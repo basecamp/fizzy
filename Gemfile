@@ -16,7 +16,7 @@ gem "kamal", bc: "kamal", ref: "344e2d79", require: false
 gem "puma", ">= 5.0"
 gem "solid_cable", ">= 3.0"
 gem "solid_cache", "~> 1.0"
-gem "solid_queue", "~> 1.1"
+gem "solid_queue", "~> 1.2"
 gem "sqlite3", ">= 2.0"
 gem "thruster", require: false
 
