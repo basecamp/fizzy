@@ -112,7 +112,7 @@ GIT
 
 GIT
   remote: https://github.com/rails/rails.git
-  revision: 58a2187f7b2ac391eba841e9ec6bb1a6d4e486dd
+  revision: 57093484e7926fb33ff266aa25b3c6241b235a68
   branch: main
   specs:
     actioncable (8.1.0.alpha)
@@ -208,6 +208,7 @@ GIT
       rackup (>= 1.0.0)
       rake (>= 12.2)
       thor (~> 1.0, >= 1.2.2)
+      tsort (>= 0.2)
       zeitwerk (~> 2.6)
 
 GEM
@@ -546,6 +547,7 @@ GEM
     tiktoken_ruby (0.0.11.1-x86_64-darwin)
     tiktoken_ruby (0.0.11.1-x86_64-linux)
     timeout (0.4.3)
+    tsort (0.2.0)
     turbo-rails (2.0.16)
       actionpack (>= 7.1.0)
       railties (>= 7.1.0)
