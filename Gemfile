@@ -42,6 +42,9 @@ gem "file_repository", "~> 1.4.5", bc: "file_repository" # needed by portfolio
 gem "queenbee", bc: "queenbee-plugin"
 gem "activeresource", require: "active_resource" # needed by queenbee
 
+# Unfurling rich links
+gem "rich_link", path: "../rich_link"
+
 # Telemetry, logging, and operations
 gem "mission_control-jobs"
 gem "sentry-ruby"

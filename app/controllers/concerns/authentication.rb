@@ -2,6 +2,8 @@ module Authentication
   extend ActiveSupport::Concern
 
   included do
+    include RichLink::Authentication
+
     # Checking for tenant must happen first so we redirect before trying to access the db.
     before_action :require_tenant
 
@@ -39,7 +41,7 @@ module Authentication
     end
 
     def require_authentication
-      resume_session || request_authentication
+      resume_session || authenticate_by_rich_link_token || request_authentication
     end
 
     def resume_session
