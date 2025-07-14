@@ -18,4 +18,8 @@ module RichTextHelper
   def cards_prompt
     content_tag "lexical-prompt", "", trigger: "#", src: prompts_cards_path, name: "card", "insert-editable-text": true, "remote-filtering": true
   end
+
+  def rich_link_unfurl_url
+    File.join(request.script_name, RichLink::Engine.routes.url_helpers.unfurl_path)
+  end
 end

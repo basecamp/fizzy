@@ -174,6 +174,7 @@ Rails.application.routes.draw do
   root "events#index"
 
   Queenbee.routes(self)
+  mount RichLink::Engine => "/rich_link"
 
   namespace :admin do
     mount MissionControl::Jobs::Engine, at: "/jobs"

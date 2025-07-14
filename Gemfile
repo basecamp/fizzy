@@ -27,10 +27,11 @@ gem "rqrcode"
 gem "redcarpet"
 gem "rouge"
 gem "jbuilder"
-gem "actiontext-lexical", bc: "actiontext-lexical"
+gem "actiontext-lexical", bc: "actiontext-lexical", branch: "flavorjones/unfurl-url"
 gem "image_processing", "~> 1.14"
 gem "platform_agent"
 gem "aws-sdk-s3", require: false
+gem "rich_link", bc: "rich_link"
 
 # 37id and Queenbee integration
 gem "signal_id", bc: "signal_id", branch: "rails4"
@@ -41,9 +42,6 @@ gem "portfolio", ">= 4.6", bc: "portfolio" # needed by signal_id
 gem "file_repository", "~> 1.4.5", bc: "file_repository" # needed by portfolio
 gem "queenbee", bc: "queenbee-plugin"
 gem "activeresource", require: "active_resource" # needed by queenbee
-
-# Unfurling rich links
-gem "rich_link", path: "../rich_link"
 
 # Telemetry, logging, and operations
 gem "mission_control-jobs"

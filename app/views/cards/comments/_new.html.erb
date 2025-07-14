@@ -10,7 +10,8 @@
                   local_save_key_value: "comment-#{card.id}",
                   action: "turbo:submit-end->local-save#submit keydown.ctrl+enter->form#submit:prevent keydown.meta+enter->form#submit:prevent keydown.esc->form#cancel:stop" } do |form| %>
         <%= form.rich_textarea :body, required: true, placeholder: new_comment_placeholder(card),
-              data: { local_save_target: "input", action: "actiontext:change->local-save#save turbo:morph-element->local-save#restoreContent" } do %>
+         data: { local_save_target: "input", unfurl_url: rich_link_unfurl_url,
+                 action: "actiontext:change->local-save#save turbo:morph-element->local-save#restoreContent" } do %>
           <%= mentions_prompt(@card.collection) %>
           <%= cards_prompt %>
         <% end %>

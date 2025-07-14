@@ -1,6 +1,7 @@
 GIT
   remote: https://github.com/basecamp/actiontext-lexical
-  revision: 109735daa044233236cf7a72f30043e5c790e853
+  revision: 9f47937e22e1f374bf43215d9f62a2a29fe19728
+  branch: flavorjones/unfurl-url
   specs:
     actiontext-lexical (0.1.0)
       rails (>= 8.0.2)
@@ -72,6 +73,17 @@ GIT
     rails_structured_logging (0.2.1)
       json
       rails (>= 6.0.0)
+
+GIT
+  remote: https://github.com/basecamp/rich_link
+  revision: ef56fd6aaa10ade1fc5e0865b1426bd5446e5533
+  specs:
+    rich_link (0.1.0)
+      faraday
+      faraday-follow_redirects
+      nokogiri
+      rails (>= 8.0.2)
+      signal_id
 
 GIT
   remote: https://github.com/basecamp/service_concurrency_prevention
@@ -209,16 +221,6 @@ GIT
       rake (>= 12.2)
       thor (~> 1.0, >= 1.2.2)
       zeitwerk (~> 2.6)
-
-PATH
-  remote: ../rich_link
-  specs:
-    rich_link (0.1.0)
-      faraday
-      faraday-follow_redirects
-      nokogiri
-      rails (>= 8.0.2)
-      signal_id
 
 GEM
   remote: https://rubygems.org/
