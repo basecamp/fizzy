@@ -12,3 +12,4 @@ test:
 beta: *cable
 staging: *cable
 production: *cable
+performance: *cable

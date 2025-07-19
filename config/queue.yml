@@ -13,3 +13,4 @@ test: *default
 beta: *default
 staging: *default
 production: *default
+performance: *default

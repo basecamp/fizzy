@@ -19,3 +19,4 @@ test: *default_options
 beta: *default
 staging: *default
 production: *default
+performance: *default

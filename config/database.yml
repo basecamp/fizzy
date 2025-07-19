@@ -11,23 +11,25 @@ default: &default
   extensions:
     - <%= SqliteVec.loadable_path %>
 
-development:
+development: &development
   primary:
     <<: *default
     database: storage/tenants/<%= Rails.env %>/%{tenant}/db/main.sqlite3
     tenanted: true
   cable:
     <<: *default
-    database: storage/development_cable.sqlite3
+    database: storage/<%= Rails.env %>_cable.sqlite3
     migrations_paths: db/cable_migrate
   cache:
     <<: *default
-    database: storage/development_cache.sqlite3
+    database: storage/<%= Rails.env %>_cache.sqlite3
     migrations_paths: db/cache_migrate
   queue:
     <<: *default
-    database: storage/development_queue.sqlite3
+    database: storage/<%= Rails.env %>_queue.sqlite3
     migrations_paths: db/queue_migrate
+
+performance: *development
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".

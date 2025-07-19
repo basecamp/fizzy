@@ -13,6 +13,10 @@ Rails.application.config.to_prepare do
       config["connect_timeout"] = 1
     end
   end
+  db_config.keys.select { |key| key.to_s.start_with?("development") }.each do |key|
+    new_key = key.sub(/development/, "performance")
+    db_config[new_key] = db_config[key]
+  end
   SignalId::Database.load_configuration db_config
   SignalId::Database.enable_rw_splitting!
 
