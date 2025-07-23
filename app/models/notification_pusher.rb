@@ -17,7 +17,7 @@ class NotificationPusher
 
   private
     def account_prefix
-      "/#{Account.first.queenbee_id}"
+      "/#{Account.sole.queenbee_id}"
     end
 
     def should_push?
