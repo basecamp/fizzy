@@ -82,7 +82,7 @@ GIT
 
 GIT
   remote: https://github.com/basecamp/signal_id
-  revision: 0b18e9665f8a9295b84a18d329ff272f494a2249
+  revision: d6c2a5ceed7bb57bf7dcdebdb439e7cd526fca09
   branch: rails4
   specs:
     signal_id (4.3.2)
@@ -373,7 +373,7 @@ GEM
     mocha (2.7.1)
       ruby2_keywords (>= 0.0.5)
     msgpack (1.8.0)
-    multi_json (1.15.0)
+    multi_json (1.17.0)
     multipart-post (2.4.1)
     net-http (0.6.0)
       uri
@@ -458,7 +458,7 @@ GEM
       psych (>= 4.0.0)
     redcarpet (3.6.1)
     regexp_parser (2.10.0)
-    reline (0.6.1)
+    reline (0.6.2)
       io-console (~> 0.5)
     rexml (3.4.1)
     rouge (4.5.2)
