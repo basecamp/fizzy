@@ -89,7 +89,7 @@ Rails.application.routes.draw do
   get "join/:join_code", to: "users#new", as: :join
   post "join/:join_code", to: "users#create"
 
-  resource :session, only: :destroy do
+  resource :session do
     scope module: "sessions" do
       resources :transfers, only: %i[ show update ]
       resource :launchpad, only: %i[ show update ], controller: "launchpad"

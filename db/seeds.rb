@@ -10,17 +10,31 @@ def seed_account(name)
   puts " #{elapsed.round(2)} sec"
 end
 
-def create_tenant(signal_account_name)
-  signal_account = SignalId::Account.find_by_product_and_name!("fizzy", signal_account_name)
-  tenant_name = signal_account.queenbee_id
+def create_tenant(signal_account_name, bare: false)
+  if bare
+    queenbee_id = Digest::SHA256.hexdigest(signal_account_name)[0..8].to_i(16)
+  else
+    signal_account = SignalId::Account.find_by_product_and_name!("fizzy", signal_account_name)
+    queenbee_id = signal_account.queenbee_id
+  end
 
-  ApplicationRecord.destroy_tenant tenant_name
-  ApplicationRecord.create_tenant(tenant_name) do
-    account = Account.create_with_admin_user(queenbee_id: signal_account.queenbee_id)
+  ApplicationRecord.destroy_tenant queenbee_id
+  ApplicationRecord.create_tenant(queenbee_id) do
+    account = if bare
+      Account.create(name: signal_account_name, queenbee_id: queenbee_id).tap do
+        User.create!(
+          name: "David Heinemeier Hansson",
+          email_address: "david@37signals.com",
+          password: "secret123456"
+        )
+      end
+    else
+      Account.create_with_admin_user(queenbee_id: queenbee_id)
+    end
     account.setup_basic_template
   end
 
-  ApplicationRecord.current_tenant = tenant_name
+  ApplicationRecord.current_tenant = queenbee_id
 end
 
 def find_or_create_user(full_name, email_address)
@@ -65,5 +79,6 @@ def create_card(title, collection:, description: nil, status: :published, creato
 end
 
 # Seed accounts
+seed_account "cleanslate"
 seed_account "37signals"
 seed_account "honcho"

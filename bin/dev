@@ -1,11 +1,21 @@
 #!/usr/bin/env sh
 
 echo "Login with david@37signals.com / secret123456 to:"
-echo "  - 37signals: http://fizzy.localhost:3006/735464785"
-echo "  - Honcho:    http://fizzy.localhost:3006/175932900"
+bin/rails runner - <<EOF
+  ApplicationRecord.with_each_tenant do |tenant|
+    next unless tenant =~ /\A\d+\z/
+    if Account.sole.signal_account || Rails.application.config.x.local_authentication
+      puts "  - #{Account.sole.name}: http://fizzy.localhost:3006/#{Account.sole.queenbee_id}"
+    end
+  end
+EOF
 
 if [ -f tmp/solid-queue.txt ]; then
   export SOLID_QUEUE_IN_PUMA=1
+fi
+
+if [ -f tmp/local-auth.txt ]; then
+  export LOCAL_AUTHENTICATION=1
 fi
 
 exec ./bin/rails server -p 3006

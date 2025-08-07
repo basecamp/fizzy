@@ -2,19 +2,13 @@
 <html lang="en">
   <%= render "layouts/shared/head" %>
 
-  <body data-controller="lightbox local-time timezone-cookie" data-action="turbo:morph@window->local-time#refreshAll">
+  <body data-controller="local-time timezone-cookie" data-action="turbo:morph@window->local-time#refreshAll">
     <header id="header">
       <a href="#main" class="skip-navigation btn" data-turbo="false">Skip to main content</a>
       <%= yield :header %>
     </header>
 
-    <% if notice = flash[:notice] || flash[:alert] %>
-      <div class="flash" data-controller="element-removal" data-action="animationend->element-removal#remove">
-        <div class="flash__inner shadow">
-          <%= notice %>
-        </div>
-      </div>
-    <% end %>
+    <%= render "layouts/shared/flash" %>
 
     <main id="main">
       <%= yield %>

@@ -766,7 +766,7 @@ http_interactions:
       message: OK
     headers:
       Date:
-      - Thu, 31 Jul 2025 19:29:32 GMT
+      - Tue, 05 Aug 2025 20:59:07 GMT
       Content-Type:
       - application/json
       Transfer-Encoding:
@@ -778,13 +778,13 @@ http_interactions:
       Openai-Organization:
       - 37signals-u7qhwk
       Openai-Processing-Ms:
-      - '751'
+      - '288'
       Openai-Project:
       - proj_M0FFIqFFeNEpzhhgv64oFzt1
       Openai-Version:
       - '2020-10-01'
       X-Envoy-Upstream-Service-Time:
-      - '810'
+      - '305'
       X-Ratelimit-Limit-Requests:
       - '5000'
       X-Ratelimit-Limit-Tokens:
@@ -798,33 +798,31 @@ http_interactions:
       X-Ratelimit-Reset-Tokens:
       - 258ms
       X-Request-Id:
-      - req_7db97a4e6e619ef29bc2ea61632a48c0
-      X-Envoy-Decorator-Operation:
-      - router.openai.svc.cluster.local:5004/*
+      - req_7276c4390272c930bae3d92ff933b50b
       Strict-Transport-Security:
       - max-age=31536000; includeSubDomains; preload
       Cf-Cache-Status:
       - DYNAMIC
       Set-Cookie:
-      - __cf_bm=_MEyZBQMh3sTv80miw7MB1mDDL0fyaH7tjoh2o2OcNo-1753990172-1.0.1.1-jPtk1_vkg9O7EZjqLfDFyIggut9UsqSxRarV6nx8MR.JmFXu6iS.yfOUYzXYuRW42_OdqqqATh77xBdy9K1Pwz2.YDGfkWyNI5PuJCyffrw;
-        path=/; expires=Thu, 31-Jul-25 19:59:32 GMT; domain=.api.openai.com; HttpOnly;
+      - __cf_bm=tZxtZ5dhNNC9dT47Dbn6er3EBVJgxKFo454cuZLmLGg-1754427547-1.0.1.1-ivApyaA.LpegnmQRb5hK8ATwBiuVUdQr7DivTFD4uE0hYa8kdPxRzk7K9INsuG3Lr64CcuC3_64S3XyxJs0hDhsTzuhYGgCBCZFmNA86ooQ;
+        path=/; expires=Tue, 05-Aug-25 21:29:07 GMT; domain=.api.openai.com; HttpOnly;
         Secure; SameSite=None
-      - _cfuvid=XHvQgds.MZ6e_zvq1oWBHF8y_JX9sMuvc2lZA4BzDOU-1753990172244-0.0.1.1-604800000;
+      - _cfuvid=g5AwZEjGcJPRvMP468aylJVT8XcOk9cM9qT41Wg1MjA-1754427547451-0.0.1.1-604800000;
         path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
       X-Content-Type-Options:
       - nosniff
       Server:
       - cloudflare
       Cf-Ray:
-      - 967f814afab41214-DFW
+      - 96a937694e65e7d3-DFW
       Alt-Svc:
       - h3=":443"; ma=86400
     body:
       encoding: ASCII-8BIT
       base64_string: |
-        ewogICJpZCI6ICJjaGF0Y21wbC1CelRGejFjUzFGMEVxT3phQVU2ZjRTYWl6
-        SGVvdiIsCiAgIm9iamVjdCI6ICJjaGF0LmNvbXBsZXRpb24iLAogICJjcmVh
-        dGVkIjogMTc1Mzk5MDE3MSwKICAibW9kZWwiOiAiZ3B0LTQuMS0yMDI1LTA0
+        ewogICJpZCI6ICJjaGF0Y21wbC1DMUoyUnVESFZBUVpaREFMZmNpWTViSHIz
+        SWhQRSIsCiAgIm9iamVjdCI6ICJjaGF0LmNvbXBsZXRpb24iLAogICJjcmVh
+        dGVkIjogMTc1NDQyNzU0NywKICAibW9kZWwiOiAiZ3B0LTQuMS0yMDI1LTA0
         LTE0IiwKICAiY2hvaWNlcyI6IFsKICAgIHsKICAgICAgImluZGV4IjogMCwK
         ICAgICAgIm1lc3NhZ2UiOiB7CiAgICAgICAgInJvbGUiOiAiYXNzaXN0YW50
         IiwKICAgICAgICAiY29udGVudCI6ICJ7IFwiY29tbWFuZHNcIjogW1wiL3Nl
@@ -834,7 +832,7 @@ http_interactions:
         CiAgXSwKICAidXNhZ2UiOiB7CiAgICAicHJvbXB0X3Rva2VucyI6IDM1NDks
         CiAgICAiY29tcGxldGlvbl90b2tlbnMiOiAxMSwKICAgICJ0b3RhbF90b2tl
         bnMiOiAzNTYwLAogICAgInByb21wdF90b2tlbnNfZGV0YWlscyI6IHsKICAg
-        ICAgImNhY2hlZF90b2tlbnMiOiAzMzI4LAogICAgICAiYXVkaW9fdG9rZW5z
+        ICAgImNhY2hlZF90b2tlbnMiOiAzNDU2LAogICAgICAiYXVkaW9fdG9rZW5z
         IjogMAogICAgfSwKICAgICJjb21wbGV0aW9uX3Rva2Vuc19kZXRhaWxzIjog
         ewogICAgICAicmVhc29uaW5nX3Rva2VucyI6IDAsCiAgICAgICJhdWRpb190
         b2tlbnMiOiAwLAogICAgICAiYWNjZXB0ZWRfcHJlZGljdGlvbl90b2tlbnMi

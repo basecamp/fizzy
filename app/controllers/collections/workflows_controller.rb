@@ -5,7 +5,10 @@ class Collections::WorkflowsController < ApplicationController
 
   def update
     @collection.update! workflow: @workflow
-    render turbo_stream: turbo_stream.replace([ @collection, :workflows ], partial: "collections/edit/workflows", locals: { collection: @collection })
+    render turbo_stream: [
+        turbo_stream.replace([ @collection, :workflows ], partial: "collections/edit/workflows", locals: { collection: @collection }),
+        turbo_stream_flash(notice: "Saved")
+      ]
   end
 
   private

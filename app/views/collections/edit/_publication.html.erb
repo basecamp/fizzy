@@ -18,12 +18,22 @@
         <span class="txt-large"><%= icon_tag "world" %></span>
       </div>
 
-      <div class="flex align-center gap-half margin-block">
-        <%= text_field_tag :publication_url, published_collection_url(collection), readonly: true, class: "full-width input fill-white" %>
-        <div class="flex align-center justify-center gap-half">
-          <%= button_to_copy_to_clipboard(published_collection_url(collection)) do %>
-            <%= icon_tag "copy-paste" %>
-            <span class="for-screen-reader">Copy public link</span>
+        <div class="flex align-center gap-half margin-block">
+          <%= text_field_tag :publication_url, published_collection_url(collection), readonly: true, class: "full-width input fill-white" %>
+          <div class="flex align-center justify-center gap-half">
+            <%= button_to_copy_to_clipboard(published_collection_url(collection)) do %>
+              <%= icon_tag "copy-paste" %>
+              <span class="for-screen-reader">Copy public link</span>
+            <% end %>
+          </div>
+        </div>
+        <strong class="margin-block-end-half flex justify-center txt-small">Add an optional description to the public page</strong>
+        <div class="border-radius input fill-white">
+          <%= form_with model: collection, class: "txt-align-start", data: { controller: "form", turbo_frame: "_top" } do |form| %>
+            <%= form.rich_textarea :public_description, class: "rich-text-content txt-small",
+              placeholder: "Add a public note about this collection…",
+              data: { action: "keydown.ctrl+enter->form#submit:prevent keydown.meta+enter->form#submit:prevent keydown.esc->form#cancel:stop" } %>
+            <%= form.button "Save changes", type: :submit, class: "btn txt-small" %>
           <% end %>
         </div>
       </div>

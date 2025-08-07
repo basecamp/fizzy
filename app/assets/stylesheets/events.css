@@ -18,9 +18,10 @@
   }
 
   .events__activity-summary {
+    border: solid var(--color-ink-lighter);
+    border-width: 1px 1px 0 1px;
     color: var(--color-ink-darker);
     inline-size: auto;
-    margin-block-end: calc(var(--block-space) * -1);
     margin-inline: auto;
     padding: 1.1lh 1lh 1lh;
     position: relative;

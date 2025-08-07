@@ -55,7 +55,7 @@
     inline-size: 100%;
     max-inline-size: 100%;
 
-    &:has(*:first-child:not(.popup__item)) {
+    .popup__list &:has(*:first-child:not(.popup__item)) {
       padding-inline-start: var(--inline-space-half);
     }
 

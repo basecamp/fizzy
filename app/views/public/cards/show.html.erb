@@ -24,7 +24,7 @@
 <% end %>
 
 <section id="<%= dom_id(@card, :card_container) %>"
-    class="card-perma card-perma--public" style="--card-color: <%= @card.color %>;">
+    class="card-perma card-perma--public" data-controller="lightbox" style="--card-color: <%= @card.color %>;">
   <div class="card-perma__bg">
     <%= card_article_tag @card, class: "card" do %>
       <header class="card__header">
@@ -45,4 +45,6 @@
       </footer>
     <% end %>
   </div>
+
+  <%= render "layouts/lightbox" %>
 </section>

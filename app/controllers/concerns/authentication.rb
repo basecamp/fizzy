@@ -7,6 +7,8 @@ module Authentication
 
     before_action :require_authentication
     helper_method :authenticated?
+
+    include LoginHelper
   end
 
   class_methods do
@@ -53,11 +55,9 @@ module Authentication
     def request_authentication(untenanted: false)
       if ApplicationRecord.current_tenant.present?
         session[:return_to_after_authenticating] = request.url
-        redirect_to Launchpad.login_url(product: true, account: Account.sole), allow_other_host: true
-      else
-        # Don't save the current untenanted URL, because it's just going to bounce back to Launchpad after login anyway.
-        redirect_to Launchpad.login_url(product: true), allow_other_host: true
       end
+
+      redirect_to_login_url
     end
 
     def after_authentication_url

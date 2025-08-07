@@ -1,5 +1,6 @@
 class Signup::BaseController < ApplicationController
   require_untenanted_access
+  before_action :redirect_if_local_auth
 
   # TODO: Remove this auth before launch.
   http_basic_authenticate_with(
@@ -32,5 +33,9 @@ class Signup::BaseController < ApplicationController
     def redirect_to_account(account)
       redirect_to account.signal_account.owner.remote_login_url(proceed_to: root_path),
                   allow_other_host: true
+    end
+
+    def redirect_if_local_auth
+      render plain: "Unauthorized", status: :unauthorized if Rails.application.config.x.local_authentication
     end
 end

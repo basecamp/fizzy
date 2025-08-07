@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_07_23_165724) do
+ActiveRecord::Schema[8.1].define(version: 2025_08_06_174718) do
   create_table "accesses", force: :cascade do |t|
     t.datetime "accessed_at"
     t.integer "collection_id", null: false
@@ -28,7 +28,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_07_23_165724) do
     t.datetime "created_at", null: false
     t.string "join_code"
     t.string "name", null: false
-    t.integer "queenbee_id", null: false
+    t.integer "queenbee_id"
     t.datetime "updated_at", null: false
     t.index ["queenbee_id"], name: "index_accounts_on_queenbee_id", unique: true
   end

@@ -4,7 +4,7 @@
   <nav class="header">
     <div class="header__actions header__actions--start"></div>
     <div class="header__actions header__actions--end">
-      <%= link_to Launchpad.login_url(account: Account.sole), class: "btn", data: { controller: "hotkey", action: "keydown.esc@document->hotkey#click" } do %>
+      <%= link_to login_url, class: "btn", data: { controller: "hotkey", action: "keydown.esc@document->hotkey#click" } do %>
         <span class="for-screen-reader">Sign in instead</span>
       <% end %>
     </div>

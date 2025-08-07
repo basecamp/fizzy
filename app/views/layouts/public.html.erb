@@ -2,7 +2,7 @@
 <html>
   <%= render "layouts/shared/head" %>
 
-  <body class="public" data-controller="lightbox local-time timezone-cookie" data-action="turbo:morph@window->local-time#refreshAll">
+  <body class="public" data-controller="local-time timezone-cookie" data-action="turbo:morph@window->local-time#refreshAll">
     <header id="header">
       <a href="#main" class="skip-navigation btn" data-turbo="false">Skip to main content</a>
       <%= yield :header %>
@@ -30,7 +30,5 @@
         <strong><a href="http://37signals.com" class="txt-ink">Made with Fizzy&trade;</a></strong>
       </div>
     </footer>
-
-    <%= render "layouts/lightbox" %>
   </body>
 </html>

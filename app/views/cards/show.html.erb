@@ -42,19 +42,19 @@
   <% end %>
 </header>
 
-<div data-controller="beacon" data-beacon-url-value="<%= card_reading_url(@card) %>">
+<div data-controller="beacon lightbox" data-beacon-url-value="<%= card_reading_url(@card) %>">
   <%= render "cards/container", card: @card %>
 
   <% if @card.published? || @card.drafted? %>
     <%= render "cards/messages", card: @card %>
   <% end %>
-</div>
 
-<%= render "layouts/lightbox" do %>
-  <% if @card.image.attached? %>
-    <%= button_to card_image_path(@card), method: :delete, class: "btn", data: { tooltip: "Remove background" } do %>
-      <%= icon_tag "trash" %>
-      <span class="for-screen-reader">Remove background image</span>
+  <%= render "layouts/lightbox" do %>
+    <% if @card.image.attached? %>
+      <%= button_to card_image_path(@card), method: :delete, class: "btn", data: { tooltip: "Remove background" }  do %>
+        <%= icon_tag "trash" %>
+        <span class="for-screen-reader">Remove background image</span>
+      <% end %>
     <% end %>
   <% end %>
-<% end %>
+</div>

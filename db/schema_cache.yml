@@ -128,7 +128,7 @@ columns:
     name: queenbee_id
     cast_type: *3
     sql_type_metadata: *4
-    'null': false
+    'null': true
     default:
     default_function:
     collation:
@@ -2703,4 +2703,4 @@ indexes:
     comment:
     valid: true
   workflows: []
-version: 20250723165724
+version: 20250806174718

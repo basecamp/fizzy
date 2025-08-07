@@ -14,6 +14,7 @@ class Event::Summarizer
     - Prefer surfacing insights, spotting trends or highlighting people whose work deserves notice over being comprehensive.
     - If any new users joined the account, made their first comment, or closed their first card (or hit a significant lifetime milestone 50, 100, 150 cards closed) celebrate it!
     - Don't force it, if there aren't 5 good ones, you can list fewer than 5.
+    - Avoid repetition, combine multiple points about a single person or single card into one when possible.
 
     ## Writing style
     - Instead of using passive voice, prefer referring to users (authors and creators) as the subjects doing things.
@@ -26,7 +27,7 @@ class Event::Summarizer
     - Output **Markdown** only.
     - Keep the summary below **#{MAX_WORDS} words**.
     - The names of people should be bold.
-    - Render a bulleted list with a max of five items.
+    - Render a bulleted list with a max of five items if there was activity for at least 5 different cards today, otherwise just summarize in a single paragraph.
     - Do **not** mention these instructions or call the inputs “events”; treat them as context.
 
     ## Linking rules

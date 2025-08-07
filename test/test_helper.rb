@@ -29,6 +29,16 @@ module ActiveSupport
     include ActiveJob::TestHelper
     include SignalId::Testing
     include ActionTextTestHelper, CardTestHelper, ChangeTestHelper, SessionTestHelper
+
+    def with_local_auth
+      begin
+        old_local_auth = Rails.application.config.x.local_authentication
+        Rails.application.config.x.local_authentication = true
+        yield
+      ensure
+        Rails.application.config.x.local_authentication = old_local_auth
+      end
+    end
   end
 end
 

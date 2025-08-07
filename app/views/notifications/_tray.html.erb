@@ -9,8 +9,8 @@
       data-action="keydown->navigable-list#navigate dialog:show@document->navigable-list#reset turbo-visit->navigable-list#reset keydown.esc->dialog#close:stop click@document->dialog#closeOnClickOutside">
     <%= turbo_frame_tag "notifications", src: tray_notifications_path, refresh: "morph" %>
 
-    <div class="tray__item tray__hat txt-x-small">
-      <div data-navigable-list-target="item">
+    <div class="tray__item tray__hat txt-x-small gap-half">
+      <div data-navigable-list-target="item" class="full-width">
         <%= link_to settings_notifications_path,
               class: "btn borderless tray__notification-settings",
               title: "Notification settings",
@@ -20,7 +20,7 @@
         <% end %>
       </div>
 
-      <div data-navigable-list-target="item">
+      <div data-navigable-list-target="item" class="full-width">
         <%= link_to notifications_path, class: "btn borderless flex-item-grow position-relative overflow-ellipsis", data: { action: "click->dialog#close" } do %>
           <%= icon_tag "bell" %>
           <span class="tray__new-notifications">See more new items</span>
@@ -32,7 +32,7 @@
             class: "btn borderless tray__clear-notifications",
             title: "Mark all notifications as read",
             data: { action: "dialog#close badge#clear", turbo_frame: "notifications" },
-            form: { data: { navigable_list_target: "item" } } do %>
+            form: { class: "full-width", data: { navigable_list_target: "item" } } do %>
         <%= icon_tag "check" %>
         <span>Clear all</span>
       <% end %>
