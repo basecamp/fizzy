@@ -1,0 +1,36 @@
+/* Add a tooltip to anything. Just add the data-tooltip="foo" attribute */
+
+@layer components {
+  [data-tooltip] {
+    --tooltip-delay: 750ms;
+    --tooltip-duration: 150ms;
+
+    &:after {
+      background: var(--color-ink);
+      border-radius: 0.5ch;
+      color: var(--color-canvas);
+      content: attr(data-tooltip);
+      font-size: var(--text-x-small);
+      font-weight: normal;
+      inset: -1ch auto auto 50%;
+      max-inline-size: 24ch;
+      opacity: 0;
+      overflow: hidden;
+      padding: 0.25ch 1ch;
+      position: absolute;
+      text-overflow: ellipsis;
+      transition: var(--tooltip-duration) ease-out allow-discrete;
+      transition-property: opacity, translate;
+      translate: -50% -85%;
+      white-space: nowrap;
+    }
+
+    @media(any-hover: hover) {
+      &:hover:after {
+        opacity: 1;
+        transition-delay: var(--tooltip-delay);
+        translate: -50% -100%;
+      }
+    }
+  }
+}

@@ -1,5 +1,5 @@
 <% if card.image.attached? %>
-  <%= button_to card_image_path(card), method: :delete, class: "btn" do %>
+  <%= button_to card_image_path(card), method: :delete, class: "btn", data: { tooltip: "Remove background" } do %>
     <%= icon_tag "picture-remove" %>
     <span class="for-screen-reader">Clear background image</span>
   <% end %>
@@ -11,7 +11,7 @@
       <%= form.file_field :image, class: "input",
             accept: "image/png, image/jpeg, image/jpg, image/webp",
             aria: { label: "Add background image" },
-            data: { action: "upload-preview#previewImage form#submit", upload_preview_target: "input" } %>
+            data: { action: "upload-preview#previewImage form#submit", upload_preview_target: "input", tooltip: "Add a background image" } %>
     </label>
   <% end %>
 <% end %>

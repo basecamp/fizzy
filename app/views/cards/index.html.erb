@@ -28,7 +28,7 @@
     <% if collection = @filter.single_collection %>
       <%= access_involvement_advance_button collection, Current.user %>
 
-      <%= link_to edit_collection_path(collection), class: "btn" do %>
+      <%= link_to edit_collection_path(collection), class: "btn", data: { tooltip: "Collection settings" } do %>
         <%= icon_tag "settings" %>
         <span class="for-screen-reader">Settings for <%= collection.name %></span>
       <% end %>
