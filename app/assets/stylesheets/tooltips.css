@@ -13,15 +13,15 @@
       font-size: var(--text-x-small);
       font-weight: normal;
       inset: -1ch auto auto 50%;
-      max-inline-size: 24ch;
+      max-inline-size: 28ch;
       opacity: 0;
       overflow: hidden;
       padding: 0.25ch 1ch;
       position: absolute;
-      text-overflow: ellipsis;
       transition: var(--tooltip-duration) ease-out allow-discrete;
       transition-property: opacity, translate;
       translate: -50% -85%;
+      text-overflow: ellipsis;
       white-space: nowrap;
     }
 

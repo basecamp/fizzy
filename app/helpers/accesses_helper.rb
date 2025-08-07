@@ -20,7 +20,7 @@ module AccessesHelper
           aria: { labelledby: dom_id(collection, :involvement_label) },
           class: [ "btn", { "btn--reversed": access.involvement == "watching" || access.involvement == "everything" } ],
           params: { involvement: next_involvement(access.involvement) },
-          title: involvement_access_label(collection, access.involvement) do
+          data: { tooltip: involvement_access_label(collection, access.involvement) } do
         icon_tag("notification-bell-#{access.involvement.dasherize}") +
           tag.span(involvement_access_label(collection, access.involvement), class: "for-screen-reader", id: dom_id(collection, :involvement_label))
       end
