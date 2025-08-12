@@ -118,7 +118,7 @@ GIT
 
 GIT
   remote: https://github.com/rails/rails.git
-  revision: 78d5233b1f36b678662f2bc00c386071aaafa7da
+  revision: 2c3ea36fe98e36039636655d23ae210ee2670dff
   branch: main
   specs:
     actioncable (8.1.0.alpha)
@@ -429,7 +429,7 @@ GEM
     pwned (2.4.1)
     raabro (1.4.0)
     racc (1.8.1)
-    rack (3.1.16)
+    rack (3.2.0)
     rack-contrib (2.5.0)
       rack (< 4)
     rack-session (2.1.1)
@@ -458,7 +458,7 @@ GEM
       psych (>= 4.0.0)
     redcarpet (3.6.1)
     regexp_parser (2.10.0)
-    reline (0.6.1)
+    reline (0.6.2)
       io-console (~> 0.5)
     rexml (3.4.1)
     rouge (4.6.0)
