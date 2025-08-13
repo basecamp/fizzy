@@ -21,8 +21,6 @@ builder:
   arch: amd64
   secrets:
     - GITHUB_TOKEN
-  remote: ssh://app@docker-builder-102
-  local: <%= ENV.fetch("KAMAL_BUILDER_LOCAL", "true") %>
 
 env:
   secret:
