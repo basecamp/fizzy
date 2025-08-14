@@ -20,7 +20,7 @@ module AvatarsHelper
   end
 
   def avatar_preview_tag(user, hidden_for_screen_reader: false, **options)
-    tag.span class: "avatar",
+    tag.span class: class_names("avatar", options.delete(:class)),
       aria: { hidden: hidden_for_screen_reader, label: user.name },
       tabindex: hidden_for_screen_reader ? -1 : nil do
       avatar_image_tag(user, **options)

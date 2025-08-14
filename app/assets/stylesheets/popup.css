@@ -18,7 +18,7 @@
     }
 
     &:has(.popup__footer) {
-      --panel-padding: var(--block-space) var(--block-space) 0 var(--block-space)
+      --panel-padding: var(--block-space) var(--block-space) 0 var(--block-space);
     }
 
     #header:has(&) {
@@ -37,10 +37,11 @@
     background-color: var(--color-canvas);
     border-block-start: 1px solid var(--color-ink-lighter);
     font-size: var(--text-small);
+    inset: auto 0 0;
     line-height: 1.6;
     margin-block-start: var(--block-space-half);
-    margin-inline: calc(var(--block-space) * -1);
     padding: 1.5ch;
+    position: sticky;
     text-align: center;
     z-index: 1;
   }
@@ -176,6 +177,15 @@
       transition-property: display, opacity, overlay;
     }
 
+    /* Safari doesn't position the sticky footer properly during the
+     * transition, so we need to delay the footer entrance. */
+    .popup__footer {
+      animation: safari-sticky-footer-hack 0s;
+      animation-delay: var(--dialog-duration);
+      animation-fill-mode: both;
+      inset-inline: var(--block-space);
+    }
+
     &[open] {
       opacity: 1;
       transform: scale(1) translateX(-50%);
@@ -195,5 +205,10 @@
         opacity: 0;
       }
     }
+  }
+
+  @keyframes safari-sticky-footer-hack {
+    0% { position: absolute; }
+    100% { position: sticky; }
   }
 }

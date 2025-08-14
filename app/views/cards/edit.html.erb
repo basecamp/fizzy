@@ -11,8 +11,7 @@
     <%= form.rich_textarea :description, class: "card-field__description rich-text-content",
           placeholder: "Add some notes, context, pictures, or video about this…",
           data: { action: "keydown.ctrl+enter->form#submit:prevent keydown.meta+enter->form#submit:prevent keydown.esc->form#cancel:stop" } do %>
-      <%= mentions_prompt(@card.collection) %>
-      <%= cards_prompt %>
+      <%= general_prompts(@card.collection) %>
     <% end %>
 
     <%= form.button "Save changes", type: :submit, class: "btn btn--reversed", style: "--btn-background: #{@card.color}" %>

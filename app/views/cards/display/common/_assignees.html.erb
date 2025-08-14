@@ -1,6 +1,6 @@
 <div class="display-contents" id="<%= dom_id(card, :assignees) %>">
   <% card.assignees.each do |assignee| %>
-    <%= avatar_tag assignee %>
+    <%= avatar_tag assignee, tabindex: (local_assigns.key?(:preview) && local_assigns[:preview]) ? -1 : 0 %>
   <% end %>
 
   <div class="position-relative" data-controller="dialog" data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside" <%= "hidden" if card.closed? %>>

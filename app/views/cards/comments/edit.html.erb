@@ -9,8 +9,7 @@
         <%= form_with model: [ @card, @comment ], class: "flex flex-column gap full-width",
               data: { controller: "form", action: "keydown.ctrl+enter->form#submit:prevent keydown.meta+enter->form#submit:prevent keydown.esc->form#cancel:stop" } do |form| %>
           <%= form.rich_textarea :body, required: true, autofocus: true, placeholder: new_comment_placeholder(@card) do %>
-            <%= mentions_prompt(@card.collection) %>
-            <%= cards_prompt %>
+            <%= general_prompts(@card.collection) %>
           <% end %>
           <div class="flex gap-half justify-start">
             <%= form.button class: "btn btn--reversed", type: :submit do %>

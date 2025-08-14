@@ -459,7 +459,7 @@
     }
 
     @media (hover: hover) {
-      &:hover {
+      .card:hover & {
         --btn-background: transparent;
 
         &:before { opacity: 0; }

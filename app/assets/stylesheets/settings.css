@@ -1,6 +1,7 @@
 @layer components {
   .settings {
     --settings-spacer: var(--block-space);
+    --settings-item-padding-inline: 0.5ch;
 
     display: grid;
     gap: calc(var(--settings-spacer) * 2);
@@ -55,20 +56,46 @@
 
   .settings__user-list {
     flex: 1 1 auto;
-    inline-size: 100%;
     list-style: none;
-    margin: calc(var(--settings-spacer) / -4) 0;
+    margin: calc(var(--settings-spacer) / -4) calc(-1 * var(--settings-item-padding-inline));
     padding: 0;
     overflow: auto;
 
+    li {
+      border-radius: 0.5em;
+
+      /* Add padding if it's not already on a link within */
+      &:not(:has(a:first-child)) { padding-inline-end: var(--settings-item-padding-inline); }
+      &:not(:has(a:last-child)) { padding-inline-end: var(--settings-item-padding-inline); }
+    }
+
     a {
-      padding-block: calc(var(--settings-spacer) / 4);
+      padding: calc(var(--settings-spacer) / 4) var(--settings-item-padding-inline);
 
       @media(any-hover: hover) {
         &:hover {
           text-decoration: underline;
         }
       }
+    }
+
+    /* Only add a BG color when you can actually navigate */
+    .settings__user-filter:focus-within & {
+      [aria-selected] {
+        background: var(--color-selected);
+      }
+    }
+  }
+
+  .settings__user-list-tips {
+    border-top: 1px solid var(--color-ink-light);
+    color: var(--color-ink-dark);
+    font-size: var(--text-small);
+    padding-block-start: var(--settings-spacer);
+
+    .settings__user-filter--bg & {
+      margin-inline: calc(-1 * var(--settings-spacer));
+      padding-inline: var(--settings-spacer);
     }
   }
 }

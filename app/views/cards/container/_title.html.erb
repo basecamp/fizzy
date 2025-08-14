@@ -18,8 +18,7 @@
     <%= form.rich_textarea :description, class: "card-field__description margin-block-start-half margin-block-end",
           placeholder: "Add some notes, context, pictures, or video about this…",
           data: { action: "actiontext:change->auto-save#change focusout->auto-save#submit keydown.ctrl+enter->form#submit:prevent keydown.meta+enter->form#submit:prevent keydown.esc->form#cancel:stop" } do %>
-      <%= mentions_prompt(card.collection) %>
-      <%= cards_prompt %>
+      <%= general_prompts(card.collection) %>
     <% end %>
   <% end %>
 <% end %>

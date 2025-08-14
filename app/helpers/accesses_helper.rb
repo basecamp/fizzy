@@ -1,7 +1,10 @@
 module AccessesHelper
   def access_menu_tag(collection, **options, &)
     tag.menu class: [ options[:class], { "toggler--toggled": collection.all_access? } ], data: {
-      controller: "filter toggle-class",
+      controller: "filter toggle-class navigable-list",
+      action: "keydown->navigable-list#navigate filter:changed->navigable-list#reset",
+      navigable_list_focus_on_selection_value: true,
+      navigable_list_actionable_items_value: true,
       toggle_class_toggle_class: "toggler--toggled" }, &
   end
 

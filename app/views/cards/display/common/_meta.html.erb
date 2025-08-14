@@ -1,7 +1,7 @@
 <div class="card__meta" id="<%= dom_id(card, :meta) %>">
 
   <div class="card__meta-grid card__meta-grid--author">
-    <%= avatar_tag card.creator, class: "card__meta-author" %>
+    <%= avatar_tag card.creator, class: "card__meta-author", tabindex: (local_assigns.key?(:preview) && local_assigns[:preview]) ? -1 : 0 %>
 
     <span class="card__meta-text card__meta-text--added overflow-ellipsis">
       Added <%= local_datetime_tag(card.created_at, style: :daysago) %>

@@ -65,7 +65,7 @@
       &:focus-visible {
         .input--file:has(&) {
           outline: 0.15rem solid var(--color-selected-dark);
-        } 
+        }
       }
     }
 
@@ -177,18 +177,19 @@
       }
     }
 
-    .switch__input:disabled + & {
-      --switch-color: var(--color-ink-medium) !important;
-
-      cursor: not-allowed;
-    }
-
     .switch__input:checked + & {
       --switch-color: var(--color-link);
 
       &::before {
         transform: translateX(1.2em);
       }
+    }
+
+    .switch__input:disabled + & {
+      --switch-color: var(--color-ink-medium);
+
+      cursor: not-allowed;
+      opacity: 0.5;
     }
   }
 

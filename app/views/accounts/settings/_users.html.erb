@@ -1,4 +1,9 @@
-<div class="settings__panel settings__panel--users panel shadow center" data-controller="filter">
+<%= tag.div class: "settings__panel settings__panel--users panel shadow center", data: {
+  controller: "filter navigable-list",
+  action: "keydown->navigable-list#navigate filter:changed->navigable-list#reset",
+  navigable_list_focus_on_selection_value: true,
+  navigable_list_actionable_items_value: true
+} do %>
   <h2 class="divider txt-large">People on the account</h2>
   <%#= render "accounts/invite" # Scheduled work in https://3.basecamp.com/2914079/buckets/37331921/todos/8746162337 %>
 
@@ -8,5 +13,9 @@
     <ul class="settings__user-list" data-filter-target="list">
       <%= render partial: "accounts/user", collection: users %>
     </ul>
+
+    <footer class="settings__user-list-tips">
+      Press <kbd class="kbd">↑</kbd><kbd class="kbd">↓</kbd> to move, <kbd class="kbd">enter</kbd> to visit profile, <kbd class="kbd">SHIFT+ENTER</kbd> to toggle.
+    </footer>
   </div>
-</div>
+<% end %>

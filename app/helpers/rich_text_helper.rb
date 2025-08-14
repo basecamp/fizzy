@@ -18,4 +18,12 @@ module RichTextHelper
   def cards_prompt
     content_tag "lexical-prompt", "", trigger: "#", src: prompts_cards_path, name: "card", "insert-editable-text": true, "remote-filtering": true, "supports-space-in-searches": true
   end
+
+  def code_language_picker
+    content_tag "lexical-code-language-picker"
+  end
+
+  def general_prompts(collection)
+    safe_join([ mentions_prompt(collection), cards_prompt, code_language_picker ])
+  end
 end
