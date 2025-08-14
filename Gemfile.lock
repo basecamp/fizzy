@@ -97,9 +97,9 @@ GIT
 
 GIT
   remote: https://github.com/crmne/ruby_llm.git
-  revision: 0dfd6625036aa2c5596bdc7c339ebb46f848999e
+  revision: 55efae7a9248b81964895855724647e7d8a4cb25
   specs:
-    ruby_llm (1.6.0)
+    ruby_llm (1.6.2)
       base64
       event_stream_parser (~> 1)
       faraday (>= 1.10.0)
