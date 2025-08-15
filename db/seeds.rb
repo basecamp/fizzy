@@ -14,7 +14,7 @@ def create_tenant(signal_account_name, bare: false)
   if bare
     queenbee_id = Digest::SHA256.hexdigest(signal_account_name)[0..8].to_i(16)
   else
-    signal_account = SignalId::Account.find_by_product_and_name!("fizzy", signal_account_name)
+    signal_account = SignalId::Account.find_by_product_and_name!(SignalId.product.name, signal_account_name)
     queenbee_id = signal_account.queenbee_id
   end
 

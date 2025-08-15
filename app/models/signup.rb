@@ -133,7 +133,7 @@ class Signup
     def queenbee_account_attributes
       {
         skip_remote: true, # Fizzy creates its own local account
-        product_name: "fizzy",
+        product_name: SignalId.product.name,
         name: queenbee_account_name,
         owner_identity_id: signal_identity.id,
         trial: false,

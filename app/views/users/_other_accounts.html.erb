@@ -1,0 +1,13 @@
+<% if accounts = other_accounts.presence %>
+  <div class="panel shadow center margin-block-double">
+    <div class="flex flex-column align-center gap txt-medium--responsive txt-medium">
+      <strong class="txt-medium">Log in to a different Fizzy account</strong>
+
+      <% accounts.each do |account| %>
+        <div class="flex-inline center justify-center flex-wrap gap">
+          <%= link_to account.name, Launchpad.login_url(product: true, account: account), class: "btn", target: "_blank" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>

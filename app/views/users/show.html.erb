@@ -46,6 +46,8 @@
     <%= render "users/transfer", user: @user %>
   </div>
 
+  <%= render "users/other_accounts", user: @user %>
+
   <div class="panel borderless center margin-block-double">
     <%= button_to session_path, method: :delete, class: "btn center txt-medium", data: { turbo: false } do %>
       <%= icon_tag "logout" %>
