@@ -59,6 +59,13 @@
 			<%= render partial: "events/filter/places" %>
 		</ul>
 
+		<% if accounts = other_accounts.presence %>
+			<ul class="popup__list">
+				<li class="popup__group-title">Other Fizzy Accounts</li>
+				<%= render partial: "events/filter/other_accounts", locals: { accounts: } %>
+			</ul>
+		<% end %>
+
 		<% if platform.desktop? %>
 			<footer class="popup__footer">
 				Press <kbd class="kbd"><%= hotkey_label(["ctrl", "J"]) -%></kbd> anytime to open this, <kbd class="kbd">esc</kbd> to close, <kbd class="kbd">↑</kbd><kbd class="kbd">↓</kbd> to move, <kbd class="kbd">enter</kbd> to navigate, <kbd class="kbd">SHIFT+ENTER</kbd> to select.

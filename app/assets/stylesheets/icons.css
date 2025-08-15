@@ -54,6 +54,7 @@
   .icon--lifebuoy { --svg: url("lifebuoy.svg "); }
   .icon--lock { --svg: url("lock.svg "); }
   .icon--logout { --svg: url("logout.svg "); }
+  .icon--logo-color { --svg: url("logo-color.svg "); }
   .icon--menu { --svg: url("menu.svg "); }
   .icon--menu-dots-horizontal { --svg: url("menu-dots-horizontal.svg "); }
   .icon--menu-dots-vertical { --svg: url("menu-dots-vertical.svg "); }

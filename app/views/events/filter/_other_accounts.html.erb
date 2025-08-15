@@ -1,0 +1,9 @@
+<% accounts.each do |account| %>
+  <li class="popup__group" data-filter-target="item" data-navigable-list-target="item">
+    <%= icon_tag "logo-color" %>
+    <%= link_to Launchpad.login_url(product: true, account: account), class: "popup__item btn", target: "_blank" do %>
+      <span class="overflow-ellipsis"><%= account.name %></span>
+      <span class="translucent flex-item-no-shrink flex-item-justify-end"> ›</span>
+    <% end %>
+  </li>
+<% end %>
