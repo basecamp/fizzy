@@ -9,7 +9,7 @@ class Conversation::Message::ResponseGeneratorJob < ApplicationJob
 
   retry_on RubyLLM::RateLimitError, RubyLLM::ServiceUnavailableError, wait: 2.seconds, attempts: 3 do |job, error|
     message = job.arguments.first
-    message.conversation.respond("Fizzy is very busy at the moment. Please try again in a moment.")
+    message.conversation.respond("Fizzy is very busy at the moment. Please try again in a minute.")
   end
 
   def perform(message)
