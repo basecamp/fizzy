@@ -6,8 +6,10 @@ class Conversation::Message::ResponseGeneratorJobTest < ActiveJob::TestCase
     conversation = message.conversation
     Conversation::Message.any_instance.stubs(:generate_response).raises(ArgumentError, "Oops!")
 
-    assert_changes -> { conversation.messages.count }, +1 do
-      Conversation::Message::ResponseGeneratorJob.perform_now(message)
+    assert_error_reported ArgumentError do
+      assert_changes -> { conversation.messages.count }, +1 do
+        Conversation::Message::ResponseGeneratorJob.perform_now(message)
+      end
     end
 
     last_message = conversation.messages.ordered.last
@@ -20,17 +22,19 @@ class Conversation::Message::ResponseGeneratorJobTest < ActiveJob::TestCase
     conversation = message.conversation
     Conversation::Message.any_instance.stubs(:generate_response).raises(RubyLLM::RateLimitError)
 
-    assert_changes -> { conversation.messages.count }, +1 do
-      Conversation::Message::ResponseGeneratorJob.perform_later(message)
+    assert_no_error_reported do
+      assert_changes -> { conversation.messages.count }, +1 do
+        Conversation::Message::ResponseGeneratorJob.perform_later(message)
 
-      perform_enqueued_jobs
-      assert_performed_with(job: Conversation::Message::ResponseGeneratorJob, args: [ message ])
+        perform_enqueued_jobs
+        assert_performed_with(job: Conversation::Message::ResponseGeneratorJob, args: [ message ])
 
-      perform_enqueued_jobs(at: 1.minute.from_now)
-      assert_performed_with(job: Conversation::Message::ResponseGeneratorJob, args: [ message ])
+        perform_enqueued_jobs(at: 1.minute.from_now)
+        assert_performed_with(job: Conversation::Message::ResponseGeneratorJob, args: [ message ])
 
-      perform_enqueued_jobs(at: 2.minutes.from_now)
-      assert_performed_with(job: Conversation::Message::ResponseGeneratorJob, args: [ message ])
+        perform_enqueued_jobs(at: 2.minutes.from_now)
+        assert_performed_with(job: Conversation::Message::ResponseGeneratorJob, args: [ message ])
+      end
     end
 
     last_message = conversation.messages.ordered.last

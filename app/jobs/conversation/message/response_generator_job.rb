@@ -1,6 +1,6 @@
 class Conversation::Message::ResponseGeneratorJob < ApplicationJob
   discard_on StandardError do |job, error|
-    Rails.error.report(error)
+    Rails.error.report(error, severity: :error)
 
     if conversation = job.arguments.first.try(:conversation)
       conversation.respond("Something went wrong. Please try again in a moment.")
