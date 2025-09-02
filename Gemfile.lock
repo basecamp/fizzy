@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/basecamp/activerecord-tenanted
-  revision: cd5a8dc0d461fc24ee5731984c597d02e1e80f43
+  revision: b6e35b5308f8dca9a27f8346f7dd1e013c3091b0
   specs:
     activerecord-tenanted (0.1.0)
       activerecord (>= 8.1.alpha)
@@ -280,7 +280,7 @@ GEM
       logger (~> 1.5)
     chunky_png (1.4.0)
     concurrent-ruby (1.3.5)
-    connection_pool (2.5.3)
+    connection_pool (2.5.4)
     crack (1.0.0)
       bigdecimal
       rexml
