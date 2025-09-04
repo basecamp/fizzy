@@ -9,7 +9,7 @@
   <%= icon_tag "check", class: "toggler__visible-when-on margin-inline-end" %>
 
   <label class="switch toggler__visible-when-off flex-item-no-shrink">
-    <%= check_box_tag "user_ids[]", user.id, selected, class: "switch__input", id: nil %>
+    <%= check_box_tag "user_ids[]", user.id, selected, class: "switch__input", id: nil, disabled: Current.user == user %>
     <span class="switch__btn round"></span>
     <span class="for-screen-reader">Give <%= user.name %> access</span>
   </label>
