@@ -1,4 +1,6 @@
-class ConversationsController < AdminController
+class ConversationsController < ApplicationController
+  include StaffOnly
+
   def create
     Current.user.start_or_continue_conversation
   end
