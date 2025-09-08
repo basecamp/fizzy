@@ -17,17 +17,15 @@
       <span>Search (<%= hotkey_label(["ctrl", "K"]) %>)</span>
     <% end %>
     <% if Current.user.staff? %>
-      <div class="bar__hidden-content">
-        <%= tag.button \
-              class: "btn btn--plain",
-              data: {
-                controller: "hotkey",
-                action: "
-                bar#ask
-                keydown.meta+a@document->hotkey#click keydown.ctrl+a@document->hotkey#click" } do %>
-          <span>Ask (<%= hotkey_label(["ctrl", "A"]) %>)</span>
-        <% end %>
-      </div>
+      <%= tag.button \
+            class: "btn btn--plain visually-hidden",
+            data: {
+              controller: "hotkey",
+              action: "
+              bar#ask
+              keydown.meta+a@document->hotkey#click keydown.ctrl+a@document->hotkey#click" } do %>
+        <span>Ask (<%= hotkey_label(["ctrl", "A"]) %>)</span>
+      <% end %>
     <% end %>
   </div>
 

@@ -55,12 +55,4 @@
       }
     }
   }
-
-  .bar__hidden-content {
-    bottom: -1px;
-    height: 1px;
-    overflow: hidden;
-    position: absolute;
-    width: 1px;
-  }
 }
