@@ -16,15 +16,19 @@
             keydown.meta+k@document->hotkey#click keydown.ctrl+k@document->hotkey#click" } do %>
       <span>Search (<%= hotkey_label(["ctrl", "K"]) %>)</span>
     <% end %>
-    <span>or</span>
-    <%= tag.button \
-          class: "btn btn--plain",
-          data: {
-            controller: "hotkey",
-            action: "
-            bar#ask
-            keydown.meta+a@document->hotkey#click keydown.ctrl+a@document->hotkey#click" } do %>
-      <span>Ask (<%= hotkey_label(["ctrl", "A"]) %>)</span>
+    <% if Current.user.staff? %>
+      <div class="bar__hidden-content">
+        <span>or</span>
+        <%= tag.button \
+              class: "btn btn--plain",
+              data: {
+                controller: "hotkey",
+                action: "
+                bar#ask
+                keydown.meta+a@document->hotkey#click keydown.ctrl+a@document->hotkey#click" } do %>
+          <span>Ask (<%= hotkey_label(["ctrl", "A"]) %>)</span>
+        <% end %>
+      </div>
     <% end %>
   </div>
 
@@ -32,9 +36,11 @@
     <%= render "searches/form", query_terms: "" %>
   </div>
 
-  <div class="bar__input" data-bar-target="askInput" hidden>
-    <%= render "conversations/composer" %>
-  </div>
+  <% if Current.user.staff? %>
+    <div class="bar__input" data-bar-target="askInput" hidden>
+      <%= render "conversations/composer" %>
+    </div>
+  <% end %>
 
   <%= tag.dialog \
     id: "bar-modal",
