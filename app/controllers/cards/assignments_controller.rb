@@ -6,6 +6,7 @@ class Cards::AssignmentsController < ApplicationController
 
   def create
     @card.toggle_assignment @collection.users.active.find(params[:assignee_id])
-    render_card_replacement
+
+    render turbo_stream: turbo_stream.replace([ @card, :assignees ], partial: "cards/display/perma/assignees", locals: { card: @card.reload })
   end
 end
