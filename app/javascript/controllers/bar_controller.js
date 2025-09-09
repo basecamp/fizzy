@@ -19,8 +19,10 @@ export default class extends Controller {
     this.#clearTurboFrame()
 
     this.#showItem(this.buttonsContainerTarget)
-    this.#hideItem(this.askInputTarget)
     this.#hideItem(this.searchInputTarget)
+    if (this.hasAskInputTarget) {
+      this.#hideItem(this.askInputTarget)
+    }
   }
 
   showModalAndSubmit(event) {
@@ -40,8 +42,10 @@ export default class extends Controller {
     this.#openInTurboFrame(this.searchUrlValue)
 
     this.#showItem(this.searchInputTarget)
-    this.#hideItem(this.askInputTarget)
     this.#hideItem(this.buttonsContainerTarget)
+    if (this.hasAskInputTarget) {
+      this.#hideItem(this.askInputTarget)
+    }
   }
 
   ask(event) {
