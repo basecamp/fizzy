@@ -22,13 +22,16 @@ class Webhook < ApplicationRecord
   has_secure_token :signing_secret
 
   has_many :deliveries, dependent: :delete_all
+  has_one :delinquency_tracker, dependent: :delete
 
   serialize :subscribed_actions, type: Array, coder: JSON
 
   scope :ordered, -> { order(name: :asc, id: :desc) }
   scope :active, -> { where(active: true) }
 
-  normalizes :subscribed_actions, with: ->(value) { Array.wrap(value).map { |e| e.to_s.strip.presence }.uniq & PERMITTED_ACTIONS }
+  after_create :create_delinquency_tracker!
+
+  normalizes :subscribed_actions, with: ->(value) { Array.wrap(value).map(&:to_s).uniq & PERMITTED_ACTIONS }
 
   validates :name, presence: true
   validate :validate_url

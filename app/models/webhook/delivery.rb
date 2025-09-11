@@ -32,9 +32,10 @@ class Webhook::Delivery < ApplicationRecord
 
     self.request[:headers] = headers
     self.response = perform_request
-
-    completed!
+    self.state = :completed
     save!
+
+    webhook.delinquency_tracker.record_delivery_of(self)
   rescue
     errored!
     raise

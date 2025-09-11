@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  webhook: one
+  last_reset_at: 2025-09-11 14:45:43
+  total_count: 1
+  failed_count: 1
+
+two:
+  webhook: two
+  last_reset_at: 2025-09-11 14:45:43
+  total_count: 1
+  failed_count: 1

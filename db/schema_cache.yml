@@ -1248,7 +1248,7 @@ columns:
   - *9
   - *18
   users:
-  - &37 !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+  - &38 !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
     auto_increment:
     name: active
     cast_type: *32
@@ -1318,6 +1318,50 @@ columns:
     default_function:
     collation:
     comment:
+  webhook_delinquency_trackers:
+  - *5
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: failed_count
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': false
+    default: 0
+    default_function:
+    collation:
+    comment:
+  - *6
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: last_reset_at
+    cast_type: *1
+    sql_type_metadata: *2
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: total_count
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': false
+    default: 0
+    default_function:
+    collation:
+    comment:
+  - *9
+  - &37 !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: webhook_id
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
   webhook_deliveries:
   - *5
   - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
@@ -1362,18 +1406,9 @@ columns:
     collation:
     comment:
   - *9
-  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
-    auto_increment:
-    name: webhook_id
-    cast_type: *3
-    sql_type_metadata: *4
-    'null': false
-    default:
-    default_function:
-    collation:
-    comment:
-  webhooks:
   - *37
+  webhooks:
+  - *38
   - *5
   - *6
   - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
@@ -1496,6 +1531,7 @@ primary_keys:
   user_settings: id
   users: id
   watches: id
+  webhook_delinquency_trackers: id
   webhook_deliveries: id
   webhooks: id
   workflow_stages: id
@@ -1549,6 +1585,7 @@ data_sources:
   user_settings: true
   users: true
   watches: true
+  webhook_delinquency_trackers: true
   webhook_deliveries: true
   webhooks: true
   workflow_stages: true
@@ -3068,6 +3105,23 @@ indexes:
     unique: false
     columns:
     - user_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
+  webhook_delinquency_trackers:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: webhook_delinquency_trackers
+    name: index_webhook_delinquency_trackers_on_webhook_id
+    unique: false
+    columns:
+    - webhook_id
     lengths: {}
     orders: {}
     opclasses: {}

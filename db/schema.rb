@@ -455,6 +455,16 @@ ActiveRecord::Schema[8.1].define(version: 2025_09_15_170056) do
     t.index ["user_id"], name: "index_watches_on_user_id"
   end
 
+  create_table "webhook_delinquency_trackers", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "failed_count", default: 0, null: false
+    t.datetime "last_reset_at"
+    t.integer "total_count", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.integer "webhook_id", null: false
+    t.index ["webhook_id"], name: "index_webhook_delinquency_trackers_on_webhook_id"
+  end
+
   create_table "webhook_deliveries", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "event_id", null: false
@@ -522,6 +532,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_09_15_170056) do
   add_foreign_key "user_settings", "users"
   add_foreign_key "watches", "cards"
   add_foreign_key "watches", "users"
+  add_foreign_key "webhook_delinquency_trackers", "webhooks"
   add_foreign_key "webhook_deliveries", "events"
   add_foreign_key "webhook_deliveries", "webhooks"
   add_foreign_key "workflow_stages", "workflows"
