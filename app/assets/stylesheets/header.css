@@ -14,7 +14,6 @@
       "actions-start title actions-end";
     max-inline-size: 100dvw;
     padding: calc(var(--block-space-half) + env(safe-area-inset-top)) var(--main-padding);
-    view-transition-name: header;
 
     /* Change the grid size depending on how many buttons are present */
     &:has(.header__actions > *:nth-child(1)) { --header-button-count: 1; }
