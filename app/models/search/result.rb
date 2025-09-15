@@ -29,6 +29,7 @@ class Search::Result < ApplicationRecord
         CGI.escapeHTML(html)
           .gsub(CGI.escapeHTML(Search::HIGHLIGHT_OPENING_MARK), Search::HIGHLIGHT_OPENING_MARK.html_safe)
           .gsub(CGI.escapeHTML(Search::HIGHLIGHT_CLOSING_MARK), Search::HIGHLIGHT_CLOSING_MARK.html_safe)
+          .html_safe
       else
         nil
       end

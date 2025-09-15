@@ -2,19 +2,19 @@
   <%= link_to result.source, class: "search__result", data: { turbo_frame: "_top" } do %>
       <div>
         <h3 class="search__title txt--medium margin-none">
-          # <%= result.card_id %> <%= result.card_title&.html_safe %>
+          # <%= result.card_id %> <%= result.card_title %>
         </h3>
 
         <% if result.card_description.present? %>
           <div class="search__excerpt">
-            <%= result.card_description.html_safe %>
+            <%= result.card_description %>
           </div>
         <% else
              if result.comment_body.present? %>
             <div class="search__excerpt search__excerpt--comment">
               <%= avatar_preview_tag result.creator %>
               <div>
-                <%= result.comment_body.html_safe %>
+                <%= result.comment_body %>
               </div>
             </div>
           <% end %>
