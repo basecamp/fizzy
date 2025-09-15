@@ -27,7 +27,7 @@
   <span class="card__meta-text card__meta-text--assignees overflow-ellipsis">
     <%= icon_tag "arrow-right" if card.assignees.any? %>
     <%= card.assignees.any? ? "Assigned to" : "Not assigned" %>
-    <%= card.assignees.map { |assignee| "<strong>#{assignee.familiar_name}</strong>" }.to_sentence.html_safe %>
+    <%= card.assignees.map { |assignee| "<strong>#{h assignee.familiar_name}</strong>" }.to_sentence.html_safe %>
   </span>
 
   <div class="card__meta-avatars card__meta-avatars--assignees">

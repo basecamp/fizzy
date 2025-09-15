@@ -19,7 +19,7 @@
 
   <span class="card__meta-text card__meta-text--assignees overflow-ellipsis">
     <%= icon_tag "arrow-right" if card.assignees.any? %>
-    <%= card.assignees.map { |assignee| assignee.familiar_name }.to_sentence(two_words_connector: " / ", last_word_connector: " / ").html_safe %>
+    <%= card.assignees.map { |assignee| h assignee.familiar_name }.to_sentence(two_words_connector: " / ", last_word_connector: " / ").html_safe %>
   </span>
 
   <div class="card__meta-avatars card__meta-avatars--assignees">
