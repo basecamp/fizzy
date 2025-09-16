@@ -76,9 +76,9 @@ GIT
 
 GIT
   remote: https://github.com/crmne/ruby_llm.git
-  revision: 32611afc114c5f40696dd42f8a1eaee6b6b81330
+  revision: f9ce1e702e2890308259d64473ce6ae203d0d112
   specs:
-    ruby_llm (1.6.4)
+    ruby_llm (1.8.0)
       base64
       event_stream_parser (~> 1)
       faraday (>= 1.10.0)
@@ -367,7 +367,7 @@ GEM
       net-imap
       net-pop
       net-smtp
-    marcel (1.0.4)
+    marcel (1.1.0)
     matrix (0.4.3)
     mini_magick (5.3.1)
       logger
