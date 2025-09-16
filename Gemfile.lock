@@ -7,7 +7,7 @@ GIT
 
 GIT
   remote: https://github.com/basecamp/lexxy
-  revision: 3babb794da31cd947f9316f5dac78a718d586554
+  revision: e79d1823e27fb0a924a46912d3ff178a00ade6ef
   specs:
     lexxy (0.1.7.beta)
       rails (>= 8.0.2)
@@ -367,7 +367,7 @@ GEM
       net-imap
       net-pop
       net-smtp
-    marcel (1.0.4)
+    marcel (1.1.0)
     matrix (0.4.3)
     mini_magick (5.3.1)
       logger
