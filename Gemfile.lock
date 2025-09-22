@@ -76,9 +76,9 @@ GIT
 
 GIT
   remote: https://github.com/crmne/ruby_llm.git
-  revision: 32611afc114c5f40696dd42f8a1eaee6b6b81330
+  revision: a74233f747c69c0a962cde01b7f2ac604c8845e6
   specs:
-    ruby_llm (1.6.4)
+    ruby_llm (1.8.1)
       base64
       event_stream_parser (~> 1)
       faraday (>= 1.10.0)
@@ -336,7 +336,7 @@ GEM
       actionview (>= 7.0.0)
       activesupport (>= 7.0.0)
     jmespath (1.6.2)
-    json (2.13.2)
+    json (2.15.0)
     jwt (3.1.2)
       base64
     kamal (2.7.0)
@@ -367,7 +367,7 @@ GEM
       net-imap
       net-pop
       net-smtp
-    marcel (1.0.4)
+    marcel (1.1.0)
     matrix (0.4.3)
     mini_magick (5.3.1)
       logger
