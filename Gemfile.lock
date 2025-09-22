@@ -98,7 +98,7 @@ GIT
 
 GIT
   remote: https://github.com/rails/rails.git
-  revision: d8795bd762ab2716b6e7fd07a403566b28159cdc
+  revision: d5eb9f6bb7fe6c54c297a3cf4cbd40c6f00d4db9
   branch: main
   specs:
     actioncable (8.1.0.beta1)
@@ -367,7 +367,7 @@ GEM
       net-imap
       net-pop
       net-smtp
-    marcel (1.0.4)
+    marcel (1.1.0)
     matrix (0.4.3)
     mini_magick (5.3.1)
       logger
