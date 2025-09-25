@@ -53,7 +53,9 @@ class Card::EntropicTest < ActiveSupport::TestCase
     end
 
     assert cards(:logo).reload.closed?
+    assert cards(:logo).events.last.action.card_auto_closed?
     assert_not cards(:shipping).reload.closed?
+    assert_not cards(:shipping).events.last.action.card_auto_closed?
   end
 
   test "auto close all due using entropy configuration defined at the collection level" do

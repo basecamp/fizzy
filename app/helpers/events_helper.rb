@@ -94,6 +94,8 @@ module EventsHelper
       "#{h event_creator_name(event) } unassigned #{ h(event.assignees.include?(Current.user) ? "yourself" : event.assignees.pluck(:name).to_sentence) } from <span style='color: var(--card-color)'>#{h title }</span>".html_safe
     when "card_published"
       "#{h event_creator_name(event) } added <span style='color: var(--card-color)'>#{h title }</span>".html_safe
+    when "card_auto_closed"
+      "<span style='color: var(--card-color)'>#{h title }</span> was auto-closed".html_safe
     when "card_closed"
       "#{h event_creator_name(event) } closed <span style='color: var(--card-color)'>#{h title }</span>".html_safe
     when "card_reopened"

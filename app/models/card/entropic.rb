@@ -32,7 +32,7 @@ module Card::Entropic
   class_methods do
     def auto_close_all_due
       due_to_be_closed.find_each do |card|
-        card.close(user: User.system, reason: "Closed")
+        card.close(user: User.system, reason: "Closed", event: :auto_closed)
       end
     end
 
