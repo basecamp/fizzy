@@ -1,6 +1,7 @@
-<section id="now-now-cards" class="cards cards--on-deck is-collapsed" style="--card-color: var(--color-card-complete);"
+<section id="not-now" class="cards cards--on-deck is-collapsed" style="--card-color: var(--color-card-complete);"
   data-collapsible-columns-target="column"
   data-drag-and-drop-target="container"
+  data-action="turbo:before-morph-attribute->collapsible-columns#preventToggle"
   data-drag-and-drop-url="<%= columns_card_drops_not_now_path("__id__") %>"
 >
 

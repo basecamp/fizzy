@@ -2,6 +2,7 @@
   class="cards cards--doing is-collapsed" style="--card-color: <%= column.color %> %>"
   data-collapsible-columns-target="column"
   data-drag-and-drop-target="container"
+  data-action="turbo:before-morph-attribute->collapsible-columns#preventToggle"
   data-drag-and-drop-url="<%= columns_card_drops_column_path("__id__", column_id: column.id) %>"
 >
   <%= cards_expander column.name, column.cards.active.count %>

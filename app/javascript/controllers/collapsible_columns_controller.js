@@ -19,4 +19,10 @@ export default class extends Controller {
       clickedColumn.classList.remove(this.collapsedClass)
     }
   }
+
+  preventToggle(event) {
+    if (event.detail.attributeName === "class") {
+      event.preventDefault()
+    }
+  }
 }
