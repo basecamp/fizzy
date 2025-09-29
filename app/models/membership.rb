@@ -1,5 +1,6 @@
 class Membership < UntenantedRecord
   belongs_to :identity, touch: true
+  has_many :magic_links, dependent: :delete
 
   # I want this to be `belongs_to :user`, but ActiveRecord::Tenanted doesn't yet support
   # associations from untenanted to untenanted models.
