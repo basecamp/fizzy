@@ -38,7 +38,7 @@ module AccessesHelper
     tag.div(class: "flex gap-half justify-center") do
       safe_join([
         safe_join(displayed_watchers.map { |watcher| avatar_tag(watcher) }),
-        (tag.span("+#{overflow_count}", class: "overflow-count") if overflow_count > 0)
+        (tag.span("+#{overflow_count} other people", class: "overflow-count") if overflow_count > 0)
       ].compact)
     end
   end
