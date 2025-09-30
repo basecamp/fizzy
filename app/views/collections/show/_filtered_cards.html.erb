@@ -1,0 +1,3 @@
+<section class="cards cards--grid">
+  <%= render partial: "cards/display/preview", collection: page.records, as: :card, locals: { draggable: true }, cached: ->(card) { cacheable_preview_parts_for(card) } %>
+</section>

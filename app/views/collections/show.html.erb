@@ -19,24 +19,18 @@
   </h1>
 
   <div class="header__actions header__actions--end">
-      <%= render "cards/collection_settings", collection: @collection %>
+    <%= render "cards/collection_settings", collection: @collection %>
   </div>
 <% end %>
 
-<%= render "filters/settings", user_filtering: @user_filtering, no_filtering_url: collection_path(@collection) do |form| %>
+<%= render "filters/settings", filter_url: collection_path(@collection), user_filtering: @user_filtering, no_filtering_url: collection_path(@collection) do |form| %>
   <%= hidden_field_tag "collection_ids[]", @collection.id %>
 <% end %>
 
-<%= tag.div data: {
-      controller: "drag-and-drop drag-and-strum",
-      drag_and_drop_dragged_item_class: "drag-and-drop__dragged-item",
-      drag_and_drop_hover_container_class: "drag-and-drop__hover-container",
-      action: "
-        dragstart->drag-and-drop#dragStart
-        dragover->drag-and-drop#dragOver
-        dragenter->drag-and-strum#dragEnter
-        drop->drag-and-drop#drop
-        dragend->drag-and-drop#dragEnd" } do %>
-
-  <%= render "collections/show/columns", page: @page, collection: @collection %>
+<%= turbo_frame_tag :cards_container do %>
+  <% if @filter.used?(ignore_collections: true) %>
+    <%= render "collections/show/filtered_cards", page: @page %>
+  <% else %>
+    <%= render "collections/show/columns", page: @page, collection: @collection %>
+  <% end %>
 <% end %>

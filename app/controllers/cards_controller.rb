@@ -12,7 +12,6 @@ class CardsController < ApplicationController
 
   def index
     set_page_and_extract_portion_from @filter.cards
-    fresh_when etag: @columns
   end
 
   def create

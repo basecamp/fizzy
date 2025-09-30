@@ -12,7 +12,9 @@
 <% content_for :header do %>
   <%= render "filters/menu", user_filtering: @user_filtering %>
 
-  <%= link_to collection_path(@card.collection), class: "header__title btn borderless txt-large", style: "--btn-padding: 0.25ch 1ch 0.25ch 0.75ch; view-transistion-name: card-collection-title;", data: { controller: "hotkey", action: "keydown.esc@document->hotkey#click" } do %>
+  <%= link_to collection_url(@card.collection), class: "header__title btn borderless txt-large",
+        style: "--btn-padding: 0.25ch 1ch 0.25ch 0.75ch; view-transistion-name: card-collection-title;",
+        data: { controller: "hotkey", action: "keydown.esc@document->hotkey#click click->turbo-navigation#backIfSamePath" } do %>
     <span class="overflow-ellipsis">
       &larr;
       <strong class="font-black"><%= @card.collection.name %></strong>

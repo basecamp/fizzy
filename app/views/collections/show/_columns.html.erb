@@ -1,6 +1,15 @@
-<%= turbo_frame_tag :cards_container do %>
-  <div class="card-columns" data-controller="collapsible-columns" data-collapsible-columns-collapsed-class="is-collapsed">
+<%= tag.div data: {
+      controller: "drag-and-drop drag-and-strum",
+      drag_and_drop_dragged_item_class: "drag-and-drop__dragged-item",
+      drag_and_drop_hover_container_class: "drag-and-drop__hover-container",
+      action: "
+        dragstart->drag-and-drop#dragStart
+        dragover->drag-and-drop#dragOver
+        dragenter->drag-and-strum#dragEnter
+        drop->drag-and-drop#drop
+        dragend->drag-and-drop#dragEnd" } do %>
 
+  <div class="card-columns" data-controller="collapsible-columns" data-collapsible-columns-collapsed-class="is-collapsed">
     <div class="card-columns__left">
       <%= render "collections/show/not_now", collection: collection %>
     </div>
@@ -11,7 +20,8 @@
       <%= render partial: "collections/show/column", collection: collection.columns, cached: true %>
       <%= render "collections/show/closed", collection: collection %>
 
-      <%= render  "collections/show/menu/columns", collection: collection %>
+      <%= render "collections/show/menu/columns", collection: collection %>
     </div>
   </div>
 <% end %>
+

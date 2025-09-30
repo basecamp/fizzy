@@ -7,7 +7,7 @@
           filter_settings_filters_set_class: "filters--has-filters-set",
           filter_settings_no_filtering_url_value: no_filtering_url,
           filter_settings_refresh_url_value: settings_refresh_path } do %>
-    <%= form_with url: cards_path, method: :get, class: "", data: {
+    <%= form_with url: filter_url, method: :get, class: "", data: {
           controller: "form",
           turbo_frame: "cards_container",
           filter_settings_target: "form",

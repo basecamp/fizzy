@@ -23,7 +23,7 @@
   </div>
 <% end %>
 
-<%= render "filters/settings", user_filtering: @user_filtering, no_filtering_url: cards_path %>
+<%= render "filters/settings", filter_url: cards_path, user_filtering: @user_filtering, no_filtering_url: cards_path %>
 
 <%= turbo_frame_tag :cards_container do %>
   <section class="cards cards--grid">

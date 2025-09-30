@@ -8,8 +8,11 @@ class CollectionsController < ApplicationController
   end
 
   def show
-    set_page_and_extract_portion_from @collection.cards.awaiting_triage.reverse_chronologically.with_golden_first
-    fresh_when etag: [ @collection, @page.records, @user_filtering ]
+    if @filter.used?(ignore_collections: true)
+      show_filtered_events
+    else
+      show_columns
+    end
   end
 
   def create
@@ -40,6 +43,16 @@ class CollectionsController < ApplicationController
   private
     def set_collection
       @collection = Current.user.collections.find params[:id]
+    end
+
+    def show_filtered_events
+      @filter.collection_ids = [ @collection.id ]
+      set_page_and_extract_portion_from @filter.cards
+    end
+
+    def show_columns
+      set_page_and_extract_portion_from @collection.cards.awaiting_triage.reverse_chronologically.with_golden_first
+      fresh_when etag: [ @collection, @page.records, @user_filtering ]
     end
 
     def collection_params
