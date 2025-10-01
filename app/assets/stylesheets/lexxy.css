@@ -178,11 +178,12 @@
     border: 1px solid var(--color-ink-lighter);
     border-radius: 0.3em;
     color: var(--color-ink);
-    font-family: var(--font-mono);
+    font-family: var(--font-base);
     font-size: var(--text-x-small);
     font-weight: 500;
+    inset-inline-end: 0;
     line-height: inherit;
-    margin: 0.3em 0.3em 0 -0.3em;
+    margin: 0.3em 0.3em 0 0;
     padding: 0.5em 1.8em 0.5em 1.2em;
     text-align: start;
 
