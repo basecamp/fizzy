@@ -14,15 +14,13 @@ default: &default
 development:
   primary:
     <<: *default
-    <% database_path = "storage/tenants/#{Rails.env}/%{tenant}/db/main.sqlite3" %>
-    <% database_path = "file:#{database_path}?vfs=beamer" if %w[1 true].include?(ENV["BEAMER"]&.downcase) %>
-    database: <%= database_path %>
+    adapter: <%= %w[1 true].include?(ENV["BEAMER"]&.downcase) ? "beamer" : "sqlite3" %>
+    database: storage/tenants/<%= Rails.env %>/%{tenant}/db/main.sqlite3
     tenanted: true
   untenanted:
     <<: *default
-    <% database_path = "storage/untenanted/development.sqlite3" %>
-    <% database_path = "file:#{database_path}?vfs=beamer" if %w[1 true].include?(ENV["BEAMER"]&.downcase) %>
-    database: <%= database_path %>
+    adapter: <%= %w[1 true].include?(ENV["BEAMER"]&.downcase) ? "beamer" : "sqlite3" %>
+    database: storage/untenanted/development.sqlite3
     migrations_paths: db/untenanted_migrate
   cable:
     <<: *default
@@ -53,13 +51,15 @@ test:
 production: &production
   primary:
     <<: *default
-    database: file:storage/tenants/<%= Rails.env %>/%{tenant}/db/main.sqlite3?vfs=beamer
+    adapter: beamer
+    database: storage/tenants/<%= Rails.env %>/%{tenant}/db/main.sqlite3
     tenanted: true
     extensions:
       - <%= SqliteVec.loadable_path %>
   untenanted:
     <<: *default
-    database: file:storage/untenanted/<%= Rails.env %>.sqlite3?vfs=beamer
+    adapter: beamer
+    database: storage/untenanted/<%= Rails.env %>.sqlite3
     migrations_paths: db/untenanted_migrate
   cable:
     <<: *default

@@ -19,6 +19,7 @@ gem "solid_cache", "~> 1.0"
 gem "solid_queue", "~> 1.1"
 gem "sqlite3", ">= 2.0"
 gem "thruster", require: false
+gem "beamer-rails", path: "../beamer/dist/beamer-rails/"
 
 # Features
 gem "bcrypt", "~> 3.1.7"
