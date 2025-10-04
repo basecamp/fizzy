@@ -476,10 +476,10 @@ GEM
       rexml (~> 3.2, >= 3.2.5)
       rubyzip (>= 1.2.2, < 4.0)
       websocket (~> 1.0)
-    sentry-rails (5.27.0)
+    sentry-rails (5.28.0)
       railties (>= 5.0)
-      sentry-ruby (~> 5.27.0)
-    sentry-ruby (5.27.0)
+      sentry-ruby (~> 5.28.0)
+    sentry-ruby (5.28.0)
       bigdecimal
       concurrent-ruby (~> 1.0, >= 1.0.2)
     sniffer (0.5.0)
