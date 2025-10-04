@@ -274,7 +274,7 @@ GEM
       actionview (>= 7.0.0)
       activesupport (>= 7.0.0)
     jmespath (1.6.2)
-    json (2.13.2)
+    json (2.15.0)
     jwt (3.1.2)
       base64
     kamal (2.7.0)
@@ -572,7 +572,7 @@ GEM
     yabeda-prometheus-mmap (0.4.0)
       prometheus-client-mmap
       yabeda (~> 0.10)
-    yabeda-puma-plugin (0.7.1)
+    yabeda-puma-plugin (0.8.0)
       json
       puma
       yabeda (~> 0.5)
