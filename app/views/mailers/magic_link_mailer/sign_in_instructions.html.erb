@@ -1,0 +1,13 @@
+<h1>Sign in to Fizzy</h1>
+
+<div>
+  <p>Hit the button below to sign in to Fizzy on this device</p>
+
+  <div><%= link_to "Sign in to Fizzy", session_magic_link_url(code: @magic_link.code), class: "btn" %></div>
+</div>
+
+<div>
+  <p>If you're signing in on another device, enter the code below:</p>
+
+  <b><%= magic_link_code(@magic_link) %></b>
+</div>

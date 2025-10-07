@@ -11,4 +11,13 @@ class Membership < UntenantedRecord
   def user
     User.with_tenant(user_tenant) { User.find_by(id: user_id) }
   end
+
+  def send_magic_link
+    magic_link = magic_links.create!
+    MagicLinkMailer.sign_in_instructions(magic_link).deliver_later
+  end
+
+  def with_tenant(&block)
+    ApplicationRecord.with_tenant(tenant_id.to_s, &block)
+  end
 end

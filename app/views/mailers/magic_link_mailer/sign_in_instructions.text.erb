@@ -1,0 +1,8 @@
+Sign in to Fizzy
+<%= "=" * 80 %>
+
+Open this link in your browser to login on this device:
+<%= session_magic_link_url(code: @magic_link.code) %>
+
+If you're signing in on another device, enter the code below:
+<%= magic_link_code(@magic_link) %>
