@@ -1,0 +1,22 @@
+<% @page_title = "Log in" %>
+
+<div
+  class="panel shadow center margin-block-double"
+  style="--panel-size: 55ch;"
+>
+  <h1 class="txt-xx-large margin-block-end-double">Log in</h1>
+
+  <p>Pick where you want to log in.</p>
+
+  <div>
+    <% @memberships.each do |membership| %>
+      <%= link_to membership.email_address, session_transfer_path(membership.user.transfer_id) %>
+    <% end %>
+  </div>
+</div>
+
+<% content_for :footer do %>
+  <div class="txt-align-center center margin-block-double txt-subtle">
+    Fizzy&trade; version 0
+  </div>
+<% end %>

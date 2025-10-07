@@ -10,10 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_09_24_190729) do
+ActiveRecord::Schema[8.1].define(version: 2025_10_07_112917) do
   create_table "identities", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "magic_links", force: :cascade do |t|
+    t.string "code"
+    t.datetime "created_at", null: false
+    t.datetime "expires_at"
+    t.integer "membership_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["code"], name: "index_magic_links_on_code", unique: true
+    t.index ["expires_at"], name: "index_magic_links_on_expires_at"
+    t.index ["membership_id"], name: "index_magic_links_on_membership_id"
   end
 
   create_table "memberships", force: :cascade do |t|
@@ -29,5 +40,6 @@ ActiveRecord::Schema[8.1].define(version: 2025_09_24_190729) do
     t.index ["user_tenant", "user_id"], name: "index_memberships_on_user_tenant_and_user_id"
   end
 
+  add_foreign_key "magic_links", "memberships"
   add_foreign_key "memberships", "identities"
 end

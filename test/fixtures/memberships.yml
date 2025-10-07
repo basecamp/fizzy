@@ -1,1 +1,5 @@
-
+kevin_in_37signals:
+  identity: kevin_identity
+  email_address: kevin@37signals.com
+  tenant_id: 1
+  user_id: <%= ActiveRecord::FixtureSet.identify(:kevin) %>

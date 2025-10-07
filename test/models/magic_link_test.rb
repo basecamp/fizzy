@@ -1,0 +1,66 @@
+require "test_helper"
+
+class MagicLinkTest < ActiveSupport::TestCase
+  test "new" do
+    magic_link = MagicLink.create!(membership: memberships(:kevin_in_37signals))
+
+    assert magic_link.code.present?
+    assert_equal MagicLink::CODE_LENGTH, magic_link.code.length
+    assert_match(/\A[#{MagicLink::CODE_ALPHABET.join}]+\z/, magic_link.code)
+    assert magic_link.expires_at.present?
+    assert_in_delta MagicLink::EXPIRATION_TIME.from_now, magic_link.expires_at, 1.second
+  end
+
+  test "active" do
+    active_link = MagicLink.create!(membership: memberships(:kevin_in_37signals))
+    expired_link = MagicLink.create!(membership: memberships(:kevin_in_37signals))
+    expired_link.update_column(:expires_at, 1.hour.ago)
+
+    assert_includes MagicLink.active, active_link
+    assert_not_includes MagicLink.active, expired_link
+  end
+
+  test "stale" do
+    active_link = MagicLink.create!(membership: memberships(:kevin_in_37signals))
+    expired_link = MagicLink.create!(membership: memberships(:kevin_in_37signals))
+    expired_link.update_column(:expires_at, 1.hour.ago)
+
+    assert_includes MagicLink.stale, expired_link
+    assert_not_includes MagicLink.stale, active_link
+  end
+
+  test "consume" do
+    magic_link = MagicLink.create!(membership: memberships(:kevin_in_37signals))
+    code_with_spaces = magic_link.code.downcase.chars.join(" ")
+
+    membership = MagicLink.consume(code_with_spaces)
+    assert_equal memberships(:kevin_in_37signals), membership
+    assert_not MagicLink.exists?(magic_link.id)
+
+    expired_link = MagicLink.create!(membership: memberships(:kevin_in_37signals))
+    expired_link.update_column(:expires_at, 1.hour.ago)
+    assert_nil MagicLink.consume(expired_link.code)
+    assert MagicLink.exists?(expired_link.id)
+
+    assert_nil MagicLink.consume("INVALID")
+    assert_nil MagicLink.consume(nil)
+  end
+
+  test "cleanup" do
+    active_link = MagicLink.create!(membership: memberships(:kevin_in_37signals))
+    expired_link = MagicLink.create!(membership: memberships(:kevin_in_37signals))
+    expired_link.update_column(:expires_at, 1.hour.ago)
+
+    MagicLink.cleanup
+
+    assert MagicLink.exists?(active_link.id)
+    assert_not MagicLink.exists?(expired_link.id)
+  end
+
+  test "sanitize_code" do
+    assert_equal "011123", MagicLink.sanitize_code("OIL123")
+    assert_equal "ABC123", MagicLink.sanitize_code("ABC-123 !@#")
+    assert_nil MagicLink.sanitize_code(nil)
+    assert_nil MagicLink.sanitize_code("")
+  end
+end
