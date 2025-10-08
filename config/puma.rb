@@ -23,9 +23,9 @@ plugin :tmp_restart
 # Run Solid Queue with Puma
 plugin :solid_queue if ENV["SOLID_QUEUE_IN_PUMA"]
 
-if ENV.fetch("PREFORK") { !Rails.env.local? }
-  # Expose prometheus metrics on port 9394
-  activate_control_app
-  plugin :yabeda
-  plugin :yabeda_prometheus
-end
+# Expose Prometheus metrics at http://0.0.0.0:9394/metrics.
+# In dev, overridden to http://127.0.0.1:9306/metrics in .mise.toml.
+control_uri = Rails.env.local? ? "unix://tmp/pumactl.sock" : "auto"
+activate_control_app control_uri, no_token: true
+plugin :yabeda
+plugin :yabeda_prometheus
