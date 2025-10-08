@@ -2,8 +2,18 @@
 #
 # Verify Tailscale connection and SSH authentication before deploying.
 
+tailscale_cmd() {
+  if command -v tailscale >/dev/null 2>&1; then
+    tailscale "$@"
+  elif [ -f "/Applications/Tailscale.app/Contents/MacOS/Tailscale" ]; then
+    env TAILSCALE_BE_CLI=1 /Applications/Tailscale.app/Contents/MacOS/Tailscale "$@"
+  else
+    return 1
+  fi
+}
+
 on_tailscale() {
-  tailscale status --json 2>/dev/null | jq -e '.Self.Online' >/dev/null 2>&1
+  tailscale_cmd status --json 2>/dev/null | jq -e '.Self.Online' >/dev/null 2>&1
 }
 
 # Check Tailscale connection
