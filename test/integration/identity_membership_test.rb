@@ -24,14 +24,14 @@ class IdentityMembershipTest < ActionDispatch::IntegrationTest
 
     # Render links for other Fizzies in the jump menu
     get my_menu_path(script_name: @tenant_paths[0])
-    assert_select "#my_menu ul li a[href='#{@tenant_urls[1]}']", "Account for #{@tenants[1]}"
+    assert_select "#my_menu ul li a[href='#{@tenant_urls[1]}']", "Account for #{@tenants[1]}: user@example.com"
 
     get my_menu_path(script_name: @tenant_paths[1])
-    assert_select "#my_menu ul li a[href='#{@tenant_urls[0]}']", "Account for #{@tenants[0]}"
+    assert_select "#my_menu ul li a[href='#{@tenant_urls[0]}']", "Account for #{@tenants[0]}: user@example.com"
 
     # Render links for all the identity's Fizzies
     get root_path(script_name: nil)
-    assert_select "ul li a[href='#{@tenant_urls[0]}']", "Account for #{@tenants[0]}"
-    assert_select "ul li a[href='#{@tenant_urls[1]}']", "Account for #{@tenants[1]}"
+    assert_select "ul li a[href='#{@tenant_urls[0]}']", "Account for #{@tenants[0]}: user@example.com"
+    assert_select "ul li a[href='#{@tenant_urls[1]}']", "Account for #{@tenants[1]}: user@example.com"
   end
 end
