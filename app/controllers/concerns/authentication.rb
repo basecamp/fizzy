@@ -86,13 +86,12 @@ module Authentication
 
     def link_identity(user)
       token_value = cookies.signed[:identity_token]
-      token_identity = Identity.find_signed(token_value["id"]) if token_value.present?
-      identity = user.set_identity(token_identity)
+      identity = Identity.find_signed(token_value["id"]) if token_value.present?
+      identity = user.set_identity(identity)
       cookies.signed.permanent[:identity_token] = { value: { "id" => identity.signed_id, "updated_at" => identity.updated_at }, httponly: true, same_site: :lax }
     end
 
     def set_current_identity_token
-      link_identity(Current.user) if cookies.signed[:identity_token].nil? && Current.user.present?
       Current.identity_token = Identity::Mock.new(**cookies.signed[:identity_token])
     end
 

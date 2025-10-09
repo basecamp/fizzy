@@ -1,20 +1,16 @@
-<% @page_title = "Choose Account" %>
-
-<div class="panel shadow center margin-block-double" style="--panel-size: 55ch;">
-  <h1 class="txt-xx-large margin-block-end-double">Boxcar</h1>
-
+<% cache [ Current.user, Current.identity_token ] do %>
   <% identity = Identity.find_signed(Current.identity_token.id) %>
   <% memberships = identity&.memberships %>
   <% if memberships.present? %>
-    <h2 class="txt-large margin-block-end">Your Boxcar Accounts</h2>
-    <ul class="flex flex-column gap txt-large" style="list-style-type: none; padding: 0;">
+    <h2>Your Boxcar Accounts</h2>
+    <ul style="list-style-type: none;">
       <% memberships.each do |membership| %>
         <li>
-          <%= link_to membership.account_name, root_url(script_name: "/#{membership.user_tenant}"), class: "btn btn--reversed center" %>
+          <%= link_to membership.account_name, root_url(script_name: "/#{membership.user_tenant}") %>: <%= membership.email_address %>
         </li>
       <% end %>
     </ul>
   <% else %>
-    <p class="txt-large txt-align-center txt-subtle">You don't have any existing Boxcar accounts.</p>
+    <p>You don't have any existing Boxcar accounts.</p>
   <% end %>
-</div>
+<% end %>
