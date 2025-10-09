@@ -371,7 +371,7 @@ GEM
     pp (0.6.3)
       prettyprint
     prettyprint (0.2.0)
-    prism (1.5.1)
+    prism (1.4.0)
     prometheus-client-mmap (1.2.10)
       base64
       bigdecimal
