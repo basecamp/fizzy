@@ -1,17 +1,18 @@
 class Sessions::MagicLinksController < ApplicationController
-  require_unauthenticated_access
-  skip_before_action :require_tenant
-
+  require_untenanted_access
   rate_limit to: 10, within: 15.minutes, only: :create, with: -> { redirect_to session_magic_link_path, alert: "Try again in 15 minutes." }
 
   def show
   end
 
   def create
-    @memberships = MagicLink.consume(code)&.identity&.memberships
+    identity = MagicLink.consume(code)&.identity
 
-    if @memberships.blank?
+    if identity.blank?
       redirect_to session_magic_link_path, alert: "Try another code."
+    else
+      set_current_identity(identity)
+      redirect_to session_login_menu_path
     end
   end
 

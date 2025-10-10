@@ -1,0 +1,16 @@
+<% cache [ @identity, @memberships ] do %>
+  <% if @memberships.present? %>
+    <h2>Your Fizzy Accounts</h2>
+    <ul style="list-style-type: none;">
+      <% @memberships.each do |membership| %>
+        <li>
+          <%= button_to session_login_menu_url(membership_id: membership, script_name: "/#{membership.user_tenant}"), method: :post, class: "btn center txt-medium" do %>
+            <%= membership.account_name %>: <%= membership.email_address %>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p>You don't have any existing Fizzy accounts.</p>
+  <% end %>
+<% end %>
