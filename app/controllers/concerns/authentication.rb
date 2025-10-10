@@ -39,12 +39,22 @@ module Authentication
     def require_tenant
       unless ApplicationRecord.current_tenant.present?
         set_current_identity_token
-        render "sessions/login_menu"
+        redirect_to session_login_menu_path
       end
     end
 
+    def require_identification
+      resume_identity || request_authentication
+    end
+
     def require_authentication
-      resume_session || request_authentication
+      (resume_identity && resume_session) || request_authentication
+    end
+
+    def resume_identity
+      if identity = find_identity_by_cookie
+        set_current_identity(identity)
+      end
     end
 
     def resume_session
@@ -53,11 +63,15 @@ module Authentication
       end
     end
 
+    def find_identity_by_cookie
+      Identity.find_signed(cookies.signed[:identity_token]&.dig("id"))
+    end
+
     def find_session_by_cookie
       Session.find_signed(cookies.signed[:session_token])
     end
 
-    def request_authentication(untenanted: false)
+    def request_authentication
       if ApplicationRecord.current_tenant.present?
         session[:return_to_after_authenticating] = request.url
       end
@@ -88,22 +102,23 @@ module Authentication
       token_value = cookies.signed[:identity_token]
       identity = Identity.find_signed(token_value["id"]) if token_value.present?
       identity = user.set_identity(identity)
-      cookies.signed.permanent[:identity_token] = { value: { "id" => identity.signed_id, "updated_at" => identity.updated_at }, httponly: true, same_site: :lax }
+      set_current_identity(identity)
     end
 
-    def set_current_identity_token
+    def set_current_identity(identity)
+      cookies.signed.permanent[:identity_token] = { value: { "id" => identity.signed_id, "updated_at" => identity.updated_at }, httponly: true, same_site: :lax }
       Current.identity_token = Identity::Mock.new(**cookies.signed[:identity_token])
     end
 
     def set_current_session(session)
       logger.struct "  Authorized User##{session.user.id}", authentication: { user: { id: session.user.id } }
       Current.session = session
-      set_current_identity_token
       cookies.signed.permanent[:session_token] = { value: session.signed_id, httponly: true, same_site: :lax, path: Account.sole.slug }
     end
 
     def terminate_session
       Current.session.destroy
       cookies.delete(:session_token)
+      cookies.delete(:identity_token)
     end
 end
