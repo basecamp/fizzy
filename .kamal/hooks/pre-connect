@@ -1,7 +1,32 @@
 #!/usr/bin/env bash
-#
-# Verify Tailscale connection and SSH authentication before deploying.
 
+# Validate hostnames are FQDNs ending in -int.37signals.com
+if command -v yq >/dev/null 2>&1; then
+  declare -A SUGGESTIONS
+  while IFS= read -r host; do
+    if [[ ! $host =~ -int\.37signals\.com$ ]]; then
+      if [[ $host =~ -4[0-9]{2}$ ]]; then
+        SUGGESTIONS["$host"]="$host.df-ams-int.37signals.com"
+      elif [[ $host =~ -1[0-9]{2}$ ]]; then
+        SUGGESTIONS["$host"]="$host.df-iad-int.37signals.com"
+      else
+        SUGGESTIONS["$host"]="$host.sc-chi-int.37signals.com"
+      fi
+    fi
+  done < <(bin/kamal config -d "${KAMAL_DESTINATION:-production}" 2>/dev/null | yq '.":hosts"[]')
+
+  if [ ${#SUGGESTIONS[@]} -gt 0 ]; then
+    echo "Unqualified hostnames found in config/deploy.${KAMAL_DESTINATION:-production}.yml:" >&2
+    echo "" >&2
+    echo "Update to use fully-qualified hostnames:" >&2
+    for host in "${!SUGGESTIONS[@]}"; do
+      echo "  $host → ${SUGGESTIONS[$host]}" >&2
+    done
+    exit 1
+  fi
+fi
+
+# Verify Tailscale connection and SSH authentication before deploying.
 tailscale_cmd() {
   if command -v tailscale >/dev/null 2>&1; then
     tailscale "$@"

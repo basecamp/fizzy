@@ -1,13 +1,13 @@
 servers:
   web:
     hosts:
-      - fizzy-beta-app-01
-      - fizzy-beta-app-101
+      - fizzy-beta-app-01.sc-chi-int.37signals.com
+      - fizzy-beta-app-101.df-iad-int.37signals.com
     labels:
       otel_scrape_enabled: true
   jobs:
     hosts:
-      - fizzy-beta-app-01
+      - fizzy-beta-app-01.sc-chi-int.37signals.com
     labels:
       otel_scrape_enabled: true
 
@@ -42,12 +42,12 @@ accessories:
       - fizzy:/home/beamer
     cmd: beamer run --retention=1h --metrics-port=9000
     hosts:
-      - fizzy-beta-app-01
-      - fizzy-beta-app-101
+      - fizzy-beta-app-01.sc-chi-int.37signals.com
+      - fizzy-beta-app-101.df-iad-int.37signals.com
 
   load-balancer:
     image: basecamp/kamal-proxy:lb
-    host: fizzy-beta-lb-01
+    host: fizzy-beta-lb-01.sc-chi-int.37signals.com
     options:
       publish:
         - 80:80
