@@ -4,6 +4,8 @@ module User::Identifiable
   included do
     has_one :membership, ->(user) { where(user_tenant: user.tenant) }
     has_one :identity, through: :membership
+
+    scope :with_identity, ->(identity) { where(id: identity.memberships.where(user_tenant: ApplicationRecord.current_tenant).pluck(:user_id)) }
   end
 
   def set_identity(token_identity)

@@ -4,6 +4,7 @@ module User::Role
   included do
     enum :role, %i[ admin member system ].index_by(&:itself), scopes: false
 
+    scope :admin, -> { where(role: :admin) }
     scope :member, -> { where(role: :member) }
     scope :active, -> { where(active: true, role: %i[ admin member ]) }
   end

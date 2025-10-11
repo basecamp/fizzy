@@ -38,12 +38,12 @@ module Authentication
 
     def require_tenant
       unless ApplicationRecord.current_tenant.present?
-        set_current_identity_token
+        resume_identity
         redirect_to session_login_menu_path
       end
     end
 
-    def require_identification
+    def require_identity
       resume_identity || request_authentication
     end
 
