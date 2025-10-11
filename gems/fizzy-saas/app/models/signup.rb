@@ -3,14 +3,19 @@ class Signup
   include ActiveModel::Attributes
   include ActiveModel::Validations
 
-  PERMITTED_KEYS = %i[ full_name email_address password company_name ]
+  PERMITTED_KEYS = %i[ full_name email_address company_name ]
 
-  # Input attributes
-  attr_accessor :company_name, :full_name, :email_address, :password
-  validates_presence_of :company_name, :full_name, :email_address, :password
+  attr_accessor :company_name, :full_name, :email_address, :user, :tenant
+  attr_reader :queenbee_account, :account
 
-  # Output attributes
-  attr_reader :tenant, :account, :user, :queenbee_account
+  with_options on: :account_creation do
+    validates_presence_of :email_address
+  end
+
+  with_options on: :completion do
+    validates_presence_of :company_name, :full_name
+  end
+
 
   def initialize(...)
     @company_name = nil
@@ -25,20 +30,41 @@ class Signup
     super
   end
 
-  def process
-    return false unless valid?
+  def create_account
+    return false unless valid?(:account_creation)
 
-    create_queenbee_account
-    create_tenant
+    if membership = Membership.find_by(email_address: email_address)
+      membership.send_magic_link
+    else
+      create_queenbee_account
+      create_tenant
+      user.membership.send_magic_link
+    end
 
-    true
   rescue => error
     destroy_tenant
     destroy_queenbee_account
 
     errors.add(:base, "An error occurred during signup: #{error.message}")
+    Rails.logger.error(error)
+    Rails.logger.error(error.backtrace.join("\n"))
 
     false
+  end
+
+  def complete
+    return false unless valid?(:completion)
+
+    ApplicationRecord.with_tenant(tenant) do
+      @account = Account.sole
+
+      ApplicationRecord.transaction do
+        user.update!(name: full_name)
+        account.update!(name: company_name, setup_status: :complete)
+        user.membership.update!(account_name: company_name)
+      end
+    end
+    # TODO: Update company and user name in QB
   end
 
   private
@@ -52,17 +78,18 @@ class Signup
     end
 
     def create_tenant
-      @tenant = queenbee_account.id.to_s
+      self.tenant = queenbee_account.id.to_s
+
       ApplicationRecord.create_tenant(tenant) do
         @account = Account.create_with_admin_user(
           account: {
             external_account_id: tenant,
-            name: company_name
+            name: "New Account",
+            setup_status: :pending
           },
           owner: {
-            name: full_name,
-            email_address: email_address,
-            password: password
+            name: email_address,
+            email_address: email_address
           }
         )
         @user = User.find_by!(role: :admin)
@@ -74,9 +101,10 @@ class Signup
       if tenant.present? && ApplicationRecord.tenant_exist?(tenant)
         ApplicationRecord.destroy_tenant(tenant)
       end
-      @user = nil
+
       @account = nil
-      @tenant = nil
+      self.user = nil
+      self.tenant = nil
     end
 
     def queenbee_account_attributes
@@ -92,8 +120,8 @@ class Signup
         # attributes[:terms_of_service] = true
 
         attributes[:product_name]   = "fizzy"
-        attributes[:name]           = company_name
-        attributes[:owner_name]     = full_name
+        attributes[:name]           = email_address
+        attributes[:owner_name]     = email_address
         attributes[:owner_email]    = email_address
 
         attributes[:trial]          = true

@@ -3,6 +3,8 @@ class Account < ApplicationRecord
 
   has_many_attached :uploads
 
+  enum :setup_status, %w[ pending complete ].index_by(&:itself), prefix: :setup, default: :pending
+
   class << self
     def create_with_admin_user(account:, owner:)
       User.system

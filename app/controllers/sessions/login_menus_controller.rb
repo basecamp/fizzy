@@ -1,7 +1,7 @@
 class Sessions::LoginMenusController < ApplicationController
   require_untenanted_access only: :show
   allow_unauthenticated_access only: :create
-  before_action :require_identification
+  before_action :require_identity
   before_action :set_identity
 
   def show
