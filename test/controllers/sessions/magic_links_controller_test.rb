@@ -2,22 +2,35 @@ require "test_helper"
 
 class Sessions::MagicLinksControllerTest < ActionDispatch::IntegrationTest
   test "show" do
-    get session_magic_link_path
+    untenanted do
+      get session_magic_link_url
 
-    assert_response :success
+      assert_response :success
+    end
   end
 
   test "create" do
-    magic_link = MagicLink.create!(membership: memberships(:kevin_in_37signals))
+    untenanted do
+      membership = memberships(:kevin_in_37signals)
+      magic_link = MagicLink.create!(membership: membership)
 
-    post session_magic_link_path, params: { code: magic_link.code }
+      post session_magic_link_url, params: { code: magic_link.code }
 
-    assert_redirected_to root_path
-    assert cookies[:session_token].present?
-    assert_not MagicLink.exists?(magic_link.id)
+      assert_response :redirect, "Valid magic link should redirect"
+      assert cookies[:identity_token].present?, "Valid magic link should set identity token"
+      assert_not MagicLink.exists?(magic_link.id), "Valid magic link should be consumed"
 
-    post session_magic_link_path, params: { code: "INVALID" }
+      post session_magic_link_url, params: { code: "INVALID" }
 
-    assert_redirected_to session_magic_link_path
+      assert_response :redirect, "Invalid code should redirect"
+
+      expired_link = MagicLink.create!(membership: membership)
+      expired_link.update_column(:expires_at, 1.hour.ago)
+
+      post session_magic_link_url, params: { code: expired_link.code }
+
+      assert_response :redirect, "Expired magic link should redirect"
+      assert MagicLink.exists?(expired_link.id), "Expired magic link should not be consumed"
+    end
   end
 end
