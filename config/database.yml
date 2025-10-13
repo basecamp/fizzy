@@ -20,7 +20,9 @@ development:
     tenanted: true
   untenanted:
     <<: *default
-    database: storage/untenanted/development.sqlite3
+    <% database_path = "storage/untenanted/development.sqlite3" %>
+    <% database_path = "file:#{database_path}?vfs=beamer" if %w[1 true].include?(ENV["BEAMER"]&.downcase) %>
+    database: <%= database_path %>
     migrations_paths: db/untenanted_migrate
   cable:
     <<: *default

@@ -148,6 +148,9 @@ cmd_server() {
   echo "Cleaning up stale socket files..."
   find . -path '*/.beamer/*/.beamer.sock' -type s -delete 2>/dev/null || true
 
+  mkdir -p ./storage/tenants
+  mkdir -p ./storage/untenanted
+
   echo "Starting web server and beamer with foreman..."
   exec foreman start -f Procfile.beamer-testbed
 }
