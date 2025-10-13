@@ -1,16 +1,27 @@
 <% cache [ @identity, @memberships ] do %>
-  <% if @memberships.present? %>
-    <h2>Your Fizzy Accounts</h2>
-    <ul style="list-style-type: none;">
-      <% @memberships.each do |membership| %>
-        <li>
-          <%= button_to session_login_menu_url(membership_id: membership, script_name: "/#{membership.user_tenant}"), method: :post, class: "btn center txt-medium" do %>
-            <%= membership.account_name %>: <%= membership.email_address %>
+  <div class="panel shadow center flex flex-column gap">
+    <div class="flex flex-column gap">
+      <% if @memberships.present? %>
+        <h2>Your Fizzy Accounts</h2>
+        <div class="flex flex-column gap-half margin-none unpad">
+          <% @memberships.each do |membership| %>
+            <%= button_to session_login_menu_url(membership_id: membership, script_name: "/#{membership.user_tenant}"), method: :post, class: "btn center txt-medium" do %>
+              <%= membership.account_name %>
+              :
+              <%= membership.email_address %>
+            <% end %>
           <% end %>
-        </li>
+        </div>
+      <% else %>
+        <p>You don't have any existing Fizzy accounts.</p>
       <% end %>
-    </ul>
-  <% else %>
-    <p>You don't have any existing Fizzy accounts.</p>
-  <% end %>
+    </div>
+
+    <div class="flex flex-column gap">
+      <%= link_to login_url, class: "btn center btn--reversed" do %>
+        <%= icon_tag "add" %>
+        Add another account
+      <% end %>
+    </div>
+  </div>
 <% end %>
