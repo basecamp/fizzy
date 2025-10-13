@@ -10,12 +10,20 @@ class Sessions::MagicLinksController < ApplicationController
 
     if membership.blank?
       redirect_to session_magic_link_path, alert: "Try another code."
-    elsif membership.account.setup_pending?
-      set_current_identity(membership.identity)
-      redirect_to saas.new_signup_completion_url(script_name: "/#{membership.user_tenant}")
     else
-      set_current_identity(membership.identity)
-      redirect_to session_login_menu_path
+      resume_identity
+
+      if Current.identity_token
+        link_identity(membership)
+      else
+        set_current_identity(membership.identity)
+      end
+
+      if membership.account.setup_pending?
+        redirect_to saas.new_signup_completion_url(script_name: "/#{membership.user_tenant}")
+      else
+        redirect_to session_login_menu_path
+      end
     end
   end
 

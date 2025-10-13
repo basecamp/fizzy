@@ -98,10 +98,16 @@ module Authentication
       end
     end
 
-    def link_identity(user)
+    def link_identity(user_or_membership)
       token_value = cookies.signed[:identity_token]
       identity = Identity.find_signed(token_value["id"]) if token_value.present?
-      identity = user.set_identity(identity)
+
+      if user_or_membership.is_a?(User)
+        identity = user_or_membership.set_identity(identity)
+      elsif user_or_membership.is_a?(Membership)
+        user_or_membership.update!(identity: identity)
+      end
+
       set_current_identity(identity)
     end
 
