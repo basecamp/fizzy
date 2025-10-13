@@ -146,7 +146,7 @@ cmd_server() {
 
   # Clean up any stale .beamer.sock files
   echo "Cleaning up stale socket files..."
-  find . -path '*/.beamer/*/.beamer.sock' -type s -delete 2>/dev/null || true
+  sudo find . -path '*/.beamer/*/.beamer.sock' -type s -delete 2>/dev/null || true
 
   mkdir -p ./storage/tenants
   mkdir -p ./storage/untenanted
