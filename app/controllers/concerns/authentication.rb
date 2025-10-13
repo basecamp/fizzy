@@ -48,7 +48,15 @@ module Authentication
     end
 
     def require_authentication
-      (resume_identity && resume_session) || request_authentication
+      if resume_identity
+        resume_session || request_session_for_identity
+      else
+        request_authentication
+      end
+    end
+
+    def request_session_for_identity
+      redirect_to session_login_menu_path
     end
 
     def resume_identity

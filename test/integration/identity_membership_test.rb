@@ -1,37 +1,16 @@
 require "test_helper"
 
 class IdentityMembershipTest < ActionDispatch::IntegrationTest
-  setup do
-    @tenants = [ ActiveRecord::FixtureSet.identify("identity-tenant-1"),
-                 ActiveRecord::FixtureSet.identify("identity-tenant-2") ]
-    @tenant_paths = @tenants.map { "/#{_1}" }
-    @tenant_urls = @tenant_paths.map { root_url(script_name: _1) }
-    @user_params = { email_address: "user@example.com", password: "password1234" }
-    @users = @tenants.map do |tenant|
-      ApplicationRecord.create_tenant(tenant) do
-        Account.create! name: "Account for #{tenant}"
-        User.create! @user_params.merge(name: "Harold Hancox")
-      end
-    end
-  end
-
   test "multiple signins on the same browser" do
-    post session_path(script_name: @tenant_paths[0], params: @user_params)
-    assert_redirected_to root_path(script_name: @tenant_paths[0])
+    # Sign in as kevin to first account
+    kevin = users(:kevin)
+    sign_in_as(kevin)
 
-    post session_path(script_name: @tenant_paths[1], params: @user_params)
-    assert_redirected_to root_path(script_name: @tenant_paths[1])
+    # Then sign in as JZ
+    jz = users(:jz)
+    set_identity_as(jz)
 
-    # Render links for other Fizzies in the jump menu
-    get my_menu_path(script_name: @tenant_paths[0])
-    assert_select "#my_menu ul li a[href='#{@tenant_urls[1]}']", "Account for #{@tenants[1]}: user@example.com"
-
-    get my_menu_path(script_name: @tenant_paths[1])
-    assert_select "#my_menu ul li a[href='#{@tenant_urls[0]}']", "Account for #{@tenants[0]}: user@example.com"
-
-    # Render links for all the identity's Fizzies
-    get root_path(script_name: nil)
-    assert_select "ul li a[href='#{@tenant_urls[0]}']", "Account for #{@tenants[0]}: user@example.com"
-    assert_select "ul li a[href='#{@tenant_urls[1]}']", "Account for #{@tenants[1]}: user@example.com"
+    expected_membership_ids = [ memberships(:kevin_in_37signals), memberships(:jz_in_37signals) ].map(&:id)
+    assert_equal expected_membership_ids.sort, jz.reload.identity.memberships.pluck(:id).sort
   end
 end

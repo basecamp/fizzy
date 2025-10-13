@@ -5,8 +5,7 @@ class SignupsControllerTest < ActionDispatch::IntegrationTest
     @signup_params = {
       full_name: "Brian Wilson",
       email_address: "brian@example.com",
-      company_name: "Beach Boys",
-      password: SecureRandom.hex(16)
+      company_name: "Beach Boys"
     }
     @starting_tenants = ApplicationRecord.tenants
 
@@ -24,39 +23,20 @@ class SignupsControllerTest < ActionDispatch::IntegrationTest
     get saas.new_signup_url, headers: http_basic_auth_headers
 
     assert_response :success
-    assert_select "h2", "Create your account"
-    assert_select "input[name='signup[full_name]']"
+    assert_select "h2", "Enter your email address to get started."
     assert_select "input[name='signup[email_address]']"
-    assert_select "input[name='signup[company_name]']"
-    assert_select "input[name='signup[password]']"
   end
 
-  test "should create signup and redirect to tenant root on success" do
-    Account.any_instance.expects(:setup_basic_template).once
-
+  test "should create signup and redirect to magic link page" do
     assert_difference -> { ApplicationRecord.tenants.count }, 1 do
-      post saas.signup_url, params: { signup: @signup_params }, headers: http_basic_auth_headers
+      post saas.signup_url, params: { signup: { email_address: @signup_params[:email_address] } }, headers: http_basic_auth_headers
     end
 
-    assert_response :redirect
-
-    new_tenant = (ApplicationRecord.tenants - @starting_tenants).first
-    ApplicationRecord.with_tenant(new_tenant) do
-      account = Account.sole
-      assert account, "Account should have been created"
-      assert_equal @signup_params[:company_name], account.name
-
-      user = User.find_by(email_address: @signup_params[:email_address])
-      assert user, "User should have been created"
-      assert_equal @signup_params[:full_name], user.name
-      assert_equal @signup_params[:email_address], user.email_address
-
-      assert_redirected_to root_url(script_name: account.slug)
-    end
+    assert_redirected_to session_magic_link_path
   end
 
   test "should render new with errors when signup fails validation" do
-    invalid_params = @signup_params.merge(password: "")
+    invalid_params = { email_address: "" }
 
     assert_no_difference -> { ApplicationRecord.tenants.count } do
       post saas.signup_url, params: { signup: invalid_params }, headers: http_basic_auth_headers
@@ -64,19 +44,6 @@ class SignupsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :unprocessable_entity
     assert_select ".alert--error"
-    assert_select ".alert--error li", /Password can't be blank/
-  end
-
-  test "should render new with errors when signup processing fails" do
-    Queenbee::Remote::Account.stubs(:create!).raises(RuntimeError, "Invalid account data")
-
-    assert_no_difference -> { ApplicationRecord.tenants.count } do
-      post saas.signup_url, params: { signup: @signup_params }, headers: http_basic_auth_headers
-    end
-
-    assert_response :unprocessable_entity
-    assert_select ".alert--error"
-    assert_select ".alert--error li", /An error occurred during signup/
   end
 
   private

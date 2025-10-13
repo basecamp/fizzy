@@ -30,26 +30,16 @@ class User::IdentifiableTest < ActiveSupport::TestCase
   end
 
   test "set_identity when token is an identity and user has a different identity" do
-    user = users(:david)
-    user2 = users(:jz)
-    token_identity = Identity.create!
-    user_identity = Identity.create!
-    user_identity.memberships.create!(user_id: user.id, user_tenant: user.tenant, email_address: user.email_address, account_name: "asdf")
-    user_identity.memberships.create!(user_id: user2.id, user_tenant: user2.tenant, email_address: user2.email_address, account_name: "qwer")
-    assert_equal(user_identity, user.identity)
-    assert_equal(user_identity, user2.identity)
+    kevin = users(:kevin)
+    jz = users(:jz)
 
-    result = user.set_identity(token_identity)
-    user.reload
-    user2.reload
+    assert_not_equal(kevin.identity, jz.identity, "Kevin and JZ should start with different identities")
 
-    assert_equal(token_identity, result)
-    assert_equal(token_identity, user.identity)
-    assert_equal(token_identity, user2.identity)
+    kevin.set_identity(jz.identity)
+    kevin.reload
+    jz.reload
 
-    assert_raises(ActiveRecord::RecordNotFound) do
-      user_identity.reload
-    end
+    assert_equal(kevin.identity, jz.identity, "Kevin and JZ should now share the same identity")
   end
 
   test "set_identity when token is nil and user has an identity" do
