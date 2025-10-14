@@ -28,6 +28,18 @@
     &[readonly] {
       --focus-ring-size: 0;
     }
+
+    &[autocomplete='one-time-code'] {
+      --input-spacing: 0.5em;
+
+      font-family: var(--font-mono);
+      font-size: var(--text-large);
+      font-weight: 900;
+      inline-size: 18ch;
+      letter-spacing: 1ch;
+      min-inline-size: 18ch;
+      text-align: center;
+    }
   }
 
   .input--file {
