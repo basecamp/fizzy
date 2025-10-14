@@ -112,7 +112,7 @@ module Authentication
 
       if user_or_membership.is_a?(User)
         identity = user_or_membership.set_identity(identity)
-      elsif user_or_membership.is_a?(Membership)
+      elsif user_or_membership.is_a?(Membership) && identity
         user_or_membership.update!(identity: identity)
       end
 
@@ -120,8 +120,12 @@ module Authentication
     end
 
     def set_current_identity(identity)
-      cookies.signed.permanent[:identity_token] = { value: { "id" => identity.signed_id, "updated_at" => identity.updated_at }, httponly: true, same_site: :lax }
-      Current.identity_token = Identity::Mock.new(**cookies.signed[:identity_token])
+      Current.identity_token = if identity
+        cookies.signed.permanent[:identity_token] = { value: { "id" => identity.signed_id, "updated_at" => identity.updated_at }, httponly: true, same_site: :lax }
+        Identity::Mock.new(**cookies.signed[:identity_token])
+      else
+        nil
+      end
     end
 
     def set_current_session(session)
