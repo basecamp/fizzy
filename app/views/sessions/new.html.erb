@@ -1,28 +1,36 @@
 <% @page_title = "Sign in" %>
 
-<div
-  class="panel shadow center margin-block-double <%= "shake" if flash[:alert] %>"
-  style="--panel-size: 55ch;"
->
-  <h1 class="txt-xx-large margin-block-end-double">Fizzy</h1>
+<% content_for :header do %>
+  <nav>
+    <div class="fizzy-header-logo center flex-inline align-center txt-normal">
+      <%= inline_svg "fizzy-logo" %>
+      <strong class="txt-medium overflow-ellipsis margin-none">Fizzy</strong>
+    </div>
+  </nav>
+<% end %>
 
-  <%= form_with url: session_path, class: "flex flex-column gap txt-large" do |form| %>
+<div class="panel shadow center margin-block-double flex flex-column gap-half" style="--panel-size: 42ch; view-transition-name: sign-in-panel">
+  <header>
+    <h1 class="txt-x-large font-weight-black margin-none"><%= @page_title %></h1>
+    <p class="margin-none-block-start">Enter your email address to continue</p>
+  </header>
+
+  <%= form_with url: session_path, class: "flex flex-column gap txt-medium" do |form| %>
     <div class="flex align-center gap">
       <label class="flex align-center gap input input--actor">
-        <%= form.email_field :email_address, required: true, class: "input full-width", autofocus: true, autocomplete: "username", placeholder: "Enter your email address" %>
-        <%= icon_tag "email", class: "txt-large" %>
+        <%= form.email_field :email_address, required: true, class: "input full-width", autofocus: true, autocomplete: "username", placeholder: "Email address" %>
       </label>
     </div>
 
-    <button type="submit" id="log_in" class="btn btn--reversed center">
+    <button type="submit" id="log_in" class="btn btn--link center">
+      <span>Go</span>
       <%= icon_tag "arrow-right" %>
-      <span class="for-screen-reader">Sign in</span>
     </button>
   <% end %>
 </div>
 
 <% content_for :footer do %>
   <div class="txt-align-center center margin-block-double txt-subtle">
-    Fizzy&trade; version 0
+    Fizzy&trade; Beta. <%= mail_to "support@37signals.com", "Need help?", class: "txt-link" %>
   </div>
 <% end %>
