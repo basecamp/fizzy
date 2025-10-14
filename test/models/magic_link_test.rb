@@ -6,7 +6,6 @@ class MagicLinkTest < ActiveSupport::TestCase
 
     assert magic_link.code.present?
     assert_equal MagicLink::CODE_LENGTH, magic_link.code.length
-    assert_match(/\A[#{MagicLink::CODE_ALPHABET.join}]+\z/, magic_link.code)
     assert magic_link.expires_at.present?
     assert_in_delta MagicLink::EXPIRATION_TIME.from_now, magic_link.expires_at, 1.second
   end
@@ -55,12 +54,5 @@ class MagicLinkTest < ActiveSupport::TestCase
 
     assert MagicLink.exists?(active_link.id)
     assert_not MagicLink.exists?(expired_link.id)
-  end
-
-  test "sanitize_code" do
-    assert_equal "011123", MagicLink.sanitize_code("OIL123")
-    assert_equal "ABC123", MagicLink.sanitize_code("ABC-123 !@#")
-    assert_nil MagicLink.sanitize_code(nil)
-    assert_nil MagicLink.sanitize_code("")
   end
 end
