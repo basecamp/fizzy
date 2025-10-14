@@ -1,6 +1,4 @@
 class MagicLink < UntenantedRecord
-  CODE_ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ".chars.freeze
-  CODE_SUBSTITUTIONS = { "O" => "0", "I" => "1", "L" => "1" }.freeze
   CODE_LENGTH = 6
   EXPIRATION_TIME = 15.minutes
 
@@ -16,25 +14,11 @@ class MagicLink < UntenantedRecord
 
   class << self
     def consume(code)
-      active.find_by(code: sanitize_code(code))&.consume
+      active.find_by(code: Code.sanitize(code))&.consume
     end
 
     def cleanup
       stale.delete_all
-    end
-
-    def generate_code(length)
-      length.times.map { CODE_ALPHABET.sample }.join
-    end
-
-    def sanitize_code(code)
-      if code.present?
-        sanitized = code.to_s.upcase
-        CODE_SUBSTITUTIONS.each { |from, to| sanitized.gsub!(from, to) }
-        sanitized.gsub(/[^#{CODE_ALPHABET.join}]/, "")
-      else
-        nil
-      end
     end
   end
 
@@ -46,7 +30,7 @@ class MagicLink < UntenantedRecord
   private
     def generate_code
       self.code = loop do
-        candidate = self.class.generate_code(CODE_LENGTH)
+        candidate = Code.generate(CODE_LENGTH)
         break candidate unless self.class.exists?(code: candidate)
       end
     end
