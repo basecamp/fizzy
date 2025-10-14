@@ -1,27 +1,45 @@
-<% cache [ @identity, @memberships ] do %>
-  <div class="panel shadow center flex flex-column gap">
-    <div class="flex flex-column gap">
-      <% if @memberships.present? %>
-        <h2>Your Fizzy Accounts</h2>
-        <div class="flex flex-column gap-half margin-none unpad">
-          <% @memberships.each do |membership| %>
-            <%= button_to session_login_menu_url(membership_id: membership, script_name: "/#{membership.user_tenant}"), method: :post, class: "btn center txt-medium" do %>
-              <%= membership.account_name %>
-              :
-              <%= membership.email_address %>
-            <% end %>
-          <% end %>
-        </div>
-      <% else %>
-        <p>You don't have any existing Fizzy accounts.</p>
-      <% end %>
-    </div>
+<% @page_title = "Choose an account" %>
 
-    <div class="flex flex-column gap">
-      <%= link_to login_url, class: "btn center btn--reversed" do %>
+<% content_for :header do %>
+  <nav>
+    <div class="fizzy-header-logo center flex-inline align-center txt-normal">
+      <%= inline_svg "fizzy-logo" %>
+      <strong class="txt-medium overflow-ellipsis margin-none">Fizzy</strong>
+    </div>
+  </nav>
+<% end %>
+
+<% cache [ @identity, @memberships ] do %>
+  <div class="panel shadow center margin-block-double flex flex-column gap-half" style="--panel-size: 42ch; view-transition-name: sign-in-panel; --popup-icon-size: 24px; --popup-item-padding-inline: 0.5rem;">
+    <% if @memberships.present? %>
+      <h1 class="txt-x-large font-weight-black margin-none">Choose a Fizzy account</h1>
+      <menu class="popup__list pad border-radius border">
+        <% @memberships.each do |membership| %>
+          <li class="popup__item txt-medium">
+            <%= icon_tag "logo-color", class: "popup__icon" %>
+            <%= button_to session_login_menu_url(membership_id: membership, script_name: "/#{membership.user_tenant}"), method: :post, class: "btn overflow-ellipsis fill-transparent popup__btn", form_class: "max-width flex-item-grow" do %>
+              <strong><%= membership.account_name %></strong>
+              <div class="txt-subtle font-weight-normal"><%= membership.email_address %></div>
+            <% end %>
+          </li>
+        <% end %>
+      </menu>
+    <% else %>
+      <h1 class="txt-x-large font-weight-black margin-none">Hmm...</h1>
+      <p class="margin-none-block-start">You don’t have any Fizzy accounts.</p>
+    <% end %>
+
+    <div class="margin-block-start">
+      <%= link_to login_url, class: "btn center txt-small" do %>
         <%= icon_tag "add" %>
-        Add another account
+        <span>Link a Fizzy account</span>
       <% end %>
     </div>
+  </div>
+<% end %>
+
+<% content_for :footer do %>
+  <div class="txt-align-center center margin-block-double txt-subtle">
+    Fizzy&trade; Beta. <%= mail_to "support@37signals.com", "Need help?", class: "txt-link" %>
   </div>
 <% end %>
