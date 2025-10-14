@@ -9,7 +9,7 @@
   </nav>
 <% end %>
 
-<div class="panel shadow center margin-block-double flex flex-column gap-half" style="--panel-size: 42ch; view-transition-name: sign-in-panel">
+<div class="panel shadow center margin-block-double flex flex-column gap-half <%= "shake" if flash[:alert] %>" style="--panel-size: 42ch; view-transition-name: sign-in-panel">
   <header>
     <h1 class="txt-x-large font-weight-black margin-none">Check your email</h1>
     <p class="margin-none-block-start">We just emailed you a special code</p>
@@ -17,7 +17,7 @@
 
   <%= form_with url: session_magic_link_path, method: :post, html: { class: "flex flex-column gap", data: { controller: token_list("auto-submit" => params[:code].present?)} } do |form| %>
     <div class="flex align-center gap">
-      <%= form.text_field :code, required: true, class: "input center txt-align-enter", autofocus: true, "data-1p-ignore": true, autocomplete: "one-time-code", maxlength: "6", value: params[:code] %>
+      <%= form.text_field :code, required: true, class: "input center txt-align-enter", autofocus: true, "data-1p-ignore": true, autocomplete: "one-time-code", maxlength: "6", placeholder: "••••••", value: params[:code] %>
     </div>
 
     <button type="submit" id="log_in" class="btn btn--link center">
