@@ -19,7 +19,9 @@ gem "solid_cache", "~> 1.0"
 gem "solid_queue", "~> 1.1"
 gem "sqlite3", ">= 2.0"
 gem "thruster", require: false
-gem "beamer-rails"
+source "https://e95ae463b12de3f204526a44650f6ae0@gems.stanko.io/private" do
+  gem "beamer-rails"
+end
 
 # Features
 gem "bcrypt", "~> 3.1.7"
