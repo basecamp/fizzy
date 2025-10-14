@@ -39,7 +39,7 @@ module Authentication
     def require_tenant
       unless ApplicationRecord.current_tenant.present?
         resume_identity
-        redirect_to session_login_menu_path
+        redirect_to session_login_menu_url(script_name: nil)
       end
     end
 
@@ -56,7 +56,7 @@ module Authentication
     end
 
     def request_session_for_identity
-      redirect_to session_login_menu_path
+      redirect_to session_login_menu_url(script_name: nil)
     end
 
     def resume_identity
