@@ -1,8 +1,8 @@
 #!/bin/bash -e
 
 # If running the rails server then create or migrate existing database
-if [ "${1}" == "./bin/thrust" ] && [ "${2}" == "./bin/rails" ] && [ "${3}" == "server" ] && bundle exec beamer is-primary; then
-  ./bin/rails db:prepare
+if [ "${1}" == "./bin/thrust" ] && [ "${2}" == "./bin/rails" ] && [ "${3}" == "server" ]; then
+  ./bin/migrate-primary-db
 fi
 
 exec "${@}"

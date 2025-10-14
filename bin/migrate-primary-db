@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+beamer is-primary && rails db:prepare
