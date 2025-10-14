@@ -17,9 +17,7 @@
 
   <%= form_with url: session_magic_link_path, method: :post, html: { class: "flex flex-column gap", data: { controller: token_list("auto-submit" => params[:code].present?)} } do |form| %>
     <div class="flex align-center gap">
-      <label class="flex align-center gap input input--actor">
-        <%= form.text_field :code, required: true, class: "input full-width txt-align-center", autofocus: true, autocomplete: "code", placeholder: "Enter the code", value: params[:code] %>
-      </label>
+      <%= form.text_field :code, required: true, class: "input center txt-align-enter", autofocus: true, "data-1p-ignore": true, autocomplete: "one-time-code", maxlength: "6", value: params[:code] %>
     </div>
 
     <button type="submit" id="log_in" class="btn btn--link center">
