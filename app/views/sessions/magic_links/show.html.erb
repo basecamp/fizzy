@@ -1,29 +1,36 @@
-<% @page_title = "Magic link" %>
+<% @page_title = "Enter your sign-in code" %>
 
-<div
-  class="panel shadow center margin-block-double <%= "shake" if flash[:alert] %>"
-  style="--panel-size: 55ch;"
->
-  <h1 class="txt-xx-large margin-block-end-double">Check your email</h1>
+<% content_for :header do %>
+  <nav>
+    <div class="fizzy-header-logo center flex-inline align-center txt-normal">
+      <%= inline_svg "fizzy-logo" %>
+      <strong class="txt-medium overflow-ellipsis margin-none">Fizzy</strong>
+    </div>
+  </nav>
+<% end %>
 
-  <p>We just emailed you a special code.</p>
+<div class="panel shadow center margin-block-double flex flex-column gap-half" style="--panel-size: 42ch; view-transition-name: sign-in-panel">
+  <header>
+    <h1 class="txt-x-large font-weight-black margin-none">Check your email</h1>
+    <p class="margin-none-block-start">We just emailed you a special code</p>
+  </header>
 
   <%= form_with url: session_magic_link_path, method: :post, html: { class: "flex flex-column gap", data: { controller: token_list("auto-submit" => params[:code].present?)} } do |form| %>
     <div class="flex align-center gap">
       <label class="flex align-center gap input input--actor">
-        <%= form.text_field :code, required: true, class: "input full-width text-align-center", autofocus: true, autocomplete: "code", placeholder: "Enter the code", value: params[:code] %>
+        <%= form.text_field :code, required: true, class: "input full-width txt-align-center", autofocus: true, autocomplete: "code", placeholder: "Enter the code", value: params[:code] %>
       </label>
     </div>
 
-    <button type="submit" class="btn btn--reversed center">
+    <button type="submit" id="log_in" class="btn btn--link center">
+      <span>Next</span>
       <%= icon_tag "arrow-right" %>
-      <span class="for-screen-reader">Next</span>
     </button>
   <% end %>
 </div>
 
 <% content_for :footer do %>
   <div class="txt-align-center center margin-block-double txt-subtle">
-    Fizzy&trade; version 0
+    Fizzy&trade; Beta. <%= mail_to "support@37signals.com", "Need help?", class: "txt-link" %>
   </div>
 <% end %>
