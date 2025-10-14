@@ -3,6 +3,6 @@ class MagicLinkPreview < ActionMailer::Preview
     membership = Membership.new email_address: "test@example.com"
     magic_link = MagicLink.new(membership: membership)
     magic_link.valid?
-    MagicLinkMailer.magic_link(magic_link)
+    MagicLinkMailer.sign_in_instructions(magic_link)
   end
 end
