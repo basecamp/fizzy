@@ -1,40 +1,16 @@
 @layer components {
-  .color-picker {
-    --color-picker-origin: calc(var(--btn-size) / 2 + var(--color-picker-spacer));
-    --color-picker-spacer: 0.5ch;
-
-    background-color: var(--color-canvas);
-    border-radius: calc(var(--btn-size) / 2 + var(--color-picker-spacer));
-    gap: var(--color-picker-spacer);
-    inline-size: auto !important;
-    inset: calc(-1 * var(--color-picker-spacer)) auto auto calc(-1 * var(--color-picker-spacer));
-    max-inline-size: var(--panel-size) !important;
-    padding: var(--color-picker-spacer);
-    position: absolute;
-    transform: scale(0.5);
-    transform-origin: var(--color-picker-origin) var(--color-picker-origin);
-    transition: 150ms allow-discrete;
-    transition-property: display, opacity, overlay, transform;
-    z-index: var(--z-popup);opacity: 0;
-
-    &[open] {
-      display: flex;
-      opacity: 1;
-      transform: scale(1);
-    }
-
-    @starting-style {
-      &[open] {
-        opacity: 0;
-        transform: scale(0.5);
-      }
-    }
-  }
-
   .color-picker__colors {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: var(--color-picker-spacer);
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--inline-space-half);
+
+    .btn {
+      --btn-border-radius: 0.1em;
+      --btn-size: 2em;
+      --icon-size: 1.3em;
+
+      inline-size: 100%;
+    }
   }
 }
 

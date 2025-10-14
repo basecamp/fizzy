@@ -30,4 +30,12 @@ class Collection::AccessibleTest < ActiveSupport::TestCase
     collection.update! all_access: true
     assert_equal User.all, collection.users.reload
   end
+
+  test "collection watchers" do
+    collections(:writebook).access_for(users(:kevin)).watching!
+    assert_includes collections(:writebook).watchers, users(:kevin)
+
+    collections(:writebook).access_for(users(:kevin)).access_only!
+    assert_not_includes collections(:writebook).reload.watchers, users(:kevin)
+  end
 end

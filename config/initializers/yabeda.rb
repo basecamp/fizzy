@@ -8,3 +8,8 @@ Yabeda::ActiveJob.install!
 
 require "yabeda/solid_queue"
 Yabeda::SolidQueue.install!
+
+Yabeda::ActionCable.configure do |config|
+  # Fizzy relies primarily on Turbo::StreamsChannel
+  config.channel_class_name = "ActionCable::Channel::Base"
+end

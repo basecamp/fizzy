@@ -2,29 +2,33 @@
   /* Column container
   /* ------------------------------------------------------------------------ */
 
-  .card-columns {
+  #main:has(.card-columns) {
     --bubble-size: 3.5rem;
-    --cards-gap: min(1.7cqi, 1.7rem);
+    --cards-gap: min(1.2cqi, 1.7rem);
     --column-gap: 8px;
     --column-width-collapsed: 40px;
     --column-width-expanded: 450px;
-    --column-transition: 350ms var(--ease-out-expo);
+    --column-transition: 200ms ease-out;
     --progress-increment: var(--progress-max-height) / var(--progress-max-cards);
     --progress-max-cards: 20;
     --progress-max-height: 50dvh;
 
-    align-items: stretch;
+    padding-inline: var(--column-gap);
+  }
+
+  .card-columns {
     container-type: inline-size;
     display: grid;
     gap: var(--column-gap);
     grid-template-columns: 1fr var(--column-width-expanded) 1fr;
-    justify-content: center;
-    margin: var(--cards-gap) auto 0;
+    margin-inline: auto;
     max-inline-size: var(--main-width);
+    overflow-x: auto;
     position: relative;
 
+    /* When it has something expanded */
     &:has(.card-columns__left .cards:not(.is-collapsed), .card-columns__right .cards:not(.is-collapsed)) {
-      grid-template-columns: auto auto auto;
+      grid-template-columns: auto var(--column-width-expanded) auto;
     }
 
     &:has(.cards) {
@@ -74,15 +78,19 @@
     }
 
     &.is-collapsed {
-      border-radius: 99rem;
+      border-radius: calc(var(--column-width-collapsed) / 2);
       flex: 0 0 var(--column-width-collapsed);
       inline-size: var(--column-width-collapsed);
       min-inline-size: 0;
 
       .blank-slate,
-      .pagination-link,
+      .pagination-link.pagination-link--active-when-observed,
       .card {
         display: none;
+      }
+
+      &:not(.cards--considering) {
+        margin-block-start: var(--column-width-collapsed);
       }
     }
 
@@ -92,7 +100,7 @@
 
     .bubble {
       inset-inline-start: 100%;
-      translate: -60% -60%;
+      translate: -90% -40%;
     }
 
     @media (any-hover: hover) {
@@ -105,6 +113,10 @@
     .card__steps {
       display: flex;
     }
+  }
+
+  .cards__new-column {
+    margin-block-start: var(--column-width-collapsed);
   }
 
   /* Used when filtering */
@@ -130,6 +142,18 @@
     .card {
       inline-size: calc((100% - var(--cards-gap) * (var(--card-grid-columns) - 1) ) / var(--card-grid-columns));
     }
+
+    .card__header .card__column-name--current {
+      --btn-padding: 0.1em 0.5em;
+
+      background: none;
+      border: 1px solid currentColor;
+      color: var(--card-color);
+      display: inline-flex;
+      flex: 0 1 auto;
+      inline-size: fit-content;
+      margin: 0 0 0 auto;
+    }
   }
 
   /* Column Elements
@@ -146,7 +170,6 @@
     gap: 0.5ch;
     position: relative;
     text-transform: uppercase;
-    transition: 100ms ease-out;
 
     @media (any-hover: hover) {
       &:hover {
@@ -174,7 +197,7 @@
 
       /* Progress */
       &:after {
-        background: var(--column-color);
+        background: linear-gradient(to bottom, var(--card-color), var(--column-color) 80%);
         block-size: calc(var(--column-width-collapsed) + var(--card-count) * var(--progress-increment));
         border-radius: 99rem;
         content: "";
@@ -192,12 +215,43 @@
       inline-size: 100%;
       margin-block-end: calc(-0.5 * var(--cards-gap));
       justify-content: center;
+    }
 
-      &:hover,
-      &:has(~ .cards__expander-menu:hover) {
-        background-color: var(--column-color);
-        filter: none;
+    .cards:is(.cards--considering) &:hover {
+      cursor: unset;
+      filter: none;
+    }
+
+    @media (any-hover: hover) {
+      .btn--circle,
+      ~ .btn--circle,
+      ~ .cards__expander-menu .btn--circle:not(label) {
+        transition: opacity 300ms ease-in-out;
+        opacity: 0;
+
+        .cards:hover & {
+          opacity: 1;
+        }
       }
+    }
+  }
+
+  .btn.cards__expander-button {
+    --btn-background: transparent;
+
+    block-size: var(--column-width-collapsed);
+    inline-size: var(--column-width-collapsed);
+    inset: 0 0 auto auto;
+    position: absolute;
+    translate: calc(var(--column-gap) * -2);
+    z-index: var(--z-popup);
+
+    .cards--considering & {
+      translate: none;
+    }
+
+    .cards.is-collapsed & {
+      display: none;
     }
   }
 
@@ -218,12 +272,18 @@
     .cards.is-collapsed & {
       writing-mode: vertical-rl;
     }
+
+    .cards:not(.is-collapsed, .cards--considering) & {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
   }
 
   .cards__expander-menu {
-    inset: 0 0 auto auto;
+    inset: 0 auto auto 0;
     position: absolute;
-    translate: calc(var(--column-gap) * -2);
+    translate: calc(var(--column-gap) * 2);
     z-index: var(--z-popup);
 
     .btn--circle {
@@ -233,10 +293,6 @@
       inline-size: var(--column-width-collapsed);
     }
 
-    .panel {
-      --panel-padding: 1ch;
-    }
-
     .cards.is-collapsed & {
       display: none;
     }
@@ -244,9 +300,26 @@
 
   .blank-slate--card {
     box-shadow: none !important;
-    border: 2px dashed color-mix(in srgb, var(--card-color) 40%, var(--color-canvas));;
-    font-weight: 600;
-    rotate: 2deg;
+    color: color-mix(in srgb, var(--card-color) 70%, var(--color-canvas));
+
+    p {
+      font-size: var(--text-small);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+
+      &.blank-slate-for-grid {
+        display: none;
+
+        .cards--grid & {
+          display: initial;
+        }
+      }
+
+      .cards--grid &:not(.blank-slate-for-grid) {
+        display: none;
+      }
+    }
   }
 
   /* TODO: I think this is legacy now? */
@@ -338,7 +411,7 @@
     .card:has(.card__background img:not([src=""])) {
       .card__content,
       .card__meta,
-      .workflow-stage:not(.workflow-stage--current) {
+      .card__column-name:not(.card__column-name--current) {
         opacity: 0;
         transition: opacity 0.2s ease-in-out;
 
@@ -352,7 +425,7 @@
 
     .bubble {
       inset-inline-start: 100%;
-      translate: -60% -60%;
+      translate: -90% -40%;
     }
 
     @media (any-hover: hover) {
@@ -372,26 +445,35 @@
 
   .cards--considering {
     --gradient-opacity: 25%;
+    --bottom-gradient-size: 4em;
 
-    background-color: var(--color-canvas);
-    background-image: linear-gradient(90deg,
-      transparent 0%,
-      color-mix(in srgb, var(--color-considering) var(--gradient-opacity), transparent) 33%,
-      color-mix(in srgb, var(--color-considering) var(--gradient-opacity), transparent) 66%,
-      transparent 100%);
+    padding-bottom: var(--bottom-gradient-size);
+    position: relative;
 
-    @supports(mask: radial-gradient(black)) {
+    @supports(mask: linear-gradient(black)) {
       &:before {
+        background-image: linear-gradient(90deg,
+          transparent 0%,
+          color-mix(in srgb, var(--color-considering) var(--gradient-opacity), transparent) 33%,
+          color-mix(in srgb, var(--color-considering) var(--gradient-opacity), transparent) 66%,
+          transparent 100%);
+        content: "";
+        inset: calc(var(--column-width-collapsed) + var(--block-space-half)) 0 0 0;
+        position: absolute;
+        z-index: 0;
+      }
+
+      &:after {
         background: linear-gradient(90deg,
           color-mix(in oklch, var(--color-considering) 0%, transparent) 0%,
           color-mix(in oklch, var(--color-considering) 20%, transparent) 25%,
           color-mix(in oklch, var(--color-considering) 20%, transparent) 50%,
           color-mix(in oklch, var(--color-considering) 0%, transparent) 100%);
         content: "";
-        inset: 0;
+        inset: calc(var(--column-width-collapsed) + var(--block-space-half)) 0 0 0;
         mask: var(--wavy-background-mask);
         position: absolute;
-        z-index: 0;
+        z-index: -1;
       }
     }
 
@@ -405,7 +487,7 @@
 
     .cards__decoration {
       --gradient-opacity: 30%;
-      --size: 4.25em;
+      --size: 2.2em;
 
       background-color: var(--color-canvas);
       background-image: radial-gradient(ellipse at bottom,
@@ -413,7 +495,7 @@
         transparent 70%);
       block-size: var(--size);
       inline-size: 100%;
-      inset: calc(var(--size) * -1) 0 auto 0;
+      inset: calc(var(--column-width-collapsed) + var(--block-space) - var(--size)) 0 auto 0;
       position: absolute;
       z-index: -1;
 
@@ -422,23 +504,31 @@
       }
 
       @supports(mask: radial-gradient(black)) {
+        --gradient-opacity: 30%;
+
         &:before {
           background: radial-gradient(ellipse at bottom,
             color-mix(in srgb, var(--color-considering) var(--gradient-opacity), transparent) 0%,
             transparent 70%);
           content: "";
           inset: 0;
-          mask: radial-gradient(6px at 50% calc(100% + 3px), transparent calc(99% - 2px), black calc(101% - 2px) 99%, transparent 101%) calc(50% - 8px) calc(50% - 3px + .5px)/16px 6px,
+          mask: radial-gradient(6px at 50% calc(100% + 3px),
+                                transparent calc(99% - 2px),
+                                black calc(101% - 2px) 99%, transparent 101%) calc(50% - 8px) calc(50% - 3px + .5px)/16px 6px,
                 radial-gradient(6px at 50% -3px, transparent calc(99% - 2px), black calc(101% - 2px) 99%, transparent 101%) 50% calc(50% + 3px)/16px 6px;
           position: absolute;
           z-index: 0;
         }
       }
+    }
 
-      &.cards__decoration--end {
-        inset: auto 0 calc(var(--size) * -1);
-        rotate: 180deg;
-      }
+    .cards__decoration-end {
+      background: linear-gradient( transparent 0%, var(--color-canvas) 90%);
+      block-size: var(--bottom-gradient-size);
+      content: "";
+      inset: auto 0 0;
+      position: absolute;
+      z-index: 1;
     }
 
     .card {
@@ -447,21 +537,16 @@
 
       background-color: var(--color-canvas);
       line-height: 1.2;
+      z-index: 2;
 
       @media (min-width: 640px) {
         --text-xx-large: 1.6em;
       }
-
-      &:nth-child(1n) { rotate: -1deg; }
-      &:nth-child(1) { rotate: 0deg; }
-      &:nth-child(2n) { rotate: 1deg; }
-      &:nth-child(3n) { rotate: -0.5deg; }
-      &:nth-child(4n) { rotate: 0.5deg; }
     }
 
     .card__collection {
       background-color: transparent;
-      color: var(--card-text-color);
+      color: var(--card-content-color);
     }
 
     .card__header {
@@ -469,7 +554,6 @@
       padding-block-start: calc(var(--card-padding-block) / 2);
     }
 
-    .card__collection,
     .card__tags {
       color: inherit;
     }
@@ -495,13 +579,20 @@
     }
   }
 
-  .card.card--new {
+  /* Collection tools
+  /* -------------------------------------------------------------------------- */
+
+  .collection-tools.card {
     --border-color: var(--color-selected-dark);
     --border-size: 1px;
     --card-padding-block: var(--block-space);
 
-    border: 1px solid var(--color-selected-dark);
+    border: 1px solid var(--border-color);
     text-align: center;
+
+    .separator--horizontal {
+      margin-block: var(--block-space);
+    }
 
     .btn--link {
       font-size: 1.2em;
@@ -524,11 +615,40 @@
     }
   }
 
+  .collection-tools__watching {
+    display: flex;
+    gap: 0.5ch;
+    inline-size: 100%;
+    margin-block: var(--block-space-half);
+    overflow: hidden;
+    place-content: center;
+    position: relative;
+
+    &:before,
+    &:after {
+      aspect-ratio: 0.5;
+      background: linear-gradient(to right, var(--color-canvas), transparent);
+      content: "";
+      inset-block: 0;
+      position: absolute;
+      z-index: 1;
+    }
+
+    &:before {
+      inset-inline-start: 0;
+    }
+
+    &:after {
+      inset-inline-end: 0;
+      rotate: 180deg;
+    }
+  }
+
   /* On Deck (Not Now)
   /* ------------------------------------------------------------------------ */
 
   .cards--on-deck {
-    --column-color: var(--color-ink-lighter);
+    --card-color: var(--color-ink-light) !important;
 
     .card {
       --card-color: var(--color-card-complete) !important;
@@ -543,6 +663,7 @@
   /* -------------------------------------------------------------------------- */
 
   /* Surface a mini bubble if there are cards with bubbles inside */
+  .cards--considering:has(.bubble:not([hidden])) .cards__expander-title,
   .cards--doing.is-collapsed:has(.bubble:not([hidden])) {
     --bubble-color: var(--card-color, oklch(var(--lch-blue-medium)));
     --bubble-shape: 54% 46% 61% 39% / 57% 49% 51% 43%;
@@ -563,10 +684,52 @@
     }
   }
 
-  /* Closed
-  /* ------------------------------------------------------------------------ */
+  .cards--considering:has(.bubble:not([hidden])) .cards__expander-title:before {
+    translate: 120% 50%;
+  }
 
-  .cards--closed {
-    --column-color: var(--color-ink-lighter);
+  /* Card column indicators
+  /* -------------------------------------------------------------------------- */
+
+  .card__column-name {
+    --btn-background: transparent;
+    --btn-padding: 0.2em 0.5em;
+    --btn-border-size: 0;
+    --btn-border-radius: 0.2em;
+
+    color: inherit;
+    inline-size: 100%;
+    justify-content: flex-start;
+    text-transform: uppercase;
+
+    @media (hover: hover) {
+      &:hover {
+        --btn-background: color(from var(--card-color) srgb r g b / 0.15);
+      }
+    }
+  }
+
+  .card__column-name--current {
+    --btn-background: var(--card-color);
+
+    color: var(--color-ink-inverted);
+
+    @media (hover: hover) {
+      &:hover {
+        --btn-background: var(--card-color);
+      }
+    }
+  }
+
+  @supports(mask: radial-gradient(black)) {
+    .card__column-name--stream:before {
+      background: white;
+      content: "";
+      inset: 0;
+      mask: var(--wavy-background-mask);
+      position: absolute;
+      z-index: 0;
+      opacity: 0.25;
+    }
   }
 }

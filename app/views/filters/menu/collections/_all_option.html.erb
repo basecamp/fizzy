@@ -1,16 +1,7 @@
-<% clear_url_path = user_filtering.self_filter_path(user_filtering.as_params.except(:collection_ids), script_name: request.script_name) %>
-
 <% if Current.user.collections.many? %>
   <li class="popup__item" data-filter-target="item" data-navigable-list-target="item" id="filter-collection-all">
-    <%= link_to clear_url_path, class: "popup__radio btn" do %>
-      <%= check_box_tag "filter_collections", nil, user_filtering.collections.blank?, class: "form-checkbox" %>
-      <span class="for-screen-reader">
-        See everything in all collections
-      </span>
-      <%= icon_tag "check", size: 18, class: "checked" %>
-    <% end %>
-
-    <%= link_to clear_url_path, class: "popup__btn btn" do %>
+    <%= icon_tag "collection", class: "popup__icon" %>
+    <%= link_to cards_path, class: "popup__btn btn" do %>
       <span class="overflow-ellipsis">All collections</span>
     <% end %>
   </li>

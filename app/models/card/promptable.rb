@@ -18,7 +18,7 @@ module Card::Promptable
 
       * Id: #{id}
       * Created by: #{creator.name}}
-      * Assigned to: #{assignees.map(&:name).join(", ")}}
+      * Assigned to: #{assignees.map(&:name).join(", ")}
       * Column: #{column_prompt_label}
       * Created at: #{created_at}}
       * Collection id: #{collection_id}

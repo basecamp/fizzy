@@ -2,7 +2,10 @@
   <%= page_title_tag %>
 
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
-  <meta name="view-transition" content="same-origin">
+
+  <% unless @disable_view_transition %>
+    <meta name="view-transition" content="same-origin">
+  <% end %>
   <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
@@ -19,7 +22,9 @@
   <%= tenanted_action_cable_meta_tag %>
   <%= yield :head %>
 
-  <link rel="manifest" href="<%= pwa_manifest_path(format: :json) %>">
+  <% if ApplicationRecord.current_tenant %>
+    <link rel="manifest" href="<%= pwa_manifest_path(format: :json) %>">
+  <% end %>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="icon" href="/favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">

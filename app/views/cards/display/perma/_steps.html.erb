@@ -1,10 +1,10 @@
 <ol class="steps txt-small margin-block-start-auto">
   <%= render partial: "cards/steps/step", collection: card.steps, as: :step %>
 
-  <div class="step">
+  <li class="step">
     <input type="checkbox" class="step__checkbox" disabled>
     <%= form_with model: [card, Step.new], url: card_steps_path(card) do |form| %>
       <%= form.text_field :content, class: "input step__content hide-focus-ring", placeholder: "Add a step…", required: true, autocomplete: "off" %>
     <% end %>
-  </div>
+  </li>
 </ol>

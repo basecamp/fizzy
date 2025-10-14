@@ -1,7 +1,7 @@
 <% @page_title = @user_filtering.selected_collections_label %>
 <% turbo_exempts_page_from_cache %>
 
-<%= render "filters/broadcasts", filter: @filter %>
+<%= render "cards/broadcasts", records: @page.records %>
 
 <% content_for :head do %>
   <%= tag.meta property: "og:title", content: @page_title %>
@@ -10,7 +10,7 @@
 <% end %>
 
 <% content_for :header do %>
-  <%= render "filters/menu", user_filtering: @user_filtering %>
+  <%= render "filters/menu" %>
 
   <h1 class="header__title divider divider--fade full-width">
     <span class="overflow-ellipsis"><%= @user_filtering.selected_collections_label %></span>
@@ -27,6 +27,8 @@
 
 <%= turbo_frame_tag :cards_container do %>
   <section class="cards cards--grid">
-    <%= render partial: "cards/display/preview", collection: @page.records, as: :card, locals: { draggable: true }, cached: ->(card) { cacheable_preview_parts_for(card) } %>
+    <%= with_automatic_pagination :cards_paginated_container, @page do %>
+      <%= render partial: "cards/display/preview", collection: @page.records, as: :card, locals: { draggable: true }, cached: ->(card) { card.cache_invalidation_parts.for_preview } %>
+    <% end %>
   </section>
 <% end %>

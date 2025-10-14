@@ -1,31 +1,41 @@
 production: &production
-  auto_postpone_all_due:
-    class: Card::AutoPostponeAllDueJob
-    schedule: every hour
-  remove_abandoned_creations:
-    class: RemoveAbandonedCreationsJob
-    schedule: every hour
-  sqlite_backups:
-    class: SQLiteBackupsJob
-    schedule: every day at 05:00
-  delete_unused_tags:
-    class: DeleteUnusedTagsJob
-    schedule: every day at 04:00
-  clear_solid_queue_finished_jobs:
-    command: "SolidQueue::Job.clear_finished_in_batches(sleep_between_batches: 0.3)"
-    schedule: every hour at minute 12
-  clear_solid_queue_recurring_executions:
-    command: "SolidQueue::RecurringExecution.clear_in_batches"
-    schedule: every hour at minute 52
+  # Application functionality: notifications and highlights
   deliver_bundled_notifications:
     command: "Notification::Bundle.deliver_all_later"
     schedule: every 30 minutes
   generate_weekly_highlights:
     command: "User.generate_all_weekly_highlights_later"
     schedule: every sunday at noon
+
+  # Application cleanup
+  auto_postpone_all_due:
+    class: Card::AutoPostponeAllDueJob
+    schedule: every hour
+  remove_abandoned_creations:
+    class: RemoveAbandonedCreationsJob
+    schedule: every hour
+  delete_unused_tags:
+    class: DeleteUnusedTagsJob
+    schedule: every day at 04:00
+
+  # Operations cleanup and backups
+  clear_solid_queue_finished_jobs:
+    command: "SolidQueue::Job.clear_finished_in_batches(sleep_between_batches: 0.3)"
+    schedule: every hour at minute 12
+  clear_solid_queue_recurring_executions:
+    command: "SolidQueue::RecurringExecution.clear_in_batches"
+    schedule: every hour at minute 52
   cleanup_webhook_deliveries:
-    command: "Webhook::CleanupDeliveriesJob"
+    class: Webhook::CleanupDeliveriesJob
     schedule: every 4 hours
+  sqlite_backups:
+    class: SQLiteBackupsJob
+    schedule: every day at 05:00
+
+  # Metrics
+  yabeda_actioncable:
+    command: "Yabeda::ActionCable.measure"
+    schedule: every 60 seconds
 
 beta: *production
 staging: *production

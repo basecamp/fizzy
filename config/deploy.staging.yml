@@ -1,11 +1,19 @@
 servers:
   web:
     hosts:
-      - fizzy-staging-app-01
-      - fizzy-staging-app-101
+      - fizzy-staging-app-01.sc-chi-int.37signals.com
+      - fizzy-staging-app-02.sc-chi-int.37signals.com
+      - fizzy-staging-app-101.df-iad-int.37signals.com
+      - fizzy-staging-app-102.df-iad-int.37signals.com
+      - fizzy-staging-app-401.df-ams-int.37signals.com
+      - fizzy-staging-app-402.df-ams-int.37signals.com
+    labels:
+      otel_scrape_enabled: true
   jobs:
     hosts:
-      - fizzy-staging-app-01
+      - fizzy-staging-app-01.sc-chi-int.37signals.com
+    labels:
+      otel_scrape_enabled: true
 
 proxy:
   ssl: false
@@ -25,6 +33,10 @@ accessories:
       username: robot$harbor-bot
       password:
         - BASECAMP_REGISTRY_PASSWORD
+    labels:
+      otel_role: beamer
+      otel_service: fizzy-beamer
+      otel_scrape_enabled: true
     options:
       user: 1000 # Match the UID of the Rails app, for volume permissions
       publish:
@@ -34,13 +46,23 @@ accessories:
       - fizzy:/home/beamer
     cmd: beamer run --retention=1h --metrics-port=9000
     hosts:
-      - fizzy-staging-app-01
-      - fizzy-staging-app-101
+      - fizzy-staging-app-01.sc-chi-int.37signals.com
+      - fizzy-staging-app-02.sc-chi-int.37signals.com
+      - fizzy-staging-app-101.df-iad-int.37signals.com
+      - fizzy-staging-app-102.df-iad-int.37signals.com
+      - fizzy-staging-app-401.df-ams-int.37signals.com
+      - fizzy-staging-app-402.df-ams-int.37signals.com
 
   load-balancer:
     image: basecamp/kamal-proxy:lb
-    roles:
-      - web
+    hosts:
+      - fizzy-staging-lb-01.sc-chi-int.37signals.com
+      - fizzy-staging-lb-101.df-iad-int.37signals.com
+      - fizzy-staging-lb-401.df-ams-int.37signals.com
+    labels:
+      otel_role: load-balancer
+      otel_service: fizzy-load-balancer
+      otel_scrape_enabled: true
     options:
       publish:
         - 80:80

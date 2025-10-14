@@ -12,8 +12,8 @@ create_collection("Fizzy", access_to: [ jason, jz, kevin ]).tap do |fizzy|
 
   create_card("Prepare sign-up page", description: "We need to do this before the launch.", collection: fizzy).tap do |card|
     card.toggle_assignment(kevin)
-    if stage = card.workflow&.stages&.sample
-      card.change_stage_to(stage)
+    if column = card.collection&.columns&.sample
+      card.triage_into(column)
     end
   end
 

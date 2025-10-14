@@ -1,0 +1,13 @@
+<div id="<%= dom_id(card, :comment_watchers) %>" class="comments__subscribers flex flex-column margin-block-start txt-align-start full-width">
+  <strong class="txt-uppercase">Subscribers</strong>
+
+  <p class="margin-none-block-start margin-block-end-half">
+    <%= pluralize(card.watchers.without(User.system).count, "person") %> will be notified when someone comments on this.
+  </p>
+
+  <div class="flex align-center flex-wrap gap-half max-width txt-normal">
+    <% card.watchers.without(User.system).alphabetically.each do |watcher| %>
+      <%= avatar_tag watcher %>
+    <% end %>
+  </div>
+</div>

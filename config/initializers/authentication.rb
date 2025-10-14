@@ -1,2 +1,2 @@
 require "bootstrap"
-Rails.application.config.x.local_authentication = Bootstrap.local_authentication?
+Rails.application.config.x.oss_config = Bootstrap.oss_config?

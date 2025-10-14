@@ -6,8 +6,6 @@ class CardsController < ApplicationController
   before_action :set_collection, only: %i[ create ]
   before_action :set_card, only: %i[ show edit update destroy ]
 
-  enable_collection_filtering only: :index
-
   PAGE_SIZE = 25
 
   def index
@@ -27,7 +25,9 @@ class CardsController < ApplicationController
   end
 
   def update
-    @card.update! card_params
+    suppressing_broadcasts_unless_published(@card) do
+      @card.update! card_params
+    end
 
     if @card.published?
       render_card_replacement
@@ -48,6 +48,14 @@ class CardsController < ApplicationController
 
     def set_card
       @card = Current.user.accessible_cards.find params[:id]
+    end
+
+    def suppressing_broadcasts_unless_published(card, &block)
+      if card.published?
+        yield
+      else
+        Collection.suppressing_turbo_broadcasts(&block)
+      end
     end
 
     def card_params

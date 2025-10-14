@@ -5,12 +5,4 @@ json.cache! collection do
   json.creator do
     json.partial! "users/user", user: collection.creator
   end
-
-  json.workflow do
-    if collection.workflow
-      json.partial! "workflows/workflow", workflow: collection.workflow
-    else
-      nil
-    end
-  end
 end

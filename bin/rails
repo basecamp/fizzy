@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 require_relative "../lib/bootstrap"
-if !Bootstrap.local_authentication?
+if !Bootstrap.oss_config?
   # default from rails/test_unit/runner.rb but adding the saas gem test files
   ENV["DEFAULT_TEST"] = "{gems/fizzy-saas/,}test/**/*_test.rb"
   ENV["DEFAULT_TEST_EXCLUDE"] = "{gems/fizzy-saas/,}test/{system,dummy,fixtures}/**/*_test.rb"

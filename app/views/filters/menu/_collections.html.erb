@@ -1,10 +1,7 @@
 <% # Using method: :get inside Turbo frame triggers some special Turbo handling where the script_name is lost %>
-<%= form_with url: user_filtering.self_filter_path(script_name: Account.sole.slug), method: :get, class: "display-contents",
-      data: { controller: "form" } do |form| %>
-  <% if user_filtering.collections.any? %>
-    <%= collapsible_nav_section "Collections" do %>
-      <%= render "filters/menu/collections/all_option", form: form, user_filtering: user_filtering %>
-      <%= render partial: "filters/menu/collections/collection", collection: user_filtering.collections, as: :collection, locals: { form: form, user_filtering: user_filtering } %>
-    <% end %>
+<% if user_filtering.collections.any? %>
+  <%= collapsible_nav_section "Collections" do %>
+    <%= render "filters/menu/collections/all_option", user_filtering: user_filtering %>
+    <%= render partial: "filters/menu/collections/collection", collection: user_filtering.collections, as: :collection %>
   <% end %>
 <% end %>

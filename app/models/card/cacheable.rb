@@ -17,11 +17,11 @@ module Card::Cacheable
     end
 
     def for_perma(*other)
-      [ card, Workflow.all, User.all, Tag.all, *other ]
+      [ card, User.all, Tag.all, *other ]
     end
 
     def for_preview(*other)
-      [ card, card.workflow, Workflow.all, card.collection.entropy_configuration, card.collection.publication, *other ]
+      [ card, card.collection.entropy_configuration, card.collection.publication, card.column&.color, *other ]
     end
   end
 end

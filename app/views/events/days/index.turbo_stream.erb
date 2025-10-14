@@ -1,7 +1,0 @@
-<%= turbo_stream.append :activity do %>
-  <%= render "events/day", day_timeline: @day_timeline %>
-<% end %>
-
-<%= turbo_stream.replace :next_page do %>
-  <%= event_next_page_link(@day_timeline.next_day) %>
-<% end %>

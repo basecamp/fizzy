@@ -1,6 +1,6 @@
 <%= turbo_frame_tag dom_id(@column, :cards) do %>
   <% if @page.used? %>
-    <%= with_manual_pagination dom_id(@column, :cards), @page do %>
+    <%= with_automatic_pagination dom_id(@column, :cards), @page do %>
       <%= render "public/collections/columns/list", cards: @page.records %>
     <% end %>
   <% else %>

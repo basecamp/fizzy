@@ -22,7 +22,7 @@
     </details>
     <% if card.entropic? && card.open? %>
       <div class="card-perma__closure-message">
-        Moves to "Not now" if no activity <%= local_datetime_tag(card.entropy.auto_clean_at, style: :indays) -%>.
+        Closes as “Not Now” <%= local_datetime_tag(card.entropy.auto_clean_at, style: :indays) -%> if there’s no activity.
       </div>
     <% end %>
   <% end %>

@@ -1,9 +1,11 @@
 <%= link_to event.notifiable_target,
       class: "event event--#{ event.action } #{ "golden-effect" if event.card.golden? } center-block flex flex-column full-width align-start justify-start position-relative",
       style: "--card-color: #{ card.closed? ? "var(--color-card-complete)" : card.color };",
-      data: { related_element_target: "related",
-            related_element_group_value: card.id,
-            action: "mouseover->related-element#highlight mouseout->related-element#unhighlight" } do %>
+      target: "_top",
+      data: {
+        related_element_target: "related",
+        related_element_group_value: card.id,
+        action: "mouseover->related-element#highlight mouseout->related-element#unhighlight" } do %>
   <div class="card__header flex align-start gap full-width">
     <h4 class="card__collection flex-inline align-start">
       <span class="card__id"><%= card.id %></span>

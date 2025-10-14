@@ -75,8 +75,8 @@ collections.each_with_index do |collection_name, index|
         travel rand(0..20).minutes
         case rand(3)
         when 0
-          if stage = card.workflow&.stages&.sample
-            card.change_stage_to(stage)
+          if column = card.collection&.columns&.sample
+            card.triage_into(column)
           end
         when 1
           card.close

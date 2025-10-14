@@ -72,7 +72,7 @@ class Ai::ListCardsTool < Ai::Tool
       .where(collection: user.collections)
       .published
       .with_rich_text_description
-      .includes(:stage, :creator, :assignees, :goldness, :collection)
+      .includes(:column, :creator, :assignees, :goldness, :collection)
 
     cards = Filter.new(scope: cards, filters: params).filter
 
@@ -98,7 +98,7 @@ class Ai::ListCardsTool < Ai::Tool
         last_active_at: card.last_active_at,
         collection_id: card.collection_id,
         golden: card.golden?,
-        stage: card.stage.as_json(only: [ :id, :name ]),
+        column: card.column.as_json(only: [ :id, :name ]),
         creator: card.creator.as_json(only: [ :id, :name ]),
         assignees: card.assignees.as_json(only: [ :id, :name ]),
         description: card.description.to_plain_text.truncate(1000),

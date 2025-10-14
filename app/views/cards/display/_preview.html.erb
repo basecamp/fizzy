@@ -9,7 +9,7 @@
       <%= icon_tag "attachment", class: "card__attachments-indicator translucent" if card.has_attachments? %>
 
       <% if card.triaged? %>
-          <span class="btn justify-start workflow-stage workflow-stage--current txt-uppercase min-width max-width">
+          <span class="btn justify-start card__column-name card__column-name--current txt-uppercase min-width max-width">
             <span class="overflow-ellipsis "><%= card.column.name %></span>
           </span>
       <% end %>
@@ -27,7 +27,7 @@
   </div>
 
   <footer class="card__footer">
-    <%= render "cards/display/preview/meta", card: card %>
+    <%= render "cards/display/preview/meta", card: card, preview: true %>
     <%= render "cards/display/common/background", card: card %>
   </footer>
 

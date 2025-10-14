@@ -7,7 +7,7 @@ module EntropyHelper
     {
       daysBeforeReminder: card.entropy.days_before_reminder,
       closesAt: card.entropy.auto_clean_at.iso8601,
-      action: "Postpones"
+      action: "Closes"
     }
   end
 

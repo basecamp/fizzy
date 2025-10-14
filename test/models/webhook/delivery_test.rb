@@ -126,9 +126,9 @@ class Webhook::DeliveryTest < ActiveSupport::TestCase
 
     request_stub = stub_request(:post, webhook.url)
       .with do |request|
-        body = JSON.parse(request.body)
-        body.key?("line") && body["line"].key?("content") && body["line"]["content"].present? &&
-        request.headers["Content-Type"] == "application/json"
+        body = CGI.parse(request.body)
+        body.key?("content") && body["content"].first.present? &&
+        request.headers["Content-Type"] == "application/x-www-form-urlencoded"
       end
       .to_return(status: 200)
 

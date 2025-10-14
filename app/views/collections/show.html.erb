@@ -1,6 +1,8 @@
 <% @page_title = @collection.name %>
 <% turbo_exempts_page_from_cache %>
 
+<%= turbo_stream_from @collection %>
+
 <% content_for :head do %>
   <%= tag.meta property: "og:title", content: @page_title %>
   <%= tag.meta property: "og:description", content: Account.sole.name %>
@@ -8,7 +10,7 @@
 <% end %>
 
 <% content_for :header do %>
-  <%= render "filters/menu", user_filtering: @user_filtering %>
+  <%= render "filters/menu" %>
 
   <div class="header__actions header__actions--start">
     <%= render "cards/webhooks", collection: @collection if Current.user.admin? %>

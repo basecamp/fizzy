@@ -24,7 +24,7 @@ class UsersController < ApplicationController
 
   def show
     @filter = Current.user.filters.new(creator_ids: [ @user.id ])
-    @day_timeline = Current.user.timeline_for(Time.current, filter: @filter)
+    @day_timeline = Current.user.timeline_for(day_param, filter: @filter)
   end
 
   def update
@@ -48,6 +48,14 @@ class UsersController < ApplicationController
 
     def ensure_permission_to_change_user
       head :forbidden unless Current.user.can_change?(@user)
+    end
+
+    def day_param
+      if params[:day].present?
+        Time.zone.parse(params[:day])
+      else
+        Time.current
+      end
     end
 
     def user_params

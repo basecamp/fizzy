@@ -45,6 +45,7 @@
   .icon--crown { --svg: url("crown.svg "); }
   .icon--email { --svg: url("email.svg "); }
   .icon--everyone { --svg: url("everyone.svg "); }
+  .icon--expand { --svg: url("expand.svg "); }
   .icon--gear { --svg: url("gear.svg "); }
   .icon--filter { --svg: url("filter.svg "); }
   .icon--globe { --svg: url("globe.svg "); }
@@ -56,6 +57,7 @@
   .icon--lifebuoy { --svg: url("lifebuoy.svg "); }
   .icon--lock { --svg: url("lock.svg "); }
   .icon--logout { --svg: url("logout.svg "); }
+  .icon--logo-color { --svg: url("logo-color.svg "); mask-size: contain; }
   .icon--menu { --svg: url("menu.svg "); }
   .icon--menu-dots-horizontal { --svg: url("menu-dots-horizontal.svg "); }
   .icon--menu-dots-vertical { --svg: url("menu-dots-vertical.svg "); }

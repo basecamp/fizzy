@@ -1,12 +1,11 @@
 #!/usr/bin/env sh
 
-echo "Login with david@37signals.com / secret123456 to:"
 bin/rails runner - <<EOF
+  puts "Login with david@37signals.com / secret123456 to:"
   ApplicationRecord.with_each_tenant do |tenant|
     next unless tenant =~ /\A\d+\z/
-    if Account.sole.tenant_id
-      puts "  - #{Account.sole.name}: http://fizzy.localhost:3006/#{Account.sole.tenant_id}"
-    end
+    next unless Account.count > 0
+    puts "  - #{Account.sole.name}: http://fizzy.localhost:3006#{Account.sole.slug}"
   end
 EOF
 
@@ -14,8 +13,8 @@ if [ -f tmp/solid-queue.txt ]; then
   export SOLID_QUEUE_IN_PUMA=1
 fi
 
-if [ -f tmp/local-auth.txt ]; then
-  export LOCAL_AUTHENTICATION=1
+if [ -f tmp/oss-config.txt ]; then
+  export OSS_CONFIG=1
 fi
 
 exec ./bin/rails server -p 3006

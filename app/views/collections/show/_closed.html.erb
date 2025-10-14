@@ -6,7 +6,9 @@
   data-drag-and-drop-url="<%= columns_card_drops_closure_path("__id__") %>"
 >
 
-  <%= render "collections/show/expander", title: "Done", count: collection.cards.closed.count, column_id: "closed-cards" %>
+  <%= render "collections/show/expander", title: "Done", count: collection.cards.closed.count, column_id: "closed-cards" do %>
+    <%= render "collections/show/menu/expand", column_path: collection_columns_closed_path(collection) %>
+  <% end %>
 
   <%= column_frame_tag :closed_column, src: collection_columns_closed_path(collection) %>
 </section>

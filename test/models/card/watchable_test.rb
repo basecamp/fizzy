@@ -16,21 +16,13 @@ class Card::WatchableTest < ActiveSupport::TestCase
     assert_not cards(:logo).watched_by?(users(:kevin))
   end
 
-  test "watched_by? when notifications are set on the collection" do
-    collections(:writebook).access_for(users(:kevin)).watching!
-    assert cards(:text).watched_by?(users(:kevin))
-
-    cards(:logo).unwatch_by users(:kevin)
-    assert_not cards(:logo).watched_by?(users(:kevin))
-  end
-
   test "cards are initially watched by their creator" do
     card = collections(:writebook).cards.create!(creator: users(:kevin))
 
     assert card.watched_by?(users(:kevin))
   end
 
-  test "watchers_and_subscribers" do
+  test "watchers" do
     collections(:writebook).access_for(users(:kevin)).watching!
     collections(:writebook).access_for(users(:jz)).watching!
 
@@ -38,10 +30,10 @@ class Card::WatchableTest < ActiveSupport::TestCase
     cards(:logo).unwatch_by users(:jz)
     cards(:logo).watch_by users(:david)
 
-    assert_equal [ users(:kevin), users(:david) ].sort, cards(:logo).watchers_and_subscribers.sort
+    assert_equal [ users(:kevin), users(:david) ].sort, cards(:logo).watchers.sort
 
     # Only active users
     users(:david).system!
-    assert_equal [ users(:kevin) ].sort, cards(:logo).watchers_and_subscribers.sort
+    assert_equal [ users(:kevin) ].sort, cards(:logo).watchers.reload.sort
   end
 end

@@ -41,6 +41,7 @@
                 0 0.8em 0.8em oklch(var(--lch-blue-medium) / 5%);
     flex-direction: column;
     gap: 2px;
+    scrollbar-gutter: stable both-edges;
   }
 
   .fizzy-menu__close {

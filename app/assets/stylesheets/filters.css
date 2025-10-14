@@ -103,11 +103,32 @@
     }
   }
 
-  .filter__terms {
+  .filter__terms:is(.input) {
     --input-background: var(--color-canvas);
+    --input-border-radius: 5em;
+    --input-padding: 0.5em 1.3em;
+    --input-width: 24ch;
+    --collapsed-filter-space: calc(var(--btn-size) + var(--inline-space-half) + 0.25em);
 
-    .filters:not(.filters--expanded) & {
-      min-inline-size: 40ch;
+    inline-size: var(--input-width);
+    min-inline-size: var(--input-width);
+
+    .filters:not(.filters--expanded, .filters--has-filters-set) & {
+      --input-padding: 0.5em 2.7em 0.5em 1.3em;
+
+      inline-size: calc(var(--input-width) + (0.25 * var(--collapsed-filter-space)));
+      margin-inline-end: calc((var(--btn-size) + var(--inline-space-half) + 0.25em) * -1);
+      min-inline-size: calc(var(--input-width) + (0.25 * var(--collapsed-filter-space)));
+    }
+  }
+
+  .filter-toggle {
+    .filters:not(.filters--expanded, .filters--has-filters-set) & {
+      --btn-background: transparent;
+      --btn-border-size: 0;
+
+      transform: translateX(calc(var(--inline-space-half) * -1));
+      position: relative;
     }
   }
 

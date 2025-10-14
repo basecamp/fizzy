@@ -4,7 +4,7 @@ class FilterTest < ActiveSupport::TestCase
   test "cards" do
     Current.set session: sessions(:david) do
       @new_collection = Collection.create! name: "Inaccessible Collection"
-      @new_card = @new_collection.cards.create!
+      @new_card = @new_collection.cards.create!(status: "published")
 
       cards(:layout).comments.create!(body: "I hate haggis")
       cards(:logo).comments.create!(body: "I love haggis")
@@ -18,18 +18,15 @@ class FilterTest < ActiveSupport::TestCase
     filter = users(:david).filters.new assignment_status: "unassigned", collection_ids: [ @new_collection.id ]
     assert_equal [ @new_card ], filter.cards
 
-    # @TODO: Temporarily commented until we make a decision on the search approach
-    # filter = users(:david).filters.new terms: [ "haggis" ]
-    # assert_equal cards(:logo, :layout).sort, filter.cards.sort
-    #
-    # filter = users(:david).filters.new terms: [ "haggis", "love" ]
-    # assert_equal [ cards(:logo) ], filter.cards
-
     filter = users(:david).filters.new indexed_by: "closed"
     assert_equal [ cards(:shipping) ], filter.cards
 
     filter = users(:david).filters.new card_ids: [ cards(:logo, :layout).collect(&:id) ]
     assert_equal [ cards(:logo), cards(:layout) ], filter.cards
+
+    filter = users(:david).filters.new card_ids: [ cards(:logo, :layout).collect(&:id) ]
+    cards(:logo).drafted!
+    assert_equal [ cards(:layout) ], filter.cards
   end
 
   test "can't see cards in collections that aren't accessible" do

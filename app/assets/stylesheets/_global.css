@@ -49,7 +49,7 @@
 
   /* Components */
   --btn-size: 2.65em;
-  --footer-height: 3.5rem;
+  --footer-height: 2.65rem;
   --tray-size: clamp(12rem, 25dvw, 24rem);
 
   /* Focus rings for keyboard navigation */
@@ -76,6 +76,7 @@
   /* Z-index */
   --z-events-column-header: 1;
   --z-events-day-header: 3;
+  --z-flash: 12;
   --z-nav: 11;
   --z-popup: 10;
   --z-terminal: 20;

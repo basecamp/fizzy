@@ -1,6 +1,6 @@
 class User < ApplicationRecord
   include Accessor, AiQuota, Assignee, Attachable, Configurable, Conversational, Highlights,
-    Mentionable, Named, Notifiable, Role, Searcher, Staff, Transferable
+    Identifiable, Mentionable, Named, Notifiable, Role, Searcher, Staff, Transferable, Watcher
   include Timelined # Depends on Accessor
 
   has_one_attached :avatar
@@ -14,7 +14,6 @@ class User < ApplicationRecord
   has_many :closures, dependent: :nullify
   has_many :pins, dependent: :destroy
   has_many :pinned_cards, through: :pins, source: :card
-  has_many :commands, dependent: :destroy
 
   normalizes :email_address, with: ->(value) { value.strip.downcase }
 

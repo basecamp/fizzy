@@ -1,5 +1,5 @@
 class Column < ApplicationRecord
-  belongs_to :collection
+  belongs_to :collection, touch: true
   has_many :cards, dependent: :nullify
 
   validates :name, presence: true

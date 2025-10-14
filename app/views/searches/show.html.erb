@@ -2,6 +2,6 @@
   <% if @card %>
     <%= auto_submit_form_with url: card_path(@card), method: :get, data: { turbo_action: "advance", turbo_frame: "_top", search_redirect: true } %>
   <% else %>
-    <%= render "results", search_results: @search_results %>
+    <%= render "results", page: @page %>
   <% end %>
 <% end %>

@@ -1,7 +1,0 @@
-<% if filter.collections.any? %>
-  <% filter.collections.each do |collection| %>
-    <%= turbo_stream_from collection %>
-  <% end %>
-<% else %>
-  <%= turbo_stream_from :collections %>
-<% end %>

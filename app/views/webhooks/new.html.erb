@@ -1,7 +1,7 @@
 <% @page_title = "Set up a Webhook" %>
 
 <% content_for :header do %>
-  <%= render "filters/menu", user_filtering: @user_filtering %>
+  <%= render "filters/menu" %>
   <div class="header__actions header__actions--start">
     <%= link_to collection_webhooks_path, class: "btn borderless txt-medium", data: { controller: "hotkey", action: "keydown.esc@document->hotkey#click" } do %>
       <span class="overflow-ellipsis">

@@ -7,14 +7,16 @@
 
 <section class="search">
   <div class="search__results">
-    <% if search_results.none? %>
+    <% unless page.used? %>
       <div class="search__empty">
         No matches
       </div>
     <% end %>
 
     <ul class="search__list">
-      <%= render partial: "searches/result", collection: search_results %>
+      <%= with_automatic_pagination :filtered_search_results, page do %>
+        <%= render partial: "searches/result", collection: page.records %>
+      <% end %>
     </ul>
   </div>
 </section>

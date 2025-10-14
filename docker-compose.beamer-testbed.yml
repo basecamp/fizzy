@@ -1,0 +1,54 @@
+x-app: &app
+  image: "basecamp/fizzy:dev"
+  build:
+    context: .
+    dockerfile: Dockerfile.dev
+    secrets:
+      - GITHUB_TOKEN
+  volumes:
+    - .:/rails
+  extra_hosts:
+    - queenbee.localhost:host-gateway
+  environment:
+    - RAILS_ENV=development
+    - BINDING=0.0.0.0
+    - BEAMER=true
+    - BEAMER_PRIMARY=fizzy-01
+    - SECRET_KEY_BASE=beamer_testbed_shared_secret_key_base_for_development_only
+  command: [ "./bin/beamer-testbed", "server" ]
+
+services:
+  kamal-proxy:
+    image: basecamp/kamal-proxy:next
+    ports:
+      - 127.0.0.1:3006:80
+      - 127.0.0.1:443:443
+    command: [ "kamal-proxy", "run", "--debug" ]
+
+  fizzy-01:
+    <<: *app
+    hostname: fizzy-01
+    volumes:
+      - .:/rails
+      - ./tmp/beamer-testbed/fizzy-01/storage:/rails/storage
+      - ./tmp/beamer-testbed/fizzy-01/tmp:/rails/tmp
+
+  fizzy-02:
+    <<: *app
+    hostname: fizzy-02
+    volumes:
+      - .:/rails
+      - ./tmp/beamer-testbed/fizzy-02/storage:/rails/storage
+      - ./tmp/beamer-testbed/fizzy-02/tmp:/rails/tmp
+
+  fizzy-03:
+    <<: *app
+    hostname: fizzy-03
+    volumes:
+      - .:/rails
+      - ./tmp/beamer-testbed/fizzy-03/storage:/rails/storage
+      - ./tmp/beamer-testbed/fizzy-03/tmp:/rails/tmp
+
+secrets:
+  GITHUB_TOKEN:
+    environment: GITHUB_TOKEN

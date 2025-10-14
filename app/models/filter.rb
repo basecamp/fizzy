@@ -18,7 +18,7 @@ class Filter < ApplicationRecord
 
   def cards
     @cards ||= begin
-      result = creator.accessible_cards
+      result = creator.accessible_cards.published
       result = result.indexed_by(indexed_by)
       result = result.sorted_by(sorted_by)
       result = result.where(id: card_ids) if card_ids.present?
@@ -65,6 +65,6 @@ class Filter < ApplicationRecord
 
   private
     def include_closed_cards?
-      only_closed? || card_ids.present?
+      only_closed? || card_ids.present? || creator_ids.present?
     end
 end

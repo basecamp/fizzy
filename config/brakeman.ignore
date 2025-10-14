@@ -1,80 +1,13 @@
 {
   "ignored_warnings": [
     {
-      "warning_type": "Cross-Site Scripting",
-      "warning_code": 2,
-      "fingerprint": "005569e6623f389266d3e1d760851a6ea9af52e21ba65b92d69dee5d3dfb492f",
-      "check_name": "CrossSiteScripting",
-      "message": "Unescaped model attribute",
-      "file": "app/views/searches/_result.html.erb",
-      "line": 20,
-      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
-      "code": "Current.new.card_description",
-      "render_path": [
-        {
-          "type": "controller",
-          "class": "SearchesController",
-          "method": "show",
-          "line": 7,
-          "file": "app/controllers/searches_controller.rb",
-          "rendered": {
-            "name": "searches/show",
-            "file": "app/views/searches/show.html.erb"
-          }
-        },
-        {
-          "type": "template",
-          "name": "searches/show",
-          "line": 28,
-          "file": "app/views/searches/show.html.erb",
-          "rendered": {
-            "name": "searches/_result",
-            "file": "app/views/searches/_result.html.erb"
-          }
-        }
-      ],
-      "location": {
-        "type": "template",
-        "template": "searches/_result"
-      },
-      "user_input": null,
-      "confidence": "High",
-      "cwe_id": [
-        79
-      ],
-      "note": ""
-    },
-    {
-      "warning_type": "SQL Injection",
-      "warning_code": 0,
-      "fingerprint": "1261c0a89b23c1d7386d684f41c26cc230fa9b5b00d062d7f8d4d1a15bde96a8",
-      "check_name": "SQL",
-      "message": "Possible SQL injection",
-      "file": "app/models/card/entropic.rb",
-      "line": 7,
-      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
-      "code": "left_outer_joins(:collection => :entropy_configuration).where(\"last_active_at <= DATETIME('now', '-' || COALESCE(entropy_configurations.#{period_name}, ?) || ' seconds')\", Entropy::Configuration.default.public_send(period_name))",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "Card::Entropic",
-        "method": null
-      },
-      "user_input": "period_name",
-      "confidence": "Weak",
-      "cwe_id": [
-        89
-      ],
-      "note": ""
-    },
-    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "2a34f36c066816753df7779e99a34c276efdb3590c16a681145c3ff62b894331",
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/concerns/searchable.rb",
-      "line": 28,
+      "line": 43,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "joins(\"join #{using} idx on #{table_name}.id = idx.rowid\")",
       "render_path": null,
@@ -97,7 +30,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/concerns/searchable.rb",
-      "line": 31,
+      "line": 46,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "joins(\"join #{using} idx on #{table_name}.id = idx.rowid\").where(\"#{using} match ?\", Search::Query.wrap(query).to_s)",
       "render_path": null,
@@ -114,46 +47,25 @@
       "note": ""
     },
     {
-      "warning_type": "Cross-Site Scripting",
-      "warning_code": 2,
-      "fingerprint": "7184deb68ef62f7a71aea3f5536a055b2b42de2173a393e846aada1b1e548042",
-      "check_name": "CrossSiteScripting",
-      "message": "Unescaped model attribute",
-      "file": "app/views/searches/_result.html.erb",
-      "line": 15,
-      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
-      "code": "Current.new.card_title",
-      "render_path": [
-        {
-          "type": "controller",
-          "class": "SearchesController",
-          "method": "show",
-          "line": 7,
-          "file": "app/controllers/searches_controller.rb",
-          "rendered": {
-            "name": "searches/show",
-            "file": "app/views/searches/show.html.erb"
-          }
-        },
-        {
-          "type": "template",
-          "name": "searches/show",
-          "line": 28,
-          "file": "app/views/searches/show.html.erb",
-          "rendered": {
-            "name": "searches/_result",
-            "file": "app/views/searches/_result.html.erb"
-          }
-        }
-      ],
+      "warning_type": "Mass Assignment",
+      "warning_code": 70,
+      "fingerprint": "ac0fa1970dea215e2f47a5676ffd63d8728951e361da12a53dd424bf6dc46f2a",
+      "check_name": "MassAssignment",
+      "message": "Specify exact keys allowed for mass assignment instead of using `permit!` which allows any keys",
+      "file": "app/helpers/pagination_helper.rb",
+      "line": 13,
+      "link": "https://brakemanscanner.org/docs/warning_types/mass_assignment/",
+      "code": "params.permit!",
+      "render_path": null,
       "location": {
-        "type": "template",
-        "template": "searches/_result"
+        "type": "method",
+        "class": "PaginationHelper",
+        "method": "pagination_link"
       },
       "user_input": null,
-      "confidence": "High",
+      "confidence": "Medium",
       "cwe_id": [
-        79
+        915
       ],
       "note": ""
     },
@@ -179,51 +91,7 @@
         470
       ],
       "note": ""
-    },
-    {
-      "warning_type": "Cross-Site Scripting",
-      "warning_code": 2,
-      "fingerprint": "e94d5d8fe73652df999614040e2a83d64d6be944b19931ff171be0cac4b9078d",
-      "check_name": "CrossSiteScripting",
-      "message": "Unescaped model attribute",
-      "file": "app/views/searches/_result.html.erb",
-      "line": 27,
-      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
-      "code": "Current.new.comment_body",
-      "render_path": [
-        {
-          "type": "controller",
-          "class": "SearchesController",
-          "method": "show",
-          "line": 7,
-          "file": "app/controllers/searches_controller.rb",
-          "rendered": {
-            "name": "searches/show",
-            "file": "app/views/searches/show.html.erb"
-          }
-        },
-        {
-          "type": "template",
-          "name": "searches/show",
-          "line": 28,
-          "file": "app/views/searches/show.html.erb",
-          "rendered": {
-            "name": "searches/_result",
-            "file": "app/views/searches/_result.html.erb"
-          }
-        }
-      ],
-      "location": {
-        "type": "template",
-        "template": "searches/_result"
-      },
-      "user_input": null,
-      "confidence": "High",
-      "cwe_id": [
-        79
-      ],
-      "note": ""
     }
   ],
-  "brakeman_version": "7.0.2"
+  "brakeman_version": "7.1.0"
 }

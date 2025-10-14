@@ -102,6 +102,16 @@ columns:
     comment:
   accounts:
   - *5
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: external_account_id
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
   - *6
   - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
     auto_increment:
@@ -119,16 +129,6 @@ columns:
     cast_type: *7
     sql_type_metadata: *8
     'null': false
-    default:
-    default_function:
-    collation:
-    comment:
-  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
-    auto_increment:
-    name: tenant_id
-    cast_type: *3
-    sql_type_metadata: *4
-    'null': true
     default:
     default_function:
     collation:
@@ -464,12 +464,12 @@ columns:
   - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
     auto_increment:
     name: due_on
-    cast_type: !ruby/object:ActiveRecord::Type::Date
+    cast_type: &37 !ruby/object:ActiveRecord::Type::Date
       precision:
       scale:
       limit:
       timezone:
-    sql_type_metadata: !ruby/object:ActiveRecord::ConnectionAdapters::SqlTypeMetadata
+    sql_type_metadata: &38 !ruby/object:ActiveRecord::ConnectionAdapters::SqlTypeMetadata
       sql_type: date
       type: :date
       limit:
@@ -487,16 +487,6 @@ columns:
     cast_type: *1
     sql_type_metadata: *2
     'null': false
-    default:
-    default_function:
-    collation:
-    comment:
-  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
-    auto_increment:
-    name: stage_id
-    cast_type: *3
-    sql_type_metadata: *4
-    'null': true
     default:
     default_function:
     collation:
@@ -612,16 +602,6 @@ columns:
   - *6
   - *10
   - *9
-  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
-    auto_increment:
-    name: workflow_id
-    cast_type: *3
-    sql_type_metadata: *4
-    'null': true
-    default:
-    default_function:
-    collation:
-    comment:
   collections_filters:
   - *24
   - *20
@@ -882,18 +862,6 @@ columns:
     collation:
     comment:
   - *9
-  filters_stages:
-  - *20
-  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
-    auto_increment:
-    name: stage_id
-    cast_type: *3
-    sql_type_metadata: *4
-    'null': false
-    default:
-    default_function:
-    collation:
-    comment:
   filters_tags:
   - *20
   - &35 !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
@@ -1268,8 +1236,33 @@ columns:
     comment:
   - *9
   - *18
+  user_weekly_highlights:
+  - *5
+  - *6
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: period_highlights_id
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: starts_at
+    cast_type: *37
+    sql_type_metadata: *38
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - *9
+  - *18
   users:
-  - &38 !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+  - &40 !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
     auto_increment:
     name: active
     cast_type: *32
@@ -1285,16 +1278,6 @@ columns:
     name: email_address
     cast_type: *7
     sql_type_metadata: *8
-    'null': true
-    default:
-    default_function:
-    collation:
-    comment:
-  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
-    auto_increment:
-    name: external_user_id
-    cast_type: *3
-    sql_type_metadata: *4
     'null': true
     default:
     default_function:
@@ -1363,7 +1346,7 @@ columns:
     comment:
   - *6
   - *9
-  - &37 !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+  - &39 !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
     auto_increment:
     name: webhook_id
     cast_type: *3
@@ -1417,9 +1400,9 @@ columns:
     collation:
     comment:
   - *9
-  - *37
+  - *39
   webhooks:
-  - *38
+  - *40
   - *24
   - *5
   - *6
@@ -1464,36 +1447,6 @@ columns:
     default_function:
     collation:
     comment:
-  workflow_stages:
-  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
-    auto_increment:
-    name: color
-    cast_type: *7
-    sql_type_metadata: *8
-    'null': true
-    default:
-    default_function:
-    collation:
-    comment:
-  - *5
-  - *6
-  - *10
-  - *9
-  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
-    auto_increment:
-    name: workflow_id
-    cast_type: *3
-    sql_type_metadata: *4
-    'null': false
-    default:
-    default_function:
-    collation:
-    comment:
-  workflows:
-  - *5
-  - *6
-  - *10
-  - *9
 primary_keys:
   accesses: id
   accounts: id
@@ -1525,7 +1478,6 @@ primary_keys:
   entropy_configurations: id
   events: id
   filters: id
-  filters_stages:
   filters_tags:
   mentions: id
   notification_bundles: id
@@ -1543,13 +1495,12 @@ primary_keys:
   taggings: id
   tags: id
   user_settings: id
+  user_weekly_highlights: id
   users: id
   watches: id
   webhook_delinquency_trackers: id
   webhook_deliveries: id
   webhooks: id
-  workflow_stages: id
-  workflows: id
 data_sources:
   accesses: true
   accounts: true
@@ -1581,7 +1532,6 @@ data_sources:
   entropy_configurations: true
   events: true
   filters: true
-  filters_stages: true
   filters_tags: true
   mentions: true
   notification_bundles: true
@@ -1599,13 +1549,12 @@ data_sources:
   taggings: true
   tags: true
   user_settings: true
+  user_weekly_highlights: true
   users: true
   watches: true
   webhook_delinquency_trackers: true
   webhook_deliveries: true
   webhooks: true
-  workflow_stages: true
-  workflows: true
 indexes:
   accesses:
   - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
@@ -1676,10 +1625,10 @@ indexes:
   accounts:
   - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
     table: accounts
-    name: index_accounts_on_tenant_id
+    name: index_accounts_on_external_account_id
     unique: true
     columns:
-    - tenant_id
+    - external_account_id
     lengths: {}
     orders: {}
     opclasses: {}
@@ -2064,22 +2013,6 @@ indexes:
     nulls_not_distinct:
     comment:
     valid: true
-  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
-    table: cards
-    name: index_cards_on_stage_id
-    unique: false
-    columns:
-    - stage_id
-    lengths: {}
-    orders: {}
-    opclasses: {}
-    where:
-    type:
-    using:
-    include:
-    nulls_not_distinct:
-    comment:
-    valid: true
   closers_filters:
   - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
     table: closers_filters
@@ -2204,22 +2137,6 @@ indexes:
     unique: false
     columns:
     - creator_id
-    lengths: {}
-    orders: {}
-    opclasses: {}
-    where:
-    type:
-    using:
-    include:
-    nulls_not_distinct:
-    comment:
-    valid: true
-  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
-    table: collections
-    name: index_collections_on_workflow_id
-    unique: false
-    columns:
-    - workflow_id
     lengths: {}
     orders: {}
     opclasses: {}
@@ -2474,39 +2391,6 @@ indexes:
     columns:
     - creator_id
     - params_digest
-    lengths: {}
-    orders: {}
-    opclasses: {}
-    where:
-    type:
-    using:
-    include:
-    nulls_not_distinct:
-    comment:
-    valid: true
-  filters_stages:
-  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
-    table: filters_stages
-    name: index_filters_stages_on_filter_id
-    unique: false
-    columns:
-    - filter_id
-    lengths: {}
-    orders: {}
-    opclasses: {}
-    where:
-    type:
-    using:
-    include:
-    nulls_not_distinct:
-    comment:
-    valid: true
-  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
-    table: filters_stages
-    name: index_filters_stages_on_stage_id
-    unique: false
-    columns:
-    - stage_id
     lengths: {}
     orders: {}
     opclasses: {}
@@ -3081,13 +2965,13 @@ indexes:
     nulls_not_distinct:
     comment:
     valid: true
-  users:
+  user_weekly_highlights:
   - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
-    table: users
-    name: index_users_on_email_address
-    unique: true
+    table: user_weekly_highlights
+    name: index_user_weekly_highlights_on_period_highlights_id
+    unique: false
     columns:
-    - email_address
+    - period_highlights_id
     lengths: {}
     orders: {}
     opclasses: {}
@@ -3099,11 +2983,45 @@ indexes:
     comment:
     valid: true
   - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
-    table: users
-    name: index_users_on_external_user_id
+    table: user_weekly_highlights
+    name: index_user_weekly_highlights_on_user_id
+    unique: false
+    columns:
+    - user_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: user_weekly_highlights
+    name: index_user_weekly_highlights_on_user_id_and_starts_at
     unique: true
     columns:
-    - external_user_id
+    - user_id
+    - starts_at
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
+  users:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: users
+    name: index_users_on_email_address
+    unique: true
+    columns:
+    - email_address
     lengths: {}
     orders: {}
     opclasses: {}
@@ -3230,22 +3148,4 @@ indexes:
     nulls_not_distinct:
     comment:
     valid: true
-  workflow_stages:
-  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
-    table: workflow_stages
-    name: index_workflow_stages_on_workflow_id
-    unique: false
-    columns:
-    - workflow_id
-    lengths: {}
-    orders: {}
-    opclasses: {}
-    where:
-    type:
-    using:
-    include:
-    nulls_not_distinct:
-    comment:
-    valid: true
-  workflows: []
-version: 20250924124737
+version: 20251007084223

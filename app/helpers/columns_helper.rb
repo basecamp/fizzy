@@ -4,7 +4,7 @@ module ColumnsHelper
       tag.span(column.name, class: "overflow-ellipsis"),
       card_triage_path(card, column_id: column),
       method: :post,
-      class: [ "workflow-stage btn", { "workflow-stage--current": column == card.column } ],
+      class: [ "card__column-name btn", { "card__column-name--current": column == card.column } ],
       form_class: "flex align-center gap-half",
       data: { turbo_frame: "_top" }
   end

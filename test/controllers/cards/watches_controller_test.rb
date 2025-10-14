@@ -11,8 +11,6 @@ class Cards::WatchesControllerTest < ActionDispatch::IntegrationTest
     assert_changes -> { cards(:logo).watched_by?(users(:kevin)) }, from: false, to: true do
       post card_watch_path(cards(:logo))
     end
-
-    assert_redirected_to card_watch_path(cards(:logo))
   end
 
   test "destroy" do
@@ -21,7 +19,5 @@ class Cards::WatchesControllerTest < ActionDispatch::IntegrationTest
     assert_changes -> { cards(:logo).watched_by?(users(:kevin)) }, from: true, to: false do
       delete card_watch_path(cards(:logo))
     end
-
-    assert_redirected_to card_watch_path(cards(:logo))
   end
 end

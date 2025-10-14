@@ -1,7 +1,7 @@
 <% cache comment do %>
-  <%= turbo_frame_tag comment do %>
+  <%= turbo_frame_tag comment, :container do %>
     <%# Bump for CSS changes: 2025-06-30 -%>
-    <div class="comment flex align-start full-width <%= "comment--system" if comment.creator.system? %>" data-creator-id="<%= comment.creator_id %>" data-created-by-current-user-target="creation">
+    <div id="<%= dom_id(comment) %>" class="comment flex align-start full-width <%= "comment--system" if comment.creator.system? %>" data-creator-id="<%= comment.creator_id %>" data-created-by-current-user-target="creation">
       <figure class="comment__avatar flex-item-no-shrink" aria-hidden="true">
         <%= avatar_tag comment.creator, hidden_for_screen_reader: true %>
       </figure>
@@ -13,7 +13,7 @@
               <%= link_to comment.creator.name, comment.creator, class: "txt-ink btn btn--plain fill-transparent", data: { turbo_frame: "_top" } %>
             </strong>
 
-            <%= link_to comment, class: "txt-undecorated txt-ink translucent txt-normal txt-capitalize" do %>
+            <%= link_to comment, class: "txt-undecorated txt-ink translucent txt-normal txt-capitalize", data: { turbo_frame: "_top" } do %>
               <%= local_datetime_tag comment.created_at, style: :agoorweekday %>,
               <%= local_datetime_tag comment.created_at, style: :time %>
             <% end %>

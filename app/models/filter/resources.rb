@@ -23,7 +23,7 @@ module Filter::Resources
 
   def collection_titles
     if collections.none?
-      [ Collection.one? ? collections.first.name : "All collections" ]
+      Collection.one? ? [ Collection.first.name ] : [ "All collections" ]
     else
       collections.map(&:name)
     end

@@ -69,6 +69,7 @@ summary {
     inset: 0 0 auto 0;
     justify-content: flex-end;
     padding: var(--block-space-half) var(--block-space);
+    pointer-events: none;
     position: absolute;
   }
 

@@ -43,7 +43,7 @@ class Event::Summarizer
   private
     attr_reader :prompt, :llm_model
 
-    MAX_TOKENS = 128000
+    MAX_TOKENS = 125000
 
     def llm_response
       @llm_response ||= chat.ask Ai::Tokenizer.truncate(llm_query, max_input_tokens: MAX_TOKENS, model: llm_model)

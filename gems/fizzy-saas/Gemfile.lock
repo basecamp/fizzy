@@ -1,20 +1,4 @@
 GIT
-  remote: https://github.com/basecamp/file_repository
-  revision: 8c8d1594f3ec7e8c0938e6a7f7def521692344e4
-  ref: 8c8d1594f3ec7e8c0938e6a7f7def521692344e4
-  specs:
-    file_repository (1.4.6)
-
-GIT
-  remote: https://github.com/basecamp/portfolio
-  revision: 86411a53d19a42ce44705a50ebe7c22828597991
-  ref: 86411a53d19a42ce44705a50ebe7c22828597991
-  specs:
-    portfolio (5.2.0)
-      activesupport
-      file_repository (>= 1.4.4)
-
-GIT
   remote: https://github.com/basecamp/queenbee-plugin
   revision: eb01c697de1ad028afc65cc7d9b5345a7a8e849f
   ref: eb01c697de1ad028afc65cc7d9b5345a7a8e849f
@@ -24,118 +8,19 @@ GIT
       builder
       rexml
 
-GIT
-  remote: https://github.com/basecamp/queuety
-  revision: bf7e2a552fb674533d3e092f06dbf9b5d1ebc753
-  ref: bf7e2a552fb674533d3e092f06dbf9b5d1ebc753
-  branch: rails4
-  specs:
-    queuety (4.0.2)
-      activerecord
-      service_concurrency_prevention
-
-GIT
-  remote: https://github.com/basecamp/service_concurrency_prevention
-  revision: 320da99431718615ed86f8723e8b9d3259c602a3
-  ref: 320da99431718615ed86f8723e8b9d3259c602a3
-  specs:
-    service_concurrency_prevention (1.1.1)
-      activesupport
-
-GIT
-  remote: https://github.com/basecamp/signal_id
-  revision: d6c2a5ceed7bb57bf7dcdebdb439e7cd526fca09
-  ref: d6c2a5ceed7bb57bf7dcdebdb439e7cd526fca09
-  branch: rails4
-  specs:
-    signal_id (4.3.2)
-      bcrypt-ruby (>= 3.0.0)
-      google-id-token (>= 1.4.0)
-      mocha
-      multi_json
-      portfolio (>= 4.0)
-      pwned (~> 2.0)
-      queuety (>= 3.0)
-      rails (>= 4.0.2)
-      rails-controller-testing
-
-GIT
-  remote: https://github.com/jeremy/mysql2.git
-  revision: b5766f5d296745d6aed014c8c0b7d82ef149ade1
-  ref: b5766f5d296745d6aed014c8c0b7d82ef149ade1
-  branch: force_latin1_to_utf8
-  specs:
-    mysql2 (0.5.4.latin1utf8)
-
 GEM
   remote: https://rubygems.org/
   specs:
-    actioncable (8.0.2.1)
-      actionpack (= 8.0.2.1)
-      activesupport (= 8.0.2.1)
-      nio4r (~> 2.0)
-      websocket-driver (>= 0.6.1)
-      zeitwerk (~> 2.6)
-    actionmailbox (8.0.2.1)
-      actionpack (= 8.0.2.1)
-      activejob (= 8.0.2.1)
-      activerecord (= 8.0.2.1)
-      activestorage (= 8.0.2.1)
-      activesupport (= 8.0.2.1)
-      mail (>= 2.8.0)
-    actionmailer (8.0.2.1)
-      actionpack (= 8.0.2.1)
-      actionview (= 8.0.2.1)
-      activejob (= 8.0.2.1)
-      activesupport (= 8.0.2.1)
-      mail (>= 2.8.0)
-      rails-dom-testing (~> 2.2)
-    actionpack (8.0.2.1)
-      actionview (= 8.0.2.1)
-      activesupport (= 8.0.2.1)
-      nokogiri (>= 1.8.5)
-      rack (>= 2.2.4)
-      rack-session (>= 1.0.1)
-      rack-test (>= 0.6.3)
-      rails-dom-testing (~> 2.2)
-      rails-html-sanitizer (~> 1.6)
-      useragent (~> 0.16)
-    actiontext (8.0.2.1)
-      actionpack (= 8.0.2.1)
-      activerecord (= 8.0.2.1)
-      activestorage (= 8.0.2.1)
-      activesupport (= 8.0.2.1)
-      globalid (>= 0.6.0)
-      nokogiri (>= 1.8.5)
-    actionview (8.0.2.1)
-      activesupport (= 8.0.2.1)
-      builder (~> 3.1)
-      erubi (~> 1.11)
-      rails-dom-testing (~> 2.2)
-      rails-html-sanitizer (~> 1.6)
-    activejob (8.0.2.1)
-      activesupport (= 8.0.2.1)
-      globalid (>= 0.3.6)
     activemodel (8.0.2.1)
       activesupport (= 8.0.2.1)
     activemodel-serializers-xml (1.0.3)
       activemodel (>= 5.0.0.a)
       activesupport (>= 5.0.0.a)
       builder (~> 3.1)
-    activerecord (8.0.2.1)
-      activemodel (= 8.0.2.1)
-      activesupport (= 8.0.2.1)
-      timeout (>= 0.4.0)
     activeresource (6.1.4)
       activemodel (>= 6.0)
       activemodel-serializers-xml (~> 1.0)
       activesupport (>= 6.0)
-    activestorage (8.0.2.1)
-      actionpack (= 8.0.2.1)
-      activejob (= 8.0.2.1)
-      activerecord (= 8.0.2.1)
-      activesupport (= 8.0.2.1)
-      marcel (~> 1.0)
     activesupport (8.0.2.1)
       base64
       benchmark (>= 0.3)
@@ -150,143 +35,21 @@ GEM
       tzinfo (~> 2.0, >= 2.0.5)
       uri (>= 0.13.1)
     base64 (0.3.0)
-    bcrypt (3.1.20)
-    bcrypt-ruby (3.1.5)
-      bcrypt (>= 3.1.3)
     benchmark (0.4.1)
     bigdecimal (3.2.3)
     builder (3.3.0)
     concurrent-ruby (1.3.5)
     connection_pool (2.5.4)
-    crass (1.0.6)
-    date (3.4.1)
     drb (2.2.3)
-    erb (5.0.2)
-    erubi (1.13.1)
-    globalid (1.2.1)
-      activesupport (>= 6.1)
-    google-id-token (1.4.2)
-      jwt (>= 1)
     i18n (1.14.7)
       concurrent-ruby (~> 1.0)
-    io-console (0.8.1)
-    irb (1.15.2)
-      pp (>= 0.6.0)
-      rdoc (>= 4.0.0)
-      reline (>= 0.4.2)
-    jwt (3.1.2)
-      base64
     logger (1.7.0)
-    loofah (2.24.1)
-      crass (~> 1.0.2)
-      nokogiri (>= 1.12.0)
-    mail (2.8.1)
-      mini_mime (>= 0.1.1)
-      net-imap
-      net-pop
-      net-smtp
-    marcel (1.0.4)
-    mini_mime (1.1.5)
     minitest (5.25.5)
-    mocha (2.7.1)
-      ruby2_keywords (>= 0.0.5)
-    multi_json (1.17.0)
-    net-imap (0.5.10)
-      date
-      net-protocol
-    net-pop (0.1.2)
-      net-protocol
-    net-protocol (0.2.2)
-      timeout
-    net-smtp (0.5.1)
-      net-protocol
-    nio4r (2.7.4)
-    nokogiri (1.18.9-aarch64-linux-gnu)
-      racc (~> 1.4)
-    nokogiri (1.18.9-aarch64-linux-musl)
-      racc (~> 1.4)
-    nokogiri (1.18.9-arm-linux-gnu)
-      racc (~> 1.4)
-    nokogiri (1.18.9-arm-linux-musl)
-      racc (~> 1.4)
-    nokogiri (1.18.9-arm64-darwin)
-      racc (~> 1.4)
-    nokogiri (1.18.9-x86_64-darwin)
-      racc (~> 1.4)
-    nokogiri (1.18.9-x86_64-linux-gnu)
-      racc (~> 1.4)
-    nokogiri (1.18.9-x86_64-linux-musl)
-      racc (~> 1.4)
-    pp (0.6.2)
-      prettyprint
-    prettyprint (0.2.0)
-    psych (5.2.6)
-      date
-      stringio
-    pwned (2.4.1)
-    racc (1.8.1)
-    rack (3.2.1)
-    rack-session (2.1.1)
-      base64 (>= 0.1.0)
-      rack (>= 3.0.0)
-    rack-test (2.2.0)
-      rack (>= 1.3)
-    rackup (2.2.1)
-      rack (>= 3)
-    rails (8.0.2.1)
-      actioncable (= 8.0.2.1)
-      actionmailbox (= 8.0.2.1)
-      actionmailer (= 8.0.2.1)
-      actionpack (= 8.0.2.1)
-      actiontext (= 8.0.2.1)
-      actionview (= 8.0.2.1)
-      activejob (= 8.0.2.1)
-      activemodel (= 8.0.2.1)
-      activerecord (= 8.0.2.1)
-      activestorage (= 8.0.2.1)
-      activesupport (= 8.0.2.1)
-      bundler (>= 1.15.0)
-      railties (= 8.0.2.1)
-    rails-controller-testing (1.0.5)
-      actionpack (>= 5.0.1.rc1)
-      actionview (>= 5.0.1.rc1)
-      activesupport (>= 5.0.1.rc1)
-    rails-dom-testing (2.3.0)
-      activesupport (>= 5.0.0)
-      minitest
-      nokogiri (>= 1.6)
-    rails-html-sanitizer (1.6.2)
-      loofah (~> 2.21)
-      nokogiri (>= 1.15.7, != 1.16.7, != 1.16.6, != 1.16.5, != 1.16.4, != 1.16.3, != 1.16.2, != 1.16.1, != 1.16.0.rc1, != 1.16.0)
-    railties (8.0.2.1)
-      actionpack (= 8.0.2.1)
-      activesupport (= 8.0.2.1)
-      irb (~> 1.13)
-      rackup (>= 1.0.0)
-      rake (>= 12.2)
-      thor (~> 1.0, >= 1.2.2)
-      zeitwerk (~> 2.6)
-    rake (13.3.0)
-    rdoc (6.14.2)
-      erb
-      psych (>= 4.0.0)
-    reline (0.6.2)
-      io-console (~> 0.5)
     rexml (3.4.4)
-    ruby2_keywords (0.0.5)
     securerandom (0.4.1)
-    stringio (3.1.7)
-    thor (1.4.0)
-    timeout (0.4.3)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     uri (1.0.3)
-    useragent (0.16.11)
-    websocket-driver (0.8.0)
-      base64
-      websocket-extensions (>= 0.1.0)
-    websocket-extensions (0.1.5)
-    zeitwerk (2.7.3)
 
 PLATFORMS
   aarch64-linux-gnu
@@ -300,13 +63,7 @@ PLATFORMS
 
 DEPENDENCIES
   activeresource
-  file_repository (~> 1.4.5)!
-  mysql2!
-  portfolio (>= 4.6)!
   queenbee!
-  queuety!
-  service_concurrency_prevention!
-  signal_id!
 
 BUNDLED WITH
    2.7.0

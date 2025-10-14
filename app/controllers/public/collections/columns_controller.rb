@@ -8,7 +8,7 @@ class Public::Collections::ColumnsController < ApplicationController
   before_action :set_column, only: :show
 
   def show
-    set_page_and_extract_portion_from @column.cards.active.reverse_chronologically.with_golden_first
+    set_page_and_extract_portion_from @column.cards.active.by_last_activity.with_golden_first
 
     # To enable caching at intermediate proxies during traffic spikes
     expires_in 5.seconds, public: true

@@ -178,7 +178,7 @@
   }
 
   .attachment__caption {
-    color: var(--color-ink-dark);
+    color: color-mix(in oklch, var(--color-ink) 66%, transparent);
     font-size: var(--text-small);
 
     .input {
@@ -216,8 +216,10 @@
     font-size: var(--text-small);
     font-weight: bold;
     inline-size: auto;
+    padding-inline: 0.5ch;
     place-content: center;
     text-transform: uppercase;
+    white-space: nowrap;
   }
 
   .attachment--preview {
@@ -246,7 +248,7 @@
   }
 
   .attachment--file {
-    --attachment-icon-color: var(--lexxy-color-text-subtle);
+    --attachment-icon-color: var(--color-ink-medium);
 
     align-items: center;
     display: flex;
@@ -264,6 +266,15 @@
       color: var(--color-ink);
       font-weight: bold;
     }
+
+    /* Video attachments don't have an identifiable class, but we need to
+     * make sure the caption is always below the video */
+    &:has(video) {
+      .attachment__caption {
+        flex: none;
+        inline-size: 100%;
+      }
+    }
   }
 
   .attachment--psd,
@@ -279,6 +290,7 @@
   }
 
   .attachment--css,
+  .attachment--crash,
   .attachment--php,
   .attachment--json,
   .attachment--htm,

@@ -1,6 +1,3 @@
 37s:
   name: 37signals
   join_code: "ejpP-THlQ-Cc2f"
-<% if Account.reflect_on_association :external_account %>
-  tenant_id: <%= ActiveRecord::FixtureSet.identify :'37s_fizzy' %>
-<% end %>

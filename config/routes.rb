@@ -221,7 +221,7 @@ Rails.application.routes.draw do
 
   root "events#index"
 
-  unless Rails.application.config.x.local_authentication
+  unless Rails.application.config.x.oss_config
     mount Fizzy::Saas::Engine, at: "/", as: "saas"
   end
 

@@ -1,0 +1,13 @@
+<div id="<%= dom_id(card, :watch_button) %>">
+  <% if card.watched_by? Current.user %>
+    <%= button_to card_watch_path(card), method: :delete, class: "btn btn--reversed", data: { controller: "tooltip" } do %>
+      <%= icon_tag "bell" %>
+      <span class="for-screen-reader">Stop watching</span>
+    <% end %>
+  <% else %>
+    <%= button_to card_watch_path(card), class: "btn", data: { controller: "tooltip" } do %>
+      <%= icon_tag "bell-off" %>
+      <span class="for-screen-reader">Watch this</span>
+    <% end %>
+  <% end %>
+</div>

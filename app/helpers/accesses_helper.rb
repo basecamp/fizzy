@@ -27,15 +27,12 @@ module AccessesHelper
   end
 
   def collection_watchers_list(collection)
-    watchers = collection.users
-                         .without(User.system)
-                         .where(accesses: { involvement: :watching })
-                         .distinct
+    watchers = collection.watchers
 
     displayed_watchers = watchers.limit(MAX_DISPLAYED_WATCHERS)
     overflow_count = watchers.count - MAX_DISPLAYED_WATCHERS
 
-    tag.div(class: "flex gap-half justify-center") do
+    tag.div(class: "collection-tools__watching") do
       safe_join([
         safe_join(displayed_watchers.map { |watcher| avatar_tag(watcher) }),
         (tag.span("+#{overflow_count} other people", class: "overflow-count") if overflow_count > 0)
@@ -50,13 +47,13 @@ module AccessesHelper
       collection_involvement_path(collection),
       method: :put,
       aria: { labelledby: involvement_label_id },
-      class: "btn",
+      class: class_names("btn", { "btn--reversed": access.watching? && icon_only }),
       params: { show_watchers: show_watchers, involvement: next_involvement(access.involvement), icon_only: icon_only }
     ) do
       safe_join([
         icon_tag("notification-bell-#{icon_only ? 'reverse-' : nil}#{access.involvement.dasherize}"),
         tag.span(
-          involvement_access_label(collection, access.involvement),
+          involvement_access_label(access),
           class: class_names("txt-nowrap txt-uppercase", "for-screen-reader": icon_only),
           id: involvement_label_id
         )
@@ -70,12 +67,11 @@ module AccessesHelper
       order[(order.index(involvement.to_s) + 1) % order.size]
     end
 
-    def involvement_access_label(collection, involvement)
-      case involvement
-      when "access_only"
+    def involvement_access_label(access)
+      if access.access_only?
         "Watch this"
-      when "watching"
-        "Stop Watching"
+      else
+        "Stop watching"
       end
     end
 end

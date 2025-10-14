@@ -2,11 +2,15 @@
   data-action="turbo:before-morph-attribute->collapsible-columns#preventToggle">
   <div class="cards__decoration"></div>
 
+  <header class="cards__expander">
+    <h2 class="cards__expander-title position-relative"">The Stream</h2>
+  </header>
+
   <% if page.used? %>
-    <%= with_manual_pagination "the-stream", @page do %>
+    <%= with_automatic_pagination "the-stream", @page do %>
       <%= render "public/collections/columns/list", cards: page.records %>
     <% end %>
   <% end %>
 
-  <div class="cards__decoration cards__decoration--end"></div>
+  <div class="cards__decoration-end"></div>
 </section>

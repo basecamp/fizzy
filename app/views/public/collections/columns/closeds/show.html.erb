@@ -1,6 +1,6 @@
 <%= turbo_frame_tag :closed_column do %>
   <% if @page.used? %>
-    <%= with_manual_pagination :closed_column, @page do %>
+    <%= with_automatic_pagination :closed_column, @page do %>
       <%= render "public/collections/columns/list", cards: @page.records %>
     <% end %>
   <% else %>

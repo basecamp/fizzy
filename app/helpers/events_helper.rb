@@ -52,17 +52,6 @@ module EventsHelper
     tag.div class: "events__time-block", style: "grid-area: #{row}/#{col}", &
   end
 
-  def event_next_page_link(next_day)
-    if next_day
-      tag.div id: "next_page",
-        data: { controller: "fetch-on-visible",
-                fetch_on_visible_url_value: events_days_path(
-                  day: next_day.strftime("%Y-%m-%d"),
-                  **@filter.as_params
-                ) }
-    end
-  end
-
   def event_action_sentence(event)
     if event.action.comment_created?
       comment_event_action_sentence(event)
@@ -98,10 +87,6 @@ module EventsHelper
       "#{h event_creator_name(event) } closed <span style='color: var(--card-color)'>#{h title }</span>".html_safe
     when "card_reopened"
       "#{h event_creator_name(event) } reopened <span style='color: var(--card-color)'>#{h title }</span>".html_safe
-    when "card_staged"
-      "#{h event_creator_name(event)} moved <span style='color: var(--card-color)'>#{h title }</span> to the #{h event.stage_name} stage".html_safe
-    when "card_unstaged"
-      "#{h event_creator_name(event)} moved <span style='color: var(--card-color)'>#{h title }</span> out ofthe #{h event.stage_name} stage".html_safe
     when "card_due_date_added"
       "#{h event_creator_name(event)} set the date to #{h event.particulars.dig('particulars', 'due_date').to_date.strftime('%B %-d')} on <span style='color: var(--card-color)'>#{h title }</span>".html_safe
     when "card_due_date_changed"
@@ -121,10 +106,6 @@ module EventsHelper
       "assigned"
     when "card_unassigned"
       "minus"
-    when "card_staged"
-      "bolt"
-    when "card_unstaged"
-      "bolt"
     when "comment_created"
       "comment"
     when "card_title_changed"

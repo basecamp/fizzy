@@ -5,7 +5,7 @@ import { post } from "@rails/request.js"
 export default class extends Controller {
   static classes = ["filtersSet"]
   static targets = ["field", "form"]
-  static values = { refreshUrl: String, noFilteringUrl: String }
+  static values = { refreshUrl: String, noFilteringUrl: String, cardsUrl: String }
 
   initialize() {
     this.debouncedToggle = debounce(this.#toggle.bind(this), 50)
@@ -29,6 +29,12 @@ export default class extends Controller {
 
   async fieldTargetConnected(field) {
     this.debouncedToggle()
+  }
+
+  submitToGenericCardsView() {
+    this.formTarget.action = this.cardsUrlValue
+    this.formTarget.dataset.turboFrame = "top"
+    this.formTarget.requestSubmit()
   }
 
   #toggle() {

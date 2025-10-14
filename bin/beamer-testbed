@@ -1,0 +1,231 @@
+#!/usr/bin/env bash
+
+set -e
+
+COMPOSE_OPTIONS="-f docker-compose.beamer-testbed.yml"
+
+# Show usage
+show_usage() {
+  echo "Usage: $0 {start|stop|logs|console|bash|server|run-migrations} [options]"
+  echo ""
+  echo "Commands:"
+  echo "  start              Build and start all services"
+  echo "  stop               Stop all services"
+  echo "  logs               Show logs (pass -f to follow)"
+  echo "  console [node]     Open Rails console (default: fizzy-01)"
+  echo "  bash [node]        Open bash shell (default: fizzy-01)"
+  echo "  server             Start web server and beamer using foreman"
+  echo "  run-migrations     Wait for beamer, then run migrations if primary"
+  exit 1
+}
+
+# Get all fizzy-* services from docker compose
+get_fizzy_services() {
+  fizzy_services=$(docker compose $COMPOSE_OPTIONS config --services | grep '^fizzy-' | sort)
+
+  if [ -z "$fizzy_services" ]; then
+    echo "Error: No fizzy-* services found in docker-compose file"
+    exit 1
+  fi
+
+  echo "$fizzy_services"
+}
+
+# Function to wait for a container to be healthy
+wait_for_container() {
+  local container=$1
+  local max_attempts=60
+  local attempt=0
+
+  echo "Waiting for $container to be ready..."
+
+  while [ $attempt -lt $max_attempts ]; do
+    if docker compose $COMPOSE_OPTIONS exec -T "$container" curl -f -s http://localhost:3000/up >/dev/null 2>&1; then
+      echo "$container is ready!"
+      return 0
+    fi
+    attempt=$((attempt + 1))
+    echo "$container isn't yet ready on attempt $attempt/$max_attempts"
+    sleep 2
+  done
+
+  echo "Error: $container failed to become ready after $max_attempts attempts"
+  return 1
+}
+
+# Function to configure kamal-proxy
+# TODO: set up the other containers as read targets
+configure_proxy() {
+  local writer=$1
+  local readers=${@:2}
+
+  echo "Configuring kamal-proxy..."
+
+  local writer_target="$writer:3000"
+  local reader_target=""
+  for reader in $readers; do
+    if [ -n "$reader_target" ]; then
+      reader_target+=","
+    fi
+    reader_target+="$reader:3000"
+  done
+
+  docker compose $COMPOSE_OPTIONS exec -T kamal-proxy \
+    kamal-proxy deploy fizzy \
+    --target $writer_target \
+    --read-target $reader_target \
+    --host fizzy.localhost
+
+  echo "Configured kamal-proxy with target=${writer_target} and read-target=${reader_target}"
+}
+
+# Start command
+cmd_start() {
+  local fizzy_services=$(get_fizzy_services)
+  local first_fizzy=$(echo "$fizzy_services" | head -n 1)
+
+  # Get GitHub token from gh CLI
+  echo "Getting GitHub token from gh CLI..."
+  export GITHUB_TOKEN=$(gh auth token)
+
+  if [ -z "$GITHUB_TOKEN" ]; then
+    echo "Error: Failed to get GitHub token from gh CLI"
+    echo "Make sure you're authenticated with: gh auth login"
+    exit 1
+  fi
+
+  # Create tmp directories with proper permissions
+  echo "Creating temporary directories..."
+  for service in $fizzy_services; do
+    mkdir -p "./tmp/beamer-testbed/$service/storage"
+    mkdir -p "./tmp/beamer-testbed/$service/tmp"
+  done
+
+  echo "Building Docker image for $first_fizzy..."
+  docker compose $COMPOSE_OPTIONS build "$first_fizzy"
+
+  echo "Starting services in detached mode..."
+  docker compose $COMPOSE_OPTIONS down
+  docker compose $COMPOSE_OPTIONS up -d
+
+  # Wait for and register each fizzy container
+  for container in $fizzy_services; do
+    wait_for_container "$container"
+  done
+  configure_proxy $fizzy_services
+
+  echo ""
+  echo "All containers are ready and registered!"
+  echo "You can access the application at: http://fizzy.localhost:3006"
+}
+
+# Stop command
+cmd_stop() {
+  echo "Stopping services..."
+  docker compose $COMPOSE_OPTIONS down
+  echo "Services stopped."
+}
+
+# Logs command
+cmd_logs() {
+  docker compose $COMPOSE_OPTIONS logs "$@"
+}
+
+# Console command
+cmd_console() {
+  local node="${1:-fizzy-01}"
+
+  echo "Opening Rails console in $node..."
+  docker compose $COMPOSE_OPTIONS exec "$node" bin/rails console
+}
+
+# Bash command
+cmd_bash() {
+  local node="${1:-fizzy-01}"
+
+  echo "Opening bash shell in $node..."
+  docker compose $COMPOSE_OPTIONS exec "$node" bash
+}
+
+# Server command (runs inside container)
+cmd_server() {
+  # Check if foreman is installed
+  if ! command -v foreman >/dev/null 2>&1; then
+    echo "Foreman not found, installing..."
+    gem install foreman
+  fi
+
+  # Clean up any stale .beamer.sock files
+  echo "Cleaning up stale socket files..."
+  find . -path '*/.beamer/*/.beamer.sock' -type s -delete 2>/dev/null || true
+
+  mkdir -p ./storage/tenants
+  mkdir -p ./storage/untenanted
+
+  echo "Starting web server and beamer with foreman..."
+  exec foreman start -f Procfile.beamer-testbed
+}
+
+# Run migrations command (runs inside container)
+cmd_run_migrations() {
+  # Store all arguments as BEAMER_OPTIONS
+  BEAMER_OPTIONS="$*"
+
+  echo "Waiting for beamer to be ready..."
+
+  # Wait for beamer status to succeed
+  while ! beamer $BEAMER_OPTIONS status >/dev/null 2>&1; do
+    echo "Beamer not ready yet, waiting..."
+    sleep 1
+  done
+
+  echo "Beamer is ready!"
+  sleep 1
+
+  # Check if this is the primary node
+  if beamer $BEAMER_OPTIONS is-primary; then
+    echo "This is the primary node, running migrations..."
+    ./bin/rails db:prepare
+    echo "Migrations complete!"
+  else
+    echo "This is not the primary node, skipping migrations."
+  fi
+
+  # Wait indefinitely until interrupted
+  echo "Waiting indefinitely (press Ctrl-C to exit)..."
+  while true; do
+    sleep 3600
+  done
+}
+
+# Main command dispatch
+case "${1:-}" in
+start)
+  cmd_start
+  ;;
+stop)
+  cmd_stop
+  ;;
+logs)
+  shift
+  cmd_logs "$@"
+  ;;
+console)
+  shift
+  cmd_console "$@"
+  ;;
+bash)
+  shift
+  cmd_bash "$@"
+  ;;
+server)
+  cmd_server
+  ;;
+run-migrations)
+  shift
+  cmd_run_migrations "$@"
+  ;;
+*)
+  show_usage
+  ;;
+esac

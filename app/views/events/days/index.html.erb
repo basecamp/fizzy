@@ -1,0 +1,4 @@
+<%= day_timeline_pagination_frame_tag @day_timeline do %>
+  <%= render "events/day", day_timeline: @day_timeline %>
+  <%= day_timeline_pagination_link(@day_timeline, @filter) %>
+<% end %>

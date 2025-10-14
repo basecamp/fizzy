@@ -1,6 +1,6 @@
 <%= turbo_frame_tag :stream_column do %>
   <% if @page.used? %>
-    <%= with_manual_pagination :stream_column, @page do %>
+    <%= with_automatic_pagination :stream_column, @page do %>
       <%= render "public/collections/columns/list", cards: @page.records %>
     <% end %>
   <% else %>

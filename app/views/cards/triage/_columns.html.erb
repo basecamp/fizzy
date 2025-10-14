@@ -1,17 +1,25 @@
-  <div id="<%= dom_id(card, :stages) %>" class="card__stages">
-    <%= button_to "Not now", card_not_now_path(card),
-        class: [ "workflow-stage btn", { "workflow-stage--current": card.postponed? } ],
-        form_class: "flex align-center gap-half" %>
+<div id="<%= dom_id(card, :stages) %>" class="card__stages" role="radiogroup">
+  <legend class="for-screen-reader">Choose a column for this card</legend>
 
-    <%= button_to "The Stream", card_triage_path(card), method: :delete,
-        class: [ "workflow-stage workflow-stage--stream btn", { "workflow-stage--current": card.awaiting_triage? } ],
-        form_class: "flex align-center gap-half" %>
+  <%= button_to "Not now", card_not_now_path(card),
+      class: [ "card__column-name btn", { "card__column-name--current": card.postponed? } ],
+      role: "radio",
+      aria: { checked: card.postponed? },
+      form_class: "flex align-center gap-half" %>
 
-    <% card.collection.columns.each do |column| %>
-      <%= button_to_set_column card, column %>
-    <% end %>
+  <%= button_to "The Stream", card_triage_path(card), method: :delete,
+      class: [ "card__column-name card__column-name--stream btn", { "card__column-name--current": card.awaiting_triage? } ],
+      role: "radio",
+      aria: { checked: card.awaiting_triage? },
+      form_class: "flex align-center gap-half" %>
 
-    <%= button_to "Closed", card_closure_path(card, reason: "Completed"),
-        class: [ "workflow-stage btn", { "workflow-stage--current": card.closed? } ],
-        form_class: "flex align-center gap-half" %>
-  </div>
+  <% card.collection.columns.each do |column| %>
+    <%= button_to_set_column card, column %>
+  <% end %>
+
+  <%= button_to "Done", card_closure_path(card, reason: "Completed"),
+      class: [ "card__column-name btn", { "card__column-name--current": card.closed? } ],
+      role: "radio",
+      aria: { checked: card.closed? },
+      form_class: "flex align-center gap-half" %>
+</div>

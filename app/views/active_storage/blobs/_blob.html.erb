@@ -18,9 +18,7 @@
   </figure>
 <% else %>
   <div class="attachment attachment--file attachment--<%= blob.filename.extension -%>">
-    <%= link_to rails_blob_path(blob, disposition: :attachment), class: "attachment__figure", download: blob.filename, title: "Download #{blob.filename}" do %>
-      <%= render "active_storage/blobs/web/representation", blob: blob %>
-    <% end %>
+    <%= render "active_storage/blobs/web/representation", blob: blob %>
 
     <div class="attachment__caption">
       <div>

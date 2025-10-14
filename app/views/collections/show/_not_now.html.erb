@@ -6,7 +6,9 @@
   data-drag-and-drop-url="<%= columns_card_drops_not_now_path("__id__") %>"
 >
 
-  <%= render "collections/show/expander", title: "Not Now", count: collection.cards.postponed.count, column_id: "not-now" %>
+  <%= render "collections/show/expander", title: "Not Now", count: collection.cards.postponed.count, column_id: "not-now" do %>
+    <%= render "collections/show/menu/expand", column_path: collection_columns_not_now_path(collection) %>
+  <% end %>
 
   <%= column_frame_tag :not_now_column, src: collection_columns_not_now_path(collection) %>
 </section>

@@ -8,14 +8,10 @@
   <%#= render "account/invite" # Scheduled work in https://3.basecamp.com/2914079/buckets/37331921/todos/8746162337 %>
 
   <div class="settings__user-filter">
-    <input placeholder="Filter…" class="input input--transparent full-width" type="search" autocorrect="off" autocomplete="off" data-1p-ignore="true" data-filter-target="input" data-action="input->filter#filter">
+    <input placeholder="Filter…" class="input input--transparent full-width txt-small" type="search" autocorrect="off" autocomplete="off" data-1p-ignore="true" data-filter-target="input" data-action="input->filter#filter">
 
-    <ul class="settings__user-list" data-filter-target="list">
+    <ul class="settings__user-list margin-block-half" data-filter-target="list">
       <%= render partial: "account/user", collection: users %>
     </ul>
-
-    <footer class="settings__user-list-tips">
-      Press <kbd class="kbd">↑</kbd><kbd class="kbd">↓</kbd> to move, <kbd class="kbd">enter</kbd> to visit profile, <kbd class="kbd">SHIFT+ENTER</kbd> to toggle.
-    </footer>
   </div>
 <% end %>

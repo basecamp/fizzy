@@ -1,0 +1,2 @@
+[env]
+PROMETHEUS_EXPORTER_URL = "http://127.0.0.1:9306/metrics"

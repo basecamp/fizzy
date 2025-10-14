@@ -12,7 +12,6 @@ module Filter::Params
     creator_ids: [],
     closer_ids: [],
     collection_ids: [],
-    stage_ids: [],
     tag_ids: [],
     terms: []
   ]

@@ -13,8 +13,8 @@
             controller: "hotkey",
             action: "
             bar#search
-            keydown.meta+k@document->hotkey#click keydown.ctrl+k@document->hotkey#click" } do %>
-      <span>Search (<%= hotkey_label(["ctrl", "K"]) %>)</span>
+            keydown.k@document->hotkey#click" } do %>
+      <span>Search <% if platform.desktop? -%><kbd>K</kbd><% end %></span>
     <% end %>
     <% if Current.user.staff? %>
       <%= tag.button \
@@ -23,8 +23,8 @@
               controller: "hotkey",
               action: "
               bar#ask
-              keydown.meta+a@document->hotkey#click keydown.ctrl+a@document->hotkey#click" } do %>
-        <span>Ask (<%= hotkey_label(["ctrl", "A"]) %>)</span>
+              keydown.a@document->hotkey#click" } do %>
+        <span>Ask <% if platform.desktop? -%><kbd>A</kbd><% end %></span>
       <% end %>
     <% end %>
   </div>

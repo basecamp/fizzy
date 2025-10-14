@@ -22,7 +22,6 @@ Gem::Specification.new do |spec|
   end
 
   spec.add_dependency "rails", ">= 8.1.0.beta1"
-  spec.add_dependency "signal_id"
   spec.add_dependency "queenbee"
   spec.add_dependency "rails_structured_logging"
 end

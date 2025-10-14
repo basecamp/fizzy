@@ -1,7 +1,0 @@
-#!/usr/bin/env ruby
-
-def system!(*args) system(*args, exception: true) end
-
-puts "\n== Starting MySQL =="
-system "[ -d ~/Work/basecamp/docker-dev ] && git -C ~/Work/basecamp/docker-dev pull || gh repo clone basecamp/docker-dev ~/Work/basecamp/docker-dev"
-system! "~/Work/basecamp/docker-dev/setup mysql80"

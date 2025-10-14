@@ -1,0 +1,46 @@
+# syntax = docker/dockerfile:1
+
+# Make sure RUBY_VERSION matches the Ruby version in .ruby-version
+ARG RUBY_VERSION=3.4.7
+FROM registry.docker.com/library/ruby:$RUBY_VERSION-slim AS base
+
+# Rails app lives here
+WORKDIR /rails
+
+# Set development environment
+ENV RAILS_ENV="development" \
+    BUNDLE_PATH="/usr/local/bundle"
+
+# Install packages needed for development
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y curl libsqlite3-0 libvips build-essential pkg-config git ffmpeg groff libreoffice-writer libreoffice-impress libreoffice-calc mupdf-tools libyaml-dev libssl-dev && \
+    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+
+# Install application gems
+COPY Gemfile Gemfile.lock .ruby-version ./
+COPY lib/bootstrap.rb ./lib/bootstrap.rb
+COPY gems ./gems/
+RUN --mount=type=secret,id=GITHUB_TOKEN --mount=type=cache,id=fizzy-devbundle-${RUBY_VERSION},sharing=locked,target=/devbundle \
+    gem install bundler && \
+    BUNDLE_PATH=/devbundle BUNDLE_GITHUB__COM="$(cat /run/secrets/GITHUB_TOKEN):x-oauth-basic" bundle install && \
+    cp -a /devbundle/. "$BUNDLE_PATH"/ && \
+    bundle clean --force
+
+# Fetch beamer library
+FROM registry.37signals.com/basecamp/beamer:vfs AS beamer
+
+# Final stage
+FROM base
+
+# Copy beamer
+COPY --from=beamer /home/beamer/bin/beamer.so /usr/local/lib/beamer/beamer.so
+COPY --from=beamer /usr/local/bin/beamer /usr/local/bin/beamer
+
+# Entrypoint prepares the database
+ENTRYPOINT ["/rails/bin/docker-entrypoint"]
+
+# Start the server by default
+EXPOSE 3000
+EXPOSE 3006
+EXPOSE 5001
+CMD ["./bin/thrust", "./bin/rails", "server"]

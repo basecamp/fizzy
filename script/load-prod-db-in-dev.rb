@@ -6,35 +6,44 @@ if ARGV.length != 1
 end
 original_dbfile = ARGV[0]
 
+require "securerandom"
+identifier = SecureRandom.hex(4)
+
+# run a process to run the migration and dump the schema cache
+Process.fork do
+  require_relative "../config/environment"
+
+  unless Rails.env.local?
+    abort "This script should only be run in a local development environment."
+  end
+
+  tenant = ActiveRecord::FixtureSet.identify(identifier)
+
+  path = ApplicationRecord.tenanted_root_config.database_path_for(tenant)
+  FileUtils.mkdir_p(File.dirname(path), verbose: true)
+  FileUtils.cp original_dbfile, path, verbose: true
+
+  ActiveRecord::Tenanted::DatabaseTasks.migrate_all
+end
+Process.wait
+
+# now load the schema cache and do what we need to do in the database
 require_relative "../config/environment"
 
-unless Rails.env.local?
-  abort "This script should only be run in a local development environment."
-end
+tenant = ActiveRecord::FixtureSet.identify(identifier)
 
-identifier = SecureRandom.hex(4)
-signup = Signup.new(
-  email_address: "dev-#{identifier}@example.com",
-  full_name: "Developer #{identifier}",
-  company_name: "Company #{identifier}",
-  password: "secret123456"
-)
+ApplicationRecord.with_tenant(tenant) do |tenant|
+  Account.sole.destroy!
 
-puts "Creating signal identity for #{signup.email_address}..."
-signup.send(:create_signal_identity)
+  Account.create_with_admin_user \
+    account: { name: "Company #{identifier}" },
+    owner: { name: "Developer #{identifier}", email_address: "dev-#{identifier}@example.com", password: "secret123456" }
 
-puts "Creating queenbee account ..."
-signup.send(:create_queenbee_account)
+  user = User.last
+  Collection.find_each do |collection|
+    collection.accesses.grant_to(user)
+  end
 
-path = ApplicationRecord.tenanted_root_config.database_path_for(signup.tenant_name)
-FileUtils.mkdir_p(File.dirname(path), verbose: true)
-FileUtils.cp original_dbfile, path, verbose: true
-
-ActiveRecord::Tenanted::DatabaseTasks.migrate_all
-
-ApplicationRecord.with_tenant(signup.tenant_name) do |tenant|
-  Account.sole.update! external_account: signup.signal_account
-  User.first.update! external_user: signup.signal_account.owner
-
-  puts "\n\nLogin to http://launchpad.localhost:3011/ as #{signup.email_address} / #{signup.password}"
+  url = Rails.application.routes.url_helpers.root_url(Rails.application.config.action_controller.default_url_options.merge(script_name: Account.sole.slug))
+  puts "\n\nLogin to #{url} as #{user.email_address} / secret123456"
 end

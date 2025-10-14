@@ -1,18 +1,24 @@
-<% cache [ page.records ] do %>
-  <section id="the-stream" class="cards cards--considering"
-    data-drag-and-drop-target="container"
-    data-action="turbo:before-morph-attribute->collapsible-columns#preventToggle"
-    data-drag-and-drop-url="<%= columns_card_drops_stream_path("__id__") %>">
-    <div class="cards__decoration"></div>
+<section id="the-stream" class="cards cards--considering"
+  data-drag-and-drop-target="container"
+  data-action="turbo:before-morph-attribute->collapsible-columns#preventToggle"
+  data-drag-and-drop-url="<%= columns_card_drops_stream_path("__id__") %>">
+  <div class="cards__decoration"></div>
 
-    <%= render "columns/show/add_card_button", collection: collection %>
-
-    <% if page.used? %>
-      <%= with_manual_pagination "the-stream", @page do %>
-        <%= render "collections/columns/list", cards: page.records, draggable: true %>
-      <% end %>
+  <header class="cards__expander">
+    <h2 class="cards__expander-title position-relative">The Stream</h2>
+    <%= link_to collection_columns_stream_path(collection), class: "btn btn--circle txt-x-small borderless cards__expander-button", data: { turbo_frame: "_top" } do %>
+      <%= icon_tag "expand", class: "translucent" %>
+      <span class="for-screen-reader">Expand column</span>
     <% end %>
+  </header>
 
-    <div class="cards__decoration cards__decoration--end"></div>
-  </section>
-<% end %>
+  <%= render "columns/show/add_card_button", collection: collection %>
+
+  <% if page.used? %>
+    <%= with_automatic_pagination "the-stream", @page do %>
+      <%= render "collections/columns/list", cards: page.records, draggable: true %>
+    <% end %>
+  <% end %>
+
+  <div class="cards__decoration-end"></div>
+</section>

@@ -1,7 +1,7 @@
 <% @page_title = @user.name %>
 
 <% content_for :header do %>
-  <%= render "filters/menu", user_filtering: @user_filtering %>
+  <%= render "filters/menu" %>
 <% end %>
 
 <div class="panel shadow center txt-align-center margin-block-end-double">
@@ -50,7 +50,4 @@
 
 <h1 class="font-weight-black txt-large margin-block-double"><%= "What #{ Current.user == @user ? "have you" : "has #{ @user.first_name }" } been up to?" %></h1>
 
-<div class="events margin-block-double" id="activity">
-  <%= render "events/day", day_timeline: @day_timeline %>
-</div>
-<%= event_next_page_link(@day_timeline.next_day) %>
+<%= render "users/activity_timeline", user: @user, day_timeline: @day_timeline, filter: @filter %>

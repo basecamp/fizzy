@@ -1,7 +1,8 @@
 ENV["RAILS_ENV"] ||= "test"
 require_relative "../config/environment"
 
-Rails.application.config.active_record_tenanted.default_tenant = ActiveRecord::FixtureSet.identify :'37s_fizzy'
+# there's no fixture for this, we're just generating a stable integer
+Rails.application.config.active_record_tenanted.default_tenant = ActiveRecord::FixtureSet.identify "37s_fizzy"
 
 require "rails/test_help"
 require "webmock/minitest"
@@ -65,6 +66,6 @@ RubyLLM.configure do |config|
   config.openai_api_key ||= "DUMMY-TEST-KEY" # Run tests with VCR without having to configure OpenAI API key locally.
 end
 
-unless Rails.application.config.x.local_authentication
+unless Rails.application.config.x.oss_config
   load File.expand_path("../gems/fizzy-saas/test/test_helper.rb", __dir__)
 end

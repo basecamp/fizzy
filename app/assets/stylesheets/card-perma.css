@@ -52,7 +52,7 @@
     }
 
     .card__title {
-      font-size: clamp(var(--text-medium), 6vw, var(--text-xx-large));
+      font-size: clamp(var(--text-medium), 6vw, var(--text-x-large));
     }
 
     .card__meta,
@@ -74,7 +74,7 @@
       }
     }
 
-    .workflow-stage {
+    .card__column-name {
       @media (max-width: 639px) {
         --btn-border-radius: 0;
       }

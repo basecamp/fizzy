@@ -1,4 +1,4 @@
-<nav data-controller="dialog" data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside">
+<nav data-controller="dialog" data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside" data-turbo-permanent>
   <%= render "filters/menu/button" %>
 
   <%= tag.dialog class: "fizzy-menu filter popup popup--animated panel margin-block-start-half",
@@ -8,6 +8,6 @@
               dialog_target: "dialog",
               navigable_list_focus_on_selection_value: false,
               navigable_list_actionable_items_value: true } do %>
-    <%= turbo_frame_tag "my_menu", src: my_menu_path(enable_collection_filtering: user_filtering.supports_collection_filtering?, **user_filtering.filter.as_params), target: "_top" %>
+    <%= turbo_frame_tag "my_menu", src: my_menu_path, target: "_top" %>
   <% end %>
 </nav>

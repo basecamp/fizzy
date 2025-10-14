@@ -71,6 +71,7 @@
     opacity: 0.7;
     padding: 0 0.4em;
     text-transform: uppercase;
+    vertical-align: middle;
     white-space: nowrap;
   }
 

@@ -6,7 +6,7 @@
     justify-content: center;
     position: fixed;
     transform: translate(-50%);
-    z-index: 6;
+    z-index: var(--z-flash);
   }
 
   .flash__inner {

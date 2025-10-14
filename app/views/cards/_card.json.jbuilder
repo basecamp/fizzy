@@ -1,4 +1,4 @@
-json.cache! card do
+json.cache! [ card, card.column&.color ] do
   json.(card, :id, :title, :status)
   json.image_url card.image.presence && url_for(card.image)
 
@@ -12,9 +12,9 @@ json.cache! card do
     json.partial! "collections/collection", locals: { collection: card.collection }
   end
 
-  json.stage do
-    if card.stage
-      json.partial! "workflows/stages/stage", stage: card.stage
+  json.column do
+    if card.column
+      json.partial! "columns/column", column: card.column
     else
       nil
     end

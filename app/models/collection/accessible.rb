@@ -24,7 +24,7 @@ module Collection::Accessible
 
     scope :all_access, -> { where(all_access: true) }
 
-    after_create -> { grant_access_to_creator }
+    after_create :grant_access_to_creator
     after_save_commit :grant_access_to_everyone
   end
 
@@ -45,6 +45,10 @@ module Collection::Accessible
 
     mentions_for_user(user).destroy_all
     notifications_for_user(user).destroy_all
+  end
+
+  def watchers
+    users.without(User.system).where(accesses: { involvement: :watching })
   end
 
   private

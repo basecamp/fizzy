@@ -33,8 +33,4 @@ module CardsHelper
     title << "assigned to #{card.assignees.map(&:name).to_sentence}" if card.assignees.any?
     title.join(" ")
   end
-
-  def cacheable_preview_parts_for(card, *options)
-    [ card, card.workflow, card.collection.entropy_configuration, card.collection.publication, *options ]
-  end
 end

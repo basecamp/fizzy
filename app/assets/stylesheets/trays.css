@@ -6,6 +6,7 @@
     --tray-duration: 350ms;
     --tray-margin: 0.5rem;
     --tray-radius: 0.25rem;
+    --tray-item-height: 76px; /* FIXME: Magic number */
 
     align-items: end;
     block-size: var(--footer-height);
@@ -86,10 +87,6 @@
       display: none;
     }
 
-    .tray__toggle-text kbd {
-      vertical-align: text-bottom;
-    }
-
     @media (max-width: 799px) {
       /* When collapsed on mobile, make it small */
       .tray__dialog:not([open]) ~ & {
@@ -122,6 +119,11 @@
 
     /* On desktop… */
     @media (min-width: 800px) {
+      .tray__dialog:not([open]):has(.tray__item:not(.tray__item--hat)) ~ & {
+        block-size: var(--tray-item-height);
+        translate: 0 -1.85rem;
+      }
+
       /* Hide the UI when collapsed, but only if there are items */
       .tray__dialog:not([open]):has(.tray__item--notification) ~ & {
         opacity: 0;
@@ -132,11 +134,9 @@
 
   .tray__toggle-btn {
     --btn-background: transparent;
-    --btn-border-color: var(--color-ink);
+    --btn-border-size: 0;
     --btn-color: var(--color-ink);
 
-    border-style: dashed;
-    border-radius: 1ch;
     inline-size: 100%;
     opacity: 0.66;
   }
@@ -146,7 +146,6 @@
 
   .tray__item {
     --tray-item-delay: calc((var(--tray-item-index) - 1) * 20ms);
-    --tray-item-height: 76px; /* FIXME: Magic number */
     --tray-item-index: 1;
     --tray-item-margin: calc(-1 * var(--tray-item-height) + var(--tray-item-offset));
     --tray-item-offset: var(--block-space-half); /* The amount they overlap */
@@ -351,7 +350,30 @@
         }
       }
 
-      &:nth-child(1n + 11) { display: none; }
+      /* Show 6 max items on smallest devices */
+      @media (max-height: 578px) {
+        &:nth-child(1n + 7) { display: none; }
+      }
+
+      /* 7 max */
+      @media (min-height: 578px) and (max-height: 656px) {
+        &:nth-child(1n + 8) { display: none; }
+      }
+
+      /* 8 max */
+      @media (min-height: 656px) and (max-height: 734px) {
+        &:nth-child(1n + 9) { display: none; }
+      }
+
+      /* 9 max */
+      @media (min-height: 734px) and (max-height: 812px) {
+        &:nth-child(1n + 10) { display: none; }
+      }
+
+      /* 10 max on larger screens */
+      @media (min-height: 812px) {
+        &:nth-child(1n + 11) { display: none; }
+      }
 
       &:not([aria-selected]) .card__link:focus-visible,
       .tray__dialog:not([open]) & .card__link:focus-visible {
@@ -366,11 +388,13 @@
       background-color: var(--card-bg-color);
       inset: 0 0 auto auto;
       opacity: 0;
+      pointer-events: none;
       position: absolute;
       z-index: 1;
 
       .tray__dialog[open] & {
         opacity: 0.66;
+        pointer-events: unset;
 
         &:hover {
           opacity: 1;
@@ -399,7 +423,7 @@
       margin-block-start: 0.3em;
     }
 
-    .workflow-stage--current {
+    .card__column-name--current {
       --btn-padding: 0.1em 0.5em;
 
       background: none !important;

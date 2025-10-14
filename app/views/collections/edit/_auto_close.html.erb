@@ -1,4 +1,7 @@
 <%= turbo_frame_tag @collection, :entropy_configuration do %>
-  <h2 class="divider txt-large">Sink or Swim</h2>
-  <%= render "entropy/auto_close", model: collection, url: collection_entropy_configuration_path(collection) %>
+  <div>
+    <h2 class="divider txt-large">Sink or Swim</h2>
+    <p class="margin-none-block-start">Cards automatically move to "Not now" after…</p>
+    <%= render "entropy/auto_close", model: collection, url: collection_entropy_configuration_path(collection) %>
+  </div>
 <% end %>

@@ -3,6 +3,8 @@
 # so that we reuse the same summary for users with different time zones or different accesses as long as the activity
 # is the same. This is important to keep AI costs down.
 class PeriodHighlights < ApplicationRecord
+  has_many :weekly_highlights, class_name: "User::WeeklyHighlights"
+
   class << self
     def create_or_find_for(collections, starts_at:, duration: 1.week)
       self.for(collections, starts_at:, duration:) || create_for(collections, starts_at:, duration:)

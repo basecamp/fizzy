@@ -32,17 +32,3 @@ aliases:
   console: app exec -i --reuse "bin/rails console"
   ssh: app exec -i --reuse /bin/bash
   switch: accessory exec beamer --reuse "beamer switch --primary=<%= ENV["PRIMARY"] %>"
-
-accessories:
-  otel_collector:
-    image: otel/opentelemetry-collector-contrib:0.126.0
-    port: 9394
-    files:
-      - config/otel_collector.yml:/etc/otelcol-contrib/config.yaml
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    options:
-      user: 0
-    roles:
-      - web
-      - jobs

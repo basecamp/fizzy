@@ -18,7 +18,7 @@
     </label>
   </li>
 
-  <input placeholder="Filter…" class="input input--transparent full-width" type="search" autocorrect="off" autocomplete="off" data-1p-ignore="true" data-filter-target="input" data-action="input->filter#filter">
+  <input placeholder="Filter…" class="input input--transparent full-width txt-small" type="search" autocorrect="off" autocomplete="off" data-1p-ignore="true" data-filter-target="input" data-action="input->filter#filter">
 
   <div class="toggler__visible-when-off">
     <div class="flex align-center justify-end gap-half">
@@ -32,8 +32,4 @@
     <%= access_toggles_for selected_users, selected: true %>
     <%= access_toggles_for unselected_users, selected: false %>
   </ul>
-
-  <footer class="settings__user-list-tips">
-    Press <kbd class="kbd">↑</kbd><kbd class="kbd">↓</kbd> to move, <kbd class="kbd">enter</kbd> to visit profile, <kbd class="kbd">SHIFT+ENTER</kbd> to toggle.
-  </footer>
 <% end %>

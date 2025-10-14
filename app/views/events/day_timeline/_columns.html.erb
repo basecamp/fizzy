@@ -1,4 +1,4 @@
-<% cache [ day_timeline.events, Workflow.all ] do %>
+<% cache [ day_timeline.events ] do %>
   <% if day_timeline.has_activity? %>
     <div class="events__columns">
       <%= render "events/day_timeline/column", event_type: "added", day_timeline: day_timeline %>

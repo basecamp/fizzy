@@ -8,7 +8,6 @@ module WebhooksHelper
     card_due_date_removed: "Card due date removed",
     card_published: "Card published",
     card_reopened: "Card reopened",
-    card_staged: "Card staged",
     card_title_changed: "Card title changed",
     card_unassigned: "Card unassigned",
     card_unstaged: "Card unstaged",

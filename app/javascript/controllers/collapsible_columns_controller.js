@@ -14,7 +14,7 @@ export default class extends Controller {
   }
 
   preventToggle(event) {
-    if (event.detail.attributeName === "class") {
+    if (event.target.hasAttribute("data-collapsible-columns-target") && event.detail.attributeName === "class") {
       event.preventDefault()
     }
   }
@@ -27,9 +27,6 @@ export default class extends Controller {
     } else {
       this.#collapse(column)
     }
-
-    console.log("TOGGLE")
-    console.log(localStorage)
   }
 
   #collapseAllExcept(clickedColumn) {

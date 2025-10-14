@@ -116,6 +116,8 @@ class Webhook::Delivery < ApplicationRecord
     def content_type
       if webhook.for_campfire?
         "text/html"
+      elsif webhook.for_basecamp?
+        "application/x-www-form-urlencoded"
       else
         "application/json"
       end
@@ -123,7 +125,7 @@ class Webhook::Delivery < ApplicationRecord
 
     def payload
       @payload ||= if webhook.for_basecamp?
-        { line: { content: render_payload(formats: :html) } }.to_json
+        { content: render_payload(formats: :html) }.to_query
       elsif webhook.for_campfire?
         render_payload(formats: :html)
       elsif webhook.for_slack?

@@ -1,0 +1,7 @@
+<%= turbo_stream.replace dom_id(card, :watch_button) do %>
+  <%= render "cards/watches/watch_button", card: card %>
+<% end %>
+
+<%= turbo_stream.replace dom_id(card, :comment_watchers) do %>
+  <%= render "cards/comments/watchers", card: card %>
+<% end %>

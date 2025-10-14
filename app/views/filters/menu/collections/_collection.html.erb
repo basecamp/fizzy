@@ -1,17 +1,5 @@
 <li class="popup__item" data-filter-target="item" data-navigable-list-target="item" id="filter-collection-<%= collection.id %>">
-  <label class="popup__radio btn">
-    <%= form.check_box "collection_ids[]", {
-          checked: user_filtering.filter.collections.include?(collection),
-          data: { action: "change->form#submit" },
-          include_hidden: false,
-    }, collection.id %>
-
-    <span class="for-screen-reader">
-      Toggle filter for <%= collection.name %>
-    </span>
-    <%= icon_tag "check", size: 18, class: "checked" %>
-  </label>
-
+  <%= icon_tag "collection", class: "popup__icon" %>
   <%= link_to collection_path(collection), class: "popup__btn btn" do %>
     <span class="overflow-ellipsis"><%= collection.name %></span>
   <% end %>

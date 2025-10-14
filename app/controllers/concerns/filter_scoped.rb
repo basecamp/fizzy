@@ -6,12 +6,6 @@ module FilterScoped
     before_action :set_user_filtering
   end
 
-  class_methods do
-    def enable_collection_filtering(**options)
-      before_action :enable_collection_filtering, **options
-    end
-  end
-
   private
     def set_filter
       if params[:filter_id].present?
@@ -31,25 +25,5 @@ module FilterScoped
 
     def expanded_param
       ActiveRecord::Type::Boolean.new.cast(params[:expand_all])
-    end
-
-    def enable_collection_filtering
-      # We pass a block so that we don't have to pass around the script_name and host
-      # to the model to make +url_for+ invocable
-      @user_filtering.enable_collection_filtering do |**options|
-        url_for(options)
-      end
-    end
-
-    def enable_referral_collection_filtering
-      @user_filtering.enable_collection_filtering do |**options|
-        if request.referer.present?
-          uri = URI.parse(request.referer)
-          uri.query = Rack::Utils.build_query(options)
-          uri.to_s
-        else
-          url_for(options)
-        end
-      end
     end
 end

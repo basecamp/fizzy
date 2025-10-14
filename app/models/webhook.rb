@@ -15,7 +15,6 @@ class Webhook < ApplicationRecord
     card_due_date_removed
     card_published
     card_reopened
-    card_staged
     card_title_changed
     card_unassigned
     card_unstaged
@@ -50,7 +49,7 @@ class Webhook < ApplicationRecord
   end
 
   def renderer
-    @renderer ||= ApplicationController.renderer.new
+    @renderer ||= ApplicationController.renderer.new(script_name: "/#{tenant}", https: !Rails.env.local?)
   end
 
   def for_basecamp?

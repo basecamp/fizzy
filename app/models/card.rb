@@ -1,7 +1,7 @@
 class Card < ApplicationRecord
   include Assignable, Attachments, Cacheable, Closeable, Colored, Entropic, Eventable,
     Golden, Mentions, Multistep, Pinnable, Postponable, Promptable, Readable, Searchable,
-    Staged, Stallable, Statuses, Taggable, Triageable, Watchable
+    Stallable, Statuses, Taggable, Triageable, Watchable
 
   belongs_to :collection, touch: true
   belongs_to :creator, class_name: "User", default: -> { Current.user }
@@ -12,17 +12,17 @@ class Card < ApplicationRecord
   has_rich_text :description
 
   before_save :set_default_title, if: :published?
-  after_save :handle_collection_change, if: :saved_change_to_collection_id?
+  after_update :handle_collection_change, if: :saved_change_to_collection_id?
 
   scope :reverse_chronologically, -> { order created_at: :desc, id: :desc }
   scope :chronologically, -> { order created_at: :asc, id: :asc }
   scope :latest, -> { order updated_at: :desc, id: :desc }
+  scope :by_last_activity, -> { order last_active_at: :desc, id: :desc }
 
   scope :indexed_by, ->(index) do
     case index
     when "stalled" then stalled
     when "postponing_soon" then postponing_soon
-    when "falling_back_soon" then falling_back_soon
     when "closed" then closed.recently_closed_first
     when "golden" then golden
     when "draft" then drafted
@@ -59,6 +59,7 @@ class Card < ApplicationRecord
 
     def handle_collection_change
       transaction do
+        update! column: nil
         track_collection_change_event
         grant_access_to_assignees unless collection.all_access?
       end

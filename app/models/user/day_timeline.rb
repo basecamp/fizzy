@@ -34,7 +34,7 @@ class User::DayTimeline
   end
 
   def weekly_highlights
-    @weekly_highlights ||= user.weekly_highlights_for(week_starts_at - 1.week)
+    @weekly_highlights ||= user.weekly_highlights_for(week_starts_at)
   end
 
   def week_starts_at
@@ -46,7 +46,7 @@ class User::DayTimeline
   end
 
   def cache_key
-    ActiveSupport::Cache.expand_cache_key [ user, filter, day.to_date, events, Workflow.all ], "day-timeline"
+    ActiveSupport::Cache.expand_cache_key [ user, filter, day.to_date, events, weekly_highlights ], "day-timeline"
   end
 
   private

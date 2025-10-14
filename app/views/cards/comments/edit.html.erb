@@ -1,4 +1,4 @@
-<%= turbo_frame_tag @comment do %>
+<%= turbo_frame_tag @comment, :container do %>
   <div class="comment flex align-start full-width">
     <figure class="comment__avatar flex-item-no-shrink" aria-hidden="true">
       <%= avatar_tag @comment.creator, hidden_for_screen_reader: true %>

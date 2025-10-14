@@ -82,15 +82,14 @@ export default class extends Controller {
 
   #clearHiddenFields() {
     this.element.querySelectorAll('input[type="hidden"]').forEach(field => {
-      if (field !== this.hiddenField) {
-        field.remove()
-      }
+      field.remove()
     })
   }
 
   #addHiddenFields() {
     this.#selectedValues().forEach(value => {
-      const [field] = this.hiddenFieldTemplateTarget.content.cloneNode(true).children
+      const [ field ] = this.hiddenFieldTemplateTarget.content.cloneNode(true).children
+      field.removeAttribute("id")
       field.value = value
       this.element.appendChild(field)
     })

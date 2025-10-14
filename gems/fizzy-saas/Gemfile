@@ -2,11 +2,5 @@ source "https://rubygems.org"
 git_source(:bc) { |repo| "https://github.com/basecamp/#{repo}" }
 
 # 37id and Queenbee integration
-gem "signal_id", bc: "signal_id", branch: "rails4", ref: "d6c2a5ceed7bb57bf7dcdebdb439e7cd526fca09"
-gem "mysql2", github: "jeremy/mysql2", branch: "force_latin1_to_utf8", ref: "b5766f5d296745d6aed014c8c0b7d82ef149ade1" # needed by signal_id
-gem "queuety", bc: "queuety", branch: "rails4", ref: "bf7e2a552fb674533d3e092f06dbf9b5d1ebc753" # needed by signal_id
-gem "service_concurrency_prevention", bc: "service_concurrency_prevention", ref: "320da99431718615ed86f8723e8b9d3259c602a3" # needed by queuety
-gem "portfolio", ">= 4.6", bc: "portfolio", ref: "86411a53d19a42ce44705a50ebe7c22828597991" # needed by signal_id
-gem "file_repository", "~> 1.4.5", bc: "file_repository", ref: "8c8d1594f3ec7e8c0938e6a7f7def521692344e4" # needed by portfolio
 gem "queenbee", bc: "queenbee-plugin", ref: "eb01c697de1ad028afc65cc7d9b5345a7a8e849f"
 gem "activeresource", require: "active_resource" # needed by queenbee

@@ -1,7 +1,10 @@
 <li class="flex align-center gap-half" data-filter-target="item" data-navigable-list-target="item">
   <%= link_to user, class: "txt-ink flex gap-half align-center min-width" do %>
     <%= avatar_preview_tag user, hidden_for_screen_reader: true %>
-    <strong class="overflow-ellipsis"><%= user.name %></strong>
+    <div class="txt-align-start overflow-ellipsis">
+      <strong><%= user.name %></strong>
+      <div class="txt-x-small"><%= user.email_address %></div>
+    </div>
   <% end %>
 
   <hr class="separator--horizontal flex-item-grow" style="--border-color: var(--color-ink-medium); --border-style: dashed" aria-hidden="true">

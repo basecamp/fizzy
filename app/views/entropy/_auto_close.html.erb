@@ -2,8 +2,6 @@
 
 <div class="flex align-start gap txt-align-center">
   <div class="flex flex-column flex-1">
-    <strong>Auto-close</strong>
-    <p class="txt-x-small margin-none-block-start">Cards automatically move to "Not now" after…</p>
     <%= form_with model: model, url: url, data: { controller: "form" } do |form| %>
       <%= render "entropy/knob",
             form: form,

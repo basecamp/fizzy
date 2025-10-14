@@ -3,10 +3,10 @@
     class="card-perma" style="--card-color: <%= card.color %>;">
     <%= render "cards/container/status", card: card %>
 
-    <aside class="card-perma__actions card-perma__actions--left" role="toolbar">
+    <div class="card-perma__actions card-perma__actions--left">
       <%= render "cards/container/gild", card: card if @card.published? && !@card.closed? %>
       <%= render "cards/container/image", card: card %>
-    </aside>
+    </div>
 
     <div class="card-perma__bg">
       <%= card_article_tag card, class: "card" do %>
@@ -20,7 +20,9 @@
             <%= render "cards/container/title", card: card %>
             <%= render "cards/display/perma/steps", card: card %>
           </div>
-          <%= render "cards/triage/columns", card: card if card.open? %>
+          <% if card.published? %>
+            <%= render "cards/triage/columns", card: card if card.open? %>
+          <% end %>
         </div>
 
         <footer class="card__footer full-width flex align-start gap">

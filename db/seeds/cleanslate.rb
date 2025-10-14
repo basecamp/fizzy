@@ -1,1 +1,1 @@
-create_tenant "cleanslate", bare: true
+create_tenant "cleanslate"

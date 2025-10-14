@@ -1,7 +1,8 @@
 source "https://rubygems.org"
 git_source(:bc) { |repo| "https://github.com/basecamp/#{repo}" }
 
-gem "rails", github: "rails/rails", branch: "main"
+# gem "rails", github: "rails/rails", branch: "main"
+gem "rails", github: "flavorjones/rails", branch: "flavorjones/improve-sqlite-url-support"
 
 # Assets & front end
 gem "importmap-rails"
@@ -10,7 +11,7 @@ gem "stimulus-rails"
 gem "turbo-rails"
 
 # Deployment and drivers
-gem "activerecord-tenanted"
+gem "activerecord-tenanted", bc: "activerecord-tenanted"
 gem "bootsnap", require: false
 gem "kamal", require: false
 gem "puma", ">= 5.0"
@@ -40,6 +41,7 @@ gem "sentry-ruby"
 gem "sentry-rails"
 gem "rails_structured_logging", bc: "rails-structured-logging"
 gem "yabeda"
+gem "yabeda-actioncable"
 gem "yabeda-activejob", github: "rosa/yabeda-activejob", branch: "support-end-time-in-seconds"
 gem "yabeda-gc"
 gem "yabeda-http_requests"
@@ -48,6 +50,8 @@ gem "yabeda-puma-plugin"
 gem "yabeda-rails"
 gem "webrick" # required for yabeda-prometheus metrics server
 gem "prometheus-client-mmap", "~> 1.1"
+gem "autotuner"
+gem "benchmark" # indirect dependency, being removed from Ruby 3.5 stdlib so here to quash warnings
 
 # AI
 gem "ruby_llm", git: "https://github.com/crmne/ruby_llm.git"
@@ -71,7 +75,7 @@ group :test do
 end
 
 require_relative "lib/bootstrap"
-unless Bootstrap.local_authentication?
+unless Bootstrap.oss_config?
   eval_gemfile "gems/fizzy-saas/Gemfile"
   gem "fizzy-saas", path: "gems/fizzy-saas"
 end

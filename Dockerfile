@@ -1,7 +1,7 @@
 # syntax = docker/dockerfile:1
 
-# Make sure RUBY_VERSION matches the Ruby version in .ruby-version and Gemfile
-ARG RUBY_VERSION=3.4.5
+# Make sure RUBY_VERSION matches the Ruby version in .ruby-version
+ARG RUBY_VERSION=3.4.7
 FROM registry.docker.com/library/ruby:$RUBY_VERSION-slim AS base
 
 # Rails app lives here
@@ -19,7 +19,7 @@ FROM base AS build
 
 # Install packages needed to build gems
 RUN apt-get update -qq && \
-    apt-get install -y --no-install-recommends -y build-essential git libvips pkg-config libyaml-dev default-libmysqlclient-dev && \
+    apt-get install -y --no-install-recommends -y build-essential pkg-config git libvips libyaml-dev libssl-dev && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Install application gems
@@ -54,7 +54,7 @@ FROM base
 
 # Install packages needed for deployment
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl libsqlite3-0 libvips build-essential ffmpeg groff libreoffice-writer libreoffice-impress libreoffice-calc mupdf-tools default-libmysqlclient-dev && \
+    apt-get install --no-install-recommends -y curl libsqlite3-0 libvips build-essential ffmpeg groff libreoffice-writer libreoffice-impress libreoffice-calc mupdf-tools && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Copy built artifacts: gems, application
@@ -69,6 +69,15 @@ USER rails:rails
 
 # Entrypoint prepares the database.
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
+
+# Ruby GC tuning values pulled from Autotuner recommendations
+ENV RUBY_GC_HEAP_0_INIT_SLOTS=692636 \
+    RUBY_GC_HEAP_1_INIT_SLOTS=175943 \
+    RUBY_GC_HEAP_2_INIT_SLOTS=148807 \
+    RUBY_GC_HEAP_3_INIT_SLOTS=9169 \
+    RUBY_GC_HEAP_4_INIT_SLOTS=3054 \
+    RUBY_GC_MALLOC_LIMIT=33554432 \
+    RUBY_GC_MALLOC_LIMIT_MAX=67108864
 
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 80 443 9394

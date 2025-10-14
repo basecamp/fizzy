@@ -18,8 +18,6 @@ class Card::Eventable::SystemCommenter
         "#{event.creator.name} <strong>assigned</strong> this to #{event.assignees.pluck(:name).to_sentence}."
       when "card_unassigned"
         "#{event.creator.name} <strong>unassigned</strong> from #{event.assignees.pluck(:name).to_sentence}."
-      when "card_staged"
-        "#{event.creator.name} <strong>moved</strong> this to ‘#{event.stage_name}’."
       when "card_closed"
         "<strong>Closed</strong> as ‘#{ card.closure.reason }’ by #{ event.creator.name }"
       when "card_reopened"

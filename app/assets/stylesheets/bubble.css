@@ -7,7 +7,7 @@
     --bubble-size-default: 4rem;
 
     block-size: var(--bubble-size, var(--bubble-size-default));
-    color: var(--color-ink);
+    color: var(--card-content-color);
     container-type: inline-size;
     font-size: 1.4rem;
     font-weight: bold;

@@ -129,6 +129,14 @@ class CardTest < ActiveSupport::TestCase
     assert_equal "Untitled", card.reload.title
   end
 
+  test "send back to triage when moved to a new collection" do
+    cards(:logo).update! column: columns(:writebook_in_progress)
+
+    assert_changes -> { cards(:logo).reload.triaged? }, from: true, to: false do
+      cards(:logo).update! collection: collections(:private)
+    end
+  end
+
   test "grants access to assignees when moved to a new collection" do
     card = cards(:logo)
     assignee = users(:david)

@@ -3,8 +3,15 @@ class Account < ApplicationRecord
 
   has_many_attached :uploads
 
+  class << self
+    def create_with_admin_user(account:, owner:)
+      User.create!(**owner.reverse_merge(role: "admin", password: SecureRandom.hex(16)))
+      create!(**account)
+    end
+  end
+
   def slug
-    "/#{tenant_id}"
+    "/#{tenant}"
   end
 
   def setup_basic_template

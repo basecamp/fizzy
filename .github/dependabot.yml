@@ -19,9 +19,9 @@ updates:
       development-dependencies:
         dependency-type: "development"
     schedule:
-      interval: daily
+      interval: weekly
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
-      interval: daily
+      interval: weekly
     open-pull-requests-limit: 10
