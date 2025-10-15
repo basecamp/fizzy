@@ -884,40 +884,6 @@ columns:
     default_function:
     collation:
     comment:
-  integrations:
-  - *5
-  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
-    auto_increment:
-    name: data
-    cast_type: *15
-    sql_type_metadata: *16
-    'null': true
-    default:
-    default_function:
-    collation:
-    comment:
-  - *6
-  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
-    auto_increment:
-    name: owner_id
-    cast_type: *3
-    sql_type_metadata: *4
-    'null': false
-    default:
-    default_function:
-    collation:
-    comment:
-  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
-    auto_increment:
-    name: type
-    cast_type: *7
-    sql_type_metadata: *8
-    'null': true
-    default:
-    default_function:
-    collation:
-    comment:
-  - *9
   mentions:
   - *5
   - *6
@@ -1523,7 +1489,6 @@ primary_keys:
   events: id
   filters: id
   filters_tags:
-  integrations: id
   mentions: id
   notification_bundles: id
   notifications: id
@@ -1578,7 +1543,6 @@ data_sources:
   events: true
   filters: true
   filters_tags: true
-  integrations: true
   mentions: true
   notification_bundles: true
   notifications: true
@@ -2470,23 +2434,6 @@ indexes:
     unique: false
     columns:
     - tag_id
-    lengths: {}
-    orders: {}
-    opclasses: {}
-    where:
-    type:
-    using:
-    include:
-    nulls_not_distinct:
-    comment:
-    valid: true
-  integrations:
-  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
-    table: integrations
-    name: index_integrations_on_owner_id
-    unique: false
-    columns:
-    - owner_id
     lengths: {}
     orders: {}
     opclasses: {}
