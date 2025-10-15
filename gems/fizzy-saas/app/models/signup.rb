@@ -3,8 +3,6 @@ class Signup
   include ActiveModel::Attributes
   include ActiveModel::Validations
 
-  PERMITTED_KEYS = %i[ full_name email_address company_name ]
-
   attr_accessor :company_name, :full_name, :email_address, :user, :tenant
   attr_reader :queenbee_account, :account
 
