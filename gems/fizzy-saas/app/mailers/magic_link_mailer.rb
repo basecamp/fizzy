@@ -3,9 +3,9 @@ class MagicLinkMailer < ApplicationMailer
 
   def sign_in_instructions(magic_link)
     @magic_link = magic_link
-    @membership = @magic_link.membership
+    @identity = @magic_link.identity
 
-    mail to: @membership.email_address, subject: "Sign in to Fizzy"
+    mail to: @identity.email_address, subject: "Sign in to Fizzy"
   end
 
   private

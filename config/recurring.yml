@@ -29,7 +29,7 @@ production: &production
     class: Webhook::CleanupDeliveriesJob
     schedule: every 4 hours at minute 51
   cleanup_magic_links:
-    class: "MagicLink::CleanupJob"
+    command: "MagicLink.cleanup"
     schedule: every 4 hours
   sqlite_backups:
     class: SQLiteBackupsJob

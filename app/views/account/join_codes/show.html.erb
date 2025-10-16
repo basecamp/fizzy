@@ -1,0 +1,105 @@
+<% @page_title = "Join Code" %>
+
+<% content_for :header do %>
+  <%= render "filters/menu" %>
+  <div class="header__actions header__actions--start">
+    <%= link_to account_join_codes_path, class: "btn borderless txt-medium", data: { controller: "hotkey", action: "keydown.esc@document->hotkey#click" } do %>
+      <span class="overflow-ellipsis">&larr; <strong>Join codes</strong></span>
+    <% end %>
+  </div>
+
+  <h1 class="header__title"><%= @page_title %></h1>
+<% end %>
+
+<article
+  class="panel center txt-align-start"
+  style="view-transition-name: <%= dom_id(@join_code) %>"
+>
+  <div class="flex flex-column gap">
+    <div class="flex align-center gap-half">
+      <h2 class="txt-large margin-none flex-item-grow">
+        <code><%= @join_code.code %></code>
+      </h2>
+      <% if @join_code.active? %>
+        <span class="badge badge--positive">Active</span>
+      <% else %>
+        <span class="badge badge--subtle">Used up</span>
+      <% end %>
+    </div>
+
+    <div class="flex flex-column gap-half">
+      <div>
+        <strong class="txt-small">Usage</strong>
+        <p class="margin-none txt-subtle">
+          <%= @join_code.usage_count %>
+          of
+          <%= @join_code.usage_limit %>
+          uses
+          <% if @join_code.active? %>
+            (
+            <%= @join_code.usage_limit - @join_code.usage_count %>
+            remaining)
+          <% end %>
+        </p>
+      </div>
+
+      <div>
+        <strong class="txt-small">Created</strong>
+        <p class="margin-none txt-subtle">
+          <%= time_ago_in_words(@join_code.created_at) %>
+          ago
+          <% if @join_code.creator %>
+            by
+            <%= @join_code.creator.name %>
+          <% end %>
+        </p>
+      </div>
+    </div>
+
+    <hr class="separator">
+
+    <div class="flex flex-column gap-half">
+      <strong class="txt-small">Join URL</strong>
+
+      <% url = join_url(join_code: @join_code.code, script_name: "/#{@join_code.tenant}") %>
+      <div class="flex align-center gap-half">
+        <input
+          type="text"
+          class="input flex-item-grow"
+          value="<%= url %>"
+          readonly
+        >
+        <%= button_to_copy_to_clipboard(url) do %>
+          <%= icon_tag "copy-paste" %>
+          <span class="for-screen-reader">Copy join link</span>
+        <% end %>
+      </div>
+
+      <p class="margin-none txt-x-small txt-subtle">
+        Share this URL with people you want to invite to your account.
+      </p>
+
+      <div
+        class="txt-align-center margin-block-start"
+        style="max-width: 200px; margin-inline: auto;"
+      >
+        <%= qr_code_image(url) %>
+      </div>
+    </div>
+
+    <hr class="separator">
+
+    <div class="flex gap-half">
+      <%= link_to edit_account_join_code_path(@join_code), class: "btn btn--secondary txt-small" do %>
+        <%= icon_tag "edit" %>
+        <span>Edit</span>
+      <% end %>
+
+      <%= button_to account_join_code_path(@join_code), method: :delete, class: "btn btn--negative txt-small",
+            data: { turbo_confirm: "Are you sure you want to delete this join code?" } do %>
+        <%= icon_tag "trash" %>
+        <span>Delete</span>
+      <% end %>
+    </div>
+  </div>
+</article>

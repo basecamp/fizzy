@@ -60,8 +60,8 @@ module Authentication
     end
 
     def resume_identity
-      if identity = find_identity_by_cookie
-        set_current_identity(identity)
+      if identity_token = find_identity_by_cookie
+        set_current_identity(identity_token)
       end
     end
 
@@ -72,7 +72,7 @@ module Authentication
     end
 
     def find_identity_by_cookie
-      Identity.find_signed(cookies.signed[:identity_token]&.dig("id"))
+      IdentityProvider.verify_token(cookies.signed[:identity_token])
     end
 
     def find_session_by_cookie
@@ -100,29 +100,15 @@ module Authentication
     end
 
     def start_new_session_for(user)
-      link_identity(user)
       user.sessions.create!(user_agent: request.user_agent, ip_address: request.remote_ip).tap do |session|
         set_current_session session
       end
     end
 
-    def link_identity(user_or_membership)
-      token_value = cookies.signed[:identity_token]
-      identity = Identity.find_signed(token_value["id"]) if token_value.present?
-
-      if user_or_membership.is_a?(User)
-        identity = user_or_membership.set_identity(identity)
-      elsif user_or_membership.is_a?(Membership) && identity
-        user_or_membership.update!(identity: identity)
-      end
-
-      set_current_identity(identity)
-    end
-
-    def set_current_identity(identity)
-      Current.identity_token = if identity
-        cookies.signed.permanent[:identity_token] = { value: { "id" => identity.signed_id, "updated_at" => identity.updated_at }, httponly: true, same_site: :lax }
-        Identity::Mock.new(**cookies.signed[:identity_token])
+    def set_current_identity(identity_token)
+      Current.identity_token = if identity_token
+        cookies.signed.permanent[:identity_token] = { value: identity_token.to_h, httponly: true, same_site: :lax }
+        identity_token
       else
         nil
       end

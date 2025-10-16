@@ -6,8 +6,10 @@ class SessionsController < ApplicationController
   end
 
   def create
-    if membership = Membership.find_by(email_address: email_address)
-      membership.send_magic_link
+    magic_link_code = IdentityProvider.send_magic_link(email_address)
+
+    if magic_link_code && Rails.env.development?
+      flash[:notice] = "Magic Link Code: #{magic_link_code}"
     end
 
     redirect_to session_magic_link_path

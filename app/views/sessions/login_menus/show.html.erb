@@ -9,17 +9,21 @@
   </nav>
 <% end %>
 
-<% cache [ @identity, @memberships ] do %>
-  <div class="panel shadow center margin-block-double flex flex-column gap-half" style="--panel-size: 42ch; view-transition-name: sign-in-panel; --popup-icon-size: 24px; --popup-item-padding-inline: 0.5rem;">
-    <% if @memberships.present? %>
-      <h1 class="txt-x-large font-weight-black margin-none">Choose a Fizzy account</h1>
+<% cache [ Current.identity_token, @tenants ] do %>
+  <div
+    class="panel shadow center margin-block-double flex flex-column gap-half"
+    style="--panel-size: 42ch; view-transition-name: sign-in-panel; --popup-icon-size: 24px; --popup-item-padding-inline: 0.5rem;"
+  >
+    <% if @tenants.present? %>
+      <h1 class="txt-x-large font-weight-black margin-none">
+        Choose a Fizzy account
+      </h1>
       <menu class="popup__list pad border-radius border">
-        <% @memberships.each do |membership| %>
+        <% @tenants.each do |tenant| %>
           <li class="popup__item txt-medium">
             <%= icon_tag "logo-color", class: "popup__icon" %>
-            <%= button_to session_login_menu_url(membership_id: membership, script_name: "/#{membership.user_tenant}"), method: :post, class: "btn overflow-ellipsis fill-transparent popup__btn", form_class: "max-width flex-item-grow" do %>
-              <strong><%= membership.account_name %></strong>
-              <div class="txt-subtle font-weight-normal"><%= membership.email_address %></div>
+            <%= button_to session_login_menu_url(membership_id: 0, script_name: "/#{tenant.id}"), method: :post, class: "btn overflow-ellipsis fill-transparent popup__btn", form_class: "max-width flex-item-grow" do %>
+              <strong><%= tenant.name %></strong>
             <% end %>
           </li>
         <% end %>
@@ -32,7 +36,7 @@
     <div class="margin-block-start">
       <%= link_to login_url, class: "btn center txt-small" do %>
         <%= icon_tag "add" %>
-        <span>Link a Fizzy account</span>
+        <span>Create a Fizzy account</span>
       <% end %>
     </div>
   </div>
