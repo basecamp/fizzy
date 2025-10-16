@@ -10,13 +10,14 @@ x-app: &app
     - .:/rails
   extra_hosts:
     - queenbee.localhost:host-gateway
-  environment:
-    - RAILS_ENV=development
-    - BINDING=0.0.0.0
-    - BEAMER=true
-    - BEAMER_PRIMARY=fizzy-01
-    - SECRET_KEY_BASE=beamer_testbed_shared_secret_key_base_for_development_only
+    - fizzy.localhost:host-gateway
   command: [ "./bin/beamer-testbed", "server" ]
+
+x-base-environment: &base-environment
+  RAILS_ENV: development
+  BINDING: 0.0.0.0
+  BEAMER: "true"
+  SECRET_KEY_BASE: beamer_testbed_shared_secret_key_base_for_development_only
 
 services:
   kamal-proxy:
@@ -29,6 +30,9 @@ services:
   fizzy-01:
     <<: *app
     hostname: fizzy-01
+    environment:
+      <<: *base-environment
+      SOLID_QUEUE_ZONE: iad-01
     volumes:
       - .:/rails
       - ./tmp/beamer-testbed/fizzy-01/storage:/rails/storage
@@ -37,6 +41,9 @@ services:
   fizzy-02:
     <<: *app
     hostname: fizzy-02
+    environment:
+      <<: *base-environment
+      SOLID_QUEUE_ZONE: ams-01
     volumes:
       - .:/rails
       - ./tmp/beamer-testbed/fizzy-02/storage:/rails/storage
@@ -45,6 +52,9 @@ services:
   fizzy-03:
     <<: *app
     hostname: fizzy-03
+    environment:
+      <<: *base-environment
+      SOLID_QUEUE_ZONE: chi-01
     volumes:
       - .:/rails
       - ./tmp/beamer-testbed/fizzy-03/storage:/rails/storage

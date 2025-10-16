@@ -1,0 +1,981 @@
+--- !ruby/object:ActiveRecord::ConnectionAdapters::SchemaCache
+columns:
+  ar_internal_metadata:
+  - &5 !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: created_at
+    cast_type: &1 !ruby/object:ActiveRecord::Type::DateTime
+      precision: 6
+      scale:
+      limit:
+      timezone:
+    sql_type_metadata: &2 !ruby/object:ActiveRecord::ConnectionAdapters::SqlTypeMetadata
+      sql_type: datetime(6)
+      type: :datetime
+      limit:
+      precision: 6
+      scale:
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - &18 !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: key
+    cast_type: &3 !ruby/object:ActiveModel::Type::String
+      true: t
+      false: f
+      precision:
+      scale:
+      limit:
+    sql_type_metadata: &4 !ruby/object:ActiveRecord::ConnectionAdapters::SqlTypeMetadata
+      sql_type: varchar
+      type: :string
+      limit:
+      precision:
+      scale:
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - &16 !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: updated_at
+    cast_type: *1
+    sql_type_metadata: *2
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: value
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  schema_migrations:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: version
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  solid_queue_blocked_executions:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: concurrency_key
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - *5
+  - &19 !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: expires_at
+    cast_type: *1
+    sql_type_metadata: *2
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - &8 !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment: true
+    name: id
+    cast_type: &6 !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3Adapter::SQLite3Integer
+      precision:
+      scale:
+      limit:
+      max: 9223372036854775808
+      min: -9223372036854775808
+    sql_type_metadata: &7 !ruby/object:ActiveRecord::ConnectionAdapters::SqlTypeMetadata
+      sql_type: INTEGER
+      type: :integer
+      limit:
+      precision:
+      scale:
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - &9 !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: job_id
+    cast_type: &10 !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3Adapter::SQLite3Integer
+      precision:
+      scale:
+      limit:
+      max: 9223372036854775808
+      min: -9223372036854775808
+    sql_type_metadata: &11 !ruby/object:ActiveRecord::ConnectionAdapters::SqlTypeMetadata
+      sql_type: bigint
+      type: :integer
+      limit:
+      precision:
+      scale:
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - &14 !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: priority
+    cast_type: *6
+    sql_type_metadata: *7
+    'null': false
+    default: 0
+    default_function:
+    collation:
+    comment:
+  - &15 !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: queue_name
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  solid_queue_claimed_executions:
+  - *5
+  - *8
+  - *9
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: process_id
+    cast_type: *10
+    sql_type_metadata: *11
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  solid_queue_failed_executions:
+  - *5
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: error
+    cast_type: &12 !ruby/object:ActiveRecord::Type::Text
+      true: t
+      false: f
+      precision:
+      scale:
+      limit:
+    sql_type_metadata: &13 !ruby/object:ActiveRecord::ConnectionAdapters::SqlTypeMetadata
+      sql_type: TEXT
+      type: :text
+      limit:
+      precision:
+      scale:
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - *8
+  - *9
+  solid_queue_jobs:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: active_job_id
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - &17 !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: arguments
+    cast_type: *12
+    sql_type_metadata: *13
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: class_name
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: concurrency_key
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - *5
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: finished_at
+    cast_type: *1
+    sql_type_metadata: *2
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - *8
+  - *14
+  - *15
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: scheduled_at
+    cast_type: *1
+    sql_type_metadata: *2
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - *16
+  solid_queue_pauses:
+  - *5
+  - *8
+  - *15
+  solid_queue_processes:
+  - *5
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: hostname
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - *8
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: kind
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: last_heartbeat_at
+    cast_type: *1
+    sql_type_metadata: *2
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: metadata
+    cast_type: *12
+    sql_type_metadata: *13
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: name
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: pid
+    cast_type: *6
+    sql_type_metadata: *7
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: supervisor_id
+    cast_type: *10
+    sql_type_metadata: *11
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  solid_queue_ready_executions:
+  - *5
+  - *8
+  - *9
+  - *14
+  - *15
+  solid_queue_recurring_executions:
+  - *5
+  - *8
+  - *9
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: run_at
+    cast_type: *1
+    sql_type_metadata: *2
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: task_key
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  solid_queue_recurring_tasks:
+  - *17
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: class_name
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: command
+    cast_type: !ruby/object:ActiveModel::Type::String
+      true: t
+      false: f
+      precision:
+      scale:
+      limit: 2048
+    sql_type_metadata: !ruby/object:ActiveRecord::ConnectionAdapters::SqlTypeMetadata
+      sql_type: varchar(2048)
+      type: :string
+      limit: 2048
+      precision:
+      scale:
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - *5
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: description
+    cast_type: *12
+    sql_type_metadata: *13
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - *8
+  - *18
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: priority
+    cast_type: *6
+    sql_type_metadata: *7
+    'null': true
+    default: 0
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: queue_name
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: schedule
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: static
+    cast_type: !ruby/object:ActiveModel::Type::Boolean
+      precision:
+      scale:
+      limit:
+    sql_type_metadata: !ruby/object:ActiveRecord::ConnectionAdapters::SqlTypeMetadata
+      sql_type: boolean
+      type: :boolean
+      limit:
+      precision:
+      scale:
+    'null': false
+    default: true
+    default_function:
+    collation:
+    comment:
+  - *16
+  solid_queue_scheduled_executions:
+  - *5
+  - *8
+  - *9
+  - *14
+  - *15
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: scheduled_at
+    cast_type: *1
+    sql_type_metadata: *2
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  solid_queue_semaphores:
+  - *5
+  - *19
+  - *8
+  - *18
+  - *16
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: value
+    cast_type: *6
+    sql_type_metadata: *7
+    'null': false
+    default: 1
+    default_function:
+    collation:
+    comment:
+primary_keys:
+  ar_internal_metadata: key
+  schema_migrations: version
+  solid_queue_blocked_executions: id
+  solid_queue_claimed_executions: id
+  solid_queue_failed_executions: id
+  solid_queue_jobs: id
+  solid_queue_pauses: id
+  solid_queue_processes: id
+  solid_queue_ready_executions: id
+  solid_queue_recurring_executions: id
+  solid_queue_recurring_tasks: id
+  solid_queue_scheduled_executions: id
+  solid_queue_semaphores: id
+data_sources:
+  ar_internal_metadata: true
+  schema_migrations: true
+  solid_queue_blocked_executions: true
+  solid_queue_claimed_executions: true
+  solid_queue_failed_executions: true
+  solid_queue_jobs: true
+  solid_queue_pauses: true
+  solid_queue_processes: true
+  solid_queue_ready_executions: true
+  solid_queue_recurring_executions: true
+  solid_queue_recurring_tasks: true
+  solid_queue_scheduled_executions: true
+  solid_queue_semaphores: true
+indexes:
+  ar_internal_metadata: []
+  schema_migrations: []
+  solid_queue_blocked_executions:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_blocked_executions
+    name: index_solid_queue_blocked_executions_for_maintenance
+    unique: false
+    columns:
+    - expires_at
+    - concurrency_key
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_blocked_executions
+    name: index_solid_queue_blocked_executions_for_release
+    unique: false
+    columns:
+    - concurrency_key
+    - priority
+    - job_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_blocked_executions
+    name: index_solid_queue_blocked_executions_on_job_id
+    unique: true
+    columns:
+    - job_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
+  solid_queue_claimed_executions:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_claimed_executions
+    name: index_solid_queue_claimed_executions_on_job_id
+    unique: true
+    columns:
+    - job_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_claimed_executions
+    name: index_solid_queue_claimed_executions_on_process_id_and_job_id
+    unique: false
+    columns:
+    - process_id
+    - job_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
+  solid_queue_failed_executions:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_failed_executions
+    name: index_solid_queue_failed_executions_on_job_id
+    unique: true
+    columns:
+    - job_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
+  solid_queue_jobs:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_jobs
+    name: index_solid_queue_jobs_for_alerting
+    unique: false
+    columns:
+    - scheduled_at
+    - finished_at
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_jobs
+    name: index_solid_queue_jobs_for_filtering
+    unique: false
+    columns:
+    - queue_name
+    - finished_at
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_jobs
+    name: index_solid_queue_jobs_on_active_job_id
+    unique: false
+    columns:
+    - active_job_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_jobs
+    name: index_solid_queue_jobs_on_class_name
+    unique: false
+    columns:
+    - class_name
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_jobs
+    name: index_solid_queue_jobs_on_finished_at
+    unique: false
+    columns:
+    - finished_at
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
+  solid_queue_pauses:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_pauses
+    name: index_solid_queue_pauses_on_queue_name
+    unique: true
+    columns:
+    - queue_name
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
+  solid_queue_processes:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_processes
+    name: index_solid_queue_processes_on_last_heartbeat_at
+    unique: false
+    columns:
+    - last_heartbeat_at
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_processes
+    name: index_solid_queue_processes_on_name_and_supervisor_id
+    unique: true
+    columns:
+    - name
+    - supervisor_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_processes
+    name: index_solid_queue_processes_on_supervisor_id
+    unique: false
+    columns:
+    - supervisor_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
+  solid_queue_ready_executions:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_ready_executions
+    name: index_solid_queue_poll_all
+    unique: false
+    columns:
+    - priority
+    - job_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_ready_executions
+    name: index_solid_queue_poll_by_queue
+    unique: false
+    columns:
+    - queue_name
+    - priority
+    - job_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_ready_executions
+    name: index_solid_queue_ready_executions_on_job_id
+    unique: true
+    columns:
+    - job_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
+  solid_queue_recurring_executions:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_recurring_executions
+    name: index_solid_queue_recurring_executions_on_job_id
+    unique: true
+    columns:
+    - job_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_recurring_executions
+    name: index_solid_queue_recurring_executions_on_task_key_and_run_at
+    unique: true
+    columns:
+    - task_key
+    - run_at
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
+  solid_queue_recurring_tasks:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_recurring_tasks
+    name: index_solid_queue_recurring_tasks_on_key
+    unique: true
+    columns:
+    - key
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_recurring_tasks
+    name: index_solid_queue_recurring_tasks_on_static
+    unique: false
+    columns:
+    - static
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
+  solid_queue_scheduled_executions:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_scheduled_executions
+    name: index_solid_queue_dispatch_all
+    unique: false
+    columns:
+    - scheduled_at
+    - priority
+    - job_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_scheduled_executions
+    name: index_solid_queue_scheduled_executions_on_job_id
+    unique: true
+    columns:
+    - job_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
+  solid_queue_semaphores:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_semaphores
+    name: index_solid_queue_semaphores_on_expires_at
+    unique: false
+    columns:
+    - expires_at
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_semaphores
+    name: index_solid_queue_semaphores_on_key
+    unique: true
+    columns:
+    - key
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_semaphores
+    name: index_solid_queue_semaphores_on_key_and_value
+    unique: false
+    columns:
+    - key
+    - value
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
+version: 1

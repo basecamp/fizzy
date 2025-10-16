@@ -32,8 +32,9 @@ development:
     migrations_paths: db/cache_migrate
   queue:
     <<: *default
-    database: storage/development_queue.sqlite3
+    database: storage/zones/<%= Rails.env %>/%{tenant}/development_queue.sqlite3
     migrations_paths: db/queue_migrate
+    tenanted: true
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
