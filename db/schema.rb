@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_10_14_204033) do
+ActiveRecord::Schema[8.1].define(version: 2025_10_15_081645) do
   create_table "accesses", force: :cascade do |t|
     t.datetime "accessed_at"
     t.integer "collection_id", null: false
@@ -22,6 +22,17 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_14_204033) do
     t.index ["collection_id", "user_id"], name: "index_accesses_on_collection_id_and_user_id", unique: true
     t.index ["collection_id"], name: "index_accesses_on_collection_id"
     t.index ["user_id"], name: "index_accesses_on_user_id"
+  end
+
+  create_table "account_join_codes", force: :cascade do |t|
+    t.string "code", null: false
+    t.datetime "created_at", null: false
+    t.integer "creator_id", null: false
+    t.datetime "updated_at", null: false
+    t.integer "usage_count", default: 0, null: false
+    t.integer "usage_limit", default: 1, null: false
+    t.index ["code"], name: "index_account_join_codes_on_code", unique: true
+    t.index ["creator_id"], name: "index_account_join_codes_on_creator_id"
   end
 
   create_table "accounts", force: :cascade do |t|
@@ -505,6 +516,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_14_204033) do
     t.index ["subscribed_actions"], name: "index_webhooks_on_subscribed_actions"
   end
 
+  add_foreign_key "account_join_codes", "users", column: "creator_id"
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "ai_quotas", "users"

@@ -1,0 +1,46 @@
+<% @page_title = "Edit Join Code" %>
+
+<% content_for :header do %>
+  <%= render "filters/menu" %>
+  <div class="header__actions header__actions--start">
+    <%= link_to account_join_code_path(@join_code), class: "btn borderless txt-medium", data: { controller: "hotkey", action: "keydown.esc@document->hotkey#click" } do %>
+      <span class="overflow-ellipsis">&larr; <strong><%= @join_code.code %></strong></span>
+    <% end %>
+  </div>
+
+  <h1 class="header__title"><%= @page_title %></h1>
+<% end %>
+
+<article
+  class="panel center txt-align-start"
+  style="view-transition-name: <%= dom_id(@join_code) %>"
+>
+  <%= form_with model: @join_code, url: account_join_code_path(@join_code), method: :patch, data: { controller: "form" }, html: { class: "flex flex-column gap" } do |form| %>
+    <div class="flex flex-column gap-half">
+      <%= form.label :usage_limit do %>
+        <strong>Usage limit</strong>
+        <br>
+
+        <p class="margin-none txt-x-small txt-subtle">
+          How many times can this code be used to join the account?
+        </p>
+      <% end %>
+
+      <%= form.number_field :usage_limit,
+            required: true,
+            autofocus: true,
+            min: @join_code.usage_count,
+            class: "input",
+            data: { action: "keydown.esc@document->form#cancel" } %>
+      <p class="margin-none txt-x-small txt-subtle">
+        Current usage: <%= @join_code.usage_count %>. You can only increase the limit to allow more uses.
+      </p>
+    </div>
+
+    <%= form.button type: :submit, class: "btn btn--link center txt-medium" do %>
+      <span>Update join code</span>
+    <% end %>
+
+    <%= link_to "Go back", account_join_code_path(@join_code), data: { form_target: "cancel" }, hidden: true %>
+  <% end %>
+</article>

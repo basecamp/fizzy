@@ -6,24 +6,13 @@ class Sessions::MagicLinksController < ApplicationController
   end
 
   def create
-    membership = MagicLink.consume(code)
+    identity_token = IdentityProvider.consume_magic_link(code)
 
-    if membership.blank?
+    if identity_token.blank?
       redirect_to session_magic_link_path, alert: "Try another code."
     else
-      resume_identity
-
-      if Current.identity_token
-        link_identity(membership)
-      else
-        set_current_identity(membership.identity)
-      end
-
-      if membership.account.setup_pending?
-        redirect_to saas.new_signup_completion_url(script_name: "/#{membership.user_tenant}")
-      else
-        redirect_to session_login_menu_path
-      end
+      set_current_identity(identity_token)
+      redirect_to session_login_menu_path
     end
   end
 

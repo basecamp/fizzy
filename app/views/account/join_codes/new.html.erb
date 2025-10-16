@@ -1,0 +1,51 @@
+<% @page_title = "New Join Code" %>
+
+<% content_for :header do %>
+  <%= render "filters/menu" %>
+  <div class="header__actions header__actions--start">
+    <%= link_to account_join_codes_path, class: "btn borderless txt-medium", data: { controller: "hotkey", action: "keydown.esc@document->hotkey#click" } do %>
+      <span class="overflow-ellipsis">&larr; <strong>Join codes</strong></span>
+    <% end %>
+  </div>
+
+  <h1 class="header__title"><%= @page_title %></h1>
+<% end %>
+
+<article
+  class="panel center txt-align-start"
+  style="view-transition-name: <%= dom_id(@join_code) %>"
+>
+  <%= form_with model: @join_code, url: account_join_codes_path, data: { controller: "form" }, html: { class: "flex flex-column gap" } do |form| %>
+    <div class="flex flex-column gap-half">
+      <%= form.label :usage_limit do %>
+        <strong>Usage limit</strong>
+        <br>
+
+        <p class="margin-none txt-x-small txt-subtle">
+          How many times can this code be used to join the account?
+        </p>
+      <% end %>
+      <%= form.number_field :usage_limit,
+            value: 10,
+            required: true,
+            autofocus: true,
+            min: 1,
+            class: "input",
+            data: { action: "keydown.esc@document->form#cancel" } %>
+    </div>
+
+    <div class="txt-subtle txt-x-small">
+      <p class="margin-none">
+        After you create this join code, you can share the join URL with people
+        you want to invite to your account. The code will remain active until it
+        reaches the usage limit.
+      </p>
+    </div>
+
+    <%= form.button type: :submit, class: "btn btn--link center txt-medium" do %>
+      <span>Create join code</span>
+    <% end %>
+
+    <%= link_to "Go back", account_join_codes_path, data: { form_target: "cancel" }, hidden: true %>
+  <% end %>
+</article>

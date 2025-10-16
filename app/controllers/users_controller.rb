@@ -10,13 +10,14 @@ class UsersController < ApplicationController
   before_action :set_user_filtering, only: %i[ edit show]
 
   def new
-    @user = User.new
   end
 
   def create
-    user = User.create!(user_params)
-    start_new_session_for user
-    redirect_to root_path
+    if Account::JoinCode.redeem(params[:join_code])
+      User.invite(params.expect(:email_address))
+    else
+      head :forbidden
+    end
   end
 
   def edit
@@ -39,7 +40,7 @@ class UsersController < ApplicationController
 
   private
     def ensure_join_code_is_valid
-      head :forbidden unless Account.sole.join_code == params[:join_code]
+      head :forbidden unless Account::JoinCode.active?(params[:join_code])
     end
 
     def set_user
@@ -59,6 +60,6 @@ class UsersController < ApplicationController
     end
 
     def user_params
-      params.expect(user: [ :name, :email_address, :password, :avatar ])
+      params.expect(user: [ :name, :email_address, :avatar ])
     end
 end

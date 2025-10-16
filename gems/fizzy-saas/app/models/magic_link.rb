@@ -1,8 +1,8 @@
-class MagicLink < UntenantedRecord
+class MagicLink < FizzySaasRecord
   CODE_LENGTH = 6
   EXPIRATION_TIME = 15.minutes
 
-  belongs_to :membership
+  belongs_to :identity
 
   scope :active, -> { where(expires_at: Time.current...) }
   scope :stale, -> { where(expires_at: ..Time.current) }
@@ -24,18 +24,18 @@ class MagicLink < UntenantedRecord
 
   def consume
     destroy
-    membership
+    identity
   end
 
   private
     def generate_code
-      self.code = loop do
+      self.code ||= loop do
         candidate = Code.generate(CODE_LENGTH)
         break candidate unless self.class.exists?(code: candidate)
       end
     end
 
     def set_expiration
-      self.expires_at = EXPIRATION_TIME.from_now
+      self.expires_at ||= EXPIRATION_TIME.from_now
     end
 end

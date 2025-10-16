@@ -1,39 +1,41 @@
-<% @page_title = "Create your account" %>
+<% @page_title = "Join #{Account.sole.name}" %>
 
 <% content_for :header do %>
-  <div class="header__actions header__actions--start"></div>
-  <div class="header__actions header__actions--end">
-    <%= link_to login_url, class: "btn", data: { controller: "hotkey", action: "keydown.esc@document->hotkey#click" } do %>
-      <span class="for-screen-reader">Sign in instead</span>
-    <% end %>
-  </div>
+  <nav>
+    <div class="fizzy-header-logo center flex-inline align-center txt-normal">
+      <%= inline_svg "fizzy-logo" %>
+      <strong class="txt-medium overflow-ellipsis margin-none">Fizzy</strong>
+    </div>
+  </nav>
 <% end %>
 
-<div class="panel shadow center">
-  <h1 class="margin-none-block-start margin-block-end-double">Fizzy</h1>
+<div
+  class="panel shadow center margin-block-double flex flex-column gap-half"
+  style="--panel-size: 42ch; view-transition-name: sign-in-panel"
+>
+  <header>
+    <h1 class="txt-x-large font-weight-black margin-none">
+      <%= @page_title %>
+    </h1>
+    <p class="margin-none-block-start">Enter your email address to continue</p>
+  </header>
 
-  <%= form_with model: @user, url: join_path(params[:join_code]), class: "flex flex-column gap" do |form| %>
+  <%= form_with url: join_path(join_code: params[:join_code]), class: "flex flex-column gap txt-medium" do |form| %>
     <div class="flex align-center gap">
       <label class="flex align-center gap input input--actor">
-        <%= form.text_field :name, class: "input full-width", autocomplete: "name", placeholder: "Name", autofocus: true, required: true, data: { "1p-ignore": true } %>
-        <%= icon_tag "person", class: "txt-large" %>
+        <%= form.email_field :email_address, required: true, class: "input full-width", autofocus: true, autocomplete: "username", placeholder: "Email address" %>
       </label>
     </div>
-    <div class="flex align-center gap">
-      <label class="flex align-center gap input input--actor">
-        <%= form.email_field :email_address, class: "input full-width", autocomplete: "username", placeholder: "Email address", required: true %>
-        <%= icon_tag "email", class: "txt-large" %>
-      </label>
-    </div>
-    <div class="flex align-center gap">
-      <label class="flex align-center gap input input--actor">
-        <%= form.password_field :password, class: "input full-width", autocomplete: "new-password", placeholder: "Password", required: true, maxlength: 72 %>
-        <%= icon_tag "password", class: "txt-large" %>
-      </label>
-    </div>
-    <button type="submit" id="log_in" class="btn btn--reversed center">
+
+    <button type="submit" id="log_in" class="btn btn--link center">
+      <span>Join</span>
       <%= icon_tag "arrow-right" %>
-      <span>Create account</span>
     </button>
   <% end %>
 </div>
+
+<% content_for :footer do %>
+  <div class="txt-align-center center margin-block-double txt-subtle">
+    Fizzy&trade; Beta. <%= mail_to "support@37signals.com", "Need help?", class: "txt-link" %>
+  </div>
+<% end %>
