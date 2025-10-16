@@ -1,6 +1,7 @@
 GIT
   remote: https://github.com/basecamp/activerecord-tenanted
-  revision: e409f75dc2ea1c3355e98feb22b76b3cc0a01fe0
+  revision: 5152cc7978bdd3d29f998746937a31cc2b9aa6cf
+  branch: flavorjones/with-tenant-callbacks
   specs:
     activerecord-tenanted (0.6.0)
       activerecord (>= 8.1.beta)
@@ -33,6 +34,19 @@ GIT
     yabeda-activejob (0.6.0)
       rails (>= 6.1)
       yabeda (~> 0.6)
+
+GIT
+  remote: https://github.com/flavorjones/solid_queue.git
+  revision: 5352b726f3029fbac4451da7eb443cbfc6f53f83
+  branch: flavorjones/claimed-executions-by-process-name
+  specs:
+    solid_queue (1.2.4)
+      activejob (>= 7.1)
+      activerecord (>= 7.1)
+      concurrent-ruby (>= 1.3.1)
+      fugit (~> 1.11)
+      railties (>= 7.1)
+      thor (>= 1.3.1)
 
 GIT
   remote: https://github.com/rails/rails.git
@@ -495,13 +509,6 @@ GEM
       activejob (>= 7.2)
       activerecord (>= 7.2)
       railties (>= 7.2)
-    solid_queue (1.2.2)
-      activejob (>= 7.1)
-      activerecord (>= 7.1)
-      concurrent-ruby (>= 1.3.1)
-      fugit (~> 1.11)
-      railties (>= 7.1)
-      thor (>= 1.3.1)
     sqlite3 (2.7.4)
       mini_portile2 (~> 2.8.0)
     sqlite3 (2.7.4-arm64-darwin)
@@ -635,7 +642,7 @@ DEPENDENCIES
   sentry-ruby
   solid_cable (>= 3.0)
   solid_cache (~> 1.0)
-  solid_queue (~> 1.2)
+  solid_queue!
   sqlite3 (>= 2.0)
   stimulus-rails
   thruster

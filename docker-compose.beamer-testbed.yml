@@ -20,7 +20,7 @@ x-app: &app
 
 services:
   kamal-proxy:
-    image: basecamp/kamal-proxy:next
+    image: basecamp/kamal-proxy:lb
     ports:
       - 127.0.0.1:3006:80
       - 127.0.0.1:443:443

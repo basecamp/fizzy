@@ -10,13 +10,15 @@ gem "stimulus-rails"
 gem "turbo-rails"
 
 # Deployment and drivers
-gem "activerecord-tenanted", bc: "activerecord-tenanted"
+# gem "activerecord-tenanted", bc: "activerecord-tenanted"
+gem "activerecord-tenanted", bc: "activerecord-tenanted", branch: "flavorjones/with-tenant-callbacks"
 gem "bootsnap", require: false
 gem "kamal", require: false
 gem "puma", ">= 5.0"
 gem "solid_cable", ">= 3.0"
 gem "solid_cache", "~> 1.0"
-gem "solid_queue", "~> 1.2"
+# gem "solid_queue", "~> 1.2"
+gem "solid_queue", github: "flavorjones/solid_queue", branch: "flavorjones/claimed-executions-by-process-name"
 gem "sqlite3", ">= 2.0"
 gem "thruster", require: false
 gem "beamer-rails", "~> 0.1.0.beta4"
