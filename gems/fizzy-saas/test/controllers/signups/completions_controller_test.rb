@@ -2,35 +2,52 @@ require "test_helper"
 
 class Signups::CompletionsControllerTest < ActionDispatch::IntegrationTest
   setup do
-    set_identity_as :kevin
+    @identity = Identity.create!(email_address: "newuser@example.com")
+    magic_link = @identity.send_magic_link
+
+    untenanted do
+      post session_magic_link_url, params: { code: magic_link.code }
+      assert_response :redirect, "Magic link should succeed"
+
+      cookie = cookies.get_cookie "identity_token"
+      assert_not_nil cookie, "Expected identity_token cookie to be set after magic link consumption"
+    end
   end
 
   test "new" do
-    get saas.new_signup_completion_path
+    untenanted do
+      get saas.new_signup_completion_path, headers: http_basic_auth_headers
 
-    assert_response :success
+      assert_response :success
+    end
   end
 
   test "create" do
-    post saas.signup_completion_path, params: {
-      signup: {
-        full_name: "Kevin Systrom",
-        company_name: "37signals"
-      }
-    }
+    untenanted do
+      assert_difference -> { Membership.count }, 1 do
+        post saas.signup_completion_path, params: {
+          signup: {
+            full_name: "New User",
+            company_name: "New Company"
+          }
+        }, headers: http_basic_auth_headers
+      end
 
-    assert_redirected_to root_path, "Successful completion should redirect to root"
-    assert cookies[:session_token].present?, "Successful completion should create a session"
-    assert_equal "Kevin Systrom", users(:kevin).reload.name, "User name should be updated"
-    assert_equal "37signals", Account.sole.reload.name, "Account name should be updated"
+      assert_redirected_to session_login_menu_path(go_to: Membership.last.tenant), "Successful completion should redirect to login menu"
 
-    post saas.signup_completion_path, params: {
-      signup: {
-        full_name: "",
-        company_name: ""
-      }
-    }
+      post saas.signup_completion_path, params: {
+        signup: {
+          full_name: "",
+          company_name: ""
+        }
+      }, headers: http_basic_auth_headers
 
-    assert_response :unprocessable_entity, "Invalid params should return unprocessable entity"
+      assert_response :unprocessable_entity, "Invalid params should return unprocessable entity"
+    end
   end
+
+  private
+    def http_basic_auth_headers
+      { "Authorization" => ActionController::HttpAuthentication::Basic.encode_credentials("testname", "testpassword") }
+    end
 end

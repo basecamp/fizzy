@@ -11,8 +11,8 @@ class Sessions::MagicLinksControllerTest < ActionDispatch::IntegrationTest
 
   test "create" do
     untenanted do
-      membership = memberships(:kevin_in_37signals)
-      magic_link = MagicLink.create!(membership: membership)
+      identity = identities(:kevin)
+      magic_link = MagicLink.create!(identity: identity)
 
       post session_magic_link_url, params: { code: magic_link.code }
 
@@ -24,7 +24,7 @@ class Sessions::MagicLinksControllerTest < ActionDispatch::IntegrationTest
 
       assert_response :redirect, "Invalid code should redirect"
 
-      expired_link = MagicLink.create!(membership: membership)
+      expired_link = MagicLink.create!(identity: identity)
       expired_link.update_column(:expires_at, 1.hour.ago)
 
       post session_magic_link_url, params: { code: expired_link.code }

@@ -18,19 +18,17 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "create with existing membership" do
+  test "create" do
     untenanted do
-      membership = memberships(:kevin_in_37signals)
+      identity = identities(:kevin)
 
       assert_difference -> { MagicLink.count }, 1 do
-        post session_path, params: { email_address: membership.email_address }
+        post session_path, params: { email_address: identity.email_address }
       end
 
       assert_redirected_to session_magic_link_path
     end
-  end
 
-  test "create with non-existent email" do
     untenanted do
       assert_no_difference -> { MagicLink.count } do
         post session_path, params: { email_address: "nonexistent@example.com" }

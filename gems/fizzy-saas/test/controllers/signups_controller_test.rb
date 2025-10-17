@@ -28,7 +28,7 @@ class SignupsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should create signup and redirect to magic link page" do
-    assert_difference -> { ApplicationRecord.tenants.count }, 1 do
+    assert_no_difference -> { ApplicationRecord.tenants.count } do
       post saas.signup_url, params: { signup: { email_address: @signup_params[:email_address] } }, headers: http_basic_auth_headers
     end
 

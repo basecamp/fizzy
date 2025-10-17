@@ -1,13 +1,14 @@
 kevin_in_37signals:
-  identity: kevin_identity
-  email_address: kevin@37signals.com
-  user_tenant: <%= Rails.application.config.active_record_tenanted.default_tenant %>
-  user_id: <%= ActiveRecord::FixtureSet.identify(:kevin) %>
+  identity: kevin
+  tenant: <%= Rails.application.config.active_record_tenanted.default_tenant %>
   account_name: Fizzy
 
 jz_in_37signals:
-  identity: jz_identity
-  email_address: jz@37signals.com
-  user_tenant: <%= Rails.application.config.active_record_tenanted.default_tenant %>
-  user_id: <%= ActiveRecord::FixtureSet.identify(:jz) %>
+  identity: jz
+  tenant: <%= Rails.application.config.active_record_tenanted.default_tenant %>
+  account_name: Fizzy
+
+david_in_37signals:
+  identity: david
+  tenant: <%= Rails.application.config.active_record_tenanted.default_tenant %>
   account_name: Fizzy

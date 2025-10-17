@@ -5,63 +5,57 @@ class SignupTest < ActiveSupport::TestCase
     @starting_tenants = ApplicationRecord.tenants
   end
 
-  test "#create_account" do
-    Account.any_instance.expects(:setup_basic_template).once
-
+  test "#create_identity" do
     signup = Signup.new(email_address: "brian@example.com")
 
-    assert_difference -> { Membership.count }, 1 do
+    assert_difference -> { Identity.count }, 1 do
       assert_difference -> { MagicLink.count }, 1 do
-        assert signup.create_account, signup.errors.full_messages.to_sentence(words_connector: ". ")
+        assert signup.create_identity
       end
     end
 
     assert_empty signup.errors
-    assert signup.tenant
-    assert_includes ApplicationRecord.tenants, signup.tenant
-    assert signup.account
-    assert signup.account.persisted?
-    assert signup.user
-    assert signup.user.persisted?
+    assert signup.identity
+    assert signup.identity.persisted?
 
     signup_existing = Signup.new(email_address: "brian@example.com")
 
-    assert_no_difference -> { Membership.count } do
+    assert_no_difference -> { Identity.count } do
       assert_difference -> { MagicLink.count }, 1 do
-        assert signup_existing.create_account, "Should send magic link for existing membership"
+        assert signup_existing.create_identity, "Should send magic link for existing identity"
       end
     end
 
     signup_invalid = Signup.new(email_address: "")
-    assert_not signup_invalid.create_account, "Should fail with invalid email"
+    assert_not signup_invalid.create_identity, "Should fail with invalid email"
     assert_not_empty signup_invalid.errors[:email_address], "Should have validation error for email_address"
-
-    Queenbee::Remote::Account.stubs(:create!).raises(RuntimeError, "Invalid account data")
-    signup_error = Signup.new(email_address: "error@example.com")
-
-    assert_not signup_error.create_account, "Should fail when error occurs"
-    assert_not_empty signup_error.errors[:base], "Should have base error"
-    assert_nil signup_error.tenant
-    assert_nil signup_error.account
-    assert_nil signup_error.user
   end
 
   test "#complete" do
+    Account.any_instance.expects(:setup_basic_template).once
+
     signup = Signup.new(
-      tenant: ApplicationRecord.current_tenant,
-      user: users(:kevin),
       full_name: "Kevin Systrom",
-      company_name: "37signals"
+      company_name: "37signals",
+      email_address: "kevin@example.com",
+      identity: identities(:kevin)
     )
 
     assert signup.complete, signup.errors.full_messages.to_sentence(words_connector: ". ")
 
-    assert_equal "Kevin Systrom", users(:kevin).reload.name, "User name should be updated"
-    assert_equal "37signals", Account.sole.reload.name, "Account name should be updated"
-    assert_equal "37signals", users(:kevin).membership.reload.account_name, "Membership account name should be updated"
+    assert signup.tenant
+    assert signup.account
+    assert signup.user
+    assert_equal "Kevin Systrom", signup.user.name
+    assert_equal "37signals", signup.account.name
 
-    signup.full_name = ""
-    assert_not signup.complete, "Complete should fail with invalid params"
-    assert_not_empty signup.errors[:full_name], "Should have validation error for full_name"
+    signup_invalid = Signup.new(
+      full_name: "",
+      company_name: "37signals",
+      email_address: "kevin@example.com",
+      identity: identities(:kevin)
+    )
+    assert_not signup_invalid.complete, "Complete should fail with invalid params"
+    assert_not_empty signup_invalid.errors[:full_name], "Should have validation error for full_name"
   end
 end
