@@ -40,7 +40,6 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_15_081645) do
     t.integer "external_account_id"
     t.string "join_code"
     t.string "name", null: false
-    t.string "setup_status"
     t.datetime "updated_at", null: false
     t.index ["external_account_id"], name: "index_accounts_on_external_account_id", unique: true
   end

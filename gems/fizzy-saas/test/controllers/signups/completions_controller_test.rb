@@ -2,7 +2,6 @@ require "test_helper"
 
 class Signups::CompletionsControllerTest < ActionDispatch::IntegrationTest
   setup do
-    Account.sole.update!(setup_status: :pending)
     set_identity_as :kevin
   end
 
@@ -22,11 +21,8 @@ class Signups::CompletionsControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to root_path, "Successful completion should redirect to root"
     assert cookies[:session_token].present?, "Successful completion should create a session"
-    assert_equal "complete", Account.sole.reload.setup_status, "Account setup status should be complete"
     assert_equal "Kevin Systrom", users(:kevin).reload.name, "User name should be updated"
     assert_equal "37signals", Account.sole.reload.name, "Account name should be updated"
-
-    Account.sole.update!(setup_status: :pending)
 
     post saas.signup_completion_path, params: {
       signup: {

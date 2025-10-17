@@ -177,16 +177,6 @@ columns:
     default_function:
     collation:
     comment:
-  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
-    auto_increment:
-    name: setup_status
-    cast_type: *5
-    sql_type_metadata: *6
-    'null': true
-    default:
-    default_function:
-    collation:
-    comment:
   - *9
   action_text_rich_texts:
   - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column

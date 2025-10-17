@@ -18,8 +18,7 @@ def create_tenant(signal_account_name)
     account = Account.create_with_admin_user(
       account: {
         external_account_id: tenant_id,
-        name: signal_account_name,
-        setup_status: :complete
+        name: signal_account_name
       },
       owner: {
         name: "David Heinemeier Hansson",

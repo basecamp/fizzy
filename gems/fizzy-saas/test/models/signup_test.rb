@@ -47,7 +47,6 @@ class SignupTest < ActiveSupport::TestCase
   end
 
   test "#complete" do
-    Account.sole.update!(setup_status: :pending)
     signup = Signup.new(
       tenant: ApplicationRecord.current_tenant,
       user: users(:kevin),
@@ -57,7 +56,6 @@ class SignupTest < ActiveSupport::TestCase
 
     assert signup.complete, signup.errors.full_messages.to_sentence(words_connector: ". ")
 
-    assert_equal "complete", Account.sole.reload.setup_status, "Account setup status should be complete"
     assert_equal "Kevin Systrom", users(:kevin).reload.name, "User name should be updated"
     assert_equal "37signals", Account.sole.reload.name, "Account name should be updated"
     assert_equal "37signals", users(:kevin).membership.reload.account_name, "Membership account name should be updated"
