@@ -2,12 +2,6 @@
 
 <% content_for :header do %>
   <%= render "filters/menu" %>
-  <div class="header__actions header__actions--start">
-    <%= link_to account_join_codes_path, class: "btn borderless txt-medium", data: { controller: "hotkey", action: "keydown.esc@document->hotkey#click" } do %>
-      <span class="overflow-ellipsis">&larr; <strong>Join codes</strong></span>
-    <% end %>
-  </div>
-
   <h1 class="header__title"><%= @page_title %></h1>
 <% end %>
 
@@ -39,18 +33,6 @@
             (
             <%= @join_code.usage_limit - @join_code.usage_count %>
             remaining)
-          <% end %>
-        </p>
-      </div>
-
-      <div>
-        <strong class="txt-small">Created</strong>
-        <p class="margin-none txt-subtle">
-          <%= time_ago_in_words(@join_code.created_at) %>
-          ago
-          <% if @join_code.creator %>
-            by
-            <%= @join_code.creator.name %>
           <% end %>
         </p>
       </div>
@@ -90,15 +72,15 @@
     <hr class="separator">
 
     <div class="flex gap-half">
-      <%= link_to edit_account_join_code_path(@join_code), class: "btn btn--secondary txt-small" do %>
+      <%= link_to edit_account_join_code_path, class: "btn btn--secondary txt-small" do %>
         <%= icon_tag "edit" %>
-        <span>Edit</span>
+        <span>Edit limit</span>
       <% end %>
 
-      <%= button_to account_join_code_path(@join_code), method: :delete, class: "btn btn--negative txt-small",
-            data: { turbo_confirm: "Are you sure you want to delete this join code?" } do %>
-        <%= icon_tag "trash" %>
-        <span>Delete</span>
+      <%= button_to account_join_code_path, method: :delete, class: "btn btn--negative txt-small",
+            data: { turbo_confirm: "Are you sure you want to regenerate this join code? The old code will no longer work." } do %>
+        <%= icon_tag "refresh" %>
+        <span>Regenerate</span>
       <% end %>
     </div>
   </div>

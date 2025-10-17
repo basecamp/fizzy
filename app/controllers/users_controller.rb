@@ -14,7 +14,7 @@ class UsersController < ApplicationController
 
   def create
     if Account::JoinCode.redeem(params[:join_code])
-      User.invite(params.expect(:email_address))
+      User.invite(**invite_params)
       redirect_to session_magic_link_path(script_name: nil)
     else
       head :forbidden
@@ -62,5 +62,9 @@ class UsersController < ApplicationController
 
     def user_params
       params.expect(user: [ :name, :email_address, :avatar ])
+    end
+
+    def invite_params
+      params.expect(user: [ :name, :email_address ])
     end
 end

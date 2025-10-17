@@ -3,8 +3,8 @@
 <% content_for :header do %>
   <%= render "filters/menu" %>
   <div class="header__actions header__actions--start">
-    <%= link_to account_join_code_path(@join_code), class: "btn borderless txt-medium", data: { controller: "hotkey", action: "keydown.esc@document->hotkey#click" } do %>
-      <span class="overflow-ellipsis">&larr; <strong><%= @join_code.code %></strong></span>
+    <%= link_to account_join_code_path, class: "btn borderless txt-medium", data: { controller: "hotkey", action: "keydown.esc@document->hotkey#click" } do %>
+      <span class="overflow-ellipsis">&larr; <strong>Join Code</strong></span>
     <% end %>
   </div>
 
@@ -15,7 +15,7 @@
   class="panel center txt-align-start"
   style="view-transition-name: <%= dom_id(@join_code) %>"
 >
-  <%= form_with model: @join_code, url: account_join_code_path(@join_code), method: :patch, data: { controller: "form" }, html: { class: "flex flex-column gap" } do |form| %>
+  <%= form_with model: @join_code, url: account_join_code_path, method: :patch, data: { controller: "form" }, html: { class: "flex flex-column gap" } do |form| %>
     <div class="flex flex-column gap-half">
       <%= form.label :usage_limit do %>
         <strong>Usage limit</strong>
@@ -41,6 +41,6 @@
       <span>Update join code</span>
     <% end %>
 
-    <%= link_to "Go back", account_join_code_path(@join_code), data: { form_target: "cancel" }, hidden: true %>
+    <%= link_to "Go back", account_join_code_path, data: { form_target: "cancel" }, hidden: true %>
   <% end %>
 </article>
