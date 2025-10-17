@@ -23,6 +23,10 @@ class User < ApplicationRecord
     update! active: false, email_address: deactived_email_address
   end
 
+  def identity
+    Identity.find_by(email_address: email_address)
+  end
+
   private
     def deactived_email_address
       email_address.sub(/@/, "-deactivated-#{SecureRandom.uuid}@")
