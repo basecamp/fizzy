@@ -5,6 +5,7 @@ class Account < ApplicationRecord
 
   class << self
     def create_with_admin_user(account:, owner:)
+      User.system
       User.create!(**owner.reverse_merge(role: "admin", password: SecureRandom.hex(16)))
       create!(**account)
     end
