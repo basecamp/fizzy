@@ -15,14 +15,11 @@ class Identity < UntenantedRecord
 
     def change_email_address(from:, to:, tenant:)
       identity = find_by(email_address: from)
+      membership = Membership.find_by(tenant: tenant, identity: identity)
 
-      if identity
-        membership = identity.memberships.find_by(tenant: tenant)
-
-        if membership
-          new_identity = find_or_create_by!(email_address: to)
-          membership.update!(identity: new_identity)
-        end
+      if membership
+        new_identity = find_or_create_by!(email_address: to)
+        membership.update!(identity: new_identity)
       end
     end
   end
