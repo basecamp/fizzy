@@ -3,15 +3,15 @@ class Signup
   include ActiveModel::Attributes
   include ActiveModel::Validations
 
-  attr_accessor :company_name, :full_name, :email_address, :user, :tenant
-  attr_reader :queenbee_account, :account
+  attr_accessor :company_name, :full_name, :email_address, :identity
+  attr_reader :queenbee_account, :account, :user, :tenant
 
-  with_options on: :account_creation do
+  with_options on: :identity_creation do
     validates_presence_of :email_address
   end
 
   with_options on: :completion do
-    validates_presence_of :company_name, :full_name
+    validates_presence_of :company_name, :full_name, :identity
   end
 
 
@@ -28,17 +28,22 @@ class Signup
     super
   end
 
-  def create_account
-    return false unless valid?(:account_creation)
+  def create_identity
+    return false unless valid?(:identity_creation)
 
-    if membership = Membership.find_by(email_address: email_address)
-      membership.send_magic_link
-    else
-      create_queenbee_account
-      create_tenant
-      user.membership.send_magic_link
-    end
+    @identity = Identity.find_or_create_by!(email_address: email_address)
+    @identity.send_magic_link
+  end
 
+  def complete
+    return false unless valid?(:completion)
+
+    create_queenbee_account
+    create_tenant
+
+    identity.link_to(tenant)
+
+    true
   rescue => error
     destroy_tenant
     destroy_queenbee_account
@@ -48,21 +53,6 @@ class Signup
     Rails.logger.error(error.backtrace.join("\n"))
 
     false
-  end
-
-  def complete
-    return false unless valid?(:completion)
-
-    ApplicationRecord.with_tenant(tenant) do
-      @account = Account.sole
-
-      ApplicationRecord.transaction do
-        user.update!(name: full_name)
-        account.update!(name: company_name, setup_status: :complete)
-        user.membership.update!(account_name: company_name)
-      end
-    end
-    # TODO: Update company and user name in QB
   end
 
   private
@@ -76,17 +66,16 @@ class Signup
     end
 
     def create_tenant
-      self.tenant = queenbee_account.id.to_s
+      @tenant = queenbee_account.id.to_s
 
       ApplicationRecord.create_tenant(tenant) do
         @account = Account.create_with_admin_user(
           account: {
             external_account_id: tenant,
-            name: "New Account",
-            setup_status: :pending
+            name: company_name
           },
           owner: {
-            name: email_address,
+            name: full_name,
             email_address: email_address
           }
         )
@@ -101,8 +90,8 @@ class Signup
       end
 
       @account = nil
-      self.user = nil
-      self.tenant = nil
+      @user = nil
+      @tenant = nil
     end
 
     def queenbee_account_attributes

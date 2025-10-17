@@ -12,7 +12,7 @@ class Sessions::MagicLinksController < ApplicationController
       redirect_to session_magic_link_path, alert: "Try another code."
     else
       set_current_identity(identity_token)
-      redirect_to session_login_menu_path
+      redirect_to after_identification_url
     end
   end
 

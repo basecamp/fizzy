@@ -17,7 +17,8 @@ class SignupsController < ApplicationController
   def create
     @signup = Signup.new(signup_params)
 
-    if @signup.create_account
+    if @signup.create_identity
+      session[:return_to_after_identification] = saas.new_signup_completion_path
       redirect_to session_magic_link_path
     else
       render :new, status: :unprocessable_entity

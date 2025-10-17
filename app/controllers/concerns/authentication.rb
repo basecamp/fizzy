@@ -91,6 +91,10 @@ module Authentication
       session.delete(:return_to_after_authenticating) || root_url
     end
 
+    def after_identification_url
+      session.delete(:return_to_after_identification) || session_login_menu_path
+    end
+
     def redirect_authenticated_user
       redirect_to root_url if authenticated?
     end

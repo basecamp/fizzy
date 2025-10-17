@@ -2,6 +2,8 @@ class Identity < UntenantedRecord
   has_many :memberships, dependent: :destroy
   has_many :magic_links, dependent: :delete_all
 
+  normalizes :email_address, with: ->(value) { value.strip.downcase }
+
   class << self
     def link(email_address:, to:)
       find_or_create_by!(email_address: email_address).tap { |identity| identity.link_to(to) }
