@@ -5,19 +5,18 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     get new_user_path(params: { join_code: "bad" })
     assert_response :forbidden
 
-    get new_user_path(params: { join_code: accounts(:"37s").join_code })
+    get new_user_path(params: { join_code: account_join_codes(:sole).code })
     assert_response :ok
   end
 
   test "create" do
-    assert_difference -> { User.active.count }, +1 do
-      post users_path(params: { join_code: accounts(:"37s").join_code }),
-        params: { user: { name: "Dash", email_address: "dash@example.com", password: "123" } }
-      assert_redirected_to root_path
+    assert_difference -> { User.count }, +1 do
+      assert_difference -> { Identity.count }, +1 do
+        post users_path(params: { join_code: account_join_codes(:sole).code }),
+          params: { user: { name: "Dash", email_address: "dash@example.com" } }
+        assert_redirected_to session_magic_link_path(script_name: nil)
+      end
     end
-
-    follow_redirect!
-    assert_response :ok
   end
 
   test "show" do
