@@ -1,44 +1,33 @@
-<% @page_title = "Edit Join Code" %>
+<% @page_title = "Change usage limit" %>
 
 <% content_for :header do %>
   <%= render "filters/menu" %>
-  <div class="header__actions header__actions--start">
+  <div class="header__title">
     <%= link_to account_join_code_path, class: "btn borderless txt-medium", data: { controller: "hotkey", action: "keydown.esc@document->hotkey#click" } do %>
-      <span class="overflow-ellipsis">&larr; <strong>Join Code</strong></span>
+      <span class="overflow-ellipsis">&larr; <strong>Invite link</strong></span>
     <% end %>
   </div>
-
-  <h1 class="header__title"><%= @page_title %></h1>
 <% end %>
 
-<article
-  class="panel center txt-align-start"
-  style="view-transition-name: <%= dom_id(@join_code) %>"
->
+<article class="panel center shadow flex flex-column gap-half" style="view-transition-name: <%= dom_id(@join_code) %>">
+  <header class="margin-block-end-half">
+    <h2 class="txt-large margin-none font-weight-black"><%= @page_title %></h2>
+    <p class="txt-medium margin-none">How many times can this link be used to join the account?</p>
+  </header>
   <%= form_with model: @join_code, url: account_join_code_path, method: :patch, data: { controller: "form" }, html: { class: "flex flex-column gap" } do |form| %>
-    <div class="flex flex-column gap-half">
-      <%= form.label :usage_limit do %>
-        <strong>Usage limit</strong>
-        <br>
+    <%= form.number_field :usage_limit,
+          required: true,
+          autofocus: true,
+          min: @join_code.usage_count,
+          class: "input center txt-large fit-content font-weight-black",
+          data: { action: "keydown.esc@document->form#cancel focus->form#select" } %>
 
-        <p class="margin-none txt-x-small txt-subtle">
-          How many times can this code be used to join the account?
-        </p>
-      <% end %>
-
-      <%= form.number_field :usage_limit,
-            required: true,
-            autofocus: true,
-            min: @join_code.usage_count,
-            class: "input",
-            data: { action: "keydown.esc@document->form#cancel" } %>
-      <p class="margin-none txt-x-small txt-subtle">
-        Current usage: <%= @join_code.usage_count %>. You can only increase the limit to allow more uses.
-      </p>
-    </div>
+    <p class="margin-none txt-subtle">
+      This code has been used <%= @join_code.usage_count %>/<%= @join_code.usage_limit %> times.
+    </p>
 
     <%= form.button type: :submit, class: "btn btn--link center txt-medium" do %>
-      <span>Update join code</span>
+      <span>Save changes</span>
     <% end %>
 
     <%= link_to "Go back", account_join_code_path, data: { form_target: "cancel" }, hidden: true %>
