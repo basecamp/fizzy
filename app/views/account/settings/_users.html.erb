@@ -6,6 +6,11 @@
 } do %>
   <h2 class="divider txt-large">People on the account</h2>
 
+  <%= link_to account_join_code_path, class: "btn btn--link center" do %>
+    <%= icon_tag "add" %>
+    <span>Add people</span>
+  <% end %>
+
   <div class="settings__user-filter">
     <input placeholder="Filter…" class="input input--transparent full-width txt-small" type="search" autocorrect="off" autocomplete="off" data-1p-ignore="true" data-filter-target="input" data-action="input->filter#filter">
 
