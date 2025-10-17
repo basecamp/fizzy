@@ -12,7 +12,7 @@ class IdentitiesController < ApplicationController
   end
 
   def change_email_address
-    Identity.change_email(from: params[:from], to: params[:to], tenant: params[:tenant])
+    Identity.change_email_address(from: params[:from], to: params[:to], tenant: params[:tenant])
     head :ok
   end
 

@@ -13,7 +13,7 @@ class Identity < UntenantedRecord
       find_by(email_address: email_address)&.unlink_from(from)
     end
 
-    def change_email(from:, to:, tenant:)
+    def change_email_address(from:, to:, tenant:)
       identity = find_by(email_address: from)
 
       if identity
