@@ -12,16 +12,6 @@ class Identity < UntenantedRecord
     def unlink(email_address:, from:)
       find_by(email_address: email_address)&.unlink_from(from)
     end
-
-    def change_email_address(from:, to:, tenant:)
-      identity = find_by(email_address: from)
-      membership = Membership.find_by(tenant: tenant, identity: identity)
-
-      if membership
-        new_identity = find_or_create_by!(email_address: to)
-        membership.update!(identity: new_identity)
-      end
-    end
   end
 
   def send_magic_link
