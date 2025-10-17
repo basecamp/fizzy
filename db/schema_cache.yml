@@ -112,16 +112,6 @@ columns:
     collation:
     comment:
   - *7
-  - &25 !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
-    auto_increment:
-    name: creator_id
-    cast_type: *3
-    sql_type_metadata: *4
-    'null': false
-    default:
-    default_function:
-    collation:
-    comment:
   - *8
   - *9
   - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
@@ -140,7 +130,7 @@ columns:
     cast_type: *3
     sql_type_metadata: *4
     'null': false
-    default: 1
+    default: 10
     default_function:
     collation:
     comment:
@@ -495,7 +485,16 @@ columns:
     collation:
     comment:
   - *7
-  - *25
+  - &25 !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: creator_id
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
   - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
     auto_increment:
     name: due_on
@@ -1666,22 +1665,6 @@ indexes:
     unique: true
     columns:
     - code
-    lengths: {}
-    orders: {}
-    opclasses: {}
-    where:
-    type:
-    using:
-    include:
-    nulls_not_distinct:
-    comment:
-    valid: true
-  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
-    table: account_join_codes
-    name: index_account_join_codes_on_creator_id
-    unique: false
-    columns:
-    - creator_id
     lengths: {}
     orders: {}
     opclasses: {}
