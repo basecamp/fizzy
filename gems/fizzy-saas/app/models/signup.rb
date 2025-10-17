@@ -65,7 +65,7 @@ class Signup
             password: password
           }
         )
-        @user = User.first
+        @user = User.find_by!(role: :admin)
         @account.setup_basic_template
       end
     end

@@ -24,12 +24,15 @@ class AccountTest < ActiveSupport::TestCase
       assert_equal ActiveRecord::FixtureSet.identify("account-create-with-admin-user-test"), account.external_account_id
       assert_equal "Account Create With Admin", account.name
 
-      assert_equal 1, User.count
-      User.first.tap do |user|
-        assert_equal "David", user.name
-        assert_equal "david@37signals.com", user.email_address
-        assert_equal "admin", user.role
-      end
+      assert_equal 2, User.count
+
+      system = User.find_by(role: "system")
+      assert system
+
+      admin = User.find_by(role: "admin")
+      assert_equal "David", admin.name
+      assert_equal "david@37signals.com", admin.email_address
+      assert_equal "admin", admin.role
     end
   end
 end
