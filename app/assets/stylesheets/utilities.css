@@ -19,6 +19,7 @@
   .txt-subtle { color: var(--color-ink-medium); }
   .txt-alert { color: var(--color-marker); }
   .txt-undecorated { text-decoration: none; }
+  .txt-underline { text-decoration: underline; }
   .txt-tight-lines { line-height: 1.2; }
   .txt-nowrap { white-space: nowrap; }
   .txt-break { word-break: break-word; }

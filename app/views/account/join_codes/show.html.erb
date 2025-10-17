@@ -1,87 +1,68 @@
-<% @page_title = "Join Code" %>
+<% @page_title = "Add people" %>
 
 <% content_for :header do %>
   <%= render "filters/menu" %>
-  <h1 class="header__title"><%= @page_title %></h1>
+  <div class="header__title">
+    <%= link_to account_settings_path, class: "btn borderless txt-medium", data: { controller: "hotkey", action: "keydown.esc@document->hotkey#click" } do %>
+      <span class="overflow-ellipsis">&larr; <strong>Account Settings</strong></span>
+    <% end %>
+  </div>
 <% end %>
 
-<article
-  class="panel center txt-align-start"
-  style="view-transition-name: <%= dom_id(@join_code) %>"
->
-  <div class="flex flex-column gap">
-    <div class="flex align-center gap-half">
-      <h2 class="txt-large margin-none flex-item-grow">
-        <code><%= @join_code.code %></code>
-      </h2>
-      <% if @join_code.active? %>
-        <span class="badge badge--positive">Active</span>
-      <% else %>
-        <span class="badge badge--subtle">Used up</span>
+<div class="panel shadow center flex flex-column gap" style="view-transition-name: <%= dom_id(@join_code) %>">
+  <header>
+    <h2 class="txt-large margin-none font-weight-black"><%= @page_title %></h2>
+    <p class="txt-medium margin-none">Share the link below to invite people to this account</p>
+  </header>
+
+  <% url = join_url(join_code: @join_code.code, script_name: "/#{@join_code.tenant}") %>
+  <div class="flex align-center gap-half">
+    <input type="text" class="input flex-item-grow" value="<%= url %>" readonly>
+    <%= button_to account_join_code_path, method: :delete, class: "btn btn--circle txt-small",
+          data: { turbo_confirm: "Are you sure you want to generate a new link? The previous code will stop working." } do %>
+      <%= icon_tag "refresh" %>
+      <span class="for-screen-reader">Generate a new code</span>
+    <% end %>
+  </div>
+
+  <div class="center flex align-center gap">
+    <%= tag.button class: "btn btn--link", data: {
+        controller: "copy-to-clipboard", action: "copy-to-clipboard#copy",
+        copy_to_clipboard_success_class: "btn--success", copy_to_clipboard_content_value: url } do %>
+
+      <%= icon_tag "copy-paste" %>
+      <span class="txt-nowrap">Copy invite link</span>
+    <% end %>
+
+    <div data-controller="dialog" data-dialog-modal-value="true" class="flex-inline">
+      <%= tag.button class: "btn", data: { action: "dialog#open" } do %>
+        <%= icon_tag "qr-code" %>
+        <span>Get QR code</span>
       <% end %>
-    </div>
 
-    <div class="flex flex-column gap-half">
-      <div>
-        <strong class="txt-small">Usage</strong>
-        <p class="margin-none txt-subtle">
-          <%= @join_code.usage_count %>
-          of
-          <%= @join_code.usage_limit %>
-          uses
-          <% if @join_code.active? %>
-            (
-            <%= @join_code.usage_limit - @join_code.usage_count %>
-            remaining)
-          <% end %>
-        </p>
-      </div>
-    </div>
+      <dialog class="dialog panel shadow" data-dialog-target="dialog">
+        <p class="margin-none-block-start"><strong>Scan this code with the camera on your mobile device</strong></p>
 
-    <hr class="separator">
-
-    <div class="flex flex-column gap-half">
-      <strong class="txt-small">Join URL</strong>
-
-      <% url = join_url(join_code: @join_code.code, script_name: "/#{@join_code.tenant}") %>
-      <div class="flex align-center gap-half">
-        <input
-          type="text"
-          class="input flex-item-grow"
-          value="<%= url %>"
-          readonly
-        >
-        <%= button_to_copy_to_clipboard(url) do %>
-          <%= icon_tag "copy-paste" %>
-          <span class="for-screen-reader">Copy join link</span>
-        <% end %>
-      </div>
-
-      <p class="margin-none txt-x-small txt-subtle">
-        Share this URL with people you want to invite to your account.
-      </p>
-
-      <div
-        class="txt-align-center margin-block-start"
-        style="max-width: 200px; margin-inline: auto;"
-      >
         <%= qr_code_image(url) %>
-      </div>
-    </div>
 
-    <hr class="separator">
-
-    <div class="flex gap-half">
-      <%= link_to edit_account_join_code_path, class: "btn btn--secondary txt-small" do %>
-        <%= icon_tag "edit" %>
-        <span>Edit limit</span>
-      <% end %>
-
-      <%= button_to account_join_code_path, method: :delete, class: "btn btn--negative txt-small",
-            data: { turbo_confirm: "Are you sure you want to regenerate this join code? The old code will no longer work." } do %>
-        <%= icon_tag "refresh" %>
-        <span>Regenerate</span>
-      <% end %>
+        <form method="dialog" class="margin-block-start flex justify-center">
+          <button class="btn">
+            <span>Done</span>
+          </button>
+        </form>
+      </dialog>
     </div>
   </div>
-</article>
+
+  <footer class="txt-small">
+    <hr class="separator--horizontal full-width margin-block" style="--border-color: var(--color-ink-lighter)">
+
+    <p class="margin-none <%= "txt-negative" if !@join_code.active? %>">
+      This code has been used <%= @join_code.usage_count %>/<%= @join_code.usage_limit %> times
+      (<%= @join_code.active? ? @join_code.usage_limit - @join_code.usage_count : "none" %> remaining)
+      <%= link_to edit_account_join_code_path, class: @join_code.active? ? "txt-link" : "txt-negative txt-underline" do %>
+        <span>Change limit</span>
+      <% end %>
+    </p>
+  </footer>
+</div>
