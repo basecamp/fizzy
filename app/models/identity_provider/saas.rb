@@ -70,7 +70,9 @@ module IdentityProvider::Saas
   end
 
   def tenants_for(token)
-    Identity.find_signed(token&.dig("id")).memberships.pluck(:tenant)
+    Identity.find_signed(token&.dig("id")).memberships.pluck(:tenant, :account_name).map do |id, name|
+      IdentityProvider::Tenant.new(id: id, name: name)
+    end
   end
 
   private
