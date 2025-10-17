@@ -1,4 +1,4 @@
-class Identity < FizzySaasRecord
+class Identity < UntenantedRecord
   has_many :memberships, dependent: :destroy
   has_many :magic_links, dependent: :delete_all
 
@@ -32,7 +32,7 @@ class Identity < FizzySaasRecord
   end
 
   def link_to(tenant)
-    memberships.find_or_create_by!(tenant: to) do |membership|
+    memberships.find_or_create_by!(tenant: tenant) do |membership|
       membership.account_name = ApplicationRecord.with_tenant(membership.tenant) { Account.sole.name }
     end
   end

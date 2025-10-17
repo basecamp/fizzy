@@ -12,7 +12,7 @@ class Account::JoinCode < ApplicationRecord
   validates :usage_count, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
   class << self
-    def redeem(code, email_address:)
+    def redeem(code)
       find_by(code: code)&.tap do |join_code|
         if join_code.active?
           join_code.increment!(:usage_count)

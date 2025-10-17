@@ -33,7 +33,7 @@ def create_tenant(signal_account_name)
   ApplicationRecord.current_tenant = tenant_id
 
   identity = Identity.find_or_create_by!(email_address: User.first.email_address)
-  identity.memberships.find_or_create_by!(tenant: tenant_id)
+  identity.memberships.find_or_create_by!(tenant: tenant_id, account_name: Account.sole.name)
 end
 
 def find_or_create_user(full_name, email_address)
@@ -46,7 +46,7 @@ def find_or_create_user(full_name, email_address)
       password: "secret123456"
 
     identity = Identity.find_or_create_by!(email_address: email_address)
-    identity.memberships.find_or_create_by!(tenant: ApplicationRecord.current_tenant)
+    identity.memberships.find_or_create_by!(tenant: ApplicationRecord.current_tenant, account_name: Account.sole.name)
 
     user
   end

@@ -11,7 +11,7 @@ module IdentityProvider
     if Bootstrap.oss_config?
       raise NotImplementedError, "No identity provider configured in OSS version"
     else
-      FizzySaasIdentityProvider
+      IdentityProvider::Saas
     end
   end
 

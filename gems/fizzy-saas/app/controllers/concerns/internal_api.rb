@@ -2,25 +2,19 @@ module InternalApi
   extend ActiveSupport::Concern
 
   included do
-    before_action :verify_request
+    require_untenanted_access
+    skip_before_action :verify_authenticity_token
+    before_action :verify_request_authentication
+    before_action :verify_request_signature
   end
 
   private
-    def verify_request
-      verify_request_authentication
-      verify_request_signature
-    end
-
     def verify_request_authentication
-      token = authenticate_with_http_token do |token, options|
-        unless ActiveSupport::SecurityUtils.secure_compare(token, InternalApiClient.token)
-          return head :unauthorized
-        end
+      authenticated = authenticate_with_http_token do |token, options|
+        ActiveSupport::SecurityUtils.secure_compare(token, InternalApiClient.token)
       end
 
-      unless token
-        head :unauthorized
-      end
+      head :unauthorized unless authenticated
     end
 
     def verify_request_signature
