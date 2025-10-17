@@ -1,4 +1,4 @@
-class MagicLink < FizzySaasRecord
+class MagicLink < UntenantedRecord
   CODE_LENGTH = 6
   EXPIRATION_TIME = 15.minutes
 
