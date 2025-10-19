@@ -89,8 +89,8 @@ class Signup
         ApplicationRecord.destroy_tenant(tenant)
       end
 
-      @account = nil
       @user = nil
+      @account = nil
       @tenant = nil
     end
 
@@ -107,8 +107,8 @@ class Signup
         # attributes[:terms_of_service] = true
 
         attributes[:product_name]   = "fizzy"
-        attributes[:name]           = email_address
-        attributes[:owner_name]     = email_address
+        attributes[:name]           = company_name
+        attributes[:owner_name]     = full_name
         attributes[:owner_email]    = email_address
 
         attributes[:trial]          = true
