@@ -1,7 +1,6 @@
 writebook_david:
   collection: writebook
   user: david
-  involvement: watching
 
 writebook_jz:
   collection: writebook
@@ -10,7 +9,6 @@ writebook_jz:
 writebook_kevin:
   collection: writebook
   user: kevin
-  involvement: watching
 
 private_kevin:
   collection: private
