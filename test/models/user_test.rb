@@ -23,14 +23,19 @@ class UserTest < ActiveSupport::TestCase
 
   test "deactivate" do
     users(:jz).sessions.create!
+    tenant = ApplicationRecord.current_tenant
 
     assert_changes -> { users(:jz).active? }, from: true, to: false do
       assert_changes -> { users(:jz).accesses.count }, from: 1, to: 0 do
         assert_changes -> { users(:jz).sessions.count }, from: 1, to: 0 do
-          users(:jz).deactivate
+          assert_difference -> { Membership.count }, -1 do
+            users(:jz).deactivate
+          end
         end
       end
     end
+
+    assert_not identities(:jz).reload.memberships.exists?(tenant: tenant)
   end
 
   test "initials" do
