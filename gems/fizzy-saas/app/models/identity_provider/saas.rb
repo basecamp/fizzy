@@ -1,22 +1,19 @@
 module IdentityProvider::Saas
-  # This is used to instantiate an Identity-like object from the `identity_token` without hitting
-  # the untenanted database. It is intended to be used with caching/etagging methods.
-  Mock = Struct.new(:id, :updated_at)
   class Error < StandardError; end
 
   extend self
-  extend Fizzy::Saas::Engine.routes.url_helpers
+  include Fizzy::Saas::Engine.routes.url_helpers
 
   def default_url_options
     Rails.application.config.action_mailer.default_url_options
   end
 
   def url_options
-    default_url_options
+    default_url_options.merge(script_name: nil)
   end
 
   def link(email_address:, to:)
-    response = InternalApiClient.new(link_identity_url(script_name: nil)).post({ email_address: email_address, to: to })
+    response = InternalApiClient.new(link_identity_url).post({ email_address: email_address, to: to })
 
     unless response.success?
       raise Error, "Failed to link identity: #{response.error || response.code}"
@@ -24,7 +21,7 @@ module IdentityProvider::Saas
   end
 
   def unlink(email_address:, from:)
-    response = InternalApiClient.new(unlink_identity_url(script_name: nil)).post({ email_address: email_address, from: from })
+    response = InternalApiClient.new(unlink_identity_url).post({ email_address: email_address, from: from })
 
     unless response.success?
       raise Error, "Failed to unlink identity: #{response.error || response.code}"
@@ -32,7 +29,7 @@ module IdentityProvider::Saas
   end
 
   def change_email_address(from:, to:, tenant:)
-    response = InternalApiClient.new(change_identity_email_address_url(script_name: nil)).post({ from: from, to: to, tenant: tenant })
+    response = InternalApiClient.new(change_identity_email_address_url).post({ from: from, to: to, tenant: tenant })
 
     unless response.success?
       raise Error, "Failed to change email address: #{response.error || response.code}"
@@ -40,7 +37,7 @@ module IdentityProvider::Saas
   end
 
   def send_magic_link(email_address)
-    response = InternalApiClient.new(send_magic_link_url(script_name: nil)).post({ email_address: email_address })
+    response = InternalApiClient.new(send_magic_link_url).post({ email_address: email_address })
 
     if response.success?
       response.parsed_body["code"]
@@ -78,7 +75,7 @@ module IdentityProvider::Saas
   private
     def wrap_identity(identity)
       if identity
-        Mock.new(identity.signed_id, identity.updated_at)
+        IdentityProvider::Token.new(identity.signed_id, identity.updated_at)
       else
         nil
       end

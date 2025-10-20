@@ -35,7 +35,7 @@ class SignupTest < ActiveSupport::TestCase
     Account.any_instance.expects(:setup_basic_template).once
 
     signup = Signup.new(
-      full_name: "Kevin Systrom",
+      full_name: "Kevin",
       company_name: "37signals",
       email_address: "kevin@example.com",
       identity: identities(:kevin)
@@ -46,7 +46,7 @@ class SignupTest < ActiveSupport::TestCase
     assert signup.tenant
     assert signup.account
     assert signup.user
-    assert_equal "Kevin Systrom", signup.user.name
+    assert_equal "Kevin", signup.user.name
     assert_equal "37signals", signup.account.name
 
     signup_invalid = Signup.new(

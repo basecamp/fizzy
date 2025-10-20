@@ -43,10 +43,6 @@ module ActiveSupport
   class TestCase
     parallelize(workers: :number_of_processors)
 
-    setup do
-      InternalApiTestHelper.setup_stubs
-    end
-
     # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
     fixtures :all
 
@@ -75,4 +71,4 @@ unless Rails.application.config.x.oss_config
   load File.expand_path("../gems/fizzy-saas/test/test_helper.rb", __dir__)
 end
 
-InternalApiTestHelper.setup_stubs
+IdentityProvider.backend = IdentityProvider::Simple

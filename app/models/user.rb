@@ -1,6 +1,6 @@
 class User < ApplicationRecord
   include Accessor, AiQuota, Assignee, Attachable, Configurable, Conversational, Highlights,
-    Invitable, Mentionable, Named, Notifiable, Role, Searcher, Staff, Transferable, Watcher
+    Identifyable, Invitable, Mentionable, Named, Notifiable, Role, Searcher, Staff, Transferable, Watcher
   include Timelined # Depends on Accessor
 
   has_one_attached :avatar
@@ -21,10 +21,6 @@ class User < ApplicationRecord
     sessions.delete_all
     accesses.destroy_all
     update! active: false, email_address: deactived_email_address
-  end
-
-  def identity
-    Identity.find_by(email_address: email_address)
   end
 
   private
