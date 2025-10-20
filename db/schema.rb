@@ -27,7 +27,6 @@ ActiveRecord::Schema[8.2].define(version: 2025_10_16_153034) do
   create_table "accounts", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "external_account_id"
-    t.string "join_code"
     t.string "name", null: false
     t.datetime "updated_at", null: false
     t.index ["external_account_id"], name: "index_accounts_on_external_account_id", unique: true

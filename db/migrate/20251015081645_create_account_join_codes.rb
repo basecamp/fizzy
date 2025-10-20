@@ -19,7 +19,13 @@ class CreateAccountJoinCodes < ActiveRecord::Migration[8.1]
       end
 
       dir.down do
+        execute <<-SQL
+          UPDATE accounts
+          SET join_code = (SELECT code FROM account_join_codes LIMIT 1);
+        SQL
       end
     end
+
+    remove_column :accounts, :join_code, :string
   end
 end
