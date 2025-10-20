@@ -1,10 +1,8 @@
 class Signups::CompletionsController < ApplicationController
+  include Restricted
+
   require_untenanted_access
   before_action :require_identity
-
-  http_basic_authenticate_with \
-    name: Rails.env.test? ? "testname" : Rails.application.credentials.account_signup_http_basic_auth.name,
-    password: Rails.env.test? ? "testpassword" : Rails.application.credentials.account_signup_http_basic_auth.password
 
   def new
     @signup = Signup.new
