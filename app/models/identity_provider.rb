@@ -1,18 +1,4 @@
 module IdentityProvider
-  Tenant = Data.define(:id, :name)
-
-  extend self
-
-  def self.backend
-    if defined?(IdentityProvider::Saas)
-      IdentityProvider::Saas
-    else
-      IdentityProvider::Simple
-    end
-  end
-
-  delegate :link, :unlink, :send_magic_link, :consume_magic_link, :tenants_for, :token_for, :resolve_token, :verify_token, to: :backend
-
   module Simple
     extend self
 
@@ -51,4 +37,12 @@ module IdentityProvider
       end
     end
   end
+
+  Tenant = Data.define(:id, :name)
+
+  extend self
+
+  mattr_accessor :backend, default: IdentityProvider::Simple
+
+  delegate :link, :unlink, :send_magic_link, :consume_magic_link, :tenants_for, :token_for, :resolve_token, :verify_token, to: :backend
 end
