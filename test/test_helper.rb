@@ -43,6 +43,10 @@ module ActiveSupport
   class TestCase
     parallelize(workers: :number_of_processors)
 
+    setup do
+      InternalApiTestHelper.setup_stubs
+    end
+
     # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
     fixtures :all
 
