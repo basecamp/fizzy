@@ -47,9 +47,8 @@ class Signup
     destroy_tenant
     destroy_queenbee_account
 
-    errors.add(:base, "An error occurred during signup: #{error.message}")
-    Rails.logger.error(error)
-    Rails.logger.error(error.backtrace.join("\n"))
+    errors.add(:base, "Something went wrong, and we couldn't create your account. Please give it another try.")
+    Rails.error.report(error, severity: :error)
 
     false
   end
