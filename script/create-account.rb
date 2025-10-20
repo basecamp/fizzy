@@ -11,7 +11,6 @@ if ARGV.size != 3
 end
 
 company_name, owner_name, owner_email = ARGV
-password = SecureRandom.hex(16)
 
 # Create a minimal Current context for the signup
 Current.set(
@@ -66,8 +65,7 @@ Current.set(
         },
         owner: {
           name: owner_name,
-          email_address: owner_email,
-          password: password
+          email_address: owner_email
         }
       )
 
@@ -99,7 +97,6 @@ Current.set(
     puts "Company: #{company_name}"
     puts "Owner: #{owner_name}"
     puts "Email: #{owner_email}"
-    puts "Password: #{password}"
     puts "Join URL: #{Rails.application.routes.url_helpers.join_url(
       join_code: join_code,
       script_name: "/#{tenant_id}",

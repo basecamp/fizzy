@@ -38,7 +38,7 @@ ApplicationRecord.with_tenant(tenant) do |tenant|
 
   Account.create_with_admin_user \
     account: { name: "Company #{identifier}" },
-    owner: { name: "Developer #{identifier}", email_address: "dev-#{identifier}@example.com", password: "secret123456" }
+    owner: { name: "Developer #{identifier}", email_address: "dev-#{identifier}@example.com" }
 
   user = User.last
   Collection.find_each do |collection|

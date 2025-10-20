@@ -5,18 +5,17 @@ class UserTest < ActiveSupport::TestCase
     user = User.create! \
       role: "member",
       name: "Victor Cooper",
-      email_address: "victor@hey.com",
-      password: "secret123456"
+      email_address: "victor@hey.com"
 
-    assert_equal user, User.authenticate_by(email_address: "victor@hey.com", password: "secret123456")
+    assert_equal [ collections(:writebook) ], user.collections
+    assert user.settings.present?
   end
 
   test "creation gives access to all_access collections" do
     user = User.create! \
       role: "member",
       name: "Victor Cooper",
-      email_address: "victor@hey.com",
-      password: "secret123456"
+      email_address: "victor@hey.com"
 
     assert_equal [ collections(:writebook) ], user.collections
   end

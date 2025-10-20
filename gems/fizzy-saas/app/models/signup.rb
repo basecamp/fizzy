@@ -19,7 +19,6 @@ class Signup
     @company_name = nil
     @full_name = nil
     @email_address = nil
-    @password = nil
     @tenant = nil
     @account = nil
     @user = nil

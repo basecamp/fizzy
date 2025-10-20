@@ -22,8 +22,7 @@ def create_tenant(signal_account_name)
       },
       owner: {
         name: "David Heinemeier Hansson",
-        email_address: "david@37signals.com",
-        password: "secret123456"
+        email_address: "david@37signals.com"
       }
     )
     account.setup_basic_template
@@ -31,7 +30,7 @@ def create_tenant(signal_account_name)
 
   ApplicationRecord.current_tenant = tenant_id
 
-  identity = Identity.find_or_create_by!(email_address: User.first.email_address)
+  identity = Identity.find_or_create_by!(email_address: User.find_by(role: :admin).email_address)
   identity.memberships.find_or_create_by!(tenant: tenant_id, account_name: Account.sole.name)
 end
 
@@ -41,8 +40,7 @@ def find_or_create_user(full_name, email_address)
   else
     user = User.create! \
       name: full_name,
-      email_address: email_address,
-      password: "secret123456"
+      email_address: email_address
 
     identity = Identity.find_or_create_by!(email_address: email_address)
     identity.memberships.find_or_create_by!(tenant: ApplicationRecord.current_tenant, account_name: Account.sole.name)

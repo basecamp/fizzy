@@ -1,21 +1,16 @@
-<% digest = BCrypt::Password.create("secret123456") %>
-
 david:
   name: David
   email_address: david@37signals.com
-  password_digest: <%= digest %>
   role: member
 
 jz:
   name: JZ
   email_address: jz@37signals.com
-  password_digest: <%= digest %>
   role: member
 
 kevin:
   name: Kevin
   email_address: kevin@37signals.com
-  password_digest: <%= digest %>
   role: admin
 
 system:

@@ -3,10 +3,11 @@ class User < ApplicationRecord
     Invitable, Mentionable, Named, Notifiable, Role, Searcher, Staff, Transferable, Watcher
   include Timelined # Depends on Accessor
 
+  self.ignored_columns = %i[ password_digest ]
+
   has_one_attached :avatar
 
   has_many :sessions, dependent: :destroy
-  has_secure_password validations: false
 
   has_many :comments, inverse_of: :creator, dependent: :destroy
 
