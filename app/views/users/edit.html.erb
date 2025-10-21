@@ -4,7 +4,7 @@
   <%= render "filters/menu" %>
 <% end %>
 
-<div class="panel shadow center">
+<div class="panel shadow center" style="--panel-size: 45ch;">
   <div class="flex flex-column gap txt-medium">
     <%= form_with model: @user, method: :patch, class: "flex flex-column gap", data: { controller: "form upload-preview" } do |form| %>
       <div class="align-center center avatar__form gap">
@@ -28,18 +28,15 @@
       <div class="flex align-center gap">
         <label class="flex align-center gap input input--actor">
           <%= form.text_field :name, class: "input full-width", autocomplete: "name", placeholder: "Name", autofocus: true, required: true, data: { "1p-ignore": true, action: "keydown.esc@document->form#cancel" } %>
-          <%= icon_tag "person", class: "txt-large" %>
         </label>
       </div>
       <div class="flex align-center gap">
-        <label class="flex align-center gap input input--actor">
+        <div class="flex align-center gap input input--actor">
           <%= form.email_field :email_address, class: "input full-width", autocomplete: "username", placeholder: "Email address", required: true, readonly: true %>
-          <%= icon_tag "email", class: "txt-large" %>
-        </label>
-        <%= link_to "Change", new_user_email_address_path(@user), class: "btn btn--secondary" %>
+          <%= link_to "Change email", new_user_email_address_path(@user), class: "btn btn--plain txt-link txt-small txt-nowrap" %>
+        </div>
       </div>
       <button type="submit" id="log_in" class="btn btn--reversed center">
-        <%= icon_tag "check" %>
         <span>Save changes</span>
       </button>
 

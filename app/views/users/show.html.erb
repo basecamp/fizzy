@@ -4,7 +4,7 @@
   <%= render "filters/menu" %>
 <% end %>
 
-<div class="panel shadow center txt-align-center margin-block-end-double">
+<div class="panel shadow center txt-align-center margin-block-end-double" style="--panel-size: 45ch;">
   <div class="flex flex-column gap position-relative">
     <% if Current.user == @user %>
       <%= link_to edit_user_path(@user), class: "user-edit-link btn" do %>
@@ -13,8 +13,8 @@
       <% end %>
     <% end %>
 
-    <div class="avatar txt-xx-large center fill-white">
-      <%= image_tag user_avatar_path(@user), alt: "Profile avatar for #{@user.name}", size: 128 %>
+    <div class="avatar txt-xx-large center fill-white btn--circle hide-focus-ring">
+      <%= image_tag user_avatar_path(@user), alt: "Profile avatar for #{@user.name}" %>
     </div>
 
     <div class="flex flex-column gap-half margin-block-end">
@@ -36,15 +36,14 @@
 </div>
 
 <% if Current.user == @user %>
-  <div class="panel shadow center margin-block-double">
+  <div class="panel shadow center margin-block-double" style="--panel-size: 45ch;">
     <%= render "users/transfer", user: @user %>
-  </div>
 
-  <div class="panel borderless center margin-block-double">
-    <%= button_to session_path, method: :delete, class: "btn center txt-medium", data: { turbo: false } do %>
-      <%= icon_tag "logout" %>
+    <div class="center margin-block-start-double">
+      <%= button_to session_path, method: :delete, class: "btn btn--plain txt-link txt-small", data: { turbo: false } do %>
       <span>Sign out</span>
     <% end %>
+    </div>
   </div>
 <% end %>
 
