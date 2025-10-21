@@ -3,7 +3,7 @@ require "test_helper"
 class Sessions::LoginMenusControllerTest < ActionDispatch::IntegrationTest
   test "show" do
     untenanted do
-      set_identity_as :kevin
+      identify_as :kevin
 
       get session_login_menu_url
 

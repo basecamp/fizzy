@@ -7,12 +7,10 @@ module SessionTestHelper
     cookies.delete :session_token
     user = users(user) unless user.is_a? User
 
-    set_identity_as user
+    identify_as user
 
-    user.reload
-    membership = Membership.joins(:identity).find_by(tenant: user.tenant, identities: { email_address: user.email_address })
     tenanted do
-      post session_login_menu_url, params: { membership_id: membership.id }
+      post session_login_menu_url
       assert_response :redirect, "Login should succeed"
 
       cookie = cookies.get_cookie "session_token"
@@ -21,7 +19,7 @@ module SessionTestHelper
     end
   end
 
-  def set_identity_as(user_or_identity)
+  def identify_as(user_or_identity)
     user = if user_or_identity.is_a?(User)
       user_or_identity
     else
