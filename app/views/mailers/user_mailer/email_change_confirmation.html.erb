@@ -1,0 +1,9 @@
+<h1 class="title">Confirm your new email address</h1>
+<p class="subtitle">Hit the button below to confirm your email address change</p>
+
+<%= link_to "Confirm email change", user_email_address_confirmation_url(@user, @token), class: "btn" %>
+
+<p class="margin-block-start-double">If you didn't request this change, you can safely ignore this email. Your email address won't be changed unless you click the button above.</p>
+
+<p class="footer">Need help? <%= mail_to "support@37signals.com", "Email us"%>.
+</p>

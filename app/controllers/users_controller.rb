@@ -61,7 +61,7 @@ class UsersController < ApplicationController
     end
 
     def user_params
-      params.expect(user: [ :name, :email_address, :avatar ])
+      params.expect(user: [ :name, :avatar ])
     end
 
     def invite_params

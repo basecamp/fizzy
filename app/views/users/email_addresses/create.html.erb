@@ -1,0 +1,19 @@
+<% @page_title = "Check your email" %>
+
+<% content_for :header do %>
+  <%= render "filters/menu" %>
+<% end %>
+
+<div class="panel shadow center">
+  <div class="flex flex-column gap txt-medium center">
+    <%= icon_tag "email", class: "txt-xx-large" %>
+
+    <h1 class="txt-large">Check your email</h1>
+
+    <p>We've sent a confirmation link to <strong><%= params[:email_address] %></strong></p>
+
+    <p>Click the link in the email to confirm your new email address.</p>
+
+    <%= link_to "Back to profile", edit_user_path(@user), class: "btn btn--secondary center" %>
+  </div>
+</div>

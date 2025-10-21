@@ -1,0 +1,7 @@
+Confirm your new email address
+<%= "=" * 80 %>
+
+Open this link in your browser to confirm your email address change:
+<%= user_email_address_confirmation_url(@user, @token) %>
+
+If you didn't request this change, you can safely ignore this email. Your email address won't be changed unless you click the link above.

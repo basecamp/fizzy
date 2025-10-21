@@ -1,0 +1,27 @@
+<% @page_title = "Change email address" %>
+
+<% content_for :header do %>
+  <%= render "filters/menu" %>
+<% end %>
+
+<div class="panel shadow center">
+  <div class="flex flex-column gap txt-medium">
+    <h1 class="txt-large">Change email address</h1>
+
+    <%= form_with url: user_email_addresses_path(@user), method: :post, class: "flex flex-column gap", data: { turbo: false } do |form| %>
+      <div class="flex align-center gap">
+        <label class="flex align-center gap input input--actor">
+          <%= form.email_field :email_address, class: "input full-width", autocomplete: "email", placeholder: "New email address", autofocus: true, required: true %>
+          <%= icon_tag "email", class: "txt-large" %>
+        </label>
+      </div>
+
+      <button type="submit" class="btn btn--reversed center">
+        <%= icon_tag "check" %>
+        <span>Continue</span>
+      </button>
+
+      <%= link_to "Cancel", edit_user_path(@user), class: "btn btn--secondary center" %>
+    <% end %>
+  </div>
+</div>

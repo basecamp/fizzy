@@ -33,9 +33,10 @@
       </div>
       <div class="flex align-center gap">
         <label class="flex align-center gap input input--actor">
-          <%= form.email_field :email_address, class: "input full-width", autocomplete: "username", placeholder: "Email address", required: true %>
+          <%= form.email_field :email_address, class: "input full-width", autocomplete: "username", placeholder: "Email address", required: true, readonly: true %>
           <%= icon_tag "email", class: "txt-large" %>
         </label>
+        <%= link_to "Change", new_user_email_address_path(@user), class: "btn btn--secondary" %>
       </div>
       <button type="submit" id="log_in" class="btn btn--reversed center">
         <%= icon_tag "check" %>
