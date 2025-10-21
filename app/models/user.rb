@@ -1,6 +1,7 @@
 class User < ApplicationRecord
-  include Accessor, AiQuota, Assignee, Attachable, Configurable, Conversational, Highlights,
-    Invitable, Mentionable, Named, Notifiable, Role, Searcher, Staff, Transferable, Watcher
+  include Accessor, AiQuota, Assignee, Attachable, Configurable, Conversational, EmailAddressChangeable,
+    Highlights, Identifiable, Invitable, Mentionable, Named, Notifiable, Role, Searcher, Staff,
+    Transferable, Watcher
   include Timelined # Depends on Accessor
 
   self.ignored_columns = %i[ password_digest ]
@@ -18,16 +19,12 @@ class User < ApplicationRecord
 
   normalizes :email_address, with: ->(value) { value.strip.downcase }
 
-  def identity
-    Identity.find_by(email_address: email_address)
-  end
-
   def deactivate
     sessions.delete_all
     accesses.destroy_all
     old_email = email_address
     update! active: false, email_address: deactived_email_address
-    IdentityProvider.unlink(email_address: old_email, from: tenant)
+    unlink_identity
   end
 
   private

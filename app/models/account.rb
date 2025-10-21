@@ -7,9 +7,10 @@ class Account < ApplicationRecord
 
   class << self
     def create_with_admin_user(account:, owner:)
-      User.system
-      User.create!(**owner.reverse_merge(role: "admin"))
-      create!(**account)
+      create!(**account).tap do
+        User.system
+        User.create!(**owner.reverse_merge(role: "admin"))
+      end
     end
   end
 
