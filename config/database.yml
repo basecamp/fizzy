@@ -32,7 +32,8 @@ development:
     migrations_paths: db/cache_migrate
   queue:
     <<: *default
-    database: storage/zones/<%= Rails.env %>/%{tenant}/development_queue.sqlite3
+    adapter: <%= local_adapter %>
+    database: storage/zones/<%= Rails.env %>/%{tenant}/queue.sqlite3
     migrations_paths: db/queue_migrate
     tenanted: true
 
@@ -72,7 +73,8 @@ production: &production
     migrations_paths: db/cache_migrate
   queue:
     <<: *default
-    database: storage/production_queue.sqlite3
+    adapter: beamer
+    database: storage/zones/<%= Rails.env %>/%{tenant}/queue.sqlite3
     migrations_paths: db/queue_migrate
 
 beta: *production
