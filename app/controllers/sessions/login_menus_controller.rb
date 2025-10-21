@@ -2,6 +2,7 @@ class Sessions::LoginMenusController < ApplicationController
   require_untenanted_access only: :show
   allow_unauthenticated_access only: :create
   skip_before_action :verify_authenticity_token, only: :create
+  before_action :require_identity, only: :show
 
   def show
     @tenants = IdentityProvider.tenants_for(resume_identity)
