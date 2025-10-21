@@ -3,7 +3,7 @@
 <% content_for :header do %>
   <nav>
     <div class="fizzy-header-logo center flex-inline align-center txt-normal">
-      <%= inline_svg "fizzy-logo" %>
+      <%= image_tag "fizzy-logo.png", style: "inline-size: 1.15em; margin-inline-end: 0.8ch; block-size: auto;" %>
       <strong class="txt-medium overflow-ellipsis margin-none">Fizzy</strong>
     </div>
   </nav>
@@ -21,7 +21,7 @@
       <menu class="popup__list pad border-radius border">
         <% @tenants.each do |tenant| %>
           <li class="popup__item txt-medium">
-            <%= icon_tag "logo-color", class: "popup__icon" %>
+            <%= icon_tag "marker", class: "popup__icon" %>
             <%= link_to new_session_start_url(script_name: "/#{tenant.id}"), class: "btn overflow-ellipsis fill-transparent popup__btn" do %>
               <strong><%= tenant.name %></strong>
             <% end %>
