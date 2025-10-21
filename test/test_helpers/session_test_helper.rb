@@ -10,7 +10,7 @@ module SessionTestHelper
     identify_as user
 
     tenanted do
-      post session_login_menu_url
+      post session_start_url
       assert_response :redirect, "Login should succeed"
 
       cookie = cookies.get_cookie "session_token"

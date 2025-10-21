@@ -22,7 +22,7 @@
         <% @tenants.each do |tenant| %>
           <li class="popup__item txt-medium">
             <%= icon_tag "logo-color", class: "popup__icon" %>
-            <%= button_to session_login_menu_url(membership_id: 0, script_name: "/#{tenant.id}"), method: :post, class: "btn overflow-ellipsis fill-transparent popup__btn", form_class: "max-width flex-item-grow" do %>
+            <%= link_to new_session_start_url(script_name: "/#{tenant.id}"), class: "btn overflow-ellipsis fill-transparent popup__btn" do %>
               <strong><%= tenant.name %></strong>
             <% end %>
           </li>

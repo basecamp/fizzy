@@ -12,7 +12,7 @@ class Signups::CompletionsController < ApplicationController
     @signup = Signup.new(signup_params)
 
     if @signup.complete
-      redirect_to session_login_menu_path(go_to: @signup.tenant)
+      redirect_to new_session_start_url(script_name: "/#{@signup.tenant}")
     else
       render :new, status: :unprocessable_entity
     end
