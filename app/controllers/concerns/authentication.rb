@@ -29,6 +29,10 @@ module Authentication
       skip_before_action :require_authentication, **options
       before_action :redirect_tenanted_request, **options
     end
+
+    def require_identity(**options)
+      before_action :require_identity, **options
+    end
   end
 
   private
