@@ -1,5 +1,5 @@
 <% @hide_footer_frames = true %>
-<% @page_title = "Signing into #{Account.sole.name}" %>
+<% @page_title = "Signing in..." %>
 
 <% content_for :header do %>
   <nav>
@@ -10,14 +10,16 @@
   </nav>
 <% end %>
 
-<div
-  class="panel shadow center margin-block-double flex flex-column gap-half"
-  style="--panel-size: 42ch; view-transition-name: sign-in-panel; --popup-icon-size: 24px; --popup-item-padding-inline: 0.5rem;"
->
-  <h1 class="txt-x-large font-weight-black margin-none"><%= @page_title %></h1>
+<div class="panel shadow center flex flex-column gap-half" style="--panel-size: 45ch;">
+  <header>
+    <h1 class="txt-x-large font-weight-black margin-none">
+      <%= @page_title %>
+    </h1>
+    <p class="margin-none">Just a sec while we sign you in with <%= Account.sole.name %>.</p>
+  </header>
 
   <%= form_with url: session_start_path, method: :post, data: { controller: "auto-submit" } do |form| %>
-    <%= form.button "Continue", type: "submit", class: "btn btn-primary" %>
+    <%= form.button "Sign in", type: "submit", class: "btn btn-primary", data: { turbo_submits_with: "Signing in..." } %>
   <% end %>
 </div>
 
