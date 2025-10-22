@@ -20,9 +20,11 @@ class User < ApplicationRecord
   normalizes :email_address, with: ->(value) { value.strip.downcase }
 
   def deactivate
-    old_email = email_address
+    old_email_address = email_address
+
     sessions.delete_all
     accesses.destroy_all
+
     update! active: false, email_address: deactivated_email_address
     IdentityProvider.unlink(email_address: old_email_address, from: tenant)
   rescue => e
