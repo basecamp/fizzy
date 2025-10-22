@@ -2,6 +2,7 @@ class SignupsController < ApplicationController
   include Restricted
 
   require_untenanted_access
+  require_unidentified_access
 
   rate_limit only: :create, name: "short-term", to: 5,  within: 3.minutes,
              with: -> { redirect_to saas.new_signup_path, alert: "Try again later." }

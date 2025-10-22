@@ -2,7 +2,7 @@ class Signups::CompletionsController < ApplicationController
   include Restricted
 
   require_untenanted_access
-  before_action :require_identity
+  require_identified_access
 
   def new
     @signup = Signup.new

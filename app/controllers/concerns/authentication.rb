@@ -21,6 +21,7 @@ module Authentication
 
     def allow_unauthenticated_access(**options)
       skip_before_action :require_authentication, **options
+      before_action :resume_identity, **options
       before_action :resume_session, **options
     end
 
@@ -30,8 +31,13 @@ module Authentication
       before_action :redirect_tenanted_request, **options
     end
 
-    def require_identity(**options)
+    def require_identified_access(**options)
       before_action :require_identity, **options
+    end
+
+    def require_unidentified_access(**options)
+      before_action :resume_identity, **options
+      before_action :redirect_request_with_identification, **options
     end
   end
 
@@ -108,6 +114,10 @@ module Authentication
 
     def redirect_tenanted_request
       redirect_to root_url if ApplicationRecord.current_tenant
+    end
+
+    def redirect_request_with_identification
+      redirect_to session_login_menu_path(script_name: nil) if Current.identity_token.present?
     end
 
     def start_new_session_for(user)

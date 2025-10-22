@@ -1,5 +1,6 @@
 class Sessions::StartsController < ApplicationController
   allow_unauthenticated_access
+  require_identified_access
 
   def new
   end
