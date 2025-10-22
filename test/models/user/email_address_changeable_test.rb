@@ -1,13 +1,14 @@
 require "test_helper"
 
 class User::EmailAddressChangeableTest < ActiveSupport::TestCase
-  test "generate_email_address_change_token" do
+  test "send_email_address_change_confirmation" do
     user = users(:david)
     new_email_address = "new@example.com"
 
-    token = user.generate_email_address_change_token(to: new_email_address)
+    assert_enqueued_jobs 1, only: ActionMailer::MailDeliveryJob do
+      user.send_email_address_change_confirmation(new_email_address)
+    end
 
-    assert_kind_of String, token
     assert_not_equal new_email_address, user.reload.email_address
   end
 
@@ -16,7 +17,12 @@ class User::EmailAddressChangeableTest < ActiveSupport::TestCase
     old_email = user.email_address
     new_email = "david.new@37signals.com"
 
-    token = user.generate_email_address_change_token(from: old_email, to: new_email)
+    token = user.to_sgid(
+      for: User::EmailAddressChangeable::EMAIL_CHANGE_TOKEN_PURPOSE,
+      expires_in: 30.minutes,
+      old_email_address: old_email,
+      new_email_address: new_email
+    ).to_s
 
     assert_equal old_email, user.reload.email_address
 

@@ -33,7 +33,8 @@ class Signups::CompletionsControllerTest < ActionDispatch::IntegrationTest
         }, headers: http_basic_auth_headers
       end
 
-      assert_redirected_to session_login_menu_path(go_to: Membership.last.tenant), "Successful completion should redirect to login menu"
+      tenant = Membership.last.tenant
+      assert_redirected_to new_session_start_url(script_name: "/#{tenant}"), "Successful completion should redirect to start session in new tenant"
 
       post saas.signup_completion_path, params: {
         signup: {

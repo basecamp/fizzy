@@ -6,8 +6,7 @@ class Users::EmailAddressesController < ApplicationController
   end
 
   def create
-    token = @user.generate_email_address_change_token(to: new_email_address, expires_in: 30.minutes)
-    UserMailer.email_change_confirmation(user: @user, email_address: new_email_address, token: token).deliver_later
+    @user.send_email_address_change_confirmation(new_email_address)
   end
 
   private

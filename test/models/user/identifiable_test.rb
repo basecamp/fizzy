@@ -12,20 +12,6 @@ class User::IdentifiableTest < ActiveSupport::TestCase
     assert_equal "newuser@example.com", user.identity.email_address
   end
 
-  test "update email address" do
-    user = users(:david)
-    old_email = user.email_address
-    new_email = "david.updated@example.com"
-
-    assert_not Identity.find_by(email_address: new_email)
-
-    user.update!(email_address: new_email)
-
-    new_identity = Identity.find_by(email_address: new_email)
-    assert new_identity.present?
-    assert new_identity.memberships.exists?(tenant: user.tenant)
-  end
-
   test "destroy" do
     user = User.create!(name: "Bob")
 
