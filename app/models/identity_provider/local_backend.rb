@@ -1,4 +1,4 @@
-module IdentityProvider::Simple
+module IdentityProvider::LocalBackend
   extend self
 
   def link(email_address:, to:)

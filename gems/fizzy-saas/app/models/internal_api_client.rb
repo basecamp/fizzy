@@ -3,7 +3,7 @@ class InternalApiClient
   TOKEN_KEY = "internal_api_client_token"
   USER_AGENT = "fizzy/1.0.0 InternalApiClient"
   SIGNATURE_HEADER = "X-Internal-Signature"
-  DEFAULT_TIMEOUT = 5.seconds
+  DEFAULT_TIMEOUT = 60.seconds
 
   class Error < StandardError; end
   class TimeoutError < Error; end

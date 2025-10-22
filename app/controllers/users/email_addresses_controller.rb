@@ -6,7 +6,12 @@ class Users::EmailAddressesController < ApplicationController
   end
 
   def create
-    @user.send_email_address_change_confirmation(new_email_address)
+    if User.exists?(email_address: new_email_address)
+      flash.now[:alert] = "Someone else already uses that email"
+      render :new, status: :unprocessable_entity
+    else
+      @user.send_email_address_change_confirmation(new_email_address)
+    end
   end
 
   private
