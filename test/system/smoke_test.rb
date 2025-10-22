@@ -43,7 +43,37 @@ class SmokeTest < ApplicationSystemTestCase
 
   private
     def sign_in_as(user)
-      visit session_transfer_url(user.transfer_id)
+      # Visit app first to establish domain for cookies
+      visit root_url
+
+      identity = Identity.find_or_create_by!(email_address: user.email_address)
+      identity.link_to(user.tenant)
+
+      session = user.sessions.create!(user_agent: "Test", ip_address: "127.0.0.1")
+
+      secret_key_base = Rails.application.secret_key_base
+      key_generator = ActiveSupport::KeyGenerator.new(secret_key_base, iterations: 1000)
+      secret = key_generator.generate_key("signed cookie")
+      verifier = ActiveSupport::MessageVerifier.new(secret, serializer: JSON)
+
+      identity_token = IdentityProvider::Token.new(identity.signed_id, identity.updated_at)
+      signed_identity_token = verifier.generate(identity_token.to_h)
+      signed_session_token = verifier.generate(session.signed_id)
+
+      # Set cookies in browser
+      Capybara.current_session.driver.browser.manage.add_cookie(
+        name: "identity_token",
+        value: signed_identity_token,
+        path: "/"
+      )
+
+      Capybara.current_session.driver.browser.manage.add_cookie(
+        name: "session_token",
+        value: signed_session_token,
+        path: "/#{user.tenant}"
+      )
+
+      visit root_url
       assert_selector "h1", text: "Activity"
     end
 
