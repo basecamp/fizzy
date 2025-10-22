@@ -10,24 +10,35 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2025_09_24_190729) do
+ActiveRecord::Schema[8.2].define(version: 2025_10_15_173452) do
   create_table "identities", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.string "email_address"
     t.datetime "updated_at", null: false
+    t.index ["email_address"], name: "index_identities_on_email_address", unique: true
+  end
+
+  create_table "magic_links", force: :cascade do |t|
+    t.string "code", null: false
+    t.datetime "created_at", null: false
+    t.datetime "expires_at", null: false
+    t.integer "identity_id"
+    t.datetime "updated_at", null: false
+    t.index ["code"], name: "index_magic_links_on_code", unique: true
+    t.index ["expires_at"], name: "index_magic_links_on_expires_at"
+    t.index ["identity_id"], name: "index_magic_links_on_identity_id"
   end
 
   create_table "memberships", force: :cascade do |t|
     t.string "account_name", null: false
     t.datetime "created_at", null: false
-    t.string "email_address", null: false
     t.integer "identity_id", null: false
+    t.string "tenant", null: false
     t.datetime "updated_at", null: false
-    t.integer "user_id", null: false
-    t.string "user_tenant", null: false
-    t.index ["email_address"], name: "index_memberships_on_email_address"
     t.index ["identity_id"], name: "index_memberships_on_identity_id"
-    t.index ["user_tenant", "user_id"], name: "index_memberships_on_user_tenant_and_user_id"
+    t.index ["tenant"], name: "index_memberships_on_user_tenant_and_user_id"
   end
 
+  add_foreign_key "magic_links", "identities"
   add_foreign_key "memberships", "identities"
 end
