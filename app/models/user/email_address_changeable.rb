@@ -9,6 +9,16 @@ module User::EmailAddressChangeable
     UserMailer.email_change_confirmation(user: self, email_address: new_email_address, token: token).deliver_later
   end
 
+  def generate_email_address_change_token(from: email_address, to:, **options)
+    options = options.reverse_merge(
+      for: EMAIL_CHANGE_TOKEN_PURPOSE,
+      old_email_address: from,
+      new_email_address: to
+    )
+
+    to_sgid(**options).to_s
+  end
+
   def change_email_address_using_token(token)
     parsed_token = SignedGlobalID.parse(token, for: EMAIL_CHANGE_TOKEN_PURPOSE)
 
@@ -24,16 +34,6 @@ module User::EmailAddressChangeable
   end
 
   private
-    def generate_email_address_change_token(from: email_address, to:, **options)
-      options = options.reverse_merge(
-        for: EMAIL_CHANGE_TOKEN_PURPOSE,
-        old_email_address: from,
-        new_email_address: to
-      )
-
-      to_sgid(**options).to_s
-    end
-
     def change_email_address(new_email_address)
       old_email_address = email_address
       update!(email_address: new_email_address)

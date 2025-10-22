@@ -12,17 +12,23 @@ class User::EmailAddressChangeableTest < ActiveSupport::TestCase
     assert_not_equal new_email_address, user.reload.email_address
   end
 
+  test "generate_email_address_change_token" do
+    user = users(:david)
+    old_email = user.email_address
+    new_email = "david.new@37signals.com"
+
+    token = user.generate_email_address_change_token(to: new_email, expires_in: 30.minutes)
+
+    assert_kind_of String, token
+    assert token.present?
+  end
+
   test "change_email_address_using_token" do
     user = users(:david)
     old_email = user.email_address
     new_email = "david.new@37signals.com"
 
-    token = user.to_sgid(
-      for: User::EmailAddressChangeable::EMAIL_CHANGE_TOKEN_PURPOSE,
-      expires_in: 30.minutes,
-      old_email_address: old_email,
-      new_email_address: new_email
-    ).to_s
+    token = user.generate_email_address_change_token(to: new_email, expires_in: 30.minutes)
 
     assert_equal old_email, user.reload.email_address
 
