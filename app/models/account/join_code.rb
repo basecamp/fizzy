@@ -11,10 +11,13 @@ class Account::JoinCode < ApplicationRecord
 
   class << self
     def redeem(code)
-      find_by(code: code)&.tap do |join_code|
-        if join_code.active?
-          join_code.increment!(:usage_count)
-        end
+      join_code = find_by(code: code)
+
+      if join_code&.active?
+        join_code.increment!(:usage_count)
+        true
+      else
+        false
       end
     end
 
@@ -28,7 +31,9 @@ class Account::JoinCode < ApplicationRecord
   end
 
   def reset
-    update!(code: generate_code, usage_count: 0)
+    generate_code
+    self.usage_count = 0
+    save!
   end
 
   private
