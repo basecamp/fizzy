@@ -19,10 +19,7 @@ module User::EmailAddressChangeable
     elsif email_address != parsed_token.params.fetch("old_email_address")
       raise ArgumentError, "The token was generated for a different email address"
     else
-      old_email_address = email_address
-      new_email_address = parsed_token.params.fetch("new_email_address")
-      update!(email_address: new_email_address)
-      IdentityProvider.change_email_address(from: old_email_address, to: new_email_address, tenant: tenant)
+      change_email_address(parsed_token.params.fetch("new_email_address"))
     end
   end
 
@@ -35,5 +32,17 @@ module User::EmailAddressChangeable
       )
 
       to_sgid(**options).to_s
+    end
+
+    def change_email_address(new_email_address)
+      old_email_address = email_address
+      update!(email_address: new_email_address)
+
+      begin
+        IdentityProvider.change_email_address(from: old_email_address, to: new_email_address, tenant: tenant)
+      rescue => e
+        update!(email_address: old_email_address)
+        raise e
+      end
     end
 end
