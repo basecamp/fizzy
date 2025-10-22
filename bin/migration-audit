@@ -62,12 +62,15 @@ echo
 
 step "Deleting schema files" rm -f db/schema.rb db/schema_cache.yml
 
-step "Deleting tenant directory" rm -rf storage/tenants/development/175932900
+temporary_tenant="9999999999"
+step "Creating temporary tenant" bash -c "bin/rails runner \"ApplicationRecord.create_tenant(\"$temporary_tenant\")\""
+
+step "Deleting tenant directory" rm -rf storage/tenants/development/$temporary_tenant
 
 step --spin "Migrating..." "Regenerating schema files" bin/rails db:migrate
 
 # Check if the schema files have any git changes
-if git diff --quiet db/schema.rb db/schema_cache.yml; then
+if git diff --quiet -- db/schema.rb db/schema_cache.yml; then
   gum style --foreground 46 "✓ Schema files are in sync with migrations"
   exit 0
 else
