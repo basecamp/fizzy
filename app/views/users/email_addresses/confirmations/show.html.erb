@@ -4,19 +4,19 @@
   <%= render "filters/menu" %>
 <% end %>
 
-<div class="panel shadow center">
-  <div class="flex flex-column gap txt-medium center">
-    <%= icon_tag "email", class: "txt-xx-large" %>
+<div class="panel shadow center flex flex-column gap-half" style="--panel-size: 45ch;">
+  <header>
+    <h1 class="txt-x-large font-weight-black margin-none">
+      <%= @page_title %>
+    </h1>
+    <p class="margin-none">Just a sec while we confirm your new email address.</p>
+  </header>
 
-    <h1 class="txt-large">Confirming email change...</h1>
+  <%= form_with url: user_email_address_confirmation_path(@user, params[:email_address_token]), method: :post, data: { controller: "auto-submit" } do |form| %>
+    <%= form.hidden_field :email_address_token, value: params[:email_address_token] %>
 
-    <%= form_with url: user_email_address_confirmation_path(@user, params[:email_address_token]), method: :post, data: { controller: "auto-submit" } do |form| %>
-      <%= form.hidden_field :email_address_token, value: params[:email_address_token] %>
-
-      <button type="submit" class="btn btn--reversed center">
-        <%= icon_tag "check" %>
-        <span>Confirm email change</span>
-      </button>
-    <% end %>
-  </div>
+    <button type="submit" class="btn btn--link center">
+      <span>Done</span>
+    </button>
+  <% end %>
 </div>

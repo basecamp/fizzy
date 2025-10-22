@@ -1,19 +1,18 @@
-<% @page_title = "Check your email" %>
+<% @page_title = "Confirm your new email address" %>
 
 <% content_for :header do %>
   <%= render "filters/menu" %>
+  <div class="header__actions header__actions--start">
+    <%= link_to user_path(@user), class: "btn borderless txt-medium", data: { controller: "hotkey", action: "keydown.esc@document->hotkey#click" } do %>
+      <span class="overflow-ellipsis">&larr; <strong>My profile</strong></span>
+    <% end %>
+  </div>
 <% end %>
 
-<div class="panel shadow center">
-  <div class="flex flex-column gap txt-medium center">
-    <%= icon_tag "email", class: "txt-xx-large" %>
+<div class="panel shadow center flex flex-column gap-half" style="--panel-size: 45ch;">
+  <h1 class="txt-x-large font-weight-black margin-none">Check your email</h1>
+  <p class="margin-none">We just sent an email to <strong><%= params[:email_address] %></strong></p>
+  <p class="margin-none-block-start">Hit the link in the email to confirm this is the email address you want to use with Fizzy going forward.</p>
 
-    <h1 class="txt-large">Check your email</h1>
-
-    <p>We've sent a confirmation link to <strong><%= params[:email_address] %></strong></p>
-
-    <p>Click the link in the email to confirm your new email address.</p>
-
-    <%= link_to "Back to profile", edit_user_path(@user), class: "btn btn--secondary center" %>
-  </div>
+  <%= link_to "Done", edit_user_path(@user), class: "btn btn--link center" %>
 </div>
