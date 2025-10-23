@@ -23,7 +23,7 @@ module Ai::Prompts
           - The system user can post comments in cards relative to certain events.
         * An open card can be:
           - Postponed (Not now)
-          - Pending triage in the Stream
+          - Pending triage in Maybe?
           - Triaged into a column
         * Both card and comments generate events relative to their lifecycle or to what the user do with them.
         * The system user can close cards due to inactivity. Refer to these as *auto-closed cards*.

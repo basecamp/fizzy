@@ -43,10 +43,6 @@
             0 0.4em 0.4em oklch(var(--lch-black) / 5%),
             0 0.8em 0.8em oklch(var(--lch-black) / 5%);
 
-  /* Patterns */
-  --wavy-background-mask: radial-gradient(6px at 50% calc(100% + 3px), transparent calc(99% - 2px), black calc(101% - 2px) 99%, transparent 101%) calc(50% - 8px) calc(50% - 3px + .5px)/16px 6px,
- radial-gradient(6px at 50% -3px, transparent calc(99% - 2px), black calc(101% - 2px) 99%, transparent 101%) 50% calc(50% + 3px)/16px 6px;
-
   /* Components */
   --btn-size: 2.65em;
   --footer-height: 2.65rem;

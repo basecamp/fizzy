@@ -38,7 +38,7 @@ module Card::Promptable
         elsif triaged?
           "#{column&.name}"
         else
-          "The stream"
+          "Maybe?"
         end
       else
         "Closed (by #{closed_by&.name} at #{closed_at})"

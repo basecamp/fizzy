@@ -529,7 +529,22 @@
     overflow: hidden;
     position: absolute;
 
-    /* Fade */
+    &:not(.pinstripes--alt) {
+      background-color: oklch(var(--lch-blue-lightest));
+    }
+  }
+
+  .pinstripes--alt {
+    --pinstripe-spacing: 10px; /* 2x previous spacing value */
+  }
+
+  .pinstripes__fade {
+    background: linear-gradient(to right, var(--color-canvas) 10%, transparent 20%, transparent 80%, var(--color-canvas) 90%);
+    content: "";
+    inset: 0;
+    position: absolute;
+
+    /* Fade top/bottom */
     &:before,
     &:after {
       background: radial-gradient(
@@ -551,17 +566,6 @@
       inset-block: auto 0;
       rotate: 180deg;
     }
-  }
-
-  .pinstripes--alt {
-    --pinstripe-spacing: 10px; /* 2x previous spacing value */
-  }
-
-  .pinstripes__fade {
-    background: linear-gradient(to right, var(--color-canvas), transparent 10%, transparent 90%, var(--color-canvas));
-    content: "";
-    inset: 0;
-    position: absolute;
   }
 
   /* Collection tools
@@ -708,14 +712,24 @@
   }
 
   @supports(mask: radial-gradient(black)) {
-    .card__column-name--stream:before {
-      background: white;
+    .card__column-name--maybe:before {
+      --pinstripe-color: var(--color-canvas);
+      --pinstripe-spacing: 5px;
+
       content: "";
       inset: 0;
-      mask: var(--wavy-background-mask);
       position: absolute;
       z-index: 0;
-      opacity: 0.25;
+
+      background: white;
+      background: repeating-linear-gradient(
+        90deg,
+        var(--pinstripe-color),
+        var(--pinstripe-color) 1px,
+        transparent 1px,
+        transparent var(--pinstripe-spacing)
+      );
+      opacity: 0.35;
     }
   }
 }
