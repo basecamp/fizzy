@@ -4,6 +4,8 @@ class Signups::CompletionsController < ApplicationController
   require_untenanted_access
   require_identified_access
 
+  layout "public"
+
   def new
     @signup = Signup.new
   end

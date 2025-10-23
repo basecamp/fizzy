@@ -1,33 +1,15 @@
-<% @page_title = "Sign up for Fizzy" %>
+<% @page_title = "Create your account" %>
 
-<div
-  class="panel shadow center margin-block-double <%= "shake" if flash[:alert] %>"
-  style="--panel-size: 65ch;"
->
-  <h1 class="txt-xx-large margin-block-end-double">Create your account</h1>
+<div class="panel panel--centered flex flex-column gap-half <%= "shake" if flash[:alert] %>">
+  <h1 class="txt-x-large font-weight-black margin-none"><%= @page_title %></h1>
 
-  <h2 class="margin-block-end-double">
-    Great! We just need two more things...
-  </h2>
-
-  <%= form_with model: @signup, url: saas.signup_completion_path, scope: "signup", class: "flex flex-column gap txt-large", data: { turbo: false } do |form| %>
-    <div class="flex align-center gap">
-      <label class="flex align-center gap input input--actor txt-large">
-        <%= form.text_field :full_name, class: "input", autocomplete: "name", placeholder: "Your name", autofocus: true, required: true %>
-        <%= icon_tag "person", class: "txt-large" %>
-      </label>
-    </div>
-
-    <div class="flex align-center gap">
-      <label class="flex align-center gap input input--actor txt-large">
-        <%= form.text_field :company_name, class: "input", autocomplete: "organization", placeholder: "Your organization", required: true %>
-        <%= icon_tag "building", class: "txt-large" %>
-      </label>
-    </div>
+  <%= form_with model: @signup, url: saas.signup_completion_path, scope: "signup", class: "flex flex-column gap", data: { turbo: false } do |form| %>
+    <%= form.text_field :full_name, class: "input", autocomplete: "name", placeholder: "Your name", autofocus: true, required: true %>
+    <%= form.text_field :company_name, class: "input", autocomplete: "organization", placeholder: "Your organization", required: true %>
 
     <% if @signup.errors.any? %>
-      <div class="alert alert--error">
-        <ul class="margin-block-none">
+      <div class="margin-block-half">
+        <ul class="margin-block-none txt-negative txt-small">
           <% @signup.errors.full_messages.each do |message| %>
             <li><%= message %></li>
           <% end %>
@@ -35,8 +17,13 @@
       </div>
     <% end %>
 
-    <button type="submit" class="btn btn--reversed center">
-      <span>Finish</span>
+    <button type="submit" class="btn btn--link center">
+      <span>Continue</span>
+      <%= icon_tag "arrow-right" %>
     </button>
   <% end %>
 </div>
+
+<% content_for :footer do %>
+  <%= render "sessions/footer" %>
+<% end %>
