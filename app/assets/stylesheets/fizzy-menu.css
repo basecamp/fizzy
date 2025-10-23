@@ -1,13 +1,13 @@
 @layer components {
-  .fizzy-header-logo {
+  .boxcar-header-logo {
+    color: var(--color-ink);
     inline-size: auto;
     margin-block-start: 0.1em;
 
-    svg {
+    img {
       block-size: auto;
-      inline-size: 1.1em;
-      margin-block-end: 0.2em;
-      margin-inline-end: 0.8ch;
+      inline-size: 1.15em; 
+      margin-inline-end: 0.8ch; 
     }
   }
 

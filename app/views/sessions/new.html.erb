@@ -1,19 +1,7 @@
 <% @page_title = "Sign in" %>
 
-<% content_for :header do %>
-  <nav>
-    <div class="fizzy-header-logo center flex-inline align-center txt-normal">
-      <%= image_tag "logo.png", style: "inline-size: 1.15em; margin-inline-end: 0.8ch; block-size: auto;" %>
-      <strong class="txt-medium overflow-ellipsis margin-none">Fizzy</strong>
-    </div>
-  </nav>
-<% end %>
-
-<div class="panel shadow center margin-block-double flex flex-column gap-half" style="--panel-size: 42ch; view-transition-name: sign-in-panel">
-  <header>
-    <h1 class="txt-x-large font-weight-black margin-none"><%= @page_title %></h1>
-    <p class="margin-none-block-start">Enter your email address to continue</p>
-  </header>
+<div class="panel panel--centered flex flex-column gap-half">
+  <h1 class="txt-x-large font-weight-black margin-none"><%= @page_title %></h1>
 
   <%= form_with url: session_path, class: "flex flex-column gap txt-medium" do |form| %>
     <div class="flex align-center gap">
@@ -23,14 +11,12 @@
     </div>
 
     <button type="submit" id="log_in" class="btn btn--link center">
-      <span>Go</span>
+      <span>Continue</span>
       <%= icon_tag "arrow-right" %>
     </button>
   <% end %>
 </div>
 
 <% content_for :footer do %>
-  <div class="txt-align-center center margin-block-double txt-subtle">
-    Fizzy&trade; Beta. <%= mail_to "support@37signals.com", "Need help?", class: "txt-link" %>
-  </div>
+  <%= render "sessions/footer" %>
 <% end %>

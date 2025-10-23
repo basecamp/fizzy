@@ -1,22 +1,13 @@
 <% @page_title = "Choose an account" %>
 
-<% content_for :header do %>
-  <nav>
-    <div class="fizzy-header-logo center flex-inline align-center txt-normal">
-      <%= image_tag "logo.png", style: "inline-size: 1.15em; margin-inline-end: 0.8ch; block-size: auto;" %>
-      <strong class="txt-medium overflow-ellipsis margin-none">Fizzy</strong>
-    </div>
-  </nav>
-<% end %>
-
 <% cache [ Current.identity_token, @tenants ] do %>
   <div
-    class="panel shadow center margin-block-double flex flex-column gap-half"
-    style="--panel-size: 42ch; view-transition-name: sign-in-panel; --popup-icon-size: 24px; --popup-item-padding-inline: 0.5rem;"
+    class="panel panel--centered flex flex-column gap-half"
+    style="--popup-icon-size: 24px; --popup-item-padding-inline: 0.5rem;"
   >
     <% if @tenants.present? %>
       <h1 class="txt-x-large font-weight-black margin-none">
-        Choose a Fizzy account
+        Your BOXCAR accounts
       </h1>
       <menu class="popup__list pad border-radius border">
         <% @tenants.each do |tenant| %>
@@ -30,14 +21,13 @@
       </menu>
     <% else %>
       <h1 class="txt-x-large font-weight-black margin-none">Hmm...</h1>
-      <p class="margin-none-block-start">You don’t have any Fizzy accounts.</p>
+      <p class="margin-none-block-start">You don’t have any BOXCAR accounts.</p>
     <% end %>
 
     <% if defined?(saas) %>
       <div class="margin-block-start">
-        <%= link_to saas.new_signup_completion_path, class: "btn center txt-small" do %>
-          <%= icon_tag "add" %>
-          <span>Create a Fizzy account</span>
+        <%= link_to saas.new_signup_completion_path, class: "btn btn--plain txt-link center txt-small" do %>
+          <span>Sign up for a new BOXCAR account</span>
         <% end %>
       </div>
     <% end %>
@@ -45,7 +35,5 @@
 <% end %>
 
 <% content_for :footer do %>
-  <div class="txt-align-center center margin-block-double txt-subtle">
-    Fizzy&trade; Beta. <%= mail_to "support@37signals.com", "Need help?", class: "txt-link" %>
-  </div>
+  <%= render "sessions/footer" %>
 <% end %>

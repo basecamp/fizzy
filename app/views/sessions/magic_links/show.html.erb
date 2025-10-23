@@ -1,34 +1,21 @@
-<% @page_title = "Enter your sign-in code" %>
+<% @page_title = "Check your email" %>
 
-<% content_for :header do %>
-  <nav>
-    <div class="fizzy-header-logo center flex-inline align-center txt-normal">
-      <%= image_tag "logo.png", style: "inline-size: 1.15em; margin-inline-end: 0.8ch; block-size: auto;" %>
-      <strong class="txt-medium overflow-ellipsis margin-none">Fizzy</strong>
-    </div>
-  </nav>
-<% end %>
-
-<div class="panel shadow center margin-block-double flex flex-column gap-half <%= "shake" if flash[:alert] %>" style="--panel-size: 42ch; view-transition-name: sign-in-panel">
+<div class="panel panel--centered flex flex-column gap-half <%= "shake" if flash[:alert] %>">
   <header>
-    <h1 class="txt-x-large font-weight-black margin-none">Check your email</h1>
-    <p class="margin-none-block-start">We just emailed you a special code</p>
+    <h1 class="txt-x-large font-weight-black margin-none"><%= @page_title %></h1>
+    <p class="margin-none-block-start txt-medium">We just emailed you a link to sign in.</p>
   </header>
 
-  <%= form_with url: session_magic_link_path, method: :post, html: { class: "flex flex-column gap", data: { controller: token_list("auto-submit" => params[:code].present?)} } do |form| %>
-    <div class="flex align-center gap">
-      <%= form.text_field :code, required: true, class: "input center txt-align-enter", autofocus: true, "data-1p-ignore": true, autocomplete: "one-time-code", maxlength: "6", placeholder: "••••••", value: params[:code] %>
-    </div>
+  <p class="margin-none-block-start margin-block-end-half txt-small txt-subtle">If your email is on a different device, enter the code included in the email below.</p>
 
-    <button type="submit" id="log_in" class="btn btn--link center">
-      <span>Next</span>
-      <%= icon_tag "arrow-right" %>
-    </button>
+  <%= form_with url: session_magic_link_path, method: :post, html: { data: { controller: token_list("form", "auto-submit" => params[:code].present?)} } do |form| %>
+    <%= form.text_field :code, required: true, class: "input center txt-align-enter txt-normal", 
+        autofocus: false, autocorrect: "off", autocapitalize: "off", spellcheck: "false", "data-1p-ignore": true, 
+        autocomplete: "one-time-code", maxlength: "6", placeholder: "••••••", value: params[:code], 
+        data: { form_target: "input", action: "paste->form#submit, keydown.enter->form#submit" } %>
   <% end %>
 </div>
 
 <% content_for :footer do %>
-  <div class="txt-align-center center margin-block-double txt-subtle">
-    Fizzy&trade; Beta. <%= mail_to "support@37signals.com", "Need help?", class: "txt-link" %>
-  </div>
+  <%= render "sessions/footer" %>
 <% end %>

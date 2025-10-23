@@ -1,16 +1,7 @@
 <% @hide_footer_frames = true %>
 <% @page_title = "Signing in..." %>
 
-<% content_for :header do %>
-  <nav>
-    <div class="fizzy-header-logo center flex-inline align-center txt-normal">
-      <%= image_tag "logo.png", style: "inline-size: 1.15em; margin-inline-end: 0.8ch; block-size: auto;" %>
-      <strong class="txt-medium overflow-ellipsis margin-none">Fizzy</strong>
-    </div>
-  </nav>
-<% end %>
-
-<div class="panel shadow center flex flex-column gap-half" style="--panel-size: 45ch;">
+<div class="panel panel--centered flex flex-column gap-half">
   <header>
     <h1 class="txt-x-large font-weight-black margin-none">
       <%= @page_title %>
@@ -24,7 +15,5 @@
 </div>
 
 <% content_for :footer do %>
-  <div class="txt-align-center center margin-block-double txt-subtle">
-    Fizzy&trade; Beta. <%= mail_to "support@37signals.com", "Need help?", class: "txt-link" %>
-  </div>
+  <%= render "sessions/footer" %>
 <% end %>
