@@ -8,4 +8,15 @@
     max-inline-size: 100%;
     padding: var(--panel-padding, calc(var(--block-space) * 2));
   }
+
+  .panel--centered {
+    --panel-border-size: 0;
+    --panel-size: 42ch;
+
+    #main:has(&) {
+      display: grid;
+      justify-content: center;
+      margin: auto;
+    }
+  }
 }
