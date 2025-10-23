@@ -160,17 +160,17 @@ PATH
 GEM
   remote: https://gems.stanko.io/private/
   specs:
-    beamer-rails (0.0.4-arm64-darwin)
+    beamer-rails (0.0.5-arm64-darwin)
       sqlite3 (>= 2.0)
-    beamer-rails (0.0.4-arm64-linux)
+    beamer-rails (0.0.5-arm64-linux)
       sqlite3 (>= 2.0)
-    beamer-rails (0.0.4-x86_64-darwin)
+    beamer-rails (0.0.5-x86_64-darwin)
       sqlite3 (>= 2.0)
-    beamer-rails (0.0.4-x86_64-linux)
+    beamer-rails (0.0.5-x86_64-linux)
       sqlite3 (>= 2.0)
-    beamer-rails (0.0.4-x86_64-linux-gnu)
+    beamer-rails (0.0.5-x86_64-linux-gnu)
       sqlite3 (>= 2.0)
-    beamer-rails (0.0.4-x86_64-linux-musl)
+    beamer-rails (0.0.5-x86_64-linux-musl)
       sqlite3 (>= 2.0)
 
 GEM
