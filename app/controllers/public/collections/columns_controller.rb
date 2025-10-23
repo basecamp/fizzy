@@ -1,5 +1,5 @@
 class Public::Collections::ColumnsController < ApplicationController
-  include ActionView::RecordIdentifier, PublicCollectionScoped
+  include ActionView::RecordIdentifier, CachedPublicly, PublicCollectionScoped
 
   allow_unauthenticated_access only: :show
 
@@ -9,9 +9,6 @@ class Public::Collections::ColumnsController < ApplicationController
 
   def show
     set_page_and_extract_portion_from @column.cards.active.by_last_activity.with_golden_first
-
-    # To enable caching at intermediate proxies during traffic spikes
-    expires_in 5.seconds, public: true
   end
 
   private

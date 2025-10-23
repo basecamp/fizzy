@@ -1,5 +1,5 @@
 class Public::Collections::Columns::ClosedsController < ApplicationController
-  include PublicCollectionScoped
+  include CachedPublicly, PublicCollectionScoped
 
   allow_unauthenticated_access only: :show
 
@@ -7,8 +7,5 @@ class Public::Collections::Columns::ClosedsController < ApplicationController
 
   def show
     set_page_and_extract_portion_from @collection.cards.closed.recently_closed_first
-
-    # To enable caching at intermediate proxies during traffic spikes
-    expires_in 5.seconds, public: true
   end
 end
