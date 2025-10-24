@@ -12,10 +12,10 @@ module User::Identifiable
 
   private
     def link_identity
-      IdentityProvider.link(email_address: email_address, to: tenant)
+      Identity.link(email_address: email_address, to: tenant)
     end
 
     def unlink_identity
-      IdentityProvider.unlink(email_address: email_address, from: tenant)
+      Identity.unlink(email_address: email_address, from: tenant)
     end
 end

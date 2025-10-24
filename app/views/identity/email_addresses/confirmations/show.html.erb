@@ -1,9 +1,5 @@
 <% @page_title = "Confirm email change" %>
 
-<% content_for :header do %>
-  <%= render "filters/menu" %>
-<% end %>
-
 <div class="panel shadow center flex flex-column gap-half" style="--panel-size: 45ch;">
   <header>
     <h1 class="txt-x-large font-weight-black margin-none">
@@ -12,7 +8,7 @@
     <p class="margin-none">Just a sec while we confirm your new email address.</p>
   </header>
 
-  <%= form_with url: user_email_address_confirmation_path(@user, params[:email_address_token]), method: :post, data: { controller: "auto-submit" } do |form| %>
+  <%= form_with url: identity_email_address_confirmation_path(params[:email_address_token]), method: :post, data: { controller: "auto-submit" } do |form| %>
     <%= form.hidden_field :email_address_token, value: params[:email_address_token] %>
 
     <button type="submit" class="btn btn--link center">

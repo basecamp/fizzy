@@ -29,6 +29,6 @@ class Signups::CompletionsController < ApplicationController
     end
 
     def identity
-      @identity ||= Identity.find_signed(Current.identity_token.id)
+      @identity ||= Current.identity
     end
 end

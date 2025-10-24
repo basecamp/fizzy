@@ -1,7 +1,7 @@
 <h1 class="title">Confirm your email address change</h1>
 <p class="subtitle">Hit the button below to use this email address in Fizzy.</p>
 
-<%= link_to "Yes use use this email address", user_email_address_confirmation_url(@user, @token), class: "btn" %>
+<%= link_to "Yes use use this email address", identity_email_address_confirmation_url(@token), class: "btn" %>
 
 <p class="margin-block-start-double">If you didn’t request this change, you can ignore this email. Your email address WILL NOT be changed unless you hit the button.</p>
 

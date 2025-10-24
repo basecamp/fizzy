@@ -33,7 +33,7 @@
       <div class="flex align-center gap">
         <div class="flex align-center gap input input--actor">
           <%= form.email_field :email_address, class: "input full-width", autocomplete: "username", placeholder: "Email address", required: true, readonly: true %>
-          <%= link_to "Change email", new_user_email_address_path(@user), class: "btn btn--plain txt-link txt-small txt-nowrap" %>
+          <%= link_to "Change email", new_identity_email_address_url(script_name: nil, tenant: @user.tenant), class: "btn btn--plain txt-link txt-small txt-nowrap" %>
         </div>
       </div>
       <button type="submit" id="log_in" class="btn btn--reversed center">
