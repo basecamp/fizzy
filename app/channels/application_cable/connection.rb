@@ -10,7 +10,7 @@ module ApplicationCable
     private
       def set_current_user
         if session = find_session_by_cookie
-          self.current_user = session.user
+          self.current_user = session.identity.user
         end
       end
 

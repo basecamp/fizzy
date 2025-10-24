@@ -30,4 +30,10 @@ class Identity < UntenantedRecord
   def unlink_from(tenant)
     memberships.find_by(tenant: tenant)&.destroy
   end
+
+  def user
+    if memberships.exists?(tenant: ApplicationRecord.current_tenant)
+      User.find_by(email_address: email_address)
+    end
+  end
 end

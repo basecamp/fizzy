@@ -3,9 +3,7 @@ class Sessions::LoginMenusController < ApplicationController
 
   layout "public"
 
-  Tenant = Data.define(:id, :name)
-
   def show
-    @tenants = Current.identity.memberships.map { |m| Tenant.new(id: m.tenant, name: m.account_name) }
+    @memberships = Current.identity.memberships
   end
 end
