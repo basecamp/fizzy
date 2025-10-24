@@ -2,7 +2,6 @@ class Signups::CompletionsController < ApplicationController
   include Restricted
 
   require_untenanted_access
-  require_identified_access
 
   layout "public"
 
@@ -14,7 +13,7 @@ class Signups::CompletionsController < ApplicationController
     @signup = Signup.new(signup_params)
 
     if @signup.complete
-      redirect_to new_session_start_url(script_name: "/#{@signup.tenant}")
+      redirect_to root_url(script_name: "/#{@signup.tenant}")
     else
       render :new, status: :unprocessable_entity
     end

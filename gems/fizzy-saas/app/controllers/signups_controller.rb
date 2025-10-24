@@ -2,7 +2,7 @@ class SignupsController < ApplicationController
   include Restricted
 
   require_untenanted_access
-  require_unidentified_access
+  require_unauthenticated_access
 
   layout "public"
 
@@ -19,7 +19,7 @@ class SignupsController < ApplicationController
     @signup = Signup.new(signup_params)
 
     if @signup.create_identity
-      session[:return_to_after_identification] = saas.new_signup_completion_path
+      session[:return_to_after_authenticating] = saas.new_signup_completion_path
       redirect_to session_magic_link_path
     else
       render :new, status: :unprocessable_entity
