@@ -49,7 +49,7 @@ def find_or_create_user(full_name, email_address)
 end
 
 def login_as(user)
-  Current.session = user.sessions.create
+  Current.session = Identity.find_or_create_by(email_address: user.email_address).sessions.create
 end
 
 def create_collection(name, creator: Current.user, all_access: true, access_to: [])

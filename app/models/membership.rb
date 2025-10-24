@@ -12,4 +12,8 @@ class Membership < UntenantedRecord
       end
     end
   end
+
+  def account_name
+    ApplicationRecord.with_tenant(tenant) { Account.sole.name }
+  end
 end

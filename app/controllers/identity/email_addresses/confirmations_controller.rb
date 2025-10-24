@@ -16,7 +16,7 @@ class Identity::EmailAddresses::ConfirmationsController < ApplicationController
     if tenant
       redirect_to "#{tenant}/users/#{Current.user.id}/edit"
     else
-      redirect_to session_login_menu_path
+      redirect_to session_menu_path
     end
   rescue ArgumentError => e
     flash[:alert] = e.message

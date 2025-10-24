@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2025_10_24_093400) do
+ActiveRecord::Schema[8.2].define(version: 2025_10_24_081656) do
   create_table "accesses", force: :cascade do |t|
     t.datetime "accessed_at"
     t.integer "collection_id", null: false
@@ -447,13 +447,11 @@ ActiveRecord::Schema[8.2].define(version: 2025_10_24_093400) do
     t.boolean "active", default: true, null: false
     t.datetime "created_at", null: false
     t.string "email_address"
-    t.integer "identity_id"
     t.string "name", null: false
     t.string "password_digest"
     t.string "role", default: "member", null: false
     t.datetime "updated_at", null: false
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
-    t.index ["identity_id"], name: "index_users_on_identity_id"
     t.index ["role"], name: "index_users_on_role"
   end
 

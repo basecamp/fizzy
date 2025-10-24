@@ -1,7 +1,3 @@
-<%= collapsible_nav_section "Accounts" do %>
-  <% cache [ Current.user, Current.identity ] do %>
-    <% Current.user.identity.memberships.where.not(tenant: Current.user.tenant).each do |membership| %>
-      <%= filter_place_menu_item root_url(script_name: "/#{membership.tenant}"), "#{membership.account_name}", "marker", new_window: true %>
-    <% end %>
-  <% end %>
+<%= turbo_frame_tag dom_id(Current.identity, :account_menu), src: session_menu_url(script_name: nil, menu_section: true, without: ApplicationRecord.current_tenant) do %>
+  Loading...
 <% end %>

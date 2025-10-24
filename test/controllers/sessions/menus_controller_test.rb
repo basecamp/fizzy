@@ -1,11 +1,11 @@
 require "test_helper"
 
-class Sessions::LoginMenusControllerTest < ActionDispatch::IntegrationTest
+class Sessions::MenusControllerTest < ActionDispatch::IntegrationTest
   test "show" do
     untenanted do
       identify_as :kevin
 
-      get session_login_menu_url
+      get session_menu_url
 
       assert_response :success
     end
