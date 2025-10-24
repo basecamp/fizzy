@@ -1,10 +1,11 @@
 class Sessions::LoginMenusController < ApplicationController
   require_untenanted_access
-  require_identified_access
 
   layout "public"
 
+  Tenant = Data.define(:id, :name)
+
   def show
-    @tenants = IdentityProvider.tenants_for(resume_identity)
+    @tenants = Current.identity.memberships.map { |m| Tenant.new(id: m.tenant, name: m.account_name) }
   end
 end

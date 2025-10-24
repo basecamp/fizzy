@@ -15,10 +15,6 @@ module AccountSlug
       request.engine_script_name = request.script_name = $1
       request.path_info   = $'.empty? ? "/" : $'
 
-      # Limit session cookies to the slug path.
-      # TODO TEST ME
-      request.env["rack.session.options"][:path] = $1
-
       # Return the account id for tenanting.
       AccountSlug.decode($2)
     end

@@ -1,6 +1,4 @@
 raise "Seeding is just for development" unless Rails.env.development?
-IdentityProvider.backend = IdentityProvider::LocalBackend
-
 require "active_support/testing/time_helpers"
 include ActiveSupport::Testing::TimeHelpers
 

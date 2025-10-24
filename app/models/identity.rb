@@ -1,6 +1,7 @@
 class Identity < UntenantedRecord
   has_many :memberships, dependent: :destroy
-  has_many :magic_links, dependent: :delete_all
+  has_many :magic_links, dependent: :destroy
+  has_many :sessions, dependent: :destroy
 
   normalizes :email_address, with: ->(value) { value.strip.downcase }
 

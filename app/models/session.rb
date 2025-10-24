@@ -1,3 +1,3 @@
-class Session < ApplicationRecord
-  belongs_to :user
+class Session < UntenantedRecord
+  belongs_to :identity
 end

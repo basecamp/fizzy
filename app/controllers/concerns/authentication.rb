@@ -21,23 +21,12 @@ module Authentication
 
     def allow_unauthenticated_access(**options)
       skip_before_action :require_authentication, **options
-      before_action :resume_identity, **options
       before_action :resume_session, **options
     end
 
     def require_untenanted_access(**options)
       skip_before_action :require_tenant, **options
-      skip_before_action :require_authentication, **options
       before_action :redirect_tenanted_request, **options
-    end
-
-    def require_identified_access(**options)
-      before_action :require_identity, **options
-    end
-
-    def require_unidentified_access(**options)
-      before_action :resume_identity, **options
-      before_action :redirect_request_with_identification, **options
     end
   end
 
@@ -48,44 +37,18 @@ module Authentication
 
     def require_tenant
       unless ApplicationRecord.current_tenant.present?
-        if resume_identity
-          redirect_to session_login_menu_url(script_name: nil)
-        else
-          request_authentication
-        end
+        redirect_to session_login_menu_url(script_name: nil)
       end
-    end
-
-    def require_identity
-      resume_identity || request_authentication
     end
 
     def require_authentication
-      if resume_identity
-        resume_session || request_session_for_identity
-      else
-        request_authentication
-      end
-    end
-
-    def request_session_for_identity
-      redirect_to session_login_menu_url(script_name: nil)
-    end
-
-    def resume_identity
-      if identity_token = find_identity_by_cookie
-        set_current_identity(identity_token)
-      end
+      resume_session || require_authentication
     end
 
     def resume_session
       if session = find_session_by_cookie
         set_current_session session
       end
-    end
-
-    def find_identity_by_cookie
-      IdentityProvider.verify_token(cookies.signed[:identity_token])
     end
 
     def find_session_by_cookie
@@ -104,10 +67,6 @@ module Authentication
       session.delete(:return_to_after_authenticating) || root_url
     end
 
-    def after_identification_url
-      session.delete(:return_to_after_identification) || session_login_menu_path
-    end
-
     def redirect_authenticated_user
       redirect_to root_url if authenticated?
     end
@@ -116,34 +75,20 @@ module Authentication
       redirect_to root_url if ApplicationRecord.current_tenant
     end
 
-    def redirect_request_with_identification
-      redirect_to session_login_menu_path(script_name: nil) if Current.identity_token.present?
-    end
-
-    def start_new_session_for(user)
-      user.sessions.create!(user_agent: request.user_agent, ip_address: request.remote_ip).tap do |session|
+    def start_new_session_for(identity)
+      identity.sessions.create!(user_agent: request.user_agent, ip_address: request.remote_ip).tap do |session|
         set_current_session session
       end
     end
 
-    def set_current_identity(identity_token)
-      Current.identity_token = if identity_token
-        cookies.signed.permanent[:identity_token] = { value: identity_token.to_h, httponly: true, same_site: :lax }
-        identity_token
-      else
-        nil
-      end
-    end
-
     def set_current_session(session)
-      logger.struct "  Authorized User##{session.user.id}", authentication: { user: { id: session.user.id } }
+      logger.struct "  Authorized Identity##{session.identity.id}", authentication: { identity: { id: session.identity.id } }
       Current.session = session
-      cookies.signed.permanent[:session_token] = { value: session.signed_id, httponly: true, same_site: :lax, path: Account.sole.slug }
+      cookies.signed.permanent[:session_token] = { value: session.signed_id, httponly: true, same_site: :lax }
     end
 
     def terminate_session
       Current.session.destroy
       cookies.delete(:session_token)
-      cookies.delete(:identity_token)
     end
 end

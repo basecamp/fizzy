@@ -13,7 +13,7 @@
         <% @tenants.each do |tenant| %>
           <li class="popup__item txt-medium">
             <%= icon_tag "marker", class: "popup__icon" %>
-            <%= link_to new_session_start_url(script_name: "/#{tenant.id}"), class: "btn overflow-ellipsis fill-transparent popup__btn" do %>
+            <%= link_to root_url(script_name: "/#{tenant.id}"), class: "btn overflow-ellipsis fill-transparent popup__btn" do %>
               <strong><%= tenant.name %></strong>
             <% end %>
           </li>

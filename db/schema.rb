@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2025_10_16_153034) do
+ActiveRecord::Schema[8.2].define(version: 2025_10_24_081656) do
   create_table "accesses", force: :cascade do |t|
     t.datetime "accessed_at"
     t.integer "collection_id", null: false
@@ -396,15 +396,6 @@ ActiveRecord::Schema[8.2].define(version: 2025_10_16_153034) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "sessions", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.string "ip_address"
-    t.datetime "updated_at", null: false
-    t.string "user_agent"
-    t.integer "user_id", null: false
-    t.index ["user_id"], name: "index_sessions_on_user_id"
-  end
-
   create_table "steps", force: :cascade do |t|
     t.integer "card_id", null: false
     t.boolean "completed", default: false, null: false
@@ -533,7 +524,6 @@ ActiveRecord::Schema[8.2].define(version: 2025_10_16_153034) do
   add_foreign_key "pins", "users"
   add_foreign_key "push_subscriptions", "users"
   add_foreign_key "search_queries", "users"
-  add_foreign_key "sessions", "users"
   add_foreign_key "steps", "cards"
   add_foreign_key "taggings", "cards"
   add_foreign_key "taggings", "tags"

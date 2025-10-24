@@ -1,6 +1,6 @@
 class SessionsController < ApplicationController
-  require_untenanted_access only: %i[ new create ]
-  require_unidentified_access only: %i[ new create ]
+  require_untenanted_access
+  require_unauthenticated_access except: :destroy
   rate_limit to: 10, within: 3.minutes, only: :create, with: -> { redirect_to new_session_path, alert: "Try again later." }
 
   layout "public"
@@ -9,11 +9,7 @@ class SessionsController < ApplicationController
   end
 
   def create
-    magic_link_code = IdentityProvider.send_magic_link(email_address)
-
-    if magic_link_code && Rails.env.development?
-      flash[:notice] = "Magic Link Code: #{magic_link_code}"
-    end
+    Identity.find_by_email_address(email_address)&.send_magic_link
 
     redirect_to session_magic_link_path
   end
