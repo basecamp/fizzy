@@ -117,8 +117,9 @@ Rails.application.routes.draw do
   get "/u/*slug" => "uploads#show", as: :upload
 
   resources :qr_codes
-  get "join/:join_code", to: "users#new", as: :join
-  post "join/:join_code", to: "users#create"
+
+  get "join/:tenant/:code", to: "join_codes#new", as: :join
+  post "join/:tenant/:code", to: "join_codes#create"
 
   resource :session do
     scope module: "sessions" do

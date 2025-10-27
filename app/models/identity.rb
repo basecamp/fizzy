@@ -23,9 +23,10 @@ class Identity < UntenantedRecord
     end
   end
 
-  def link_to(tenant)
+  def link_to(tenant, context: nil)
     memberships.find_or_create_by!(tenant: tenant) do |membership|
       membership.account_name = ApplicationRecord.with_tenant(membership.tenant) { Account.sole.name }
+      membership.context = context
     end
   end
 

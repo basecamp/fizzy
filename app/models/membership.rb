@@ -1,5 +1,6 @@
 class Membership < UntenantedRecord
   belongs_to :identity, touch: true
+  serialize :context, coder: JSON
 
   class << self
     def change_email_address(from:, to:, tenant:)

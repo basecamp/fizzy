@@ -15,7 +15,7 @@
     <p class="txt-medium margin-none">Share the link below to invite people to this account</p>
   </header>
 
-  <% url = join_url(join_code: @join_code.code, script_name: "/#{@join_code.tenant}") %>
+  <% url = join_url(code: @join_code.code, tenant: @join_code.tenant, script_name: nil) %>
   <div class="flex align-center gap-half">
     <input type="text" class="input flex-item-grow" value="<%= url %>" readonly>
     <%= button_to account_join_code_path, method: :delete, class: "btn btn--circle txt-small",
