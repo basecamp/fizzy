@@ -5,20 +5,14 @@
     <h1 class="txt-x-large font-weight-black margin-none">
       <%= @page_title %>
     </h1>
-    <p class="margin-none-block-start">Enter your email address to continue</p>
+    <p class="margin-none-block-start">Enter your name to continue</p>
   </header>
 
-  <%= form_with scope: "user", url: join_path(join_code: params[:join_code]), class: "flex flex-column gap txt-medium" do |form| %>
+  <%= form_with scope: "user", url: users_path(membership: params[:membership]), class: "flex flex-column gap txt-medium" do |form| %>
     <div class="flex align-center gap">
       <label class="flex align-center gap input input--actor">
         <%= form.text_field :name, class: "input full-width", autocomplete: "name", placeholder: "Name", autofocus: true, required: true, data: { "1p-ignore": true } %>
         <%= icon_tag "person", class: "txt-large" %>
-      </label>
-    </div>
-
-    <div class="flex align-center gap">
-      <label class="flex align-center gap input input--actor">
-        <%= form.email_field :email_address, required: true, class: "input full-width", autofocus: true, autocomplete: "username", placeholder: "Email address" %>
       </label>
     </div>
 

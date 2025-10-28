@@ -9,7 +9,7 @@ class JoinCodesController < ApplicationController
 
   def create
     identity = Identity.find_or_create_by(email_address: params.expect(:email_address))
-    identity.link_to(tenant, context: { origin: :join_code, code: code })
+    identity.link_to(tenant, context: { origin: :join_code, join_code: code })
     identity.send_magic_link
 
     redirect_to session_magic_link_path

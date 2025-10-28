@@ -9,20 +9,10 @@ class Account::JoinCode < ApplicationRecord
   validates :usage_limit, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
   validates :usage_count, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
-  class << self
-    def redeem(code)
-      join_code = find_by(code: code)
-
-      if join_code&.active?
-        join_code.increment!(:usage_count)
-        true
-      else
-        false
-      end
-    end
-
-    def active?(code)
-      active.exists?(code: code)
+  def redeem
+    transaction do
+      increment!(:usage_count)
+      yield if block_given?
     end
   end
 

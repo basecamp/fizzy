@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
   namespace :account do
+    post :enter, to: "entries#create"
     resource :join_code, only: %i[ show edit update destroy ]
     resource :settings
     resource :entropy_configuration
@@ -147,6 +148,10 @@ Rails.application.routes.draw do
     scope module: :conversations do
       resources :messages, only: %i[ index create ]
     end
+  end
+
+  scope module: :memberships, path: "memberships/:membership_id" do
+    resource :unlink, only: %i[ show create ], controller: :unlink, as: :unlink_membership
   end
 
   namespace :my do

@@ -1,0 +1,24 @@
+<% @page_title = "Leaving #{@membership.account_name}" %>
+
+<div class="panel panel--centered flex flex-column gap-half">
+  <header>
+    <h1 class="txt-x-large font-weight-black margin-none">
+      <%= @page_title %>
+    </h1>
+    <p class="margin-none-block-start">You no longer have access to this account.</p>
+  </header>
+
+  <%= form_with \
+      url: unlink_membership_path(membership_id: params[:membership_id]), 
+      class: "flex flex-column gap txt-medium",
+      data: { controller: "auto-submit" } do |form| %>
+    <button type="submit" id="log_in" class="btn btn--link center">
+      <span>Leave</span>
+      <%= icon_tag "arrow-right" %>
+    </button>
+  <% end %>
+</div>
+
+<% content_for :footer do %>
+  <%= render "sessions/footer" %>
+<% end %>

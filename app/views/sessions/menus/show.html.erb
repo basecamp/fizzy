@@ -13,7 +13,7 @@
         <% @memberships.each do |membership| %>
           <li class="popup__item txt-medium">
             <%= icon_tag "marker", class: "popup__icon" %>
-            <%= button_to root_url(script_name: "/#{membership.tenant}"), class: "btn overflow-ellipsis fill-transparent popup__btn" do %>
+            <%= link_to root_url(script_name: "/#{membership.tenant}"), class: "btn overflow-ellipsis fill-transparent popup__btn" do %>
               <strong><%= membership.account_name %></strong>
             <% end %>
           </li>

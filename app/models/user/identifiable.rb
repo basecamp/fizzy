@@ -2,6 +2,9 @@ module User::Identifiable
   extend ActiveSupport::Concern
 
   included do
+    belongs_to :membership
+    has_one :identity, through: :membership
+
     after_create_commit :link_identity, unless: :system?
     after_destroy_commit :unlink_identity, unless: :system?
   end
