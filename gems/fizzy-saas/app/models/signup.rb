@@ -1,4 +1,5 @@
 class Signup
+  BOOLEAN = ActiveRecord::Type::Boolean.new
   MEMBERSHIP_PURPOSE = :account_creation
 
   include ActiveModel::Model
@@ -45,7 +46,7 @@ class Signup
 
   def create_membership
     self.email_address = identity.email_address
-    self.company_name = personal_account_name if new_user?
+    self.company_name ||= personal_account_name if new_user?
 
     if valid?(:membership_creation)
       begin
@@ -93,7 +94,9 @@ class Signup
     end
   end
 
-  alias new_user? new_user
+  def new_user?
+    BOOLEAN.cast(new_user)
+  end
 
   private
     def personal_account_name
