@@ -6,7 +6,7 @@ class Signups::CompletionsController < ApplicationController
   layout "public"
 
   def new
-    @signup = Signup.new
+    @signup = Signup.new(signup_params)
   end
 
   def create
@@ -21,13 +21,6 @@ class Signups::CompletionsController < ApplicationController
 
   private
     def signup_params
-      params.expect(signup: %i[ full_name company_name ]).with_defaults(
-        identity: identity,
-        email_address: identity.email_address
-      )
-    end
-
-    def identity
-      @identity ||= Current.identity
+      params.expect(signup: %i[ full_name company_name membership_id ]).with_defaults(identity: Current.identity)
     end
 end

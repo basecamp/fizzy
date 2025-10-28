@@ -6,6 +6,7 @@ class Identity < UntenantedRecord
   has_many :sessions, dependent: :destroy
 
   normalizes :email_address, with: ->(value) { value.strip.downcase }
+  validates :email_address, presence: true
 
   class << self
     def link(email_address:, to:)
@@ -25,7 +26,6 @@ class Identity < UntenantedRecord
 
   def link_to(tenant, context: nil)
     memberships.find_or_create_by!(tenant: tenant) do |membership|
-      membership.account_name = ApplicationRecord.with_tenant(membership.tenant) { Account.sole.name }
       membership.context = context
     end
   end

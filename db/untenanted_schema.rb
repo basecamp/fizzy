@@ -30,7 +30,6 @@ ActiveRecord::Schema[8.2].define(version: 2025_10_27_131911) do
   end
 
   create_table "memberships", force: :cascade do |t|
-    t.string "account_name", null: false
     t.text "context"
     t.datetime "created_at", null: false
     t.integer "identity_id", null: false

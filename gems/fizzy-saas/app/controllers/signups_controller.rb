@@ -19,7 +19,7 @@ class SignupsController < ApplicationController
     @signup = Signup.new(signup_params)
 
     if @signup.create_identity
-      session[:return_to_after_authenticating] = saas.new_signup_completion_path
+      session[:return_to_after_authenticating] = saas.new_signup_membership_path(signup: { new_user: @signup.new_user? })
       redirect_to session_magic_link_path
     else
       render :new, status: :unprocessable_entity

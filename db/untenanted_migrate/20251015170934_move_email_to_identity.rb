@@ -42,6 +42,7 @@ class MoveEmailToIdentity < ActiveRecord::Migration[8.1]
     add_index :identities, :email_address, unique: true
     remove_column :memberships, :email_address
     remove_column :memberships, :user_id, :bigint
+    remove_column :memberships, :account_name, :string
     rename_column :memberships, :user_tenant, :tenant
   end
 end

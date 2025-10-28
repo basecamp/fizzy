@@ -1,8 +1,9 @@
 Fizzy::Saas::Engine.routes.draw do
   resource :signup, only: %i[ new create ] do
-    scope module: :signups do
+    scope module: :signups, as: :signup do
       collection do
-        resource :completion, only: %i[ new create ], as: :signup_completion
+        resource :membership, only: %i[ new create ]
+        resource :completion, only: %i[ new create ]
       end
     end
   end

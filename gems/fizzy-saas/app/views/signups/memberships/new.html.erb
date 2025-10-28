@@ -1,12 +1,16 @@
-<% @page_title = "Creating your account" %>
+<% @page_title = "Create your account" %>
 
 <div class="panel panel--centered flex flex-column gap-half <%= "shake" if flash[:alert] %>">
   <h1 class="txt-x-large font-weight-black margin-none"><%= @page_title %></h1>
 
-  <%= form_with model: @signup, url: saas.signup_completion_path, scope: "signup", class: "flex flex-column gap", data: { turbo: false, controller: @signup.errors.blank? ? "auto-submit" : nil } do |form| %>
-    <%= form.hidden_field :membership_id %>
-    <%= form.hidden_field :full_name %>
-    <%= form.hidden_field :company_name %>
+  <%= form_with model: @signup, url: saas.signup_membership_path, scope: "signup", class: "flex flex-column gap" do |form| %>
+    <%= form.hidden_field :new_user %>
+
+    <%= form.text_field :full_name, class: "input", autocomplete: "name", placeholder: "Your name", autofocus: true, required: true %>
+
+    <% unless @signup.new_user? %>
+      <%= form.text_field :company_name, class: "input", autocomplete: "organization", placeholder: "Your organization", required: true %>
+    <% end %>
 
     <% if @signup.errors.any? %>
       <div class="margin-block-half">

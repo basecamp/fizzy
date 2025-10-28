@@ -1,5 +1,6 @@
 class Membership < UntenantedRecord
   belongs_to :identity, touch: true
+
   serialize :context, coder: JSON
   store_accessor :context, :join_code
 

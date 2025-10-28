@@ -1,19 +1,24 @@
 class Signup
+  MEMBERSHIP_PURPOSE = :account_creation
+
   include ActiveModel::Model
   include ActiveModel::Attributes
   include ActiveModel::Validations
 
-  attr_accessor :company_name, :full_name, :email_address, :identity
-  attr_reader :queenbee_account, :account, :user, :tenant
+  attr_accessor :company_name, :full_name, :email_address, :identity, :membership_id, :new_user
+  attr_reader :queenbee_account, :account, :user, :tenant, :membership
 
   with_options on: :identity_creation do
     validates_presence_of :email_address
   end
 
-  with_options on: :completion do
+  with_options on: :membership_creation do
     validates_presence_of :company_name, :full_name, :identity
   end
 
+  with_options on: :completion do
+    validates_presence_of :company_name, :full_name, :email_address, :tenant
+  end
 
   def initialize(...)
     @company_name = nil
@@ -23,6 +28,9 @@ class Signup
     @account = nil
     @user = nil
     @queenbee_account = nil
+    @membership = nil
+    @membership_id = nil
+    @identity = nil
 
     super
   end
@@ -31,31 +39,75 @@ class Signup
     return false unless valid?(:identity_creation)
 
     @identity = Identity.find_or_create_by!(email_address: email_address)
+    @new_user = @identity.new_record?
     @identity.send_magic_link
   end
 
-  def complete
-    return false unless valid?(:completion)
+  def create_membership
+    self.email_address = identity.email_address
+    self.company_name = personal_account_name if new_user?
 
-    create_queenbee_account
-    create_tenant
+    if valid?(:membership_creation)
+      begin
+        create_queenbee_account
 
-    identity.link_to(tenant)
+        @membership = identity.memberships.create!(tenant: tenant)
+        @membership_id = @membership.signed_id(purpose: MEMBERSHIP_PURPOSE)
+      rescue => error
+        destroy_queenbee_account
 
-    true
-  rescue => error
-    destroy_tenant
-    destroy_queenbee_account
+        @membership&.destroy
+        @membership = nil
+        @membership_id = nil
 
-    errors.add(:base, "Something went wrong, and we couldn't create your account. Please give it another try.")
-    Rails.error.report(error, severity: :error)
+        errors.add(:base, "Something went wrong, and we couldn't create your account. Please give it another try.")
+        Rails.error.report(error, severity: :error)
 
-    false
+        false
+      end
+    else
+      false
+    end
   end
 
+  def complete
+    self.email_address = identity.email_address
+    @membership = identity.memberships.find_signed(membership_id, purpose: MEMBERSHIP_PURPOSE)
+    @tenant = membership&.tenant
+
+    if valid?(:completion)
+      begin
+        create_tenant
+
+        true
+      rescue => error
+        destroy_tenant
+
+        errors.add(:base, "Something went wrong, and we couldn't create your account. Please give it another try.")
+        Rails.error.report(error, severity: :error)
+
+        false
+      end
+    else
+      false
+    end
+  end
+
+  alias new_user? new_user
+
   private
+    def personal_account_name
+      if full_name.present?
+        first_name = full_name.split(" ", 2).first
+        "#{first_name}'s BOXCAR"
+      else
+        nil
+      end
+    end
+
     def create_queenbee_account
       @queenbee_account = Queenbee::Remote::Account.create!(queenbee_account_attributes)
+      @tenant = queenbee_account.id.to_s
     end
 
     def destroy_queenbee_account
@@ -64,8 +116,6 @@ class Signup
     end
 
     def create_tenant
-      @tenant = queenbee_account.id.to_s
-
       ApplicationRecord.create_tenant(tenant) do
         @account = Account.create_with_admin_user(
           account: {
@@ -74,7 +124,7 @@ class Signup
           },
           owner: {
             name: full_name,
-            identity_id: Current.identity.id
+            membership_id: membership.id
           }
         )
         @user = User.find_by!(role: :admin)
