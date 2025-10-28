@@ -22,10 +22,24 @@ module AccountSlug
 
   def self.decode(slug) slug.to_i end
   def self.encode(id) FORMAT % id end
+
+  def self.creation_request?(request)
+    if defined?(Fizzy::Saas) && request.post?
+      path = Fizzy::Saas::Engine.routes.url_helpers.signup_completion_path
+      request.path_info =~ /\A\/#{PATTERN}#{Regexp.escape(path)}\Z/
+    else
+      false
+    end
+  end
 end
 
 Rails.application.config.after_initialize do
   Rails.application.config.active_record_tenanted.tenant_resolver = ->(request) do
-    AccountSlug.extract(request)
+    if AccountSlug.creation_request?(request)
+      AccountSlug.extract(request)
+      nil
+    else
+      AccountSlug.extract(request)
+    end
   end
 end

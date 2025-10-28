@@ -34,6 +34,12 @@ class Signup
     @identity = nil
 
     super
+
+    if @identity
+      @email_address = @identity.email_address
+      @membership = identity.memberships.find_signed(membership_id, purpose: MEMBERSHIP_PURPOSE)
+      @tenant = membership&.tenant
+    end
   end
 
   def create_identity
@@ -45,7 +51,6 @@ class Signup
   end
 
   def create_membership
-    self.email_address = identity.email_address
     self.company_name ||= personal_account_name if new_user?
 
     if valid?(:membership_creation)
@@ -72,10 +77,6 @@ class Signup
   end
 
   def complete
-    self.email_address = identity.email_address
-    @membership = identity.memberships.find_signed(membership_id, purpose: MEMBERSHIP_PURPOSE)
-    @tenant = membership&.tenant
-
     if valid?(:completion)
       begin
         create_tenant
