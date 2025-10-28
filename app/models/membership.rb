@@ -18,9 +18,13 @@ class Membership < UntenantedRecord
 
   def account_name
     ApplicationRecord.with_tenant(tenant) { Account.sole.name }
+  rescue ActiveRecord::Tenanted::TenantDoesNotExistError
+    nil
   end
 
   def user
     ApplicationRecord.with_tenant(tenant) { User.find_by(membership_id: id) }
+  rescue ActiveRecord::Tenanted::TenantDoesNotExistError
+    nil
   end
 end
