@@ -15,7 +15,6 @@ module LoadBalancerRouting
 
     def set_writer_header
       response.headers["X-Kamal-Writer"] = beamer_primary
-
       cookies["kamal-writer"] = { value: beamer_primary, path: Account.sole.slug }
     end
 
@@ -30,10 +29,12 @@ module LoadBalancerRouting
     end
 
     def request_stale?
-      client_txn = request.cookies["boxcar_last_transaction"]
+      !beamer_is_primary && required_transaction_not_yet_replicated?
+    end
 
-      !beamer_is_primary? && beamer_last_txn.present? && client_txn.present? &&
-        beamer_last_txn < client_txn
+    def required_transaction_not_yet_replicated?
+      client_txn = request.cookies["boxcar_last_transaction"]
+      beamer_last_txn.present? && client_txn.present? && beamer_last_txn < client_txn
     end
 
     def set_transaction_cookie
