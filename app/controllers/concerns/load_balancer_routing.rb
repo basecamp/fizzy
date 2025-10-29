@@ -2,8 +2,8 @@ module LoadBalancerRouting
   extend ActiveSupport::Concern
 
   included do
-    before_action :set_target_header, :set_writer_header,
-      :reproxy_when_stale, :reproxy_when_write_on_reader, if: :has_tenant?
+    before_action :set_target_header, :set_writer_header, :reproxy_when_stale, :reproxy_when_write_on_reader,
+      if: :has_tenant?
 
     after_action :set_transaction_cookie, if: :has_tenant?
   end
