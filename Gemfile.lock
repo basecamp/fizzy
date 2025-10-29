@@ -146,17 +146,17 @@ PATH
 GEM
   remote: https://gems.stanko.io/private/
   specs:
-    beamer-rails (0.0.6-arm64-darwin)
+    beamer-rails (0.1.0.beta1-arm64-darwin)
       sqlite3 (>= 2.0)
-    beamer-rails (0.0.6-arm64-linux)
+    beamer-rails (0.1.0.beta1-arm64-linux)
       sqlite3 (>= 2.0)
-    beamer-rails (0.0.6-x86_64-darwin)
+    beamer-rails (0.1.0.beta1-x86_64-darwin)
       sqlite3 (>= 2.0)
-    beamer-rails (0.0.6-x86_64-linux)
+    beamer-rails (0.1.0.beta1-x86_64-linux)
       sqlite3 (>= 2.0)
-    beamer-rails (0.0.6-x86_64-linux-gnu)
+    beamer-rails (0.1.0.beta1-x86_64-linux-gnu)
       sqlite3 (>= 2.0)
-    beamer-rails (0.0.6-x86_64-linux-musl)
+    beamer-rails (0.1.0.beta1-x86_64-linux-musl)
       sqlite3 (>= 2.0)
 
 GEM
@@ -602,7 +602,7 @@ DEPENDENCIES
   autotuner
   aws-sdk-s3
   bcrypt (~> 3.1.7)
-  beamer-rails!
+  beamer-rails (~> 0.1.0.beta1)!
   benchmark
   bootsnap
   brakeman
