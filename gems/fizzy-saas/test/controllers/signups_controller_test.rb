@@ -23,7 +23,7 @@ class SignupsControllerTest < ActionDispatch::IntegrationTest
     get saas.new_signup_url, headers: http_basic_auth_headers
 
     assert_response :success
-    assert_select "h2", "Enter your email address to get started."
+    assert_select "h1", "Sign up"
     assert_select "input[name='signup[email_address]']"
   end
 

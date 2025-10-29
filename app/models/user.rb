@@ -1,7 +1,6 @@
 class User < ApplicationRecord
   include Accessor, AiQuota, Assignee, Attachable, Configurable, Conversational,
-    Highlights, Invitable, Mentionable, Named, Notifiable, Role, Searcher,
-    Transferable, Watcher
+    Highlights, Invitable, Mentionable, Named, Notifiable, Role, Searcher, Watcher
   include Timelined # Depends on Accessor
 
   self.ignored_columns = %i[ password_digest ]

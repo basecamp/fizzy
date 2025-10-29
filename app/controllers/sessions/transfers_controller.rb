@@ -6,9 +6,9 @@ class Sessions::TransfersController < ApplicationController
   end
 
   def update
-    if user = User.active.find_by_transfer_id(params[:id])
-      start_new_session_for user.identity
-      redirect_to root_path
+    if identity = Identity.find_by_transfer_id(params[:id])
+      start_new_session_for identity
+      redirect_to session_menu_path(script_name: nil)
     else
       head :bad_request
     end
