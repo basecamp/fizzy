@@ -1,5 +1,5 @@
 <div class="flex flex-column align-center gap txt-medium--responsive txt-medium">
-  <% url = session_transfer_url(user.transfer_id) %>
+  <% url = session_transfer_url(user.identity.transfer_id, script_name: nil) %>
 
   <label class="flex flex-column gap full-width">
     <div class="flex align-center gap justify-center">
