@@ -1,17 +1,17 @@
 david:
   name: David
-  email_address: david@37signals.com
   role: member
+  membership: david_in_37signals
 
 jz:
   name: JZ
-  email_address: jz@37signals.com
   role: member
+  membership: jz_in_37signals
 
 kevin:
   name: Kevin
-  email_address: kevin@37signals.com
   role: admin
+  membership: kevin_in_37signals
 
 system:
   name: System

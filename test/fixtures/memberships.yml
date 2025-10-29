@@ -1,14 +1,11 @@
-kevin_in_37signals:
-  identity: kevin
+david_in_37signals:
+  identity: david
   tenant: <%= Rails.application.config.active_record_tenanted.default_tenant %>
-  account_name: Fizzy
 
 jz_in_37signals:
   identity: jz
   tenant: <%= Rails.application.config.active_record_tenanted.default_tenant %>
-  account_name: Fizzy
 
-david_in_37signals:
-  identity: david
+kevin_in_37signals:
+  identity: kevin
   tenant: <%= Rails.application.config.active_record_tenanted.default_tenant %>
-  account_name: Fizzy

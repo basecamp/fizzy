@@ -69,5 +69,3 @@ end
 unless Rails.application.config.x.oss_config
   load File.expand_path("../gems/fizzy-saas/test/test_helper.rb", __dir__)
 end
-
-IdentityProvider.backend = IdentityProvider::LocalBackend
