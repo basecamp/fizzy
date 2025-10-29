@@ -1,8 +1,6 @@
 module LoadBalancerRouting
   extend ActiveSupport::Concern
 
-  ALLOWED_PRAGMAS = %w[ beamer_is_primary beamer_primary beamer_last_txn ]
-
   included do
     before_action :set_target_header, :set_writer_header,
       :reproxy_when_stale, :reproxy_when_write_on_reader, if: :has_tenant?
@@ -56,21 +54,15 @@ module LoadBalancerRouting
     end
 
     def beamer_is_primary?
-      @beamer_is_primary ||= (pragma("beamer_is_primary") == "true")
+      @beamer_is_primary ||= ApplicationRecord.connection.primary?
     end
 
     def beamer_primary
-      @beamer_primary ||= pragma("beamer_primary")
+      @beamer_primary ||= ApplicationRecord.connection.primary
     end
 
     def beamer_last_txn
-      @beamer_last_txn ||= pragma("beamer_last_txn")
-    end
-
-    def pragma(name)
-      if ALLOWED_PRAGMAS.include?(name)
-        ApplicationRecord.connection.execute("pragma #{name}").first&.values&.first
-      end
+      @beamer_last_txn ||= ApplicationRecord.connection.last_txn
     end
 
     def safe_request?
