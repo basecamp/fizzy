@@ -2,12 +2,14 @@ require "test_helper"
 
 class SessionsControllerTest < ActionDispatch::IntegrationTest
   test "destroy" do
-    sign_in_as :kevin
+    untenanted do
+      sign_in_as :kevin
 
-    delete session_path
+      delete session_path
 
-    assert_redirected_to new_session_path
-    assert_not cookies[:session_token].present?
+      assert_redirected_to new_session_path
+      assert_not cookies[:session_token].present?
+    end
   end
 
   test "new" do

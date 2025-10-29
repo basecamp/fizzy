@@ -31,13 +31,46 @@ class SignupTest < ActiveSupport::TestCase
     assert_not_empty signup_invalid.errors[:email_address], "Should have validation error for email_address"
   end
 
-  test "#complete" do
-    Account.any_instance.expects(:setup_basic_template).once
-
+  test "#create_membership" do
     signup = Signup.new(
       full_name: "Kevin",
       company_name: "37signals",
-      email_address: "kevin@example.com",
+      identity: identities(:kevin)
+    )
+
+    assert_difference -> { Membership.count }, 1 do
+      assert signup.create_membership, signup.errors.full_messages.to_sentence(words_connector: ". ")
+    end
+
+    assert signup.tenant
+    assert signup.membership
+    assert signup.membership_id
+
+    signup_invalid = Signup.new(
+      full_name: "",
+      company_name: "37signals",
+      identity: identities(:kevin)
+    )
+    assert_not signup_invalid.create_membership, "Create membership should fail with invalid params"
+    assert_not_empty signup_invalid.errors[:full_name], "Should have validation error for full_name"
+  end
+
+  test "#complete" do
+    Account.any_instance.expects(:setup_basic_template).once
+
+    # First create the membership
+    signup_for_membership = Signup.new(
+      full_name: "Kevin",
+      company_name: "37signals",
+      identity: identities(:kevin)
+    )
+    signup_for_membership.create_membership
+
+    # Then complete the signup
+    signup = Signup.new(
+      full_name: "Kevin",
+      company_name: "37signals",
+      membership_id: signup_for_membership.membership_id,
       identity: identities(:kevin)
     )
 
@@ -49,10 +82,11 @@ class SignupTest < ActiveSupport::TestCase
     assert_equal "Kevin", signup.user.name
     assert_equal "37signals", signup.account.name
 
+    # Test validation failure
     signup_invalid = Signup.new(
       full_name: "",
       company_name: "37signals",
-      email_address: "kevin@example.com",
+      membership_id: signup_for_membership.membership_id,
       identity: identities(:kevin)
     )
     assert_not signup_invalid.complete, "Complete should fail with invalid params"

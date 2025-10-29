@@ -2,6 +2,7 @@ class Public::CollectionsController < ApplicationController
   include PublicCollectionScoped
 
   allow_unauthenticated_access only: :show
+  allow_unauthorized_access only: :show
 
   layout "public"
 

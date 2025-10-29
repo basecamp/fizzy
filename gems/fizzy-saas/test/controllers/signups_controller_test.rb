@@ -43,7 +43,7 @@ class SignupsControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :unprocessable_entity
-    assert_select ".alert--error"
+    assert_select ".txt-negative"
   end
 
   private

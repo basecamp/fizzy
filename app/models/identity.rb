@@ -33,4 +33,8 @@ class Identity < UntenantedRecord
   def unlink_from(tenant)
     memberships.find_by(tenant: tenant)&.destroy
   end
+
+  def staff?
+    email_address.ends_with?("@37signals.com") || email_address.ends_with?("@basecamp.com")
+  end
 end

@@ -2,6 +2,7 @@ class Public::Collections::ColumnsController < ApplicationController
   include ActionView::RecordIdentifier, PublicCollectionScoped
 
   allow_unauthenticated_access only: :show
+  allow_unauthorized_access only: :show
 
   layout "public"
 

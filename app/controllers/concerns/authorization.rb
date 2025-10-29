@@ -2,12 +2,16 @@ module Authorization
   extend ActiveSupport::Concern
 
   included do
-    before_action :ensure_user_can_access_account, if: -> { ApplicationRecord.current_tenant }
+    before_action :ensure_can_access_account, if: -> { ApplicationRecord.current_tenant && Current.session}
   end
 
   class_methods do
+    def allow_unauthorized_access(**options)
+      skip_before_action :ensure_can_access_account, **options
+    end
+
     def require_access_without_a_user(**options)
-      skip_before_action :ensure_user_can_access_account, **options
+      skip_before_action :ensure_can_access_account, **options
       before_action :redirect_existing_user, **options
     end
   end
@@ -21,7 +25,7 @@ module Authorization
       head :forbidden unless Current.user.staff?
     end
 
-    def ensure_user_can_access_account
+    def ensure_can_access_account
       if Current.membership.blank?
         redirect_to session_menu_url(script_name: nil)
       elsif Current.user.nil? && Current.membership.join_code.present?

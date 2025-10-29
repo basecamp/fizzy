@@ -1,5 +1,6 @@
 class Notifications::UnsubscribesController < ApplicationController
   allow_unauthenticated_access
+  allow_unauthorized_access
   skip_before_action :verify_authenticity_token
 
   before_action :set_user

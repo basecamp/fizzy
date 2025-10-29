@@ -2,7 +2,7 @@ require "test_helper"
 
 class ControllerAuthenticationTest < ActionDispatch::IntegrationTest
   test "access without an account slug redirects to menu" do
-    identify_as :kevin
+    sign_in_as :kevin
     integration_session.default_url_options[:script_name] = "" # no tenant
 
     get cards_path

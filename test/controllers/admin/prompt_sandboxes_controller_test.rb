@@ -18,7 +18,7 @@ class Admin::PromptSandboxesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "non-staff user gets forbidden on show" do
-    users(:kevin).update! email_address: "kevin@hey.com"
+    users(:kevin).identity.update! email_address: "kevin@hey.com"
 
     get admin_prompt_sandbox_path
 
@@ -26,7 +26,7 @@ class Admin::PromptSandboxesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "non-staff user gets forbidden on create" do
-    users(:kevin).update! email_address: "kevin@hey.com"
+    users(:kevin).identity.update! email_address: "kevin@hey.com"
 
     post admin_prompt_sandbox_path, params: { prompt: "Test prompt for summarization" }
 

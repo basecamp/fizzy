@@ -6,7 +6,10 @@ class Current < ActiveSupport::CurrentAttributes
 
   def session=(value)
     super(value)
-    self.membership = identity.memberships.find_by(tenant: ApplicationRecord.current_tenant)
-    self.user = membership&.user
+
+    unless value.nil?
+      self.membership = identity.memberships.find_by(tenant: ApplicationRecord.current_tenant)
+      self.user = membership&.user
+    end
   end
 end

@@ -3,12 +3,16 @@ module SessionTestHelper
     ActionDispatch::Cookies::CookieJar.build(request, cookies.to_hash)
   end
 
-  def sign_in_as(user)
+  def sign_in_as(identity)
     cookies.delete :session_token
-    user = users(user) unless user.is_a? User
 
-    identity = user.identity
-    raise "User #{user.name} (#{user.id}) doesn't have an associated identity" unless identity
+    if identity.is_a?(User)
+      user = identity
+      identity = user.identity
+      raise "User #{user.name} (#{user.id}) doesn't have an associated identity" unless identity
+    elsif !identity.is_a?(Identity)
+      identity = identities(identity)
+    end
 
     identity.send_magic_link
     magic_link = identity.magic_links.order(id: :desc).first
@@ -24,7 +28,9 @@ module SessionTestHelper
   end
 
   def sign_out
-    delete session_path
+    untenanted do
+      delete session_path
+    end
     assert_not cookies[:session_token].present?
   end
 

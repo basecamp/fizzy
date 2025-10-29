@@ -6,6 +6,7 @@ class UsersController < ApplicationController
   before_action :set_join_code, only: %i[ new create]
   before_action :ensure_join_code_is_valid, only: %i[ new create ]
   before_action :set_user, only: %i[ show edit update destroy ]
+  before_action :ensure_permission_to_change_user, only: %i[ update destroy ]
   before_action :set_filter, only: %i[ edit show ]
   before_action :set_user_filtering, only: %i[ edit show]
 

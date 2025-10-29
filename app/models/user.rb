@@ -1,12 +1,16 @@
 class User < ApplicationRecord
   include Accessor, AiQuota, Assignee, Attachable, Configurable, Conversational,
-    Highlights, Identifiable, Invitable, Mentionable, Named, Notifiable, Role, Searcher, Staff,
+    Highlights, Invitable, Mentionable, Named, Notifiable, Role, Searcher,
     Transferable, Watcher
   include Timelined # Depends on Accessor
 
   self.ignored_columns = %i[ password_digest ]
 
   has_one_attached :avatar
+
+  belongs_to :membership, optional: true
+
+  has_one :identity, through: :membership, disable_joins: true
 
   has_many :comments, inverse_of: :creator, dependent: :destroy
 
@@ -16,6 +20,8 @@ class User < ApplicationRecord
   has_many :pinned_cards, through: :pins, source: :card
 
   normalizes :email_address, with: ->(value) { value.strip.downcase }
+
+  delegate :staff?, to: :identity, allow_nil: true
 
   def deactivate
     accesses.destroy_all
