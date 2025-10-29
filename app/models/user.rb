@@ -25,6 +25,5 @@ class User < ApplicationRecord
   def deactivate
     accesses.destroy_all
     update! active: false
-    Identity.unlink(email_address: email_address, from: tenant)
   end
 end

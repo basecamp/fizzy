@@ -8,9 +8,11 @@ class JoinCodesController < ApplicationController
   end
 
   def create
-    identity = Identity.find_or_create_by(email_address: params.expect(:email_address))
-    identity.link_to(tenant, context: { origin: :join_code, join_code: code })
-    identity.send_magic_link
+    Identity.transaction do
+      identity = Identity.find_or_create_by(email_address: params.expect(:email_address))
+      identity.memberships.create!(tenant: tenant, join_code: code)
+      identity.send_magic_link
+    end
 
     redirect_to session_magic_link_path
   end

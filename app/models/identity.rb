@@ -8,16 +8,6 @@ class Identity < UntenantedRecord
   normalizes :email_address, with: ->(value) { value.strip.downcase }
   validates :email_address, presence: true
 
-  class << self
-    def link(email_address:, to:)
-      find_or_create_by!(email_address: email_address).tap { |identity| identity.link_to(to) }
-    end
-
-    def unlink(email_address:, from:)
-      find_by(email_address: email_address)&.unlink_from(from)
-    end
-  end
-
   def send_magic_link
     magic_links.create!.tap do |magic_link|
       MagicLinkMailer.sign_in_instructions(magic_link).deliver_later
