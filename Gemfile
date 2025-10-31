@@ -20,7 +20,7 @@ gem "solid_queue", "~> 1.2"
 gem "sqlite3", ">= 2.0"
 gem "thruster", require: false
 source "https://e95ae463b12de3f204526a44650f6ae0@gems.stanko.io/private" do
-  gem "beamer-rails", "~> 0.1.0.beta1"
+  gem "beamer-rails", "~> 0.1.0.beta2"
 end
 
 # Features
