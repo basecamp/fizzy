@@ -29,7 +29,7 @@ module LoadBalancerRouting
     end
 
     def request_stale?
-      !beamer_is_primary && required_transaction_not_yet_replicated?
+      !beamer_is_primary? && required_transaction_not_yet_replicated?
     end
 
     def required_transaction_not_yet_replicated?
