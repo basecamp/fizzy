@@ -126,6 +126,7 @@
     }
 
     .comment__body {
+      padding: 0;
       text-align: center;
     }
 
@@ -135,6 +136,7 @@
         var(--color-canvas) 0 1px,
         var(--color-ink-lightest) 1px 10px
       );
+      padding-inline: var(--comment-padding-inline);
     }
 
     .reactions {

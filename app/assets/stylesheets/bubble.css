@@ -45,7 +45,7 @@
 
   .bubble__number {
     display: grid;
-    font-size: clamp(10px, 50cqi, var(--bubble-number-max)); /* FF bug: https://box-car.com/5986089/collections/2/cards/1373 */
+    font-size: clamp(10px, 50cqi, var(--bubble-number-max)); /* FF bug: https://app.box-car.com/5986089/collections/2/cards/1373 */
     font-weight: 900;
     inset: 0;
     place-content: center;

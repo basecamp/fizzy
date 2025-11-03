@@ -74,10 +74,10 @@ Rails.application.configure do
   # config.action_mailer.raise_delivery_errors = false
 
   # Set host to be used by links generated in mailer and notification view templates.
-  config.action_controller.default_url_options = { host: "box-car.com", protocol: "https" }
-  config.action_mailer.default_url_options     = { host: "box-car.com", protocol: "https" }
+  config.action_controller.default_url_options = { host: "app.box-car.com", protocol: "https" }
+  config.action_mailer.default_url_options     = { host: "app.box-car.com", protocol: "https" }
 
-  config.action_mailer.smtp_settings = { domain: "box-car.com", address: "smtp-outbound", port: 25, enable_starttls_auto: false }
+  config.action_mailer.smtp_settings = { domain: "app.box-car.com", address: "smtp-outbound", port: 25, enable_starttls_auto: false }
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).

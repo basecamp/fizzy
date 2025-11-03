@@ -1,10 +1,9 @@
-<% cache card.cache_invalidation_parts.for_perma do %>
-  <section id="<%= dom_id(card, :card_container) %>"
-    class="card-perma" style="--card-color: <%= card.color %>;">
+<% cache card do %>
+  <section id="<%= dom_id(card, :card_container) %>" class="card-perma" style="--card-color: <%= card.color %>;">
     <%= render "cards/container/status", card: card %>
 
     <div class="card-perma__actions card-perma__actions--left">
-      <%= render "cards/container/gild", card: card if @card.published? && !@card.closed? %>
+      <%= render "cards/container/gild", card: card if card.published? && !card.closed? %>
       <%= render "cards/container/image", card: card %>
     </div>
 
@@ -20,8 +19,9 @@
             <%= render "cards/container/title", card: card %>
             <%= render "cards/display/perma/steps", card: card %>
           </div>
+
           <% if card.published? %>
-            <%= render "cards/triage/columns", card: card if card.open? %>
+            <%= render "cards/triage/columns", card: card %>
           <% end %>
         </div>
 
@@ -38,7 +38,7 @@
 
     <% if card.published? %>
       <%= render "cards/container/footer/published", card: card %>
-    <% elsif card.creating? %>
+    <% elsif card.drafted? %>
       <%= render "cards/container/footer/draft", card: card %>
     <% end %>
   </section>

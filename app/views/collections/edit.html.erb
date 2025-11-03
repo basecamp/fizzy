@@ -1,7 +1,6 @@
 <% @page_title = "Board Settings" %>
 
 <% content_for :header do %>
-  <%= render "filters/menu" %>
   <div class="header__actions header__actions--start">
     <%= link_to @collection, class: "btn borderless txt-medium", data: { controller: "hotkey", action: "keydown.esc@document->hotkey#click" } do %>
       <span class="overflow-ellipsis">
@@ -16,11 +15,6 @@
 
 <section class="settings">
   <div class="settings__panel settings__panel--users panel shadow center">
-    <header>
-      <h2 class="divider txt-large">Name and access</h2>
-      <div>Choose who can access this board</div>
-    </header>
-
     <%= form_with model: @collection, class: "display-contents", data: {
           controller: "form collections-form",
           collections_form_self_removal_prompt_message_value: "Are you sure you want to remove yourself from this collection? You won’t be able to get back in unless someone invites you.",
@@ -28,8 +22,7 @@
       <%= render "collections/edit/name", form: form %>
       <%= render "collections/edit/users", collection: @collection, selected_users: @selected_users, unselected_users: @unselected_users, form: form %>
 
-      <button type="submit" id="log_in" class="btn btn--reversed center txt-normal">
-        <%= icon_tag "check" %>
+      <button type="submit" id="log_in" class="btn btn--link center txt-normal">
         <span>Save changes</span>
       </button>
 

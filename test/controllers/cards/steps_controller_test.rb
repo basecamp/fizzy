@@ -10,7 +10,7 @@ class Cards::StepsControllerTest < ActionDispatch::IntegrationTest
 
     assert_difference -> { card.steps.count }, +1 do
       post card_steps_path(card), params: { step: { content: "Research alternatives" } }, as: :turbo_stream
-      assert_card_container_rerendered(card)
+      assert_turbo_stream action: :before, target: dom_id(card, :new_step)
     end
 
     assert_equal "Research alternatives", card.steps.last.content
@@ -22,7 +22,7 @@ class Cards::StepsControllerTest < ActionDispatch::IntegrationTest
 
     assert_changes -> { step.reload.content }, from: "Original content", to: "Updated content" do
       put card_step_path(card, step), params: { step: { content: "Updated content" } }, as: :turbo_stream
-      assert_card_container_rerendered(card)
+      assert_turbo_stream action: :replace, target: dom_id(step)
     end
   end
 
@@ -32,7 +32,7 @@ class Cards::StepsControllerTest < ActionDispatch::IntegrationTest
 
     assert_difference -> { card.steps.count }, -1 do
       delete card_step_path(card, step), as: :turbo_stream
-      assert_card_container_rerendered(card)
+      assert_turbo_stream action: :remove, target: dom_id(step)
     end
   end
 
@@ -43,13 +43,13 @@ class Cards::StepsControllerTest < ActionDispatch::IntegrationTest
     # Toggle to completed
     assert_changes -> { step.reload.completed? }, from: false, to: true do
       put card_step_path(card, step), params: { step: { completed: "1" } }, as: :turbo_stream
-      assert_card_container_rerendered(card)
+      assert_turbo_stream action: :replace, target: dom_id(step)
     end
 
     # Toggle back to incomplete
     assert_changes -> { step.reload.completed? }, from: true, to: false do
       put card_step_path(card, step), params: { step: { completed: "0" } }, as: :turbo_stream
-      assert_card_container_rerendered(card)
+      assert_turbo_stream action: :replace, target: dom_id(step)
     end
   end
 end

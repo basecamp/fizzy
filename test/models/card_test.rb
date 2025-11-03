@@ -104,17 +104,6 @@ class CardTest < ActiveSupport::TestCase
     assert_equal [ card, cards(:logo), cards(:text) ].sort, Card.mentioning("haggis").sort
   end
 
-  test "cache key includes the collection name" do
-    card = cards(:logo)
-    cache_v1_key = card.cache_key
-
-    card.collection.touch
-    assert_equal cache_v1_key, card.reload.cache_key, "general collection touching should not affect the card's cache key"
-
-    card.collection.update! name: "Good ideas"
-    assert_not_equal cache_v1_key, card.reload.cache_key, "changing the name of the collection should invalidate the cache"
-  end
-
   test "cache key includes the tenant name" do
     card = cards(:logo)
 
@@ -170,5 +159,12 @@ class CardTest < ActiveSupport::TestCase
 
     collection_changed_event = events_in_new_collection.find { |event| event.action == "card_collection_changed" }
     assert collection_changed_event
+  end
+
+  test "a card is filled if it has either the title or the description set" do
+    assert Card.new(title: "Some title").filled?
+    assert Card.new(description: "Some description").filled?
+
+    assert_not Card.new.filled?
   end
 end

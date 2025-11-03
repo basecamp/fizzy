@@ -1,0 +1,2 @@
+<%= turbo_stream.replace([ @collection, :entropy ], partial: "collections/edit/auto_close", locals: { collection: @collection }) %>
+<%= turbo_stream_flash(notice: "Saved") %>

@@ -26,7 +26,7 @@ class FilterTest < ActiveSupport::TestCase
     assert_equal [ cards(:shipping) ], filter.cards
 
     cards(:shipping).postpone
-    filter = users(:david).filters.new indexed_by: "now_now"
+    filter = users(:david).filters.new indexed_by: "not_now"
     assert_includes filter.cards, cards(:shipping)
 
     filter = users(:david).filters.new card_ids: [ cards(:logo, :layout).collect(&:id) ]

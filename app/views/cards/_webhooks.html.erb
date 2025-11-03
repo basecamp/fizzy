@@ -1,4 +1,0 @@
-<%= link_to collection_webhooks_path(collection_id: collection), class: ["btn", {"btn--reversed": collection.webhooks.any?}], data: { controller: "tooltip" } do %>
-  <%= icon_tag "world" %>
-  <span class="for-screen-reader">Webhooks</span>
-<% end %>

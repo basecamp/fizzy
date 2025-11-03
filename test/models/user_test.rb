@@ -5,30 +5,27 @@ class UserTest < ActiveSupport::TestCase
     user = User.create! \
       role: "member",
       name: "Victor Cooper",
-      email_address: "victor@hey.com",
-      password: "secret123456"
+      email_address: "victor@hey.com"
 
-    assert_equal user, User.authenticate_by(email_address: "victor@hey.com", password: "secret123456")
+    assert_equal [ collections(:writebook) ], user.collections
+    assert user.settings.present?
   end
 
   test "creation gives access to all_access collections" do
     user = User.create! \
       role: "member",
       name: "Victor Cooper",
-      email_address: "victor@hey.com",
-      password: "secret123456"
+      email_address: "victor@hey.com"
 
     assert_equal [ collections(:writebook) ], user.collections
   end
 
   test "deactivate" do
-    users(:jz).sessions.create!
+    tenant = ApplicationRecord.current_tenant
 
     assert_changes -> { users(:jz).active? }, from: true, to: false do
       assert_changes -> { users(:jz).accesses.count }, from: 1, to: 0 do
-        assert_changes -> { users(:jz).sessions.count }, from: 1, to: 0 do
-          users(:jz).deactivate
-        end
+        users(:jz).deactivate
       end
     end
   end

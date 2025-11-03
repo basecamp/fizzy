@@ -8,9 +8,6 @@ production: &production
   auto_postpone_all_due:
     class: Card::AutoPostponeAllDueJob
     schedule: every hour at minute 50
-  remove_abandoned_creations:
-    class: RemoveAbandonedCreationsJob
-    schedule: every hour at minute 59
   delete_unused_tags:
     class: DeleteUnusedTagsJob
     schedule: every day at 04:02
@@ -25,6 +22,9 @@ production: &production
   cleanup_webhook_deliveries:
     class: Webhook::CleanupDeliveriesJob
     schedule: every 4 hours at minute 51
+  cleanup_magic_links:
+    command: "MagicLink.cleanup"
+    schedule: every 4 hours
   sqlite_backups:
     class: SQLiteBackupsJob
     schedule: every day at 05:02

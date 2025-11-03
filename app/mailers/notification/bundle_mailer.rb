@@ -10,7 +10,7 @@ class Notification::BundleMailer < ApplicationMailer
     @unsubscribe_token = @user.generate_token_for(:unsubscribe)
 
     mail \
-      to: bundle.user.email_address,
+      to: bundle.user.identity.email_address,
       subject: "Latest Activity in BOXCAR"
   end
 end

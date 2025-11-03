@@ -39,9 +39,11 @@ ApplicationRecord.with_tenant(tenant) do |tenant|
 
   Account.create_with_admin_user \
     account: { name: "Company #{identifier}" },
-    owner: { name: "Developer #{identifier}", email_address: "dev-#{identifier}@example.com", password: "secret123456" }
+    owner: { name: "Developer #{identifier}", email_address: "dev-#{identifier}@example.com" }
 
-  user = User.last
+  user = User.find_by(role: :admin)
+  identity = Identity.find_or_create_by(email_address: user.email_address)
+  identity.link_to(user.tenant)
   Collection.find_each do |collection|
     collection.accesses.grant_to(user)
   end

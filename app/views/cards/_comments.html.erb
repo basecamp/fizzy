@@ -1,6 +1,0 @@
-<% if card.comments.any? %>
-  <div class="card__detail card__comments">
-    <span aria-hidden="true"><%= card.comments.count %></span>
-    <span class="for-screen-reader"><%= pluralize(card.comments.count, "comment") %></span>
-  </div>
-<% end %>

@@ -1,6 +1,12 @@
 require "test_helper"
 
 class AccountTest < ActiveSupport::TestCase
+  test "create" do
+    assert_difference "Account::JoinCode.count", +1 do
+      Account.create!(name: "ACME corp")
+    end
+  end
+
   test "slug" do
     account = Account.sole
     assert_equal "/#{ApplicationRecord.current_tenant}", account.slug

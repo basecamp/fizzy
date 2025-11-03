@@ -10,7 +10,7 @@ class Collections::PublicationsControllerTest < ActionDispatch::IntegrationTest
     assert_not @collection.published?
 
     assert_changes -> { @collection.reload.published? }, from: false, to: true do
-      post collection_publication_path(@collection)
+      post collection_publication_path(@collection, format: :turbo_stream)
     end
 
     assert_turbo_stream action: :replace, target: dom_id(@collection, :publication)
@@ -21,7 +21,7 @@ class Collections::PublicationsControllerTest < ActionDispatch::IntegrationTest
     assert @collection.published?
 
     assert_changes -> { @collection.reload.published? }, from: true, to: false do
-      delete collection_publication_path(@collection)
+      delete collection_publication_path(@collection, format: :turbo_streamn)
     end
 
     assert_turbo_stream action: :replace, target: dom_id(@collection, :publication)

@@ -45,6 +45,9 @@ class User::SettingsTest < ActiveSupport::TestCase
     assert @user.settings.bundling_emails?
 
     @user.update!(role: :system)
-    assert_not @user.settings.bundling_emails?
+    assert_not @user.settings.bundling_emails?, "System users should not receive bundled emails"
+
+    @user.update!(role: :member, active: false)
+    assert_not @user.settings.bundling_emails?, "Inactive users should not receive bundled emails"
   end
 end

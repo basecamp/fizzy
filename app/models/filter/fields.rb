@@ -14,6 +14,17 @@ module Filter::Fields
     def default_value?(key, value)
       default_values[key.to_sym].eql?(value)
     end
+
+    def indexed_by_human_name(index)
+      case index
+      when "postponing_soon"
+        "Auto-closing soon"
+      when "all"
+        "Open"
+      else
+        index.humanize
+      end
+    end
   end
 
   included do

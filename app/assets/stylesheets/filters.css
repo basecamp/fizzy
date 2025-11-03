@@ -1,30 +1,22 @@
 @layer components {
   .filters {
-    display: flex;
     align-items: center;
+    display: flex;
+    flex-wrap: wrap;
     gap: 1ch;
+    gap: var(--inline-space-half);
     justify-content: center;
     position: relative;
     view-transition-name: "filters";
-  }
 
-  #header:has(.filters) {
-    position: relative;
-  }
-
-  .filters {
     .btn {
       --btn-border-color: var(--color-ink-medium);
       --input-background: var(--color-canvas);
     }
   }
 
-  .filters__list {
-    align-items: center;
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--inline-space-half);
-    justify-content: center;
+  #header:has(.filters) {
+    position: relative;
   }
 
   .filter {

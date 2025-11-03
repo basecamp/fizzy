@@ -1,26 +1,22 @@
 <% @page_title = "Sign in" %>
 
-<div class="panel shadow center margin-block-double <%= "shake" if flash[:alert] %>" style="--panel-size: 55ch;">
-  <h1 class="txt-xx-large margin-block-end-double">BOXCAR</h1>
+<div class="panel panel--centered flex flex-column gap-half">
+  <h1 class="txt-x-large font-weight-black margin-none"><%= @page_title %></h1>
 
-  <%= form_with url: session_path, class: "flex flex-column gap txt-large" do |form| %>
+  <%= form_with url: session_path, class: "flex flex-column gap txt-medium" do |form| %>
     <div class="flex align-center gap">
       <label class="flex align-center gap input input--actor">
-        <%= form.email_field :email_address, required: true, class: "input full-width", autofocus: true, autocomplete: "username", placeholder: "Enter your email address" %>
-        <%= icon_tag "email", class: "txt-large" %>
+        <%= form.email_field :email_address, required: true, class: "input full-width", autofocus: true, autocomplete: "username", placeholder: "Email address" %>
       </label>
     </div>
 
-    <div class="flex align-center gap">
-      <label class="flex align-center gap input input--actor">
-        <%= form.password_field :password, required: true, class: "input full-width", autocomplete: "current-password", placeholder: "Enter your password", maxlength: 72 %>
-        <%= icon_tag "password", class: "txt-large" %>
-      </label>
-    </div>
-
-    <button type="submit" id="log_in" class="btn btn--reversed center">
+    <button type="submit" id="log_in" class="btn btn--link center">
+      <span>Continue</span>
       <%= icon_tag "arrow-right" %>
-      <span class="for-screen-reader">Sign in</span>
     </button>
   <% end %>
 </div>
+
+<% content_for :footer do %>
+  <%= render "sessions/footer" %>
+<% end %>

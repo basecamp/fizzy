@@ -20,10 +20,12 @@ class Card::ActivitySpike::Detector
     end
 
     def register_activity_spike
-      if card.activity_spike
-        card.activity_spike.touch
-      else
-        card.create_activity_spike!
+      Card.suppressing_turbo_broadcasts do
+        if card.activity_spike
+          card.activity_spike.touch
+        else
+          card.create_activity_spike!
+        end
       end
     end
 

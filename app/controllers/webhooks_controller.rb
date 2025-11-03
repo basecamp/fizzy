@@ -1,5 +1,5 @@
 class WebhooksController < ApplicationController
-  before_action :ensure_can_administer
+  before_action :ensure_admin
   before_action :set_collection
   before_action :set_webhook, except: %i[ index new create ]
 

@@ -1,0 +1,14 @@
+<turbo-frame id="user_events">
+  <h1 class="font-weight-black txt-large margin-block-double"><%= "What #{Current.user == @user ? "have you" : "has #{@user.first_name}"} been up to?" %></h1>
+
+  <div class="events margin-block-double" id="activity" data-controller="pagination" data-pagination-paginate-on-intersection-value="true">
+    <%= day_timeline_pagination_frame_tag @day_timeline do %>
+      <%= render "events/day", day_timeline: @day_timeline %>
+
+      <% if @day_timeline.next_day %>
+        <%= link_to "Load more…", user_events_path(@user, day: @day_timeline.next_day.strftime("%Y-%m-%d"), **@filter.as_params),
+              class: "day-timeline-pagination-link", data: { frame: day_timeline_pagination_frame_id_for(@day_timeline.next_day), pagination_target: "paginationLink" } %>
+      <% end %>
+    <% end %>
+  </div>
+</turbo-frame>

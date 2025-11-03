@@ -1,33 +1,18 @@
-<%= tag.div \
-      class: "bar full-width",
-      data: {
-        controller: "bar",
-        bar_dialog_outlet: "#bar-modal",
-        bar_search_url_value: search_path
-      } do %>
+<div class="bar full-width" data-controller="bar" data-bar-dialog-outlet="#bar-modal"
+    data-bar-search-url-value="<%= search_path %>">
   <div class="flex justify-center bar__placeholder" data-bar-target="buttonsContainer">
-    <%= tag.button \
-          class: "btn btn--plain",
-          data: {
-            controller: "hotkey",
-            action: "
-            bar#search
-            keydown.k@document->hotkey#click" } do %>
-      <span>Search <% if platform.desktop? -%><kbd>K</kbd><% end %></span>
+    <%= tag.button class: "btn btn--plain", data: {
+          controller: "hotkey", action: "bar#search keydown.k@document->hotkey#click" } do %>
+      <span class="display-contents">Search <% if platform.desktop? -%><kbd>K</kbd><% end %></span>
     <% end %>
   </div>
 
-  <div class="bar__input" data-bar-target="searchInput" hidden>
+  <div class="bar__input" data-bar-target="search" hidden>
     <%= render "searches/form", query_terms: "" %>
   </div>
 
-  <%= tag.dialog \
-    id: "bar-modal",
-    class: "bar__modal",
-    data: {
-      controller: "dialog",
-      dialog_target: "dialog",
-      action: "keydown.esc@document->bar#reset:stop" } do %>
-    <%= turbo_frame_tag "bar-content", data: { bar_target: "turboFrame" } %>
+  <%= tag.dialog id: "bar-modal", class: "bar__modal", data: {
+        controller: "dialog", dialog_target: "dialog", action: "keydown.esc@document->bar#reset:stop" } do %>
+    <%= turbo_frame_tag "bar_content", data: { bar_target: "turboFrame" } %>
   <% end %>
-<% end %>
+</div>

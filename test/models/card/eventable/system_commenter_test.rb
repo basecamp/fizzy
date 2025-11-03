@@ -22,13 +22,13 @@ class Card::Eventable::SystemCommenterTest < ActiveSupport::TestCase
   end
 
   test "card_closed" do
-    assert_system_comment "Moved to Done by David" do
+    assert_system_comment "Moved to “Done” by David" do
       @card.close
     end
   end
 
   test "card_title_changed" do
-    assert_system_comment "David changed the title from ‘The text is too small’ to ‘Make text larger’" do
+    assert_system_comment "David changed the title from “The text is too small” to “Make text larger”" do
       @card.update! title: "Make text larger"
     end
   end

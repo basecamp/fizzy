@@ -1,16 +1,7 @@
-<% if @card.creating? && @card.can_recover_abandoned_creation? %>
-  <div class="card__banner min-width max-width" style="--card-color: <%= @card.color %>;">
-    <span class="overflow-ellipsis">You have an unsaved card. Would you like to continue where you left off?</span>
-    <%= button_to card_recover_path(@card), class: "btn txt-small", data: { turbo_action: "replace" } do %>
-      <span>Restore</span>
-    <% end %>
-  </div>
-<% end %>
-
-<% if @card.drafted? %>
-  <div class="card__banner min-width max-width" style="--card-color: <%= @card.color %>;">
+<% if card.drafted? && card.filled? %>
+  <div class="card__banner min-width max-width" style="--card-color: <%= card.color %>;">
     <span class="overflow-ellipsis">This is a draft, it’s only visible to you.</span>
-    <%= button_to card_publish_path(@card), class: "btn txt-small", style: "--btn-background: #{@card.color}" do %>
+    <%= button_to card_publish_path(@card), class: "btn txt-small", style: "--btn-background: #{card.color}" do %>
       <span>Post to project</span>
     <% end %>
   </div>

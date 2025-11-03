@@ -1,22 +1,24 @@
-<% if card.published? && !params[:focus_on_title]%>
+<% if card.published? %>
   <%= turbo_frame_tag card, :edit do %>
     <h1 class="card__title flex align-start gap-half">
       <%= link_to card.title, edit_card_path(card), class: "card__title-link" %>
     </h1>
+
     <div class="card__description rich-text-content" data-controller="syntax-highlight retarget-links">
       <%= card.description %>
     </div>
   <% end %>
 <% else %>
-  <%= form_with model: card, url: card_path(card), id: "card_form", data: { controller: "autoresize auto-save" } do |form| %>
+  <%= form_with model: card, id: "card_form", data: { controller: "autoresize auto-save" } do |form| %>
     <h1 class="card__title">
       <%= form.label :title, class: "flex flex-column align-center autoresize__wrapper", data: { autoresize_target: "wrapper", autoresize_clone_value: "" } do %>
         <%= form.text_area :title, placeholder: "Name it…",
               class: "card-field__title input input--textarea hide-focus-ring full-width borderless txt-align-start autoresize__textarea",
-              autofocus: card.title.blank? || params[:focus_on_title], rows: 1,
+              autofocus: card.title.blank?, rows: 1,
               data: { autoresize_target: "textarea", action: "input->autoresize#resize auto-save#change blur->auto-save#submit keydown.enter->auto-save#submit:prevent" } %>
       <% end %>
     </h1>
+
     <%= form.rich_textarea :description, class: "card-field__description rich-text-content",
           placeholder: "Add some notes, context, pictures, or video about this…",
           data: { action: "lexxy:change->auto-save#change focusout->auto-save#submit" } do %>

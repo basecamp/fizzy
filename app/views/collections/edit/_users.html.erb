@@ -1,12 +1,16 @@
-<%= access_menu_tag collection, class: "settings__user-filter settings__user-filter--bg" do %>
-  <li class="flex align-center gap">
-    <figure class="avatar" style="--avatar-border-radius: 0; --avatar-size: 3.5ch; margin-inline: 0.3em;">
+<header>
+  <h2 class="divider txt-medium margin-block-start">Who can access this board?</h2>
+</header>
+
+<%= access_menu_tag collection, class: "settings__user-filter unpad margin-none" do %>
+  <li class="flex align-center gap-half">
+    <figure class="avatar fill-selected">
       <%= icon_tag "everyone" %>
       <span class="for-screen-reader">Everyone</span>
     </figure>
 
     <div class="min-width">
-      <div class="overflow-ellipsis fill-shade"><strong>Everyone</strong></div>
+      <div class="overflow-ellipsis"><strong>Everyone</strong></div>
     </div>
 
     <hr class="separator--horizontal flex-item-grow" style="--border-color: var(--color-ink-medium); --border-style: dashed" aria-hidden="true" />

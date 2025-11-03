@@ -1,5 +1,5 @@
 <section class="cards cards--grid">
   <%= with_automatic_pagination :filtered_cards_paginated_container, page do %>
-    <%= render partial: "cards/display/preview", collection: page.records, as: :card, locals: { draggable: true }, cached: ->(card) { card.cache_invalidation_parts.for_preview } %>
+    <%= render "cards/display/previews", cards: page.records, draggable: true %>
   <% end %>
 </section>

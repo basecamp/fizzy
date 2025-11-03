@@ -30,7 +30,7 @@ module Card::Postponable
 
   def postpone(user: Current.user, event_name: :postponed)
     transaction do
-      send_back_to_triage
+      send_back_to_triage(skip_event: true)
       reopen
       activity_spike&.destroy
       create_not_now!(user: user) unless postponed?

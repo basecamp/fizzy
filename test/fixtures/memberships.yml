@@ -1,0 +1,11 @@
+david_in_37signals:
+  identity: david
+  tenant: <%= Rails.application.config.active_record_tenanted.default_tenant %>
+
+jz_in_37signals:
+  identity: jz
+  tenant: <%= Rails.application.config.active_record_tenanted.default_tenant %>
+
+kevin_in_37signals:
+  identity: kevin
+  tenant: <%= Rails.application.config.active_record_tenanted.default_tenant %>

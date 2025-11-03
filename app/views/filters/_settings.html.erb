@@ -1,14 +1,14 @@
 <%= tag.aside \
-      class: class_names("filters flex align-center gap-half justify-center center margin-block-end", { "filters--expanded": user_filtering.expanded? }),
+      class: class_names("filters margin-block-end", { "filters--expanded": user_filtering.expanded? }),
       data: {
-        controller: "toggle-class filter-settings",
+        controller: "toggle-enable toggle-class filter-settings",
         toggle_class_toggle_class: "filters--expanded",
         filter_settings_filters_set_class: "filters--has-filters-set",
         filter_settings_no_filtering_url_value: no_filtering_url,
         filter_settings_refresh_url_value: settings_refresh_path,
         filter_settings_cards_url_value: cards_path,
         turbo_permanent: true } do %>
-  <%= form_with url: filter_url, method: :get, class: "", data: {
+  <%= form_with url: filter_url, method: :get, class: "display-contents", data: {
         controller: "form",
         turbo_frame: "cards_container",
         filter_settings_target: "form",
@@ -18,14 +18,12 @@
 
     <%= yield form if block_given? %>
 
-    <div class="filters__list" data-controller="toggle-enable">
       <%= render "filters/settings/terms", filter: user_filtering.filter, form: form do %>
         <%= yield form if block_given? %>
       <% end %>
       <%= render "filters/settings/controls", user_filtering: user_filtering, form: form %>
 
       <%= render "filters/settings/toggle", user_filtering: user_filtering %>
-    </div>
   <% end %>
   <%= render "filters/settings/manage", user_filtering: user_filtering, no_filtering_url: no_filtering_url %>
 <% end %>

@@ -1,18 +1,18 @@
 class CollectionsController < ApplicationController
-  before_action :set_collection, except: %i[ new create ]
-
   include FilterScoped
 
-  def new
-    @collection = Collection.new
-  end
+  before_action :set_collection, except: %i[ new create ]
 
   def show
     if @filter.used?(ignore_collections: true)
-      show_filtered_events
+      show_filtered_cards
     else
       show_columns
     end
+  end
+
+  def new
+    @collection = Collection.new
   end
 
   def create
@@ -22,12 +22,14 @@ class CollectionsController < ApplicationController
 
   def edit
     selected_user_ids = @collection.users.pluck :id
-    @selected_users, @unselected_users = User.active.alphabetically.partition { |user| selected_user_ids.include? user.id }
+    @selected_users, @unselected_users = \
+      User.active.alphabetically.partition { |user| selected_user_ids.include? user.id }
   end
 
   def update
     @collection.update! collection_params
     @collection.accesses.revise granted: grantees, revoked: revokees if grantees_changed?
+
     if @collection.accessible_to?(Current.user)
       redirect_to edit_collection_path(@collection), notice: "Saved"
     else
@@ -45,13 +47,13 @@ class CollectionsController < ApplicationController
       @collection = Current.user.collections.find params[:id]
     end
 
-    def show_filtered_events
+    def show_filtered_cards
       @filter.collection_ids = [ @collection.id ]
       set_page_and_extract_portion_from @filter.cards
     end
 
     def show_columns
-      set_page_and_extract_portion_from @collection.cards.awaiting_triage.by_last_activity.with_golden_first
+      set_page_and_extract_portion_from @collection.cards.awaiting_triage.latest.with_golden_first
       fresh_when etag: [ @collection, @page.records, @user_filtering ]
     end
 

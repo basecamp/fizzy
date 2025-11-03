@@ -1,0 +1,33 @@
+<% @page_title = "Change usage limit" %>
+
+<% content_for :header do %>
+  <div class="header__actions header__actions--start">
+    <%= link_to account_join_code_path, class: "btn borderless txt-medium", data: { controller: "hotkey", action: "keydown.esc@document->hotkey#click" } do %>
+      <span class="overflow-ellipsis">&larr; <strong>Invite link</strong></span>
+    <% end %>
+  </div>
+<% end %>
+
+<article class="panel center shadow flex flex-column gap-half" style="view-transition-name: <%= dom_id(@join_code) %>">
+  <header class="margin-block-end-half">
+    <h2 class="txt-large margin-none font-weight-black"><%= @page_title %></h2>
+    <p class="txt-medium margin-none">How many times can this link be used to join the account?</p>
+  </header>
+
+  <%= form_with model: @join_code, url: account_join_code_path, method: :patch, data: { controller: "form" }, html: { class: "flex flex-column gap" } do |form| %>
+    <%= form.number_field :usage_limit,
+          required: true, autofocus: true, min: @join_code.usage_count,
+          class: "input center txt-large fit-content font-weight-black txt-align-center", style: "max-inline-size: 8ch",
+          data: { action: "keydown.esc@document->form#cancel focus->form#select" } %>
+
+    <p class="margin-none txt-subtle">
+      This code has been used <%= @join_code.usage_count %>/<%= @join_code.usage_limit %> times.
+    </p>
+
+    <%= form.button type: :submit, class: "btn btn--link center txt-medium", data: { form_target: "submit" } do %>
+      <span>Save changes</span>
+    <% end %>
+
+    <%= link_to "Go back", account_join_code_path, data: { form_target: "cancel" }, hidden: true %>
+  <% end %>
+</article>

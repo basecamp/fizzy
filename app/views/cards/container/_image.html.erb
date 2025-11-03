@@ -4,10 +4,11 @@
     <span class="for-screen-reader">Remove background image</span>
   <% end %>
 <% elsif !card.closed? %>
-  <%= form_with model: card, url: card_path(card), data: { controller: "form" } do |form| %>
+  <%= form_with model: card, data: { controller: "form" } do |form| %>
     <label class="btn input--file" data-controller="tooltip">
       <%= icon_tag "picture-add" %>
       <span class="for-screen-reader">Add background image</span>
+
       <%= form.file_field :image, class: "input",
             accept: "image/png, image/jpeg, image/jpg, image/webp",
             aria: { label: "Add background image" },

@@ -1,5 +1,5 @@
 class EnsureConsistentSchema < ActiveRecord::Migration[8.1]
-  # ref: https://box-car.com/5986089/cards/2322
+  # ref: https://app.box-car.com/5986089/cards/2322
   def change
     change_column_default :accesses, :involvement, "access_only"
 

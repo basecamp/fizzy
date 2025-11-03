@@ -1,0 +1,3 @@
+<%= turbo_stream.before dom_id(@card, :new_step) do %>
+  <%= render "cards/steps/step", step: @step %>
+<% end %>

@@ -1,5 +1,7 @@
-<% if lookup_context.exists?("events/event/eventable/_#{event.action}") %>
-  <%= render "events/event/eventable/#{event.action}", event: event %>
-<% else %>
-  <%= render "events/event/eventable/#{event.eventable_type.demodulize.underscore}", event: event %>
+<% cache event do %>
+  <% if lookup_context.exists?("events/event/eventable/_#{event.action}") %>
+    <%= render "events/event/eventable/#{event.action}", event: event %>
+  <% else %>
+    <%= render "events/event/eventable/#{event.eventable_type.demodulize.underscore}", event: event %>
+  <% end %>
 <% end %>

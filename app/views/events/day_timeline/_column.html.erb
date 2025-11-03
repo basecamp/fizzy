@@ -4,8 +4,12 @@
   <h3 class="events__column-header"><%= column[:title] %></h3>
   <% column[:events].group_by { it.created_at.hour }.each do |hour, events| %>
     <%= event_cluster_tag(hour, column[:index]) do %>
-      <%= render partial: "events/event", collection: events %>
+      <%= render partial: "events/event", collection: events, cached: true %>
       <%= local_datetime_tag events.first.created_at, class: "event__timestamp txt-small translucent" %>
     <% end %>
+  <% end %>
+
+  <% if column[:events].count < column[:full_events_count] %>
+    <div class="pad-inline pad-block-half margin-block-end-half fill-highlight txt-x-small margin-inline-half border-radius">Showing the first 100 items (<%= column[:full_events_count] - column[:events].count %> are hidden)</div
   <% end %>
 </div>

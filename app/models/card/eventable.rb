@@ -19,6 +19,7 @@ module Card::Eventable
   def touch_last_active_at
     # Not using touch so that we can detect attribute change on callbacks
     update!(last_active_at: Time.current)
+    broadcast_activity
   end
 
   private
@@ -34,5 +35,9 @@ module Card::Eventable
 
     def create_system_comment_for(event)
       SystemCommenter.new(self, event).comment
+    end
+
+    def broadcast_activity
+      broadcast_render_later_to self, :activity, partial: "card/display/refresh_activity", locals: { card: self }
     end
 end

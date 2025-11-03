@@ -14,6 +14,7 @@
     padding-inline: calc(var(--tray-size) + calc(var(--inline-space) * 3));
     place-content: center;
     position: fixed;
+    view-transition-name: bar;
     z-index: var(--z-terminal);
 
     @media (prefers-color-scheme: dark) {
@@ -23,6 +24,10 @@
     &:has(.bar__placeholder[hidden]) {
       padding-inline: 1ch;
     }
+  }
+
+  ::view-transition-group(bar) {
+    z-index: 99;
   }
 
   .bar__input {

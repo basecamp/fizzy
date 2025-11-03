@@ -21,11 +21,12 @@ class Cards::PublishesControllerTest < ActionDispatch::IntegrationTest
     card.drafted!
 
     assert_changes -> { card.reload.published? }, from: false, to: true do
-      assert_difference -> { Card.creating.count }, +1 do
+      assert_difference -> { Card.count }, +1 do
         post card_publish_path(card, creation_type: "add_another")
       end
     end
 
-    assert_redirected_to Card.creating.last
+    assert Card.last.drafted?
+    assert_redirected_to Card.last
   end
 end

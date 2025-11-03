@@ -6,4 +6,28 @@ class ColumnTest < ActiveSupport::TestCase
 
     assert_equal Card::DEFAULT_COLOR, column.color
   end
+
+  test "touch all the cards when the name or color changes" do
+    column = columns(:writebook_triage)
+
+    assert_changes -> { column.cards.first.updated_at } do
+      column.update!(name: "New Name")
+    end
+
+    assert_changes -> { column.cards.first.updated_at } do
+      column.update!(color: "#FF0000")
+    end
+
+    assert_no_changes -> { column.cards.first.updated_at } do
+      column.update!(updated_at: 1.hour.from_now)
+    end
+  end
+
+  test "touch all collection cards when column is destroyed" do
+    column = columns(:writebook_triage)
+
+    assert_changes -> { column.collection.cards.first.updated_at } do
+      column.destroy
+    end
+  end
 end

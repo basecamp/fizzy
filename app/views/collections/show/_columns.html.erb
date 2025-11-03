@@ -16,7 +16,7 @@
     <%= render "collections/show/stream", collection: collection, page: page %>
 
     <div class="card-columns__right">
-      <%= render partial: "collections/show/column", collection: collection.columns, cached: true %>
+      <%= render partial: "collections/show/column", collection: collection.columns.sorted, cached: ->(column){ [ column, column.leftmost?, column.rightmost? ] } %>
       <%= render "collections/show/closed", collection: collection %>
 
       <%= render "collections/show/menu/columns", collection: collection %>

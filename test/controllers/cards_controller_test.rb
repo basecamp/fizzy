@@ -15,11 +15,23 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "create" do
+  test "create a new draft" do
     assert_difference -> { Card.count }, 1 do
       post collection_cards_path(collections(:writebook))
     end
-    assert_redirected_to card_path(Card.last)
+
+    assert Card.last.drafted?
+    assert_redirected_to Card.last
+  end
+
+  test "create resumes existing draft if it exists" do
+    draft = collections(:writebook).cards.create!(creator: users(:kevin), status: :drafted)
+
+    assert_no_difference -> { Card.count } do
+      post collection_cards_path(collections(:writebook))
+    end
+
+    assert_redirected_to draft
   end
 
   test "show" do
@@ -39,7 +51,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
         image: fixture_file_upload("moon.jpg", "image/jpeg"),
         description: "Something more in-depth",
         tag_ids: [ tags(:mobile).id ] } }
-    assert_response :success
+    assert_redirected_to card_path(cards(:logo))
 
     card = cards(:logo).reload
     assert_equal "Logo needs to change", card.title

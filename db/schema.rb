@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2025_10_29_104115) do
+ActiveRecord::Schema[8.2].define(version: 2025_11_02_115338) do
   create_table "accesses", force: :cascade do |t|
     t.datetime "accessed_at"
     t.integer "collection_id", null: false
@@ -24,10 +24,18 @@ ActiveRecord::Schema[8.2].define(version: 2025_10_29_104115) do
     t.index ["user_id"], name: "index_accesses_on_user_id"
   end
 
+  create_table "account_join_codes", force: :cascade do |t|
+    t.string "code", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "usage_count", default: 0, null: false
+    t.integer "usage_limit", default: 10, null: false
+    t.index ["code"], name: "index_account_join_codes_on_code", unique: true
+  end
+
   create_table "accounts", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "external_account_id"
-    t.string "join_code"
     t.string "name", null: false
     t.datetime "updated_at", null: false
     t.index ["external_account_id"], name: "index_accounts_on_external_account_id", unique: true
@@ -136,7 +144,7 @@ ActiveRecord::Schema[8.2].define(version: 2025_10_29_104115) do
     t.integer "creator_id", null: false
     t.date "due_on"
     t.datetime "last_active_at", null: false
-    t.text "status", default: "creating", null: false
+    t.text "status", default: "drafted", null: false
     t.string "title"
     t.datetime "updated_at", null: false
     t.index ["collection_id"], name: "index_cards_on_collection_id"
@@ -191,7 +199,9 @@ ActiveRecord::Schema[8.2].define(version: 2025_10_29_104115) do
     t.string "color", null: false
     t.datetime "created_at", null: false
     t.string "name", null: false
+    t.integer "position", default: 0, null: false
     t.datetime "updated_at", null: false
+    t.index ["collection_id", "position"], name: "index_columns_on_collection_id_and_position"
     t.index ["collection_id"], name: "index_columns_on_collection_id"
   end
 
@@ -210,13 +220,13 @@ ActiveRecord::Schema[8.2].define(version: 2025_10_29_104115) do
     t.index ["filter_id"], name: "index_creators_filters_on_filter_id"
   end
 
-  create_table "entropy_configurations", force: :cascade do |t|
+  create_table "entropies", force: :cascade do |t|
     t.bigint "auto_postpone_period", default: 2592000, null: false
     t.integer "container_id", null: false
     t.string "container_type", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["container_type", "container_id", "auto_postpone_period"], name: "idx_on_container_type_container_id_auto_postpone_pe_47f82c5b73"
+    t.index ["container_type", "container_id", "auto_postpone_period"], name: "idx_on_container_type_container_id_auto_postpone_pe_3d79b50517"
     t.index ["container_type", "container_id"], name: "index_entropy_configurations_on_container", unique: true
   end
 
@@ -340,15 +350,6 @@ ActiveRecord::Schema[8.2].define(version: 2025_10_29_104115) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "sessions", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.string "ip_address"
-    t.datetime "updated_at", null: false
-    t.string "user_agent"
-    t.integer "user_id", null: false
-    t.index ["user_id"], name: "index_sessions_on_user_id"
-  end
-
   create_table "steps", force: :cascade do |t|
     t.integer "card_id", null: false
     t.boolean "completed", default: false, null: false
@@ -389,11 +390,13 @@ ActiveRecord::Schema[8.2].define(version: 2025_10_29_104115) do
     t.boolean "active", default: true, null: false
     t.datetime "created_at", null: false
     t.string "email_address"
+    t.integer "membership_id"
     t.string "name", null: false
     t.string "password_digest"
     t.string "role", default: "member", null: false
     t.datetime "updated_at", null: false
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
+    t.index ["membership_id"], name: "index_users_on_membership_id"
     t.index ["role"], name: "index_users_on_role"
   end
 
@@ -463,7 +466,6 @@ ActiveRecord::Schema[8.2].define(version: 2025_10_29_104115) do
   add_foreign_key "pins", "users"
   add_foreign_key "push_subscriptions", "users"
   add_foreign_key "search_queries", "users"
-  add_foreign_key "sessions", "users"
   add_foreign_key "steps", "cards"
   add_foreign_key "taggings", "cards"
   add_foreign_key "taggings", "tags"

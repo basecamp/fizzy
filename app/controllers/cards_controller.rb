@@ -9,12 +9,12 @@ class CardsController < ApplicationController
   end
 
   def create
-    card = @collection.cards.create!
+    card = @collection.cards.find_or_create_by!(creator: Current.user, status: "drafted")
     redirect_to card
   end
 
   def show
-    fresh_when etag: @card.cache_invalidation_parts.for_perma
+    fresh_when @card
   end
 
   def edit
@@ -25,21 +25,17 @@ class CardsController < ApplicationController
       @card.update! card_params
     end
 
-    if @card.published?
-      render_card_replacement
-    else
-      redirect_to @card
-    end
+    redirect_to @card
   end
 
   def destroy
     @card.destroy!
-    redirect_to @card.collection, notice: ("Card deleted" unless @card.creating?)
+    redirect_to @card.collection, notice: "Card deleted"
   end
 
   private
     def set_collection
-      @collection = Current.user.collections.find(params[:collection_id])
+      @collection = Current.user.collections.find params[:collection_id]
     end
 
     def set_card
@@ -56,9 +52,5 @@ class CardsController < ApplicationController
 
     def card_params
       params.expect(card: [ :status, :title, :description, :image, tag_ids: [] ])
-    end
-
-    def render_card_replacement
-      render turbo_stream: turbo_stream.replace([ @card, :card_container ], partial: "cards/container", locals: { card: @card.reload })
     end
 end

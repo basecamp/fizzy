@@ -39,6 +39,31 @@
       opacity: 0.3;
       pointer-events: none;
     }
+
+    [aria-busy] &:disabled {
+      position: relative;
+
+      > * {
+        visibility: hidden;
+      }
+
+      &::after {
+        --mask: no-repeat radial-gradient(#000 68%,#0000 71%);
+        --size: 1.25em;
+
+        -webkit-mask: var(--mask), var(--mask), var(--mask);
+        -webkit-mask-size: 28% 45%;
+        animation: submitting 1s infinite linear;
+        aspect-ratio: 8/5;
+        background: currentColor;
+        content: "";
+        inline-size: var(--size);
+        inset: 50%;
+        margin-block: calc((var(--size) / 3) * -1);
+        margin-inline: calc((var(--size) / 2) * -1);
+        position: absolute;
+      }
+    }
   }
 
   /* Variants

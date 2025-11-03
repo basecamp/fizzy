@@ -5,7 +5,7 @@
             action: "keydown.esc->dialog#close click@document->dialog#closeOnClickOutside",
             filter_show: user_filtering.show_indexed_by?,
             combobox_default_value_value: "all",
-            combobox_default_label_value: "Status",
+            combobox_default_label_value: "Status…",
             combobox_with_default_class: "quick-filter--with-default" } do %>
     <button type="button" class="btn input input--select flex-inline txt-x-small" data-action="click->dialog#toggle:stop">
       <span class="overflow-ellipsis" data-combobox-target="label">
@@ -17,13 +17,14 @@
     </template>
 
     <%= filter_dialog "Filter by…" do %>
-      <strong class="popup__title">Filter by…</strong>
+      <strong class="popup__title">Filter by status…</strong>
 
       <ul class="popup__list" data-filter-target="list" role="listbox">
         <% Filter::INDEXES.each do |index| %>
-          <%= tag.li class: "popup__item", data: { navigable_list_target: "item", combobox_target: "item", combobox_value: index, combobox_label: index.humanize }, role: "checkbox", aria: { checked: filter.indexed_by == index } do %>
+          <% label = Filter.indexed_by_human_name(index) %>
+          <%= tag.li class: "popup__item", data: { navigable_list_target: "item", combobox_target: "item", combobox_value: index, combobox_label: label }, role: "checkbox", aria: { checked: filter.indexed_by == index } do %>
             <button type="button" class="btn popup__btn" data-action="dialog#close combobox#change filter-settings#change form#submit">
-              <span class="overflow-ellipsis flex-item-grow"><%= index == "all" ? "Status" : index.humanize %></span>
+              <span class="overflow-ellipsis flex-item-grow"><%= label %></span>
               <%= icon_tag "check", class: "checked flex-item-justify-end" %>
             </button>
           <% end %>

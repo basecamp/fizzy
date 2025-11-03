@@ -1,8 +1,0 @@
-<div class="fizzy-menu__hotkeys" role="list">
-  <%= filter_hotkey_link "Home", root_path, 1, "home" %>
-  <%= filter_hotkey_link "Assigned to me", cards_path(assignee_ids: [Current.user.id]), 2, "clipboard" %>
-  <%= filter_hotkey_link "Added by me", cards_path(creator_ids: [Current.user.id]), 3, "person-add" %>
-  <%= filter_hotkey_link "New board", new_collection_path, 4, "collection-add" %>
-  <%= filter_hotkey_link "Notifications", notifications_path, 5, "bell" %>
-  <%= filter_hotkey_link "Account #{tag.span("Settings", class: "visually-hidden")}", account_settings_path, 6, "settings" %>
-</div>

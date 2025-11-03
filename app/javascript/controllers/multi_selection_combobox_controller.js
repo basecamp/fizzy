@@ -13,8 +13,7 @@ export default class extends Controller {
   }
 
   connect() {
-    this.labelTarget.textContent = this.#selectedLabel
-    this.#updateHiddenFields()
+    this.refresh()
   }
 
   change(event) {
@@ -24,6 +23,10 @@ export default class extends Controller {
     }
   }
 
+  refresh() {
+    this.labelTarget.textContent = this.#selectedLabel
+    this.#updateHiddenFields()
+  }
 
   clear(event) {
     this.#deselectAll()

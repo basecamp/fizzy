@@ -1,13 +1,19 @@
 Rails.application.routes.draw do
   namespace :account do
+    post :enter, to: "entries#create"
     resource :join_code
     resource :settings
-    resource :entropy_configuration
+    resource :entropy
   end
 
   resources :users do
-    resource :role, module: :users
-    resources :push_subscriptions, module: :users
+    scope module: :users do
+      resource :avatar
+      resource :role
+      resource :events
+
+      resources :push_subscriptions
+    end
   end
 
   resources :collections do
@@ -15,7 +21,7 @@ Rails.application.routes.draw do
       resource :subscriptions
       resource :involvement
       resource :publication
-      resource :entropy_configuration
+      resource :entropy
 
       namespace :columns do
         resource :not_now
@@ -26,18 +32,23 @@ Rails.application.routes.draw do
       resources :columns
     end
 
-    resources :cards, only: %i[ create ]
+    resources :cards, only: :create
 
     resources :webhooks do
-      scope module: "webhooks" do
-        resource :activation, only: %i[ create ]
+      scope module: :webhooks do
+        resource :activation, only: :create
       end
     end
   end
 
+  resources :columns, only: [] do
+    resource :left_position, module: :columns
+    resource :right_position, module: :columns
+  end
+
   namespace :columns do
     resources :cards do
-      scope module: "cards" do
+      scope module: :cards do
         namespace :drops do
           resource :not_now
           resource :stream
@@ -52,7 +63,7 @@ Rails.application.routes.draw do
     resources :previews
   end
 
-  resources :cards, only: %i[ index show edit update destroy ] do
+  resources :cards do
     scope module: :cards do
       resource :goldness
       resource :image
@@ -62,9 +73,9 @@ Rails.application.routes.draw do
       resource :triage
       resource :publish
       resource :reading
-      resource :recover
       resource :watch
-      resource :collection, only: :update
+      resource :collection
+      resource :column
 
       resources :assignments
       resources :taggings
@@ -88,7 +99,7 @@ Rails.application.routes.draw do
     scope module: :notifications do
       get "tray", to: "trays#show", on: :collection
 
-      resource :reading, only: %i[ create destroy ]
+      resource :reading
       collection do
         resource :bulk_reading, only: :create
       end
@@ -113,30 +124,36 @@ Rails.application.routes.draw do
     resources :days
   end
 
-  resources :uploads, only: :create
-  get "/u/*slug" => "uploads#show", as: :upload
-
   resources :qr_codes
-  get "join/:join_code", to: "users#new", as: :join
-  post "join/:join_code", to: "users#create"
 
-  resource :session do
-    scope module: "sessions" do
-      resources :transfers, only: %i[ show update ]
-    end
+  get "join/:tenant/:code", to: "join_codes#new", as: :join
+  post "join/:tenant/:code", to: "join_codes#create"
+
+  namespace :users do
+    resources :joins
   end
 
-  resources :users do
-    scope module: :users do
-      resource :avatar
+  resource :session do
+    scope module: :sessions do
+      resources :transfers
+      resource :magic_link
+      resource :menu
     end
   end
 
   resources :commands
 
-  resource :conversation, only: %i[ show create ] do
+  resource :conversation do
     scope module: :conversations do
-      resources :messages, only: %i[ index create ]
+      resources :messages
+    end
+  end
+
+  scope module: :memberships, path: "memberships/:membership_id" do
+    resource :unlink, controller: :unlink, as: :unlink_membership
+
+    resources :email_addresses, param: :token do
+      resource :confirmation, module: :email_addresses
     end
   end
 
@@ -209,12 +226,6 @@ Rails.application.routes.draw do
   get "up", to: "rails/health#show", as: :rails_health_check
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   get "service-worker" => "pwa#service_worker"
-
-  match "/400", to: "errors#bad_request", via: :all
-  match "/404", to: "errors#not_found", via: :all
-  match "/406", to: "errors#not_acceptable", via: :all
-  match "/422", to: "errors#unprocessable_entity", via: :all
-  match "/500", to: "errors#internal_server_error", via: :all
 
   root "events#index"
 

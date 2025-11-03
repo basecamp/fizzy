@@ -12,13 +12,11 @@ class Webhook < ApplicationRecord
     card_postponed
     card_auto_postponed
     card_collection_changed
-    card_due_date_added
-    card_due_date_changed
-    card_due_date_removed
     card_published
     card_reopened
+    card_sent_back_to_triage
+    card_triaged
     card_unassigned
-    card_unstaged
     comment_created
   ].freeze
 
@@ -42,11 +40,11 @@ class Webhook < ApplicationRecord
   validate :validate_url
 
   def activate
-    update_columns active: true
+    update! active: true unless active?
   end
 
   def deactivate
-    update_columns active: false
+    update! active: false
   end
 
   def renderer

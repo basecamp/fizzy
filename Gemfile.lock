@@ -36,7 +36,7 @@ GIT
 
 GIT
   remote: https://github.com/rails/rails.git
-  revision: def13087d55a6dbbfa80d114c847555927ce2ed7
+  revision: d3d17c297a70d3e255a34693a1fb0074712e9930
   branch: main
   specs:
     actioncable (8.2.0.alpha)
@@ -200,6 +200,7 @@ GEM
     bcrypt_pbkdf (1.1.1)
     benchmark (0.5.0)
     bigdecimal (3.3.1)
+    bindex (0.8.1)
     bootsnap (1.18.6)
       msgpack (~> 1.2)
     brakeman (7.1.0)
@@ -238,6 +239,8 @@ GEM
     erubi (1.13.1)
     et-orbi (1.4.0)
       tzinfo
+    faker (3.5.2)
+      i18n (>= 1.8.11, < 2)
     ffi (1.17.2)
     ffi (1.17.2-arm64-darwin)
     ffi (1.17.2-x86_64-darwin)
@@ -262,7 +265,7 @@ GEM
       activesupport (>= 6.0.0)
       railties (>= 6.0.0)
     io-console (0.8.1)
-    irb (1.15.2)
+    irb (1.15.3)
       pp (>= 0.6.0)
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
@@ -340,7 +343,7 @@ GEM
     net-smtp (0.5.1)
       net-protocol
     net-ssh (7.3.0)
-    nio4r (2.7.4)
+    nio4r (2.7.5)
     nokogiri (1.18.10)
       mini_portile2 (~> 2.8.2)
       racc (~> 1.4)
@@ -402,7 +405,7 @@ GEM
       nio4r (~> 2.0)
     raabro (1.4.0)
     racc (1.8.1)
-    rack (3.2.3)
+    rack (3.2.4)
     rack-session (2.1.1)
       base64 (>= 0.1.0)
       rack (>= 3.0.0)
@@ -422,7 +425,7 @@ GEM
     rake-compiler-dock (1.9.1)
     rb_sys (0.9.117)
       rake-compiler-dock (= 1.9.1)
-    rdoc (6.15.0)
+    rdoc (6.15.1)
       erb
       psych (>= 4.0.0)
       tsort
@@ -503,10 +506,6 @@ GEM
       fugit (~> 1.11)
       railties (>= 7.1)
       thor (>= 1.3.1)
-    sqlite-vec (0.1.7.alpha.2-arm64-darwin)
-    sqlite-vec (0.1.7.alpha.2-arm64-linux)
-    sqlite-vec (0.1.7.alpha.2-x86_64-darwin)
-    sqlite-vec (0.1.7.alpha.2-x86_64-linux)
     sqlite3 (2.7.4)
       mini_portile2 (~> 2.8.0)
     sqlite3 (2.7.4-arm64-darwin)
@@ -538,10 +537,15 @@ GEM
     unicode-display_width (3.2.0)
       unicode-emoji (~> 4.1)
     unicode-emoji (4.1.0)
-    uri (1.0.4)
+    uri (1.1.0)
     useragent (0.16.11)
     vcr (6.3.1)
       base64
+    web-console (4.2.1)
+      actionview (>= 6.0.0)
+      activemodel (>= 6.0.0)
+      bindex (>= 0.4.0)
+      railties (>= 6.0.0)
     web-push (3.0.2)
       jwt (~> 3.0)
       openssl (~> 3.0)
@@ -607,6 +611,7 @@ DEPENDENCIES
   bundler-audit
   capybara
   debug
+  faker
   fizzy-saas!
   geared_pagination (~> 1.2)
   image_processing (~> 1.14)
@@ -635,12 +640,12 @@ DEPENDENCIES
   solid_cable (>= 3.0)
   solid_cache (~> 1.0)
   solid_queue (~> 1.2)
-  sqlite-vec (= 0.1.7.alpha.2)
   sqlite3 (>= 2.0)
   stimulus-rails
   thruster
   turbo-rails
   vcr
+  web-console
   web-push
   webmock
   webrick

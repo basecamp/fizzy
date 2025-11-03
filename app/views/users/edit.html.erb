@@ -1,10 +1,6 @@
 <% @page_title = "Edit your profile" %>
 
-<% content_for :header do %>
-  <%= render "filters/menu" %>
-<% end %>
-
-<div class="panel shadow center">
+<div class="panel shadow center" style="--panel-size: 45ch;">
   <div class="flex flex-column gap txt-medium">
     <%= form_with model: @user, method: :patch, class: "flex flex-column gap", data: { controller: "form upload-preview" } do |form| %>
       <div class="align-center center avatar__form gap">
@@ -28,23 +24,15 @@
       <div class="flex align-center gap">
         <label class="flex align-center gap input input--actor">
           <%= form.text_field :name, class: "input full-width", autocomplete: "name", placeholder: "Name", autofocus: true, required: true, data: { "1p-ignore": true, action: "keydown.esc@document->form#cancel" } %>
-          <%= icon_tag "person", class: "txt-large" %>
         </label>
       </div>
       <div class="flex align-center gap">
-        <label class="flex align-center gap input input--actor">
-          <%= form.email_field :email_address, class: "input full-width", autocomplete: "username", placeholder: "Email address", required: true %>
-          <%= icon_tag "email", class: "txt-large" %>
-        </label>
+        <div class="flex align-center gap input input--actor">
+          <%= form.email_field :email_address, class: "input full-width", autocomplete: "username", placeholder: "Email address", required: true, readonly: true, value: @user.identity.email_address %>
+          <%= link_to "Change email", new_email_address_url(script_name: nil, membership_id: Current.membership.id), class: "btn btn--plain txt-link txt-small txt-nowrap" %>
+        </div>
       </div>
-      <div class="flex align-center gap">
-        <label class="flex align-center gap input input--actor">
-          <%= form.password_field :password, class: "input full-width", autocomplete: "new-password", placeholder: "Password", required: false, maxlength: 72 %>
-          <%= icon_tag "password", class: "txt-large" %>
-        </label>
-      </div>
-      <button type="submit" id="log_in" class="btn btn--reversed center">
-        <%= icon_tag "check" %>
+      <button type="submit" id="log_in" class="btn btn--reversed center" data-form-target="submit">
         <span>Save changes</span>
       </button>
 

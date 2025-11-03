@@ -5,12 +5,12 @@
       <span class="for-screen-reader">Add a tag</span>
     </button>
 
-    <dialog class="popup panel flex-column align-start justify-start fill-white shadow txt-small" data-dialog-target="dialog">
-      <%= turbo_frame_tag card, :tagging, src: new_card_tagging_path(card) %>
+    <dialog class="popup panel flex-column align-start justify-start fill-white shadow txt-small" data-dialog-target="dialog" data-action="turbo:before-morph-attribute->dialog#preventCloseOnMorphing turbo:submit-end->dialog#close">
+      <%= turbo_frame_tag card, :tagging, src: new_card_tagging_path(card), refresh: "morph" %>
     </dialog>
   </div>
 
-  <% if card.tags.any? || card.creating? %>
+  <% if card.tags.any? %>
     <div class="min-width overflow-ellipsis">
       <% card.tags.each_with_index do |tag, index| %>
         <%= link_to cards_path(collection_ids: [ card.collection ], tag_ids: [ tag.id ]),

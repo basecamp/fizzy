@@ -1,39 +1,24 @@
 <% @page_title = @card.title %>
 <% @header_class = "header--card" %>
-<%= turbo_stream_from @card %>
 
 <% content_for :head do %>
-  <%= tag.meta property: "og:title", content: "#{@card.title} | #{@card.collection.name}" %>
-  <%= tag.meta property: "og:description", content: format_excerpt(@card&.description, length: 200) %>
-  <%= tag.meta property: "og:image", content: @card.image.attached? ? "#{request.base_url}#{url_for(@card.image)}" : "#{request.base_url}/app-icon.png" %>
-  <%= tag.meta property: "og:url", content: card_url(@card) %>
+  <%= card_social_tags(@card) %>
 <% end %>
 
 <% content_for :header do %>
-  <%= render "filters/menu" %>
-  <%= link_to collection_url(@card.collection), class: "header__title btn borderless txt-large",
-        style: "--btn-padding: 0.25ch 1ch 0.25ch 0.75ch; view-transistion-name: card-collection-title;",
-        data: { controller: "hotkey", action: "keydown.esc@document->hotkey#click click->turbo-navigation#backIfSamePath" } do %>
-    <span class="overflow-ellipsis">
-      &larr;
-      <strong class="font-black"><%= @card.collection.name %></strong>
-    </span>
-  <% end %>
+  <div class="header__actions header__actions--start">
+    <%= link_back_to_collection(@card.collection) %>
+  </div>
 <% end %>
 
-<div data-controller="beacon lightbox" data-beacon-url-value="<%= card_reading_url(@card) %>">
-  <%= render "cards/container", card: @card %>
+<%= turbo_stream_from @card %>
+<%= turbo_stream_from @card, :activity %>
 
-  <% if @card.published? || @card.drafted? %>
-    <%= render "cards/messages", card: @card %>
-  <% end %>
+<div data-controller="beacon lightbox" data-beacon-url-value="<%= card_reading_path(@card) %>">
+  <%= render "cards/container", card: @card %>
+  <%= render "cards/messages",  card: @card unless @card.drafted? %>
 
   <%= render "layouts/lightbox" do %>
-    <% if @card.image.attached? %>
-      <%= button_to card_image_path(@card), method: :delete, class: "btn", data: { controller: "tooltip" } do %>
-        <%= icon_tag "trash" %>
-        <span class="for-screen-reader">Remove background image</span>
-      <% end %>
-    <% end %>
+    <%= button_to_remove_card_image(@card) if @card.image.attached? %>
   <% end %>
 </div>

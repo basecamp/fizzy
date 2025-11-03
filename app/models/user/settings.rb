@@ -20,7 +20,7 @@ class User::Settings < ApplicationRecord
   end
 
   def bundling_emails?
-    !bundle_email_never? && !user.system?
+    !bundle_email_never? && !user.system? && user.active?
   end
 
   def timezone

@@ -1,5 +1,5 @@
 <%= turbo_frame_tag @card, :edit do %>
-  <%= form_with model: @card, url: card_path(@card),
+  <%= form_with model: @card,
         data: { controller: "autoresize form local-save", local_save_key_value: "card-#{@card.id}", action: "turbo:submit-end->local-save#submit" } do |form| %>
     <h1 class="card__title flex align-start gap-half">
       <%= form.label :title, class: "flex flex-column align-center autoresize__wrapper", data: { autoresize_target: "wrapper", autoresize_clone_value: "" } do %>
@@ -16,6 +16,6 @@
     <% end %>
 
     <%= form.button "Save changes", type: :submit, class: "btn btn--reversed fit-content", style: "--btn-background: #{@card.color}" %>
-    <%= link_to "Close editor and discard changes", card_path(@card), data: { form_target: "cancel" }, hidden: true %>
+    <%= link_to "Close editor and discard changes", @card, data: { form_target: "cancel" }, hidden: true %>
   <% end %>
 <% end %>

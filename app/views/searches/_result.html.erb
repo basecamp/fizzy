@@ -1,5 +1,5 @@
 <li>
-  <%= link_to result.source, class: "search__result", data: { turbo_frame: "_top" } do %>
+  <%= link_to result.source, class: "search__result", data: { turbo_frame: "_top", action: "bar#reset" } do %>
       <div>
         <h3 class="search__title txt--medium margin-none">
           # <%= result.card_id %> <%= result.card_title %>

@@ -1,5 +1,5 @@
 #
-#  see https://box-car.com/5986089/collections/7/cards/1302
+#  see https://app.box-car.com/5986089/collections/7/cards/1302
 #
 #  Large previewable uploads may take longer than the "pin reads" interval. So we pick a small-ish
 #  number and turn off previews for anything larger, at least until we can come up with a permanent

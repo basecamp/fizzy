@@ -1,3 +1,7 @@
-<% referenced_collections_from(records).each do |collection| %>
-  <%= turbo_stream_from collection %>
+<% if filter.collections.any? %>
+  <% filter.collections.each do |collection| %>
+    <%= turbo_stream_from collection %>
+  <% end %>
+<% else %>
+  <%= turbo_stream_from :all_collections %>
 <% end %>

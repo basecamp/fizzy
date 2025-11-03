@@ -7,5 +7,6 @@ export default class extends Controller {
     const emojiChar = event.target.getAttribute("data-emoji")
     const value = this.inputTarget.value
     this.inputTarget.value = `${value}${emojiChar}`
+    this.inputTarget.focus()
   }
 }

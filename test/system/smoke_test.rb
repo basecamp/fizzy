@@ -43,7 +43,8 @@ class SmokeTest < ApplicationSystemTestCase
 
   private
     def sign_in_as(user)
-      visit session_transfer_url(user.transfer_id)
+      visit session_transfer_url(user.identity.transfer_id, script_name: nil)
+      click_on ApplicationRecord.with_tenant(user.tenant) { Account.sole.name }
       assert_selector "h1", text: "Activity"
     end
 
@@ -60,8 +61,8 @@ class SmokeTest < ApplicationSystemTestCase
 
     def assert_image_figure_attachment(content_type: "image/png", caption:)
       assert_figure_attachment(content_type: content_type) do
-        assert_selector("img[src*='/rails/active_storage']")
-        assert_selector "figcaption input[placeholder='#{caption}']"
+        assert_selector "img[src*='/rails/active_storage']", wait: 10
+        assert_selector "figcaption input[placeholder='#{caption}']", wait: 10
       end
     end
 end

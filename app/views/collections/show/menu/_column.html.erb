@@ -11,6 +11,27 @@
           <span>Edit column</span>
         </button>
       </li>
+
+      <li class="popup__item">
+        <%= button_to column_left_position_path(column),
+              class: "popup__btn btn",
+              form_class: "display-contents",
+              disabled: column.leftmost? do %>
+          <%= icon_tag "column-left" %>
+          <span>Move to the left</span>
+        <% end %>
+      </li>
+
+      <li class="popup__item">
+        <%= button_to column_right_position_path(column),
+              class: "popup__btn btn",
+              form_class: "display-contents",
+              disabled: column.rightmost? do %>
+          <%= icon_tag "column-right" %>
+          <span>Move to the right</span>
+        <% end %>
+      </li>
+
       <li class="popup__item">
         <%= button_to collection_column_path(column.collection, column),
               method: :delete,

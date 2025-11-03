@@ -1,18 +1,24 @@
-<%= tag.div class: "settings__panel settings__panel--users panel shadow center", data: {
+<header>
+  <h2 class="divider txt-medium margin-block-start">People on this account</h2>
+</header>
+
+<%= tag.div class: "flex flex-column gap settings__user-filter", data: {
   controller: "filter navigable-list",
   action: "keydown->navigable-list#navigate filter:changed->navigable-list#reset",
   navigable_list_focus_on_selection_value: true,
   navigable_list_actionable_items_value: true
 } do %>
 
-  <h2 class="divider txt-large">People on the account</h2>
-  <%= render "account/invite" %>
-
   <div class="settings__user-filter">
     <input placeholder="Filter…" class="input input--transparent full-width txt-small" type="search" autocorrect="off" autocomplete="off" data-1p-ignore="true" data-filter-target="input" data-action="input->filter#filter">
 
     <ul class="settings__user-list margin-block-half" data-filter-target="list">
-      <%= render partial: "account/user", collection: users %>
+      <%= render partial: "account/settings/user", collection: users %>
     </ul>
   </div>
+
+  <%= link_to account_join_code_path, class: "btn btn--link center txt-small" do %>
+    <%= icon_tag "add" %>
+    <span>Invite people</span>
+  <% end %>
 <% end %>

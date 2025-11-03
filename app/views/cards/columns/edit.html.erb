@@ -1,0 +1,27 @@
+<%= turbo_frame_tag dom_id(@card, :columns) do %>
+  <div class="card__stages" role="radiogroup">
+    <legend class="for-screen-reader">Choose a column for this card</legend>
+
+    <%= button_to "Not now", card_not_now_path(@card),
+        class: [ "card__column-name btn", { "card__column-name--current": @card.postponed? } ],
+        role: "radio",
+        aria: { checked: @card.postponed? },
+        form_class: "flex align-center gap-half" %>
+
+    <%= button_to "Maybe?", card_triage_path(@card), method: :delete,
+        class: [ "card__column-name card__column-name--stream btn", { "card__column-name--current": @card.awaiting_triage? } ],
+        role: "radio",
+        aria: { checked: @card.awaiting_triage? },
+        form_class: "flex align-center gap-half" %>
+
+    <% @columns.each do |column| %>
+      <%= button_to_set_column @card, column %>
+    <% end %>
+
+    <%= button_to "Done", card_closure_path(@card),
+        class: [ "card__column-name btn", { "card__column-name--current": @card.closed? } ],
+        role: "radio",
+        aria: { checked: @card.closed? },
+        form_class: "flex align-center gap-half" %>
+  </div>
+<% end %>

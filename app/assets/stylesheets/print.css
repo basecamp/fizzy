@@ -35,8 +35,8 @@
     print-color-adjust: exact;
   }
 
-  .fizzy-menu,
-  .fizzy-menu-trigger,
+  .boxcar-menu,
+  .boxcar-menu-trigger,
   .header__actions {
     display: none;
   }

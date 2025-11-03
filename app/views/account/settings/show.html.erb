@@ -1,11 +1,14 @@
-<% @page_title = "Account Settings for #{Account.sole.name}" %>
+<% @page_title = "Account Settings" %>
 
 <% content_for :header do %>
-  <%= render "filters/menu" %>
   <h1 class="header__title"><%= @page_title %></h1>
 <% end %>
 
-<section class="settings">
-  <%= render "account/settings/users", users: @users %>
-  <%= render "account/settings/entropy_configuration", account: @account %>
+<section class="settings margin-block-start-half">
+  <div class="settings__panel settings__panel--users panel shadow center">
+    <%= render "account/settings/name", account: @account %>
+    <%= render "account/settings/users", users: @users %>
+  </div>
+
+  <%= render "account/settings/entropy", account: @account %>
 </section>

@@ -1,2 +1,2 @@
 <%= turbo_stream.replace("filter-settings-save-toggle", partial: "filters/filter_toggle", locals: { filter: @filter }) %>
-<%= turbo_stream.replace("my-filters", partial: "filters/menu/custom", locals: { filters: @filters }) %>
+<%= turbo_stream.replace("my-filters", partial: "my/menus/saved_filter", locals: { filters: @filters }) %>

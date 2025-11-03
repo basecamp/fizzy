@@ -4,7 +4,7 @@
   data-drag-and-strum-target="container"
   data-collapsible-columns-target="column"
   data-controller="clicker"
-  data-action="turbo:before-morph-attribute->collapsible-columns#preventToggle"
+  data-action="turbo:before-morph-attribute->collapsible-columns#preventToggle turbo:before-stream-render@document->collapsible-columns#restoreState"
   data-drag-and-drop-url="<%= columns_card_drops_column_path("__id__", column_id: column.id) %>"
 >
   <%= render "collections/show/expander", title: column.name, count: column.cards.active.count, column_id: dom_id(column) do %>

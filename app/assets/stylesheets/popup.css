@@ -8,16 +8,45 @@
     --popup-item-padding-inline: 0.5rem;
 
     inset: 0 auto auto 50%;
-    max-block-size: 80vh;
     min-inline-size: min(25ch, calc(100dvw - var(--block-space-double)));
     max-inline-size: min(55ch, calc(100dvw - var(--block-space-double)));
     overflow: auto;
     position: absolute;
     transform: translateX(-50%);
     z-index: var(--z-popup);
+    opacity: 0;
+    transform: scale(0.2) translateX(-50%);
+    transform-origin: top left;
+    transition: var(--dialog-duration) allow-discrete;
+    transition-property: display, opacity, overlay, transform;
+
+    &::backdrop {
+      background-color: var(--color-always-black);
+      opacity: 0;
+      transform: scale(1);
+      transition: var(--dialog-duration) allow-discrete;
+      transition-property: display, opacity, overlay;
+    }
 
     &[open] {
       display: flex;
+      opacity: 1;
+      transform: scale(1) translateX(-50%);
+
+      &::backdrop {
+        opacity: 0.5;
+      }
+    }
+
+    @starting-style {
+      &[open] {
+        opacity: 0;
+        transform: scale(0.2) translateX(-50%);
+      }
+
+      &[open]::backdrop {
+        opacity: 0;
+      }
     }
 
     &.orient-left {
@@ -178,54 +207,6 @@
     position: sticky;
     text-align: center;
     z-index: 1;
-  }
-
-  /* Variants
-  /* ------------------------------------------------------------------------ */
-
-  .popup--animated {
-    opacity: 0;
-    transform: scale(0.2) translateX(-50%);
-    transform-origin: top left;
-    transition: var(--dialog-duration) allow-discrete;
-    transition-property: display, opacity, overlay, transform;
-
-    &::backdrop {
-      background-color: var(--color-always-black);
-      opacity: 0;
-      transform: scale(1);
-      transition: var(--dialog-duration) allow-discrete;
-      transition-property: display, opacity, overlay;
-    }
-
-    /* Safari doesn't position the sticky footer properly during the
-     * transition, so we need to delay the footer entrance. */
-    .popup__footer {
-      animation: safari-sticky-footer-hack 0s;
-      animation-delay: var(--dialog-duration);
-      animation-fill-mode: both;
-      inset-inline: var(--block-space);
-    }
-
-    &[open] {
-      opacity: 1;
-      transform: scale(1) translateX(-50%);
-
-      &::backdrop {
-        opacity: 0.5;
-      }
-    }
-
-    @starting-style {
-      &[open] {
-        opacity: 0;
-        transform: scale(0.2) translateX(-50%);
-      }
-
-      &[open]::backdrop {
-        opacity: 0;
-      }
-    }
   }
 
   @keyframes safari-sticky-footer-hack {

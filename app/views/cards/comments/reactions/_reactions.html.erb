@@ -8,7 +8,7 @@
       <%= link_to new_card_comment_reaction_path(comment.card, comment), role: "button",
             class: "reactions__trigger btn btn--circle borderless", action: "soft-keyboard#open",
             data: { turbo_frame: dom_id(comment, :new_reaction), action: "dialog#close" } do %>
-        <%= icon_tag "reaction" %>
+        <%= image_tag "boost-color.svg", aria: { hidden: true } %>
         <span class="for-screen-reader">Add your own reaction</span>
       <% end %>
     <% end %>

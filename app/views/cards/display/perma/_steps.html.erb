@@ -1,9 +1,9 @@
 <ol class="steps txt-small margin-block-start-auto">
   <%= render partial: "cards/steps/step", collection: card.steps, as: :step %>
 
-  <li class="step">
+  <li id="<%= dom_id(card, :new_step) %>" class="step">
     <input type="checkbox" class="step__checkbox" disabled>
-    <%= form_with model: [card, Step.new], url: card_steps_path(card), data: { controller: "form", action: "submit->form#preventEmptySubmit" } do |form| %>
+    <%= form_with model: [card, Step.new], url: card_steps_path(card), data: { controller: "form", action: "submit->form#preventEmptySubmit turbo:submit-end->form#reset" } do |form| %>
       <%= form.text_field :content, class: "input step__content hide-focus-ring", placeholder: "Add a step…", autocomplete: "off", data: { form_target: "input" }, aria: { label: "Add a step" } %>
     <% end %>
   </li>

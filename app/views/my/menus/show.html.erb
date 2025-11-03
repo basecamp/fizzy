@@ -1,39 +1,25 @@
 <%= turbo_frame_tag "my_menu", target: "_top" do %>
   <div class="flex gap">
-    <%= text_field_tag :search, nil,
-          type: "search",
-          role: "combobox",
-          placeholder: "Type to jump to a collection, person, place, or tag…",
-          class: "input input--transparent txt-small",
-          autofocus: true,
-          autocorrect: "off",
-          autocomplete: "off",
-          aria: { activedescendant: "" },
-          data: {
-            "1p-ignore": "true",
-            filter_target: "input",
-            nav_section_expander_target: "input",
-            navigable_list_target: "input",
-            action: "input->filter#filter" } %>
-    <button class="fizzy-menu__close btn borderless txt-small" data-action="dialog#close">
+    <%= jump_field_tag %>
+
+    <button class="boxcar-menu__close btn borderless txt-small" data-action="dialog#close">
       <%= icon_tag "close" %>
       <span class="for-screen-reader">Close menu</span>
     </button>
   </div>
 
-  <%= render "filters/menu/hotkeys" %>
+  <%= render "hotkeys" %>
 
-  <div class="margin-block-start-half txt-x-small flex-inline align-center gap-half justify-center txt-subtle">
-    <span>BOXCAR is designed, built, and backed by</span>
-    <strong><%= icon_tag "37signals" %> <a href="https://37signals.com" target="_blank" class="txt-subtle">37signals</a>.</strong>
+  <div class="margin-block-start-half txt-x-small txt-align-center">
+    BOXCAR is designed, built, and backed by <strong class="txt-nowrap"><%= icon_tag "37signals", class: "v-align-middle" %> <a href="https://37signals.com" target="_blank" class="txt-ink">37signals</a>.</strong>
   </div>
 
-  <%= render "filters/menu/custom", filters: @user_filtering.filters %>
-  <%= render "filters/menu/collections", user_filtering: @user_filtering %>
-  <%= render "filters/menu/tags", user_filtering: @user_filtering %>
-  <%= render "filters/menu/users", user_filtering: @user_filtering %>
-  <%= render "filters/menu/places", user_filtering: @user_filtering %>
-  <%= render "filters/menu/accounts", user_filtering: @user_filtering %>
+  <%= render "saved_filter", filters: @user_filtering.filters %>
+  <%= render "collections", user_filtering: @user_filtering %>
+  <%= render "tags", user_filtering: @user_filtering %>
+  <%= render "users", user_filtering: @user_filtering %>
+  <%= render "places", user_filtering: @user_filtering %>
+  <%= render "accounts", user_filtering: @user_filtering %>
 
-  <%= render "filters/menu/shortcut_notice" %>
+  <%= render "shortcut_notice" %>
 <% end %>

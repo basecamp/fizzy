@@ -19,12 +19,12 @@
       text-overflow: ellipsis;
 
       &.orient-right {
-        inset-inline-start: 0;
+        inset-inline: 0 auto;
         translate: 0 -100%;
       }
 
       &.orient-left {
-        inset-inline-end: 0;
+        inset-inline: auto 0;
         translate: 0 -100%;
       }
     }

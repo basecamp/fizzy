@@ -1,8 +1,6 @@
 <% @page_title = "Column: Closed" %>
 
 <% content_for :header do %>
-  <%= render "filters/menu" %>
-
   <div class="header__actions header__actions--start">
     <%= link_to @collection, class: "btn borderless txt-medium", data: { controller: "hotkey", action: "keydown.esc@document->hotkey#click" } do %>
       <span class="overflow-ellipsis">
@@ -24,9 +22,11 @@
         <%= render "collections/columns/list", cards: @page.records, draggable: true %>
       <% end %>
     <% else %>
-      <div class="card blank-slate blank-slate--card">
-        <p class="txt-align-center">Drag cards here</p>
-        <p class="txt-align-center blank-slate-for-grid">Nothing here</p>
+      <div class="cards__list">
+        <div class="card blank-slate blank-slate--card">
+          <p class="txt-align-center">Drag cards here</p>
+          <p class="txt-align-center blank-slate-for-grid">Nothing here</p>
+        </div>
       </div>
     <% end %>
   <% end %>

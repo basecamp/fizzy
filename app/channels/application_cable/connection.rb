@@ -4,13 +4,14 @@ module ApplicationCable
 
     def connect
       super
-      ApplicationRecord.with_tenant(current_tenant) { set_current_user || reject_unauthorized_connection }
+      set_current_user || reject_unauthorized_connection
     end
 
     private
       def set_current_user
         if session = find_session_by_cookie
-          self.current_user = session.user
+          membership = session.identity.memberships.find_by!(tenant: current_tenant)
+          self.current_user = membership.user if membership.user.active?
         end
       end
 

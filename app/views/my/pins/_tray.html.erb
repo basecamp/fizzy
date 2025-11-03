@@ -1,10 +1,10 @@
 <%= turbo_stream_from Current.user, :pins_tray %>
 
 <section class="tray tray--pins" data-controller="dialog">
-  <%= tag.dialog id: "pin-tray", class: "tray__dialog", data: { 
+  <%= tag.dialog id: "pin-tray", class: "tray__dialog", data: {
       action: "keydown->navigable-list#navigate dialog:show@document->navigable-list#reset keydown.esc->dialog#close:stop click@document->dialog#closeOnClickOutside",
-      controller: "navigable-list", 
-      dialog_target: "dialog",  
+      controller: "navigable-list",
+      dialog_target: "dialog",
       navigable_list_actionable_items_value: "true",
       navigable_list_reverse_navigation_value: "true" },
       turbo_permanent: true do %>

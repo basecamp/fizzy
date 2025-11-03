@@ -1,9 +1,5 @@
 <% @page_title = "Create a new board" %>
 
-<% content_for :header do %>
-  <%= render "filters/menu" %>
-<% end %>
-
 <div class="panel panel--centered">
   <%= form_with model: @collection, class: "flex flex-column gap", data: { controller: "form" } do |form| %>
     <h1 class="txt-x-large margin-none font-weight-black"><%= @page_title %></h2>

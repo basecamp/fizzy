@@ -1,3 +1,3 @@
 <div class="cards__list">
-  <%= render partial: "cards/display/public_preview", collection: cards, as: :card, cached: ->(card) { card.cache_invalidation_parts.for_preview } %>
+  <%= render "cards/display/public_previews", cards: cards %>
 </div>

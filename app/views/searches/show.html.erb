@@ -1,4 +1,4 @@
-<%= turbo_frame_tag "bar-content" do %>
+<%= turbo_frame_tag "bar_content" do %>
   <% if @card %>
     <%= auto_submit_form_with url: card_path(@card), method: :get, data: { turbo_action: "advance", turbo_frame: "_top", search_redirect: true } %>
   <% else %>

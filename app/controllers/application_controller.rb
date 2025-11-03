@@ -1,7 +1,10 @@
 class ApplicationController < ActionController::Base
-  include Authentication, Authorization, CurrentRequest, CurrentTimezone, DisableWriterAffinity,
-    LoadBalancerRouting, SetPlatform, TurboFlash, ViewTransitions
+  include DisableWriterAffinity, LoadBalancerRouting
+  include Authentication
+  include Authorization
+  include CurrentRequest, CurrentTimezone, SetPlatform
+  include TurboFlash, ViewTransitions
 
   stale_when_importmap_changes
-  allow_browser versions: :modern, block: -> { render "errors/not_acceptable", layout: "error" }
+  allow_browser versions: :modern
 end

@@ -1,5 +1,4 @@
 raise "Seeding is just for development" unless Rails.env.development?
-
 require "active_support/testing/time_helpers"
 include ActiveSupport::Testing::TimeHelpers
 
@@ -12,6 +11,9 @@ end
 
 def create_tenant(signal_account_name)
   tenant_id = ActiveRecord::FixtureSet.identify signal_account_name
+  email_address = "david@37signals.com"
+  identity = Identity.find_or_create_by!(email_address: email_address)
+  membership = identity.memberships.find_or_create_by!(tenant: tenant_id)
 
   ApplicationRecord.destroy_tenant tenant_id
   ApplicationRecord.create_tenant(tenant_id) do
@@ -22,8 +24,7 @@ def create_tenant(signal_account_name)
       },
       owner: {
         name: "David Heinemeier Hansson",
-        email_address: "david@37signals.com",
-        password: "secret123456"
+        membership: membership
       }
     )
     account.setup_basic_template
@@ -36,15 +37,19 @@ def find_or_create_user(full_name, email_address)
   if user = User.find_by(email_address: email_address)
     user
   else
-    User.create! \
+    identity = Identity.find_or_create_by!(email_address: email_address)
+    membership = identity.memberships.find_or_create_by!(tenant: ApplicationRecord.current_tenant)
+
+    user = User.create! \
       name: full_name,
-      email_address: email_address,
-      password: "secret123456"
+      membership: membership
+
+    user
   end
 end
 
 def login_as(user)
-  Current.session = user.sessions.create
+  Current.session = user.identity.sessions.create
 end
 
 def create_collection(name, creator: Current.user, all_access: true, access_to: [])

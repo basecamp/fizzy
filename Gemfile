@@ -55,15 +55,17 @@ gem "prometheus-client-mmap", "~> 1.1"
 gem "autotuner"
 gem "benchmark" # indirect dependency, being removed from Ruby 3.5 stdlib so here to quash warnings
 
-# AI
-gem "sqlite-vec", "0.1.7.alpha.2"
-
 group :development, :test do
   gem "debug"
   gem "bundler-audit", require: false
   gem "brakeman", require: false
   gem "rubocop-rails-omakase", require: false
   gem "letter_opener"
+  gem "faker"
+end
+
+group :development do
+  gem "web-console"
 end
 
 group :test do

@@ -1,10 +1,28 @@
 class Account::JoinCodesController < ApplicationController
+  before_action :set_join_code
+
   def show
-    render svg: RQRCode::QRCode.new(join_url(Account.sole.join_code)).as_svg(viewbox: true, fill: :white, color: :black)
+  end
+
+  def edit
   end
 
   def update
-    Account.sole.reset_join_code
-    redirect_to users_path
+    @join_code.update!(join_code_params)
+    redirect_to account_join_code_path
   end
+
+  def destroy
+    @join_code.reset
+    redirect_to account_join_code_path
+  end
+
+  private
+    def set_join_code
+      @join_code = Account::JoinCode.sole
+    end
+
+    def join_code_params
+      params.expect account_join_code: [ :usage_limit ]
+    end
 end

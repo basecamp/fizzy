@@ -9,7 +9,7 @@ class RouteTest < ActionDispatch::IntegrationTest
     assert_recognizes({ controller: "account/settings", action: "show" }, "/account/settings")
   end
 
-  test "account/entropy_configuration" do
-    assert_recognizes({ controller: "account/entropy_configurations", action: "show" }, "/account/entropy_configuration")
+  test "account/entropy" do
+    assert_recognizes({ controller: "account/entropies", action: "show" }, "/account/entropy")
   end
 end

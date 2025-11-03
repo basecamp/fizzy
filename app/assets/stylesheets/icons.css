@@ -33,6 +33,7 @@
   .icon--bolt { --svg: url("bolt.svg "); }
   .icon--bookmark-outline { --svg: url("bookmark-outline.svg "); }
   .icon--bookmark { --svg: url("bookmark.svg "); }
+  .icon--boost { --svg: url("boost.svg "); }
   .icon--camera { --svg: url("camera.svg "); }
   .icon--caret-down { --svg: url("caret-down.svg "); }
   .icon--check { --svg: url("check.svg "); }
@@ -43,6 +44,8 @@
   .icon--close-circle { --svg: url("close-circle.svg "); }
   .icon--collection { --svg: url("collection.svg "); }
   .icon--collection-add { --svg: url("collection-add.svg "); }
+  .icon--column-left { --svg: url("column-left.svg "); }
+  .icon--column-right { --svg: url("column-right.svg "); }
   .icon--comment { --svg: url("comment.svg "); }
   .icon--copy-paste { --svg: url("copy-paste.svg "); }
   .icon--crown { --svg: url("crown.svg "); }

@@ -56,11 +56,14 @@ step "Installing Ruby" mise install --yes
 eval "$(mise hook-env)"
 
 if which pacman >/dev/null 2>&1; then
-  packages=(imagemagick openslide)
+  packages=(imagemagick openslide libvips)
   if ! pacman -Q "${packages[@]}" >/dev/null 2>&1; then
     step "Installing packages" sudo pacman -S --noconfirm --needed "${packages[@]}"
   fi
 fi
+
+# Ensure gh-signoff is installed and up to date
+step "Set up gh-signoff" bash -c "gh extension install basecamp/gh-signoff || gh extension upgrade basecamp/gh-signoff"
 
 bundle config set --local auto_install true
 step "Installing RubyGems" bundle install

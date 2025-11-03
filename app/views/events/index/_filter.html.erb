@@ -6,7 +6,7 @@
   <%= tag.div class: "flex-inline position-relative quick-filter",
         data: {
           controller: "dialog multi-selection-combobox",
-          action: "keydown.esc->dialog#close click@document->dialog#closeOnClickOutside",
+          action: "keydown.esc->dialog#close click@document->dialog#closeOnClickOutside turbo:morph@window->multi-selection-combobox#refresh",
           filter_show: user_filtering.show_collections?,
           multi_selection_combobox_no_selection_label_value: user_filtering.selected_collections_label } do %>
         <button type="button" class="btn borderless btn--plain events__filter-select" data-action="click->dialog#toggle:stop">

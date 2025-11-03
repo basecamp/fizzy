@@ -22,6 +22,7 @@ class Filter < ApplicationRecord
       result = result.indexed_by(indexed_by)
       result = result.sorted_by(sorted_by)
       result = result.where(id: card_ids) if card_ids.present?
+      result = result.where.missing(:not_now) unless include_not_now_cards?
       result = result.open unless include_closed_cards?
       result = result.unassigned if assignment_status.unassigned?
       result = result.assigned_to(assignees.ids) if assignees.present?
@@ -66,5 +67,9 @@ class Filter < ApplicationRecord
   private
     def include_closed_cards?
       only_closed? || card_ids.present? || creator_ids.present?
+    end
+
+    def include_not_now_cards?
+      indexed_by.not_now? || card_ids.present?
     end
 end

@@ -9,6 +9,7 @@
   .drag-and-drop__hover-container {
     background-color: var(--color-selected-light);
     outline: 2px dashed var(--color-selected-dark);
+    outline-offset: -2px;
     transition: background-color 200ms;
     z-index: 1;
 

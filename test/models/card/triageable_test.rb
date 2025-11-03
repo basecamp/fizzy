@@ -24,7 +24,9 @@ class Card::TriageableTest < ActiveSupport::TestCase
     assert_nil card.column
     assert card.awaiting_triage?
 
-    card.triage_into(column)
+    assert_difference -> { card.reload.events.where(action: "card_triaged").count }, +1 do
+      card.triage_into(column)
+    end
 
     assert_equal column, card.reload.column
     assert card.triaged?
@@ -47,7 +49,9 @@ class Card::TriageableTest < ActiveSupport::TestCase
     card = cards(:logo)
     assert card.triaged?
 
-    card.send_back_to_triage
+    assert_difference -> { card.reload.events.where(action: "card_sent_back_to_triage").count }, +1 do
+      card.send_back_to_triage
+    end
 
     assert card.reload.awaiting_triage?
   end

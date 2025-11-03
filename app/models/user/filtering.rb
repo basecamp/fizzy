@@ -1,6 +1,4 @@
 class User::Filtering
-  include Rails.application.routes.url_helpers
-
   attr_reader :user, :filter, :expanded
 
   delegate :as_params, :single_collection, to: :filter

@@ -1,5 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
-import { nextFrame } from "helpers/timing_helpers";
+import { nextFrame, debounce } from "helpers/timing_helpers";
 
 export default class extends Controller {
   static classes = [ "collapsed", "noTransitions" ]
@@ -8,12 +8,12 @@ export default class extends Controller {
     collection: String
   }
 
-  async connect() {
-    this.#disableTransitions()
-    this.#restoreColumns()
+  initialize() {
+    this.restoreState = debounce(this.restoreState.bind(this), 10)
+  }
 
-    await nextFrame()
-    this.#enableTransitions()
+  async connect() {
+    await this.#restoreColumnsDisablingTransitions()
   }
 
   toggle({ target }) {
@@ -25,6 +25,19 @@ export default class extends Controller {
     if (event.target.hasAttribute("data-collapsible-columns-target") && event.detail.attributeName === "class") {
       event.preventDefault()
     }
+  }
+
+  async restoreState(event) {
+    await nextFrame()
+    await this.#restoreColumnsDisablingTransitions()
+  }
+
+  async #restoreColumnsDisablingTransitions() {
+    this.#disableTransitions()
+    this.#restoreColumns()
+
+    await nextFrame()
+    this.#enableTransitions()
   }
 
   #disableTransitions() {
@@ -79,11 +92,15 @@ export default class extends Controller {
 
   #restoreColumns() {
     this.columnTargets.forEach(column => {
-      const key = this.#localStorageKeyFor(column)
-      if (localStorage.getItem(key)) {
-        this.#expand(column)
-      }
+      this.#restoreColumn(column)
     })
+  }
+
+  #restoreColumn(column) {
+    const key = this.#localStorageKeyFor(column)
+    if (localStorage.getItem(key)) {
+      this.#expand(column)
+    }
   }
 
   #localStorageKeyFor(column) {

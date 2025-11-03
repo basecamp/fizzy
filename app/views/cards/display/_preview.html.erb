@@ -9,9 +9,9 @@
       <%= icon_tag "attachment", class: "card__attachments-indicator translucent" if card.has_attachments? %>
 
       <% if card.triaged? %>
-          <span class="btn justify-start card__column-name card__column-name--current txt-uppercase min-width max-width">
-            <span class="overflow-ellipsis "><%= card.column.name %></span>
-          </span>
+        <span class="btn justify-start card__column-name card__column-name--current txt-uppercase min-width max-width">
+          <span class="overflow-ellipsis "><%= card.column.name %></span>
+        </span>
       <% end %>
     </header>
 

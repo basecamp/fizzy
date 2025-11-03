@@ -1,0 +1,155 @@
+@layer components {
+  .boxcar-header-logo {
+    color: var(--color-ink);
+    inline-size: auto;
+    margin-block-start: 0.1em;
+
+    img {
+      block-size: auto;
+      inline-size: 1.15em;
+      margin-inline-end: 0.8ch;
+    }
+  }
+
+  .input:is(.boxcar-menu-trigger) {
+    --input-background: var(--color-canvas);
+    --input-border-color: transparent;
+    --input-padding: 0.3em 2em 0.3em 0.75em;
+
+    font-weight: 600;
+    inline-size: auto;
+    margin-block-start: 0.1em;
+
+    ::-webkit-search-cancel-button {
+      -webkit-appearance: none;
+    }
+
+    @media (any-hover: hover) {
+      &:hover {
+        filter: brightness(0.9);
+
+        span {
+          background: var(--color-ink-lighter);
+        }
+
+        @media (prefers-color-scheme: dark) {
+          --input-background: var(--color-ink-lighter);
+        }
+      }
+    }
+
+    span {
+      background: var(--color-ink-lightest);
+      block-size: auto;
+      border-radius: 0.3125em;
+      box-shadow:
+        0 0 0 1px oklch(var(--lch-ink-darkest) / 0.1),
+        0 0.1em 0.2em -0.1em oklch(var(--lch-ink-darkest) / 0.05),
+        0 0.2em 0.4em -0.2em oklch(var(--lch-ink-darkest) / 0.05),
+        0 0.3em 0.6em -0.3em oklch(var(--lch-ink-darkest) / 0.05)
+      ;
+      display: grid;
+      height: 1.5em;
+      inline-size: 1.5em;
+      margin-inline-end: 0.8ch;
+      padding: 0.325em 0.275em 0.225em 0.275em;
+      place-content: center;
+      width: 1.5em;
+    }
+  }
+
+  .boxcar-menu:is(.panel) {
+    --panel-border-color: var(--color-selected-dark);
+    --panel-border-radius: 1.4em;
+    --panel-size: 45ch;
+
+    align-items: stretch;
+    box-shadow: 0 0 0 1px oklch(var(--lch-blue-medium) / 5%),
+                0 0.2em 0.2em oklch(var(--lch-blue-medium) / 5%),
+                0 0.4em 0.4em oklch(var(--lch-blue-medium) / 5%),
+                0 0.8em 0.8em oklch(var(--lch-blue-medium) / 5%);
+    flex-direction: column;
+    gap: 2px;
+    scrollbar-gutter: stable both-edges;
+
+    /* Safari doesn't position the sticky footer properly during the
+     * transition, so we need to delay the footer entrance. */
+    .popup__footer {
+      animation: safari-sticky-footer-hack 0s;
+      animation-delay: var(--dialog-duration);
+      animation-fill-mode: both;
+      inset-inline: var(--block-space);
+    }
+  }
+
+  .boxcar-menu__close {
+    @media (any-hover: hover) {
+      display: none;
+    }
+  }
+
+  .boxcar-menu__hotkeys {
+    --gap: 8px;
+
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gap);
+    inline-size: 100%;
+    list-style: none;
+    justify-content: center;
+    margin: var(--block-space) auto calc(var(--block-space-half) / 2);
+    max-inline-size: 100%;
+
+    /* When all its children are hidden, hide this as well so it doesn't take up space */
+    &:has(.popup__item[hidden]):not(:has(.popup__item:not([hidden]))) {
+      display: none;
+    }
+
+    .btn {
+      --btn-border-radius: 0.4em;
+
+      align-content: end;
+      aspect-ratio: 5/3;
+      background-color: var(--color-ink-lightest);
+      border-radius: 0.5em;
+      flex-basis: calc((100% - var(--gap) * 2) / 3);
+      flex-direction: column;
+      font-size: var(--text-small);
+      line-height: 1;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+      row-gap: 0.3lh;
+      text-align: center;
+
+      kbd {
+        border: none;
+        box-shadow: none;
+        inset: 0.66em 0.33em auto auto;
+        opacity: 0.5;
+        position: absolute;
+
+        @media (any-hover: none) {
+          /* This is a reasonable way to assert touch devices. any-pointer would seem */
+          /* to be a better fit but it is incorrectly reported on many devices */
+          display: none;
+        }
+      }
+
+      .icon {
+        --icon-size: 2em !important;
+      }
+
+      span {
+        display: flex;
+        text-wrap: nowrap;
+      }
+
+      @media (max-width: 639px) {
+        font-size: var(--text-x-small);
+        font-weight: 500;
+      }
+    }
+  }
+}

@@ -3,6 +3,8 @@ class Step < ApplicationRecord
 
   scope :completed, -> { where(completed: true) }
 
+  validates :content, presence: true
+
   def completed?
     completed
   end

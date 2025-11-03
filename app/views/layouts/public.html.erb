@@ -5,7 +5,12 @@
   <body class="public" data-controller="local-time timezone-cookie" data-action="turbo:morph@window->local-time#refreshAll">
     <header class="header" id="header">
       <a href="#main" class="header__skip-navigation btn" data-turbo="false">Skip to main content</a>
-      <%= yield :header %>
+      <nav>
+        <%= link_to "https://box-car.com", class: "boxcar-header-logo center flex-inline align-center txt-normal" do %>
+          <%= image_tag "logo.png" %>
+          <strong class="txt-medium overflow-ellipsis margin-none">BOXCAR</strong>
+        <% end %>
+      </nav>
     </header>
 
     <main id="main">
@@ -13,10 +18,6 @@
     </main>
 
     <footer id="footer">
-      <div class="justify-center center margin-block-double flex align-end gap">
-        <%= image_tag "logo.png", size: 28 %>
-        <strong><a href="https://box-car.com" class="txt-ink">Made with Boxcar&trade;</a></strong>
-      </div>
-    </footer>
+      <%= yield :footer %>
   </body>
 </html>

@@ -44,7 +44,7 @@ class CollectionsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to edit_collection_path(collections(:writebook))
     assert_equal "Writebook bugs", collections(:writebook).reload.name
     assert_equal users(:kevin, :jz).sort, collections(:writebook).users.sort
-    assert_equal 1.day, entropy_configurations(:writebook_collection).auto_postpone_period
+    assert_equal 1.day, entropies(:writebook_collection).auto_postpone_period
     assert_not collections(:writebook).all_access?
   end
 

@@ -8,7 +8,7 @@
       <%= form_with model: Comment.new, url: card_comments_path(card), class: "flex flex-column gap full-width",
             data: { controller: "form local-save",
                   local_save_key_value: "comment-#{card.id}",
-                  action: "turbo:submit-end->local-save#submit keydown.ctrl+enter->form#submit:prevent keydown.meta+enter->form#submit:prevent keydown.esc->form#cancel:stop" } do |form| %>
+                  action: "turbo:submit-end->local-save#submit keydown.ctrl+enter->form#debouncedSubmit:prevent keydown.meta+enter->form#debouncedSubmit:prevent keydown.esc->form#cancel:stop" } do |form| %>
         <%= form.rich_textarea :body, required: true, placeholder: new_comment_placeholder(card),
               data: { local_save_target: "input", action: "lexxy:change->form#disableSubmitWhenInvalid lexxy:change->local-save#save turbo:morph-element->local-save#restoreContent" } do %>
           <%= general_prompts(@card.collection) %>

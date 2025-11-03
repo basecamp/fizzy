@@ -3,92 +3,88 @@ require "test_helper"
 class SignupTest < ActiveSupport::TestCase
   setup do
     @starting_tenants = ApplicationRecord.tenants
-    @signup = Signup.new(
-      email_address: "brian@example.com",
-      full_name: "Brian Wilson",
-      company_name: "Beach Boys",
-      password: SecureRandom.hex(16)
-    )
   end
 
-  test "#process creates all the necessary objects for a new Fizzy account" do
+  test "#create_identity" do
+    signup = Signup.new(email_address: "brian@example.com")
+
+    assert_difference -> { Identity.count }, 1 do
+      assert_difference -> { MagicLink.count }, 1 do
+        assert signup.create_identity
+      end
+    end
+
+    assert_empty signup.errors
+    assert signup.identity
+    assert signup.identity.persisted?
+
+    signup_existing = Signup.new(email_address: "brian@example.com")
+
+    assert_no_difference -> { Identity.count } do
+      assert_difference -> { MagicLink.count }, 1 do
+        assert signup_existing.create_identity, "Should send magic link for existing identity"
+      end
+    end
+
+    signup_invalid = Signup.new(email_address: "")
+    assert_not signup_invalid.create_identity, "Should fail with invalid email"
+    assert_not_empty signup_invalid.errors[:email_address], "Should have validation error for email_address"
+  end
+
+  test "#create_membership" do
+    signup = Signup.new(
+      full_name: "Kevin",
+      identity: identities(:kevin)
+    )
+
+    assert_difference -> { Membership.count }, 1 do
+      assert signup.create_membership
+    end
+
+    assert signup.tenant
+    assert signup.membership
+    assert signup.membership_id
+
+    signup_invalid = Signup.new(
+      full_name: "",
+      identity: identities(:kevin)
+    )
+    assert_not signup_invalid.create_membership, "Create membership should fail with invalid params"
+    assert_not_empty signup_invalid.errors[:full_name], "Should have validation error for full_name"
+  end
+
+  test "#complete" do
     Account.any_instance.expects(:setup_basic_template).once
 
-    assert @signup.process, @signup.errors.full_messages.to_sentence(words_connector: ". ")
-    assert_empty @signup.errors
+    # First create the membership
+    signup_for_membership = Signup.new(
+      full_name: "Kevin",
+      identity: identities(:kevin)
+    )
+    signup_for_membership.create_membership
 
-    assert @signup.tenant
-    assert_includes ApplicationRecord.tenants, @signup.tenant
+    signup = Signup.new(
+      full_name: "Kevin",
+      account_name: "37signals",
+      membership_id: signup_for_membership.membership_id,
+      identity: identities(:kevin)
+    )
 
-    assert @signup.account
-    assert @signup.account.persisted?
-    assert @signup.account.external_account_id
-    assert_equal @signup.company_name, @signup.account.name
-    assert_equal @signup.tenant, @signup.account.external_account_id.to_s
-    assert_equal @signup.tenant, @signup.account.tenant
+    assert signup.complete
 
-    assert @signup.user
-    assert @signup.user.persisted?
-    assert_equal @signup.full_name, @signup.user.name
-    assert_equal @signup.email_address, @signup.user.email_address
+    assert signup.tenant
+    assert signup.account
+    assert signup.user
+    assert_equal "Kevin", signup.user.name
+    assert_equal "37signals", signup.account.name
 
-    auth_params = { email_address: @signup.email_address, password: @signup.password }
-    user = ApplicationRecord.with_tenant(@signup.tenant) { User.authenticate_by(**auth_params) }
-
-    assert user, "User should be able to authenticate with #{auth_params.inspect}"
-    assert_equal @signup.user, user
-    assert_equal @signup.tenant, @signup.user.tenant
-  end
-
-  test "#process does nothing if a basic validation error occurs" do
-    @signup.password = ""
-
-    assert_not @signup.process
-    assert_not_empty @signup.errors[:password]
-
-    assert_nil @signup.tenant
-    assert_nil @signup.account
-    assert_nil @signup.user
-    assert_equal @starting_tenants, ApplicationRecord.tenants
-  end
-
-  test "#process does nothing if an error occurs creating the queenbee record" do
-    Queenbee::Remote::Account.stubs(:create!).raises(RuntimeError, "Invalid account data")
-
-    assert_not @signup.process
-    assert_not_empty @signup.errors[:base]
-
-    assert_nil @signup.tenant
-    assert_nil @signup.account
-    assert_nil @signup.user
-    assert_equal @starting_tenants, ApplicationRecord.tenants
-  end
-
-  test "#process does nothing if an error occurs creating the tenant" do
-    ApplicationRecord.stubs(:create_tenant).raises(RuntimeError, "Tenant already exists")
-
-    Queenbee::Remote::Account.any_instance.expects(:cancel).once
-
-    assert_not @signup.process
-    assert_not_empty @signup.errors[:base]
-
-    assert_nil @signup.tenant
-    assert_nil @signup.account
-    assert_nil @signup.user
-    assert_equal @starting_tenants, ApplicationRecord.tenants
-  end
-
-  test "#process does nothing if an error occurs creating the tenanted records" do
-    Account.stubs(:create_with_admin_user).raises(ActiveRecord::RecordInvalid, "Validation failed: Name can't be blank")
-
-    Queenbee::Remote::Account.any_instance.expects(:cancel).once
-
-    assert_not @signup.process
-    assert_not_empty @signup.errors[:base]
-
-    assert_nil @signup.tenant
-    assert_nil @signup.account
-    assert_nil @signup.user
-    assert_equal @starting_tenants, ApplicationRecord.tenants
+    signup_invalid = Signup.new(
+      full_name: "",
+      account_name: "37signals",
+      membership_id: signup_for_membership.membership_id,
+      identity: identities(:kevin)
+    )
+    assert_not signup_invalid.complete, "Complete should fail with invalid params"
+    assert_not_empty signup_invalid.errors[:full_name], "Should have validation error for full_name"
   end
 end

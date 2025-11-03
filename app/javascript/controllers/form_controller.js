@@ -20,7 +20,7 @@ export default class extends Controller {
     const input = this.hasInputTarget ? this.inputTarget : null
 
     if (input) {
-      const value = (input.value || "").trim()  
+      const value = (input.value || "").trim()
       if (value.length === 0) {
         event.preventDefault()
       }

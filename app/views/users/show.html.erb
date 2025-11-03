@@ -1,53 +1,51 @@
 <% @page_title = @user.name %>
+<% me_or_you = Current.user == @user ? "me" : @user.first_name %>
 
-<% content_for :header do %>
-  <%= render "filters/menu" %>
-<% end %>
-
-<div class="panel shadow center txt-align-center margin-block-end-double">
-  <div class="flex flex-column gap position-relative">
-    <% if Current.user == @user %>
-      <%= link_to edit_user_path(@user), class: "user-edit-link btn" do %>
-        <%= icon_tag "pencil" %>
-        <span class="for-screen-reader">Edit</span>
-      <% end %>
-    <% end %>
-
-    <div class="avatar txt-xx-large center fill-white">
-      <%= image_tag user_avatar_path(@user), alt: "Profile avatar for #{@user.name}", size: 128 %>
-    </div>
-
-    <div class="flex flex-column gap-half margin-block-end">
-      <h1 class="txt-x-large margin-none"><%= @user.name %></h1>
-      <div class="txt-medium">
-        <% if @user.active? %>
-          <%= mail_to @user.email_address %>
-        <% else %>
-          <%= @user.name %> is no longer on this account
+<div class="profile-layout">
+  <section class="panel shadow txt-align-center" style="--panel-size: 45ch;">
+    <div class="flex flex-column gap position-relative">
+      <% if Current.user == @user %>
+        <%= link_to edit_user_path(@user), class: "user-edit-link btn" do %>
+          <%= icon_tag "pencil" %>
+          <span class="for-screen-reader">Edit</span>
         <% end %>
+      <% end %>
+
+      <div class="avatar txt-xx-large center fill-white btn--circle hide-focus-ring">
+        <%= image_tag user_avatar_path(@user), alt: "Profile avatar for #{@user.name}" %>
+      </div>
+
+      <div class="flex flex-column gap-half margin-block-end">
+        <h1 class="txt-x-large margin-none"><%= @user.name %></h1>
+        <div class="txt-medium">
+          <% if @user.active? %>
+            <%= mail_to @user.email_address %>
+          <% else %>
+            <%= @user.name %> is no longer on this account
+          <% end %>
+        </div>
+      </div>
+
+      <div class="flex-inline center justify-center flex-wrap gap">
+        <%= link_to "Which cards are assigned to #{me_or_you}?", 
+              cards_path(assignee_ids: [ @user.id ], sorted_by: "newest"), class: "btn", data: { turbo_frame: "_top" } %>
+        <%= link_to "Which cards were added by #{me_or_you}?", 
+              cards_path(creator_ids: [ @user.id ], sorted_by: "newest"), class: "btn", data: { turbo_frame: "_top" } %>
       </div>
     </div>
+  </section>
 
-    <div class="flex-inline center justify-center flex-wrap gap">
-      <%= link_to "Which cards are assigned to #{ Current.user == @user ? "me" : @user.first_name }?", cards_path(assignee_ids: [@user.id], sorted_by: "newest"), class: "btn", data: { turbo_frame: "_top" } %>
-      <%= link_to "Which cards were added by #{ Current.user == @user ? "me" : @user.first_name }?", cards_path(creator_ids: [@user.id], sorted_by: "newest"), class: "btn", data: { turbo_frame: "_top" } %>
-    </div>
-  </div>
+  <% if Current.user == @user %>
+    <section class="panel shadow" style="--panel-size: 45ch;">
+      <%= render "users/transfer", user: @user %>
+
+      <div class="center margin-block-start-double">
+        <%= button_to session_url(script_name: nil), method: :delete, class: "btn btn--plain txt-link txt-small", data: { turbo: false } do %>
+        <span>Sign out</span>
+      <% end %>
+      </div>
+    </section>
+  <% end %>
 </div>
 
-<% if Current.user == @user %>
-  <div class="panel shadow center margin-block-double">
-    <%= render "users/transfer", user: @user %>
-  </div>
-
-  <div class="panel borderless center margin-block-double">
-    <%= button_to session_path, method: :delete, class: "btn center txt-medium", data: { turbo: false } do %>
-      <%= icon_tag "logout" %>
-      <span>Sign out</span>
-    <% end %>
-  </div>
-<% end %>
-
-<h1 class="font-weight-black txt-large margin-block-double"><%= "What #{ Current.user == @user ? "have you" : "has #{ @user.first_name }" } been up to?" %></h1>
-
-<%= render "users/activity_timeline", user: @user, day_timeline: @day_timeline, filter: @filter %>
+<%= turbo_frame_tag "user_events", src: user_events_path(@user) %>

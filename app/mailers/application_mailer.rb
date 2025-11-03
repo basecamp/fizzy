@@ -7,6 +7,10 @@ class ApplicationMailer < ActionMailer::Base
 
   private
     def default_url_options
-      super.merge(script_name: Account.sole.slug)
+      if ApplicationRecord.current_tenant
+        super.merge(script_name: Account.sole.slug)
+      else
+        super
+      end
     end
 end

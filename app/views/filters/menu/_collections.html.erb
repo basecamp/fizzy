@@ -1,6 +1,0 @@
-<% # Using method: :get inside Turbo frame triggers some special Turbo handling where the script_name is lost %>
-<% if user_filtering.collections.any? %>
-  <%= collapsible_nav_section "Boards" do %>
-    <%= render partial: "filters/menu/collections/collection", collection: user_filtering.collections, as: :collection %>
-  <% end %>
-<% end %>

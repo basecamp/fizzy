@@ -4,29 +4,26 @@ class Users::AvatarsController < ApplicationController
   allow_unauthenticated_access only: :show
 
   before_action :set_user
+  before_action :ensure_permission_to_administer_user, only: :destroy
 
   def show
-    if stale? @user, cache_control: { max_age: cache_max_age, stale_while_revalidate: 1.week }
+    if stale? @user, cache_control: { max_age: (30.minutes unless Current.user == @user), stale_while_revalidate: 1.week }.compact
       render_avatar_or_initials
     end
   end
 
   def destroy
     @user.avatar.destroy
-    redirect_to user_path(@user)
+    redirect_to @user
   end
 
   private
-    def cache_max_age
-      if Current.user == @user
-        0
-      else
-        30.minutes
-      end
-    end
-
     def set_user
       @user = User.find(params[:user_id])
+    end
+
+    def ensure_permission_to_administer_user
+      head :forbidden unless Current.user.admin? || Current.user == @user
     end
 
     def render_avatar_or_initials

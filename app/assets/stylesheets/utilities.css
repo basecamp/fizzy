@@ -19,11 +19,13 @@
   .txt-subtle { color: var(--color-ink-medium); }
   .txt-alert { color: var(--color-marker); }
   .txt-undecorated { text-decoration: none; }
+  .txt-underline { text-decoration: underline; }
   .txt-tight-lines { line-height: 1.2; }
   .txt-nowrap { white-space: nowrap; }
   .txt-break { word-break: break-word; }
   .txt-uppercase { text-transform: uppercase; }
   .txt-capitalize { text-transform: capitalize; }
+  .txt-capitalize-first-letter::first-letter { text-transform: capitalize; }
   .txt-link { color: var(--color-link); text-decoration: underline; }
 
   .font-weight-black { font-weight: 900; }
@@ -42,6 +44,8 @@
   .align-self-center { align-self: center; }
   .align-self-end { align-self: end; }
   .align-self-start { align-self: start; }
+
+  .v-align-middle { vertical-align: middle; }
 
   .contain { contain: inline-size; }
 

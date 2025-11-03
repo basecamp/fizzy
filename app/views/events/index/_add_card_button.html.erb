@@ -1,8 +1,8 @@
 <div class="header__actions header__actions--start">
   <% if collection = user_filtering.single_collection_or_first %>
-    <%= button_to collection_cards_path(collection), method: :post, class: "btn btn--link btn--circle-mobile" do %>
-      <%= icon_tag "add" %>
+    <%= button_to collection_cards_path(collection), method: :post, class: "btn btn--link btn--circle-mobile", data: { controller: "hotkey", action: "keydown.c@document->hotkey#click" } do %>
       <span>Add a card</span>
+      <kbd>C</kbd>
     <% end %>
   <% end %>
 </div>

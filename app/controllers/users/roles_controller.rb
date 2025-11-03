@@ -3,7 +3,7 @@ class Users::RolesController < ApplicationController
   before_action :ensure_permission_to_administer_user
 
   def update
-    @user.update(role_params)
+    @user.update!(role_params)
     redirect_to users_path
   end
 

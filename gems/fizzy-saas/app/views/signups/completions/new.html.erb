@@ -1,0 +1,30 @@
+<% @page_title = "Creating your account" %>
+
+<div class="panel panel--centered flex flex-column gap-half <%= "shake" if flash[:alert] %>">
+  <h1 class="txt-x-large font-weight-black margin-none"><%= @page_title %></h1>
+
+  <%= form_with model: @signup, url: saas.signup_completion_url(script_name: "/#{@signup.tenant}"), scope: "signup", class: "flex flex-column gap", data: { turbo: false, controller: @signup.errors.blank? ? "form auto-submit" : "form" } do |form| %>
+    <%= form.hidden_field :membership_id %>
+    <%= form.hidden_field :full_name %>
+    <%= form.hidden_field :account_name %>
+
+    <% if @signup.errors.any? %>
+      <div class="margin-block-half">
+        <ul class="margin-block-none txt-negative txt-small">
+          <% @signup.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <button type="submit" class="btn btn--link center" data-form-target="submit">
+      <span>Continue</span>
+      <%= icon_tag "arrow-right" %>
+    </button>
+  <% end %>
+</div>
+
+<% content_for :footer do %>
+  <%= render "sessions/footer" %>
+<% end %>

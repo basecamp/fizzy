@@ -22,13 +22,15 @@ module Card::Triageable
     transaction do
       resume
       update! column: column
+      track_event "triaged", particulars: { column: column.name }
     end
   end
 
-  def send_back_to_triage
+  def send_back_to_triage(skip_event: false)
     transaction do
       resume
       update! column: nil
+      track_event "sent_back_to_triage" unless skip_event
     end
   end
 end

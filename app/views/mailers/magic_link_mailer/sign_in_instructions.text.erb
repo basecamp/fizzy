@@ -1,0 +1,8 @@
+Sign in to BOXCAR
+<%= "=" * 80 %>
+
+Open this link in your browser to login on this device:
+<%= session_magic_link_url(code: @magic_link.code) %>
+
+If you're signing in on another device, enter this code:
+<%= @magic_link.code %>

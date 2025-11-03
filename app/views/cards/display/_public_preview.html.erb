@@ -1,43 +1,42 @@
-<% cache card.cache_invalidation_parts.for_preview do %>
-  <%= card_article_tag card, class: "card" do %>
-    <div class="flex flex-column flex-item-grow max-inline-size">
-      <header class="card__header">
-        <div class="card__collection flex align-start">
+<%= card_article_tag card, class: "card" do %>
+  <div class="flex flex-column flex-item-grow max-inline-size">
+    <header class="card__header">
+      <div class="card__collection flex align-start">
           <span class="card__id">
             <span class="for-screen-reader">Card number</span>
             <%= card.id %>
           </span>
-          <span class="card__collection-name">
+        <span class="card__collection-name">
             <span class="overflow-ellipsis"><%= card.collection.name %></span>
           </span>
-        </div>
-
-        <%= render "cards/display/preview/tags", card: card %>
-      </header>
-
-      <div class="card__body justify-space-between">
-        <div class="card__content">
-          <h1 class="card__title overflow-line-clamp">
-            <%= card.title %>
-          </h1>
-        </div>
-
-        <%= render "cards/display/public_preview/columns", card: card if card.triaged? %>
       </div>
+
+      <%= render "cards/display/preview/tags", card: card %>
+    </header>
+
+    <div class="card__body justify-space-between">
+      <div class="card__content">
+        <h1 class="card__title overflow-line-clamp">
+          <%= card.title %>
+        </h1>
+      </div>
+
+      <%= render "cards/display/public_preview/columns", card: card if card.triaged? %>
     </div>
+  </div>
 
-    <footer class="card__footer">
-      <%= render "cards/display/public_preview/meta", card: card %>
-    </footer>
+  <footer class="card__footer">
+    <%= render "cards/display/public_preview/meta", card: card %>
+  </footer>
 
-    <%= render "cards/display/common/background", card: card %>
+  <%= render "cards/display/common/background", card: card %>
 
-    <%= link_to published_card_path(card), class: "card__link", title: card_title_tag(card), data: { turbo_frame: "_top" } do %>
-      <span class="for-screen-reader"><%= card.title %></span>
-    <% end %>
+  <%= link_to published_card_path(card), class: "card__link", title: card_title_tag(card), data: { turbo_frame: "_top" } do %>
+    <span class="for-screen-reader"><%= card.title %></span>
+  <% end %>
 
-    <% if card.entropic? %>
-      <%= render "cards/display/preview/bubble", card: card %>
-    <% end %>
+  <% if card.entropic? %>
+    <%= render "cards/display/preview/bubble", card: card %>
+      <span class="card__collection-name">
   <% end %>
 <% end %>

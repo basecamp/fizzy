@@ -28,7 +28,7 @@ class Card::StallableTest < ActiveSupport::TestCase
 
   test "a card with an old activity spike is not stalled after being postponed" do
     card = cards(:logo)
-    card.update!(last_active_at: 1.day.ago - card.collection.entropy_configuration.auto_postpone_period)
+    card.update!(last_active_at: 1.day.ago - card.collection.entropy.auto_postpone_period)
     card.create_activity_spike!(updated_at: 3.months.ago)
 
     assert card.stalled?

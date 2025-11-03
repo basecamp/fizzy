@@ -5,7 +5,6 @@ class Cards::StepsController < ApplicationController
 
   def create
     @step = @card.steps.create!(step_params)
-    render_card_replacement
   end
 
   def show
@@ -16,12 +15,10 @@ class Cards::StepsController < ApplicationController
 
   def update
     @step.update!(step_params)
-    render_card_replacement
   end
 
   def destroy
     @step.destroy!
-    render_card_replacement
   end
 
   private

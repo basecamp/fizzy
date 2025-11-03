@@ -9,7 +9,7 @@
       <span class="for-screen-reader">Assign</span>
     </button>
 
-    <dialog class="popup panel flex-column align-start gap-half fill-white shadow" data-dialog-target="dialog">
+    <dialog class="popup panel flex-column align-start gap-half fill-white shadow" data-dialog-target="dialog" data-action="turbo:before-morph-attribute->dialog#preventCloseOnMorphing turbo:submit-end->dialog#close">
       <%= yield %>
     </dialog>
   </div>

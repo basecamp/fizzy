@@ -1,21 +1,25 @@
 class SessionsController < ApplicationController
-  require_unauthenticated_access only: %i[ new create ]
+  require_untenanted_access
+  require_unauthenticated_access except: :destroy
   rate_limit to: 10, within: 3.minutes, only: :create, with: -> { redirect_to new_session_path, alert: "Try again later." }
+
+  layout "public"
 
   def new
   end
 
   def create
-    if user = User.active.authenticate_by(params.permit(:email_address, :password))
-      start_new_session_for user
-      redirect_to after_authentication_url
-    else
-      redirect_to new_session_path, alert: "Try another email address or password."
-    end
+    Identity.find_by_email_address(email_address)&.send_magic_link
+    redirect_to session_magic_link_path
   end
 
   def destroy
     terminate_session
     redirect_to_logout_url
   end
+
+  private
+    def email_address
+      params.expect(:email_address)
+    end
 end
