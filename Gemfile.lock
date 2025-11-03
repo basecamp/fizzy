@@ -551,7 +551,7 @@ GEM
     web-push (3.0.2)
       jwt (~> 3.0)
       openssl (~> 3.0)
-    webmock (3.26.0)
+    webmock (3.26.1)
       addressable (>= 2.8.0)
       crack (>= 0.3.2)
       hashdiff (>= 0.4.0, < 2.0.0)
