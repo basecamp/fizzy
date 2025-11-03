@@ -55,15 +55,15 @@ module LoadBalancerRouting
     end
 
     def beamer_is_primary?
-      @beamer_is_primary ||= ApplicationRecord.connection.primary?
+      @beamer_is_primary ||= ApplicationRecord.connection.beamer_primary?
     end
 
     def beamer_primary
-      @beamer_primary ||= ApplicationRecord.connection.primary
+      @beamer_primary ||= ApplicationRecord.connection.beamer_primary
     end
 
     def beamer_last_txn
-      @beamer_last_txn ||= ApplicationRecord.connection.last_txn
+      @beamer_last_txn ||= ApplicationRecord.connection.beamer_last_txn
     end
 
     def safe_request?
