@@ -4,6 +4,8 @@
 #   Ensure the SQLite 3 gem is defined in your Gemfile
 #   gem "sqlite3"
 #
+<% local_adapter = %w[1 true].include?(ENV["BEAMER"]&.downcase) ? "beamer" : "sqlite3" %>
+
 default: &default
   adapter: sqlite3
   pool: 50
@@ -12,12 +14,12 @@ default: &default
 development:
   primary:
     <<: *default
-    adapter: <%= %w[1 true].include?(ENV["BEAMER"]&.downcase) ? "beamer" : "sqlite3" %>
+    adapter: <%= local_adapter %>
     database: storage/tenants/<%= Rails.env %>/%{tenant}/db/main.sqlite3
     tenanted: true
   untenanted:
     <<: *default
-    adapter: <%= %w[1 true].include?(ENV["BEAMER"]&.downcase) ? "beamer" : "sqlite3" %>
+    adapter: <%= local_adapter %>
     database: storage/untenanted/development.sqlite3
     migrations_paths: db/untenanted_migrate
   cable:
@@ -39,10 +41,12 @@ development:
 test:
   primary:
     <<: *default
+    adapter: <%= local_adapter %>
     database: storage/tenants/<%= Rails.env %>/%{tenant}/db/main.sqlite3
     tenanted: true
   untenanted:
     <<: *default
+    adapter: <%= local_adapter %>
     database: storage/untenanted/test.sqlite3
     migrations_paths: db/untenanted_migrate
 

@@ -3,9 +3,9 @@ module LoadBalancerRouting
 
   included do
     before_action :set_target_header, :set_writer_header, :reproxy_when_stale, :reproxy_when_write_on_reader,
-      if: :has_tenant?
+      if: :is_replicated_tenant?
 
-    after_action :set_transaction_cookie, if: :has_tenant?
+    after_action :set_transaction_cookie, if: :is_replicated_tenant?
   end
 
   private
@@ -55,22 +55,22 @@ module LoadBalancerRouting
     end
 
     def beamer_is_primary?
-      @beamer_is_primary ||= ApplicationRecord.connection.primary?
+      @beamer_is_primary ||= ApplicationRecord.connection.beamer_primary?
     end
 
     def beamer_primary
-      @beamer_primary ||= ApplicationRecord.connection.primary
+      @beamer_primary ||= ApplicationRecord.connection.beamer_primary
     end
 
     def beamer_last_txn
-      @beamer_last_txn ||= ApplicationRecord.connection.last_txn
+      @beamer_last_txn ||= ApplicationRecord.connection.beamer_last_txn
     end
 
     def safe_request?
       request.get? || request.head?
     end
 
-    def has_tenant?
-      ApplicationRecord.current_tenant.present?
+    def is_replicated_tenant?
+      ApplicationRecord.current_tenant.present? && ApplicationRecord.connection_pool.db_config.adapter == "beamer"
     end
 end
