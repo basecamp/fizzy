@@ -1,0 +1,1 @@
+<%= turbo_stream.replace([ @card, :meta ], partial: "/cards/display/perma/meta", method: "morph", locals: { card: @card.reload }) %>

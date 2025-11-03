@@ -7,17 +7,16 @@
 				navigable_list_actionable_items_value: true } do %>
     <strong class="popup__title">Assign this to…</strong>
 
-    <% if @collection.users.active.count > 1 %>
+    <% if @users.many? %>
 			<%= text_field_tag :search, nil, placeholder: "Filter…", class: "input input--transparent txt-small margin-block-half", autofocus: true,
 						type: "search", autocorrect: "off", autocomplete: "off", data: { "1p-ignore": "true", filter_target: "input", action: "input->filter#filter" } %>
     <% end %>
 
     <ul class="popup__list" data-filter-target="list">
-      <% @collection.users.active.alphabetically.each do |user| %>
+      <% @users.each do |user| %>
         <li class="popup__item" data-filter-target="item" data-navigable-list-target="item" aria-checked="<%= @card.assignees.include?(user) %>">
           <%= button_to card_assignments_path(@card, params: { assignee_id: user.id }), method: :post,
-              class: "popup__btn btn",
-              form_class: "max-width flex-item-grow" do %>
+                class: "popup__btn btn", form_class: "max-width flex-item-grow" do %>
             <span class="overflow-ellipsis flex-item-grow"><%= user.name %></span>
             <%= icon_tag "check", size: 18, class: "checked flex-item-no-shrink flex-item-justify-end", style: "--icon-size: 1em" %>
           <% end %>

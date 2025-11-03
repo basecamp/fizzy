@@ -198,6 +198,12 @@
     z-index: var(--z-events-column-header);
   }
 
+  .events__column-footer {
+    grid-row-start: 26;
+    margin: var(--events-gap);
+    padding: var(--block-space-half) var(--inline-space);
+  }
+
   .events__time-block {
     align-content: end;
     display: grid;

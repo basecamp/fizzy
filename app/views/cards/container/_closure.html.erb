@@ -12,9 +12,9 @@
     <% end %>
 
     <div id="<%= dom_id(card, :closure_notice) %>">
-      <% if card.entropic? && card.open? %>
+      <% if card.entropic? && card.open? && !card.postponed? %>
         <div class="card-perma__closure-message">
-          Closes as "Not Now" <%= local_datetime_tag(card.entropy.auto_clean_at, style: :indays) -%> if there's no activity.
+          Closes as “Not Now” <%= local_datetime_tag(card.entropy.auto_clean_at, style: :indays) -%> if there’s no activity.
         </div>
       <% end %>
     </div>

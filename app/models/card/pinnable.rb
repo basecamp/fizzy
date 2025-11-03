@@ -9,6 +9,10 @@ module Card::Pinnable
     pins.exists?(user: user)
   end
 
+  def pin_for(user)
+    pins.find_by(user: user)
+  end
+
   def pin_by(user)
     pins.find_or_create_by!(user: user)
   end

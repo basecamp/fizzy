@@ -10,6 +10,8 @@
   <% end %>
 
   <% if column[:events].count < column[:full_events_count] %>
-    <div class="pad-inline pad-block-half margin-block-end-half fill-highlight txt-x-small margin-inline-half border-radius">Showing the first 100 items (<%= column[:full_events_count] - column[:events].count %> are hidden)</div
+    <div class="events__column-footer fill-highlight txt-x-small border-radius" style="grid-column-start: <%= column[:index] %>">
+      Showing the 100 most recent (<%= column[:full_events_count] - column[:events].count %> are hidden)
+    </div>
   <% end %>
 </div>

@@ -1,6 +1,7 @@
 class WebhooksController < ApplicationController
+  include CollectionScoped
+
   before_action :ensure_admin
-  before_action :set_collection
   before_action :set_webhook, except: %i[ index new create ]
 
   def index
@@ -15,8 +16,8 @@ class WebhooksController < ApplicationController
   end
 
   def create
-    @webhook = @collection.webhooks.create!(webhook_params)
-    redirect_to @webhook
+    webhook = @collection.webhooks.create!(webhook_params)
+    redirect_to webhook
   end
 
   def edit
@@ -29,14 +30,10 @@ class WebhooksController < ApplicationController
 
   def destroy
     @webhook.destroy!
-    redirect_to collection_webhooks_path, status: :see_other
+    redirect_to collection_webhooks_path
   end
 
   private
-    def set_collection
-      @collection = Collection.find(params[:collection_id])
-    end
-
     def set_webhook
       @webhook = @collection.webhooks.find(params[:id])
     end

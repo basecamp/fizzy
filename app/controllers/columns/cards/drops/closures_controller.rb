@@ -3,7 +3,5 @@ class Columns::Cards::Drops::ClosuresController < ApplicationController
 
   def create
     @card.close
-
-    render turbo_stream: turbo_stream.replace("closed-cards", partial: "collections/show/closed", method: :morph, locals: { collection: @card.collection })
   end
 end

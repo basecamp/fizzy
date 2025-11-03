@@ -9,7 +9,11 @@ module Card::Watchable
   end
 
   def watched_by?(user)
-    watchers.include?(user)
+    watch_for(user)&.watching?
+  end
+
+  def watch_for(user)
+    watches.find_by(user: user)
   end
 
   def watch_by(user)

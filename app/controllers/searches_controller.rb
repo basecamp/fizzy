@@ -1,8 +1,8 @@
 class SearchesController < ApplicationController
-  include Search::QueryTermsScoped, Turbo::DriveHelper
+  include Turbo::DriveHelper
 
   def show
-    if card = Current.user.accessible_cards.find_by_id(@query_terms)
+    if card = Current.user.accessible_cards.find_by_id(params[:q])
       @card = card
     else
       perform_search
@@ -11,7 +11,7 @@ class SearchesController < ApplicationController
 
   private
     def perform_search
-      set_page_and_extract_portion_from Current.user.search(@query_terms)
+      set_page_and_extract_portion_from Current.user.search(params[:q])
       @recent_search_queries = Current.user.search_queries.order(updated_at: :desc).limit(10)
     end
 end

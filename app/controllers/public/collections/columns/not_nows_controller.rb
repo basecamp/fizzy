@@ -1,11 +1,4 @@
-class Public::Collections::Columns::NotNowsController < ApplicationController
-  include CachedPublicly, PublicCollectionScoped
-
-  allow_unauthenticated_access only: :show
-  allow_unauthorized_access only: :show
-
-  layout "public"
-
+class Public::Collections::Columns::NotNowsController < Public::BaseController
   def show
     set_page_and_extract_portion_from @collection.cards.postponed.reverse_chronologically.with_golden_first
   end

@@ -2,6 +2,7 @@ class Cards::PinsController < ApplicationController
   include CardScoped
 
   def show
+    fresh_when etag: @card.pin_for(Current.user) || "none"
   end
 
   def create

@@ -12,7 +12,7 @@ class Cards::TriagesControllerTest < ActionDispatch::IntegrationTest
 
     assert_changes -> { card.reload.column }, from: original_column, to: column do
       post card_triage_path(card, column_id: column.id)
-      assert_card_container_rerendered(card)
+      assert_redirected_to card
     end
   end
 
@@ -20,8 +20,8 @@ class Cards::TriagesControllerTest < ActionDispatch::IntegrationTest
     card = cards(:shipping)
 
     assert_changes -> { card.reload.column }, to: nil do
-      delete card_triage_path(card)
-      assert_card_container_rerendered(card)
+      delete card_triage_path(card), as: :turbo_stream
+      assert_redirected_to card
     end
   end
 end

@@ -1,14 +1,12 @@
 <%= render "cards/display/common/collection", card: card do %>
-  <% if Current.user.collections.count > 1 %>
-    <div class="align-self-center position-relative txt-small" data-controller="dialog" data-action="keydown.esc->dialog#close:stop click@document->dialog#closeOnClickOutside" <%= "hidden" if card.closed? %>>
-      <button class="collection-picker__button btn btn--reversed card__hide-on-index fill-transparent" data-action="click->dialog#open:stop">
-        <%= icon_tag "caret-down" %>
-        <span class="for-screen-reader">Choose a collection for this card</span>
-      </button>
+  <div class="align-self-center position-relative txt-small" data-controller="dialog" data-action="keydown.esc->dialog#close:stop click@document->dialog#closeOnClickOutside" <%= "hidden" if card.closed? %>>
+    <button class="collection-picker__button btn btn--reversed card__hide-on-index fill-transparent" data-action="click->dialog#open:stop">
+      <%= icon_tag "caret-down" %>
+      <span class="for-screen-reader">Choose a collection for this card</span>
+    </button>
 
-      <dialog class="popup panel flex-column align-start gap-half fill-white shadow margin-block-double" data-dialog-target="dialog" data-action="turbo:before-morph-attribute->dialog#preventCloseOnMorphing turbo:submit-end->dialog#close">
-        <%= turbo_frame_tag "collection_picker", src: edit_card_collection_path(card), target: "_top", refresh: "morph" %>
-      </dialog>
-    </div>
-  <% end %>
+    <dialog class="popup panel flex-column align-start gap-half fill-white shadow margin-block-double" data-dialog-target="dialog" data-action="turbo:before-morph-attribute->dialog#preventCloseOnMorphing turbo:submit-end->dialog#close">
+      <%= turbo_frame_tag "collection_picker", src: edit_card_collection_path(card), target: "_top", refresh: "morph" %>
+    </dialog>
+  </div>
 <% end %>

@@ -1,11 +1,4 @@
-class Public::CardsController < ApplicationController
-  include CachedPublicly, PublicCardScoped
-
-  allow_unauthenticated_access only: :show
-  allow_unauthorized_access only: :show
-
-  layout "public"
-
+class Public::CardsController < Public::BaseController
   def show
   end
 end
