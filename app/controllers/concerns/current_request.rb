@@ -6,7 +6,7 @@ module CurrentRequest
       Current.http_method = request.method
       Current.request_id  = request.uuid
       Current.user_agent  = request.user_agent
-      Current.ip_address  = request.ip
+      Current.ip_address  = request.headers["True-Client-IP"] || request.ip
       Current.referrer    = request.referrer
     end
   end
