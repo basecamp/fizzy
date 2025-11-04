@@ -31,7 +31,7 @@ class Account::Seeder
       playground = Collection.create! name: "Playground", creator: creator, all_access: true
 
       # Cards
-      have_fun_card = playground.cards.create! creator: creator, title: "Watch this: Fizzy orientation video", status: "published", description: <<~HTML
+      playground.cards.create! creator: creator, title: "Watch this: Fizzy orientation video", status: "published", description: <<~HTML
         <p>There’s a whole lot more you can do in Fizzy. In the video below 37signals founder and CEO, Jason Fried, will walk you through the basics in just 8 minutes.</p>
         <p><br></p>
         <action-text-attachment url="https://videos.37signals.com/fizzy/assets/videos/fizzyorientation-4k.mp4" caption="Fizzy orientation" content-type="video/mp4" filename="fizzyorientation-4k.mp4"></action-text-attachment>
