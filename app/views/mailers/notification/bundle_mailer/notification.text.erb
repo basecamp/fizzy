@@ -4,7 +4,7 @@ You have <%= pluralize @notifications.count, "new notification" %>.
 <%= render partial: "notification/bundle_mailer/notification", collection: @notifications, as: :notification %>
 --------------------------------------------------------------------------------
 
-BOXCAR emails you about new notifications every few hours.
+Fizzy emails you about new notifications every few hours.
 
 Change how often you get these:
 <%= notifications_settings_url %>

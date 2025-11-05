@@ -1,0 +1,10 @@
+<figure class="attachment attachment--preview attachment--video">
+  <%= tag.video controls: true, width: remote_video.width, height: remote_video.height do %>
+    <%= tag.source src: remote_video.url, type: remote_video.content_type %>
+  <% end %>
+  <% if caption = remote_video.try(:caption) %>
+    <figcaption class="attachment__caption">
+      <%= caption %>
+    </figcaption>
+  <% end %>
+</figure>

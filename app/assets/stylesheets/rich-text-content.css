@@ -61,6 +61,21 @@
       display: none;
     }
 
+    :where(hr) {
+      block-size: 0;
+      border-block-end: 1px solid currentColor;
+      inline-size: 20%;
+      margin: var(--block-margin) 0;
+    }
+
+    .horizontal-divider  {
+      margin-inline: 0;
+    }
+
+    .lexxy-content__strikethrough {
+      text-decoration: line-through;
+    }
+
     /* Code */
     :where(code, pre) {
       background-color: var(--color-canvas);

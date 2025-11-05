@@ -163,6 +163,10 @@
     z-index: 1;
   }
 
+  :where(.lexxy-editor__toolbar-spacer) {
+    flex: 1;
+  }
+
   /* Based on .input, .input--select */
   .lexxy-code-language-picker {
     -webkit-appearance: none;

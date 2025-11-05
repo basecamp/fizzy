@@ -3,7 +3,7 @@
     <%= avatar_preview_tag user, hidden_for_screen_reader: true %>
     <div class="txt-align-start overflow-ellipsis">
       <strong><%= user.name %></strong>
-      <div class="txt-x-small"><%= user.email_address %></div>
+      <div class="txt-x-small"><%= user.identity.email_address %></div>
     </div>
   <% end %>
 

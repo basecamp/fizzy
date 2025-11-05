@@ -7,13 +7,13 @@
   >
     <% if @memberships.present? %>
       <h1 class="txt-x-large font-weight-black margin-none">
-        Your BOXCAR accounts
+        Your Fizzy accounts
       </h1>
       <menu class="popup__list pad border-radius border">
         <% @memberships.each do |membership| %>
           <li class="popup__item txt-medium">
             <%= icon_tag "marker", class: "popup__icon" %>
-            <%= link_to root_url(script_name: "/#{membership.tenant}"), class: "btn overflow-ellipsis fill-transparent popup__btn" do %>
+            <%= link_to landing_url(script_name: "/#{membership.tenant}"), class: "btn overflow-ellipsis fill-transparent popup__btn" do %>
               <strong><%= membership.account_name %></strong>
             <% end %>
           </li>
@@ -21,13 +21,13 @@
       </menu>
     <% else %>
       <h1 class="txt-x-large font-weight-black margin-none">Hmm...</h1>
-      <p class="margin-none-block-start">You don’t have any BOXCAR accounts.</p>
+      <p class="margin-none-block-start">You don’t have any Fizzy accounts.</p>
     <% end %>
 
     <% if defined?(saas) %>
       <div class="margin-block-start">
-        <%= link_to saas.new_signup_membership_path, class: "btn btn--plain txt-link center txt-small" do %>
-          <span>Sign up for a new BOXCAR account</span>
+        <%= link_to saas.new_signup_membership_path, class: "btn btn--plain txt-link center txt-small", data: { turbo_prefetch: false } do %>
+          <span>Sign up for a new Fizzy account</span>
         <% end %>
       </div>
     <% end %>

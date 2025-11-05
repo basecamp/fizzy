@@ -1,7 +1,7 @@
 module Filter::Fields
   extend ActiveSupport::Concern
 
-  INDEXES = %w[ all closed not_now stalled postponing_soon golden draft ]
+  INDEXES = %w[ all closed not_now stalled postponing_soon golden ]
   SORTED_BY = %w[ newest oldest latest ]
 
   delegate :default_value?, to: :class

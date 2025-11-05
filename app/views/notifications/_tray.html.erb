@@ -28,7 +28,7 @@
         <% end %>
       </div>
 
-      <%= button_to bulk_reading_path,
+      <%= button_to bulk_reading_path(from_tray: true),
             class: "btn borderless tray__clear-notifications",
             title: "Mark all notifications as read",
             data: { action: "dialog#close badge#clear", turbo_frame: "notifications" },
@@ -42,7 +42,7 @@
   <button class="tray__toggle" data-action="dialog#toggle keydown.n@document->hotkey#click" data-controller="hotkey" aria-label="Toggle notifications stack" aria-haspopup="true">
     <div class="tray__toggle-btn txt-uppercase btn btn--reversed txt-x-small center full-width">
       <%= icon_tag "bell" %>
-      <span class="tray__toggle-text">Notifications <% if platform.desktop? -%><kbd>N</kbd><% end %></span>
+      <span class="tray__toggle-text">Notifications <kbd class="hide-on-touch">N</kbd></span>
     </div>
   </button>
 </section>

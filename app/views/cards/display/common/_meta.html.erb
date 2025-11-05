@@ -5,9 +5,6 @@
 
   <span class="card__meta-text card__meta-text--added">
     Added <%= local_datetime_tag(card.created_at, style: :daysago) %>
-    <% if card.drafted? %>
-      <strong>(Draft)</strong>
-    <% end %>
   </span>
 
   <span class="card__meta-text card__meta-text--author">

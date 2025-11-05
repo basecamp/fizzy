@@ -116,7 +116,7 @@ class Signup
           }
         )
         @user = User.find_by!(role: :admin)
-        @account.setup_basic_template
+        @account.setup_customer_template
       end
     end
 

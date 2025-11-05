@@ -8,7 +8,14 @@ class Memberships::EmailAddressesController < ApplicationController
   end
 
   def create
-    @membership.send_email_address_change_confirmation(new_email_address)
+    identity = Identity.find_by_email_address(new_email_address)
+
+    if identity&.memberships&.exists?(tenant: @membership.tenant)
+      flash[:alert] = "You already have a user in this account with that email address"
+      redirect_to new_email_address_path
+    else
+      @membership.send_email_address_change_confirmation(new_email_address)
+    end
   end
 
   private

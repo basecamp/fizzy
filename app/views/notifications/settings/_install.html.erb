@@ -1,10 +1,10 @@
 <% unless (platform.chrome? && !platform.ios?) || (platform.firefox? && !platform.android?) %>
   <div class="notifications-help pwa__instructions hide-in-pwa">
-    <h2><%= platform.safari? && platform.desktop? ? "…or install" : "Install " -%> BOXCAR as a web app.</h2>
+    <h2><%= platform.safari? && platform.desktop? ? "…or install" : "Install " -%> Fizzy as a web app.</h2>
     <% case
       when platform.edge? %>
         <ol>
-          <li>Click <em><%= icon_tag "install-edge", alt: "the app available - install BOXCAR button" %></em>in the address bar.</li>
+          <li>Click <em><%= icon_tag "install-edge", alt: "the app available - install Fizzy button" %></em>in the address bar.</li>
           <li>Click <em>Install</em>.</li>
         </ol>
       <% when platform.chrome? && platform.android? %>
@@ -23,13 +23,13 @@
           <li>Click <em>Add to Dock…</em>.</li>
         </ol>
       <% when (platform.safari? || platform.chrome?) && platform.ios? %>
-        <p>To receive push notifications in <%= platform.browser.capitalize %> for <%= platform.operating_system %>, you must first install BOXCAR as a web app.</p>
+        <p>To receive push notifications in <%= platform.browser.capitalize %> for <%= platform.operating_system %>, you must first install Fizzy as a web app.</p>
         <ol>
           <li>Tap <em><%= icon_tag "share", alt: "the share button" %></em></li>
           <li>Tap <em>Add to Home Screen</em>.</li>
         </ol>
       <% else %>
-        <p>Some platforms require you to install BOXCAR as a web app to receive push notifications.</p>
+        <p>Some platforms require you to install Fizzy as a web app to receive push notifications.</p>
     <% end %>
   </div>
 <% end %>

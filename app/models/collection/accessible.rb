@@ -57,7 +57,7 @@ module Collection::Accessible
     end
 
     def grant_access_to_everyone
-      accesses.grant_to(User.all) if all_access_previously_changed?(to: true)
+      accesses.grant_to(User.active) if all_access_previously_changed?(to: true)
     end
 
     def mentions_for_user(user)

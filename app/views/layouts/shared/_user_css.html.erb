@@ -1,0 +1,10 @@
+<% if Current.user %>
+  <style>
+    [data-creator-id="<%= Current.user.id %>"] {
+      [data-only-visible-to-others] { display: none; }
+    }
+    [data-creator-id]:not([data-creator-id="<%= Current.user.id %>"]) {
+      [data-only-visible-to-you] { display: none; }
+    }
+  </style>
+<% end %>

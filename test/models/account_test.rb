@@ -13,6 +13,8 @@ class AccountTest < ActiveSupport::TestCase
   end
 
   test ".create_with_admin_user creates a new local account" do
+    membership = memberships(:david_in_37signals)
+
     ApplicationRecord.create_tenant("account-create-with-dependents") do
       account = Account.create_with_admin_user(
         account: {
@@ -21,7 +23,7 @@ class AccountTest < ActiveSupport::TestCase
         },
         owner: {
           name: "David",
-          email_address: "david@37signals.com"
+          membership: membership
         }
       )
       assert_not_nil account
@@ -37,7 +39,7 @@ class AccountTest < ActiveSupport::TestCase
 
       admin = User.find_by(role: "admin")
       assert_equal "David", admin.name
-      assert_equal "david@37signals.com", admin.email_address
+      assert_equal "david@37signals.com", admin.identity.email_address
       assert_equal "admin", admin.role
     end
   end

@@ -67,6 +67,6 @@ This environment uses a FlashBlade bucket for blob storage, and shares nothing w
 
 ### Production
 
-- https://app.box-car.com/
+- https://app.fizzy.do/
 
 This environment uses a FlashBlade bucket for blob storage.

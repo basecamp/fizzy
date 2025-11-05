@@ -28,6 +28,22 @@ module Attachments
     attachments.any?
   end
 
+  def remote_images
+    @remote_images ||= rich_text_record&.body&.attachables&.grep(ActionText::Attachables::RemoteImage) || []
+  end
+
+  def has_remote_images?
+    remote_images.any?
+  end
+
+  def remote_videos
+    @remote_videos ||= rich_text_record&.body&.attachables&.grep(ActionText::Attachables::RemoteVideo) || []
+  end
+
+  def has_remote_videos?
+    remote_videos.any?
+  end
+
   private
     def rich_text_record
       @rich_text_record ||= begin

@@ -12,19 +12,19 @@
       <ol>
         <li>Click <em>Start</em>, then <em>Settings</em>.</li>
         <li>Go to <em>System &gt; Notification</em>.</li>
-        <li>Click <em><%= icon_tag "switch", alt: "the toggle button" %></em> <em>ON</em> for BOXCAR.</li>
+        <li>Click <em><%= icon_tag "switch", alt: "the toggle button" %></em> <em>ON</em> for Fizzy.</li>
       </ol>
     <% when (platform.firefox? || platform.chrome?) && platform.desktop? %>
       <ol>
         <% if platform.windows? %>
           <li>Click <em>Start</em>, then <em>Settings</em>.</li>
           <li>Go to <em>System &gt; Notification</em>.</li>
-          <li>Click <em><%= icon_tag "switch", alt: "the toggle button" %></em> <em>ON</em> for BOXCAR.</li>
+          <li>Click <em><%= icon_tag "switch", alt: "the toggle button" %></em> <em>ON</em> for Fizzy.</li>
         <% else %>
           <li>Click <em aria-label="the Apple menu"></em> in the top left.</li>
           <li>Click <em>System Settings…</em>.</li>
           <li>Click <em>Notifications</em>.</li>
-          <li>Click <em>BOXCAR</em>.</li>
+          <li>Click <em>Fizzy</em>.</li>
           <li>Click <em><%= icon_tag "switch", alt: "the allow notifications switch" %></em> to <em>Allow notifications</em>.</li>
         <% end %>
       </ol>
@@ -33,13 +33,13 @@
         <li>Click <em aria-label="the Apple menu"></em> in the top left.</li>
         <li>Click <em>System Settings…</em>.</li>
         <li>Click <em>Notifications</em>.</li>
-        <li>Click <em>BOXCAR</em>.</li>
+        <li>Click <em>Fizzy</em>.</li>
         <li>Click <em><%= icon_tag "switch", alt: "the allow notifications switch" %></em> to <em>Allow notifications</em>.</li>
       </ol>
     <% when (platform.safari? || platform.chrome?) && platform.ios? %>
       <ol>
         <li>Open the <em><%= icon_tag "gear", aria: { hidden: "true" } %></em> Settings app.</li>
-        <li>Scroll to and tap <em>BOXCAR</em>.</li>
+        <li>Scroll to and tap <em>Fizzy</em>.</li>
         <li>Tap <em>Notifications</em>.</li>
         <li>Tap <em><%= icon_tag "switch", alt: "the allow notifications switch button" %></em> to <em>Allow Notifications</em>.</li>
       </ol>
@@ -48,7 +48,7 @@
         <li>Open the <em><%= icon_tag "gear", aria: { hidden: "true" } %></em> Settings app.</li>
         <li>Tap <em>Notifications</em>.</li>
         <li>Tap <em>App notifications</em>.</li>
-        <li>Scroll to <em>BOXCAR</em>.</li>
+        <li>Scroll to <em>Fizzy</em>.</li>
         <li>Tap <em><%= icon_tag "switch", alt: "the switch" %></em> to <em>Allow Notifications</em>.</li>
       </ol>
     <% else %>

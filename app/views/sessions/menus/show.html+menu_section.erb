@@ -2,7 +2,7 @@
   <% cache [ Current.identity, @memberships ] do %>
     <%= collapsible_nav_section "Accounts" do %>
       <% @memberships.each do |membership| %>
-        <%= filter_place_menu_item root_url(script_name: "/#{membership.tenant}"), "#{membership.account_name}", "marker", new_window: true %>
+        <%= filter_place_menu_item landing_url(script_name: "/#{membership.tenant}"), "#{membership.account_name}", "marker", new_window: true %>
       <% end %>
     <% end %>
   <% end %>

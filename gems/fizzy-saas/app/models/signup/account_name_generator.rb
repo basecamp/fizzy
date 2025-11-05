@@ -1,5 +1,5 @@
 class Signup::AccountNameGenerator
-  SUFFIX = "BOXCAR".freeze
+  SUFFIX = "Fizzy".freeze
 
   attr_reader :identity, :name
 

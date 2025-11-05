@@ -1,7 +1,8 @@
 <div class="collection-tools card">
   <%= button_to collection_cards_path(collection), method: :post, class: "btn btn--link", form: { data: { turbo_frame: "_top" } }, data: { controller: "hotkey", action: "keydown.c@document->hotkey#click" } do %>
+    <%= icon_tag "add", class: "show-on-touch" %>
     <span>Add a card</span>
-    <kbd>C</kbd>
+    <kbd class="hide-on-touch">C</kbd>
   <% end %>
 
   <hr class="separator--horizontal full-width" aria-hidden="true">

@@ -9,17 +9,11 @@
   </div>
 
   <%= render "hotkeys" %>
-
-  <div class="margin-block-start-half txt-x-small txt-align-center">
-    BOXCAR is designed, built, and backed by <strong class="txt-nowrap"><%= icon_tag "37signals", class: "v-align-middle" %> <a href="https://37signals.com" target="_blank" class="txt-ink">37signals</a>.</strong>
-  </div>
-
   <%= render "saved_filter", filters: @user_filtering.filters %>
   <%= render "collections", user_filtering: @user_filtering %>
   <%= render "tags", user_filtering: @user_filtering %>
   <%= render "users", user_filtering: @user_filtering %>
   <%= render "places", user_filtering: @user_filtering %>
   <%= render "accounts", user_filtering: @user_filtering %>
-
-  <%= render "shortcut_notice" %>
+  <%= render "footer" %>
 <% end %>

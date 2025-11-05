@@ -6,7 +6,6 @@ class Identity < UntenantedRecord
   has_many :sessions, dependent: :destroy
 
   normalizes :email_address, with: ->(value) { value.strip.downcase }
-  validates :email_address, presence: true
 
   def send_magic_link
     magic_links.create!.tap do |magic_link|

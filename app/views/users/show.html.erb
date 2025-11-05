@@ -19,7 +19,7 @@
         <h1 class="txt-x-large margin-none"><%= @user.name %></h1>
         <div class="txt-medium">
           <% if @user.active? %>
-            <%= mail_to @user.email_address %>
+            <%= mail_to @user.identity.email_address %>
           <% else %>
             <%= @user.name %> is no longer on this account
           <% end %>

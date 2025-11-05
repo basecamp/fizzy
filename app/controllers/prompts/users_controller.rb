@@ -1,6 +1,6 @@
 class Prompts::UsersController < ApplicationController
   def index
-    @users = User.all.alphabetically
+    @users = User.active.alphabetically
 
     if stale? etag: @users
       render layout: false

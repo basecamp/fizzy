@@ -68,7 +68,12 @@ module EventsHelper
     end
 
     def event_creator_name(event)
-      event.creator == Current.user ? "You" : h(event.creator.name)
+      tag.span data: { creator_id: event.creator.id } do
+        safe_join([
+          tag.span("You", data: { only_visible_to_you: true }),
+          tag.span(h(event.creator.name), data: { only_visible_to_others: true })
+        ])
+      end
     end
 
     def card_event_action_sentence(event)

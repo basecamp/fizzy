@@ -1045,16 +1045,6 @@ columns:
     collation:
     comment:
   - *7
-  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
-    auto_increment:
-    name: email_address
-    cast_type: *5
-    sql_type_metadata: *6
-    'null': true
-    default:
-    default_function:
-    collation:
-    comment:
   - *8
   - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
     auto_increment:
@@ -1067,16 +1057,6 @@ columns:
     collation:
     comment:
   - *10
-  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
-    auto_increment:
-    name: password_digest
-    cast_type: *5
-    sql_type_metadata: *6
-    'null': true
-    default:
-    default_function:
-    collation:
-    comment:
   - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
     auto_increment:
     name: role
@@ -2717,22 +2697,6 @@ indexes:
   users:
   - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
     table: users
-    name: index_users_on_email_address
-    unique: true
-    columns:
-    - email_address
-    lengths: {}
-    orders: {}
-    opclasses: {}
-    where:
-    type:
-    using:
-    include:
-    nulls_not_distinct:
-    comment:
-    valid: true
-  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
-    table: users
     name: index_users_on_membership_id
     unique: false
     columns:
@@ -2879,4 +2843,4 @@ indexes:
     nulls_not_distinct:
     comment:
     valid: true
-version: 20251102115338
+version: 20251103125353

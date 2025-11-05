@@ -3,8 +3,6 @@ class User < ApplicationRecord
     Mentionable, Named, Notifiable, Role, Searcher, Watcher
   include Timelined # Depends on Accessor
 
-  self.ignored_columns = %i[ password_digest ]
-
   has_one_attached :avatar
 
   belongs_to :membership, optional: true
@@ -17,8 +15,6 @@ class User < ApplicationRecord
   has_many :closures, dependent: :nullify
   has_many :pins, dependent: :destroy
   has_many :pinned_cards, through: :pins, source: :card
-
-  normalizes :email_address, with: ->(value) { value.strip.downcase }
 
   delegate :staff?, to: :identity, allow_nil: true
 

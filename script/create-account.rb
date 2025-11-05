@@ -68,9 +68,6 @@ Current.set(
           email_address: owner_email
         }
       )
-
-      # Setup basic template
-      account.setup_basic_template
     end
 
     puts "✓ Tenant created"

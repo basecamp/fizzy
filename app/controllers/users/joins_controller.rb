@@ -11,7 +11,7 @@ class Users::JoinsController < ApplicationController
       User.create!(user_params.merge(membership: Current.membership))
     end
 
-    redirect_to root_path
+    redirect_to landing_path
   end
 
   private

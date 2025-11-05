@@ -31,10 +31,6 @@ class FilterTest < ActiveSupport::TestCase
 
     filter = users(:david).filters.new card_ids: [ cards(:logo, :layout).collect(&:id) ]
     assert_equal [ cards(:logo), cards(:layout) ], filter.cards
-
-    filter = users(:david).filters.new card_ids: [ cards(:logo, :layout).collect(&:id) ]
-    cards(:logo).drafted!
-    assert_equal [ cards(:logo), cards(:layout) ], filter.cards
   end
 
   test "can't see cards in collections that aren't accessible" do

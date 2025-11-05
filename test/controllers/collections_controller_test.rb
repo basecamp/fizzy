@@ -86,7 +86,7 @@ class CollectionsControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to edit_collection_path(collection)
     assert collection.reload.all_access?
-    assert_equal User.all, collection.users
+    assert_equal User.active.sort, collection.users.sort
   end
 
   test "destroy" do

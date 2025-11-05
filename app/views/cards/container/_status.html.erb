@@ -1,8 +1,0 @@
-<% if card.drafted? && card.filled? %>
-  <div class="card__banner min-width max-width" style="--card-color: <%= card.color %>;">
-    <span class="overflow-ellipsis">This is a draft, it’s only visible to you.</span>
-    <%= button_to card_publish_path(@card), class: "btn txt-small", style: "--btn-background: #{card.color}" do %>
-      <span>Post to project</span>
-    <% end %>
-  </div>
-<% end %>

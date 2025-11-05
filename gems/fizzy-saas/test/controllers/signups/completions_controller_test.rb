@@ -33,7 +33,7 @@ class Signups::CompletionsControllerTest < ActionDispatch::IntegrationTest
       }, headers: http_basic_auth_headers
     end
 
-    assert_redirected_to root_url(script_name: "/#{@signup.tenant}"), "Successful completion should redirect to root in new tenant"
+    assert_redirected_to landing_path(script_name: "/#{@signup.tenant}"), "Successful completion should redirect to root in new tenant"
 
     untenanted do
       post saas.signup_completion_path, params: {

@@ -45,7 +45,7 @@ class Signups::MembershipsControllerTest < ActionDispatch::IntegrationTest
         signup: {
           membership_id: membership.signed_id(purpose: :account_creation),
           full_name: "New User",
-          account_name: "New's BOXCAR"
+          account_name: "New's Fizzy"
         }
       )
     end

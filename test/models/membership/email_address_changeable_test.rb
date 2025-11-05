@@ -27,6 +27,9 @@ class Membership::EmailAddressChangeableTest < ActiveSupport::TestCase
     assert_not old_identity.reload.memberships.exists?(id: @membership.id)
     assert_equal @new_email, @membership.reload.identity.email_address
 
+    # Make sure that a prior membership doesn't exist
+    identities(:david).memberships.where(tenant: @tenant).delete_all
+
     assert_no_difference -> { Identity.count } do
       @membership.change_email_address(identities(:david).email_address)
     end

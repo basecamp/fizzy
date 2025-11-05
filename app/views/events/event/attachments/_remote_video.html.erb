@@ -1,0 +1,3 @@
+<%= tag.video controls: true, class: "attachment attachment--video", width: remote_video.width, height: remote_video.height do %>
+  <%= tag.source src: remote_video.url, type: remote_video.content_type %>
+<% end %>

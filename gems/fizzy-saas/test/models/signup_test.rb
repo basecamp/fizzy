@@ -54,7 +54,7 @@ class SignupTest < ActiveSupport::TestCase
   end
 
   test "#complete" do
-    Account.any_instance.expects(:setup_basic_template).once
+    Account.any_instance.expects(:setup_customer_template).once
 
     # First create the membership
     signup_for_membership = Signup.new(

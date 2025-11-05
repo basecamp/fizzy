@@ -26,7 +26,7 @@ class Users::JoinsControllerTest < ActionDispatch::IntegrationTest
 
     assert_difference -> { User.count }, +1 do
       post users_joins_path, params: { user: { name: "Newart Userbaum" } }
-      assert_redirected_to root_path
+      assert_redirected_to landing_path
     end
   end
 end

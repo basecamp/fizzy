@@ -3,7 +3,7 @@
   <div class="flex justify-center bar__placeholder" data-bar-target="buttonsContainer">
     <%= tag.button class: "btn btn--plain", data: {
           controller: "hotkey", action: "bar#search keydown.k@document->hotkey#click" } do %>
-      <span class="display-contents">Search <% if platform.desktop? -%><kbd>K</kbd><% end %></span>
+      <span class="display-contents">Search <kbd class="hide-on-touch">K</kbd></span>
     <% end %>
   </div>
 

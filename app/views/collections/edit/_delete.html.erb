@@ -1,8 +1,7 @@
-<% if Current.user.collections.many? %>
-  <%= form_with model: collection, class: "txt-align-center margin-block-start-auto", method: :delete do |form| %>
-    <%= form.button class: "btn txt-negative borderless txt-small", data: { turbo_confirm: "Are you sure you want to permanently delete this board?" } do %>
-      <%= icon_tag "trash" %>
-      <span>Delete this board</span>
-    <% end %>
+<%= form_with model: collection, class: "txt-align-center margin-block-start-auto", method: :delete do |form| %>
+  <%= form.button class: "btn txt-negative borderless txt-small", data: { turbo_confirm: "Are you sure you want to permanently delete this board?" } do %>
+    <%= icon_tag "trash" %>
+    <span>Delete this board</span>
   <% end %>
 <% end %>
+

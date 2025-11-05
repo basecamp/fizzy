@@ -1,6 +1,5 @@
 class Public::BaseController < ApplicationController
   allow_unauthenticated_access
-  allow_unauthorized_access
 
   before_action :set_collection, :set_card, :set_public_cache_expiration
 

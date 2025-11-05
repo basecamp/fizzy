@@ -23,6 +23,7 @@ module Authentication
     def allow_unauthenticated_access(**options)
       skip_before_action :require_authentication, **options
       before_action :resume_session, **options
+      allow_unauthorized_access **options
     end
 
     def require_untenanted_access(**options)
@@ -72,7 +73,7 @@ module Authentication
     end
 
     def after_authentication_url
-      session.delete(:return_to_after_authenticating) || root_url
+      session.delete(:return_to_after_authenticating) || landing_url
     end
 
     def redirect_authenticated_user

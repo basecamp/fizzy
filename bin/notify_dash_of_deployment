@@ -10,7 +10,7 @@ if [ -n "$DASH_BASIC_AUTH_SECRET" ]; then
     --arg env "${5}" \
     --arg duration "${6}" \
     '{
-      "application":"boxcar",
+      "application":"fizzy",
       "rails_env": $env,
       "branch": $branch,
       "deployer": $author,

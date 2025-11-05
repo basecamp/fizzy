@@ -233,4 +233,18 @@
   .hide-focus-ring {
     --focus-ring-size: 0;
   }
+
+  .hide-on-touch {
+    @media (any-hover: none) {
+      display: none;
+    }
+  }
+
+  .show-on-touch {
+    display: none;
+
+    @media (any-hover: none) {
+      display: unset;
+    }
+  }
 }

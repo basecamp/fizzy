@@ -13,7 +13,7 @@ class Signups::CompletionsController < ApplicationController
     @signup = Signup.new(signup_params)
 
     if @signup.complete
-      redirect_to root_url(script_name: "/#{@signup.tenant}")
+      redirect_to landing_url(script_name: "/#{@signup.tenant}")
     else
       render :new, status: :unprocessable_entity
     end

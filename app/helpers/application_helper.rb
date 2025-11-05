@@ -1,6 +1,6 @@
 module ApplicationHelper
   def page_title_tag
-    tag.title @page_title || "BOXCAR"
+    tag.title @page_title || "Fizzy"
   end
 
   def icon_tag(name, **options)

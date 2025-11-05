@@ -76,10 +76,12 @@ fi
 
 if [[ $* == *--reset* ]]; then
   step "Resetting the database" rails db:reset
-elif needs_seeding; then
-  step "Setting up the database" rails db:reset
 else
   step "Preparing the database" rails db:prepare
+
+  if needs_seeding; then
+    step "Seeding the database" rails db:seed
+  fi
 fi
 
 step "Cleaning up logs and tempfiles" rails log:clear tmp:clear

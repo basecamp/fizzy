@@ -14,7 +14,7 @@
   <button class="tray__toggle" data-action="dialog#toggle keydown.p@document->hotkey#click" data-controller="hotkey" aria-label="Toggle pins stack" aria-haspopup="true">
     <div class="tray__toggle-btn txt-uppercase btn btn--reversed txt-x-small center full-width">
       <%= icon_tag "pinned" %>
-      <span class="tray__toggle-text">Pinned <% if platform.desktop? -%><kbd>P</kbd><% end %></span>
+      <span class="tray__toggle-text">Pinned <kbd class="hide-on-touch">P</kbd></span>
     </div>
   </button>
 </section>

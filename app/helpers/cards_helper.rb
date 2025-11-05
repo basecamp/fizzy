@@ -4,8 +4,7 @@ module CardsHelper
       options.delete(:class),
       ("golden-effect" if card.golden?),
       ("card--postponed" if card.postponed?),
-      ("card--active" if card.active?),
-      ("card--drafted" if card.drafted?)
+      ("card--active" if card.active?)
     ].compact.join(" ")
 
     tag.article \

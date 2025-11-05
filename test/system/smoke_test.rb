@@ -50,8 +50,7 @@ class SmokeTest < ApplicationSystemTestCase
   private
     def sign_in_as(user)
       visit session_transfer_url(user.identity.transfer_id, script_name: nil)
-      click_on ApplicationRecord.with_tenant(user.tenant) { Account.sole.name }
-      assert_selector "h1", text: "Activity"
+      assert_selector "h1", text: "Latest Activity"
     end
 
     def fill_in_lexxy(selector = "lexxy-editor", with:)

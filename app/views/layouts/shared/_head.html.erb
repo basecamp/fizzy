@@ -20,6 +20,8 @@
   <%= javascript_importmap_tags %>
 
   <%= tenanted_action_cable_meta_tag %>
+  <%= render "layouts/shared/user_css" %>
+
   <%= yield :head %>
 
   <% if ApplicationRecord.current_tenant %>

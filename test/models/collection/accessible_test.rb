@@ -18,7 +18,7 @@ class Collection::AccessibleTest < ActiveSupport::TestCase
     collection = Current.set(session: sessions(:david)) do
       Collection.create! name: "New collection", all_access: true
     end
-    assert_equal User.all, collection.users
+    assert_equal User.active.sort, collection.users.sort
   end
 
   test "grants access to everyone after update" do
@@ -28,7 +28,7 @@ class Collection::AccessibleTest < ActiveSupport::TestCase
     assert_equal [ users(:david) ], collection.users
 
     collection.update! all_access: true
-    assert_equal User.all, collection.users.reload
+    assert_equal User.active.sort, collection.users.reload.sort
   end
 
   test "collection watchers" do

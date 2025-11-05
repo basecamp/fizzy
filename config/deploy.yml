@@ -1,5 +1,6 @@
 service: fizzy
 image: basecamp/fizzy
+asset_path: /rails/public/assets
 
 servers:
   jobs:

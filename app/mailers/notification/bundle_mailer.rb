@@ -11,6 +11,6 @@ class Notification::BundleMailer < ApplicationMailer
 
     mail \
       to: bundle.user.identity.email_address,
-      subject: "Latest Activity in BOXCAR"
+      subject: "Latest Activity in Fizzy"
   end
 end

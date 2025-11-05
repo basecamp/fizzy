@@ -1,4 +1,4 @@
-<div class="boxcar-menu__hotkeys" role="list">
+<div class="boxcar-menu__hotkeys margin-block-end-half" role="list">
   <%= filter_hotkey_link "Home", root_path, 1, "home" %>
   <%= filter_hotkey_link "New board", new_collection_path, 2, "collection-add" %>
   <%= filter_hotkey_link "Assigned to me", cards_path(assignee_ids: [Current.user.id]), 3, "clipboard" %>

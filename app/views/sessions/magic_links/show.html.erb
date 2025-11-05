@@ -9,10 +9,10 @@
   <p class="margin-none-block-start margin-block-end-half txt-small txt-subtle">If your email is on a different device, enter the code included in the email below.</p>
 
   <%= form_with url: session_magic_link_path, method: :post, html: { data: { controller: token_list("form", "auto-submit" => params[:code].present?)} } do |form| %>
-    <%= form.text_field :code, required: true, class: "input center txt-align-enter txt-normal", 
-        autofocus: false, autocorrect: "off", autocapitalize: "off", spellcheck: "false", "data-1p-ignore": true, 
-        autocomplete: "one-time-code", maxlength: "6", placeholder: "••••••", value: params[:code], 
-        data: { form_target: "input", action: "paste->form#submit, keydown.enter->form#submit" } %>
+    <%= form.text_field :code, required: true, class: "input center txt-align-enter txt-normal",
+        autofocus: false, autocorrect: "off", autocapitalize: "off", spellcheck: "false", "data-1p-ignore": true,
+        autocomplete: "one-time-code", maxlength: "6", placeholder: "••••••", value: params[:code],
+        data: { form_target: "input", action: "paste->form#debouncedSubmit" } %>
   <% end %>
 </div>
 

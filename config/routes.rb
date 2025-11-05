@@ -1,6 +1,5 @@
 Rails.application.routes.draw do
   namespace :account do
-    post :enter, to: "entries#create"
     resource :join_code
     resource :settings
     resource :entropy
@@ -15,6 +14,8 @@ Rails.application.routes.draw do
       resources :push_subscriptions
     end
   end
+
+  resource :landing
 
   resources :collections do
     scope module: :collections do
@@ -150,7 +151,7 @@ Rails.application.routes.draw do
   end
 
   scope module: :memberships, path: "memberships/:membership_id" do
-    resource :unlink, controller: :unlink, as: :unlink_membership
+    resource :unlink, only: %i[ show create ], controller: :unlink, as: :unlink_membership
 
     resources :email_addresses, param: :token do
       resource :confirmation, module: :email_addresses

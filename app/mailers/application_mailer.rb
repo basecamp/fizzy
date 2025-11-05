@@ -1,5 +1,5 @@
 class ApplicationMailer < ActionMailer::Base
-  default from: "The BOXCAR team <support@37signals.com>"
+  default from: "The Fizzy team <support@37signals.com>"
 
   layout "mailer"
   append_view_path Rails.root.join("app/views/mailers")
