@@ -40,6 +40,7 @@ class User::DayTimeline
       card_published
       card_closed
       card_reopened
+      card_collection_changed
       card_board_changed
       card_postponed
       card_triaged
