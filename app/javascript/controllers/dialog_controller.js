@@ -24,6 +24,7 @@ export default class extends Controller {
 
     limitHeightToViewport(this.dialogTarget, true)
 
+    this.#loadLazyTurboFrames()
     this.dialogTarget.setAttribute("aria-hidden", "false")
     this.dispatch("show")
   }
@@ -53,5 +54,13 @@ export default class extends Controller {
       event.preventDefault()
       event.stopPropagation()
     }
+  }
+
+  #loadLazyTurboFrames() {
+    this.element.querySelectorAll("turbo-frame[loading=lazy]").forEach(frame => {
+      if (frame.delegate?.appearanceObserver) {
+        frame.delegate.appearanceObserver.intersect([{ isIntersecting: true }])
+      }
+    })
   }
 }
