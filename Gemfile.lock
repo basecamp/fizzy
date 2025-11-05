@@ -163,8 +163,8 @@ GEM
     ast (2.4.3)
     autotuner (1.0.2)
     aws-eventstream (1.4.0)
-    aws-partitions (1.1175.0)
-    aws-sdk-core (3.234.0)
+    aws-partitions (1.1180.0)
+    aws-sdk-core (3.236.0)
       aws-eventstream (~> 1, >= 1.3.0)
       aws-partitions (~> 1, >= 1.992.0)
       aws-sigv4 (~> 1.9)
@@ -172,10 +172,10 @@ GEM
       bigdecimal
       jmespath (~> 1, >= 1.6.1)
       logger
-    aws-sdk-kms (1.115.0)
+    aws-sdk-kms (1.116.0)
       aws-sdk-core (~> 3, >= 3.234.0)
       aws-sigv4 (~> 1.5)
-    aws-sdk-s3 (1.201.0)
+    aws-sdk-s3 (1.203.0)
       aws-sdk-core (~> 3, >= 3.234.0)
       aws-sdk-kms (~> 1)
       aws-sigv4 (~> 1.5)
