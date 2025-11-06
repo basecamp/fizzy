@@ -1,6 +1,6 @@
 class Notifier::CardEventNotifier < Notifier
   delegate :creator, to: :source
-  delegate :collection, to: :card
+  delegate :board, to: :card
 
   private
     def recipients
@@ -8,11 +8,11 @@ class Notifier::CardEventNotifier < Notifier
       when "card_assigned"
         source.assignees.excluding(creator)
       when "card_published"
-        collection.watchers.without(creator, *card.mentionees)
+        board.watchers.without(creator, *card.mentionees)
       when "comment_created"
         card.watchers.without(creator, *source.eventable.mentionees)
       else
-        collection.watchers.without(creator)
+        board.watchers.without(creator)
       end
     end
 

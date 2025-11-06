@@ -11,7 +11,7 @@
                   action: "turbo:submit-end->local-save#submit keydown.ctrl+enter->form#debouncedSubmit:prevent keydown.meta+enter->form#debouncedSubmit:prevent keydown.esc->form#cancel:stop" } do |form| %>
         <%= form.rich_textarea :body, required: true, placeholder: new_comment_placeholder(card),
               data: { local_save_target: "input", action: "lexxy:change->form#disableSubmitWhenInvalid lexxy:change->local-save#save turbo:morph-element->local-save#restoreContent" } do %>
-          <%= general_prompts(@card.collection) %>
+          <%= general_prompts(@card.board) %>
         <% end %>
         <%= form.button class: "comment__submit btn btn--reversed flex-item-justify-start", data: { form_target: "submit" }, disabled: true do %>
           <span>Post this comment</span>

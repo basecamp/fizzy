@@ -41,13 +41,13 @@ ApplicationRecord.with_each_tenant do |tenant|
   puts
 
   Card.find_each do |card|
-    puts "### Processing card #{card.id} in #{Rails.application.routes.url_helpers.collection_card_path(card.collection, card)}"
+    puts "### Processing card #{card.id} in #{Rails.application.routes.url_helpers.board_card_path(card.board, card)}"
     fix_attachments(card.description)
     card.reload
 
     old_body = card.description.body.to_s
     if match = regex.match(old_body)
-      puts "URL found in card #{card.id} in #{Rails.application.routes.url_helpers.collection_card_path(card.collection, card)}"
+      puts "URL found in card #{card.id} in #{Rails.application.routes.url_helpers.board_card_path(card.board, card)}"
       new_body = old_body.gsub(regex, "://#{domain}/#{account_id}/")
 
       card.description.update(body: new_body) || raise("Failed to update card description for card #{card.id}")
@@ -55,13 +55,13 @@ ApplicationRecord.with_each_tenant do |tenant|
   end
 
   Comment.find_each do |comment|
-    puts "### Processing comment #{comment.id} in #{Rails.application.routes.url_helpers.collection_card_path(comment.card.collection, comment.card)}"
+    puts "### Processing comment #{comment.id} in #{Rails.application.routes.url_helpers.board_card_path(comment.card.board, comment.card)}"
     fix_attachments(comment.body)
     comment.reload
 
     old_body = comment.body.body.to_s
     if match = regex.match(old_body)
-      puts "URL found in comment #{comment.id} in #{Rails.application.routes.url_helpers.collection_card_path(comment.card.collection, comment.card)}"
+      puts "URL found in comment #{comment.id} in #{Rails.application.routes.url_helpers.board_card_path(comment.card.board, comment.card)}"
       new_body = old_body.gsub(regex, "://#{domain}/#{account_id}/")
 
       comment.body.update(body: new_body) || raise("Failed to update comment body for comment #{comment.id}")

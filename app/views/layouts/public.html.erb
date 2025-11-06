@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <%= render "layouts/shared/head" %>
 
   <body class="public" data-controller="local-time timezone-cookie" data-action="turbo:morph@window->local-time#refreshAll">
     <header class="header" id="header">
       <a href="#main" class="header__skip-navigation btn" data-turbo="false">Skip to main content</a>
       <nav>
-        <%= link_to "https://box-car.com", class: "boxcar-header-logo center flex-inline align-center txt-normal" do %>
-          <%= image_tag "logo.png" %>
+        <%= link_to "https://fizzy.do", class: "boxcar-header-logo center flex-inline align-center txt-normal" do %>
+          <%= image_tag "logo.png", alt: "Fizzy", role: "presentation" %>
           <strong class="txt-medium overflow-ellipsis margin-none">Fizzy</strong>
         <% end %>
       </nav>

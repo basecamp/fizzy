@@ -16,6 +16,12 @@
   <% end %>
 </div>
 
+<% if Rails.env.development? %>
+  <script>
+    console.log("Magic link code: <%= flash[:magic_link_code].presence || "not generated" %>");
+  </script>
+<% end %>
+
 <% content_for :footer do %>
   <%= render "sessions/footer" %>
 <% end %>

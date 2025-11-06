@@ -1,0 +1,9 @@
+<section id="not-now" class="cards cards--on-deck is-collapsed" style="--card-color: var(--color-card-complete);"
+  data-collapsible-columns-target="column"
+  data-action="turbo:before-morph-attribute->collapsible-columns#preventToggle"
+>
+
+  <%= render "boards/show/expander", title: "Not Now", count: board.cards.postponed.count, column_id: "not-now" %>
+
+  <%= column_frame_tag :not_now_column, src: public_board_columns_not_now_path(board.publication.key) %>
+</section>

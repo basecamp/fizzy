@@ -11,7 +11,7 @@ class Webhook < ApplicationRecord
     card_closed
     card_postponed
     card_auto_postponed
-    card_collection_changed
+    card_board_changed
     card_published
     card_reopened
     card_sent_back_to_triage
@@ -25,7 +25,7 @@ class Webhook < ApplicationRecord
   has_many :deliveries, dependent: :delete_all
   has_one :delinquency_tracker, dependent: :delete
 
-  belongs_to :collection
+  belongs_to :board
 
   serialize :subscribed_actions, type: Array, coder: JSON
 

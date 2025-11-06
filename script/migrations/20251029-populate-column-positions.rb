@@ -5,10 +5,10 @@ require_relative "../../config/environment"
 ApplicationRecord.with_each_tenant do |tenant|
   puts "Processing tenant: #{tenant}"
 
-  Collection.find_each do |collection|
-    puts "  Processing collection: #{collection.name} (ID: #{collection.id})"
+  Board.find_each do |board|
+    puts "  Processing board: #{board.name} (ID: #{board.id})"
 
-    columns = collection.columns.order(:id)
+    columns = board.columns.order(:id)
 
     columns.each_with_index do |column, index|
       column.update_column(:position, index)

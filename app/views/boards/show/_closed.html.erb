@@ -1,0 +1,17 @@
+<section id="closed-cards" class="cards cards--on-deck is-collapsed" style="--card-color: var(--color-card-complete);"
+  data-drag-and-drop-target="container"
+  data-drag-and-strum-target="container"
+  data-collapsible-columns-target="column"
+  data-column-name="Done"
+  data-action="turbo:before-morph-attribute->collapsible-columns#preventToggle"
+  data-drag-and-drop-url="<%= columns_card_drops_closure_path("__id__") %>"
+>
+  <div class="cards__transition-container">
+    <header class="cards__header">
+      <%= render "boards/show/expander", title: "Done", count: board.cards.closed.count, column_id: "closed-cards" do %>
+        <%= render "boards/show/menu/expand", column_path: board_columns_closed_path(board) %>
+      <% end %>
+    </header>
+    <%= column_frame_tag :closed_column, src: board_columns_closed_path(board) %>
+  </div>
+</section>

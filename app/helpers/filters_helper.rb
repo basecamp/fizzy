@@ -11,8 +11,8 @@ module FiltersHelper
     hidden_field_tag name, value, id: nil
   end
 
-  def filter_selected_collections_title(user_filtering)
-    user_filtering.selected_collection_titles.collect { tag.strong it }.to_sentence.html_safe
+  def filter_selected_boards_title(user_filtering)
+    user_filtering.selected_board_titles.collect { tag.strong it }.to_sentence.html_safe
   end
 
   def filter_place_menu_item(path, label, icon, new_window: false, current: false)

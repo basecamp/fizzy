@@ -14,8 +14,8 @@ class SearchTest < ActiveSupport::TestCase
   end
 
   test "don't include innaccessible" do
-    collections(:writebook).update! all_access: false
-    collections(:writebook).accesses.revoke_from(@user)
+    boards(:writebook).update! all_access: false
+    boards(:writebook).accesses.revoke_from(@user)
 
     assert_not @user.search("layout").find { it.card == cards(:layout) }
     assert_not @user.search("overflowing").find { it.comment == comments(:layout_overflowing_david) }

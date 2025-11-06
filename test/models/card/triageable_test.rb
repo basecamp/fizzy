@@ -32,16 +32,16 @@ class Card::TriageableTest < ActiveSupport::TestCase
     assert card.triaged?
   end
 
-  test "cannot triage into a column from a different collection" do
+  test "cannot triage into a column from a different board" do
     card = cards(:buy_domain)
-    other_collection_column = Column.create!(
+    other_board_column = Column.create!(
       name: "Other",
       color: "#000000",
-      collection: collections(:private)
+      board: boards(:private)
     )
 
-    assert_raises(RuntimeError, "The column must belong to the card collection") do
-      card.triage_into(other_collection_column)
+    assert_raises(RuntimeError, "The column must belong to the card board") do
+      card.triage_into(other_board_column)
     end
   end
 

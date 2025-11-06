@@ -21,7 +21,7 @@ class Search
         "highlight(cards_search_index, 0, '#{HIGHLIGHT_OPENING_MARK}', '#{HIGHLIGHT_CLOSING_MARK}') AS card_title",
         "snippet(cards_search_index, 1, '#{HIGHLIGHT_OPENING_MARK}', '#{HIGHLIGHT_CLOSING_MARK}', '...', 20) AS card_description",
         "null as comment_body",
-        "collections.name as collection_name",
+        "boards.name as board_name",
         "cards.creator_id",
         "cards.created_at",
         "bm25(cards_search_index, 10.0, 2.0) AS score"
@@ -34,7 +34,7 @@ class Search
         "cards.title AS card_title",
         "null AS card_description",
         "snippet(comments_search_index, 0, '#{HIGHLIGHT_OPENING_MARK}', '#{HIGHLIGHT_CLOSING_MARK}', '...', 20) AS comment_body",
-        "collections.name as collection_name",
+        "boards.name as board_name",
         "comments.creator_id",
         "comments.created_at",
         "bm25(comments_search_index, 1.0) AS score"

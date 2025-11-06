@@ -13,7 +13,7 @@
   <% if card.tags.any? %>
     <div class="min-width overflow-ellipsis">
       <% card.tags.each_with_index do |tag, index| %>
-        <%= link_to cards_path(collection_ids: [ card.collection ], tag_ids: [ tag.id ]),
+        <%= link_to cards_path(board_ids: [ card.board ], tag_ids: [ tag.id ]),
               class: "card__tag btn btn--plain min-width txt-uppercase fill-transparent" do %>
           <%= tag.title %>
         <% end %><%= "," unless index == card.tags.size - 1 %>

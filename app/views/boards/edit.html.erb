@@ -1,0 +1,38 @@
+<% @page_title = "Board Settings" %>
+
+<% content_for :header do %>
+  <div class="header__actions header__actions--start">
+    <%= link_to @board, class: "btn borderless txt-medium", data: { controller: "hotkey", action: "keydown.esc@document->hotkey#click" } do %>
+      <span class="overflow-ellipsis">
+        &larr;
+        <strong><%= @board.name %></strong>
+      </span>
+    <% end %>
+  </div>
+
+  <h1 class="header__title"><%= @page_title %></h1>
+<% end %>
+
+<section class="settings">
+  <div class="settings__panel settings__panel--users panel shadow center">
+    <%= form_with model: @board, class: "display-contents", data: {
+          controller: "form boards-form",
+          boards_form_self_removal_prompt_message_value: "Are you sure you want to remove yourself from this board? You won’t be able to get back in unless someone invites you.",
+          action: "turbo:submit-start->boards-form#submitWithWarning" } do |form| %>
+      <%= render "boards/edit/name", form: form %>
+      <%= render "boards/edit/users", board: @board, selected_users: @selected_users, unselected_users: @unselected_users, form: form %>
+
+      <button type="submit" id="log_in" class="btn btn--link center txt-normal">
+        <span>Save changes</span>
+      </button>
+
+      <%= link_to "Cancel and go back", @board, data: { form_target: "cancel", turbo_frame: "_top" }, hidden: true %>
+    <% end %>
+  </div>
+
+  <div class="settings__panel panel shadow center">
+    <%= render "boards/edit/auto_close", board: @board %>
+    <%= render "boards/edit/publication", board: @board %>
+    <%= render "boards/edit/delete", board: @board %>
+  </div>
+</section>

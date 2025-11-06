@@ -1,0 +1,30 @@
+<% @page_title = @board.name %>
+<% turbo_exempts_page_from_cache %>
+
+<%= turbo_stream_from @board %>
+
+<% content_for :header do %>
+  <div class="header__actions header__actions--start">
+    <%= link_to_webhooks(@board) if Current.user.admin? %>
+  </div>
+
+  <h1 class="header__title divider divider--fade full-width">
+    <span class="overflow-ellipsis"><%= @board.name %></span>
+  </h1>
+
+  <div class="header__actions header__actions--end">
+    <%= link_to_edit_board @board %>
+  </div>
+<% end %>
+
+<%= render "filters/settings", filter_url: board_path(@board), user_filtering: @user_filtering, no_filtering_url: board_path(@board) do |form| %>
+  <%= hidden_field_tag "board_ids[]", @board.id %>
+<% end %>
+
+<%= turbo_frame_tag :cards_container do %>
+  <% if @filter.used?(ignore_boards: true) %>
+    <%= render "boards/show/filtered_cards", page: @page %>
+  <% else %>
+    <%= render "boards/show/columns", page: @page, board: @board %>
+  <% end %>
+<% end %>

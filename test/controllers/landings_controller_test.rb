@@ -5,22 +5,22 @@ class LandingsControllerTest < ActionDispatch::IntegrationTest
     sign_in_as :kevin
   end
 
-  test "redirects to the timeline when many collections" do
+  test "redirects to the timeline when many boards" do
     get landing_path
-    assert_redirected_to events_path
+    assert_redirected_to root_path
   end
 
-  test "redirects to the timeline when no collections" do
-    Collection.destroy_all
+  test "redirects to the timeline when no boards" do
+    Board.destroy_all
     get landing_path
-    assert_redirected_to events_path
+    assert_redirected_to root_path
   end
 
-  test "redirects to collections when only one collection" do
-    sole_collection, *collections_to_delete = users(:kevin).collections.to_a
-    collections_to_delete.each(&:destroy)
+  test "redirects to boards when only one board" do
+    sole_board, *boards_to_delete = users(:kevin).boards.to_a
+    boards_to_delete.each(&:destroy)
 
     get landing_path
-    assert_redirected_to collection_path(sole_collection)
+    assert_redirected_to board_path(sole_board)
   end
 end

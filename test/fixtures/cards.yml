@@ -1,5 +1,5 @@
 logo:
-  collection: writebook
+  board: writebook
   creator: david
   column: writebook_triage
   title: The logo isn't big enough
@@ -9,7 +9,7 @@ logo:
   last_active_at: <%= 1.week.ago %>
 
 layout:
-  collection: writebook
+  board: writebook
   creator: david
   column: writebook_triage
   title: Layout is broken
@@ -18,7 +18,7 @@ layout:
   last_active_at: <%= 1.week.ago %>
 
 text:
-  collection: writebook
+  board: writebook
   creator: kevin
   column: writebook_in_progress
   title: The text is too small
@@ -27,7 +27,7 @@ text:
   last_active_at: <%= 1.week.ago %>
 
 shipping:
-  collection: writebook
+  board: writebook
   creator: kevin
   column: writebook_triage
   title: We need to ship the app
@@ -36,7 +36,7 @@ shipping:
   last_active_at: <%= 1.week.ago %>
 
 buy_domain:
-  collection: writebook
+  board: writebook
   creator: david
   title: Buy domain
   created_at: <%= 1.week.ago %>

@@ -12,7 +12,7 @@ class FiltersControllerTest < ActionDispatch::IntegrationTest
         assignment_status: "unassigned",
         tag_ids: [ tags(:mobile).id ],
         assignee_ids: [ users(:jz).id ],
-        collection_ids: [ collections(:writebook).id ] }, as: :turbo_stream
+        board_ids: [ boards(:writebook).id ] }, as: :turbo_stream
     end
     assert_response :success
 
@@ -21,7 +21,7 @@ class FiltersControllerTest < ActionDispatch::IntegrationTest
     assert_predicate filter.assignment_status, :unassigned?
     assert_equal [ tags(:mobile) ], filter.tags
     assert_equal [ users(:jz) ], filter.assignees
-    assert_equal [ collections(:writebook) ], filter.collections
+    assert_equal [ boards(:writebook) ], filter.boards
   end
 
   test "destroy" do

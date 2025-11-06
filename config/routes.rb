@@ -17,8 +17,8 @@ Rails.application.routes.draw do
 
   resource :landing
 
-  resources :collections do
-    scope module: :collections do
+  resources :boards do
+    scope module: :boards do
       resource :subscriptions
       resource :involvement
       resource :publication
@@ -75,7 +75,7 @@ Rails.application.routes.draw do
       resource :publish
       resource :reading
       resource :watch
-      resource :collection
+      resource :board
       resource :column
 
       resources :assignments
@@ -88,8 +88,10 @@ Rails.application.routes.draw do
     end
   end
 
-  # Redirect old card URLs from /collections/:collection_id/cards/:id to /cards/:id
+  # Support for legacy URLs
   get "/collections/:collection_id/cards/:id", to: redirect { |params, request| "#{request.script_name}/cards/#{params[:id]}" }
+  get "/collections/:id", to: redirect { |params, request| "#{request.script_name}/boards/#{params[:id]}" }
+  get "/public/collections/:id", to: redirect { |params, request| "#{request.script_name}/public/boards/#{params[:id]}" }
 
   namespace :notifications do
     resource :settings
@@ -169,16 +171,16 @@ Rails.application.routes.draw do
     resources :users
     resources :tags
 
-    resources :collections do
-      scope module: :collections do
+    resources :boards do
+      scope module: :boards do
         resources :users
       end
     end
   end
 
   namespace :public do
-    resources :collections do
-      scope module: :collections do
+    resources :boards do
+      scope module: :boards do
         namespace :columns do
           resource :not_now, only: :show
           resource :stream, only: :show
@@ -195,12 +197,12 @@ Rails.application.routes.draw do
   namespace :admin do
   end
 
-  direct :published_collection do |collection, options|
-    route_for :public_collection, collection.publication.key
+  direct :published_board do |board, options|
+    route_for :public_board, board.publication.key
   end
 
   direct :published_card do |card, options|
-    route_for :public_collection_card, card.collection.publication.key, card
+    route_for :public_board_card, card.board.publication.key, card
   end
 
   resolve "Comment" do |comment, options|
@@ -221,7 +223,7 @@ Rails.application.routes.draw do
   end
 
   resolve "Webhook" do |webhook, options|
-    route_for :collection_webhook, webhook.collection, webhook, options
+    route_for :board_webhook, webhook.board, webhook, options
   end
 
   get "up", to: "rails/health#show", as: :rails_health_check

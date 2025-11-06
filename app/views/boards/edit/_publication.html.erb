@@ -1,0 +1,55 @@
+<%= turbo_frame_tag @board, :publication do %>
+  <header>
+    <h2 class="divider txt-large">Public link</h2>
+    <div>Turn on the Public link to share this board with anyone in the world. They won’t need to log in and they won’t be able to see anything else in Fizzy.</div>
+  </header>
+
+  <% if board.published? %>
+    <div class="border-radius pad fill-selected">
+      <div class="flex-inline center justify-between gap">
+        <span class="txt-large"><%= icon_tag "lock" %></span>
+        <label class="switch flex align-center justify-between">
+          <%= form_with url: board_publication_path(board), method: :delete, data: { controller: "form" } do |form| %>
+            <%= form.check_box :published, class: "switch__input", checked: true, data: { action: "change->form#submit" } %>
+            <span class="switch__btn round"></span>
+            <span class="for-screen-reader">Turn off the public link</span>
+          <% end %>
+        </label>
+        <span class="txt-large"><%= icon_tag "world" %></span>
+      </div>
+
+      <div class="flex align-center gap-half margin-block">
+        <%= text_field_tag :publication_url, published_board_url(board), readonly: true, class: "full-width input fill-white" %>
+        <div class="flex align-center justify-center gap-half">
+          <%= button_to_copy_to_clipboard(published_board_url(board)) do %>
+            <%= icon_tag "copy-paste" %>
+            <span class="for-screen-reader">Copy public link</span>
+          <% end %>
+        </div>
+      </div>
+      <strong class="margin-block-end-half flex justify-center txt-small">Add an optional description to the public page</strong>
+      <div class="border-radius input fill-white">
+        <%= form_with model: board, class: "txt-align-start", data: { controller: "form", turbo_frame: "_top" } do |form| %>
+          <%= form.rich_textarea :public_description, class: "rich-text-content txt-small",
+            placeholder: "Add a public note about this board…",
+            data: { action: "keydown.ctrl+enter->form#submit:prevent keydown.meta+enter->form#submit:prevent keydown.esc->form#cancel:stop" } %>
+          <%= form.button "Save changes", type: :submit, class: "btn txt-small" %>
+        <% end %>
+      </div>
+    </div>
+  <% else %>
+    <div class="border-radius pad fill-shade">
+      <div class="flex-inline center justify-between gap">
+        <span class="txt-large"><%= icon_tag "lock" %></span>
+        <label class="switch flex align-center justify-between">
+          <%= form_with url: board_publication_path(board), method: :post, data: { controller: "form" } do |form| %>
+            <%= form.check_box :published, class: "switch__input", checked: false, data: { action: "change->form#submit" } %>
+            <span class="switch__btn round"></span>
+            <span class="for-screen-reader">Turn on the public link</span>
+          <% end %>
+        </label>
+        <span class="txt-large"><%= icon_tag "world" %></span>
+      </div>
+    </div>
+  <% end %>
+<% end %>

@@ -42,8 +42,8 @@
   .icon--clipboard { --svg: url("clipboard.svg "); }
   .icon--close { --svg: url("close.svg "); }
   .icon--close-circle { --svg: url("close-circle.svg "); }
-  .icon--collection { --svg: url("collection.svg "); }
-  .icon--collection-add { --svg: url("collection-add.svg "); }
+  .icon--board { --svg: url("board.svg "); }
+  .icon--board-add { --svg: url("board-add.svg "); }
   .icon--column-left { --svg: url("column-left.svg "); }
   .icon--column-right { --svg: url("column-right.svg "); }
   .icon--comment { --svg: url("comment.svg "); }

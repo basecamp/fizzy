@@ -4,7 +4,7 @@ class SmokeTest < ApplicationSystemTestCase
   test "create a card" do
     sign_in_as(users(:david))
 
-    visit collection_url(collections(:writebook))
+    visit board_url(boards(:writebook))
     click_on "Add a card"
     fill_in "card_title", with: "Hello, world!"
     fill_in_lexxy with: "I am editing this thing"

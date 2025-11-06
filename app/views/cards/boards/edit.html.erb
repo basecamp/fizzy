@@ -1,0 +1,26 @@
+<%= turbo_frame_tag "board_picker" do %>
+  <%= tag.div class: "max-width full-width", data: {
+        action: "turbo:before-cache@document->dialog#close dialog:show@document->navigable-list#reset keydown->navigable-list#navigate filter:changed->navigable-list#reset",
+        controller: "filter navigable-list",
+        dialog_target: "dialog",
+        navigable_list_focus_on_selection_value: false,
+        navigable_list_actionable_items_value: true } do %>
+    <strong class="popup__title pad-inline-half">Move this card to…</strong>
+
+    <%= text_field_tag :search, nil, placeholder: "Filter…", class: "input input--transparent txt-small margin-block-half font-weight-normal", autofocus: true,
+          type: "search", autocorrect: "off", autocomplete: "off", data: { "1p-ignore": "true", filter_target: "input", action: "input->filter#filter" } %>
+
+    <ul class="popup__list margin-block-start-half margin-none-block-end" data-filter-target="list">
+      <% @boards.each do |board| %>
+        <li class="popup__item" data-filter-target="item" data-navigable-list-target="item" aria-checked="<%= @card.board == board %>">
+          <%= button_to card_board_path(@card, params: { board_id: board.id }), method: :patch,
+                class: "popup__btn btn",
+                form_class: "max-width flex-item-grow" do %>
+            <span class="overflow-ellipsis flex-item-grow"><%= board.name %></span>
+            <%= icon_tag "check", size: 18, class: "checked flex-item-no-shrink flex-item-justify-end", style: "--icon-size: 1em" %>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+<% end %>

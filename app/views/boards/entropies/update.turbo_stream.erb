@@ -1,0 +1,2 @@
+<%= turbo_stream.replace([ @board, :entropy ], partial: "boards/edit/auto_close", locals:{ board: @board }) %>
+<%= turbo_stream_flash(notice: "Saved") %>

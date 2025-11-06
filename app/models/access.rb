@@ -1,5 +1,5 @@
 class Access < ApplicationRecord
-  belongs_to :collection, touch: true
+  belongs_to :board, touch: true
   belongs_to :user, touch: true
 
   enum :involvement, %i[ access_only watching ].index_by(&:itself), default: :access_only
@@ -18,6 +18,6 @@ class Access < ApplicationRecord
     end
 
     def clean_inaccessible_data_later
-      Collection::CleanInaccessibleDataJob.perform_later(user, collection)
+      Board::CleanInaccessibleDataJob.perform_later(user, board)
     end
 end

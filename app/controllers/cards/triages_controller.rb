@@ -2,7 +2,7 @@ class Cards::TriagesController < ApplicationController
   include CardScoped
 
   def create
-    column = @card.collection.columns.find(params[:column_id])
+    column = @card.board.columns.find(params[:column_id])
     @card.triage_into(column)
 
     redirect_to @card

@@ -6,16 +6,16 @@ class UserTest < ActiveSupport::TestCase
       role: "member",
       name: "Victor Cooper"
 
-    assert_equal [ collections(:writebook) ], user.collections
+    assert_equal [ boards(:writebook) ], user.boards
     assert user.settings.present?
   end
 
-  test "creation gives access to all_access collections" do
+  test "creation gives access to all_access boards" do
     user = User.create! \
       role: "member",
       name: "Victor Cooper"
 
-    assert_equal [ collections(:writebook) ], user.collections
+    assert_equal [ boards(:writebook) ], user.boards
   end
 
   test "deactivate" do

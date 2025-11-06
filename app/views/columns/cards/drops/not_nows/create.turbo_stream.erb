@@ -1,1 +1,1 @@
-<%= turbo_stream.replace("not-now", partial: "collections/show/not_now", method: :morph, locals: { collection: @card.collection }) %>
+<%= turbo_stream.replace("not-now", partial: "boards/show/not_now", method: :morph, locals:{ board: @card.board }) %>

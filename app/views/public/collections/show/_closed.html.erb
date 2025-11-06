@@ -1,9 +1,0 @@
-<section id="closed-cards" class="cards cards--on-deck is-collapsed" style="--card-color: var(--color-card-complete);"
-  data-collapsible-columns-target="column"
-  data-action="turbo:before-morph-attribute->collapsible-columns#preventToggle"
->
-
-  <%= render "collections/show/expander", title: "Done", count: collection.cards.closed.count, column_id: "closed-cards" %>
-
-  <%= column_frame_tag :closed_column, src: public_collection_columns_closed_path(collection.publication.key) %>
-</section>

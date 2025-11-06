@@ -1,5 +1,5 @@
 <div id="<%= dom_id(card, :columns) %>" class="card__stages">
-  <% card.collection.columns.each do |column| %>
+  <% card.board.columns.each do |column| %>
     <%= tag.div column.name,
           class: ["card__column-name overflow-ellipsis flex align-center gap-half btn non-clickable no-hover", { "card__column-name--current": column == card.column }] %>
   <% end %>

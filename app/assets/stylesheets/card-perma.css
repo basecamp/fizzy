@@ -85,7 +85,7 @@
       }
     }
 
-    .collection-picker__button {
+    .board-picker__button {
       --btn-border-size: 0;
 
       font-size: 0.5em;

@@ -1,0 +1,2 @@
+<%= turbo_stream.replace([ @board, :publication ], partial: "boards/edit/publication", locals:{ board: @board }) %>
+<%= turbo_stream_flash(notice: "Saved") %>

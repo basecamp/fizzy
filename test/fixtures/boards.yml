@@ -1,0 +1,9 @@
+writebook:
+  name: Writebook
+  creator: david
+  all_access: true
+
+private:
+  name: Private board
+  creator: kevin
+  all_access: false

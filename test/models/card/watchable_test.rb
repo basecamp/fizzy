@@ -17,14 +17,14 @@ class Card::WatchableTest < ActiveSupport::TestCase
   end
 
   test "cards are initially watched by their creator" do
-    card = collections(:writebook).cards.create!(creator: users(:kevin))
+    card = boards(:writebook).cards.create!(creator: users(:kevin))
 
     assert card.watched_by?(users(:kevin))
   end
 
   test "watchers" do
-    collections(:writebook).access_for(users(:kevin)).watching!
-    collections(:writebook).access_for(users(:jz)).watching!
+    boards(:writebook).access_for(users(:kevin)).watching!
+    boards(:writebook).access_for(users(:jz)).watching!
 
     cards(:logo).watch_by users(:kevin)
     cards(:logo).unwatch_by users(:jz)

@@ -2,11 +2,11 @@ class Cards::AssignmentsController < ApplicationController
   include CardScoped
 
   def new
-    @users = @collection.users.active.alphabetically
+    @users = @board.users.active.alphabetically
     fresh_when @users
   end
 
   def create
-    @card.toggle_assignment @collection.users.active.find(params[:assignee_id])
+    @card.toggle_assignment @board.users.active.find(params[:assignee_id])
   end
 end

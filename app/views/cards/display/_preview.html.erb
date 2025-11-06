@@ -3,7 +3,7 @@
 <%= card_article_tag card, class: "card", draggable: draggable, data: { id: card.id, drag_and_drop_target: "item" } do %>
   <div class="flex flex-column flex-item-grow max-inline-size">
     <header class="card__header">
-      <%= render "cards/display/preview/collection", card: card %>
+      <%= render "cards/display/preview/board", card: card %>
       <%= render "cards/display/preview/tags", card: card %>
       <%= render "cards/display/preview/steps", card: card %>
       <%= icon_tag "attachment", class: "card__attachments-indicator translucent" if card.has_attachments? %>

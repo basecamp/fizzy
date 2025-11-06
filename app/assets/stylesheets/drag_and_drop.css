@@ -7,8 +7,11 @@
   }
 
   .drag-and-drop__hover-container {
-    background-color: var(--color-selected-light);
-    outline: 2px dashed var(--color-selected-dark);
+    --dnd-bg-color: var(--color-selected-light);
+    --dnd-border-color: var(--color-selected-dark);
+
+    background-color: var(--dnd-bg-color);
+    outline: 2px dashed var(--dnd-border-color);
     outline-offset: -2px;
     transition: background-color 200ms;
     z-index: 1;

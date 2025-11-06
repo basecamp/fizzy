@@ -1,9 +1,9 @@
 class Card < ApplicationRecord
-  include Assignable, Attachments, Broadcastable, Closeable, Colored, Entropic,
-    Eventable, Golden, Mentions, Multistep, Pinnable, Postponable, Promptable,
+  include Assignable, Attachments, Closeable, Colored, Entropic, Eventable,
+    Golden, Mentions, Multistep, Pinnable, Postponable, Promptable,
     Readable, Searchable, Stallable, Statuses, Taggable, Triageable, Watchable
 
-  belongs_to :collection, touch: true
+  belongs_to :board, touch: true
   belongs_to :creator, class_name: "User", default: -> { Current.user }
 
   has_many :comments, dependent: :destroy
@@ -12,7 +12,7 @@ class Card < ApplicationRecord
   has_rich_text :description
 
   before_save :set_default_title, if: :published?
-  after_update :handle_collection_change, if: :saved_change_to_collection_id?
+  after_update :handle_board_change, if: :saved_change_to_board_id?
 
   scope :reverse_chronologically, -> { order created_at:     :desc, id: :desc }
   scope :chronologically,         -> { order created_at:     :asc,  id: :asc  }
@@ -39,16 +39,16 @@ class Card < ApplicationRecord
     end
   end
 
-  delegate :accessible_to?, to: :collection
+  delegate :accessible_to?, to: :board
 
   def card
     self
   end
 
-  def move_to(new_collection)
+  def move_to(new_board)
     transaction do
-      card.update!(collection: new_collection)
-      card.events.update_all(collection_id: new_collection.id)
+      card.update!(board: new_board)
+      card.events.update_all(board_id: new_board.id)
     end
   end
 
@@ -61,23 +61,23 @@ class Card < ApplicationRecord
       self.title = "Untitled" if title.blank?
     end
 
-    def handle_collection_change
-      old_collection = Collection.find_by(id: collection_id_before_last_save)
+    def handle_board_change
+      old_board = Board.find_by(id: board_id_before_last_save)
 
       transaction do
         update! column: nil
-        track_collection_change_event(old_collection.name)
-        grant_access_to_assignees unless collection.all_access?
+        track_board_change_event(old_board.name)
+        grant_access_to_assignees unless board.all_access?
       end
 
       remove_inaccessible_notifications_later
     end
 
-    def track_collection_change_event(old_collection_name)
-      track_event "collection_changed", particulars: { old_collection: old_collection_name, new_collection: collection.name }
+    def track_board_change_event(old_board_name)
+      track_event "board_changed", particulars: { old_board: old_board_name, new_board: board.name }
     end
 
     def grant_access_to_assignees
-      collection.accesses.grant_to(assignees)
+      board.accesses.grant_to(assignees)
     end
 end

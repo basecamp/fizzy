@@ -61,7 +61,7 @@ class CardTest < ActiveSupport::TestCase
   end
 
   test "searchable by title" do
-    card = collections(:writebook).cards.create! title: "Insufficient haggis", creator: users(:kevin)
+    card = boards(:writebook).cards.create! title: "Insufficient haggis", creator: users(:kevin)
 
     assert_includes Card.search("haggis"), card
   end
@@ -86,10 +86,10 @@ class CardTest < ActiveSupport::TestCase
     assert_equal cards(:layout, :logo), Card.assigned_by(users(:david))
   end
 
-  test "in collection" do
-    new_collection = Collection.create! name: "New Collection", creator: users(:david)
-    assert_equal cards(:logo, :shipping, :layout, :text, :buy_domain), Card.where(collection: collections(:writebook))
-    assert_empty Card.where(collection: new_collection)
+  test "in board" do
+    new_board = Board.create! name: "New Board", creator: users(:david)
+    assert_equal cards(:logo, :shipping, :layout, :text, :buy_domain), Card.where(board: boards(:writebook))
+    assert_empty Card.where(board: new_board)
   end
 
   test "tagged with" do
@@ -97,7 +97,7 @@ class CardTest < ActiveSupport::TestCase
   end
 
   test "mentioning" do
-    card = collections(:writebook).cards.create! title: "Insufficient haggis", creator: users(:kevin)
+    card = boards(:writebook).cards.create! title: "Insufficient haggis", creator: users(:kevin)
     cards(:logo).comments.create!(body: "I hate haggis")
     cards(:text).comments.create!(body: "I love haggis")
 
@@ -111,54 +111,54 @@ class CardTest < ActiveSupport::TestCase
   end
 
   test "for published cards, it should set the default title 'Untitiled' when not provided" do
-    card = collections(:writebook).cards.create!
+    card = boards(:writebook).cards.create!
     assert_nil card.title
 
     card.publish
     assert_equal "Untitled", card.reload.title
   end
 
-  test "send back to triage when moved to a new collection" do
+  test "send back to triage when moved to a new board" do
     cards(:logo).update! column: columns(:writebook_in_progress)
 
     assert_changes -> { cards(:logo).reload.triaged? }, from: true, to: false do
-      cards(:logo).update! collection: collections(:private)
+      cards(:logo).update! board: boards(:private)
     end
   end
 
-  test "grants access to assignees when moved to a new collection" do
+  test "grants access to assignees when moved to a new board" do
     card = cards(:logo)
     assignee = users(:david)
     card.toggle_assignment(assignee)
 
-    collection = collections(:private)
-    assert_not_includes collection.users, assignee
+    board = boards(:private)
+    assert_not_includes board.users, assignee
 
-    card.update!(collection: collection)
-    assert_includes collection.users.reload, assignee
+    card.update!(board: board)
+    assert_includes board.users.reload, assignee
   end
 
-  test "move cards to a different collection" do
+  test "move cards to a different board" do
     card = cards(:logo)
-    old_collection = collections(:writebook)
-    new_collection = collections(:private)
+    old_board = boards(:writebook)
+    new_board = boards(:private)
 
-    assert_equal old_collection, card.collection
+    assert_equal old_board, card.board
 
-    assert card.events.where(collection: old_collection).exists?
+    assert card.events.where(board: old_board).exists?
 
-    card.move_to(new_collection)
+    card.move_to(new_board)
 
-    assert_equal new_collection, card.reload.collection
+    assert_equal new_board, card.reload.board
 
-    events_in_old_collection = card.events.where(collection: old_collection)
-    events_in_new_collection = card.events.where(collection: new_collection)
+    events_in_old_board = card.events.where(board: old_board)
+    events_in_new_board = card.events.where(board: new_board)
 
-    assert_empty events_in_old_collection
-    assert events_in_new_collection.exists?
+    assert_empty events_in_old_board
+    assert events_in_new_board.exists?
 
-    collection_changed_event = events_in_new_collection.find { |event| event.action == "card_collection_changed" }
-    assert collection_changed_event
+    board_changed_event = events_in_new_board.find { |event| event.action == "card_board_changed" }
+    assert board_changed_event
   end
 
   test "a card is filled if it has either the title or the description set" do

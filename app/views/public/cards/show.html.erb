@@ -1,22 +1,22 @@
 <% @page_title = @card.title %>
 
 <% content_for :head do %>
-  <%= tag.meta property: "og:title", content: "#{@card.title} | #{@card.collection.name}" %>
+  <%= tag.meta property: "og:title", content: "#{@card.title} | #{@card.board.name}" %>
   <%= tag.meta property: "og:description", content: format_excerpt(@card&.description, length: 200) %>
   <%= tag.meta property: "og:image", content: @card.image.attached? ? "#{request.base_url}#{url_for(@card.image)}" : "#{request.base_url}/app-icon.png" %>
   <%= tag.meta property: "og:url", content: published_card_url(@card) %>
 
-  <%= tag.meta property: "twitter:title", content: "#{@card.title} | #{@card.collection.name}" %>
+  <%= tag.meta property: "twitter:title", content: "#{@card.title} | #{@card.board.name}" %>
   <%= tag.meta property: "twitter:description", content: format_excerpt(@card&.description, length: 200) %>
   <%= tag.meta property: "twitter:image", content: @card.image.attached? ? "#{request.base_url}#{url_for(@card.image)}" : "#{request.base_url}/app-icon.png" %>
   <%= tag.meta property: "twitter:card", content: "summary_large_image" %>
 <% end %>
 
 <% content_for :header do %>
-  <%= link_to published_collection_url(@card.collection), class: "header__title btn borderless txt-large", style: "--btn-padding: 0.25ch 1ch 0.25ch 0.75ch; view-transistion-name: card-collection-title;", data: { controller: "hotkey", action: "keydown.esc@document->hotkey#click" } do %>
+  <%= link_to published_board_url(@card.board), class: "header__title btn borderless txt-large", style: "--btn-padding: 0.25ch 1ch 0.25ch 0.75ch; view-transistion-name: card-board-title;", data: { controller: "hotkey", action: "keydown.esc@document->hotkey#click" } do %>
     <span class="overflow-ellipsis">
       &larr;
-      <strong class="font-black"><%= @card.collection.name %></strong>
+      <strong class="font-black"><%= @card.board.name %></strong>
     </span>
   <% end %>
 <% end %>
@@ -26,7 +26,7 @@
   <div class="card-perma__bg">
     <%= card_article_tag @card, class: "card" do %>
       <header class="card__header">
-        <%= render "cards/display/preview/collection", card: @card %>
+        <%= render "cards/display/preview/board", card: @card %>
         <%= render "cards/display/preview/tags", card: @card %>
       </header>
 

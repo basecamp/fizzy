@@ -3,6 +3,6 @@ class Columns::Cards::Drops::StreamsController < ApplicationController
 
   def create
     @card.send_back_to_triage
-    set_page_and_extract_portion_from @collection.cards.awaiting_triage.latest.with_golden_first
+    set_page_and_extract_portion_from @board.cards.awaiting_triage.latest.with_golden_first
   end
 end

@@ -2,7 +2,7 @@ module WebhooksHelper
   ACTION_LABELS = {
     card_published: "Card added",
     card_title_changed: "Card title changed",
-    card_collection_changed: "Card collection changed",
+    card_board_changed: "Card board changed",
     comment_created: "Comment added",
     card_assigned: "Card assigned",
     card_unassigned: "Card unassigned",
@@ -22,9 +22,9 @@ module WebhooksHelper
     ACTION_LABELS[action] || action.to_s.humanize
   end
 
-  def link_to_webhooks(collection, &)
-    link_to collection_webhooks_path(collection_id: collection),
-        class: [ "btn", { "btn--reversed": collection.webhooks.any? } ],
+  def link_to_webhooks(board, &)
+    link_to board_webhooks_path(board_id: board),
+        class: [ "btn", { "btn--reversed": board.webhooks.any? } ],
         data: { controller: "tooltip" } do
       icon_tag("world") + tag.span("Webhooks", class: "for-screen-reader")
     end

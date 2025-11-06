@@ -2,10 +2,10 @@
   container: 37s (Account)
   auto_postpone_period: <%= 30.days.to_i %>
 
-writebook_collection:
-  container: writebook (Collection)
+writebook_board:
+  container: writebook (Board)
   auto_postpone_period: <%= 90.days.to_i %>
 
-private_collection:
-  container: private (Collection)
+private_board:
+  container: private (Board)
   auto_postpone_period: <%= 30.days.to_i %>

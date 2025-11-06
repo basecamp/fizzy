@@ -51,12 +51,12 @@ def login_as(user)
   Current.session = user.identity.sessions.create
 end
 
-def create_collection(name, creator: Current.user, all_access: true, access_to: [])
-  Collection.create!(name:, creator:, all_access:).tap { it.accesses.grant_to(access_to) }
+def create_board(name, creator: Current.user, all_access: true, access_to: [])
+  Board.create!(name:, creator:, all_access:).tap { it.accesses.grant_to(access_to) }
 end
 
-def create_card(title, collection:, description: nil, status: :published, creator: Current.user)
-  collection.cards.create!(title:, description:, creator:, status:)
+def create_card(title, board:, description: nil, status: :published, creator: Current.user)
+  board.cards.create!(title:, description:, creator:, status:)
 end
 
 # Seed accounts

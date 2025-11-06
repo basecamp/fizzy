@@ -3,7 +3,7 @@
 require_relative "../config/environment"
 
 def replace_url(string)
-  string.gsub(%r{/collections/\d+/cards/(\d+)}) do
+  string.gsub(%r{/boards/\d+/cards/(\d+)}) do
     "/cards/#{$1}"
   end
 end

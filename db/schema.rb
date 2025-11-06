@@ -10,17 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2025_11_03_125353) do
+ActiveRecord::Schema[8.2].define(version: 2025_11_05_122933) do
   create_table "accesses", force: :cascade do |t|
     t.datetime "accessed_at"
-    t.integer "collection_id", null: false
+    t.integer "board_id", null: false
     t.datetime "created_at", null: false
     t.string "involvement", default: "access_only", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
     t.index ["accessed_at"], name: "index_accesses_on_accessed_at", order: :desc
-    t.index ["collection_id", "user_id"], name: "index_accesses_on_collection_id_and_user_id", unique: true
-    t.index ["collection_id"], name: "index_accesses_on_collection_id"
+    t.index ["board_id", "user_id"], name: "index_accesses_on_board_id_and_user_id", unique: true
+    t.index ["board_id"], name: "index_accesses_on_board_id"
     t.index ["user_id"], name: "index_accesses_on_user_id"
   end
 
@@ -105,6 +105,31 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_03_125353) do
     t.index ["card_id"], name: "index_assignments_on_card_id"
   end
 
+  create_table "board_publications", force: :cascade do |t|
+    t.integer "board_id", null: false
+    t.datetime "created_at", null: false
+    t.string "key"
+    t.datetime "updated_at", null: false
+    t.index ["board_id"], name: "index_board_publications_on_board_id"
+    t.index ["key"], name: "index_board_publications_on_key", unique: true
+  end
+
+  create_table "boards", force: :cascade do |t|
+    t.boolean "all_access", default: false, null: false
+    t.datetime "created_at", null: false
+    t.integer "creator_id", null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["creator_id"], name: "index_boards_on_creator_id"
+  end
+
+  create_table "boards_filters", id: false, force: :cascade do |t|
+    t.integer "board_id", null: false
+    t.integer "filter_id", null: false
+    t.index ["board_id"], name: "index_boards_filters_on_board_id"
+    t.index ["filter_id"], name: "index_boards_filters_on_filter_id"
+  end
+
   create_table "card_activity_spikes", force: :cascade do |t|
     t.integer "card_id", null: false
     t.datetime "created_at", null: false
@@ -138,7 +163,7 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_03_125353) do
   end
 
   create_table "cards", force: :cascade do |t|
-    t.integer "collection_id", null: false
+    t.integer "board_id", null: false
     t.integer "column_id"
     t.datetime "created_at", null: false
     t.integer "creator_id", null: false
@@ -147,7 +172,7 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_03_125353) do
     t.text "status", default: "drafted", null: false
     t.string "title"
     t.datetime "updated_at", null: false
-    t.index ["collection_id"], name: "index_cards_on_collection_id"
+    t.index ["board_id"], name: "index_cards_on_board_id"
     t.index ["column_id"], name: "index_cards_on_column_id"
     t.index ["last_active_at", "status"], name: "index_cards_on_last_active_at_and_status"
   end
@@ -169,40 +194,15 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_03_125353) do
     t.index ["user_id"], name: "index_closures_on_user_id"
   end
 
-  create_table "collection_publications", force: :cascade do |t|
-    t.integer "collection_id", null: false
-    t.datetime "created_at", null: false
-    t.string "key"
-    t.datetime "updated_at", null: false
-    t.index ["collection_id"], name: "index_collection_publications_on_collection_id"
-    t.index ["key"], name: "index_collection_publications_on_key", unique: true
-  end
-
-  create_table "collections", force: :cascade do |t|
-    t.boolean "all_access", default: false, null: false
-    t.datetime "created_at", null: false
-    t.integer "creator_id", null: false
-    t.string "name", null: false
-    t.datetime "updated_at", null: false
-    t.index ["creator_id"], name: "index_collections_on_creator_id"
-  end
-
-  create_table "collections_filters", id: false, force: :cascade do |t|
-    t.integer "collection_id", null: false
-    t.integer "filter_id", null: false
-    t.index ["collection_id"], name: "index_collections_filters_on_collection_id"
-    t.index ["filter_id"], name: "index_collections_filters_on_filter_id"
-  end
-
   create_table "columns", force: :cascade do |t|
-    t.integer "collection_id", null: false
+    t.integer "board_id", null: false
     t.string "color", null: false
     t.datetime "created_at", null: false
     t.string "name", null: false
     t.integer "position", default: 0, null: false
     t.datetime "updated_at", null: false
-    t.index ["collection_id", "position"], name: "index_columns_on_collection_id_and_position"
-    t.index ["collection_id"], name: "index_columns_on_collection_id"
+    t.index ["board_id", "position"], name: "index_columns_on_board_id_and_position"
+    t.index ["board_id"], name: "index_columns_on_board_id"
   end
 
   create_table "comments", force: :cascade do |t|
@@ -232,7 +232,7 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_03_125353) do
 
   create_table "events", force: :cascade do |t|
     t.string "action", null: false
-    t.integer "collection_id", null: false
+    t.integer "board_id", null: false
     t.datetime "created_at", null: false
     t.integer "creator_id", null: false
     t.integer "eventable_id", null: false
@@ -240,8 +240,8 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_03_125353) do
     t.json "particulars", default: {}
     t.datetime "updated_at", null: false
     t.index ["action"], name: "index_events_on_summary_id_and_action"
-    t.index ["collection_id", "action", "created_at"], name: "index_events_on_collection_id_and_action_and_created_at"
-    t.index ["collection_id"], name: "index_events_on_collection_id"
+    t.index ["board_id", "action", "created_at"], name: "index_events_on_board_id_and_action_and_created_at"
+    t.index ["board_id"], name: "index_events_on_board_id"
     t.index ["creator_id"], name: "index_events_on_creator_id"
     t.index ["eventable_type", "eventable_id"], name: "index_events_on_eventable"
   end
@@ -430,19 +430,20 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_03_125353) do
 
   create_table "webhooks", force: :cascade do |t|
     t.boolean "active", default: true, null: false
-    t.integer "collection_id", null: false
+    t.integer "board_id", null: false
     t.datetime "created_at", null: false
     t.string "name"
     t.string "signing_secret", null: false
     t.text "subscribed_actions"
     t.datetime "updated_at", null: false
     t.text "url", null: false
-    t.index ["collection_id"], name: "index_webhooks_on_collection_id"
+    t.index ["board_id"], name: "index_webhooks_on_board_id"
     t.index ["subscribed_actions"], name: "index_webhooks_on_subscribed_actions"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "board_publications", "boards"
   add_foreign_key "card_activity_spikes", "cards"
   add_foreign_key "card_goldnesses", "cards"
   add_foreign_key "card_not_nows", "cards"
@@ -450,10 +451,9 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_03_125353) do
   add_foreign_key "cards", "columns"
   add_foreign_key "closures", "cards"
   add_foreign_key "closures", "users"
-  add_foreign_key "collection_publications", "collections"
-  add_foreign_key "columns", "collections"
+  add_foreign_key "columns", "boards"
   add_foreign_key "comments", "cards"
-  add_foreign_key "events", "collections"
+  add_foreign_key "events", "boards"
   add_foreign_key "mentions", "users", column: "mentionee_id"
   add_foreign_key "mentions", "users", column: "mentioner_id"
   add_foreign_key "notification_bundles", "users"
@@ -472,7 +472,7 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_03_125353) do
   add_foreign_key "webhook_delinquency_trackers", "webhooks"
   add_foreign_key "webhook_deliveries", "events"
   add_foreign_key "webhook_deliveries", "webhooks"
-  add_foreign_key "webhooks", "collections"
+  add_foreign_key "webhooks", "boards"
 
   # Virtual tables defined in this database.
   # Note that virtual tables may not work with other database engines. Be careful if changing database.

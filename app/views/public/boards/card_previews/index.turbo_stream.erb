@@ -1,0 +1,10 @@
+<%= turbo_stream.remove "#{params[:target]}-load-page-#{@page.number}" %>
+
+<%= turbo_stream.append params[:target] do %>
+  <%= render partial: "cards/display/public_preview",
+        board: @page.records, as: :card, locals: { draggable: true }, cached: true %>
+
+  <% unless @page.last? %>
+    <%= public_board_cards_next_page_link @board, params[:target], page: @page, fetch_on_visible: params[:target] == "closed-cards" %>
+  <% end %>
+<% end %>

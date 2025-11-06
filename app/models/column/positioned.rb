@@ -16,11 +16,11 @@ module Column::Positioned
   end
 
   def left_column
-    collection.columns.where("position < ?", position).sorted.last
+    board.columns.where("position < ?", position).sorted.last
   end
 
   def right_column
-    collection.columns.where("position > ?", position).sorted.first
+    board.columns.where("position > ?", position).sorted.first
   end
 
   def leftmost?
@@ -33,7 +33,7 @@ module Column::Positioned
 
   private
     def set_position
-      max_position = collection.columns.maximum(:position) || 0
+      max_position = board.columns.maximum(:position) || 0
       self.position = max_position + 1
     end
 

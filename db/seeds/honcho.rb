@@ -24,7 +24,7 @@ card_titles = [
   "Set up CI/CD"
 ]
 
-collections = [
+boards = [
   "Project Launch",
   "Frontend Dev",
   "Backend Dev",
@@ -34,13 +34,13 @@ collections = [
 
 time_range = (60 .. 30.days.in_minutes)
 
-collections.each_with_index do |collection_name, index|
-  create_collection(collection_name, access_to: authors.sample(3)).tap do |collection|
+boards.each_with_index do |board_name, index|
+  create_board(board_name, access_to: authors.sample(3)).tap do |board|
     card_titles.each do |title|
       travel(-rand(time_range).minutes) do
         card = create_card title,
-                           description: "#{title} for #{collection_name} phase #{index + 1}.",
-                           collection: collection,
+                           description: "#{title} for #{board_name} phase #{index + 1}.",
+                           board: board,
                            creator: authors.sample
 
         # Randomly assign to 1-2 authors
@@ -56,7 +56,7 @@ collections.each_with_index do |collection_name, index|
         travel rand(0..20).minutes
         case rand(3)
         when 0
-          if column = card.collection&.columns&.sample
+          if column = card.board&.columns&.sample
             card.triage_into(column)
           end
         when 1

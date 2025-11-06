@@ -8,13 +8,13 @@
         related_element_group_value: card.id,
         action: "mouseover->related-element#highlight mouseout->related-element#unhighlight" } do %>
   <div class="card__header flex align-start gap full-width">
-    <h4 class="card__collection flex-inline align-start">
+    <h4 class="card__board flex-inline align-start">
       <span class="card__id">
         <span class="for-screen-reader">Card number</span>
         <%= card.id %>
       </span>
-      <span class="card__collection-name">
-        <span class="overflow-ellipsis"><%= event.collection.name %></span>
+      <span class="card__board-name">
+        <span class="overflow-ellipsis"><%= event.board.name %></span>
       </span>
     </h4>
 
@@ -32,7 +32,7 @@
 
       <div class="flex flex-column min-width txt-small align-start txt-align-start" style="color: color-mix(in srgb, var(--card-color) 40%, var(--color-ink));">
         <strong class="event__title txt-break overflow-line-clamp txt-tight-lines">
-          <%= event_action_sentence(event) %>
+          <%= event.description_for(Current.user).to_html %>
         </strong>
 
         <%= yield %>

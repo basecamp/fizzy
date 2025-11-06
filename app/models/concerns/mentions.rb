@@ -41,7 +41,7 @@ module Mentions
     end
 
     def mentionable_users
-      collection.users
+      board.users
     end
 
     def rich_text_associations

@@ -1,15 +1,15 @@
 writebook_david:
-  collection: writebook
+  board: writebook
   user: david
 
 writebook_jz:
-  collection: writebook
+  board: writebook
   user: jz
 
 writebook_kevin:
-  collection: writebook
+  board: writebook
   user: kevin
 
 private_kevin:
-  collection: private
+  board: private
   user: kevin

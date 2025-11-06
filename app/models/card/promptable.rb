@@ -21,8 +21,8 @@ module Card::Promptable
       * Assigned to: #{assignees.map(&:name).join(", ")}
       * Column: #{column_prompt_label}
       * Created at: #{created_at}}
-      * Collection id: #{collection_id}
-      * Collection name: #{collection.name}
+      * Board id: #{board_id}
+      * Board name: #{board.name}
       * Number of comments: #{comments.count}
       * Path: #{card_path(self, script_name: Account.sole.slug)}
 

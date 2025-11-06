@@ -1,7 +1,7 @@
 class Event < ApplicationRecord
   include Notifiable, Particulars, Promptable
 
-  belongs_to :collection
+  belongs_to :board
   belongs_to :creator, class_name: "User"
   belongs_to :eventable, polymorphic: true
 
@@ -20,6 +20,10 @@ class Event < ApplicationRecord
 
   def notifiable_target
     eventable
+  end
+
+  def description_for(user)
+    Event::Description.new(self, user)
   end
 
   private

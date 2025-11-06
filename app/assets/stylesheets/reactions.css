@@ -29,6 +29,7 @@
       }
 
       .reactions__trigger {
+        --btn-border-color: var(--color-ink-lightest);
         background-color: var(--color-ink-lightest);
 
         &:not(:hover) {
@@ -38,10 +39,23 @@
     }
   }
 
+  .reactions__trigger {
+    --btn-border-color: var(--reaction-border-color);
+
+    img {
+      block-size: 65%;
+      inline-size: 65%;
+    }
+  }
+
   .reactions__list {
     display: inline-flex;
     flex-wrap: wrap;
     gap: var(--inline-space-half);
+
+    &:not(:has(.reaction)) {
+      display: none;
+    }
   }
 
   /* Single reaction

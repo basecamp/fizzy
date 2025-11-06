@@ -5,8 +5,8 @@ class Account::SedeableTest < ActiveSupport::TestCase
     @account = Account.sole
   end
 
-  test "setup_customer_template adds collections, cards, and comments" do
-    assert_changes -> { Collection.count } do
+  test "setup_customer_template adds boards, cards, and comments" do
+    assert_changes -> { Board.count } do
       assert_changes -> { Card.count } do
         @account.setup_customer_template
       end

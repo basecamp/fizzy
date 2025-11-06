@@ -28,7 +28,7 @@ class Card::StallableTest < ActiveSupport::TestCase
 
   test "a card with an old activity spike is not stalled after being postponed" do
     card = cards(:logo)
-    card.update!(last_active_at: 1.day.ago - card.collection.entropy.auto_postpone_period)
+    card.update!(last_active_at: 1.day.ago - card.board.entropy.auto_postpone_period)
     card.create_activity_spike!(updated_at: 3.months.ago)
 
     assert card.stalled?
@@ -57,7 +57,7 @@ class Card::StallableTest < ActiveSupport::TestCase
 
   test "don't detect activity spikes when creating new cards" do
     assert_no_enqueued_jobs only: Card::ActivitySpike::DetectionJob do
-      collections(:writebook).cards.create! title: "A new card", creator: users(:kevin)
+      boards(:writebook).cards.create! title: "A new card", creator: users(:kevin)
     end
   end
 end

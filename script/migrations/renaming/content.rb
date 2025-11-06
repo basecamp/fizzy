@@ -8,7 +8,7 @@ RENAME_RULES = {
   "closed" => "closed",
   "poppable" => "closeable",
   "pop" => "closure",
-  "bucket" => "collection"
+  "bucket" => "board"
 }
 
 EXTENSIONS = %w[.rb .yml .html .js .css .erb]

@@ -26,15 +26,15 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "only displays events from filtered collections" do
-    get events_path(collection_ids: [ collections(:writebook).id ])
+  test "only displays events from filtered boards" do
+    get events_path(board_ids: [ boards(:writebook).id ])
     assert_response :success
 
     events_shown = css_select(".event").count
     assert events_shown > 0, "Should show some events"
 
     css_select(".event").each do |event|
-      assert_includes event.text, collections(:writebook).name
+      assert_includes event.text, boards(:writebook).name
     end
   end
 end

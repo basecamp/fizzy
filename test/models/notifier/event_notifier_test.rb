@@ -27,7 +27,7 @@ class Notifier::EventNotifierTest < ActiveSupport::TestCase
   end
 
   test "does not create a notification for access-only users" do
-    collections(:writebook).access_for(users(:kevin)).access_only!
+    boards(:writebook).access_for(users(:kevin)).access_only!
 
     notifications = Notifier.for(events(:layout_commented)).notify
 
@@ -35,7 +35,7 @@ class Notifier::EventNotifierTest < ActiveSupport::TestCase
   end
 
   test "links to the card" do
-    collections(:writebook).access_for(users(:kevin)).watching!
+    boards(:writebook).access_for(users(:kevin)).watching!
 
     Notifier.for(events(:logo_published)).notify
 
@@ -43,16 +43,16 @@ class Notifier::EventNotifierTest < ActiveSupport::TestCase
   end
 
   test "assignment events only create a notification for the assignee" do
-    collections(:writebook).access_for(users(:jz)).watching!
-    collections(:writebook).access_for(users(:kevin)).watching!
+    boards(:writebook).access_for(users(:jz)).watching!
+    boards(:writebook).access_for(users(:kevin)).watching!
 
     notifications = Notifier.for(events(:logo_assignment_jz)).notify
 
     assert_equal [ users(:jz) ], notifications.map(&:user)
   end
 
-  test "assignment events do not notify users who are access-only for the collection" do
-    collections(:writebook).access_for(users(:jz)).watching!
+  test "assignment events do not notify users who are access-only for the board" do
+    boards(:writebook).access_for(users(:jz)).watching!
     events(:logo_assignment_jz).update! creator: users(:jz)
 
     notifications = Notifier.for(events(:logo_assignment_jz)).notify
@@ -61,7 +61,7 @@ class Notifier::EventNotifierTest < ActiveSupport::TestCase
   end
 
   test "assignment events do not notify you if you assigned yourself" do
-    collections(:writebook).access_for(users(:david)).watching!
+    boards(:writebook).access_for(users(:david)).watching!
 
     notifications = Notifier.for(events(:logo_assignment_david)).notify
 
@@ -85,7 +85,7 @@ class Notifier::EventNotifierTest < ActiveSupport::TestCase
   end
 
   test "assignment events notify assignees regardless of involvement level" do
-    collections(:writebook).access_for(users(:jz)).access_only!
+    boards(:writebook).access_for(users(:jz)).access_only!
 
     notifications = Notifier.for(events(:logo_assignment_jz)).notify
 

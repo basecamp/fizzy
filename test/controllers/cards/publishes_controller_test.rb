@@ -13,7 +13,7 @@ class Cards::PublishesControllerTest < ActionDispatch::IntegrationTest
       post card_publish_path(card)
     end
 
-    assert_redirected_to card.collection
+    assert_redirected_to card.board
   end
 
   test "create and add another" do

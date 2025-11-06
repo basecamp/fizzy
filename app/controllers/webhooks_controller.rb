@@ -1,22 +1,22 @@
 class WebhooksController < ApplicationController
-  include CollectionScoped
+  include BoardScoped
 
   before_action :ensure_admin
   before_action :set_webhook, except: %i[ index new create ]
 
   def index
-    set_page_and_extract_portion_from @collection.webhooks.ordered
+    set_page_and_extract_portion_from @board.webhooks.ordered
   end
 
   def show
   end
 
   def new
-    @webhook = @collection.webhooks.new
+    @webhook = @board.webhooks.new
   end
 
   def create
-    webhook = @collection.webhooks.create!(webhook_params)
+    webhook = @board.webhooks.create!(webhook_params)
     redirect_to webhook
   end
 
@@ -30,17 +30,17 @@ class WebhooksController < ApplicationController
 
   def destroy
     @webhook.destroy!
-    redirect_to collection_webhooks_path
+    redirect_to board_webhooks_path
   end
 
   private
     def set_webhook
-      @webhook = @collection.webhooks.find(params[:id])
+      @webhook = @board.webhooks.find(params[:id])
     end
 
     def webhook_params
       params
         .expect(webhook: [ :name, :url, subscribed_actions: [] ])
-        .merge(collection_id: @collection.id)
+        .merge(board_id: @board.id)
     end
 end

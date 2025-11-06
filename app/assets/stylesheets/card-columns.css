@@ -63,20 +63,9 @@
   .cards {
     --column-color: color-mix(in srgb, var(--card-color) 15%, var(--color-canvas));
 
-    border-radius: calc(var(--column-width-collapsed) / 2);
     inline-size: var(--column-width-expanded);
     position: relative;
     scroll-snap-align: start;
-    translate: 0;
-    transition: translate var(--column-transition-duration) var(--ease-out-overshoot-subtle);
-
-    .no-transitions & {
-      transition: none;
-    }
-
-    &:not(.is-collapsed) {
-      padding-inline: var(--column-padding-expanded);
-    }
 
     &.is-collapsed {
       inline-size: var(--column-width-collapsed);
@@ -85,17 +74,82 @@
       .card {
         display: none;
       }
+    }
 
-      &:not(.cards--considering) {
-        translate: 0 var(--column-width-collapsed);
+    &.drag-and-drop__hover-container {
+      --dnd-bg-color: transparent;
+      --dnd-border-color: transparent;
+
+      &.is-off-screen {
+        &:after {
+          content: attr(data-column-name);
+          font-size: var(--text-x-small);
+          font-weight: 500;
+          line-height: var(--column-width-collapsed);
+          padding-inline: 1ch;
+          position: fixed;
+          text-transform: uppercase;
+          top: 0;
+          translate: -50%;
+        }
+
+        &.is-collapsed {
+          &:after {
+            writing-mode: vertical-rl;
+          }
+        }
+
+        &:not(.is-collapsed) {
+          &:after {
+            background-color: var(--column-color);
+            inline-size: calc(var(--column-width-expanded) - 4px); /* make room for the dnd border */
+          }
+        }
       }
     }
+
 
     @media (any-hover: hover) {
       .card:has(.card__background img:not([src=""])):hover .card__background img:not([src=""]) {
         filter: blur(3px) brightness(1.2);
         opacity: 0.2;
       }
+    }
+  }
+
+  .cards__transition-container {
+    block-size: 100%;
+    border-radius: calc(var(--column-width-collapsed) / 2);
+    translate: 0;
+    transition: translate var(--column-transition-duration) var(--ease-out-overshoot-subtle);
+
+    .is-collapsed:not(.cards--considering) & {
+      translate: 0 var(--column-width-collapsed);
+    }
+
+    .cards:not(.is-collapsed) & {
+      padding-inline: var(--column-padding-expanded);
+    }
+
+    .drag-and-drop__hover-container & {
+      --dnd-bg-color: var(--column-color);
+      --dnd-border-color: var(--card-color);
+
+      background-color: var(--dnd-bg-color);
+      outline: 2px dashed var(--dnd-border-color);
+      outline-offset: -2px;
+      transition: background-color 200ms;
+      z-index: 1;
+    }
+
+    .no-transitions & {
+      transition: none;
+    }
+  }
+
+  .cards__header {
+    .cards.is-collapsed & {
+      block-size: 100%;
     }
   }
 
@@ -473,11 +527,9 @@
   /* ------------------------------------------------------------------------ */
 
   .cards--considering {
-    position: relative;
+    --card-color: oklch(var(--lch-blue-medium));
 
-    @media (min-width: 640px) {
-      padding-inline: var(--cards-gap);
-    }
+    position: relative;
 
     .card {
       --avatar-size: 2.75em;
@@ -492,7 +544,7 @@
       }
     }
 
-    .card__collection {
+    .card__board {
       background-color: transparent;
       color: var(--card-content-color);
     }
@@ -519,10 +571,10 @@
     }
   }
 
-  /* Collection tools
+  /* Board tools
   /* -------------------------------------------------------------------------- */
 
-  .collection-tools.card {
+  .board-tools.card {
     --border-color: var(--color-selected-dark);
     --border-size: 1px;
     --card-padding-block: var(--block-space);
@@ -560,7 +612,7 @@
     }
   }
 
-  .collection-tools__watching {
+  .board-tools__watching {
     --btn-size: 32px;
     --gap: 0.5ch;
 
@@ -572,7 +624,7 @@
     position: relative;
   }
 
-  .collection-tools__watching-dialog {
+  .board-tools__watching-dialog {
     --panel-padding: 2ch;
     --panel-size: 100%;
 

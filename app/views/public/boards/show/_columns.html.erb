@@ -1,0 +1,15 @@
+<%= turbo_frame_tag :cards_container do %>
+  <div class="card-columns" data-controller="collapsible-columns" data-collapsible-columns-board-value="<%= board.id %>" data-collapsible-columns-collapsed-class="is-collapsed" data-collapsible-columns-no-transitions-class="no-transitions">
+
+    <div class="card-columns__left">
+      <%= render "public/boards/show/not_now", board: board %>
+    </div>
+
+    <%= render "public/boards/show/stream", board: board, page: page %>
+
+    <div class="card-columns__right">
+      <%= render partial: "public/boards/show/column", collection: board.columns, cached: true %>
+      <%= render "public/boards/show/closed", board: board %>
+    </div>
+  </div>
+<% end %>

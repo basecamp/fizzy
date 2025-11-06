@@ -44,8 +44,8 @@ ApplicationRecord.with_tenant(tenant) do |tenant|
   user = User.find_by(role: :admin)
   identity = Identity.find_or_create_by(email_address: user.email_address)
   identity.link_to(user.tenant)
-  Collection.find_each do |collection|
-    collection.accesses.grant_to(user)
+  Board.find_each do |board|
+    board.accesses.grant_to(user)
   end
 
   url = Rails.application.routes.url_helpers.root_url(Rails.application.config.action_controller.default_url_options.merge(script_name: Account.sole.slug))

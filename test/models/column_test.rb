@@ -2,7 +2,7 @@ require "test_helper"
 
 class ColumnTest < ActiveSupport::TestCase
   test "creates column with default color when color not provided" do
-    column = collections(:writebook).columns.create!(name: "New Column")
+    column = boards(:writebook).columns.create!(name: "New Column")
 
     assert_equal Card::DEFAULT_COLOR, column.color
   end
@@ -23,10 +23,10 @@ class ColumnTest < ActiveSupport::TestCase
     end
   end
 
-  test "touch all collection cards when column is destroyed" do
+  test "touch all board cards when column is destroyed" do
     column = columns(:writebook_triage)
 
-    assert_changes -> { column.collection.cards.first.updated_at } do
+    assert_changes -> { column.board.cards.first.updated_at } do
       column.destroy
     end
   end

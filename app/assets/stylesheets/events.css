@@ -270,7 +270,7 @@
       z-index: 0;
     }
 
-    .card__collection {
+    .card__board {
       background-color: transparent;
       color: color-mix(in srgb, var(--card-color) 40%, var(--color-ink));
       font-size: 0.7em;
@@ -278,7 +278,7 @@
       translate: 0 -0.3em;
     }
 
-    .card__collection-name {
+    .card__board-name {
       border-inline-start: 1px solid color-mix(in srgb, var(--color-ink) 33%, var(--color-canvas));
       color: color-mix(in srgb, var(--card-color) 40%, var(--color-ink));
       margin: 0 0 0 calc(var(--inline-space) * 0.75);

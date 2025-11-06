@@ -1,0 +1,17 @@
+<section id="not-now" class="cards cards--on-deck is-collapsed" style="--card-color: var(--color-card-complete);"
+  data-collapsible-columns-target="column"
+  data-drag-and-drop-target="container"
+  data-drag-and-strum-target="container"
+  data-column-name="Not Now"
+  data-action="turbo:before-morph-attribute->collapsible-columns#preventToggle"
+  data-drag-and-drop-url="<%= columns_card_drops_not_now_path("__id__") %>"
+>
+  <div class="cards__transition-container">
+    <header class="cards__header">
+      <%= render "boards/show/expander", title: "Not Now", count: board.cards.postponed.count, column_id: "not-now" do %>
+        <%= render "boards/show/menu/expand", column_path: board_columns_not_now_path(board) %>
+      <% end %>
+    </header>
+    <%= column_frame_tag :not_now_column, src: board_columns_not_now_path(board) %>
+  </div>
+</section>

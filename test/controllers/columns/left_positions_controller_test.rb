@@ -6,8 +6,8 @@ class Columns::LeftPositionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "move column left" do
-    collection = collections(:writebook)
-    columns = collection.columns.sorted.to_a
+    board = boards(:writebook)
+    columns = board.columns.sorted.to_a
 
     column_a = columns[0]
     column_b = columns[1]

@@ -11,9 +11,9 @@ class Webhooks::ActivationsControllerTest < ActionDispatch::IntegrationTest
     assert_not webhook.active?
 
     assert_changes -> { webhook.reload.active? }, from: false, to: true do
-      post collection_webhook_activation_path(webhook.collection, webhook)
+      post board_webhook_activation_path(webhook.board, webhook)
     end
 
-    assert_redirected_to collection_webhook_path(webhook.collection, webhook)
+    assert_redirected_to board_webhook_path(webhook.board, webhook)
   end
 end

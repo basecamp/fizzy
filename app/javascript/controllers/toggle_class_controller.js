@@ -24,7 +24,7 @@ export default class extends Controller {
 
   checkNone() {
     this.checkboxTargets.forEach(checkbox => {
-      if (checkbox.dataset.collectionsFormTarget === "meCheckbox") return
+      if (checkbox.dataset.boardsFormTarget === "meCheckbox") return
       checkbox.checked = false
     })
   }

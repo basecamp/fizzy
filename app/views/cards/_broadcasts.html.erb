@@ -1,7 +1,7 @@
-<% if filter.collections.any? %>
-  <% filter.collections.each do |collection| %>
-    <%= turbo_stream_from collection %>
+<% if filter.boards.any? %>
+  <% filter.boards.each do |board| %>
+    <%= turbo_stream_from board %>
   <% end %>
 <% else %>
-  <%= turbo_stream_from :all_collections %>
+  <%= turbo_stream_from :all_boards %>
 <% end %>

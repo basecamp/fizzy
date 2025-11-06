@@ -1,16 +1,16 @@
-<% @page_title = @user_filtering.selected_collections_label %>
+<% @page_title = @user_filtering.selected_boards_label %>
 <% turbo_exempts_page_from_cache %>
 
 <%= render "cards/broadcasts", filter: @filter %>
 
 <% content_for :header do %>
   <h1 class="header__title divider divider--fade full-width">
-    <span class="overflow-ellipsis txt-capitalize-first-letter"><%= @user_filtering.selected_collections_label %></span>
+    <span class="overflow-ellipsis txt-capitalize-first-letter"><%= @user_filtering.selected_boards_label %></span>
   </h1>
 
   <div class="header__actions header__actions--end">
-    <% if collection = @filter.single_collection %>
-      <%= link_to_edit_collection collection %>
+    <% if board = @filter.single_board %>
+      <%= link_to_edit_board board %>
     <% end %>
   </div>
 <% end %>

@@ -1,0 +1,28 @@
+<%= tag.div class: "card-columns", data: {
+      controller: "collapsible-columns drag-and-drop drag-and-strum",
+      drag_and_drop_dragged_item_class: "drag-and-drop__dragged-item",
+      drag_and_drop_hover_container_class: "drag-and-drop__hover-container",
+      collapsible_columns_board_value: board.id,
+      collapsible_columns_collapsed_class: "is-collapsed",
+      collapsible_columns_no_transitions_class: "no-transitions",
+      collapsible_columns_title_not_visible_class: "is-off-screen",
+      action: "
+        dragstart->drag-and-drop#dragStart
+        dragover->drag-and-drop#dragOver
+        dragenter->drag-and-strum#dragEnter
+        drop->drag-and-drop#drop
+        dragend->drag-and-drop#dragEnd" } do %>
+  <div class="card-columns__left">
+    <%= render "boards/show/not_now", board: board %>
+  </div>
+
+  <%= render "boards/show/stream", board: board, page: page %>
+
+  <div class="card-columns__right">
+    <%= render partial: "boards/show/column", collection: board.columns.sorted, cached: ->(column){ [ column, column.leftmost?, column.rightmost? ] } %>
+    <%= render "boards/show/closed", board: board %>
+
+    <%= render "boards/show/menu/columns", board: board %>
+  </div>
+<% end %>
+

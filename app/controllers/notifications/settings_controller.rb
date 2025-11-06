@@ -2,7 +2,7 @@ class Notifications::SettingsController < ApplicationController
   before_action :set_settings
 
   def show
-    @collections = Current.user.collections.alphabetically
+    @boards = Current.user.boards.alphabetically
   end
 
   def update

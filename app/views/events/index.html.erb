@@ -7,10 +7,10 @@
   <%= render "events/index/add_card_button", user_filtering: @user_filtering %>
 
   <h1 class="header__title">
-    <% if @user_filtering.collections.one? %>
+    <% if @user_filtering.boards.one? %>
       Latest Activity
     <% else %>
-      <span>Activity <%= @user_filtering.filter.collections.any? ? "in" : "across" %></span>
+      <span>Activity <%= @user_filtering.filter.boards.any? ? "in" : "across" %></span>
       <%= render "events/index/filter", user_filtering: @user_filtering %>
     <% end %>
   </h1>

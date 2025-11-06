@@ -6,27 +6,27 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "index" do
-    get collection_webhooks_path(collections(:writebook))
+    get board_webhooks_path(boards(:writebook))
     assert_response :success
   end
 
   test "show" do
     webhook = webhooks(:active)
-    get collection_webhook_path(webhook.collection, webhook)
+    get board_webhook_path(webhook.board, webhook)
     assert_response :success
   end
 
   test "new" do
-    get new_collection_webhook_path(collections(:writebook))
+    get new_board_webhook_path(boards(:writebook))
     assert_response :success
     assert_select "form"
   end
 
   test "create with valid params" do
-    collection = collections(:writebook)
+    board = boards(:writebook)
 
     assert_difference "Webhook.count", 1 do
-      post collection_webhooks_path(collection), params: {
+      post board_webhooks_path(board), params: {
         webhook: {
           name: "Test Webhook",
           url: "https://example.com/webhook",
@@ -37,17 +37,17 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
 
     webhook = Webhook.order(id: :desc).first
 
-    assert_redirected_to collection_webhook_path(webhook.collection, webhook)
-    assert_equal collection, webhook.collection
+    assert_redirected_to board_webhook_path(webhook.board, webhook)
+    assert_equal board, webhook.board
     assert_equal "Test Webhook", webhook.name
     assert_equal "https://example.com/webhook", webhook.url
     assert_equal [ "card_published", "card_closed" ], webhook.subscribed_actions
   end
 
   test "create with invalid params" do
-    collection = collections(:writebook)
+    board = boards(:writebook)
     assert_no_difference "Webhook.count" do
-      post collection_webhooks_path(collection), params: {
+      post board_webhooks_path(board), params: {
         webhook: {
           name: "",
           url: "invalid-url"
@@ -60,14 +60,14 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
 
   test "edit" do
     webhook = webhooks(:active)
-    get edit_collection_webhook_path(webhook.collection, webhook)
+    get edit_board_webhook_path(webhook.board, webhook)
     assert_response :success
     assert_select "form"
   end
 
   test "update with valid params" do
     webhook = webhooks(:active)
-    patch collection_webhook_path(webhook.collection, webhook), params: {
+    patch board_webhook_path(webhook.board, webhook), params: {
       webhook: {
         name: "Updated Webhook",
         subscribed_actions: [ "card_published" ]
@@ -76,14 +76,14 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
 
     webhook.reload
 
-    assert_redirected_to collection_webhook_path(webhook.collection, webhook)
+    assert_redirected_to board_webhook_path(webhook.board, webhook)
     assert_equal "Updated Webhook", webhook.name
     assert_equal [ "card_published" ], webhook.subscribed_actions
   end
 
   test "update with invalid params" do
     webhook = webhooks(:active)
-    patch collection_webhook_path(webhook.collection, webhook), params: {
+    patch board_webhook_path(webhook.board, webhook), params: {
       webhook: {
         name: ""
       }
@@ -92,7 +92,7 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
 
     assert_no_changes -> { webhook.reload.url } do
-      patch collection_webhook_path(webhook.collection, webhook), params: {
+      patch board_webhook_path(webhook.board, webhook), params: {
         webhook: {
           name: "Updated Webhook",
           url: "https://different.com/webhook"
@@ -100,16 +100,16 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
       }
     end
 
-    assert_redirected_to collection_webhook_path(webhook.collection, webhook)
+    assert_redirected_to board_webhook_path(webhook.board, webhook)
   end
 
   test "destroy" do
     webhook = webhooks(:active)
 
     assert_difference "Webhook.count", -1 do
-      delete collection_webhook_path(webhook.collection, webhook)
+      delete board_webhook_path(webhook.board, webhook)
     end
 
-    assert_redirected_to collection_webhooks_path(webhook.collection)
+    assert_redirected_to board_webhooks_path(webhook.board)
   end
 end

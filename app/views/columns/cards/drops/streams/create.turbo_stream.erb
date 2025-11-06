@@ -1,1 +1,1 @@
-<%= turbo_stream.replace("the-stream", partial: "collections/show/stream", method: :morph, locals: { collection: @card.collection, page: @page }) %>
+<%= turbo_stream.replace("the-stream", partial: "boards/show/stream", method: :morph, locals:{ board: @card.board, page: @page }) %>

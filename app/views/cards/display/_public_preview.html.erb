@@ -1,13 +1,13 @@
 <%= card_article_tag card, class: "card" do %>
   <div class="flex flex-column flex-item-grow max-inline-size">
     <header class="card__header">
-      <div class="card__collection flex align-start">
+      <div class="card__board flex align-start">
           <span class="card__id">
             <span class="for-screen-reader">Card number</span>
             <%= card.id %>
           </span>
-        <span class="card__collection-name">
-            <span class="overflow-ellipsis"><%= card.collection.name %></span>
+        <span class="card__board-name">
+            <span class="overflow-ellipsis"><%= card.board.name %></span>
           </span>
       </div>
 
@@ -37,6 +37,6 @@
 
   <% if card.entropic? %>
     <%= render "cards/display/preview/bubble", card: card %>
-      <span class="card__collection-name">
+      <span class="card__board-name">
   <% end %>
 <% end %>

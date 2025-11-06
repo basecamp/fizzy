@@ -11,7 +11,7 @@ RENAMES = {
   "poppable" => "closeable",
   "closed" => "closed",
   "pop" => "closure",
-  "bucket" => "collection"
+  "bucket" => "board"
 }.freeze
 
 FILE_EXTENSIONS = %w[rb yml html css js jpg jpeg png gif svg erb].freeze

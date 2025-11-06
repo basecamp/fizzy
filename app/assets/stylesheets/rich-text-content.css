@@ -1,13 +1,13 @@
 @layer components {
   .rich-text-content {
-    --block-margin: 0;
+    --block-margin: 0.5lh;
 
     :where(h1, h2, h3, h4, h5, h6) {
       display: block;
       font-weight: 800;
       letter-spacing: -0.02ch;
       line-height: 1.1;
-      margin-block: var(--block-margin);
+      margin-block: 0 var(--block-margin);
       overflow-wrap: break-word;
       text-wrap: balance;
     }
@@ -62,14 +62,17 @@
     }
 
     :where(hr) {
+      color: currentColor;
       block-size: 0;
-      border-block-end: 1px solid currentColor;
+      border: none;
+      border-block-end: 2px solid currentColor;
       inline-size: 20%;
-      margin: var(--block-margin) 0;
+      margin: calc(var(--block-margin) * 2) 0;
     }
 
     .horizontal-divider  {
-      margin-inline: 0;
+      margin: var(--block-margin) 0;
+      padding-block: var(--block-margin);
     }
 
     .lexxy-content__strikethrough {

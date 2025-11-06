@@ -3,7 +3,7 @@ module Filter::Resources
 
   included do
     has_and_belongs_to_many :tags
-    has_and_belongs_to_many :collections
+    has_and_belongs_to_many :boards
     has_and_belongs_to_many :assignees, class_name: "User", join_table: "assignees_filters", association_foreign_key: "assignee_id"
     has_and_belongs_to_many :creators, class_name: "User", join_table: "creators_filters", association_foreign_key: "creator_id"
     has_and_belongs_to_many :closers, class_name: "User", join_table: "closers_filters", association_foreign_key: "closer_id"
@@ -17,19 +17,19 @@ module Filter::Resources
     destroy!
   end
 
-  def collections
-    creator.collections.where id: super.ids
+  def boards
+    creator.boards.where id: super.ids
   end
 
-  def collection_titles
-    if collections.none?
-      Collection.one? ? [ Collection.first.name ] : [ "all boards" ]
+  def board_titles
+    if boards.none?
+      Board.one? ? [ Board.first.name ] : [ "all boards" ]
     else
-      collections.map(&:name)
+      boards.map(&:name)
     end
   end
 
-  def collections_label
-    collection_titles.to_sentence
+  def boards_label
+    board_titles.to_sentence
   end
 end

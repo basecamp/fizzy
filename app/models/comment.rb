@@ -14,7 +14,7 @@ class Comment < ApplicationRecord
 
   after_create_commit :watch_card_by_creator
 
-  delegate :collection, :watch_by, to: :card
+  delegate :board, :watch_by, to: :card
 
   def to_partial_path
     "cards/#{super}"

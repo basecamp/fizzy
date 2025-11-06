@@ -4,7 +4,7 @@ require_relative "../config/environment"
 
 def replace_url(string)
   string.gsub(%r{/buckets/(\d+)/bubbles/(\d+)}) do
-    "/collections/#{$1}/cards/#{$2}"
+    "/boards/#{$1}/cards/#{$2}"
   end
 end
 

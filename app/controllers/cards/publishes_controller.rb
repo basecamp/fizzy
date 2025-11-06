@@ -5,9 +5,9 @@ class Cards::PublishesController < ApplicationController
     @card.publish
 
     if add_another_param?
-      redirect_to @collection.cards.create!, notice: "Card added"
+      redirect_to @board.cards.create!, notice: "Card added"
     else
-      redirect_to @card.collection
+      redirect_to @card.board
     end
   end
 

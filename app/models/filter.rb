@@ -27,7 +27,7 @@ class Filter < ApplicationRecord
       result = result.unassigned if assignment_status.unassigned?
       result = result.assigned_to(assignees.ids) if assignees.present?
       result = result.where(creator_id: creators.ids) if creators.present?
-      result = result.where(collection: collections.ids) if collections.present?
+      result = result.where(board: boards.ids) if boards.present?
       result = result.tagged_with(tags.ids) if tags.present?
       result = result.where("cards.created_at": creation_window) if creation_window
       result = result.closed_at_window(closure_window) if closure_window
@@ -44,16 +44,16 @@ class Filter < ApplicationRecord
     self.class.normalize_params(as_params).blank?
   end
 
-  def single_collection
-    collections.first if collections.one?
+  def single_board
+    boards.first if boards.one?
   end
 
   def single_workflow
-    collections.first.workflow if collections.pluck(:workflow_id).uniq.one?
+    boards.first.workflow if boards.pluck(:workflow_id).uniq.one?
   end
 
   def cacheable?
-    collections.exists?
+    boards.exists?
   end
 
   def cache_key

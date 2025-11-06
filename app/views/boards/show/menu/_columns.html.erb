@@ -1,0 +1,8 @@
+<div class="position-relative cards__new-column" data-controller="dialog" data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside" data-turbo-permanent>
+  <button class="btn btn--circle txt-x-small borderless" data-action="click->dialog#open:stop" aria-label="Add a new column, etc.">
+    <%= icon_tag "add", class: "translucent" %>
+  </button>
+  <dialog class="popup panel flex-column gap-half fill-white shadow txt-small margin-block-double" data-dialog-target="dialog">
+    <%= render "boards/show/menu/column_form", board: board, column: Column.new, label: "Add column" %>
+  </dialog>
+</div>

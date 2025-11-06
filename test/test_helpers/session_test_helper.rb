@@ -27,6 +27,11 @@ module SessionTestHelper
     assert_not_nil cookie, "Expected session_token cookie to be set after sign in"
   end
 
+  def logout_and_sign_in_as(identity)
+    Session.delete_all
+    sign_in_as identity
+  end
+
   def sign_out
     untenanted do
       delete session_path

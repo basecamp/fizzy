@@ -7,10 +7,11 @@
 
 <% content_for :header do %>
   <div class="header__actions header__actions--start">
-    <%= link_back_to_collection(@card.collection) %>
+    <%= link_back_to_board(@card.board) %>
   </div>
 <% end %>
 
+<%= turbo_stream_from @card %>
 <%= turbo_stream_from @card, :activity %>
 
 <div data-controller="beacon lightbox" data-beacon-url-value="<%= card_reading_path(@card) %>">

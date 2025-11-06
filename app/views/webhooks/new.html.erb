@@ -2,7 +2,7 @@
 
 <% content_for :header do %>
   <div class="header__actions header__actions--start">
-    <%= link_to collection_webhooks_path, class: "btn borderless txt-medium", data: { controller: "hotkey", action: "keydown.esc@document->hotkey#click" } do %>
+    <%= link_to board_webhooks_path, class: "btn borderless txt-medium", data: { controller: "hotkey", action: "keydown.esc@document->hotkey#click" } do %>
       <span class="overflow-ellipsis">
         &larr;
         <strong>Webhooks</strong>
@@ -14,7 +14,7 @@
 <% end %>
 
 <article class="panel center txt-align-start" style="view-transition-name: <%= dom_id(@webhook) %>">
-  <%= form_with model: @webhook, url: collection_webhooks_path, data: { controller: "form" }, html: { class: "flex flex-column gap" } do |form| %>
+  <%= form_with model: @webhook, url: board_webhooks_path, data: { controller: "form" }, html: { class: "flex flex-column gap" } do |form| %>
     <h2 class="txt-large margin-none">
       <%= form.text_field :name, required: true, autofocus: true, class: "input", placeholder: "Name this Webhook…", data: { action: "keydown.esc@document->form#cancel" } %>
     </h2>
@@ -45,6 +45,6 @@
       <span>Create Webhook</span>
     <% end %>
 
-    <%= link_to "Go back", collection_webhooks_path, data: { form_target: "cancel" }, hidden: true %>
+    <%= link_to "Go back", board_webhooks_path, data: { form_target: "cancel" }, hidden: true %>
   <% end %>
 </article>

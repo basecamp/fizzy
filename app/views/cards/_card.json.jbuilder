@@ -8,8 +8,8 @@ json.cache! [ card, card.column&.color ] do
 
   json.url card_url(card)
 
-  json.collection do
-    json.partial! "collections/collection", locals: { collection: card.collection }
+  json.board do
+    json.partial! "boards/board", locals: { board: card.board }
   end
 
   json.column do

@@ -1,0 +1,12 @@
+<section id="the-stream" class="cards cards--considering" data-column-name="Maybe?"
+  data-action="turbo:before-morph-attribute->collapsible-columns#preventToggle">
+  <header class="cards__expander">
+    <h2 class="cards__expander-title position-relative" data-collapsible-columns-target="title">Maybe?</h2>
+  </header>
+
+  <% if page.used? %>
+    <%= with_automatic_pagination "the-stream", @page do %>
+      <%= render "public/boards/columns/list", cards: page.records %>
+    <% end %>
+  <% end %>
+</section>

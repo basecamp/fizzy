@@ -1,0 +1,11 @@
+<%= turbo_frame_tag :not_now_column do %>
+  <% if @page.used? %>
+    <%= with_automatic_pagination :not_now_column, @page do %>
+      <%= render "public/boards/columns/list", cards: @page.records %>
+    <% end %>
+  <% else %>
+    <div class="card blank-slate blank-slate--card">
+      <p class="txt-align-center txt-normal">No cards here</p>
+    </div>
+  <% end %>
+<% end %>

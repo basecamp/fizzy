@@ -8,7 +8,7 @@
   <div class="settings__panel settings__panel--users panel shadow center">
     <h2 class="txt-medium txt-uppercase divider">Boards</h2>
     <div class="settings__user-list flex flex-column gap-half">
-      <%= render partial: "notifications/settings/collection", collection: @collections, locals: { user: Current.user } %>
+      <%= render partial: "notifications/settings/board", collection: @boards, locals: { user: Current.user } %>
     </div>
   </div>
 

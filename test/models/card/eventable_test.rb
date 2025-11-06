@@ -8,7 +8,7 @@ class Card::EventableTest < ActiveSupport::TestCase
   test "new cards get the current time as the last activity time" do
     freeze_time
 
-    card = collections(:writebook).cards.create!(title: "Some card card", creator: users(:david))
+    card = boards(:writebook).cards.create!(title: "Some card card", creator: users(:david))
     assert_equal Time.current, card.last_active_at
   end
 

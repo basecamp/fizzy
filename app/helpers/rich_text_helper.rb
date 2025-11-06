@@ -1,6 +1,6 @@
 module RichTextHelper
-  def mentions_prompt(collection)
-    content_tag "lexxy-prompt", "", trigger: "@", src: prompts_collection_users_path(collection), name: "mention"
+  def mentions_prompt(board)
+    content_tag "lexxy-prompt", "", trigger: "@", src: prompts_board_users_path(board), name: "mention"
   end
 
   def global_mentions_prompt
@@ -19,7 +19,7 @@ module RichTextHelper
     content_tag "lexxy-code-language-picker"
   end
 
-  def general_prompts(collection)
-    safe_join([ mentions_prompt(collection), cards_prompt, code_language_picker ])
+  def general_prompts(board)
+    safe_join([ mentions_prompt(board), cards_prompt, code_language_picker ])
   end
 end

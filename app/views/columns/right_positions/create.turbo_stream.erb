@@ -1,4 +1,4 @@
 <% if @right_column %>
   <%= turbo_stream.remove(dom_id(@column)) %>
-  <%= turbo_stream.after(@right_column, partial: "collections/show/column", locals: { column: @column }) %>
+  <%= turbo_stream.after(@right_column, partial: "boards/show/column", locals: { column: @column }) %>
 <% end %>

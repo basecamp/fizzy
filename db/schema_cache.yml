@@ -20,9 +20,9 @@ columns:
     default_function:
     collation:
     comment:
-  - &23 !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+  - &22 !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
     auto_increment:
-    name: collection_id
+    name: board_id
     cast_type: &3 !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3Adapter::SQLite3Integer
       precision:
       scale:
@@ -375,7 +375,7 @@ columns:
   assignments:
   - *20
   - *21
-  - &22 !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+  - &23 !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
     auto_increment:
     name: card_id
     cast_type: *3
@@ -388,8 +388,59 @@ columns:
   - *7
   - *8
   - *9
-  card_activity_spikes:
+  board_publications:
   - *22
+  - *7
+  - *8
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: key
+    cast_type: *5
+    sql_type_metadata: *6
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
+  - *9
+  boards:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: all_access
+    cast_type: &31 !ruby/object:ActiveModel::Type::Boolean
+      precision:
+      scale:
+      limit:
+    sql_type_metadata: &32 !ruby/object:ActiveRecord::ConnectionAdapters::SqlTypeMetadata
+      sql_type: boolean
+      type: :boolean
+      limit:
+      precision:
+      scale:
+    'null': false
+    default: false
+    default_function:
+    collation:
+    comment:
+  - *7
+  - &24 !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: creator_id
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': false
+    default:
+    default_function:
+    collation:
+    comment:
+  - *8
+  - *10
+  - *9
+  boards_filters:
+  - *22
+  - *19
+  card_activity_spikes:
+  - *23
   - *7
   - *8
   - *9
@@ -418,16 +469,16 @@ columns:
     comment:
   - *9
   card_goldnesses:
-  - *22
+  - *23
   - *7
   - *8
   - *9
   card_not_nows:
-  - *22
+  - *23
   - *7
   - *8
   - *9
-  - &24 !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+  - &25 !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
     auto_increment:
     name: user_id
     cast_type: *3
@@ -438,7 +489,7 @@ columns:
     collation:
     comment:
   cards:
-  - *23
+  - *22
   - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
     auto_increment:
     name: column_id
@@ -450,16 +501,7 @@ columns:
     collation:
     comment:
   - *7
-  - &25 !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
-    auto_increment:
-    name: creator_id
-    cast_type: *3
-    sql_type_metadata: *4
-    'null': false
-    default:
-    default_function:
-    collation:
-    comment:
+  - *24
   - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
     auto_increment:
     name: due_on
@@ -524,55 +566,13 @@ columns:
     comment:
   - *19
   closures:
-  - *22
-  - *7
-  - *8
-  - *9
-  - *24
-  collection_publications:
   - *23
   - *7
   - *8
-  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
-    auto_increment:
-    name: key
-    cast_type: *5
-    sql_type_metadata: *6
-    'null': true
-    default:
-    default_function:
-    collation:
-    comment:
   - *9
-  collections:
-  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
-    auto_increment:
-    name: all_access
-    cast_type: &31 !ruby/object:ActiveModel::Type::Boolean
-      precision:
-      scale:
-      limit:
-    sql_type_metadata: &32 !ruby/object:ActiveRecord::ConnectionAdapters::SqlTypeMetadata
-      sql_type: boolean
-      type: :boolean
-      limit:
-      precision:
-      scale:
-    'null': false
-    default: false
-    default_function:
-    collation:
-    comment:
-  - *7
   - *25
-  - *8
-  - *10
-  - *9
-  collections_filters:
-  - *23
-  - *19
   columns:
-  - *23
+  - *22
   - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
     auto_increment:
     name: color
@@ -598,13 +598,13 @@ columns:
     comment:
   - *9
   comments:
-  - *22
+  - *23
   - *7
-  - *25
+  - *24
   - *8
   - *9
   creators_filters:
-  - *25
+  - *24
   - *19
   entropies:
   - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
@@ -651,9 +651,9 @@ columns:
     default_function:
     collation:
     comment:
-  - *23
+  - *22
   - *7
-  - *25
+  - *24
   - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
     auto_increment:
     name: eventable_id
@@ -696,7 +696,7 @@ columns:
   - *9
   filters:
   - *7
-  - *25
+  - *24
   - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
     auto_increment:
     name: fields
@@ -838,7 +838,7 @@ columns:
   - *9
   - *28
   pins:
-  - *22
+  - *23
   - *7
   - *8
   - *9
@@ -973,7 +973,7 @@ columns:
   - *8
   - *9
   steps:
-  - *22
+  - *23
   - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
     auto_increment:
     name: completed
@@ -998,7 +998,7 @@ columns:
   - *8
   - *9
   taggings:
-  - *22
+  - *23
   - *7
   - *8
   - *33
@@ -1069,7 +1069,7 @@ columns:
     comment:
   - *9
   watches:
-  - *22
+  - *23
   - *7
   - *8
   - *9
@@ -1165,7 +1165,7 @@ columns:
   - *35
   webhooks:
   - *36
-  - *23
+  - *22
   - *7
   - *8
   - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
@@ -1221,6 +1221,9 @@ primary_keys:
   assignees_filters:
   assigners_filters:
   assignments: id
+  board_publications: id
+  boards: id
+  boards_filters:
   card_activity_spikes: id
   card_engagements: id
   card_goldnesses: id
@@ -1228,9 +1231,6 @@ primary_keys:
   cards: id
   closers_filters:
   closures: id
-  collection_publications: id
-  collections: id
-  collections_filters:
   columns: id
   comments: id
   creators_filters:
@@ -1268,6 +1268,9 @@ data_sources:
   assignees_filters: true
   assigners_filters: true
   assignments: true
+  board_publications: true
+  boards: true
+  boards_filters: true
   card_activity_spikes: true
   card_engagements: true
   card_goldnesses: true
@@ -1275,9 +1278,6 @@ data_sources:
   cards: true
   closers_filters: true
   closures: true
-  collection_publications: true
-  collections: true
-  collections_filters: true
   columns: true
   comments: true
   creators_filters: true
@@ -1323,10 +1323,10 @@ indexes:
     valid: true
   - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
     table: accesses
-    name: index_accesses_on_collection_id
+    name: index_accesses_on_board_id
     unique: false
     columns:
-    - collection_id
+    - board_id
     lengths: {}
     orders: {}
     opclasses: {}
@@ -1339,10 +1339,10 @@ indexes:
     valid: true
   - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
     table: accesses
-    name: index_accesses_on_collection_id_and_user_id
+    name: index_accesses_on_board_id_and_user_id
     unique: true
     columns:
-    - collection_id
+    - board_id
     - user_id
     lengths: {}
     orders: {}
@@ -1611,6 +1611,89 @@ indexes:
     nulls_not_distinct:
     comment:
     valid: true
+  board_publications:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: board_publications
+    name: index_board_publications_on_board_id
+    unique: false
+    columns:
+    - board_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: board_publications
+    name: index_board_publications_on_key
+    unique: true
+    columns:
+    - key
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
+  boards:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: boards
+    name: index_boards_on_creator_id
+    unique: false
+    columns:
+    - creator_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
+  boards_filters:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: boards_filters
+    name: index_boards_filters_on_board_id
+    unique: false
+    columns:
+    - board_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: boards_filters
+    name: index_boards_filters_on_filter_id
+    unique: false
+    columns:
+    - filter_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
   card_activity_spikes:
   - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
     table: card_activity_spikes
@@ -1714,10 +1797,10 @@ indexes:
   cards:
   - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
     table: cards
-    name: index_cards_on_collection_id
+    name: index_cards_on_board_id
     unique: false
     columns:
-    - collection_id
+    - board_id
     lengths: {}
     orders: {}
     opclasses: {}
@@ -1844,96 +1927,13 @@ indexes:
     nulls_not_distinct:
     comment:
     valid: true
-  collection_publications:
-  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
-    table: collection_publications
-    name: index_collection_publications_on_collection_id
-    unique: false
-    columns:
-    - collection_id
-    lengths: {}
-    orders: {}
-    opclasses: {}
-    where:
-    type:
-    using:
-    include:
-    nulls_not_distinct:
-    comment:
-    valid: true
-  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
-    table: collection_publications
-    name: index_collection_publications_on_key
-    unique: true
-    columns:
-    - key
-    lengths: {}
-    orders: {}
-    opclasses: {}
-    where:
-    type:
-    using:
-    include:
-    nulls_not_distinct:
-    comment:
-    valid: true
-  collections:
-  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
-    table: collections
-    name: index_collections_on_creator_id
-    unique: false
-    columns:
-    - creator_id
-    lengths: {}
-    orders: {}
-    opclasses: {}
-    where:
-    type:
-    using:
-    include:
-    nulls_not_distinct:
-    comment:
-    valid: true
-  collections_filters:
-  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
-    table: collections_filters
-    name: index_collections_filters_on_collection_id
-    unique: false
-    columns:
-    - collection_id
-    lengths: {}
-    orders: {}
-    opclasses: {}
-    where:
-    type:
-    using:
-    include:
-    nulls_not_distinct:
-    comment:
-    valid: true
-  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
-    table: collections_filters
-    name: index_collections_filters_on_filter_id
-    unique: false
-    columns:
-    - filter_id
-    lengths: {}
-    orders: {}
-    opclasses: {}
-    where:
-    type:
-    using:
-    include:
-    nulls_not_distinct:
-    comment:
-    valid: true
   columns:
   - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
     table: columns
-    name: index_columns_on_collection_id
+    name: index_columns_on_board_id
     unique: false
     columns:
-    - collection_id
+    - board_id
     lengths: {}
     orders: {}
     opclasses: {}
@@ -1946,10 +1946,10 @@ indexes:
     valid: true
   - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
     table: columns
-    name: index_columns_on_collection_id_and_position
+    name: index_columns_on_board_id_and_position
     unique: false
     columns:
-    - collection_id
+    - board_id
     - position
     lengths: {}
     orders: {}
@@ -2050,10 +2050,10 @@ indexes:
   events:
   - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
     table: events
-    name: index_events_on_collection_id
+    name: index_events_on_board_id
     unique: false
     columns:
-    - collection_id
+    - board_id
     lengths: {}
     orders: {}
     opclasses: {}
@@ -2066,10 +2066,10 @@ indexes:
     valid: true
   - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
     table: events
-    name: index_events_on_collection_id_and_action_and_created_at
+    name: index_events_on_board_id_and_action_and_created_at
     unique: false
     columns:
-    - collection_id
+    - board_id
     - action
     - created_at
     lengths: {}
@@ -2813,10 +2813,10 @@ indexes:
   webhooks:
   - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
     table: webhooks
-    name: index_webhooks_on_collection_id
+    name: index_webhooks_on_board_id
     unique: false
     columns:
-    - collection_id
+    - board_id
     lengths: {}
     orders: {}
     opclasses: {}
@@ -2843,4 +2843,4 @@ indexes:
     nulls_not_distinct:
     comment:
     valid: true
-version: 20251103125353
+version: 20251105122933

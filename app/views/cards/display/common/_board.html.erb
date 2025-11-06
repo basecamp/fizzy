@@ -1,0 +1,10 @@
+<label class="card__board">
+  <span class="card__id">
+    <span class="for-screen-reader">Card number</span>
+    <%= card.id %>
+  </span>
+  <span class="card__board-name">
+    <span class="overflow-ellipsis"><%= card.board.name %></span>
+  </span>
+  <%= yield %>
+</label>

@@ -11,7 +11,7 @@ module Filter::Params
     assignee_ids: [],
     creator_ids: [],
     closer_ids: [],
-    collection_ids: [],
+    board_ids: [],
     tag_ids: [],
     terms: []
   ]
@@ -40,9 +40,9 @@ module Filter::Params
     before_save { self.params_digest = self.class.digest_params(as_params) }
   end
 
-  def used?(ignore_collections: false)
+  def used?(ignore_boards: false)
     tags.any? || assignees.any? || creators.any? || closers.any? ||
-      terms.any? || card_ids&.any? || (!ignore_collections && collections.present?) ||
+      terms.any? || card_ids&.any? || (!ignore_boards && boards.present?) ||
       assignment_status.unassigned? || !indexed_by.all? || !sorted_by.latest?
   end
 
@@ -57,7 +57,7 @@ module Filter::Params
       params[:assignment_status] = assignment_status
       params[:terms]             = terms
       params[:tag_ids]           = tags.ids
-      params[:collection_ids]    = collections.ids
+      params[:board_ids]    = boards.ids
       params[:card_ids]          = card_ids
       params[:assignee_ids]      = assignees.ids
       params[:creator_ids]       = creators.ids

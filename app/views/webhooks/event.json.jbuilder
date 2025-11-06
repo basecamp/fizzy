@@ -9,8 +9,8 @@ json.cache! @event do
     end
   end
 
-  json.collection do
-    json.partial! "collections/collection", locals: { collection: @event.collection }
+  json.board do
+    json.partial! "boards/board", locals: { board: @event.board }
   end
 
   json.creator do

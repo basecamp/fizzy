@@ -1,8 +1,8 @@
 GIT
   remote: https://github.com/basecamp/activerecord-tenanted
-  revision: aaa4a3473eab400c4c8a6ca05a7207578d3ade53
+  revision: e409f75dc2ea1c3355e98feb22b76b3cc0a01fe0
   specs:
-    activerecord-tenanted (0.5.0)
+    activerecord-tenanted (0.6.0)
       activerecord (>= 8.1.beta)
       railties (>= 8.1.beta)
       zeitwerk
@@ -36,7 +36,7 @@ GIT
 
 GIT
   remote: https://github.com/rails/rails.git
-  revision: d3d17c297a70d3e255a34693a1fb0074712e9930
+  revision: bc41ad696a76a151db56259938dccf64ef87b501
   branch: main
   specs:
     actioncable (8.2.0.alpha)
@@ -144,20 +144,6 @@ PATH
       rails_structured_logging
 
 GEM
-  remote: https://gems.stanko.io/private/
-  specs:
-    beamer-rails (0.1.0.beta4-arm64-darwin)
-      sqlite3 (>= 2.0)
-    beamer-rails (0.1.0.beta4-arm64-linux-gnu)
-      sqlite3 (>= 2.0)
-    beamer-rails (0.1.0.beta4-x86_64-darwin)
-      sqlite3 (>= 2.0)
-    beamer-rails (0.1.0.beta4-x86_64-linux-gnu)
-      sqlite3 (>= 2.0)
-    beamer-rails (0.1.0.beta4-x86_64-linux-musl)
-      sqlite3 (>= 2.0)
-
-GEM
   remote: https://rubygems.org/
   specs:
     action_text-trix (2.1.15)
@@ -198,6 +184,16 @@ GEM
     base64 (0.3.0)
     bcrypt (3.1.20)
     bcrypt_pbkdf (1.1.1)
+    beamer-rails (0.1.0.beta4-arm64-darwin)
+      sqlite3 (>= 2.0)
+    beamer-rails (0.1.0.beta4-arm64-linux-gnu)
+      sqlite3 (>= 2.0)
+    beamer-rails (0.1.0.beta4-x86_64-darwin)
+      sqlite3 (>= 2.0)
+    beamer-rails (0.1.0.beta4-x86_64-linux-gnu)
+      sqlite3 (>= 2.0)
+    beamer-rails (0.1.0.beta4-x86_64-linux-musl)
+      sqlite3 (>= 2.0)
     benchmark (0.5.0)
     bigdecimal (3.3.1)
     bindex (0.8.1)
@@ -294,7 +290,7 @@ GEM
       logger (~> 1.6)
     letter_opener (1.10.0)
       launchy (>= 2.2, < 4)
-    lexxy (0.1.18.beta)
+    lexxy (0.1.19.beta)
       rails (>= 8.0.2)
     lint_roller (1.1.0)
     logger (1.7.0)
@@ -537,7 +533,7 @@ GEM
     unicode-display_width (3.2.0)
       unicode-emoji (~> 4.1)
     unicode-emoji (4.1.0)
-    uri (1.1.0)
+    uri (1.1.1)
     useragent (0.16.11)
     vcr (6.3.1)
       base64
@@ -604,7 +600,7 @@ DEPENDENCIES
   autotuner
   aws-sdk-s3
   bcrypt (~> 3.1.7)
-  beamer-rails (~> 0.1.0.beta4)!
+  beamer-rails (~> 0.1.0.beta4)
   benchmark
   bootsnap
   brakeman

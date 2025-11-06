@@ -1,1 +1,1 @@
-<%= turbo_stream.replace("closed-cards", partial: "collections/show/closed", method: :morph, locals: { collection: @card.collection }) %>
+<%= turbo_stream.replace("closed-cards", partial: "boards/show/closed", method: :morph, locals:{ board: @card.board }) %>

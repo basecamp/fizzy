@@ -37,7 +37,7 @@ class Card::ReadableTest < ActiveSupport::TestCase
     david_notifications = [ notifications(:logo_card_david_mention_by_jz), notifications(:logo_comment_david_mention_by_jz) ]
 
     # Kevin loses access
-    card.collection.accesses.find_by(user: kevin).destroy
+    card.board.accesses.find_by(user: kevin).destroy
     assert_not card.accessible_to?(kevin)
     assert card.accessible_to?(david)
 

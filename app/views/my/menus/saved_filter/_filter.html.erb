@@ -2,7 +2,7 @@
   <%= icon_tag "bookmark", class: "popup__icon" %>
   <%= link_to cards_path(filter_id: filter.id), class: "popup__btn btn" do %>
     <div class="txt-tight-lines min-width txt-small overflow-ellipsis">
-      <div><strong><%= filter.collections_label %></strong></div>
+      <div><strong><%= filter.boards_label %></strong></div>
       <div class="txt-capitalize"><%= filter.summary %></div>
     </div>
   <% end %>
