@@ -58,9 +58,7 @@ export default class extends Controller {
 
   #loadLazyTurboFrames() {
     this.element.querySelectorAll("turbo-frame[loading=lazy]").forEach(frame => {
-      if (frame.delegate?.appearanceObserver) {
-        frame.delegate.appearanceObserver.intersect([{ isIntersecting: true }])
-      }
+      frame.delegate.appearanceObserver.intersect([{ isIntersecting: true }])
     })
   }
 }
