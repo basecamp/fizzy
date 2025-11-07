@@ -3,7 +3,7 @@ x-app: &app
   user: "${DOCKER_UID:-1000}:${DOCKER_GID:-1000}"
   build:
     context: .
-    dockerfile: Dockerfile.dev
+    dockerfile: Dockerfile.beamer-testbed
     secrets:
       - GITHUB_TOKEN
   volumes:
@@ -17,7 +17,9 @@ x-base-environment: &base-environment
   RAILS_ENV: development
   BINDING: 0.0.0.0
   BEAMER: "true"
+  BEAMER_TESTBED: "true"
   SECRET_KEY_BASE: beamer_testbed_shared_secret_key_base_for_development_only
+  SOLID_QUEUE_IN_PUMA: 1
 
 services:
   kamal-proxy:

@@ -80,18 +80,28 @@ Rails.application.configure do
     config.action_mailer.raise_delivery_errors = false
   end
 
-  config.hosts = %w[ fizzy.localhost localhost 127.0.0.1 ] + [ /^fizzy-\d+(:\d+)$/ ]
+  config.hosts = %w[ fizzy.localhost localhost 127.0.0.1 ]
 
   # Set host to be used by links generated in mailer and notification view templates.
   config.action_controller.default_url_options = { host: config.hosts.first, port: 3006 }
   config.action_mailer.default_url_options     = { host: config.hosts.first, port: 3006 }
 
-  if Rails.root.join("tmp/solid-queue.txt").exist?
+  if Rails.root.join("tmp/solid-queue.txt").exist? || ENV["BEAMER_TESTBED"].present?
     config.active_job.queue_adapter = :solid_queue
     config.solid_queue.connects_to = { database: { writing: :queue } }
   end
 
   if Rails.root.join("tmp/structured-logging.txt").exist?
     config.structured_logging.logger = ActiveSupport::Logger.new("log/structured-development.log")
+  end
+
+  if ENV["BEAMER_TESTBED"].present?
+    config.hosts += [ /^fizzy-\d+(:\d+)?$/ ]
+
+    config.logger = ActiveSupport::Logger.new(STDOUT)
+                      .tap  { |logger| logger.formatter = ::Logger::Formatter.new }
+                      .then { |logger| ActiveSupport::TaggedLogging.new(logger) }
+    config.log_level = :fatal
+    config.structured_logging.logger = ActiveSupport::Logger.new(STDOUT)
   end
 end

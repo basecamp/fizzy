@@ -3,20 +3,24 @@
 set -e
 
 COMPOSE_OPTIONS="-f docker-compose.beamer-testbed.yml"
+BEAMER_OPTIONS="--debug --directory ./storage"
 
 # Show usage
 show_usage() {
   echo "Usage: $0 {start|stop|logs|console|bash|server|run-migrations} [options]"
   echo ""
-  echo "Commands:"
+  echo "Lifecycle commands:"
   echo "  start              Build and start all services"
   echo "  stop               Stop all services"
+  echo "  clean              Clean up testbed state, stopping the cluster if necessary"
+  echo ""
+  echo "Database manipulation:"
+  echo "  create-accounts    Create sample accounts in the database"
+  echo ""
+  echo "Debugging commands:"
   echo "  logs               Show logs (pass -f to follow)"
   echo "  console [node]     Open Rails console (default: fizzy-01)"
   echo "  bash [node]        Open bash shell (default: fizzy-01)"
-  echo "  server             Start web server and beamer using foreman"
-  echo "  run-migrations     Wait for beamer, then run migrations if primary"
-  exit 1
 }
 
 # Get all fizzy-* services from docker compose
@@ -34,49 +38,76 @@ get_fizzy_services() {
 # Function to wait for a container to be healthy
 wait_for_container() {
   local container=$1
-  local max_attempts=60
-  local attempt=0
+  local max_iterations=10
+  local iteration=0
 
-  echo "Waiting for $container to be ready..."
-
-  while [ $attempt -lt $max_attempts ]; do
-    if docker compose $COMPOSE_OPTIONS exec -T "$container" curl -f -s http://localhost:3000/up >/dev/null 2>&1; then
-      echo "$container is ready!"
-      return 0
-    fi
-    attempt=$((attempt + 1))
-    echo "$container isn't yet ready on attempt $attempt/$max_attempts"
+  while ! docker compose $COMPOSE_OPTIONS exec -T "$container" curl -f -s http://localhost/up >/dev/null 2>&1; do
+    echo "wait_for_container: Waiting for $container..."
     sleep 2
+    iteration=$((iteration + 1))
+
+    if [ $iteration -ge $max_iterations ]; then
+      echo "wait_for_container: Timeout waiting for $container after ${max_iterations} iterations"
+      exit 1
+    fi
   done
 
-  echo "Error: $container failed to become ready after $max_attempts attempts"
-  return 1
+  echo "wait_for_container: done waiting for $container"
+}
+
+# Function to wait until beamer is healthy in the container
+wait_for_beamer() {
+  while ! bin/beamer $BEAMER_OPTIONS status >/dev/null 2>&1; do
+    echo "wait_for_beamer: Waiting for beamer to be ready..."
+    sleep 1
+  done
+
+  echo "wait_for_beamer: done waiting for beamer"
+}
+
+# Function to wait until the default writer has created and replicated the untenanted database
+wait_for_default_writer() {
+  while [ ! -f storage/untenanted/development.sqlite3 ] ; do
+    echo "wait_for_default_writer: Waiting for untenanted database to be replicated..."
+    sleep 1
+  done
+
+  echo "wait_for_default_writer: done waiting for untenanted database."
+}
+
+# Function to wait until all migrations have been run locally
+wait_for_migrations() {
+  while [ ! -f storage/migrations_done ]; do
+    echo "wait_for_migrations: Waiting for migrations..."
+    sleep 1
+  done
+
+  echo "wait_for_migrations: done waiting for migrations."
 }
 
 # Function to configure kamal-proxy
-# TODO: set up the other containers as read targets
+# TODO: set up more containers as read targets
 configure_proxy() {
-  local writer=$1
-  local readers=${@:2}
+  local writers=$@
 
-  echo "Configuring kamal-proxy..."
+  echo "configure_proxy: starting for ${writers}"
 
-  local writer_target="$writer:3000"
-  local reader_target=""
-  for reader in $readers; do
-    if [ -n "$reader_target" ]; then
-      reader_target+=","
+  local writer_target="$writer"
+  for writer in $writers; do
+    if [ -n "$writer_target" ]; then
+      writer_target+=","
     fi
-    reader_target+="$reader:3000"
+    writer_target+="$writer"
   done
 
   docker compose $COMPOSE_OPTIONS exec -T kamal-proxy \
     kamal-proxy deploy fizzy \
-    --target $writer_target \
-    --read-target $reader_target \
-    --host fizzy.localhost
+      --target $writer_target \
+      --default-writer fizzy-01 \
+      --dynamic-load-balancing \
+      --host fizzy.localhost
 
-  echo "Configured kamal-proxy with target=${writer_target} and read-target=${reader_target}"
+  echo "configure_proxy: configured with target=${writer_target}"
 }
 
 # Start command
@@ -102,6 +133,7 @@ cmd_start() {
   echo "Creating temporary directories..."
   for service in $fizzy_services; do
     mkdir -p "./tmp/beamer-testbed/$service/storage"
+    rm -rf   "./tmp/beamer-testbed/$service/tmp"
     mkdir -p "./tmp/beamer-testbed/$service/tmp"
   done
 
@@ -127,7 +159,13 @@ cmd_start() {
 cmd_stop() {
   echo "Stopping services..."
   docker compose $COMPOSE_OPTIONS down
-  echo "Services stopped."
+}
+
+cmd_clean() {
+  cmd_stop
+
+  echo "Cleaning up testbed state..."
+  rm -rf ./tmp/beamer-testbed
 }
 
 # Logs command
@@ -166,40 +204,70 @@ cmd_server() {
   mkdir -p ./storage/tenants
   mkdir -p ./storage/untenanted
 
-  echo "Starting web server and beamer with foreman..."
+  echo "Starting all the things..."
   exec foreman start -f Procfile.beamer-testbed
+}
+
+# Create sample accounts in each zone
+cmd_create_accounts() {
+  # TODO: this is the set of zone writers
+  for host in fizzy-01 fizzy-02 fizzy-03 ; do
+    docker compose $COMPOSE_OPTIONS exec -T $host script/create-testbed-account.rb
+  done
+}
+
+# Run the rails server
+cmd_run_web() {
+  wait_for_migrations
+
+  bin/thrust bin/rails server
 }
 
 # Run migrations command (runs inside container)
 cmd_run_migrations() {
-  # Store all arguments as BEAMER_OPTIONS
-  BEAMER_OPTIONS="$*"
+  wait_for_beamer
 
-  echo "Waiting for beamer to be ready..."
+  # give cmd_run_beamer moment to configure zones
+  sleep 2
 
-  # Wait for beamer status to succeed
-  while ! bin/beamer $BEAMER_OPTIONS status >/dev/null 2>&1; do
-    echo "Beamer not ready yet, waiting..."
-    sleep 1
-  done
-
-  echo "Beamer is ready!"
-  sleep 1
-
-  # Check if this is the primary node
-  if bin/beamer $BEAMER_OPTIONS is-primary; then
-    echo "This is the primary node, running migrations..."
-    ./bin/rails db:prepare
-    echo "Migrations complete!"
+  if bin/beamer $BEAMER_OPTIONS is-primary --zone iad-01 ; then
+    echo "cmd_run_migrations: I am the primary, going immediately..."
   else
-    echo "This is not the primary node, skipping migrations."
+    echo "cmd_run_migrations: I am NOT the primary, waiting for that guy..."
+    wait_for_default_writer
   fi
 
+  echo "cmd_run_migrations: Running migrations ..."
+  bin/rails db:prepare
+  touch storage/migrations_done
+
   # Wait indefinitely until interrupted
-  echo "Waiting indefinitely (press Ctrl-C to exit)..."
+  echo "cmd_run_migrations: Waiting indefinitely (press Ctrl-C to exit)..."
   while true; do
     sleep 3600
   done
+}
+
+# Run the beamer daemon (runs inside container)
+cmd_run_beamer() {
+  set -m
+
+  echo "cmd_run_beamer: Starting..."
+  bin/beamer $BEAMER_OPTIONS run --primary fizzy-01 &
+
+  wait_for_beamer
+
+  # Configure zones
+  bin/beamer $BEAMER_OPTIONS switch --zone iad-01 --primary fizzy-01
+  bin/beamer $BEAMER_OPTIONS switch --zone ams-01 --primary fizzy-02
+  bin/beamer $BEAMER_OPTIONS switch --zone chi-01 --primary fizzy-03
+
+  # make the default zone read-only
+  bin/beamer $BEAMER_OPTIONS switch --zone default --no-primary
+
+  # Bring beamer daemon process to foreground
+  echo "cmd_run_beamer: Okey dokey"
+  fg
 }
 
 # Main command dispatch
@@ -209,6 +277,9 @@ start)
   ;;
 stop)
   cmd_stop
+  ;;
+clean)
+  cmd_clean
   ;;
 logs)
   shift
@@ -225,9 +296,17 @@ bash)
 server)
   cmd_server
   ;;
+create-accounts)
+  cmd_create_accounts
+  ;;
+run-web)
+  cmd_run_web
+  ;;
 run-migrations)
-  shift
-  cmd_run_migrations "$@"
+  cmd_run_migrations
+  ;;
+run-beamer)
+  cmd_run_beamer
   ;;
 *)
   show_usage

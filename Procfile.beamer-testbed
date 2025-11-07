@@ -1,3 +1,3 @@
-web: bin/thrust bin/rails server
-beamer: bin/beamer --debug --directory ./storage/ run --primary ${BEAMER_PRIMARY:-$(hostname)}
-migrations: bin/beamer-testbed run-migrations --debug --directory ./storage/
+web:        bin/beamer-testbed run-web
+beamer:     bin/beamer-testbed run-beamer
+migrations: bin/beamer-testbed run-migrations
