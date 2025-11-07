@@ -32,4 +32,4 @@ env:
 aliases:
   console: app exec -i --reuse "bin/rails console"
   ssh: app exec -i --reuse /bin/bash
-  switch: accessory exec beamer --reuse "beamer switch --primary=<%= ENV["PRIMARY"] %>"
+  switch: accessory exec beamer --reuse "beamer switch --primary=<%= ENV["PRIMARY"] %> --zone=<%= ENV["ZONE"] %>"
