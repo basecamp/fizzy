@@ -7,9 +7,9 @@ task "db_migrate_queue_zones" => :environment do
 
     tasks = ActiveRecord::Tenanted::DatabaseTasks.new(config)
 
-    FIZZY_ZONES.each do |zone|
+    BEAMER_ZONES.each do |zone|
       # TODO: the beamer-rails gem should offer an API for this
-      if system("bin/beamer -d ./storage is-primary --zone #{zone.inspect} 2> /dev/null")
+      if BEAMER_ZONES.size == 1 || system("bin/beamer -d ./storage is-primary --zone #{zone.inspect} 2> /dev/null")
         $stdout.puts "Preparing Fizzy's Solid Queue database for zone #{zone.inspect}"
         tasks.migrate_tenant(zone)
       end

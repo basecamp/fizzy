@@ -37,6 +37,7 @@ fizzy_nodes() {
 }
 
 fizzy_default_writer_node() {
+  # TODO: dynamically find the writer for PRIMARY_ZONE
   echo "fizzy-01"
 }
 

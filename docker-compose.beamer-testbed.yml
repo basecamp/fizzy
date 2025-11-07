@@ -18,6 +18,8 @@ x-base-environment: &base-environment
   BINDING: 0.0.0.0
   BEAMER: "true"
   BEAMER_TESTBED: "true"
+  BEAMER_ZONES: "chi-01 iad-01 ams-01"
+  PRIMARY_ZONE: "chi-01"
   SECRET_KEY_BASE: beamer_testbed_shared_secret_key_base_for_development_only
 
 services:

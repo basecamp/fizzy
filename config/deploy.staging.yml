@@ -1,17 +1,19 @@
 servers:
   web:
     hosts:
-      - fizzy-staging-app-01.sc-chi-int.37signals.com
-      - fizzy-staging-app-02.sc-chi-int.37signals.com
-      - fizzy-staging-app-101.df-iad-int.37signals.com
-      - fizzy-staging-app-102.df-iad-int.37signals.com
-      - fizzy-staging-app-401.df-ams-int.37signals.com
-      - fizzy-staging-app-402.df-ams-int.37signals.com
+      - fizzy-staging-app-01.sc-chi-int.37signals.com: sc_chi
+      - fizzy-staging-app-02.sc-chi-int.37signals.com: sc_chi
+      - fizzy-staging-app-101.df-iad-int.37signals.com: df_iad
+      - fizzy-staging-app-102.df-iad-int.37signals.com: df_iad
+      - fizzy-staging-app-401.df-ams-int.37signals.com: df_ams
+      - fizzy-staging-app-402.df-ams-int.37signals.com: df_ams
     labels:
       otel_scrape_enabled: true
   jobs:
     hosts:
-      - fizzy-staging-app-01.sc-chi-int.37signals.com
+      - fizzy-staging-app-01.sc-chi-int.37signals.com: sc_chi
+      - fizzy-staging-app-101.df-iad-int.37signals.com: df_iad
+      - fizzy-staging-app-401.df-ams-int.37signals.com: df_ams
     labels:
       otel_scrape_enabled: true
 
@@ -24,6 +26,15 @@ ssh:
 env:
   clear:
     RAILS_ENV: staging
+    BEAMER_ZONES: "chi-01 iad-01 ams-01"
+    PRIMARY_ZONE: "chi-01"
+  tags:
+    sc_chi:
+      SOLID_QUEUE_ZONE: chi-01
+    df_iad:
+      SOLID_QUEUE_ZONE: iad-01
+    df_ams:
+      SOLID_QUEUE_ZONE: ams-01
 
 accessories:
   beamer:
