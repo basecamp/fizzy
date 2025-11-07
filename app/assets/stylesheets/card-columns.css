@@ -3,6 +3,10 @@
   /* ------------------------------------------------------------------------ */
 
   #main:has(.card-columns) {
+    --main-padding: 0;
+  }
+
+  .card-columns {
     --bubble-size: 3.5rem;
     --cards-gap: min(1.2cqi, 1.7rem);
     --column-gap: 8px;
@@ -14,10 +18,7 @@
     --progress-max-cards: 20;
     --progress-max-height: 50dvh;
 
-    padding-inline: var(--column-gap);
-  }
-
-  .card-columns {
+    -ms-overflow-style: none;  /* Hide x-scrollbar on Edge */
     container-type: inline-size;
     display: grid;
     gap: var(--column-gap);
@@ -26,7 +27,14 @@
     max-inline-size: var(--main-width);
     overflow-x: auto;
     overflow-y: hidden;
+    padding-block-end: var(--column-width-collapsed);
     position: relative;
+    scrollbar-width: none; /* Hide x-scrollbar on FF */
+
+    /* Hide x-scrollbar on Chrome/Safari/Opera */
+    &::-webkit-scrollbar {
+      display: none;
+    }
 
     /* When it has something expanded */
     &:has(.card-columns__left .cards:not(.is-collapsed), .card-columns__right .cards:not(.is-collapsed)) {
@@ -51,10 +59,12 @@
 
   .card-columns__left {
     justify-content: end;
+    padding-inline-start: var(--column-gap);
   }
 
   .card-columns__right {
     justify-content: start;
+    padding-inline-end: var(--column-gap);
   }
 
   /* Column

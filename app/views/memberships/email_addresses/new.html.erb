@@ -13,7 +13,7 @@
     <h1 class="txt-x-large font-weight-black margin-none">
       <%= @page_title %>
     </h1>
-    <p class="margin-none">Enter your new email address. We'll send you a confirmation to verify it.</p>
+    <p class="margin-none">Enter your new email address, then hit the link to confirm it</p>
   </header>
 
   <%= form_with url: email_addresses_path(membership_id: @membership.id), method: :post, class: "flex flex-column gap", data: { controller: "form", turbo: false } do |form| %>
@@ -23,8 +23,8 @@
       </label>
     </div>
 
-    <button type="submit" class="btn btn--reversed center" data-form-target="submit">
-      <span>Next</span>
+    <button type="submit" class="btn btn--link center" data-form-target="submit">
+      <span>Continue</span>
       <%= icon_tag "arrow-right" %>
     </button>
   <% end %>

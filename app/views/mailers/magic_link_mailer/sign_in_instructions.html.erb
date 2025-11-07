@@ -1,11 +1,13 @@
-<h1 class="title">Sign in to Fizzy</h1>
-<p class="subtitle">Hit the button below to sign in to Fizzy on this device</p>
 
-<%= link_to "Sign in to Fizzy", session_magic_link_url(code: @magic_link.code), class: "btn" %>
+<% if @identity.memberships.any? %>
+  <h1 class="title">Fizzy verification code</h1>
+  <p class="subtitle">Please enter this 6-character verification code on the Fizzy sign-in page:</p>
+<% else %>
+  <h1 class="title">Welcome to Fizzy!</h1>
+  <p class="subtitle">Please enter this 6-character verification code on the Fizzy sign-up page to create your new account:</p>
+<% end %>
 
-<p class="margin-block-start-double">If you’re signing in on another device, enter this special code:
-  <br><strong class="txt-large"><%= @magic_link.code %></strong>
-</p>
+<strong class="txt-large"><%= @magic_link.code %></strong>
 
 <p class="footer">Need help? <%= mail_to "support@37signals.com", "Email us"%>.
 </p>

@@ -1,5 +1,5 @@
 <% filter = user_filtering.filter %>
-<%= tag.div class: "quick-filter position-relative",
+<%= tag.div class: "quick-filter",
       data: { controller: "dialog", action: "keydown.esc->dialog#close click@document->dialog#closeOnClickOutside", filter_show: filter.public_send("#{name}_window").present? } do %>
     <button class="btn input input--select flex-inline txt-x-small" data-action="click->dialog#open:stop">
       <span class="overflow-ellipsis">

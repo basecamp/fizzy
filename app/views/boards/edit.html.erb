@@ -33,6 +33,6 @@
   <div class="settings__panel panel shadow center">
     <%= render "boards/edit/auto_close", board: @board %>
     <%= render "boards/edit/publication", board: @board %>
-    <%= render "boards/edit/delete", board: @board %>
+    <%= render "boards/edit/delete", board: @board if Current.user.can_administer_card?(@board) %>
   </div>
 </section>

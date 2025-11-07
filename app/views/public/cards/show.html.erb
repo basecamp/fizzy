@@ -13,12 +13,14 @@
 <% end %>
 
 <% content_for :header do %>
-  <%= link_to published_board_url(@card.board), class: "header__title btn borderless txt-large", style: "--btn-padding: 0.25ch 1ch 0.25ch 0.75ch; view-transistion-name: card-board-title;", data: { controller: "hotkey", action: "keydown.esc@document->hotkey#click" } do %>
-    <span class="overflow-ellipsis">
-      &larr;
-      <strong class="font-black"><%= @card.board.name %></strong>
-    </span>
-  <% end %>
+  <div class="header__actions header__actions--start">
+    <%= link_to published_board_url(@card.board), class: "btn borderless txt-medium", style: "view-transistion-name: card-board-title;", data: { controller: "hotkey", action: "keydown.esc@document->hotkey#click" } do %>
+      <span class="overflow-ellipsis">
+        &larr;
+        <strong class="font-black"><%= @card.board.name %></strong>
+      </span>
+    <% end %>
+  </div>
 <% end %>
 
 <section id="<%= dom_id(@card, :card_container) %>"

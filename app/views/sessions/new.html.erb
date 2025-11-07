@@ -1,17 +1,19 @@
-<% @page_title = "Sign in" %>
+<% @page_title = "Enter your email" %>
 
-<div class="panel panel--centered flex flex-column gap-half">
-  <h1 class="txt-x-large font-weight-black margin-none"><%= @page_title %></h1>
+<div class="panel panel--centered flex flex-column gap-half" style="--panel-size: 65ch;">
+  <h1 class="txt-x-large font-weight-black margin-block-end">Let’s get you in to Fizzy</h1>
 
   <%= form_with url: session_path, class: "flex flex-column gap txt-medium" do |form| %>
     <div class="flex align-center gap">
       <label class="flex align-center gap input input--actor">
-        <%= form.email_field :email_address, required: true, class: "input full-width", autofocus: true, autocomplete: "username", placeholder: "Email address" %>
+        <%= form.email_field :email_address, required: true, class: "input txt-large full-width", autofocus: true, autocomplete: "username", placeholder: "Enter your email address…" %>
       </label>
     </div>
 
-    <button type="submit" id="log_in" class="btn btn--link center">
-      <span>Continue</span>
+    <p>If you’ve already got an account we’ll get you signed in. If you’re new here, we’ll set you up with your own Fizzy account.</p>
+
+    <button type="submit" id="log_in" class="btn btn--link center txt-medium">
+      <span>Let’s go</span>
       <%= icon_tag "arrow-right" %>
     </button>
   <% end %>

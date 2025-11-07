@@ -1,6 +1,6 @@
 <% filter = user_filtering.filter %>
 
-<%= tag.div class: class_names("quick-filter position-relative"),
+<%= tag.div class: class_names("quick-filter"),
       data: {
         controller: "dialog combobox",
         action: "keydown.esc->dialog#close click@document->dialog#closeOnClickOutside",

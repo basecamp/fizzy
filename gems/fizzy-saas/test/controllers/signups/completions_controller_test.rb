@@ -1,6 +1,6 @@
 require "test_helper"
 
-class Signups::CompletionsControllerTest < ActionDispatch::IntegrationTest
+class Signup::CompletionsControllerTest < ActionDispatch::IntegrationTest
   setup do
     @signup = Signup.new(email_address: "newuser@example.com", full_name: "New User")
 
@@ -16,7 +16,7 @@ class Signups::CompletionsControllerTest < ActionDispatch::IntegrationTest
       get saas.new_signup_completion_path(signup: {
         membership_id: @signup.membership_id,
         full_name: @signup.full_name,
-        account_name: @signup.account_name }), headers: http_basic_auth_headers
+        account_name: @signup.account_name })
     end
 
     assert_response :success
@@ -30,7 +30,7 @@ class Signups::CompletionsControllerTest < ActionDispatch::IntegrationTest
           full_name: @signup.full_name,
           account_name: @signup.account_name
         }
-      }, headers: http_basic_auth_headers
+      }
     end
 
     assert_redirected_to landing_path(script_name: "/#{@signup.tenant}"), "Successful completion should redirect to root in new tenant"
@@ -42,14 +42,9 @@ class Signups::CompletionsControllerTest < ActionDispatch::IntegrationTest
           full_name: "",
           account_name: ""
         }
-      }, headers: http_basic_auth_headers
+      }
     end
 
     assert_response :unprocessable_entity, "Invalid params should return unprocessable entity"
   end
-
-  private
-    def http_basic_auth_headers
-      { "Authorization" => ActionController::HttpAuthentication::Basic.encode_credentials("testname", "testpassword") }
-    end
 end

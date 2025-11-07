@@ -10,7 +10,7 @@ class MagicLinkMailerTest < ActionMailer::TestCase
     end
 
     assert_equal [ "kevin@37signals.com" ], email.to
-    assert_equal "Sign in to Fizzy", email.subject
+    assert_equal "Your Fizzy verification code", email.subject
     assert_match magic_link.code, email.body.encoded
   end
 end

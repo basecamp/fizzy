@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2025_11_05_122933) do
+ActiveRecord::Schema[8.2].define(version: 2025_11_06_154151) do
   create_table "accesses", force: :cascade do |t|
     t.datetime "accessed_at"
     t.integer "board_id", null: false
@@ -404,6 +404,7 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_05_122933) do
     t.integer "user_id", null: false
     t.boolean "watching", default: true, null: false
     t.index ["card_id"], name: "index_watches_on_card_id"
+    t.index ["user_id", "card_id"], name: "index_watches_on_user_id_and_card_id"
     t.index ["user_id"], name: "index_watches_on_user_id"
   end
 

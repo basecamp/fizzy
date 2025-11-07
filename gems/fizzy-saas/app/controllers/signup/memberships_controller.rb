@@ -1,6 +1,4 @@
-class Signups::MembershipsController < ApplicationController
-  include Restricted
-
+class Signup::MembershipsController < ApplicationController
   require_untenanted_access
 
   layout "public"

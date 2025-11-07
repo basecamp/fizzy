@@ -38,4 +38,6 @@ class Board::AccessibleTest < ActiveSupport::TestCase
     boards(:writebook).access_for(users(:kevin)).access_only!
     assert_not_includes boards(:writebook).reload.watchers, users(:kevin)
   end
+
+  # NOTE: The tests for clearing inaccessible data are in +AccessTest+
 end

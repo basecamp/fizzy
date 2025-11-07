@@ -45,6 +45,7 @@ module Board::Accessible
 
     mentions_for_user(user).destroy_all
     notifications_for_user(user).destroy_all
+    watches_for(user).destroy_all
   end
 
   def watchers
@@ -88,5 +89,9 @@ module Board::Accessible
         .where("(notifications.source_type = 'Event' AND events.eventable_type = 'Card' AND event_cards.board_id = ?) OR
               (notifications.source_type = 'Event' AND events.eventable_type = 'Comment' AND event_comment_cards.board_id = ?)",
                id, id)
+    end
+
+    def watches_for(user)
+      Watch.where(card: cards, user: user)
     end
 end

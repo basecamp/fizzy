@@ -64,4 +64,20 @@ class AccessTest < ActiveSupport::TestCase
 
     assert_empty remaining_mentions
   end
+
+  test "watches are destroyed when access is lost" do
+    kevin = users(:kevin)
+    board = boards(:writebook)
+    card = board.cards.first
+
+    assert card.watched_by?(kevin)
+
+    kevin_access = accesses(:writebook_kevin)
+
+    perform_enqueued_jobs only: Board::CleanInaccessibleDataJob do
+      kevin_access.destroy
+    end
+
+    assert_not card.watched_by?(kevin)
+  end
 end

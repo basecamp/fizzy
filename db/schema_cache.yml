@@ -2760,6 +2760,23 @@ indexes:
     nulls_not_distinct:
     comment:
     valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: watches
+    name: index_watches_on_user_id_and_card_id
+    unique: false
+    columns:
+    - user_id
+    - card_id
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
   webhook_delinquency_trackers:
   - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
     table: webhook_delinquency_trackers
@@ -2843,4 +2860,4 @@ indexes:
     nulls_not_distinct:
     comment:
     valid: true
-version: 20251105122933
+version: 20251106154151

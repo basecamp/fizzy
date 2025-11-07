@@ -4,7 +4,11 @@
   data-controller="clicker"
   data-action="turbo:before-morph-attribute->collapsible-columns#preventToggle"
 >
-  <%= render "boards/show/expander", title: column.name, count: column.cards.active.count, column_id: dom_id(column) %>
+  <div class="cards__transition-container">
+    <header class="cards__header">
+      <%= render "boards/show/expander", title: column.name, count: column.cards.active.count, column_id: dom_id(column) %>
+    </header>
 
-  <%= column_frame_tag dom_id(column, :cards), src: public_board_column_path(column.board.publication.key, column) %>
+    <%= column_frame_tag dom_id(column, :cards), src: public_board_column_path(column.board.publication.key, column) %>
+  </div>
 </section>

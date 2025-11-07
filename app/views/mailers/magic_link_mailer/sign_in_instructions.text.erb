@@ -1,8 +1,7 @@
-Sign in to Fizzy
-<%= "=" * 80 %>
+<% if @identity.memberships.any? %>
+Please enter this 6-character verification code on the Fizzy sign-in page:
+<% else %>
+Please enter this 6-character verification code on the Fizzy sign-up page to create your new account:
+<% end %>
 
-Open this link in your browser to login on this device:
-<%= session_magic_link_url(code: @magic_link.code) %>
-
-If you're signing in on another device, enter this code:
 <%= @magic_link.code %>
