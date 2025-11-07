@@ -167,6 +167,16 @@ columns:
     default_function:
     collation:
     comment:
+  - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
+    auto_increment:
+    name: process_name
+    cast_type: *3
+    sql_type_metadata: *4
+    'null': true
+    default:
+    default_function:
+    collation:
+    comment:
   solid_queue_failed_executions:
   - *5
   - !ruby/object:ActiveRecord::ConnectionAdapters::SQLite3::Column
@@ -607,6 +617,22 @@ indexes:
     nulls_not_distinct:
     comment:
     valid: true
+  - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
+    table: solid_queue_claimed_executions
+    name: index_solid_queue_claimed_executions_on_process_name
+    unique: false
+    columns:
+    - process_name
+    lengths: {}
+    orders: {}
+    opclasses: {}
+    where:
+    type:
+    using:
+    include:
+    nulls_not_distinct:
+    comment:
+    valid: true
   solid_queue_failed_executions:
   - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
     table: solid_queue_failed_executions
@@ -743,11 +769,10 @@ indexes:
     valid: true
   - !ruby/object:ActiveRecord::ConnectionAdapters::IndexDefinition
     table: solid_queue_processes
-    name: index_solid_queue_processes_on_name_and_supervisor_id
+    name: index_solid_queue_processes_on_name
     unique: true
     columns:
     - name
-    - supervisor_id
     lengths: {}
     orders: {}
     opclasses: {}
@@ -978,4 +1003,4 @@ indexes:
     nulls_not_distinct:
     comment:
     valid: true
-version: 1
+version: 20251013013530
