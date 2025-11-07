@@ -76,6 +76,7 @@ production: &production
     adapter: beamer
     database: storage/zones/<%= Rails.env %>/%{tenant}/queue.sqlite3
     migrations_paths: db/queue_migrate
+    tenanted: true
 
 beta: *production
 staging: *production
