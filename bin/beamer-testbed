@@ -13,14 +13,15 @@ show_usage() {
   echo "  start              Build and start all services"
   echo "  stop               Stop all services"
   echo "  clean              Clean up testbed state, stopping the cluster if necessary"
+  echo "  exec <node> <cmd>  Execute command in specified node"
   echo ""
   echo "Database manipulation:"
   echo "  create-accounts    Create sample accounts in the database"
   echo ""
   echo "Debugging commands:"
   echo "  logs               Show logs (pass -f to follow)"
-  echo "  console [node]     Open Rails console (default: fizzy-01)"
-  echo "  bash [node]        Open bash shell (default: fizzy-01)"
+  echo "  console <node>     Open Rails console (default: fizzy-01)"
+  echo "  bash <node>        Open bash shell (default: fizzy-01)"
 }
 
 # Functions to introspect on the cluster
@@ -205,6 +206,14 @@ cmd_clean() {
   rm -rf ./tmp/beamer-testbed
 }
 
+cmd_exec() {
+  local node="$1"
+  shift
+  echo "Running command in $node: $*"
+
+  docker compose $COMPOSE_OPTIONS exec "$node" "$@"
+}
+
 # Logs command
 cmd_logs() {
   docker compose $COMPOSE_OPTIONS logs "$@"
@@ -320,6 +329,10 @@ stop)
   ;;
 clean)
   cmd_clean
+  ;;
+exec)
+  shift
+  cmd_exec "$@"
   ;;
 logs)
   shift
