@@ -1,12 +1,7 @@
-<% @page_title = "Join #{@account_name}" %>
+<% @page_title = "Join #{@account_name} in Fizzy" %>
 
 <div class="panel panel--centered flex flex-column gap-half">
-  <header>
-    <h1 class="txt-x-large font-weight-black margin-none">
-      <%= @page_title %>
-    </h1>
-    <p class="margin-none-block-start">Enter your email address to continue</p>
-  </header>
+  <h1 class="txt-x-large font-weight-black margin-none"><%= @page_title %></h1>
 
   <%= form_with url: join_path(code: params[:code], tenant: params[:tenant]), class: "flex flex-column gap txt-medium", data: { controller: "form" } do |form| %>
     <div class="flex align-center gap">
@@ -16,7 +11,7 @@
     </div>
 
     <button type="submit" id="log_in" class="btn btn--link center" data-form-target="submit">
-      <span>Join</span>
+      <span>Continue</span>
       <%= icon_tag "arrow-right" %>
     </button>
   <% end %>

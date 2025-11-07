@@ -59,10 +59,6 @@
       transform: translateX(0);
     }
 
-    &:has(.popup__footer) {
-      --panel-padding: var(--block-space) var(--block-space) 0 var(--block-space);
-    }
-
     form {
       display: contents;
     }
@@ -194,23 +190,5 @@
     &:hover {
       --btn-border-color: var(--color-ink);
     }
-  }
-
-  .popup__footer {
-    background-color: var(--color-canvas);
-    border-block-start: 1px solid var(--color-ink-lighter);
-    font-size: var(--text-small);
-    inset: auto 0 0;
-    line-height: 1.6;
-    margin-block-start: var(--block-space-half);
-    padding: 1.5ch;
-    position: sticky;
-    text-align: center;
-    z-index: 1;
-  }
-
-  @keyframes safari-sticky-footer-hack {
-    0% { position: absolute; }
-    100% { position: sticky; }
   }
 }

@@ -1,6 +1,6 @@
 require "test_helper"
 
-class Signups::MembershipsControllerTest < ActionDispatch::IntegrationTest
+class Signup::MembershipsControllerTest < ActionDispatch::IntegrationTest
   setup do
     @identity = Identity.create!(email_address: "newuser@example.com")
     magic_link = @identity.send_magic_link
@@ -16,7 +16,7 @@ class Signups::MembershipsControllerTest < ActionDispatch::IntegrationTest
 
   test "new" do
     untenanted do
-      get saas.new_signup_membership_path, headers: http_basic_auth_headers
+      get saas.new_signup_membership_path
 
       assert_response :success
     end
@@ -24,7 +24,7 @@ class Signups::MembershipsControllerTest < ActionDispatch::IntegrationTest
 
   test "new with new_user param" do
     untenanted do
-      get saas.new_signup_membership_path(signup: { new_user: true }), headers: http_basic_auth_headers
+      get saas.new_signup_membership_path(signup: { new_user: true })
 
       assert_response :success
     end
@@ -37,7 +37,7 @@ class Signups::MembershipsControllerTest < ActionDispatch::IntegrationTest
           signup: {
             full_name: "New User"
           }
-        }, headers: http_basic_auth_headers
+        }
       end
 
       membership = Membership.last
@@ -58,15 +58,10 @@ class Signups::MembershipsControllerTest < ActionDispatch::IntegrationTest
           signup: {
             full_name: ""
           }
-        }, headers: http_basic_auth_headers
+        }
       end
 
       assert_response :unprocessable_entity, "Invalid params should return unprocessable entity"
     end
   end
-
-  private
-    def http_basic_auth_headers
-      { "Authorization" => ActionController::HttpAuthentication::Basic.encode_credentials("testname", "testpassword") }
-    end
 end

@@ -375,6 +375,12 @@
     }
   }
 
+  action-text-attachment[content-type^='application/vnd.actiontext.mention'] {
+    img {
+      object-fit: cover;
+    }
+  }
+
   [data-lexical-cursor] {
     animation: blink 1s step-end infinite;
     block-size: 1lh;

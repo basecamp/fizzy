@@ -3,7 +3,7 @@ class MagicLinkMailer < ApplicationMailer
     @magic_link = magic_link
     @identity = @magic_link.identity
 
-    mail to: @identity.email_address, subject: "Sign in to Fizzy"
+    mail to: @identity.email_address, subject: "Your Fizzy verification code"
   end
 
   private

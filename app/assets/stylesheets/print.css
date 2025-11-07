@@ -35,8 +35,8 @@
     print-color-adjust: exact;
   }
 
-  .boxcar-menu,
-  .boxcar-menu-trigger,
+  .nav__menu,
+  .nav__trigger,
   .header__actions {
     display: none;
   }

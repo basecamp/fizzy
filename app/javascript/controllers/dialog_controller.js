@@ -24,6 +24,7 @@ export default class extends Controller {
 
     limitHeightToViewport(this.dialogTarget, true)
 
+    this.#loadLazyFrames()
     this.dialogTarget.setAttribute("aria-hidden", "false")
     this.dispatch("show")
   }
@@ -53,5 +54,9 @@ export default class extends Controller {
       event.preventDefault()
       event.stopPropagation()
     }
+  }
+
+  #loadLazyFrames() {
+    Array.from(this.dialogTarget.querySelectorAll("turbo-frame")).forEach(frame => { frame.loading = "eager" })
   }
 }

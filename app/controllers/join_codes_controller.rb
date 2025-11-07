@@ -4,6 +4,8 @@ class JoinCodesController < ApplicationController
   before_action :set_join_code
   before_action :ensure_join_code_is_valid
 
+  layout "public"
+
   def new
     @account_name = ApplicationRecord.with_tenant(tenant) { Account.sole.name }
   end

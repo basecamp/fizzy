@@ -27,8 +27,9 @@ class SignupTest < ActiveSupport::TestCase
     end
 
     signup_invalid = Signup.new(email_address: "")
-    assert_not signup_invalid.create_identity, "Should fail with invalid email"
-    assert_not_empty signup_invalid.errors[:email_address], "Should have validation error for email_address"
+    assert_raises do
+      signup_invalid.create_identity
+    end
   end
 
   test "#create_membership" do
@@ -56,7 +57,6 @@ class SignupTest < ActiveSupport::TestCase
   test "#complete" do
     Account.any_instance.expects(:setup_customer_template).once
 
-    # First create the membership
     signup_for_membership = Signup.new(
       full_name: "Kevin",
       identity: identities(:kevin)

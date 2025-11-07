@@ -3,6 +3,8 @@ class Users::JoinsController < ApplicationController
 
   before_action :set_join_code, :ensure_join_code_is_valid
 
+  layout "public"
+
   def new
   end
 

@@ -8,10 +8,6 @@ class Signup
   attr_accessor :full_name, :email_address, :identity, :membership_id, :account_name
   attr_reader :queenbee_account, :account, :user, :tenant, :membership
 
-  with_options on: :identity_creation do
-    validates_presence_of :email_address
-  end
-
   with_options on: :membership_creation do
     validates_presence_of :full_name, :identity
   end
@@ -42,8 +38,6 @@ class Signup
   end
 
   def create_identity
-    return false unless valid?(:identity_creation)
-
     @identity = Identity.find_or_create_by!(email_address: email_address)
     @identity.send_magic_link
   end

@@ -1,11 +1,9 @@
 Fizzy::Saas::Engine.routes.draw do
-  resource :signup, only: %i[ new create ] do
-    scope module: :signups, as: :signup do
-      collection do
-        resource :membership, only: %i[ new create ]
-        resource :completion, only: %i[ new create ]
-      end
-    end
+  get "/signup/new", to: redirect("/session/new")
+
+  namespace :signup do
+    resource :membership, only: %i[ new create ]
+    resource :completion, only: %i[ new create ]
   end
 
   Queenbee.routes(self)

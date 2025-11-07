@@ -1,6 +1,4 @@
-class Signups::CompletionsController < ApplicationController
-  include Restricted
-
+class Signup::CompletionsController < ApplicationController
   require_untenanted_access
 
   layout "public"

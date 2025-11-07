@@ -13,7 +13,8 @@
       "menu menu menu"
       "actions-start title actions-end";
     max-inline-size: 100dvw;
-    padding: calc(var(--block-space-half) + env(safe-area-inset-top)) var(--main-padding);
+    padding-block: calc(var(--block-space-half) + env(safe-area-inset-top)) var(--block-space-half);
+    padding-inline: var(--main-padding);
 
     /* Change the grid size depending on how many buttons are present */
     &:has(.header__actions > *:nth-child(1)) { --header-button-count: 1; }
@@ -76,6 +77,18 @@
 
     &:focus {
       --left-offset: var(--inline-space);
+    }
+  }
+
+  .header__logo {
+    color: var(--color-ink);
+    inline-size: auto;
+    margin-block-start: 0.1em;
+
+    img {
+      block-size: auto;
+      inline-size: 1.15em;
+      margin-inline-end: 0.8ch;
     }
   }
 }

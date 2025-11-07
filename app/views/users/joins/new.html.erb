@@ -1,24 +1,17 @@
-<% @page_title = "Join #{Account.sole.name}" %>
+<% @page_title = "Great! Now enter your name" %>
 
 <div class="panel panel--centered flex flex-column gap-half">
-  <header>
-    <h1 class="txt-x-large font-weight-black margin-none">
-      <%= @page_title %>
-    </h1>
-
-    <p class="margin-none-block-start">Enter your name to continue</p>
-  </header>
+  <h1 class="txt-large font-weight-black margin-none"><%= @page_title %></h1>
 
   <%= form_with scope: "user", url: users_joins_path(membership: params[:membership]), class: "flex flex-column gap txt-medium", data: { controller: "form" } do |form| %>
     <div class="flex align-center gap">
       <label class="flex align-center gap input input--actor">
-        <%= form.text_field :name, class: "input full-width", autocomplete: "name", placeholder: "Name", autofocus: true, required: true, data: { "1p-ignore": true } %>
-        <%= icon_tag "person", class: "txt-large" %>
+        <%= form.text_field :name, class: "input full-width", autocomplete: "name", placeholder: "Full name", autofocus: true, required: true, data: { "1p-ignore": true } %>
       </label>
     </div>
 
     <button type="submit" id="log_in" class="btn btn--link center" data-form-target="submit">
-      <span>Join</span>
+      <span>Continue</span>
       <%= icon_tag "arrow-right" %>
     </button>
   <% end %>

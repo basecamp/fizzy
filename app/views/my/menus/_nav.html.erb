@@ -1,7 +1,7 @@
-<nav data-controller="dialog" data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside" data-turbo-permanent>
+<nav class="nav" data-controller="dialog" data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside" data-turbo-permanent>
   <%= render "my/menus/button" %>
 
-  <%= tag.dialog class: "boxcar-menu filter popup panel margin-block-start-half", data: {
+  <%= tag.dialog class: "nav__menu filter popup panel margin-block-start-half", data: {
         action: "turbo:before-cache@document->dialog#close keydown->navigable-list#navigate filter:changed->navigable-list#reset filter:changed->nav-section-expander#showWhileFiltering toggle->filter#filter",
         controller: "filter navigable-list nav-section-expander",
         dialog_target: "dialog",
