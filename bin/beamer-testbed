@@ -23,16 +23,30 @@ show_usage() {
   echo "  bash [node]        Open bash shell (default: fizzy-01)"
 }
 
-# Get all fizzy-* services from docker compose
-get_fizzy_services() {
-  fizzy_services=$(docker compose $COMPOSE_OPTIONS config --services | grep '^fizzy-' | sort)
+# Functions to introspect on the cluster
+fizzy_nodes() {
+  fizzy_nodes=$(yq -r ".services | keys | .[]" docker-compose.beamer-testbed.yml | grep fizzy- | sort)
 
-  if [ -z "$fizzy_services" ]; then
+  if [ -z "$fizzy_nodes" ]; then
     echo "Error: No fizzy-* services found in docker-compose file"
     exit 1
   fi
 
-  echo "$fizzy_services"
+  echo "$fizzy_nodes"
+}
+
+fizzy_default_writer_node() {
+  echo "fizzy-01"
+}
+
+# Nodes ending in 1 are the writers
+fizzy_writer_nodes() {
+  fizzy_nodes | grep -E '01$'
+}
+
+# Nodes ending in 1 are the writers
+fizzy_reader_nodes() {
+  fizzy_nodes | grep -E '02$'
 }
 
 # Function to wait for a container to be healthy
@@ -65,6 +79,17 @@ wait_for_beamer() {
   echo "wait_for_beamer: done waiting for beamer"
 }
 
+wait_for_zone_configurations() {
+  wait_for_beamer
+
+  while [ ! -f storage/zones_configured ]; do
+    echo "wait_for_zone_configurations: Waiting for zones to be ready..."
+    sleep 1
+  done
+
+  echo "wait_for_zone_configurations: done waiting for zones"
+}
+
 # Function to wait until the default writer has created and replicated the untenanted database
 wait_for_default_writer() {
   while [ ! -f storage/untenanted/development.sqlite3 ] ; do
@@ -73,6 +98,16 @@ wait_for_default_writer() {
   done
 
   echo "wait_for_default_writer: done waiting for untenanted database."
+}
+
+# Function to wait until the default writer has created and replicated the untenanted database
+wait_for_zone_writer() {
+  while [ ! -f storage/zones/development/$SOLID_QUEUE_ZONE/queue.sqlite3 ] ; do
+    echo "wait_for_zone_writer: Waiting for zone queue database to be replicated..."
+    sleep 1
+  done
+
+  echo "wait_for_zone_writer: done waiting for zone queue database."
 }
 
 # Function to wait until all migrations have been run locally
@@ -88,9 +123,7 @@ wait_for_migrations() {
 # Function to configure kamal-proxy
 # TODO: set up more containers as read targets
 configure_proxy() {
-  local writers=$@
-
-  echo "configure_proxy: starting for ${writers}"
+  echo "configure_proxy: starting..."
 
   local writer_target="$writer"
   for writer in $writers; do
@@ -100,20 +133,24 @@ configure_proxy() {
     writer_target+="$writer"
   done
 
-  docker compose $COMPOSE_OPTIONS exec -T kamal-proxy \
-    kamal-proxy deploy fizzy \
-      --target $writer_target \
-      --default-writer fizzy-01 \
-      --dynamic-load-balancing \
-      --host fizzy.localhost
+  command="kamal-proxy deploy fizzy --host fizzy.localhost --dynamic-load-balancing"
+  command="$command --default-writer $(fizzy_default_writer_node)"
+  for node in $(fizzy_writer_nodes) ; do
+    command="$command --target $node"
+  done
+  for node in $(fizzy_reader_nodes) ; do
+    command="$command --read-target $node"
+  done
 
-  echo "configure_proxy: configured with target=${writer_target}"
+  echo "configure_proxy: configuring with: $command"
+
+  docker compose $COMPOSE_OPTIONS exec -T kamal-proxy $command
 }
 
 # Start command
 cmd_start() {
-  local fizzy_services=$(get_fizzy_services)
-  local first_fizzy=$(echo "$fizzy_services" | head -n 1)
+  local nodes=$(fizzy_nodes)
+  local first_fizzy=$(echo "$nodes" | head -n 1)
 
   # Set UID and GID for Docker user mapping
   export DOCKER_UID=$(id -u)
@@ -131,10 +168,10 @@ cmd_start() {
 
   # Create tmp directories with proper permissions
   echo "Creating temporary directories..."
-  for service in $fizzy_services; do
-    mkdir -p "./tmp/beamer-testbed/$service/storage"
-    rm -rf   "./tmp/beamer-testbed/$service/tmp"
-    mkdir -p "./tmp/beamer-testbed/$service/tmp"
+  for node in $nodes; do
+    mkdir -p "./tmp/beamer-testbed/$node/storage"
+    rm -rf   "./tmp/beamer-testbed/$node/tmp"
+    mkdir -p "./tmp/beamer-testbed/$node/tmp"
   done
 
   echo "Building Docker image for $first_fizzy..."
@@ -145,10 +182,10 @@ cmd_start() {
   docker compose $COMPOSE_OPTIONS up -d
 
   # Wait for and register each fizzy container
-  for container in $fizzy_services; do
-    wait_for_container "$container"
+  for node in $nodes; do
+    wait_for_container $node
   done
-  configure_proxy $fizzy_services
+  configure_proxy
 
   echo ""
   echo "All containers are ready and registered!"
@@ -210,8 +247,7 @@ cmd_server() {
 
 # Create sample accounts in each zone
 cmd_create_accounts() {
-  # TODO: this is the set of zone writers
-  for host in fizzy-01 fizzy-02 fizzy-03 ; do
+  for host in $(fizzy_writer_nodes) ; do
     docker compose $COMPOSE_OPTIONS exec -T $host script/create-testbed-account.rb
   done
 }
@@ -225,19 +261,20 @@ cmd_run_web() {
 
 # Run migrations command (runs inside container)
 cmd_run_migrations() {
-  wait_for_beamer
+  wait_for_zone_configurations
 
-  # give cmd_run_beamer moment to configure zones
-  sleep 2
-
-  if bin/beamer $BEAMER_OPTIONS is-primary --zone iad-01 ; then
-    echo "cmd_run_migrations: I am the primary, going immediately..."
-  else
-    echo "cmd_run_migrations: I am NOT the primary, waiting for that guy..."
+  if [[ $(hostname) -eq $(fizzy_default_writer_node) ]] ; then
+    echo "cmd_run_migrations: I am the default writer, going immediately..."
+    bin/rails db:prepare
+  elif bin/beamer $BEAMER_OPTIONS is-primary --zone $SOLID_QUEUE_ZONE ; then
+    echo "cmd_run_migrations: I am a zone writer, waiting for default writer..."
     wait_for_default_writer
+  else
+    # TODO migrations should be smart enough not to run if not on the zone writer
+    echo "cmd_run_migrations: I am a replica, waiting for zone writer..."
+    wait_for_zone_writer
   fi
 
-  echo "cmd_run_migrations: Running migrations ..."
   bin/rails db:prepare
   touch storage/migrations_done
 
@@ -253,20 +290,23 @@ cmd_run_beamer() {
   set -m
 
   echo "cmd_run_beamer: Starting..."
-  bin/beamer $BEAMER_OPTIONS run --primary fizzy-01 &
+  rm -rf storage/zones_configured
+  bin/beamer $BEAMER_OPTIONS run --primary $(fizzy_default_writer_node) &
 
   wait_for_beamer
 
   # Configure zones
-  bin/beamer $BEAMER_OPTIONS switch --zone iad-01 --primary fizzy-01
-  bin/beamer $BEAMER_OPTIONS switch --zone ams-01 --primary fizzy-02
-  bin/beamer $BEAMER_OPTIONS switch --zone chi-01 --primary fizzy-03
+  for node in $(fizzy_writer_nodes); do
+    zone=$(yq -r ".services[\"${node}\"].environment.SOLID_QUEUE_ZONE" docker-compose.beamer-testbed.yml)
+    bin/beamer $BEAMER_OPTIONS switch --zone $zone --primary $node
+  done
 
   # make the default zone read-only
   bin/beamer $BEAMER_OPTIONS switch --zone default --no-primary
 
   # Bring beamer daemon process to foreground
-  echo "cmd_run_beamer: Okey dokey"
+  echo "cmd_run_beamer: Okey dokey on $(hostname)"
+  touch storage/zones_configured
   fg
 }
 

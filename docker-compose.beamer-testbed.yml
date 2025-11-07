@@ -19,7 +19,6 @@ x-base-environment: &base-environment
   BEAMER: "true"
   BEAMER_TESTBED: "true"
   SECRET_KEY_BASE: beamer_testbed_shared_secret_key_base_for_development_only
-  SOLID_QUEUE_IN_PUMA: 1
 
 services:
   kamal-proxy:
@@ -34,7 +33,8 @@ services:
     hostname: fizzy-01
     environment:
       <<: *base-environment
-      SOLID_QUEUE_ZONE: iad-01
+      SOLID_QUEUE_ZONE: chi-01
+      SOLID_QUEUE_IN_PUMA: 1 # TODO: we should run bin/jobs instead
     volumes:
       - .:/rails
       - ./tmp/beamer-testbed/fizzy-01/storage:/rails/storage
@@ -45,22 +45,57 @@ services:
     hostname: fizzy-02
     environment:
       <<: *base-environment
-      SOLID_QUEUE_ZONE: ams-01
+      SOLID_QUEUE_ZONE: chi-01
     volumes:
       - .:/rails
       - ./tmp/beamer-testbed/fizzy-02/storage:/rails/storage
       - ./tmp/beamer-testbed/fizzy-02/tmp:/rails/tmp
 
-  fizzy-03:
+  fizzy-101:
     <<: *app
-    hostname: fizzy-03
+    hostname: fizzy-101
     environment:
       <<: *base-environment
-      SOLID_QUEUE_ZONE: chi-01
+      SOLID_QUEUE_ZONE: iad-01
+      SOLID_QUEUE_IN_PUMA: 1
     volumes:
       - .:/rails
-      - ./tmp/beamer-testbed/fizzy-03/storage:/rails/storage
-      - ./tmp/beamer-testbed/fizzy-03/tmp:/rails/tmp
+      - ./tmp/beamer-testbed/fizzy-101/storage:/rails/storage
+      - ./tmp/beamer-testbed/fizzy-101/tmp:/rails/tmp
+
+  fizzy-102:
+    <<: *app
+    hostname: fizzy-102
+    environment:
+      <<: *base-environment
+      SOLID_QUEUE_ZONE: iad-01
+    volumes:
+      - .:/rails
+      - ./tmp/beamer-testbed/fizzy-102/storage:/rails/storage
+      - ./tmp/beamer-testbed/fizzy-102/tmp:/rails/tmp
+
+  fizzy-401:
+    <<: *app
+    hostname: fizzy-401
+    environment:
+      <<: *base-environment
+      SOLID_QUEUE_ZONE: ams-01
+      SOLID_QUEUE_IN_PUMA: 1
+    volumes:
+      - .:/rails
+      - ./tmp/beamer-testbed/fizzy-401/storage:/rails/storage
+      - ./tmp/beamer-testbed/fizzy-401/tmp:/rails/tmp
+
+  fizzy-402:
+    <<: *app
+    hostname: fizzy-402
+    environment:
+      <<: *base-environment
+      SOLID_QUEUE_ZONE: ams-01
+    volumes:
+      - .:/rails
+      - ./tmp/beamer-testbed/fizzy-402/storage:/rails/storage
+      - ./tmp/beamer-testbed/fizzy-402/tmp:/rails/tmp
 
 secrets:
   GITHUB_TOKEN:

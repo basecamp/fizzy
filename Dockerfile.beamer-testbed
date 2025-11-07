@@ -13,7 +13,7 @@ ENV RAILS_ENV="development" \
 
 # Install packages needed for development
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl libsqlite3-0 libvips build-essential pkg-config git ffmpeg groff libreoffice-writer libreoffice-impress libreoffice-calc mupdf-tools libyaml-dev libssl-dev sqlite3 && \
+    apt-get install --no-install-recommends -y curl libsqlite3-0 libvips build-essential pkg-config git ffmpeg groff libreoffice-writer libreoffice-impress libreoffice-calc mupdf-tools libyaml-dev libssl-dev sqlite3 yq && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Install application gems
