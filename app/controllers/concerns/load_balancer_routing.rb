@@ -33,14 +33,14 @@ module LoadBalancerRouting
     end
 
     def required_transaction_not_yet_replicated?
-      client_txn = request.cookies["boxcar_last_transaction"]
+      client_txn = request.cookies["fizzy_last_transaction"]
       beamer_last_txn.present? && client_txn.present? && beamer_last_txn < client_txn
     end
 
     def set_transaction_cookie
       unless safe_request?
         if ApplicationRecord.current_tenant.present? && Account.sole.present?
-          cookies["boxcar_last_transaction"] = { value: beamer_last_txn, path: Account.sole.slug }
+          cookies["fizzy_last_transaction"] = { value: beamer_last_txn, path: Account.sole.slug }
         end
       end
     end

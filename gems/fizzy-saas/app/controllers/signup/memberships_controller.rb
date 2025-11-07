@@ -27,4 +27,8 @@ class Signup::MembershipsController < ApplicationController
     def signup_params
       params.expect(signup: %i[ full_name ]).with_defaults(identity: Current.identity)
     end
+
+    def closest_writer
+      ENV.fecth()
+    end
 end

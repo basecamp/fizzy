@@ -5,6 +5,8 @@ class Signup::CompletionsController < ApplicationController
 
   def new
     @signup = Signup.new(signup_params)
+
+    cookies["kamal-writer"] = { value: closest_writer, path: @signup.tenant } if closest_writer
   end
 
   def create
@@ -20,5 +22,14 @@ class Signup::CompletionsController < ApplicationController
   private
     def signup_params
       params.expect(signup: %i[ full_name account_name membership_id ]).with_defaults(identity: Current.identity)
+    end
+
+    def closest_writer
+      zone = ENV["SOLID_QUEUE_ZONE"]
+
+      if zone
+        primary_file = Rails.root.join("storage", ".beamer", "zones", zone, "NODE")
+        primary_file.read if primary_file.exists?
+      end
     end
 end
