@@ -53,8 +53,10 @@ accessories:
       publish:
         - 5001:5001
         - 9000:9000
+    env:
+      BEAMER_DIR: /rails/storage
     volumes:
-      - fizzy:/home/beamer
+      - fizzy:/rails/storage
     cmd: beamer run --retention=1h --metrics-port=9000
     hosts:
       - fizzy-staging-app-01.sc-chi-int.37signals.com
