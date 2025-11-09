@@ -11,6 +11,8 @@ module Yabeda
         gauge :recurring_tasks_delayed_count, comment: "Number of recurring jobs that haven't been enqueued within their schedule"
 
         collect do
+          ::SolidQueue::Record.current_tenant = ApplicationRecord.solid_queue_zone
+
           if ::SolidQueue.supervisor?
             solid_queue.jobs_failed_count.set({}, ::SolidQueue::FailedExecution.count)
             solid_queue.jobs_unreleased_count.set({}, ::SolidQueue::ClaimedExecution.where(process: nil).count)
