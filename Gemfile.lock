@@ -1,7 +1,6 @@
 GIT
   remote: https://github.com/basecamp/activerecord-tenanted
-  revision: ac8f01f4a16e351b0060edad6053e6be9e2eb42b
-  branch: flavorjones/with-tenant-callbacks
+  revision: 1e92cb34d0b7b02875040826330c1918abb06e9d
   specs:
     activerecord-tenanted (0.6.0)
       activerecord (>= 8.1.beta)
