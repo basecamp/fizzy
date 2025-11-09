@@ -1,4 +1,5 @@
 <% url = local_assigns[:url] %>
+<% disabled = local_assigns[:disabled] %>
 
 <div class="flex align-start gap txt-align-center">
   <div class="flex flex-column flex-1">
@@ -7,7 +8,8 @@
             form: form,
             name: :auto_postpone_period,
             knob_options: entropy_auto_close_options,
-            label: "Days until auto-close" %>
+            label: "Days until auto-close",
+            disabled: disabled  %>
     <% end %>
   </div>
 </div>

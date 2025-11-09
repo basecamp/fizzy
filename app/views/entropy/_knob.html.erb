@@ -13,7 +13,8 @@
                 action: "change->knob#optionChanged change->form#submit",
                 index: index,
                 knob_target: "option"
-              } %>
+              },
+              disabled: disabled %>
         <span><%= value %></span>
       </label>
     <% end %>
@@ -23,7 +24,8 @@
           data: { action: "input->knob#sliderChanged change->form#submit", knob_target: "slider" },
           "aria-hidden": true,
           max: knob_options.length - 1,
-          min: 0
+          min: 0,
+          disabled: disabled
     %>
 
     <div class="knob__knob" aria-hidden></div>

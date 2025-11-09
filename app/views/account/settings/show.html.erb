@@ -1,7 +1,12 @@
 <% @page_title = "Account Settings" %>
 
 <% content_for :header do %>
-  <h1 class="header__title"><%= @page_title %></h1>
+  <h1 class="header__title">
+    <%= @page_title %>
+    <% unless Current.user.can_administer?%>
+      <div class="txt-normal font-weight-normal">Only admins can change these settings</div>
+    <% end %>
+  </h1>
 <% end %>
 
 <section class="settings margin-block-start-half">

@@ -2,8 +2,16 @@
   <% if board = user_filtering.single_board_or_first %>
     <%= button_to board_cards_path(board), method: :post, class: "btn btn--link btn--circle-mobile", data: { controller: "hotkey", action: "keydown.c@document->hotkey#click" } do %>
       <%= icon_tag "add", class: "show-on-touch" %>
-      <span>Add a card</span>
+      <span class="overflow-ellipsis">Add a card</span>
       <kbd class="hide-on-touch">C</kbd>
     <% end %>
+  <% end %>
+</div>
+
+<div class="header__actions header__actions--end">
+  <%= link_to new_board_path, class: "btn btn--link btn--circle-mobile", data: { controller: "hotkey", action: "keydown.b@document->hotkey#click" } do %>
+    <%= icon_tag "board", class: "show-on-touch" %>
+    <span class="overflow-ellipsis">Add a board</span>
+    <kbd class="hide-on-touch">B</kbd>
   <% end %>
 </div>

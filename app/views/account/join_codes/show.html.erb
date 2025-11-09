@@ -17,10 +17,13 @@
   <% url = join_url(code: @join_code.code, tenant: @join_code.tenant, script_name: nil) %>
   <div class="flex align-center gap-half">
     <input type="text" class="input flex-item-grow" value="<%= url %>" readonly>
-    <%= button_to account_join_code_path, method: :delete, class: "btn btn--circle txt-small", data: {
-          turbo_confirm: "Are you sure you want to generate a new link? The previous code will stop working." } do %>
-      <%= icon_tag "refresh" %>
-      <span class="for-screen-reader">Generate a new code</span>
+
+    <% if Current.user.can_administer? %>
+      <%= button_to account_join_code_path, method: :delete, class: "btn btn--circle txt-small", data: {
+            turbo_confirm: "Are you sure you want to generate a new link? The previous code will stop working." } do %>
+        <%= icon_tag "refresh" %>
+        <span class="for-screen-reader">Generate a new code</span>
+      <% end %>
     <% end %>
   </div>
 
@@ -59,8 +62,10 @@
       This code has been used <%= @join_code.usage_count %>/<%= @join_code.usage_limit %> times
       (<%= @join_code.active? ? @join_code.usage_limit - @join_code.usage_count : "none" %> remaining)
 
-      <%= link_to edit_account_join_code_path, class: @join_code.active? ? "txt-link" : "txt-negative txt-underline" do %>
-        <span>Change limit</span>
+      <% if Current.user.can_administer? %>
+        <%= link_to edit_account_join_code_path, class: @join_code.active? ? "txt-link" : "txt-negative txt-underline" do %>
+          <span>Change limit</span>
+        <% end %>
       <% end %>
     </p>
   </footer>

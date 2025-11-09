@@ -1,17 +1,5 @@
 @layer components {
-  .boxcar-header-logo {
-    color: var(--color-ink);
-    inline-size: auto;
-    margin-block-start: 0.1em;
-
-    img {
-      block-size: auto;
-      inline-size: 1.15em;
-      margin-inline-end: 0.8ch;
-    }
-  }
-
-  .input:is(.boxcar-menu-trigger) {
+  .nav__trigger {
     --input-background: var(--color-canvas);
     --input-border-color: transparent;
     --input-padding: 0.3em 2em 0.3em 0.75em;
@@ -58,9 +46,10 @@
     }
   }
 
-  .boxcar-menu:is(.panel) {
+  .nav__menu.popup {
     --panel-border-color: var(--color-selected-dark);
     --panel-border-radius: 1.4em;
+    --panel-padding: var(--block-space) var(--block-space) 0 var(--block-space);
     --panel-size: 45ch;
 
     align-items: stretch;
@@ -71,24 +60,15 @@
     flex-direction: column;
     gap: 2px;
     scrollbar-gutter: stable both-edges;
-
-    /* Safari doesn't position the sticky footer properly during the
-     * transition, so we need to delay the footer entrance. */
-    .popup__footer {
-      animation: safari-sticky-footer-hack 0s;
-      animation-delay: var(--dialog-duration);
-      animation-fill-mode: both;
-      inset-inline: var(--block-space);
-    }
   }
 
-  .boxcar-menu__close {
+  .nav__close {
     @media (any-hover: hover) {
       display: none;
     }
   }
 
-  .boxcar-menu__hotkeys {
+  .nav__hotkeys {
     --gap: 8px;
 
     align-items: center;
@@ -151,5 +131,29 @@
         font-weight: 500;
       }
     }
+  }
+
+  /* Safari doesn't position the sticky footer properly during the
+   * transition, so we need to delay the footer entrance. */
+  .nav__footer {
+    animation: safari-sticky-footer-hack 0s;
+    animation-delay: var(--dialog-duration);
+    animation-fill-mode: both;
+    background-color: var(--color-canvas);
+    border-block-start: 1px solid var(--color-ink-lighter);
+    font-size: var(--text-small);
+    inset: auto 0 0;
+    inset-inline: var(--block-space);
+    line-height: 1.6;
+    margin-block-start: var(--block-space-half);
+    padding: 1.5ch;
+    position: sticky;
+    text-align: center;
+    z-index: 1;
+  }
+
+  @keyframes safari-sticky-footer-hack {
+    0% { position: absolute; }
+    100% { position: sticky; }
   }
 }

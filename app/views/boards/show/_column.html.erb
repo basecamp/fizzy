@@ -10,13 +10,12 @@
 >
   <div class="cards__transition-container">
     <header class="cards__header">
-      <%= render "boards/show/expander", title: column.name, count: column.cards.active.count, column_id: dom_id(column) do %>
-        <%= render "boards/show/menu/column", column: column %>
-      <% end %>
+      <%= render "boards/show/menu/column", column: column %>
+      <%= render "boards/show/expander", title: column.name, count: column.cards.active.count, column_id: dom_id(column) %>
 
-      <%= link_to board_column_path(column.board, column), class: "cards__expander-button btn btn--circle txt-x-small borderless", data: { turbo_frame: "_top" } do %>
-        <%= icon_tag "expand", class: "translucent" %>
-        <span class="for-screen-reader">Expand column</span>
+      <%= link_to board_column_path(column.board, column), class: "cards__maximize-button btn btn--circle txt-x-small borderless", data: { turbo_frame: "_top" } do %>
+        <%= icon_tag "maximize", class: "translucent" %>
+        <span class="for-screen-reader">Maximize column</span>
       <% end %>
     </header>
     <%= column_frame_tag dom_id(column, :cards), src: board_column_path(column.board, column) %>

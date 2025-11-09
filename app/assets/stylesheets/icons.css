@@ -42,6 +42,7 @@
   .icon--clipboard { --svg: url("clipboard.svg "); }
   .icon--close { --svg: url("close.svg "); }
   .icon--close-circle { --svg: url("close-circle.svg "); }
+  .icon--collapse { --svg: url("collapse.svg "); }
   .icon--board { --svg: url("board.svg "); }
   .icon--board-add { --svg: url("board-add.svg "); }
   .icon--column-left { --svg: url("column-left.svg "); }
@@ -64,6 +65,7 @@
   .icon--lock { --svg: url("lock.svg "); }
   .icon--logout { --svg: url("logout.svg "); }
   .icon--marker { --svg: url("marker.svg "); }
+  .icon--maximize { --svg: url("maximize.svg "); }
   .icon--menu { --svg: url("menu.svg "); }
   .icon--menu-dots-horizontal { --svg: url("menu-dots-horizontal.svg "); }
   .icon--menu-dots-vertical { --svg: url("menu-dots-vertical.svg "); }

@@ -1,8 +1,0 @@
-<%= tag.button class:"boxcar-menu-trigger input input--select center flex-inline align-center txt-normal",
-      data: {
-        action: "click->dialog#open:stop keydown.j@document->hotkey#click keydown.meta+j@document->hotkey#click keydown.ctrl+j@document->hotkey#click",
-        controller: "hotkey" } do %>
-  <span><%= image_tag "logo.png" %></span>
-  <strong class="txt-medium overflow-ellipsis margin-none">Fizzy</strong>
-  <kbd class="kbd txt-xx-small margin-inline-start hide-on-touch">J</kbd>
-<% end %>

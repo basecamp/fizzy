@@ -1,8 +1,15 @@
 <table class="notification">
   <tr>
-    <td class="avatar__container"><%= image_tag user_avatar_url(notification.creator), alt: notification.creator.name, class: "avatar", size: 48 %></td>
+    <td>&nbsp;</td>
     <td>
       <%= render "notification/bundle_mailer/header", notification: notification %>
+    </td>
+  </tr>
+  <tr>
+    <td class="avatar__container">
+      <%= mail_avatar_tag(notification.creator) %>
+    </td>
+    <td class="what">
       <%= render "notification/bundle_mailer/#{notification.source_type.underscore}/body", notification: notification %>
     </td>
   </tr>

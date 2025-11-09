@@ -1,4 +1,4 @@
-<div id="<%= dom_id(column, :menu) %>" class="cards__expander-menu" data-controller="dialog" data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside">
+<div id="<%= dom_id(column, :menu) %>" class="cards__menu" data-controller="dialog" data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside">
   <button class="btn btn--circle txt-x-small borderless" data-action="click->dialog#open">
     <%= icon_tag "menu-dots-horizontal", class: "translucent" %>
     <span class="for-screen-reader">Column options</span>

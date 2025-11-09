@@ -1,6 +1,0 @@
-<%= collapsible_nav_section "Saved filters", id: "my-filters" do %>
-  <%= form_with url: cards_path, method: :get, data: { controller: "form" } do |form| %>
-    <%= render "my/menus/saved_filter/create" %>
-    <%= render partial: "my/menus/saved_filter/filter", collection: filters, as: :filter %>
-  <% end %>
-<% end %>

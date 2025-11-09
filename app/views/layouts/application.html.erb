@@ -5,7 +5,7 @@
   <body data-controller="local-time timezone-cookie turbo-navigation" data-action="turbo:morph@window->local-time#refreshAll turbo:before-visit@document->turbo-navigation#rememberLocation">
     <header class="header <%= @header_class %>" id="header">
       <a href="#main" class="header__skip-navigation btn" data-turbo="false">Skip to main content</a>
-      <%= render "my/menus/menu" if Current.user %>
+      <%= render "my/menu" if Current.user %>
       <%= yield :header %>
     </header>
 
