@@ -36,7 +36,7 @@ GIT
 
 GIT
   remote: https://github.com/rails/rails.git
-  revision: bc41ad696a76a151db56259938dccf64ef87b501
+  revision: a9b4f5f638fbfc908dc4e657915278cc2451810c
   branch: main
   specs:
     actioncable (8.2.0.alpha)
@@ -269,7 +269,7 @@ GEM
       actionview (>= 7.0.0)
       activesupport (>= 7.0.0)
     jmespath (1.6.2)
-    json (2.15.2)
+    json (2.16.0)
     jwt (3.1.2)
       base64
     kamal (2.8.2)
@@ -309,7 +309,7 @@ GEM
       logger
     mini_mime (1.1.5)
     mini_portile2 (2.8.9)
-    minitest (5.26.0)
+    minitest (5.26.1)
     mission_control-jobs (1.1.0)
       actioncable (>= 7.1)
       actionpack (>= 7.1)
@@ -427,7 +427,7 @@ GEM
       tsort
     redcarpet (3.6.1)
     regexp_parser (2.11.3)
-    reline (0.6.2)
+    reline (0.6.3)
       io-console (~> 0.5)
     rexml (3.4.4)
     rouge (4.6.1)
