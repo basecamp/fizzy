@@ -514,6 +514,7 @@ GEM
     thruster (0.1.16-x86_64-darwin)
     thruster (0.1.16-x86_64-linux)
     timeout (0.4.4)
+    trilogy (2.9.0)
     tsort (0.2.0)
     turbo-rails (2.0.20)
       actionpack (>= 7.1.0)
@@ -628,6 +629,7 @@ DEPENDENCIES
   sqlite3 (>= 2.0)
   stimulus-rails
   thruster
+  trilogy (~> 2.9)
   turbo-rails
   vcr
   web-console
