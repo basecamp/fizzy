@@ -1,16 +1,16 @@
-<div class="display-contents" id="<%= dom_id(card, :assignees) %>">
-  <% card.assignees.each do |assignee| %>
-    <%= avatar_tag assignee, tabindex: (local_assigns.key?(:preview) && local_assigns[:preview]) ? -1 : 0 %>
-  <% end %>
+<div id="<%= dom_id(card, :assignees) %>" class="position-relative" data-controller="dialog" data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside" <%= "hidden" if card.closed? %>>
+  <button class="card__assignees-trigger" data-action="click->dialog#open:stop" data-controller="tooltip">
+    <% card.assignees.each do |assignee| %>
+      <%= avatar_preview_tag assignee, tabindex: (local_assigns.key?(:preview) && local_assigns[:preview]) ? -1 : 0 %>
+    <% end %>
 
-  <div class="position-relative" data-controller="dialog" data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside" <%= "hidden" if card.closed? %>>
-    <button class="btn card__hide-on-index" data-action="click->dialog#open:stop" style="--btn-background: var(--card-bg-color);" data-controller="tooltip">
+    <span class="btn card__hide-on-index" style="--btn-background: var(--card-bg-color);">
       <%= icon_tag "person-add" %>
       <span class="for-screen-reader">Assign</span>
-    </button>
+    </span>
+  </button>
 
-    <dialog class="popup panel flex-column align-start gap-half fill-white shadow" data-dialog-target="dialog" data-action="turbo:before-morph-attribute->dialog#preventCloseOnMorphing turbo:submit-end->dialog#close">
-      <%= yield %>
-    </dialog>
-  </div>
+  <dialog class="popup panel flex-column align-start gap-half fill-white shadow" data-dialog-target="dialog" data-action="turbo:before-morph-attribute->dialog#preventCloseOnMorphing turbo:submit-end->dialog#close">
+    <%= yield %>
+  </dialog>
 </div>

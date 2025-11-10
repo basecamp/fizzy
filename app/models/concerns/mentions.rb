@@ -49,7 +49,7 @@ module Mentions
     end
 
     def should_create_mentions?
-      mentionable? && mentionable_content_changed?
+      mentionable? && (mentionable_content_changed? || should_check_mentions?)
     end
 
     def mentionable_content_changed?
@@ -63,5 +63,9 @@ module Mentions
     # Template method
     def mentionable?
       true
+    end
+
+    def should_check_mentions?
+      false
     end
 end

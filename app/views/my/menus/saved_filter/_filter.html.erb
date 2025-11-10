@@ -1,9 +1,0 @@
-<li class="popup__item" data-filter-target="item" data-navigable-list-target="item" id="filter-custom-<%= filter.id %>">
-  <%= icon_tag "bookmark", class: "popup__icon" %>
-  <%= link_to cards_path(filter_id: filter.id), class: "popup__btn btn" do %>
-    <div class="txt-tight-lines min-width txt-small overflow-ellipsis">
-      <div><strong><%= filter.boards_label %></strong></div>
-      <div class="txt-capitalize"><%= filter.summary %></div>
-    </div>
-  <% end %>
-</li>

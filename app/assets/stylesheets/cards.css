@@ -253,6 +253,13 @@
     }
   }
 
+  .card__assignees-trigger {
+    background: transparent;
+    border: none;
+    padding: 0;
+    display: flex;
+  }
+
   .card__meta-text {
     line-height: 1;
     white-space: nowrap;

@@ -8,9 +8,8 @@
 >
   <div class="cards__transition-container">
     <header class="cards__header">
-      <%= render "boards/show/expander", title: "Not Now", count: board.cards.postponed.count, column_id: "not-now" do %>
-        <%= render "boards/show/menu/expand", column_path: board_columns_not_now_path(board) %>
-      <% end %>
+      <%= render "boards/show/expander", title: "Not Now", count: board.cards.postponed.count, column_id: "not-now" %>
+      <%= render "boards/show/menu/maximize", column_path: board_columns_not_now_path(board) %>
     </header>
     <%= column_frame_tag :not_now_column, src: board_columns_not_now_path(board) %>
   </div>

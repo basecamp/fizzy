@@ -1,0 +1,20 @@
+<nav class="nav" data-controller="dialog" data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside">
+  <%= tag.button class:"nav__trigger input input--select center flex-inline align-center txt-normal", data: {
+        action: "click->dialog#open:stop keydown.j@document->hotkey#click keydown.meta+j@document->hotkey#click keydown.ctrl+j@document->hotkey#click",
+        controller: "hotkey" } do %>
+    <span><%= image_tag "logo.png" %></span>
+    <strong class="txt-medium overflow-ellipsis margin-none">Fizzy</strong>
+    <kbd class="kbd txt-xx-small margin-inline-start hide-on-touch">J</kbd>
+  <% end %>
+
+  <%= tag.dialog class: "nav__menu filter popup popup--animated panel margin-block-start-half", data: {
+        action: "turbo:before-cache@document->dialog#close keydown->navigable-list#navigate filter:changed->navigable-list#reset filter:changed->nav-section-expander#showWhileFiltering toggle->filter#filter",
+        controller: "filter navigable-list nav-section-expander",
+        dialog_target: "dialog",
+        navigable_list_focus_on_selection_value: false,
+        navigable_list_actionable_items_value: true } do %>
+    <%= turbo_frame_tag "my_menu", src: my_menu_path, loading: :lazy, target: "_top" do %>
+      <%= render "my/menus/navigation" %>
+    <% end %>
+  <% end %>
+</nav>

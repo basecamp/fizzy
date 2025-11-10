@@ -157,12 +157,6 @@
     }
   }
 
-  .cards__header {
-    .cards.is-collapsed & {
-      block-size: 100%;
-    }
-  }
-
   /* The wrapper around the cards used to clip overflow while transitioning.
    * Also, don't resize cards while transitioning to avoid reflow. */
   .cards__list {
@@ -235,6 +229,46 @@
   /* Column Elements
   /* ------------------------------------------------------------------------ */
 
+  .cards__header {
+    .cards.is-collapsed & {
+      block-size: 100%;
+    }
+
+    .cards:not(.is-collapsed) & {
+      display: grid;
+      grid-template-areas: "menu expander maximize";
+      grid-template-columns: var(--column-width-collapsed) 1fr var(--column-width-collapsed);
+      margin-block-end: calc(0.5 * var(--cards-gap));
+    }
+  }
+
+  .cards__menu .btn--circle,
+  .cards__maximize-button {
+    --btn-background: transparent;
+
+    block-size: var(--column-width-collapsed);
+    inline-size: var(--column-width-collapsed);
+    opacity: 0;
+    outline-offset: -2px;
+
+    .cards:hover &,
+    &:focus-visible {
+      opacity: 1;
+    }
+
+    .cards.is-collapsed & {
+      display: none;
+    }
+  }
+
+  .cards__menu {
+    z-index: var(--z-popup);
+  }
+
+  .cards__maximize-button {
+    grid-area: maximize;
+  }
+
   .cards__expander {
     align-items: center;
     border-radius: 99rem;
@@ -244,6 +278,8 @@
     font-size: var(--text-x-small);
     font-weight: 600;
     gap: 0.5ch;
+    grid-area: expander;
+    outline-offset: -2px;
     position: relative;
     text-transform: uppercase;
 
@@ -303,46 +339,12 @@
 
     .cards:not(.is-collapsed) & {
       inline-size: 100%;
-      margin-block-end: calc(0.5 * var(--cards-gap));
       justify-content: center;
     }
 
     .cards:is(.cards--considering) &:hover {
       cursor: unset;
       filter: none;
-    }
-
-    @media (any-hover: hover) {
-      .btn--circle,
-      ~ .btn--circle,
-      ~ .cards__expander-menu .btn--circle:not(label) {
-        transition: opacity 300ms ease-in-out;
-        opacity: 0;
-
-        &:focus-visible,
-        .cards:hover & {
-          opacity: 1;
-        }
-      }
-    }
-  }
-
-  .btn.cards__expander-button {
-    --btn-background: transparent;
-
-    block-size: var(--column-width-collapsed);
-    inline-size: var(--column-width-collapsed);
-    inset: 0 0 auto auto;
-    position: absolute;
-    translate: calc(var(--column-gap) * -2);
-    z-index: var(--z-popup);
-
-    .cards--considering & {
-      translate: none;
-    }
-
-    .cards.is-collapsed & {
-      display: none;
     }
   }
 
@@ -369,25 +371,28 @@
     }
 
     .cards:not(.is-collapsed, .cards--considering) & {
+      align-items: center;
+      display: flex;
+      gap: 0.25ch;
       max-inline-size: calc(100% - var(--column-width-collapsed) * 2);
     }
-  }
 
-  .cards__expander-menu {
-    inset: 0 auto auto 0;
-    position: absolute;
-    translate: calc(var(--column-gap) * 2);
-    z-index: var(--z-popup);
+    .icon--collapse {
+    --icon-size: 1.15em;
 
-    .btn--circle {
-      --btn-background: transparent;
+      opacity: 0;
+      scale: 1.5;
+      transition: 150ms ease-out;
+      transition-property: opacity, scale;
 
-      block-size: var(--column-width-collapsed);
-      inline-size: var(--column-width-collapsed);
-    }
+      .cards.is-collapsed & {
+        display: none;
+      }
 
-    .cards.is-collapsed & {
-      display: none;
+      .cards:not(.is-collapsed) .cards__expander:hover & {
+        opacity: 0.66;
+        scale: 1;
+      }
     }
   }
 
@@ -514,8 +519,8 @@
 
         @media (any-hover: hover) {
           .card:hover & {
-              opacity: 1;
-            }
+            opacity: 1;
+          }
         }
       }
     }
@@ -666,24 +671,26 @@
   /* -------------------------------------------------------------------------- */
 
   /* Surface a mini bubble if there are cards with bubbles inside */
-  .cards--considering:has(.bubble:not([hidden])) .cards__expander-title,
+  .cards--considering:has(.bubble:not([hidden])),
   .cards--doing.is-collapsed:has(.bubble:not([hidden])) {
-    --bubble-color: var(--card-color, oklch(var(--lch-blue-medium)));
-    --bubble-shape: 54% 46% 61% 39% / 57% 49% 51% 43%;
+    .cards__transition-container {
+      --bubble-color: var(--card-color, oklch(var(--lch-blue-medium)));
+      --bubble-shape: 54% 46% 61% 39% / 57% 49% 51% 43%;
 
-    &:before {
-      background: radial-gradient(
-        color-mix(in srgb, var(--bubble-color) 8%, var(--color-canvas)) 50%,
-        color-mix(in srgb, var(--bubble-color) 48%, var(--color-canvas)) 100%
-      );
-      block-size: 1em;
-      border-radius: var(--bubble-shape);
-      content: "";
-      inline-size: 1em;
-      inset: 0 0 auto auto;
-      position: absolute;
-      translate: 25% -25%;
-      z-index: 1;
+      &:before {
+        background: radial-gradient(
+          color-mix(in srgb, var(--bubble-color) 8%, var(--color-canvas)) 50%,
+          color-mix(in srgb, var(--bubble-color) 48%, var(--color-canvas)) 100%
+        );
+        block-size: 1em;
+        border-radius: var(--bubble-shape);
+        content: "";
+        inline-size: 1em;
+        inset: 0 0 auto auto;
+        position: absolute;
+        translate: 25% -25%;
+        z-index: 1;
+      }
     }
   }
 

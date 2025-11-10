@@ -1,4 +1,4 @@
-<%= turbo_frame_tag dom_id(Current.identity, :account_menu) do %>
+<%= turbo_frame_tag Current.identity, :account_menu do %>
   <% cache [ Current.identity, @memberships ] do %>
     <%= collapsible_nav_section "Accounts" do %>
       <% @memberships.each do |membership| %>

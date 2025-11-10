@@ -1,19 +1,70 @@
 <%= turbo_frame_tag "my_menu", target: "_top" do %>
-  <div class="flex gap">
-    <%= jump_field_tag %>
+  <%= render "my/menus/navigation" %>
 
-    <button class="nav__close btn borderless txt-small" data-action="dialog#close">
-      <%= icon_tag "close" %>
-      <span class="for-screen-reader">Close menu</span>
-    </button>
-  </div>
+  <%= collapsible_nav_section "Saved filters", id: "my-filters" do %>
+    <%= form_with url: cards_path, method: :get, data: { controller: "form" } do |form| %>
+      <li class="popup__item overflow-ellipsis" data-navigable-list-target="item" data-filter-target="item" id="filter-custom-create">
+        <%= icon_tag "bookmark", class: "popup__icon" %>
+        <%= link_to cards_path(expand_all: true), class: "popup__btn btn" do %>
+          <span>Add a filter</span>
+        <% end %>
+      </li>
 
-  <%= render "hotkeys" %>
-  <%= render "saved_filter", filters: @user_filtering.filters %>
-  <%= render "boards", user_filtering: @user_filtering %>
-  <%= render "tags", user_filtering: @user_filtering %>
-  <%= render "users", user_filtering: @user_filtering %>
-  <%= render "places", user_filtering: @user_filtering %>
-  <%= render "accounts", user_filtering: @user_filtering %>
-  <%= render "footer" %>
+      <% @filters.each do |filter| %>
+        <%= my_menu_filter_item(filter) %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <%= collapsible_nav_section "Boards" do %>
+    <li class="popup__item" data-filter-target="item" data-navigable-list-target="item">
+      <%= icon_tag "add", class: "popup__icon" %>
+      <%= link_to new_board_path, class: "popup__btn btn" do %>
+        <span class="overflow-ellipsis">Add a board</span>
+      <% end %>
+    </li>
+
+    <% @boards.each do |board| %>
+      <%= my_menu_board_item(board) %>
+    <% end %>
+  <% end %>
+
+  <%= collapsible_nav_section "Tags" do %>
+    <% @tags.each do |tag| %>
+      <%= my_menu_tag_item(tag) %>
+    <% end %>
+  <% end %>
+
+  <%= collapsible_nav_section "People" do %>
+    <li class="popup__item" data-filter-target="item" data-navigable-list-target="item">
+      <%= icon_tag "add", class: "popup__icon" %>
+      <%= link_to account_join_code_path, class: "popup__btn btn" do %>
+        <span class="overflow-ellipsis">Invite people</span>
+      <% end %>
+    </li>
+
+    <% @users.each do |user| %>
+      <%= my_menu_user_item(user) %>
+    <% end %>
+  <% end %>
+
+  <%= collapsible_nav_section "Jump to…" do %>
+    <%= filter_place_menu_item account_settings_path, "Account Settings", "settings" %>
+    <%= filter_place_menu_item user_path(Current.user), "My Profile", "person" %>
+    <%= filter_place_menu_item notifications_path, "Notifications", "bell" %>
+    <%= filter_place_menu_item notifications_settings_path, "Notification Settings", "settings" %>
+
+    <%= tag.li class: "popup__item", data: { filter_target: "item", navigable_list_target: "item" } do %>
+      <%= icon_tag "logout", class: "popup__icon" %>
+      <%= button_to session_url(script_name: nil), method: :delete, class: "popup__btn btn", data: { turbo: false } do %>
+        <span>Sign out</span>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <%= turbo_frame_tag Current.identity, :account_menu, src: session_menu_url(script_name: nil, menu_section: true, without: ApplicationRecord.current_tenant) %>
+
+  <footer class="nav__footer">
+    Fizzy&trade; is designed, built, and backed by <strong class="txt-nowrap"><%= icon_tag "37signals", class: "v-align-middle" %> <a href="https://37signals.com" target="_blank" class="txt-ink">37signals&trade;</a></strong>
+  </footer>
 <% end %>

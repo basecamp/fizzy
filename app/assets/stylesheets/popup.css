@@ -14,39 +14,9 @@
     position: absolute;
     transform: translateX(-50%);
     z-index: var(--z-popup);
-    opacity: 0;
-    transform: scale(0.2) translateX(-50%);
-    transform-origin: top left;
-    transition: var(--dialog-duration) allow-discrete;
-    transition-property: display, opacity, overlay, transform;
-
-    &::backdrop {
-      background-color: var(--color-always-black);
-      opacity: 0;
-      transform: scale(1);
-      transition: var(--dialog-duration) allow-discrete;
-      transition-property: display, opacity, overlay;
-    }
 
     &[open] {
       display: flex;
-      opacity: 1;
-      transform: scale(1) translateX(-50%);
-
-      &::backdrop {
-        opacity: 0.5;
-      }
-    }
-
-    @starting-style {
-      &[open] {
-        opacity: 0;
-        transform: scale(0.2) translateX(-50%);
-      }
-
-      &[open]::backdrop {
-        opacity: 0;
-      }
     }
 
     &.orient-left {
@@ -189,6 +159,45 @@
 
     &:hover {
       --btn-border-color: var(--color-ink);
+    }
+  }
+
+  /* Animated
+  /* -------------------------------------------------------------------------- */
+
+  .popup--animated {
+    opacity: 0;
+    transform: scale(0.2) translateX(-50%);
+    transform-origin: top left;
+    transition: var(--dialog-duration) allow-discrete;
+    transition-property: display, opacity, overlay, transform;
+
+    &::backdrop {
+      background-color: var(--color-always-black);
+      opacity: 0;
+      transform: scale(1);
+      transition: var(--dialog-duration) allow-discrete;
+      transition-property: display, opacity, overlay;
+    }
+
+    &[open] {
+      opacity: 1;
+      transform: scale(1) translateX(-50%);
+
+      &::backdrop {
+        opacity: 0.5;
+      }
+    }
+
+    @starting-style {
+      &[open] {
+        opacity: 0;
+        transform: scale(0.2) translateX(-50%);
+      }
+
+      &[open]::backdrop {
+        opacity: 0;
+      }
     }
   }
 }

@@ -20,6 +20,8 @@ class MentionsTest < ActiveSupport::TestCase
         boards(:writebook).cards.create title: "Cleanup", description: "Did you finish up with the cleanup, @david?"
       end
 
+      card = Card.find(card.id)
+
       assert_difference -> { Mention.count }, +1 do
         card.published!
       end
@@ -32,6 +34,8 @@ class MentionsTest < ActiveSupport::TestCase
         attachment = ActionText::Attachment.from_attachable(users(:david))
         boards(:writebook).cards.create title: "Cleanup", description: "Did you finish up with the cleanup, #{attachment.to_html}?"
       end
+
+      card = Card.find(card.id)
 
       assert_difference -> { Mention.count }, +1 do
         card.published!

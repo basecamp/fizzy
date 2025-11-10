@@ -1,17 +1,15 @@
-<% column = event_columns(event_type, day_timeline) %>
-
 <div class="events__column">
-  <h3 class="events__column-header"><%= column[:title] %></h3>
-  <% column[:events].group_by { it.created_at.hour }.each do |hour, events| %>
-    <%= event_cluster_tag(hour, column[:index]) do %>
+  <h3 class="events__column-header"><%= column.title %></h3>
+  <% column.events_by_hour.each do |hour, events| %>
+    <%= events_at_hour_container(column, hour) do %>
       <%= render partial: "events/event", collection: events, cached: true %>
       <%= local_datetime_tag events.first.created_at, class: "event__timestamp txt-small translucent" %>
     <% end %>
   <% end %>
 
-  <% if column[:events].count < column[:full_events_count] %>
-    <div class="events__column-footer fill-highlight txt-x-small border-radius" style="grid-column-start: <%= column[:index] %>">
-      Showing the 100 most recent (<%= column[:full_events_count] - column[:events].count %> are hidden)
+  <% if column.has_more_events? %>
+    <div class="events__column-footer fill-highlight txt-x-small border-radius" style="grid-column-start: <%= column.index %>">
+      Showing the 100 most recent (<%= column.hidden_events_count %> are hidden)
     </div>
   <% end %>
 </div>

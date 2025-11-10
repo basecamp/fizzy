@@ -40,7 +40,7 @@
       pointer-events: none;
     }
 
-    [aria-busy] &:disabled {
+    form[aria-busy] &:disabled {
       position: relative;
 
       > * {

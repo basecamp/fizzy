@@ -1,9 +1,9 @@
 <% cache [ day_timeline.events ] do %>
   <% if day_timeline.has_activity? %>
     <div class="events__columns">
-      <%= render "events/day_timeline/column", event_type: "added", day_timeline: day_timeline %>
-      <%= render "events/day_timeline/column", event_type: "updated", day_timeline: day_timeline %>
-      <%= render "events/day_timeline/column", event_type: "closed", day_timeline: day_timeline %>
+      <%= render "events/day_timeline/column", column: day_timeline.added_column %>
+      <%= render "events/day_timeline/column", column: day_timeline.updated_column %>
+      <%= render "events/day_timeline/column", column: day_timeline.closed_column %>
     </div>
   <% end %>
 <% end %>

@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  root "events#index"
+
   namespace :account do
     resource :join_code
     resource :settings
@@ -14,8 +16,6 @@ Rails.application.routes.draw do
       resources :push_subscriptions
     end
   end
-
-  resource :landing
 
   resources :boards do
     scope module: :boards do
@@ -66,21 +66,21 @@ Rails.application.routes.draw do
 
   resources :cards do
     scope module: :cards do
+      resource :board
+      resource :closure
+      resource :column
       resource :goldness
       resource :image
-      resource :pin
-      resource :closure
       resource :not_now
-      resource :triage
+      resource :pin
       resource :publish
       resource :reading
+      resource :triage
       resource :watch
-      resource :board
-      resource :column
 
       resources :assignments
-      resources :taggings
       resources :steps
+      resources :taggings
 
       resources :comments do
         resources :reactions, module: :comments
@@ -144,13 +144,7 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :commands
-
-  resource :conversation do
-    scope module: :conversations do
-      resources :messages
-    end
-  end
+  resource :landing
 
   scope module: :memberships, path: "memberships/:membership_id" do
     resource :unlink, only: %i[ show create ], controller: :unlink, as: :unlink_membership
@@ -168,8 +162,8 @@ Rails.application.routes.draw do
 
   namespace :prompts do
     resources :cards
-    resources :users
     resources :tags
+    resources :users
 
     resources :boards do
       scope module: :boards do
@@ -192,9 +186,6 @@ Rails.application.routes.draw do
 
       resources :cards, only: :show
     end
-  end
-
-  namespace :admin do
   end
 
   direct :published_board do |board, options|
@@ -229,8 +220,6 @@ Rails.application.routes.draw do
   get "up", to: "rails/health#show", as: :rails_health_check
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   get "service-worker" => "pwa#service_worker"
-
-  root "events#index"
 
   unless Rails.application.config.x.oss_config
     mount Fizzy::Saas::Engine, at: "/", as: "saas"

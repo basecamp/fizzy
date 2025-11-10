@@ -1,8 +1,0 @@
-<% day_timeline.events.group_by { it.created_at.hour }.each do |hour, events_grouped_by_hour| %>
-  <% events_grouped_by_hour.group_by { event_column(it) }.each do |column, events| %>
-    <%= event_cluster_tag(hour, column) do %>
-      <%= render partial: "events/event", collection: events %>
-      <%= local_datetime_tag events.first.created_at, class: "event__timestamp txt-small translucent" %>
-    <% end %>
-  <% end %>
-<% end %>

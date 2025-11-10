@@ -6,12 +6,12 @@
   <div class="cards__transition-container">
     <header class="cards__header">
       <div class="cards__expander">
-        <h2 class="cards__expander-title position-relative" data-collapsible-columns-target="title">Maybe?</h2>
-        <%= link_to board_columns_stream_path(board), class: "cards__expander-button btn btn--circle txt-x-small borderless", data: { turbo_frame: "_top" } do %>
-          <%= icon_tag "expand", class: "translucent" %>
-          <span class="for-screen-reader">Expand column</span>
-        <% end %>
+        <h2 class="cards__expander-title" data-collapsible-columns-target="title">Maybe?</h2>
       </div>
+      <%= link_to board_columns_stream_path(board), class: "cards__maximize-button btn btn--circle txt-x-small borderless", data: { turbo_frame: "_top" } do %>
+        <%= icon_tag "maximize", class: "translucent" %>
+        <span class="for-screen-reader">Expand column</span>
+      <% end %>
     </header>
     <%= render "columns/show/add_card_button", board: board %>
     <% if page.used? %>
