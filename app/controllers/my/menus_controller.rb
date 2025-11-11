@@ -5,6 +5,6 @@ class My::MenusController < ApplicationController
     @tags = Tag.all.alphabetically.load_async
     @users = User.active.alphabetically.load_async
 
-    fresh_when etag: [ @filters, @boards.pluck(:id), @tags, @users ]
+    fresh_when etag: [ @filters, @boards.pluck(:name), @tags, @users ] # Boards are touched when cards change, so we pick the names
   end
 end
