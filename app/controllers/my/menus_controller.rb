@@ -5,6 +5,6 @@ class My::MenusController < ApplicationController
     @tags = Tag.all.alphabetically.load_async
     @users = User.active.alphabetically.load_async
 
-    fresh_when etag: [ @filters, @boards, @tags, @users ]
+    fresh_when etag: [ @filters, @boards.pluck(:id), @tags, @users ]
   end
 end
