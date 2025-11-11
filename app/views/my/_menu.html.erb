@@ -13,7 +13,7 @@
         dialog_target: "dialog",
         navigable_list_focus_on_selection_value: false,
         navigable_list_actionable_items_value: true } do %>
-    <%= turbo_frame_tag "my_menu", src: my_menu_path, loading: :lazy, target: "_top" do %>
+    <%= turbo_frame_tag "my_menu", src: my_menu_path, target: "_top" do %>
       <%= render "my/menus/jump" %>
     <% end %>
   <% end %>
