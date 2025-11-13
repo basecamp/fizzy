@@ -13,7 +13,6 @@ def create_tenant(signal_account_name)
   tenant_id = ActiveRecord::FixtureSet.identify signal_account_name
   email_address = "david@37signals.com"
   identity = Identity.find_or_create_by!(email_address: email_address)
-  membership = identity.memberships.find_or_create_by!(tenant: tenant_id)
 
   account = Account.create_with_admin_user(
     account: {
@@ -22,24 +21,18 @@ def create_tenant(signal_account_name)
     },
     owner: {
       name: "David Heinemeier Hansson",
-      membership: membership
+      identity: identity
     }
   )
   Current.account = account
 end
 
 def find_or_create_user(full_name, email_address)
-  if user = Identity.find_by(email_address: email_address)&.memberships&.find_by(tenant: Current.account.external_account_id)&.user
+  identity = Identity.find_or_create_by!(email_address: email_address)
+  if user = identity.users.find_by(account: Current.account)
     user
   else
-    identity = Identity.find_or_create_by!(email_address: email_address)
-    membership = identity.memberships.find_or_create_by!(tenant: Current.account.external_account_id)
-
-    user = User.create! \
-      name: full_name,
-      membership: membership
-
-    user
+    User.create!(name: full_name, identity: identity, account: Current.account)
   end
 end
 
