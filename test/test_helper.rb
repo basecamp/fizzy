@@ -81,7 +81,7 @@ module FixturesTestHelper
       end
 
       # Rails passes :string for varchar columns, so handle both :uuid and :string
-      return super(label, column_type) unless column_type.in?([:uuid, :string])
+      return super(label, column_type) unless column_type.in?([ :uuid, :string ])
       generate_fixture_uuid(label)
     end
 

@@ -23,7 +23,7 @@ class IdentityTest < ActiveSupport::TestCase
     identity = identities(:david)
     account = accounts(:initech)
 
-    assert_difference ["Membership.count", "User.count"], 1 do
+    assert_difference [ "Membership.count", "User.count" ], 1 do
       identity.join(account)
     end
 

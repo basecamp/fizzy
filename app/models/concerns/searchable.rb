@@ -62,9 +62,9 @@ module Searchable
       ])
     end
 
-    # Models must implement these methods:
-    # - search_title: returns title string or nil
-    # - search_content: returns content string
-    # - search_card_id: returns the card id (self.id for cards, card_id for comments)
-    # - search_board_id: returns the board id
+  # Models must implement these methods:
+  # - search_title: returns title string or nil
+  # - search_content: returns content string
+  # - search_card_id: returns the card id (self.id for cards, card_id for comments)
+  # - search_board_id: returns the board id
 end

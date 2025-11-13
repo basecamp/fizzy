@@ -28,8 +28,8 @@ class Search::Highlighter
     if words.length <= max_words
       highlight(text)
     elsif match_index
-      start_index = [0, match_index - max_words / 2].max
-      end_index = [words.length - 1, start_index + max_words - 1].min
+      start_index = [ 0, match_index - max_words / 2 ].max
+      end_index = [ words.length - 1, start_index + max_words - 1 ].min
 
       snippet_text = words[start_index..end_index].join(" ")
       snippet_text = "...#{snippet_text}" if start_index > 0
@@ -50,7 +50,7 @@ class Search::Highlighter
           terms << phrase.first
         end
 
-        unquoted = query.gsub(/"[^"]+"/, '')
+        unquoted = query.gsub(/"[^"]+"/, "")
         unquoted.split(/\s+/).each do |word|
           terms << word if word.present?
         end

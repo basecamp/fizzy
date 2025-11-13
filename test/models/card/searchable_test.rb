@@ -27,16 +27,16 @@ class Card::SearchableTest < ActiveSupport::TestCase
     # Searching by comment
     card_with_comment = @board.cards.create!(title: "Some card", creator: @user)
     card_with_comment.comments.create!(body: "overflowing text", creator: @user)
-    results = Card.mentioning("overflowing", user: @user )
+    results = Card.mentioning("overflowing", user: @user)
     assert_includes results, card_with_comment
 
     # Sanitizing search query
     card_broken = @board.cards.create!(title: "broken layout", creator: @user)
-    results = Card.mentioning("broken \"", user: @user )
+    results = Card.mentioning("broken \"", user: @user)
     assert_includes results, card_broken
 
     # Empty query returns no results
-    assert_empty Card.mentioning("\"", user: @user )
+    assert_empty Card.mentioning("\"", user: @user)
 
     # Filtering by board_ids
     other_board = Board.create!(name: "Other Board", account: @account, creator: @user)
