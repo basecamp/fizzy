@@ -61,7 +61,16 @@
       <% end %>
     <% end %>
 
-    <%= turbo_frame_tag Current.identity, :account_menu, src: session_menu_url(script_name: nil, menu_section: true, without: Current.account.id) %>
+    <% accounts = Current.identity.accounts.where.not(id: Current.account) %>
+    <% if accounts.any? %>
+      <% cache [ Current.identity, accounts ] do %>
+        <%= collapsible_nav_section "Accounts" do %>
+          <% accounts.each do |account| %>
+            <%= filter_place_menu_item landing_url(script_name: account.slug), account.name, "marker", new_window: true %>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
   <% end %>
 
   <footer class="nav__footer">

@@ -20,7 +20,7 @@ class SessionsController < ApplicationController
       redirect_to session_magic_link_path
     elsif signups_allowed?
       Signup.new(email_address: email_address).create_identity
-      session[:return_to_after_authenticating] = saas.new_signup_membership_path
+      session[:return_to_after_authenticating] = saas.new_signup_completion_path
       redirect_to session_magic_link_path
     end
   end

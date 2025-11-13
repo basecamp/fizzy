@@ -4,14 +4,14 @@ class Signup::CompletionsController < ApplicationController
   disallow_account_scope
 
   def new
-    @signup = Signup.new(signup_params)
+    @signup = Signup.new(identity: Current.identity)
   end
 
   def create
     @signup = Signup.new(signup_params)
 
     if @signup.complete
-      redirect_to landing_url(script_name: "/#{@signup.tenant}")
+      redirect_to landing_url(script_name: @signup.account.slug)
     else
       render :new, status: :unprocessable_entity
     end
@@ -19,6 +19,6 @@ class Signup::CompletionsController < ApplicationController
 
   private
     def signup_params
-      params.expect(signup: %i[ full_name account_name membership_id ]).with_defaults(identity: Current.identity)
+      params.expect(signup: %i[ full_name ]).with_defaults(identity: Current.identity)
     end
 end

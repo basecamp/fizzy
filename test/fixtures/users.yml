@@ -2,21 +2,21 @@ david:
   id: <%= ActiveRecord::FixtureSet.identify("david", :uuid) %>
   name: David
   role: member
-  membership: david_in_37signals
+  identity: david
   account: 37s_uuid
 
 jz:
   id: <%= ActiveRecord::FixtureSet.identify("jz", :uuid) %>
   name: JZ
   role: member
-  membership: jz_in_37signals
+  identity: jz
   account: 37s_uuid
 
 kevin:
   id: <%= ActiveRecord::FixtureSet.identify("kevin", :uuid) %>
   name: Kevin
   role: admin
-  membership: kevin_in_37signals
+  identity: kevin
   account: 37s_uuid
 
 system:
@@ -29,5 +29,5 @@ mike:
   id: <%= ActiveRecord::FixtureSet.identify("mike", :uuid) %>
   name: Mike
   role: admin
-  membership: mike_in_initech
+  identity: mike
   account: initech_uuid

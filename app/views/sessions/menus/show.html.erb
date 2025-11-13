@@ -26,7 +26,7 @@
 
     <% if signups_allowed? %>
       <div class="margin-block-start">
-        <%= link_to saas.new_signup_membership_path, class: "btn btn--plain txt-link center txt-small", data: { turbo_prefetch: false } do %>
+        <%= link_to saas.new_signup_completion_path, class: "btn btn--plain txt-link center txt-small", data: { turbo_prefetch: false } do %>
           <span>Sign up for a new Fizzy account</span>
         <% end %>
       </div>

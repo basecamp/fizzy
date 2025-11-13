@@ -1,7 +1,7 @@
 class Filter < ApplicationRecord
   include Fields, Params, Resources, Summarized
 
-  belongs_to :account, default: -> { Current.account }
+  belongs_to :account, default: -> { creator.account }
   belongs_to :creator, class_name: "User", default: -> { Current.user }
 
   class << self

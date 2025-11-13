@@ -7,7 +7,7 @@ class Account::Seeder
   end
 
   def seed
-    Current.set session: session do
+    Current.set(user: creator, account: account) do
       populate
     end
   end
@@ -20,15 +20,11 @@ class Account::Seeder
   end
 
   private
-    def session
-      creator.identity.sessions.last
-    end
-
     def populate
       # ---------------
       # Playground Board
       # ---------------
-      playground = Board.create! name: "Playground", creator: creator, all_access: true
+      playground = account.boards.create! name: "Playground", creator: creator, all_access: true
 
       # Cards
       playground.cards.create! creator: creator, title: "Finally, watch this Fizzy orientation video", status: "published", description: <<~HTML
@@ -104,8 +100,8 @@ class Account::Seeder
     end
 
     def delete_everything
-      Current.set session: session do
-        Board.destroy_all
+      Current.set(user: creator, account: account) do
+        account.boards.destroy_all
       end
     end
 end

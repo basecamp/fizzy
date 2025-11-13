@@ -1,7 +1,7 @@
 class Column < ApplicationRecord
   include Positioned
 
-  belongs_to :account, default: -> { Current.account }
+  belongs_to :account, default: -> { board.account }
   belongs_to :board, touch: true
   has_many :cards, dependent: :nullify
 

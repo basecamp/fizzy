@@ -5,7 +5,7 @@ class User < ApplicationRecord
 
   has_one_attached :avatar
 
-  belongs_to :account, default: -> { Current.account }
+  belongs_to :account
   belongs_to :identity, optional: true
 
   has_many :comments, inverse_of: :creator, dependent: :destroy

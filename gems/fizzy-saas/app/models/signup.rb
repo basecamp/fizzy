@@ -1,40 +1,26 @@
 class Signup
-  MEMBERSHIP_PURPOSE = :account_creation
-
   include ActiveModel::Model
   include ActiveModel::Attributes
   include ActiveModel::Validations
 
-  attr_accessor :full_name, :email_address, :identity, :membership_id, :account_name
-  attr_reader :queenbee_account, :account, :user, :tenant, :membership
-
-  with_options on: :membership_creation do
-    validates_presence_of :full_name, :identity
-  end
+  attr_accessor :full_name, :email_address, :identity
+  attr_reader :queenbee_account, :account, :user
 
   with_options on: :completion do
-    validates_presence_of :full_name, :account_name, :identity, :membership
+    validates_presence_of :full_name, :identity
   end
 
   def initialize(...)
     @full_name = nil
     @email_address = nil
-    @tenant = nil
     @account = nil
     @user = nil
     @queenbee_account = nil
-    @membership = nil
-    @membership_id = nil
     @identity = nil
-    @account_name = nil
 
     super
 
-    if @identity
-      @email_address = @identity.email_address
-      @membership = identity.memberships.find_signed(membership_id, purpose: MEMBERSHIP_PURPOSE)
-      @tenant = membership&.tenant
-    end
+    @email_address = @identity.email_address if @identity
   end
 
   def create_identity
@@ -42,41 +28,21 @@ class Signup
     @identity.send_magic_link
   end
 
-  def create_membership
-    if valid?(:membership_creation)
-      begin
-        create_queenbee_account
-
-        @membership = identity.memberships.create!(tenant: tenant)
-        @membership_id = @membership.signed_id(purpose: MEMBERSHIP_PURPOSE)
-      rescue => error
-        destroy_queenbee_account
-
-        @membership&.destroy
-        @membership = nil
-        @membership_id = nil
-
-        errors.add(:base, "Something went wrong, and we couldn't create your account. Please give it another try.")
-        Rails.error.report(error, severity: :error)
-
-        false
-      end
-    else
-      false
-    end
-  end
-
   def complete
     if valid?(:completion)
       begin
-        create_tenant
+        create_queenbee_account
+        create_account
 
         true
       rescue => error
-        destroy_tenant
+        destroy_account
+        destroy_queenbee_account
 
         errors.add(:base, "Something went wrong, and we couldn't create your account. Please give it another try.")
         Rails.error.report(error, severity: :error)
+        Rails.logger.error error
+        Rails.logger.error error.backtrace.join("\n")
 
         false
       end
@@ -97,35 +63,24 @@ class Signup
       @queenbee_account = nil
     end
 
-    def create_tenant
+    def create_account
       @account = Account.create_with_admin_user(
         account: {
-          external_account_id: tenant,
-          name: account_name
+          external_account_id: @tenant,
+          name: @account_name
         },
         owner: {
           name: full_name,
-          membership_id: membership.id
+          identity: identity,
         }
       )
       @user = @account.users.find_by!(role: :admin)
-
-      # TODO:PLANB: remove this once board and other models have an account_id.
-      #             this is needed because code will try to reference Account#entropy, previously
-      #             that code used Account.sole.
-      old_account, Current.account = Current.account, @account
-      # TODO:PLANB: I'm not sure how to get around needing Current.user here (which requires Current.membership)
-      old_membership, Current.membership = Current.membership, @membership
-      begin
-        @account.setup_customer_template
-      ensure
-        Current.membership = old_membership
-        Current.account = old_account
-      end
+      @account.setup_customer_template
     end
 
-    def destroy_tenant
-      # # TODO:PLANB: need to destroy the account/user records properly
+    def destroy_account
+      @account&.destroy!
+
       @user = nil
       @account = nil
       @tenant = nil
@@ -134,7 +89,7 @@ class Signup
     def queenbee_account_attributes
       {}.tap do |attributes|
         attributes[:product_name]   = "fizzy"
-        attributes[:name]           = account_name
+        attributes[:name]           = @account_name
         attributes[:owner_name]     = full_name
         attributes[:owner_email]    = email_address
 

@@ -148,7 +148,7 @@ class Import
         import.users.find_each do |old_user|
           new_identity = nil
 
-          if old_user.membership_id
+          if old_user.membership_id && old_user.active?
             membership = untenanted.memberships.find(old_user.membership_id)
             new_identity = Identity.find_or_create_by!(email_address: membership.identity.email_address)
           end

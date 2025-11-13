@@ -1,7 +1,7 @@
 class Event < ApplicationRecord
   include Notifiable, Particulars, Promptable
 
-  belongs_to :account, default: -> { Current.account }
+  belongs_to :account, default: -> { board.account }
   belongs_to :board
   belongs_to :creator, class_name: "User"
   belongs_to :eventable, polymorphic: true

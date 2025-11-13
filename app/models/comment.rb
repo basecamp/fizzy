@@ -1,7 +1,7 @@
 class Comment < ApplicationRecord
   include Attachments, Eventable, Mentions, Promptable, Searchable
 
-  belongs_to :account, default: -> { Current.account }
+  belongs_to :account, default: -> { card.account }
   belongs_to :card, touch: true
   belongs_to :creator, class_name: "User", default: -> { Current.user }
   has_many :reactions, dependent: :delete_all
