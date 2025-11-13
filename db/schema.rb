@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2025_11_13_163145) do
+ActiveRecord::Schema[8.2].define(version: 2025_11_13_190256) do
   create_table "accesses", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -396,198 +396,6 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_13_163145) do
     t.index ["reacter_id"], name: "index_reactions_on_reacter_id"
   end
 
-  create_table "search_index_0", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.uuid "board_id", null: false
-    t.uuid "card_id", null: false
-    t.text "content"
-    t.datetime "created_at", null: false
-    t.uuid "searchable_id", null: false
-    t.string "searchable_type", null: false
-    t.string "title"
-    t.index ["content", "title"], name: "idx_si0_fulltext", type: :fulltext
-    t.index ["searchable_type", "searchable_id"], name: "idx_si0_type_id", unique: true
-  end
-
-  create_table "search_index_1", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.uuid "board_id", null: false
-    t.uuid "card_id", null: false
-    t.text "content"
-    t.datetime "created_at", null: false
-    t.uuid "searchable_id", null: false
-    t.string "searchable_type", null: false
-    t.string "title"
-    t.index ["content", "title"], name: "idx_si1_fulltext", type: :fulltext
-    t.index ["searchable_type", "searchable_id"], name: "idx_si1_type_id", unique: true
-  end
-
-  create_table "search_index_10", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.uuid "board_id", null: false
-    t.uuid "card_id", null: false
-    t.text "content"
-    t.datetime "created_at", null: false
-    t.uuid "searchable_id", null: false
-    t.string "searchable_type", null: false
-    t.string "title"
-    t.index ["content", "title"], name: "idx_si10_fulltext", type: :fulltext
-    t.index ["searchable_type", "searchable_id"], name: "idx_si10_type_id", unique: true
-  end
-
-  create_table "search_index_11", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.uuid "board_id", null: false
-    t.uuid "card_id", null: false
-    t.text "content"
-    t.datetime "created_at", null: false
-    t.uuid "searchable_id", null: false
-    t.string "searchable_type", null: false
-    t.string "title"
-    t.index ["content", "title"], name: "idx_si11_fulltext", type: :fulltext
-    t.index ["searchable_type", "searchable_id"], name: "idx_si11_type_id", unique: true
-  end
-
-  create_table "search_index_12", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.uuid "board_id", null: false
-    t.uuid "card_id", null: false
-    t.text "content"
-    t.datetime "created_at", null: false
-    t.uuid "searchable_id", null: false
-    t.string "searchable_type", null: false
-    t.string "title"
-    t.index ["content", "title"], name: "idx_si12_fulltext", type: :fulltext
-    t.index ["searchable_type", "searchable_id"], name: "idx_si12_type_id", unique: true
-  end
-
-  create_table "search_index_13", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.uuid "board_id", null: false
-    t.uuid "card_id", null: false
-    t.text "content"
-    t.datetime "created_at", null: false
-    t.uuid "searchable_id", null: false
-    t.string "searchable_type", null: false
-    t.string "title"
-    t.index ["content", "title"], name: "idx_si13_fulltext", type: :fulltext
-    t.index ["searchable_type", "searchable_id"], name: "idx_si13_type_id", unique: true
-  end
-
-  create_table "search_index_14", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.uuid "board_id", null: false
-    t.uuid "card_id", null: false
-    t.text "content"
-    t.datetime "created_at", null: false
-    t.uuid "searchable_id", null: false
-    t.string "searchable_type", null: false
-    t.string "title"
-    t.index ["content", "title"], name: "idx_si14_fulltext", type: :fulltext
-    t.index ["searchable_type", "searchable_id"], name: "idx_si14_type_id", unique: true
-  end
-
-  create_table "search_index_15", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.uuid "board_id", null: false
-    t.uuid "card_id", null: false
-    t.text "content"
-    t.datetime "created_at", null: false
-    t.uuid "searchable_id", null: false
-    t.string "searchable_type", null: false
-    t.string "title"
-    t.index ["content", "title"], name: "idx_si15_fulltext", type: :fulltext
-    t.index ["searchable_type", "searchable_id"], name: "idx_si15_type_id", unique: true
-  end
-
-  create_table "search_index_2", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.uuid "board_id", null: false
-    t.uuid "card_id", null: false
-    t.text "content"
-    t.datetime "created_at", null: false
-    t.uuid "searchable_id", null: false
-    t.string "searchable_type", null: false
-    t.string "title"
-    t.index ["content", "title"], name: "idx_si2_fulltext", type: :fulltext
-    t.index ["searchable_type", "searchable_id"], name: "idx_si2_type_id", unique: true
-  end
-
-  create_table "search_index_3", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.uuid "board_id", null: false
-    t.uuid "card_id", null: false
-    t.text "content"
-    t.datetime "created_at", null: false
-    t.uuid "searchable_id", null: false
-    t.string "searchable_type", null: false
-    t.string "title"
-    t.index ["content", "title"], name: "idx_si3_fulltext", type: :fulltext
-    t.index ["searchable_type", "searchable_id"], name: "idx_si3_type_id", unique: true
-  end
-
-  create_table "search_index_4", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.uuid "board_id", null: false
-    t.uuid "card_id", null: false
-    t.text "content"
-    t.datetime "created_at", null: false
-    t.uuid "searchable_id", null: false
-    t.string "searchable_type", null: false
-    t.string "title"
-    t.index ["content", "title"], name: "idx_si4_fulltext", type: :fulltext
-    t.index ["searchable_type", "searchable_id"], name: "idx_si4_type_id", unique: true
-  end
-
-  create_table "search_index_5", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.uuid "board_id", null: false
-    t.uuid "card_id", null: false
-    t.text "content"
-    t.datetime "created_at", null: false
-    t.uuid "searchable_id", null: false
-    t.string "searchable_type", null: false
-    t.string "title"
-    t.index ["content", "title"], name: "idx_si5_fulltext", type: :fulltext
-    t.index ["searchable_type", "searchable_id"], name: "idx_si5_type_id", unique: true
-  end
-
-  create_table "search_index_6", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.uuid "board_id", null: false
-    t.uuid "card_id", null: false
-    t.text "content"
-    t.datetime "created_at", null: false
-    t.uuid "searchable_id", null: false
-    t.string "searchable_type", null: false
-    t.string "title"
-    t.index ["content", "title"], name: "idx_si6_fulltext", type: :fulltext
-    t.index ["searchable_type", "searchable_id"], name: "idx_si6_type_id", unique: true
-  end
-
-  create_table "search_index_7", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.uuid "board_id", null: false
-    t.uuid "card_id", null: false
-    t.text "content"
-    t.datetime "created_at", null: false
-    t.uuid "searchable_id", null: false
-    t.string "searchable_type", null: false
-    t.string "title"
-    t.index ["content", "title"], name: "idx_si7_fulltext", type: :fulltext
-    t.index ["searchable_type", "searchable_id"], name: "idx_si7_type_id", unique: true
-  end
-
-  create_table "search_index_8", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.uuid "board_id", null: false
-    t.uuid "card_id", null: false
-    t.text "content"
-    t.datetime "created_at", null: false
-    t.uuid "searchable_id", null: false
-    t.string "searchable_type", null: false
-    t.string "title"
-    t.index ["content", "title"], name: "idx_si8_fulltext", type: :fulltext
-    t.index ["searchable_type", "searchable_id"], name: "idx_si8_type_id", unique: true
-  end
-
-  create_table "search_index_9", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.uuid "board_id", null: false
-    t.uuid "card_id", null: false
-    t.text "content"
-    t.datetime "created_at", null: false
-    t.uuid "searchable_id", null: false
-    t.string "searchable_type", null: false
-    t.string "title"
-    t.index ["content", "title"], name: "idx_si9_fulltext", type: :fulltext
-    t.index ["searchable_type", "searchable_id"], name: "idx_si9_type_id", unique: true
-  end
-
   create_table "search_queries", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.uuid "account_id", null: false
     t.datetime "created_at", null: false
@@ -598,6 +406,230 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_13_163145) do
     t.index ["user_id", "terms"], name: "index_search_queries_on_user_id_and_terms", length: { terms: 255 }
     t.index ["user_id", "updated_at"], name: "index_search_queries_on_user_id_and_updated_at", unique: true
     t.index ["user_id"], name: "index_search_queries_on_user_id"
+  end
+
+  create_table "search_records_0", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.uuid "board_id", null: false
+    t.uuid "card_id", null: false
+    t.text "content"
+    t.datetime "created_at", null: false
+    t.uuid "searchable_id", null: false
+    t.string "searchable_type", null: false
+    t.string "title"
+    t.index ["account_id"], name: "index_search_records_0_on_account_id"
+    t.index ["content", "title"], name: "index_search_records_0_on_content_and_title", type: :fulltext
+    t.index ["searchable_type", "searchable_id"], name: "index_search_records_0_on_searchable_type_and_searchable_id", unique: true
+  end
+
+  create_table "search_records_1", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.uuid "board_id", null: false
+    t.uuid "card_id", null: false
+    t.text "content"
+    t.datetime "created_at", null: false
+    t.uuid "searchable_id", null: false
+    t.string "searchable_type", null: false
+    t.string "title"
+    t.index ["account_id"], name: "index_search_records_1_on_account_id"
+    t.index ["content", "title"], name: "index_search_records_1_on_content_and_title", type: :fulltext
+    t.index ["searchable_type", "searchable_id"], name: "index_search_records_1_on_searchable_type_and_searchable_id", unique: true
+  end
+
+  create_table "search_records_10", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.uuid "board_id", null: false
+    t.uuid "card_id", null: false
+    t.text "content"
+    t.datetime "created_at", null: false
+    t.uuid "searchable_id", null: false
+    t.string "searchable_type", null: false
+    t.string "title"
+    t.index ["account_id"], name: "index_search_records_10_on_account_id"
+    t.index ["content", "title"], name: "index_search_records_10_on_content_and_title", type: :fulltext
+    t.index ["searchable_type", "searchable_id"], name: "index_search_records_10_on_searchable_type_and_searchable_id", unique: true
+  end
+
+  create_table "search_records_11", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.uuid "board_id", null: false
+    t.uuid "card_id", null: false
+    t.text "content"
+    t.datetime "created_at", null: false
+    t.uuid "searchable_id", null: false
+    t.string "searchable_type", null: false
+    t.string "title"
+    t.index ["account_id"], name: "index_search_records_11_on_account_id"
+    t.index ["content", "title"], name: "index_search_records_11_on_content_and_title", type: :fulltext
+    t.index ["searchable_type", "searchable_id"], name: "index_search_records_11_on_searchable_type_and_searchable_id", unique: true
+  end
+
+  create_table "search_records_12", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.uuid "board_id", null: false
+    t.uuid "card_id", null: false
+    t.text "content"
+    t.datetime "created_at", null: false
+    t.uuid "searchable_id", null: false
+    t.string "searchable_type", null: false
+    t.string "title"
+    t.index ["account_id"], name: "index_search_records_12_on_account_id"
+    t.index ["content", "title"], name: "index_search_records_12_on_content_and_title", type: :fulltext
+    t.index ["searchable_type", "searchable_id"], name: "index_search_records_12_on_searchable_type_and_searchable_id", unique: true
+  end
+
+  create_table "search_records_13", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.uuid "board_id", null: false
+    t.uuid "card_id", null: false
+    t.text "content"
+    t.datetime "created_at", null: false
+    t.uuid "searchable_id", null: false
+    t.string "searchable_type", null: false
+    t.string "title"
+    t.index ["account_id"], name: "index_search_records_13_on_account_id"
+    t.index ["content", "title"], name: "index_search_records_13_on_content_and_title", type: :fulltext
+    t.index ["searchable_type", "searchable_id"], name: "index_search_records_13_on_searchable_type_and_searchable_id", unique: true
+  end
+
+  create_table "search_records_14", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.uuid "board_id", null: false
+    t.uuid "card_id", null: false
+    t.text "content"
+    t.datetime "created_at", null: false
+    t.uuid "searchable_id", null: false
+    t.string "searchable_type", null: false
+    t.string "title"
+    t.index ["account_id"], name: "index_search_records_14_on_account_id"
+    t.index ["content", "title"], name: "index_search_records_14_on_content_and_title", type: :fulltext
+    t.index ["searchable_type", "searchable_id"], name: "index_search_records_14_on_searchable_type_and_searchable_id", unique: true
+  end
+
+  create_table "search_records_15", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.uuid "board_id", null: false
+    t.uuid "card_id", null: false
+    t.text "content"
+    t.datetime "created_at", null: false
+    t.uuid "searchable_id", null: false
+    t.string "searchable_type", null: false
+    t.string "title"
+    t.index ["account_id"], name: "index_search_records_15_on_account_id"
+    t.index ["content", "title"], name: "index_search_records_15_on_content_and_title", type: :fulltext
+    t.index ["searchable_type", "searchable_id"], name: "index_search_records_15_on_searchable_type_and_searchable_id", unique: true
+  end
+
+  create_table "search_records_2", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.uuid "board_id", null: false
+    t.uuid "card_id", null: false
+    t.text "content"
+    t.datetime "created_at", null: false
+    t.uuid "searchable_id", null: false
+    t.string "searchable_type", null: false
+    t.string "title"
+    t.index ["account_id"], name: "index_search_records_2_on_account_id"
+    t.index ["content", "title"], name: "index_search_records_2_on_content_and_title", type: :fulltext
+    t.index ["searchable_type", "searchable_id"], name: "index_search_records_2_on_searchable_type_and_searchable_id", unique: true
+  end
+
+  create_table "search_records_3", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.uuid "board_id", null: false
+    t.uuid "card_id", null: false
+    t.text "content"
+    t.datetime "created_at", null: false
+    t.uuid "searchable_id", null: false
+    t.string "searchable_type", null: false
+    t.string "title"
+    t.index ["account_id"], name: "index_search_records_3_on_account_id"
+    t.index ["content", "title"], name: "index_search_records_3_on_content_and_title", type: :fulltext
+    t.index ["searchable_type", "searchable_id"], name: "index_search_records_3_on_searchable_type_and_searchable_id", unique: true
+  end
+
+  create_table "search_records_4", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.uuid "board_id", null: false
+    t.uuid "card_id", null: false
+    t.text "content"
+    t.datetime "created_at", null: false
+    t.uuid "searchable_id", null: false
+    t.string "searchable_type", null: false
+    t.string "title"
+    t.index ["account_id"], name: "index_search_records_4_on_account_id"
+    t.index ["content", "title"], name: "index_search_records_4_on_content_and_title", type: :fulltext
+    t.index ["searchable_type", "searchable_id"], name: "index_search_records_4_on_searchable_type_and_searchable_id", unique: true
+  end
+
+  create_table "search_records_5", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.uuid "board_id", null: false
+    t.uuid "card_id", null: false
+    t.text "content"
+    t.datetime "created_at", null: false
+    t.uuid "searchable_id", null: false
+    t.string "searchable_type", null: false
+    t.string "title"
+    t.index ["account_id"], name: "index_search_records_5_on_account_id"
+    t.index ["content", "title"], name: "index_search_records_5_on_content_and_title", type: :fulltext
+    t.index ["searchable_type", "searchable_id"], name: "index_search_records_5_on_searchable_type_and_searchable_id", unique: true
+  end
+
+  create_table "search_records_6", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.uuid "board_id", null: false
+    t.uuid "card_id", null: false
+    t.text "content"
+    t.datetime "created_at", null: false
+    t.uuid "searchable_id", null: false
+    t.string "searchable_type", null: false
+    t.string "title"
+    t.index ["account_id"], name: "index_search_records_6_on_account_id"
+    t.index ["content", "title"], name: "index_search_records_6_on_content_and_title", type: :fulltext
+    t.index ["searchable_type", "searchable_id"], name: "index_search_records_6_on_searchable_type_and_searchable_id", unique: true
+  end
+
+  create_table "search_records_7", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.uuid "board_id", null: false
+    t.uuid "card_id", null: false
+    t.text "content"
+    t.datetime "created_at", null: false
+    t.uuid "searchable_id", null: false
+    t.string "searchable_type", null: false
+    t.string "title"
+    t.index ["account_id"], name: "index_search_records_7_on_account_id"
+    t.index ["content", "title"], name: "index_search_records_7_on_content_and_title", type: :fulltext
+    t.index ["searchable_type", "searchable_id"], name: "index_search_records_7_on_searchable_type_and_searchable_id", unique: true
+  end
+
+  create_table "search_records_8", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.uuid "board_id", null: false
+    t.uuid "card_id", null: false
+    t.text "content"
+    t.datetime "created_at", null: false
+    t.uuid "searchable_id", null: false
+    t.string "searchable_type", null: false
+    t.string "title"
+    t.index ["account_id"], name: "index_search_records_8_on_account_id"
+    t.index ["content", "title"], name: "index_search_records_8_on_content_and_title", type: :fulltext
+    t.index ["searchable_type", "searchable_id"], name: "index_search_records_8_on_searchable_type_and_searchable_id", unique: true
+  end
+
+  create_table "search_records_9", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.uuid "board_id", null: false
+    t.uuid "card_id", null: false
+    t.text "content"
+    t.datetime "created_at", null: false
+    t.uuid "searchable_id", null: false
+    t.string "searchable_type", null: false
+    t.string "title"
+    t.index ["account_id"], name: "index_search_records_9_on_account_id"
+    t.index ["content", "title"], name: "index_search_records_9_on_content_and_title", type: :fulltext
+    t.index ["searchable_type", "searchable_id"], name: "index_search_records_9_on_searchable_type_and_searchable_id", unique: true
   end
 
   create_table "search_results", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|

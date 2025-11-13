@@ -1,10 +1,6 @@
 module Searchable
   extend ActiveSupport::Concern
 
-  def self.search_index_table_name(account_id)
-    "search_index_#{Zlib.crc32(account_id) % 16}"
-  end
-
   included do
     after_create_commit :create_in_search_index
     after_update_commit :update_in_search_index
@@ -17,54 +13,40 @@ module Searchable
 
   private
     def create_in_search_index
-      table_name = Searchable.search_index_table_name(account_id)
-      uuid_type = ActiveRecord::Type.lookup(:uuid, adapter: :trilogy)
-
-      self.class.connection.execute self.class.sanitize_sql([
-        "INSERT INTO #{table_name} (id, searchable_type, searchable_id, card_id, board_id, title, content, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-        uuid_type.serialize(ActiveRecord::Type::Uuid.generate),
-        self.class.name,
-        uuid_type.serialize(id),
-        uuid_type.serialize(search_card_id),
-        uuid_type.serialize(search_board_id),
-        search_title,
-        search_content,
-        created_at
-      ])
+      Search::Record.for_account(account_id).create!(search_record_attributes)
     end
 
     def update_in_search_index
-      table_name = Searchable.search_index_table_name(account_id)
-      uuid_type = ActiveRecord::Type.lookup(:uuid, adapter: :trilogy)
-
-      result = self.class.connection.execute(self.class.sanitize_sql([
-        "UPDATE #{table_name} SET card_id = ?, board_id = ?, title = ?, content = ?, created_at = ? WHERE searchable_type = ? AND searchable_id = ?",
-        uuid_type.serialize(search_card_id),
-        uuid_type.serialize(search_board_id),
-        search_title,
-        search_content,
-        created_at,
-        self.class.name,
-        uuid_type.serialize(id)
-      ]))
-
-      create_in_search_index if result.affected_rows == 0
+      Search::Record.for_account(account_id).upsert_all(
+        [search_record_attributes.merge(id: ActiveRecord::Type::Uuid.generate)],
+        update_only: [:card_id, :board_id, :title, :content, :created_at]
+      )
     end
 
     def remove_from_search_index
-      table_name = Searchable.search_index_table_name(account_id)
-      uuid_type = ActiveRecord::Type.lookup(:uuid, adapter: :trilogy)
-
-      self.class.connection.execute self.class.sanitize_sql([
-        "DELETE FROM #{table_name} WHERE searchable_type = ? AND searchable_id = ?",
-        self.class.name,
-        uuid_type.serialize(id)
-      ])
+      Search::Record.for_account(account_id).where(
+        searchable_type: self.class.name,
+        searchable_id: id
+      ).delete_all
     end
 
-  # Models must implement these methods:
-  # - search_title: returns title string or nil
-  # - search_content: returns content string
-  # - search_card_id: returns the card id (self.id for cards, card_id for comments)
-  # - search_board_id: returns the board id
+    def search_record_attributes
+      {
+        account_id: account_id,
+        searchable_type: self.class.name,
+        searchable_id: id,
+        card_id: search_card_id,
+        board_id: search_board_id,
+        title: Search::Stemmer.stem(search_title),
+        content: Search::Stemmer.stem(search_content),
+        created_at: created_at
+      }
+    end
+
+    # Models must implement these methods:
+    # - account_id: returns the account id
+    # - search_title: returns title string or nil
+    # - search_content: returns content string
+    # - search_card_id: returns the card id (self.id for cards, card_id for comments)
+    # - search_board_id: returns the board id
 end

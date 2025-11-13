@@ -6,7 +6,7 @@ module User::Searcher
   end
 
   def search(terms)
-    Search.new(self, terms).results
+    Search.results(query: terms, user: self)
   end
 
   def remember_search(terms)

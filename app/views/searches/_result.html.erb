@@ -2,7 +2,7 @@
   <%= link_to result.source, class: "search__result", data: { turbo_frame: "_top", action: "bar#reset" } do %>
       <div>
         <h3 class="search__title txt--medium margin-none">
-          # <%= result.number %> <%= result.card_title %>
+          # <%= result.card.number %> <%= result.card_title %>
         </h3>
 
         <% if result.card_description.present? %>
@@ -12,7 +12,7 @@
         <% else
              if result.comment_body.present? %>
             <div class="search__excerpt search__excerpt--comment">
-              <%= avatar_preview_tag result.creator %>
+              <%= avatar_preview_tag result.card.creator %>
               <div>
                 <%= result.comment_body %>
               </div>
@@ -20,6 +20,6 @@
           <% end %>
         <% end %>
       </div>
-      <div class="overflow-ellipsis translucent txt-ink"><%= result.board_name %></div>
+      <div class="overflow-ellipsis translucent txt-ink"><%= result.card.board.name %></div>
   <% end %>
 </li>
