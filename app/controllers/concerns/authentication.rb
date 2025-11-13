@@ -35,10 +35,8 @@ module Authentication
     end
 
     def require_account
-      if request_account_id.blank?
+      unless Current.account.present?
         redirect_to session_menu_url(script_name: nil)
-      else
-        set_current_account
       end
     end
 
@@ -57,7 +55,7 @@ module Authentication
     end
 
     def request_authentication
-      if request_account_id.present?
+      if Current.account.present?
         session[:return_to_after_authenticating] = request.url
       end
 
@@ -73,7 +71,7 @@ module Authentication
     end
 
     def redirect_tenanted_request
-      redirect_to root_url if request_account_id
+      redirect_to root_url if Current.account.present?
     end
 
     def start_new_session_for(identity)
@@ -91,13 +89,5 @@ module Authentication
     def terminate_session
       Current.session.destroy
       cookies.delete(:session_token)
-    end
-
-    def set_current_account
-      Current.account = Account.find_by(external_account_id: request_account_id)
-    end
-
-    def request_account_id
-      request.env["fizzy.external_account_id"]
     end
 end
