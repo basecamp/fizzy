@@ -113,7 +113,6 @@ class Import
         account = import.accounts.sole
 
         new_identity = Identity.find_or_create_by!(email_address: membership.identity.email_address)
-        new_membership = new_identity.memberships.find_or_create_by!(tenant: account.external_account_id.to_s)
 
         if Account.all.exists?(external_account_id: account.external_account_id)
           raise "Account already exists"
@@ -125,7 +124,7 @@ class Import
             },
             owner: {
               name: oldest_admin.name,
-              membership_id: new_membership.id
+              identity: new_identity
             }
           )
           @tenant = @account.external_account_id
@@ -147,26 +146,28 @@ class Import
       step("Copying users", "Copied %{count} users in %{duration}") do
         mapping[:users] ||= {}
         import.users.find_each do |old_user|
-          new_membership = nil
+          new_identity = nil
 
-          if old_user.active && old_user.membership_id
+          if old_user.membership_id
             membership = untenanted.memberships.find(old_user.membership_id)
             new_identity = Identity.find_or_create_by!(email_address: membership.identity.email_address)
-            new_membership = new_identity.memberships.find_or_create_by!(tenant: tenant)
           end
 
-          new_user = User.find_or_create_by!(account_id: account.id, membership_id: new_membership&.id) do |u|
-            u.name = old_user.name
-            u.role = old_user.role
-            u.active = old_user.active
-          end
+          new_user = User.create!(
+            account: account,
+            identity: new_identity,
+            name: old_user.name,
+            role: old_user.role,
+            active: old_user.active,
+          )
 
           old_settings = old_user.settings
           if old_settings
-            User::Settings.find_or_create_by!(user_id: new_user.id) do |s|
-              s.bundle_email_frequency = old_settings.bundle_email_frequency
-              s.timezone_name = old_settings.timezone_name
-            end
+            User::Settings.create!(
+              user: new_user,
+              bundle_email_frequency: old_settings.bundle_email_frequency,
+              timezone_name: old_settings.timezone_name
+            )
           end
 
           mapping[:users][old_user.id] = new_user.id

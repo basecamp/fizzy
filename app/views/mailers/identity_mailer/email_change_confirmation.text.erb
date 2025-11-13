@@ -3,6 +3,6 @@ Confirm your email address change
 
 Hit the link below to use this email address in Fizzy:
 
-<%= email_address_confirmation_url(membership_id: @membership.id, email_address_token: @token) %>
+<%= email_address_confirmation_url(user_id: @user.id, email_address_token: @token) %>
 
 If you didn’t request this change, you can ignore this email. Your email address WILL NOT be changed unless you hit the button.

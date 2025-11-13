@@ -1,6 +1,6 @@
 <div class="flex gap">
   <div class="flex flex-column full-width justify-center gap-half">
-    <% if Current.user.identity.memberships.many? %>
+    <% if Current.user.identity.users.many? %>
       <strong class="center"><%= Current.account.name %></strong>
     <% end %>
     <%= jump_field_tag %>

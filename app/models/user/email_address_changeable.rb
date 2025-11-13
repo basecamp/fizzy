@@ -1,4 +1,4 @@
-module Membership::EmailAddressChangeable
+module User::EmailAddressChangeable
   EMAIL_CHANGE_TOKEN_PURPOSE = "change_email_address"
   EMAIL_CHANGE_TOKEN_EXPIRATION = 30.minutes
 

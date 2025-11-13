@@ -2,7 +2,7 @@
 
 <% content_for :header do %>
   <div class="header__actions header__actions--start">
-    <%= link_to edit_user_path(@membership.user, script_name: "/#{@membership.tenant}"), class: "btn borderless txt-medium", data: { controller: "hotkey", action: "keydown.left@document->hotkey#click" } do %>
+    <%= link_to edit_user_path(@user, script_name: @user.account.slug), class: "btn borderless txt-medium", data: { controller: "hotkey", action: "keydown.left@document->hotkey#click" } do %>
       <span class="overflow-ellipsis flex align-center">
         <strong>Back to My profile</strong>
         <kbd class="txt-x-small margin-inline-start hide-on-touch">&larr;</kbd>
@@ -16,8 +16,8 @@
     <%= @page_title %>
   </h1>
 
-  <%= form_with url: email_addresses_path(membership_id: @membership.id), method: :post, class: "flex flex-column gap-half", data: { controller: "form", turbo: false } do |form| %>
-    <div class="flex align-center gap-haf">
+  <%= form_with url: user_email_addresses_path(user_id: @user.id), method: :post, class: "flex flex-column gap-half", data: { controller: "form", turbo: false } do |form| %>
+    <div class="flex align-center gap-half">
       <label class="flex align-center gap input input--actor">
         <%= form.email_field :email_address, class: "input full-width", autocomplete: "email", placeholder: "New email address", autofocus: true, required: true %>
       </label>

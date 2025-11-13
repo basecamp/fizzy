@@ -3,7 +3,7 @@
 <div class="panel panel--centered flex flex-column gap-half">
   <h1 class="txt-large font-weight-black margin-none"><%= @page_title %></h1>
 
-  <%= form_with scope: "user", url: users_joins_path(membership: params[:membership]), class: "flex flex-column gap txt-medium", data: { controller: "form" } do |form| %>
+  <%= form_with scope: "user", url: users_joins_path, class: "flex flex-column gap txt-medium", data: { controller: "form" } do |form| %>
     <div class="flex align-center gap">
       <label class="flex align-center gap input input--actor">
         <%= form.text_field :name, class: "input full-width", autocomplete: "name", placeholder: "Full name", autofocus: true, required: true, data: { "1p-ignore": true } %>

@@ -1,4 +1,4 @@
-class Memberships::EmailAddresses::ConfirmationsController < ApplicationController
+class Users::EmailAddresses::ConfirmationsController < ApplicationController
   disallow_account_scope
   allow_unauthenticated_access
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2025_11_12_184932) do
+ActiveRecord::Schema[8.2].define(version: 2025_11_13_111501) do
   create_table "accesses", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "board_id", null: false
@@ -286,16 +286,6 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_12_184932) do
     t.index ["code"], name: "index_magic_links_on_code", unique: true
     t.index ["expires_at"], name: "index_magic_links_on_expires_at"
     t.index ["identity_id"], name: "index_magic_links_on_identity_id"
-  end
-
-  create_table "memberships", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.uuid "identity_id", null: false
-    t.string "tenant", null: false
-    t.datetime "updated_at", null: false
-    t.index ["identity_id"], name: "index_memberships_on_identity_id"
-    t.index ["tenant", "identity_id"], name: "index_memberships_on_tenant_and_identity_id", unique: true
-    t.index ["tenant"], name: "index_memberships_on_user_tenant_and_user_id"
   end
 
   create_table "mentions", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -632,11 +622,11 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_12_184932) do
     t.uuid "account_id"
     t.boolean "active", default: true, null: false
     t.datetime "created_at", null: false
-    t.uuid "membership_id"
+    t.uuid "identity_id"
     t.string "name", null: false
     t.string "role", default: "member", null: false
     t.datetime "updated_at", null: false
-    t.index ["membership_id"], name: "index_users_on_membership_id"
+    t.index ["identity_id"], name: "index_users_on_identity_id"
     t.index ["role"], name: "index_users_on_role"
   end
 
@@ -700,7 +690,6 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_12_184932) do
   add_foreign_key "comments", "cards"
   add_foreign_key "events", "boards"
   add_foreign_key "magic_links", "identities"
-  add_foreign_key "memberships", "identities"
   add_foreign_key "mentions", "users", column: "mentionee_id"
   add_foreign_key "mentions", "users", column: "mentioner_id"
   add_foreign_key "notification_bundles", "users"
@@ -715,6 +704,7 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_12_184932) do
   add_foreign_key "taggings", "cards"
   add_foreign_key "taggings", "tags"
   add_foreign_key "user_settings", "users"
+  add_foreign_key "users", "identities"
   add_foreign_key "watches", "cards"
   add_foreign_key "watches", "users"
   add_foreign_key "webhook_delinquency_trackers", "webhooks"

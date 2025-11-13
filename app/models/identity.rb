@@ -1,9 +1,11 @@
 class Identity < ApplicationRecord
   include Joinable, Transferable
 
-  has_many :memberships, dependent: :destroy
+  has_many :users, dependent: :nullify
   has_many :magic_links, dependent: :destroy
   has_many :sessions, dependent: :destroy
+
+  before_destroy :deactivate_users
 
   normalizes :email_address, with: ->(value) { value.strip.downcase.presence }
 
@@ -16,4 +18,9 @@ class Identity < ApplicationRecord
   def staff?
     email_address.ends_with?("@37signals.com") || email_address.ends_with?("@basecamp.com")
   end
+
+  private
+    def deactivate_users
+      users.find_each(&:deactivate)
+    end
 end

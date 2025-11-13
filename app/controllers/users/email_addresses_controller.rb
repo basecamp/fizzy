@@ -1,4 +1,4 @@
-class Memberships::EmailAddressesController < ApplicationController
+class Users::EmailAddressesController < ApplicationController
   disallow_account_scope
 
   layout "public"

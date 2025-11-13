@@ -1,8 +1,8 @@
 <%= turbo_frame_tag Current.identity, :account_menu do %>
-  <% cache [ Current.identity, @memberships ] do %>
+  <% cache [ Current.identity, @accounts ] do %>
     <%= collapsible_nav_section "Accounts" do %>
-      <% @memberships.each do |membership| %>
-        <%= filter_place_menu_item landing_url(script_name: "/#{membership.tenant}"), "#{membership.account_name}", "marker", new_window: true %>
+      <% @accounts.each do |account| %>
+        <%= filter_place_menu_item landing_url(script_name: account.slug, account.name, "marker", new_window: true %>
       <% end %>
     <% end %>
   <% end %>

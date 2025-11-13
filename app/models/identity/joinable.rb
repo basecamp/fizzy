@@ -1,14 +1,15 @@
 module Identity::Joinable
   extend ActiveSupport::Concern
 
-  def join(account)
+  def join(account, **attributes)
+    attributes[:name] ||= email_address
+
     transaction do
-      membership = memberships.create!(tenant: account.external_account_id)
-      account.users.create!(membership: membership, name: email_address)
+      account.users.create!(**attributes, identity: self)
     end
   end
 
   def member_of?(account)
-    memberships.exists?(tenant: account.external_account_id.to_s)
+    account.users.exists?(identity: self)
   end
 end
