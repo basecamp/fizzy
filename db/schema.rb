@@ -11,21 +11,21 @@
 # It's strongly recommended that you check this file into your version control system.
 
 ActiveRecord::Schema[8.2].define(version: 2025_11_12_184932) do
-  create_table "accesses", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "accesses", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "accessed_at"
-    t.binary "board_id", null: false, limit: 16
+    t.uuid "board_id", null: false
     t.datetime "created_at", null: false
     t.string "involvement", default: "access_only", null: false
     t.datetime "updated_at", null: false
-    t.binary "user_id", null: false, limit: 16
+    t.uuid "user_id", null: false
     t.index ["accessed_at"], name: "index_accesses_on_accessed_at", order: :desc
     t.index ["board_id", "user_id"], name: "index_accesses_on_board_id_and_user_id", unique: true
     t.index ["board_id"], name: "index_accesses_on_board_id"
     t.index ["user_id"], name: "index_accesses_on_user_id"
   end
 
-  create_table "account_join_codes", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "account_id", limit: 16
+  create_table "account_join_codes", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "account_id"
     t.string "code", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -34,7 +34,7 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_12_184932) do
     t.index ["code"], name: "index_account_join_codes_on_code", unique: true
   end
 
-  create_table "accounts", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "accounts", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "cards_count", default: 0, null: false
     t.datetime "created_at", null: false
     t.integer "external_account_id"
@@ -43,27 +43,27 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_12_184932) do
     t.index ["external_account_id"], name: "index_accounts_on_external_account_id", unique: true
   end
 
-  create_table "action_text_rich_texts", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "action_text_rich_texts", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
     t.string "name", null: false
-    t.binary "record_id", null: false, limit: 16
+    t.uuid "record_id", null: false
     t.string "record_type", null: false
     t.datetime "updated_at", null: false
     t.index ["record_type", "record_id", "name"], name: "index_action_text_rich_texts_uniqueness", unique: true
   end
 
-  create_table "active_storage_attachments", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "blob_id", null: false, limit: 16
+  create_table "active_storage_attachments", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "blob_id", null: false
     t.datetime "created_at", null: false
     t.string "name", null: false
-    t.binary "record_id", null: false, limit: 16
+    t.uuid "record_id", null: false
     t.string "record_type", null: false
     t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
     t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
   end
 
-  create_table "active_storage_blobs", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "active_storage_blobs", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "byte_size", null: false
     t.string "checksum"
     t.string "content_type"
@@ -75,38 +75,38 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_12_184932) do
     t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
   end
 
-  create_table "active_storage_variant_records", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "blob_id", null: false, limit: 16
+  create_table "active_storage_variant_records", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
   create_table "assignees_filters", id: false, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "assignee_id", null: false, limit: 16
-    t.binary "filter_id", null: false, limit: 16
+    t.uuid "assignee_id", null: false
+    t.uuid "filter_id", null: false
     t.index ["assignee_id"], name: "index_assignees_filters_on_assignee_id"
     t.index ["filter_id"], name: "index_assignees_filters_on_filter_id"
   end
 
   create_table "assigners_filters", id: false, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "assigner_id", null: false, limit: 16
-    t.binary "filter_id", null: false, limit: 16
+    t.uuid "assigner_id", null: false
+    t.uuid "filter_id", null: false
     t.index ["assigner_id"], name: "index_assigners_filters_on_assigner_id"
     t.index ["filter_id"], name: "index_assigners_filters_on_filter_id"
   end
 
-  create_table "assignments", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "assignee_id", null: false, limit: 16
-    t.binary "assigner_id", null: false, limit: 16
-    t.binary "card_id", null: false, limit: 16
+  create_table "assignments", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "assignee_id", null: false
+    t.uuid "assigner_id", null: false
+    t.uuid "card_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["assignee_id", "card_id"], name: "index_assignments_on_assignee_id_and_card_id", unique: true
     t.index ["card_id"], name: "index_assignments_on_card_id"
   end
 
-  create_table "board_publications", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "board_id", null: false, limit: 16
+  create_table "board_publications", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "board_id", null: false
     t.datetime "created_at", null: false
     t.string "key"
     t.datetime "updated_at", null: false
@@ -114,32 +114,32 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_12_184932) do
     t.index ["key"], name: "index_board_publications_on_key", unique: true
   end
 
-  create_table "boards", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "account_id", limit: 16
+  create_table "boards", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "account_id"
     t.boolean "all_access", default: false, null: false
     t.datetime "created_at", null: false
-    t.binary "creator_id", null: false, limit: 16
+    t.uuid "creator_id", null: false
     t.string "name", null: false
     t.datetime "updated_at", null: false
     t.index ["creator_id"], name: "index_boards_on_creator_id"
   end
 
   create_table "boards_filters", id: false, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "board_id", null: false, limit: 16
-    t.binary "filter_id", null: false, limit: 16
+    t.uuid "board_id", null: false
+    t.uuid "filter_id", null: false
     t.index ["board_id"], name: "index_boards_filters_on_board_id"
     t.index ["filter_id"], name: "index_boards_filters_on_filter_id"
   end
 
-  create_table "card_activity_spikes", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "card_id", null: false, limit: 16
+  create_table "card_activity_spikes", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "card_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["card_id"], name: "index_card_activity_spikes_on_card_id"
   end
 
-  create_table "card_engagements", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "card_id", limit: 16
+  create_table "card_engagements", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "card_id"
     t.datetime "created_at", null: false
     t.string "status", default: "doing", null: false
     t.datetime "updated_at", null: false
@@ -147,28 +147,28 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_12_184932) do
     t.index ["status"], name: "index_card_engagements_on_status"
   end
 
-  create_table "card_goldnesses", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "card_id", null: false, limit: 16
+  create_table "card_goldnesses", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "card_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["card_id"], name: "index_card_goldnesses_on_card_id", unique: true
   end
 
-  create_table "card_not_nows", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "card_id", null: false, limit: 16
+  create_table "card_not_nows", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "card_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.binary "user_id", limit: 16
+    t.uuid "user_id"
     t.index ["card_id"], name: "index_card_not_nows_on_card_id", unique: true
     t.index ["user_id"], name: "index_card_not_nows_on_user_id"
   end
 
-  create_table "cards", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "account_id", limit: 16
-    t.binary "board_id", null: false, limit: 16
-    t.binary "column_id", limit: 16
+  create_table "cards", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "account_id"
+    t.uuid "board_id", null: false
+    t.uuid "column_id"
     t.datetime "created_at", null: false
-    t.binary "creator_id", null: false, limit: 16
+    t.uuid "creator_id", null: false
     t.date "due_on"
     t.datetime "last_active_at", null: false
     t.bigint "number", null: false
@@ -182,25 +182,25 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_12_184932) do
   end
 
   create_table "closers_filters", id: false, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "closer_id", null: false, limit: 16
-    t.binary "filter_id", null: false, limit: 16
+    t.uuid "closer_id", null: false
+    t.uuid "filter_id", null: false
     t.index ["closer_id"], name: "index_closers_filters_on_closer_id"
     t.index ["filter_id"], name: "index_closers_filters_on_filter_id"
   end
 
-  create_table "closures", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "card_id", null: false, limit: 16
+  create_table "closures", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "card_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.binary "user_id", limit: 16
+    t.uuid "user_id"
     t.index ["card_id", "created_at"], name: "index_closures_on_card_id_and_created_at"
     t.index ["card_id"], name: "index_closures_on_card_id", unique: true
     t.index ["user_id"], name: "index_closures_on_user_id"
   end
 
-  create_table "columns", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "account_id", limit: 16
-    t.binary "board_id", null: false, limit: 16
+  create_table "columns", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "account_id"
+    t.uuid "board_id", null: false
     t.string "color", null: false
     t.datetime "created_at", null: false
     t.string "name", null: false
@@ -210,25 +210,25 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_12_184932) do
     t.index ["board_id"], name: "index_columns_on_board_id"
   end
 
-  create_table "comments", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "account_id", limit: 16
-    t.binary "card_id", null: false, limit: 16
+  create_table "comments", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "account_id"
+    t.uuid "card_id", null: false
     t.datetime "created_at", null: false
-    t.binary "creator_id", null: false, limit: 16
+    t.uuid "creator_id", null: false
     t.datetime "updated_at", null: false
     t.index ["card_id"], name: "index_comments_on_card_id"
   end
 
   create_table "creators_filters", id: false, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "creator_id", null: false, limit: 16
-    t.binary "filter_id", null: false, limit: 16
+    t.uuid "creator_id", null: false
+    t.uuid "filter_id", null: false
     t.index ["creator_id"], name: "index_creators_filters_on_creator_id"
     t.index ["filter_id"], name: "index_creators_filters_on_filter_id"
   end
 
-  create_table "entropies", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "entropies", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "auto_postpone_period", default: 2592000, null: false
-    t.binary "container_id", null: false, limit: 16
+    t.uuid "container_id", null: false
     t.string "container_type", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -236,13 +236,13 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_12_184932) do
     t.index ["container_type", "container_id"], name: "index_entropy_configurations_on_container", unique: true
   end
 
-  create_table "events", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "account_id", limit: 16
+  create_table "events", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "account_id"
     t.string "action", null: false
-    t.binary "board_id", null: false, limit: 16
+    t.uuid "board_id", null: false
     t.datetime "created_at", null: false
-    t.binary "creator_id", null: false, limit: 16
-    t.binary "eventable_id", null: false, limit: 16
+    t.uuid "creator_id", null: false
+    t.uuid "eventable_id", null: false
     t.string "eventable_type", null: false
     t.json "particulars", default: -> { "(json_object())" }
     t.datetime "updated_at", null: false
@@ -253,10 +253,10 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_12_184932) do
     t.index ["eventable_type", "eventable_id"], name: "index_events_on_eventable"
   end
 
-  create_table "filters", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "account_id", limit: 16
+  create_table "filters", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "account_id"
     t.datetime "created_at", null: false
-    t.binary "creator_id", null: false, limit: 16
+    t.uuid "creator_id", null: false
     t.json "fields", default: -> { "(json_object())" }, null: false
     t.string "params_digest", null: false
     t.datetime "updated_at", null: false
@@ -264,33 +264,33 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_12_184932) do
   end
 
   create_table "filters_tags", id: false, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "filter_id", null: false, limit: 16
-    t.binary "tag_id", null: false, limit: 16
+    t.uuid "filter_id", null: false
+    t.uuid "tag_id", null: false
     t.index ["filter_id"], name: "index_filters_tags_on_filter_id"
     t.index ["tag_id"], name: "index_filters_tags_on_tag_id"
   end
 
-  create_table "identities", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "identities", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email_address", null: false
     t.datetime "updated_at", null: false
     t.index ["email_address"], name: "index_identities_on_email_address", unique: true
   end
 
-  create_table "magic_links", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "magic_links", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "code", null: false
     t.datetime "created_at", null: false
     t.datetime "expires_at", null: false
-    t.binary "identity_id", limit: 16
+    t.uuid "identity_id"
     t.datetime "updated_at", null: false
     t.index ["code"], name: "index_magic_links_on_code", unique: true
     t.index ["expires_at"], name: "index_magic_links_on_expires_at"
     t.index ["identity_id"], name: "index_magic_links_on_identity_id"
   end
 
-  create_table "memberships", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "memberships", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.binary "identity_id", null: false, limit: 16
+    t.uuid "identity_id", null: false
     t.string "join_code"
     t.string "tenant", null: false
     t.datetime "updated_at", null: false
@@ -299,11 +299,11 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_12_184932) do
     t.index ["tenant"], name: "index_memberships_on_user_tenant_and_user_id"
   end
 
-  create_table "mentions", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "mentions", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.binary "mentionee_id", null: false, limit: 16
-    t.binary "mentioner_id", null: false, limit: 16
-    t.binary "source_id", null: false, limit: 16
+    t.uuid "mentionee_id", null: false
+    t.uuid "mentioner_id", null: false
+    t.uuid "source_id", null: false
     t.string "source_type", null: false
     t.datetime "updated_at", null: false
     t.index ["mentionee_id"], name: "index_mentions_on_mentionee_id"
@@ -311,53 +311,53 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_12_184932) do
     t.index ["source_type", "source_id"], name: "index_mentions_on_source"
   end
 
-  create_table "notification_bundles", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "account_id", limit: 16
+  create_table "notification_bundles", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "account_id"
     t.datetime "created_at", null: false
     t.datetime "ends_at", null: false
     t.datetime "starts_at", null: false
     t.integer "status", default: 0, null: false
     t.datetime "updated_at", null: false
-    t.binary "user_id", null: false, limit: 16
+    t.uuid "user_id", null: false
     t.index ["ends_at", "status"], name: "index_notification_bundles_on_ends_at_and_status"
     t.index ["user_id", "starts_at", "ends_at"], name: "idx_on_user_id_starts_at_ends_at_7eae5d3ac5"
     t.index ["user_id", "status"], name: "index_notification_bundles_on_user_id_and_status"
   end
 
-  create_table "notifications", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "account_id", limit: 16
+  create_table "notifications", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "account_id"
     t.datetime "created_at", null: false
-    t.binary "creator_id", limit: 16
+    t.uuid "creator_id"
     t.datetime "read_at"
-    t.binary "source_id", null: false, limit: 16
+    t.uuid "source_id", null: false
     t.string "source_type", null: false
     t.datetime "updated_at", null: false
-    t.binary "user_id", null: false, limit: 16
+    t.uuid "user_id", null: false
     t.index ["creator_id"], name: "index_notifications_on_creator_id"
     t.index ["source_type", "source_id"], name: "index_notifications_on_source"
     t.index ["user_id", "read_at", "created_at"], name: "index_notifications_on_user_id_and_read_at_and_created_at", order: { read_at: :desc, created_at: :desc }
     t.index ["user_id"], name: "index_notifications_on_user_id"
   end
 
-  create_table "pins", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "card_id", null: false, limit: 16
+  create_table "pins", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "card_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.binary "user_id", null: false, limit: 16
+    t.uuid "user_id", null: false
     t.index ["card_id", "user_id"], name: "index_pins_on_card_id_and_user_id", unique: true
     t.index ["card_id"], name: "index_pins_on_card_id"
     t.index ["user_id"], name: "index_pins_on_user_id"
   end
 
-  create_table "push_subscriptions", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "account_id", limit: 16
+  create_table "push_subscriptions", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "account_id"
     t.string "auth_key"
     t.datetime "created_at", null: false
     t.string "endpoint"
     t.string "p256dh_key"
     t.datetime "updated_at", null: false
     t.string "user_agent"
-    t.binary "user_id", null: false, limit: 16
+    t.uuid "user_id", null: false
     t.index ["endpoint", "p256dh_key", "auth_key"], name: "idx_on_endpoint_p256dh_key_auth_key_7553014576"
     t.index ["endpoint"], name: "index_push_subscriptions_on_endpoint"
     t.index ["user_agent"], name: "index_push_subscriptions_on_user_agent"
@@ -365,235 +365,235 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_12_184932) do
     t.index ["user_id"], name: "index_push_subscriptions_on_user_id"
   end
 
-  create_table "reactions", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "comment_id", null: false, limit: 16
+  create_table "reactions", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "comment_id", null: false
     t.string "content", limit: 16, null: false
     t.datetime "created_at", null: false
-    t.binary "reacter_id", null: false, limit: 16
+    t.uuid "reacter_id", null: false
     t.datetime "updated_at", null: false
     t.index ["comment_id"], name: "index_reactions_on_comment_id"
     t.index ["reacter_id"], name: "index_reactions_on_reacter_id"
   end
 
-  create_table "search_index_0", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "board_id", null: false, limit: 16
-    t.binary "card_id", null: false, limit: 16
+  create_table "search_index_0", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "board_id", null: false
+    t.uuid "card_id", null: false
     t.text "content"
     t.datetime "created_at", null: false
-    t.binary "searchable_id", null: false, limit: 16
+    t.uuid "searchable_id", null: false
     t.string "searchable_type", null: false
     t.string "title"
     t.index ["content", "title"], name: "idx_si0_fulltext", type: :fulltext
     t.index ["searchable_type", "searchable_id"], name: "idx_si0_type_id", unique: true
   end
 
-  create_table "search_index_1", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "board_id", null: false, limit: 16
-    t.binary "card_id", null: false, limit: 16
+  create_table "search_index_1", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "board_id", null: false
+    t.uuid "card_id", null: false
     t.text "content"
     t.datetime "created_at", null: false
-    t.binary "searchable_id", null: false, limit: 16
+    t.uuid "searchable_id", null: false
     t.string "searchable_type", null: false
     t.string "title"
     t.index ["content", "title"], name: "idx_si1_fulltext", type: :fulltext
     t.index ["searchable_type", "searchable_id"], name: "idx_si1_type_id", unique: true
   end
 
-  create_table "search_index_10", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "board_id", null: false, limit: 16
-    t.binary "card_id", null: false, limit: 16
+  create_table "search_index_10", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "board_id", null: false
+    t.uuid "card_id", null: false
     t.text "content"
     t.datetime "created_at", null: false
-    t.binary "searchable_id", null: false, limit: 16
+    t.uuid "searchable_id", null: false
     t.string "searchable_type", null: false
     t.string "title"
     t.index ["content", "title"], name: "idx_si10_fulltext", type: :fulltext
     t.index ["searchable_type", "searchable_id"], name: "idx_si10_type_id", unique: true
   end
 
-  create_table "search_index_11", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "board_id", null: false, limit: 16
-    t.binary "card_id", null: false, limit: 16
+  create_table "search_index_11", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "board_id", null: false
+    t.uuid "card_id", null: false
     t.text "content"
     t.datetime "created_at", null: false
-    t.binary "searchable_id", null: false, limit: 16
+    t.uuid "searchable_id", null: false
     t.string "searchable_type", null: false
     t.string "title"
     t.index ["content", "title"], name: "idx_si11_fulltext", type: :fulltext
     t.index ["searchable_type", "searchable_id"], name: "idx_si11_type_id", unique: true
   end
 
-  create_table "search_index_12", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "board_id", null: false, limit: 16
-    t.binary "card_id", null: false, limit: 16
+  create_table "search_index_12", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "board_id", null: false
+    t.uuid "card_id", null: false
     t.text "content"
     t.datetime "created_at", null: false
-    t.binary "searchable_id", null: false, limit: 16
+    t.uuid "searchable_id", null: false
     t.string "searchable_type", null: false
     t.string "title"
     t.index ["content", "title"], name: "idx_si12_fulltext", type: :fulltext
     t.index ["searchable_type", "searchable_id"], name: "idx_si12_type_id", unique: true
   end
 
-  create_table "search_index_13", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "board_id", null: false, limit: 16
-    t.binary "card_id", null: false, limit: 16
+  create_table "search_index_13", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "board_id", null: false
+    t.uuid "card_id", null: false
     t.text "content"
     t.datetime "created_at", null: false
-    t.binary "searchable_id", null: false, limit: 16
+    t.uuid "searchable_id", null: false
     t.string "searchable_type", null: false
     t.string "title"
     t.index ["content", "title"], name: "idx_si13_fulltext", type: :fulltext
     t.index ["searchable_type", "searchable_id"], name: "idx_si13_type_id", unique: true
   end
 
-  create_table "search_index_14", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "board_id", null: false, limit: 16
-    t.binary "card_id", null: false, limit: 16
+  create_table "search_index_14", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "board_id", null: false
+    t.uuid "card_id", null: false
     t.text "content"
     t.datetime "created_at", null: false
-    t.binary "searchable_id", null: false, limit: 16
+    t.uuid "searchable_id", null: false
     t.string "searchable_type", null: false
     t.string "title"
     t.index ["content", "title"], name: "idx_si14_fulltext", type: :fulltext
     t.index ["searchable_type", "searchable_id"], name: "idx_si14_type_id", unique: true
   end
 
-  create_table "search_index_15", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "board_id", null: false, limit: 16
-    t.binary "card_id", null: false, limit: 16
+  create_table "search_index_15", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "board_id", null: false
+    t.uuid "card_id", null: false
     t.text "content"
     t.datetime "created_at", null: false
-    t.binary "searchable_id", null: false, limit: 16
+    t.uuid "searchable_id", null: false
     t.string "searchable_type", null: false
     t.string "title"
     t.index ["content", "title"], name: "idx_si15_fulltext", type: :fulltext
     t.index ["searchable_type", "searchable_id"], name: "idx_si15_type_id", unique: true
   end
 
-  create_table "search_index_2", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "board_id", null: false, limit: 16
-    t.binary "card_id", null: false, limit: 16
+  create_table "search_index_2", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "board_id", null: false
+    t.uuid "card_id", null: false
     t.text "content"
     t.datetime "created_at", null: false
-    t.binary "searchable_id", null: false, limit: 16
+    t.uuid "searchable_id", null: false
     t.string "searchable_type", null: false
     t.string "title"
     t.index ["content", "title"], name: "idx_si2_fulltext", type: :fulltext
     t.index ["searchable_type", "searchable_id"], name: "idx_si2_type_id", unique: true
   end
 
-  create_table "search_index_3", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "board_id", null: false, limit: 16
-    t.binary "card_id", null: false, limit: 16
+  create_table "search_index_3", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "board_id", null: false
+    t.uuid "card_id", null: false
     t.text "content"
     t.datetime "created_at", null: false
-    t.binary "searchable_id", null: false, limit: 16
+    t.uuid "searchable_id", null: false
     t.string "searchable_type", null: false
     t.string "title"
     t.index ["content", "title"], name: "idx_si3_fulltext", type: :fulltext
     t.index ["searchable_type", "searchable_id"], name: "idx_si3_type_id", unique: true
   end
 
-  create_table "search_index_4", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "board_id", null: false, limit: 16
-    t.binary "card_id", null: false, limit: 16
+  create_table "search_index_4", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "board_id", null: false
+    t.uuid "card_id", null: false
     t.text "content"
     t.datetime "created_at", null: false
-    t.binary "searchable_id", null: false, limit: 16
+    t.uuid "searchable_id", null: false
     t.string "searchable_type", null: false
     t.string "title"
     t.index ["content", "title"], name: "idx_si4_fulltext", type: :fulltext
     t.index ["searchable_type", "searchable_id"], name: "idx_si4_type_id", unique: true
   end
 
-  create_table "search_index_5", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "board_id", null: false, limit: 16
-    t.binary "card_id", null: false, limit: 16
+  create_table "search_index_5", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "board_id", null: false
+    t.uuid "card_id", null: false
     t.text "content"
     t.datetime "created_at", null: false
-    t.binary "searchable_id", null: false, limit: 16
+    t.uuid "searchable_id", null: false
     t.string "searchable_type", null: false
     t.string "title"
     t.index ["content", "title"], name: "idx_si5_fulltext", type: :fulltext
     t.index ["searchable_type", "searchable_id"], name: "idx_si5_type_id", unique: true
   end
 
-  create_table "search_index_6", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "board_id", null: false, limit: 16
-    t.binary "card_id", null: false, limit: 16
+  create_table "search_index_6", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "board_id", null: false
+    t.uuid "card_id", null: false
     t.text "content"
     t.datetime "created_at", null: false
-    t.binary "searchable_id", null: false, limit: 16
+    t.uuid "searchable_id", null: false
     t.string "searchable_type", null: false
     t.string "title"
     t.index ["content", "title"], name: "idx_si6_fulltext", type: :fulltext
     t.index ["searchable_type", "searchable_id"], name: "idx_si6_type_id", unique: true
   end
 
-  create_table "search_index_7", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "board_id", null: false, limit: 16
-    t.binary "card_id", null: false, limit: 16
+  create_table "search_index_7", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "board_id", null: false
+    t.uuid "card_id", null: false
     t.text "content"
     t.datetime "created_at", null: false
-    t.binary "searchable_id", null: false, limit: 16
+    t.uuid "searchable_id", null: false
     t.string "searchable_type", null: false
     t.string "title"
     t.index ["content", "title"], name: "idx_si7_fulltext", type: :fulltext
     t.index ["searchable_type", "searchable_id"], name: "idx_si7_type_id", unique: true
   end
 
-  create_table "search_index_8", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "board_id", null: false, limit: 16
-    t.binary "card_id", null: false, limit: 16
+  create_table "search_index_8", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "board_id", null: false
+    t.uuid "card_id", null: false
     t.text "content"
     t.datetime "created_at", null: false
-    t.binary "searchable_id", null: false, limit: 16
+    t.uuid "searchable_id", null: false
     t.string "searchable_type", null: false
     t.string "title"
     t.index ["content", "title"], name: "idx_si8_fulltext", type: :fulltext
     t.index ["searchable_type", "searchable_id"], name: "idx_si8_type_id", unique: true
   end
 
-  create_table "search_index_9", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "board_id", null: false, limit: 16
-    t.binary "card_id", null: false, limit: 16
+  create_table "search_index_9", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "board_id", null: false
+    t.uuid "card_id", null: false
     t.text "content"
     t.datetime "created_at", null: false
-    t.binary "searchable_id", null: false, limit: 16
+    t.uuid "searchable_id", null: false
     t.string "searchable_type", null: false
     t.string "title"
     t.index ["content", "title"], name: "idx_si9_fulltext", type: :fulltext
     t.index ["searchable_type", "searchable_id"], name: "idx_si9_type_id", unique: true
   end
 
-  create_table "search_queries", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "search_queries", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "terms", limit: 2000, null: false
     t.datetime "updated_at", null: false
-    t.binary "user_id", null: false, limit: 16
+    t.uuid "user_id", null: false
     t.index ["user_id", "terms"], name: "index_search_queries_on_user_id_and_terms", length: { terms: 255 }
     t.index ["user_id", "updated_at"], name: "index_search_queries_on_user_id_and_updated_at", unique: true
     t.index ["user_id"], name: "index_search_queries_on_user_id"
   end
 
-  create_table "search_results", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "search_results", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
-  create_table "sessions", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "sessions", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.binary "identity_id", null: false, limit: 16
+    t.uuid "identity_id", null: false
     t.string "ip_address"
     t.datetime "updated_at", null: false
     t.string "user_agent"
     t.index ["identity_id"], name: "index_sessions_on_identity_id"
   end
 
-  create_table "steps", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "account_id", limit: 16
-    t.binary "card_id", null: false, limit: 16
+  create_table "steps", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "account_id"
+    t.uuid "card_id", null: false
     t.boolean "completed", default: false, null: false
     t.text "content", null: false
     t.datetime "created_at", null: false
@@ -602,38 +602,38 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_12_184932) do
     t.index ["card_id"], name: "index_steps_on_card_id"
   end
 
-  create_table "taggings", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "card_id", null: false, limit: 16
+  create_table "taggings", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "card_id", null: false
     t.datetime "created_at", null: false
-    t.binary "tag_id", null: false, limit: 16
+    t.uuid "tag_id", null: false
     t.datetime "updated_at", null: false
     t.index ["card_id", "tag_id"], name: "index_taggings_on_card_id_and_tag_id", unique: true
     t.index ["tag_id"], name: "index_taggings_on_tag_id"
   end
 
-  create_table "tags", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "account_id", limit: 16
+  create_table "tags", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "account_id"
     t.datetime "created_at", null: false
     t.string "title"
     t.datetime "updated_at", null: false
     t.index ["title"], name: "index_tags_on_title", unique: true
   end
 
-  create_table "user_settings", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "user_settings", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "bundle_email_frequency", default: 0, null: false
     t.datetime "created_at", null: false
     t.string "timezone_name"
     t.datetime "updated_at", null: false
-    t.binary "user_id", null: false, limit: 16
+    t.uuid "user_id", null: false
     t.index ["user_id", "bundle_email_frequency"], name: "index_user_settings_on_user_id_and_bundle_email_frequency"
     t.index ["user_id"], name: "index_user_settings_on_user_id"
   end
 
-  create_table "users", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "account_id", limit: 16
+  create_table "users", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "account_id"
     t.boolean "active", default: true, null: false
     t.datetime "created_at", null: false
-    t.binary "membership_id", limit: 16
+    t.uuid "membership_id"
     t.string "name", null: false
     t.string "role", default: "member", null: false
     t.datetime "updated_at", null: false
@@ -641,42 +641,42 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_12_184932) do
     t.index ["role"], name: "index_users_on_role"
   end
 
-  create_table "watches", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "card_id", null: false, limit: 16
+  create_table "watches", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "card_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.binary "user_id", null: false, limit: 16
+    t.uuid "user_id", null: false
     t.boolean "watching", default: true, null: false
     t.index ["card_id"], name: "index_watches_on_card_id"
     t.index ["user_id", "card_id"], name: "index_watches_on_user_id_and_card_id"
     t.index ["user_id"], name: "index_watches_on_user_id"
   end
 
-  create_table "webhook_delinquency_trackers", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "webhook_delinquency_trackers", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "consecutive_failures_count", default: 0
     t.datetime "created_at", null: false
     t.datetime "first_failure_at"
     t.datetime "updated_at", null: false
-    t.binary "webhook_id", null: false, limit: 16
+    t.uuid "webhook_id", null: false
     t.index ["webhook_id"], name: "index_webhook_delinquency_trackers_on_webhook_id"
   end
 
-  create_table "webhook_deliveries", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "webhook_deliveries", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.binary "event_id", null: false, limit: 16
+    t.uuid "event_id", null: false
     t.text "request"
     t.text "response"
     t.string "state", null: false
     t.datetime "updated_at", null: false
-    t.binary "webhook_id", null: false, limit: 16
+    t.uuid "webhook_id", null: false
     t.index ["event_id"], name: "index_webhook_deliveries_on_event_id"
     t.index ["webhook_id"], name: "index_webhook_deliveries_on_webhook_id"
   end
 
-  create_table "webhooks", id: { type: :binary, limit: 16 }, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.binary "account_id", limit: 16
+  create_table "webhooks", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "account_id"
     t.boolean "active", default: true, null: false
-    t.binary "board_id", null: false, limit: 16
+    t.uuid "board_id", null: false
     t.datetime "created_at", null: false
     t.string "name"
     t.string "signing_secret", null: false
