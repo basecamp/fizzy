@@ -71,7 +71,7 @@ class Signup
         },
         owner: {
           name: full_name,
-          identity: identity,
+          identity: identity
         }
       )
       @user = @account.users.find_by!(role: :admin)

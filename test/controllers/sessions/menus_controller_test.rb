@@ -44,5 +44,4 @@ class Sessions::MenusControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
   end
-
 end
