@@ -7,7 +7,7 @@ class FilterTest < ActiveSupport::TestCase
 
   test "cards" do
     Current.set session: sessions(:david) do
-      @new_board = Board.create! name: "Inaccessible Board"
+      @new_board = Board.create! name: "Inaccessible Board", creator: users(:david)
       @new_card = @new_board.cards.create!(status: "published")
 
       cards(:layout).comments.create!(body: "I hate haggis")

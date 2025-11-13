@@ -15,14 +15,14 @@ class Board::AccessibleTest < ActiveSupport::TestCase
   end
 
   test "grants access to everyone after creation" do
-    board = Current.set(session: sessions(:david)) do
+    board = Current.set(session: sessions(:david), user: users(:david)) do
       Board.create! name: "New board", all_access: true
     end
     assert_equal accounts("37s").users.active.sort, board.users.sort
   end
 
   test "grants access to everyone after update" do
-    board = Current.set(session: sessions(:david)) do
+    board = Current.set(session: sessions(:david), user: users(:david)) do
       Board.create! name: "New board"
     end
     assert_equal [ users(:david) ], board.users

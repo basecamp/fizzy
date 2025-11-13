@@ -1,8 +1,8 @@
 class Board < ApplicationRecord
   include Accessible, AutoPostponing, Broadcastable, Cards, Entropic, Filterable, Publishable, Triageable
 
-  belongs_to :account, default: -> { creator.account }
   belongs_to :creator, class_name: "User", default: -> { Current.user }
+  belongs_to :account, default: -> { creator.account }
 
   has_rich_text :public_description
 

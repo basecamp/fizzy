@@ -36,7 +36,7 @@ class JoinCodesControllerTest < ActionDispatch::IntegrationTest
   test "create" do
     untenanted do
       assert_difference -> { Identity.count }, 1 do
-        assert_difference -> { Membership.count }, 1 do
+        assert_difference -> { User.count }, 1 do
           post join_path(tenant: @tenant, code: @join_code.code), params: { email_address: "new_user@example.com" }
         end
       end
@@ -52,7 +52,7 @@ class JoinCodesControllerTest < ActionDispatch::IntegrationTest
 
     untenanted do
       assert_no_difference -> { Identity.count } do
-        assert_no_difference -> { Membership.count } do
+        assert_no_difference -> { User.count } do
           post join_path(tenant: @tenant, code: @join_code.code), params: { email_address: identity.email_address }
         end
       end

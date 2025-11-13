@@ -20,7 +20,7 @@ class User < ApplicationRecord
   def deactivate
     transaction do
       accesses.destroy_all
-      update! active: false
+      update! active: false, identity: nil
     end
   end
 end

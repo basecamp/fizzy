@@ -7,16 +7,11 @@ class Signup::CompletionsControllerTest < ActionDispatch::IntegrationTest
     @signup.create_identity || raise("Failed to create identity")
 
     sign_in_as @signup.identity
-
-    @signup.create_membership || raise("Failed to create membership")
   end
 
   test "new" do
     untenanted do
-      get saas.new_signup_completion_path(signup: {
-        membership_id: @signup.membership_id,
-        full_name: @signup.full_name,
-        account_name: @signup.account_name })
+      get saas.new_signup_completion_path
     end
 
     assert_response :success

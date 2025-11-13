@@ -14,6 +14,10 @@ Rails.application.routes.draw do
       resource :events
 
       resources :push_subscriptions
+
+      resources :email_addresses, param: :token do
+        resource :confirmation, module: :email_addresses
+      end
     end
   end
 
@@ -145,12 +149,6 @@ Rails.application.routes.draw do
   end
 
   resource :landing
-
-  scope module: :memberships, path: "memberships/:membership_id" do
-    resources :email_addresses, param: :token do
-      resource :confirmation, module: :email_addresses
-    end
-  end
 
   namespace :my do
     resources :pins

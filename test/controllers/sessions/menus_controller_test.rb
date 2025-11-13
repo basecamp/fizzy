@@ -7,7 +7,7 @@ class Sessions::MenusControllerTest < ActionDispatch::IntegrationTest
 
   test "show with no memberships" do
     sign_in_as @identity
-    @identity.memberships.delete_all
+    @identity.users.delete_all
 
     untenanted do
       get session_menu_url
@@ -18,22 +18,25 @@ class Sessions::MenusControllerTest < ActionDispatch::IntegrationTest
 
   test "show with exactly one membership" do
     sign_in_as @identity
-    @identity.memberships.delete_all
-    @identity.memberships.create(tenant: "37signals")
+    @identity.users.delete_all
+    account = Account.create!(external_account_id: 9999991, name: "Test Account")
+    @identity.users.create!(account: account, name: "Kevin")
 
     untenanted do
       get session_menu_url
     end
 
     assert_response :redirect
-    assert_redirected_to root_url(script_name: "/37signals")
+    assert_redirected_to root_url(script_name: "/9999991")
   end
 
   test "show with multiple memeberships" do
     sign_in_as @identity
-    @identity.memberships.delete_all
-    @identity.memberships.create(tenant: "37signals")
-    @identity.memberships.create(tenant: "acme")
+    @identity.users.delete_all
+    account1 = Account.create!(external_account_id: 9999992, name: "37signals")
+    account2 = Account.create!(external_account_id: 9999993, name: "Acme")
+    @identity.users.create!(account: account1, name: "Kevin")
+    @identity.users.create!(account: account2, name: "Kevin")
 
     untenanted do
       get session_menu_url
@@ -42,28 +45,4 @@ class Sessions::MenusControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "show renders as a menu section" do
-    sign_in_as @identity
-    @identity.memberships.delete_all
-    @identity.memberships.create(tenant: "37signals")
-    @identity.memberships.create(tenant: "acme")
-
-    untenanted do
-      get session_menu_url menu_section: true
-    end
-
-    assert_response :success
-  end
-
-  test "show doesn't redirect when rendered as a menu section" do
-    sign_in_as @identity
-    @identity.memberships.delete_all
-    @identity.memberships.create(tenant: "37signals")
-
-    untenanted do
-      get session_menu_url menu_section: true
-    end
-
-    assert_response :success
-  end
 end

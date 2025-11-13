@@ -77,7 +77,7 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "update all access" do
-    board = Current.set(session: sessions(:kevin)) do
+    board = Current.set(account: accounts("37s"), session: sessions(:kevin), user: users(:kevin)) do
       Board.create! name: "New board", all_access: false
     end
     assert_equal [ users(:kevin) ], board.users

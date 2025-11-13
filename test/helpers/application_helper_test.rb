@@ -26,7 +26,8 @@ class ApplicationHelperTest < ActionView::TestCase
 
   test "page_title_tag on tenanted page when user has multiple memberships" do
     Current.session = sessions(:david)
-    identities(:david).memberships.create!(tenant: "dangling-tenant")
+    other_account = Account.create!(external_account_id: "dangling-tenant", name: "Other Account")
+    identities(:david).users.create!(account: other_account, name: "David")
 
     assert_select parse(page_title_tag), "title", text: "37signals | Fizzy"
   end
@@ -40,7 +41,8 @@ class ApplicationHelperTest < ActionView::TestCase
 
   test "page_title_tag on tenanted page with a page title when user has multiple memberships" do
     Current.session = sessions(:david)
-    identities(:david).memberships.create!(tenant: "dangling-tenant")
+    other_account = Account.create!(external_account_id: "dangling-tenant", name: "Other Account")
+    identities(:david).users.create!(account: other_account, name: "David")
     @page_title = "Holodeck"
 
     assert_select parse(page_title_tag), "title", text: "Holodeck | 37signals | Fizzy"

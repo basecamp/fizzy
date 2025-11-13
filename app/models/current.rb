@@ -7,8 +7,16 @@ class Current < ActiveSupport::CurrentAttributes
   def session=(value)
     super(value)
 
-    if value.present? && Current.account.present?
-      self.user = identity.users.find_by(account: Current.account)
+    if value.present? && account.present?
+      self.user = identity.users.find_by(account: account)
+    end
+  end
+
+  def account=(value)
+    super(value)
+
+    if value.present? && identity.present?
+      self.user = identity.users.find_by(account: value)
     end
   end
 end
