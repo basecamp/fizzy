@@ -44,7 +44,7 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_12_184932) do
   end
 
   create_table "action_text_rich_texts", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.text "body"
+    t.text "body", size: :long
     t.datetime "created_at", null: false
     t.string "name", null: false
     t.uuid "record_id", null: false
@@ -291,7 +291,6 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_12_184932) do
   create_table "memberships", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.uuid "identity_id", null: false
-    t.string "join_code"
     t.string "tenant", null: false
     t.datetime "updated_at", null: false
     t.index ["identity_id"], name: "index_memberships_on_identity_id"
