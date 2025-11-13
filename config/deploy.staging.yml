@@ -1,17 +1,18 @@
 servers:
   web:
     hosts:
-      - fizzy-staging-app-01.sc-chi-int.37signals.com
-      - fizzy-staging-app-02.sc-chi-int.37signals.com
-      - fizzy-staging-app-101.df-iad-int.37signals.com
-      - fizzy-staging-app-102.df-iad-int.37signals.com
-      - fizzy-staging-app-401.df-ams-int.37signals.com
-      - fizzy-staging-app-402.df-ams-int.37signals.com
+      - fizzy-staging-app-101.df-iad-int.37signals.com: df_iad
+      - fizzy-staging-app-102.df-iad-int.37signals.com: df_iad
+      - fizzy-staging-app-01.sc-chi-int.37signals.com: sc_chi
+      - fizzy-staging-app-02.sc-chi-int.37signals.com: sc_chi
+      - fizzy-staging-app-401.df-ams-int.37signals.com: df_ams
+      - fizzy-staging-app-402.df-ams-int.37signals.com: df_ams
     labels:
       otel_scrape_enabled: true
   jobs:
     hosts:
-      - fizzy-staging-app-01.sc-chi-int.37signals.com
+      - fizzy-staging-app-101.df-iad-int.37signals.com: df_iad
+      - fizzy-staging-app-102.df-iad-int.37signals.com: df_iad
     labels:
       otel_scrape_enabled: true
 
@@ -24,6 +25,26 @@ ssh:
 env:
   clear:
     RAILS_ENV: staging
+    MYSQL_DATABASE_HOST: fizzy-staging-mysql-primary
+    MYSQL_DATABASE_REPLICA_HOST: fizzy-staging-mysql-replica
+    MYSQL_SOLID_CABLE_HOST: fizzy-staging-mysql-primary
+    MYSQL_SOLID_QUEUE_HOST: fizzy-staging-mysql-primary
+  secret:
+    - RAILS_MASTER_KEY
+    - MYSQL_ALTER_PASSWORD
+    - MYSQL_ALTER_USER
+    - MYSQL_APP_PASSWORD
+    - MYSQL_APP_USER
+    - MYSQL_READONLY_PASSWORD
+    - MYSQL_READONLY_USER
+  tags:
+    sc_chi:
+      MYSQL_SOLID_CACHE_HOST: fizzy-staging-solidcache-db-101.df-iad-int.37signals.com
+    df_iad:
+      MYSQL_SOLID_CACHE_HOST: fizzy-staging-solidcache-db-101.df-iad-int.37signals.com
+    df_ams:
+      MYSQL_SOLID_CACHE_HOST: fizzy-staging-solidcache-db-101.df-iad-int.37signals.com
+
 
 accessories:
   load-balancer:
