@@ -94,19 +94,20 @@ module FixturesTestHelper
       # so that UUIDs sort in the same order as integer IDs
       fixture_int = Zlib.crc32("fixtures/#{label}") % (2**30 - 1)
 
-      # Use fixture_int as second offset from a fixed base time (1 year before 2025-01-01)
-      # This ensures all fixtures are in the past, and new test records are newest
+      # Translate the deterministic order into times in the past, so that records
+      # created during test runs are also always newer than the fixtures.
       base_time = Time.utc(2024, 1, 1, 0, 0, 0)
-      timestamp = base_time + fixture_int.seconds
+      timestamp = base_time + (fixture_int / 1000.0)
 
       uuid_v7_with_timestamp(timestamp, label)
     end
 
     def uuid_v7_with_timestamp(time, seed_string)
       # Generate UUIDv7 with custom timestamp and deterministic random bits
-      # Format: 48-bit timestamp_ms | 12-bit random | 4-bit version | 62-bit random
+      # Format: 48-bit timestamp_ms | 12-bit sub_ms_precision | 4-bit version | 62-bit random
 
-      timestamp_ms = (time.to_f * 1000).to_i
+      time_ms = time.to_f * 1000
+      timestamp_ms = time_ms.to_i
 
       # 48-bit timestamp (milliseconds since epoch)
       bytes = []
@@ -117,13 +118,18 @@ module FixturesTestHelper
       bytes[4] = (timestamp_ms >> 8) & 0xff
       bytes[5] = timestamp_ms & 0xff
 
-      # Derive deterministic "random" bits from seed_string
+      # Use the 12-bit rand_a field for sub-millisecond precision
+      # Extract fractional milliseconds and convert to 12-bit value (0-4095)
+      # This gives us ~0.244 microsecond precision
+      frac_ms = time_ms - timestamp_ms
+      sub_ms_precision = (frac_ms * 4096).to_i & 0xfff
+
+      # Derive deterministic "random" bits from seed_string for the remaining random bits
       hash = Digest::MD5.hexdigest(seed_string)
 
-      # 12-bit random + 4-bit version (0111 for v7)
-      rand_a = hash[0...3].to_i(16) & 0xfff
-      bytes[6] = ((rand_a >> 8) & 0x0f) | 0x70  # version 7
-      bytes[7] = rand_a & 0xff
+      # 12-bit sub-ms precision + 4-bit version (0111 for v7)
+      bytes[6] = ((sub_ms_precision >> 8) & 0x0f) | 0x70  # version 7
+      bytes[7] = sub_ms_precision & 0xff
 
       # 2-bit variant (10) + 62-bit random
       rand_b = hash[3...19].to_i(16) & ((2**62) - 1)

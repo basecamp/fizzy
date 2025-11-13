@@ -26,7 +26,7 @@ class Card::PostponableTest < ActiveSupport::TestCase
     end
 
     assert_equal users(:david), card.not_now.user
-    assert card.events.order(created_at: :desc).first.action.card_postponed?
+    assert card.events.last.action.card_postponed?
 
     assert_changes -> { card.reload.postponed? }, to: false do
       card.resume
@@ -42,7 +42,7 @@ class Card::PostponableTest < ActiveSupport::TestCase
       end
     end
 
-    assert card.events.order(created_at: :desc).first.action.card_auto_postponed?
+    assert card.events.last.action.card_auto_postponed?
   end
 
   test "scopes" do

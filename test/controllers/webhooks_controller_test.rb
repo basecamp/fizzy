@@ -35,7 +35,7 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
       }
     end
 
-    webhook = Webhook.order(created_at: :desc).first
+    webhook = Webhook.last
 
     assert_redirected_to board_webhook_path(webhook.board, webhook)
     assert_equal board, webhook.board

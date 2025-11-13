@@ -23,7 +23,7 @@ class CardTest < ActiveSupport::TestCase
       cards(:logo).comments.create!(body: "Agreed.")
     end
 
-    assert_equal "Agreed.", cards(:logo).comments.order(created_at: :desc).first.body.to_plain_text.chomp
+    assert_equal "Agreed.", cards(:logo).comments.last.body.to_plain_text.chomp
   end
 
   test "assignment states" do
@@ -38,7 +38,7 @@ class CardTest < ActiveSupport::TestCase
       cards(:logo).toggle_assignment users(:kevin)
     end
     assert_not cards(:logo).assigned_to?(users(:kevin))
-    unassign_event = Event.order(created_at: :desc).first
+    unassign_event = Event.last
     assert_equal "card_unassigned", unassign_event.action
     assert_equal [ users(:kevin) ], unassign_event.assignees
 
@@ -46,7 +46,7 @@ class CardTest < ActiveSupport::TestCase
       cards(:logo).toggle_assignment users(:kevin)
     end
     assert cards(:logo).assigned_to?(users(:kevin))
-    assign_event = Event.order(created_at: :desc).first
+    assign_event = Event.last
     assert_equal "card_assigned", assign_event.action
     assert_equal [ users(:kevin) ], assign_event.assignees
   end

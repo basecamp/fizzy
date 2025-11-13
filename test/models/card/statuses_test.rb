@@ -34,7 +34,7 @@ class Card::StatusesTest < ActiveSupport::TestCase
       @card = boards(:writebook).cards.create! creator: users(:kevin), title: "Published Card", status: :published
     end
 
-    event = Event.order(created_at: :desc).first
+    event = Event.last
     assert_equal @card, event.eventable
     assert_equal "card_published", event.action
   end
@@ -47,7 +47,7 @@ class Card::StatusesTest < ActiveSupport::TestCase
       card.publish
     end
 
-    event = Event.order(created_at: :desc).first
+    event = Event.last
     assert_equal card, event.eventable
     assert_equal "card_published", event.action
   end

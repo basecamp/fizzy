@@ -40,7 +40,6 @@ class SmokeTest < ApplicationSystemTestCase
 
     notif = notifications(:logo_comment_david_mention_by_jz)
 
-    skip("Grouped notifications and the new UUID ids are making this test flaky")
     assert_selector "div##{dom_id(notif)}"
 
     within_window(open_new_window) { visit card_url(notif.card) }

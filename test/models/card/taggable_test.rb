@@ -10,7 +10,7 @@ class Card::TaggableTest < ActiveSupport::TestCase
       @card.toggle_tag_with "ruby"
     end
 
-    assert_equal "ruby", @card.tags.order(created_at: :desc).first.title
+    assert_equal "ruby", @card.tags.last.title
 
     assert_difference -> { @card.tags.count }, -1 do
       @card.toggle_tag_with "ruby"

@@ -16,7 +16,7 @@ class Boards::ColumnsControllerTest < ActionDispatch::IntegrationTest
       assert_response :success
     end
 
-    assert_equal "New Column", boards(:writebook).columns.order(created_at: :desc).first.name
+    assert_equal "New Column", boards(:writebook).columns.last.name
   end
 
   test "update" do

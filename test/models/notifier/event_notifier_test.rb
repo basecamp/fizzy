@@ -39,7 +39,7 @@ class Notifier::EventNotifierTest < ActiveSupport::TestCase
 
     Notifier.for(events(:logo_published)).notify
 
-    assert_equal cards(:logo), Notification.order(created_at: :desc).first.source.eventable
+    assert_equal cards(:logo), Notification.last.source.eventable
   end
 
   test "assignment events only create a notification for the assignee" do

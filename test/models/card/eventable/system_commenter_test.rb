@@ -45,7 +45,7 @@ class Card::Eventable::SystemCommenterTest < ActiveSupport::TestCase
     def assert_system_comment(expected_comment)
       assert_difference -> { @card.comments.count }, 1 do
         yield
-        comment = @card.comments.order(created_at: :desc).first
+        comment = @card.comments.last
         assert comment.creator.system?
         assert_match Regexp.new(expected_comment.strip, Regexp::IGNORECASE), comment.body.to_plain_text.strip
       end

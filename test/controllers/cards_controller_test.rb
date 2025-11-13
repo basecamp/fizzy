@@ -20,7 +20,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
       post board_cards_path(boards(:writebook))
     end
 
-    card = Card.order(created_at: :desc).first
+    card = Card.last
     assert card.drafted?
     assert_redirected_to card
   end

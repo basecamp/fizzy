@@ -18,7 +18,7 @@ class Card::CloseableTest < ActiveSupport::TestCase
     end
 
     assert cards(:logo).closed?
-    assert cards(:logo).events.order(created_at: :desc).first.action.card_closed?
+    assert cards(:logo).events.last.action.card_closed?
     assert_equal users(:kevin), cards(:logo).closed_by
   end
 
@@ -29,6 +29,6 @@ class Card::CloseableTest < ActiveSupport::TestCase
       cards(:shipping).reopen
     end
     assert cards(:shipping).reload.open?
-    assert cards(:shipping).events.order(created_at: :desc).first.action.card_reopened?
+    assert cards(:shipping).events.last.action.card_reopened?
   end
 end
