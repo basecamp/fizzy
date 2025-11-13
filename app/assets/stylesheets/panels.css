@@ -6,12 +6,26 @@
     color: var(--color-ink);
     inline-size: var(--panel-size, 60ch);
     max-inline-size: 100%;
-    padding: var(--panel-padding, calc(var(--block-space) * 2));
+    padding: var(--panel-padding, var(--block-space));
+
+    @media (min-width: 640px) {
+      --panel-size: 100%;
+
+      padding: var(--panel-padding, var(--block-space-double));
+    }
+  }
+
+  .panel--wide {
+    --panel-size: 60ch;
   }
 
   .panel--centered {
     --panel-border-size: 0;
-    --panel-size: 42ch;
+    --panel-size: 100%;
+
+    @media (min-width: 640px) {
+      --panel-size: 42ch;
+    }
 
     #main:has(&) {
       display: grid;

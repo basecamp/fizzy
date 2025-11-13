@@ -10,29 +10,16 @@ class Cards::Comments::ReactionsController < ApplicationController
   end
 
   def create
-    reaction = @comment.reactions.create!(params.expect(reaction: :content))
-
-    broadcast_create(reaction)
-    redirect_to card_comment_reactions_path(@card, @comment)
+    @reaction = @comment.reactions.create!(params.expect(reaction: :content))
   end
 
   def destroy
-    reaction = @comment.reactions.find(params[:id])
-    reaction.destroy
-
-    broadcast_remove(reaction)
+    @reaction = @comment.reactions.find(params[:id])
+    @reaction.destroy
   end
 
   private
     def set_comment
       @comment = @card.comments.find(params[:comment_id])
-    end
-
-    def broadcast_create(reaction)
-      reaction.broadcast_append_to @card, target: [ @comment, :reactions ], partial: "cards/comments/reactions/reaction"
-    end
-
-    def broadcast_remove(reaction)
-      reaction.broadcast_remove_to @card
     end
 end

@@ -20,14 +20,17 @@ module NotificationsHelper
   end
 
   def notification_tag(notification, &)
-    tag.div id: dom_id(notification), class: "tray__item tray__item--notification", data: { navigable_list_target: "item" } do
-      concat(
-        link_to(notification,
-          class: [ "card card--notification", { "card--closed": notification.card.closed? }, { "unread": !notification.read? } ],
-          data: { turbo_frame: "_top", badge_target: "unread", action: "badge#update dialog#close" },
-          style: { "--card-color:": notification.card.color },
-          &)
-      )
+    tag.div id: dom_id(notification), class: "tray__item tray__item--notification", data: {
+      navigable_list_target: "item",
+      notifications_tray_target: "notification",
+      card_id: notification.card.id,
+      timestamp: notification.created_at.to_i
+    } do
+      link_to(notification,
+        class: [ "card card--notification", { "card--closed": notification.card.closed? }, { "unread": !notification.read? } ],
+        data: { turbo_frame: "_top", badge_target: "unread", action: "badge#update dialog#close" },
+        style: { "--card-color:": notification.card.color },
+        &)
     end
   end
 
@@ -40,7 +43,6 @@ module NotificationsHelper
           data: { action: "form#submit:stop badge#update:stop", form_target: "submit" },
           form: { data: { controller: "form" } } do
         concat(icon_tag("unseen"))
-        concat(tag.span("Mark as unread", class: "for-screen-reader"))
       end
     else
       button_to notification_reading_path(notification),
@@ -49,7 +51,7 @@ module NotificationsHelper
           data: { action: "form#submit:stop badge#update:stop", form_target: "submit" },
           form: { data: { controller: "form" } } do
         concat(icon_tag("remove"))
-        concat(tag.span("Mark as read", class: "for-screen-reader"))
+        concat(tag.span("1", class: "badge-count", data: { group_count: "" }))
       end
     end
   end
@@ -84,6 +86,6 @@ module NotificationsHelper
     end
 
     def card_notification_title(card)
-      card.title.presence || "Card #{card.id}"
+      card.title.presence || "Card #{card.number}"
     end
 end

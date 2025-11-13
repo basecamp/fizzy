@@ -1,20 +1,5 @@
 <%= turbo_frame_tag "my_menu", target: "_top" do %>
   <%= render "my/menus/jump" do %>
-    <%= collapsible_nav_section "Saved filters", id: "my-filters" do %>
-      <%= form_with url: cards_path, method: :get, data: { controller: "form" } do |form| %>
-        <li class="popup__item overflow-ellipsis" data-navigable-list-target="item" data-filter-target="item" id="filter-custom-create">
-          <%= icon_tag "bookmark", class: "popup__icon" %>
-          <%= link_to cards_path(expand_all: true), class: "popup__btn btn" do %>
-            <span>Add a filter</span>
-          <% end %>
-        </li>
-
-        <% @filters.each do |filter| %>
-          <%= my_menu_filter_item(filter) %>
-        <% end %>
-      <% end %>
-    <% end %>
-
     <%= collapsible_nav_section "Boards" do %>
       <li class="popup__item" data-filter-target="item" data-navigable-list-target="item">
         <%= icon_tag "add", class: "popup__icon" %>
@@ -25,6 +10,21 @@
 
       <% @boards.each do |board| %>
         <%= my_menu_board_item(board) %>
+      <% end %>
+    <% end %>
+
+    <%= collapsible_nav_section "Custom views", id: "my-filters" do %>
+      <%= form_with url: cards_path, method: :get, data: { controller: "form" } do |form| %>
+        <li class="popup__item overflow-ellipsis" data-navigable-list-target="item" data-filter-target="item" id="filter-custom-create">
+          <%= icon_tag "bookmark", class: "popup__icon" %>
+          <%= link_to cards_path(expand_all: true), class: "popup__btn btn" do %>
+            <span>Create a custom view</span>
+          <% end %>
+        </li>
+
+        <% @filters.each do |filter| %>
+          <%= my_menu_filter_item(filter) %>
+        <% end %>
       <% end %>
     <% end %>
 
@@ -47,10 +47,10 @@
       <% end %>
     <% end %>
 
-    <%= collapsible_nav_section "Jump to…" do %>
+    <%= collapsible_nav_section "Settings" do %>
       <%= filter_place_menu_item account_settings_path, "Account Settings", "settings" %>
       <%= filter_place_menu_item user_path(Current.user), "My Profile", "person" %>
-      <%= filter_place_menu_item notifications_path, "Notifications", "bell" %>
+      <%= filter_place_menu_item notifications_path, "All notifications", "bell" %>
       <%= filter_place_menu_item notifications_settings_path, "Notification Settings", "settings" %>
 
       <%= tag.li class: "popup__item", data: { filter_target: "item", navigable_list_target: "item" } do %>
@@ -65,6 +65,6 @@
   <% end %>
 
   <footer class="nav__footer">
-    <strong><%= link_to "Fizzy", "https://www.fizzy.do", class: "txt-ink", target: "_blank" %></strong> is designed, built, and backed by <strong class="txt-nowrap"><%= icon_tag "37signals", class: "v-align-middle", target: "_blank" %> <a href="https://37signals.com" target="_blank" class="txt-ink">37signals</a></strong>
+    <strong class="txt-nowrap"><a href="https://www.fizzy.do" target="_blank" class="txt-ink"><%= icon_tag "fizzy", class: "v-align-middle" %> Fizzy™</a></strong> is designed, built, and backed by <strong class="txt-nowrap"><a href="https://37signals.com" target="_blank" class="txt-ink"><%= icon_tag "37signals", class: "v-align-middle" %> 37signals™</a></strong>
   </footer>
 <% end %>

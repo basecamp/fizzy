@@ -20,4 +20,9 @@ export default class extends Controller {
 
     this.dispatch("changed")
   }
+
+  clearInput() {
+    if (!this.hasInputTarget) return
+    this.inputTarget.value = ""
+  }
 }

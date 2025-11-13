@@ -5,6 +5,6 @@ class My::MenusController < ApplicationController
     @tags = Tag.all.alphabetically
     @users = Current.account.users.active.alphabetically
 
-    # fresh_when etag: [ @user_filtering, Current.session ]
+    fresh_when etag: [ @filters, @boards, @tags, @users ]
   end
 end

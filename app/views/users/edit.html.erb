@@ -1,5 +1,16 @@
 <% @page_title = "Edit your profile" %>
 
+<% content_for :header do %>
+  <div class="header__actions header__actions--start">
+    <%= link_to user_path(@user), class: "btn borderless txt-medium", data: { controller: "hotkey", action: "keydown.left@document->hotkey#click" } do %>
+      <span class="overflow-ellipsis flex align-center">
+        <strong>Back to profile</strong>
+        <kbd class="txt-x-small margin-inline-start hide-on-touch">&larr;</kbd>
+      </span>
+    <% end %>
+  </div>
+<% end %>
+
 <div class="panel shadow center" style="--panel-size: 45ch;">
   <div class="flex flex-column gap txt-medium">
     <%= form_with model: @user, method: :patch, class: "flex flex-column gap", data: { controller: "form upload-preview" } do |form| %>

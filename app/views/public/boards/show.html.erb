@@ -25,3 +25,7 @@
 <% end %>
 
 <%= render "public/boards/show/columns", page: @page, board: @board %>
+
+<% content_for :footer do %>
+  <%= render "public/footer" %>
+<% end %>

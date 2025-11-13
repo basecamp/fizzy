@@ -3,7 +3,7 @@
 <% content_for :header do %>
   <h1 class="header__title">
     <%= @page_title %>
-    <% unless Current.user.can_administer?%>
+    <% unless Current.user.admin? %>
       <div class="txt-normal font-weight-normal">Only admins can change these settings</div>
     <% end %>
   </h1>

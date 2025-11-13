@@ -8,20 +8,17 @@ class Cards::Comments::ReactionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "create" do
-    assert_turbo_stream_broadcasts @card, count: 1 do
-      assert_difference -> { @comment.reactions.count }, 1 do
-        post card_comment_reactions_path(@comment.card, @comment, format: :turbo_stream), params: { reaction: { content: "Great work!" } }
-        assert_redirected_to card_comment_reactions_path(@comment.card, @comment)
-      end
+    assert_difference -> { @comment.reactions.count }, 1 do
+      post card_comment_reactions_path(@comment.card, @comment, format: :turbo_stream), params: { reaction: { content: "Great work!" } }
+      assert_turbo_stream action: :replace, target: dom_id(@comment, :reacting)
     end
   end
 
   test "destroy" do
-    assert_turbo_stream_broadcasts @card, count: 1 do
-      assert_difference -> { @comment.reactions.count }, -1 do
-        delete card_comment_reaction_path(@comment.card, @comment, reactions(:kevin), format: :turbo_stream)
-        assert_response :success
-      end
+    reaction = reactions(:kevin)
+    assert_difference -> { @comment.reactions.count }, -1 do
+      delete card_comment_reaction_path(@comment.card, @comment, reaction, format: :turbo_stream)
+      assert_turbo_stream action: :remove, target: dom_id(reaction)
     end
   end
 end

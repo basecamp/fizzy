@@ -2,35 +2,24 @@
 
 <% content_for :header do %>
   <div class="header__actions header__actions--start">
-    <%= link_to @board, class: "btn borderless txt-medium", data: { controller: "hotkey", action: "keydown.esc@document->hotkey#click" } do %>
-      <span class="overflow-ellipsis">
-        &larr;
-        <strong><%= @board.name %></strong>
-      </span>
-    <% end %>
+    <%= link_back_to_board(@board) %>
   </div>
 
   <h1 class="header__title"><%= @page_title %></h1>
-
-  <div class="header__actions header__actions--end">
-    <%= link_to new_board_webhook_path, class: "btn" do %>
-      <%= icon_tag "add" %>
-      <span class="for-screen-reader">Create a new webhook</span>
-    <% end %>
-  </div>
 <% end %>
 
 <%= tag.section class: "panel shadow center webhooks" do %>
   <% if @page.records.any? %>
-    <ul class="flex flex-column align-start gap margin-none unpad webhooks-list">
+    <ul class="flex flex-column align-start gap margin-none-block-start unpad webhooks-list">
       <%= render partial: "webhooks/webhook", collection: @page.records %>
     </ul>
   <% else %>
     <p>Webhooks can notify another application when something happens in this Fizzy board. You’ll choose which events to subscribe to and provide a URL to receive the data.</p>
     <p>For example, you could create a webhook that posts to a Campfire chat in Basecamp when new cards are added to Fizzy.</p>
-    <%= link_to new_board_webhook_path, class: "btn btn--link" do %>
-      <%= icon_tag "add" %>
-      <span>Set up a webhook</span>
-    <% end %>
+  <% end %>
+
+  <%= link_to new_board_webhook_path, class: "btn btn--link" do %>
+    <%= icon_tag "add" %>
+    <span>Set up a new webhook</span>
   <% end %>
 <% end %>

@@ -13,7 +13,7 @@
 
 <div data-controller="badge navigable-list" data-badge-unread-class="unread" data-action="keydown@document->navigable-list#navigate" data-navigable-list-actionable-items-value="true"
       data-navigable-list-focus-on-selection-value="false">
-  <section class="notifications-list panel center borderless unpad flex flex-column gap-half">
+  <section class="notifications-list panel panel--wide center borderless unpad flex flex-column gap-half">
     <% if @unread.any? %>
       <div class="flex align-center justify-space-between margin-block-start margin-block-end-half">
         <h2 class="txt-medium txt-uppercase txt-alert">New for you</h2>
@@ -30,7 +30,7 @@
     </div>
   </section>
 
-  <section class="notifications-list notifications-list--read panel center borderless unpad flex flex-column gap-half margin-block-start">
+  <section class="notifications-list notifications-list--read panel panel--wide center borderless unpad flex flex-column gap-half margin-block-start">
     <h2 class="txt-medium margin-block-start-double margin-block-end-half txt-uppercase translucent">Previously seen</h2>
 
     <div id="notifications_list_read" contents>

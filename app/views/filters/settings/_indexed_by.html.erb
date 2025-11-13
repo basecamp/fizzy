@@ -1,8 +1,8 @@
 <% filter = user_filtering.filter %>
 
 <%= tag.div class: class_names("quick-filter"),
-      data: { controller: "dialog combobox",
-            action: "keydown.esc->dialog#close click@document->dialog#closeOnClickOutside",
+      data: { controller: "dialog filter combobox",
+            action: "keydown.esc->dialog#close click@document->dialog#closeOnClickOutside dialog:close@document->filter#clearInput",
             filter_show: user_filtering.show_indexed_by?,
             combobox_default_value_value: "all",
             combobox_default_label_value: "Status…",

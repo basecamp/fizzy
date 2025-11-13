@@ -14,10 +14,10 @@
 
 <% content_for :header do %>
   <div class="header__actions header__actions--start">
-    <%= link_to published_board_url(@card.board), class: "btn borderless txt-medium", style: "view-transistion-name: card-board-title;", data: { controller: "hotkey", action: "keydown.esc@document->hotkey#click" } do %>
-      <span class="overflow-ellipsis">
-        &larr;
-        <strong class="font-black"><%= @card.board.name %></strong>
+    <%= link_to published_board_url(@card.board), class: "btn borderless txt-medium", style: "view-transistion-name: card-board-title;", data: { controller: "hotkey", action: "keydown.left@document->hotkey#click" } do %>
+      <span class="overflow-ellipsis flex align-center">
+        <strong>Back to <%= @card.board.name %></strong>
+        <kbd class="txt-x-small margin-inline-start hide-on-touch">&larr;</kbd>
       </span>
     <% end %>
   </div>
@@ -48,3 +48,7 @@
 
   <%= render "layouts/lightbox" %>
 </section>
+
+<% content_for :footer do %>
+  <%= render "public/footer" %>
+<% end %>

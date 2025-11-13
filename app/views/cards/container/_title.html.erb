@@ -10,7 +10,10 @@
       </div>
     <% end %>
 
-    <%= link_to "Edit", edit_card_path(card), class: "btn btn--reversed fit-content", style: "--btn-background: #{card.color}" %>
+    <%= link_to edit_card_path(card), class: "btn fit-content txt-small", data: { controller: "hotkey", action: "keydown.e@document->hotkey#click" } do %>
+      <span>Edit</span>
+      <kbd class="txt-x-small hide-on-touch">e</kbd>
+    <% end %>
   <% end %>
 <% else %>
   <%= form_with model: card, id: "card_form", data: { controller: "autoresize auto-save" } do |form| %>
@@ -23,7 +26,7 @@
       <% end %>
     </h1>
 
-    <%= form.rich_textarea :description, class: "card-field__description rich-text-content",
+    <%= form.rich_textarea :description, class: "card__description rich-text-content",
           placeholder: "Add some notes, context, pictures, or video about this…",
           data: { action: "lexxy:change->auto-save#change focusout->auto-save#submit" } do %>
       <%= general_prompts(card.board) %>

@@ -2,8 +2,8 @@
 
 <%= tag.div class: class_names("quick-filter"),
       data: {
-        controller: "dialog combobox",
-        action: "keydown.esc->dialog#close click@document->dialog#closeOnClickOutside",
+        controller: "dialog filter combobox",
+        action: "keydown.esc->dialog#close click@document->dialog#closeOnClickOutside dialog:close@document->filter#clearInput",
         filter_show: user_filtering.show_sorted_by?,
         combobox_default_value_value: "latest",
         combobox_with_default_class: "quick-filter--with-default" } do %>

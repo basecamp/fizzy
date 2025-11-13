@@ -550,11 +550,6 @@
       }
     }
 
-    .card__notification-unread-indicator {
-      --btn-icon-size: 1.25em;
-      --btn-size: 2em;
-    }
-
     /* On mobile… */
     @media (max-width: 799px) {
       /* …add a border */

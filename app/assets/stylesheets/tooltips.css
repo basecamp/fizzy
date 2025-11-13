@@ -1,5 +1,5 @@
 @layer components {
-  [data-controller^="tooltip"] {
+  [data-controller~="tooltip"] {
     --tooltip-delay: 750ms;
     --tooltip-duration: 150ms;
 

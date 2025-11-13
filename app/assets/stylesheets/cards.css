@@ -179,16 +179,19 @@
       display: none;
     }
 
-    & ~ .btn {
-      --btn-background: var(--card-color);
-      --btn-color: var(--color-ink-inverted);
-    }
-  }
-
-  .card-field__description {
     lexxy-toolbar {
       border-block-start: 1px solid var(--color-ink-light);
       margin-block-start: var(--block-space-half) !important;
+    }
+
+    & ~ .btn.btn--reversed {
+      --btn-background: var(--card-color);
+      --btn-color: var(--color-ink-inverted);
+    }
+
+    & ~ .btn {
+      --btn-border-color: var(--card-color);
+      --btn-color: var(--card-color);
     }
   }
 
@@ -258,6 +261,14 @@
     border: none;
     padding: 0;
     display: flex;
+
+    &:focus-visible {
+      outline: none;
+
+      .btn {
+        box-shadow: 0 0 0 var(--focus-ring-size) var(--focus-ring-color);
+      }
+    }
   }
 
   .card__meta-text {
@@ -453,43 +464,31 @@
   }
 
   .card__notification-unread-indicator {
-    --btn-background: var(--color-canvas);
+    --btn-background: var(--color-marker);
     --btn-border-color: var(--color-canvas);
-    --btn-icon-size: 0.75em;
+    --btn-color: var(--color-ink-inverted);
+    --btn-icon-size: 0.5em;
     --btn-padding: 0;
-    --btn-size: 1.25em;
+    --btn-size: 1.6em;
 
+    font-size: var(--text-xx-small);
+    font-weight: 600;
+    margin: 2px;
     position: relative;
     z-index: 1;
 
-    &:before,
-    .icon {
-      transition: opacity 150ms ease;
-    }
-
-    /* The red dot */
-    &:before {
-      aspect-ratio: 1;
-      background-color: var(--color-marker);
-      border-radius: 50%;
-      content: "";
-      inline-size: 50%;
-      inset: 50% auto auto 50%;
-      position: absolute;
-      translate: -50% -50%;
-    }
-
-    /* The X */
     .icon {
       opacity: 0;
+      transition: opacity 150ms ease;
     }
 
     @media (hover: hover) {
       .card:hover & {
-        --btn-background: transparent;
+        --btn-background: var(--color-ink-lightest);
+        --btn-color: var(--color-ink);
 
-        &:before { opacity: 0; }
-           .icon { opacity: 1; }
+        .badge-count { opacity: 0; }
+               .icon { opacity: 1; }
       }
     }
   }

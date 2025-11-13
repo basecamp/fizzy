@@ -4,5 +4,5 @@
     <p class="margin-none-block-start">Fizzy doesn’t let stale cards stick around forever. Cards automatically close as “Not Now” without activity for specific period of time. <em>This is the default, global setting — you can override it on each board.</em></p>
   </header>
 
-  <%= render "entropy/auto_close", model: account.entropy, url: account_entropy_path, disabled: !Current.user.can_administer? %>
+  <%= render "entropy/auto_close", model: account.entropy, url: account_entropy_path, disabled: !Current.user.admin? %>
 </div>

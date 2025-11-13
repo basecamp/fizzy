@@ -1,9 +1,8 @@
 <% mention = notification.source %>
 
-<h3 class="event__title">
-  <%= link_to "#{mention.mentioner.first_name} mentioned you", mention %>
-</h3>
-
-<p class="event__details">
+<strong class="notificaton__mention">
+  <%= "#{mention.mentioner.first_name} mentioned you:" %>
+</strong>
+<p class="notification__details">
   <%= mention.source.mentionable_content.truncate(250) %>
 </p>

@@ -1,14 +1,17 @@
 <% @page_title = "Confirm your new email address" %>
 
 <% content_for :header do %>
-  <div class="header__title">
-    <%= link_to edit_user_path(@membership.user, script_name: "/#{@tenant}"), class: "btn borderless txt-medium", data: { controller: "hotkey", action: "keydown.esc@document->hotkey#click" } do %>
-      <span class="overflow-ellipsis">&larr; <strong>My profile</strong></span>
+  <div class="header__actions header__actions--start">
+    <%= link_to edit_user_path(@membership.user, script_name: "/#{@tenant}"), class: "btn borderless txt-medium", data: { controller: "hotkey", action: "keydown.left@document->hotkey#click" } do %>
+      <span class="overflow-ellipsis flex align-center">
+        <strong>Back to My profile</strong>
+        <kbd class="txt-x-small margin-inline-start hide-on-touch">&larr;</kbd>
+      </span>
     <% end %>
   </div>
 <% end %>
 
-<div class="panel shadow center flex flex-column gap-half" style="--panel-size: 45ch;">
+<div class="panel panel--centered flex flex-column gap-half">
   <h1 class="txt-x-large font-weight-black margin-none">Check your email</h1>
   <p class="margin-none">We just sent an email to <strong><%= params[:email_address] %></strong></p>
   <p class="margin-none-block-start">Hit the link in the email to confirm this is the email address you want to use with Fizzy going forward.</p>

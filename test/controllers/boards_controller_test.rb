@@ -122,4 +122,18 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
     assert_response :forbidden
     assert_equal original_users, board.reload.users.sort
   end
+
+  test "non-admin cannot change board name on board they don't own" do
+    logout_and_sign_in_as :jz
+
+    board = boards(:writebook)
+    original_name = board.name
+
+    patch board_path(board), params: {
+      board: { name: "Hacked Board Name" }
+    }
+
+    assert_response :forbidden
+    assert_equal original_name, board.reload.name
+  end
 end

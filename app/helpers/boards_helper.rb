@@ -1,8 +1,8 @@
 module BoardsHelper
   def link_back_to_board(board)
     link_to board, class: "btn borderless txt-medium",
-      data: { controller: "hotkey", action: "keydown.b@document->hotkey#click click->turbo-navigation#backIfSamePath" } do
-        tag.span ("&larr;" + tag.strong(board.name, class: "overflow-ellipsis") + tag.kbd("b", class: "txt-x-small margin-inline-start hide-on-touch")).html_safe
+      data: { controller: "hotkey", action: "keydown.left@document->hotkey#click click->turbo-navigation#backIfSamePath" } do
+        tag.span(tag.strong("Back to #{board.name}", class: "overflow-ellipsis") + tag.kbd("←", class: "txt-x-small margin-inline-start hide-on-touch"), class: "flex align-center").html_safe
     end
   end
 

@@ -1,7 +1,7 @@
 <%= form_with model: account, url: account_settings_path, method: :put, scope: :account, data: { controller: "form" }, class: "flex gap-half" do |form| %>
-  <strong class="full-width"><%= form.text_field :name, required: true, class: "input input--transparent full-width txt-medium", placeholder: "Account name…", data: { action: "input->form#disableSubmitWhenInvalid" }, readonly: !Current.user.can_administer? %></strong>
+  <strong class="full-width"><%= form.text_field :name, required: true, class: "input input--transparent full-width txt-medium", placeholder: "Account name…", data: { action: "input->form#disableSubmitWhenInvalid" }, readonly: !Current.user.admin? %></strong>
 
-  <% if Current.user.can_administer? %>
+  <% if Current.user.admin? %>
     <%= form.button class: "btn btn--circle btn--link txt-medium", data: { form_target: "submit" }, disabled: form.object do %>
       <%= icon_tag "arrow-right" %>
       <span class="for-screen-reader">Save changes</span>

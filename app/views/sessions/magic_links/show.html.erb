@@ -3,7 +3,7 @@
 <div class="panel panel--centered flex flex-column gap-half <%= "shake" if flash[:alert] %>">
   <header>
     <h1 class="txt-x-large font-weight-black margin-none"><%= @page_title %></h1>
-    <p class="margin-none-block-start txt-medium">Then enter the verfifcation code included in the email below:</p>
+    <p class="margin-none-block-start txt-medium">Then enter the verification code included in the email below:</p>
   </header>
 
   <%= form_with url: session_magic_link_path, method: :post, html: { data: { controller: token_list("form", "auto-submit" => params[:code].present?)} } do |form| %>

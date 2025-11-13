@@ -45,8 +45,9 @@
       min-block-size: 20lh;
     }
 
-    @media (max-width: 639px) {
-      --bubble-size: 3rem;
+    /* Hide on small, fat-finger touch devices */
+    @media (hover: none) and (pointer: coarse) and (max-width: 519px) {
+      display: none;
     }
   }
 
@@ -400,6 +401,10 @@
     box-shadow: none !important;
     color: color-mix(in srgb, var(--card-color) 70%, var(--color-canvas));
 
+    .cards--considering & {
+      background-color: var(--card-bg-color) !important;
+    }
+
     p {
       font-size: var(--text-small);
       overflow: hidden;
@@ -412,10 +417,6 @@
         .cards--grid & {
           display: initial;
         }
-      }
-
-      .cards--grid &:not(.blank-slate-for-grid) {
-        display: none;
       }
     }
   }
@@ -727,6 +728,54 @@
     @media (hover: hover) {
       &:hover {
         --btn-background: var(--card-color);
+      }
+    }
+  }
+
+  /* Mobile columns
+  /* -------------------------------------------------------------------------- */
+
+  .mobile-card-columns {
+    --column-gap: 8px;
+    --column-padding-expanded: calc(var(--column-gap) * 2);
+    --column-width-collapsed: 40px;
+    --progress-increment: var(--progress-max-width) / var(--progress-max-cards);
+    --progress-max-cards: 20;
+    --progress-max-width: 100%;
+
+    padding-inline: 3vw;
+
+    /* Hide on larger devices with cursors */
+    @media (hover: hover) and (min-width: 520px) {
+      display: none;
+    }
+
+    .cards.is-collapsed {
+      inline-size: auto;
+      display: block;
+      padding-block: 0.5ch;
+
+      .cards__expander {
+        flex-direction: row;
+        inline-size: auto;
+
+        &:before {
+          block-size: 1px;
+          inline-size: 100%;
+          inset: 50% 0 auto;
+          translaate: 0 -50%;
+        }
+
+        &:after {
+          block-size: var(--column-width-collapsed);
+          inline-size: calc(var(--column-width-collapsed) + var(--card-count) * var(--progress-increment));
+          margin-inline-start: 0;
+          max-inline-size: var(--progress-max-width);
+        }
+      }
+
+      .cards__expander-title {
+        writing-mode: revert;
       }
     }
   }

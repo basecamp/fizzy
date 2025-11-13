@@ -7,6 +7,11 @@
   <div class="cards__transition-container">
     <header class="cards__header">
       <%= render "boards/show/expander", title: column.name, count: column.cards.active.count, column_id: dom_id(column) %>
+
+      <%= link_to public_board_column_url(column.board.publication.key, column), class: "cards__maximize-button btn btn--circle txt-x-small borderless", data: { turbo_frame: "_top" } do %>
+        <%= icon_tag "grid", class: "translucent" %>
+        <span class="for-screen-reader">Maximize column</span>
+      <% end %>
     </header>
 
     <%= column_frame_tag dom_id(column, :cards), src: public_board_column_path(column.board.publication.key, column) %>

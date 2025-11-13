@@ -102,7 +102,7 @@ class NotificationPusher
     end
 
     def card_notification_title(card)
-      card.title.presence || "Card #{card.id}"
+      card.title.presence || "Card #{card.number}"
     end
 
     def comment_notification_body(event)

@@ -5,9 +5,9 @@
   <section class="panel shadow txt-align-center" style="--panel-size: 45ch;">
     <div class="flex flex-column gap position-relative">
       <% if Current.user == @user %>
-        <%= link_to edit_user_path(@user), class: "user-edit-link btn" do %>
+        <%= link_to edit_user_path(@user), class: "user-edit-link btn", data: { controller: "tooltip" } do %>
           <%= icon_tag "pencil" %>
-          <span class="for-screen-reader">Edit</span>
+          <span class="for-screen-reader">Edit profile</span>
         <% end %>
       <% end %>
 
@@ -27,9 +27,9 @@
       </div>
 
       <div class="flex-inline center justify-center flex-wrap gap">
-        <%= link_to "Which cards are assigned to #{me_or_you}?", 
+        <%= link_to "Which cards are assigned to #{me_or_you}?",
               cards_path(assignee_ids: [ @user.id ], sorted_by: "newest"), class: "btn", data: { turbo_frame: "_top" } %>
-        <%= link_to "Which cards were added by #{me_or_you}?", 
+        <%= link_to "Which cards were added by #{me_or_you}?",
               cards_path(creator_ids: [ @user.id ], sorted_by: "newest"), class: "btn", data: { turbo_frame: "_top" } %>
       </div>
     </div>

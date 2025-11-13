@@ -14,7 +14,7 @@
       <%= render "boards/show/expander", title: column.name, count: column.cards.active.count, column_id: dom_id(column) %>
 
       <%= link_to board_column_path(column.board, column), class: "cards__maximize-button btn btn--circle txt-x-small borderless", data: { turbo_frame: "_top" } do %>
-        <%= icon_tag "maximize", class: "translucent" %>
+        <%= icon_tag "grid", class: "translucent" %>
         <span class="for-screen-reader">Maximize column</span>
       <% end %>
     </header>

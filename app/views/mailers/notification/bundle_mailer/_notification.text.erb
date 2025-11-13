@@ -1,5 +1,2 @@
-================================================================================
-
-<%= render "notification/bundle_mailer/header", notification: notification %>
 <%= render "notification/bundle_mailer/#{notification.source_type.underscore}/body", notification: notification %>
 

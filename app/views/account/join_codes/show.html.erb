@@ -2,8 +2,11 @@
 
 <% content_for :header do %>
   <div class="header__actions header__actions--start">
-    <%= link_to account_settings_path, class: "btn borderless txt-medium", data: { controller: "hotkey", action: "keydown.esc@document->hotkey#click" } do %>
-      <span class="overflow-ellipsis">&larr; <strong>Account Settings</strong></span>
+    <%= link_to account_settings_path, class: "btn borderless txt-medium", data: { controller: "hotkey", action: "keydown.left@document->hotkey#click" } do %>
+      <span class="overflow-ellipsis flex align-center">
+        <strong>Back to Account Settings</strong>
+        <kbd class="txt-x-small margin-inline-start hide-on-touch">&larr;</kbd>
+      </span>
     <% end %>
   </div>
 <% end %>
@@ -18,7 +21,7 @@
   <div class="flex align-center gap-half">
     <input type="text" class="input flex-item-grow" value="<%= url %>" readonly>
 
-    <% if Current.user.can_administer? %>
+    <% if Current.user.admin? %>
       <%= button_to account_join_code_path, method: :delete, class: "btn btn--circle txt-small", data: {
             turbo_confirm: "Are you sure you want to generate a new link? The previous code will stop working." } do %>
         <%= icon_tag "refresh" %>
@@ -62,7 +65,7 @@
       This code has been used <%= @join_code.usage_count %>/<%= @join_code.usage_limit %> times
       (<%= @join_code.active? ? @join_code.usage_limit - @join_code.usage_count : "none" %> remaining)
 
-      <% if Current.user.can_administer? %>
+      <% if Current.user.admin? %>
         <%= link_to edit_account_join_code_path, class: @join_code.active? ? "txt-link" : "txt-negative txt-underline" do %>
           <span>Change limit</span>
         <% end %>

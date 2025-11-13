@@ -3,7 +3,7 @@ class Cards::AssignmentsController < ApplicationController
 
   def new
     @users = @board.users.active.alphabetically
-    fresh_when @users
+    fresh_when etag: [ @users, @card.assignees ]
   end
 
   def create

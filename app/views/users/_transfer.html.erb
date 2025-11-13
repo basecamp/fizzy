@@ -12,18 +12,18 @@
 
   <div class="flex align-center gap">
     <div data-controller="dialog" data-dialog-modal-value="true" class="flex-inline">
-      <%= tag.button class: "btn", data: { action: "dialog#open" } do %>
+      <%= tag.button class: "btn", data: { action: "dialog#open", controller: "tooltip" } do %>
         <%= icon_tag "qr-code" %>
-        <span class="for-screen-reader">Show auto-login QR code</span>
+        <span class="for-screen-reader">Display auto-login QR code</span>
       <% end %>
 
       <dialog class="dialog panel shadow" data-dialog-target="dialog">
         <%= qr_code_image(url) %>
 
         <form method="dialog" class="margin-block-start flex justify-center">
-          <button class="btn">
+          <button class="btn" data-controller="tooltip">
             <%= icon_tag "remove" %>
-            <span class="for-screen-reader">Close</span>
+            <span class="for-screen-reader">Close dialog</span>
           </button>
         </form>
       </dialog>

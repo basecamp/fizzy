@@ -30,7 +30,7 @@ module FiltersHelper
     tag.dialog class: "margin-block-start-half popup panel flex-column align-start gap-half fill-white shadow txt-small", data: {
       action: "turbo:before-cache@document->dialog#close keydown->navigable-list#navigate filter:changed->navigable-list#reset toggle->filter#filter",
       aria: { label: label, aria_description: label },
-      controller: "filter navigable-list",
+      controller: "navigable-list",
       dialog_target: "dialog",
       navigable_list_focus_on_selection_value: false,
       navigable_list_actionable_items_value: true

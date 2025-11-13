@@ -1,6 +1,7 @@
 <div class="cards__new-column position-relative" data-controller="dialog" data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside" data-turbo-permanent>
-  <button class="btn btn--circle txt-x-small borderless" data-action="click->dialog#open:stop" aria-label="Add a new column, etc.">
+  <button class="btn btn--circle txt-x-small borderless" data-controller="tooltip" data-action="click->dialog#open:stop">
     <%= icon_tag "add", class: "translucent" %>
+    <span class="for-screen-reader">Add a column</span>
   </button>
   <dialog class="popup panel flex-column gap-half fill-white shadow txt-small margin-block-double" data-dialog-target="dialog">
     <%= render "boards/show/menu/column_form", board: board, column: Column.new, label: "Add column" %>

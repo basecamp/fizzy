@@ -2,8 +2,8 @@
 
 <%= tag.div class: "quick-filter",
       data: {
-        controller: "dialog multi-selection-combobox",
-        action: "keydown.esc->dialog#close click@document->dialog#closeOnClickOutside",
+        controller: "dialog filter multi-selection-combobox",
+        action: "keydown.esc->dialog#close click@document->dialog#closeOnClickOutside dialog:close@document->filter#clearInput",
         filter_show: user_filtering.show_closers?,
         multi_selection_combobox_no_selection_label_value: "Closed by…",
         multi_selection_combobox_label_prefix_value: "Closed by" } do %>

@@ -2,12 +2,7 @@
 
 <% content_for :header do %>
   <div class="header__actions header__actions--start">
-    <%= link_to @board, class: "btn borderless txt-medium", data: { controller: "hotkey", action: "keydown.esc@document->hotkey#click" } do %>
-      <span class="overflow-ellipsis">
-        &larr;
-        <strong><%= @board.name %></strong>
-      </span>
-    <% end %>
+    <%= link_back_to_board(@board) %>
   </div>
 
   <h1 class="header__title divider divider--fade full-width">

@@ -6,6 +6,11 @@
   <div class="cards__transition-container">
     <header class="cards__header">
       <%= render "boards/show/expander", title: "Done", count: board.cards.closed.count, column_id: "closed-cards" %>
+
+      <%= link_to public_board_columns_closed_url(board.publication.key), class: "cards__maximize-button btn btn--circle txt-x-small borderless", data: { turbo_frame: "_top" } do %>
+        <%= icon_tag "grid", class: "translucent" %>
+        <span class="for-screen-reader">Maximize column</span>
+      <% end %>
     </header>
 
     <%= column_frame_tag :closed_column, src: public_board_columns_closed_path(board.publication.key) %>

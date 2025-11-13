@@ -1,13 +1,13 @@
 <div id="filter-settings-save-toggle">
   <% if filter.persisted? %>
-    <%= button_to filter_path(filter), method: :delete, class: "btn txt-x-small btn--reversed", form_class: "inline" do %>
+    <%= button_to filter_path(filter), method: :delete, class: "btn txt-x-small btn--reversed", data: { controller: "tooltip" }, form_class: "inline" do %>
       <%= icon_tag "bookmark-outline" %>
-      <span class="for-screen-reader">Remove saved filter</span>
+      <span class="for-screen-reader">Delete custom view</span>
     <% end %>
   <% else %>
-    <%= button_to filters_path(filter.as_params), method: :post, class: "btn txt-x-small", form_class: "inline" do %>
+    <%= button_to filters_path(filter.as_params), method: :post, class: "btn txt-x-small", data: { controller: "tooltip" }, form_class: "inline" do %>
       <%= icon_tag "bookmark-outline" %>
-      <span class="for-screen-reader">Save filter</span>
+      <span class="for-screen-reader">Save custom view</span>
     <% end %>
   <% end %>
 </div>

@@ -1,11 +1,34 @@
-<%= turbo_frame_tag :stream_column do %>
-  <% if @page.used? %>
-    <%= with_automatic_pagination :stream_column, @page do %>
-      <%= render "public/boards/columns/list", cards: @page.records %>
+<% @page_title = "Column: Maybe?" %>
+
+<% content_for :header do %>
+  <div class="header__actions header__actions--start">
+    <%= link_to published_board_url(@board), class: "btn borderless txt-medium", data: { controller: "hotkey", action: "keydown.left@document->hotkey#click" } do %>
+      <span class="flex align-center">
+        <strong class="overflow-ellipsis">Back to <%= @board.name %></strong>
+        <kbd class="txt-x-small hide-on-touch margin-inline-start">&larr;</kbd>
+      </span>
     <% end %>
-  <% else %>
-    <div class="card blank-slate blank-slate--card">
-      <p class="txt-align-center txt-normal">No cards here</p>
-    </div>
+  </div>
+
+  <h1 class="header__title divider divider--fade full-width">
+    <span class="overflow-ellipsis"><%= @page_title %></span>
+  </h1>
+<% end %>
+
+<section class="cards cards--grid">
+  <%= turbo_frame_tag :stream_column do %>
+    <% if @page.used? %>
+      <%= with_automatic_pagination :stream_column, @page do %>
+        <%= render "public/boards/columns/list", cards: @page.records %>
+      <% end %>
+    <% else %>
+      <div class="card blank-slate blank-slate--card">
+        <p class="txt-align-center txt-normal">No cards here</p>
+      </div>
+    <% end %>
   <% end %>
+</section>
+
+<% content_for :footer do %>
+  <%= render "public/footer" %>
 <% end %>

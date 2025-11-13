@@ -1,7 +1,17 @@
 Everything since <%= @bundle.starts_at.strftime("%-l%P on %A, %B %-d") %>
 You have <%= pluralize @notifications.count, "new notification" %>.
 
-<%= render partial: "notification/bundle_mailer/notification", collection: @notifications, as: :notification %>
+<% @notifications.group_by(&:card).each do |card, notifications| %>
+--------------------------------------------------------------------------------
+
+<%= card.board.name %>
+<%= "##{ card.number } #{ card.title }" %>
+
+--------------------------------------------------------------------------------
+
+<%= render partial: "notification/bundle_mailer/notification", collection: notifications, as: :notification %>
+<% end %>
+
 --------------------------------------------------------------------------------
 
 Fizzy emails you about new notifications every few hours.

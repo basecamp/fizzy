@@ -2,10 +2,10 @@
 
 <% content_for :header do %>
   <div class="header__actions header__actions--start">
-    <%= link_to @webhook, class: "btn borderless txt-medium", data: { controller: "hotkey", action: "keydown.esc@document->hotkey#click" } do %>
-      <span class="overflow-ellipsis">
-        &larr;
-        <strong><%= @page_title %></strong>
+    <%= link_to @webhook, class: "btn borderless txt-medium", data: { controller: "hotkey", action: "keydown.left@document->hotkey#click" } do %>
+      <span class="overflow-ellipsis flex align-center">
+        <strong>Back to <%= @page_title %></strong>
+        <kbd class="txt-x-small margin-inline-start hide-on-touch">&larr;</kbd>
       </span>
     <% end %>
   </div>

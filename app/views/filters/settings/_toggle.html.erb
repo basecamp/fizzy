@@ -1,11 +1,13 @@
 <% filter = user_filtering.filter %>
 
 <% if user_filtering.expanded? %>
-  <button type="button" class="btn txt-x-small btn--reversed" aria-selected="true" aria-label="Close filter options" data-action="toggle-class#toggle toggle-enable#toggle">
+  <button type="button" class="btn txt-x-small btn--reversed" aria-selected="true" data-action="toggle-class#toggle toggle-enable#toggle" data-controller="tooltip">
     <%= icon_tag "filter" %>
+    <span class="for-screen-reader">Close filter options</span>
   </button>
 <% else %>
-  <button type="button" class="btn txt-x-small filter-toggle" aria-label="Expand filter options" data-action="toggle-class#toggle toggle-enable#toggle">
+  <button type="button" class="btn txt-x-small filter-toggle" data-action="toggle-class#toggle toggle-enable#toggle" data-controller="tooltip">
     <%= icon_tag "filter" %>
+    <span class="for-screen-reader">Expand filter options</span>
   </button>
 <% end %>

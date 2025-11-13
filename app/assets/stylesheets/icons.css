@@ -54,7 +54,9 @@
   .icon--everyone { --svg: url("everyone.svg "); }
   .icon--expand { --svg: url("expand.svg "); }
   .icon--gear { --svg: url("gear.svg "); }
+  .icon--grid { --svg: url("grid.svg "); }
   .icon--filter { --svg: url("filter.svg "); }
+  .icon--fizzy { --svg: url("fizzy.svg"); }
   .icon--globe { --svg: url("globe.svg "); }
   .icon--golden-ticket { --svg: url("golden-ticket.svg "); }
   .icon--home { --svg: url("home.svg "); }

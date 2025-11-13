@@ -16,7 +16,7 @@ module Comment::Promptable
         #### Metadata
 
         * Id: #{id}
-        * Card id: #{card.id}
+        * Card id: #{card.number}
         * Card title: #{card.title}
         * Created by: #{creator.name}}
         * Created at: #{created_at}}

@@ -13,13 +13,16 @@
               data: { local_save_target: "input", action: "lexxy:change->form#disableSubmitWhenInvalid lexxy:change->local-save#save turbo:morph-element->local-save#restoreContent" } do %>
           <%= general_prompts(@card.board) %>
         <% end %>
-        <%= form.button class: "comment__submit btn btn--reversed flex-item-justify-start",
-            data: { form_target: "submit" }, disabled: true do %>
-          <span>Post this comment</span>
-          <span class="hide-on-touch">
+
+        <span class="flex-inline align-center gap">
+          <%= form.button class: "comment__submit btn btn--reversed",
+              data: { form_target: "submit" }, disabled: true do %>
+            <span>Post this comment</span>
+          <% end %>
+          <span class="hide-on-touch txt-subtle">
             <kbd class="txt-x-small"><%= hotkey_label([ "ctrl", "enter" ]) %></kbd>
           </span>
-        <% end %>
+        </span>
         <span data-form-target="cancel" hidden></span>
       <% end %>
     </div>

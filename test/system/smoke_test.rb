@@ -27,7 +27,7 @@ class SmokeTest < ApplicationSystemTestCase
       assert_selector "figcaption input[placeholder='moon.jpg']"
     end
 
-    click_on "Post this comment"
+    click_on "Post"
 
     within("action-text-attachment") do
       assert_selector "a img[src*='/rails/active_storage']"
@@ -38,7 +38,7 @@ class SmokeTest < ApplicationSystemTestCase
   test "dismissing notifications" do
     sign_in_as(users(:david))
 
-    notif = notifications(:logo_card_david_mention_by_jz)
+    notif = notifications(:logo_comment_david_mention_by_jz)
 
     assert_selector "div##{dom_id(notif)}"
 

@@ -5,7 +5,8 @@ import { limitHeightToViewport } from "helpers/sizing_helpers"
 export default class extends Controller {
   static targets = [ "dialog" ]
   static values = {
-    modal: { type: Boolean, default: false }
+    modal: { type: Boolean, default: false },
+    sizing: { type: Boolean, default: true }
   }
 
   connect() {
@@ -22,7 +23,7 @@ export default class extends Controller {
       orient(this.dialogTarget)
     }
 
-    limitHeightToViewport(this.dialogTarget, true)
+    limitHeightToViewport(this.dialogTarget, this.sizingValue)
 
     this.#loadLazyFrames()
     this.dialogTarget.setAttribute("aria-hidden", "false")
@@ -43,6 +44,7 @@ export default class extends Controller {
     this.dialogTarget.blur()
     orient(this.dialogTarget, false)
     limitHeightToViewport(this.dialogTarget, false)
+    this.dispatch("close")
   }
 
   closeOnClickOutside({ target }) {
