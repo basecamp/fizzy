@@ -1,9 +1,11 @@
 logo_kevin:
   id: <%= ActiveRecord::FixtureSet.identify("logo_kevin_pin", :uuid) %>
+  account: 37s_uuid
   card: logo_uuid
   user: kevin_uuid
 
 shipping_kevin:
   id: <%= ActiveRecord::FixtureSet.identify("shipping_kevin_pin", :uuid) %>
+  account: 37s_uuid
   card: shipping_uuid
   user: kevin_uuid 

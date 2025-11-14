@@ -10,6 +10,7 @@ class Webhook::Delivery < ApplicationRecord
     IPAddr.new("0.0.0.0/8")
   ].freeze
 
+  belongs_to :account, default: -> { webhook.account }
   belongs_to :webhook
   belongs_to :event
 

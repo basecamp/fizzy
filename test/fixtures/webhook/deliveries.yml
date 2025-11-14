@@ -2,6 +2,7 @@
 
 successfully_completed:
   id: <%= ActiveRecord::FixtureSet.identify("successfully_completed_delivery", :uuid) %>
+  account: 37s_uuid
   webhook: active_uuid
   event: logo_published_uuid
   state: completed
@@ -11,6 +12,7 @@ successfully_completed:
 
 unsuccessfully_completed:
   id: <%= ActiveRecord::FixtureSet.identify("unsuccessfully_completed_delivery", :uuid) %>
+  account: 37s_uuid
   webhook: active_uuid
   event: logo_assignment_jz_uuid
   state: completed
@@ -20,6 +22,7 @@ unsuccessfully_completed:
 
 errored:
   id: <%= ActiveRecord::FixtureSet.identify("errored_delivery", :uuid) %>
+  account: 37s_uuid
   webhook: active_uuid
   event: layout_published_uuid
   state: errored
@@ -29,6 +32,7 @@ errored:
 
 pending:
   id: <%= ActiveRecord::FixtureSet.identify("pending_delivery", :uuid) %>
+  account: 37s_uuid
   webhook: active_uuid
   event: shipping_closed_uuid
   state: pending
@@ -38,6 +42,7 @@ pending:
 
 in_progress:
   id: <%= ActiveRecord::FixtureSet.identify("in_progress_delivery", :uuid) %>
+  account: 37s_uuid
   webhook: active_uuid
   event: logo_assignment_km_uuid
   state: in_progress

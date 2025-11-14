@@ -1,11 +1,13 @@
 logo_card_david_mention_by_jz:
   id: <%= ActiveRecord::FixtureSet.identify("logo_card_david_mention_by_jz", :uuid) %>
+  account: 37s_uuid
   source: logo_uuid (Card)
   mentioner: jz_uuid
   mentionee: david_uuid
 
 logo_comment_david_mention_by_jz:
   id: <%= ActiveRecord::FixtureSet.identify("logo_comment_david_mention_by_jz", :uuid) %>
+  account: 37s_uuid
   source: logo_agreement_jz_uuid (Comment)
   mentioner: jz_uuid
   mentionee: david_uuid
