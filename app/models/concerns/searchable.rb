@@ -18,8 +18,8 @@ module Searchable
 
     def update_in_search_index
       Search::Record.for_account(account_id).upsert_all(
-        [search_record_attributes.merge(id: ActiveRecord::Type::Uuid.generate)],
-        update_only: [:card_id, :board_id, :title, :content, :created_at]
+        [ search_record_attributes.merge(id: ActiveRecord::Type::Uuid.generate) ],
+        update_only: [ :card_id, :board_id, :title, :content, :created_at ]
       )
     end
 
@@ -43,10 +43,10 @@ module Searchable
       }
     end
 
-    # Models must implement these methods:
-    # - account_id: returns the account id
-    # - search_title: returns title string or nil
-    # - search_content: returns content string
-    # - search_card_id: returns the card id (self.id for cards, card_id for comments)
-    # - search_board_id: returns the board id
+  # Models must implement these methods:
+  # - account_id: returns the account id
+  # - search_title: returns title string or nil
+  # - search_content: returns content string
+  # - search_card_id: returns the card id (self.id for cards, card_id for comments)
+  # - search_board_id: returns the board id
 end

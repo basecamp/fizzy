@@ -21,7 +21,7 @@ class Signup::CompletionsControllerTest < ActionDispatch::IntegrationTest
     untenanted do
       post saas.signup_completion_path, params: {
         signup: {
-          full_name: @signup.full_name,
+          full_name: @signup.full_name
         }
       }
     end
@@ -33,7 +33,7 @@ class Signup::CompletionsControllerTest < ActionDispatch::IntegrationTest
     untenanted do
       post saas.signup_completion_path, params: {
         signup: {
-          full_name: "",
+          full_name: ""
         }
       }
     end

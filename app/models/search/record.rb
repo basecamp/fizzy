@@ -53,7 +53,7 @@ class Search::Record < ApplicationRecord
 
   scope :search, ->(query:, user:) do
     for_query(query: query, user: user)
-      .includes(:searchable, card: [:board, :creator])
+      .includes(:searchable, card: [ :board, :creator ])
       .select(:id, :searchable_type, :searchable_id, :card_id, :board_id, :account_id, :created_at, "#{connection.quote(query.terms)} AS query")
       .order(created_at: :desc)
   end
