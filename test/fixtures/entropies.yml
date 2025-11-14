@@ -15,3 +15,15 @@ private_board:
   account: 37s_uuid
   container: private_uuid (Board)
   auto_postpone_period: <%= 30.days.to_i %>
+
+initech_account:
+  id: <%= ActiveRecord::FixtureSet.identify("initech_account", :uuid) %>
+  account: initech_uuid
+  container: initech_uuid (Account)
+  auto_postpone_period: <%= 30.days.to_i %>
+
+miltons_wish_list_board:
+  id: <%= ActiveRecord::FixtureSet.identify("miltons_wish_list_board", :uuid) %>
+  account: initech_uuid
+  container: miltons_wish_list_uuid (Board)
+  auto_postpone_period: <%= 90.days.to_i %>

@@ -33,3 +33,4 @@ production: &production
 
 beta: *production
 staging: *production
+development: *production
