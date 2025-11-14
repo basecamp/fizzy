@@ -73,11 +73,11 @@
   --z-events-column-header: 1;
   --z-events-day-header: 3;
   --z-flash: 12;
-  --z-nav: 11;
   --z-popup: 10;
   --z-terminal: 20;
   --z-tray: 21;
-  --z-tooltip: 30;
+  --z-nav: 30;
+  --z-tooltip: 40;
 
   /* OKLCH colors: Fixed */
   --lch-black: 0% 0 0;

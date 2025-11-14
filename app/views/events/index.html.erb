@@ -1,5 +1,5 @@
 <% @page_title = "Home" %>
-<% @header_class = "header--events" %>
+<% @header_class = "header--events header--mobile-actions-stack" %>
 
 <%= render "cards/broadcasts", filter: @filter %>
 
@@ -14,6 +14,8 @@
       <%= render "events/index/filter", user_filtering: @user_filtering %>
     <% end %>
   </h1>
+
+  <%= render "events/index/add_board_button", user_filtering: @user_filtering %>
 <% end %>
 
 <%= tag.div id: "activity", class: "events", data: { controller: "pagination", pagination_paginate_on_intersection_value: true } do %>

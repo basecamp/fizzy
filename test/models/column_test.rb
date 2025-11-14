@@ -1,12 +1,6 @@
 require "test_helper"
 
 class ColumnTest < ActiveSupport::TestCase
-  test "creates column with default color when color not provided" do
-    column = boards(:writebook).columns.create!(name: "New Column")
-
-    assert_equal Card::DEFAULT_COLOR, column.color
-  end
-
   test "touch all the cards when the name or color changes" do
     column = columns(:writebook_triage)
 

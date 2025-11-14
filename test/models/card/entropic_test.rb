@@ -22,6 +22,16 @@ class Card::EntropicTest < ActiveSupport::TestCase
     assert_equal (123 - 2).days.from_now, cards(:layout).entropy.auto_clean_at
   end
 
+  test "setting auto_postpone_period in the board without entropy will create it, without affecting the account entropy" do
+    account_entropy = entropies("37s_account")
+    original_period = account_entropy.auto_postpone_period
+
+    entropies(:writebook_board).destroy
+    boards(:writebook).update! auto_postpone_period: 999.days
+
+    assert_equal original_period, account_entropy.reload.auto_postpone_period
+  end
+
   test "auto postpone all due using the default account entropy" do
     entropies(:writebook_board).destroy
 

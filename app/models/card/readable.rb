@@ -7,9 +7,15 @@ module Card::Readable
     end
   end
 
+  def unread_by(user)
+    all_notifications_for(user).tap do |notifications|
+      notifications.each(&:unread)
+    end
+  end
+
   def remove_inaccessible_notifications
     User.find_each do |user|
-      notifications_for(user).destroy_all unless accessible_to?(user)
+      all_notifications_for(user).destroy_all unless accessible_to?(user)
     end
   end
 
@@ -20,6 +26,12 @@ module Card::Readable
 
     def notifications_for(user)
       scope = user.notifications.unread
+      scope.where(source: event_notification_sources)
+        .or(scope.where(source: mention_notification_sources))
+    end
+
+    def all_notifications_for(user)
+      scope = user.notifications
       scope.where(source: event_notification_sources)
         .or(scope.where(source: mention_notification_sources))
     end

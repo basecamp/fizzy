@@ -31,6 +31,12 @@ module Fizzy
     config.active_record.query_log_tags_enabled = true
     config.active_record.query_log_tags = [ :tenant ]
 
+    # Enable debug mode for Rails event logging so we get SQL query logs.
+    # This was made necessary by the change in https://github.com/rails/rails/pull/55900
+    config.after_initialize do
+      Rails.event.debug_mode = true
+    end
+
     # Use UUID primary keys for all new tables
     config.generators do |g|
       g.orm :active_record, primary_key_type: :uuid

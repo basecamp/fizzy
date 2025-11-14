@@ -55,7 +55,7 @@
   .nav__menu.popup {
     --panel-border-color: var(--color-selected-dark);
     --panel-border-radius: 1.4em;
-    --panel-padding: var(--block-space) var(--block-space) 0 var(--block-space);
+    --panel-padding: var(--block-space);
     --panel-size: 45ch;
     --popup-display: grid;
     --nav-section-gap: 2px;
@@ -68,6 +68,7 @@
     grid-template-rows: auto 1fr auto;
     gap: var(--nav-section-gap);
     overflow: hidden;
+    padding-block-end: 0;
     scrollbar-gutter: stable both-edges;
   }
 
@@ -83,8 +84,46 @@
 
   .nav__close {
     @media (any-hover: hover) {
-      display: none;
+      display: none !important;
     }
+  }
+
+  .nav__header {
+    --actions-width: 2rem;
+
+    display: grid;
+    grid-template-columns: var(--actions-width) 1fr var(--actions-width);
+    grid-template-areas:
+      "actions-start title actions-end";
+    justify-items: center;
+  }
+
+  .nav__header-actions {
+    display: flex;
+    font-size: var(--text-x-small);
+    gap: var(--inline-space);
+    inline-size: var(--actions-width);
+    min-inline-size: fit-content;
+  }
+
+  .nav__header-actions--end {
+    grid-area: actions-end;
+    justify-content: flex-end;
+    margin-inline-start: auto;
+  }
+
+  .nav__header-actions--start {
+    grid-area: actions-start;
+    margin-inline-end: auto;
+  }
+
+  .nav__header-title {
+    color: inherit;
+    grid-area: title;
+    justify-content: center;
+    margin: auto;
+    min-inline-size: 0;
+    text-align: center;
   }
 
   .nav__hotkeys {

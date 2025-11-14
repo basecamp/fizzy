@@ -27,6 +27,41 @@ class Card::ReadableTest < ActiveSupport::TestCase
     end
   end
 
+  test "unread marks events notifications as unread" do
+    notifications(:logo_published_kevin).read
+    notifications(:logo_assignment_kevin).read
+
+    assert_changes -> { notifications(:logo_published_kevin).reload.read? }, from: true, to: false do
+      assert_changes -> { notifications(:logo_assignment_kevin).reload.read? }, from: true, to: false do
+        cards(:logo).unread_by(users(:kevin))
+      end
+    end
+  end
+
+  test "unread marks mentions in the description as unread" do
+    notifications(:logo_card_david_mention_by_jz).read
+
+    assert_changes -> { notifications(:logo_card_david_mention_by_jz).reload.read? }, from: true, to: false do
+      cards(:logo).unread_by(users(:david))
+    end
+  end
+
+  test "unread marks mentions in comments as unread" do
+    notifications(:logo_comment_david_mention_by_jz).read
+
+    assert_changes -> { notifications(:logo_comment_david_mention_by_jz).reload.read? }, from: true, to: false do
+      cards(:logo).unread_by(users(:david))
+    end
+  end
+
+  test "unread marks notifications from the comments as unread" do
+    notifications(:layout_commented_kevin).read
+
+    assert_changes -> { notifications(:layout_commented_kevin).reload.read? }, from: true, to: false do
+      cards(:layout).unread_by(users(:kevin))
+    end
+  end
+
   test "remove inaccessible notifications" do
     card = cards(:logo)
     kevin = users(:kevin)

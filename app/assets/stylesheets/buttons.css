@@ -199,6 +199,26 @@
     }
   }
 
+  .btn--back {
+    --btn-border-size: 0;
+
+    font-size: var(--text-medium);
+
+    @media (max-width: 639px) {
+      padding: 0.5em;
+
+      strong, kbd {
+        display: none;
+      }
+    }
+
+    @media (min-width: 640px) {
+      .icon--arrow-left {
+        display: none;
+      }
+    }
+  }
+
   /* Button groups
   /* ------------------------------------------------------------------------ */
 

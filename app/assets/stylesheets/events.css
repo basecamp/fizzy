@@ -3,6 +3,8 @@
   /* ------------------------------------------------------------------------ */
 
   .header--events {
+    --header-button-count: 1;
+
     @media (min-width: 640px) {
       --header-actions-width: 7.25rem !important;
     }

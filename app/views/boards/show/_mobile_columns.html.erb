@@ -1,4 +1,8 @@
 <section class="mobile-card-columns">
+  <div class="cards margin-block-end-half">
+    <%= render "columns/show/add_card_button", board: board %>
+  </div>
+
   <%= link_to board_columns_not_now_path(board), class: "cards cards--on-deck is-collapsed", style: "--card-color: var(--color-card-complete);", data: { turbo_frame: "_top" } do %>
     <div class="cards__expander btn btn--plain" style="--card-count: <%= board.cards.postponed.count %>">
       <span class="cards__expander-count"><%= board.cards.postponed.count %></span>

@@ -1,0 +1,9 @@
+<div class="card__body">
+  <div class="avatar txt-x-small">
+    <%= avatar_image_tag notification.creator %>
+  </div>
+
+  <h3 class="flex flex-column min-width flex-item-grow font-weight-normal">
+    <%= render "notifications/notification/#{notification.source_type.underscore}/body", notification: notification %>
+  </h3>
+</div>

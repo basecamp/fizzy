@@ -4,7 +4,7 @@ class Boards::EntropiesController < ApplicationController
   before_action :ensure_permission_to_admin_board
 
   def update
-    @board.entropy.update!(entropy_params)
+    @board.update!(entropy_params)
   end
 
   private

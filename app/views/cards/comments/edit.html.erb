@@ -1,11 +1,11 @@
 <%= turbo_frame_tag @comment, :container do %>
-  <div class="comment flex align-start full-width">
+  <div id="<%= dom_id(@comment) %>" class="comment flex align-start full-width">
     <figure class="comment__avatar flex-item-no-shrink" aria-hidden="true">
       <%= avatar_tag @comment.creator, hidden_for_screen_reader: true %>
     </figure>
 
     <div class="comment__content flex flex-column flex-item-grow full-width">
-      <div class="comment__body rich-text-content">
+      <div class="comment__body rich-text-content" data-turbo-permanent>
         <%= form_with model: [ @card, @comment ], class: "flex flex-column gap full-width",
               data: { controller: "form", action: "keydown.ctrl+enter->form#submit:prevent keydown.meta+enter->form#submit:prevent keydown.esc->form#cancel:stop" } do |form| %>
           <%= form.rich_textarea :body, required: true, autofocus: true, placeholder: new_comment_placeholder(@card) do %>

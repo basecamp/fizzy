@@ -1,18 +1,8 @@
 <% cache notification do %>
   <%= notification_tag notification do %>
-
-    <header class="card__header">
-      <%= render "notifications/notification/#{notification.source_type.underscore}/header", notification: notification %>
-    </header>
-
-    <div class="card__body">
-      <div class="avatar txt-x-small">
-        <%= avatar_image_tag notification.creator %>
-      </div>
-
-      <h3 class="flex flex-column min-width flex-item-grow font-weight-normal">
-        <%= render "notifications/notification/#{notification.source_type.underscore}/body", notification: notification %>
-      </h3>
-    </div>
+    <%= render "notifications/notification/header", notification: notification do %>
+      <%= notification_toggle_read_button(notification, url: card_reading_path(notification.card)) %>
+    <% end %>
+    <%= render "notifications/notification/body", notification: notification %>
   <% end %>
 <% end %>

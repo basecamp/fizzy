@@ -339,8 +339,15 @@
     rotate: 5deg;
     transform-origin: top right;
 
-    .cards &  {
+    .cards & {
       display: none;
+
+      .cards--grid &,
+      .cards--on-deck & {
+        &.card__closed--system {
+          display: flex;
+        }
+      }
     }
   }
 

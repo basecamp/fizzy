@@ -15,4 +15,10 @@ module ApplicationHelper
     return File.read(file_path).html_safe if File.exist?(file_path)
     "(not found)"
   end
+
+  def back_link_to(label, url, action, **options)
+    link_to url, class: "btn btn--back", data: { controller: "hotkey", action: action }, **options do
+      icon_tag("arrow-left") + tag.strong("Back to #{label}", class: "overflow-ellipsis") + tag.kbd("←", class: "txt-x-small hide-on-touch").html_safe
+    end
+  end
 end

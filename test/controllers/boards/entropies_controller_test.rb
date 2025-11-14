@@ -7,11 +7,13 @@ class Boards::EntropiesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "update" do
-    put board_entropy_path(@board, format: :turbo_stream), params: { board: { auto_postpone_period: 1.day } }
+    assert_no_difference -> { Current.account.entropy.reload.auto_postpone_period } do
+      put board_entropy_path(@board, format: :turbo_stream), params: { board: { auto_postpone_period: 123.days } }
 
-    assert_equal 1.day, @board.entropy.reload.auto_postpone_period
+      assert_equal 123.days, @board.entropy.reload.auto_postpone_period
 
-    assert_turbo_stream action: :replace, target: dom_id(@board, :entropy)
+      assert_turbo_stream action: :replace, target: dom_id(@board, :entropy)
+    end
   end
 
   test "update requires board admin permission" do

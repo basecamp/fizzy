@@ -40,4 +40,42 @@ class Cards::ReadingsControllerTest < ActionDispatch::IntegrationTest
 
     assert_equal "false", response.headers["X-Writer-Affinity"]
   end
+
+  test "destroy" do
+    freeze_time
+
+    notifications(:logo_published_kevin).read
+    notifications(:logo_assignment_kevin).read
+
+    assert_changes -> { notifications(:logo_published_kevin).reload.read? }, from: true, to: false do
+      assert_changes -> { accesses(:writebook_kevin).reload.accessed_at }, to: Time.current do
+        delete card_reading_url(cards(:logo)), as: :turbo_stream
+      end
+    end
+
+    assert_response :success
+  end
+
+  test "unread one notification on destroy" do
+    notifications(:logo_published_kevin).read
+
+    assert_changes -> { notifications(:logo_published_kevin).reload.read? }, from: true, to: false do
+      delete card_reading_path(cards(:logo)), as: :turbo_stream
+    end
+
+    assert_response :success
+  end
+
+  test "unread multiple notifications on destroy" do
+    notifications(:logo_published_kevin).read
+    notifications(:logo_assignment_kevin).read
+
+    assert_changes -> { notifications(:logo_published_kevin).reload.read? }, from: true, to: false do
+      assert_changes -> { notifications(:logo_assignment_kevin).reload.read? }, from: true, to: false do
+        delete card_reading_path(cards(:logo)), as: :turbo_stream
+      end
+    end
+
+    assert_response :success
+  end
 end

@@ -5,7 +5,7 @@ class Cards::CommentsController < ApplicationController
   before_action :ensure_creatorship, only: %i[ edit update destroy ]
 
   def create
-    @card.comments.create!(comment_params)
+    @comment = @card.comments.create!(comment_params)
   end
 
   def show
@@ -20,7 +20,6 @@ class Cards::CommentsController < ApplicationController
 
   def destroy
     @comment.destroy
-    redirect_to @card
   end
 
   private

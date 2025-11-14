@@ -1,13 +1,8 @@
-<% @page_title = "Column: Closed" %>
+<% @page_title = "Column: Done" %>
 
 <% content_for :header do %>
   <div class="header__actions header__actions--start">
-    <%= link_to published_board_url(@board), class: "btn borderless txt-medium", data: { controller: "hotkey", action: "keydown.left@document->hotkey#click" } do %>
-      <span class="flex align-center">
-        <strong class="overflow-ellipsis">Back to <%= @board.name %></strong>
-        <kbd class="txt-x-small hide-on-touch margin-inline-start">&larr;</kbd>
-      </span>
-    <% end %>
+    <%= back_link_to @board.name, published_board_url(@board), "keydown.left@document->hotkey#click" %>
   </div>
 
   <h1 class="header__title divider divider--fade full-width">

@@ -16,6 +16,7 @@
     font-family: var(--font-sans);
     interpolate-size: allow-keywords;
     line-height: 1.375;
+    max-inline-size: 100vw;
     scroll-behavior: auto;
     text-rendering: optimizeLegibility;
     text-size-adjust: none;

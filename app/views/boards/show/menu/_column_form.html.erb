@@ -3,11 +3,11 @@
         required: true, autocomplete: "off", pattern: ".*\\S.*", title: "Column name cannot be blank", data: { action: "focus->form#select" } %>
 
   <div class="color-picker__colors">
-    <% ([Card::DEFAULT_COLOR] + Card::COLORS).each do |color| %>
-      <label class="btn txt-small borderless" style="--btn-background: <%= color %>" title="<%= color %>">
-        <%= form.radio_button :color, color, checked: (column.color == color || (column.new_record? && color == Card::DEFAULT_COLOR)) %>
+    <% Color::COLORS.each do |color| %>
+      <label class="btn txt-small borderless" style="--btn-background: <%= color %>" title="<%= color.name %>">
+        <%= form.radio_button :color, color.value, checked: (column.color == color || (column.new_record? && color == Column::Colored::DEFAULT_COLOR)) %>
         <%= icon_tag "check", class: "checked" %>
-        <span class="for-screen-reader"><%= color %></span>
+        <span class="for-screen-reader"><%= color.name %></span>
       </label>
     <% end %>
   </div>

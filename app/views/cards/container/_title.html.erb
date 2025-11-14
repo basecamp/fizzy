@@ -1,5 +1,5 @@
 <% if card.published? %>
-  <%= turbo_frame_tag card, :edit do %>
+  <%= turbo_frame_tag card, :edit, data: { turbo_permanent: true } do %>
     <h1 class="card__title flex align-start gap-half">
       <%= link_to card.title, edit_card_path(card), class: "card__title-link" %>
     </h1>

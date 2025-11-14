@@ -1,0 +1,7 @@
+<%= turbo_stream.before dom_id(@card, :new_comment) do %>
+  <%= render "cards/comments/comment", comment: @comment %>
+<% end %>
+
+<%= turbo_stream.update dom_id(@card, :new_comment) do %>
+  <%= render "cards/comments/new", card: @card %>
+<% end %>

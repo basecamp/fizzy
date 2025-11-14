@@ -45,8 +45,7 @@
       min-block-size: 20lh;
     }
 
-    /* Hide on small, fat-finger touch devices */
-    @media (hover: none) and (pointer: coarse) and (max-width: 519px) {
+    @media (max-width: 519px) {
       display: none;
     }
   }
@@ -271,6 +270,8 @@
   }
 
   .cards__expander {
+    --gradient-direction: to bottom;
+
     align-items: center;
     border-radius: 99rem;
     cursor: pointer;
@@ -292,7 +293,7 @@
 
     /* Progress */
     &:after {
-      background: linear-gradient(to bottom, var(--card-color), var(--column-color) 80%);
+      background: linear-gradient(var(--gradient-direction), var(--card-color), var(--column-color) 80%);
       block-size: var(--column-width-collapsed);
       border-radius: 99rem;
       content: "";
@@ -689,7 +690,7 @@
         inline-size: 1em;
         inset: 0 0 auto auto;
         position: absolute;
-        translate: 25% -25%;
+        translate: 0 0;
         z-index: 1;
       }
     }
@@ -746,7 +747,7 @@
     padding-inline: 3vw;
 
     /* Hide on larger devices with cursors */
-    @media (hover: hover) and (min-width: 520px) {
+    @media (min-width: 520px) {
       display: none;
     }
 
@@ -756,6 +757,8 @@
       padding-block: 0.5ch;
 
       .cards__expander {
+        --gradient-direction: to right;
+
         flex-direction: row;
         inline-size: auto;
 

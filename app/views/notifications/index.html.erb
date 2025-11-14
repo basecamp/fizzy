@@ -26,7 +26,7 @@
     <% end %>
 
     <div id="notifications_list" contents>
-      <%= render partial: "notifications/notification", collection: @unread, cached: true %>
+      <%= render partial: "notifications/index/notification", collection: @unread, cached: true %>
     </div>
   </section>
 
@@ -34,7 +34,7 @@
     <h2 class="txt-medium margin-block-start-double margin-block-end-half txt-uppercase translucent">Previously seen</h2>
 
     <div id="notifications_list_read" contents>
-      <%= render partial: "notifications/notification", collection: @page.records, cached: true %>
+      <%= render partial: "notifications/index/notification", collection: @page.records, cached: true %>
     </div>
   </section>
 </div>

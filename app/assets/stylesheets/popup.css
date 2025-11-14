@@ -9,8 +9,8 @@
     --popup-display: flex;
 
     inset: 0 auto auto 50%;
-    min-inline-size: min(25ch, calc(100dvw - var(--block-space-double)));
-    max-inline-size: min(55ch, calc(100dvw - var(--block-space-double)));
+    min-inline-size: min(25ch, calc(100vw - (var(--panel-padding) * 2)));
+    max-inline-size: min(55ch, calc(100vw - (var(--panel-padding) * 2)));
     overflow: auto;
     position: absolute;
     transform: translateX(-50%);
