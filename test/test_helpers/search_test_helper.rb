@@ -15,8 +15,7 @@ module SearchTestHelper
 
     @account = Account.create!(name: "Search Test", external_account_id: ActiveRecord::FixtureSet.identify("search_test"))
     @identity = Identity.create!(email_address: "test@example.com")
-    @membership = Membership.create!(identity: @identity, tenant: @account.external_account_id)
-    @user = User.create!(name: "Test User", account: @account, membership: @membership)
+    @user = User.create!(name: "Test User", account: @account, identity: @identity)
     @board = Board.create!(name: "Test Board", account: @account, creator: @user)
     Current.account = @account
   end
