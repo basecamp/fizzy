@@ -48,7 +48,6 @@ class Import
             ActiveStorage::Attachment.skip_callback(:commit, :after, :purge_dependent_blob_later)
 
             Event.suppress do
-              # copy_entropies
               copy_users
               copy_boards
               copy_accesses
@@ -69,6 +68,7 @@ class Import
               copy_webhooks
               copy_push_subscriptions
               copy_filters
+              copy_entropies
             end
 
             copy_notifications
@@ -536,13 +536,11 @@ class Import
           else next
           end
 
-          Entropy.create!(
-            container_type: old_entropy.container_type,
-            container_id: container_id,
-            auto_postpone_period: old_entropy.auto_postpone_period,
-            created_at: old_entropy.created_at,
-            updated_at: old_entropy.updated_at
-          )
+          Entropy.find_or_create_by!(account_id: account.id, container_type: old_entropy.container_type, container_id: container_id) do |entropy|
+            entropy.auto_postpone_period = old_entropy.auto_postpone_period,
+            entropy.created_at = old_entropy.created_at,
+            entropy.updated_at = old_entropy.updated_at
+          end
         end
       end
     end
