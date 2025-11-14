@@ -12,9 +12,9 @@ private:
   all_access: false
   account: 37s_uuid
 
-staplers:
-  id: <%= ActiveRecord::FixtureSet.identify("staplers", :uuid) %>
-  name: Staplers
+miltons_wish_list:
+  id: <%= ActiveRecord::FixtureSet.identify("miltons_wish_list", :uuid) %>
+  name: Milton's Wish List
   creator: mike_uuid
   all_access: true
   account: initech_uuid

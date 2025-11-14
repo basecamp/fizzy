@@ -58,3 +58,24 @@ buy_domain:
   last_active_at: <%= 1.week.ago %>
   account: 37s_uuid
 
+radio:
+  id: <%= ActiveRecord::FixtureSet.identify("radio", :uuid) %>
+  number: 1
+  board: miltons_wish_list_uuid
+  creator: mike_uuid
+  title: I want to play my radio at a reasonable volume
+  created_at: <%= 1.week.ago %>
+  status: published
+  last_active_at: <%= 1.week.ago %>
+  account: initech_uuid
+
+paycheck:
+  id: <%= ActiveRecord::FixtureSet.identify("paycheck", :uuid) %>
+  number: 2
+  board: miltons_wish_list_uuid
+  creator: mike_uuid
+  title: I haven't received my paycheck
+  created_at: <%= 1.week.ago %>
+  status: published
+  last_active_at: <%= 1.week.ago %>
+  account: initech_uuid
