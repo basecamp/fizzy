@@ -47,6 +47,10 @@ class Card < ApplicationRecord
     self
   end
 
+  def to_param
+    number.to_s
+  end
+
   def move_to(new_board)
     transaction do
       card.update!(board: new_board)

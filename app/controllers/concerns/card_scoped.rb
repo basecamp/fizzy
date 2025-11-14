@@ -7,7 +7,7 @@ module CardScoped
 
   private
     def set_card
-      @card = Current.user.accessible_cards.find(params[:card_id])
+      @card = Current.user.accessible_cards.find_by!(number: params[:card_id])
     end
 
     def set_board

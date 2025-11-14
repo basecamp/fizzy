@@ -40,7 +40,7 @@ class CardsController < ApplicationController
     end
 
     def set_card
-      @card = Current.user.accessible_cards.find params[:id]
+      @card = Current.user.accessible_cards.find_by!(number: params[:id])
     end
 
     def ensure_permission_to_administer_card
