@@ -88,7 +88,7 @@ class NotificationPusher
       {
         title: "New notification",
         body: "You have a new notification",
-        path: "#{notification.account.slug}#{notifications_path}"
+        path: notifications_path(script_name: notification.account.slug)
       }
     end
 
@@ -110,10 +110,14 @@ class NotificationPusher
     end
 
     def card_path(card)
-      "#{notification.account.slug}#{Rails.application.routes.url_helpers.card_path(card)}"
+      Rails.application.routes.url_helpers.card_path(card, script_name: notification.account.slug)
     end
 
     def card_path_with_comment_anchor(comment)
-      "#{notification.account.slug}#{Rails.application.routes.url_helpers.card_path(comment.card, anchor: ActionView::RecordIdentifier.dom_id(comment))}"
+      Rails.application.routes.url_helpers.card_path(
+        comment.card,
+        anchor: ActionView::RecordIdentifier.dom_id(comment),
+        script_name: notification.account.slug
+      )
     end
 end
