@@ -39,11 +39,11 @@ env:
     - MYSQL_READONLY_USER
   tags:
     sc_chi:
-      MYSQL_SOLID_CACHE_HOST: fizzy-staging-solidcache-db-101.df-iad-int.37signals.com
+      MYSQL_SOLID_CACHE_HOST: fizzy-staging-solidcache-db-01.sc-chi-int.37signals.com
     df_iad:
       MYSQL_SOLID_CACHE_HOST: fizzy-staging-solidcache-db-101.df-iad-int.37signals.com
     df_ams:
-      MYSQL_SOLID_CACHE_HOST: fizzy-staging-solidcache-db-101.df-iad-int.37signals.com
+      MYSQL_SOLID_CACHE_HOST: fizzy-staging-solidcache-db-401.df-ams-int.37signals.com
 
 
 accessories:
