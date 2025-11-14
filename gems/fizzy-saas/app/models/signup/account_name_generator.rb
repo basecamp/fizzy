@@ -24,11 +24,13 @@ class Signup::AccountNameGenerator
     end
 
     def existing_indices
-      identity.accounts.filter_map do |account|
-        if account.name.match?(first_account_name_regex)
-          1
-        elsif match = account.name.match(nth_account_name_regex)
-          match[1].to_i
+      Current.without_account do
+        identity.accounts.filter_map do |account|
+          if account.name.match?(first_account_name_regex)
+            1
+          elsif match = account.name.match(nth_account_name_regex)
+            match[1].to_i
+          end
         end
       end
     end

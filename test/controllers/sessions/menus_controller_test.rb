@@ -18,9 +18,12 @@ class Sessions::MenusControllerTest < ActionDispatch::IntegrationTest
 
   test "show with exactly one account" do
     sign_in_as @identity
-    @identity.users.delete_all
-    account = Account.create!(external_account_id: 9999991, name: "Test Account")
-    @identity.users.create!(account: account, name: "Kevin")
+
+    Current.without_account do
+      @identity.users.delete_all
+      account = Account.create!(external_account_id: 9999991, name: "Test Account")
+      @identity.users.create!(account: account, name: "Kevin")
+    end
 
     untenanted do
       get session_menu_url

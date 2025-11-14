@@ -41,10 +41,13 @@ module SessionTestHelper
 
   def with_current_user(user)
     user = users(user) unless user.is_a? User
-    Current.session = Session.new(identity: user.identity)
-    yield
-  ensure
-    Current.clear_all
+    @old_session = Current.session
+    begin
+      Current.session = Session.new(identity: user.identity)
+      yield
+    ensure
+      Current.session = @old_session
+    end
   end
 
   def untenanted(&block)
