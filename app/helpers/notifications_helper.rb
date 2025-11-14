@@ -50,8 +50,7 @@ module NotificationsHelper
           title: "Mark as read",
           data: { action: "form#submit:stop badge#update:stop", form_target: "submit" },
           form: { data: { controller: "form" } } do
-        concat(icon_tag("remove"))
-        concat(tag.span("1", class: "badge-count", data: { group_count: "" }))
+        icon_tag("remove")
       end
     end
   end

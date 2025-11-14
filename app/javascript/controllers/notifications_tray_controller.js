@@ -63,12 +63,10 @@ export default class extends Controller {
   #showAsGrouped(notification, size) {
     notification.classList.add(this.groupedClass)
     this.#showGroupedNotification(notification)
-    this.#setGroupCount(notification, size)
   }
 
   #hideInGroup(notification) {
     this.#hideGroupedNotification(notification)
-    this.#setGroupCount(notification, "")
   }
 
   // We use a hidden container instead of hiding the notifications directly so that the CSS that sort the
@@ -81,9 +79,5 @@ export default class extends Controller {
 
   #hideGroupedNotification(notification) {
     this.hiddenNotificationsTarget.appendChild(notification)
-  }
-
-  #setGroupCount(notification, count) {
-    notification.querySelector("[data-group-count]").textContent = count
   }
 }
