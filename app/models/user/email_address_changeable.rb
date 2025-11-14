@@ -25,7 +25,7 @@ module User::EmailAddressChangeable
       expires_in: EMAIL_CHANGE_TOKEN_EXPIRATION
     )
 
-    IdentityMailer.email_change_confirmation(
+    UserMailer.email_change_confirmation(
       email_address: new_email_address,
       token: token,
       user: self

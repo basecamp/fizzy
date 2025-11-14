@@ -1,4 +1,4 @@
-class IdentityMailer < ApplicationMailer
+class UserMailer < ApplicationMailer
   def email_change_confirmation(email_address:, token:, user:)
     @token = token
     @user = user
