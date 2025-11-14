@@ -4,21 +4,18 @@ module User::EmailAddressChangeable
 
   extend ActiveSupport::Concern
 
-  class_methods do
-    def change_email_address_using_token(token)
-      parsed_token = SignedGlobalID.parse(token, for: EMAIL_CHANGE_TOKEN_PURPOSE)
-      user = parsed_token&.find
+  def change_email_address_using_token(token)
+    parsed_token = SignedGlobalID.parse(token, for: EMAIL_CHANGE_TOKEN_PURPOSE)
 
-      if parsed_token.nil?
-        raise ArgumentError, "The token is invalid"
-      elsif user.nil?
-        raise ArgumentError, "The user no longer exists"
-      elsif user.identity.email_address != parsed_token.params.fetch("old_email_address")
-        raise ArgumentError, "The token was generated for a different email address"
-      else
-        new_email_address = parsed_token.params.fetch("new_email_address")
-        user.change_email_address(new_email_address)
-      end
+    if parsed_token.nil?
+      raise ArgumentError, "The token is invalid"
+    elsif parsed_token.find != self
+      raise ArgumentError, "The token was generated for a different user"
+    elsif identity.email_address != parsed_token.params.fetch("old_email_address")
+      raise ArgumentError, "The token was generated for a different email address"
+    else
+      new_email_address = parsed_token.params.fetch("new_email_address")
+      change_email_address(new_email_address)
     end
   end
 

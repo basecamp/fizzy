@@ -1,5 +1,4 @@
 class Users::EmailAddresses::ConfirmationsController < ApplicationController
-  disallow_account_scope
   allow_unauthenticated_access
 
   before_action :set_user
@@ -9,7 +8,7 @@ class Users::EmailAddresses::ConfirmationsController < ApplicationController
   end
 
   def create
-    user = User.change_email_address_using_token(token)
+    user = @user.change_email_address_using_token(token)
 
     terminate_session if Current.session
     start_new_session_for user.identity
@@ -19,7 +18,7 @@ class Users::EmailAddresses::ConfirmationsController < ApplicationController
 
   private
     def set_user
-      @user = User.find(params[:user_id])
+      @user = Current.account.users.active.find(params[:user_id])
     end
 
     def token

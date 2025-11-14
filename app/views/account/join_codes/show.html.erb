@@ -17,7 +17,7 @@
     <p class="txt-medium margin-none">Share the link below to invite people to this account</p>
   </header>
 
-  <% url = join_url(code: @join_code.code, tenant: Current.account.external_account_id, script_name: nil) %>
+  <% url = join_url(code: @join_code.code, script_name: Current.account.slug) %>
   <div class="flex align-center gap-half">
     <input type="text" class="input flex-item-grow" value="<%= url %>" readonly>
 

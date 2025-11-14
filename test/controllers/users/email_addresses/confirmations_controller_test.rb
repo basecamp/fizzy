@@ -8,28 +8,22 @@ class Users::EmailAddresses::ConfirmationsControllerTest < ActionDispatch::Integ
   end
 
   test "show" do
-    untenanted do
-      get user_email_address_confirmation_path(user_id: @user.id, email_address_token: @token)
-      assert_response :success
-    end
+    get user_email_address_confirmation_path(user_id: @user.id, email_address_token: @token, script_name: @user.account.slug)
+    assert_response :success
   end
 
   test "create" do
     old_email = @user.identity.email_address
 
-    untenanted do
-      post user_email_address_confirmation_path(user_id: @user.id, email_address_token: @token)
+    post user_email_address_confirmation_path(user_id: @user.id, email_address_token: @token, script_name: @user.account.slug)
 
-      assert_equal @new_email, @user.reload.identity.email_address
-      assert_redirected_to edit_user_url(script_name: @user.account.slug, id: @user)
-    end
+    assert_equal @new_email, @user.reload.identity.email_address
+    assert_redirected_to edit_user_url(script_name: @user.account.slug, id: @user)
   end
 
   test "create with invalid token" do
-    untenanted do
-      assert_raises(ArgumentError) do
-        post user_email_address_confirmation_path(user_id: @user.id, email_address_token: "invalid")
-      end
+    assert_raises(ArgumentError) do
+      post user_email_address_confirmation_path(user_id: @user.id, email_address_token: "invalid", script_name: @user.account.slug)
     end
   end
 end

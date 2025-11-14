@@ -1,5 +1,4 @@
 class JoinCodesController < ApplicationController
-  disallow_account_scope
   allow_unauthenticated_access
 
   before_action :set_join_code
@@ -30,22 +29,13 @@ class JoinCodesController < ApplicationController
 
   private
     def set_join_code
-      # TODO:PLANB: this find should be scoped by account
-      #      2025-11-12 [Stanko]: I think that we don't have to scope this by account as the code
-      #                           is globally unique and indexed. Except if we need to scope it
-      #                           for some other reason?
-      @join_code ||= Account::JoinCode.active.find_by(code: code)
+      @join_code ||= Account::JoinCode.active.find_by(
+        code: params.expect(:code),
+        account: Current.account
+      )
     end
 
     def ensure_join_code_is_valid
       head :not_found unless @join_code&.active?
-    end
-
-    def tenant
-      params.expect(:tenant)
-    end
-
-    def code
-      params.expect(:code)
     end
 end

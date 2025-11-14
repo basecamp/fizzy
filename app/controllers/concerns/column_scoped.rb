@@ -7,6 +7,6 @@ module ColumnScoped
 
   private
     def set_column
-      @column = Column.find(params[:column_id])
+      @column = Current.account.columns.find(params[:column_id])
     end
 end

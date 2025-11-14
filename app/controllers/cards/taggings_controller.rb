@@ -2,7 +2,7 @@ class Cards::TaggingsController < ApplicationController
   include CardScoped
 
   def new
-    @tags = Tag.all.alphabetically
+    @tags = Current.account.tags.all.alphabetically
     fresh_when etag: [ @tags, @card.tags ]
   end
 

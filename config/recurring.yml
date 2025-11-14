@@ -7,6 +7,7 @@ production: &production
   # Application cleanup
   auto_postpone_all_due:
     class: Card::AutoPostponeAllDueJob
+    command: "Card.auto_postpone_all_due"
     schedule: every hour at minute 50
   delete_unused_tags:
     class: DeleteUnusedTagsJob
@@ -20,7 +21,7 @@ production: &production
     command: "SolidQueue::RecurringExecution.clear_in_batches"
     schedule: every hour at minute 52
   cleanup_webhook_deliveries:
-    class: Webhook::CleanupDeliveriesJob
+    command: "Webhook::Delivery.cleanup"
     schedule: every 4 hours at minute 51
   cleanup_magic_links:
     command: "MagicLink.cleanup"

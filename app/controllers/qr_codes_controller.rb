@@ -3,6 +3,11 @@ class QrCodesController < ApplicationController
 
   def show
     expires_in 1.year, public: true
-    render svg: RQRCode::QRCode.new(QrCodeLink.from_signed(params[:id]).url).as_svg(viewbox: true, fill: :white, color: :black)
+
+    qr_code_svg = RQRCode::QRCode
+      .new(QrCodeLink.from_signed(params[:id]).url)
+      .as_svg(viewbox: true, fill: :white, color: :black)
+
+    render svg: qr_code_svg
   end
 end
