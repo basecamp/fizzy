@@ -1,5 +1,5 @@
 class User < ApplicationRecord
-  include Accessor, Assignee, Attachable, Configurable,
+  include Accessor, Assignee, Attachable, Configurable, EmailAddressChangeable,
     Mentionable, Named, Notifiable, Role, Searcher, Watcher
   include Timelined # Depends on Accessor
 

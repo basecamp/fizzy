@@ -19,7 +19,7 @@ class IdentityTest < ActiveSupport::TestCase
     assert_not Identity.new(email_address: "test@example.com").staff?
   end
 
-  test "join creates membership and user for account" do
+  test "join" do
     identity = identities(:david)
     account = accounts(:initech)
 
@@ -27,7 +27,8 @@ class IdentityTest < ActiveSupport::TestCase
       identity.join(account)
     end
 
-    user = account.users.find_by(identity: identity)
+    user = account.users.find_by!(identity: identity)
+
     assert_not_nil user
     assert_equal identity, user.identity
     assert_equal identity.email_address, user.name

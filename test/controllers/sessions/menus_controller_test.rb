@@ -5,7 +5,7 @@ class Sessions::MenusControllerTest < ActionDispatch::IntegrationTest
     @identity = identities(:kevin)
   end
 
-  test "show with no memberships" do
+  test "show with no account" do
     sign_in_as @identity
     @identity.users.delete_all
 
@@ -16,7 +16,7 @@ class Sessions::MenusControllerTest < ActionDispatch::IntegrationTest
     assert_response :success, "Renders an empty menu"
   end
 
-  test "show with exactly one membership" do
+  test "show with exactly one account" do
     sign_in_as @identity
     @identity.users.delete_all
     account = Account.create!(external_account_id: 9999991, name: "Test Account")
@@ -30,7 +30,7 @@ class Sessions::MenusControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to root_url(script_name: "/9999991")
   end
 
-  test "show with multiple memeberships" do
+  test "show with multiple accounts" do
     sign_in_as @identity
     @identity.users.delete_all
     account1 = Account.create!(external_account_id: 9999992, name: "37signals")

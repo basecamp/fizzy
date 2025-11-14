@@ -12,7 +12,7 @@ class Users::EmailAddresses::ConfirmationsController < ApplicationController
     user = User.change_email_address_using_token(token)
 
     terminate_session if Current.session
-    start_new_session_for user.reload.identity
+    start_new_session_for user.identity
 
     redirect_to edit_user_url(script_name: user.account.slug, id: user)
   end
