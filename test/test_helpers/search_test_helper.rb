@@ -14,10 +14,10 @@ module SearchTestHelper
     Identity.find_by(email_address: "test@example.com")&.destroy
 
     @account = Account.create!(name: "Search Test", external_account_id: ActiveRecord::FixtureSet.identify("search_test"))
+    Current.account = @account
     @identity = Identity.create!(email_address: "test@example.com")
     @user = User.create!(name: "Test User", account: @account, identity: @identity)
     @board = Board.create!(name: "Test Board", account: @account, creator: @user)
-    Current.account = @account
   end
 
   def teardown_search_test

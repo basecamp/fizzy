@@ -24,10 +24,18 @@ module AccountSlug
 
         # Stash the account's Queenbee ID.
         env["fizzy.external_account_id"] = AccountSlug.decode($2)
-        Current.account = Account.find_by(external_account_id: env["fizzy.external_account_id"])
       end
 
-      @app.call env
+      if env["fizzy.external_account_id"]
+        account = Account.find_by(external_account_id: env["fizzy.external_account_id"])
+        Current.with_account(account) do
+          @app.call env
+        end
+      else
+        Current.without_account do
+          @app.call env
+        end
+      end
     end
   end
 

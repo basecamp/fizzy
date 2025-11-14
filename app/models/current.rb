@@ -12,11 +12,19 @@ class Current < ActiveSupport::CurrentAttributes
     end
   end
 
-  def account=(value)
-    super(value)
+  def with_account(value)
+    @old_account = self.account
+    self.account = value
+    yield
+  ensure
+    self.account = @old_account
+  end
 
-    if value.present? && identity.present?
-      self.user = identity.users.find_by(account: value)
-    end
+  def without_account
+    @old_account = self.account
+    self.account = nil
+    yield
+  ensure
+    self.account = @old_account
   end
 end

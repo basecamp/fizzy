@@ -23,14 +23,16 @@ class IdentityTest < ActiveSupport::TestCase
     identity = identities(:david)
     account = accounts(:initech)
 
-    assert_difference "User.count", 1 do
-      identity.join(account)
+    Current.without_account do
+      assert_difference "User.count", 1 do
+        identity.join(account)
+      end
+
+      user = account.users.find_by!(identity: identity)
+
+      assert_not_nil user
+      assert_equal identity, user.identity
+      assert_equal identity.email_address, user.name
     end
-
-    user = account.users.find_by!(identity: identity)
-
-    assert_not_nil user
-    assert_equal identity, user.identity
-    assert_equal identity.email_address, user.name
   end
 end
