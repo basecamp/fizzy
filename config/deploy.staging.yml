@@ -26,7 +26,6 @@ env:
   clear:
     RAILS_ENV: staging
     MYSQL_DATABASE_HOST: fizzy-staging-mysql-primary
-    MYSQL_DATABASE_REPLICA_HOST: fizzy-staging-mysql-replica
     MYSQL_SOLID_CABLE_HOST: fizzy-staging-mysql-primary
     MYSQL_SOLID_QUEUE_HOST: fizzy-staging-mysql-primary
   secret:
@@ -40,10 +39,13 @@ env:
   tags:
     sc_chi:
       MYSQL_SOLID_CACHE_HOST: fizzy-staging-solidcache-db-01.sc-chi-int.37signals.com
+      MYSQL_DATABASE_REPLICA_HOST: fizzy-staging-db-01.sc-chi-int.37signals.com
     df_iad:
       MYSQL_SOLID_CACHE_HOST: fizzy-staging-solidcache-db-101.df-iad-int.37signals.com
+      MYSQL_DATABASE_REPLICA_HOST: fizzy-staging-db-102.df-iad-int.37signals.com
     df_ams:
       MYSQL_SOLID_CACHE_HOST: fizzy-staging-solidcache-db-401.df-ams-int.37signals.com
+      MYSQL_DATABASE_REPLICA_HOST: fizzy-staging-db-401.df-ams-int.37signals.com
 
 
 accessories:
