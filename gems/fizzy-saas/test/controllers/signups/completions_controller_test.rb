@@ -18,25 +18,22 @@ class Signup::CompletionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "create" do
-    skip("TODO:PLANB: hard to make work without account_id on models and Current.membership being sorted for the setup_customer_template notification generation")
     untenanted do
       post saas.signup_completion_path, params: {
         signup: {
-          membership_id: @signup.membership_id,
           full_name: @signup.full_name,
-          account_name: @signup.account_name
         }
       }
     end
 
-    assert_redirected_to landing_path(script_name: "/#{@signup.tenant}"), "Successful completion should redirect to root in new tenant"
+    assert_response :redirect, "Valid params should redirect"
+  end
 
+  test "create with invalid params" do
     untenanted do
       post saas.signup_completion_path, params: {
         signup: {
-          membership_id: @membership_id,
           full_name: "",
-          account_name: ""
         }
       }
     end

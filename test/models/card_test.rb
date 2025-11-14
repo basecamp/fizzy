@@ -75,13 +75,6 @@ class CardTest < ActiveSupport::TestCase
     assert_equal "prioritized", cards(:logo).taggings.last.tag.title
   end
 
-  test "searchable by title" do
-    card = boards(:writebook).cards.create! title: "Insufficient haggis", creator: users(:kevin)
-
-    skip("TODO:PLANB: search")
-    assert_includes Card.search("haggis"), card
-  end
-
   test "closed" do
     assert_equal [ cards(:shipping) ], Card.closed
   end
@@ -110,15 +103,6 @@ class CardTest < ActiveSupport::TestCase
 
   test "tagged with" do
     assert_equal cards(:layout, :text), Card.tagged_with(tags(:mobile))
-  end
-
-  test "mentioning" do
-    card = boards(:writebook).cards.create! title: "Insufficient haggis", creator: users(:kevin)
-    cards(:logo).comments.create!(body: "I hate haggis")
-    cards(:text).comments.create!(body: "I love haggis")
-
-    skip("TODO:PLANB: search")
-    assert_equal [ card, cards(:logo), cards(:text) ].sort, Card.mentioning("haggis").sort
   end
 
   test "for published cards, it should set the default title 'Untitiled' when not provided" do

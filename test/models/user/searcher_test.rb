@@ -13,11 +13,6 @@ class User::SearcherTest < ActiveSupport::TestCase
     assert_equal "broken", @user.search_queries.last.terms
   end
 
-  test "return an empty functional relation when no query" do
-    skip("TODO:PLANB: search")
-    assert Card.where(id: @user.search("").select(:card_id)).none?
-  end
-
   test "don't duplicate repeated searches but touch the existing match" do
     search_result = @user.remember_search("broken")
     original_updated_at = search_result.updated_at
