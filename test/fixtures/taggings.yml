@@ -1,19 +1,23 @@
 logo_web:
   id: <%= ActiveRecord::FixtureSet.identify("logo_web_tagging", :uuid) %>
+  account: 37s_uuid
   card: logo_uuid
   tag: web_uuid
 
 layout_web:
   id: <%= ActiveRecord::FixtureSet.identify("layout_web_tagging", :uuid) %>
+  account: 37s_uuid
   card: layout_uuid
   tag: web_uuid
 
 layout_mobile:
   id: <%= ActiveRecord::FixtureSet.identify("layout_mobile_tagging", :uuid) %>
+  account: 37s_uuid
   card: layout_uuid
   tag: mobile_uuid
 
 text_mobile:
   id: <%= ActiveRecord::FixtureSet.identify("text_mobile_tagging", :uuid) %>
+  account: 37s_uuid
   card: text_uuid
   tag: mobile_uuid

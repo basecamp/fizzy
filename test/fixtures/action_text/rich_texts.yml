@@ -1,32 +1,20 @@
 logo_agreement_jz:
   id: <%= ActiveRecord::FixtureSet.identify("logo_agreement_jz_rich_text", :uuid) %>
+  account: 37s_uuid
   record: logo_agreement_jz_uuid (Comment)
   name: body
   body: I agree.
 
 logo_agreement_kevin:
   id: <%= ActiveRecord::FixtureSet.identify("logo_agreement_kevin_rich_text", :uuid) %>
+  account: 37s_uuid
   record: logo_agreement_kevin_uuid (Comment)
   name: body
   body: Same, let's do it.
 
 layout_overflowing_david:
   id: <%= ActiveRecord::FixtureSet.identify("layout_overflowing_david_rich_text", :uuid) %>
+  account: 37s_uuid
   record: layout_overflowing_david_uuid (Comment)
   name: body
   body: The text is overflowing the container.
-
-kevins_conversation_question:
-  record: kevins_question (Conversation::Message)
-  name: content
-  body: "Who is on a hot-streak?"
-
-kevins_conversation_answer:
-  record: kevins_answer (Conversation::Message)
-  name: content
-  body: "<b>David</b> is on a hot-streak. He has recently added many cards to Writebook."
-
-davids_conversation_question:
-  record: davids_question (Conversation::Message)
-  name: content
-  body: "What is the meaning of life, the Universe, and everything else?"

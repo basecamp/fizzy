@@ -3,20 +3,24 @@ _fixture:
 
 david_settings:
   id: <%= ActiveRecord::FixtureSet.identify("david_settings", :uuid) %>
+  account: 37s_uuid
   user: david_uuid
   bundle_email_frequency: never
 
 jz_settings:
   id: <%= ActiveRecord::FixtureSet.identify("jz_settings", :uuid) %>
+  account: 37s_uuid
   user: jz_uuid
   bundle_email_frequency: never
 
 kevin_settings:
   id: <%= ActiveRecord::FixtureSet.identify("kevin_settings", :uuid) %>
+  account: 37s_uuid
   user: kevin_uuid
   bundle_email_frequency: never
 
 system_settings:
   id: <%= ActiveRecord::FixtureSet.identify("system_settings", :uuid) %>
+  account: 37s_uuid
   user: system_uuid
   bundle_email_frequency: never

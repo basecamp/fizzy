@@ -270,6 +270,7 @@ class Import
             if old_activity_spike
               activity_spikes_to_insert << {
                 id: generate_uuid,
+                account_id: account.id,
                 card_id: new_id,
                 created_at: old_activity_spike.created_at,
                 updated_at: old_activity_spike.updated_at
@@ -280,6 +281,7 @@ class Import
             if old_engagement
               engagements_to_insert << {
                 id: generate_uuid,
+                account_id: account.id,
                 card_id: new_id,
                 status: old_engagement.status,
                 created_at: old_engagement.created_at,
@@ -291,6 +293,7 @@ class Import
             if old_goldness
               goldnesses_to_insert << {
                 id: generate_uuid,
+                account_id: account.id,
                 card_id: new_id,
                 created_at: old_goldness.created_at,
                 updated_at: old_goldness.updated_at
@@ -301,6 +304,7 @@ class Import
             if old_not_now
               not_nows_to_insert << {
                 id: generate_uuid,
+                account_id: account.id,
                 card_id: new_id,
                 user_id: old_not_now.user_id ? mapping[:users][old_not_now.user_id] : nil,
                 created_at: old_not_now.created_at,
@@ -311,6 +315,7 @@ class Import
             old_card.assignments.each do |old_assignment|
               assignments_to_insert << {
                 id: generate_uuid,
+                account_id: account.id,
                 card_id: new_id,
                 assignee_id: mapping[:users][old_assignment.assignee_id],
                 assigner_id: mapping[:users][old_assignment.assigner_id],
@@ -323,6 +328,7 @@ class Import
             if old_closure
               closures_to_insert << {
                 id: generate_uuid,
+                account_id: account.id,
                 card_id: new_id,
                 user_id: old_closure.user_id ? mapping[:users][old_closure.user_id] : nil,
                 created_at: old_closure.created_at,
@@ -442,6 +448,7 @@ class Import
 
             accesses_to_insert << {
               id: new_id,
+              account_id: account.id,
               board_id: mapping[:boards][old_access.board_id],
               user_id: mapping[:users][old_access.user_id],
               involvement: old_access.involvement,
@@ -701,6 +708,7 @@ class Import
 
         ActiveStorage::VariantRecord.find_or_create_by!(
           id: new_variant_blob.id,
+          account_id: account.id,
           blob_id: new_blob.id,
           variation_digest: old_variant_record.variation_digest
         )
@@ -772,6 +780,7 @@ class Import
 
             watches_to_insert << {
               id: new_id,
+              account_id: account.id,
               user_id: mapping[:users][old_watch.user_id],
               card_id: mapping[:cards][old_watch.card_id],
               watching: old_watch.watching,
@@ -800,6 +809,7 @@ class Import
 
             pins_to_insert << {
               id: new_id,
+              account_id: account.id,
               user_id: mapping[:users][old_pin.user_id],
               card_id: mapping[:cards][old_pin.card_id],
               created_at: old_pin.created_at,

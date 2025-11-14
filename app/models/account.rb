@@ -24,4 +24,8 @@ class Account < ApplicationRecord
   def slug
     "/#{external_account_id}"
   end
+
+  def account
+    self
+  end
 end

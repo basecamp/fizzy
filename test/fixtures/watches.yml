@@ -1,53 +1,62 @@
 logo_david:
   id: <%= ActiveRecord::FixtureSet.identify("logo_david_watch", :uuid) %>
+  account: 37s_uuid
   card: logo_uuid
   user: david_uuid
   watching: true
 
 logo_kevin:
   id: <%= ActiveRecord::FixtureSet.identify("logo_kevin_watch", :uuid) %>
+  account: 37s_uuid
   card: logo_uuid
   user: kevin_uuid
   watching: true
 
 layout_david:
   id: <%= ActiveRecord::FixtureSet.identify("layout_david_watch", :uuid) %>
+  account: 37s_uuid
   card: layout_uuid
   user: david_uuid
   watching: true
 
 layout_kevin:
   id: <%= ActiveRecord::FixtureSet.identify("layout_kevin_watch", :uuid) %>
+  account: 37s_uuid
   card: layout_uuid
   user: kevin_uuid
   watching: true
 
 text_david:
   id: <%= ActiveRecord::FixtureSet.identify("text_david_watch", :uuid) %>
+  account: 37s_uuid
   card: text_uuid
   user: david_uuid
   watching: true
 
 text_jz:
   id: <%= ActiveRecord::FixtureSet.identify("text_jz_watch", :uuid) %>
+  account: 37s_uuid
   card: text_uuid
   user: jz_uuid
   watching: true
 
 shipping_david:
   id: <%= ActiveRecord::FixtureSet.identify("shipping_david_watch", :uuid) %>
+  account: 37s_uuid
   card: shipping_uuid
   user: david_uuid
   watching: true
 
 shipping_jz:
   id: <%= ActiveRecord::FixtureSet.identify("shipping_jz_watch", :uuid) %>
+  account: 37s_uuid
   card: shipping_uuid
   user: jz_uuid
   watching: true
 
 shipping_kevin:
   id: <%= ActiveRecord::FixtureSet.identify("shipping_kevin_watch", :uuid) %>
+  account: 37s_uuid
   card: shipping_uuid
   user: kevin_uuid
   watching: true

@@ -2,12 +2,14 @@
 
 active_webhook_tracker:
   id: <%= ActiveRecord::FixtureSet.identify("active_webhook_tracker", :uuid) %>
+  account: 37s_uuid
   webhook: active_uuid
   consecutive_failures_count: 1
   first_failure_at: <%= 1.hour.ago %>
 
 inactive_webhook_tracker:
   id: <%= ActiveRecord::FixtureSet.identify("inactive_webhook_tracker", :uuid) %>
+  account: 37s_uuid
   webhook: inactive_uuid
   consecutive_failures_count: 1
   first_failure_at: <%= 1.hour.ago %>
