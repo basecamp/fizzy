@@ -35,21 +35,21 @@ class User::EmailAddressChangeableTest < ActiveSupport::TestCase
   test "change_email_address_using_token" do
     token = @user.send(:generate_email_address_change_token, to: @new_email)
 
-    User.change_email_address_using_token(token)
+    @user.change_email_address_using_token(token)
 
     assert_equal @new_email, @user.reload.identity.email_address
   end
 
   test "change_email_address_using_token with invalid token" do
     assert_raises(ArgumentError, match: /invalid/) do
-      User.change_email_address_using_token("invalid_token")
+      @user.change_email_address_using_token("invalid_token")
     end
 
     token = @user.send(:generate_email_address_change_token, to: @new_email)
     @identity.update!(email_address: "different@example.com")
 
     assert_raises(ArgumentError, match: /different email address/) do
-      User.change_email_address_using_token(token)
+      @user.change_email_address_using_token(token)
     end
   end
 end

@@ -1,8 +1,4 @@
 class Users::EmailAddressesController < ApplicationController
-  disallow_account_scope
-
-  layout "public"
-
   before_action :set_user
   rate_limit to: 5, within: 1.hour, only: :create
 

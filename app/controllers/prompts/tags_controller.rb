@@ -1,6 +1,6 @@
 class Prompts::TagsController < ApplicationController
   def index
-    @tags = Tag.all.alphabetically
+    @tags = Current.account.tags.all.alphabetically
 
     if stale? etag: @tags
       render layout: false

@@ -133,8 +133,11 @@ Rails.application.routes.draw do
 
   resources :qr_codes
 
-  get "join/:tenant/:code", to: "join_codes#new", as: :join
-  post "join/:tenant/:code", to: "join_codes#create"
+  # FIXME: Remove this before release
+  get "join/:tenant/:code", to: redirect { |params, request| "/#{params[:tenant]}/join/#{params[:code]}" }
+
+  get "join/:code", to: "join_codes#new", as: :join
+  post "join/:code", to: "join_codes#create"
 
   namespace :users do
     resources :joins

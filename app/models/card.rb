@@ -64,7 +64,7 @@ class Card < ApplicationRecord
     end
 
     def handle_board_change
-      old_board = Board.find_by(id: board_id_before_last_save)
+      old_board = account.boards.find_by(id: board_id_before_last_save)
 
       transaction do
         update! column: nil

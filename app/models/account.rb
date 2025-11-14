@@ -4,7 +4,10 @@ class Account < ApplicationRecord
   has_one :join_code
   has_many :users, dependent: :destroy
   has_many :boards, dependent: :destroy
-  has_many :cards, through: :boards
+  has_many :cards, dependent: :destroy
+  has_many :webhooks, dependent: :destroy
+  has_many :tags, dependent: :destroy
+  has_many :columns, dependent: :destroy
 
   has_many_attached :uploads
 
@@ -15,8 +18,8 @@ class Account < ApplicationRecord
   class << self
     def create_with_admin_user(account:, owner:)
       create!(**account).tap do |account|
-        User.create!(account: account, role: :system, name: "System")
-        User.create!(**owner.reverse_merge(role: "admin", account: account))
+        account.users.create!(role: :system, name: "System")
+        account.users.create!(**owner.reverse_merge(role: "admin"))
       end
     end
   end
