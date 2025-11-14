@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2025_11_13_190256) do
+ActiveRecord::Schema[8.2].define(version: 2025_11_14_084325) do
   create_table "accesses", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -630,11 +630,6 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_13_190256) do
     t.index ["account_id"], name: "index_search_records_9_on_account_id"
     t.index ["content", "title"], name: "index_search_records_9_on_content_and_title", type: :fulltext
     t.index ["searchable_type", "searchable_id"], name: "index_search_records_9_on_searchable_type_and_searchable_id", unique: true
-  end
-
-  create_table "search_results", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
   end
 
   create_table "sessions", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
