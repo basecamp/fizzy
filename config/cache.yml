@@ -6,7 +6,7 @@ default_options: &default_options
     namespace: <%= Rails.env %>
 
 default_connection: &default_connection
-  database: :cache
+  database: cache
 
 default: &default
   <<: *default_connection
