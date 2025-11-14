@@ -52,11 +52,16 @@ Rails.application.configure do
                                        .tap  { |logger| logger.formatter = ::Logger::Formatter.new }
                                        .then { |logger| ActiveSupport::TaggedLogging.new(logger) }
 
-  # Suppress unstructured log lines
-  config.log_level = :fatal
+  # Enable detailed logging
+  config.log_level = :debug
+
+  # Prevent health checks from clogging up the logs.
+  config.silence_healthcheck_path = "/up"
 
   # Structured JSON logging
   config.structured_logging.logger = ActiveSupport::Logger.new(STDOUT)
+
+  config.solid_queue.logger = ActiveSupport::Logger.new(STDOUT, level: :info)
 
   # Prepend all log lines with the following tags.
   config.log_tags = [ :request_id ]
