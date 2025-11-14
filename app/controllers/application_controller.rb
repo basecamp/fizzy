@@ -4,7 +4,7 @@ class ApplicationController < ActionController::Base
   include CurrentRequest, CurrentTimezone, SetPlatform
   include TurboFlash, ViewTransitions
   include Saas
-  include WriterAffinity
+  include RoutingHeaders, WriterAffinity
 
   stale_when_importmap_changes
   allow_browser versions: :modern

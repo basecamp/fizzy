@@ -1,21 +1,18 @@
 servers:
   web:
     hosts:
-      - fizzy-app-101.df-iad-int.37signals.com
-      - fizzy-app-102.df-iad-int.37signals.com
-      - fizzy-app-01.sc-chi-int.37signals.com
-      - fizzy-app-02.sc-chi-int.37signals.com
-      - fizzy-app-401.df-ams-int.37signals.com
-      - fizzy-app-402.df-ams-int.37signals.com
+      - fizzy-app-01.sc-chi-int.37signals.com: sc_chi
+      - fizzy-app-02.sc-chi-int.37signals.com: sc_chi
+      - fizzy-app-101.df-iad-int.37signals.com: df_iad
+      - fizzy-app-102.df-iad-int.37signals.com: df_iad
+      - fizzy-app-401.df-ams-int.37signals.com: df_ams
+      - fizzy-app-402.df-ams-int.37signals.com: df_ams
     labels:
       otel_scrape_enabled: true
   jobs:
     hosts:
-      - fizzy-app-101.df-iad-int.37signals.com
-    options:
-      # NFS mount for backups
-      # See https://3.basecamp.com/2914079/buckets/37331921/todos/9175385847
-      mount: type=volume,src=backups,dst=/backups,volume-driver=local,volume-opt=type=nfs,volume-opt=device=:/fizzy-production-backups,"volume-opt=o=addr=purestorage.sc-chi-int.37signals.com,nfsvers=3,rw,noatime,nconnect=8,soft,timeo=30,retrans=2"
+      - fizzy-app-101.df-iad-int.37signals.com: df_iad
+      - fizzy-app-102.df-iad-int.37signals.com: df_iad
     labels:
       otel_scrape_enabled: true
 
@@ -28,6 +25,26 @@ ssh:
 env:
   clear:
     RAILS_ENV: production
+    MYSQL_DATABASE_HOST: fizzy-mysql-primary
+    MYSQL_DATABASE_REPLICA_HOST: fizzy-mysql-replica
+    MYSQL_SOLID_CABLE_HOST: fizzy-mysql-primary
+    MYSQL_SOLID_QUEUE_HOST: fizzy-mysql-primary
+  secret:
+    - RAILS_MASTER_KEY
+    - MYSQL_ALTER_PASSWORD
+    - MYSQL_ALTER_USER
+    - MYSQL_APP_PASSWORD
+    - MYSQL_APP_USER
+    - MYSQL_READONLY_PASSWORD
+    - MYSQL_READONLY_USER
+  tags:
+    sc_chi:
+      MYSQL_SOLID_CACHE_HOST: fizzy-solidcache-db-101.df-iad-int.37signals.com
+    df_iad:
+      MYSQL_SOLID_CACHE_HOST: fizzy-solidcache-db-101.df-iad-int.37signals.com
+    df_ams:
+      MYSQL_SOLID_CACHE_HOST: fizzy-solidcache-db-101.df-iad-int.37signals.com
+
 
 accessories:
   load-balancer:
