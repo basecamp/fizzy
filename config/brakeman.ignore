@@ -1,29 +1,6 @@
 {
   "ignored_warnings": [
     {
-      "warning_type": "SQL Injection",
-      "warning_code": 0,
-      "fingerprint": "08f15e8e259f1da31762507f718191732f86a4f4f6d2fe2719e70fd22c9bc738",
-      "check_name": "SQL",
-      "message": "Possible SQL injection",
-      "file": "app/models/search.rb",
-      "line": 34,
-      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
-      "code": "Search::Result.from(Searchable.search_index_table_name(user.account_id)).joins(\"INNER JOIN cards ON #{Searchable.search_index_table_name(user.account_id)}.card_id = cards.id\")",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "Search",
-        "method": "perform_search"
-      },
-      "user_input": "Searchable.search_index_table_name(user.account_id)",
-      "confidence": "Medium",
-      "cwe_id": [
-        89
-      ],
-      "note": ""
-    },
-    {
       "warning_type": "Mass Assignment",
       "warning_code": 70,
       "fingerprint": "ac0fa1970dea215e2f47a5676ffd63d8728951e361da12a53dd424bf6dc46f2a",
@@ -66,29 +43,6 @@
       "confidence": "Medium",
       "cwe_id": [
         470
-      ],
-      "note": ""
-    },
-    {
-      "warning_type": "SQL Injection",
-      "warning_code": 0,
-      "fingerprint": "c05a5b5487f25eb46f1e6e6980ea952e65c460a27f1d67b093cd0cc028ec041b",
-      "check_name": "SQL",
-      "message": "Possible SQL injection",
-      "file": "app/models/card/searchable.rb",
-      "line": 15,
-      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
-      "code": "joins(\"INNER JOIN #{Searchable.search_index_table_name(user.account_id)} ON #{Searchable.search_index_table_name(user.account_id)}.card_id = cards.id AND #{Searchable.search_index_table_name(user.account_id)}.board_id = cards.board_id\")",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "Card::Searchable",
-        "method": null
-      },
-      "user_input": "Searchable.search_index_table_name(user.account_id)",
-      "confidence": "Medium",
-      "cwe_id": [
-        89
       ],
       "note": ""
     }
