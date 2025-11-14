@@ -18,8 +18,8 @@ class Account < ApplicationRecord
   class << self
     def create_with_admin_user(account:, owner:)
       create!(**account).tap do |account|
-        User.create!(account: account, role: :system, name: "System")
-        User.create!(**owner.reverse_merge(role: "admin", account: account))
+        account.users.create!(role: :system, name: "System")
+        account.users.create!(**owner.reverse_merge(role: "admin"))
       end
     end
   end

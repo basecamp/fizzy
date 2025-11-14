@@ -49,7 +49,7 @@ class Webhook < ApplicationRecord
   end
 
   def renderer
-    @renderer ||= ApplicationController.renderer.new(script_name: "/#{account.external_account_id}", https: !Rails.env.local?)
+    @renderer ||= ApplicationController.renderer.new(script_name: account.slug, https: !Rails.env.local?)
   end
 
   def for_basecamp?
