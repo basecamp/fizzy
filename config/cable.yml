@@ -3,6 +3,7 @@ cable: &cable
   connects_to:
     database:
       writing: cable
+      reading: cable
   polling_interval: 0.1.seconds
   message_retention: 1.day
 

@@ -9,6 +9,7 @@ default_connection: &default_connection
   connects_to:
     database:
       writing: :cache
+      reading: :cache
 
 default: &default
   <<: *default_connection

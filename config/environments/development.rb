@@ -91,7 +91,7 @@ Rails.application.configure do
 
   if Rails.root.join("tmp/solid-queue.txt").exist?
     config.active_job.queue_adapter = :solid_queue
-    config.solid_queue.connects_to = { database: { writing: :queue } }
+    config.solid_queue.connects_to = { database: { writing: :queue, reading: :queue } }
   end
 
   if Rails.root.join("tmp/structured-logging.txt").exist?
