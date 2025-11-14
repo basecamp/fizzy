@@ -45,6 +45,7 @@ module ActiveSupport
 
     include ActiveJob::TestHelper
     include ActionTextTestHelper, CardTestHelper, ChangeTestHelper, SessionTestHelper
+    include Turbo::Broadcastable::TestHelper
 
     setup do
       # TODO:PLANB: this is hacky, we should sort through the `Current` dependencies and figure out
