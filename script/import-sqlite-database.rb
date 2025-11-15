@@ -128,6 +128,7 @@ class Import
             }
           )
           @tenant = @account.external_account_id
+          @admin = @account.users.find_by(role: :admin)
         end
 
         old_join_code = import.account_join_codes.sole
@@ -153,13 +154,17 @@ class Import
             new_identity = Identity.find_or_create_by!(email_address: membership.identity.email_address)
           end
 
-          new_user = User.create!(
-            account: account,
-            identity: new_identity,
-            name: old_user.name,
-            role: old_user.role,
-            active: old_user.active,
-          )
+          new_user = if new_identity == @admin.identity
+            @admin
+          else
+            User.create!(
+              account: account,
+              identity: new_identity,
+              name: old_user.name,
+              role: old_user.role,
+              active: old_user.active,
+            )
+          end
 
           old_settings = old_user.settings
           if old_settings
