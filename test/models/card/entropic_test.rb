@@ -73,21 +73,13 @@ class Card::EntropicTest < ActiveSupport::TestCase
     cards(:logo).update!(last_active_at: entropies(:writebook_board).auto_postpone_period.seconds.ago - 2.days)
     cards(:radio).update!(last_active_at: entropies(:miltons_wish_list_board).auto_postpone_period.seconds.ago - 2.days)
 
-    actual = Card.due_to_be_postponed.to_a
-
-    cards(:logo, :radio).each do |card|
-      assert_includes actual, card
-    end
+    assert_equal(cards(:logo, :radio).to_set, Card.due_to_be_postponed.to_set)
   end
 
   test "postponing_soon scope works properly cross-account" do
     cards(:logo).update!(last_active_at: entropies(:writebook_board).auto_postpone_period.seconds.ago + 2.days)
     cards(:radio).update!(last_active_at: entropies(:miltons_wish_list_board).auto_postpone_period.seconds.ago + 2.days)
 
-    actual = Card.postponing_soon.to_a
-
-    cards(:logo, :radio).each do |card|
-      assert_includes actual, card
-    end
+    assert_equal(cards(:logo, :radio).to_set, Card.postponing_soon.to_set)
   end
 end
