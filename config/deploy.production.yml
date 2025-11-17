@@ -42,6 +42,7 @@ env:
       MYSQL_SOLID_CACHE_HOST: fizzy-solidcache-db-01.sc-chi-int.37signals.com
     df_iad:
       MYSQL_SOLID_CACHE_HOST: fizzy-solidcache-db-101.df-iad-int.37signals.com
+      PRIMARY_DATACENTER: true
     df_ams:
       MYSQL_SOLID_CACHE_HOST: fizzy-solidcache-db-401.df-ams-int.37signals.com
 
