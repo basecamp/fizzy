@@ -1,6 +1,6 @@
 <% draggable = local_assigns.fetch(:draggable, false) && card.published? %>
 
-<%= card_article_tag card, class: "card", draggable: draggable, data: { id: card.id, drag_and_drop_target: "item" } do %>
+<%= card_article_tag card, class: "card", draggable: draggable, data: { id: card.number, drag_and_drop_target: "item" } do %>
   <div class="flex flex-column flex-item-grow max-inline-size">
     <header class="card__header">
       <%= render "cards/display/preview/board", card: card %>
