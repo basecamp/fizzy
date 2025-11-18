@@ -18,6 +18,7 @@ class FixActiveStorage
 
     @users = {}
     @memberships = {}
+    @attachments = {}
     @identities = {}
   end
 
@@ -25,6 +26,7 @@ class FixActiveStorage
     models = Models.new(db_path)
 
     @mapping[models.accounts.sole.external_account_id.to_s] = models.blobs.all.index_by(&:id)
+    @attachments[models.accounts.sole.external_account_id.to_s] = models.attachments.all.index_by(&:id)
     @users[models.accounts.sole.external_account_id.to_s] = models.users.all.index_by(&:id)
   end
 
@@ -36,13 +38,98 @@ class FixActiveStorage
   end
 
   def perform
-    fix_mentions
-    fix_attachments
+    fix_avatars
+    # fix_mentions
+    # fix_attachments
 
     pp [ @processed, @skipped ]
   end
 
   private
+    def fix_avatars
+      User.all.active.preload(:identity).find_each do |user|
+        tenant = user.account.external_account_id.to_s
+        email_address = user.identity.email_address
+
+        membership = @memberships.values.find { |m| m.tenant == tenant && @identities[m.identity_id]&.email_address == email_address }
+        old_user = @users[tenant]&.values&.find { |u| u.membership_id == membership&.id }
+
+        next if user.avatar.attached? || old_user.nil?
+
+        old_avatar_attachment = @attachments[tenant]&.values&.find do |attachment|
+          attachment.record_type == "User" && attachment.record_id == old_user.id && attachment.name == "avatar"
+        end
+
+        if old_avatar_attachment.nil?
+          @skipped += 1
+          next
+        end
+
+
+        old_blob = old_avatar_attachment.blob
+
+        if old_blob.nil?
+          @skipped += 1
+          next
+        end
+
+        new_blob = ActiveStorage::Blob.find_by(key: old_blob.key)
+
+        unless new_blob
+          new_blob = ActiveStorage::Blob.create!(
+            account_id: user.account_id,
+            byte_size: old_blob.byte_size,
+            checksum: old_blob.checksum,
+            content_type: old_blob.content_type,
+            created_at: old_blob.created_at,
+            filename: old_blob.filename,
+            key: old_blob.key,
+            metadata: old_blob.metadata,
+            service_name: old_blob.service_name
+          )
+        end
+
+          ActiveStorage::Attachment.find_or_create_by!(
+            account_id: user.account_id,
+            blob_id: new_blob.id,
+            name: "avatar",
+            record: user
+          )
+
+        @processed += 1
+      end
+    end
+
+    def fix_mentions
+      ActionText::RichText.where("body LIKE '%action-text-attachment%'").find_each do |rich_text|
+        rich_text.body.send(:attachment_nodes).each do |node|
+          next unless node["content-type"] == "application/vnd.actiontext.mention"
+
+          sgid = SignedGlobalID.parse(node["sgid"], for: ActionText::Attachable::LOCATOR_NAME)
+
+          user = @users.dig(sgid.params[:tenant], sgid.model_id.to_i)
+          membership = @memberships[user&.membership_id]
+          unless membership
+            @skipped += 1
+            next
+          end
+          identity = @identities[membership&.identity_id]
+          unless identity
+            @skipped += 1
+            next
+          end
+
+          new_identity = Identity.find_by(email_address: identity.email_address)
+          new_account = Account.find_by(external_account_id: sgid.params[:tenant])
+          new_user = User.find_by(identity: new_identity, account: new_account)
+          new_sgid = new_user.attachable_sgid
+
+          node["sgid"] = new_sgid.to_s
+        end
+        rich_text.save!
+      end
+    end
+
     def fix_attachments
       scope.find_each do |rich_text|
         next unless rich_text.body
@@ -96,36 +183,6 @@ class FixActiveStorage
         next
       end
     end
-
-    def fix_mentions
-      ActionText::RichText.where("body LIKE '%action-text-attachment%'").find_each do |rich_text|
-        rich_text.body.send(:attachment_nodes).each do |node|
-          next unless node["content-type"] == "application/vnd.actiontext.mention"
-
-          sgid = SignedGlobalID.parse(node["sgid"], for: ActionText::Attachable::LOCATOR_NAME)
-
-          user = @users.dig(sgid.params[:tenant], sgid.model_id.to_i)
-          membership = @memberships[user&.membership_id]
-          unless membership
-            @skipped += 1
-            next
-          end
-          identity = @identities[membership&.identity_id]
-          unless identity
-            @skipped += 1
-            next
-          end
-
-          new_identity = Identity.find_by(email_address: identity.email_address)
-          new_account = Account.find_by(external_account_id: sgid.params[:tenant])
-          new_user = User.find_by(identity: new_identity, account: new_account)
-          new_sgid = new_user.attachable_sgid
-
-          node["sgid"] = new_sgid.to_s
-        end
-        rich_text.save!
-      end
-    end
 end
 
 class Models
@@ -171,8 +228,13 @@ class Models
   end
 
   def attachments
+    models = self
     @attachments ||= Class.new(application_record) do
       self.table_name = "active_storage_attachments"
+
+      def blob
+        models.blobs.find_by(id: blob_id)
+      end
     end
   end
 
@@ -194,8 +256,6 @@ class Models
     end
   end
 end
-
-# scope = ActionText::RichText.all.where(id: Card.find_by_number!(2600).description)
 
 # tenanted_db_paths = ARGV
 tenanted_db_paths = Dir[Rails.root.join("storage/tenants/production/*/db/main.sqlite3")]
