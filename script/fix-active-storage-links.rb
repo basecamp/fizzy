@@ -7,7 +7,7 @@ require "base64"
 require "json"
 
 class FixActiveStorage
-  attr_reader :skipped, :processed
+  attr_reader :skipped, :processed, :scope
 
   def initialize(scope = nil)
     @scope = scope || ActionText::RichText.all.where("body LIKE '%/rails/active_storage/%'")
@@ -36,85 +36,96 @@ class FixActiveStorage
   end
 
   def perform
-    ActionText::RichText.where("body LIKE '%action-text-attachment%'").find_each do |rich_text|
-      rich_text.body.send(:attachment_nodes).each do |node|
-        next unless node["content-type"] == "application/vnd.actiontext.mention"
-
-        sgid = SignedGlobalID.parse(node["sgid"], for: ActionText::Attachable::LOCATOR_NAME)
-
-        user = @users.dig(sgid.params[:tenant], sgid.model_id.to_i)
-        membership = @memberships[user&.membership_id]
-        unless membership
-          @skipped += 1
-          next
-        end
-        identity = @identities[membership&.identity_id]
-        unless identity
-          @skipped += 1
-          next
-        end
-
-        new_identity = Identity.find_by(email_address: identity.email_address)
-        new_account = Account.find_by(external_account_id: sgid.params[:tenant])
-        new_user = User.find_by(identity: new_identity, account: new_account)
-        new_sgid = new_user.attachable_sgid
-
-        node["sgid"] = new_sgid.to_s
-      end
-      rich_text.save!
-    end
-
-    scope.find_each do |rich_text|
-      next unless rich_text.body
-
-      rich_text.body.send(:attachment_nodes).each do |node|
-        sgid = node["sgid"]
-        url = node["url"]
-        next if url.blank? || sgid.blank?
-
-        sgid = SignedGlobalID.parse(node["sgid"], for: ActionText::Attachable::LOCATOR_NAME)
-        old_blob = @mapping.dig(sgid.params[:tenant], sgid.model_id.to_i)
-
-        # There are some old files that got lost in a previous migration
-        unless old_blob
-          @skipped += 1
-          next
-        end
-
-        new_blob = ActiveStorage::Blob.find_by(key: old_blob.key)
-
-        unless new_blob
-          new_blob = ActiveStorage::Blob.create!(
-            account_id: rich_text.account_id,
-            byte_size: old_blob.byte_size,
-            checksum: old_blob.checksum,
-            content_type: old_blob.content_type,
-            created_at: old_blob.created_at,
-            filename: old_blob.filename,
-            key: old_blob.key,
-            metadata: old_blob.metadata,
-            service_name: old_blob.service_name
-          )
-
-          ActiveStorage::Attachment.create!(
-            account_id: rich_text.account_id,
-            blob_id: new_blob.id,
-            created_at: old_blob.created_at,
-            name: "embeds",
-            record: rich_text
-          )
-        end
-
-        node["sgid"] = new_blob.attachable_sgid
-
-        @processed += 1
-      end
-
-      rich_text.save!
-    end
+    fix_mentions
+    fix_attachments
 
     pp [ @processed, @skipped ]
   end
+
+  private
+    def fix_attachments
+      scope.find_each do |rich_text|
+        next unless rich_text.body
+
+        rich_text.body.send(:attachment_nodes).each do |node|
+          sgid = node["sgid"]
+          url = node["url"]
+          next if url.blank? || sgid.blank?
+
+          sgid = SignedGlobalID.parse(node["sgid"], for: ActionText::Attachable::LOCATOR_NAME)
+          old_blob = @mapping.dig(sgid.params[:tenant], sgid.model_id.to_i)
+
+          # There are some old files that got lost in a previous migration
+          unless old_blob
+            @skipped += 1
+            next
+          end
+
+          new_blob = ActiveStorage::Blob.find_by(key: old_blob.key)
+
+          unless new_blob
+            new_blob = ActiveStorage::Blob.create!(
+              account_id: rich_text.account_id,
+              byte_size: old_blob.byte_size,
+              checksum: old_blob.checksum,
+              content_type: old_blob.content_type,
+              created_at: old_blob.created_at,
+              filename: old_blob.filename,
+              key: old_blob.key,
+              metadata: old_blob.metadata,
+              service_name: old_blob.service_name
+            )
+
+            ActiveStorage::Attachment.create!(
+              account_id: rich_text.account_id,
+              blob_id: new_blob.id,
+              created_at: old_blob.created_at,
+              name: "embeds",
+              record: rich_text
+            )
+          end
+
+          node["sgid"] = new_blob.attachable_sgid
+
+          @processed += 1
+        end
+
+        rich_text.save!
+      rescue ActiveStorage::FileNotFoundError
+        @skipped += 1
+        next
+      end
+    end
+
+    def fix_mentions
+      ActionText::RichText.where("body LIKE '%action-text-attachment%'").find_each do |rich_text|
+        rich_text.body.send(:attachment_nodes).each do |node|
+          next unless node["content-type"] == "application/vnd.actiontext.mention"
+
+          sgid = SignedGlobalID.parse(node["sgid"], for: ActionText::Attachable::LOCATOR_NAME)
+
+          user = @users.dig(sgid.params[:tenant], sgid.model_id.to_i)
+          membership = @memberships[user&.membership_id]
+          unless membership
+            @skipped += 1
+            next
+          end
+          identity = @identities[membership&.identity_id]
+          unless identity
+            @skipped += 1
+            next
+          end
+
+          new_identity = Identity.find_by(email_address: identity.email_address)
+          new_account = Account.find_by(external_account_id: sgid.params[:tenant])
+          new_user = User.find_by(identity: new_identity, account: new_account)
+          new_sgid = new_user.attachable_sgid
+
+          node["sgid"] = new_sgid.to_s
+        end
+        rich_text.save!
+      end
+    end
 end
 
 class Models
@@ -184,6 +195,8 @@ class Models
   end
 end
 
+# scope = ActionText::RichText.all.where(id: Card.find_by_number!(2600).description)
+
 # tenanted_db_paths = ARGV
 tenanted_db_paths = Dir[Rails.root.join("storage/tenants/production/*/db/main.sqlite3")]
 untenanted_db_path = Rails.root.join("storage/untenanted/production.sqlite3")
@@ -197,6 +210,7 @@ end
 fix = FixActiveStorage.new
 
 fix.ingest_untenanted(untenanted_db_path)
+
 tenanted_db_paths.each_with_index do |db_path, _index|
   fix.ingest_blob_keys(db_path)
 end
