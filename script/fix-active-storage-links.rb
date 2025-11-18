@@ -39,8 +39,8 @@ class FixActiveStorage
 
   def perform
     fix_avatars
-    # fix_mentions
-    # fix_attachments
+    fix_mentions
+    fix_attachments
 
     pp [ @processed, @skipped ]
   end
