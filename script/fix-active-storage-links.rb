@@ -7,11 +7,12 @@ require "base64"
 require "json"
 
 class FixActiveStorage
-  attr_reader :skipped, :processed
+  attr_reader :skipped, :processed, :scope
 
   def initialize(scope = nil)
     @scope = scope || ActionText::RichText.all.where("body LIKE '%/rails/active_storage/%'")
     @mapping = {}
+    @key_mapping = {}
     @skipped = 0
     @processed = 0
   end
@@ -20,6 +21,7 @@ class FixActiveStorage
     models = Models.new(db_path)
 
     @mapping[models.accounts.sole.external_account_id.to_s] = models.blobs.all.index_by(&:id)
+    @key_mapping.merge!(models.blobs.all.index_by(&:key))
   end
 
   def perform
@@ -62,6 +64,14 @@ class FixActiveStorage
             name: "embeds",
             record: rich_text
           )
+        end
+
+        missing_variants = old_blob.variants.select? { |v| !new_blob.variant_records.exists?(variation_digest: v.variation_digest) }
+
+        if missing_variants.any?
+          missing_variants.each do |variant|
+            new_blob.variant_records.create!(account_id: blob.account_id, variation_digest: variant.variation_digest, created_at: variant.created_at)
+          end
         end
 
         node["sgid"] = new_blob.attachable_sgid
@@ -113,6 +123,10 @@ class Models
       def attachments
         models.attachments.where(blob_id: id)
       end
+
+      def variants
+        models.variants.where(blob_id: id)
+      end
     end
   end
 
@@ -121,9 +135,16 @@ class Models
       self.table_name = "active_storage_attachments"
     end
   end
+
+  def variants
+    @variants ||= Class.new(application_record) do
+      self.table_name = "active_storage_variant_records"
+    end
+  end
 end
 
-scope = Card.find!(xxx).description
+scope = ActionText::RichText.all.where(id: Card.find_by_number!(2600).description)
+
 # tenanted_db_paths = ARGV
 tenanted_db_paths = Dir[Rails.root.join("storage/tenants/production/*/db/main.sqlite3")]
 
@@ -134,7 +155,7 @@ if tenanted_db_paths.empty?
   exit 1
 end
 
-fix = FixActiveStorage.new
+fix = FixActiveStorage.new(scope)
 
 tenanted_db_paths.each_with_index do |db_path, _index|
   fix.ingest_blob_keys(db_path)
