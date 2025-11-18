@@ -13,11 +13,9 @@ export default class extends Controller {
   }
 
   connect() {
-    // bind handlers
     this._onActivate = this.activate.bind(this)
     this._onDeactivate = this.deactivate.bind(this)
 
-    // listen for element-targeted events (dispatched by collapsible_columns)
     this.element.addEventListener("navigable-list:activate", this._onActivate)
     this.element.addEventListener("navigable-list:deactivate", this._onDeactivate)
 
@@ -25,7 +23,6 @@ export default class extends Controller {
     const insideColumn = !!this.element.closest('[data-collapsible-columns-target="column"]')
     this.active = !insideColumn
 
-    // initialize selection for standalone lists
     if (this.active) {
       this.reset()
     }
@@ -38,18 +35,18 @@ export default class extends Controller {
 
   // Actions
 
-  // generic public API used by collapsible_columns (column-agnostic)
   activate() {
     if (this.active) return
     this.active = true
-    if (this.reverseOrderValue) this.selectLast()
-    else this.selectFirst()
+
+    this.reset()
   }
 
-  deactivate() { // or blur()
+  deactivate() {
     if (!this.active) return
     this.active = false
-    this.#clearSelection() // clear aria-selected etc.
+
+    this.#clearSelection()
     if (this.hasInputTarget) this.inputTarget.removeAttribute("aria-activedescendant")
     if (this.currentItem && typeof this.currentItem.blur === "function") {
       try { this.currentItem.blur() } catch (e) {}

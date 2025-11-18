@@ -74,6 +74,7 @@
     --column-color: color-mix(in srgb, var(--card-color) 15%, var(--color-canvas));
 
     inline-size: var(--column-width-expanded);
+    outline: none;
     position: relative;
     scroll-snap-align: start;
 

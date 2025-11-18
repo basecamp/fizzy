@@ -184,7 +184,6 @@ export default class extends Controller {
   }
 
   #focus(column) {
-    // this.dispatch("focus", { detail: { column } })
     const navigableLists = Array.from(document.querySelectorAll('.card-columns [data-controller~="navigable-list"]'))
 
     navigableLists.forEach(list => {
