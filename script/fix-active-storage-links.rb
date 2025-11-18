@@ -7,8 +7,13 @@ require "base64"
 require "json"
 
 class FixActiveStorage
-  def initialize
+  attr_reader :skipped, :processed
+
+  def initialize(scope = nil)
+    @scope = scope || ActionText::RichText.all.where("body LIKE '%/rails/active_storage/%'")
     @mapping = {}
+    @skipped = 0
+    @processed = 0
   end
 
   def ingest_blob_keys(db_path)
@@ -18,7 +23,7 @@ class FixActiveStorage
   end
 
   def perform
-    ActionText::RichText.all.where("body LIKE '%/rails/active_storage/%'").find_each do |rich_text|
+    scope.find_each do |rich_text|
       next unless rich_text.body
 
       rich_text.body.send(:attachment_nodes).each do |node|
@@ -27,14 +32,44 @@ class FixActiveStorage
         next if url.blank? || sgid.blank?
 
         sgid = SignedGlobalID.parse(node["sgid"], for: ActionText::Attachable::LOCATOR_NAME)
-        old_blob = @mapping.dig(sgid.params[:tenant], sgid.model_id)
-        raise "Blob not found for sgid #{sgid}" unless old_blob
+        old_blob = @mapping.dig(sgid.params[:tenant], sgid.model_id.to_i)
 
-        new_blob = ActiveStorage::Blob.find_by!(key: old_blob.key)
-        # node["sgid"] = new_blob.attachable_sgid
+        # There are some old files that got lost in a previous migration
+        unless old_blob
+          @skipped += 1
+          next
+        end
+
+        new_blob = ActiveStorage::Blob.find_by(key: old_blob.key)
+
+        unless new_blob
+          new_blob = ActiveStorage::Blob.create!(
+            account_id: rich_text.account_id,
+            byte_size: old_blob.byte_size,
+            checksum: old_blob.checksum,
+            content_type: old_blob.content_type,
+            created_at: old_blob.created_at,
+            filename: old_blob.filename,
+            key: old_blob.key,
+            metadata: old_blob.metadata,
+            service_name: old_blob.service_name
+          )
+
+          ActiveStorage::Attachment.create!(
+            account_id: rich_text.account_id,
+            blob_id: new_blob.id,
+            created_at: old_blob.created_at,
+            name: "embeds",
+            record: rich_text
+          )
+        end
+
+        node["sgid"] = new_blob.attachable_sgid
+
+        @processed += 1
       end
 
-      # rich_text.save!
+      rich_text.save!
     end
   end
 end
@@ -71,8 +106,13 @@ class Models
   end
 
   def blobs
+    models = self
     @blobs ||= Class.new(application_record) do
       self.table_name = "active_storage_blobs"
+
+      def attachments
+        models.attachments.where(blob_id: id)
+      end
     end
   end
 
@@ -83,6 +123,7 @@ class Models
   end
 end
 
+scope = Card.find!(xxx).description
 # tenanted_db_paths = ARGV
 tenanted_db_paths = Dir[Rails.root.join("storage/tenants/production/*/db/main.sqlite3")]
 
