@@ -12,14 +12,13 @@ class FixActiveStorage
   end
 
   def ingest_blob_keys(db_path)
-    @mapping.merge!(Models.new(db_path).blobs.all.index_by { |blob| blob.signed_id(for: ActionText::Attachable::LOCATOR_NAME) })
+    @mapping.merge!(Models.new(db_path).blobs.all.index_by { |blob| blob.signed_id(purpose: ActionText::Attachable::LOCATOR_NAME) })
   end
 
   def perform
     ActionText::RichText.all.where("body LIKE '%/rails/active_storage/%'").find_each do |rich_text|
       next unless rich_text.body
 
-      blobs = rich_text.embeds.map(&:blob)
       rich_text.body.send(:attachment_nodes).each do |node|
         sgid = node["sgid"]
         url = node["url"]
@@ -29,7 +28,7 @@ class FixActiveStorage
         raise "Blob not found for sgid #{sgid}" unless old_blob
 
         new_blob = ActiveStorage::Blob.find_by!(key: old_blob.key)
-        node["sgid"] = new_blob.attachable_sgid
+        # node["sgid"] = new_blob.attachable_sgid
       end
 
       # rich_text.save!
