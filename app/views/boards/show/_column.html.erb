@@ -1,11 +1,16 @@
 <section id="<%= dom_id(column) %>"
   class="cards cards--doing is-collapsed" style="--card-color: <%= column.color %>;"
+  tabindex="0"
+  data-controller="navigable-list"
   data-drag-and-drop-target="container"
   data-drag-and-strum-target="container"
   data-collapsible-columns-target="column"
   data-controller="clicker"
   data-column-name="<%= column.name %>"
-  data-action="turbo:before-morph-attribute->collapsible-columns#preventToggle turbo:before-stream-render@document->collapsible-columns#restoreState"
+  data-navigable-list-actionable-items-value="true"
+  data-navigable-list-left-right-navigation-value="false"
+  data-navigable-list-focus-on-selection-value="true"
+  data-action="turbo:before-morph-attribute->collapsible-columns#preventToggle turbo:before-stream-render@document->collapsible-columns#restoreState keydown@document->navigable-list#navigate collapsible-columns:focus@document->navigable-list#selectFirst"
   data-drag-and-drop-url="<%= columns_card_drops_column_path("__id__", column_id: column.id) %>"
 >
   <div class="cards__transition-container">

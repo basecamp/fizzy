@@ -1,9 +1,14 @@
 <section id="not-now" class="cards cards--on-deck is-collapsed" style="--card-color: var(--color-card-complete);"
+  tabindex="0"
+  data-controller="navigable-list"
   data-collapsible-columns-target="column"
   data-drag-and-drop-target="container"
   data-drag-and-strum-target="container"
   data-column-name="Not Now"
-  data-action="turbo:before-morph-attribute->collapsible-columns#preventToggle collapsible-columns:focus@document->navigable-list#selectFirst"
+  data-navigable-list-actionable-items-value="true"
+  data-navigable-list-left-right-navigation-value="false"
+  data-navigable-list-focus-on-selection-value="true"
+  data-action="turbo:before-morph-attribute->collapsible-columns#preventToggle keydown@document->navigable-list#navigate collapsible-columns:focus@document->navigable-list#selectFirst"
   data-drag-and-drop-url="<%= columns_card_drops_not_now_path("__id__") %>"
 >
   <div class="cards__transition-container">
