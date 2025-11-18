@@ -12,7 +12,9 @@ class FixActiveStorage
   end
 
   def ingest_blob_keys(db_path)
-    @mapping.merge!(Models.new(db_path).blobs.all.index_by { |blob| blob.signed_id(purpose: ActionText::Attachable::LOCATOR_NAME) })
+    models = Models.new(db_path)
+
+    @mapping[models.accounts.sole.external_account_id.to_s] = models.blobs.all.index_by(&:id)
   end
 
   def perform
@@ -24,7 +26,8 @@ class FixActiveStorage
         url = node["url"]
         next if url.blank? || sgid.blank?
 
-        old_blob = @mapping[sgid]
+        sgid = SignedGlobalID.parse(node["sgid"], for: ActionText::Attachable::LOCATOR_NAME)
+        old_blob = @mapping.dig(sgid.params[:tenant], sgid.model_id)
         raise "Blob not found for sgid #{sgid}" unless old_blob
 
         new_blob = ActiveStorage::Blob.find_by!(key: old_blob.key)
@@ -61,6 +64,12 @@ class Models
     @application_record.const_set("MODELS", self)
   end
 
+  def accounts
+    @accounts ||= Class.new(application_record) do
+      self.table_name = "accounts"
+    end
+  end
+
   def blobs
     @blobs ||= Class.new(application_record) do
       self.table_name = "active_storage_blobs"
@@ -74,7 +83,8 @@ class Models
   end
 end
 
-tenanted_db_paths = ARGV
+# tenanted_db_paths = ARGV
+tenanted_db_paths = Dir[Rails.root.join("storage/tenants/production/*/db/main.sqlite3")]
 
 if tenanted_db_paths.empty?
   $stderr.puts "Error: at least one tenanted database path is required"
