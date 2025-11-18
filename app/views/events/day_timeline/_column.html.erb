@@ -1,7 +1,7 @@
 <div class="events__column">
   <h3 class="events__column-header"><%= column.title %></h3>
   <% column.events_by_hour.each do |hour, events| %>
-    <%= events_at_hour_container(column, hour) do %>
+    <%= tag.div class: "events__time-block" do %>
       <%= render partial: "events/event", collection: events, cached: true %>
       <%= local_datetime_tag events.first.created_at, class: "event__timestamp txt-small translucent" %>
     <% end %>

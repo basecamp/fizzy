@@ -154,12 +154,11 @@
     z-index: 1;
 
     @media (min-width: 640px) {
-      align-items: end;
+      /* align-items: start; */
       border-inline: var(--events-border);
       display: grid;
       grid-template-columns: repeat(3, 1fr);
 
-      /* Pseudo column borders since .events__column is display: contents */
       &:before,
       &:after {
         border-inline-start: var(--events-border);
@@ -175,6 +174,9 @@
   }
 
   .events__column {
+    align-self: stretch;
+    position: relative;
+
     @media (max-width: 639px) {
       &:not(:has(.event)) {
         display: none;
@@ -182,17 +184,17 @@
     }
 
     @media (min-width: 640px) {
-      display: contents;
+      display: flex;
+      flex-direction: column;
     }
 
-    &:nth-of-type(1) > * { grid-column-start: 1; }
-    &:nth-of-type(2) > * { grid-column-start: 2; }
-    &:nth-of-type(3) > * { grid-column-start: 3; }
+    &:nth-of-type(1) { grid-column-start: 1; }
+    &:nth-of-type(2) { grid-column-start: 2; }
+    &:nth-of-type(3) { grid-column-start: 3; }
   }
 
   .events__column-header {
     background-color: var(--color-canvas);
-    grid-row-start: 1;
     inset-block-start: calc(var(--block-space) * -1);
     margin-block-end: var(--events-gap);
     padding-block: calc(var(--events-gap) * 3) var(--events-gap);
@@ -208,20 +210,20 @@
 
   .events__time-block {
     align-content: end;
+    align-self: start;
     display: grid;
     gap: var(--events-gap);
     justify-items: center;
     margin: 0;
     padding: 0;
 
+    /* This is defensive so we won't break events cached attributes from the previous design */
+    /* Can be removed at some later date */
+    grid-area: unset !important;
+
     @media (min-width: 640px) {
       padding-block-end: calc(var(--events-gap) * 3);
       padding-inline: calc(var(--events-gap) * 2);
-    }
-
-    .event {
-      grid-column-start: unset !important;
-      grid-row-start: unset !important;
     }
   }
 

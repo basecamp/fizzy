@@ -15,8 +15,4 @@ module EventsHelper
       "person"
     end
   end
-
-  def events_at_hour_container(column, hour, &block)
-    tag.div class: "events__time-block", style: "grid-area: #{25 - hour}/#{column.index}", &block
-  end
 end
