@@ -31,6 +31,9 @@
 !/tmp/storage/.keep
 /data
 
+*.sqlite3
+*.sqlite3_*
+
 /public/assets
 
 # Ignore master key for decrypting credentials and more.
