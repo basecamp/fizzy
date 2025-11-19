@@ -2,6 +2,7 @@ class ApplicationController < ActionController::Base
   include Authentication
   include Authorization
   include CurrentRequest, CurrentTimezone, SetPlatform
+  include RequestForgeryProtection
   include TurboFlash, ViewTransitions
   include Saas
   include RoutingHeaders
