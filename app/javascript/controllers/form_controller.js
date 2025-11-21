@@ -10,6 +10,7 @@ export default class extends Controller {
 
   initialize() {
     this.debouncedSubmit = debounce(this.debouncedSubmit.bind(this), this.debounceTimeoutValue)
+    this.debouncedSubmitToTopTarget = debounce(this.submitToTopTarget.bind(this), this.debounceTimeoutValue)
   }
 
   submit() {

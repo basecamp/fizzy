@@ -3,7 +3,7 @@
             "1p-ignore": "true",
             controller: "hotkey",
             filter_settings_target: "field",
-            action: "keydown.f@document->hotkey#focus input->filter-settings#resetIfNoFiltering input->form#debouncedSubmit keydown.enter->form#submitToTopTarget blur->form#submitToTopTarget" } %>
+            action: "keydown.f@document->hotkey#focus input->filter-settings#resetIfNoFiltering input->form#debouncedSubmit keydown.enter->form#debouncedSubmitToTopTarget blur->form#debouncedSubmitToTopTarget" } %>
 
 <% if filter.terms.present? %>
   <% filter.terms.each do |term| %>
