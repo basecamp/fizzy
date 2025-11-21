@@ -23,8 +23,12 @@ export default class extends Controller {
   }
 
   clearInput() {
-    this.searchInputTarget.value = ""
-    this.searchInputTarget.focus()
+    if (this.searchInputTarget.value) {
+      this.searchInputTarget.value = ""
+      this.searchInputTarget.focus()
+    } else {
+      this.reset()
+    }
   }
 
   showModalAndSubmit(event) {
