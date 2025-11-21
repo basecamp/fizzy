@@ -17,7 +17,7 @@ module Search::Record::Trilogy
       if Current.account
         "search_records_#{shard_id_for_account(Current.account.id)}"
       else
-        raise "Current.account is not set; cannot determine shard for Search::Record"
+        "search_records"
       end
     end
 
