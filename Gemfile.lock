@@ -122,14 +122,6 @@ GIT
       tsort (>= 0.2)
       zeitwerk (~> 2.6)
 
-PATH
-  remote: gems/fizzy-saas
-  specs:
-    fizzy-saas (0.1.0)
-      queenbee
-      rails (>= 8.1.0.beta1)
-      rails_structured_logging
-
 GEM
   remote: https://rubygems.org/
   specs:
@@ -377,8 +369,6 @@ GEM
     public_suffix (7.0.0)
     puma (7.1.0)
       nio4r (~> 2.0)
-    queenbee (1.5.1)
-      json (> 1.8)
     raabro (1.4.0)
     racc (1.8.1)
     rack (3.2.4)
@@ -587,7 +577,6 @@ DEPENDENCIES
   capybara
   debug
   faker
-  fizzy-saas!
   geared_pagination (~> 1.2)
   image_processing (~> 1.14)
   importmap-rails

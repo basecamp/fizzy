@@ -76,6 +76,9 @@ group :test do
   gem "mocha"
 end
 
-group :saas do
+require_relative "lib/fizzy"
+if Fizzy.saas?
+  gem "activeresource", require: "active_resource"
+  gem "queenbee", git: "https://github.com/basecamp/queenbee-plugin"
   gem "fizzy-saas", path: "gems/fizzy-saas"
 end
