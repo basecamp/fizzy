@@ -1,4 +1,6 @@
 class SessionsController < ApplicationController
+  allow_browser versions: :modern
+
   # FIXME: Remove this before launch!
   unless Rails.env.local?
     http_basic_authenticate_with \
