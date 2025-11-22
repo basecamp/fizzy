@@ -1,10 +1,4 @@
 #!/usr/bin/env ruby
-require_relative "../lib/bootstrap"
-if !Bootstrap.oss_config?
-  # default from rails/test_unit/runner.rb but adding the saas gem test files
-  ENV["DEFAULT_TEST"] = "{gems/fizzy-saas/,}test/**/*_test.rb"
-  ENV["DEFAULT_TEST_EXCLUDE"] = "{gems/fizzy-saas/,}test/{system,dummy,fixtures}/**/*_test.rb"
-end
 APP_PATH = File.expand_path('../config/application', __dir__)
 require_relative '../config/boot'
 require 'rails/commands'

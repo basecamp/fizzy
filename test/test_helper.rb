@@ -152,7 +152,3 @@ end
 ActiveSupport.on_load(:active_record_fixture_set) do
   prepend(FixturesTestHelper)
 end
-
-unless Rails.application.config.x.oss_config
-  load File.expand_path("../gems/fizzy-saas/test/test_helper.rb", __dir__)
-end

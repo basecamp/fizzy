@@ -224,7 +224,8 @@ Rails.application.routes.draw do
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   get "service-worker" => "pwa#service_worker"
 
-  unless Rails.application.config.x.oss_config
+  # TODO: Can we move this just to the engine
+  if Fizzy.saas?
     mount Fizzy::Saas::Engine, at: "/", as: "saas"
   end
 

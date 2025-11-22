@@ -76,8 +76,6 @@ group :test do
   gem "mocha"
 end
 
-require_relative "lib/bootstrap"
-unless Bootstrap.oss_config?
-  eval_gemfile "gems/fizzy-saas/Gemfile"
+group :saas do
   gem "fizzy-saas", path: "gems/fizzy-saas"
 end

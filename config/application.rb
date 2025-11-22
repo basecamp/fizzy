@@ -1,5 +1,7 @@
 require_relative "boot"
 require "rails/all"
+require_relative "../lib/fizzy"
+
 Bundler.require(*Rails.groups)
 
 module Fizzy

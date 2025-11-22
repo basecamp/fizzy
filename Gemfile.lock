@@ -1,14 +1,4 @@
 GIT
-  remote: https://github.com/basecamp/queenbee-plugin
-  revision: eb01c697de1ad028afc65cc7d9b5345a7a8e849f
-  ref: eb01c697de1ad028afc65cc7d9b5345a7a8e849f
-  specs:
-    queenbee (3.2.0)
-      activeresource
-      builder
-      rexml
-
-GIT
   remote: https://github.com/basecamp/rails-structured-logging
   revision: 76960cb5c15fc2b6b5f7542e05d7dcc031cef9e6
   specs:
@@ -387,6 +377,8 @@ GEM
     public_suffix (7.0.0)
     puma (7.1.0)
       nio4r (~> 2.0)
+    queenbee (1.5.1)
+      json (> 1.8)
     raabro (1.4.0)
     racc (1.8.1)
     rack (3.2.4)
@@ -585,7 +577,6 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
-  activeresource
   autotuner
   aws-sdk-s3
   bcrypt (~> 3.1.7)
@@ -612,7 +603,6 @@ DEPENDENCIES
   prometheus-client-mmap (~> 1.3)
   propshaft
   puma (>= 5.0)
-  queenbee!
   rack-mini-profiler
   rails!
   rails_structured_logging!

@@ -9,8 +9,7 @@ CI.run do
   step "Security: Importmap audit", "bin/importmap audit"
   step "Security: Brakeman audit",  "bin/brakeman --quiet --no-pager --exit-on-warn --exit-on-error"
 
-  step "Tests: Rails: SaaS config", "bin/rails test"
-  step "Tests: Rails: OSS config",  "OSS_CONFIG=1 bin/rails test"
+  step "Tests: Rails", "bin/rails test"
   step "Tests: System",             "bin/rails test:system"
 
   if success?

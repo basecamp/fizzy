@@ -21,7 +21,7 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  unless Bootstrap.oss_config?
+  if Fizzy.saas?
     test "create for a new user" do
       untenanted do
         assert_difference -> { Identity.count }, +1 do
