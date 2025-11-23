@@ -1,7 +1,4 @@
 <%
-  database_adapter = ENV.fetch("DATABASE_ADAPTER", "mysql")
-  use_sqlite = database_adapter == "sqlite"
-
   if ENV["MIGRATE"].present?
     mysql_app_user_key = "MYSQL_ALTER_USER"
     mysql_app_password_key = "MYSQL_ALTER_PASSWORD"
@@ -17,7 +14,7 @@
 %>
 
 default: &default
-  <% if use_sqlite %>
+  <% if Fizzy.db_adapter.sqlite? %>
   adapter: sqlite3
   pool: 5
   timeout: 5000
@@ -33,7 +30,7 @@ default: &default
   <% end %>
 
 development:
-  <% if use_sqlite %>
+  <% if Fizzy.db_adapter.sqlite? %>
   primary:
     <<: *default
     database: storage/development.sqlite3
@@ -69,7 +66,7 @@ development:
 # re-generated from your development database when you run "rake".
 # Do not set this db to the same as development or production.
 test:
-  <% if use_sqlite %>
+  <% if Fizzy.db_adapter.sqlite? %>
   primary:
     <<: *default
     database: storage/test.sqlite3
