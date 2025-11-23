@@ -6,7 +6,5 @@ Fizzy.configure_bundle
 
 require_relative "../config/boot"
 
-puts "SaaS version (#{Fizzy.db_adapter})" if Fizzy.saas?
-
 require "rails/commands"
 
