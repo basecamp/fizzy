@@ -8,6 +8,14 @@ app_root="$(
 )"
 export PATH="$app_root/bin:$PATH"
 
+if [ -e tmp/saas.txt ]; then
+  export SAAS=1
+fi
+
+if [ -n "$SAAS" ]; then
+  export BUNDLE_GEMFILE="Gemfile.saas"
+fi
+
 # Install gum if needed
 if ! command -v gum &>/dev/null; then
   echo
@@ -71,13 +79,14 @@ step "Set up gh-signoff" bash -c "gh extension install basecamp/gh-signoff || gh
 bundle config set --local auto_install true
 step "Installing RubyGems" bundle install
 
-if [ -e tmp/minio-dev.txt ]; then
-  step "Starting Docker services" bash -c "[ -d ~/Work/basecamp/docker-dev ] && git -C ~/Work/basecamp/docker-dev pull || gh repo clone basecamp/docker-dev ~/Work/basecamp/docker-dev && ~/Work/basecamp/docker-dev/setup minio"
+if [ -n "$SAAS" ]; then
+  if [ -e tmp/minio-dev.txt ]; then
+    step "Starting Docker services" bash -c "[ -d ~/Work/basecamp/docker-dev ] && git -C ~/Work/basecamp/docker-dev pull || gh repo clone basecamp/docker-dev ~/Work/basecamp/docker-dev && ~/Work/basecamp/docker-dev/setup minio"
+    step "Configuring MinIO" bin/minio-setup
+  fi
 
-  step "Configuring MinIO" bin/minio-setup
+  step "Starting mysql" bash -c "[ -d ~/Work/basecamp/docker-dev ] && git -C ~/Work/basecamp/docker-dev pull || gh repo clone basecamp/docker-dev ~/Work/basecamp/docker-dev && ~/Work/basecamp/docker-dev/setup mysql80"
 fi
-
-step "Starting mysql" bash -c "[ -d ~/Work/basecamp/docker-dev ] && git -C ~/Work/basecamp/docker-dev pull || gh repo clone basecamp/docker-dev ~/Work/basecamp/docker-dev && ~/Work/basecamp/docker-dev/setup mysql80"
 
 if [[ $* == *--reset* ]]; then
   step "Resetting the database" rails db:reset
