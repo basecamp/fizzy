@@ -80,12 +80,8 @@ bundle config set --local auto_install true
 step "Installing RubyGems" bundle install
 
 if [ -n "$SAAS" ]; then
-  if [ -e tmp/minio-dev.txt ]; then
-    step "Starting Docker services" bash -c "[ -d ~/Work/basecamp/docker-dev ] && git -C ~/Work/basecamp/docker-dev pull || gh repo clone basecamp/docker-dev ~/Work/basecamp/docker-dev && ~/Work/basecamp/docker-dev/setup minio"
-    step "Configuring MinIO" bin/minio-setup
-  fi
-
-  step "Starting mysql" bash -c "[ -d ~/Work/basecamp/docker-dev ] && git -C ~/Work/basecamp/docker-dev pull || gh repo clone basecamp/docker-dev ~/Work/basecamp/docker-dev && ~/Work/basecamp/docker-dev/setup mysql80"
+  saas_setup=$(bundle show fizzy-saas)/bin/setup
+  source "$saas_setup"
 fi
 
 if [[ $* == *--reset* ]]; then
