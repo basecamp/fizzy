@@ -1,0 +1,12 @@
+servers:
+  web:
+    hosts:
+      - test-1
+  jobs:
+    hosts:
+      - test-1
+env:
+  clear:
+    ARTENANT: test
+
+proxy: false

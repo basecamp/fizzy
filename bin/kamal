@@ -22,6 +22,22 @@ Replace `bin/bundle` by running `bundle binstubs bundler --force`, then run this
 end
 
 require "rubygems"
+
+require_relative "../lib/fizzy"
+if Fizzy.saas?
+  ENV["BUNDLE_WITH"] = [ ENV["BUNDLE_WITH"], "saas" ].compact.join(",")
+end
+
 require "bundler/setup"
+
+if Fizzy.saas?
+  gem_path = Gem::Specification.find_by_name("fizzy-saas").gem_dir
+  deploy_config = File.join(gem_path, "config", "deploy.yml")
+
+  # Add -c option to ARGV if not already present
+  unless ARGV.include?("-c") || ARGV.include?("--config-file")
+    ARGV.unshift("-c", deploy_config)
+  end
+end
 
 load Gem.bin_path("kamal", "kamal")
