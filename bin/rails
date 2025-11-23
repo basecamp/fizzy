@@ -7,4 +7,3 @@ Fizzy.configure_bundle
 require_relative "../config/boot"
 
 require "rails/commands"
-
