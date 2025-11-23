@@ -74,10 +74,3 @@ group :test do
   gem "vcr"
   gem "mocha"
 end
-
-group :saas, optional: true do
-  gem "activeresource", require: "active_resource"
-  gem "queenbee", bc: "queenbee-plugin"
-  gem "fizzy-saas", bc: "fizzy-saas"
-  gem "rails_structured_logging", bc: "rails-structured-logging"
-end
