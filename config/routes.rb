@@ -224,10 +224,6 @@ Rails.application.routes.draw do
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   get "service-worker" => "pwa#service_worker"
 
-  if Fizzy.saas?
-    mount Fizzy::Saas::Engine, at: "/", as: "saas"
-  end
-
   namespace :admin do
     mount MissionControl::Jobs::Engine, at: "/jobs"
     get "stats", to: "stats#show"
