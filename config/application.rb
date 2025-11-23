@@ -2,9 +2,7 @@ require_relative "boot"
 require "rails/all"
 require_relative "../lib/fizzy"
 
-groups = Rails.groups
-groups << :saas if Fizzy.saas?
-Bundler.require(*groups)
+Bundler.require(*Rails.groups)
 
 module Fizzy
   class Application < Rails::Application
