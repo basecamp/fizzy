@@ -1,4 +1,13 @@
 GIT
+  remote: https://github.com/basecamp/fizzy-saas
+  revision: 38562580daf4d2f4d5f582411086ddf14aaa77a9
+  specs:
+    fizzy-saas (0.1.0)
+      queenbee
+      rails (>= 8.1.0.beta1)
+      rails_structured_logging
+
+GIT
   remote: https://github.com/basecamp/queenbee-plugin
   revision: 15faf03a876c5e66b67753d2e1ddb24f1eb5abb2
   specs:
@@ -124,14 +133,6 @@ GIT
       thor (~> 1.0, >= 1.2.2)
       tsort (>= 0.2)
       zeitwerk (~> 2.6)
-
-PATH
-  remote: ../fizzy-saas
-  specs:
-    fizzy-saas (0.1.0)
-      queenbee
-      rails (>= 8.1.0.beta1)
-      rails_structured_logging
 
 GEM
   remote: https://rubygems.org/
