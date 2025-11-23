@@ -1,4 +1,13 @@
 GIT
+  remote: https://github.com/basecamp/queenbee-plugin
+  revision: 15faf03a876c5e66b67753d2e1ddb24f1eb5abb2
+  specs:
+    queenbee (3.2.0)
+      activeresource
+      builder
+      rexml
+
+GIT
   remote: https://github.com/basecamp/rails-structured-logging
   revision: 76960cb5c15fc2b6b5f7542e05d7dcc031cef9e6
   specs:
@@ -121,6 +130,14 @@ GIT
       thor (~> 1.0, >= 1.2.2)
       tsort (>= 0.2)
       zeitwerk (~> 2.6)
+
+PATH
+  remote: gems/fizzy-saas
+  specs:
+    fizzy-saas (0.1.0)
+      queenbee
+      rails (>= 8.1.0.beta1)
+      rails_structured_logging
 
 GEM
   remote: https://rubygems.org/
@@ -567,6 +584,7 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
+  activeresource
   autotuner
   aws-sdk-s3
   bcrypt (~> 3.1.7)
@@ -577,6 +595,7 @@ DEPENDENCIES
   capybara
   debug
   faker
+  fizzy-saas!
   geared_pagination (~> 1.2)
   image_processing (~> 1.14)
   importmap-rails
@@ -592,6 +611,7 @@ DEPENDENCIES
   prometheus-client-mmap (~> 1.3)
   propshaft
   puma (>= 5.0)
+  queenbee!
   rack-mini-profiler
   rails!
   rails_structured_logging!

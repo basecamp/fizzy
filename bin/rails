@@ -1,4 +1,15 @@
 #!/usr/bin/env ruby
-APP_PATH = File.expand_path('../config/application', __dir__)
-require_relative '../config/boot'
-require 'rails/commands'
+APP_PATH = File.expand_path("../config/application", __dir__)
+
+require_relative "../lib/fizzy"
+
+if Fizzy.saas?
+  ENV["BUNDLE_WITH"] = [ ENV["BUNDLE_WITH"] , "saas" ].compact.join(",")
+end
+
+require_relative "../config/boot"
+
+puts "SaaS version (#{Fizzy.db_adapter})" if Fizzy.saas?
+
+require "rails/commands"
+
