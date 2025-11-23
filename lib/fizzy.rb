@@ -2,7 +2,7 @@ module Fizzy
   class << self
     def saas?
       return @saas if defined?(@saas)
-      @saas = !!(ENV["SAAS"] || File.exist?(File.expand_path("../../tmp/saas.txt", __dir__)))
+      @saas = !!(ENV["SAAS"] || File.exist?(File.expand_path("../tmp/saas.txt", __dir__)))
     end
 
     def db_adapter
