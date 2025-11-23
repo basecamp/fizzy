@@ -40,7 +40,6 @@ gem "useragent", bc: "useragent"
 gem "mission_control-jobs"
 gem "sentry-ruby"
 gem "sentry-rails"
-gem "rails_structured_logging", bc: "rails-structured-logging"
 gem "yabeda"
 gem "yabeda-actioncable"
 gem "yabeda-activejob", github: "basecamp/yabeda-activejob", branch: "bulk-and-scheduled-jobs"
@@ -78,6 +77,7 @@ end
 
 group :saas, optional: true do
   gem "activeresource", require: "active_resource"
-  gem "queenbee", git: "https://github.com/basecamp/queenbee-plugin"
-  gem "fizzy-saas", path: "gems/fizzy-saas"
+  gem "queenbee", bc: "queenbee-plugin"
+  gem "fizzy-saas", bc: "fizzy-saas"
+  gem "rails_structured_logging", bc: "rails-structured-logging"
 end
