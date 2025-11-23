@@ -1,0 +1,21 @@
+default: &default
+  adapter: sqlite3
+  pool: 50
+  timeout: 5000
+
+development:
+  primary:
+    <<: *default
+    database: db/development.sqlite3
+    schema_dump: schema_sqlite.rb
+
+test:
+  primary:
+    <<: *default
+    database: db/test.sqlite3
+    schema_dump: schema_sqlite.rb
+
+production:
+  primary:
+    <<: *default
+    database: db/production.sqlite3
