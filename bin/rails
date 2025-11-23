@@ -2,10 +2,7 @@
 APP_PATH = File.expand_path("../config/application", __dir__)
 
 require_relative "../lib/fizzy"
-
-if Fizzy.saas?
-  ENV["BUNDLE_WITH"] = [ ENV["BUNDLE_WITH"] , "saas" ].compact.join(",")
-end
+Fizzy.configure_bundle
 
 require_relative "../config/boot"
 

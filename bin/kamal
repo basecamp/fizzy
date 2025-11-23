@@ -24,9 +24,7 @@ end
 require "rubygems"
 
 require_relative "../lib/fizzy"
-if Fizzy.saas?
-  ENV["BUNDLE_WITH"] = [ ENV["BUNDLE_WITH"], "saas" ].compact.join(",")
-end
+Fizzy.configure_bundle
 
 require "bundler/setup"
 

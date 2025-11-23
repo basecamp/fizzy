@@ -8,6 +8,12 @@ module Fizzy
     def db_adapter
       @db_adapter ||= DbAdapter.new ENV.fetch("DATABASE_ADAPTER", saas? ? "mysql" : "sqlite")
     end
+
+    def configure_bundle
+      if saas?
+        ENV["BUNDLE_WITH"] = [ENV["BUNDLE_WITH"], "saas"].compact.join(",")
+      end
+    end
   end
 
   class DbAdapter
