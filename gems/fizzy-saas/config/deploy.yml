@@ -1,6 +1,7 @@
 service: fizzy
 image: basecamp/fizzy
 asset_path: /rails/public/assets
+hooks_path: <%= File.join(Gem::Specification.find_by_name("fizzy-saas").gem_dir, ".kamal", "hooks") %>
 
 servers:
   jobs:
