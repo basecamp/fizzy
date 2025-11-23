@@ -11,7 +11,7 @@ module Fizzy
 
     def configure_bundle
       if saas?
-        ENV["BUNDLE_WITH"] = [ENV["BUNDLE_WITH"], "saas"].compact.join(",")
+        ENV["BUNDLE_WITH"] = [ ENV["BUNDLE_WITH"], "saas" ].compact.join(",")
       end
     end
   end
