@@ -8,12 +8,12 @@
 
   .card-columns {
     --bubble-size: 3.5rem;
-    --cards-gap: min(1.2cqi, 1.7rem);
-    --column-gap: 8px;
+    --cards-gap: clamp(0.75rem, 1.2cqi, 1.7rem);
+    --column-gap: 0.75rem;
     --column-padding-expanded: calc(var(--column-gap) * 2);
     --column-transition-duration: 300ms;
     --column-width-collapsed: 40px;
-    --column-width-expanded: 450px;
+    --column-width-expanded: calc(100vw - var(--column-gap) * 4);
     --progress-increment: var(--progress-max-height) / var(--progress-max-cards);
     --progress-max-cards: 20;
     --progress-max-height: 50dvh;
@@ -28,6 +28,11 @@
     overflow-y: hidden;
     padding-block-end: var(--column-width-collapsed);
     position: relative;
+
+    @media (min-width: 640px) {
+      --column-gap: 8px;
+      --column-width-expanded: 450px;
+    }
 
     /* When it has something expanded */
     &:has(.card-columns__left .cards:not(.is-collapsed), .card-columns__right .cards:not(.is-collapsed)) {
@@ -120,13 +125,12 @@
   .cards__transition-container {
     block-size: 100%;
     border-radius: calc(var(--column-width-collapsed) / 2);
-    padding-inline: var(--column-padding-expanded);
     translate: 0;
     transition: translate var(--column-transition-duration) var(--ease-out-overshoot-subtle);
 
     @media (min-width: 640px) {
-      .is-collapsed & {
-        padding-inline: 0;
+      &:not(.is-collapsed) {
+        padding-inline: var(--column-padding-expanded);
       }
 
       .is-collapsed:not(.cards--considering) & {
@@ -153,7 +157,7 @@
   /* The wrapper around the cards used to clip overflow while transitioning.
    * Also, don't resize cards while transitioning to avoid reflow. */
   .cards__list {
-    align-items: flex-end; /* use flex-start to wipe from left */
+    align-items: flex-end;
     display: flex;
     flex-direction: column;
     gap: var(--cards-gap);
@@ -166,10 +170,10 @@
       .is-collapsed & {
         padding: 0;
       }
-    }
 
-    .card {
-      inline-size: calc(var(--column-width-expanded) - var(--column-padding-expanded) * 2);
+      .card {
+        inline-size: calc(var(--column-width-expanded) - var(--column-padding-expanded) * 2);
+      }
     }
 
     .cards--grid & {
