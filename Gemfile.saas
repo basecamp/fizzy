@@ -1,6 +1,9 @@
 # This Gemfile extends the base Gemfile with SaaS-specific dependencies
 eval_gemfile "Gemfile"
 
+git_source(:bc) { |repo| "https://github.com/basecamp/#{repo}" }
+
+
 gem "activeresource", require: "active_resource"
 gem "queenbee", bc: "queenbee-plugin"
 gem "fizzy-saas", bc: "fizzy-saas"
