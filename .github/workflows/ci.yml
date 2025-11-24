@@ -1,0 +1,100 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  security:
+    name: Security
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        env:
+          BUNDLE_GITHUB__COM: "x-access-token:${{ secrets.GH_TOKEN }}"
+          BUNDLE_GEMFILE: Gemfile
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      - name: Gem audit
+        run: bin/bundler-audit check --update
+
+      - name: Importmap audit
+        run: bin/importmap audit
+
+      - name: Brakeman audit
+        run: bin/brakeman --quiet --no-pager --exit-on-warn --exit-on-error
+
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        env:
+          BUNDLE_GITHUB__COM: "x-access-token:${{ secrets.GH_TOKEN }}"
+          BUNDLE_GEMFILE: Gemfile
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      - name: Lint code for consistent style
+        run: bin/rubocop
+
+
+  test:
+    name: Tests (${{ matrix.mode }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        mode: [SQLite, MySQL, SaaS]
+
+    services:
+      mysql:
+        image: ${{ (matrix.mode == 'MySQL' || matrix.mode == 'SaaS') && 'mysql:8.0' || '' }}
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_DATABASE: fizzy_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    env:
+      RAILS_ENV: test
+      DATABASE_ADAPTER: ${{ matrix.mode == 'SQLite' && 'sqlite' || 'mysql' }}
+      ${{ matrix.mode == 'SaaS' && 'SAAS' || 'SAAS_DISABLED' }}: ${{ matrix.mode == 'SaaS' && '1' || '' }}
+      BUNDLE_GEMFILE: ${{ matrix.mode == 'SaaS' && 'Gemfile.saas' || 'Gemfile' }}
+      MYSQL_HOST: 127.0.0.1
+      MYSQL_PORT: 3306
+      MYSQL_USER: root
+
+    steps:
+      - name: Install system packages
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libsqlite3-0 libvips curl ffmpeg
+
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        env:
+          BUNDLE_GITHUB__COM: "x-access-token:${{ secrets.GH_TOKEN }}"
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      - name: Run tests
+        run: bin/rails db:setup test
+
+      - name: Run system tests
+        run: bin/rails test:system
