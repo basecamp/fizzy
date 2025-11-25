@@ -55,11 +55,18 @@ jobs:
 
     strategy:
       matrix:
-        mode: [SQLite, MySQL, SaaS]
+        include:
+          - mode: SQLite
+            db_adapter: sqlite
+          - mode: MySQL
+            db_adapter: mysql
+          - mode: SaaS
+            db_adapter: mysql
 
     services:
       mysql:
-        image: 'mysql:8.0'
+        if: ${{ matrix.db_adapter == 'mysql' }}
+        image: mysql:8.0
         env:
           MYSQL_ALLOW_EMPTY_PASSWORD: yes
           MYSQL_DATABASE: fizzy_test
@@ -73,7 +80,7 @@ jobs:
 
     env:
       RAILS_ENV: test
-      DATABASE_ADAPTER: ${{ matrix.mode == 'SQLite' && 'sqlite' || 'mysql' }}
+      DATABASE_ADAPTER: ${{ matrix.db_adapter }}
       ${{ matrix.mode == 'SaaS' && 'SAAS' || 'SAAS_DISABLED' }}: ${{ matrix.mode == 'SaaS' && '1' || '' }}
       BUNDLE_GEMFILE: ${{ matrix.mode == 'SaaS' && 'Gemfile.saas' || 'Gemfile' }}
       MYSQL_HOST: 127.0.0.1
