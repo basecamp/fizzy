@@ -7,3 +7,5 @@ Fizzy.configure_bundle
 require_relative "../config/boot"
 
 require "rails/commands"
+
+Fizzy::Saas.append_test_paths if Fizzy.saas? && Rails.env.test?
