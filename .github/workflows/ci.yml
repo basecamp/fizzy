@@ -85,6 +85,8 @@ jobs:
       MYSQL_HOST: mysql
       MYSQL_PORT: 3306
       MYSQL_USER: root
+      FIZZY_DB_HOST: ${{ matrix.mode == 'SaaS' && 'mysql' || '' }}
+      FIZZY_DB_PORT: ${{ matrix.mode == 'SaaS' && '3306' || '' }}
 
     steps:
       - name: Install system packages
