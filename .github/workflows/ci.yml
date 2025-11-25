@@ -1,4 +1,4 @@
-name: Reusable CI
+name: Common CI
 
 on:
   workflow_call:
@@ -58,7 +58,6 @@ jobs:
             db_adapter: sqlite
           - mode: MySQL
             db_adapter: mysql
-          # Only include SaaS if requested
           - mode: SaaS
             db_adapter: mysql
             saas: ${{ inputs.saas }}
