@@ -33,12 +33,12 @@ module RequestForgeryProtection
     end
 
     def report_on_forgery_protection_results(origin:, token:, sec_fetch_site:)
-      unless [ origin, token, sec_fetch_site ].all?
-        info = {
-          origin: "#{pass_or_fail_value(origin)} (#{request.origin})",
-          token: "#{pass_or_fail_value(token)}",
-          sec_fetch_site: "#{pass_or_fail_value(sec_fetch_site)} (#{safe_fetch_site_value})"
-        }
+      results = { origin:, token:, sec_fetch_site: }
+
+      unless results.values.all?
+        info = results.transform_values { it ? "pass" : "fail" }
+        info[:origin] += " (#{request.origin})"
+        info[:sec_fetch_site] += " (#{safe_fetch_site_value})"
 
         Rails.logger.info "CSRF protection check: " + info.map { it.join(" ") }.join(", ")
 
@@ -46,9 +46,5 @@ module RequestForgeryProtection
           Sentry.capture_message "CSRF protection mismatch", level: :info, extra: { info: info }
         end
       end
-    end
-
-    def pass_or_fail_value(result)
-      result ? "pass" : "fail"
     end
 end
