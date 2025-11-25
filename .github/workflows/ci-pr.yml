@@ -1,0 +1,10 @@
+name: CI (PR)
+
+on:
+  pull_request:
+
+jobs:
+  call-ci:
+    uses: ./.github/workflows/ci.yml
+    with:
+      saas: false

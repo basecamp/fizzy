@@ -1,0 +1,12 @@
+name: CI (Main)
+
+on:
+  push:
+
+jobs:
+  call-ci:
+    uses: ./.github/workflows/ci.yml
+    with:
+      saas: true
+    secrets:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}

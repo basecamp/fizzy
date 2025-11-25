@@ -1,8 +1,14 @@
-name: CI
+name: Reusable CI
 
 on:
-  push:
-  pull_request:
+  workflow_call:
+    inputs:
+      saas:
+        type: boolean
+        required: true
+    secrets:
+      GH_TOKEN:
+        required: false
 
 jobs:
   security:
@@ -11,11 +17,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
       - uses: ruby/setup-ruby@v1
-        env:
-          BUNDLE_GITHUB__COM: "x-access-token:${{ secrets.GH_TOKEN }}"
-          BUNDLE_GEMFILE: Gemfile
         with:
           ruby-version: .ruby-version
           bundler-cache: true
@@ -36,11 +38,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
       - uses: ruby/setup-ruby@v1
-        env:
-          BUNDLE_GITHUB__COM: "x-access-token:${{ secrets.GH_TOKEN }}"
-          BUNDLE_GEMFILE: Gemfile
         with:
           ruby-version: .ruby-version
           bundler-cache: true
@@ -60,8 +58,10 @@ jobs:
             db_adapter: sqlite
           - mode: MySQL
             db_adapter: mysql
+          # Only include SaaS if requested
           - mode: SaaS
             db_adapter: mysql
+            saas: ${{ inputs.saas }}
 
     services:
       mysql:
@@ -85,8 +85,9 @@ jobs:
       MYSQL_HOST: 127.0.0.1
       MYSQL_PORT: 3306
       MYSQL_USER: root
-      FIZZY_DB_HOST: ${{ matrix.mode == 'SaaS' && '127.0.0.1' || '' }}
-      FIZZY_DB_PORT: ${{ matrix.mode == 'SaaS' && '3306' || '' }}
+      FIZZY_DB_HOST: 127.0.0.1
+      FIZZY_DB_PORT: 3306
+      BUNDLE_GITHUB__COM: ${{ inputs.saas && format('x-access-token:{0}', secrets.GH_TOKEN) || '' }}
 
     steps:
       - name: Install system packages
@@ -95,8 +96,6 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: ruby/setup-ruby@v1
-        env:
-          BUNDLE_GITHUB__COM: "x-access-token:${{ secrets.GH_TOKEN }}"
         with:
           ruby-version: .ruby-version
           bundler-cache: true
