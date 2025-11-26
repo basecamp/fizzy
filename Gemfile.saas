@@ -6,6 +6,6 @@ git_source(:bc) { |repo| "https://github.com/basecamp/#{repo}" }
 
 gem "activeresource", require: "active_resource"
 gem "queenbee", bc: "queenbee-plugin"
-gem "fizzy-saas", bc: "fizzy-saas"
+gem "fizzy-saas", bc: "fizzy-saas", branch: "secrets"
 gem "rails_structured_logging", bc: "rails-structured-logging"
 
