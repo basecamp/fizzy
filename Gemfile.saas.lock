@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/basecamp/fizzy-saas
-  revision: 3bf089d1af610c828fae1e6a15d5d6b0fbce9b5b
+  revision: 7865bd2ac6e5980171caae308f447d646bda80ed
   specs:
     fizzy-saas (0.1.0)
       queenbee
