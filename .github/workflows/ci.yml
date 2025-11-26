@@ -80,8 +80,8 @@ jobs:
     env:
       RAILS_ENV: test
       DATABASE_ADAPTER: ${{ matrix.db_adapter }}
-      ${{ matrix.mode == 'SaaS' && 'SAAS' || 'SAAS_DISABLED' }}: ${{ matrix.mode == 'SaaS' && '1' || '' }}
-      BUNDLE_GEMFILE: ${{ matrix.mode == 'SaaS' && 'Gemfile.saas' || 'Gemfile' }}
+      ${{ inputs.saas && 'SAAS' || 'SAAS_DISABLED' }}: ${{ inputs.saas && '1' || '' }}
+      BUNDLE_GEMFILE: ${{ inputs.saas && 'Gemfile.saas' || 'Gemfile' }}
       MYSQL_HOST: 127.0.0.1
       MYSQL_PORT: 3306
       MYSQL_USER: root
