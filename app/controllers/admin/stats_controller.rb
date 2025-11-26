@@ -1,6 +1,4 @@
 class Admin::StatsController < AdminController
-  disallow_account_scope
-
   layout "public"
 
   def show

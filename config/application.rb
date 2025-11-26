@@ -24,5 +24,7 @@ module Fizzy
     config.generators do |g|
       g.orm :active_record, primary_key_type: :uuid
     end
+
+    config.mission_control.jobs.http_basic_auth_enabled = false
   end
 end

@@ -1,11 +1,13 @@
 david:
   email_address: david@37signals.com
+  staff: true
 
 jz:
   email_address: jz@37signals.com
 
 kevin:
   email_address: kevin@37signals.com
+  staff: true
 
 mike:
   email_address: mike@37signals.com
