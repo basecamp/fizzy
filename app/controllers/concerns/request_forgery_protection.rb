@@ -2,11 +2,11 @@ module RequestForgeryProtection
   extend ActiveSupport::Concern
 
   included do
-    after_action :append_set_fetch_site_to_vary_header
+    after_action :append_sec_fetch_site_to_vary_header
   end
 
   private
-    def append_set_fetch_site_to_vary_header
+    def append_sec_fetch_site_to_vary_header
       vary_header = response.headers["Vary"].to_s.split(",").map(&:strip).reject(&:blank?)
       response.headers["Vary"] = (vary_header + [ "Sec-Fetch-Site" ]).join(",")
     end
@@ -25,10 +25,10 @@ module RequestForgeryProtection
     SAFE_FETCH_SITES = %w[ same-origin same-site ]
 
     def safe_fetch_site?
-      SAFE_FETCH_SITES.include?(safe_fetch_site_value)
+      SAFE_FETCH_SITES.include?(sec_fetch_site_value)
     end
 
-    def safe_fetch_site_value
+    def sec_fetch_site_value
       request.headers["Sec-Fetch-Site"].to_s.downcase
     end
 
@@ -38,7 +38,7 @@ module RequestForgeryProtection
       unless results.values.all?
         info = results.transform_values { it ? "pass" : "fail" }
         info[:origin] += " (#{request.origin})"
-        info[:sec_fetch_site] += " (#{safe_fetch_site_value})"
+        info[:sec_fetch_site] += " (#{sec_fetch_site_value})"
 
         Rails.logger.info "CSRF protection check: " + info.map { it.join(" ") }.join(", ")
 
