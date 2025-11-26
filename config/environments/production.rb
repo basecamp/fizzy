@@ -55,8 +55,8 @@ Rails.application.configure do
   # Suppress unstructured log lines
   config.log_level = :fatal
 
-  # Structured JSON logging
-  config.structured_logging.logger = ActiveSupport::Logger.new(STDOUT)
+  # Structured JSON logging. Pending to move to new Rails' built-in support.
+  config.structured_logging.logger = ActiveSupport::Logger.new(STDOUT) if config.respond_to?(:structured_logging)
 
   # Prepend all log lines with the following tags.
   config.log_tags = [ :request_id ]

@@ -94,7 +94,7 @@ Rails.application.configure do
     config.solid_queue.connects_to = { database: { writing: :queue, reading: :queue } }
   end
 
-  if Rails.root.join("tmp/structured-logging.txt").exist?
+  if config.respond_to?(:structured_logging) && Rails.root.join("tmp/structured-logging.txt").exist?
     config.structured_logging.logger = ActiveSupport::Logger.new("log/structured-development.log")
   end
 end
