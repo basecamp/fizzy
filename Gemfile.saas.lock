@@ -25,6 +25,12 @@ GIT
       rails (>= 6.0.0)
 
 GIT
+  remote: https://github.com/basecamp/useragent
+  revision: 433ca320a42db1266c4b89df74d0abdb9a880c5e
+  specs:
+    useragent (0.16.11)
+
+GIT
   remote: https://github.com/basecamp/yabeda-activejob.git
   revision: 684973f77ff01d8b3dd75874538fae55961e15e6
   branch: bulk-and-scheduled-jobs
@@ -519,7 +525,6 @@ GEM
       unicode-emoji (~> 4.1)
     unicode-emoji (4.1.0)
     uri (1.1.1)
-    useragent (0.16.11)
     vcr (6.3.1)
       base64
     web-console (4.2.1)
@@ -605,7 +610,7 @@ DEPENDENCIES
   mocha
   net-http-persistent
   platform_agent
-  prometheus-client-mmap (~> 1.1)
+  prometheus-client-mmap (~> 1.3)
   propshaft
   puma (>= 5.0)
   queenbee!
@@ -627,6 +632,7 @@ DEPENDENCIES
   thruster
   trilogy (~> 2.9)
   turbo-rails
+  useragent!
   vcr
   web-console
   web-push

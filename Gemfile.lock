@@ -1,30 +1,4 @@
 GIT
-  remote: https://github.com/basecamp/fizzy-saas
-  revision: 00de8e2e1ae8e9df5e0a2acf4593a4e9a824c5c8
-  specs:
-    fizzy-saas (0.1.0)
-      queenbee
-      rails (>= 8.1.0.beta1)
-      rails_structured_logging
-
-GIT
-  remote: https://github.com/basecamp/queenbee-plugin
-  revision: 15faf03a876c5e66b67753d2e1ddb24f1eb5abb2
-  specs:
-    queenbee (3.2.0)
-      activeresource
-      builder
-      rexml
-
-GIT
-  remote: https://github.com/basecamp/rails-structured-logging
-  revision: 76960cb5c15fc2b6b5f7542e05d7dcc031cef9e6
-  specs:
-    rails_structured_logging (0.2.1)
-      json
-      rails (>= 6.0.0)
-
-GIT
   remote: https://github.com/basecamp/useragent
   revision: 433ca320a42db1266c4b89df74d0abdb9a880c5e
   specs:
@@ -145,14 +119,6 @@ GEM
   specs:
     action_text-trix (2.1.15)
       railties
-    activemodel-serializers-xml (1.0.3)
-      activemodel (>= 5.0.0.a)
-      activesupport (>= 5.0.0.a)
-      builder (~> 3.1)
-    activeresource (6.2.0)
-      activemodel (>= 7.0)
-      activemodel-serializers-xml (~> 1.0)
-      activesupport (>= 7.0)
     addressable (2.8.8)
       public_suffix (>= 2.0.2, < 8.0)
     anyway_config (2.7.2)
