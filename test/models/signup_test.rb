@@ -32,10 +32,7 @@ class SignupTest < ActiveSupport::TestCase
     Account.any_instance.expects(:setup_customer_template).once
 
     Current.without_account do
-      signup = Signup.new(
-        full_name: "Kevin",
-        identity: identities(:kevin)
-      )
+      signup = Signup.new(full_name: "Kevin", identity: identities(:kevin))
 
       assert signup.complete
 
