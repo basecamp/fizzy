@@ -22,9 +22,6 @@ jobs:
             db_adapter: sqlite
           - mode: MySQL
             db_adapter: mysql
-          - mode: SaaS
-            db_adapter: mysql
-            saas: ${{ inputs.saas }}
 
     services:
       mysql:

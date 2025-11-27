@@ -4,7 +4,13 @@ on:
   push:
 
 jobs:
-  test:
+  test_oss:
+    name: Test (OSS)
+    uses: ./.github/workflows/test.yml
+    with:
+      saas: false
+  test_saas:
+    name: Test (SaaS)
     uses: ./.github/workflows/test.yml
     with:
       saas: true
