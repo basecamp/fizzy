@@ -39,6 +39,6 @@ class Account < ApplicationRecord
 
   private
     def assign_external_account_id
-      self.external_account_id ||= ExternalAccount.create!.id
+      self.external_account_id ||= ExternalIdSequence.next
     end
 end

@@ -69,12 +69,13 @@ class AccountTest < ActiveSupport::TestCase
     assert_equal account1.external_account_id + 1, account2.external_account_id
   end
 
-  test "external_account_id can be overridden without creating sequence entry" do
-    custom_id = Account.last.id + 99999
+  test "external_account_id can be overridden" do
+    custom_id = 999999
+    sequence_value_before = Account::ExternalIdSequence.first_or_create!(value: 0).value
 
-    assert_no_difference -> { ExternalAccount.count } do
-      account = Account.create!(name: "Custom ID Account", external_account_id: custom_id)
-      assert_equal custom_id, account.external_account_id
-    end
+    account = Account.create!(name: "Custom ID Account", external_account_id: custom_id)
+
+    assert_equal custom_id, account.external_account_id
+    assert_equal sequence_value_before, Account::ExternalIdSequence.value
   end
 end
