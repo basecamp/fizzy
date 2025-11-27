@@ -81,8 +81,6 @@ module Authentication
     end
 
     def set_current_session(session)
-      # TODO: Release structured logging or look for alternative
-      logger.try :struct, "  Authorized Identity##{session.identity.id}", authentication: { identity: { id: session.identity.id } }
       Current.session = session
       cookies.signed.permanent[:session_token] = { value: session.signed_id, httponly: true, same_site: :lax }
     end
