@@ -1,0 +1,41 @@
+name: Checks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  security:
+    name: Security
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      - name: Gem audit
+        run: bin/bundler-audit check --update
+
+      - name: Importmap audit
+        run: bin/importmap audit
+
+      - name: Brakeman audit
+        run: bin/brakeman --quiet --no-pager --exit-on-warn --exit-on-error
+
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      - name: Lint code for consistent style
+        run: bin/rubocop

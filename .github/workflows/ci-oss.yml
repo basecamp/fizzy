@@ -4,7 +4,7 @@ on:
   pull_request:
 
 jobs:
-  call-ci:
-    uses: ./.github/workflows/ci.yml
+  test:
+    uses: ./.github/workflows/test.yml
     with:
       saas: false
