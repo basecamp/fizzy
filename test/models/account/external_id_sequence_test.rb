@@ -5,7 +5,7 @@ class Account::ExternalIdSequenceTest < ActiveSupport::TestCase
     Account::ExternalIdSequence.delete_all
   end
 
-  test ".next returns sequential values" do
+  test "generate sequential values" do
     first_value = Account::ExternalIdSequence.next
     second_value = Account::ExternalIdSequence.next
     third_value = Account::ExternalIdSequence.next
@@ -14,7 +14,7 @@ class Account::ExternalIdSequenceTest < ActiveSupport::TestCase
     assert_equal second_value + 1, third_value
   end
 
-  test ".next initializes from maximum external_account_id" do
+  test "start from the maximum existing external account id" do
     max_id = Account.maximum(:external_account_id) || 0
 
     first_value = Account::ExternalIdSequence.next
@@ -22,13 +22,13 @@ class Account::ExternalIdSequenceTest < ActiveSupport::TestCase
     assert_equal max_id + 1, first_value
   end
 
-  test ".next creates single sequence record" do
+  test "use a single record for the sequence" do
     3.times { Account::ExternalIdSequence.next }
 
     assert_equal 1, Account::ExternalIdSequence.count
   end
 
-  test ".next is concurrency-safe" do
+  test "handle concurrent access safely" do
     values = 20.times.map do
       Thread.new do
         Account::ExternalIdSequence.next
