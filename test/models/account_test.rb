@@ -59,4 +59,22 @@ class AccountTest < ActiveSupport::TestCase
       account.system_user
     end
   end
+
+  test "external_account_id auto-increments on creation" do
+    account1 = Account.create!(name: "First Account")
+    account2 = Account.create!(name: "Second Account")
+
+    assert_not_nil account1.external_account_id
+    assert_not_nil account2.external_account_id
+    assert_equal account1.external_account_id + 1, account2.external_account_id
+  end
+
+  test "external_account_id can be overridden without creating sequence entry" do
+    custom_id = Account.last.id + 99999
+
+    assert_no_difference -> { ExternalAccount.count } do
+      account = Account.create!(name: "Custom ID Account", external_account_id: custom_id)
+      assert_equal custom_id, account.external_account_id
+    end
+  end
 end

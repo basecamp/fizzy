@@ -11,6 +11,7 @@ class Account < ApplicationRecord
 
   has_many_attached :uploads
 
+  before_create :assign_external_account_id
   after_create :create_join_code
 
   validates :name, presence: true
@@ -35,4 +36,9 @@ class Account < ApplicationRecord
   def system_user
     users.where(role: :system).first!
   end
+
+  private
+    def assign_external_account_id
+      self.external_account_id ||= ExternalAccount.create!.id
+    end
 end
