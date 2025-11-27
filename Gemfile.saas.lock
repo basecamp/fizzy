@@ -1,6 +1,7 @@
 GIT
   remote: https://github.com/basecamp/fizzy-saas
-  revision: 40f68d8604a1b410ba514f5793a93e9b11c00219
+  revision: 3b012b9ffa7c8fdc1e4b9f5aa7d866ed4108a8ff
+  branch: extract-signup
   specs:
     fizzy-saas (0.1.0)
       queenbee

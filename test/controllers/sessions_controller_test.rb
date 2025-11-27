@@ -21,14 +21,28 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "destroy" do
-    sign_in_as :kevin
-
+  test "create for a new user" do
     untenanted do
-      delete session_path
+      assert_difference -> { Identity.count }, +1 do
+        assert_difference -> { MagicLink.count }, +1 do
+          post session_path,
+            params: { email_address: "nonexistent-#{SecureRandom.hex(6)}@example.com" }
+        end
+      end
 
-      assert_redirected_to new_session_path
-      assert_not cookies[:session_token].present?
+      assert_redirected_to session_magic_link_path
     end
   end
+
+  private
+    test "destroy" do
+      sign_in_as :kevin
+
+      untenanted do
+        delete session_path
+
+        assert_redirected_to new_session_path
+        assert_not cookies[:session_token].present?
+      end
+    end
 end

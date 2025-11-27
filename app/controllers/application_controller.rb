@@ -4,7 +4,6 @@ class ApplicationController < ActionController::Base
   include CurrentRequest, CurrentTimezone, SetPlatform
   include RequestForgeryProtection
   include TurboFlash, ViewTransitions
-  include Saas
   include RoutingHeaders
 
   etag { "v1" }

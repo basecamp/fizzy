@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2025_11_25_130010) do
+ActiveRecord::Schema[8.2].define(version: 2025_11_27_000001) do
   create_table "accesses", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -23,6 +23,11 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_25_130010) do
     t.index ["board_id", "user_id"], name: "index_accesses_on_board_id_and_user_id", unique: true
     t.index ["board_id"], name: "index_accesses_on_board_id"
     t.index ["user_id"], name: "index_accesses_on_user_id"
+  end
+
+  create_table "account_external_id_sequences", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.bigint "value", default: 0, null: false
+    t.index ["value"], name: "index_account_external_id_sequences_on_value", unique: true
   end
 
   create_table "account_join_codes", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
