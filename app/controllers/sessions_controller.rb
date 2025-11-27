@@ -19,11 +19,9 @@ class SessionsController < ApplicationController
 
   def create
     if identity = Identity.find_by_email_address(email_address)
-      magic_link = identity.send_magic_link
-      flash[:magic_link_code] = magic_link&.code if Rails.env.development?
-      redirect_to session_magic_link_path
+      handle_existing_user(identity)
     elsif
-      process_new_signup
+      handle_new_signup
     end
   end
 
@@ -37,7 +35,13 @@ class SessionsController < ApplicationController
       params.expect(:email_address)
     end
 
-    def process_new_signup
+    def handle_existing_user(identity)
+      magic_link = identity.send_magic_link
+      flash[:magic_link_code] = magic_link&.code if Rails.env.development?
+      redirect_to session_magic_link_path
+    end
+
+    def handle_new_signup
       Signup.new(email_address: email_address).create_identity
       session[:return_to_after_authenticating] = new_signup_completion_path
       redirect_to session_magic_link_path
