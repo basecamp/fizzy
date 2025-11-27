@@ -1,4 +1,4 @@
-name: CI (PR)
+name: CI (OSS)
 
 on:
   pull_request:

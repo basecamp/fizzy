@@ -1,4 +1,4 @@
-name: CI (Main)
+name: CI (SaaS)
 
 on:
   push:
