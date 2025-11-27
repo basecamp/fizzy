@@ -2,7 +2,7 @@
 
 ## Setting up for development
 
-First get everything installed and configured with:
+First, get everything installed and configured with:
 
     bin/setup
 
