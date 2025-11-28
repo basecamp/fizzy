@@ -10,6 +10,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: .ruby-version
@@ -24,6 +27,8 @@ jobs:
       - name: Brakeman audit
         run: bin/brakeman --quiet --no-pager --exit-on-warn --exit-on-error
 
+      - name: Gitleaks audit
+        uses: gitleaks/gitleaks-action@v2
 
   lint:
     name: Lint
