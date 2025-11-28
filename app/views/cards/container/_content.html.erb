@@ -2,8 +2,8 @@
   <div data-turbo-permanent>
   <%= turbo_frame_tag card, :edit do %>
     <%# When canceling an edit (with the ESC key), restore the button area to show "Edit" instead of "Save changes". %>
-    <%= turbo_stream.update dom_id(card, :card_closure_toggle) do %>
-      <%= render "cards/container/closure_buttons", card: card %>
+    <%= turbo_stream.replace dom_id(card, :card_closure_toggle) do %>
+      <%= render "cards/container/closure", card: card %>
     <% end %>
 
     <%= render "cards/container/content_display", card: card %>

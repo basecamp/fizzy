@@ -1,5 +1,5 @@
 <%= turbo_frame_tag @card, :edit do %>
-  <%# When entering edit mode, this turbo-stream replaces the button area to show
+  <%# When entering edit mode, this turbo-stream updates the button area to show
       "Save changes" instead of "Edit". Turbo processes this stream as part of the
       frame response. %>
   <%= turbo_stream.update dom_id(@card, :card_closure_toggle) do %>
