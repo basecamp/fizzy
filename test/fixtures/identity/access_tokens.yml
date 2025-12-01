@@ -1,11 +1,13 @@
 jasons_api_token:
   identity: jason
+  session: jason_api
   token: 018cf1425682700098f24f0799e3fe20
   description: My Superscript
   permission: read
 
 davids_api_token:
   identity: david
+  session: david_api
   token: x18cf1425682700098f24f0799e3fe20
   description: My Superscript
   permission: write

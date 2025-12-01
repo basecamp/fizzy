@@ -2,6 +2,7 @@ class CreateIdentityAccessTokens < ActiveRecord::Migration[8.2]
   def change
     create_table :identity_access_tokens, id: :uuid do |t|
       t.uuid :identity_id, null: false
+      t.uuid :session_id, null: false
       t.string :token
       t.string :permission
       t.text :description
