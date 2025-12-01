@@ -1,14 +1,26 @@
 require "test_helper"
 
 class ApiTest < ActionDispatch::IntegrationTest
+  setup do
+    @davids_bearer_token = bearer_token_env(identity_access_tokens(:davids_api_token).token)
+  end
+
   test "authenticate with valid access token" do
-    get boards_path(format: :json), env: bearer_token_env(identity_access_tokens(:jasons_api_token).token)
+    get boards_path(format: :json), env: @davids_bearer_token
     assert_response :success
   end
 
   test "fail to authenticate with invalid access token" do
     get boards_path(format: :json), env: bearer_token_env("nonsense")
     assert_response :unauthorized
+  end
+
+  test "boards" do
+    get boards_path(format: :json), env: @davids_bearer_token
+    assert_equal users(:david).boards.count, @response.parsed_body.count
+
+    get board_path(boards(:writebook), format: :json), env: @jasons_bearer_token
+    assert_equal boards(:writebook).name, @response.parsed_body["name"]
   end
 
   private
