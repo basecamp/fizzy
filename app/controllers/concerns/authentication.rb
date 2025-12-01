@@ -46,7 +46,7 @@ module Authentication
     end
 
     def resume_session
-      if session = find_session_by_cookie
+      if session = find_session_by_cookie || find_or_start_session_by_bearer_token
         set_current_session session
       end
     end
@@ -55,12 +55,30 @@ module Authentication
       Session.find_signed(cookies.signed[:session_token])
     end
 
-    def request_authentication
-      if Current.account.present?
-        session[:return_to_after_authenticating] = request.url
+    def find_or_start_session_by_bearer_token
+      if request_authorized_by_bearer_token?
+        Identity::AccessToken.find_by(token: authorization_bearer_token)&.session
       end
+    end
 
-      redirect_to_login_url
+    def request_authorized_by_bearer_token?
+      request.authorization.to_s.starts_with? "Bearer"
+    end
+
+    def authorization_bearer_token
+      request.authorization.to_s.split(" ", 2).second
+    end
+
+    def request_authentication
+      if request_authorized_by_bearer_token?
+        head :unauthorized
+      else
+        if Current.account.present?
+          session[:return_to_after_authenticating] = request.url
+        end
+
+        redirect_to_login_url
+      end
     end
 
     def after_authentication_url

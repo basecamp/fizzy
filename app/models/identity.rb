@@ -1,6 +1,7 @@
 class Identity < ApplicationRecord
   include Joinable, Transferable
 
+  has_many :access_tokens, dependent: :destroy
   has_many :magic_links, dependent: :destroy
   has_many :sessions, dependent: :destroy
   has_many :users, dependent: :nullify
