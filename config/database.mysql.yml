@@ -8,13 +8,28 @@ default: &default
   timeout: 5000
 
 development:
-  <<: *default
-  database: fizzy_development
+  primary:
+    <<: *default
+    database: fizzy_development
+  cable:
+    <<: *default
+    database: fizzy_development_cable
+    migrations_paths: db/cable_migrate
 
 test:
-  <<: *default
-  database: fizzy_test
+  primary:
+    <<: *default
+    database: fizzy_test
+  cable:
+    <<: *default
+    database: fizzy_test_cable
+    migrations_paths: db/cable_migrate
 
 production:
-  <<: *default
-  database: fizzy_production
+  primary:
+    <<: *default
+    database: fizzy_production
+  cable:
+    <<: *default
+    database: fizzy_production_cable
+    migrations_paths: db/cable_migrate

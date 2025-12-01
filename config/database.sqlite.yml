@@ -8,15 +8,27 @@ development:
     <<: *default
     database: storage/development.sqlite3
     schema_dump: schema_sqlite.rb
+  cable:
+    <<: *default
+    database: storage/development_cable.sqlite3
+    migrations_paths: db/cable_migrate
 
 test:
   primary:
     <<: *default
     database: storage/test.sqlite3
     schema_dump: schema_sqlite.rb
+  cable:
+    <<: *default
+    database: storage/test_cable.sqlite3
+    migrations_paths: db/cable_migrate
 
 production:
   primary:
     <<: *default
     database: storage/production.sqlite3
     schema_dump: schema_sqlite.rb
+  cable:
+    <<: *default
+    database: storage/production_cable.sqlite3
+    migrations_paths: db/cable_migrate
