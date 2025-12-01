@@ -19,7 +19,7 @@ class ApiTest < ActionDispatch::IntegrationTest
     get boards_path(format: :json), env: @davids_bearer_token
     assert_equal users(:david).boards.count, @response.parsed_body.count
 
-    get board_path(boards(:writebook), format: :json), env: @jasons_bearer_token
+    get board_path(boards(:writebook), format: :json), env: @davids_bearer_token
     assert_equal boards(:writebook).name, @response.parsed_body["name"]
   end
 
