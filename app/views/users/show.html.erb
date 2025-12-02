@@ -28,9 +28,9 @@
 
       <div class="flex-inline center justify-center flex-wrap gap">
         <%= link_to "Which cards are assigned to #{me_or_you}?",
-              cards_path(assignee_ids: [ @user.id ], sorted_by: "newest"), class: "btn", data: { turbo_frame: "_top" } %>
+              cards_path(assignee_ids: [ @user.id ], sorted_by: "newest"), class: "btn btn--link", data: { turbo_frame: "_top" } %>
         <%= link_to "Which cards were added by #{me_or_you}?",
-              cards_path(creator_ids: [ @user.id ], sorted_by: "newest"), class: "btn", data: { turbo_frame: "_top" } %>
+              cards_path(creator_ids: [ @user.id ], sorted_by: "newest"), class: "btn btn--link", data: { turbo_frame: "_top" } %>
       </div>
     </div>
   </section>
@@ -38,10 +38,11 @@
   <% if Current.user == @user %>
     <section class="panel shadow" style="--panel-size: 45ch;">
       <%= render "users/transfer", user: @user %>
+      <%= render "users/developer", user: @user %>
 
       <div class="center margin-block-start-double">
         <%= button_to session_url(script_name: nil), method: :delete, class: "btn btn--plain txt-link txt-small", data: { turbo: false } do %>
-        <span>Sign out</span>
+        <span>Sign out of Fizzy</span>
       <% end %>
       </div>
     </section>
