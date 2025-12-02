@@ -1,4 +1,4 @@
-<tr>
+<tr style="view-transition-name: <%= dom_id(access_token) %>">
   <td><strong><%= access_token.description %></strong></td>
   <td><%= access_token.permission.humanize %></td>
   <td><%= local_datetime_tag access_token.created_at, style: :datetime %></td>
