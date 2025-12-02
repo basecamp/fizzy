@@ -59,8 +59,10 @@ module Authentication
       authorization_scheme, bearer_token = request.authorization.to_s.split(" ", 2)
 
       if authorization_scheme == "Bearer" && bearer_token.present?
-        if identity = Identity.find_by_access_token(bearer_token)
-          Current.identity = identity
+        access_token = Identity::AccessToken.find_by(token: bearer_token)
+
+        if access_token && access_token.allows?(request.method)
+          Current.identity = access_token.identity
         else
           head :unauthorized
         end
