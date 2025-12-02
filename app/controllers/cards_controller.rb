@@ -10,8 +10,17 @@ class CardsController < ApplicationController
   end
 
   def create
-    card = @board.cards.find_or_create_by!(creator: Current.user, status: "drafted")
-    redirect_to card
+    respond_to do |format|
+      format.html do
+        card = @board.cards.find_or_create_by!(creator: Current.user, status: "drafted")
+        redirect_to card
+      end
+
+      format.json do
+        card = @board.cards.create! card_params.merge(creator: Current.user)
+        head :created, location: card_path(card, format: :json)
+      end
+    end
   end
 
   def show

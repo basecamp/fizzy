@@ -40,6 +40,14 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert_equal "My new board", @response.parsed_body["name"]
   end
 
+  test "create card" do
+    post board_cards_path(boards(:writebook), format: :json), params: { card: { title: "My new card" } }, env: @davids_bearer_token
+    assert_equal card_path(Card.last, format: :json), @response.headers["Location"]
+
+    get card_path(Card.last, format: :json), env: @davids_bearer_token
+    assert_equal "My new card", @response.parsed_body["title"]
+  end
+
   private
     def bearer_token_env(token)
       { "HTTP_AUTHORIZATION" => "Bearer #{token}" }
