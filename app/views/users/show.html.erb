@@ -38,7 +38,7 @@
   <% if Current.user == @user %>
     <section class="panel shadow" style="--panel-size: 45ch;">
       <%= render "users/transfer", user: @user %>
-      <%= render "users/developer", user: @user %>
+      <%= render "users/developer" %>
 
       <div class="center margin-block-start-double">
         <%= button_to session_url(script_name: nil), method: :delete, class: "btn btn--plain txt-link txt-small", data: { turbo: false } do %>
