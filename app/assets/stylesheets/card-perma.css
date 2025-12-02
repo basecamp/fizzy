@@ -161,7 +161,7 @@
       z-index: 1;
     }
 
-    &:has([data-controller="tooltip"]:hover) {
+    &:has([data-controller~="tooltip"]:hover) {
       z-index: var(--z-tooltip);
     }
   }

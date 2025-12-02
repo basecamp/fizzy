@@ -10,7 +10,7 @@
     <%= form.text_field :code, required: true, class: "input center txt-align-enter txt-large",
         autofocus: true, autocorrect: "off", autocapitalize: "off", spellcheck: "false", "data-1p-ignore": true,
         autocomplete: "one-time-code", maxlength: "6", placeholder: "••••••", value: params[:code],
-        data: { magic_link_target: "input", action: "keydown.enter->magic-link#submit paste->magic-link#paste" } %>
+        data: { magic_link_target: "input", action: "keydown.enter->magic-link#submit paste->magic-link#submit" } %>
   <% end %>
 
   <p class="txt-small">The code you receive will work for <%= distance_of_time_in_words(MagicLink::EXPIRATION_TIME) %>.</p>
