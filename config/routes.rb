@@ -15,6 +15,7 @@ Rails.application.routes.draw do
       resource :events
 
       resources :push_subscriptions
+      resources :access_tokens
 
       resources :email_addresses, param: :token do
         resource :confirmation, module: :email_addresses
