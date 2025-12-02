@@ -32,7 +32,7 @@ module Authentication
 
   private
     def authenticated?
-      Current.session.present?
+      Current.identity.present?
     end
 
     def require_account
@@ -42,11 +42,11 @@ module Authentication
     end
 
     def require_authentication
-      resume_session || request_authentication
+      resume_session || authenticate_by_bearer_token || request_authentication
     end
 
     def resume_session
-      if session = find_session_by_cookie || find_session_by_bearer_token
+      if session = find_session_by_cookie
         set_current_session session
       end
     end
@@ -55,9 +55,11 @@ module Authentication
       Session.find_signed(cookies.signed[:session_token])
     end
 
-    def find_session_by_bearer_token
+    def authenticate_by_bearer_token
       if request_authorized_by_bearer_token?
-        Identity::AccessToken.find_by(token: authorization_bearer_token)&.session
+        if access_token = Identity::AccessToken.find_by(token: authorization_bearer_token)
+          Current.identity = access_token.identity
+        end
       end
     end
 
