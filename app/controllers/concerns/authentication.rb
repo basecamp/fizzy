@@ -56,21 +56,15 @@ module Authentication
     end
 
     def authenticate_by_bearer_token
-      if request_authorized_by_bearer_token?
-        if access_token = Identity::AccessToken.find_by(token: authorization_bearer_token)
+      scheme, bearer_token = request.authorization.to_s.split(" ", 2)
+
+      if scheme == "Bearer" && bearer_token.present?
+        if access_token = Identity::AccessToken.find_by(token: bearer_token)
           Current.identity = access_token.identity
         else
           head :unauthorized
         end
       end
-    end
-
-    def request_authorized_by_bearer_token?
-      request.authorization.to_s.starts_with? "Bearer"
-    end
-
-    def authorization_bearer_token
-      request.authorization.to_s.split(" ", 2).second
     end
 
     def request_authentication
