@@ -34,7 +34,7 @@ class ApiTest < ActionDispatch::IntegrationTest
 
   test "create board" do
     post boards_path(format: :json), params: { board: { name: "My new board" } }, env: @davids_bearer_token
-    assert_equal board_path(Board.last), @response.headers["Location"]
+    assert_equal board_path(Board.last, format: :json), @response.headers["Location"]
 
     get board_path(Board.last, format: :json), env: @davids_bearer_token
     assert_equal "My new board", @response.parsed_body["name"]
