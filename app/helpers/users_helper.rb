@@ -7,6 +7,6 @@ module UsersHelper
   end
 
   def access_token_permission_options
-    Identity::AccessToken.permissions.keys.map { |it| [ it.humanize, it ] }
+    Identity::AccessToken.permissions.keys.map { [ it.humanize, it ] }
   end
 end
