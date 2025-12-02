@@ -41,6 +41,8 @@ gem "useragent", bc: "useragent"
 gem "autotuner"
 gem "mission_control-jobs"
 gem "benchmark" # indirect dependency, being removed from Ruby 3.5 stdlib so here to quash warnings
+gem "console1984", bc: "console1984"
+gem "audits1984", bc: "audits1984"
 
 group :development, :test do
   gem "brakeman", require: false

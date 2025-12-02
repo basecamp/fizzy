@@ -1,4 +1,25 @@
 GIT
+  remote: https://github.com/basecamp/audits1984
+  revision: c790eaec0716c8df56b3d0ab5bf5d75e3e1b0ed0
+  specs:
+    audits1984 (0.1.7)
+      console1984
+      importmap-rails (>= 1.2.1)
+      rinku
+      rouge
+      turbo-rails
+
+GIT
+  remote: https://github.com/basecamp/console1984
+  revision: 02b1b9ee7fd7050174b6a98c2b43057553621dc4
+  specs:
+    console1984 (0.2.2)
+      irb (~> 1.13)
+      parser
+      rails (>= 7.0)
+      rainbow
+
+GIT
   remote: https://github.com/basecamp/useragent
   revision: 433ca320a42db1266c4b89df74d0abdb9a880c5e
   specs:
@@ -360,6 +381,7 @@ GEM
     reline (0.6.3)
       io-console (~> 0.5)
     rexml (3.4.4)
+    rinku (2.0.6)
     rouge (4.6.1)
     rqrcode (3.1.1)
       chunky_png (~> 1.0)
@@ -502,6 +524,7 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
+  audits1984!
   autotuner
   aws-sdk-s3
   bcrypt (~> 3.1.7)
@@ -510,6 +533,7 @@ DEPENDENCIES
   brakeman
   bundler-audit
   capybara
+  console1984!
   debug
   faker
   geared_pagination (~> 1.2)
