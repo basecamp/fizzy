@@ -59,6 +59,8 @@ module Authentication
       if request_authorized_by_bearer_token?
         if access_token = Identity::AccessToken.find_by(token: authorization_bearer_token)
           Current.identity = access_token.identity
+        else
+          head :unauthorized
         end
       end
     end
@@ -72,15 +74,11 @@ module Authentication
     end
 
     def request_authentication
-      if request_authorized_by_bearer_token?
-        head :unauthorized
-      else
-        if Current.account.present?
-          session[:return_to_after_authenticating] = request.url
-        end
-
-        redirect_to_login_url
+      if Current.account.present?
+        session[:return_to_after_authenticating] = request.url
       end
+
+      redirect_to_login_url
     end
 
     def after_authentication_url
