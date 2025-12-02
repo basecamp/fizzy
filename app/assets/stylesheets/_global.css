@@ -45,7 +45,7 @@
 
   /* Components */
   --btn-size: 2.65em;
-  --footer-height: 2.65rem;
+  --bar-height: 2.65rem;
   --tray-size: clamp(12rem, 25dvw, 24rem);
 
   /* Focus rings for keyboard navigation */
@@ -63,7 +63,7 @@
   --ease-out-overshoot-subtle: cubic-bezier(0.25, 1.25, 0.5, 1);
 
   @media (max-width: 799px) {
-    --tray-size: var(--footer-height);
+    --tray-size: var(--bar-height);
   }
 
   /* Layout */

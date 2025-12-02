@@ -6,25 +6,44 @@
     &.public {
       grid-template-rows: auto 1fr auto;
     }
+
+    @media (max-width: 639px) {
+      &.contained-scrolling {
+        block-size: 100dvh;
+        grid-template-rows: 1fr var(--bar-height);
+      }
+    }
+  }
+
+  :where(#header) {
+    position: relative;
+    z-index: var(--z-nav);
+  }
+
+  @media (max-width: 639px) {
+    :where(.contained-scrolling #global-container) {
+      overflow: hidden;
+    }
+
+    :where(:not(.contained-scrolling) #global-container) {
+      display: contents;
+    }
   }
 
   :where(#main) {
     inline-size: 100dvw;
     margin-inline: auto;
     max-inline-size: 100dvw;
+    overflow: auto;
+    padding-block-end: 1.5rem;
     padding-inline:
       calc(var(--main-padding) + env(safe-area-inset-left))
       calc(var(--main-padding) + env(safe-area-inset-right));
     text-align: center;
-  }
 
-  :where(#footer) {
-    max-inline-size: 100dvw;
-  }
-
-  :where(#header) {
-    position: relative;
-    z-index: var(--z-nav);
+    @media (min-width: 800px) {
+      padding-block-end: 6rem; /* Room for cards in the tray */
+    }
   }
 
   :is(#header, #footer) {

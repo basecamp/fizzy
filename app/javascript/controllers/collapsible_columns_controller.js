@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 import { nextFrame, debounce } from "helpers/timing_helpers";
 
 export default class extends Controller {
-  static classes = [ "collapsed", "noTransitions", "titleNotVisible" ]
+  static classes = [ "collapsed", "noTransitions" ]
   static targets = [ "column", "button", "title" ]
   static values = {
     board: String
@@ -14,14 +14,6 @@ export default class extends Controller {
 
   async connect() {
     await this.#restoreColumnsDisablingTransitions()
-    this.#setupIntersectionObserver()
-  }
-
-  disconnect() {
-    if (this._intersectionObserver) {
-      this._intersectionObserver.disconnect()
-      this._intersectionObserver = null
-    }
   }
 
   toggle({ target }) {
@@ -120,24 +112,5 @@ export default class extends Controller {
 
   #localStorageKeyFor(column) {
     return `expand-${this.boardValue}-${column.getAttribute("id")}`
-  }
-
-  #setupIntersectionObserver() {
-    if (typeof IntersectionObserver === "undefined") return
-    if (this._intersectionObserver) this._intersectionObserver.disconnect()
-
-    this._intersectionObserver = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        const title = entry.target
-        const column = title.closest(".cards")
-
-        if (!column) return
-
-        const offscreen = entry.intersectionRatio === 0
-        column.classList.toggle(this.titleNotVisibleClass, offscreen)
-      })
-    }, { threshold: [0] })
-
-    this.titleTargets.forEach(title => this._intersectionObserver.observe(title))
   }
 }

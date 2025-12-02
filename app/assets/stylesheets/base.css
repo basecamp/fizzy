@@ -96,7 +96,8 @@
   }
 
   /* Turbo */
-  turbo-frame {
+  turbo-frame,
+  turbo-cable-stream-source {
     display: contents;
   }
 

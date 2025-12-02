@@ -9,7 +9,7 @@
     --tray-item-height: 76px; /* FIXME: Magic number */
 
     align-items: end;
-    block-size: var(--footer-height);
+    block-size: var(--bar-height);
     display: grid;
     inset-block: auto env(safe-area-inset-bottom);
     inline-size: var(--tray-size);
@@ -51,11 +51,11 @@
       box-shadow:
         0 0 0 1px var(--color-ink-lighter),
         0 0 16px oklch(var(--lch-black) / 33%);
-      inset-block-end: calc(var(--footer-height) - 0.75ch);
+      inset-block-end: calc(var(--bar-height) - 0.75ch);
     }
 
     &:not([open]) {
-      block-size: var(--footer-height);
+      block-size: var(--bar-height);
       pointer-events: none;
 
       /* On desktop, when there aren't items, tweak the hat so it doesn't look
@@ -94,7 +94,7 @@
     @media (max-width: 799px) {
       /* When collapsed on mobile, make it small */
       .tray__dialog:not([open]) ~ & {
-        inline-size: var(--footer-height);
+        inline-size: var(--bar-height);
 
         .tray__toggle-btn {
           border: 0;

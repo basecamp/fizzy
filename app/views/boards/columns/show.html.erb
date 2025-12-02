@@ -13,11 +13,13 @@
 <section class="cards cards--grid">
   <%= turbo_frame_tag @column, :cards do %>
     <% if @page.used? %>
-      <%= with_automatic_pagination dom_id(@column, :cards), @page do %>
-        <%= render "boards/columns/list", cards: @page.records, draggable: true %>
-      <% end %>
+      <div class="cards__list hide-scrollbar">
+        <%= with_automatic_pagination dom_id(@column, :cards), @page do %>
+          <%= render "boards/columns/list", cards: @page.records, draggable: true %>
+        <% end %>
+      </div>
     <% else %>
-      <div class="cards__list">
+      <div class="cards__list hide-scrollbar">
         <div class="card blank-slate blank-slate--card">
           <p class="txt-align-center">Drag cards here</p>
           <p class="txt-align-center blank-slate-for-grid">Nothing here</p>
