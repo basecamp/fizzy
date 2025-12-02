@@ -82,7 +82,7 @@ gum style --foreground 111 --bold "  ∘˚˳°∘°  𝒻𝒾𝓏𝓏𝓎  °∘
 echo
 
 step "Installing Ruby" mise install --yes
-eval "$(mise hook-env)"
+eval "$(mise hook-env -s bash)"
 
 if which pacman >/dev/null 2>&1; then
   packages=(imagemagick mariadb-libs openslide libvips gitleaks)
