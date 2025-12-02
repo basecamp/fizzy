@@ -56,9 +56,9 @@ module Authentication
     end
 
     def authenticate_by_bearer_token
-      scheme, bearer_token = request.authorization.to_s.split(" ", 2)
+      authorization_scheme, bearer_token = request.authorization.to_s.split(" ", 2)
 
-      if scheme == "Bearer" && bearer_token.present?
+      if authorization_scheme == "Bearer" && bearer_token.present?
         if access_token = Identity::AccessToken.find_by(token: bearer_token)
           Current.identity = access_token.identity
         else
