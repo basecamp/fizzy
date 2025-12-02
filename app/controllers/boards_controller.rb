@@ -22,7 +22,11 @@ class BoardsController < ApplicationController
 
   def create
     @board = Board.create! board_params.with_defaults(all_access: true)
-    redirect_to board_path(@board)
+
+    respond_to do |format|
+      format.html { redirect_to board_path(@board) }
+      format.json { head :created, location: board_path(@board) }
+    end
   end
 
   def edit

@@ -21,15 +21,23 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert_response :unauthorized
 
     post boards_path(format: :json), params: { board: { name: "My new board" } }, env: @davids_bearer_token
-    assert_response :redirect
+    assert_response :success
   end
 
-  test "boards" do
+  test "get boards" do
     get boards_path(format: :json), env: @davids_bearer_token
     assert_equal users(:david).boards.count, @response.parsed_body.count
 
     get board_path(boards(:writebook), format: :json), env: @davids_bearer_token
     assert_equal boards(:writebook).name, @response.parsed_body["name"]
+  end
+
+  test "create board" do
+    post boards_path(format: :json), params: { board: { name: "My new board" } }, env: @davids_bearer_token
+    assert_equal board_path(Board.last), @response.headers["Location"]
+
+    get board_path(Board.last, format: :json), env: @davids_bearer_token
+    assert_equal "My new board", @response.parsed_body["name"]
   end
 
   private
