@@ -126,7 +126,7 @@ end
 If a module only has private methods, we mark it `private` at the top and add an extra new line after but don't indent.
 
 ```ruby
-class SomeModule
+module SomeModule
   private
   
   def some_private_method
