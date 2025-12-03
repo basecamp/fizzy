@@ -48,6 +48,14 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert_equal "My new card", @response.parsed_body["title"]
   end
 
+  test "get tags" do
+    tags = users(:david).account.tags.all.alphabetically
+    
+    get tags_path(format: :json), env: @davids_bearer_token
+    assert_equal tags.count, @response.parsed_body.count
+    assert_equal tags.pluck(:title), @response.parsed_body.pluck("title")
+  end
+
   test "get users" do
     get users_path(format: :json), env: @davids_bearer_token
     assert_equal users(:david).account.users.active.count, @response.parsed_body.count
