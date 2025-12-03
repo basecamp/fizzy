@@ -48,6 +48,14 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert_equal "My new card", @response.parsed_body["title"]
   end
 
+  test "get users" do
+    get users_path(format: :json), env: @davids_bearer_token
+    assert_equal users(:david).account.users.active.count, @response.parsed_body.count
+
+    get user_path(users(:david), format: :json), env: @davids_bearer_token
+    assert_equal users(:david).name, @response.parsed_body["name"]
+  end
+
   private
     def bearer_token_env(token)
       { "HTTP_AUTHORIZATION" => "Bearer #{token}" }
