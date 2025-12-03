@@ -13,11 +13,7 @@ json.cache! [ card, card.column&.color ] do
   end
 
   json.column do
-    if card.column
-      json.partial! "columns/column", column: card.column
-    else
-      nil
-    end
+    json.partial! "columns/column", column: card.column if card.column
   end
 
   json.creator do
