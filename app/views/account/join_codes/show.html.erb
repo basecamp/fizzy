@@ -2,13 +2,7 @@
 
 <% content_for :header do %>
   <div class="header__actions header__actions--start">
-    <%= link_to account_settings_path, class: "btn btn--back borderless txt-medium", data: { controller: "hotkey", action: "keydown.left@document->hotkey#click" } do %>
-      <span class="overflow-ellipsis flex align-center">
-        <%= icon_tag "arrow-left" %>
-        <strong>Back to Account Settings</strong>
-        <kbd class="txt-x-small margin-inline-start hide-on-touch">&larr;</kbd>
-      </span>
-    <% end %>
+    <%= back_link_to "Account Settings", account_settings_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
   </div>
 <% end %>
 

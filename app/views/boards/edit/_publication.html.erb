@@ -34,7 +34,7 @@
             placeholder: "Add a public note about this board…",
             data: { action: "keydown.ctrl+enter->form#submit:prevent keydown.meta+enter->form#submit:prevent keydown.esc->form#cancel:stop" },
             readonly: !Current.user.can_administer_board?(@board) %>
-          <%= form.button "Save changes", type: :submit, class: "btn txt-small" %>
+          <%= form.button "Save changes", type: :submit, class: "btn txt-small", title: "Save changes (#{ hotkey_label(["ctrl", "enter"]) })" %>
         <% end %>
       </div>
     </div>

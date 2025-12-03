@@ -3,5 +3,5 @@
     <%= turbo_stream_from board %>
   <% end %>
 <% else %>
-  <%= turbo_stream_from :all_boards %>
+  <%= turbo_stream_from [ Current.account, :all_boards ] %>
 <% end %>

@@ -4,16 +4,12 @@ import { onNextEventLoopTick } from "helpers/timing_helpers"
 export default class extends Controller {
   static targets = [ "input" ]
 
-  submit(event) {
+  submit() {
     onNextEventLoopTick(() => {
-      this.inputTarget.disabled = true
-    })
-  }
-
-  paste(event) {
-    onNextEventLoopTick(() => {
-      this.element.submit()
-      this.inputTarget.disabled = true
+      if (!this.inputTarget.disabled) {
+        this.element.submit()
+        this.inputTarget.disabled = true
+      }
     })
   }
 }

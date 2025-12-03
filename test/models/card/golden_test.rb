@@ -24,4 +24,19 @@ class Card::GoldenTest < ActiveSupport::TestCase
     assert_includes Card.golden, cards(:logo)
     assert_not_includes Card.golden, cards(:text)
   end
+
+  test "gilding a card touches both the card and the board" do
+    card = cards(:text)
+    board = card.board
+
+    card_updated_at = card.updated_at
+    board_updated_at = board.updated_at
+
+    travel 1.minute do
+      card.gild
+    end
+
+    assert card.reload.updated_at > card_updated_at
+    assert board.reload.updated_at > board_updated_at
+  end
 end

@@ -5,6 +5,7 @@ Rails.application.routes.draw do
     resource :join_code
     resource :settings
     resource :entropy
+    resources :exports, only: [ :create, :show ]
   end
 
   resources :users do

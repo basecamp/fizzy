@@ -1,0 +1,7 @@
+<%= collapsible_nav_section "Shortcuts", class: "nav__section popup__section nav__section--secret" do %>
+  <%= filter_place_menu_item cards_path(indexed_by: :golden), "Golden cards", "filter" %>
+  <%= filter_place_menu_item cards_path(indexed_by: :stalled), "Stalled cards", "filter" %>
+  <%= filter_place_menu_item cards_path(indexed_by: :postponing_soon), "Cards closing soon", "filter" %>
+  <%= filter_place_menu_item cards_path(creation: "today"), "Added today", "filter" %>
+  <%= filter_place_menu_item cards_path(closure: "today"), "Done today", "filter" %>
+<% end %>

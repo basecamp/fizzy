@@ -3,7 +3,7 @@
     .autoresize__wrapper {
       display: grid !important;
       position: relative;
-    
+
       > *, &::after {
         grid-area: 1 / 1 / 2 / 2;
       }
@@ -12,6 +12,7 @@
         content: attr(data-autoresize-clone-value) " ";
         font: inherit;
         line-height: inherit;
+        padding-block: var(--autosize-block-padding, 0);
         visibility: hidden;
         white-space: pre-wrap;
       }

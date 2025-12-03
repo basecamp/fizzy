@@ -190,7 +190,7 @@
     gap: var(--inline-space-half);
     grid-template-columns: repeat(10, 1fr);
 
-    @media (max-width: 630px) {
+    @media (max-width: 639px) {
       grid-template-columns: repeat(6, 1fr);
     }
 

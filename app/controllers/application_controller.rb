@@ -1,6 +1,7 @@
 class ApplicationController < ActionController::Base
   include Authentication
   include Authorization
+  include BlockSearchEngineIndexing
   include CurrentRequest, CurrentTimezone, SetPlatform
   include RequestForgeryProtection
   include TurboFlash, ViewTransitions

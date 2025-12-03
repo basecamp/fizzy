@@ -108,7 +108,7 @@
   }
 
   /* Make a normal button circular on mobile */
-  @media (max-width: 640px) {
+  @media (max-width: 639px) {
     .btn--circle-mobile {
       --btn-size: 3em;
       --btn-padding: 0;

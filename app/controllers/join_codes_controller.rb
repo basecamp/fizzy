@@ -20,12 +20,7 @@ class JoinCodesController < ApplicationController
     elsif identity == Current.identity
       redirect_to new_users_join_url(script_name: @join_code.account.slug)
     else
-      terminate_session if Current.identity
-
-      magic_link = identity.send_magic_link
-      flash[:magic_link_code] = magic_link&.code if Rails.env.development?
-
-      session[:return_to_after_authenticating] = new_users_join_url(script_name: @join_code.account.slug)
+      logout_and_send_new_magic_link(identity)
       redirect_to session_magic_link_url(script_name: nil)
     end
   end
@@ -41,5 +36,14 @@ class JoinCodesController < ApplicationController
       elsif !@join_code.active?
         render :inactive, status: :gone
       end
+    end
+
+    def logout_and_send_new_magic_link(identity)
+      terminate_session if Current.identity
+
+      magic_link = identity.send_magic_link
+      serve_development_magic_link(magic_link)
+
+      session[:return_to_after_authenticating] = new_users_join_url(script_name: @join_code.account.slug)
     end
 end

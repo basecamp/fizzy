@@ -1,0 +1,29 @@
+<% if @export.present? %>
+  <% @page_title = "Download Export" %>
+<% else %>
+  <% @page_title = "Download Expired" %>
+<% end %>
+
+<% content_for :header do %>
+  <div class="header__actions header__actions--start">
+    <%= back_link_to "Account Settings", account_settings_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+  </div>
+<% end %>
+
+<div class="panel panel--wide shadow center flex flex-column gap">
+  <h2 class="txt-large margin-none font-weight-black"><%= @page_title %></h2>
+
+  <% if @export.present? %>
+    <p class="margin-none-block-start">Your export is ready. The download should start automatically.</p>
+
+    <%= link_to rails_blob_path(@export.file, disposition: "attachment"),
+          id: "download-link",
+          class: "btn btn--link",
+          data: { turbo: false, controller: "auto-click" } do %>
+      Download your data
+    <% end %>
+  <% else %>
+    <p class="margin-none-block-start">That download link has expired. You’ll need to <%= link_to "request a new export", account_settings_path, class: "txt-lnk" %>.</p>
+  <% end %>
+
+</div>

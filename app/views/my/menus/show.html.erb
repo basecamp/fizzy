@@ -1,10 +1,10 @@
 <%= turbo_frame_tag "my_menu", target: "_top" do %>
   <%= render "my/menus/jump" do %>
     <%= render "my/menus/boards", boards: @boards %>
-    <%= render "my/menus/custom_views", filters: @filters %>
     <%= render "my/menus/tags", tags: @tags %>
     <%= render "my/menus/people", users: @users %>
     <%= render "my/menus/settings" %>
+    <%= render "my/menus/shortcuts" %>
     <%= render "my/menus/accounts", accounts: Current.identity.accounts %>
   <% end %>
 

@@ -59,11 +59,27 @@
 
     .card__title {
       font-size: clamp(var(--text-medium), 6vw, var(--text-x-large));
+      margin-block-end: 0.5ch;
+
+      /* With tight line spacing, Windows will cover over adjacent lines of text
+      * when input text is selected. Here, we're setting the selection color to a
+      * transparent value so the overlapping text lines are at least visible. */
+      ::selection {
+        background: oklch(var(--lch-blue-light) / 0.5);
+      }
+
+      &:has(textarea) {
+        margin-block-end: 0;
+
+        @supports not (field-sizing: content) {
+          text-wrap: unset; /* Safari is annoying if you have text-wrap: balance in textareas */
+        }
+      }
     }
 
     .card__meta,
     .card__stages {
-      @media (min-width: 639px) {
+      @media (min-width: 640px) {
         font-size: var(--text-small);
       }
     }
@@ -117,14 +133,14 @@
       inset: calc(var(--bubble-size) / -4) calc(var(--bubble-size) / 1.5) auto auto;
       translate: 0 0;
 
-      @media (max-width: 800px) {
+      @media (max-width: 799px) {
         --bubble-size: 4.5rem;
 
         inset: calc(var(--bubble-size) / 1.5) 0 auto auto;
       }
     }
 
-    @media (max-width: 800px) {
+    @media (max-width: 799px) {
       --padding-inline: var(--main-padding);
 
       column-gap: 0;
@@ -164,7 +180,7 @@
       z-index: 1;
     }
 
-    &:has([data-controller="tooltip"]:hover) {
+    &:has([data-controller~="tooltip"]:hover) {
       z-index: var(--z-tooltip);
     }
   }
@@ -172,7 +188,7 @@
   .card-perma__actions--left { grid-area: actions-left; }
   .card-perma__actions--right { grid-area: actions-right; }
 
-  @media (max-width: 800px) {
+  @media (max-width: 799px) {
     .card-perma__actions {
       display: flex;
       padding-inline: var(--padding-inline);

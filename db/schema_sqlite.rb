@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2025_11_29_175717) do
+ActiveRecord::Schema[8.2].define(version: 2025_12_01_100607) do
   create_table "accesses", id: :uuid, force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -23,6 +23,17 @@ ActiveRecord::Schema[8.2].define(version: 2025_11_29_175717) do
     t.index ["board_id", "user_id"], name: "index_accesses_on_board_id_and_user_id", unique: true
     t.index ["board_id"], name: "index_accesses_on_board_id"
     t.index ["user_id"], name: "index_accesses_on_user_id"
+  end
+
+  create_table "account_exports", id: :uuid, force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.string "status", limit: 255, default: "pending", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "user_id", null: false
+    t.index ["account_id"], name: "index_account_exports_on_account_id"
+    t.index ["user_id"], name: "index_account_exports_on_user_id"
   end
 
   create_table "account_external_id_sequences", id: :uuid, force: :cascade do |t|

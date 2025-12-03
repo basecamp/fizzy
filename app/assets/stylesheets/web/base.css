@@ -53,7 +53,7 @@
   }
 
   ::selection {
-    background-color: var(--color-selected);
+    background: var(--color-selected);
 
     @media (prefers-color-scheme: dark) {
       background-color: var(--color-selected-dark);

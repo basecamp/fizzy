@@ -19,13 +19,9 @@ CI.run do
   if Fizzy.saas?
     step "Tests: SaaS",          "#{SAAS_ENV} bin/rails test"
     step "Tests: SaaS System",   "#{SAAS_ENV} #{SYSTEM_TEST_ENV} bin/rails test:system"
-    step "Tests: SQLite",        "#{OSS_ENV} DATABASE_ADAPTER=sqlite bin/rails test"
-    step "Tests: SQLite System", "#{OSS_ENV} DATABASE_ADAPTER=sqlite #{SYSTEM_TEST_ENV} bin/rails test:system"
   else
-    step "Tests: MySQL",         "#{OSS_ENV} DATABASE_ADAPTER=mysql bin/rails test"
-    step "Tests: MySQL System",  "#{OSS_ENV} DATABASE_ADAPTER=mysql #{SYSTEM_TEST_ENV} bin/rails test:system"
-    step "Tests: SQLite",        "#{OSS_ENV} DATABASE_ADAPTER=sqlite bin/rails test"
-    step "Tests: SQLite System", "#{OSS_ENV} DATABASE_ADAPTER=sqlite #{SYSTEM_TEST_ENV} bin/rails test:system"
+    step "Tests: SQLite",        "#{OSS_ENV} bin/rails test"
+    step "Tests: SQLite System", "#{OSS_ENV} #{SYSTEM_TEST_ENV} bin/rails test:system"
   end
 
   if success?

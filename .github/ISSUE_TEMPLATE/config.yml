@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Features, Bug Reports, Questions
+    url: https://github.com/basecamp/fizzy/discussions/new/choose
+    about: Please use the discussions area to report issues or ask quest

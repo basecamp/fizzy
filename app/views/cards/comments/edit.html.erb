@@ -12,10 +12,10 @@
             <%= general_prompts(@card.board) %>
           <% end %>
           <div class="flex gap-half justify-start align-center">
-            <%= form.button class: "btn btn--reversed", type: :submit do %>
+            <%= form.button class: "btn btn--reversed", type: :submit, title: "Save changes (#{ hotkey_label(["ctrl", "enter"]) })" do %>
               <span>Save</span>
             <% end %>
-            <%= link_to card_comment_path(@card, @comment), class: "btn", data: { form_target: "cancel" } do %>
+            <%= link_to card_comment_path(@card, @comment), class: "btn", data: { form_target: "cancel" },title: "Cancel (#{ hotkey_label(["esc"]) })" do %>
               <span>Cancel</span>
             <% end %>
 

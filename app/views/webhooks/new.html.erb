@@ -2,13 +2,13 @@
 
 <% content_for :header do %>
   <div class="header__actions header__actions--start">
-    <%= link_back_to_board(@board) %>
+    <%= back_link_to "Webhooks", board_webhooks_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
   </div>
 
   <h1 class="header__title"><%= @page_title %></h1>
 <% end %>
 
-<article class="panel center txt-align-start" style="view-transition-name: <%= dom_id(@webhook) %>">
+<article class="panel panel--wide center txt-align-start" style="view-transition-name: <%= dom_id(@webhook) %>">
   <%= form_with model: @webhook, url: board_webhooks_path, data: { controller: "form" }, html: { class: "flex flex-column gap" } do |form| %>
     <h2 class="txt-large margin-none">
       <%= form.text_field :name, required: true, autofocus: true, class: "input", placeholder: "Name this Webhook…", data: { action: "keydown.esc@document->form#cancel" } %>

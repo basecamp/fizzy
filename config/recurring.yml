@@ -27,6 +27,9 @@ production: &production
   cleanup_magic_links:
     command: "MagicLink.cleanup"
     schedule: every 4 hours
+  cleanup_exports:
+    command: "Account::Export.cleanup"
+    schedule: every hour at minute 20
 
 <% if Fizzy.saas? %>
   # Metrics

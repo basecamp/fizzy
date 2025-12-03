@@ -3,12 +3,12 @@
 <% content_for :head do %>
   <%= tag.meta property: "og:title", content: "#{@board.name} | #{Current.account.name}" %>
   <%= tag.meta property: "og:description", content: format_excerpt(@board&.public_description, length: 200) %>
-  <%= tag.meta property: "og:image", content: "#{request.base_url}/app-icon.png" %>
+  <%= tag.meta property: "og:image", content: "#{request.base_url}/opengraph.png" %>
   <%= tag.meta property: "og:url", content: published_board_url(@board) %>
 
   <%= tag.meta property: "twitter:title", content: "#{@board.name} | #{Current.account.name}" %>
   <%= tag.meta property: "twitter:description", content: format_excerpt(@board&.public_description, length: 200) %>
-  <%= tag.meta property: "twitter:image", content: "#{request.base_url}/app-icon.png" %>
+  <%= tag.meta property: "twitter:image", content: "#{request.base_url}/opengraph.png" %>
   <%= tag.meta property: "twitter:card", content: "summary_large_image" %>
 <% end %>
 

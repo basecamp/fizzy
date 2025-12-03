@@ -1,7 +1,7 @@
 <% cache comment do %>
   <%= turbo_frame_tag comment, :container do %>
     <%# Bump for CSS changes: 2025-06-30 -%>
-    <div id="<%= dom_id(comment) %>" class="comment flex align-start full-width <%= "comment--system" if comment.creator.system? %>" data-creator-id="<%= comment.creator_id %>" data-created-by-current-user-target="creation">
+    <div id="<%= dom_id(comment) %>" data-creator-id="<%= comment.creator_id %>"  class="comment flex align-start full-width <%= "comment--system" if comment.creator.system? %>">
       <figure class="comment__avatar flex-item-no-shrink" aria-hidden="true">
         <%= avatar_tag comment.creator, hidden_for_screen_reader: true %>
       </figure>
@@ -20,7 +20,7 @@
           </h3>
 
           <%= link_to edit_card_comment_path(comment.card, comment),
-                class: "comment__edit btn btn--circle borderless translucent" do %>
+                class: "comment__edit btn btn--circle borderless translucent", data: { only_visible_to_you: true } do %>
             <%= icon_tag "menu-dots-horizontal" %>
             <span class="for-screen-reader">Edit this comment</span>
           <% end %>

@@ -1,6 +1,6 @@
 class Card < ApplicationRecord
   include Assignable, Attachments, Broadcastable, Closeable, Colored, Entropic, Eventable,
-    Golden, Mentions, Multistep, Pinnable, Postponable, Promptable,
+    Exportable, Golden, Mentions, Multistep, Pinnable, Postponable, Promptable,
     Readable, Searchable, Stallable, Statuses, Taggable, Triageable, Watchable
 
   belongs_to :account, default: -> { board.account }
@@ -16,6 +16,7 @@ class Card < ApplicationRecord
   before_create :assign_number
 
   after_save   -> { board.touch }, if: :published?
+  after_touch  -> { board.touch }, if: :published?
   after_update :handle_board_change, if: :saved_change_to_board_id?
 
   scope :reverse_chronologically, -> { order created_at:     :desc, id: :desc }

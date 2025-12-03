@@ -38,8 +38,10 @@
       min-block-size: 20lh;
     }
 
-    @media (max-width: 519px) {
-      display: none;
+    body:not(.public) & {
+      @media (max-width: 519px) {
+        display: none;
+      }
     }
   }
 
@@ -486,7 +488,6 @@
     }
 
     .card__title {
-      line-height: 1.2;
       pointer-events: none;
     }
 
@@ -728,8 +729,10 @@
     text-transform: uppercase;
 
     @media (hover: hover) {
-      &:hover {
-        --btn-background: color(from var(--card-color) srgb r g b / 0.15);
+      &:not(.card__column-name--current):hover {
+        --btn-background: color(from var(--column-color) srgb r g b / 0.15);
+
+        color: var(--column-color);
       }
     }
   }

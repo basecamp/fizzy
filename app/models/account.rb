@@ -8,6 +8,7 @@ class Account < ApplicationRecord
   has_many :webhooks, dependent: :destroy
   has_many :tags, dependent: :destroy
   has_many :columns, dependent: :destroy
+  has_many :exports, class_name: "Account::Export", dependent: :destroy
 
   has_many_attached :uploads
 
@@ -26,7 +27,7 @@ class Account < ApplicationRecord
   end
 
   def slug
-    "/#{external_account_id}"
+    "/#{AccountSlug.encode(external_account_id)}"
   end
 
   def account

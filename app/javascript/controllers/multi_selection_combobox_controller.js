@@ -26,12 +26,14 @@ export default class extends Controller {
   refresh() {
     this.labelTarget.textContent = this.#selectedLabel
     this.#updateHiddenFields()
+    this.#updateFilterShow()
   }
 
   clear(event) {
     this.#deselectAll()
     this.#updateHiddenFields()
     this.labelTarget.textContent = this.#selectedLabel
+    this.#updateFilterShow()
   }
 
   get #selectedLabel() {
@@ -80,6 +82,7 @@ export default class extends Controller {
   #updateHiddenFields() {
     this.#clearHiddenFields()
     this.#addHiddenFields()
+    this.#updateFilterShow()
   }
 
   #deselectAll() {
@@ -121,5 +124,10 @@ export default class extends Controller {
       field.value = value
       this.element.appendChild(field)
     })
+  }
+
+  #updateFilterShow() {
+    const hasSelection = this.#selectedValues().length > 0
+    this.element.setAttribute("data-filter-show", hasSelection)
   }
 }

@@ -16,6 +16,7 @@ class User < ApplicationRecord
   has_many :closures, dependent: :nullify
   has_many :pins, dependent: :destroy
   has_many :pinned_cards, through: :pins, source: :card
+  has_many :exports, class_name: "Account::Export", dependent: :destroy
 
   scope :with_avatars, -> { preload(:account, :avatar_attachment) }
 
@@ -23,10 +24,16 @@ class User < ApplicationRecord
     transaction do
       accesses.destroy_all
       update! active: false, identity: nil
+      close_remote_connections
     end
   end
 
   def setup?
     name != identity.email_address
   end
+
+  private
+    def close_remote_connections
+      ActionCable.server.remote_connections.where(current_user: self).disconnect(reconnect: false)
+    end
 end

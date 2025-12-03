@@ -9,7 +9,7 @@ module Card::Mentions
     end
 
     def should_check_mentions?
-      saved_change_to_status? && published?
+      was_just_published?
     end
   end
 end

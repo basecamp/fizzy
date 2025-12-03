@@ -23,7 +23,7 @@ class MentionsTest < ActiveSupport::TestCase
       card = Card.find(card.id)
 
       assert_difference -> { Mention.count }, +1 do
-        card.published!
+        card.publish
       end
     end
   end

@@ -45,10 +45,6 @@
   .comment__avatar {
     margin: calc(var(--comment-padding-block) * 0.75) calc(var(--comment-padding-inline) * -0.75);
     z-index: 0;
-
-    .comment--mine_ & {
-      margin-inline: calc(var(--comment-padding-inline) * -0.75);
-    }
   }
 
   .comment__body {
@@ -82,16 +78,6 @@
 
   .comment__edit {
     background-color: var(--color-ink-lightest);
-
-    .comment:not(.comment--mine) & {
-      display: none;
-    }
-  }
-
-  .comment--mine {
-    .comment__reaction {
-      display: none;
-    }
   }
 
   .comment--system {

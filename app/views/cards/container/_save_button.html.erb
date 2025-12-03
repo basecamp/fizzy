@@ -1,7 +1,7 @@
 <div class="flex gap-half">
   <%= button_tag type: :submit, form: dom_id(card, :edit_form), class: "btn borderless",
+        title: "Save changes (#{ hotkey_label(["ctrl", "enter"]) })",
         data: { controller: "hotkey", action: "keydown.ctrl+enter@document->hotkey#click keydown.meta+enter@document->hotkey#click" } do %>
     <span>Save changes</span>
-    <kbd class="txt-x-small hide-on-touch"><%= hotkey_label(["ctrl", "enter"]) %></kbd>
   <% end %>
 </div>

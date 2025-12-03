@@ -2,7 +2,7 @@
 
 <% content_for :header do %>
   <div class="header__actions header__actions--start">
-    <%= back_link_to @board.name, published_board_url(@board), "keydown.left@document->hotkey#click" %>
+    <%= back_link_to @board.name, published_board_url(@board), "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
   </div>
 
   <h1 class="header__title divider divider--fade full-width">

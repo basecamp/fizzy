@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/basecamp/fizzy-saas
-  revision: 130c8b23f9861a89feb59ca68f192bd05d51310c
+  revision: 6dd8bb616632edfabc3d814f88f0658d96486e17
   specs:
     fizzy-saas (0.1.0)
       prometheus-client-mmap
@@ -239,6 +239,7 @@ GEM
     ffi (1.17.2-aarch64-linux-musl)
     ffi (1.17.2-arm-linux-gnu)
     ffi (1.17.2-arm-linux-musl)
+    ffi (1.17.2-arm64-darwin)
     ffi (1.17.2-x86_64-linux-gnu)
     ffi (1.17.2-x86_64-linux-musl)
     fugit (1.12.1)
@@ -347,6 +348,8 @@ GEM
       racc (~> 1.4)
     nokogiri (1.18.10-arm-linux-musl)
       racc (~> 1.4)
+    nokogiri (1.18.10-arm64-darwin)
+      racc (~> 1.4)
     nokogiri (1.18.10-x86_64-linux-gnu)
       racc (~> 1.4)
     nokogiri (1.18.10-x86_64-linux-musl)
@@ -375,6 +378,11 @@ GEM
       logger
       rb_sys (~> 0.9.117)
     prometheus-client-mmap (1.3.0-aarch64-linux-musl)
+      base64
+      bigdecimal
+      logger
+      rb_sys (~> 0.9.117)
+    prometheus-client-mmap (1.3.0-arm64-darwin)
       base64
       bigdecimal
       logger
@@ -508,6 +516,7 @@ GEM
     sqlite3 (2.8.0-aarch64-linux-musl)
     sqlite3 (2.8.0-arm-linux-gnu)
     sqlite3 (2.8.0-arm-linux-musl)
+    sqlite3 (2.8.0-arm64-darwin)
     sqlite3 (2.8.0-x86_64-linux-gnu)
     sqlite3 (2.8.0-x86_64-linux-musl)
     sshkit (1.24.0)
@@ -523,6 +532,7 @@ GEM
     thor (1.4.0)
     thruster (0.1.16)
     thruster (0.1.16-aarch64-linux)
+    thruster (0.1.16-arm64-darwin)
     thruster (0.1.16-x86_64-linux)
     timeout (0.4.4)
     trilogy (2.9.0)
@@ -593,6 +603,8 @@ PLATFORMS
   aarch64-linux-musl
   arm-linux-gnu
   arm-linux-musl
+  arm64-darwin
+  x86_64-linux
   x86_64-linux-gnu
   x86_64-linux-musl
 
@@ -632,6 +644,7 @@ DEPENDENCIES
   rouge
   rqrcode
   rubocop-rails-omakase
+  rubyzip
   selenium-webdriver
   sentry-rails
   sentry-ruby

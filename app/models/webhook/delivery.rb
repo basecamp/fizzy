@@ -4,8 +4,6 @@ class Webhook::Delivery < ApplicationRecord
   ENDPOINT_TIMEOUT = 7.seconds
   DNS_RESOLUTION_TIMEOUT = 2
   DISALLOWED_IP_RANGES = [
-    # IPv4 mapped to IPv6
-    IPAddr.new("::ffff:0:0/96"),
     # Broadcasts
     IPAddr.new("0.0.0.0/8")
   ].freeze
@@ -85,7 +83,7 @@ class Webhook::Delivery < ApplicationRecord
       end
 
       ip_addresses.any? do |ip|
-        ip.private? || ip.loopback? || DISALLOWED_IP_RANGES.any? { |range| range.include?(ip) }
+        ip.private? || ip.loopback? || ip.link_local? || ip.ipv4_mapped? || DISALLOWED_IP_RANGES.any? { |range| range.include?(ip) }
       end
     end
 

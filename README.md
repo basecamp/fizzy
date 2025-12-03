@@ -35,13 +35,14 @@ The full continuous integration tests can be run with:
 
 ### Database configuration
 
-Fizzy supports SQLite (default, recommended for most scenarios) and MySQL. You can switch adapters with the `DATABASE_ADAPTER` environment variable.
+Fizzy works with SQLite by default and supports MySQL too. You can switch adapters with the `DATABASE_ADAPTER` environment variable. For example, to develop locally against MySQL:
 
 ```sh
-DATABASE_ADAPTER=mysql bin/rails
-DATABASE_ADAPTER=mysql bin/test
-bin/ci # Runs tests against both SQLite and MySQL
+DATABASE_ADAPTER=mysql bin/setup --reset
+DATABASE_ADAPTER=mysql bin/ci
 ```
+
+The remote CI pipeline will run tests against both SQLite and MySQL.
 
 ### Outbound Emails
 

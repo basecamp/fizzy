@@ -6,7 +6,12 @@ export default class extends Controller {
   insertEmoji(event) {
     const emojiChar = event.target.getAttribute("data-emoji")
     const value = this.inputTarget.value
-    this.inputTarget.value = `${value}${emojiChar}`
+    const newValue = `${value}${emojiChar}`
+
+    if (this.inputTarget.maxLength > 0 && newValue.length <= this.inputTarget.maxLength) {
+      this.inputTarget.value = newValue
+    }
+
     this.inputTarget.focus()
   }
 }

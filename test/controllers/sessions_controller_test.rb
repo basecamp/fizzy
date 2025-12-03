@@ -18,6 +18,7 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
       end
 
       assert_redirected_to session_magic_link_path
+      assert_nil flash[:magic_link_code]
     end
   end
 

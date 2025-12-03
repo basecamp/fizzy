@@ -11,7 +11,7 @@ class SessionsController < ApplicationController
   def create
     if identity = Identity.find_by_email_address(email_address)
       magic_link = identity.send_magic_link
-      flash[:magic_link_code] = magic_link&.code if Rails.env.development?
+      serve_development_magic_link(magic_link)
     end
 
     redirect_to session_magic_link_path

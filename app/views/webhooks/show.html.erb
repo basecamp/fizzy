@@ -2,13 +2,9 @@
 
 <% content_for :header do %>
   <div class="header__actions header__actions--start">
-    <%= link_to board_webhooks_path, class: "btn btn--back borderless txt-medium", data: { controller: "hotkey", action: "keydown.left@document->hotkey#click" } do %>
-      <span class="overflow-ellipsis flex align-center">
-        <%= icon_tag "arrow-left" %>
-        <strong>Back to Webhooks</strong>
-        <kbd class="txt-x-small margin-inline-start hide-on-touch">&larr;</kbd>
-      </span>
-    <% end %>
+    <div class="header__actions header__actions--start">
+      <%= back_link_to "Webhooks", board_webhooks_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+    </div>
   </div>
 
   <div class="header__actions header__actions--end">
@@ -16,10 +12,10 @@
       <%= icon_tag "pencil" %>
       <span class="for-screen-reader">Edit</span>
     <% end %>
-  <div>
+  </div>
 <% end %>
 
-<div class="panel shadow center flex flex-column gap txt-align-start">
+<div class="panel panel--wide shadow center flex flex-column gap txt-align-start">
   <header>
     <h1 class="txt-x-large margin-none"><%= @webhook.name %></h1>
     <span class="txt-medium txt-break"><%= @webhook.url %></span>
@@ -43,7 +39,7 @@
     <div class="flex flex-column">
       <h2 class="margin-none txt-uppercase txt-medium">Subscribed to</h2>
       <% if @webhook.subscribed_actions.empty? %>
-        <p class="margin-none txt-subtle">This Webhook isn't subscribed to any events. It will never trigger.<p/>
+        <p class="margin-none txt-subtle">This Webhook isn't subscribed to any events. It will never trigger.</p>
       <% else %>
         <ul class="margin-none unpad-block">
           <% @webhook.subscribed_actions.each do |action| %>
@@ -56,7 +52,7 @@
     <div class="flex flex-column">
       <h2 class="margin-none txt-uppercase txt-medium">Deliveries</h2>
       <% if @webhook.deliveries.empty? %>
-        <p class="margin-none txt-subtle">This Webhook hasn't been triggered yet<p/>
+        <p class="margin-none txt-subtle">This Webhook hasn't been triggered yet</p>
       <% else %>
         <ul class="margin-none unpad-block">
           <%= render partial: "webhooks/delivery", collection: @webhook.deliveries.ordered.limit(20), as: :delivery %>

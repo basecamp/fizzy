@@ -14,7 +14,7 @@
 
 <% content_for :header do %>
   <div class="header__actions header__actions--start">
-    <%= back_link_to @card.board.name, published_board_url(@card.board), "keydown.left@document->hotkey#click", style: "view-transistion-name: card-board-title;" %>
+    <%= back_link_to @card.board.name, published_board_url(@card.board), "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click", style: "view-transistion-name: card-board-title;" %>
   </div>
 <% end %>
 

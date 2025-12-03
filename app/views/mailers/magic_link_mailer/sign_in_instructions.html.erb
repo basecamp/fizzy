@@ -9,6 +9,8 @@
 
 <strong class="txt-large"><%= @magic_link.code %></strong>
 
+<p>This code will work for <%= distance_of_time_in_words(MagicLink::EXPIRATION_TIME) %>.</p>
+
 <p class="footer">Need help? <%= mail_to "support@fizzy.do", "Send us an email"%>.
 </p>
 

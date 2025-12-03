@@ -58,27 +58,20 @@ needs_seeding() {
   fi
 }
 
-
-setup_database() {
-  local adapter="$1"
-  local reset="$2"
-  local label="${adapter:+ ($adapter)}"
-  local env_cmd="${adapter:+env DATABASE_ADAPTER=$adapter}"
-
-  # When setting up sqlite in SAAS mode, we need to disable SAAS so that
-  # database.yml will use database.sqlite.yml instead of the fizzy-saas config.
-  # We also unset BUNDLE_GEMFILE so the standard Gemfile is used (without fizzy-saas).
-  if [ -n "$SAAS" ] && [ "$adapter" = "sqlite" ]; then
-    env_cmd="env DATABASE_ADAPTER=$adapter SAAS=false BUNDLE_GEMFILE="
-  fi
-
-  if [ "$reset" = "true" ]; then
-    step "Resetting the database$label" $env_cmd rails db:reset
-  else
-    step "Preparing the database$label" $env_cmd rails db:prepare
-
-    if needs_seeding; then
-      step "Seeding the database$label" $env_cmd rails db:seed
+oss_mysql_setup() {
+  if ! nc -z localhost 3306 2>/dev/null; then
+    if docker ps -aq -f name=fizzy-mysql | grep -q .; then
+      step "Starting MySQL" docker start fizzy-mysql
+    else
+      step "Setting up MySQL" bash -c '
+        docker pull mysql:8.4
+        docker run -d \
+          --name fizzy-mysql \
+          -e MYSQL_ALLOW_EMPTY_PASSWORD=yes \
+          -p 3306:3306 \
+          mysql:8.4
+        echo "MySQL is starting… (it may take a few seconds)"
+      '
     fi
   fi
 }
@@ -89,7 +82,7 @@ gum style --foreground 111 --bold "  ∘˚˳°∘°  𝒻𝒾𝓏𝓏𝓎  °∘
 echo
 
 step "Installing Ruby" mise install --yes
-eval "$(mise hook-env)"
+eval "$(mise hook-env -s bash)"
 
 if which pacman >/dev/null 2>&1; then
   packages=(imagemagick mariadb-libs openslide libvips gitleaks)
@@ -108,34 +101,19 @@ if [ -n "$SAAS" ]; then
   saas_setup=$(bundle show fizzy-saas)/bin/setup
   source "$saas_setup"
 else
-  if ! nc -z localhost 3306 2>/dev/null; then
-    if docker ps -aq -f name=fizzy-mysql | grep -q .; then
-      step "Starting MySQL" docker start fizzy-mysql
-    else
-      step "Setting up MySQL" bash -c '
-        docker pull mysql:8.4
-        docker run -d \
-          --name fizzy-mysql \
-          -e MYSQL_ALLOW_EMPTY_PASSWORD=yes \
-          -p 3306:3306 \
-          mysql:8.4
-        echo "MySQL is starting… (it may take a few seconds)"
-      '
-    fi
+  if [ "$DATABASE_ADAPTER" = "mysql" ]; then
+    oss_mysql_setup
   fi
 fi
 
-reset_flag=""
-[[ $* == *--reset* ]] && reset_flag="true"
-
-if [ -n "$SAAS" ]; then
-  for adapter in saas sqlite; do
-    setup_database "$adapter" "$reset_flag"
-  done
+if [[ $* == *--reset* ]]; then
+  step "Resetting the database" rails db:reset
 else
-  for adapter in sqlite mysql; do
-    setup_database "$adapter" "$reset_flag"
-  done
+  step "Preparing the database" rails db:prepare
+
+  if needs_seeding; then
+    step "Seeding the database" rails db:seed
+  fi
 fi
 
 step "Cleaning up logs and tempfiles" rails log:clear tmp:clear

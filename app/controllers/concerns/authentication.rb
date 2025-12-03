@@ -4,6 +4,7 @@ module Authentication
   included do
     before_action :require_account # Checking and setting account must happen first
     before_action :require_authentication
+    after_action :ensure_development_magic_link_not_leaked
     helper_method :authenticated?
 
     etag { Current.session.id if authenticated? }
@@ -88,5 +89,17 @@ module Authentication
     def terminate_session
       Current.session.destroy
       cookies.delete(:session_token)
+    end
+
+    def ensure_development_magic_link_not_leaked
+      unless Rails.env.development?
+        raise "Leaking magic link via flash in #{Rails.env}?" if flash[:magic_link_code].present?
+      end
+    end
+
+    def serve_development_magic_link(magic_link)
+      if Rails.env.development?
+        flash[:magic_link_code] = magic_link&.code
+      end
     end
 end

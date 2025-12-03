@@ -426,6 +426,10 @@
         opacity: 0;
         pointer-events: none;
       }
+
+      [aria-busy] & {
+        position: absolute !important;
+      }
     }
 
     .avatar,

@@ -24,13 +24,13 @@ module TableDefinitionColumnLimits
       options[:limit] ||= STRING_DEFAULT_LIMIT
     end
 
-    if type == :text
+    if type == :text || type == :binary
       if options.key?(:size)
         size = options.delete(:size)
         options[:limit] ||= TEXT_SIZE_TO_LIMIT.fetch(size) do
           raise ArgumentError, "Unknown text size: #{size.inspect}. Use :tiny, :medium, or :long"
         end
-      else
+      elsif type == :text
         options[:limit] ||= TEXT_DEFAULT_LIMIT
       end
     end

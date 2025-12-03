@@ -8,7 +8,7 @@
   <h1 class="header__title"><%= @page_title %></h1>
 <% end %>
 
-<%= tag.section class: "panel shadow center webhooks" do %>
+<%= tag.section class: "panel panel--wide shadow center webhooks" do %>
   <% if @page.records.any? %>
     <ul class="flex flex-column align-start gap margin-none-block-start unpad webhooks-list">
       <%= render partial: "webhooks/webhook", collection: @page.records %>

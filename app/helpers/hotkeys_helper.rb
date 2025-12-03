@@ -6,8 +6,6 @@ module HotkeysHelper
         "⌘"
       elsif key == "enter"
         platform.mac? ? "return" : "enter"
-      elsif key == "shift"
-        "⇧"
       else
         key
       end.capitalize

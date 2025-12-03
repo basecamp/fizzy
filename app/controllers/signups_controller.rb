@@ -1,12 +1,4 @@
 class SignupsController < ApplicationController
-  # FIXME: Remove this before launch!
-  unless Rails.env.local?
-    http_basic_authenticate_with \
-      name: Rails.application.credentials.account_signup_http_basic_auth.name,
-      password: Rails.application.credentials.account_signup_http_basic_auth.password,
-      realm: "Fizzy Signup"
-  end
-
   disallow_account_scope
   allow_unauthenticated_access
   rate_limit to: 10, within: 3.minutes, only: :create, with: -> { redirect_to new_signup_path, alert: "Try again later." }

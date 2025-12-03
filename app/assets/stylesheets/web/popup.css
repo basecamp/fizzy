@@ -5,7 +5,7 @@
     --panel-padding: var(--block-space);
     --panel-size: auto;
     --popup-icon-size: 24px;
-    --popup-item-padding-inline: 0.5rem;
+    --popup-item-padding-inline: 0.4rem;
     --popup-display: flex;
 
     inset: 0 auto auto 50%;
@@ -53,10 +53,10 @@
   .popup__section-title {
     background: var(--color-canvas);
     font-size: var(--text-small);
-    font-weight: bold;
+    font-weight: 600;
     inset-block-start: 0;
     list-style: none;
-    padding: var(--block-space-half) var(--inline-space-half);
+    padding: 0.75ch var(--inline-space-half);
     position: sticky;
     text-transform: uppercase;
     z-index: 1;
@@ -65,8 +65,7 @@
       align-items: center;
       cursor: pointer;
       display: flex;
-      gap: 2ch;
-      justify-content: space-between;
+      gap: 0.5ch;
     }
 
     &::-webkit-details-marker {
@@ -74,7 +73,8 @@
     }
 
     .icon--caret-down {
-      opacity: 0.66;
+      font-size: 1ch;
+      margin-inline-start: -0.5ch;
       transition: rotate 150ms ease-out;
     }
 
@@ -94,6 +94,10 @@
     max-inline-size: 100%;
     padding: 0;
     row-gap: 1px;
+
+    details & {
+      margin-inline-start: 0.75ch;
+    }
   }
 
   .popup__item {

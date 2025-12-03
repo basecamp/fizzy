@@ -15,5 +15,8 @@
     <%= render "account/settings/users", users: @users %>
   </div>
 
-  <%= render "account/settings/entropy", account: @account %>
+  <div class="settings__panel settings__panel--entropy panel shadow center">
+    <%= render "account/settings/entropy", account: @account %>
+    <%= render "account/settings/export" %>
+  </div>
 </section>
