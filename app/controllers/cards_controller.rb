@@ -18,6 +18,7 @@ class CardsController < ApplicationController
 
       format.json do
         card = @board.cards.create! card_params.merge(creator: Current.user)
+        card.publish
         head :created, location: card_path(card, format: :json)
       end
     end
