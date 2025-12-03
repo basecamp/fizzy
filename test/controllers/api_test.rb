@@ -50,7 +50,7 @@ class ApiTest < ActionDispatch::IntegrationTest
 
   test "get tags" do
     tags = users(:david).account.tags.all.alphabetically
-    
+
     get tags_path(format: :json), env: @davids_bearer_token
     assert_equal tags.count, @response.parsed_body.count
     assert_equal tags.pluck(:title), @response.parsed_body.pluck("title")
