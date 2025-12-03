@@ -21,7 +21,7 @@ GIT
 
 GIT
   remote: https://github.com/basecamp/fizzy-saas
-  revision: 6dd8bb616632edfabc3d814f88f0658d96486e17
+  revision: 62579e72b4539bf5013c9683669856af7f66c276
   specs:
     fizzy-saas (0.1.0)
       prometheus-client-mmap
