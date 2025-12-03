@@ -165,4 +165,19 @@ class FilterTest < ActiveSupport::TestCase
     assert users(:david).filters.new(board_ids: [ boards(:writebook).id ]).used?
     assert_not users(:david).filters.new(board_ids: [ boards(:writebook).id ]).used?(ignore_boards: true)
   end
+
+  test "board titles are scoped to creator's account" do
+    # Give mike (initech) access to the board in his account
+    boards(:miltons_wish_list).accesses.grant_to(users(:mike))
+    assert_equal 1, users(:mike).boards.count
+
+    # Filter with no boards selected should show the single board name from mike's account
+    filter = users(:mike).filters.new(creator: users(:mike))
+    assert_equal [ "Milton's Wish List" ], filter.board_titles
+
+    # Should NOT leak board names from other accounts (37s has multiple boards)
+    assert Board.where.not(account: accounts(:initech)).exists?
+    assert_not_includes filter.board_titles, "Writebook"
+    assert_not_includes filter.board_titles, "Private board"
+  end
 end
