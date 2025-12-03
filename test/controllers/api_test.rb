@@ -41,11 +41,17 @@ class ApiTest < ActionDispatch::IntegrationTest
   end
 
   test "create card" do
-    post board_cards_path(boards(:writebook), format: :json), params: { card: { title: "My new card" } }, env: @davids_bearer_token
+    post board_cards_path(boards(:writebook), format: :json),
+      params: { card: { title: "My new card", description: "Big if true", tag_ids: [ tags(:web).id, tags(:mobile).id ] } },
+      env: @davids_bearer_token
+
     assert_equal card_path(Card.last, format: :json), @response.headers["Location"]
 
-    get card_path(Card.last, format: :json), env: @davids_bearer_token
+    new_card = Card.last
+    get card_path(new_card, format: :json), env: @davids_bearer_token
     assert_equal "My new card", @response.parsed_body["title"]
+    assert_equal "Big if true", @response.parsed_body["description"]
+    assert_equal [ tags(:web).title, tags(:mobile).title ].sort, @response.parsed_body["tags"]
   end
 
   test "get tags" do
