@@ -7,7 +7,6 @@ export default class extends Controller {
     document.documentElement.removeAttribute("data-theme");
 
     let cookie_value = this.getCookie('theme');
-    console.log(cookie_value)
     if (cookie_value && cookie_value == "dark") {
       document.documentElement.setAttribute("data-theme", "dark");
     }
