@@ -10,4 +10,15 @@ class ApplicationController < ActionController::Base
   etag { "v1" }
   stale_when_importmap_changes
   allow_browser versions: :modern
+
+  def swap_theme()
+    if cookies[:theme] == "dark"
+      cookies[:theme] = "light"
+    else
+      cookies[:theme] = "dark"
+    end
+
+    redirect_back(fallback_location: root_path)
+  end
+
 end

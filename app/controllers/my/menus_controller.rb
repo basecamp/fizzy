@@ -4,7 +4,7 @@ class My::MenusController < ApplicationController
     @boards = Current.user.boards.ordered_by_recently_accessed
     @tags = Current.account.tags.all.alphabetically
     @users = Current.account.users.active.alphabetically
-
-    fresh_when etag: [ @filters, @boards, @tags, @users ]
+    @theme = cookies[:theme]
+    fresh_when etag: [ @filters, @boards, @tags, @users, @theme ]
   end
 end

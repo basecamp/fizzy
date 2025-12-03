@@ -72,6 +72,7 @@
   .icon--menu-dots-horizontal { --svg: url("menu-dots-horizontal.svg "); }
   .icon--menu-dots-vertical { --svg: url("menu-dots-vertical.svg "); }
   .icon--minus { --svg: url("minus.svg "); }
+  .icon--moon { --svg: url("moon.svg "); }
   .icon--move { --svg: url("move.svg "); }
   .icon--notification-bell-access-only { --svg: url("bell.svg "); }
   .icon--notification-bell-watching { --svg: url("bell-off.svg "); }
@@ -94,6 +95,7 @@
   .icon--rename { --svg: url("rename.svg "); }
   .icon--search { --svg: url("search.svg "); }
   .icon--settings { --svg: url("settings.svg "); }
+  .icon--sun { --svg: url("sun.svg "); }
   .icon--share { --svg: url("share.svg "); }
   .icon--sliders { --svg: url("sliders.svg "); }
   .icon--switch { --svg: url("switch.svg "); }

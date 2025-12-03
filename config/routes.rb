@@ -99,6 +99,8 @@ Rails.application.routes.draw do
   get "/collections/:id", to: redirect { |params, request| "#{request.script_name}/boards/#{params[:id]}" }
   get "/public/collections/:id", to: redirect { |params, request| "#{request.script_name}/public/boards/#{params[:id]}" }
 
+  get "/swap_theme", to: "application#swap_theme", as: :swap_theme
+
   namespace :notifications do
     resource :settings
     resource :unsubscribe

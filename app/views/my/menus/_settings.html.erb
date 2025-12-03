@@ -3,6 +3,7 @@
   <%= filter_place_menu_item user_path(Current.user), "My Profile", "person" %>
   <%= filter_place_menu_item notifications_path, "All notifications", "bell" %>
   <%= filter_place_menu_item notifications_settings_path, "Notification Settings", "settings" %>
+  <%= filter_place_menu_item swap_theme_path, @theme == "dark" ? 'Switch to light mode' : 'Switch to dark mode', @theme == "dark" ? 'sun' : 'moon', turbo: false%>
 
   <%= tag.li class: "popup__item", data: { filter_target: "item", navigable_list_target: "item" } do %>
     <%= icon_tag "logout", class: "popup__icon" %>
