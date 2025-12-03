@@ -1,0 +1,13 @@
+{
+  "contextPreLoad": [
+    "dev/workspace/WORKSPACE.md",
+    "dev/workspace/CLAUDE.md",
+    "dev/workspace/context/tree.md"
+  ],
+  "preLoadBegin": "Loading project context files...",
+  "preLoadSeparator": "\n\n------- Context File -------\n",
+  "preLoadEnd": "\n✓ Context loaded successfully",
+  "treeFolders": ["dev", "docs", "app", "config", "db", "lib", "test", "public"],
+  "treeExcludePatterns": ["*.svg", "*.jpg", "*.webp"],
+  "treeOutputPath": "dev/workspace/context/tree.md"
+}

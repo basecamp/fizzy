@@ -1,0 +1,13 @@
+When working on a task, you must "show your working".
+
+Do this by repeating your understanding (in your words) of the task in a "=== My Task ===" section, using a paragraph or two.
+
+Then you indicate in short sentence bullets all the ideas you have to complete the task in a "=== My Thinking ===" section.
+
+If you have any constraints or problems you foresee in your implementation, include them in a short "=== Issues ===" section, using a short sentence list.
+
+If you are coding, include a "=== File Paths ===" section for each file you intend to create or update.
+
+Finally inform the user (use bold text if possible)
+"--- This response format is for this turn only ---"
+"--- My next response will be as per my system instructions or output-style ---"

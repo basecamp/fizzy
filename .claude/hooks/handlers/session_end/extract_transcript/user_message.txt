@@ -1,0 +1,5 @@
+<% if parentUuid == null %>[✨ NEW CONVERSATION BRANCH]<% end %>
+[USER]    💭: <%= thinkingMetadata&.level || 'none' %>
+<%= message.content %>
+
+------------------------------------------------------------
