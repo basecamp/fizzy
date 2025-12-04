@@ -13,7 +13,7 @@ VCR.configure do |config|
   config.allow_http_connections_when_no_cassette = true
   config.cassette_library_dir = "test/vcr_cassettes"
   config.hook_into :webmock
-  config.filter_sensitive_data("<OPEN_API_KEY>") { Rails.application.credentials.openai_api_key || ENV["OPEN_AI_API_KEY"] }
+  config.filter_sensitive_data("<OPEN_AI_KEY>") { Rails.application.credentials.openai_api_key || ENV["OPEN_AI_API_KEY"] }
   config.default_cassette_options = {
     match_requests_on: [ :method, :uri, :body ]
   }
