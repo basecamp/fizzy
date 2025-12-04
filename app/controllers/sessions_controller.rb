@@ -12,9 +12,10 @@ class SessionsController < ApplicationController
     if identity = Identity.find_by_email_address(email_address)
       magic_link = identity.send_magic_link
       serve_development_magic_link(magic_link)
+      redirect_to session_magic_link_path
+    else
+      redirect_to new_signup_path, alert: "No account found for #{email_address}, Please sign up first."
     end
-
-    redirect_to session_magic_link_path
   end
 
   def destroy
