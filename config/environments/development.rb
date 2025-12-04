@@ -100,11 +100,7 @@ Rails.application.configure do
 
   # Allow localhost hosts for development
   # Note: Rails may check Host header with port included, so we match both
-  config.hosts.clear
-  config.hosts << "fizzy.localhost"
-  config.hosts << "localhost"
-  config.hosts << "127.0.0.1"
-  config.hosts << /^fizzy-\d+(:\d+)?$/
+  config.hosts = %w[fizzy.localhost localhost 127.0.0.1] + [/^fizzy-\d+(:\d+)?$/]
 
   # Allow custom domains via ALLOWED_HOST_DOMAINS environment variable
   # Example: ALLOWED_HOST_DOMAINS=example.com,another.com
@@ -113,8 +109,10 @@ Rails.application.configure do
       domain = domain.strip
       next if domain.empty?
       # Match domain and any subdomain, with optional port
-      config.hosts << /\.#{Regexp.escape(domain)}(:\d+)?$/
-      config.hosts << /^.*\.#{Regexp.escape(domain)}(:\d+)?$/
+      config.hosts += [
+        /\.#{Regexp.escape(domain)}(:\d+)?$/,
+        /^.*\.#{Regexp.escape(domain)}(:\d+)?$/
+      ]
     end
   end
 
