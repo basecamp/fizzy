@@ -76,14 +76,47 @@ Rails.application.configure do
   # Prepend all log lines with the following tags.
   config.log_tags = [ :request_id ]
 
-  if Rails.root.join("tmp/email-dev.txt").exist?
+  # Email delivery configuration
+  # Priority: SMTP (if SMTP_HOST env var set) > letter_opener > console
+  if ENV["SMTP_HOST"].present?
+    # Use SMTP proxy (e.g., MailHog) for email delivery
+    config.action_mailer.delivery_method = :smtp
+    config.action_mailer.perform_deliveries = true
+    config.action_mailer.raise_delivery_errors = true
+    config.action_mailer.smtp_settings = {
+      address: ENV.fetch("SMTP_HOST", "mailhog"),
+      port: ENV.fetch("SMTP_PORT", "1025").to_i,
+      domain: ENV.fetch("SMTP_DOMAIN", "localhost"),
+      # No authentication needed for MailHog
+    }
+  elsif Rails.root.join("tmp/email-dev.txt").exist?
+    # Use letter_opener to preview emails in browser
     config.action_mailer.delivery_method = :letter_opener
     config.action_mailer.perform_deliveries = true
   else
+    # Default: don't send emails, code shown in browser console
     config.action_mailer.raise_delivery_errors = false
   end
 
-  config.hosts = %w[ fizzy.localhost localhost 127.0.0.1 ] + [ /^fizzy-\d+(:\d+)$/ ]
+  # Allow localhost hosts for development
+  # Note: Rails may check Host header with port included, so we match both
+  config.hosts.clear
+  config.hosts << "fizzy.localhost"
+  config.hosts << "localhost"
+  config.hosts << "127.0.0.1"
+  config.hosts << /^fizzy-\d+(:\d+)?$/
+
+  # Allow custom domains via ALLOWED_HOST_DOMAINS environment variable
+  # Example: ALLOWED_HOST_DOMAINS=example.com,another.com
+  if ENV["ALLOWED_HOST_DOMAINS"].present?
+    ENV["ALLOWED_HOST_DOMAINS"].split(",").each do |domain|
+      domain = domain.strip
+      next if domain.empty?
+      # Match domain and any subdomain, with optional port
+      config.hosts << /\.#{Regexp.escape(domain)}(:\d+)?$/
+      config.hosts << /^.*\.#{Regexp.escape(domain)}(:\d+)?$/
+    end
+  end
 
   # Set host to be used by links generated in mailer and notification view templates.
   config.action_controller.default_url_options = { host: config.hosts.first, port: 3006 }

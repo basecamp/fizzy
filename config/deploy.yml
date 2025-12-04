@@ -55,6 +55,10 @@ env:
     # Use fizzy-db for a db accessory server on same machine via local kamal docker network.
     # DB_HOST: 192.168.0.2
 
+    # Configure allowed host domains for Rails host authorization
+    # Example: ALLOWED_HOST_DOMAINS: example.com,subdomain.example.com
+    # ALLOWED_HOST_DOMAINS: your-domain.com
+
     # Log everything from Rails
     # RAILS_LOG_LEVEL: debug
 

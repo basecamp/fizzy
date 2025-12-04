@@ -79,6 +79,20 @@ Rails.application.configure do
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
 
+  # Configure allowed hosts for production
+  # Allow custom domains via ALLOWED_HOST_DOMAINS environment variable
+  # Example: ALLOWED_HOST_DOMAINS=example.com,subdomain.example.com
+  if ENV["ALLOWED_HOST_DOMAINS"].present?
+    config.hosts.clear
+    ENV["ALLOWED_HOST_DOMAINS"].split(",").each do |domain|
+      domain = domain.strip
+      next if domain.empty?
+      # Match domain and any subdomain, with optional port
+      config.hosts << /\.#{Regexp.escape(domain)}(:\d+)?$/
+      config.hosts << /^.*\.#{Regexp.escape(domain)}(:\d+)?$/
+    end
+  end
+
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
 end

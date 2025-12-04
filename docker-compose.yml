@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      # GITHUB_TOKEN secret is optional - only needed if Gemfile includes private gems
+      # Create .github_token file with your token if needed: echo "your_token" > .github_token
+      secrets:
+        - source: github_token
+          target: GITHUB_TOKEN
+    ports:
+      - "3006:3006"
+    environment:
+      - RAILS_ENV=development
+      - DATABASE_ADAPTER=sqlite
+      # SMTP configuration for MailHog
+      - SMTP_HOST=mailhog
+      - SMTP_PORT=1025
+      # Allow custom host domains (e.g., for remote development)
+      # Uncomment and set your domain: ALLOWED_HOST_DOMAINS=example.com
+      # - ALLOWED_HOST_DOMAINS=example.com
+    depends_on:
+      - mailhog
+    volumes:
+      # Mount entire codebase for hot reload
+      - .:/rails
+      # Mount storage directory for SQLite database persistence
+      - ./storage:/rails/storage
+      # Mount tmp directory for temporary files
+      - ./tmp:/rails/tmp
+      # Mount node_modules if it exists (for importmap)
+      - node_modules:/rails/node_modules
+    working_dir: /rails
+    command: ["./bin/thrust", "./bin/rails", "server", "-b", "0.0.0.0", "-p", "3006"]
+    stdin_open: true
+    tty: true
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    ports:
+      - "8025:8025"  # Web UI
+      - "1025:1025"  # SMTP server
+    networks:
+      - default
+
+secrets:
+  # Optional: Only needed if accessing private GitHub gems
+  # Create .github_token file with your token: echo "your_token" > .github_token
+  # If the file doesn't exist, the build will proceed without it (may fail if private gems are required)
+  github_token:
+    file: .github_token
+
+volumes:
+  node_modules:
+
