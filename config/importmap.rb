@@ -9,6 +9,7 @@ pin "@rails/request.js", to: "rails-request.js" # @0.0.11
 pin_all_from "app/javascript/controllers", under: "controllers"
 pin_all_from "app/javascript/helpers", under: "helpers"
 pin_all_from "app/javascript/initializers", under: "initializers"
+pin_all_from "app/javascript/models", under: "models"
 pin "marked" # @15.0.11
 pin "lexxy"
 pin "@rails/activestorage", to: "activestorage.esm.js"

@@ -1,0 +1,11 @@
+<% @hide_footer_frames = true %>
+
+<div data-controller="popup-window" class="panel shadow center margin-block-double">
+  <strong class="txt-large">Connect to Basecamp to auto-preview links?</strong>
+  <p>If you want links from Basecamp to use the title of the item "important message" rather than just the URL "http://basecamp.com/1234", connect your Basecamp account to Fizzy.</p>
+  <p>In the next step you'll sign in to Basecamp and authorize the connection to Fizzy.</p>
+  <div class="flex justify-center align-center gap-half">
+    <%= button_to "Yes, continue…", basecamp_integration_path, method: :post, data: { turbo: false }, class: "btn btn--link" %>
+    <button class="btn" data-action="popup-window#close">Never mind</button>
+  </div>
+</div>

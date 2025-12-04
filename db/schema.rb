@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2025_12_01_100607) do
+ActiveRecord::Schema[8.2].define(version: 2025_12_02_144419) do
   create_table "accesses", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -319,6 +319,15 @@ ActiveRecord::Schema[8.2].define(version: 2025_12_01_100607) do
     t.boolean "staff", default: false, null: false
     t.datetime "updated_at", null: false
     t.index ["email_address"], name: "index_identities_on_email_address", unique: true
+  end
+
+  create_table "integrations", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "data"
+    t.bigint "owner_id", null: false
+    t.string "type"
+    t.datetime "updated_at", null: false
+    t.index ["owner_id"], name: "index_integrations_on_owner_id"
   end
 
   create_table "magic_links", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|

@@ -54,8 +54,8 @@ class Webhook::Delivery < ApplicationRecord
 
   private
     def perform_request
-      if private_uri?
-        { error: :private_uri }
+      if restricted_uri?
+        { error: :restricted_uri }
       else
         response = http.request(
           Net::HTTP::Post.new(uri, headers).tap { |request| request.body = payload }
@@ -73,18 +73,8 @@ class Webhook::Delivery < ApplicationRecord
       { error: :failed_tls }
     end
 
-    def private_uri?
-      ip_addresses = []
-
-      Resolv::DNS.open(timeouts: DNS_RESOLUTION_TIMEOUT) do |dns|
-        dns.each_address(uri.host) do |ip_address|
-          ip_addresses << IPAddr.new(ip_address)
-        end
-      end
-
-      ip_addresses.any? do |ip|
-        ip.private? || ip.loopback? || ip.link_local? || ip.ipv4_mapped? || DISALLOWED_IP_RANGES.any? { |range| range.include?(ip) }
-      end
+    def restricted_uri?
+      NetworkGuard.restricted_host?(uri.host, timeout: DNS_RESOLUTION_TIMEOUT)
     end
 
     def uri

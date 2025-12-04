@@ -47,6 +47,29 @@
       "note": ""
     },
     {
+      "warning_type": "Redirect",
+      "warning_code": 18,
+      "fingerprint": "a8fc3f4864b089c35f52d7d5607a60f70aedb99ba46b9b0f2ca41ddc8386a03c",
+      "check_name": "Redirect",
+      "message": "Possible unprotected redirect",
+      "file": "app/controllers/integrations/basecamps_controller.rb",
+      "line": 9,
+      "link": "https://brakemanscanner.org/docs/warning_types/redirect/",
+      "code": "redirect_to(Integration::Basecamp.find_or_create_by(:owner => Current.user).authorization_url, :allow_other_host => true)",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Integrations::BasecampsController",
+        "method": "create"
+      },
+      "user_input": "Integration::Basecamp.find_or_create_by(:owner => Current.user).authorization_url",
+      "confidence": "Weak",
+      "cwe_id": [
+        601
+      ],
+      "note": ""
+    },
+    {
       "warning_type": "Mass Assignment",
       "warning_code": 70,
       "fingerprint": "ac0fa1970dea215e2f47a5676ffd63d8728951e361da12a53dd424bf6dc46f2a",

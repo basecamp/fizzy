@@ -393,4 +393,19 @@
     line-height: inherit;
     margin-block: 1em;
   }
+
+  .unfurl-notice {
+    background-color: var(--color-selected);
+    border-radius: 0.5em;
+    font-size: var(--text-small);
+    padding: 0.5em 0.5em 0.5em 1em;
+
+    p {
+      margin: 0;
+    }
+
+    .btn {
+      white-space: nowrap;
+    }
+  }
 }

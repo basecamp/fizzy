@@ -186,6 +186,8 @@ Rails.application.routes.draw do
     end
   end
 
+  resource :unfurl_link, only: :create
+
   namespace :public do
     resources :boards do
       scope module: :boards do

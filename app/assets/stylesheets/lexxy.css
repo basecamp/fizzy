@@ -34,6 +34,15 @@
     }
   }
 
+  lexxy-editor[data-controller~="unfurl-link"] {
+    display: flex;
+    flex-direction: column;
+
+    [data-unfurl-link-target~="linkAccountsPrompt"] {
+      order: 999;
+    }
+  }
+
   .lexxy-dialog-actions {
     display: flex;
     font-size: var(--text-x-small);
