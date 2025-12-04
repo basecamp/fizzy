@@ -19,6 +19,10 @@ module AvatarsHelper
     end
   end
 
+  def avatar_tags(users, **options)
+    users.collect { avatar_tag(it, **options) }.join.html_safe
+  end
+
   def mail_avatar_tag(user, size: 48, **options)
     if user.avatar.attached?
       image_tag user_avatar_url(user), alt: user.name, class: "avatar", size: size, **options

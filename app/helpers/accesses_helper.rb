@@ -1,6 +1,4 @@
 module AccessesHelper
-  MAX_DISPLAYED_WATCHERS = 8
-
   def access_menu_tag(board, **options, &)
     tag.menu class: [ options[:class], { "toggler--toggled": board.all_access? } ], data: {
       controller: "filter toggle-class navigable-list",
@@ -27,25 +25,19 @@ module AccessesHelper
   end
 
   def board_watchers_list(board)
-    watchers = board.watchers.with_avatars
+    watchers = board.watchers.with_avatars.load
 
-    displayed_watchers = watchers.limit(MAX_DISPLAYED_WATCHERS)
-    overflow_count = watchers.count - MAX_DISPLAYED_WATCHERS
+    displayed_watchers = watchers.first(8)
+    overflow_count = watchers.size - 8
 
-    safe_join([
-      tag.strong(displayed_watchers.any? ? "Watching for new cards" : "No one is watching for new cards", class: "txt-uppercase"),
-      tag.div(class: "board-tools__watching") do
-        safe_join([
-          safe_join(displayed_watchers.map { |watcher| avatar_tag(watcher) }),
-          (tag.div(data: { controller: "dialog", action: "keydown.esc->dialog#close click@document->dialog#closeOnClickOutside" }) do
-            concat tag.button("+#{overflow_count}", class: "overflow-count btn btn--circle borderless", data: { action: "dialog#open" }, aria: { label: "Show #{overflow_count} more watchers" })
-            concat(tag.dialog(class: "board-tools__watching-dialog dialog panel", data: { dialog_target: "dialog" }, aria: { hidden: "true" }) do
-              safe_join(watchers.map { |watcher| avatar_tag(watcher) })
-            end)
-          end if overflow_count > 0)
-        ].compact)
+    tag.strong(displayed_watchers.any? ? "Watching for new cards" : "No one is watching for new cards", class: "txt-uppercase") do
+      tag.div(avatar_tags(displayed_watchers), class: "board-tools__watching") do
+        tag.div(data: { controller: "dialog", action: "keydown.esc->dialog#close click@document->dialog#closeOnClickOutside" }) do
+          tag.button("+#{overflow_count}", class: "overflow-count btn btn--circle borderless", data: { action: "dialog#open" }, aria: { label: "Show #{overflow_count} more watchers" }) +
+          tag.dialog(avatar_tags(watchers), class: "board-tools__watching-dialog dialog panel", data: { dialog_target: "dialog" }, aria: { hidden: "true" })
+        end if overflow_count > 0
       end
-    ])
+    end
   end
 
   def involvement_button(board, access, show_watchers, icon_only)
