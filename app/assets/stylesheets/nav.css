@@ -19,32 +19,30 @@
       &:hover {
         filter: brightness(0.9);
 
-        span {
-          background: var(--color-ink-lighter);
-        }
-
         @media (prefers-color-scheme: dark) {
           --input-background: var(--color-ink-lighter);
         }
       }
     }
 
-    span {
-      background: var(--color-ink-lightest);
-      block-size: auto;
-      border-radius: 0.3125em;
-      box-shadow:
-        0 0 0 1px oklch(var(--lch-ink-darkest) / 0.1),
-        0 0.1em 0.2em -0.1em oklch(var(--lch-ink-darkest) / 0.05),
-        0 0.2em 0.4em -0.2em oklch(var(--lch-ink-darkest) / 0.05),
-        0 0.3em 0.6em -0.3em oklch(var(--lch-ink-darkest) / 0.05)
-      ;
-      display: grid;
+    img {
       height: 1.5em;
-      inline-size: 1.5em;
-      padding: 0.325em 0.275em 0.225em 0.275em;
-      place-content: center;
       width: 1.5em;
+      display: block;
+    }
+
+    .logo-light {
+      @media (prefers-color-scheme: dark) {
+        display: none;
+      }
+    }
+
+    .logo-dark {
+      display: none;
+
+      @media (prefers-color-scheme: dark) {
+        display: block;
+      }
     }
 
     svg {
