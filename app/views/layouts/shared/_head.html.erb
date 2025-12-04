@@ -8,16 +8,6 @@
   <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#0d181d" media="(prefers-color-scheme: dark)">
-  <script>
-    (function() {
-      const storageKey = "theme-preference";
-      const savedTheme = localStorage.getItem(storageKey);
-      const theme = savedTheme === "light" || savedTheme === "dark"
-        ? savedTheme
-        : (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-      document.documentElement.setAttribute("data-theme", theme);
-    })();
-  </script>
   <%= csrf_meta_tags %>
   <%= csp_meta_tag %>
   <%= tag.meta name: "current-user-id", content: Current.user.id if Current.user %>
