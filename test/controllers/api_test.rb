@@ -73,9 +73,11 @@ class ApiTest < ActionDispatch::IntegrationTest
   test "get identity" do
     identity = identities(:david)
 
-    get identity_path(format: :json), env: @davids_bearer_token
-    assert_response :success # Fix 302 redirect
-    assert_equal identity.accounts.count, @response.parsed_body["accounts"].count
+    untenanted do
+      get identity_path(format: :json), env: @davids_bearer_token
+      assert_response :success
+      assert_equal identity.accounts.count, @response.parsed_body["accounts"].count
+    end
   end
 
   private

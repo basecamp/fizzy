@@ -7,7 +7,7 @@ module Authentication
     after_action :ensure_development_magic_link_not_leaked
     helper_method :authenticated?
 
-    etag { Current.session.id if authenticated? }
+    etag { Current.identity.id if authenticated? }
 
     include LoginHelper
   end
