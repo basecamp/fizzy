@@ -2,11 +2,6 @@ class Webhook::Delivery < ApplicationRecord
   STALE_TRESHOLD = 7.days
   USER_AGENT = "fizzy/1.0.0 Webhook"
   ENDPOINT_TIMEOUT = 7.seconds
-  DNS_RESOLUTION_TIMEOUT = 2
-  DISALLOWED_IP_RANGES = [
-    # Broadcasts
-    IPAddr.new("0.0.0.0/8")
-  ].freeze
 
   belongs_to :account, default: -> { webhook.account }
   belongs_to :webhook
@@ -54,14 +49,14 @@ class Webhook::Delivery < ApplicationRecord
 
   private
     def perform_request
-      if private_uri?
+      if resolved_ip.nil?
         { error: :private_uri }
       else
         response = http.request(
           Net::HTTP::Post.new(uri, headers).tap { |request| request.body = payload }
         )
 
-      { code: response.code.to_i }
+        { code: response.code.to_i }
       end
     rescue Resolv::ResolvTimeout, Resolv::ResolvError, SocketError
       { error: :dns_lookup_failed }
@@ -73,18 +68,9 @@ class Webhook::Delivery < ApplicationRecord
       { error: :failed_tls }
     end
 
-    def private_uri?
-      ip_addresses = []
-
-      Resolv::DNS.open(timeouts: DNS_RESOLUTION_TIMEOUT) do |dns|
-        dns.each_address(uri.host) do |ip_address|
-          ip_addresses << IPAddr.new(ip_address)
-        end
-      end
-
-      ip_addresses.any? do |ip|
-        ip.private? || ip.loopback? || ip.link_local? || ip.ipv4_mapped? || DISALLOWED_IP_RANGES.any? { |range| range.include?(ip) }
-      end
+    def resolved_ip
+      return @resolved_ip if defined?(@resolved_ip)
+      @resolved_ip = SsrfProtection.resolve_public_ip(uri.host)
     end
 
     def uri
@@ -92,7 +78,7 @@ class Webhook::Delivery < ApplicationRecord
     end
 
     def http
-      Net::HTTP.new(uri.host, uri.port).tap do |http|
+      Net::HTTP.new(uri.host, uri.port, ipaddr: resolved_ip).tap do |http|
         http.use_ssl = (uri.scheme == "https")
         http.open_timeout = ENDPOINT_TIMEOUT
         http.read_timeout = ENDPOINT_TIMEOUT

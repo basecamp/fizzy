@@ -1,0 +1,37 @@
+module SsrfProtection
+  extend self
+
+  DNS_RESOLUTION_TIMEOUT = 2
+
+  DISALLOWED_IP_RANGES = [
+    IPAddr.new("0.0.0.0/8") # Broadcasts
+  ].freeze
+
+  def resolve_public_ip(hostname)
+    ip_addresses = resolve_dns(hostname)
+    public_ips = ip_addresses.reject { |ip| private_address?(ip) }
+    public_ips.first&.to_s
+  end
+
+  def private_address?(ip)
+    ip = IPAddr.new(ip.to_s) unless ip.is_a?(IPAddr)
+    ip.private? || ip.loopback? || ip.link_local? || ip.ipv4_mapped? || in_disallowed_range?(ip)
+  end
+
+  private
+    def resolve_dns(hostname)
+      ip_addresses = []
+
+      Resolv::DNS.open(timeouts: DNS_RESOLUTION_TIMEOUT) do |dns|
+        dns.each_address(hostname) do |ip_address|
+          ip_addresses << IPAddr.new(ip_address.to_s)
+        end
+      end
+
+      ip_addresses
+    end
+
+    def in_disallowed_range?(ip)
+      DISALLOWED_IP_RANGES.any? { |range| range.include?(ip) }
+    end
+end
