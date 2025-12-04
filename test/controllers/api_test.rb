@@ -70,6 +70,14 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert_equal users(:david).name, @response.parsed_body["name"]
   end
 
+  test "get identity" do
+    identity = identities(:david)
+
+    get identity_path(format: :json), env: @davids_bearer_token
+    assert_response :success # Fix 302 redirect
+    assert_equal identity.accounts.count, @response.parsed_body["accounts"].count
+  end
+
   private
     def bearer_token_env(token)
       { "HTTP_AUTHORIZATION" => "Bearer #{token}" }

@@ -162,6 +162,8 @@ Rails.application.routes.draw do
 
   resource :landing
 
+  resource :identity, only: :show
+
   namespace :my do
     resources :access_tokens
     resources :pins
