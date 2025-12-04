@@ -10,6 +10,9 @@ on:
       GH_TOKEN:
         required: false
 
+permissions:
+  contents: read
+
 jobs:
   test:
     name: Tests (${{ matrix.mode }})

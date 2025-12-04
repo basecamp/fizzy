@@ -3,6 +3,9 @@ name: CI (SaaS)
 on:
   push:
 
+permissions:
+  contents: read
+
 jobs:
   test_oss:
     name: Test (OSS)
