@@ -234,9 +234,10 @@
   --color-gradient-2: oklch(var(--lch-pink-lighter));
   --color-gradient-3: oklch(var(--lch-purple-lighter));
   --color-gradient-4: var(--color-canvas);
+}
 
-  @media (prefers-color-scheme: dark) {
-    --lch-canvas: 20% 0.0195 232.58;
+:root[data-theme="dark"] {
+  --lch-canvas: 20% 0.0195 232.58;
     --lch-ink-inverted: var(--lch-black);
 
     --lch-ink-darkest: 96.02% 0.0034 260;
@@ -338,5 +339,4 @@
               0 .4em .8em -1.2em oklch(var(--lch-black) / 0.8),
               0 .8em 1.2em -1.6em oklch(var(--lch-black) / 0.9),
               0 1.2em 1.6em -2em oklch(var(--lch-black) / 1);
-  }
 }
