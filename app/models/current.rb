@@ -5,7 +5,7 @@ class Current < ActiveSupport::CurrentAttributes
   def session=(value)
     super(value)
 
-    if value.present? && account.present?
+    if value.present?
       self.identity = session.identity
     end
   end
