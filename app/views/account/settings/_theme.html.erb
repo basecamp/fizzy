@@ -1,0 +1,12 @@
+<header>
+  <h2 class="divider txt-large">Theme</h2>
+  <p class="margin-none-block-start">Choose your preferred color scheme.</p>
+</header>
+
+<div class="flex gap justify-center">
+  <%= button_tag type: "button", class: "btn", data: { action: "click->theme#toggle" } do %>
+    <%= icon_tag "switch", class: "icon" %>
+    <span data-theme-target="label">Theme</span>
+  <% end %>
+</div>
+
