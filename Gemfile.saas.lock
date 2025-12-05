@@ -21,7 +21,7 @@ GIT
 
 GIT
   remote: https://github.com/basecamp/fizzy-saas
-  revision: 97d126e0a6084905aceaadf4facaa2a48b44e124
+  revision: 3b30f3d56d8318bb9256469cb91c06a5a5c760a6
   specs:
     fizzy-saas (0.1.0)
       audits1984
