@@ -1,0 +1,54 @@
+<% @page_title = "Create API Token" %>
+
+<% content_for :header do %>
+  <div class="header__actions header__actions--start">
+    <%= back_link_to "API Tokens", admin_api_tokens_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+  </div>
+  <h1 class="header__title"><%= @page_title %></h1>
+<% end %>
+
+<article class="panel panel--wide center txt-align-start">
+  <%= form_with model: @api_token, url: admin_api_tokens_path, data: { controller: "form" }, html: { class: "flex flex-column gap" } do |form| %>
+    <% if @api_token.errors.any? %>
+      <div class="margin-block-half">
+        <ul class="margin-block-none txt-negative txt-small">
+          <% @api_token.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="flex flex-column gap-half">
+      <%= form.label :name do %>
+        <strong>Token Name</strong><br>
+        <p class="margin-none txt-x-small txt-subtle">A descriptive name for this token (e.g., "Production API", "Development Agent")</p>
+      <% end %>
+      <%= form.text_field :name, required: true, autofocus: true, class: "input", placeholder: "Enter token name…", data: { action: "keydown.esc@document->form#cancel" } %>
+    </div>
+
+    <div class="flex flex-column gap-half">
+      <%= form.label :account_id do %>
+        <strong>Account</strong><br>
+        <p class="margin-none txt-x-small txt-subtle">Select the account this token will be associated with</p>
+      <% end %>
+      <%= form.collection_select :account_id, @accounts, :id, :name, { prompt: "Select an account…" }, { required: true, class: "input" } %>
+    </div>
+
+    <div class="flex flex-column gap-half">
+      <%= form.label :expires_at do %>
+        <strong>Expiration Date (Optional)</strong><br>
+        <p class="margin-none txt-x-small txt-subtle">Leave blank for tokens that never expire</p>
+      <% end %>
+      <%= form.datetime_local_field :expires_at, class: "input", data: { action: "keydown.esc@document->form#cancel" } %>
+    </div>
+
+    <%= form.button type: :submit, class: "btn btn--link center txt-medium" do %>
+      <span>Create Token</span>
+      <%= icon_tag "arrow-right" %>
+    <% end %>
+
+    <%= link_to "Cancel", admin_api_tokens_path, data: { form_target: "cancel" }, hidden: true %>
+  <% end %>
+</article>
+

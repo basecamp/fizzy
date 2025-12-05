@@ -1,0 +1,72 @@
+<% @page_title = "API Tokens" %>
+
+<% content_for :header do %>
+  <%= render "admin/navigation" %>
+  <div class="header__actions header__actions--end">
+    <%= link_to new_admin_api_token_path, class: "btn btn--link btn--circle-mobile" do %>
+      <%= icon_tag "add" %>
+      <span class="overflow-ellipsis">New Token</span>
+    <% end %>
+  </div>
+  <h1 class="header__title"><%= @page_title %></h1>
+<% end %>
+
+<section class="settings">
+  <div class="settings__panel panel shadow center">
+    <header>
+      <h2 class="divider txt-medium margin-block-start">
+        All API Tokens
+      </h2>
+    </header>
+
+    <% if @api_tokens.any? %>
+      <ul class="margin-block-half">
+        <% @api_tokens.each do |token| %>
+          <li class="flex align-start gap-half margin-block-start-half">
+            <div class="flex-item-grow min-width overflow-ellipsis" style="text-align: left">
+              <strong><%= token.name %></strong>
+              <br>
+              <span class="txt-x-small txt-ink-medium">
+                Account: <%= token.account.name %> (#<%= token.account.external_account_id %>)
+              </span>
+              <br>
+              <span class="txt-x-small txt-ink-medium">
+                Token: <code style="font-size: 0.9em; background: var(--color-ink-low); padding: 0.2em 0.4em; border-radius: 0.2em;"><%= token.token %></code>
+              </span>
+              <% if token.expires_at.present? %>
+                <br>
+                <span class="txt-x-small txt-ink-medium">
+                  Expires: <%= token.expires_at.strftime("%Y-%m-%d %H:%M") %>
+                  <% if token.expired? %>
+                    <span class="txt-negative">(Expired)</span>
+                  <% end %>
+                </span>
+              <% end %>
+              <% if token.last_used_at.present? %>
+                <br>
+                <span class="txt-x-small txt-ink-medium">
+                  Last used: <%= time_ago_in_words(token.last_used_at) %> ago
+                </span>
+              <% else %>
+                <br>
+                <span class="txt-x-small txt-ink-medium">Never used</span>
+              <% end %>
+            </div>
+
+            <div class="txt-medium txt-ink-medium" style="text-align: right">
+              <%= button_to admin_api_token_path(token), method: :delete, 
+                    class: "btn btn--circle btn--negative",
+                    data: { turbo_confirm: "Are you sure you want to delete this token?" } do %>
+                <%= icon_tag "minus" %>
+                <span class="for-screen-reader">Delete token</span>
+              <% end %>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="txt-medium txt-ink-medium margin-block-half">No API tokens yet.</p>
+    <% end %>
+  </div>
+</section>
+

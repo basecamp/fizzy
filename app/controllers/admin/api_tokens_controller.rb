@@ -1,0 +1,36 @@
+class Admin::ApiTokensController < AdminController
+  layout "public"
+
+  def index
+    @api_tokens = ApiToken.includes(:account, :user).order(created_at: :desc)
+    @accounts = Account.order(:name)
+  end
+
+  def new
+    @api_token = ApiToken.new
+    @accounts = Account.order(:name)
+  end
+
+  def create
+    @api_token = ApiToken.new(api_token_params)
+    @accounts = Account.order(:name)
+
+    if @api_token.save
+      redirect_to admin_api_tokens_path, notice: "Token créé avec succès. Le token est : #{@api_token.token}"
+    else
+      render :new, status: :unprocessable_entity
+    end
+  end
+
+  def destroy
+    @api_token = ApiToken.find(params[:id])
+    @api_token.destroy
+    redirect_to admin_api_tokens_path, notice: "Token supprimé avec succès"
+  end
+
+  private
+    def api_token_params
+      params.require(:api_token).permit(:account_id, :name, :expires_at)
+    end
+end
+
