@@ -1,0 +1,9 @@
+<%# Admin navigation partial - provides consistent navigation across all admin pages %>
+<%# Use main_app to access routes when rendered from Mission Control engine %>
+<% routes = respond_to?(:main_app) ? main_app : self %>
+<div class="header__actions header__actions--start">
+  <%= admin_nav_link "Stats", routes.admin_stats_path, icon: "arrow-left" %>
+  <%= admin_nav_link "API Tokens", routes.admin_api_tokens_path, icon: "arrow-left" %>
+  <%= admin_nav_link "Jobs", "/admin/jobs", icon: "arrow-left" %>
+</div>
+

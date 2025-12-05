@@ -21,4 +21,21 @@ module ApplicationHelper
       icon_tag("arrow-left") + tag.strong("Back to #{label}", class: "overflow-ellipsis") + tag.kbd("ESC", class: "txt-x-small hide-on-touch").html_safe
     end
   end
+
+  def admin_nav_link(label, url, icon: nil, **options)
+    classes = class_names("btn btn--back", options.delete(:class))
+    
+    link_to url, class: classes, **options do
+      content = []
+      content << icon_tag(icon) if icon
+      content << tag.strong(label, class: "overflow-ellipsis")
+      safe_join(content)
+    end
+  end
+  
+  def admin_header_content
+    if request.path.start_with?("/admin/jobs")
+      render("admin/navigation")
+    end
+  end
 end

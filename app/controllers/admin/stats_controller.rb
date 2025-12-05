@@ -16,5 +16,10 @@ class Admin::StatsController < AdminController
       .limit(20)
 
     @recent_accounts = Account.order(created_at: :desc).limit(10)
+
+    @api_tokens_total = ApiToken.count
+    @api_tokens_active = ApiToken.active.count
+    @api_tokens_expired = ApiToken.expired.count
+    @recent_api_tokens = ApiToken.includes(:account, :user).order(created_at: :desc).limit(10)
   end
 end

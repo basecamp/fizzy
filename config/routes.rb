@@ -235,6 +235,10 @@ Rails.application.routes.draw do
   namespace :admin do
     mount MissionControl::Jobs::Engine, at: "/jobs"
     get "stats", to: "stats#show"
-    resources :api_tokens, only: [:index, :new, :create, :destroy]
+    resources :api_tokens, only: [:index, :new, :create, :destroy] do
+      collection do
+        get "users_for_account"
+      end
+    end
   end
 end

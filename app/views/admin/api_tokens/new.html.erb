@@ -32,7 +32,15 @@
         <strong>Account</strong><br>
         <p class="margin-none txt-x-small txt-subtle">Select the account this token will be associated with</p>
       <% end %>
-      <%= form.collection_select :account_id, @accounts, :id, :name, { prompt: "Select an account…" }, { required: true, class: "input" } %>
+      <%= form.collection_select :account_id, @accounts, :id, :name, { prompt: "Select an account…" }, { required: true, class: "input", data: { action: "change->user-select#loadUsers" } } %>
+    </div>
+
+    <div class="flex flex-column gap-half" data-controller="user-select">
+      <%= form.label :user_id do %>
+        <strong>User</strong><br>
+        <p class="margin-none txt-x-small txt-subtle">Select the user this token will authenticate as</p>
+      <% end %>
+      <%= form.select :user_id, [], { prompt: "Select an account first…" }, { required: true, class: "input", disabled: true, data: { user_select_target: "select" } } %>
     </div>
 
     <div class="flex flex-column gap-half">

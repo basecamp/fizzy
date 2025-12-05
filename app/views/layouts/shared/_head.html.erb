@@ -23,7 +23,7 @@
 
   <%= yield :head %>
 
-  <link rel="manifest" href="<%= pwa_manifest_path(format: :json) %>">
+  <link rel="manifest" href="<%= main_app.pwa_manifest_path(format: :json) rescue pwa_manifest_path(format: :json) %>">
   <link rel="icon" href="/favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 </head>

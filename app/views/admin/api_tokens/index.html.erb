@@ -27,7 +27,8 @@
               <strong><%= token.name %></strong>
               <br>
               <span class="txt-x-small txt-ink-medium">
-                Account: <%= token.account.name %> (#<%= token.account.external_account_id %>)
+                Account: <%= token.account.name %> (#<%= token.account.external_account_id %>) •
+                User: <%= token.user.name %> (<%= token.user.identity&.email_address %>)
               </span>
               <br>
               <span class="txt-x-small txt-ink-medium">

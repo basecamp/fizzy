@@ -28,9 +28,22 @@ class Admin::ApiTokensController < AdminController
     redirect_to admin_api_tokens_path, notice: "Token supprimé avec succès"
   end
 
+  def users_for_account
+    account = Account.find(params[:account_id])
+    users = account.users.active.includes(:identity).order(:name)
+    
+    render json: users.map { |user|
+      {
+        id: user.id,
+        name: user.name,
+        email: user.identity&.email_address || "No email"
+      }
+    }
+  end
+
   private
     def api_token_params
-      params.require(:api_token).permit(:account_id, :name, :expires_at)
+      params.require(:api_token).permit(:account_id, :user_id, :name, :expires_at)
     end
 end
 
