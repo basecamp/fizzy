@@ -30,11 +30,7 @@ class Sessions::MagicLinksController < ApplicationController
 
         format.json do
           new_access_token = magic_link.identity.access_tokens.create!(permission: :write)
-          render json: {
-            email_address: magic_link.identity.email_address,
-            access_token: new_access_token.token,
-            users: magic_link.identity.users
-          }
+          render json: { access_token: new_access_token.token }
         end
       end
     end
