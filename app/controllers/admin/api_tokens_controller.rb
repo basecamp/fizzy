@@ -16,7 +16,7 @@ class Admin::ApiTokensController < AdminController
     @accounts = Account.order(:name)
 
     if @api_token.save
-      redirect_to admin_api_tokens_path, notice: "Token créé avec succès. Le token est : #{@api_token.token}"
+      redirect_to admin_api_tokens_path, notice: "Token created successfully. The token is: #{@api_token.token}"
     else
       render :new, status: :unprocessable_entity
     end
@@ -25,7 +25,7 @@ class Admin::ApiTokensController < AdminController
   def destroy
     @api_token = ApiToken.find(params[:id])
     @api_token.destroy
-    redirect_to admin_api_tokens_path, notice: "Token supprimé avec succès"
+    redirect_to admin_api_tokens_path, notice: "Token deleted successfully"
   end
 
   def users_for_account

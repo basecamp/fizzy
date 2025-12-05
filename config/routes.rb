@@ -232,6 +232,19 @@ Rails.application.routes.draw do
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   get "service-worker" => "pwa#service_worker"
 
+  namespace :api do
+    resources :boards, only: [:index, :show] do
+      resources :cards, only: [:create], controller: "cards"
+    end
+
+    post "cards/:card_id/move", to: "cards#move"
+    post "cards/:card_id/close", to: "cards#close"
+    post "cards/:card_id/reopen", to: "cards#reopen"
+    post "cards/:card_id/assign", to: "cards#assign"
+    post "cards/:card_id/tag", to: "cards#tag"
+    post "cards/:card_id/comments", to: "comments#create"
+  end
+
   namespace :admin do
     mount MissionControl::Jobs::Engine, at: "/jobs"
     get "stats", to: "stats#show"

@@ -6,69 +6,72 @@
 #   OR
 #   bin/rails runner script/create_agent_api_tokens.rb
 #
-# This script creates:
-# - Users for each agent (if they don't exist)
-# - API tokens for each agent
+# This script creates API tokens for each agent.
+# Tokens are automatically associated with the account's system_user.
 
 # Agent configurations - adjust these to match your simulator setup
 AGENTS = [
   {
     email: "overcommitter@fizzy-sim.local",
-    name: "Overcommitter Agent",
-    role: "system"
+    name: "The Overcommitter (Senior Developer)"
+  },
+  {
+    email: "scope.creeper@fizzy-sim.local",
+    name: "The Scope Creeper (Product Manager)"
   },
   {
     email: "perfectionist@fizzy-sim.local",
-    name: "Perfectionist Agent",
-    role: "system"
+    name: "The Perfectionist (QA Engineer)"
   },
   {
-    email: "scope_creeper@fizzy-sim.local",
-    name: "Scope Creeper Agent",
-    role: "system"
+    email: "ghost@fizzy-sim.local",
+    name: "The Ghost (Contractor)"
+  },
+  {
+    email: "bikeshedder@fizzy-sim.local",
+    name: "The Bikeshedder (Tech Lead)"
+  },
+  {
+    email: "arsonist@fizzy-sim.local",
+    name: "The Arsonist (Junior Developer)"
+  },
+  {
+    email: "lurker@fizzy-sim.local",
+    name: "The Lurker (Stakeholder)"
+  },
+  {
+    email: "automator@fizzy-sim.local",
+    name: "The Automator (DevOps Engineer)"
+  },
+  {
+    email: "archaeologist@fizzy-sim.local",
+    name: "The Archaeologist (Staff Engineer)"
+  },
+  {
+    email: "firefighter@fizzy-sim.local",
+    name: "The Fire Fighter (On-Call Engineer)"
   }
 ].freeze
 
-def find_or_create_identity(email)
-  Identity.find_or_create_by!(email_address: email)
-end
-
-def find_or_create_user(account, email, name, role)
-  identity = find_or_create_identity(email)
-  
-  user = account.users.find_by(identity: identity)
-  
-  unless user
-    user = account.users.create!(
-      identity: identity,
-      name: name,
-      role: role
-    )
-    puts "  ✓ Created user: #{name} (#{email})"
-  else
-    puts "  → User already exists: #{name} (#{email})"
-  end
-  
-  user
-end
-
-def create_api_token(account, user, name)
-  token = ApiToken.find_by(account: account, user: user, name: name)
+def create_api_token(account, name)
+  # Use system_user (automatically set by ApiToken model callback)
+  token = ApiToken.find_by(account: account, name: name)
   
   if token
     puts "  → API token already exists for #{name}"
     puts "     Token: #{token.token}"
+    puts "     User: #{token.user.name}"
     return token
   end
   
   token = ApiToken.create!(
     account: account,
-    user: user,
     name: name
   )
   
   puts "  ✓ Created API token for #{name}"
   puts "     Token: #{token.token}"
+  puts "     User: #{token.user.name} (system_user)"
   
   token
 end
@@ -83,17 +86,9 @@ account = Account.first || Account.create!(name: "Test Account", external_accoun
 puts "\nAccount: #{account.name} (ID: #{account.id})"
 puts "\nProcessing agents:\n"
 
-AGENTS.each do |agent_config|
-  puts "\n#{agent_config[:name]}:"
-  
-  user = find_or_create_user(
-    account,
-    agent_config[:email],
-    agent_config[:name],
-    agent_config[:role]
-  )
-  
-  create_api_token(account, user, agent_config[:name])
+AGENTS.each do |agent|
+  puts "\n#{agent[:name]} (#{agent[:email]}):"
+  create_api_token(account, agent[:name])
 end
 
 puts "\n" + "=" * 60

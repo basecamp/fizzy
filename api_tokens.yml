@@ -1,0 +1,31 @@
+# Fizzy API Token Configuration
+#
+# Maps agent email addresses to their API tokens.
+# 
+# To create tokens for all agents, run in Rails console:
+#   load 'docs/create_fizzy_tokens.rb'
+#
+# See docs/FIZZY_CREATE_TOKENS_FINAL.md for detailed instructions.
+#
+# Tokens can also be set via environment variables:
+#   FIZZY_API_TOKEN_OVERCOMMITTER=your_token_here
+#   FIZZY_API_TOKEN_SCOPE_CREEPER=your_token_here
+#   etc.
+#
+# Environment variables take precedence over this file.
+
+tokens:
+  # Core personas (currently configured)
+  overcommitter@fizzy-sim.local: eaYCZNECreg9jrpTjQCEobWp
+  scope.creeper@fizzy-sim.local: UdCW61KdhC7PpTYP7LFaUDuC
+  perfectionist@fizzy-sim.local: E3cY4fcQ4MJhCWM1WadLdHoB
+  
+  # Additional personas (all tokens created)
+  ghost@fizzy-sim.local: R7WsHPdQAEvFn3T4Nks73JGT
+  bikeshedder@fizzy-sim.local: ZzaGJes8sMcugnvsxaXWh97g
+  arsonist@fizzy-sim.local: uEj9EDH1cU9e2AZ3T7PNAcPa
+  lurker@fizzy-sim.local: AT1DQeD3dWtgFdhhTPoLjtUF
+  automator@fizzy-sim.local: q6qzWJAgduSA5GCEfgGJA5yc
+  archaeologist@fizzy-sim.local: akjQSZ5m4eCamjwN3UbbrXps
+  firefighter@fizzy-sim.local: ZChfhjqKYWBvRxGGgiPrMNUC
+

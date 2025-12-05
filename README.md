@@ -168,6 +168,22 @@ puts "VAPID_PRIVATE_KEY=#{vapid_key.private_key}"
 puts "VAPID_PUBLIC_KEY=#{vapid_key.public_key}"
 ```
 
+## REST API
+
+Fizzy provides a REST API for programmatic access to boards, cards, and comments. See [API.md](API.md) for complete API documentation.
+
+### Quick Start
+
+1. Create an API token through the admin interface at `/admin/api_tokens`
+2. Grant board access to the token (see [API.md](API.md) for details)
+3. Use the token in API requests with the `Authorization: Bearer TOKEN` header
+
+Example:
+```bash
+curl -H "Authorization: Bearer YOUR_TOKEN" \
+  http://fizzy.localhost:3006/api/boards
+```
+
 ## SaaS gem
 
 37signals bundles Fizzy with [`fizzy-saas`](https://github.com/basecamp/fizzy-saas), a companion gem that links Fizzy with our billing system and contains our production setup.
