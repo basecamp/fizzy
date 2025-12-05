@@ -24,6 +24,8 @@ class Api::CardsController < Api::BaseController
   end
 
   def move
+    raise ArgumentError, "to_column parameter is required" unless params[:to_column].present?
+    
     column = find_column_by_name(params[:to_column])
     @card.triage_into(column)
     

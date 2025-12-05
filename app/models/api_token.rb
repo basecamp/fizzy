@@ -7,7 +7,7 @@ class ApiToken < ApplicationRecord
   scope :active, -> { where("expires_at IS NULL OR expires_at > ?", Time.current) }
   scope :expired, -> { where("expires_at IS NOT NULL AND expires_at <= ?", Time.current) }
 
-  validates :name, presence: true, if: -> { name.present? }
+  validates :name, presence: true
 
   def expired?
     expires_at.present? && expires_at <= Time.current

@@ -108,10 +108,11 @@ Rails.application.configure do
     ENV["ALLOWED_HOST_DOMAINS"].split(",").each do |domain|
       domain = domain.strip
       next if domain.empty?
-      # Match domain and any subdomain, with optional port
+      escaped_domain = Regexp.escape(domain)
+      # Match exact domain, domain with port, and any subdomain (with optional port)
       config.hosts += [
-        /\.#{Regexp.escape(domain)}(:\d+)?$/,
-        /^.*\.#{Regexp.escape(domain)}(:\d+)?$/
+        /^#{escaped_domain}(:\d+)?$/,
+        /^.*\.#{escaped_domain}(:\d+)?$/
       ]
     end
   end
