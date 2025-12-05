@@ -1,6 +1,6 @@
 # This Gemfile extends the base Gemfile with OSS-specific dependencies
 eval_gemfile "Gemfile"
-
+oss_repo = ENV.fetch("FIZZY_REPO", "fizzy-oss")
 git_source(:oss) { |repo| "https://github.com/#{ENV['GH_USER']}/#{repo}" }
 
-gem "fizzy-oss", oss: "fizzy-oss"
+gem oss_repo, oss: "fizzy-oss"
