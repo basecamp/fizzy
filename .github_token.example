@@ -1,0 +1,4 @@
+# Placez votre token GitHub ici si vous avez besoin d'accéder à des gems privées
+# Copiez ce fichier vers .github_token et remplacez ce commentaire par votre token
+# Exemple: echo "your_token" > .github_token
+

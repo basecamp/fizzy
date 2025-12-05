@@ -1,0 +1,13 @@
+#!/bin/bash
+# Script d'initialisation pour docker-compose
+# Crée le fichier .github_token s'il n'existe pas
+
+if [ ! -f .github_token ]; then
+  echo "Création du fichier .github_token vide..."
+  touch .github_token
+  echo "Fichier créé. Si vous avez besoin d'accéder à des gems privées GitHub,"
+  echo "ajoutez votre token: echo 'your_token' > .github_token"
+fi
+
+exec docker-compose "$@"
+

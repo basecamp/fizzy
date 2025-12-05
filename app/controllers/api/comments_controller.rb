@@ -18,7 +18,7 @@ class Api::CommentsController < Api::BaseController
     def comment_json(comment)
       {
         id: comment.id,
-        body: comment.body.to_plain_text,
+        body: comment.body&.to_plain_text,
         card_id: comment.card.number,
         creator: {
           id: comment.creator.id,

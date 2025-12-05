@@ -28,11 +28,12 @@ To login, enter `david@example.com` and grab the verification code from the brow
 For easy local and remote development, you can use Docker Compose:
 
 ```sh
-# If you need to access private GitHub gems, create a token file:
-echo "your_github_token" > .github_token
-
 # Build and start the container
 docker-compose up
+
+# Note: If you need to access private GitHub gems, create a token file first:
+# echo "your_github_token" > .github_token
+# Or set the BUILDKIT_GITHUB_TOKEN environment variable: export BUILDKIT_GITHUB_TOKEN=your_token
 
 # Or run in background
 docker-compose up -d
@@ -91,7 +92,10 @@ docker-compose down
 docker-compose up -d
 ```
 
-**Note**: If your Gemfile includes private GitHub gems, create a `.github_token` file with your GitHub personal access token. If you don't need private gems, create an empty file: `touch .github_token`. The `.github_token` file is git-ignored for security.
+**Note**: If your Gemfile includes private GitHub gems, you need to provide a GitHub token:
+- Option 1: Create a `.github_token` file: `echo "your_token" > .github_token`
+- Option 2: Set the `BUILDKIT_GITHUB_TOKEN` environment variable: `export BUILDKIT_GITHUB_TOKEN=your_token`
+- If neither is provided, create an empty file first: `touch .github_token` (the build will proceed without authentication, but may fail if private gems are required)
 
 ### Running tests
 

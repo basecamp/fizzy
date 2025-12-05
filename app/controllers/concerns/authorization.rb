@@ -27,7 +27,7 @@ module Authorization
     end
 
     def ensure_can_access_account
-      redirect_to session_menu_url(script_name: nil) if Current.user.blank? || !Current.user.active?
+      redirect_to session_menu_url(script_name: nil), allow_other_host: true if Current.user.blank? || !Current.user.active?
     end
 
     def ensure_only_staff_can_access_non_production_remote_environments

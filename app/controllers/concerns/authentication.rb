@@ -37,7 +37,7 @@ module Authentication
 
     def require_account
       unless Current.account.present?
-        redirect_to session_menu_url(script_name: nil)
+        redirect_to session_menu_url(script_name: nil), allow_other_host: true
       end
     end
 

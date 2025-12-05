@@ -3,8 +3,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
-      # GITHUB_TOKEN secret is optional - only needed if Gemfile includes private gems
-      # Create .github_token file with your token if needed: echo "your_token" > .github_token
+      # GITHUB_TOKEN is optional - only needed if Gemfile includes private gems
+      # Option 1: Set BUILDKIT_GITHUB_TOKEN environment variable: export BUILDKIT_GITHUB_TOKEN=your_token
+      # Option 2: Create .github_token file and set GITHUB_TOKEN_FILE: export GITHUB_TOKEN_FILE=.github_token
+      # If neither exists, the build will proceed without it (may fail if private gems are required)
+      args:
+        - GITHUB_TOKEN=${BUILDKIT_GITHUB_TOKEN:-}
       secrets:
         - source: github_token
           target: GITHUB_TOKEN
@@ -45,10 +49,12 @@ services:
 
 secrets:
   # Optional: Only needed if accessing private GitHub gems
-  # Create .github_token file with your token: echo "your_token" > .github_token
-  # If the file doesn't exist, the build will proceed without it (may fail if private gems are required)
+  # Option 1: Set BUILDKIT_GITHUB_TOKEN environment variable: export BUILDKIT_GITHUB_TOKEN=your_token
+  # Option 2: Create .github_token file: cp .github_token.example .github_token && echo "your_token" > .github_token
+  # If the file doesn't exist, create it first: touch .github_token
+  # The build will proceed without authentication (may fail if private gems are required)
   github_token:
-    file: .github_token
+    file: ${GITHUB_TOKEN_FILE:-.github_token}
 
 volumes:
   node_modules:
