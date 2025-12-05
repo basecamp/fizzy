@@ -65,7 +65,7 @@ Rails.application.configure do
 
   config.action_mailer.perform_caching = false
 
-  config.action_mailer.delivery_method = ENV.fetch("MAILER_DELIVERY_METHOD", "sendmail").to_sym
+  config.action_mailer.delivery_method = ENV.fetch("MAILER_DELIVERY_METHOD", "smtp").to_sym
 
   config.action_mailer.smtp_settings = {
     address: ENV.fetch("SMTP_ADDRESS", "localhost"),
