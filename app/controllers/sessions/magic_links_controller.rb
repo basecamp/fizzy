@@ -30,11 +30,11 @@ class Sessions::MagicLinksController < ApplicationController
 
         format.json do
           new_access_token = magic_link.identity.access_tokens.create!(permission: :write)
-          render json: { 
+          render json: {
             email_address: magic_link.identity.email_address,
             access_token: new_access_token.token,
             users: magic_link.identity.users
-           }
+          }
         end
       end
     end
@@ -55,7 +55,8 @@ class Sessions::MagicLinksController < ApplicationController
     end
 
     def rate_limit_exceeded
-      rate_limit_exceeded_message = "Try again later."
+      rate_limit_exceeded_message = "Try again in 15 minutes."
+
       respond_to do |format|
         format.html { redirect_to session_magic_link_path, alert: rate_limit_exceeded_message }
         format.json { render json: { message: rate_limit_exceeded_message }, status: :too_many_requests }
