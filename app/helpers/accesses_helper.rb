@@ -30,7 +30,7 @@ module AccessesHelper
     displayed_watchers = watchers.first(8)
     overflow_count = watchers.size - 8
 
-    tag.strong(displayed_watchers.any? ? "Watching for new cards" : "No one is watching for new cards", class: "txt-uppercase") +
+    tag.strong(watchers.any? ? "Watching for new cards" : "No one is watching for new cards", class: "txt-uppercase") +
     tag.div(avatar_tags(displayed_watchers), class: "board-tools__watching") do
       tag.div(data: { controller: "dialog", action: "keydown.esc->dialog#close click@document->dialog#closeOnClickOutside" }) do
         tag.button("+#{overflow_count}", class: "overflow-count btn btn--circle borderless", data: { action: "dialog#open" }, aria: { label: "Show #{overflow_count} more watchers" }) +
