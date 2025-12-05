@@ -152,6 +152,11 @@
     }
   }
 
+  /* Temporarily hide the highlighter button until we tackle the styles */
+  [name="strikethrough"] + .lexxy-editor__toolbar-dropdown {
+    display: none;
+  }
+
   .lexxy-editor__toolbar-overflow-menu {
     background-color: var(--color-canvas);
     border-radius: 0.5ch;
