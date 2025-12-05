@@ -2,6 +2,7 @@ class BoardsController < ApplicationController
   include FilterScoped
 
   before_action :set_board, except: %i[ new create ]
+  before_action :ensure_board_accessible, only: %i[ show ]
   before_action :ensure_permission_to_admin_board, only: %i[ update destroy ]
 
   def show
@@ -46,6 +47,12 @@ class BoardsController < ApplicationController
   private
     def set_board
       @board = Current.user.boards.find params[:id]
+    end
+
+    def ensure_board_accessible
+      unless @board.accessible_to?(Current.user)
+        head :forbidden
+      end
     end
 
     def ensure_permission_to_admin_board
