@@ -24,7 +24,6 @@ class SessionsController < ApplicationController
     respond_to do |format|
       format.html { redirect_to_session_magic_link magic_link }
       format.json do
-        response.set_header("X-Magic-Link-Code", magic_link&.code) if Rails.env.development? && magic_link
         head :created
       end
     end
@@ -42,6 +41,7 @@ class SessionsController < ApplicationController
 
     def rate_limit_exceeded
       rate_limit_exceeded_message = "Try again later."
+
       respond_to do |format|
         format.html { redirect_to new_session_path, alert: rate_limit_exceeded_message }
         format.json { render json: { message: rate_limit_exceeded_message }, status: :too_many_requests }
