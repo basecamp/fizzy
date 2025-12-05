@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2025_12_01_100607) do
+ActiveRecord::Schema[8.2].define(version: 2025_12_05_120000) do
   create_table "accesses", id: :uuid, force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -104,6 +104,21 @@ ActiveRecord::Schema[8.2].define(version: 2025_12_01_100607) do
     t.string "variation_digest", limit: 255, null: false
     t.index ["account_id"], name: "index_active_storage_variant_records_on_account_id"
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "api_tokens", id: :uuid, force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "expires_at"
+    t.datetime "last_used_at"
+    t.string "name", limit: 255
+    t.string "token", limit: 255, null: false
+    t.datetime "updated_at", null: false
+    t.uuid "user_id", null: false
+    t.index ["account_id", "user_id"], name: "index_api_tokens_on_account_id_and_user_id"
+    t.index ["account_id"], name: "index_api_tokens_on_account_id"
+    t.index ["token"], name: "index_api_tokens_on_token", unique: true
+    t.index ["user_id"], name: "index_api_tokens_on_user_id"
   end
 
   create_table "assignees_filters", id: false, force: :cascade do |t|
@@ -555,6 +570,9 @@ ActiveRecord::Schema[8.2].define(version: 2025_12_01_100607) do
     t.index ["account_id"], name: "index_webhooks_on_account_id"
     t.index ["board_id", "subscribed_actions"], name: "index_webhooks_on_board_id_and_subscribed_actions"
   end
+
+  add_foreign_key "api_tokens", "accounts"
+  add_foreign_key "api_tokens", "users"
   execute "CREATE VIRTUAL TABLE search_records_fts USING fts5(\n        title,\n        content,\n        tokenize='porter'\n      )"
 
 end

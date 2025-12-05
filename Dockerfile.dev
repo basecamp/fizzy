@@ -22,7 +22,12 @@ COPY lib/fizzy.rb ./lib/fizzy.rb
 COPY gems ./gems/
 RUN --mount=type=secret,id=GITHUB_TOKEN --mount=type=cache,id=fizzy-devbundle-${RUBY_VERSION},sharing=locked,target=/devbundle \
     gem install bundler foreman && \
-    BUNDLE_PATH=/devbundle BUNDLE_GITHUB__COM="$(cat /run/secrets/GITHUB_TOKEN):x-oauth-basic" bundle install && \
+    (GITHUB_TOKEN=$(cat /run/secrets/GITHUB_TOKEN 2>/dev/null || echo ''); \
+     if [ -n "$GITHUB_TOKEN" ]; then \
+       BUNDLE_GITHUB__COM="${GITHUB_TOKEN}:x-oauth-basic" bundle install; \
+     else \
+       bundle install; \
+     fi) && \
     cp -a /devbundle/. "$BUNDLE_PATH"/ && \
     bundle clean --force
 
