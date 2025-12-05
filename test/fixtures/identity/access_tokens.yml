@@ -1,0 +1,11 @@
+jasons_api_token:
+  identity: jason
+  token: 018cf1425682700098f24f0799e3fe20
+  description: My Superscript
+  permission: read
+
+davids_api_token:
+  identity: david
+  token: x18cf1425682700098f24f0799e3fe20
+  description: My Superscript
+  permission: write

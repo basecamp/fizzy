@@ -1,6 +1,10 @@
 json.cache! [ card, card.column&.color ] do
   json.(card, :id, :title, :status)
+  json.description card.description.to_plain_text
+  json.description_html card.description.to_s
   json.image_url card.image.presence && url_for(card.image)
+
+  json.tags card.tags.pluck(:title).sort
 
   json.golden card.golden?
   json.last_active_at card.last_active_at.utc
@@ -13,11 +17,7 @@ json.cache! [ card, card.column&.color ] do
   end
 
   json.column do
-    if card.column
-      json.partial! "columns/column", column: card.column
-    else
-      nil
-    end
+    json.partial! "columns/column", column: card.column if card.column
   end
 
   json.creator do

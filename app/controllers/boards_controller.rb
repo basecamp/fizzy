@@ -1,8 +1,12 @@
 class BoardsController < ApplicationController
   include FilterScoped
 
-  before_action :set_board, except: %i[ new create ]
+  before_action :set_board, except: %i[ index new create ]
   before_action :ensure_permission_to_admin_board, only: %i[ update destroy ]
+
+  def index
+    @boards = Current.user.boards
+  end
 
   def show
     if @filter.used?(ignore_boards: true)
@@ -18,7 +22,11 @@ class BoardsController < ApplicationController
 
   def create
     @board = Board.create! board_params.with_defaults(all_access: true)
-    redirect_to board_path(@board)
+
+    respond_to do |format|
+      format.html { redirect_to board_path(@board) }
+      format.json { head :created, location: board_path(@board, format: :json) }
+    end
   end
 
   def edit

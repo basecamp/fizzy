@@ -7,7 +7,7 @@ module Authentication
     after_action :ensure_development_magic_link_not_leaked
     helper_method :authenticated?
 
-    etag { Current.session.id if authenticated? }
+    etag { Current.identity.id if authenticated? }
 
     include LoginHelper
   end
@@ -32,7 +32,7 @@ module Authentication
 
   private
     def authenticated?
-      Current.session.present?
+      Current.identity.present?
     end
 
     def require_account
@@ -42,7 +42,7 @@ module Authentication
     end
 
     def require_authentication
-      resume_session || request_authentication
+      resume_session || authenticate_by_bearer_token || request_authentication
     end
 
     def resume_session
@@ -53,6 +53,16 @@ module Authentication
 
     def find_session_by_cookie
       Session.find_signed(cookies.signed[:session_token])
+    end
+
+    def authenticate_by_bearer_token
+      if request.authorization.to_s.include?("Bearer")
+        authenticate_or_request_with_http_token do |token|
+          if identity = Identity.find_by_permissable_access_token(token, method: request.method)
+            Current.identity = identity
+          end
+        end
+      end
     end
 
     def request_authentication
