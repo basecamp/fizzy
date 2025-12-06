@@ -3,14 +3,6 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = [ "caption", "image", "dialog", "zoomedImage" ]
 
-  connect() {
-    this.dialogTarget.addEventListener('transitionend', this.handleTransitionEnd.bind(this))
-  }
-
-  disconnect() {
-    this.dialogTarget.removeEventListener('transitionend', this.handleTransitionEnd.bind(this))
-  }
-
   open(event) {
     this.dialogTarget.showModal()
     this.#set(event.target.closest("a"))
