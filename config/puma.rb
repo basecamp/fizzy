@@ -25,7 +25,7 @@ if !Rails.env.local?
   # worker per CPU, 1 thread per worker and tune it from there.
   #
   # https://edgeguides.rubyonrails.org/tuning_performance_for_deployment.html#puma
-  workers Concurrent.physical_processor_count
+  workers Integer(ENV.fetch("WEB_CONCURRENCY") { Concurrent.physical_processor_count })
   threads 1, 1
 
   # Tell the Ruby VM that we're finished booting up.
