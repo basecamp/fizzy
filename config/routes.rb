@@ -238,12 +238,24 @@ Rails.application.routes.draw do
     end
 
     get "cards", to: "cards#index"
+    patch "cards/:card_id", to: "cards#update"
     post "cards/:card_id/move", to: "cards#move"
     post "cards/:card_id/close", to: "cards#close"
     post "cards/:card_id/reopen", to: "cards#reopen"
     post "cards/:card_id/assign", to: "cards#assign"
     post "cards/:card_id/tag", to: "cards#tag"
     post "cards/:card_id/comments", to: "comments#create"
+    get "cards/search", to: "cards#search"
+    get "users/find", to: "users#find"
+    get "users/search", to: "users#search"
+    resources :notifications, only: [:index] do
+      member do
+        patch :read
+      end
+      collection do
+        post :mark_all_read
+      end
+    end
   end
 
   namespace :admin do

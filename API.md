@@ -165,6 +165,10 @@ Lists and filters cards accessible to the authenticated user.
         "name": "David Heinemeier Hansson"
       }
     ],
+    "creator": {
+      "id": "03f5rbdwmg3sx2tntbr587rng",
+      "name": "David Heinemeier Hansson"
+    },
     "created_at": "2025-12-05T12:18:27Z",
     "updated_at": "2025-12-05T12:18:27Z"
   }
@@ -235,6 +239,10 @@ When using virtual columns:
   "board_id": "03f5swdbgdw56ecg7hjgowotc",
   "tags": ["urgent", "bug"],
   "assignees": [],
+  "creator": {
+    "id": "03f5rbdwmg3sx2tntbr587rng",
+    "name": "David Heinemeier Hansson"
+  },
   "created_at": "2025-12-05T12:18:27Z",
   "updated_at": "2025-12-05T12:18:27Z"
 }
@@ -278,6 +286,10 @@ When using virtual columns:
   "board_id": "03f5swdbgdw56ecg7hjgowotc",
   "tags": ["urgent", "bug"],
   "assignees": [],
+  "creator": {
+    "id": "03f5rbdwmg3sx2tntbr587rng",
+    "name": "David Heinemeier Hansson"
+  },
   "created_at": "2025-12-05T12:18:27Z",
   "updated_at": "2025-12-05T12:19:31Z"
 }
@@ -343,6 +355,10 @@ Assigns or unassigns a user to/from a card.
       "name": "David Heinemeier Hansson"
     }
   ],
+  "creator": {
+    "id": "03f5rbdwmg3sx2tntbr587rng",
+    "name": "David Heinemeier Hansson"
+  },
   ...
 }
 ```
@@ -371,6 +387,43 @@ Adds or removes tags from a card.
 }
 ```
 
+#### Update Card
+```
+PATCH /api/cards/:card_id
+```
+
+Updates a card's title and/or description.
+
+**Request Body:**
+```json
+{
+  "title": "Updated Card Title",
+  "description": "Updated card description"
+}
+```
+
+Both `title` and `description` are optional. You can update just one or both fields.
+
+**Response:**
+```json
+{
+  "id": 1,
+  "title": "Updated Card Title",
+  "description": "Updated card description",
+  "status": "published",
+  "column": "In Progress",
+  "board_id": "03f5swdbgdw56ecg7hjgowotc",
+  "tags": ["urgent", "bug"],
+  "assignees": [],
+  "creator": {
+    "id": "03f5rbdwmg3sx2tntbr587rng",
+    "name": "David Heinemeier Hansson"
+  },
+  "created_at": "2025-12-05T12:18:27Z",
+  "updated_at": "2025-12-05T12:19:45Z"
+}
+```
+
 ### Comments
 
 #### Create Comment
@@ -392,13 +445,260 @@ Creates a comment on a card.
 {
   "id": "03f5swkrqzw24bx0ob1wtewpa",
   "body": "This is a comment",
+  "body_plain_text": "This is a comment",
   "card_id": 1,
   "creator": {
     "id": "03f5rbdwljhrmbqpk1erhobzo",
     "name": "System"
   },
+  "mentions": [
+    {
+      "user_id": "03f5rbdwmg3sx2tntbr587rng",
+      "username": "david",
+      "name": "David Heinemeier Hansson",
+      "email": "david@example.com"
+    }
+  ],
+  "card_links": [
+    {
+      "card_id": 42,
+      "title": "Fix login bug"
+    }
+  ],
   "created_at": "2025-12-05T12:19:21Z"
 }
+```
+
+#### Search Cards
+```
+GET /api/cards/search?q=term&board_id=xxx&limit=10
+```
+
+Searches for cards accessible to the authenticated user by title, ID (number), or description.
+
+**Query Parameters:**
+- `q` (required) - Search term (title, card number, or description text)
+- `board_id` (optional) - Filter by board
+- `limit` (optional) - Maximum number of results (default: 10, max: 50)
+
+**Response:**
+```json
+{
+  "cards": [
+    {
+      "id": 42,
+      "title": "Fix login bug",
+      "board_id": "03f5swdbgdw56ecg7hjgowotc",
+      "column": "In Progress"
+    }
+  ]
+}
+```
+
+**Example:**
+```bash
+curl -H "Authorization: Bearer YOUR_TOKEN" \
+  "http://fizzy.localhost:3006/api/cards/search?q=login&limit=10"
+```
+
+### Notifications
+
+#### List Notifications
+```
+GET /api/notifications?unread_only=true&limit=50&offset=0
+```
+
+Retrieves notifications for the authenticated user.
+
+**Query Parameters:**
+- `unread_only` (optional) - Filter to only unread notifications (default: false)
+- `limit` (optional) - Maximum number of notifications (default: 50, max: 100)
+- `offset` (optional) - Pagination offset (default: 0)
+
+**Response:**
+```json
+{
+  "notifications": [
+    {
+      "id": "notif_123",
+      "type": "user.mentioned",
+      "read": false,
+      "occurred_at": "2025-01-10T12:00:00Z",
+      "card": {
+        "id": 42,
+        "title": "Fix login bug"
+      },
+      "board": {
+        "id": "eng-backlog",
+        "name": "Engineering"
+      },
+      "actor": {
+        "id": "user_7",
+        "name": "John Doe",
+        "email": "john@example.com"
+      },
+      "comment": {
+        "id": "c_501",
+        "body": "Hey @user_5, can you review this?",
+        "body_plain_text": "Hey @user_5, can you review this?",
+        "mentions": [
+          {
+            "user_id": "user_5",
+            "username": "jane.smith",
+            "name": "Jane Smith",
+            "email": "jane@example.com"
+          }
+        ]
+      }
+    }
+  ],
+  "total": 15,
+  "unread_count": 5
+}
+```
+
+#### Mark Notification as Read
+```
+PATCH /api/notifications/:notification_id/read
+```
+
+Marks a specific notification as read.
+
+**Response:**
+```json
+{
+  "id": "notif_123",
+  "read": true,
+  "read_at": "2025-01-10T12:05:00Z"
+}
+```
+
+#### Mark All Notifications as Read
+```
+POST /api/notifications/mark_all_read
+```
+
+Marks all notifications for the authenticated user as read.
+
+**Response:**
+```json
+{
+  "marked_count": 5
+}
+```
+
+### Comment Format: Mentions and Card Links
+
+Comments in the API include information about user mentions and card links.
+
+#### Mentions Format
+
+Mentions are represented in the `mentions` array of comment responses:
+
+```json
+{
+  "mentions": [
+    {
+      "user_id": "03f5rbdwmg3sx2tntbr587rng",
+      "username": "david",
+      "name": "David Heinemeier Hansson",
+      "email": "david@example.com"
+    }
+  ]
+}
+```
+
+Mentions can be created in comments using:
+- `@username` format in plain text
+- ActionText mention attachments (handled automatically by the UI)
+
+The `body_plain_text` field contains the plain text version with mentions preserved as `@username`.
+
+#### Card Links Format
+
+Card links are represented in the `card_links` array of comment responses:
+
+```json
+{
+  "card_links": [
+    {
+      "card_id": 42,
+      "title": "Fix login bug"
+    }
+  ]
+}
+```
+
+Card links can be created in comments using:
+- `#123` (simple hashtag format)
+- `#card-123` (hashtag format with prefix)
+- `[Card Title](#123)` (Markdown format)
+- `[Card Title](card:123)` (custom schema format)
+- HTML links with `data-card-id` attributes
+
+The `body_plain_text` field contains the plain text version with card references preserved as `#123`.
+
+### Users
+
+#### Find User by Email
+```
+GET /api/users/find?email=user@example.com
+```
+
+Finds a user in the current account by their email address. This is useful for resolving email addresses to user UUIDs when needed for API calls (e.g., for the `assign_user` endpoint).
+
+**Query Parameters:**
+- `email` (required) - The email address to look up
+
+**Response:**
+```json
+{
+  "id": "03f5rbdwmg3sx2tntbr587rng",
+  "name": "David Heinemeier Hansson",
+  "email": "david@example.com"
+}
+```
+
+**Error Responses:**
+- `400 Bad Request` - Email parameter is missing
+- `404 Not Found` - No user found with that email address in the current account
+
+**Example:**
+```bash
+curl -H "Authorization: Bearer YOUR_TOKEN" \
+  "http://fizzy.localhost:3006/api/users/find?email=david@example.com"
+```
+
+#### Search Users
+```
+GET /api/users/search?q=term&board_id=xxx&limit=10
+```
+
+Searches for users in the current account by name, email, or ID.
+
+**Query Parameters:**
+- `q` (required) - Search term (name, email, or user ID)
+- `board_id` (optional) - Filter by board (only users with access to the board)
+- `limit` (optional) - Maximum number of results (default: 10, max: 50)
+
+**Response:**
+```json
+{
+  "users": [
+    {
+      "id": "03f5rbdwmg3sx2tntbr587rng",
+      "name": "David Heinemeier Hansson",
+      "email": "david@example.com",
+      "avatar_url": "https://..."
+    }
+  ]
+}
+```
+
+**Example:**
+```bash
+curl -H "Authorization: Bearer YOUR_TOKEN" \
+  "http://fizzy.localhost:3006/api/users/search?q=david&limit=10"
 ```
 
 ## Error Responses

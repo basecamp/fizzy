@@ -1,6 +1,6 @@
 class Api::CardsController < Api::BaseController
   before_action :set_board, only: [:create]
-  before_action :set_card, only: [:move, :close, :reopen, :assign, :tag]
+  before_action :set_card, only: [:move, :close, :reopen, :assign, :tag, :update]
 
   def index
     cards = Current.user.accessible_cards.published
@@ -204,6 +204,11 @@ class Api::CardsController < Api::BaseController
     render json: card_json(@card.reload)
   end
 
+  def update
+    @card.update!(card_update_params)
+    render json: card_json(@card.reload)
+  end
+
   private
     def set_board
       @board = Current.account.boards.find(params[:board_id])
@@ -227,6 +232,10 @@ class Api::CardsController < Api::BaseController
       column || (raise ActiveRecord::RecordNotFound, "Column '#{column_name}' not found")
     end
 
+    def card_update_params
+      params.permit(:title, :description)
+    end
+
     def card_json(card)
       column_name = if card.closed?
         "DONE"
@@ -247,8 +256,62 @@ class Api::CardsController < Api::BaseController
         board_id: card.board_id,
         tags: card.tags.pluck(:title),
         assignees: card.assignees.map { |u| { id: u.id, name: u.name } },
+        creator: {
+          id: card.creator.id,
+          name: card.creator.name
+        },
         created_at: card.created_at.iso8601,
         updated_at: card.updated_at.iso8601
+      }
+    end
+
+    def search
+      raise ArgumentError, "q parameter is required" unless params[:q].present?
+      
+      query = params[:q].strip
+      limit = [ (params[:limit] || 10).to_i, 50 ].min
+      
+      cards = Current.user.accessible_cards.published
+      
+      # Filter by board if provided
+      if params[:board_id].present?
+        board = Current.account.boards.find(params[:board_id])
+        cards = cards.where(board: board)
+      end
+      
+      # Search by number, title, or description
+      if query =~ /^\d+$/
+        # Number search
+        cards = cards.where(number: query.to_i)
+      else
+        # Text search in title and description
+        cards = cards.where(
+          "cards.title LIKE ? OR EXISTS (SELECT 1 FROM action_text_rich_texts WHERE action_text_rich_texts.record_type = 'Card' AND action_text_rich_texts.record_id = cards.id AND action_text_rich_texts.name = 'description' AND action_text_rich_texts.body LIKE ?)",
+          "%#{query}%", "%#{query}%"
+        )
+      end
+      
+      cards = cards.limit(limit).preloaded
+      
+      render json: {
+        cards: cards.map { |card|
+          column_name = if card.closed?
+            "DONE"
+          elsif card.postponed?
+            "NOT NOW"
+          elsif card.awaiting_triage?
+            "MAYBE?"
+          else
+            card.column&.name
+          end
+          
+          {
+            id: card.number,
+            title: card.title,
+            board_id: card.board_id,
+            column: column_name
+          }
+        }
       }
     end
 end

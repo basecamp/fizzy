@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2025_12_05_120000) do
+ActiveRecord::Schema[8.2].define(version: 2025_12_06_083510) do
   create_table "accesses", id: :uuid, force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -201,6 +201,21 @@ ActiveRecord::Schema[8.2].define(version: 2025_12_05_120000) do
     t.datetime "updated_at", null: false
     t.index ["account_id"], name: "index_card_goldnesses_on_account_id"
     t.index ["card_id"], name: "index_card_goldnesses_on_card_id", unique: true
+  end
+
+  create_table "card_links", id: :uuid, force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.uuid "card_id", null: false
+    t.datetime "created_at", null: false
+    t.uuid "creator_id", null: false
+    t.uuid "source_id", null: false
+    t.string "source_type", limit: 255, null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_card_links_on_account_id"
+    t.index ["card_id"], name: "index_card_links_on_card_id"
+    t.index ["creator_id"], name: "index_card_links_on_creator_id"
+    t.index ["source_type", "source_id", "card_id"], name: "index_card_links_on_source_and_card", unique: true
+    t.index ["source_type", "source_id"], name: "index_card_links_on_source"
   end
 
   create_table "card_not_nows", id: :uuid, force: :cascade do |t|

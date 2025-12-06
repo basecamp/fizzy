@@ -190,6 +190,8 @@ Webhooks can subscribe to the following event types:
 9. **`card_triaged`** - Card moved to a column
 10. **`card_unassigned`** - User unassigned from card
 11. **`comment_created`** - Comment added to a card
+12. **`user.mentioned`** - User mentioned in a comment
+13. **`card.linked`** - Card referenced/linked in a comment
 
 ### Webhook Payload Structure
 
@@ -257,10 +259,39 @@ When `eventable` is a Comment, it includes:
 - `body` - Object with:
   - `plain_text` - Plain text version
   - `html` - HTML version
+- `body_plain_text` - Plain text version of the comment
+- `mentions` - Array of mention objects, each with:
+  - `user_id` - User UUID
+  - `username` - Username (derived from email or name)
+  - `name` - User's full name
+  - `email` - User's email address
+- `card_links` - Array of card link objects, each with:
+  - `card_id` - Card number
+  - `title` - Card title
 - `created_at`, `updated_at` - UTC timestamps
 - `creator` - Full user object (same structure as above)
 - `reactions_url` - URL for comment reactions
 - `url` - Comment URL
+
+### user.mentioned Webhook
+
+When `action` is `user.mentioned`, the webhook payload includes:
+
+- Standard webhook structure with `eventable` as the Comment containing the mention
+- `target` - Object with:
+  - `id` - User UUID of the mentioned user
+  - `email` - Email address of the mentioned user
+- The `eventable.comment` includes the full `mentions` array
+
+### card.linked Webhook
+
+When `action` is `card.linked`, the webhook payload includes:
+
+- Standard webhook structure with `eventable` as the Comment containing the link
+- `linked_card` - Object with:
+  - `id` - Card number
+  - `title` - Card title
+- The `eventable.comment` includes the full `card_links` array
 
 ---
 

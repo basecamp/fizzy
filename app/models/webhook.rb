@@ -18,6 +18,8 @@ class Webhook < ApplicationRecord
     card_triaged
     card_unassigned
     comment_created
+    user.mentioned
+    card.linked
   ].freeze
 
   has_secure_token :signing_secret
