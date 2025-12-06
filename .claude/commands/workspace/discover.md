@@ -1,6 +1,6 @@
 ---
 name: discover
-description: Discover codebase context.
+description: Discover codebase context with a deep dive.
 argument-hint: <@discover-prompt>
 ---
 

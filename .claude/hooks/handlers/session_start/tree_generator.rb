@@ -7,7 +7,7 @@ class TreeGenerator < ClaudeHooks::SessionStart
   CONFIG_PATH = 'config/config.json'
 
   def call
-    log "Generating tree structure..."
+    log 'Generating tree structure...'
 
     config_data = load_config
     return output_data unless config_data
@@ -17,7 +17,7 @@ class TreeGenerator < ClaudeHooks::SessionStart
     output_path = config_data['treeOutputPath']
 
     if folders.empty? || output_path.nil?
-      log "Tree configuration incomplete, skipping", level: :warn
+      log 'Tree configuration incomplete, skipping', level: :warn
       suppress_output!
       return output_data
     end

@@ -1,6 +1,6 @@
 ---
 name: archive-workspace
-description: Create or update workspace archive snapshot
+description: Creates or updates a workspace directory snapshot.
 allowed-tools: bash()
 ---
 

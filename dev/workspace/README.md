@@ -30,11 +30,10 @@ A structured development environment for AI-assisted coding sessions. Provides c
 
 ```
 dev/
-├── workspace/                 # Active workspace (on feature branch)
+├── workspace/                # Active workspace (on feature branch)
 │   ├── WORKSPACE.md          # Configuration (merge strategy, post-merge actions)
 │   ├── CLAUDE.md             # Discoveries and guidance for AI
 │   ├── context/              # Codebase understanding
-│   │   ├── discover.md       # Discovery session outputs
 │   │   └── tree.md           # Auto-updated directory tree
 │   ├── filebox/              # Scratch files and notes
 │   ├── history/              # Conversation transcripts (searchable)
@@ -44,7 +43,7 @@ dev/
 │   ├── reviews/              # Code review artifacts
 │   └── tasks/                # Task tracking
 │       └── user_tasks.md     # Your todo list
-└── branches/                  # Archived workspaces (preserved after merge)
+└── branches/                 # Archived workspaces (preserved after merge)
     └── YYMMDD_type_description/
 ```
 

@@ -42,21 +42,40 @@ Examples:
 - `rails_authentication_magic_links.txt`
 - `task_completion_photo_upload.txt`
 
-### Step 4: Present Suggestion
+### Step 4: Generate Summary
+
+Create a descriptive summary of the conversation. To go in the SUMMARY section
+- maximum of 5 lines
+- place between `>>>` `<<<`)
+
+Example:
+```txt
+[SUMMARY]
+>>>
+Explored Fizzy's layout system and content injection patterns. Discovered minimal shell layout with named yield slots and instance variable configuration, CSS-driven container widths via `.panel` classes and `:has()` selectors, and zero-JS user-scoped CSS. Extracted findings into layout-shell.md pattern documentation.
+<<<
+```
+
+### Step 5: Present Suggestion
 
 ```
 Suggested filename: {new-name}
+Suggested summary: {summary}
 
-Current: {current-filename}
+Current filename: {current-filename}
 Session ID: {session-id from line 1}
 
 Rename? (yes/no)
 ```
 
-### Step 5: Execute Rename
+### Step 6: Execute Rename
 
-On confirmation:
+On confirmation...
 
+Insert the summary:
+Edit the existing SUMMARY section.
+
+Rename the file:
 ```bash
 mv "dev/workspace/history/{current-filename}" "dev/workspace/history/{new-name}"
 ```

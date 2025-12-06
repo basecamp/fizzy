@@ -1,5 +1,5 @@
 
-[ASSISTANT]
-<%= message.content[0].text %>
+[SKILL TOOL]
+Skill: <%= message.content[0].input.skill %>
 
 ------------------------------------------------------------
