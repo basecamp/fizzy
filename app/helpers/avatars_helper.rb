@@ -42,6 +42,11 @@ module AvatarsHelper
   end
 
   def avatar_image_tag(user, **options)
-    image_tag user_avatar_url(user, script_name: user.account.slug), aria: { hidden: "true" }, size: 48, title: user.name, **options
+    tag.span data: { creator_id: user.id } do
+      safe_join [
+        image_tag(user_avatar_url(user, script_name: user.account.slug), aria: { hidden: "true" }, size: 48, title: user.name, data: { only_visible_to_others: true }, **options),
+        image_tag(my_avatar_url(script_name: user.account.slug), aria: { hidden: "true" }, size: 48, title: user.name, data: { only_visible_to_you: true }, **options)
+      ]
+    end
   end
 end

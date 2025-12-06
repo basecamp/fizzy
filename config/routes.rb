@@ -8,6 +8,8 @@ Rails.application.routes.draw do
     resources :exports, only: [ :create, :show ]
   end
 
+  get "users/mine/avatar", to: "users/my_avatar#show", as: :my_avatar
+
   resources :users do
     scope module: :users do
       resource :avatar
