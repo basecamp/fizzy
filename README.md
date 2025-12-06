@@ -94,21 +94,13 @@ The remote CI pipeline will run tests against both SQLite and MySQL.
 
 ### Outbound Emails
 
-By default, emails are not sent in development. To preview emails in development, you can use email preview tools. Enable it with:
+You can view email previews at http://fizzy.localhost:3006/rails/mailers.
+
+You can enable or disable [`letter_opener`](https://github.com/ryanb/letter_opener) to open sent emails automatically with:
 
     bin/rails dev:email
 
-**Local development (non-Docker):**
-- When enabled, [`letter_opener`](https://github.com/ryanb/letter_opener) automatically opens sent emails in your browser.
-
-**Docker development:**
-- When enabled, [`letter_opener_web`](https://github.com/fgrehm/letter_opener_web) saves emails and makes them accessible via a web interface at http://fizzy.localhost:3006/admin/letter_opener (or your server hostname:3006/admin/letter_opener).
-
-You can toggle email preview on/off by running the command again.
-
-You can also view email previews at http://fizzy.localhost:3006/rails/mailers.
-
-Under the hood, this will create or remove `tmp/email-dev.txt`. The configuration priority is: SMTP (if `SMTP_HOST` env var is set) > letter_opener/letter_opener_web (if `tmp/email-dev.txt` exists) > no delivery (default).
+Under the hood, this will create or remove `tmp/email-dev.txt`.
 
 ## Deployment
 

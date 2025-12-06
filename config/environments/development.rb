@@ -77,7 +77,7 @@ Rails.application.configure do
   config.log_tags = [ :request_id ]
 
   # Email delivery configuration
-  # Priority: SMTP (if SMTP_HOST env var set) > letter_opener/letter_opener_web > console
+  # Priority: SMTP (if SMTP_HOST env var set) > letter_opener > console
   if ENV["SMTP_HOST"].present?
     # Use SMTP server for email delivery (useful for testing with external SMTP services)
     config.action_mailer.delivery_method = :smtp
@@ -90,14 +90,8 @@ Rails.application.configure do
       # Authentication can be added via SMTP_USERNAME and SMTP_PASSWORD env vars if needed
     }
   elsif Rails.root.join("tmp/email-dev.txt").exist?
-    # Use letter_opener_web in Docker (accessible via web interface) or letter_opener locally
-    # Detect Docker by checking for /.dockerenv or container environment
-    in_docker = File.exist?("/.dockerenv") || ENV["DOCKER_CONTAINER"].present?
-    if in_docker
-      config.action_mailer.delivery_method = :letter_opener_web
-    else
-      config.action_mailer.delivery_method = :letter_opener
-    end
+    # Use letter_opener to preview emails in browser
+    config.action_mailer.delivery_method = :letter_opener
     config.action_mailer.perform_deliveries = true
   else
     # Default: don't send emails, code shown in browser console
