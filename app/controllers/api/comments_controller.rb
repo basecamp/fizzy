@@ -10,15 +10,26 @@ class Api::CommentsController < Api::BaseController
   def create
     raise ArgumentError, "body parameter is required" unless params[:body].present?
     
-    comment = @card.comments.create!(
-      creator: Current.user,
-      body: params[:body]
-    )
+    # Disable callbacks before creation to prevent double execution
+    # We'll create mentions and card_links synchronously instead
+    Comment.skip_callback(:commit, :after, :create_mentions_later, raise: false)
+    Comment.skip_callback(:commit, :after, :create_card_links_later, raise: false)
+    
+    begin
+      comment = @card.comments.create!(
+        creator: Current.user,
+        body: params[:body]
+      )
 
-    # Create mentions and card_links synchronously for API responses
-    # (normally done asynchronously via jobs, but we need them immediately)
-    comment.create_mentions(mentioner: Current.user)
-    comment.create_card_links(creator: Current.user)
+      # Create mentions and card_links synchronously for API responses
+      # (normally done asynchronously via jobs, but we need them immediately)
+      comment.create_mentions(mentioner: Current.user)
+      comment.create_card_links(creator: Current.user)
+    ensure
+      # Re-enable callbacks for future operations
+      Comment.set_callback(:commit, :after, :create_mentions_later)
+      Comment.set_callback(:commit, :after, :create_card_links_later)
+    end
 
     # Reload with associations to avoid N+1 queries
     comment = Comment.preloaded
