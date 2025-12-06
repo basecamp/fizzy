@@ -2,22 +2,21 @@
 service: fizzy
 image: fizzy
 
-
 #-- About your deployment --#
 
 # Where to deploy fizzy
 servers:
   web:
-    - fizzy.example.com  # Set your server name here
+    - fizzy.artano.tech # Set your server name here
 
 # How you connect to your server
 ssh:
-  user: root  # If you use a different username to SSH to your server, specify it here
+  user: root # If you use a different username to SSH to your server, specify it here
 
 # Automatic SSL
 proxy:
-  ssl: true                # Set this to false if you *don't* want SSL
-  host: fizzy.example.com  # Set your server name here to use automatic SSL
+  ssl: true # Set this to false if you *don't* want SSL
+  host: fizzy.artano.tech # Set your server name here to use automatic SSL
 
 # Your application configuration (secrets come from .kamal/secrets).
 env:
@@ -28,9 +27,8 @@ env:
     - SMTP_USERNAME
     - SMTP_PASSWORD
   clear:
-    MAILER_FROM_ADDRESS: support@example.com # The email address that Fizzy sends email from
+    MAILER_FROM_ADDRESS: fizzy@nextlevelspecialtycoffee.com # The email address that Fizzy sends email from
     SOLID_QUEUE_IN_PUMA: true # Run background jobs in the app container
-
 
 #-- General configuration --#
 
@@ -58,4 +56,4 @@ asset_path: /rails/public/assets
 
 # Configure the image builder.
 builder:
-  arch: amd64
+  arch: arm64
