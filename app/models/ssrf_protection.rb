@@ -28,13 +28,25 @@ module SsrfProtection
     def resolve_dns(hostname)
       ip_addresses = []
 
-      Resolv::DNS.open(timeouts: DNS_RESOLUTION_TIMEOUT) do |dns|
-        dns.each_address(hostname) do |ip_address|
-          ip_addresses << IPAddr.new(ip_address.to_s)
+      # Use Socket.getaddrinfo which respects /etc/hosts (for host.docker.internal, localhost, etc.)
+      begin
+        Socket.getaddrinfo(hostname, nil, Socket::AF_UNSPEC, Socket::SOCK_STREAM).each do |addr_info|
+          ip_addresses << IPAddr.new(addr_info[3]) # addr_info[3] is the IP address
+        end
+      rescue SocketError
+        # Hostname not found, try DNS resolution as fallback
+        begin
+          Resolv::DNS.open(timeouts: DNS_RESOLUTION_TIMEOUT) do |dns|
+            dns.each_address(hostname) do |ip_address|
+              ip_addresses << IPAddr.new(ip_address.to_s)
+            end
+          end
+        rescue Resolv::ResolvError, Resolv::ResolvTimeout
+          # DNS resolution also failed
         end
       end
 
-      ip_addresses
+      ip_addresses.uniq
     end
 
     def in_disallowed_range?(ip)

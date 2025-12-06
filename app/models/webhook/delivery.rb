@@ -78,7 +78,12 @@ class Webhook::Delivery < ApplicationRecord
     end
 
     def http
-      Net::HTTP.new(uri.host, uri.port, ipaddr: resolved_ip).tap do |http|
+      http_args = [uri.host, uri.port]
+      # Only use ipaddr in production for SSRF protection
+      # In development, allow normal DNS resolution (e.g., for host.docker.internal)
+      http_args << { ipaddr: resolved_ip } if resolved_ip.present? && !Rails.env.development?
+      
+      Net::HTTP.new(*http_args).tap do |http|
         http.use_ssl = (uri.scheme == "https")
         http.open_timeout = ENDPOINT_TIMEOUT
         http.read_timeout = ENDPOINT_TIMEOUT
