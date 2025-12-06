@@ -90,6 +90,24 @@ After the first deploy is done, any subsequent steps won't need to do that initi
 
     bin/kamal deploy
 
+## File storage (Active Storage)
+
+Production uses the local disk service by default. To use any other service defined in `config/storage.yml`, set `ACTIVE_STORAGE_SERVICE`.
+
+To use the included `s3` service, set:
+
+- `ACTIVE_STORAGE_SERVICE=s3`
+- `S3_ACCESS_KEY_ID`
+- `S3_BUCKET` (defaults to `fizzy-#{Rails.env}-activestorage`)
+- `S3_REGION` (defaults to `us-east-1`)
+- `S3_SECRET_ACCESS_KEY`
+
+Optional for S3-compatible endpoints:
+
+- `S3_ENDPOINT`
+- `S3_FORCE_PATH_STYLE=true`
+- `S3_REQUEST_CHECKSUM_CALCULATION` (defaults to `when_supported`)
+- `S3_RESPONSE_CHECKSUM_VALIDATION` (defaults to `when_supported`)
 
 ## Development
 
@@ -175,4 +193,3 @@ We welcome contributions! Please read our [style guide](STYLE.md) before submitt
 ## License
 
 Fizzy is released under the [O'Saasy License](LICENSE.md).
-

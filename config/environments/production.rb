@@ -40,6 +40,9 @@ Rails.application.configure do
     "Cache-Control" => "public, max-age=#{1.year.to_i}"
   }
 
+  # Select Active Storage service via env var; default to local disk.
+  config.active_storage.service = ENV.fetch("ACTIVE_STORAGE_SERVICE", "local").to_sym
+
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
   # config.asset_host = "http://assets.example.com"
 
