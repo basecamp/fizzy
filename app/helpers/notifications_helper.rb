@@ -2,7 +2,7 @@ module NotificationsHelper
   def event_notification_title(event)
     case event_notification_action(event)
     when "comment_created" then "RE: #{card_notification_title(event.eventable.card)}"
-    else card_notification_title(event.eventable)
+    else card_notification_title(event.card)
     end
   end
 
