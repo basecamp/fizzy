@@ -34,6 +34,11 @@
 
     :where(li:has(li)) {
       list-style: none;
+
+      :where(ol, ul) {
+        margin: 0;
+        padding-inline-start: 2ch;
+      }
     }
 
     :where(b, strong, .lexxy-content__bold) {

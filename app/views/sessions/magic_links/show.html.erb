@@ -16,10 +16,12 @@
   <p class="txt-small">The code you receive will work for <%= distance_of_time_in_words(MagicLink::EXPIRATION_TIME) %>.</p>
 </div>
 
-<% if Rails.env.development? %>
-  <script>
-    console.log("Magic link code: <%= flash[:magic_link_code].presence || "not generated" %>");
-  </script>
+<% if Rails.env.development? && flash[:magic_link_code].present? %>
+  <div class="flex align-center justify-center gap fill-shade border-radius pad margin-block-start full-width position-relative" style="animation: slide-up-fade-in 400ms ease-out both; max-width: 42ch; overflow: hidden;">
+    <span class="txt-uppercase translucent txt-tight-lines">Psst, here's your code:</span>
+    <code class="txt-large font-weight-black txt-tight-lines"><%= flash[:magic_link_code] %></code>
+    <span class="txt-xx-small txt-uppercase font-weight-black txt-align-center flex align-center justify-center" style="position: absolute; top: 0; bottom: 0; left: 0; background: var(--color-ink-lighter); padding: 0 0.5em; writing-mode: vertical-rl; transform: rotate(180deg); line-height: 1;">DEV</span>
+  </div>
 <% end %>
 
 <% content_for :footer do %>

@@ -44,6 +44,11 @@
     to   { transform: translateY(0); }
   }
 
+  @keyframes slide-up-fade-in {
+    from { transform: translateY(2rem); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+  }
+
   @keyframes slide-down {
     from { transform: translateY(0); }
     to   { transform: translateY(2rem); }
