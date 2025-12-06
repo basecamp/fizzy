@@ -14,14 +14,19 @@ Rails.application.configure do
 
   config.content_security_policy do |policy|
     policy.default_src :self
-    policy.script_src :self
+    policy.script_src :self, "https://challenges.cloudflare.com"
+    policy.connect_src :self, "https://storage.basecamp.com"
+    policy.frame_src :self, "https://challenges.cloudflare.com"
+
+    # Don't fight user tools: permit inline styles, data:/https: sources, and
+    # blob: workers for accessibility extensions, privacy tools, and custom fonts.
     policy.style_src :self, :unsafe_inline
-    policy.connect_src :self
     policy.img_src :self, "blob:", "data:", "https:"
     policy.font_src :self, "data:", "https:"
     policy.media_src :self, "blob:", "data:", "https:"
-    policy.object_src :none
+    policy.worker_src :self, "blob:"
 
+    policy.object_src :none
     policy.base_uri :none
     policy.form_action :self
     policy.frame_ancestors :self
