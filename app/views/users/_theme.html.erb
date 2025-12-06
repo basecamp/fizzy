@@ -1,0 +1,42 @@
+<header class="margin-block-start">
+    <h2 class="divider txt-large">Appearance</h2>
+    <p class="margin-none-block-start txt-small">Choose how Fizzy looks for you.</p>
+</header>
+
+<div class="flex flex-column gap margin-block-start" data-controller="theme">
+  <div class="btn__group flex justify-center gap-half margin-block-start" role="radiogroup" aria-label="Color theme">
+    <button type="button"
+            class="btn theme-choice flex flex-column align-center justify-center"
+            role="radio"
+            aria-checked="false"
+            data-theme-target="option"
+            data-theme-option-value="light"
+            data-action="theme#selectLight">
+      <%= icon_tag "sun", class: "popup__icon" %>
+      <span class="txt-small txt-align-center">Always light</span>
+    </button>
+
+    <button type="button"
+            class="btn theme-choice flex flex-column align-center justify-center"
+            role="radio"
+            aria-checked="false"
+            data-theme-target="option"
+            data-theme-option-value="dark"
+            data-action="theme#selectDark">
+      <%= icon_tag "moon", class: "popup__icon" %>
+      <span class="txt-small txt-align-center">Always dark</span>
+    </button>
+
+    <button type="button"
+            class="btn theme-choice flex flex-column align-center justify-center"
+            role="radio"
+            aria-checked="false"
+            data-theme-target="option"
+            data-theme-option-value="system"
+            data-action="theme#selectSystem">
+      <%= icon_tag "monitor", class: "popup__icon" %>
+      <span class="txt-small txt-align-center">Same as OS</span>
+    </button>
+  </div>
+</div>
+
