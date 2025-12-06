@@ -24,6 +24,7 @@
     block-size: var(--knob-size);
     inline-size: var(--knob-size);
     inset: 50% auto auto 50%;
+    opacity: 0;
     position: absolute;
     translate: -50% -50%;
     z-index: 1;
