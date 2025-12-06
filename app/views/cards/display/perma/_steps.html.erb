@@ -4,8 +4,8 @@
   <% unless card.closed? %>
     <li id="<%= dom_id(card, :new_step) %>" class="step">
       <input type="checkbox" class="step__checkbox" disabled>
-      <%= form_with model: [card, Step.new], url: card_steps_path(card), class: "min-width", data: { controller: "form", action: "submit->form#preventEmptySubmit turbo:submit-end->form#reset" } do |form| %>
-        <%= form.text_field :content, class: "input step__content hide-focus-ring", placeholder: "Add a step…", autocomplete: "off", data: { form_target: "input", "1p-ignore": "true" }, aria: { label: "Add a step" } %>
+      <%= form_with model: [card, Step.new], url: card_steps_path(card), class: "min-width", data: { controller: "form", action: "submit->form#preventEmptySubmit submit->form#preventComposingSubmit turbo:submit-end->form#reset" } do |form| %>
+        <%= form.text_field :content, class: "input step__content hide-focus-ring", placeholder: "Add a step…", autocomplete: "off", data: { form_target: "input", "1p-ignore": "true", action: "compositionstart->form#compositionStart compositionend->form#compositionEnd" }, aria: { label: "Add a step" } %>
       <% end %>
     </li>
   <% end %>
