@@ -39,6 +39,7 @@
 
   .header__actions {
     display: flex;
+    align-items: center;
     font-size: var(--text-x-small);
     gap: var(--header-gap);
     inline-size: var(--header-actions-width);
@@ -116,17 +117,15 @@
   /* Optional class to stack header actions on small screens
   /* ------------------------------------------------------------------------ */
 
-  /* .header--mobile-actions-stack {
+  .header--mobile-actions-stack {
     @media (max-width: 639px) {
-      grid-template-columns: 1fr 1fr;
       grid-template-areas:
-        "menu menu"
-        "actions-start actions-end"
-        "title title";
+        "actions-start menu actions-end"
+        "title title title";
 
       .header__title {
         margin-block-start: 0.25rem;
       }
     }
-  } */
+  }
 }

@@ -250,6 +250,10 @@
     }
   }
 
+  .show-in-mobile-app {
+    display: none;
+  }
+
   .hide-scrollbar {
     -ms-overflow-style: none;  /* Edge */
     scrollbar-width: none; /* FF */
