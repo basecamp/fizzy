@@ -30,7 +30,7 @@ echo '{"session_id":"738339c7-5090-49a7-bfb7-627f359ae2af","transcript_path":"/U
 
 ## Common Issues
 
-- **Tilde not expanded**: Use full path `/Users/dylangraham/.claude/...`
+- **Tilde not expanded**: Use full path `/Users/yourname/.claude/...`
 - **Template errors**: Check logs for ERB rendering failures
 - **File not updated**: Verify transcript_path exists and is readable
 - **Auto-rename timeout**: Rename runs in background (20s timeout)
