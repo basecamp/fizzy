@@ -17,14 +17,9 @@ services:
     environment:
       - RAILS_ENV=development
       - DATABASE_ADAPTER=sqlite
-      # SMTP configuration for MailHog
-      - SMTP_HOST=mailhog
-      - SMTP_PORT=1025
       # Allow custom host domains (e.g., for remote development)
       # Uncomment and set your domain: ALLOWED_HOST_DOMAINS=example.com
       # - ALLOWED_HOST_DOMAINS=example.com
-    depends_on:
-      - mailhog
     volumes:
       # Mount entire codebase for hot reload
       - .:/rails
@@ -38,14 +33,6 @@ services:
     command: ["./bin/thrust", "./bin/rails", "server", "-b", "0.0.0.0", "-p", "3006"]
     stdin_open: true
     tty: true
-
-  mailhog:
-    image: mailhog/mailhog:latest
-    ports:
-      - "8025:8025"  # Web UI
-      - "1025:1025"  # SMTP server
-    networks:
-      - default
 
 secrets:
   # Optional: Only needed if accessing private GitHub gems

@@ -262,6 +262,7 @@ Rails.application.routes.draw do
 
   namespace :admin do
     mount MissionControl::Jobs::Engine, at: "/jobs"
+    mount LetterOpenerWeb::Engine, at: "/letter_opener" if Rails.env.development?
     get "stats", to: "stats#show"
     resources :api_tokens, only: [:index, :new, :create, :destroy] do
       collection do

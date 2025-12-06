@@ -48,6 +48,7 @@ group :development, :test do
   gem "debug"
   gem "faker"
   gem "letter_opener"
+  gem "letter_opener_web"
   gem "rack-mini-profiler"
   gem "rubocop-rails-omakase", require: false
 end

@@ -59,38 +59,12 @@ Docker Compose works great for remote development on a server. After copying the
 
 1. **Access the application**: The app will be accessible at `http://your-server-hostname:3006`. To allow access from your server's domain, set the `ALLOWED_HOST_DOMAINS` environment variable (e.g., `ALLOWED_HOST_DOMAINS=example.com,subdomain.example.com`). This can be set in your `docker-compose.yml` or shell environment.
 
-2. **Access MailHog**: The MailHog web UI is available at `http://your-server-hostname:8025` to view all captured emails.
-
-3. **Port forwarding (optional)**: If you prefer to access via localhost, you can use SSH port forwarding:
+2. **Port forwarding (optional)**: If you prefer to access via localhost, you can use SSH port forwarding:
    ```sh
    # Forward app port
    ssh -L 3006:localhost:3006 user@your-server
-   
-   # Forward MailHog port
-   ssh -L 8025:localhost:8025 user@your-server
    ```
-   Then access at http://localhost:3006 and http://localhost:8025.
-
-#### Email Development with MailHog
-
-MailHog is included as an SMTP proxy for development. It captures all emails sent by the application and provides a web interface to view them.
-
-**Viewing Emails**:
-- Open http://localhost:8025 (or your server hostname:8025) in your browser
-- All emails sent by the app will appear in the MailHog interface
-- Click on any email to view its full content, including HTML and text versions
-
-**How it works**:
-- When you register or request a magic link, the email is sent to MailHog instead of a real SMTP server
-- The magic link code is included in the email body
-- You can copy the code from MailHog and use it to sign in
-
-**Disabling MailHog**: If you want to use letter_opener or console output instead, remove the `SMTP_HOST` environment variable from `docker-compose.yml` and restart:
-```sh
-docker-compose down
-# Edit docker-compose.yml to remove SMTP_HOST and SMTP_PORT
-docker-compose up -d
-```
+   Then access at http://localhost:3006.
 
 **Note**: If your Gemfile includes private GitHub gems, you need to provide a GitHub token:
 - Option 1: Create a `.github_token` file: `echo "your_token" > .github_token`
@@ -120,13 +94,21 @@ The remote CI pipeline will run tests against both SQLite and MySQL.
 
 ### Outbound Emails
 
-You can view email previews at http://fizzy.localhost:3006/rails/mailers.
-
-You can enable or disable [`letter_opener`](https://github.com/ryanb/letter_opener) to open sent emails automatically with:
+By default, emails are not sent in development. To preview emails in development, you can use email preview tools. Enable it with:
 
     bin/rails dev:email
 
-Under the hood, this will create or remove `tmp/email-dev.txt`.
+**Local development (non-Docker):**
+- When enabled, [`letter_opener`](https://github.com/ryanb/letter_opener) automatically opens sent emails in your browser.
+
+**Docker development:**
+- When enabled, [`letter_opener_web`](https://github.com/fgrehm/letter_opener_web) saves emails and makes them accessible via a web interface at http://fizzy.localhost:3006/admin/letter_opener (or your server hostname:3006/admin/letter_opener).
+
+You can toggle email preview on/off by running the command again.
+
+You can also view email previews at http://fizzy.localhost:3006/rails/mailers.
+
+Under the hood, this will create or remove `tmp/email-dev.txt`. The configuration priority is: SMTP (if `SMTP_HOST` env var is set) > letter_opener/letter_opener_web (if `tmp/email-dev.txt` exists) > no delivery (default).
 
 ## Deployment
 
