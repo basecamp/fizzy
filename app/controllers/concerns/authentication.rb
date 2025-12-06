@@ -108,8 +108,9 @@ module Authentication
     end
 
     def serve_development_magic_link(magic_link)
-      if Rails.env.development?
-        flash[:magic_link_code] = magic_link&.code
+      if Rails.env.development? && magic_link.present?
+        flash[:magic_link_code] = magic_link.code
+        response.set_header("X-Magic-Link-Code", magic_link.code)
       end
     end
 end

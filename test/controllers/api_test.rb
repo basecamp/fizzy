@@ -6,6 +6,24 @@ class ApiTest < ActionDispatch::IntegrationTest
     @jasons_bearer_token = bearer_token_env(identity_access_tokens(:jasons_api_token).token)
   end
 
+  test "request a magic link" do
+    untenanted do
+      post session_path(format: :json), params: { email_address: identities(:david).email_address }
+      assert_response :created
+    end
+  end
+
+  test "magic link consumption" do
+    identity = identities(:david)
+    magic_link = identity.send_magic_link
+
+    untenanted do
+      post session_magic_link_path(format: :json), params: { code: magic_link.code }
+      assert_response :success
+      assert @response.parsed_body["session_token"].present?
+    end
+  end
+
   test "authenticate with valid access token" do
     get boards_path(format: :json), env: @davids_bearer_token
     assert_response :success
