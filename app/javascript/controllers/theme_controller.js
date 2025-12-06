@@ -11,7 +11,10 @@ export default class extends Controller {
     this.applyTheme()
     this.updateAllLabels()
     document.addEventListener("turbo:frame-load", () => this.updateAllLabels())
-    document.addEventListener("turbo:load", () => this.updateAllLabels())
+    document.addEventListener("turbo:load", () => {
+      this.applyTheme()
+      this.updateAllLabels()
+    })
   }
 
   toggle() {
