@@ -1,5 +1,5 @@
 class Comment < ApplicationRecord
-  include Attachments, Eventable, Mentions, Promptable, Searchable
+  include Attachments, Eventable, Mentions, Promptable, Searchable, StorageTracking
 
   belongs_to :account, default: -> { card.account }
   belongs_to :card, touch: true

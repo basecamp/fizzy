@@ -1,0 +1,2 @@
+hello_txt: <%= ActiveStorage::FixtureSet.blob filename: "hello.txt", service_name: "local", account_id: ActiveRecord::FixtureSet.identify("37s", :uuid) %>
+list_pdf: <%= ActiveStorage::FixtureSet.blob filename: "list.pdf", service_name: "local", account_id: ActiveRecord::FixtureSet.identify("37s", :uuid) %>

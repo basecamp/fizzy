@@ -1,7 +1,7 @@
 class Card < ApplicationRecord
   include Assignable, Attachments, Broadcastable, Closeable, Colored, Entropic, Eventable,
     Exportable, Golden, Mentions, Multistep, Pinnable, Postponable, Promptable,
-    Readable, Searchable, Stallable, Statuses, Taggable, Triageable, Watchable
+    Readable, Searchable, Stallable, Statuses, StorageTracking, Taggable, Triageable, Watchable
 
   belongs_to :account, default: -> { board.account }
   belongs_to :board

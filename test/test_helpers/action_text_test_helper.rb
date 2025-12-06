@@ -18,4 +18,8 @@ module ActionTextTestHelper
       end
     end.to_html.strip
   end
+
+  def attachment_html(blob)
+    ActionText::Attachment.from_attachable(blob).to_html
+  end
 end
