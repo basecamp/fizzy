@@ -16,6 +16,15 @@ if [ -n "$SAAS" ]; then
   export BUNDLE_GEMFILE="Gemfile.saas"
 fi
 
+# Determine if we are setting up the OSS version
+if [ -e tmp/oss.txt ]; then
+  export OSS=1
+fi
+
+if [ -n "$OSS" ]; then
+  export BUNDLE_GEMFILE="Gemfile.oss"
+fi
+
 # Install gum if needed
 if ! command -v gum &>/dev/null; then
   echo

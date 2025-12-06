@@ -1,0 +1,66 @@
+service: fizzy
+
+# Change this to your repo, for GHCR it should be <username>/<repository>
+image: fizzy
+
+servers:
+  web:
+    - 192.168.0.1
+  job:
+    hosts:
+      - 192.168.0.1
+    cmd: bin/jobs
+
+# Enable SSL auto certification via Let's Encrypt (and allow for multiple apps on one server).
+# If using something like Cloudflare, it is recommended to set encryption mode 
+# in Cloudflare's SSL/TLS setting to "Full" to enable end-to-end encryption. 
+proxy:
+  ssl: true
+  host: 192.168.0.1
+  healthcheck:
+    path: /up
+    interval: 6
+    timeout: 10
+
+
+registry:
+  server: localhost:5555
+
+# Configure builder setup.
+builder:
+  arch: arm64
+  dockerfile: <%= File.join(Gem::Specification.find_by_name("fizzy-oss").gem_dir, "Dockerfile") %>
+  args:
+    GH_USER: "<%= ENV['GH_USER'] %>"
+
+# Inject ENV variables into containers (secrets come from .kamal/secrets).
+env:
+  clear:
+    OSS: "1"
+    #DISABLE_SSL: "YES" # The proxy will terminate SSL, no need for Thruster to do the same
+    SSL_DOMAIN: "192.168.0.1"
+  secret:
+    - SECRET_KEY_BASE
+    - VAPID_PRIVATE_KEY
+    - VAPID_PUBLIC_KEY
+    - GH_USER
+    - MAILER_FROM_ADDRESS
+    - MAILER_DELIVERY_METHOD
+    - SMTP_ADDRESS
+    - SMTP_PORT
+    - SMTP_DOMAIN
+    - SMTP_USERNAME
+    - SMTP_PASSWORD
+    - SMTP_AUTHENTICATION
+    - SMTP_ENABLE_STARTTLS_AUTO
+
+ssh:
+  user: root
+
+volumes:
+  - "fizzy_storage:/rails/storage"
+
+# Bridge fingerprinted assets, like JS and CSS, between versions to avoid
+# hitting 404 on in-flight requests. Combines all files from new and old
+# version inside the asset_path.
+asset_path: /rails/public/assets
