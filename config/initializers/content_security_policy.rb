@@ -13,10 +13,13 @@ Rails.application.configure do
   config.content_security_policy_nonce_directives = %w[ script-src ]
 
   config.content_security_policy do |policy|
+    policy.default_src :self
     policy.script_src :self
     policy.style_src :self, :unsafe_inline
+    policy.connect_src :self
     policy.img_src :self, "blob:", "data:", "https:"
-    policy.font_src :self
+    policy.font_src :self, "data:", "https:"
+    policy.media_src :self, "blob:", "data:", "https:"
     policy.object_src :none
 
     policy.base_uri :none
