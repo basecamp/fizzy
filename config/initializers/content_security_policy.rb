@@ -4,9 +4,14 @@
 # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
 
 Rails.application.configure do
-  # Configure from environment variables (fizzy-saas can override by setting config.x values first)
-  config.x.content_security_policy.report_uri ||= ENV["CSP_REPORT_URI"]
-  config.x.content_security_policy.report_only ||= ENV["CSP_REPORT_ONLY"] == "true"
+  # Configure with environment variables with fallback to config.x values (via fizzy-sass)
+  report_uri = ENV.fetch("CSP_REPORT_URI") { config.x.content_security_policy.report_uri }
+  report_only =
+    if ENV.key?("CSP_REPORT_ONLY")
+      ENV["CSP_REPORT_ONLY"] == "true"
+    else
+      config.x.content_security_policy.report_only
+    end
 
   # Generate nonces for importmap and inline scripts
   config.content_security_policy_nonce_generator = ->(request) { SecureRandom.base64(16) }
@@ -32,11 +37,9 @@ Rails.application.configure do
     policy.frame_ancestors :self
 
     # Specify URI for violation reports (e.g., Sentry CSP endpoint)
-    if report_uri = config.x.content_security_policy.report_uri
-      policy.report_uri report_uri
-    end
+    policy.report_uri report_uri if report_uri
   end
 
   # Report violations without enforcing the policy.
-  config.content_security_policy_report_only = config.x.content_security_policy.report_only
+  config.content_security_policy_report_only = report_only
 end unless ENV["DISABLE_CSP"]
