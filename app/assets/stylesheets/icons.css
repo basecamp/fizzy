@@ -93,6 +93,9 @@
   .icon--remove { --svg: url("remove.svg "); }
   .icon--rename { --svg: url("rename.svg "); }
   .icon--search { --svg: url("search.svg "); }
+  .icon--sun { --svg: url("sun.svg "); }
+  .icon--moon { --svg: url("moon.svg "); }
+  .icon--monitor { --svg: url("monitor.svg "); }
   .icon--settings { --svg: url("settings.svg "); }
   .icon--share { --svg: url("share.svg "); }
   .icon--sliders { --svg: url("sliders.svg "); }

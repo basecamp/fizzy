@@ -3,4 +3,24 @@
     inset: 0 0 auto auto;
     position: absolute;
   }
+
+  .theme-choice {
+    --btn-border-radius: 0.35em;
+    --btn-border-color: var(--color-ink-light);
+    min-inline-size: 7.5rem;
+    padding: 0.8em 0.9em;
+    gap: 0.35em;
+    text-align: center;
+  }
+
+  .theme-choice .popup__icon {
+    --icon-size: 1.1em;
+  }
+
+  .theme-choice.is-current {
+    --btn-background: var(--color-selected);
+    --btn-border-color: var(--color-link);
+    --btn-color: var(--color-ink);
+    box-shadow: 0 0 0 1px var(--color-link);
+  }
 }
