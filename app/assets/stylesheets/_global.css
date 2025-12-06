@@ -255,8 +255,117 @@
   --color-gradient-2: oklch(var(--lch-pink-lighter));
   --color-gradient-3: oklch(var(--lch-purple-lighter));
   --color-gradient-4: var(--color-canvas);
+}
 
-  @media (prefers-color-scheme: dark) {
+/* Dark mode - explicit theme choice overrides system preference */
+html[data-theme="dark"] {
+  --lch-canvas: 20% 0.0195 232.58;
+  --lch-ink-inverted: var(--lch-black);
+
+  --lch-ink-darkest: 96.02% 0.0034 260;
+  --lch-ink-darker: 86% 0.0061 260;
+  --lch-ink-dark: 73.97% 0.009 260;
+  --lch-ink-medium: 62% 0.0122 260;
+  --lch-ink-light: 40% 0.0148 260;
+  --lch-ink-lighter: 30% 0.0178 260;
+  --lch-ink-lightest: 25% 0.0204 260;
+
+  --lch-uncolor-darkest: 96.09% 0.0076 100;
+  --lch-uncolor-darker: 86% 0.021 90;
+  --lch-uncolor-dark: 73.93% 0.041 80;
+  --lch-uncolor-medium: 62% 0.0552 70;
+  --lch-uncolor-light: 40% 0.0387 60;
+  --lch-uncolor-lighter: 30% 0.012 50;
+  --lch-uncolor-lightest: 25% 0.0017 40;
+
+  --lch-red-darkest: 95.85% 0.0218 46;
+  --lch-red-darker: 86% 0.086 44;
+  --lch-red-dark: 73.95% 0.139 42;
+  --lch-red-medium: 62% 0.154 40;
+  --lch-red-light: 40% 0.088 38;
+  --lch-red-lighter: 30% 0.032 36;
+  --lch-red-lightest: 25% 0.011 34;
+
+  --lch-yellow-darkest: 96% 0.056 100;
+  --lch-yellow-darker: 86% 0.103 90;
+  --lch-yellow-dark: 74.06% 0.136 80;
+  --lch-yellow-medium: 62.1% 0.146 70;
+  --lch-yellow-light: 40% 0.0736 60;
+  --lch-yellow-lighter: 30% 0.026 50;
+  --lch-yellow-lightest: 25% 0.01 40;
+
+  --lch-lime-darkest: 96.04% 0.066 115;
+  --lch-lime-darker: 86% 0.098 114;
+  --lch-lime-dark: 73.97% 0.121 113;
+  --lch-lime-medium: 62% 0.128 112;
+  --lch-lime-light: 40% 0.0637 111;
+  --lch-lime-lighter: 30% 0.024 110;
+  --lch-lime-lightest: 25% 0.012 109;
+
+  --lch-green-darkest: 96.12% 0.035 143;
+  --lch-green-darker: 86% 0.082 144;
+  --lch-green-dark: 73.99% 0.117 145;
+  --lch-green-medium: 62% 0.1261 146;
+  --lch-green-light: 40% 0.065 147;
+  --lch-green-lighter: 30% 0.03 148;
+  --lch-green-lightest: 25% 0.018 149;
+
+  --lch-aqua-darkest: 96.15% 0.0244 202;
+  --lch-aqua-darker: 86% 0.06 204;
+  --lch-aqua-dark: 73.92% 0.095 206;
+  --lch-aqua-medium: 62% 0.106 208;
+  --lch-aqua-light: 40% 0.0594 210;
+  --lch-aqua-lighter: 30% 0.028 212;
+  --lch-aqua-lightest: 25% 0.017 214;
+
+  --lch-blue-darkest: 95.93% 0.0217 252;
+  --lch-blue-darker: 86% 0.068 254;
+  --lch-blue-dark: 74% 0.1293 256;
+  --lch-blue-medium: 62% 0.159 258;
+  --lch-blue-light: 40% 0.094 260;
+  --lch-blue-lighter: 30% 0.0452 262;
+  --lch-blue-lightest: 25% 0.0318 264;
+
+  --lch-violet-darkest: 95.97% 0.019 280;
+  --lch-violet-darker: 86% 0.068 282;
+  --lch-violet-dark: 74.08% 0.142 284;
+  --lch-violet-medium: 62% 0.184 286;
+  --lch-violet-light: 40% 0.108 288;
+  --lch-violet-lighter: 30% 0.048 290;
+  --lch-violet-lightest: 25% 0.025 292;
+
+  --lch-purple-darkest: 95.99% 0.0217 302;
+  --lch-purple-darker: 86% 0.068 304;
+  --lch-purple-dark: 73.98% 0.141 306;
+  --lch-purple-medium: 62% 0.177 308;
+  --lch-purple-light: 40% 0.099 310;
+  --lch-purple-lighter: 30% 0.04 312;
+  --lch-purple-lightest: 25% 0.017 314;
+
+  --lch-pink-darkest: 95.84% 0.0308 336;
+  --lch-pink-darker: 86% 0.074 338;
+  --lch-pink-dark: 74.04% 0.1294 340;
+  --lch-pink-medium: 62% 0.166 342;
+  --lch-pink-light: 40% 0.085 344;
+  --lch-pink-lighter: 30% 0.03 346;
+  --lch-pink-lightest: 25% 0.011 348;
+
+  --color-terminal-bg: var(--color-canvas);
+  --color-terminal-text-light: oklch(var(--lch-green-dark));
+  --color-golden: oklch(var(--lch-blue-medium));
+  --color-highlight: oklch(var(--lch-blue-lighter));
+
+  --shadow: 0 0 0 1px oklch(var(--lch-black) / 0.42),
+    0 0.2em 1.6em -0.8em oklch(var(--lch-black) / 0.6),
+    0 0.4em 2.4em -1em oklch(var(--lch-black) / 0.7),
+    0 0.4em 0.8em -1.2em oklch(var(--lch-black) / 0.8),
+    0 0.8em 1.2em -1.6em oklch(var(--lch-black) / 0.9),
+    0 1.2em 1.6em -2em oklch(var(--lch-black) / 1);
+}
+
+/* Fallback to system preference when no explicit theme is set */
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) {
     --lch-canvas: 20% 0.0195 232.58;
     --lch-ink-inverted: var(--lch-black);
 
