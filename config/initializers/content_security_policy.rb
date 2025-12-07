@@ -20,7 +20,14 @@ Rails.application.configure do
   config.content_security_policy do |policy|
     policy.default_src :self
     policy.script_src :self, "https://challenges.cloudflare.com"
-    policy.connect_src :self, "https://storage.basecamp.com"
+
+    # Add Cloudflare R2 endpoint if configured
+    connect_src_sources = [ :self, "https://storage.basecamp.com" ]
+    if ENV["CLOUDFLARE_ENDPOINT"].present?
+      connect_src_sources << "https://#{ENV['CLOUDFLARE_ENDPOINT']}.eu.r2.cloudflarestorage.com"
+    end
+    policy.connect_src(*connect_src_sources)
+
     policy.frame_src :self, "https://challenges.cloudflare.com"
 
     # Don't fight user tools: permit inline styles, data:/https: sources, and

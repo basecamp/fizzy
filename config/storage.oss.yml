@@ -16,3 +16,14 @@ devminio:
   region: us-east-1 # default region required for signer
   access_key_id: minioadmin
   secret_access_key: minioadmin
+
+cloudflare_production:
+  service: S3
+  endpoint: https://<%= ENV['CLOUDFLARE_ENDPOINT'] %>.eu.r2.cloudflarestorage.com
+  access_key_id: <%= ENV["R2_ACCESS_KEY"] %>
+  secret_access_key: <%= ENV["R2_SECRET_ACCESS_KEY"] %>
+  bucket: <%= ENV.fetch("R2_BUCKET", "lucianghinda") %>
+  region: auto
+  force_path_style: true
+  request_checksum_calculation: when_required
+  response_checksum_validation: when_required

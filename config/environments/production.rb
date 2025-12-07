@@ -7,16 +7,22 @@ Rails.application.configure do
   #
   # Configure these according to whichever email provider you use. An example setup
   # using SMTP looks like the following:
-  #
-  # config.action_mailer.smtp_settings = {
-  #   address:              'smtp.example.com', # The address of your email provider's SMTP server
-  #   port:                 2525,
-  #   domain:               'example.com',      # Your domain, which Fizzy will send email from
-  #   user_name:            ENV["SMTP_USERNAME"],
-  #   password:             ENV["SMTP_PASSWORD"],
-  #   authentication:       :plain,
-  #   enable_starttls_auto: true
-  # }
+  app_host = ENV.fetch("APP_HOST", "localhost")
+  config.action_mailer.default_url_options = { host: app_host }
+  routes.default_url_options[:host] ||= app_host
+  config.action_mailer.delivery_method = :smtp
+
+  config.action_mailer.smtp_settings = {
+    address: ENV.fetch("SMTP_SERVER", "smtp.example.com"),
+    port: ENV.fetch("SMTP_PORT", "587"),
+    domain: ENV.fetch("SMTP_DOMAIN", "example.com"),
+    user_name: ENV.fetch("SMTP_USERNAME", ""),
+    password: ENV.fetch("SMTP_PASSWORD", ""),
+    authentication: "plain",
+    enable_starttls: true,
+    open_timeout: 5,
+    read_timeout: 5
+}
 
   # Code is not reloaded between requests.
   config.enable_reloading = false
@@ -65,7 +71,7 @@ Rails.application.configure do
                                        .then { |logger| ActiveSupport::TaggedLogging.new(logger) }
 
   # Suppress unstructured log lines
-  config.log_level = :fatal
+  config.log_level = :debug
 
   # Prepend all log lines with the following tags.
   config.log_tags = [ :request_id ]
@@ -96,4 +102,5 @@ Rails.application.configure do
 
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
+  config.active_storage.service = :cloudflare_production
 end

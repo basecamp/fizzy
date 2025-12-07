@@ -2,22 +2,21 @@
 service: fizzy
 image: fizzy
 
-
 #-- About your deployment --#
 
 # Where to deploy fizzy
 servers:
   web:
-    - fizzy.example.com  # Set your server name here
+    - <%= ENV.fetch("APP_HOST") %>
 
 # How you connect to your server
 ssh:
-  user: root  # If you use a different username to SSH to your server, specify it here
+  user: root # If you use a different username to SSH to your server, specify it here
 
 # Automatic SSL
 proxy:
-  ssl: true                # Set this to false if you *don't* want SSL
-  host: fizzy.example.com  # Set your server name here to use automatic SSL
+  ssl: true # Set this to false if you *don't* want SSL
+  host: <%= ENV.fetch("APP_HOST") %>
 
 # Your application configuration (secrets come from .kamal/secrets).
 env:
@@ -27,10 +26,18 @@ env:
     - VAPID_PRIVATE_KEY
     - SMTP_USERNAME
     - SMTP_PASSWORD
+    - SMTP_PORT
+    - SMTP_SERVER
+    - SMTP_DOMAIN
+    - CLOUDFLARE_ENDPOINT
+    - R2_ACCESS_KEY
+    - R2_SECRET_ACCESS_KEY
+    - R2_BUCKET
+    - APP_HOST
   clear:
-    MAILER_FROM_ADDRESS: support@example.com # The email address that Fizzy sends email from
+    MAILER_FROM_ADDRESS: lucian@shortruby.com # The email address that Fizzy sends email from
     SOLID_QUEUE_IN_PUMA: true # Run background jobs in the app container
-
+    RAILS_LOG_TO_STDOUT: true
 
 #-- General configuration --#
 
