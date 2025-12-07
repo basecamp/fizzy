@@ -24,8 +24,8 @@ Each Chat History file has a max 5 line summary near the top of the file, and a 
 
 # Workspace
 
-**Branch:** `docs/extract-rails-patterns`
-**Started:** `2025-12-03`
+**Branch:** `fix/identity-user-destroy-pattern`
+**Started:** `2025-12-07`
 **Status:**
 
 - [x] In Progress
@@ -34,9 +34,21 @@ Each Chat History file has a max 5 line summary near the top of the file, and a 
 
 ## Purpose
 
-[Claude will place a purpose here when you setup the workspace. Below is an example]
+Fix and improve how Fizzy handles destroying Identities and Users. The core issue is ensuring proper ordering of callbacks and dependent associations so that user deactivation works correctly before identity links are nullified.
 
-Extract and document modern Rails patterns from this OSS Fizzy codebase (37signals/Basecamp). The goal is to identify, catalog, and understand best practices and architectural patterns used in a production-quality Rails application for reference and learning.
+## Key Files
+
+- `app/models/identity.rb` - `before_destroy :deactivate_users, prepend: true`
+- `app/models/user.rb` - `User#deactivate` preserves identity link intentionally
+- `app/models/identity/joinable.rb` - Reactivation relies on preserved identity link
+
+## Pattern Summary
+
+The destroy/deactivation flow requires careful ordering:
+1. Identity#destroy triggers `deactivate_users` callback (prepend: true ensures this runs first)
+2. Each user is deactivated (accesses destroyed, marked inactive, connections closed)
+3. Only then does `dependent: :nullify` sever the identity link
+4. Reactivation via `Identity::Joinable#join` finds existing inactive user by identity
 
 
 ## Discoveries
