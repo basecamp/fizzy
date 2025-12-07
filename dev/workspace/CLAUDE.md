@@ -11,6 +11,7 @@ Workspaces are Claude's primary source of truth. Prioritise searching and reveal
 - **/plans** - structured planning documents
 - **/research** - May contain useful research artifacts
 - **/reviews** - May contain reviews of completed work
+- **/tasks** - Tasks to complete, may contain instructions for Claude
 
 ### Search Chat History
 
@@ -33,9 +34,15 @@ Each Chat History file has a max 5 line summary near the top of the file, and a 
 
 ## Purpose
 
+[Claude will place a purpose here when you setup the workspace. Below is an example]
+
 Extract and document modern Rails patterns from this OSS Fizzy codebase (37signals/Basecamp). The goal is to identify, catalog, and understand best practices and architectural patterns used in a production-quality Rails application for reference and learning.
+
 
 ## Discoveries
 
-- Use &CLAUDE_PROJECT_DIR to access the project directory inside hooks
+- **IMPORTANT FOR MERGE**: Before merging this branch to main, remove the `dev/workspace/** merge=ours` line from `.gitattributes` on THIS branch (otherwise merge will be blocked). After merge completes, ADD the protection line to `.gitattributes` while on main branch.
+
+- Use `&CLAUDE_PROJECT_DIR` to access the project directory inside hooks
+
 - When renaming files. Use the mv command with relative file paths. don't cd to the directory first.

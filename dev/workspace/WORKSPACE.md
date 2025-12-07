@@ -37,8 +37,8 @@ This is guiding context for Ai Agents when working in this workspace
 
 If selected please read the file at the start of the session before starting work
 
-- [ ] dev/workspace/plans/prd.md
-- [ ] dev/workspace/plans/architecture.md
-- [x] dev/workspace/context/discover.md
+- [ ] `dev/workspace/plans/prd.md`
+- [ ] `dev/workspace/plans/architecture.md`
+- [ ] `dev/workspace/context/discover.md`
 
 ---

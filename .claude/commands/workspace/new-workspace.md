@@ -2,7 +2,7 @@
 name: new-workspace
 description: Create new branch with workspace folder and CLAUDE.md
 allowed-tools: Bash(git status), Bash(git branch:*), Bash(git checkout:*), Bash(git fetch:*), Bash(git add:*), Bash(git commit:*), Write, Read, Edit
-argument-hint: <purpose>
+argument-hint: <branch purpose>
 ---
 
 Create a new branch with a workspace environment for isolated work.

@@ -4,10 +4,10 @@ require 'claude_hooks'
 require 'json'
 
 class ContextLoader < ClaudeHooks::SessionStart
-  CONFIG_PATH = 'config/config.json'
+  CONFIG_PATH = 'config/config.json'.freeze
 
   def call
-    log "Loading project context from config..."
+    log 'Loading project context from config...'
 
     config_data = load_config
     return output unless config_data
@@ -16,18 +16,19 @@ class ContextLoader < ClaudeHooks::SessionStart
 
     if context
       add_additional_context!(context)
-      log "Context loaded successfully"
+      system_message!("\n--- \"Context Loader\" hook ran successfully ---")
+      log 'Context loaded successfully'
 
       # Uncomment to see full context being sent to Claude
       log "=== CONTEXT SENT TO CLAUDE ===\n#{context}\n=== END CONTEXT ==="
     else
-      log "No context to load", level: :warn
+      log 'No context to load', level: :warn
     end
 
     output
   end
 
-private
+  private
 
   def load_config
     config_file = project_path_for(CONFIG_PATH)
