@@ -22,11 +22,12 @@ class Notification::BundleMailerTest < ActionMailer::TestCase
   end
 
   test "renders avatar with external image URL when avatar is attached" do
-    @user.avatar.attach(
+    blob = ActiveStorage::Blob.create_and_upload!(
       io: File.open(Rails.root.join("test", "fixtures", "files", "avatar.png")),
       filename: "avatar.png",
       content_type: "image/png"
     )
+    @user.avatar.attach(blob)
 
     create_notification(@user)
 

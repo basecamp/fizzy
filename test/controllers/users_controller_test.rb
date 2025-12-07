@@ -79,9 +79,10 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
   test "update with valid avatar" do
     sign_in_as :kevin
 
-    png_file = fixture_file_upload("avatar.png", "image/png")
+    # Create blob separately to ensure file is uploaded before variant processing
+    blob = ActiveStorage::Blob.create_and_upload!(io: File.open(file_fixture("avatar.png")), filename: "avatar.png", content_type: "image/png")
 
-    put user_path(users(:kevin)), params: { user: { avatar: png_file } }
+    put user_path(users(:kevin)), params: { user: { avatar: blob.signed_id } }
     assert_redirected_to user_path(users(:kevin))
     assert users(:kevin).reload.avatar.attached?
     assert_equal "image/png", users(:kevin).avatar.content_type
