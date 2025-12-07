@@ -35,10 +35,7 @@ Each Chat History file has a max 5 line summary near the top of the file, and a 
 
 Extract and document modern Rails patterns from this OSS Fizzy codebase (37signals/Basecamp). The goal is to identify, catalog, and understand best practices and architectural patterns used in a production-quality Rails application for reference and learning.
 
-## Workflow
-
-
 ## Discoveries
 
-- Use `&CLAUDE_PROJECT_DIR` to access the project directory inside hooks
+- Use &CLAUDE_PROJECT_DIR to access the project directory inside hooks
 - When renaming files. Use the mv command with relative file paths. don't cd to the directory first.

@@ -1,48 +1,28 @@
 dev
-├── patterns
-│   ├── activerecord-tenanted.md
-│   ├── identity-user-split.md
-│   ├── layout-shell.md
-│   ├── README.md
-│   └── ruby-llm-summaries.md
-├── workspace
-│   ├── context
-│   │   └── tree.md
-│   ├── filebox
-│   │   ├── joinable_refactor
-│   │   │   ├── identity.rb
-│   │   │   ├── joinable.rb
-│   │   │   └── user.rb
-│   │   ├── CAULDE.md
-│   │   └── README.txt
-│   ├── history
-│   │   ├── .DS_Store
-│   │   ├── 25-12-03_fizzy-patterns-workspace-setup.txt
-│   │   ├── 25-12-03_identity-user-split-pattern-extraction.txt
-│   │   ├── 25-12-03_layout-shell-pattern-extraction.txt
-│   │   ├── 25-12-04_user-reactivation-pattern-analysis.txt
-│   │   ├── 25-12-05_create-pattern-extractor-skill.txt
-│   │   └── 25-12-05_css-finder-agent-eval.txt
-│   ├── plans
-│   │   ├── architectural.md
-│   │   └── prd.md
-│   ├── prompts
-│   │   ├── discover_prompt.md
-│   │   ├── fix.xml
-│   │   ├── plan.xml
-│   │   ├── README.md
-│   │   ├── research_prompt.md
-│   │   ├── setup_prompt.txt
-│   │   └── task.xml
-│   ├── research
-│   ├── reviews
-│   ├── tasks
-│   │   └── assistant
-│   ├── .DS_Store
-│   ├── CLAUDE.md
-│   ├── README.md
-│   └── WORKSPACE.md
-└── .DS_Store
+└── workspace
+    ├── context
+    │   └── tree.md
+    ├── filebox
+    │   └── README.txt
+    ├── history
+    ├── plans
+    │   ├── architectural.md
+    │   └── prd.md
+    ├── prompts
+    │   ├── discover_prompt.md
+    │   ├── fix.xml
+    │   ├── plan.xml
+    │   ├── README.md
+    │   ├── research_prompt.md
+    │   ├── setup_prompt.txt
+    │   └── task.xml
+    ├── research
+    ├── reviews
+    ├── tasks
+    │   └── assistant
+    ├── CLAUDE.md
+    ├── README.md
+    └── WORKSPACE.md
 docs  [error opening dir]
 app
 ├── assets
@@ -57,7 +37,6 @@ app
 │       ├── avatars.css
 │       ├── bar.css
 │       ├── base.css
-│       ├── blank-slates.css
 │       ├── bubble.css
 │       ├── buttons.css
 │       ├── card-columns.css
@@ -218,8 +197,7 @@ app
 │   │   ├── events_controller.rb
 │   │   ├── joins_controller.rb
 │   │   ├── push_subscriptions_controller.rb
-│   │   ├── roles_controller.rb
-│   │   └── verifications_controller.rb
+│   │   └── roles_controller.rb
 │   ├── webhooks
 │   │   └── activations_controller.rb
 │   ├── admin_controller.rb
@@ -284,7 +262,6 @@ app
 │   │   ├── collapsible_columns_controller.js
 │   │   ├── combobox_controller.js
 │   │   ├── copy_to_clipboard_controller.js
-│   │   ├── css_variable_counter_controller.js
 │   │   ├── details_controller.js
 │   │   ├── dialog_controller.js
 │   │   ├── dialog_manager_controller.js
@@ -344,8 +321,6 @@ app
 │   │   ├── activity_spike
 │   │   │   └── detection_job.rb
 │   │   └── remove_inaccessible_notifications_job.rb
-│   ├── concerns
-│   │   └── smtp_delivery_error_handling.rb
 │   ├── event
 │   │   └── webhook_dispatch_job.rb
 │   ├── mention
@@ -428,7 +403,6 @@ app
 │   │   └── searchable.rb
 │   ├── concerns
 │   │   ├── attachments.rb
-│   │   ├── eventable.rb
 │   │   ├── filterable.rb
 │   │   ├── mentions.rb
 │   │   ├── notifiable.rb
@@ -478,7 +452,6 @@ app
 │   │   ├── accessor.rb
 │   │   ├── assignee.rb
 │   │   ├── attachable.rb
-│   │   ├── avatar.rb
 │   │   ├── configurable.rb
 │   │   ├── day_timeline.rb
 │   │   ├── email_address_changeable.rb
@@ -510,6 +483,7 @@ app
 │   ├── current.rb
 │   ├── entropy.rb
 │   ├── event.rb
+│   ├── eventable.rb
 │   ├── filter.rb
 │   ├── identity.rb
 │   ├── magic_link.rb
@@ -524,7 +498,6 @@ app
 │   ├── search.rb
 │   ├── session.rb
 │   ├── signup.rb
-│   ├── ssrf_protection.rb
 │   ├── step.rb
 │   ├── tag.rb
 │   ├── tagging.rb
@@ -568,7 +541,6 @@ app
     │   │   │   └── show.html.erb
     │   │   ├── streams
     │   │   │   └── show.html.erb
-    │   │   ├── _empty_placeholder.html.erb
     │   │   ├── _list.html.erb
     │   │   ├── create.turbo_stream.erb
     │   │   ├── destroy.turbo_stream.erb
@@ -606,6 +578,9 @@ app
     │   ├── edit.html.erb
     │   ├── new.html.erb
     │   └── show.html.erb
+    ├── card
+    │   └── display
+    │       └── _refresh_activity.turbo_stream.erb
     ├── cards
     │   ├── assignments
     │   │   ├── _user.html.erb
@@ -949,15 +924,12 @@ app
     │   │   └── show.svg.erb
     │   ├── email_addresses
     │   │   ├── confirmations
-    │   │   │   ├── invalid_token.html.erb
     │   │   │   └── show.html.erb
     │   │   ├── create.html.erb
     │   │   └── new.html.erb
     │   ├── events
     │   │   └── show.html.erb
     │   ├── joins
-    │   │   └── new.html.erb
-    │   ├── verifications
     │   │   └── new.html.erb
     │   ├── _activity_timeline.html.erb
     │   ├── _attachable.html.erb
@@ -1055,8 +1027,7 @@ db
 │   ├── 20251127000001_create_account_external_id_sequences.rb
 │   ├── 20251129110120_add_purpose_to_magic_links.rb
 │   ├── 20251129175717_promote_first_admin_to_owner.rb
-│   ├── 20251201100607_create_account_exports.rb
-│   └── 20251205010536_add_verified_at_to_users.rb
+│   └── 20251201100607_create_account_exports.rb
 ├── seeds
 │   ├── 37signals.rb
 │   ├── cleanslate.rb
@@ -1073,7 +1044,6 @@ lib
 ├── deployment
 │   └── database_resolver.rb
 ├── rails_ext
-│   ├── action_mailer_mail_delivery_job.rb
 │   ├── active_record_date_arithmetic.rb
 │   ├── active_record_replica_support.rb
 │   ├── active_record_uuid_type.rb
@@ -1184,8 +1154,7 @@ test
 │   │   ├── events_controller_test.rb
 │   │   ├── joins_controller_test.rb
 │   │   ├── push_subscriptions_controller_test.rb
-│   │   ├── roles_controller_test.rb
-│   │   └── verifications_controller_test.rb
+│   │   └── roles_controller_test.rb
 │   ├── webhooks
 │   │   └── activations_controller_test.rb
 │   ├── allow_browser_test.rb
@@ -1268,8 +1237,7 @@ test
 │   │   └── user_mailer_preview.rb
 │   ├── .keep
 │   ├── export_mailer_test.rb
-│   ├── magic_link_mailer_test.rb
-│   └── smtp_delivery_error_test.rb
+│   └── magic_link_mailer_test.rb
 ├── models
 │   ├── account
 │   │   ├── export_test.rb
@@ -1294,7 +1262,6 @@ test
 │   │   ├── exportable_test.rb
 │   │   ├── golden_test.rb
 │   │   ├── messages_test.rb
-│   │   ├── pinnable_test.rb
 │   │   ├── postponable_test.rb
 │   │   ├── readable_test.rb
 │   │   ├── searchable_test.rb
@@ -1331,7 +1298,6 @@ test
 │   │   └── account_name_generator_test.rb
 │   ├── user
 │   │   ├── accessor_test.rb
-│   │   ├── avatar_test.rb
 │   │   ├── configurable_test.rb
 │   │   ├── email_address_changeable_test.rb
 │   │   ├── mentionable_test.rb
@@ -1430,4 +1396,4 @@ public
 ├── opengraph.png
 └── robots.txt
 
-308 directories, 1122 files
+306 directories, 1090 files

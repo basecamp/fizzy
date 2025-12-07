@@ -39,6 +39,6 @@ If selected please read the file at the start of the session before starting wor
 
 - [ ] dev/workspace/plans/prd.md
 - [ ] dev/workspace/plans/architecture.md
-- [ ] dev/workspace/context/discover.md
+- [x] dev/workspace/context/discover.md
 
 ---
