@@ -27,9 +27,7 @@ class Users::AvatarsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "show own image redirects to the blob url" do
-    # Create blob separately to ensure file is uploaded before variant processing
-    blob = ActiveStorage::Blob.create_and_upload!(io: File.open(file_fixture("moon.jpg")), filename: "moon.jpg", content_type: "image/jpeg")
-    users(:david).avatar.attach(blob)
+    users(:david).avatar.attach(io: File.open(file_fixture("moon.jpg")), filename: "moon.jpg", content_type: "image/jpeg")
     assert users(:david).avatar.attached?
 
     get user_avatar_path(users(:david))
@@ -38,9 +36,7 @@ class Users::AvatarsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "show other image redirects to the blob url" do
-    # Create blob separately to ensure file is uploaded before variant processing
-    blob = ActiveStorage::Blob.create_and_upload!(io: File.open(file_fixture("moon.jpg")), filename: "moon.jpg", content_type: "image/jpeg")
-    users(:kevin).avatar.attach(blob)
+    users(:kevin).avatar.attach(io: File.open(file_fixture("moon.jpg")), filename: "moon.jpg", content_type: "image/jpeg")
     assert users(:kevin).avatar.attached?
 
     get user_avatar_path(users(:kevin))
