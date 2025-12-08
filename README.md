@@ -2,7 +2,6 @@
 
 This is the source code of [Fizzy](https://fizzy.do/), the Kanban tracking tool for issues and ideas by [37signals](https://37signals.com).
 
-
 ## Deploying Fizzy
 
 If you'd like to run Fizzy on your own server, we recommend deploying it with [Kamal](https://kamal-deploy.org/).
@@ -48,7 +47,7 @@ Refer to the [Kamal documentation](https://kamal-deploy.org/docs/configuration/e
 
 To store your secrets, create the file `.kamal/secrets` and enter something like the following:
 
-```
+```ini
 SECRET_KEY_BASE=12345
 VAPID_PUBLIC_KEY=something
 VAPID_PRIVATE_KEY=somethingelse
@@ -61,7 +60,9 @@ The values you enter here will be specific to you, and you can get or create the
 - `SECRET_KEY_BASE` should be a long, random secret. You can run `bin/rails secret` to create a suitable value for this.
 - `VAPID_PUBLIC_KEY` & `VAPID_PRIVATE_KEY` are a pair of credentials that are used for sending notifications. You can create your own keys by starting a development console with:
 
-      bin/rails c
+  ```sh
+  bin/rails c
+  ```
 
   And then run the following to create a new pair of keys:
 
@@ -82,14 +83,17 @@ Once you've made all those changes, commit them to your fork so they're saved.
 
 You can now do your first deploy by running:
 
-    bin/kamal setup
+```sh
+bin/kamal setup
+```
 
 This will set up Docker (if needed), build your Fizzy app container, configure it, and start it running.
 
 After the first deploy is done, any subsequent steps won't need to do that initial setup. So for future deploys you can just run:
 
-    bin/kamal deploy
-
+```sh
+bin/kamal deploy
+```
 
 ## Development
 
@@ -132,11 +136,15 @@ puts "VAPID_PUBLIC_KEY=#{vapid_key.public_key}"
 
 For fast feedback loops, unit tests can be run with:
 
-    bin/rails test
+```sh
+bin/rails test
+```
 
 The full continuous integration tests can be run with:
 
-    bin/ci
+```sh
+bin/ci
+```
 
 ### Database configuration
 
@@ -155,10 +163,11 @@ You can view email previews at http://fizzy.localhost:3006/rails/mailers.
 
 You can enable or disable [`letter_opener`](https://github.com/ryanb/letter_opener) to open sent emails automatically with:
 
-    bin/rails dev:email
+```sh
+bin/rails dev:email
+```
 
 Under the hood, this will create or remove `tmp/email-dev.txt`.
-
 
 ## SaaS gem
 
@@ -166,13 +175,10 @@ Under the hood, this will create or remove `tmp/email-dev.txt`.
 
 This gem depends on some private git repositories and it is not meant to be used by third parties. But we hope it can serve as inspiration for anyone wanting to run fizzy on their own infrastructure.
 
-
 ## Contributing
 
 We welcome contributions! Please read our [style guide](STYLE.md) before submitting code.
 
-
 ## License
 
 Fizzy is released under the [O'Saasy License](LICENSE.md).
-

@@ -11,10 +11,10 @@
 
     <%= form_with url: card_taggings_path(@card),
           id: dom_id(@card, :tags_form),
-          data: { controller: "form", action: "submit->form#preventEmptySubmit" },
+          data: { controller: "form", action: "submit->form#preventEmptySubmit submit->form#preventComposingSubmit" },
           class: "flex flex-column gap-half full-width margin-block-half" do |form| %>
       <%= form.text_field :tag_title, placeholder: @tags.any? ? "Add a new tag or filter…" : "Name this tag…", class: "input txt-small full-width",
-            autocomplete: "off", autofocus: true, data: { filter_target: "input", form_target: "input", action: "input->filter#filter" } %>
+            autocomplete: "off", autofocus: true, data: { filter_target: "input", form_target: "input", action: "input->filter#filter compositionstart->form#compositionStart compositionend->form#compositionEnd" } %>
     <% end %>
 
     <ul class="popup__list" data-filter-target="list">

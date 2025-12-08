@@ -97,6 +97,12 @@ module Authentication
       end
     end
 
+    def redirect_to_session_magic_link(magic_link, return_to: nil)
+      serve_development_magic_link(magic_link)
+      session[:return_to_after_authenticating] = return_to if return_to
+      redirect_to session_magic_link_url(script_name: nil)
+    end
+
     def serve_development_magic_link(magic_link)
       if Rails.env.development?
         flash[:magic_link_code] = magic_link&.code

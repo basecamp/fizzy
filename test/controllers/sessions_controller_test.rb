@@ -36,15 +36,29 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  private
-    test "destroy" do
-      sign_in_as :kevin
-
+  test "create with invalid email address" do
+    # Avoid Sentry exceptions when attackers try to stuff invalid emails. The browser performs form
+    # field validation that should normally prevent this from occurring, so I'm not worried about
+    # returning proper validation errors.
+    without_action_dispatch_exception_handling do
       untenanted do
-        delete session_path
+        assert_no_difference -> { Identity.count } do
+          post session_path, params: { email_address: "not-a-valid-email" }
+        end
 
-        assert_redirected_to new_session_path
-        assert_not cookies[:session_token].present?
+        assert_response :unprocessable_entity
       end
     end
+  end
+
+  test "destroy" do
+    sign_in_as :kevin
+
+    untenanted do
+      delete session_path
+
+      assert_redirected_to new_session_path
+      assert_not cookies[:session_token].present?
+    end
+  end
 end

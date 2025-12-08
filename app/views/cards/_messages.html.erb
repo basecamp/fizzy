@@ -9,7 +9,7 @@
   <% if Current.user.can_administer_card?(card) %>
     <footer class="delete-card txt-align-center full-width flex flex-column margin-block-start-double">
       <hr class="separator--horizontal full-width margin-block" style="--border-color: var(--color-ink-lighter)">
-      <%= button_to_delete_card(card) %>
+      <%= render "cards/delete", card: card %>
     </footer>
   <% end %>
 <% end %>

@@ -2,12 +2,12 @@ class Cards::ClosuresController < ApplicationController
   include CardScoped
 
   def create
-    @card.close(user: Current.user)
+    @card.close
     render_card_replacement
   end
 
   def destroy
-    @card.reopen(user: Current.user)
+    @card.reopen
     render_card_replacement
   end
 end

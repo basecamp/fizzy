@@ -6,9 +6,8 @@ class Signup
   attr_accessor :full_name, :email_address, :identity
   attr_reader :account, :user
 
-  with_options on: :completion do
-    validates_presence_of :full_name, :identity
-  end
+  validates :email_address, format: { with: URI::MailTo::EMAIL_REGEXP }, on: :identity_creation
+  validates :full_name, :identity, presence: true, on: :completion
 
   def initialize(...)
     super

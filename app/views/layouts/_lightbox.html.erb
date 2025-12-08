@@ -1,5 +1,5 @@
 <%= tag.dialog class:"lightbox", aria: { label: "Image Viewer (Press escape to close)" },
-    data: { controller: "dialog", dialog_target: "dialog", dialog_modal_value: "true", lightbox_target: "dialog", action: "keydown.esc->dialog#close:stop" } do %>
+    data: { controller: "dialog", dialog_target: "dialog", dialog_modal_value: "true", lightbox_target: "dialog", action: "keydown.esc->dialog#close:stop transitionend->lightbox#handleTransitionEnd" } do %>
 
   <figure class="lightbox__figure">
     <img src="" class="lightbox__image" data-lightbox-target="zoomedImage" />

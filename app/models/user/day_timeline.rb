@@ -30,15 +30,15 @@ class User::DayTimeline
   end
 
   def added_column
-    @added_column ||= build_column("Added", 1, events.where(action: %w[card_published card_reopened]))
+    @added_column ||= build_column(:added, "Added", 1, events.where(action: %w[card_published card_reopened]))
   end
 
   def updated_column
-    @updated_column ||= build_column("Updated", 2, events.where.not(action: %w[card_published card_closed card_reopened]))
+    @updated_column ||= build_column(:updated, "Updated", 2, events.where.not(action: %w[card_published card_closed card_reopened]))
   end
 
   def closed_column
-    @closed_column ||= build_column("Done", 3, events.where(action: "card_closed"))
+    @closed_column ||= build_column(:closed, "Done", 3, events.where(action: "card_closed"))
   end
 
   def cache_key
@@ -84,8 +84,8 @@ class User::DayTimeline
       filtered_events.where(created_at: ...day.beginning_of_day).chronologically.last
     end
 
-    def build_column(base_title, index, events)
-      Column.new(self, base_title, index, events)
+    def build_column(id, base_title, index, events)
+      Column.new(self, id, base_title, index, events)
     end
 
     def window

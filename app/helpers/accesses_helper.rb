@@ -40,13 +40,15 @@ module AccessesHelper
   end
 
   def involvement_button(board, access, show_watchers, icon_only)
+    label_text = access.access_only? ? "Watch this" : "Stop watching"
     button_to(
       board_involvement_path(board), method: :put,
       params: { show_watchers: show_watchers, involvement: next_involvement(access.involvement), icon_only: icon_only },
-      aria: { labelledby: dom_id(board, :involvement_label) }, title: access.access_only? ? "Watch this" : "Stop watching",
+      aria: { labelledby: dom_id(board, :involvement_label) },
+      title: (label_text if icon_only),
       class: class_names("btn", { "btn--reversed": access.watching? && icon_only })) do
         icon_tag("notification-bell-#{icon_only ? 'reverse-' : nil}#{access.involvement.dasherize}") +
-        tag.span(class: class_names("txt-nowrap txt-uppercase", "for-screen-reader": icon_only), id: dom_id(board, :involvement_label))
+        tag.span(label_text, class: class_names("txt-nowrap txt-uppercase", "for-screen-reader": icon_only), id: dom_id(board, :involvement_label))
     end
   end
 

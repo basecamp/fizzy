@@ -9,8 +9,9 @@
     <p>You're one step away. Just enter your name to get your own Fizzy account.</p>
 
     <% if @signup.errors.any? %>
-      <div class="margin-block-half">
-        <ul class="margin-block-none txt-negative txt-small">
+      <div class="margin-block-half txt-negative txt-small" style="text-align: left;">
+        <p class="margin-block-none font-weight-bold">Your changes couldn't be saved:</p>
+        <ul class="margin-block-none">
           <% @signup.errors.full_messages.each do |message| %>
             <li><%= message %></li>
           <% end %>

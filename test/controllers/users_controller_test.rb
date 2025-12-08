@@ -64,4 +64,26 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     delete user_path(users(:david))
     assert_response :forbidden
   end
+
+  test "update with invalid avatar shows validation error" do
+    sign_in_as :kevin
+
+    svg_file = fixture_file_upload("avatar.svg", "image/svg+xml")
+
+    put user_path(users(:kevin)), params: { user: { avatar: svg_file } }
+    assert_response :unprocessable_entity
+    assert_select "form[action='#{user_path(users(:kevin))}']"
+    assert_select ".txt-negative", text: /must be a JPEG, PNG, GIF, or WebP image/
+  end
+
+  test "update with valid avatar" do
+    sign_in_as :kevin
+
+    png_file = fixture_file_upload("avatar.png", "image/png")
+
+    put user_path(users(:kevin)), params: { user: { avatar: png_file } }
+    assert_redirected_to user_path(users(:kevin))
+    assert users(:kevin).reload.avatar.attached?
+    assert_equal "image/png", users(:kevin).avatar.content_type
+  end
 end

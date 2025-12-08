@@ -11,8 +11,12 @@ class SignupsController < ApplicationController
   end
 
   def create
-    Signup.new(signup_params).create_identity
-    redirect_to session_magic_link_path
+    signup = Signup.new(signup_params)
+    if signup.valid?(:identity_creation)
+      redirect_to_session_magic_link signup.create_identity
+    else
+      head :unprocessable_entity
+    end
   end
 
   private

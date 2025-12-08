@@ -9,8 +9,11 @@ class UsersController < ApplicationController
   end
 
   def update
-    @user.update! user_params
-    redirect_to @user
+    if @user.update(user_params)
+      redirect_to @user
+    else
+      render :edit, status: :unprocessable_entity
+    end
   end
 
   def destroy

@@ -8,8 +8,19 @@ export default class extends Controller {
     debounceTimeout: { type: Number, default: 300 }
   }
 
+  #isComposing = false
+
   initialize() {
     this.debouncedSubmit = debounce(this.debouncedSubmit.bind(this), this.debounceTimeoutValue)
+  }
+
+  // IME Composition tracking
+  compositionStart() {
+    this.#isComposing = true
+  }
+
+  compositionEnd() {
+    this.#isComposing = false
   }
 
   submit() {
@@ -29,6 +40,12 @@ export default class extends Controller {
         input.reportValidity()
         input.addEventListener("input", () => input.setCustomValidity(""), { once: true })
       }
+    }
+  }
+
+  preventComposingSubmit(event) {
+    if (this.#isComposing) {
+      event.preventDefault()
     }
   }
 

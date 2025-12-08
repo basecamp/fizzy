@@ -34,15 +34,17 @@ class SignupsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "create with email address containing blanks" do
-    untenanted do
-      assert_no_difference -> { Identity.count } do
-        assert_no_difference -> { MagicLink.count } do
-          post signup_path, params: { signup: { email_address: "sam smith@example.com" } }
+  test "create with invalid email address" do
+    without_action_dispatch_exception_handling do
+      untenanted do
+        assert_no_difference -> { Identity.count } do
+          assert_no_difference -> { MagicLink.count } do
+            post signup_path, params: { signup: { email_address: "not-a-valid-email" } }
+          end
         end
-      end
 
-      assert_response :unprocessable_entity
+        assert_response :unprocessable_entity
+      end
     end
   end
 
