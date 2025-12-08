@@ -8,7 +8,7 @@ class Identity < ApplicationRecord
 
   has_one_attached :avatar
 
-  before_destroy :deactivate_users
+  before_destroy :deactivate_users, prepend: true
 
   validates :email_address, format: { with: URI::MailTo::EMAIL_REGEXP }
   normalizes :email_address, with: ->(value) { value.strip.downcase.presence }
