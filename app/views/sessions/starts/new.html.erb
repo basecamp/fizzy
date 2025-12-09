@@ -1,16 +1,16 @@
 <% @hide_footer_frames = true %>
-<% @page_title = "Đang đăng nhập..." %>
+<% @page_title = t("sessions.starts.signing_in") %>
 
 <div class="panel panel--centered flex flex-column gap-half">
   <header>
     <h1 class="txt-x-large font-weight-black margin-none">
       <%= @page_title %>
     </h1>
-    <p class="margin-none">Vui lòng chờ, đang đăng nhập với <%= Current.account.name %>.</p>
+    <p class="margin-none"><%= t("sessions.starts.please_wait") %> <%= Current.account.name %>.</p>
   </header>
 
   <%= form_with url: session_start_path, method: :post, data: { controller: "form auto-submit" } do |form| %>
-    <%= form.button "Đăng nhập", type: "submit", class: "btn btn-primary", data: { form_target: "submit", turbo_submits_with: "Đang đăng nhập..." } %>
+    <%= form.button t("sessions.starts.signing_in"), type: "submit", class: "btn btn-primary", data: { form_target: "submit", turbo_submits_with: t("sessions.starts.signing_in") } %>
   <% end %>
 </div>
 

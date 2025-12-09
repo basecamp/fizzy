@@ -1,24 +1,24 @@
-<% @page_title = "Kiểm tra email" %>
+<% @page_title = t("sessions.magic_links.title") %>
 
 <div class="panel panel--centered flex flex-column gap-half <%= "shake" if flash[:alert] || flash[:shake] %>">
   <header>
     <h1 class="txt-x-large font-weight-black margin-none"><%= @page_title %></h1>
-    <p class="margin-none-block-start txt-medium">Nhập mã xác thực từ email:</p>
+    <p class="margin-none-block-start txt-medium"><%= t("sessions.magic_links.instructions") %></p>
   </header>
 
   <%= form_with url: session_magic_link_path, method: :post, html: { data: { controller: "magic-link" } } do |form| %>
     <%= form.text_field :code, required: true, class: "input center txt-align-enter txt-large",
         autofocus: true, autocorrect: "off", autocapitalize: "off", spellcheck: "false", "data-1p-ignore": true,
-        autocomplete: "one-time-code", maxlength: "6", placeholder: "••••••", value: params[:code],
+        autocomplete: "one-time-code", maxlength: "6", placeholder: t("sessions.magic_links.code_placeholder"), value: params[:code],
         data: { magic_link_target: "input", action: "keydown.enter->magic-link#submitOnEnter paste->magic-link#submitOnPaste" } %>
   <% end %>
 
-  <p class="txt-small">Mã có hiệu lực trong <%= distance_of_time_in_words(MagicLink::EXPIRATION_TIME) %>.</p>
+  <p class="txt-small"><%= t("sessions.magic_links.code_expires_in") %> <%= distance_of_time_in_words(MagicLink::EXPIRATION_TIME) %>.</p>
 </div>
 
 <% if Rails.env.development? && flash[:magic_link_code].present? %>
   <div class="flex align-center justify-center gap fill-shade border-radius pad margin-block-start full-width position-relative" style="animation: slide-up-fade-in 400ms ease-out both; max-width: 42ch; overflow: hidden;">
-    <span class="txt-uppercase translucent txt-tight-lines">Mã của bạn:</span>
+    <span class="txt-uppercase translucent txt-tight-lines"><%= t("sessions.magic_links.your_code") %></span>
     <code class="txt-large font-weight-black txt-tight-lines"><%= flash[:magic_link_code] %></code>
     <span class="txt-xx-small txt-uppercase font-weight-black txt-align-center flex align-center justify-center" style="position: absolute; top: 0; bottom: 0; left: 0; background: var(--color-ink-lighter); padding: 0 0.5em; writing-mode: vertical-rl; transform: rotate(180deg); line-height: 1;">DEV</span>
   </div>

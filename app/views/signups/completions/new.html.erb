@@ -1,16 +1,16 @@
-<% @page_title = "Complete your sign-up" %>
+<% @page_title = t("signups.completions.title") %>
 
 <div class="panel panel--centered flex flex-column gap-half <%= "shake" if flash[:alert] %>">
   <h1 class="txt-x-large font-weight-black margin-block-end"><%= @page_title %></h1>
 
   <%= form_with model: @signup, url: signup_completion_path, scope: "signup", class: "flex flex-column gap", data: { controller: "form" } do |form| %>
-    <%= form.text_field :full_name, class: "input txt-large", autocomplete: "name", placeholder: "Enter your full name…", autofocus: true, required: true %>
+    <%= form.text_field :full_name, class: "input txt-large", autocomplete: "name", placeholder: t("signups.completions.name_placeholder"), autofocus: true, required: true %>
 
-    <p>You're one step away. Just enter your name to get your own Fizzy account.</p>
+    <p><%= t("signups.completions.helper_text") %></p>
 
     <% if @signup.errors.any? %>
       <div class="margin-block-half txt-negative txt-small" style="text-align: left;">
-        <p class="margin-block-none font-weight-bold">Your changes couldn't be saved:</p>
+        <p class="margin-block-none font-weight-bold"><%= t("common.errors.changes_not_saved") %></p>
         <ul class="margin-block-none">
           <% @signup.errors.full_messages.each do |message| %>
             <li><%= message %></li>
@@ -20,7 +20,7 @@
     <% end %>
 
     <button type="submit" class="btn btn--link center" data-form-target="submit">
-      <span>Continue</span>
+      <span><%= t("signups.completions.submit") %></span>
       <%= icon_tag "arrow-right" %>
     </button>
   <% end %>

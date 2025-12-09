@@ -1,16 +1,16 @@
 <header>
-  <h2 class="divider txt-medium margin-block-start">Who can access this board?</h2>
+  <h2 class="divider txt-medium margin-block-start"><%= t("boards.access.title") %></h2>
 </header>
 
 <%= access_menu_tag board, class: "settings__user-filter unpad margin-none" do %>
   <li class="flex align-center gap-half">
     <figure class="avatar fill-selected">
       <%= icon_tag "everyone" %>
-      <span class="for-screen-reader">Everyone</span>
+      <span class="for-screen-reader"><%= t("boards.access.everyone") %></span>
     </figure>
 
     <div class="min-width">
-      <div class="overflow-ellipsis"><strong>Everyone</strong></div>
+      <div class="overflow-ellipsis"><strong><%= t("boards.access.everyone") %></strong></div>
     </div>
 
     <hr class="separator--horizontal flex-item-grow" style="--border-color: var(--color-ink-medium); --border-style: dashed" aria-hidden="true" />
@@ -18,17 +18,17 @@
     <label for="board_all_access" class="switch">
       <%= form.check_box :all_access, class: "switch__input", checked: board.all_access?, disabled: !Current.user.can_administer_board?(board), data: { action: "change->toggle-class#toggle" } %>
       <span class="switch__btn round"></span>
-      <span class="for-screen-reader">Give everyone access to this board</span>
+      <span class="for-screen-reader"><%= t("boards.access.everyone_access") %></span>
     </label>
   </li>
 
-  <input placeholder="Filter…" class="input input--transparent full-width txt-small" type="search" autocorrect="off" autocomplete="off" data-1p-ignore="true" data-filter-target="input" data-action="input->filter#filter">
+  <input placeholder="<%= t("boards.access.filter_placeholder") %>" class="input input--transparent full-width txt-small" type="search" autocorrect="off" autocomplete="off" data-1p-ignore="true" data-filter-target="input" data-action="input->filter#filter">
 
   <div class="toggler__visible-when-off">
     <div class="flex align-center justify-end gap-half">
-      <button type="button" class="btn btn--plain txt-x-small txt-link font-weight-normal" data-action="click->toggle-class#checkAll">Select all</button>
+      <button type="button" class="btn btn--plain txt-x-small txt-link font-weight-normal" data-action="click->toggle-class#checkAll"><%= t("boards.access.select_all") %></button>
       <span class="txt-subtle">&middot;</span>
-      <button type="button" class="btn btn--plain txt-x-small txt-link font-weight-normal" data-action="click->toggle-class#checkNone">Select none</button>
+      <button type="button" class="btn btn--plain txt-x-small txt-link font-weight-normal" data-action="click->toggle-class#checkNone"><%= t("boards.access.select_none") %></button>
     </div>
   </div>
 

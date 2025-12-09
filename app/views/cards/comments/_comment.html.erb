@@ -22,7 +22,7 @@
           <%= link_to edit_card_comment_path(comment.card, comment),
                 class: "comment__edit btn btn--circle borderless translucent", data: { only_visible_to_you: true } do %>
             <%= icon_tag "menu-dots-horizontal" %>
-            <span class="for-screen-reader">Edit this comment</span>
+            <span class="for-screen-reader"><%= t("comments.edit") %></span>
           <% end %>
         </div>
 

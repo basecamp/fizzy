@@ -4,7 +4,7 @@
 
   <body class="public" data-controller="local-time timezone-cookie" data-action="turbo:morph@window->local-time#refreshAll">
     <header class="header" id="header">
-      <a href="#main" class="header__skip-navigation btn" data-turbo="false">Skip to main content</a>
+      <a href="#main" class="header__skip-navigation btn" data-turbo="false"><%= t("layouts.skip_to_content") %></a>
       <nav>
         <%= link_to root_path, class: "header__logo center flex-inline align-center" do %>
           <span><%= image_tag "logo.png" %></span>

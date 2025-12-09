@@ -1,19 +1,19 @@
-<% @page_title = "Nhập email của bạn" %>
+<% @page_title = t("sessions.new.title") %>
 
 <div class="panel panel--centered flex flex-column gap-half">
-  <h1 class="txt-x-large font-weight-black margin-block-end">Đăng nhập CHIPVN</h1>
+  <h1 class="txt-x-large font-weight-black margin-block-end"><%= t("sessions.new.heading") %></h1>
 
   <%= form_with url: session_path, class: "flex flex-column gap-half txt-medium" do |form| %>
     <div class="flex align-center gap">
       <label class="flex align-center gap input input--actor">
-        <%= form.email_field :email_address, required: true, class: "input txt-large full-width", autofocus: true, autocomplete: "username", placeholder: "Nhập địa chỉ email…" %>
+        <%= form.email_field :email_address, required: true, class: "input txt-large full-width", autofocus: true, autocomplete: "username", placeholder: t("sessions.new.email_placeholder") %>
       </label>
     </div>
 
-    <p><strong>Người dùng mới?</strong> <%= link_to "Đăng ký", new_signup_path %> để tạo tài khoản. <strong>Đã có tài khoản?</strong> Nhập email để đăng nhập.</p>
+    <p><strong><%= t("sessions.new.new_user") %></strong> <%= link_to t("sessions.new.sign_up"), new_signup_path %> để tạo tài khoản. <strong><%= t("sessions.new.existing_user") %></strong> Nhập email để đăng nhập.</p>
 
     <button type="submit" id="log_in" class="btn btn--link center txt-medium">
-      <span>Tiếp tục</span>
+      <span><%= t("sessions.new.continue") %></span>
       <%= icon_tag "arrow-right" %>
     </button>
   <% end %>

@@ -1,7 +1,7 @@
 <div class="flex align-center gap">
   <label class="flex-item-grow">
     <strong><%= form.text_field :name, name: "board[name]", class: "input full-width txt-medium",
-          required: true, autofocus: false, placeholder: "Board name…",
+          required: true, autofocus: false, placeholder: t("boards.edit.name_placeholder"),
           data: { action: "keydown.enter->form#submit:prevent, keydown.esc->form#cancel" },
           readonly: !Current.user.can_administer_board?(board) %></strong>
   </label>

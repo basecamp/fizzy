@@ -11,17 +11,17 @@
     <h1 class="card__title flex align-start gap-half">
       <%= form.label :title, class: "flex flex-column align-center autoresize__wrapper", data: { autoresize_target: "wrapper", autoresize_clone_value: "" } do %>
         <%= form.text_area :title, class: "card-field__title autoresize__textarea input input--textarea full-width borderless txt-align-start hide-focus-ring hide-scrollbar",
-              required: true, autofocus: true, placeholder: "Name it…", rows: 1, dir: "auto", maxlength: 255,
+              required: true, autofocus: true, placeholder: t("cards.edit.title_placeholder"), rows: 1, dir: "auto", maxlength: 255,
               data: { autoresize_target: "textarea", action: "input->autoresize#resize keydown.enter->form#submit:prevent keydown.ctrl+enter->form#submit:prevent keydown.meta+enter->form#submit:prevent keydown.esc->form#cancel focus->form#select" } %>
       <% end %>
     </h1>
 
     <%= form.rich_textarea :description, class: "card__description rich-text-content",
-          placeholder: "Add some notes, context, pictures, or video about this…",
+          placeholder: t("cards.edit.description_placeholder"),
           data: { local_save_target: "input", action: "lexxy:change->local-save#save turbo:morph-element->local-save#restoreContent keydown.ctrl+enter->form#submit:prevent keydown.meta+enter->form#submit:prevent keydown.esc->form#cancel:stop" } do %>
       <%= general_prompts(@card.board) %>
     <% end %>
 
-    <%= link_to "Close editor and discard changes", @card, data: { form_target: "cancel" }, hidden: true %>
+    <%= link_to t("cards.edit.cancel"), @card, data: { form_target: "cancel" }, hidden: true %>
   <% end %>
 <% end %>

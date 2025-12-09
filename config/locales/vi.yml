@@ -32,6 +32,9 @@ vi:
     sign_out: "Đăng xuất"
     add_a_board: "Thêm bảng"
     all_tags: "Tất cả nhãn"
+    close_menu: "Đóng menu"
+    assigned_to_me: "Được giao cho tôi"
+    added_by_me: "Tôi đã thêm"
 
   # ============================================================================
   # SESSIONS (Login/Authentication)
@@ -57,7 +60,20 @@ vi:
 
     starts:
       signing_in: "Đang đăng nhập..."
-      please_wait: "Vui lòng chờ, đang đăng nhập với..."
+      please_wait: "Vui lòng chờ, đang đăng nhập với"
+
+    menus:
+      title: "Chọn tài khoản"
+      your_accounts: "Tài khoản Fizzy của bạn"
+      no_accounts_title: "Hmm..."
+      no_accounts_message: "Bạn chưa có tài khoản Fizzy nào."
+      signup_link: "Đăng ký tài khoản Fizzy mới"
+
+    footer:
+      product_name: "CHIPVN"
+      description: "Hệ thống quản lý công việc nội bộ."
+      need_help: "Cần hỗ trợ?"
+      email_us: "Gửi email cho chúng tôi"
 
   # ============================================================================
   # SIGNUPS
@@ -111,6 +127,7 @@ vi:
       filter_placeholder: "Lọc…"
       select_all: "Chọn tất cả"
       select_none: "Bỏ chọn tất cả"
+      self_removal_warning: "Bạn có chắc muốn xóa bản thân khỏi bảng này? Bạn sẽ không thể quay lại trừ khi ai đó mời bạn."
 
     publication:
       title: "Liên kết công khai"
@@ -164,6 +181,7 @@ vi:
     steps:
       add_placeholder: "Thêm bước…"
       edit_placeholder: "Đặt tên cho bước này…"
+      delete: "Xóa bước này"
 
     default_title: "Chưa đặt tên"
 
@@ -176,6 +194,11 @@ vi:
     name_placeholder: "Đặt tên cột"
     validation_blank: "Tên cột không được để trống"
     delete_confirm: "Bạn có chắc muốn xóa cột này? Các thẻ sẽ được chuyển về Có thể."
+    options: "Tùy chọn cột"
+    edit: "Chỉnh sửa cột"
+    move_left: "Di chuyển sang trái"
+    move_right: "Di chuyển sang phải"
+    delete: "Xóa cột"
 
   # ============================================================================
   # USERS
@@ -357,6 +380,7 @@ vi:
   # ============================================================================
   comments:
     delete_confirm: "Bạn có chắc muốn xóa bình luận này?"
+    edit: "Chỉnh sửa bình luận"
 
   # ============================================================================
   # COMMON / SHARED

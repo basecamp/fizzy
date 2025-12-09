@@ -1,15 +1,15 @@
-<% @page_title = "Create a new board" %>
+<% @page_title = t("boards.new.title") %>
 
 <div class="panel panel--centered">
   <%= form_with model: @board, class: "flex flex-column gap", data: { controller: "form", action: "submit->form#preventEmptySubmit" } do |form| %>
     <h1 class="txt-x-large margin-none font-weight-black"><%= @page_title %></h1>
-    <%= form.text_field :name, required: true, class: "input full-width", autofocus: true, autocomplete: "off", placeholder: "Name it…", data: { form_target: "input", action: "keydown.esc@document->form#cancel", validation_message: "Board names can‘t be blank" } %>
+    <%= form.text_field :name, required: true, class: "input full-width", autofocus: true, autocomplete: "off", placeholder: t("boards.new.name_placeholder"), data: { form_target: "input", action: "keydown.esc@document->form#cancel", validation_message: t("boards.new.validation_blank") } %>
 
     <button type="submit" class="btn btn--link center">
-      <span>Create board</span>
+      <span><%= t("boards.new.submit") %></span>
       <%= icon_tag "arrow-right" %>
     </button>
 
-    <%= link_to "Cancel and go back", root_path, data: { form_target: "cancel", turbo_frame: "_top" }, hidden: true %>
+    <%= link_to t("boards.new.cancel"), root_path, data: { form_target: "cancel", turbo_frame: "_top" }, hidden: true %>
   <% end %>
 </div>
