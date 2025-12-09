@@ -10,8 +10,6 @@ class Account < ApplicationRecord
   has_many :columns, dependent: :destroy
   has_many :exports, class_name: "Account::Export", dependent: :destroy
 
-  has_many_attached :uploads
-
   before_create :assign_external_account_id
   after_create :create_join_code
 
