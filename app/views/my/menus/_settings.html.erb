@@ -1,13 +1,13 @@
-<%= collapsible_nav_section "Settings" do %>
-  <%= filter_place_menu_item account_settings_path, "Account Settings", "settings" %>
-  <%= filter_place_menu_item user_path(Current.user), "My Profile", "person" %>
-  <%= filter_place_menu_item notifications_path, "All notifications", "bell" %>
-  <%= filter_place_menu_item notifications_settings_path, "Notification Settings", "settings" %>
+<%= collapsible_nav_section t("views.my.menus.settings.title") do %>
+  <%= filter_place_menu_item account_settings_path, t("views.my.menus.settings.account_settings"), "settings" %>
+  <%= filter_place_menu_item user_path(Current.user), t("views.my.menus.settings.my_profile"), "person" %>
+  <%= filter_place_menu_item notifications_path, t("views.my.menus.settings.all_notifications"), "bell" %>
+  <%= filter_place_menu_item notifications_settings_path, t("views.my.menus.settings.notification_settings"), "settings" %>
 
   <%= tag.li class: "popup__item", data: { filter_target: "item", navigable_list_target: "item" } do %>
     <%= icon_tag "logout", class: "popup__icon" %>
     <%= button_to session_url(script_name: nil), method: :delete, class: "popup__btn btn", data: { turbo: false } do %>
-      <span>Sign out</span>
+      <span><%= t("views.my.menus.settings.sign_out") %></span>
     <% end %>
   <% end %>
 <% end %>

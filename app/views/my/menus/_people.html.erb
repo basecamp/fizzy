@@ -1,8 +1,8 @@
-<%= collapsible_nav_section "People" do %>
+<%= collapsible_nav_section t("views.my.menus.people.title") do %>
   <li class="popup__item" data-filter-target="item" data-navigable-list-target="item">
     <%= icon_tag "add", class: "popup__icon" %>
     <%= link_to account_join_code_path, class: "popup__btn btn" do %>
-      <span class="overflow-ellipsis">Invite people</span>
+      <span class="overflow-ellipsis"><%= t("views.my.menus.people.invite_people") %></span>
     <% end %>
   </li>
 

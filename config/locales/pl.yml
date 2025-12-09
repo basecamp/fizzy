@@ -1,0 +1,69 @@
+pl:
+  views:
+    layouts:
+      application:
+        skip_navigation: "Przejdź do głównej treści"
+    my:
+      menu:
+        footer:
+          designed_by: "zaprojektowane, zbudowane i wspierane przez"
+      menus:
+        jump:
+          home: "Strona główna"
+          assigned_to_me: "Przypisane do mnie"
+          added_by_me: "Dodane przeze mnie"
+          close_menu: "Zamknij menu"
+        settings:
+          title: "Ustawienia"
+          account_settings: "Ustawienia konta"
+          my_profile: "Mój profil"
+          all_notifications: "Wszystkie powiadomienia"
+          notification_settings: "Ustawienia powiadomień"
+          sign_out: "Wyloguj się"
+        shortcuts:
+          title: "Skróty"
+          golden_cards: "Wyróżnione karty"
+          stalled_cards: "Karty pozostawione"
+          cards_closing_soon: "Karty zamykane wkrótce"
+          added_today: "Dodane dziś"
+          done_today: "Zrobione dziś"
+        boards:
+          title: "Tablice"
+          add_board: "Dodaj tablicę"
+        tags:
+          title: "Tagi"
+        people:
+          title: "Osoby"
+          invite_people: "Zaproś osoby"
+        accounts:
+          title: "Konta"
+        custom_views:
+          title: "Niestandardowe widoki"
+          create_custom_view: "Utwórz niestandardowy widok"
+      pins:
+        tray:
+          pinned: "Przypięte"
+          toggle_label: "Przełącz stos przypiętych"
+    notifications:
+      tray:
+        notifications: "Powiadomienia"
+        toggle_label: "Przełącz stos powiadomień"
+        settings: "Ustawienia"
+        notification_settings: "Ustawienia powiadomień"
+        see_more_new_items: "Zobacz więcej nowych elementów"
+        see_older_items: "Zobacz starsze elementy"
+        clear_all: "Wyczyść wszystko"
+        mark_all_read: "Oznacz wszystkie powiadomienia jako przeczytane"
+    bar:
+      search: "Szukaj"
+  helpers:
+    my:
+      menu:
+        jump_field_tag:
+          placeholder: "Wpisz, aby przejść do tablicy, osoby, miejsca lub tagu…"
+    filters:
+      sorted_by_label:
+        newest: "Od najnowszych do najstarszych"
+        oldest: "Od najstarszych do najnowszych"
+        latest: "Ostatnio zaktualizowane"
+

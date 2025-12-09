@@ -1,31 +1,68 @@
-# Files in the config/locales directory are used for internationalization and
-# are automatically loaded by Rails. If you want to use locales other than
-# English, add the necessary files in this directory.
-#
-# To use the locales, use `I18n.t`:
-#
-#     I18n.t "hello"
-#
-# In views, this is aliased to just `t`:
-#
-#     <%= t("hello") %>
-#
-# To use a different locale, set it with `I18n.locale`:
-#
-#     I18n.locale = :es
-#
-# This would use the information in config/locales/es.yml.
-#
-# To learn more about the API, please read the Rails Internationalization guide
-# at https://guides.rubyonrails.org/i18n.html.
-#
-# Be aware that YAML interprets the following case-insensitive strings as
-# booleans: `true`, `false`, `on`, `off`, `yes`, `no`. Therefore, these strings
-# must be quoted to be interpreted as strings. For example:
-#
-#     en:
-#       "yes": yup
-#       enabled: "ON"
-
 en:
-  hello: "Hello world"
+  views:
+    layouts:
+      application:
+        skip_navigation: "Skip to main content"
+    my:
+      menu:
+        footer:
+          designed_by: "is designed, built, and backed by"
+      menus:
+        jump:
+          home: "Home"
+          assigned_to_me: "Assigned to me"
+          added_by_me: "Added by me"
+          close_menu: "Close menu"
+        settings:
+          title: "Settings"
+          account_settings: "Account Settings"
+          my_profile: "My Profile"
+          all_notifications: "All notifications"
+          notification_settings: "Notification Settings"
+          sign_out: "Sign out"
+        shortcuts:
+          title: "Shortcuts"
+          golden_cards: "Golden cards"
+          stalled_cards: "Stalled cards"
+          cards_closing_soon: "Cards closing soon"
+          added_today: "Added today"
+          done_today: "Done today"
+        boards:
+          title: "Boards"
+          add_board: "Add a board"
+        tags:
+          title: "Tags"
+        people:
+          title: "People"
+          invite_people: "Invite people"
+        accounts:
+          title: "Accounts"
+        custom_views:
+          title: "Custom views"
+          create_custom_view: "Create a custom view"
+      pins:
+        tray:
+          pinned: "Pinned"
+          toggle_label: "Toggle pins stack"
+    notifications:
+      tray:
+        notifications: "Notifications"
+        toggle_label: "Toggle notifications stack"
+        settings: "Settings"
+        notification_settings: "Notification settings"
+        see_more_new_items: "See more new items"
+        see_older_items: "See older items"
+        clear_all: "Clear all"
+        mark_all_read: "Mark all notifications as read"
+    bar:
+      search: "Search"
+  helpers:
+    my:
+      menu:
+        jump_field_tag:
+          placeholder: "Type to jump to a board, person, place, or tag…"
+    filters:
+      sorted_by_label:
+        newest: "Newest to oldest"
+        oldest: "Oldest to newest"
+        latest: "Recently updated"

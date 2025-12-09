@@ -1,9 +1,9 @@
-<%= collapsible_nav_section "Custom views", id: "my-filters" do %>
+<%= collapsible_nav_section t("views.my.menus.custom_views.title"), id: "my-filters" do %>
   <%= form_with url: cards_path, method: :get, data: { controller: "form" } do |form| %>
     <li class="popup__item overflow-ellipsis" data-navigable-list-target="item" data-filter-target="item" id="filter-custom-create">
       <%= icon_tag "bookmark", class: "popup__icon" %>
       <%= link_to cards_path(expand_all: true), class: "popup__btn btn" do %>
-        <span>Create a custom view</span>
+        <span><%= t("views.my.menus.custom_views.create_custom_view") %></span>
       <% end %>
     </li>
 

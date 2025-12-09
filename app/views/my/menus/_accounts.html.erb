@@ -1,6 +1,6 @@
 <% if accounts.many? %>
   <% cache [ Current.identity, accounts, Current.account ] do %>
-    <%= collapsible_nav_section "Accounts" do %>
+    <%= collapsible_nav_section t("views.my.menus.accounts.title") do %>
       <%# Bust cache 1 Dec 2025 %>
       <% accounts.each do |account| %>
         <%= filter_place_menu_item landing_url(script_name: account.slug), account.name, "marker", current: account == Current.account, turbo: false %>
