@@ -38,7 +38,7 @@ end
 
 module ActiveSupport
   class TestCase
-    parallelize(workers: :number_of_processors)
+    parallelize workers: :number_of_processors, work_stealing: ENV["WORK_STEALING"] != "false"
 
     # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
     fixtures :all
