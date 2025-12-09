@@ -66,9 +66,11 @@ class ActionDispatch::IntegrationTest
     def without_action_dispatch_exception_handling
       original = Rails.application.config.action_dispatch.show_exceptions
       Rails.application.config.action_dispatch.show_exceptions = :none
+      Rails.application.instance_variable_set(:@app_env_config, nil) # Clear memoized env_config
       yield
     ensure
       Rails.application.config.action_dispatch.show_exceptions = original
+      Rails.application.instance_variable_set(:@app_env_config, nil) # Reset env_config
     end
 end
 
