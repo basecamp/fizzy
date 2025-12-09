@@ -1,10 +1,10 @@
-<% @page_title = "Account Settings" %>
+<% @page_title = t("account.settings.title") %>
 
 <% content_for :header do %>
   <h1 class="header__title">
     <%= @page_title %>
     <% unless Current.user.admin? %>
-      <div class="txt-normal font-weight-normal">Only admins can change these settings</div>
+      <div class="txt-normal font-weight-normal"><%= t("account.settings.subtitle") %></div>
     <% end %>
   </h1>
 <% end %>

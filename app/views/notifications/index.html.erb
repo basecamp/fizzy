@@ -1,16 +1,16 @@
-<% @page_title = "Notifications" %>
+<% @page_title = t("notifications.index.title") %>
 <% @hide_footer_frames = true %>
 
 <% content_for :header do %>
   <div class="header__actions header__actions--start">
-    <%= back_link_to "Home", root_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+    <%= back_link_to t("notifications.index.home"), root_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
   </div>
 
   <h1 class="header__title"><%= @page_title %></h1>
 
   <div class="header__actions header__actions--end">
     <%= link_to notifications_settings_path, class: "btn" do %>
-      <%= icon_tag "settings" %> <span class="for-screen-reader">Notification settings</span>
+      <%= icon_tag "settings" %> <span class="for-screen-reader"><%= t("notifications.index.settings_button") %></span>
     <% end %>
   </div>
 <% end %>

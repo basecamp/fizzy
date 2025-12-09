@@ -219,6 +219,7 @@ vi:
       unverified_explanation: "Mã đăng nhập đã được gửi đến địa chỉ email này, nhưng người dùng chưa đăng nhập để xác nhận danh tính."
 
     queries:
+      me: "tôi"
       assigned_to: "Thẻ nào được giao cho"
       added_by: "Thẻ nào được thêm bởi"
 

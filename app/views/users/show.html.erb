@@ -1,5 +1,5 @@
 <% @page_title = @user.name %>
-<% me_or_you = Current.user == @user ? "me" : @user.first_name %>
+<% me_or_you = Current.user == @user ? t("users.queries.me") : @user.first_name %>
 
 <div class="profile-layout">
   <section class="panel shadow txt-align-center" style="--panel-size: 45ch;">
@@ -7,7 +7,7 @@
       <% if Current.user == @user %>
         <%= link_to edit_user_path(@user), class: "user-edit-link btn", data: { controller: "tooltip" } do %>
           <%= icon_tag "pencil" %>
-          <span class="for-screen-reader">Edit profile</span>
+          <span class="for-screen-reader"><%= t("users.profile.edit_button") %></span>
         <% end %>
       <% end %>
 
@@ -19,10 +19,10 @@
         <h1 class="txt-x-large margin-none"><%= @user.name %></h1>
         <div class="txt-medium">
           <% if !@user.active? %>
-            <%= @user.name %> is no longer on this account
+            <%= @user.name %> <%= t("users.status.inactive") %>
           <% elsif !@user.verified? %>
-            Unverified
-            <div class="txt-small txt-tinted">A sign-in code has been sent to this email address, but the user has not yet logged in to confirm their identity.</div>
+            <%= t("users.status.unverified") %>
+            <div class="txt-small txt-tinted"><%= t("users.status.unverified_explanation") %></div>
           <% else %>
             <%= mail_to @user.identity.email_address %>
           <% end %>
@@ -31,9 +31,9 @@
 
       <% if @user.verified? %>
         <div class="flex-inline center justify-center flex-wrap gap">
-          <%= link_to "Which cards are assigned to #{me_or_you}?",
+          <%= link_to "#{t("users.queries.assigned_to")} #{me_or_you}?",
                 cards_path(assignee_ids: [ @user.id ], sorted_by: "newest"), class: "btn", data: { turbo_frame: "_top" } %>
-          <%= link_to "Which cards were added by #{me_or_you}?",
+          <%= link_to "#{t("users.queries.added_by")} #{me_or_you}?",
                 cards_path(creator_ids: [ @user.id ], sorted_by: "newest"), class: "btn", data: { turbo_frame: "_top" } %>
         </div>
       <% end %>
@@ -46,7 +46,7 @@
 
       <div class="center margin-block-start-double">
         <%= button_to session_url(script_name: nil), method: :delete, class: "btn btn--plain txt-link txt-small", data: { turbo: false } do %>
-        <span>Sign out</span>
+        <span><%= t("users.logout") %></span>
       <% end %>
       </div>
     </section>
