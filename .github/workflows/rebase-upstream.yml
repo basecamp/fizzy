@@ -52,19 +52,20 @@ jobs:
           fi
           git remote -v
 
-      - name: Fetch upstream
+      - name: Fetch all remotes and update origin
         run: |
+          # Fetch and prune both remotes
+          git fetch origin --prune
           git fetch upstream --prune
-
-      - name: Ensure local target branch exists
-        run: |
+          # Ensure local branch matches remote
           git checkout "${{ steps.vars.outputs.target_branch }}"
-
-      - name: Rebase onto upstream
+          git reset --hard origin/"${{ steps.vars.outputs.target_branch }}"
+      
+      - name: Rebase fork on top of upstream
         run: |
           set -e
-          git rebase "upstream/${{ steps.vars.outputs.upstream_branch }}"
-
+          git rebase upstream/"${{ steps.vars.outputs.upstream_branch }}"
+      
       - name: Push rebased branch to fork
         env:
           TOKEN: ${{ secrets.UPSTREAM_SYNC_TOKEN }}
