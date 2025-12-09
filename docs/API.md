@@ -9,9 +9,22 @@ To use the API you'll need an access token. To get one, go to your profile, then
 in the API section, click on "Personal access tokens" and then click on
 "Generate new access token".
 
-Pick what kind of permission you want the access token to have:
+Give it a description and pick what kind of permission you want the access token to have:
 - `Read`: allows reading data from your account
 - `Read + Write`: allows reading and writing data to your account on your behalf
+
+Then click on "Generate access token".
+
+<details>
+  <summary>Access token generation guide with screenshots</summary>
+
+  | Step | Description | Screenshot |
+  |:----:|-------------|:----------:|
+  | 1 | Go to your profile | <img width="400" alt="Profile page with API section" src="https://github.com/user-attachments/assets/49e7e12b-2952-4220-84fd-cef99b13bc04" /> |
+  | 2 | In the API section click on "Personal access token" | <img width="400" alt="Personal access tokens page" src="https://github.com/user-attachments/assets/2f026ea0-416f-4fbe-a097-61313f24f180" /> |
+  | 3 | Click on "Generate a new access token" | <img width="400" alt="Generate new access token dialog" src="https://github.com/user-attachments/assets/d766f047-8628-416d-8e21-b89522f6c0d9" /> |
+  | 4 | Give it a description and assign it a permission | <img width="400" alt="Access token created" src="https://github.com/user-attachments/assets/49b8e350-d152-4946-8aad-e13260b983fd" /> |
+</details>
 
 > [!IMPORTANT]
 > __An access token is like a password, keep it secret and do not share it with anyone.__
@@ -280,6 +293,76 @@ Cards are tasks or items of work on a board
 ### Columns
 
 Columns represent stages in a workflow on a board. Cards move through columns as they progress.
+
+#### `GET /:account_slug/boards/:board_id/columns/:column_id`
+
+Returns the specified column.
+
+__Response:__
+
+```json
+{
+  "id": "03f5v9zkft4hj9qq0lsn9ohcm",
+  "name": "In Progress",
+  "color": "var(--color-card-default)",
+  "created_at": "2025-12-05T19:36:35.534Z"
+}
+```
+
+#### `POST /:account_slug/boards/:board_id/columns`
+
+Creates a new column on the board.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `name` | string | Yes | The name of the column |
+| `color` | string | No | The column color. One of: `var(--color-card-default)` (Blue), `var(--color-card-1)` (Gray), `var(--color-card-2)` (Tan), `var(--color-card-3)` (Yellow), `var(--color-card-4)` (Lime), `var(--color-card-5)` (Aqua), `var(--color-card-6)` (Violet), `var(--color-card-7)` (Purple), `var(--color-card-8)` (Pink) |
+
+__Request:__
+
+```json
+{
+  "column": {
+    "name": "In Progress",
+    "color": "var(--color-card-4)"
+  }
+}
+```
+
+__Response:__
+
+Returns `201 Created` with a `Location` header pointing to the new column.
+
+#### `PUT /:account_slug/boards/:board_id/columns/:column_id`
+
+Updates a column.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `name` | string | No | The name of the column |
+| `color` | string | No | The column color |
+
+__Request:__
+
+```json
+{
+  "column": {
+    "name": "Done"
+  }
+}
+```
+
+__Response:__
+
+Returns `204 No Content` on success.
+
+#### `DELETE /:account_slug/boards/:board_id/columns/:column_id`
+
+Deletes a column.
+
+__Response:__
+
+Returns `204 No Content` on success.
 
 ### Users
 
