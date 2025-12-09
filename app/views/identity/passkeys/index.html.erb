@@ -1,0 +1,45 @@
+<% @page_title = "Passkeys" %>
+
+<div class="panel panel--centered flex flex-column gap">
+  <header class="flex align-center justify-space-between gap">
+    <h1 class="txt-x-large font-weight-black margin-none">Passkeys</h1>
+    <%= link_to new_identity_passkey_path, class: "btn btn--link txt-small" do %>
+      <%= icon_tag "plus" %>
+      <span>Add passkey</span>
+    <% end %>
+  </header>
+
+  <% if @passkeys.any? %>
+    <ul class="flex flex-column gap-half">
+      <% @passkeys.each do |passkey| %>
+        <li class="flex align-center justify-space-between gap pad-half fill-shade border-radius">
+          <div class="flex flex-column">
+            <strong><%= passkey.name %></strong>
+            <span class="txt-small translucent">Added <%= time_ago_in_words(passkey.created_at) %> ago</span>
+          </div>
+          <%= button_to identity_passkey_path(passkey),
+                        method: :delete,
+                        class: "btn btn--plain txt-danger txt-small",
+                        data: { turbo_confirm: "Remove this passkey?" } do %>
+            <%= icon_tag "trash" %>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p class="translucent txt-medium">
+      No passkeys yet. Add one to sign in without email.
+    </p>
+  <% end %>
+
+  <div class="margin-block-start">
+    <%= link_to session_menu_path(script_name: nil), class: "btn btn--plain txt-link txt-small" do %>
+      <%= icon_tag "arrow-left" %>
+      <span>Back to accounts</span>
+    <% end %>
+  </div>
+</div>
+
+<% content_for :footer do %>
+  <%= render "sessions/footer" %>
+<% end %>

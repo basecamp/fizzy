@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2025_12_05_010536) do
+ActiveRecord::Schema[8.2].define(version: 2025_12_09_050324) do
   create_table "accesses", id: :uuid, force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -377,6 +377,18 @@ ActiveRecord::Schema[8.2].define(version: 2025_12_05_010536) do
     t.index ["user_id"], name: "index_notifications_on_user_id"
   end
 
+  create_table "passkeys", id: :uuid, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "external_id", limit: 255, null: false
+    t.uuid "identity_id", null: false
+    t.string "name", limit: 255
+    t.binary "public_key", null: false
+    t.bigint "sign_count", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_passkeys_on_external_id", unique: true
+    t.index ["identity_id"], name: "index_passkeys_on_identity_id"
+  end
+
   create_table "pins", id: :uuid, force: :cascade do |t|
     t.uuid "account_id", null: false
     t.uuid "card_id", null: false
@@ -556,6 +568,8 @@ ActiveRecord::Schema[8.2].define(version: 2025_12_05_010536) do
     t.index ["account_id"], name: "index_webhooks_on_account_id"
     t.index ["board_id", "subscribed_actions"], name: "index_webhooks_on_board_id_and_subscribed_actions"
   end
+
+  add_foreign_key "passkeys", "identities"
   execute "CREATE VIRTUAL TABLE search_records_fts USING fts5(\n        title,\n        content,\n        tokenize='porter'\n      )"
 
 end

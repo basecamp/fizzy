@@ -1,0 +1,13 @@
+david_macbook:
+  identity: david
+  external_id: david-macbook-external-id
+  public_key: <%= Base64.strict_encode64("fake-public-key-david-macbook") %>
+  sign_count: 5
+  name: MacBook Pro
+
+kevin_iphone:
+  identity: kevin
+  external_id: kevin-iphone-external-id
+  public_key: <%= Base64.strict_encode64("fake-public-key-kevin-iphone") %>
+  sign_count: 10
+  name: iPhone

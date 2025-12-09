@@ -3,18 +3,34 @@
 <div class="panel panel--centered flex flex-column gap-half">
   <h1 class="txt-x-large font-weight-black margin-block-end">Sign up</h1>
 
-  <%= form_with model: @signup, url: signup_path, scope: "signup", class: "flex flex-column gap", data: { turbo: false, controller: "form" } do |form| %>
-    <div class="flex align-center gap">
-      <label class="flex align-center gap input input--actor">
-        <%= form.email_field :email_address, required: true, class: "input txt-large full-width", autofocus: true, autocomplete: "username", placeholder: "Enter your email address…" %>
-      </label>
-    </div>
+  <div class="flex align-center gap">
+    <label class="flex align-center gap input input--actor">
+      <%= email_field_tag :email_address, nil, required: true, id: "signup_email", class: "input txt-large full-width", autofocus: true, autocomplete: "username", placeholder: "Enter your email address…" %>
+    </label>
+  </div>
 
-    <p>Enter your email to create an account.</p>
+  <p>Enter your email to create an account.</p>
 
-    <button type="submit" id="log_in" class="btn btn--link center txt-medium">
-      <span>Let’s go</span>
-      <%= icon_tag "arrow-right" %>
+  <%= form_with url: signup_path, scope: "signup", class: "flex flex-column gap-half", data: { turbo: false, controller: "form", form_email_selector_value: "#signup_email", action: "submit->form#copyEmailToHidden" } do |form| %>
+    <%= form.hidden_field :email_address, data: { form_target: "hiddenEmail" } %>
+
+    <button type="submit" class="btn btn--link center txt-medium">
+      <%= icon_tag "email" %>
+      <span>Verify with email</span>
+    </button>
+  <% end %>
+
+  <p class="txt-small translucent txt-align-center">or</p>
+
+  <%= form_with url: signup_passkey_path,
+                data: { controller: "passkey", passkey_options_value: @passkey_options.as_json, passkey_email_selector_value: "#signup_email" } do |form| %>
+    <%= form.hidden_field :credential, data: { passkey_target: "credential" } %>
+    <%= form.hidden_field :email_address, data: { passkey_target: "email" } %>
+
+    <button type="button" class="btn center txt-medium"
+            data-action="click->passkey#register">
+      <%= icon_tag "password" %>
+      <span>Create passkey</span>
     </button>
   <% end %>
 </div>

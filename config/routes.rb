@@ -146,7 +146,13 @@ Rails.application.routes.draw do
       resources :transfers
       resource :magic_link
       resource :menu
+      resource :passkey, only: :create
+      resource :choice, only: %i[new create]
     end
+  end
+
+  scope module: :identity, as: :identity, path: "identity" do
+    resources :passkeys, only: %i[index new create destroy]
   end
 
   get "/signup", to: redirect("/signup/new")
@@ -155,6 +161,7 @@ Rails.application.routes.draw do
     collection do
       scope module: :signups, as: :signup do
         resource :completion, only: %i[ new create ]
+        resource :passkey, only: %i[ create ]
       end
     end
   end

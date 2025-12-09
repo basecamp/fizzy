@@ -32,6 +32,7 @@ gem "image_processing", "~> 1.14"
 gem "platform_agent"
 gem "aws-sdk-s3", require: false
 gem "web-push"
+gem "webauthn", "~> 3.0"
 gem "net-http-persistent"
 gem "rubyzip", require: "zip"
 gem "mittens"
