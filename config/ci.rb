@@ -19,6 +19,8 @@ CI.run do
   if Fizzy.saas?
     step "Tests: SaaS",          "#{SAAS_ENV} bin/rails test"
     step "Tests: SaaS System",   "#{SAAS_ENV} #{SYSTEM_TEST_ENV} bin/rails test:system"
+    step "Tests: OSS",           "#{OSS_ENV} bin/rails test"
+    step "Tests: OSS System",    "#{OSS_ENV} #{SYSTEM_TEST_ENV} bin/rails test:system"
   else
     step "Tests: SQLite",        "#{OSS_ENV} bin/rails test"
     step "Tests: SQLite System", "#{OSS_ENV} #{SYSTEM_TEST_ENV} bin/rails test:system"
