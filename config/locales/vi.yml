@@ -1,0 +1,436 @@
+# Vietnamese translations for Fizzy
+# File: config/locales/vi.yml
+#
+# Hướng dẫn:
+# - Các key bằng tiếng Anh được giữ nguyên
+# - Giá trị bằng tiếng Việt cần được review và chỉnh sửa
+# - %{variable} là biến động, không dịch
+# - Dấu nháy đơn hoặc kép cần thiết cho các string có ký tự đặc biệt
+
+vi:
+  # ============================================================================
+  # LAYOUTS & NAVIGATION
+  # ============================================================================
+  layouts:
+    skip_to_content: "Chuyển đến nội dung chính"
+    branding:
+      product_name: "Fizzy™"
+      designed_by: "được thiết kế, xây dựng và hỗ trợ bởi"
+      company_name: "37signals™"
+
+  navigation:
+    home: "Trang chủ"
+    boards: "Bảng"
+    tags: "Nhãn"
+    shortcuts: "Lối tắt"
+    notifications: "Thông báo"
+    settings: "Cài đặt"
+    account_settings: "Cài đặt tài khoản"
+    my_profile: "Hồ sơ của tôi"
+    all_notifications: "Tất cả thông báo"
+    notification_settings: "Cài đặt thông báo"
+    sign_out: "Đăng xuất"
+    add_a_board: "Thêm bảng"
+    all_tags: "Tất cả nhãn"
+
+  # ============================================================================
+  # SESSIONS (Login/Authentication)
+  # ============================================================================
+  sessions:
+    new:
+      title: "Nhập email của bạn"
+      heading: "Đăng nhập Fizzy"
+      email_placeholder: "Nhập địa chỉ email…"
+      new_user: "Người dùng mới?"
+      sign_up: "Đăng ký"
+      existing_user: "Đã có tài khoản?"
+      continue: "Tiếp tục"
+      rate_limit_error: "Vui lòng thử lại sau."
+
+    magic_links:
+      title: "Kiểm tra email"
+      instructions: "Nhập mã xác thực từ email:"
+      code_placeholder: "••••••"
+      code_expires_in: "Mã có hiệu lực trong"
+      your_code: "Mã của bạn:"
+      rate_limit_error: "Chờ 15 phút rồi thử lại"
+
+    starts:
+      signing_in: "Đang đăng nhập..."
+      please_wait: "Vui lòng chờ, đang đăng nhập với..."
+
+  # ============================================================================
+  # SIGNUPS
+  # ============================================================================
+  signups:
+    new:
+      title: "Đăng ký Fizzy"
+      heading: "Đăng ký"
+      email_placeholder: "Nhập địa chỉ email…"
+      helper_text: "Nhập email để tạo tài khoản."
+      submit: "Bắt đầu"
+      rate_limit_error: "Vui lòng thử lại sau."
+
+    completions:
+      title: "Hoàn tất đăng ký"
+      name_placeholder: "Nhập họ tên đầy đủ…"
+      helper_text: "Chỉ còn một bước nữa. Nhập tên để có tài khoản Fizzy của riêng bạn."
+      submit: "Tiếp tục"
+
+    join_codes:
+      join_title: "Tham gia %{account_name}"
+      email_placeholder: "Địa chỉ email"
+      code_inactive:
+        title: "Mã này đã hết hiệu lực"
+        message_1: "Hãy liên hệ với ai đó từ"
+        message_2: "để gửi cho bạn link mới hoặc tăng giới hạn."
+
+  # ============================================================================
+  # BOARDS
+  # ============================================================================
+  boards:
+    new:
+      title: "Tạo bảng mới"
+      name_placeholder: "Đặt tên…"
+      validation_blank: "Tên bảng không được để trống"
+      submit: "Tạo bảng"
+      cancel: "Hủy và quay lại"
+
+    edit:
+      title: "Cài đặt bảng"
+      subtitle: "Chỉ quản trị viên mới có thể thay đổi cài đặt này"
+      name_placeholder: "Tên bảng…"
+      submit: "Lưu thay đổi"
+      saved: "Đã lưu"
+      saved_removed: "Đã lưu (bạn đã bị xóa khỏi bảng)"
+
+    access:
+      title: "Ai có thể truy cập bảng này?"
+      everyone: "Tất cả mọi người"
+      everyone_access: "Cho phép tất cả mọi người truy cập bảng này"
+      filter_placeholder: "Lọc…"
+      select_all: "Chọn tất cả"
+      select_none: "Bỏ chọn tất cả"
+
+    publication:
+      title: "Liên kết công khai"
+      description: "Bật liên kết công khai để chia sẻ bảng này với bất kỳ ai trên thế giới. Họ không cần đăng nhập và không thể xem bất kỳ thứ gì khác trong Fizzy."
+      turn_off: "Tắt liên kết công khai"
+      turn_on: "Bật liên kết công khai"
+      copy_link: "Sao chép liên kết công khai"
+      description_label: "Thêm mô tả tùy chọn cho trang công khai"
+      description_placeholder: "Thêm ghi chú công khai về bảng này…"
+
+    auto_close:
+      title: "Tự động đóng"
+      description: "Fizzy không để các thẻ cũ nằm mãi. Thẻ sẽ tự động chuyển sang \"Tạm hoãn\" nếu không ai cập nhật, bình luận hoặc di chuyển trong…"
+      days_label: "Số ngày trước khi tự động đóng"
+
+    delete:
+      button: "Xóa bảng này"
+      confirm_title: "Xóa bảng này?"
+      confirm_message: "Bạn có chắc muốn xóa vĩnh viễn bảng này và tất cả các thẻ trong đó không? Hành động này không thể hoàn tác."
+      confirm_button: "Xóa bảng"
+
+  # ============================================================================
+  # CARDS
+  # ============================================================================
+  cards:
+    operations:
+      deleted: "Đã xóa thẻ"
+      added: "Đã thêm thẻ"
+
+    edit:
+      title_placeholder: "Đặt tên…"
+      description_placeholder: "Thêm ghi chú, ngữ cảnh, hình ảnh hoặc video về thẻ này…"
+      cancel: "Đóng trình soạn thảo và hủy thay đổi"
+      edit_button: "Chỉnh sửa"
+      mark_done: "Đánh dấu hoàn thành"
+      save_changes: "Lưu thay đổi"
+
+    status:
+      not_now: "Tạm hoãn"
+      maybe: "Có thể?"
+      done: "Hoàn thành"
+      choose_column: "Chọn cột cho thẻ này"
+
+    delete:
+      button: "Xóa thẻ này"
+      confirm_title: "Xóa thẻ này?"
+      confirm_message: "Bạn có chắc muốn xóa vĩnh viễn thẻ này không?"
+      confirm_button: "Xóa thẻ"
+      cancel: "Hủy"
+
+    steps:
+      add_placeholder: "Thêm bước…"
+      edit_placeholder: "Đặt tên cho bước này…"
+
+    default_title: "Chưa đặt tên"
+
+  # ============================================================================
+  # COLUMNS
+  # ============================================================================
+  columns:
+    add_button: "Thêm cột"
+    add_dialog_label: "Thêm cột"
+    name_placeholder: "Đặt tên cột"
+    validation_blank: "Tên cột không được để trống"
+    delete_confirm: "Bạn có chắc muốn xóa cột này? Các thẻ sẽ được chuyển về Có thể."
+
+  # ============================================================================
+  # USERS
+  # ============================================================================
+  users:
+    profile:
+      edit_button: "Chỉnh sửa hồ sơ"
+      edit_title: "Chỉnh sửa hồ sơ của bạn"
+      name_placeholder: "Tên"
+      email_placeholder: "Địa chỉ email"
+      change_email: "Đổi email"
+      delete_avatar: "Xóa ảnh đại diện"
+      delete_avatar_confirm: "Bạn có chắc muốn xóa ảnh đại diện? Hành động này không thể hoàn tác."
+
+    status:
+      inactive: "không còn trong tài khoản này"
+      unverified: "Chưa xác thực"
+      unverified_explanation: "Mã đăng nhập đã được gửi đến địa chỉ email này, nhưng người dùng chưa đăng nhập để xác nhận danh tính."
+
+    queries:
+      assigned_to: "Thẻ nào được giao cho"
+      added_by: "Thẻ nào được thêm bởi"
+
+    email_change:
+      new_email_placeholder: "Địa chỉ email mới"
+      already_exists: "Bạn đã có người dùng trong tài khoản này với địa chỉ email đó"
+
+    logout: "Đăng xuất"
+
+  # ============================================================================
+  # ACCOUNT
+  # ============================================================================
+  account:
+    settings:
+      title: "Cài đặt tài khoản"
+      subtitle: "Chỉ quản trị viên mới có thể thay đổi cài đặt này"
+      name_placeholder: "Tên tài khoản…"
+      updated: "Đã cập nhật tài khoản"
+
+    people:
+      title: "Người trong tài khoản này"
+      invite: "Mời người"
+      remove_confirm: "Bạn có chắc muốn xóa vĩnh viễn người này khỏi tài khoản?"
+
+    entropy:
+      title: "Tự động đóng"
+      description: "Fizzy không để các thẻ cũ nằm mãi. Thẻ tự động chuyển sang \"Tạm hoãn\" nếu không có hoạt động trong một khoảng thời gian. Đây là cài đặt mặc định toàn cục — bạn có thể ghi đè trên từng bảng."
+
+    export:
+      title: "Xuất dữ liệu"
+      description: "Tải về bản lưu trữ dữ liệu Fizzy của bạn."
+      button: "Bắt đầu xuất..."
+      dialog_title: "Xuất dữ liệu tài khoản"
+      dialog_body_1: "Điều này sẽ tạo một file ZIP chứa tất cả dữ liệu trong các bảng bạn có quyền truy cập."
+      dialog_body_2: "Khi file sẵn sàng, chúng tôi sẽ gửi email cho bạn với link tải về. Link sẽ hết hạn sau 24 giờ."
+      start_button: "Bắt đầu xuất"
+      cancel: "Hủy"
+      started: "Đã bắt đầu xuất. Bạn sẽ nhận được email khi sẵn sàng."
+
+    join_codes:
+      title: "Thêm người"
+      description: "Chia sẻ link bên dưới để mời người vào tài khoản này"
+      generate_new: "Tạo mã mới"
+      generate_confirm: "Bạn có chắc muốn tạo link mới? Mã cũ sẽ ngừng hoạt động."
+      copy_link: "Sao chép link mời"
+      get_qr: "Lấy mã QR"
+      qr_instruction: "Quét mã này bằng camera trên thiết bị di động"
+      done: "Xong"
+      used_times: "Mã này đã được sử dụng"
+      times: "lần"
+      remaining: "còn lại"
+      change_limit: "Đổi giới hạn"
+      change_limit_title: "Đổi giới hạn sử dụng"
+      change_limit_label: "Link này có thể được sử dụng bao nhiêu lần để tham gia tài khoản?"
+      go_back: "Quay lại"
+
+  # ============================================================================
+  # NOTIFICATIONS
+  # ============================================================================
+  notifications:
+    index:
+      title: "Thông báo"
+      home: "Trang chủ"
+      settings_button: "Cài đặt thông báo"
+      mark_all_read: "Đánh dấu tất cả đã đọc"
+
+    settings:
+      title: "Cài đặt thông báo"
+      boards_section: "Bảng"
+      updated: "Đã cập nhật cài đặt"
+
+    email:
+      title: "Thông báo email"
+      description: "Nhận một email duy nhất với tất cả thông báo của bạn mỗi vài giờ, hàng ngày hoặc hàng tuần."
+      frequency_label: "Gửi email về thông báo mới..."
+
+    push:
+      status_on: "Thông báo đẩy đang BẬT"
+      status_off: "Thông báo đẩy đang TẮT"
+      turn_on: "Bật thông báo đẩy trên thiết bị này"
+      help_toggle: "Giúp tôi sửa lỗi"
+      not_receiving: "Không nhận được thông báo?"
+      help_text: "Khi thông báo đẩy không hoạt động, thường có thể khắc phục bằng cách kiểm tra cài đặt thông báo để đảm bảo chúng được cho phép."
+      install_message_1: "Để nhận thông báo đẩy trong"
+      install_message_2: "cho"
+      install_message_3: "bạn phải cài đặt Fizzy như một ứng dụng web trước."
+      apple_menu_instruction: "Nhấp vào menu Apple ở góc trên bên trái."
+
+    unsubscribe:
+      message: "Hủy đăng ký tất cả thông báo email với tư cách"
+      button: "Hủy đăng ký ngay"
+      thanks: "Cảm ơn,"
+      success_message: "Fizzy sẽ không gửi thêm thông báo email cho bạn nữa. Nếu bạn đổi ý, bạn có thể bật lại trong"
+      settings_link: "Cài đặt thông báo"
+      invalid_link: "Link hủy đăng ký không hợp lệ"
+
+  # ============================================================================
+  # MAILERS
+  # ============================================================================
+  mailers:
+    magic_link:
+      subject: "Mã Fizzy của bạn là %{code}"
+      heading_signin: "Mã xác thực Fizzy"
+      heading_signup: "Chào mừng đến với Fizzy!"
+      body_signin: "Vui lòng nhập mã xác thực 6 ký tự này trên trang đăng nhập Fizzy:"
+      body_signup: "Vui lòng nhập mã xác thực 6 ký tự này trên trang đăng ký Fizzy để tạo tài khoản mới:"
+      expires_in: "Mã này có hiệu lực trong"
+      support_link: "Gửi email cho chúng tôi"
+
+    export:
+      subject: "Dữ liệu xuất Fizzy của bạn đã sẵn sàng để tải về"
+      heading: "Tải về dữ liệu Fizzy của bạn"
+      body: "Việc xuất dữ liệu Fizzy của bạn đã hoàn tất và sẵn sàng để tải về."
+      download_link: "Tải về dữ liệu"
+      need_help: "Cần trợ giúp?"
+      support_link: "Gửi email cho chúng tôi"
+
+    notification_bundle:
+      subject: "Fizzy: Thông báo mới"
+      you_have: "Bạn có"
+      new_notification: "thông báo mới"
+      new_notifications: "thông báo mới"
+      in_account: "trong"
+      change_frequency: "Thay đổi tần suất nhận"
+      or: "hoặc"
+      unsubscribe: "hủy đăng ký tất cả thông báo email"
+
+    email_change:
+      subject: "Xác nhận địa chỉ email mới của bạn"
+      body: "Nhấp vào link bên dưới để sử dụng địa chỉ email này trong Fizzy:"
+      disclaimer: "Nếu bạn không yêu cầu thay đổi này, bạn có thể bỏ qua email này. Địa chỉ email của bạn SẼ KHÔNG được thay đổi trừ khi bạn nhấp vào nút."
+
+  # ============================================================================
+  # SEARCH
+  # ============================================================================
+  search:
+    placeholder: "Tìm kiếm…"
+    label: "Tìm kiếm Fizzy"
+    close: "Đóng tìm kiếm"
+
+  # ============================================================================
+  # SHORTCUTS / FILTERS
+  # ============================================================================
+  shortcuts:
+    golden_cards: "Thẻ vàng"
+    stalled_cards: "Thẻ bị trì hoãn"
+    closing_soon: "Thẻ sắp đóng"
+    added_today: "Thêm hôm nay"
+    done_today: "Hoàn thành hôm nay"
+
+  # ============================================================================
+  # WEBHOOKS
+  # ============================================================================
+  webhooks:
+    delete_confirm: "Bạn có chắc muốn xóa vĩnh viễn webhook này?"
+
+  # ============================================================================
+  # COMMENTS
+  # ============================================================================
+  comments:
+    delete_confirm: "Bạn có chắc muốn xóa bình luận này?"
+
+  # ============================================================================
+  # COMMON / SHARED
+  # ============================================================================
+  common:
+    buttons:
+      save: "Lưu"
+      save_changes: "Lưu thay đổi"
+      cancel: "Hủy"
+      continue: "Tiếp tục"
+      done: "Xong"
+      delete: "Xóa"
+      edit: "Chỉnh sửa"
+      add: "Thêm"
+      close: "Đóng"
+      go_back: "Quay lại"
+      submit: "Gửi"
+
+    confirmations:
+      are_you_sure: "Bạn có chắc không?"
+
+    forms:
+      filter_placeholder: "Lọc…"
+
+    errors:
+      changes_not_saved: "Các thay đổi của bạn không thể được lưu:"
+      try_again_later: "Vui lòng thử lại sau."
+
+    time:
+      minutes: "phút"
+      hours: "giờ"
+      days: "ngày"
+      weeks: "tuần"
+
+  # ============================================================================
+  # ACTIVERECORD ERRORS & VALIDATIONS
+  # ============================================================================
+  activerecord:
+    errors:
+      models:
+        board:
+          attributes:
+            name:
+              blank: "Tên bảng không được để trống"
+        column:
+          attributes:
+            name:
+              blank: "Tên cột không được để trống"
+        user:
+          attributes:
+            name:
+              blank: "Tên không được để trống"
+            avatar:
+              content_type_invalid: "phải là ảnh JPEG, PNG, GIF hoặc WebP"
+        webhook:
+          attributes:
+            endpoint:
+              invalid_url: "không phải là URL hợp lệ"
+              must_use_https: "phải sử dụng HTTPS"
+        identity:
+          attributes:
+            email:
+              invalid: "không phải là địa chỉ email hợp lệ"
+              taken: "đã được sử dụng"
+
+    attributes:
+      user:
+        name: "Tên"
+        email: "Email"
+        avatar: "Ảnh đại diện"
+      board:
+        name: "Tên"
+      card:
+        title: "Tiêu đề"
+        description: "Mô tả"
+      column:
+        name: "Tên"
