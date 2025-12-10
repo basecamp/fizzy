@@ -1,6 +1,7 @@
 class Push::Subscription < ApplicationRecord
   PERMITTED_ENDPOINT_HOSTS = %w[
     fcm.googleapis.com
+    jmt17.google.com
     updates.push.services.mozilla.com
     web.push.apple.com
     notify.windows.com
