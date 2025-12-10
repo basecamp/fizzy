@@ -62,7 +62,7 @@ jobs:
 
       - name: Extract Docker metadata (tags, labels) with arch suffix
         id: meta
-        uses: docker/metadata-action@v5.8.0
+        uses: docker/metadata-action@v5.10.0
         with:
           images: ${{ steps.vars.outputs.canonical }}
           tags: |
@@ -135,7 +135,7 @@ jobs:
 
       - name: Compute base tags (no suffix)
         id: meta
-        uses: docker/metadata-action@v5.8.0
+        uses: docker/metadata-action@v5.10.0
         with:
           images: ${{ steps.vars.outputs.canonical }}
           tags: |
