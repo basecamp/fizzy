@@ -30,7 +30,7 @@ This is guiding context for Ai Agents when working in this workspace
 
 ### Testing
 
-- [ ] Requires testing
+- [x] Requires testing
   > Update relevant tests as per testing strategy. All tests must pass before PR.
 
 ### Plans currently available
