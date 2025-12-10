@@ -3,8 +3,7 @@ module Authorization
 
   included do
     before_action :ensure_can_access_account, if: -> { Current.account.present? && authenticated? }
-    before_action :ensure_only_staff_can_access_non_production_remote_environments, if: :authenticated?
-    helper_method :single_tenant?
+    before_action :ensure_only_staff_can_access_non_production_remote_environments, if: :authenticated? 
   end
 
   class_methods do
@@ -37,9 +36,5 @@ module Authorization
 
     def redirect_existing_user
       redirect_to root_path if Current.user
-    end
-
-    def single_tenant?
-      ENV.fetch("SINGLE_TENANT", "false") == "true"
     end
 end
