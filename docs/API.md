@@ -477,6 +477,7 @@ Creates a new card in a board.
 | `status` | string | No | Initial status: `published` (default), `closed`, `not_now` |
 | `image` | file | No | Header image for the card |
 | `tag_ids` | array | No | Array of tag IDs to apply to the card |
+| `created_at` | datetime | No | Override creation timestamp (ISO 8601 format) |
 
 __Request:__
 
@@ -682,6 +683,7 @@ Creates a new comment on a card.
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `body` | string | Yes | The comment body (supports rich text) |
+| `created_at` | datetime | No | Override creation timestamp (ISO 8601 format) |
 
 __Request:__
 

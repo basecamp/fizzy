@@ -26,7 +26,7 @@ module Card::Statuses
 
   private
     def update_created_at_on_publication
-      if will_save_change_to_status? && status_in_database.inquiry.drafted?
+      if will_save_change_to_status? && status_in_database.inquiry.drafted? && persisted?
         self.created_at = Time.current
       end
     end
