@@ -168,7 +168,7 @@ curl -X POST \
       "content_type": "image/png"
     }
   }' \
-  https://app.fizzy.do/rails/active_storage/direct_uploads
+  https://app.fizzy.do/:account_slug/api/direct_uploads
 ```
 
 The `checksum` is a Base64-encoded MD5 hash of the file content.
@@ -186,11 +186,11 @@ __Response:__
   "direct_upload": {
     "url": "https://storage.example.com/...",
     "headers": {
-      "Content-Type": "image/png",
-      "Content-MD5": "GQ5SqLsM7ylnji0Wgd9wNA=="
+      "Content-Type": "image/png"
     }
   },
-  "signed_id": "eyJfcmFpbHMi..."
+  "signed_id": "eyJfcmFpbHMi...",
+  "attachable_sgid": "eyJfcmFpbHMi..."
 }
 ```
 
@@ -208,7 +208,7 @@ curl -X PUT \
 
 #### 3. Reference the file in rich text
 
-Use the `signed_id` from step 1 to embed the file in your rich text using an `<action-text-attachment>` tag:
+Use the `attachable_sgid` from step 1 to embed the file in your rich text using an `<action-text-attachment>` tag:
 
 ```json
 {
@@ -219,7 +219,7 @@ Use the `signed_id` from step 1 to embed the file in your rich text using an `<a
 }
 ```
 
-The `sgid` attribute should contain the `signed_id` returned from the direct upload response.
+The `sgid` attribute should contain the `attachable_sgid` returned from the direct upload response.
 
 ## Identity
 

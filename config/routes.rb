@@ -171,6 +171,10 @@ Rails.application.routes.draw do
     resource :menu
   end
 
+  namespace :api do
+    resources :direct_uploads, only: :create
+  end
+
   namespace :prompts do
     resources :cards
     resources :tags
