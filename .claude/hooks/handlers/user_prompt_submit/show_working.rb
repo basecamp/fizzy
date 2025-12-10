@@ -25,7 +25,7 @@ private
 
   def read_file
     # If we were in the project directory, we would use project_path_for instead
-    file_path = project_path_for('hooks/user_prompt_submit/trigger_instructions/show-working.txt')
+    file_path = project_path_for('hooks/handlers/user_prompt_submit/trigger_instructions/show-working.txt')
 
     if File.exist?(file_path)
       content = File.read(file_path).strip
