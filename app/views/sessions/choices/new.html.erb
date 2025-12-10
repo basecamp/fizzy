@@ -1,0 +1,44 @@
+<% @page_title = "Sign in" %>
+
+<div class="panel panel--centered flex flex-column gap-half <%= "shake" if flash[:alert] %>">
+  <h1 class="txt-x-large font-weight-black margin-block-end">Welcome back</h1>
+
+  <p class="txt-medium">Choose how to sign in as <strong><%= @identity.email_address %></strong></p>
+
+  <%= form_with url: session_choice_path,
+                data: { controller: "passkey", passkey_options_value: @passkey_options.as_json } do |form| %>
+    <%= form.hidden_field :email, value: @identity.email_address %>
+    <%= form.hidden_field :credential, data: { passkey_target: "credential" } %>
+    <%= form.hidden_field :method, value: "passkey", data: { passkey_target: "method" } %>
+
+    <div class="flex flex-column gap">
+      <button type="button" class="btn btn--link center txt-medium"
+              data-action="click->passkey#authenticate">
+        <%= icon_tag "password" %>
+        <span>Use passkey</span>
+      </button>
+    </div>
+  <% end %>
+
+  <div class="margin-block txt-align-center">
+    <p class="txt-small translucent margin-block-half">or</p>
+  </div>
+
+  <%= form_with url: session_choice_path, class: "flex flex-column gap" do |form| %>
+    <%= form.hidden_field :email, value: @identity.email_address %>
+    <%= form.hidden_field :method, value: "magic_link" %>
+
+    <button type="submit" class="btn center txt-medium">
+      <%= icon_tag "email" %>
+      <span>Verify with email</span>
+    </button>
+  <% end %>
+
+  <p class="txt-small margin-block-start">
+    Not you? <%= link_to "Use a different email", new_session_path %>
+  </p>
+</div>
+
+<% content_for :footer do %>
+  <%= render "sessions/footer" %>
+<% end %>

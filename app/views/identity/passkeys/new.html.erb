@@ -1,0 +1,31 @@
+<% @page_title = "Add passkey" %>
+
+<div class="panel panel--centered flex flex-column gap-half <%= "shake" if flash[:alert] %>">
+  <h1 class="txt-x-large font-weight-black margin-block-end">Add a passkey</h1>
+
+  <%= form_with url: identity_passkeys_path,
+                data: { controller: "passkey", passkey_options_value: @options.as_json } do |form| %>
+    <%= form.hidden_field :credential, data: { passkey_target: "credential" } %>
+
+    <div class="flex flex-column gap">
+      <%= form.text_field :name,
+                          class: "input txt-medium",
+                          placeholder: "Name this passkey (optional)",
+                          autocomplete: "off" %>
+
+      <button type="button" class="btn btn--link center txt-medium"
+              data-action="click->passkey#register">
+        <%= icon_tag "password" %>
+        <span>Create passkey</span>
+      </button>
+    </div>
+  <% end %>
+
+  <p class="txt-small margin-block-start">
+    <%= link_to "Cancel", identity_passkeys_path, class: "txt-link" %>
+  </p>
+</div>
+
+<% content_for :footer do %>
+  <%= render "sessions/footer" %>
+<% end %>

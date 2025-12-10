@@ -3,6 +3,7 @@ class Identity < ApplicationRecord
 
   has_many :access_tokens, dependent: :destroy
   has_many :magic_links, dependent: :destroy
+  has_many :passkeys, dependent: :destroy
   has_many :sessions, dependent: :destroy
   has_many :users, dependent: :nullify
   has_many :accounts, through: :users

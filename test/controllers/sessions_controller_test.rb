@@ -9,8 +9,8 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "create" do
-    identity = identities(:kevin)
+  test "create for existing user without passkeys sends magic link" do
+    identity = identities(:jz) # jz has no passkeys in fixtures
 
     untenanted do
       assert_difference -> { MagicLink.count }, 1 do
@@ -18,28 +18,35 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
       end
 
       assert_redirected_to session_magic_link_path
-      assert_nil flash[:magic_link_code]
     end
   end
 
-  test "create for a new user" do
+  test "create for existing user with passkeys redirects to choice" do
+    identity = identities(:kevin) # kevin has a passkey in fixtures
+
     untenanted do
-      assert_difference -> { MagicLink.count }, +1 do
-        assert_difference -> { Identity.count }, +1 do
+      assert_no_difference -> { MagicLink.count } do
+        post session_path, params: { email_address: identity.email_address }
+      end
+
+      assert_redirected_to new_session_choice_path(email: identity.email_address)
+    end
+  end
+
+  test "create for a new user redirects to signup" do
+    untenanted do
+      assert_no_difference -> { Identity.count } do
+        assert_no_difference -> { MagicLink.count } do
           post session_path,
-            params: { email_address: "nonexistent-#{SecureRandom.hex(6)}@example.com" }
+            params: { email_address: "newuser-#{SecureRandom.hex(6)}@example.com" }
         end
       end
 
-      assert_redirected_to session_magic_link_path
-      assert MagicLink.last.for_sign_up?
+      assert_redirected_to new_signup_path
     end
   end
 
   test "create with invalid email address" do
-    # Avoid Sentry exceptions when attackers try to stuff invalid emails. The browser performs form
-    # field validation that should normally prevent this from occurring, so I'm not worried about
-    # returning proper validation errors.
     without_action_dispatch_exception_handling do
       untenanted do
         assert_no_difference -> { Identity.count } do

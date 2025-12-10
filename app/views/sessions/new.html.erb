@@ -17,6 +17,19 @@
       <%= icon_tag "arrow-right" %>
     </button>
   <% end %>
+
+  <p class="txt-small translucent txt-align-center">or</p>
+
+  <%= form_with url: session_passkey_path,
+                data: { controller: "passkey", passkey_options_value: @passkey_options.as_json } do |form| %>
+    <%= form.hidden_field :credential, data: { passkey_target: "credential" } %>
+
+    <button type="button" class="btn center txt-medium"
+            data-action="click->passkey#authenticate">
+      <%= icon_tag "password" %>
+      <span>Use passkey</span>
+    </button>
+  <% end %>
 </div>
 
 <% content_for :footer do %>

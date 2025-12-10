@@ -20,12 +20,12 @@ class SignupsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "create" do
+  test "create sends magic link for email verification" do
     email_address = "newuser-#{SecureRandom.hex(6)}@example.com"
 
     untenanted do
-      assert_difference -> { Identity.count }, +1 do
-        assert_difference -> { MagicLink.count }, +1 do
+      assert_difference -> { Identity.count }, 1 do
+        assert_difference -> { MagicLink.count }, 1 do
           post signup_path, params: { signup: { email_address: email_address } }
         end
       end

@@ -2,10 +2,11 @@ import { Controller } from "@hotwired/stimulus"
 import { debounce, nextFrame } from "helpers/timing_helpers";
 
 export default class extends Controller {
-  static targets = [ "cancel", "submit", "input" ]
+  static targets = [ "cancel", "submit", "input", "hiddenEmail" ]
 
   static values = {
-    debounceTimeout: { type: Number, default: 300 }
+    debounceTimeout: { type: Number, default: 300 },
+    emailSelector: String
   }
 
   #isComposing = false
@@ -86,5 +87,14 @@ export default class extends Controller {
 
   blurActiveInput() {
     document.activeElement?.blur()
+  }
+
+  copyEmailToHidden(event) {
+    if (this.hasHiddenEmailTarget && this.emailSelectorValue) {
+      const emailInput = document.querySelector(this.emailSelectorValue)
+      if (emailInput) {
+        this.hiddenEmailTarget.value = emailInput.value
+      }
+    }
   }
 }
