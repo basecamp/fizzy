@@ -32,4 +32,4 @@ Use `""` to parse all files.
 
 ### treeOutputPath
 
-The path to save the tree output to
+The path to save the tree output to.

@@ -19,6 +19,7 @@ class ExtractTranscript < ClaudeHooks::SessionEnd
     case reason
     when 'clear', 'logout', 'prompt_input_exit'
       log "Extracting transcript for session #{session_id}"
+      system_message!("\n--- \"Extracting Conversation, Please Wait\" ---")
       extract_and_parse_transcript
     else
       log "Skipping transcript extraction for reason: #{reason}"
