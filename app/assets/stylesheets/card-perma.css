@@ -277,7 +277,7 @@
       border-radius: 99rem;
     }
 
-    .btn:not(.popup__btn, .btn--plain, .btn--reversed) {
+    .btn:not(.popup__btn, .btn--plain, .btn--reversed, .settings-subscription__button) {
       --btn-background: var(--card-color);
       --btn-color: var(--color-ink-inverted);
     }

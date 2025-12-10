@@ -3,10 +3,10 @@ eval_gemfile "Gemfile"
 
 git_source(:bc) { |repo| "https://github.com/basecamp/#{repo}" }
 
-# SaaS-only functionality
 gem "activeresource", require: "active_resource"
+gem "stripe", "~> 18.0"
 gem "queenbee", bc: "queenbee-plugin"
-gem "fizzy-saas", bc: "fizzy-saas"
+gem "fizzy-saas", bc: "fizzy-saas", branch: "billing"
 gem "console1984", bc: "console1984"
 gem "audits1984", bc: "audits1984"
 
