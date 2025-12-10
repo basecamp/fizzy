@@ -1,9 +1,3 @@
 d8463077:gems/fizzy-saas/bin/setup:generic-api-key:54
 c4073c1c:app/models/integration/basecamp.rb:generic-api-key:3
 c4073c1c:app/models/integration/basecamp.rb:generic-api-key:4
-02a42167:test/models/webhook_test.rb:slack-webhook-url:57
-2fc9215b:test/models/webhook/delivery_test.rb:slack-webhook-url:156
-2fc9215b:test/models/webhook_test.rb:slack-webhook-url:57
-a515ea3b:test/fixtures/webhooks.yml:generic-api-key:5
-a515ea3b:test/fixtures/webhooks.yml:generic-api-key:11
-1f21c12c:test/vcr_cassettes/command/ai/translator_test-test_combine_commands_and_filters.yml:github-oauth:73012
