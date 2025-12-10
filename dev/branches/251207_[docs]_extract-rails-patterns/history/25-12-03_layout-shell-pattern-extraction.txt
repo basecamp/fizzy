@@ -1,0 +1,809 @@
+Session: f34c642d-3573-4bf1-9af0-e1e431df9aba
+Date: 2025-12-03 18:18
+Branch: docs/extract-rails-patterns
+CWD: ~/Projects/37signals/fizzy
+
+============================================================
+[SUMMARY]
+>>>
+Explored Fizzy's layout system and content injection patterns. Discovered minimal shell layout with named yield slots and instance variable configuration, CSS-driven container widths via `.panel` classes and `:has()` selectors, and zero-JS user-scoped CSS. Extracted findings into layout-shell.md pattern documentation.
+<<<
+------------------------------------------------------------
+[✨ NEW CONVERSATION BRANCH]
+[USER]    💭: none
+as per our @CLAUDE.md, lets discuss how fizzy uses application.html and subsequent patterns to inject content and partials, particularly interesting is "content_for" on most view pages.
+
+------------------------------------------------------------
+[ASSISTANT]
+Great topic! Let me explore how Fizzy uses `content_for` and the layout patterns.
+
+------------------------------------------------------------
+[READ TOOL]
+File: ~/Projects/37signals/fizzy/app/views/layouts/application.html.erb
+
+------------------------------------------------------------
+[ASSISTANT]
+Interesting patterns emerging. Let me look at the shared head partial and a few representative views to see the full picture:
+
+------------------------------------------------------------
+[READ TOOL]
+File: ~/Projects/37signals/fizzy/app/views/layouts/shared/_head.html.erb
+
+------------------------------------------------------------
+[READ TOOL]
+File: ~/Projects/37signals/fizzy/app/views/boards/show.html.erb
+
+------------------------------------------------------------
+[READ TOOL]
+File: ~/Projects/37signals/fizzy/app/views/cards/show.html.erb
+
+------------------------------------------------------------
+[ASSISTANT]
+This is a clean pattern. Let me also check how `@page_title` and `@header_class` are used, and look at a footer example:
+
+------------------------------------------------------------
+[READ TOOL]
+File: ~/Projects/37signals/fizzy/app/helpers/application_helper.rb
+
+------------------------------------------------------------
+[READ TOOL]
+File: ~/Projects/37signals/fizzy/app/views/sessions/new.html.erb
+
+------------------------------------------------------------
+[ASSISTANT]
+Excellent. Now I have a clear picture. Here's the pattern:
+
+## Fizzy's Layout Content Injection Pattern
+
+**Three named yield slots in application.html.erb:**
+
+1. **`:head`** (in `_head.html.erb:24`) - For page-specific meta tags, social cards, etc.
+2. **`:header`** (in `application.html.erb:9`) - For page-specific header content (actions, title)
+3. **`:footer`** (in `application.html.erb:20`) - For page-specific footer content
+
+**Plus instance variables as layout configuration:**
+
+- `@page_title` - Used by `page_title_tag` helper to build `<title>` 
+- `@header_class` - Applied to `<header class="header <%= @header_class %>">`
+- `@hide_footer_frames` - Conditionally hides the permanent footer frames (bar, pins, notifications)
+- `@disable_view_transition` - Conditionally disables view transitions
+
+**The pattern in action (cards/show.html.erb):**
+
+```ruby
+<% @page_title = @card.title %>           # Sets document title
+<% @header_class = "header--card" %>       # Modifies header styling
+
+<% content_for :head do %>
+  <%= card_social_tags(@card) %>           # OG/Twitter meta tags
+<% end %>
+
+<% content_for :header do %>
+  <div class="header__actions header__actions--start">
+    <%= link_back_to_board(@card.board) %>  # Left-aligned back link
+  </div>
+<% end %>
+
+# Main content follows (no wrapper needed, goes into yield)
+```
+
+**What's interesting here:**
+
+1. **Instance variables over `content_for` for simple values** - `@page_title` is cleaner than `content_for(:page_title) { "My Title" }`
+
+2. **Header has structure conventions** - Views inject into `:header` using consistent CSS classes (`header__actions--start`, `header__actions--end`, `header__title`)
+
+3. **Footer is conditional** - The persistent UI (bar, pins tray, notifications) only renders for logged-in users and can be hidden via `@hide_footer_frames`
+
+4. **Position in template doesn't matter** - `content_for :footer` at the bottom of sessions/new.html.erb, but it works because Rails captures the block, doesn't execute inline
+
+Would you like to explore any specific aspect deeper? For example:
+- The `turbo-permanent` footer frames pattern (how they persist across navigation)
+- The header structure conventions (`header__actions--start/end`)
+- How `@header_class` variations work across different page types
+
+------------------------------------------------------------
+
+[USER]    💭: none
+any more interesting finds in layouts? i see a public page, a action text context, and a bunch of unusual methods in the head partial? any others also?
+
+------------------------------------------------------------
+[ASSISTANT]
+Let me explore all the layout files and dig into those interesting pieces:
+
+------------------------------------------------------------
+[READ TOOL]
+File: ~/Projects/37signals/fizzy/app/views/layouts/public.html.erb
+
+------------------------------------------------------------
+[READ TOOL]
+File: ~/Projects/37signals/fizzy/app/views/layouts/action_text/contents/_content.html.erb
+
+------------------------------------------------------------
+[ASSISTANT]
+Now let me trace those interesting head methods - `tenanted_action_cable_meta_tag` and `turbo_refreshes_with`:
+
+------------------------------------------------------------
+[READ TOOL]
+File: ~/Projects/37signals/fizzy/app/helpers/tenanting_helper.rb
+
+------------------------------------------------------------
+[READ TOOL]
+File: ~/Projects/37signals/fizzy/app/helpers/html_helper.rb
+
+------------------------------------------------------------
+[READ TOOL]
+File: ~/Projects/37signals/fizzy/app/views/layouts/mailer.html.erb
+
+------------------------------------------------------------
+[ASSISTANT]
+Great finds! Here's the full picture:
+
+## Layout Patterns Summary
+
+### 1. **Multiple Layout Strategy**
+
+- **`application.html.erb`** - Full app with auth, persistent UI (bar, pins, notifications)
+- **`public.html.erb`** - Stripped-down for unauthenticated/public board views (no persistent frames, simpler body class)
+- **`mailer.html.erb`** - Email-safe HTML with inline styles, table-based layout
+
+### 2. **Shared Partials (Gems)**
+
+**`_user_css.html.erb`** - Dynamic CSS based on current user:
+```erb
+[data-creator-id="<%= Current.user.id %>"] {
+  [data-only-visible-to-others] { display: none; }
+}
+```
+This is clever - uses CSS attribute selectors to hide/show "Only visible to you" vs "Only visible to others" badges without JS. The view marks elements with `data-creator-id` and `data-only-visible-to-you/others`, and CSS handles the visibility.
+
+**`_time_zone.html.erb`** - Auto-sync timezone from browser:
+```erb
+<% if timezone_from_cookie.present? && timezone_from_cookie != Current.user.timezone %>
+  <%= auto_submit_form_with url: my_timezone_path, method: :put do %>
+```
+If browser timezone (set via `timezone-cookie` Stimulus controller) differs from saved preference, auto-submits to update it. Silent UX fix.
+
+**`_flash.html.erb`** - Self-removing flash with Turbo Frame:
+```erb
+<%= turbo_frame_tag :flash do %>
+  <div data-controller="element-removal" data-action="animationend->element-removal#remove">
+```
+Uses CSS animation end event to trigger removal - no timers needed.
+
+### 3. **Head Partial Interesting Methods**
+
+**`tenanted_action_cable_meta_tag`** - Multi-tenant ActionCable:
+```ruby
+content: "#{request.script_name}#{ActionCable.server.config.mount_path}"
+```
+Prepends `script_name` (the account path prefix like `/acme`) so WebSocket connections route to the right tenant.
+
+**`turbo_refreshes_with method: :morph, scroll: :preserve`** - Rails 8 Turbo feature for morphing DOM updates instead of full page replacement.
+
+### 4. **Action Text Content Layout**
+
+```erb
+<div class="action-text-content">
+  <%= format_html yield -%>
+</div>
+```
+Wraps Action Text content with `format_html` helper that auto-links URLs and emails using Nokogiri (but skips links, code, figcaptions).
+
+### 5. **`_lightbox.html.erb`** - Reusable Dialog Pattern
+
+```erb
+<%= tag.dialog class:"lightbox" ... do %>
+  <!-- standard structure -->
+  <%= yield %>  <!-- slot for custom actions -->
+<% end %>
+```
+Used as a layout partial with a yield slot for per-page actions (like "remove image" button on cards).
+
+---
+
+**Most interesting patterns for extraction:**
+
+1. **User-scoped CSS injection** (`_user_css.html.erb`) - Zero-JS visibility control
+2. **Auto-timezone sync** - Seamless UX with cookie + auto-submit
+3. **Tenanted ActionCable** - Path-prefix aware WebSocket meta tag
+4. **Flash with animation cleanup** - CSS-driven lifecycle
+
+Want to dig into any of these specifically?
+
+------------------------------------------------------------
+
+[USER]    💭: none
+how do they handle container widths etc, is that all done in the yielded pages?
+
+------------------------------------------------------------
+[ASSISTANT]
+Let me check how they handle layout/container widths:
+
+------------------------------------------------------------
+[READ TOOL]
+File: ~/Projects/37signals/fizzy/app/assets/stylesheets/layout.css
+
+------------------------------------------------------------
+[ASSISTANT]
+Let me check for panels (centered containers) and the global CSS variables:
+
+------------------------------------------------------------
+[READ TOOL]
+File: ~/Projects/37signals/fizzy/app/assets/stylesheets/panels.css
+
+------------------------------------------------------------
+[READ TOOL]
+File: ~/Projects/37signals/fizzy/app/assets/stylesheets/_global.css
+
+------------------------------------------------------------
+[ASSISTANT]
+Now I see the full picture. Let me check a few example pages to confirm:
+
+------------------------------------------------------------
+[READ TOOL]
+File: ~/Projects/37signals/fizzy/app/views/sessions/new.html.erb
+
+------------------------------------------------------------
+[READ TOOL]
+File: ~/Projects/37signals/fizzy/app/views/account/settings/show.html.erb
+
+------------------------------------------------------------
+[ASSISTANT]
+Now I have the complete picture:
+
+## Container Width Strategy
+
+**Yes, it's all done in the yielded pages** - but with a clever CSS system.
+
+### The Layout (`layout.css`)
+
+```css
+body {
+  display: grid;
+  grid-template-rows: auto 1fr auto 9em;  /* header, main, footer, bar space */
+}
+
+:where(#main) {
+  inline-size: 100dvw;
+  max-inline-size: 100dvw;
+  padding-inline: calc(var(--main-padding) + env(safe-area-inset-left)) ...;
+  text-align: center;  /* centers inline-block children */
+}
+```
+
+The `#main` is full-width with responsive padding (`--main-padding: clamp(1ch, 3vw, 3ch)`). It doesn't constrain width - **pages decide their own width**.
+
+### Width Control via Component Classes
+
+**`.panel`** - The primary width constraint:
+```css
+.panel {
+  inline-size: var(--panel-size, 60ch);
+  max-inline-size: 100%;
+}
+
+.panel--centered {
+  --panel-size: 100%;  /* mobile */
+  @media (min-width: 640px) {
+    --panel-size: 42ch;  /* narrow centered form */
+  }
+  
+  /* Magic: affects parent! */
+  #main:has(&) {
+    display: grid;
+    justify-content: center;
+  }
+}
+
+.panel--wide {
+  --panel-size: 60ch;
+}
+```
+
+### Examples
+
+**Login page** (`sessions/new.html.erb`):
+```erb
+<div class="panel panel--centered flex flex-column gap-half">
+```
+Uses `.panel--centered` → narrow form, auto-centers in `#main`
+
+**Settings page** (`account/settings/show.html.erb`):
+```erb
+<section class="settings margin-block-start-half">
+  <div class="settings__panel ... panel shadow center">
+```
+Uses `.panel` + `.center` → medium width panels
+
+**Board page** (`boards/show.html.erb`):
+No panel wrapper - columns go full width with their own CSS
+
+### The Pattern
+
+1. **No container wrapper in layout** - `#main` is just a semantic shell with padding
+2. **Pages choose their constraint** via CSS classes:
+   - `.panel--centered` (42ch) - auth forms, simple actions
+   - `.panel` (60ch) - settings, content pages  
+   - No panel - full-width layouts (boards, cards)
+3. **`:has()` selector magic** - `.panel--centered` actually modifies its parent `#main` to center itself
+4. **CSS custom properties** for responsive overrides (`--panel-size`)
+
+This is more flexible than a single `.container` class - each page type gets appropriate width without layout modifications.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+So would you say that the layouts are minimal containers with only logic that belongs directly on the layout itself and then a few standardised injection points for individual page logic and layout differences. 
+
+------------------------------------------------------------
+[ASSISTANT]
+Exactly. The layouts are minimal scaffolding with:
+
+**What's in the layout:**
+- Document structure (`<html>`, `<head>`, `<body>`)
+- Grid-based page zones (`header`, `main`, `footer`)
+- Global concerns (flash, timezone sync, user CSS injection)
+- Persistent UI for authenticated users (bar, trays - with `turbo-permanent`)
+
+**What's NOT in the layout:**
+- Width constraints
+- Page-specific styling
+- Content structure beyond the zones
+
+**The injection points are simple and consistent:**
+- `@page_title` → document title
+- `@header_class` → header element modifier
+- `@hide_footer_frames` / `@disable_view_transition` → boolean flags
+- `yield :head` → meta tags, social cards
+- `yield :header` → page-specific header content
+- `yield :footer` → page-specific footer content
+- `yield` → main content
+
+**Pages own their layout concerns:**
+- Choose width via `.panel`, `.panel--centered`, or none
+- Structure their own content
+- Inject only what they need into the slots
+
+It's essentially a "shell with slots" pattern - the layout provides the stage, pages bring their own props and scenery. The CSS system (particularly `:has()` for `.panel--centered`) lets pages influence their container without needing layout variants.
+
+Compare this to apps that have `layouts/narrow.html.erb`, `layouts/wide.html.erb`, `layouts/centered.html.erb` - Fizzy avoids that by pushing width/structure decisions to CSS classes in the views themselves.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+lets follow the pattern extraction instructions to get this one extracted.
+
+------------------------------------------------------------
+[ASSISTANT]
+Let me read the current state of the pattern files to understand what format to follow:
+
+------------------------------------------------------------
+[READ TOOL]
+File: ~/Projects/37signals/fizzy/dev/patterns/README.md
+
+------------------------------------------------------------
+[READ TOOL]
+File: ~/Projects/37signals/fizzy/dev/patterns/identity-user-split.md
+
+------------------------------------------------------------
+[ASSISTANT]
+Good, I now understand the format. Looking at the pattern extraction instructions in CLAUDE.md and the existing patterns, I should:
+
+1. Add a summary row to the Pattern Index table in CLAUDE.md
+2. Create a detailed extraction in `dev/patterns/`
+
+Let me also re-read CLAUDE.md to see where this pattern fits:
+
+------------------------------------------------------------
+[READ TOOL]
+File: ~/Projects/37signals/fizzy/CLAUDE.md
+
+------------------------------------------------------------
+[ASSISTANT]
+Now I'll create both the CLAUDE.md entry and the detailed pattern file. Based on our discussion, this is a "View & Frontend" pattern. Let me add it:
+
+------------------------------------------------------------
+[EDIT TOOL]
+File: ~/Projects/37signals/fizzy/CLAUDE.md
+
+------------------------------------------------------------
+[ASSISTANT]
+Now let me create the detailed pattern file:
+
+------------------------------------------------------------
+[WRITE TOOL]
+File: ~/Projects/37signals/fizzy/dev/patterns/layout-shell.md
+
+------------------------------------------------------------
+[ASSISTANT]
+Now let me update the README.md to mark this pattern as extracted:
+
+------------------------------------------------------------
+[EDIT TOOL]
+File: ~/Projects/37signals/fizzy/dev/patterns/README.md
+
+------------------------------------------------------------
+[ASSISTANT]
+Let me also update the View & Frontend section to mark the related patterns as covered by layout-shell.md:
+
+------------------------------------------------------------
+[EDIT TOOL]
+File: ~/Projects/37signals/fizzy/dev/patterns/README.md
+
+------------------------------------------------------------
+[ASSISTANT]
+Done. Here's what was created:
+
+**CLAUDE.md** - Added a new "View & Layout" section with:
+- Table of 4 related patterns (Minimal Shell Layout, Content Injection, CSS-Driven Widths, User-Scoped CSS)
+- A few paragraphs explaining the core concept
+- Quick reference code snippets showing layout structure, injection points, width control, and user-scoped CSS
+
+**dev/patterns/layout-shell.md** - Detailed extraction with:
+- Overview explaining the problem and core insight
+- Key Files table
+- Architecture diagram
+- Full implementation code with annotations
+- Usage examples from actual Fizzy views
+- Coverage of the supporting patterns (flash, timezone sync, multiple layouts)
+- Adaptation notes for simpler implementations
+
+**dev/patterns/README.md** - Updated to:
+- Add layout-shell.md to extracted patterns list
+- Mark the View & Frontend category with the extracted pattern
+
+------------------------------------------------------------
+
+[USER] [SLASH COMMAND]
+/exit unknown
+
+------------------------------------------------------------
+[ASSISTANT]
+Now let me look at the other shared partials and trace those unusual head methods:
+
+------------------------------------------------------------
+[READ TOOL]
+File: ~/Projects/37signals/fizzy/app/views/layouts/shared/_user_css.html.erb
+
+------------------------------------------------------------
+[READ TOOL]
+File: ~/Projects/37signals/fizzy/app/views/layouts/shared/_time_zone.html.erb
+
+------------------------------------------------------------
+[READ TOOL]
+File: ~/Projects/37signals/fizzy/app/views/layouts/shared/_flash.html.erb
+
+------------------------------------------------------------
+[READ TOOL]
+File: ~/Projects/37signals/fizzy/app/views/layouts/_lightbox.html.erb
+
+------------------------------------------------------------
+[ASSISTANT]
+Now let me trace those interesting head methods - `tenanted_action_cable_meta_tag` and `turbo_refreshes_with`:
+
+------------------------------------------------------------
+[READ TOOL]
+File: ~/Projects/37signals/fizzy/app/helpers/tenanting_helper.rb
+
+------------------------------------------------------------
+[READ TOOL]
+File: ~/Projects/37signals/fizzy/app/helpers/html_helper.rb
+
+------------------------------------------------------------
+[READ TOOL]
+File: ~/Projects/37signals/fizzy/app/views/layouts/mailer.html.erb
+
+------------------------------------------------------------
+[ASSISTANT]
+Great finds! Here's the full picture:
+
+## Layout Patterns Summary
+
+### 1. **Multiple Layout Strategy**
+
+- **`application.html.erb`** - Full app with auth, persistent UI (bar, pins, notifications)
+- **`public.html.erb`** - Stripped-down for unauthenticated/public board views (no persistent frames, simpler body class)
+- **`mailer.html.erb`** - Email-safe HTML with inline styles, table-based layout
+
+### 2. **Shared Partials (Gems)**
+
+**`_user_css.html.erb`** - Dynamic CSS based on current user:
+```erb
+[data-creator-id="<%= Current.user.id %>"] {
+  [data-only-visible-to-others] { display: none; }
+}
+```
+This is clever - uses CSS attribute selectors to hide/show "Only visible to you" vs "Only visible to others" badges without JS. The view marks elements with `data-creator-id` and `data-only-visible-to-you/others`, and CSS handles the visibility.
+
+**`_time_zone.html.erb`** - Auto-sync timezone from browser:
+```erb
+<% if timezone_from_cookie.present? && timezone_from_cookie != Current.user.timezone %>
+  <%= auto_submit_form_with url: my_timezone_path, method: :put do %>
+```
+If browser timezone (set via `timezone-cookie` Stimulus controller) differs from saved preference, auto-submits to update it. Silent UX fix.
+
+**`_flash.html.erb`** - Self-removing flash with Turbo Frame:
+```erb
+<%= turbo_frame_tag :flash do %>
+  <div data-controller="element-removal" data-action="animationend->element-removal#remove">
+```
+Uses CSS animation end event to trigger removal - no timers needed.
+
+### 3. **Head Partial Interesting Methods**
+
+**`tenanted_action_cable_meta_tag`** - Multi-tenant ActionCable:
+```ruby
+content: "#{request.script_name}#{ActionCable.server.config.mount_path}"
+```
+Prepends `script_name` (the account path prefix like `/acme`) so WebSocket connections route to the right tenant.
+
+**`turbo_refreshes_with method: :morph, scroll: :preserve`** - Rails 8 Turbo feature for morphing DOM updates instead of full page replacement.
+
+### 4. **Action Text Content Layout**
+
+```erb
+<div class="action-text-content">
+  <%= format_html yield -%>
+</div>
+```
+Wraps Action Text content with `format_html` helper that auto-links URLs and emails using Nokogiri (but skips links, code, figcaptions).
+
+### 5. **`_lightbox.html.erb`** - Reusable Dialog Pattern
+
+```erb
+<%= tag.dialog class:"lightbox" ... do %>
+  <!-- standard structure -->
+  <%= yield %>  <!-- slot for custom actions -->
+<% end %>
+```
+Used as a layout partial with a yield slot for per-page actions (like "remove image" button on cards).
+
+---
+
+**Most interesting patterns for extraction:**
+
+1. **User-scoped CSS injection** (`_user_css.html.erb`) - Zero-JS visibility control
+2. **Auto-timezone sync** - Seamless UX with cookie + auto-submit
+3. **Tenanted ActionCable** - Path-prefix aware WebSocket meta tag
+4. **Flash with animation cleanup** - CSS-driven lifecycle
+
+Want to dig into any of these specifically?
+
+------------------------------------------------------------
+[ASSISTANT]
+Let me check how they handle layout/container widths:
+
+------------------------------------------------------------
+[READ TOOL]
+File: ~/Projects/37signals/fizzy/app/assets/stylesheets/layout.css
+
+------------------------------------------------------------
+[ASSISTANT]
+Let me check for panels (centered containers) and the global CSS variables:
+
+------------------------------------------------------------
+[READ TOOL]
+File: ~/Projects/37signals/fizzy/app/assets/stylesheets/panels.css
+
+------------------------------------------------------------
+[READ TOOL]
+File: ~/Projects/37signals/fizzy/app/assets/stylesheets/_global.css
+
+------------------------------------------------------------
+[ASSISTANT]
+Now I see the full picture. Let me check a few example pages to confirm:
+
+------------------------------------------------------------
+[READ TOOL]
+File: ~/Projects/37signals/fizzy/app/views/sessions/new.html.erb
+
+------------------------------------------------------------
+[READ TOOL]
+File: ~/Projects/37signals/fizzy/app/views/account/settings/show.html.erb
+
+------------------------------------------------------------
+[ASSISTANT]
+Now I have the complete picture:
+
+## Container Width Strategy
+
+**Yes, it's all done in the yielded pages** - but with a clever CSS system.
+
+### The Layout (`layout.css`)
+
+```css
+body {
+  display: grid;
+  grid-template-rows: auto 1fr auto 9em;  /* header, main, footer, bar space */
+}
+
+:where(#main) {
+  inline-size: 100dvw;
+  max-inline-size: 100dvw;
+  padding-inline: calc(var(--main-padding) + env(safe-area-inset-left)) ...;
+  text-align: center;  /* centers inline-block children */
+}
+```
+
+The `#main` is full-width with responsive padding (`--main-padding: clamp(1ch, 3vw, 3ch)`). It doesn't constrain width - **pages decide their own width**.
+
+### Width Control via Component Classes
+
+**`.panel`** - The primary width constraint:
+```css
+.panel {
+  inline-size: var(--panel-size, 60ch);
+  max-inline-size: 100%;
+}
+
+.panel--centered {
+  --panel-size: 100%;  /* mobile */
+  @media (min-width: 640px) {
+    --panel-size: 42ch;  /* narrow centered form */
+  }
+  
+  /* Magic: affects parent! */
+  #main:has(&) {
+    display: grid;
+    justify-content: center;
+  }
+}
+
+.panel--wide {
+  --panel-size: 60ch;
+}
+```
+
+### Examples
+
+**Login page** (`sessions/new.html.erb`):
+```erb
+<div class="panel panel--centered flex flex-column gap-half">
+```
+Uses `.panel--centered` → narrow form, auto-centers in `#main`
+
+**Settings page** (`account/settings/show.html.erb`):
+```erb
+<section class="settings margin-block-start-half">
+  <div class="settings__panel ... panel shadow center">
+```
+Uses `.panel` + `.center` → medium width panels
+
+**Board page** (`boards/show.html.erb`):
+No panel wrapper - columns go full width with their own CSS
+
+### The Pattern
+
+1. **No container wrapper in layout** - `#main` is just a semantic shell with padding
+2. **Pages choose their constraint** via CSS classes:
+   - `.panel--centered` (42ch) - auth forms, simple actions
+   - `.panel` (60ch) - settings, content pages  
+   - No panel - full-width layouts (boards, cards)
+3. **`:has()` selector magic** - `.panel--centered` actually modifies its parent `#main` to center itself
+4. **CSS custom properties** for responsive overrides (`--panel-size`)
+
+This is more flexible than a single `.container` class - each page type gets appropriate width without layout modifications.
+
+------------------------------------------------------------
+[ASSISTANT]
+Exactly. The layouts are minimal scaffolding with:
+
+**What's in the layout:**
+- Document structure (`<html>`, `<head>`, `<body>`)
+- Grid-based page zones (`header`, `main`, `footer`)
+- Global concerns (flash, timezone sync, user CSS injection)
+- Persistent UI for authenticated users (bar, trays - with `turbo-permanent`)
+
+**What's NOT in the layout:**
+- Width constraints
+- Page-specific styling
+- Content structure beyond the zones
+
+**The injection points are simple and consistent:**
+- `@page_title` → document title
+- `@header_class` → header element modifier
+- `@hide_footer_frames` / `@disable_view_transition` → boolean flags
+- `yield :head` → meta tags, social cards
+- `yield :header` → page-specific header content
+- `yield :footer` → page-specific footer content
+- `yield` → main content
+
+**Pages own their layout concerns:**
+- Choose width via `.panel`, `.panel--centered`, or none
+- Structure their own content
+- Inject only what they need into the slots
+
+It's essentially a "shell with slots" pattern - the layout provides the stage, pages bring their own props and scenery. The CSS system (particularly `:has()` for `.panel--centered`) lets pages influence their container without needing layout variants.
+
+Compare this to apps that have `layouts/narrow.html.erb`, `layouts/wide.html.erb`, `layouts/centered.html.erb` - Fizzy avoids that by pushing width/structure decisions to CSS classes in the views themselves.
+
+------------------------------------------------------------
+[ASSISTANT]
+Let me read the current state of the pattern files to understand what format to follow:
+
+------------------------------------------------------------
+[READ TOOL]
+File: ~/Projects/37signals/fizzy/dev/patterns/README.md
+
+------------------------------------------------------------
+[READ TOOL]
+File: ~/Projects/37signals/fizzy/dev/patterns/identity-user-split.md
+
+------------------------------------------------------------
+[ASSISTANT]
+Good, I now understand the format. Looking at the pattern extraction instructions in CLAUDE.md and the existing patterns, I should:
+
+1. Add a summary row to the Pattern Index table in CLAUDE.md
+2. Create a detailed extraction in `dev/patterns/`
+
+Let me also re-read CLAUDE.md to see where this pattern fits:
+
+------------------------------------------------------------
+[READ TOOL]
+File: ~/Projects/37signals/fizzy/CLAUDE.md
+
+------------------------------------------------------------
+[ASSISTANT]
+Now I'll create both the CLAUDE.md entry and the detailed pattern file. Based on our discussion, this is a "View & Frontend" pattern. Let me add it:
+
+------------------------------------------------------------
+[EDIT TOOL]
+File: ~/Projects/37signals/fizzy/CLAUDE.md
+
+------------------------------------------------------------
+[ASSISTANT]
+Now let me create the detailed pattern file:
+
+------------------------------------------------------------
+[WRITE TOOL]
+File: ~/Projects/37signals/fizzy/dev/patterns/layout-shell.md
+
+------------------------------------------------------------
+[ASSISTANT]
+Now let me update the README.md to mark this pattern as extracted:
+
+------------------------------------------------------------
+[EDIT TOOL]
+File: ~/Projects/37signals/fizzy/dev/patterns/README.md
+
+------------------------------------------------------------
+[ASSISTANT]
+Let me also update the View & Frontend section to mark the related patterns as covered by layout-shell.md:
+
+------------------------------------------------------------
+[EDIT TOOL]
+File: ~/Projects/37signals/fizzy/dev/patterns/README.md
+
+------------------------------------------------------------
+[ASSISTANT]
+Done. Here's what was created:
+
+**CLAUDE.md** - Added a new "View & Layout" section with:
+- Table of 4 related patterns (Minimal Shell Layout, Content Injection, CSS-Driven Widths, User-Scoped CSS)
+- A few paragraphs explaining the core concept
+- Quick reference code snippets showing layout structure, injection points, width control, and user-scoped CSS
+
+**dev/patterns/layout-shell.md** - Detailed extraction with:
+- Overview explaining the problem and core insight
+- Key Files table
+- Architecture diagram
+- Full implementation code with annotations
+- Usage examples from actual Fizzy views
+- Coverage of the supporting patterns (flash, timezone sync, multiple layouts)
+- Adaptation notes for simpler implementations
+
+**dev/patterns/README.md** - Updated to:
+- Add layout-shell.md to extracted patterns list
+- Mark the View & Frontend category with the extracted pattern
+
+------------------------------------------------------------
+[ASSISTANT]
+No response requested.
+
+------------------------------------------------------------
+
+[USER] [SLASH COMMAND]
+/exit unknown
+
+------------------------------------------------------------
