@@ -51,6 +51,6 @@ class Cards::CommentsController < ApplicationController
     end
 
     def comment_params
-      params.expect(comment: :body)
+      params.expect(comment: [ :body, :created_at ])
     end
 end

@@ -37,7 +37,7 @@ module Authentication
 
     def require_account
       unless Current.account.present?
-        redirect_to session_menu_url(script_name: nil)
+        redirect_to main_app.session_menu_url(script_name: nil)
       end
     end
 
@@ -78,11 +78,11 @@ module Authentication
     end
 
     def redirect_authenticated_user
-      redirect_to root_url if authenticated?
+      redirect_to main_app.root_url if authenticated?
     end
 
     def redirect_tenanted_request
-      redirect_to root_url if Current.account.present?
+      redirect_to main_app.root_url if Current.account.present?
     end
 
     def start_new_session_for(identity)
@@ -110,7 +110,7 @@ module Authentication
     def redirect_to_session_magic_link(magic_link, return_to: nil)
       serve_development_magic_link(magic_link)
       session[:return_to_after_authenticating] = return_to if return_to
-      redirect_to session_magic_link_url(script_name: nil)
+      redirect_to main_app.session_magic_link_url(script_name: nil)
     end
 
     def serve_development_magic_link(magic_link)

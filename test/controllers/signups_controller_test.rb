@@ -63,4 +63,16 @@ class SignupsControllerTest < ActionDispatch::IntegrationTest
       assert_redirected_to new_signup_completion_path
     end
   end
+
+  test "redirects to session#new when single_tenant and user exists" do
+    users(:david)
+
+    with_multi_tenant_mode(false) do
+      untenanted do
+        get new_signup_path
+
+        assert_redirected_to new_session_url
+      end
+    end
+  end
 end

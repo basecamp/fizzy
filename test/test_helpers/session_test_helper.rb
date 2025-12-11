@@ -57,4 +57,12 @@ module SessionTestHelper
   ensure
     integration_session.default_url_options[:script_name] = original_script_name
   end
+
+  def with_multi_tenant_mode(enabled)
+    previous = Account.multi_tenant
+    Account.multi_tenant = enabled
+    yield
+  ensure
+    Account.multi_tenant = previous
+  end
 end

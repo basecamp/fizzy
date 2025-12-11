@@ -37,28 +37,22 @@
                 cards_path(creator_ids: [ @user.id ], sorted_by: "newest"), class: "btn btn--link", data: { turbo_frame: "_top" } %>
         </div>
       <% end %>
+
+      <% if Current.user == @user %>
+        <hr class="separator--horizontal full-width flex-item-grow margin-block-start-double" style="--border-color: var(--color-ink-light);" aria-hidden="true">
+
+        <%= button_to session_url(script_name: nil), method: :delete, class: "btn txt-x-small center", data: { turbo: false } do %>
+          <span>Sign out of Fizzy on this device</span>
+        <% end %>
+      <% end %>
     </div>
   </section>
 
   <% if Current.user == @user %>
     <section class="panel shadow" style="--panel-size: 45ch;">
+      <%= render "users/theme" %>
       <%= render "users/transfer", user: @user %>
-
-      <div class="flex flex-column align-center gap margin-block-start-double">
-        <header class="full-width">
-          <h2 class="divider txt-large margin-none-block">API</h2>
-        </header>
-
-        <div class="flex align-center gap txt-normal">
-          <%= link_to "Personal access tokens", my_access_tokens_path, class: "btn" %>
-        </div>
-      </div>
-
-      <div class="center margin-block-start-double">
-        <%= button_to session_url(script_name: nil), method: :delete, class: "btn btn--plain txt-link txt-small", data: { turbo: false } do %>
-        <span>Sign out of Fizzy</span>
-      <% end %>
-      </div>
+      <%= render "users/access_tokens" %>
     </section>
   <% end %>
 </div>

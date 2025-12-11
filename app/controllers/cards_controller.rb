@@ -17,8 +17,7 @@ class CardsController < ApplicationController
       end
 
       format.json do
-        card = @board.cards.create! card_params.merge(creator: Current.user)
-        card.publish
+        card = @board.cards.create! card_params.merge(creator: Current.user, status: "published")
         head :created, location: card_path(card, format: :json)
       end
     end
@@ -62,6 +61,6 @@ class CardsController < ApplicationController
     end
 
     def card_params
-      params.expect(card: [ :status, :title, :description, :image, tag_ids: [] ])
+      params.expect(card: [ :status, :title, :description, :image, :created_at, tag_ids: [] ])
     end
 end

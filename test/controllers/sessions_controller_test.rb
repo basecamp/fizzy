@@ -9,6 +9,15 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "new redirects authenticated users" do
+    sign_in_as :kevin
+
+    untenanted do
+      get new_session_path
+      assert_redirected_to root_url
+    end
+  end
+
   test "create" do
     identity = identities(:kevin)
 
@@ -33,6 +42,21 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
 
       assert_redirected_to session_magic_link_path
       assert MagicLink.last.for_sign_up?
+    end
+  end
+
+  test "create for a new user when single tenant mode already has a tenant" do
+    with_multi_tenant_mode(false) do
+      untenanted do
+        assert_no_difference -> { MagicLink.count } do
+          assert_no_difference -> { Identity.count } do
+            post session_path,
+              params: { email_address: "nonexistent-#{SecureRandom.hex(6)}@example.com" }
+          end
+        end
+
+        assert_redirected_to session_magic_link_path
+      end
     end
   end
 

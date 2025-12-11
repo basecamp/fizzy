@@ -23,8 +23,14 @@
           background: var(--color-ink-lighter);
         }
 
-        @media (prefers-color-scheme: dark) {
+        html[data-theme="dark"] & {
           --input-background: var(--color-ink-lighter);
+        }
+
+        @media (prefers-color-scheme: dark) {
+          html:not([data-theme]) & {
+            --input-background: var(--color-ink-lighter);
+          }
         }
       }
     }
@@ -221,7 +227,7 @@
 
   .nav__blank-slate {
     font-size: var(--text-small);
-    margin: 1rem auto;
+    margin: 2rem auto;
 
     .nav:has(.popup__item:not([hidden])) & {
       display: none;

@@ -116,6 +116,8 @@
     pointer-events: none;
   }
 
+  .cursor-pointer { cursor: pointer; }
+
   /* Padding */
   .pad { padding: var(--block-space) var(--inline-space); }
   .pad-double { padding: var(--block-space-double) var(--inline-space-double); }

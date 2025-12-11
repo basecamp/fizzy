@@ -11,6 +11,11 @@ module ActionText
           end
         end
       end
+
+      # Delegate storage tracking to the parent record (Card, Comment, Board, etc.)
+      def storage_tracked_record
+        record.try(:storage_tracked_record)
+      end
     end
   end
 end

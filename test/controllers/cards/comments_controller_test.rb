@@ -48,6 +48,18 @@ class Cards::CommentsControllerTest < ActionDispatch::IntegrationTest
     assert_equal card_comment_path(card, Comment.last, format: :json), @response.headers["Location"]
   end
 
+  test "create as JSON with custom created_at" do
+    card = cards(:logo)
+    custom_time = Time.utc(2024, 1, 15, 10, 30, 0)
+
+    assert_difference -> { card.comments.count }, +1 do
+      post card_comments_path(card), params: { comment: { body: "Backdated comment", created_at: custom_time } }, as: :json
+    end
+
+    assert_response :created
+    assert_equal custom_time, Comment.last.created_at
+  end
+
   test "show as JSON" do
     comment = comments(:logo_agreement_kevin)
 

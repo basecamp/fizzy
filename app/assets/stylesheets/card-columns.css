@@ -179,8 +179,14 @@
       outline: var(--focus-ring-size) solid var(--color-selected-dark);
       outline-offset: var(--focus-ring-offset);
 
-      @media (prefers-color-scheme: dark) {
+      html[data-theme="dark"] & {
         outline-color: oklch(var(--lch-blue-medium));
+      }
+
+      @media (prefers-color-scheme: dark) {
+        html:not([data-theme]) & {
+          outline-color: oklch(var(--lch-blue-medium));
+        }
       }
     }
   }

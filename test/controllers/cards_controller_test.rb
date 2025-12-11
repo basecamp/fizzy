@@ -160,6 +160,19 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_equal [ tags(:mobile), tags(:web) ].sort, card.tags.sort
   end
 
+  test "create as JSON with custom created_at" do
+    custom_time = Time.utc(2024, 1, 15, 10, 30, 0)
+
+    assert_difference -> { Card.count }, +1 do
+      post board_cards_path(boards(:writebook)),
+        params: { card: { title: "Backdated card", created_at: custom_time } },
+        as: :json
+    end
+
+    assert_response :created
+    assert_equal custom_time, Card.last.created_at
+  end
+
   test "update as JSON" do
     card = cards(:logo)
     put card_path(card, format: :json), params: { card: { title: "Update test" } }
