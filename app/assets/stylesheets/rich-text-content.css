@@ -29,6 +29,7 @@
     }
 
     :where(ol, ul) {
+      list-style: disc;
       padding-inline-start: 3ch;
     }
 
