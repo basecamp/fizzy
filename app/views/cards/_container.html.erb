@@ -37,7 +37,11 @@
     <% if card.published? %>
       <%= render "cards/container/footer/published", card: card %>
     <% elsif card.drafted? %>
-      <%= render "cards/container/footer/draft", card: card %>
+      <% if Fizzy.saas? %>
+        <%= render "cards/container/footer/saas/create", card: card %>
+      <% else %>
+        <%= render "cards/container/footer/create", card: card %>
+      <% end %>
     <% end %>
   </section>
 <% end %>

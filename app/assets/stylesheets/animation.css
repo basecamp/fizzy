@@ -71,6 +71,15 @@
     33% { background-color: var(--color-border-darker); scale: 1; }
   }
 
+  @keyframes wiggle {
+    0% { transform: rotate(0deg); }
+    20% { transform: rotate(3deg); }
+    40% { transform: rotate(-3deg); }
+    60% { transform: rotate(3deg); }
+    80% { transform: rotate(-3deg); }
+    100% { transform: rotate(0deg); }
+  }
+
   @keyframes wobble {
     0%  { transform: rotate(calc(var(--bubble-rotate) + 30deg)); }
     15% { border-radius: 66% 34% 72% 28% / 39% 63% 37% 61%; }
