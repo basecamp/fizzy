@@ -173,6 +173,22 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_equal custom_time, Card.last.created_at
   end
 
+  test "create as JSON with custom last_active_at" do
+    created_time = Time.utc(2024, 1, 15, 10, 30, 0)
+    last_active_time = Time.utc(2024, 6, 1, 12, 0, 0)
+
+    assert_difference -> { Card.count }, +1 do
+      post board_cards_path(boards(:writebook)),
+        params: { card: { title: "Card with activity", created_at: created_time, last_active_at: last_active_time } },
+        as: :json
+    end
+
+    assert_response :created
+    card = Card.last
+    assert_equal created_time, card.created_at
+    assert_equal last_active_time, card.last_active_at
+  end
+
   test "update as JSON" do
     card = cards(:logo)
     put card_path(card, format: :json), params: { card: { title: "Update test" } }
