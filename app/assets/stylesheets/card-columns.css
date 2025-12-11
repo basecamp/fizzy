@@ -764,7 +764,7 @@
           block-size: 1px;
           inline-size: 100%;
           inset: 50% 0 auto;
-          translaate: 0 -50%;
+          translate: 0 -50%;
         }
 
         &:after {
