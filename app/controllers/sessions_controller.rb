@@ -21,6 +21,8 @@ class SessionsController < ApplicationController
       end
     end
 
+    serve_development_magic_link magic_link
+
     respond_to do |format|
       format.html { redirect_to_session_magic_link magic_link }
       format.json do
