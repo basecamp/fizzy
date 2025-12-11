@@ -1,0 +1,23 @@
+Please <%= @task %>:
+
+<% if @context.present? %>
+Context: <%= @context %>
+
+<% end %>
+## Content to expand:
+<%= @content %>
+
+<% if @target_length.present? %>
+Target length: approximately <%= @target_length %> words.
+<% end %>
+<% if @areas_to_expand.present? %>
+Areas to focus on expanding: <%= @areas_to_expand %>
+<% end %>
+
+Guidelines:
+- Add appropriate transitions and context
+- Elaborate on key points with relevant details
+- Maintain the original intent and voice
+- Stay factual and avoid adding unsubstantiated claims
+- Create well-structured paragraphs
+- Respond with markdown formatting

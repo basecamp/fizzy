@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2025_12_05_010536) do
+ActiveRecord::Schema[8.2].define(version: 2025_12_10_200000) do
   create_table "accesses", id: :uuid, force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -104,6 +104,59 @@ ActiveRecord::Schema[8.2].define(version: 2025_12_05_010536) do
     t.string "variation_digest", limit: 255, null: false
     t.index ["account_id"], name: "index_active_storage_variant_records_on_account_id"
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "agent_contexts", force: :cascade do |t|
+    t.string "action_name", limit: 255
+    t.string "agent_name", limit: 255, null: false
+    t.integer "contextable_id"
+    t.string "contextable_type", limit: 255
+    t.datetime "created_at", null: false
+    t.text "instructions", limit: 65535
+    t.json "options", default: {}
+    t.string "status", limit: 255, default: "pending"
+    t.string "trace_id", limit: 255
+    t.datetime "updated_at", null: false
+    t.index ["contextable_type", "contextable_id"], name: "index_agent_contexts_on_contextable"
+    t.index ["trace_id"], name: "index_agent_contexts_on_trace_id"
+  end
+
+  create_table "agent_generations", force: :cascade do |t|
+    t.integer "agent_context_id", null: false
+    t.integer "cached_tokens"
+    t.datetime "created_at", null: false
+    t.integer "duration_ms"
+    t.text "error_message", limit: 65535
+    t.string "finish_reason", limit: 255
+    t.integer "input_tokens", default: 0
+    t.string "model", limit: 255
+    t.integer "output_tokens", default: 0
+    t.json "provider_details", default: {}
+    t.string "provider_id", limit: 255
+    t.json "raw_request"
+    t.json "raw_response"
+    t.integer "reasoning_tokens"
+    t.integer "response_message_id"
+    t.string "status", limit: 255, default: "completed"
+    t.integer "total_tokens", default: 0
+    t.datetime "updated_at", null: false
+    t.index ["agent_context_id"], name: "index_agent_generations_on_agent_context_id"
+    t.index ["response_message_id"], name: "index_agent_generations_on_response_message_id"
+  end
+
+  create_table "agent_messages", force: :cascade do |t|
+    t.integer "agent_context_id", null: false
+    t.text "content", limit: 65535
+    t.json "content_parts", default: []
+    t.datetime "created_at", null: false
+    t.string "function_name", limit: 255
+    t.string "name", limit: 255
+    t.integer "position", default: 0
+    t.string "role", limit: 255, null: false
+    t.string "tool_call_id", limit: 255
+    t.datetime "updated_at", null: false
+    t.index ["agent_context_id", "position"], name: "index_agent_messages_on_agent_context_id_and_position"
+    t.index ["agent_context_id"], name: "index_agent_messages_on_agent_context_id"
   end
 
   create_table "assignees_filters", id: false, force: :cascade do |t|
@@ -566,6 +619,10 @@ ActiveRecord::Schema[8.2].define(version: 2025_12_05_010536) do
     t.index ["account_id"], name: "index_webhooks_on_account_id"
     t.index ["board_id", "subscribed_actions"], name: "index_webhooks_on_board_id_and_subscribed_actions"
   end
+
+  add_foreign_key "agent_generations", "agent_contexts"
+  add_foreign_key "agent_generations", "agent_messages", column: "response_message_id"
+  add_foreign_key "agent_messages", "agent_contexts"
   execute "CREATE VIRTUAL TABLE search_records_fts USING fts5(\n        title,\n        content,\n        tokenize='porter'\n      )"
 
 end

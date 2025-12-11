@@ -1,0 +1,30 @@
+Research the following topic and provide a comprehensive analysis:
+
+<% if @query.present? %>
+## Query:
+<%= @query %>
+<% end %>
+
+<% if @topic.present? %>
+## Topic:
+<%= @topic %>
+<% end %>
+
+<% if @context.present? %>
+## Additional Context:
+<%= @context %>
+<% end %>
+
+Research depth: <%= @depth %>
+
+Please provide:
+- A clear summary of the topic
+- Key points and important facts
+- Relevant context and background
+- Potential considerations or caveats
+<% if @depth == "thorough" %>
+- Detailed analysis with multiple perspectives
+- Connections to related topics
+<% end %>
+
+Respond with well-structured markdown formatting.

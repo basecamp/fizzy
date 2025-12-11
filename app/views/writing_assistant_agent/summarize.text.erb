@@ -1,0 +1,19 @@
+Please <%= @task %> of the following content:
+
+<% if @context.present? %>
+Context: <%= @context %>
+
+<% end %>
+## Content to summarize:
+<%= @content %>
+
+<% if @max_words.present? %>
+Keep the summary to approximately <%= @max_words %> words or less.
+<% end %>
+
+Guidelines:
+- Capture the main points and key takeaways
+- Use bullet points for clarity
+- Preserve the most critical information
+- Remove redundant or less important details
+- Respond with markdown formatting

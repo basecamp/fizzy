@@ -183,6 +183,28 @@ Rails.application.routes.draw do
     end
   end
 
+  namespace :ai do
+    resource :writing, only: [], controller: "writing" do
+      post :improve
+      post :summarize
+      post :expand
+      post :adjust_tone
+      post :stream
+    end
+
+    resource :analysis, only: [], controller: "analysis" do
+      post :analyze
+      post :extract_text
+      post :describe_image
+    end
+
+    resource :research, only: [], controller: "research" do
+      post :research
+      post :suggest_topics
+      post :break_down_task
+    end
+  end
+
   namespace :public do
     resources :boards do
       scope module: :boards do

@@ -1,0 +1,18 @@
+Break down the following task into smaller, actionable subtasks:
+
+## Task:
+<%= @task %>
+
+<% if @context.present? %>
+## Context:
+<%= @context %>
+<% end %>
+
+Please provide:
+- A logical sequence of subtasks to complete this task
+- Clear, actionable steps that can be individually completed
+- Any dependencies between tasks (what needs to happen before what)
+- Estimated effort levels (small, medium, large) for each subtask
+- Potential blockers or considerations to keep in mind
+
+Format as a numbered list with clear descriptions. Use markdown formatting for clarity.

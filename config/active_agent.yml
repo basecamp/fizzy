@@ -1,0 +1,40 @@
+# ActiveAgent Generation Provider Configuration
+# Configure AI providers for each environment.
+# API keys should be stored in Rails credentials.
+
+development:
+  openai:
+    service: "OpenAI"
+    api_key: <%= ENV['OPENAI_API_KEY'] || Rails.application.credentials.dig(:openai, :api_key) %>
+    model: "gpt-4o-mini"
+    temperature: 0.7
+  anthropic:
+    service: "Anthropic"
+    api_key: <%= ENV['ANTHROPIC_API_KEY'] || Rails.application.credentials.dig(:anthropic, :api_key) %>
+    model: "claude-sonnet-4-20250514"
+    temperature: 0.7
+  ollama:
+    service: "Ollama"
+    model: "llama3.2:latest"
+    base_url: <%= ENV['OLLAMA_HOST'] || Rails.application.credentials.dig(:ollama, :base_url) || 'http://localhost:11434' %>
+    api_key: <%= Rails.application.credentials.dig(:ollama, :api_key) %>
+    temperature: 0.7
+
+test:
+  openai:
+    service: "OpenAI"
+    api_key: "test_key"
+    model: "gpt-4o-mini"
+    temperature: 0.7
+
+production:
+  openai:
+    service: "OpenAI"
+    api_key: <%= ENV['OPENAI_API_KEY'] %>
+    model: "gpt-4o"
+    temperature: 0.7
+  anthropic:
+    service: "Anthropic"
+    api_key: <%= ENV['ANTHROPIC_API_KEY'] %>
+    model: "claude-sonnet-4-20250514"
+    temperature: 0.7

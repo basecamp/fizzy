@@ -37,7 +37,8 @@ gem "net-http-persistent"
 gem "rubyzip", require: "zip"
 gem "mittens"
 gem "useragent", bc: "useragent"
-
+gem "herb"
+gem "activeagent"
 # Operations
 gem "autotuner"
 gem "mission_control-jobs"
@@ -64,3 +65,7 @@ group :test do
   gem "vcr"
   gem "mocha"
 end
+
+gem "reactionview", "~> 0.2.0"
+
+gem "openai", "~> 0.38.0"

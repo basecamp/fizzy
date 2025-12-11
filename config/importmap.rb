@@ -13,3 +13,4 @@ pin "marked" # @15.0.11
 pin "lexxy"
 pin "@rails/activestorage", to: "activestorage.esm.js"
 pin "@rails/actiontext", to: "actiontext.esm.js"
+pin "@rails/actioncable", to: "actioncable.esm.js"

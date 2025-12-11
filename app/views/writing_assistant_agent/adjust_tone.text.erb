@@ -1,0 +1,17 @@
+Please <%= @task %>:
+
+<% if @context.present? %>
+Context: <%= @context %>
+
+<% end %>
+## Content to adjust:
+<%= @content %>
+
+Target tone: <%= @tone || "professional" %>
+
+Guidelines:
+- Maintain the core message and meaning
+- Adjust word choice and phrasing for the target tone
+- Keep the same general structure unless it conflicts with the tone
+- Ensure the content reads naturally in the new tone
+- Respond with markdown formatting

@@ -1,0 +1,29 @@
+Please <%= @task %><%= @has_selection ? " of the selected text" : " of the following content" %>:
+
+<% if @context.present? %>
+Context: <%= @context %>
+
+<% end %>
+<% if @has_selection %>
+## Selected text to improve:
+<%= @selection %>
+
+<% if @full_content.present? && @full_content != @selection %>
+## Full document context (for reference only - do not include in output):
+<%= @full_content %>
+<% end %>
+<% else %>
+## Content to improve:
+<%= @content %>
+<% end %>
+
+Provide the improved version while maintaining the author's voice and intent. Focus on:
+- Clarity and coherence
+- Flow and readability
+- Engaging language
+- Proper structure
+<% if @has_selection %>
+- Only output the improved selected text, not the entire document
+<% end %>
+- Respond with markdown formatting only
+  - include any URL links as links and images as images

@@ -27,5 +27,12 @@
         </div>
       <% end %>
     </footer>
+
+    <%# AI Modal for streaming interactions %>
+    <% if Current.user %>
+      <div data-controller="ai-modal">
+        <%= render "shared/ai_modal" %>
+      </div>
+    <% end %>
   </body>
 </html>
