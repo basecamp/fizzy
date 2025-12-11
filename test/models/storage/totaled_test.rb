@@ -273,4 +273,39 @@ class Storage::TotaledTest < ActiveSupport::TestCase
     assert_not_nil entry
     assert_equal(-5000, entry.delta)
   end
+
+  test "reconcile_storage aborts when entry added during scan" do
+    board = @account.boards.create!(name: "Test Board", creator: users(:david))
+    card = board.cards.create!(title: "Test Card", creator: users(:david))
+    card.image.attach io: StringIO.new("x" * 1000), filename: "test.png", content_type: "image/png"
+
+    # Delete entry to create drift
+    Storage::Entry.where(board: board).delete_all
+
+    # Intercept calculate_real_storage_bytes to insert a new entry mid-scan,
+    # faithfully simulating a concurrent upload that changes the cursor
+    board.define_singleton_method(:calculate_real_storage_bytes) do
+      Storage::Entry.create!(
+        account_id: account.id,
+        board_id: id,
+        delta: 500,
+        operation: "attach"
+      )
+      super()
+    end
+
+    # Should abort and return false without creating reconcile entry
+    assert_no_difference "Storage::Entry.where(operation: 'reconcile').count" do
+      result = board.reconcile_storage
+      assert_equal false, result
+    end
+  end
+
+  test "reconcile_storage returns true on success" do
+    board = @account.boards.create!(name: "Test Board", creator: users(:david))
+
+    result = board.reconcile_storage
+
+    assert_equal true, result
+  end
 end

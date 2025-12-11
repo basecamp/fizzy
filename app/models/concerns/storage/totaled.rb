@@ -44,22 +44,36 @@ module Storage::Totaled
   end
 
   # Reconcile ledger against actual attachment storage.
-  # Uses cursor to ensure consistency: captures max entry ID first, then calculates
-  # real bytes, then sums only entries up to that cursor. Concurrent uploads during
-  # calculation will have entries with IDs beyond the cursor, avoiding double-count.
+  #
+  # Uses two-cursor approach for consistency: capture cursor before AND after the
+  # scan. If they differ, entries were added during the scan and we can't get an
+  # accurate diff without risking double-counting or undercounting.
+  #
+  # Returns true if reconciled successfully, false if aborted due to concurrent
+  # writes. Caller (ReconcileJob) handles retries to avoid amplification.
   def reconcile_storage
-    max_entry_id = storage_entries.maximum(:id)
+    cursor_before = storage_entries.maximum(:id)
     real_bytes = calculate_real_storage_bytes
-    ledger_bytes = max_entry_id ? storage_entries.where(id: ..max_entry_id).sum(:delta) : 0
-    diff = real_bytes - ledger_bytes
+    cursor_after = storage_entries.maximum(:id)
 
-    if diff.nonzero?
-      Storage::Entry.record \
-        account: is_a?(Account) ? self : account,
-        board: is_a?(Board) ? self : nil,
-        recordable: nil,
-        delta: diff,
-        operation: "reconcile"
+    if cursor_before != cursor_after
+      Rails.logger.warn "[Storage] Reconcile aborted for #{self.class}##{id}: cursor moved during scan"
+      false
+    else
+      ledger_bytes = cursor_after ? storage_entries.where(id: ..cursor_after).sum(:delta) : 0
+      diff = real_bytes - ledger_bytes
+
+      if diff.nonzero?
+        Rails.logger.info "[Storage] Reconcile #{self.class}##{id}: adjusting by #{diff} bytes"
+        Storage::Entry.record \
+          account: is_a?(Account) ? self : account,
+          board: is_a?(Board) ? self : nil,
+          recordable: nil,
+          delta: diff,
+          operation: "reconcile"
+      end
+
+      true
     end
   end
 

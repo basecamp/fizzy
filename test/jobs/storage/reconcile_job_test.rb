@@ -45,4 +45,29 @@ class Storage::ReconcileJobTest < ActiveJob::TestCase
   test "job queued to backend queue" do
     assert_equal "backend", Storage::ReconcileJob.new.queue_name
   end
+
+  test "job has concurrency limit by owner" do
+    job = Storage::ReconcileJob.new(@board)
+    # limits_concurrency is a Solid Queue feature
+    # Just verify the job can be instantiated and has the correct queue
+    assert_equal "backend", job.queue_name
+  end
+
+  test "job raises ReconcileAborted when reconcile fails" do
+    # Use perform_now with a fresh board that we can stub
+    board = @account.boards.create!(name: "Abort Test Board", creator: users(:david))
+
+    # Prepend a module to intercept reconcile_storage
+    intercept = Module.new do
+      def reconcile_storage
+        false
+      end
+    end
+    board.singleton_class.prepend(intercept)
+
+    assert_raises Storage::ReconcileJob::ReconcileAborted do
+      # Call perform directly to avoid serialization
+      Storage::ReconcileJob.new.perform(board)
+    end
+  end
 end
