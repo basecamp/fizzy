@@ -1,0 +1,5 @@
+@layer ios {
+  .hide-in-ios-app {
+    display: none;
+  }
+}
