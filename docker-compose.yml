@@ -1,0 +1,66 @@
+services:
+  fizzy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fizzy_app
+    environment:
+      # Rails configuration
+      RAILS_ENV: production
+      RAILS_LOG_TO_STDOUT: 'true'
+      RAILS_SERVE_STATIC_FILES: 'true'
+      
+      # Required secrets - generate these before running
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY}
+      
+      # SMTP configuration (optional - email won't work without proper settings)
+      SMTP_ADDRESS: ${SMTP_ADDRESS:-smtp.example.com}
+      SMTP_USERNAME: ${SMTP_USERNAME:-user@example.com}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-password}
+      MAILER_FROM_ADDRESS: ${MAILER_FROM_ADDRESS:-noreply@fizzy.local}
+      
+      # Application settings
+      MULTI_TENANT: ${MULTI_TENANT:-false}
+      SOLID_QUEUE_IN_PUMA: 'true'
+      
+      # Database adapter (sqlite by default)
+      DATABASE_ADAPTER: ${DATABASE_ADAPTER:-sqlite}
+    volumes:
+      - fizzy_storage:/rails/storage
+      - fizzy_logs:/rails/log
+    networks:
+      - fizzy_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/up"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  nginx:
+    image: nginx:alpine
+    container_name: fizzy_nginx
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - fizzy
+    networks:
+      - fizzy_network
+    restart: unless-stopped
+
+volumes:
+  fizzy_storage:
+    driver: local
+  fizzy_logs:
+    driver: local
+
+networks:
+  fizzy_network:
+    driver: bridge

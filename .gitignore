@@ -41,3 +41,9 @@
 
 /config/credentials/*.key
 .DS_Store
+
+# Ignore Docker Compose SSL certificates
+/nginx/ssl/*.crt
+/nginx/ssl/*.key
+!/nginx/ssl/*.sh
+!/nginx/ssl/*.ps1

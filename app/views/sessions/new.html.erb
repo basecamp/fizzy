@@ -1,4 +1,4 @@
-<% @page_title = "Enter your email" %>
+<% @page_title = "Enter your username" %>
 
 <div class="panel panel--centered flex flex-column gap-half">
   <h1 class="txt-x-large font-weight-black margin-block-end">Get into Fizzy</h1>
@@ -6,15 +6,11 @@
   <%= form_with url: session_path, class: "flex flex-column gap-half txt-medium" do |form| %>
     <div class="flex align-center gap">
       <label class="flex align-center gap input input--actor">
-        <%= form.email_field :email_address, required: true, class: "input txt-large full-width", autofocus: true, autocomplete: "username", placeholder: "Enter your email address…" %>
+        <%= form.text_field :username, required: true, class: "input txt-large full-width", autofocus: true, autocomplete: "username", placeholder: "Enter your username…", pattern: "[a-zA-Z0-9_]+" %>
       </label>
     </div>
 
-    <% if Account.accepting_signups? %>
-      <p><strong>New here?</strong> <%= link_to "Sign up", new_signup_path %> to create an account. <strong>Already have an account?</strong> Enter your email and we’ll get you signed in.</p>
-    <% else %>
-      <p>Enter your email and we’ll get you signed in.</p>
-    <% end %>
+    <p><strong>Local Login:</strong> Enter a username (letters, numbers, and underscores only). A workspace will be created automatically if you don't have one.</p>
 
     <button type="submit" id="log_in" class="btn btn--link center txt-medium">
       <span>Let’s go</span>

@@ -25,6 +25,9 @@ class User < ApplicationRecord
   end
 
   def setup?
+    # For local auth (username-only), always considered setup
+    return true if identity&.email_address.blank?
+    # For email-based auth, check if name differs from email
     name != identity.email_address
   end
 

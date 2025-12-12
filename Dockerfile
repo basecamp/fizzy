@@ -46,6 +46,9 @@ RUN bundle install && \
 # Copy application code
 COPY . .
 
+# Fix line endings for bin scripts (in case built on Windows)
+RUN find ./bin -type f -exec sed -i 's/\r$//' {} \;
+
 # Precompile bootsnap code for faster boot times.
 # -j 1 disable parallel compilation to avoid a QEMU bug: https://github.com/rails/bootsnap/issues/495
 RUN bundle exec bootsnap precompile -j 1 app/ lib/
@@ -66,17 +69,26 @@ ARG OCI_SOURCE
 LABEL org.opencontainers.image.source="${OCI_SOURCE}"
 LABEL org.opencontainers.image.licenses="O'Saasy"
 
-# Run and own only the runtime files as a non-root user for security
+# Run as non-root user for security
 RUN groupadd --system --gid 1000 rails && \
     useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash
-USER 1000:1000
+
+# Install gosu for user switching
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gosu && \
+    rm -rf /var/lib/apt/lists/* && \
+    gosu nobody true
 
 # Copy built artifacts: gems, application
 COPY --chown=rails:rails --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
 COPY --chown=rails:rails --from=build /rails /rails
 
+# Copy custom entrypoint wrapper
+COPY docker-entrypoint-wrapper.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 # Entrypoint prepares the database.
-ENTRYPOINT ["/rails/bin/docker-entrypoint"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 # Start server via Thruster by default, this can be overwritten at runtime
 EXPOSE 80
