@@ -12,7 +12,7 @@ module AccessesHelper
     render partial: "boards/access_toggle",
       collection: users, as: :user,
       locals: { selected: selected, disabled: disabled },
-      cached: ->(user) { [ user, selected ] }
+      cached: ->(user) { [ user, selected, disabled ] }
   end
 
   def access_involvement_advance_button(board, user, show_watchers: true, icon_only: false)

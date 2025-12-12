@@ -5,7 +5,7 @@ module User::Avatar
 
   included do
     has_one_attached :avatar do |attachable|
-      attachable.variant :thumb, resize_to_fill: [ 256, 256 ]
+      attachable.variant :thumb, resize_to_fill: [ 256, 256 ], process: :immediately
     end
 
     validate :avatar_content_type_allowed

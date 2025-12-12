@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2025_12_05_010536) do
+ActiveRecord::Schema[8.2].define(version: 2025_12_10_054934) do
   create_table "accesses", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -319,6 +319,16 @@ ActiveRecord::Schema[8.2].define(version: 2025_12_05_010536) do
     t.boolean "staff", default: false, null: false
     t.datetime "updated_at", null: false
     t.index ["email_address"], name: "index_identities_on_email_address", unique: true
+  end
+
+  create_table "identity_access_tokens", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.uuid "identity_id", null: false
+    t.string "permission"
+    t.string "token"
+    t.datetime "updated_at", null: false
+    t.index ["identity_id"], name: "index_access_token_on_identity_id"
   end
 
   create_table "magic_links", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -685,6 +695,35 @@ ActiveRecord::Schema[8.2].define(version: 2025_12_05_010536) do
     t.index ["account_id"], name: "index_steps_on_account_id"
     t.index ["card_id", "completed"], name: "index_steps_on_card_id_and_completed"
     t.index ["card_id"], name: "index_steps_on_card_id"
+  end
+
+  create_table "storage_entries", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.uuid "blob_id"
+    t.uuid "board_id"
+    t.datetime "created_at", null: false
+    t.bigint "delta", null: false
+    t.string "operation", null: false
+    t.uuid "recordable_id"
+    t.string "recordable_type"
+    t.string "request_id"
+    t.uuid "user_id"
+    t.index ["account_id"], name: "index_storage_entries_on_account_id"
+    t.index ["blob_id"], name: "index_storage_entries_on_blob_id"
+    t.index ["board_id"], name: "index_storage_entries_on_board_id"
+    t.index ["recordable_type", "recordable_id"], name: "index_storage_entries_on_recordable"
+    t.index ["request_id"], name: "index_storage_entries_on_request_id"
+    t.index ["user_id"], name: "index_storage_entries_on_user_id"
+  end
+
+  create_table "storage_totals", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.bigint "bytes_stored", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.uuid "last_entry_id"
+    t.uuid "owner_id", null: false
+    t.string "owner_type", null: false
+    t.datetime "updated_at", null: false
+    t.index ["owner_type", "owner_id"], name: "index_storage_totals_on_owner_type_and_owner_id", unique: true
   end
 
   create_table "taggings", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|

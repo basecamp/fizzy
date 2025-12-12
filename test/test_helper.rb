@@ -38,13 +38,13 @@ end
 
 module ActiveSupport
   class TestCase
-    parallelize(workers: :number_of_processors)
+    parallelize workers: :number_of_processors, work_stealing: ENV["WORK_STEALING"] != "false"
 
     # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
     fixtures :all
 
     include ActiveJob::TestHelper
-    include ActionTextTestHelper, CardTestHelper, ChangeTestHelper, SessionTestHelper
+    include ActionTextTestHelper, CachingTestHelper, CardTestHelper, ChangeTestHelper, SessionTestHelper
     include Turbo::Broadcastable::TestHelper
 
     setup do
@@ -66,9 +66,11 @@ class ActionDispatch::IntegrationTest
     def without_action_dispatch_exception_handling
       original = Rails.application.config.action_dispatch.show_exceptions
       Rails.application.config.action_dispatch.show_exceptions = :none
+      Rails.application.instance_variable_set(:@app_env_config, nil) # Clear memoized env_config
       yield
     ensure
       Rails.application.config.action_dispatch.show_exceptions = original
+      Rails.application.instance_variable_set(:@app_env_config, nil) # Reset env_config
     end
 end
 

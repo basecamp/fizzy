@@ -148,4 +148,4 @@ Use Chrome MCP tools to interact with the running dev app for UI testing and deb
 
 ## Coding style
 
-Please read the separate file `STYLE.md` for some guidance on coding style.
+@STYLE.md

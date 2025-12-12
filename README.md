@@ -14,7 +14,7 @@ This repo contains a starter deployment file that you can modify for your own sp
 The steps to configure your very own Fizzy are:
 
 1. Fork the repo
-2. Edit few things in config/deploy.yml, .kamal/secrets, and config/environments/production.rb
+2. Edit few things in config/deploy.yml and .kamal/secrets
 3. Run `kamal setup` to do your first deploy.
 
 We'll go through each of these in turn.
@@ -37,6 +37,9 @@ We've added comments to that file to highlight what each setting needs to be, bu
 - `ssh/user`: If you access your server a `root` you can leave this alone; if you use a different user, set it here.
 - `proxy/ssl` and `proxy/host`: Kamal can set up SSL certificates for you automatically. To enable that, set the hostname again as `host`. If you don't want SSL for some reason, you can set `ssl: false` to turn it off.
 - `env/clear/MAILER_FROM_ADDRESS`: This is the email address that Fizzy will send emails from. It should usually be an address from the same domain where you're running Fizzy.
+- `env/clear/SMTP_ADDRESS`: The address of an SMTP server that you can send email through. You can use a 3rd-party service for this, like Sendgrid or Postmark, in which case their documentation will tell you what to use for this.
+- `env/clear/MULTI_TENANT`: Set to `false` to enable single-tenant mode (disable multi-account signups).
+
 
 Fizzy also requires a few environment variables to be set up, some of which contain secrets.
 The simplest way to do this is to put them in a file called `.kamal/secrets`.
@@ -58,6 +61,7 @@ SMTP_PASSWORD=email-provider-password
 The values you enter here will be specific to you, and you can get or create them as follows:
 
 - `SECRET_KEY_BASE` should be a long, random secret. You can run `bin/rails secret` to create a suitable value for this.
+- `SMTP_USERNAME` & `SMTP_PASSWORD` should be valid credentials for your SMTP server. If you're using a 3rd-party service here, consult their documentation for what to use.
 - `VAPID_PUBLIC_KEY` & `VAPID_PRIVATE_KEY` are a pair of credentials that are used for sending notifications. You can create your own keys by starting a development console with:
 
   ```sh
@@ -72,10 +76,6 @@ The values you enter here will be specific to you, and you can get or create the
   puts "VAPID_PRIVATE_KEY=#{vapid_key.private_key}"
   puts "VAPID_PUBLIC_KEY=#{vapid_key.public_key}"
   ```
-
-- `SMTP_USERNAME`/`SMTP_PASSWORD` are credentials you should get from your email provider.
-
-Lastly, you'll need to set up the rest of your email configuration in `config/environments/production.rb`. There is an example configuration in comments at the top of that file. The actual settings you use here will depend on your email provider, but in most cases will look similar to that section, so you can uncomment it and edit to suit. Note that it will use the `SMTP_USERNAME` and `SMTP_PASSWORD` values you entered in your secrets.
 
 Once you've made all those changes, commit them to your fork so they're saved.
 
@@ -94,6 +94,25 @@ After the first deploy is done, any subsequent steps won't need to do that initi
 ```sh
 bin/kamal deploy
 ```
+
+## File storage (Active Storage)
+
+Production uses the local disk service by default. To use any other service defined in `config/storage.yml`, set `ACTIVE_STORAGE_SERVICE`.
+
+To use the included `s3` service, set:
+
+- `ACTIVE_STORAGE_SERVICE=s3`
+- `S3_ACCESS_KEY_ID`
+- `S3_BUCKET` (defaults to `fizzy-#{Rails.env}-activestorage`)
+- `S3_REGION` (defaults to `us-east-1`)
+- `S3_SECRET_ACCESS_KEY`
+
+Optional for S3-compatible endpoints:
+
+- `S3_ENDPOINT`
+- `S3_FORCE_PATH_STYLE=true`
+- `S3_REQUEST_CHECKSUM_CALCULATION` (defaults to `when_supported`)
+- `S3_RESPONSE_CHECKSUM_VALIDATION` (defaults to `when_supported`)
 
 ## Development
 

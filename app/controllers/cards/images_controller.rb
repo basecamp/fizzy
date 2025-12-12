@@ -3,6 +3,10 @@ class Cards::ImagesController < ApplicationController
 
   def destroy
     @card.image.purge_later
-    redirect_to @card
+
+    respond_to do |format|
+      format.html { redirect_to @card }
+      format.json { head :no_content }
+    end
   end
 end

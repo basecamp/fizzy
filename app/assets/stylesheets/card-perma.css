@@ -127,7 +127,7 @@
     }
 
     @media (max-width: 799px) {
-      --padding-inline: var(--main-padding);
+      --padding-inline: 1.5ch;
 
       column-gap: 0;
       grid-template-areas:
@@ -150,6 +150,10 @@
     border-radius: 0.2em;
     grid-area: card;
     padding: clamp(2rem, 4vw, var(--padding-block));
+
+    @media (max-width: 799px) {
+      padding-inline: var(--padding-inline);
+    }
   }
 
   .card-perma__actions {

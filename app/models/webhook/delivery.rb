@@ -1,7 +1,10 @@
 class Webhook::Delivery < ApplicationRecord
+  class ResponseTooLarge < StandardError; end
+
   STALE_TRESHOLD = 7.days
   USER_AGENT = "fizzy/1.0.0 Webhook"
   ENDPOINT_TIMEOUT = 7.seconds
+  MAX_RESPONSE_SIZE = 100.kilobytes
 
   belongs_to :account, default: -> { webhook.account }
   belongs_to :webhook
@@ -52,12 +55,16 @@ class Webhook::Delivery < ApplicationRecord
       if resolved_ip.nil?
         { error: :private_uri }
       else
-        response = http.request(
-          Net::HTTP::Post.new(uri, headers).tap { |request| request.body = payload }
-        )
+        request = Net::HTTP::Post.new(uri, headers).tap { |request| request.body = payload }
+
+        response = http.request(request) do |net_http_response|
+          stream_body_with_limit(net_http_response)
+        end
 
         { code: response.code.to_i }
       end
+    rescue ResponseTooLarge
+      { error: :response_too_large }
     rescue Resolv::ResolvTimeout, Resolv::ResolvError, SocketError
       { error: :dns_lookup_failed }
     rescue Net::OpenTimeout, Net::ReadTimeout, Errno::ETIMEDOUT
@@ -66,6 +73,14 @@ class Webhook::Delivery < ApplicationRecord
       { error: :destination_unreachable }
     rescue OpenSSL::SSL::SSLError
       { error: :failed_tls }
+    end
+
+    def stream_body_with_limit(response)
+      bytes_read = 0
+      response.read_body do |chunk|
+        bytes_read += chunk.bytesize
+        raise ResponseTooLarge if bytes_read > MAX_RESPONSE_SIZE
+      end
     end
 
     def resolved_ip

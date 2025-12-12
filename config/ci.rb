@@ -11,6 +11,7 @@ CI.run do
 
   step "Style: Ruby", "bin/rubocop"
 
+  step "Gemfile: Drift check", "bin/bundle-drift check"
   step "Security: Gem audit", "bin/bundler-audit check --update"
   step "Security: Importmap audit", "bin/importmap audit"
   step "Security: Brakeman audit", "bin/brakeman --quiet --no-pager --exit-on-warn --exit-on-error"
@@ -19,6 +20,8 @@ CI.run do
   if Fizzy.saas?
     step "Tests: SaaS",          "#{SAAS_ENV} bin/rails test"
     step "Tests: SaaS System",   "#{SAAS_ENV} #{SYSTEM_TEST_ENV} bin/rails test:system"
+    step "Tests: OSS",           "#{OSS_ENV} bin/rails test"
+    step "Tests: OSS System",    "#{OSS_ENV} #{SYSTEM_TEST_ENV} bin/rails test:system"
   else
     step "Tests: SQLite",        "#{OSS_ENV} bin/rails test"
     step "Tests: SQLite System", "#{OSS_ENV} #{SYSTEM_TEST_ENV} bin/rails test:system"

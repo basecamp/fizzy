@@ -23,8 +23,14 @@
           background: var(--color-ink-lighter);
         }
 
-        @media (prefers-color-scheme: dark) {
+        html[data-theme="dark"] & {
           --input-background: var(--color-ink-lighter);
+        }
+
+        @media (prefers-color-scheme: dark) {
+          html:not([data-theme]) & {
+            --input-background: var(--color-ink-lighter);
+          }
         }
       }
     }
@@ -216,6 +222,15 @@
         font-size: clamp(var(--text-xx-small), 3.15cqi, var(--text-small));
         font-weight: 500;
       }
+    }
+  }
+
+  .nav__blank-slate {
+    font-size: var(--text-small);
+    margin: 2rem auto;
+
+    .nav:has(.popup__item:not([hidden])) & {
+      display: none;
     }
   }
 

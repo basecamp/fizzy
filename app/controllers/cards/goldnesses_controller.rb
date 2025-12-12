@@ -3,11 +3,19 @@ class Cards::GoldnessesController < ApplicationController
 
   def create
     @card.gild
-    render_card_replacement
+
+    respond_to do |format|
+      format.turbo_stream { render_card_replacement }
+      format.json { head :no_content }
+    end
   end
 
   def destroy
     @card.ungild
-    render_card_replacement
+
+    respond_to do |format|
+      format.turbo_stream { render_card_replacement }
+      format.json { head :no_content }
+    end
   end
 end

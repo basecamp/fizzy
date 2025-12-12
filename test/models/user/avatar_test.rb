@@ -16,7 +16,7 @@ class User::AvatarTest < ActiveSupport::TestCase
   end
 
   test "allows valid image content types" do
-    users(:david).avatar.attach(io: File.open(file_fixture("moon.jpg")), filename: "test.jpg")
+    users(:david).avatar.attach(io: File.open(file_fixture("moon.jpg")), filename: "test.jpg", content_type: "image/jpeg")
 
     assert users(:david).valid?
   end
@@ -26,5 +26,11 @@ class User::AvatarTest < ActiveSupport::TestCase
 
     assert_not users(:david).valid?
     assert_includes users(:david).errors[:avatar], "must be a JPEG, PNG, GIF, or WebP image"
+  end
+
+  test "thumb variant is processed immediately on attachment" do
+    users(:david).avatar.attach(io: File.open(file_fixture("avatar.png")), filename: "avatar.png", content_type: "image/png")
+
+    assert users(:david).avatar.variant(:thumb).processed?
   end
 end

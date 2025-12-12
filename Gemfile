@@ -1,7 +1,8 @@
 source "https://rubygems.org"
 
-gem "rails", github: "rails/rails", branch: "main"
 git_source(:bc) { |repo| "https://github.com/basecamp/#{repo}" }
+
+gem "rails", github: "rails/rails", branch: "main"
 
 # Assets & front end
 gem "importmap-rails"
@@ -27,7 +28,7 @@ gem "rqrcode"
 gem "redcarpet"
 gem "rouge"
 gem "jbuilder"
-gem "lexxy"
+gem "lexxy", bc: "lexxy"
 gem "image_processing", "~> 1.14"
 gem "platform_agent"
 gem "aws-sdk-s3", require: false

@@ -94,6 +94,8 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :tags, only: :index
+
   namespace :notifications do
     resource :settings
     resource :unsubscribe
@@ -162,6 +164,8 @@ Rails.application.routes.draw do
   resource :landing
 
   namespace :my do
+    resource :identity, only: :show
+    resources :access_tokens
     resources :pins
     resource :timezone
     resource :menu

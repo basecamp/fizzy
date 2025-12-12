@@ -22,4 +22,14 @@ class Notifications::BulkReadingsControllerTest < ActionDispatch::IntegrationTes
     post bulk_reading_path, params: { from_tray: true }
     assert_response :ok
   end
+
+  test "create as JSON" do
+    assert_changes -> { notifications(:logo_published_kevin).reload.read? }, from: false, to: true do
+      assert_changes -> { notifications(:layout_commented_kevin).reload.read? }, from: false, to: true do
+        post bulk_reading_path, as: :json
+      end
+    end
+
+    assert_response :no_content
+  end
 end

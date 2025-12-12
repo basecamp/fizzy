@@ -17,4 +17,16 @@ class Cards::BoardsControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to card
   end
+
+  test "update as JSON" do
+    card = cards(:logo)
+    new_board = boards(:private)
+
+    assert_not_equal new_board, card.board
+
+    put card_board_path(card), params: { board_id: new_board.id }, as: :json
+
+    assert_response :no_content
+    assert_equal new_board, card.reload.board
+  end
 end

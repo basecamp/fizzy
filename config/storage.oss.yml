@@ -17,13 +17,13 @@ devminio:
   access_key_id: minioadmin
   secret_access_key: minioadmin
 
-cloudflare_production:
+s3:
   service: S3
-  endpoint: https://<%= ENV['CLOUDFLARE_ENDPOINT'] %>.eu.r2.cloudflarestorage.com
-  access_key_id: <%= ENV["R2_ACCESS_KEY"] %>
-  secret_access_key: <%= ENV["R2_SECRET_ACCESS_KEY"] %>
-  bucket: <%= ENV.fetch("R2_BUCKET", "lucianghinda") %>
-  region: auto
-  force_path_style: true
-  request_checksum_calculation: when_required
-  response_checksum_validation: when_required
+  access_key_id: <%= ENV["S3_ACCESS_KEY_ID"] %>
+  bucket: <%= ENV["S3_BUCKET"] || "fizzy-#{Rails.env}-activestorage" %>
+  endpoint: <%= ENV["S3_ENDPOINT"] %>
+  force_path_style: <%= ENV["S3_FORCE_PATH_STYLE"] == "true" %>
+  region: <%= ENV.fetch("S3_REGION", "us-east-1") %>
+  request_checksum_calculation: <%= ENV.fetch("S3_REQUEST_CHECKSUM_CALCULATION", "when_supported") %>
+  response_checksum_validation: <%= ENV.fetch("S3_RESPONSE_CHECKSUM_VALIDATION", "when_supported") %>
+  secret_access_key: <%= ENV["S3_SECRET_ACCESS_KEY"] %>
