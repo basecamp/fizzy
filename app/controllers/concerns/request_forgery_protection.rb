@@ -12,16 +12,21 @@ module RequestForgeryProtection
     end
 
     def verified_request?
-      super || safe_fetch_site? || request.format.json?
+      request.get? || request.head? || !protect_against_forgery? ||
+        (valid_request_origin? && safe_fetch_site?)
     end
 
     SAFE_FETCH_SITES = %w[ same-origin same-site ]
 
     def safe_fetch_site?
-      SAFE_FETCH_SITES.include?(sec_fetch_site_value)
+      SAFE_FETCH_SITES.include?(sec_fetch_site_value) || (sec_fetch_site_value.nil? && api_request?)
+    end
+
+    def api_request?
+      request.format.json?
     end
 
     def sec_fetch_site_value
-      request.headers["Sec-Fetch-Site"].to_s.downcase
+      request.headers["Sec-Fetch-Site"].to_s.downcase.presence
     end
 end
