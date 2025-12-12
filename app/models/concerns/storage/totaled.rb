@@ -19,7 +19,7 @@ module Storage::Totaled
 
   # Exact: snapshot + pending entries
   def bytes_used_exact
-    (storage_total || create_storage_total!).current_usage
+    create_or_find_storage_total.current_usage
   end
 
   def materialize_storage_later
@@ -28,7 +28,7 @@ module Storage::Totaled
 
   # Materialize all pending entries into snapshot
   def materialize_storage
-    total = storage_total || create_storage_total!
+    total = create_or_find_storage_total
 
     total.with_lock do
       latest_entry_id = storage_entries.maximum(:id)
@@ -78,6 +78,10 @@ module Storage::Totaled
   end
 
   private
+    def create_or_find_storage_total
+      self.storage_total ||= Storage::Total.create_or_find_by!(owner: self)
+    end
+
     def calculate_real_storage_bytes
       raise NotImplementedError, "Subclass must implement calculate_real_storage_bytes"
     end

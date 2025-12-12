@@ -308,4 +308,50 @@ class Storage::TotaledTest < ActiveSupport::TestCase
 
     assert_equal true, result
   end
+
+
+  # ensure_storage_total race safety
+
+  test "ensure_storage_total handles concurrent creation" do
+    @account.storage_total&.destroy
+
+    threads = 3.times.map do
+      Thread.new do
+        ActiveRecord::Base.connection_pool.with_connection do
+          @account.bytes_used_exact
+        end
+      end
+    end
+
+    threads.each(&:join)
+    assert_equal 1, Storage::Total.where(owner: @account).count
+  end
+
+
+  # per-attachment reconcile
+
+  test "reconcile counts each attachment separately" do
+    board = @account.boards.create!(name: "Test", creator: users(:david))
+
+    # Create 3 distinct blobs (one per card) - no reuse
+    file = file_fixture("moon.jpg")
+    expected_bytes = file.size
+
+    3.times do |i|
+      blob = ActiveStorage::Blob.create_and_upload! \
+        io: file.open,
+        filename: "image_#{i}.jpg",
+        content_type: "image/jpeg"
+
+      embed = ActionText::Attachment.from_attachable(blob).to_html
+      board.cards.create!(title: "Card #{i}", description: "<p>#{embed}</p>", creator: users(:david))
+    end
+
+    Storage::Entry.where(board: board).delete_all
+    board.reconcile_storage
+
+    entry = Storage::Entry.find_by(board: board, operation: "reconcile")
+    # 3 attachments x file_size bytes
+    assert_equal expected_bytes * 3, entry.delta
+  end
 end

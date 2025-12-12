@@ -1,3 +1,6 @@
+# Storage tracking is a business abstraction - we count what users upload.
+# Original upload bytes only; variants/previews/derivatives excluded.
+# Physical storage optimizations (deduplication, compression) don't affect quotas.
 module Storage::Tracked
   extend ActiveSupport::Concern
 
@@ -26,7 +29,7 @@ module Storage::Tracked
     end
 
     def track_board_transfer
-      old_board_id = attribute_in_database(:board_id)
+      old_board = Board.find_by(id: attribute_in_database(:board_id))
       records = storage_transfer_records.compact
       return if records.empty?
 
@@ -37,10 +40,10 @@ module Storage::Tracked
         next if bytes.zero?
 
         # Debit old board
-        if old_board_id
+        if old_board
           Storage::Entry.record \
             account: account,
-            board_id: old_board_id,
+            board: old_board,
             recordable: recordable,
             delta: -bytes,
             operation: "transfer_out"
