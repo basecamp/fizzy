@@ -30,4 +30,3 @@ updates:
     open-pull-requests-limit: 10
     cooldown:
       default-days: 7
-      semver-major-days: 14

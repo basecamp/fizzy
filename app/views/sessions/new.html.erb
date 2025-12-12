@@ -10,7 +10,11 @@
       </label>
     </div>
 
-    <p><strong>New here?</strong> <%= link_to "Sign up", new_signup_path %> to create an account. <strong>Already have an account?</strong> Enter your email and we’ll get you signed in.</p>
+    <% if Account.accepting_signups? %>
+      <p><strong>New here?</strong> <%= link_to "Sign up", new_signup_path %> to create an account. <strong>Already have an account?</strong> Enter your email and we’ll get you signed in.</p>
+    <% else %>
+      <p>Enter your email and we’ll get you signed in.</p>
+    <% end %>
 
     <button type="submit" id="log_in" class="btn btn--link center txt-medium">
       <span>Let’s go</span>

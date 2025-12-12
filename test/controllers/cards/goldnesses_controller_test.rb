@@ -18,4 +18,26 @@ class Cards::GoldnessesControllerTest < ActionDispatch::IntegrationTest
       assert_card_container_rerendered(cards(:logo))
     end
   end
+
+  test "create as JSON" do
+    card = cards(:text)
+
+    assert_not card.golden?
+
+    post card_goldness_path(card), as: :json
+
+    assert_response :no_content
+    assert card.reload.golden?
+  end
+
+  test "destroy as JSON" do
+    card = cards(:logo)
+
+    assert card.golden?
+
+    delete card_goldness_path(card), as: :json
+
+    assert_response :no_content
+    assert_not card.reload.golden?
+  end
 end

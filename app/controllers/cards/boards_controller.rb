@@ -11,7 +11,11 @@ class Cards::BoardsController < ApplicationController
 
   def update
     @card.move_to(@board)
-    redirect_to @card
+
+    respond_to do |format|
+      format.html { redirect_to @card }
+      format.json { head :no_content }
+    end
   end
 
   private

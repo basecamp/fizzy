@@ -30,6 +30,7 @@ env:
   clear:
     MAILER_FROM_ADDRESS: support@example.com # The email "from" address that Fizzy sends email from
     SMTP_ADDRESS: mail.example.com # The SMTP server you'll use to send email
+    MULTI_TENANT: false # Set to false to enable single-tenant mode
     SOLID_QUEUE_IN_PUMA: true # Run background jobs in the app container
 
 

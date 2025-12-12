@@ -9,11 +9,6 @@ json.cache! @event do
     end
   end
 
-  json.board do
-    json.partial! "boards/board", locals: { board: @event.board }
-  end
-
-  json.creator do
-    json.partial! "users/user", user: @event.creator
-  end
+  json.board @event.board, partial: "boards/board", as: :board
+  json.creator @event.creator, partial: "users/user", as: :user
 end

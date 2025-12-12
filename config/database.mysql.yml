@@ -5,6 +5,7 @@ default: &default
   username: <%= ENV.fetch("MYSQL_USER", "root") %>
   password: <%= ENV["MYSQL_PASSWORD"] %>
   pool: 50
+  ssl_mode: <%= ENV["MYSQL_SSL_MODE"] %>
   timeout: 5000
 
 development:

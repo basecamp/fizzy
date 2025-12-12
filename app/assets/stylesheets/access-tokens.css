@@ -1,0 +1,19 @@
+.access_tokens_table {
+  border-collapse: collapse;
+  inline-size: 100%;
+
+  td, th {
+    border-block-end: 1px solid var(--color-ink-light);
+    padding-inline: var(--inline-space);
+    text-align: start;
+  }
+
+  th {
+    font-size: var(--text-x-small);
+    text-transform: uppercase;
+  }
+
+  tr:nth-of-type(even) {
+    background-color: var(--color-ink-lightest);
+  }
+}

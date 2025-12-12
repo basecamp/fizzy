@@ -4,8 +4,8 @@ bin/rails runner - <<EOF
   puts "Login with david@example.com to: http://fizzy.localhost:3006/"
 EOF
 
-if [ -f tmp/solid-queue.txt ]; then
-  export SOLID_QUEUE_IN_PUMA=1
+if [ ! -f tmp/solid-queue.txt ]; then
+  export SOLID_QUEUE_IN_PUMA=false
 fi
 
 if [ -f tmp/oss-config.txt ]; then

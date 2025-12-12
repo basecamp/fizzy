@@ -1,4 +1,6 @@
 class Card::Eventable::SystemCommenter
+  include ERB::Util
+
   attr_reader :card, :event
 
   def initialize(card, event)
@@ -15,25 +17,53 @@ class Card::Eventable::SystemCommenter
     def comment_body
       case event.action
       when "card_assigned"
-        "#{event.creator.name} <strong>assigned</strong> this to #{event.assignees.pluck(:name).to_sentence}."
+        "#{creator_name} <strong>assigned</strong> this to #{assignee_names}."
       when "card_unassigned"
-        "#{event.creator.name} <strong>unassigned</strong> from #{event.assignees.pluck(:name).to_sentence}."
+        "#{creator_name} <strong>unassigned</strong> from #{assignee_names}."
       when "card_closed"
-        "<strong>Moved</strong> to “Done” by #{event.creator.name}"
+        "<strong>Moved</strong> to “Done” by #{creator_name}"
       when "card_reopened"
-        "<strong>Reopened</strong> by #{event.creator.name}"
+        "<strong>Reopened</strong> by #{creator_name}"
       when "card_postponed"
-        "#{event.creator.name} <strong>moved</strong> this to “Not Now”"
+        "#{creator_name} <strong>moved</strong> this to “Not Now”"
       when "card_auto_postponed"
         "<strong>Moved</strong> to “Not Now” due to inactivity"
       when "card_title_changed"
-        "#{event.creator.name} <strong>changed the title</strong> from “#{event.particulars.dig('particulars', 'old_title')}” to “#{event.particulars.dig('particulars', 'new_title')}”."
+        "#{creator_name} <strong>changed the title</strong> from “#{old_title}” to “#{new_title}”."
       when "card_board_changed"
-      "#{event.creator.name} <strong>moved</strong> this from “#{event.particulars.dig('particulars', 'old_board')}” to “#{event.particulars.dig('particulars', 'new_board')}”."
+        "#{creator_name} <strong>moved</strong> this from “#{old_board}” to “#{new_board}”."
       when "card_triaged"
-        "#{event.creator.name} <strong>moved</strong> this to “#{event.particulars.dig('particulars', 'column')}”"
+        "#{creator_name} <strong>moved</strong> this to “#{column}”"
       when "card_sent_back_to_triage"
-        "#{event.creator.name} <strong>moved</strong> this back to “Maybe?”"
+        "#{creator_name} <strong>moved</strong> this back to “Maybe?”"
       end
+    end
+
+    def creator_name
+      h event.creator.name
+    end
+
+    def assignee_names
+      h event.assignees.pluck(:name).to_sentence
+    end
+
+    def old_title
+      h event.particulars.dig("particulars", "old_title")
+    end
+
+    def new_title
+      h event.particulars.dig("particulars", "new_title")
+    end
+
+    def old_board
+      h event.particulars.dig("particulars", "old_board")
+    end
+
+    def new_board
+      h event.particulars.dig("particulars", "new_board")
+    end
+
+    def column
+      h event.particulars.dig("particulars", "column")
     end
 end

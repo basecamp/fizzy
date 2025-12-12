@@ -1,3 +1,7 @@
+ActiveSupport.on_load(:active_storage_attachment) do
+  include Storage::AttachmentTracking
+end
+
 ActiveSupport.on_load(:active_storage_blob) do
   ActiveStorage::DiskController.after_action only: :show do
     expires_in 5.minutes, public: true
@@ -31,6 +35,16 @@ module ActiveStorageControllerExtensions
   end
 end
 
+module ActiveStorageDirectUploadsControllerExtensions
+  extend ActiveSupport::Concern
+
+  included do
+    include Authentication
+    skip_forgery_protection if: :authenticate_by_bearer_token
+  end
+end
+
 Rails.application.config.to_prepare do
   ActiveStorage::BaseController.include ActiveStorageControllerExtensions
+  ActiveStorage::DirectUploadsController.include ActiveStorageDirectUploadsControllerExtensions
 end

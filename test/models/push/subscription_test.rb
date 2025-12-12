@@ -98,6 +98,7 @@ class Push::SubscriptionTest < ActiveSupport::TestCase
   test "accepts all permitted push service domains" do
     permitted_endpoints = [
       "https://fcm.googleapis.com/fcm/send/token123",
+      "https://jmt17.google.com/fcm/send/token123",
       "https://updates.push.services.mozilla.com/wpush/v2/token123",
       "https://web.push.apple.com/QaBC123",
       "https://wns2-db5p.notify.windows.com/w/?token=abc123"

@@ -2,7 +2,7 @@ source "https://rubygems.org"
 
 git_source(:bc) { |repo| "https://github.com/basecamp/#{repo}" }
 
-gem "rails", github: "rails/rails", branch: "ast-immediate-variants-process-locally"
+gem "rails", github: "rails/rails", branch: "main"
 
 # Assets & front end
 gem "importmap-rails"

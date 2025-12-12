@@ -12,7 +12,7 @@ module RequestForgeryProtection
     end
 
     def verified_request?
-      super || safe_fetch_site?
+      super || safe_fetch_site? || request.format.json?
     end
 
     SAFE_FETCH_SITES = %w[ same-origin same-site ]

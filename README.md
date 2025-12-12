@@ -38,6 +38,8 @@ We've added comments to that file to highlight what each setting needs to be, bu
 - `proxy/ssl` and `proxy/host`: Kamal can set up SSL certificates for you automatically. To enable that, set the hostname again as `host`. If you don't want SSL for some reason, you can set `ssl: false` to turn it off.
 - `env/clear/MAILER_FROM_ADDRESS`: This is the email address that Fizzy will send emails from. It should usually be an address from the same domain where you're running Fizzy.
 - `env/clear/SMTP_ADDRESS`: The address of an SMTP server that you can send email through. You can use a 3rd-party service for this, like Sendgrid or Postmark, in which case their documentation will tell you what to use for this.
+- `env/clear/MULTI_TENANT`: Set to `false` to enable single-tenant mode (disable multi-account signups).
+
 
 Fizzy also requires a few environment variables to be set up, some of which contain secrets.
 The simplest way to do this is to put them in a file called `.kamal/secrets`.
@@ -92,6 +94,25 @@ After the first deploy is done, any subsequent steps won't need to do that initi
 ```sh
 bin/kamal deploy
 ```
+
+## File storage (Active Storage)
+
+Production uses the local disk service by default. To use any other service defined in `config/storage.yml`, set `ACTIVE_STORAGE_SERVICE`.
+
+To use the included `s3` service, set:
+
+- `ACTIVE_STORAGE_SERVICE=s3`
+- `S3_ACCESS_KEY_ID`
+- `S3_BUCKET` (defaults to `fizzy-#{Rails.env}-activestorage`)
+- `S3_REGION` (defaults to `us-east-1`)
+- `S3_SECRET_ACCESS_KEY`
+
+Optional for S3-compatible endpoints:
+
+- `S3_ENDPOINT`
+- `S3_FORCE_PATH_STYLE=true`
+- `S3_REQUEST_CHECKSUM_CALCULATION` (defaults to `when_supported`)
+- `S3_RESPONSE_CHECKSUM_VALIDATION` (defaults to `when_supported`)
 
 ## Development
 
