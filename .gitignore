@@ -1,5 +1,2 @@
-.idea/
-*.DS_Store
-
 # Ignore auto-generated tree file in workspace context
 dev/workspace/context/tree.md
