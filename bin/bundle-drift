@@ -1,0 +1,128 @@
+#!/usr/bin/env ruby
+# Checks that Gemfile.lock and Gemfile.saas.lock are in sync for shared dependencies.
+# Since Gemfile.saas evals Gemfile, shared gems should have identical versions.
+#
+# Usage:
+#   bin/bundle-drift [check]   # check for drift (default subcommand)
+#   bin/bundle-drift correct   # restore alignment (Gemfile.saas.lock is authoritative)
+require "bundler"
+require "fileutils"
+
+GEMFILE_LOCK = "Gemfile.lock"
+GEMFILE_SAAS_LOCK = "Gemfile.saas.lock"
+
+class GemfileDriftChecker
+  def initialize
+    @oss_lockfile = parse_lockfile(GEMFILE_LOCK)
+    @saas_lockfile = parse_lockfile(GEMFILE_SAAS_LOCK)
+  end
+
+  def check
+    find_drift.tap do
+      report it
+    end
+  end
+
+  private
+    def parse_lockfile(path)
+      Bundler::LockfileParser.new(File.read(path))
+    end
+
+    def find_drift
+      oss_specs, saas_specs = specs_hash(@oss_lockfile), specs_hash(@saas_lockfile)
+      shared_gems = oss_specs.keys & saas_specs.keys
+
+      shared_gems.filter_map do |name|
+        oss_version, saas_version = oss_specs[name], saas_specs[name]
+        if oss_version != saas_version
+          { name: name, oss: oss_version, saas: saas_version }
+        end
+      end.sort_by { |d| d[:name] }
+    end
+
+    def specs_hash(lockfile)
+      lockfile.specs.to_h { |spec| [ spec.name, spec.version.to_s ] }
+    end
+
+    def report(drift)
+      if drift.empty?
+        puts "✓ Gemfile.lock and Gemfile.saas.lock are in sync"
+      else
+        puts "✗ Gemfile lock files have drifted!\n\n"
+
+        name_width = [ drift.map { |d| d[:name].length }.max, "Gem".length ].max
+        oss_width = [ drift.map { |d| d[:oss].length }.max, "Gemfile.lock".length ].max
+        saas_width = [ drift.map { |d| d[:saas].length }.max, "Gemfile.saas.lock".length ].max
+
+        puts "  #{"Gem".ljust(name_width)}  #{"Gemfile.lock".ljust(oss_width)}  Gemfile.saas.lock"
+        puts "  #{"-" * name_width}  #{"-" * oss_width}  #{"-" * saas_width}"
+
+        drift.each do |d|
+          puts "  #{d[:name].ljust(name_width)}  #{d[:oss].ljust(oss_width)}  #{d[:saas]}"
+        end
+
+        puts "\nRun 'bin/bundle-drift correct' to restore alignment."
+      end
+    end
+end
+
+class GemfileDriftCorrector
+  def correct
+    drift = GemfileDriftChecker.new.check
+    return puts "\nNothing to correct." if drift.empty?
+
+    puts "\nRestoring alignment (Gemfile.saas.lock is authoritative)...\n\n"
+
+    # Save original for diff
+    original_content = File.read(GEMFILE_LOCK)
+
+    # Seed Gemfile.lock with Gemfile.saas.lock - Bundler will use these as version hints
+    FileUtils.cp(GEMFILE_SAAS_LOCK, GEMFILE_LOCK)
+
+    # Re-lock: Bundler prunes SaaS-only gems while preserving shared versions
+    puts "▸ Re-locking Gemfile (seeded from Gemfile.saas.lock)"
+    unless system("BUNDLE_GEMFILE=Gemfile bundle lock")
+      File.write(GEMFILE_LOCK, original_content)
+      abort("Failed to lock Gemfile. Restored original.")
+    end
+
+    puts "\n▸ Verifying alignment"
+    new_drift = GemfileDriftChecker.new.check
+
+    if new_drift.empty?
+      puts "\n✓ Lock files are now in sync"
+      show_diff(original_content, File.read(GEMFILE_LOCK))
+    else
+      puts "\n✗ Lock files still have drift after correction."
+      puts "  Bundler couldn't resolve to matching versions."
+      puts "  Restoring original Gemfile.lock."
+      File.write(GEMFILE_LOCK, original_content)
+      exit 1
+    end
+  end
+
+  private
+    def show_diff(original, corrected)
+      require "tempfile"
+
+      Tempfile.create("gemfile-lock-original") do |f|
+        f.write(original)
+        f.flush
+
+        diff = `diff -u #{f.path} #{GEMFILE_LOCK} 2>/dev/null`
+        unless diff.empty?
+          puts "\nChanges made to Gemfile.lock:"
+          puts diff
+        end
+      end
+    end
+end
+
+case command = ARGV[0] || "check"
+when "check"
+  exit 1 unless GemfileDriftChecker.new.check.empty?
+when "correct"
+  GemfileDriftCorrector.new.correct
+else
+  abort "Usage: bin/bundle-drift [check|correct]"
+end
