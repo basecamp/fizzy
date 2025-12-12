@@ -21,7 +21,7 @@ class JoinCodesController < ApplicationController
       redirect_to new_users_join_url(script_name: @join_code.account.slug)
     else
       logout_and_send_new_magic_link(identity)
-      redirect_to session_magic_link_url(script_name: nil)
+      redirect_to session_magic_link_url(script_name: nil), allow_other_host: true
     end
   end
 
