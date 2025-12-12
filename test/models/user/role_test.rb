@@ -58,6 +58,22 @@ class User::RoleTest < ActiveSupport::TestCase
     assert_not_includes accounts("37s").users.admin, users(:kevin)
   end
 
+  test "system scope returns only system users" do
+    system_users = User.system
+    assert_includes system_users, users(:system)
+    assert_not_includes system_users, users(:jason)
+    assert_not_includes system_users, users(:kevin)
+    assert_not_includes system_users, users(:david)
+  end
+
+  test "non_system scope returns only non-system users" do
+    non_system_users = User.non_system
+    assert_includes non_system_users, users(:jason)
+    assert_includes non_system_users, users(:kevin)
+    assert_includes non_system_users, users(:david)
+    assert_not_includes non_system_users, users(:system)
+  end
+
   test "can administer board?" do
     writebook_board = boards(:writebook)
     private_board = boards(:private)
