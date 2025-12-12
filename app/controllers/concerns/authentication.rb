@@ -38,7 +38,7 @@ module Authentication
 
     def require_account
       unless Current.account.present?
-        redirect_to main_app.session_menu_url(script_name: nil)
+        redirect_to main_app.session_menu_path(script_name: nil)
       end
     end
 
@@ -125,7 +125,7 @@ module Authentication
       serve_development_magic_link(magic_link)
       session[:email_address_pending_authentication] = magic_link.identity.email_address if magic_link
       session[:return_to_after_authenticating] = return_to if return_to
-      redirect_to main_app.session_magic_link_url(script_name: nil)
+      redirect_to main_app.session_magic_link_path(script_name: nil)
     end
 
     def serve_development_magic_link(magic_link)
