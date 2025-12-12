@@ -24,6 +24,6 @@ module Account::Billing
   end
 
   def exceeding_card_limit?
-    cards_count > plan.card_limit
+    plan.limit_cards? && cards_count > plan.card_limit
   end
 end
