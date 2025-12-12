@@ -9,6 +9,9 @@ module User::Role
     scope :member, -> { where(active: true, role: :member) }
     scope :active, -> { where(active: true, role: %i[ owner admin member ]) }
 
+    scope :system, -> { where(role: :system) }
+    scope :non_system, -> { where.not(role: :system) }
+
     def admin?
       super || owner?
     end

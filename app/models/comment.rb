@@ -10,8 +10,8 @@ class Comment < ApplicationRecord
 
   scope :chronologically, -> { order created_at: :asc, id: :desc }
   scope :preloaded, -> { with_rich_text_body.includes(reactions: :reacter) }
-  scope :by_system, -> { joins(:creator).where(creator: { role: "system" }) }
-  scope :by_user, -> { joins(:creator).where.not(creator: { role: "system" }) }
+  scope :by_system, -> { joins(:creator).merge(User.system) }
+  scope :by_user, -> { joins(:creator).merge(User.non_system) }
 
   after_create_commit :watch_card_by_creator
 
