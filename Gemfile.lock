@@ -8,7 +8,6 @@ GIT
 GIT
   remote: https://github.com/basecamp/useragent
   revision: 433ca320a42db1266c4b89df74d0abdb9a880c5e
-GEM
   specs:
     useragent (0.16.11)
 
@@ -167,6 +166,8 @@ GEM
     childprocess (5.1.0)
       logger (~> 1.5)
     chunky_png (1.4.0)
+    claude_hooks (1.0.0)
+      json (~> 2.0)
     concurrent-ruby (1.3.5)
     connection_pool (2.5.5)
     crack (1.0.1)
@@ -224,8 +225,6 @@ GEM
       actionview (>= 7.0.0)
       activesupport (>= 7.0.0)
     jmespath (1.6.2)
-    claude_hooks (1.0.0)
-      json (~> 2.0)
     json (2.17.1)
     jwt (3.1.2)
       base64
@@ -500,8 +499,8 @@ PLATFORMS
   arm-linux-gnu
   arm-linux-musl
   arm64-darwin
-  arm64-linux
   arm64-darwin-24
+  arm64-linux
   ruby
   x86-linux-gnu
   x86-linux-musl
@@ -519,6 +518,7 @@ DEPENDENCIES
   brakeman
   bundler-audit
   capybara
+  claude_hooks (~> 1.0)
   debug
   faker
   geared_pagination (~> 1.2)
@@ -556,7 +556,6 @@ DEPENDENCIES
   web-console
   web-push
   webmock
-  claude_hooks (~> 1.0)
 
 BUNDLED WITH
    2.7.2

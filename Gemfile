@@ -37,6 +37,7 @@ gem "net-http-persistent"
 gem "rubyzip", require: "zip"
 gem "mittens"
 gem "useragent", bc: "useragent"
+gem "claude_hooks", "~> 1.0"
 
 # Operations
 gem "autotuner"
@@ -64,4 +65,3 @@ group :test do
   gem "vcr"
   gem "mocha"
 end
-gem 'claude_hooks', '~> 1.0'
