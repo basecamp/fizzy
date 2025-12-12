@@ -8,8 +8,8 @@ services:
       dockerfile: .devcontainer/Dockerfile
 
     volumes:
-    - ../../${COMPOSE_PROJECT_NAME}:/workspaces/${COMPOSE_PROJECT_NAME}:cached
-    - ~/.config/gh:/home/dev/.config/gh:cached
+      - ../../${COMPOSE_PROJECT_NAME}:/workspaces/${COMPOSE_PROJECT_NAME}:cached
+      - ~/.config/gh:/home/dev/.config/gh:cached
 
     environment:
       GH_CONFIG_DIR: /home/dev/.config/gh
@@ -23,7 +23,7 @@ services:
     # Use "forwardPorts" in **devcontainer.json** to forward an app port locally.
     # (Adding the "ports" property to this file will not forward from a Codespace.)
     depends_on:
-    - selenium
+      - selenium
 
   selenium:
     container_name: ${COMPOSE_PROJECT_NAME}-selenium
