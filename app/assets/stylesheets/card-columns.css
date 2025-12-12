@@ -664,36 +664,37 @@
   /* -------------------------------------------------------------------------- */
 
   /* Surface a mini bubble if there are cards with bubbles inside */
-  .cards--considering:has(.bubble:not([hidden])),
-  .cards--doing.is-collapsed:has(.bubble:not([hidden])) {
-    .cards__transition-container {
-      --bubble-color: var(--card-color, oklch(var(--lch-blue-medium)));
-      --bubble-shape: 54% 46% 61% 39% / 57% 49% 51% 43%;
+  .cards--considering:has(.bubble:not([hidden])) .cards__expander-title,
+  .cards--doing.is-collapsed:has(.bubble:not([hidden])) .cards__transition-container {
+    --bubble-color: var(--card-color, oklch(var(--lch-blue-medium)));
+    --bubble-shape: 54% 46% 61% 39% / 57% 49% 51% 43%;
+
+    &:before {
+      background: radial-gradient(
+        color-mix(in srgb, var(--bubble-color) 8%, var(--color-canvas)) 50%,
+        color-mix(in srgb, var(--bubble-color) 48%, var(--color-canvas)) 100%
+      );
+      block-size: 1em;
+      border-radius: var(--bubble-shape);
+      content: "";
+      inline-size: 1em;
+      inset: 0 0 auto auto;
+      position: absolute;
+      translate: 20% -20%;
+      z-index: 1;
+    }
+
+    /* Maybe column: position bubble relative to the title, not the container */
+    .cards--considering & {
+      overflow: visible;
+      position: relative;
 
       &:before {
-        background: radial-gradient(
-          color-mix(in srgb, var(--bubble-color) 8%, var(--color-canvas)) 50%,
-          color-mix(in srgb, var(--bubble-color) 48%, var(--color-canvas)) 100%
-        );
-        block-size: 1em;
-        border-radius: var(--bubble-shape);
-        content: "";
-        inline-size: 1em;
-        inset: 0 0 auto auto;
-        position: absolute;
-        translate: 20% -20%;
-        z-index: 1;
-      }
-
-      .cards--considering &:before {
-        inset: 0 auto auto 0;
-        translate: 100% 75%;
+        inset-block-start: 50%;
+        translate: 125% -75%;
+        z-index: -1;
       }
     }
-  }
-
-  .cards--considering:has(.bubble:not([hidden])) .cards__expander-title:before {
-    translate: 120% 50%;
   }
 
   /* Card column indicators

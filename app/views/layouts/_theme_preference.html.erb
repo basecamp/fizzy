@@ -1,0 +1,6 @@
+<%= javascript_tag nonce: true do %>
+  const theme = localStorage.getItem("theme")
+  if (theme && theme !== "auto") {
+    document.documentElement.dataset.theme = theme
+  }
+<% end %>
