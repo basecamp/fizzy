@@ -15,7 +15,7 @@ $ARGUMENTS
 
 !`git status`
 
-!`git branch --show-current`
+!`git branch`
 
 ## Workflow
 
@@ -49,20 +49,28 @@ Sanitization:
 
 **Uncommitted changes:** Stop. "Commit or stash before creating new branch."
 
-**Non-main branch:** Confirm switch.
+**Command branch:** If `command` branch is available. Ensure it is checked out. If not, confirm switch to `command`
+
+**Main branch:** If no `command` branch, Ensure `main` is checked out. If not, confirm switch to `main`
 
 ### Step 5: Fetch & Create Branch
 
+**IF** on `main` branch:
 ```bash
 git fetch origin main
 git checkout -b {branch-name} origin/main
+```
+**IF** on `command` branch:
+```bash
+git fetch origin command
+git checkout -b {branch-name} origin/command
 ```
 
 If branch exists, checkout existing.
 
 ### Step 6: Update CLAUDE.md
 
-@dev/workspace/CLAUDE.md
+dev/workspace/CLAUDE.md
 
 1. Edit only these placeholders:
     - `{branch-name}` → actual branch name
