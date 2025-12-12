@@ -4,7 +4,7 @@ module Card::Eventable
   include ::Eventable
 
   included do
-    before_create { self.last_active_at ||= created_at }
+    before_create { self.last_active_at ||= created_at || Time.current }
 
     after_save :track_title_change, if: :saved_change_to_title?
   end

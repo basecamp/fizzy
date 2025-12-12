@@ -21,8 +21,9 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     end
 
     card = Card.last
-    assert card.drafted?
     assert_redirected_to card
+
+    assert card.drafted?
   end
 
   test "create resumes existing draft if it exists" do
@@ -30,9 +31,8 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
 
     assert_no_difference -> { Card.count } do
       post board_cards_path(boards(:writebook))
+      assert_redirected_to draft
     end
-
-    assert_redirected_to draft
   end
 
   test "show" do
@@ -68,6 +68,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
 
     boards(:writebook).update! all_access: false
     boards(:writebook).accesses.revoke_from users(:kevin)
+
     get card_path(cards(:logo))
     assert_response :not_found
   end
@@ -75,6 +76,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
   test "admins can see delete button on any card" do
     get card_path(cards(:logo))
     assert_response :success
+
     assert_match "Delete this card", response.body
   end
 
@@ -83,6 +85,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
 
     get card_path(cards(:logo))
     assert_response :success
+
     assert_match "Delete this card", response.body
   end
 
@@ -91,6 +94,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
 
     get card_path(cards(:logo))
     assert_response :success
+
     assert_no_match "Delete this card", response.body
   end
 
@@ -124,10 +128,9 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
 
   test "show card with comment containing malformed remote image attachment" do
     card = cards(:logo)
-    card.comments.create!(
+    card.comments.create! \
       creator: users(:kevin),
       body: '<action-text-attachment url="image.png" content-type="image/*" presentation="gallery"></action-text-attachment>'
-    )
 
     get card_path(card)
     assert_response :success
@@ -140,6 +143,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
 
     get card_path(card), as: :json
     assert_response :success
+
     assert_equal card.title, @response.parsed_body["title"]
     assert_equal 2, @response.parsed_body["steps"].size
   end
@@ -149,12 +153,12 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
       post board_cards_path(boards(:writebook)),
         params: { card: { title: "My new card", description: "Big if true", tag_ids: [ tags(:web).id, tags(:mobile).id ] } },
         as: :json
+      assert_response :created
     end
 
-    assert_response :created
-    assert_equal card_path(Card.last, format: :json), @response.headers["Location"]
-
     card = Card.last
+    assert_equal card_path(card, format: :json), @response.headers["Location"]
+
     assert_equal "My new card", card.title
     assert_equal "Big if true", card.description.to_plain_text
     assert_equal [ tags(:mobile), tags(:web) ].sort, card.tags.sort
@@ -167,9 +171,9 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
       post board_cards_path(boards(:writebook)),
         params: { card: { title: "Backdated card", created_at: custom_time } },
         as: :json
+      assert_response :created
     end
 
-    assert_response :created
     assert_equal custom_time, Card.last.created_at
   end
 
@@ -181,27 +185,77 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
       post board_cards_path(boards(:writebook)),
         params: { card: { title: "Card with activity", created_at: created_time, last_active_at: last_active_time } },
         as: :json
+      assert_response :created
     end
 
-    assert_response :created
     card = Card.last
     assert_equal created_time, card.created_at
     assert_equal last_active_time, card.last_active_at
   end
 
-  test "update as JSON" do
+  test "create as JSON defaults last_active_at to created_at when not provided" do
+    created_time = Time.utc(2024, 1, 15, 10, 30, 0)
+
+    assert_difference -> { Card.count }, +1 do
+      post board_cards_path(boards(:writebook)),
+        params: { card: { title: "Backdated card without last_active_at", created_at: created_time } },
+        as: :json
+      assert_response :created
+    end
+
+    card = Card.last
+    assert_equal created_time, card.created_at
+    assert_equal created_time, card.last_active_at
+  end
+
+  test "update as JSON with custom last_active_at" do
     card = cards(:logo)
-    put card_path(card, format: :json), params: { card: { title: "Update test" } }
+    custom_time = Time.utc(2024, 3, 15, 14, 0, 0)
+
+    put card_path(card, format: :json), params: { card: { last_active_at: custom_time } }
 
     assert_response :success
+    assert_equal custom_time, card.reload.last_active_at
+  end
+
+  test "update as JSON can restore last_active_at after comments overwrite it" do
+    created_time = Time.utc(2024, 1, 15, 10, 30, 0)
+    last_active_time = Time.utc(2024, 6, 1, 12, 0, 0)
+
+    # Create a card with custom timestamps (simulating import)
+    post board_cards_path(boards(:writebook)),
+      params: { card: { title: "Imported card", created_at: created_time, last_active_at: last_active_time } },
+      as: :json
+    assert_response :created
+
+    card = Card.last
+
+    # Adding a comment overwrites last_active_at (this is expected)
+    card.comments.create!(creator: users(:kevin), body: "Imported comment")
+    assert_not_equal last_active_time, card.reload.last_active_at
+
+    # After import, restore the correct last_active_at
+    put card_path(card, format: :json), params: { card: { last_active_at: last_active_time } }
+    assert_response :success
+
+    assert_equal last_active_time, card.reload.last_active_at
+  end
+
+  test "update as JSON" do
+    card = cards(:logo)
+
+    put card_path(card, format: :json), params: { card: { title: "Update test" } }
+    assert_response :success
+
     assert_equal "Update test", card.reload.title
   end
 
   test "delete as JSON" do
     card = cards(:logo)
-    delete card_path(card, format: :json)
 
+    delete card_path(card, format: :json)
     assert_response :no_content
+
     assert_not Card.exists?(card.id)
   end
 end
