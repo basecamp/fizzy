@@ -2,19 +2,21 @@
 <html lang="en">
   <%= render "layouts/shared/head" %>
 
-  <body data-controller="local-time timezone-cookie turbo-navigation theme" data-action="turbo:morph@window->local-time#refreshAll turbo:before-visit@document->turbo-navigation#rememberLocation">
-    <header class="header <%= @header_class %>" id="header">
-      <a href="#main" class="header__skip-navigation btn" data-turbo="false">Skip to main content</a>
-      <%= render "my/menu" if Current.user %>
-      <%= yield :header %>
-    </header>
+  <body class="<%= @body_class %>" data-controller="local-time timezone-cookie turbo-navigation theme" data-action="turbo:morph@window->local-time#refreshAll turbo:before-visit@document->turbo-navigation#rememberLocation">
+    <div id="global-container">
+      <header class="header <%= @header_class %>" id="header">
+        <a href="#main" class="header__skip-navigation btn" data-turbo="false">Skip to main content</a>
+        <%= render "my/menu" if Current.user %>
+        <%= yield :header %>
+      </header>
 
-    <%= render "layouts/shared/flash" %>
-    <%= render "layouts/shared/time_zone" if Current.user %>
+      <%= render "layouts/shared/flash" %>
+      <%= render "layouts/shared/time_zone" if Current.user %>
 
-    <main id="main">
-      <%= yield %>
-    </main>
+      <main id="main">
+        <%= yield %>
+      </main>
+    </div>
 
     <footer id="footer">
       <%= yield :footer %>

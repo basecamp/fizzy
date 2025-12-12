@@ -1,33 +1,66 @@
 @layer components {
+  /* Layout adjustments for contained scrolling
+  /* ------------------------------------------------------------------------ */
+
+  body.contained-scrolling {
+    block-size: 100dvh;
+    grid-template-rows: 1fr var(--bar-height);
+
+    #global-container,
+    #main {
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    #global-container {
+      overflow: hidden;
+    }
+
+    #main {
+      overflow: auto;
+      padding: 0;
+    }
+  }
+
   /* Column container
   /* ------------------------------------------------------------------------ */
 
-  #main:has(.card-columns) {
-    --main-padding: 0;
-  }
-
   .card-columns {
     --bubble-size: 3.5rem;
-    --cards-gap: min(1.2cqi, 1.7rem);
-    --column-gap: 8px;
+    --cards-gap: clamp(0.75rem, 1.2cqi, 1.7rem);
+    --column-gap: 0.75rem;
     --column-padding-expanded: calc(var(--column-gap) * 2);
     --column-transition-duration: 300ms;
     --column-width-collapsed: 40px;
-    --column-width-expanded: 450px;
     --progress-increment: var(--progress-max-height) / var(--progress-max-cards);
     --progress-max-cards: 20;
     --progress-max-height: 50dvh;
 
     container-type: inline-size;
-    display: grid;
-    gap: var(--column-gap);
-    grid-template-columns: 1fr var(--column-width-expanded) 1fr;
-    margin-inline: auto;
-    max-inline-size: var(--main-width);
+    inline-size: 100%;
     overflow-x: auto;
     overflow-y: hidden;
-    padding-block-end: var(--column-width-collapsed);
     position: relative;
+
+    @media (max-width: 639px) {
+      --column-width-expanded: calc(100vw - var(--column-gap) * 3);
+
+      display: flex;
+      padding-inline: calc(var(--column-gap) * 3);
+      scroll-snap-type: inline mandatory;
+    }
+
+    @media (min-width: 640px) {
+      --column-gap: 8px;
+      --column-width-expanded: 450px;
+
+      display: grid;
+      grid-template-columns: 1fr var(--column-width-expanded) 1fr;
+      grid-template-rows: 1fr;
+      gap: var(--column-gap);
+      margin-inline: auto;
+      max-inline-size: var(--main-width);
+    }
 
     /* When it has something expanded */
     &:has(.card-columns__left .cards:not(.is-collapsed), .card-columns__right .cards:not(.is-collapsed)) {
@@ -49,7 +82,15 @@
   .card-columns__right {
     align-items: stretch;
     display: flex;
-    gap: var(--column-gap);
+    overflow: hidden;
+
+    @media (max-width: 639px) {
+      display: contents;
+    }
+
+    @media (min-width: 640px) {
+      gap: var(--column-gap);
+    }
   }
 
   .card-columns__left {
@@ -68,48 +109,28 @@
   .cards {
     --column-color: color-mix(in srgb, var(--card-color) 15%, var(--color-canvas));
 
+    flex-shrink: 0;
     inline-size: var(--column-width-expanded);
     outline: none;
+    overflow: auto;
     position: relative;
-    scroll-snap-align: start;
-
-    &.is-collapsed {
-      inline-size: var(--column-width-collapsed);
-
-      .pagination-link.pagination-link--active-when-observed,
-      .card {
-        display: none;
-      }
-    }
 
     &.drag-and-drop__hover-container {
       --dnd-bg-color: transparent;
       --dnd-border-color: transparent;
+    }
 
-      &.is-off-screen {
-        &:after {
-          content: attr(data-column-name);
-          font-size: var(--text-x-small);
-          font-weight: 500;
-          line-height: var(--column-width-collapsed);
-          padding-inline: 1ch;
-          position: fixed;
-          text-transform: uppercase;
-          top: 0;
-          translate: -50%;
-        }
+    @media (max-width: 639px) {
+      scroll-snap-align: center;
+    }
 
-        &.is-collapsed {
-          &:after {
-            writing-mode: vertical-rl;
-          }
-        }
+    @media (min-width: 640px) {
+      &.is-collapsed {
+        inline-size: var(--column-width-collapsed);
 
-        &:not(.is-collapsed) {
-          &:after {
-            background-color: var(--column-color);
-            inline-size: calc(var(--column-width-expanded) - 4px); /* make room for the dnd border */
-          }
+        .pagination-link.pagination-link--active-when-observed,
+        .card {
+          display: none;
         }
       }
     }
@@ -124,16 +145,27 @@
 
   .cards__transition-container {
     block-size: 100%;
-    border-radius: calc(var(--column-width-collapsed) / 2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding-inline: calc(var(--column-gap) / 2);
     translate: 0;
     transition: translate var(--column-transition-duration) var(--ease-out-overshoot-subtle);
 
-    .is-collapsed:not(.cards--considering) & {
-      translate: 0 var(--column-width-collapsed);
-    }
+    @media (min-width: 640px) {
+      border-radius: calc(var(--column-width-collapsed) / 2);
 
-    .cards:not(.is-collapsed) & {
-      padding-inline: var(--column-padding-expanded);
+      .cards:not(.is-collapsed) & {
+        padding-inline: var(--column-padding-expanded);
+      }
+
+      .is-collapsed & {
+        padding-inline: 0;
+      }
+
+      .is-collapsed:not(.cards--considering) & {
+        translate: 0 var(--column-width-collapsed);
+      }
     }
 
     .drag-and-drop__hover-container & {
@@ -155,24 +187,24 @@
   /* The wrapper around the cards used to clip overflow while transitioning.
    * Also, don't resize cards while transitioning to avoid reflow. */
   .cards__list {
-    align-items: flex-end; /* use flex-start to wipe from left */
+    align-items: center;
     display: flex;
     flex-direction: column;
     gap: var(--cards-gap);
     margin-block-start: -1ch;
     margin-inline: -1ch;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 1ch;
 
-    .cards:not(.is-collapsed) & {
-      padding: 1ch;
-    }
+    @media (min-width: 640px) {
+      .is-collapsed & {
+        padding: 0;
+      }
 
-    .card {
-      inline-size: calc(var(--column-width-expanded) - var(--column-padding-expanded) * 2);
-    }
-
-    .cards--grid & {
-      display: contents;
+      .card {
+        inline-size: calc(var(--column-width-expanded) - var(--column-padding-expanded) * 2);
+      }
     }
 
     [aria-selected] & .card[aria-selected] {
@@ -193,6 +225,7 @@
 
   .cards__new-column {
     margin-block-start: var(--column-width-collapsed);
+    scroll-snap-align: center;
   }
 
   /* Cards grid; used when filtering
@@ -210,6 +243,7 @@
     justify-content: center;
     margin-inline: auto;
     max-inline-size: var(--main-width);
+    padding: 1ch;
 
     @media (min-width: 640px) {
       --card-grid-columns: 2;
@@ -217,6 +251,10 @@
 
     @media (min-width: 960px) {
       --card-grid-columns: 3;
+    }
+
+    .cards__list {
+      display: contents;
     }
 
     .card {
@@ -240,15 +278,17 @@
   /* ------------------------------------------------------------------------ */
 
   .cards__header {
-    .cards.is-collapsed & {
-      block-size: 100%;
-    }
+    display: grid;
+    grid-template-areas: "menu expander maximize";
+    grid-template-columns: var(--column-width-collapsed) 1fr var(--column-width-collapsed);
+    margin-block-end: calc(0.5 * var(--cards-gap));
 
-    .cards:not(.is-collapsed) & {
-      display: grid;
-      grid-template-areas: "menu expander maximize";
-      grid-template-columns: var(--column-width-collapsed) 1fr var(--column-width-collapsed);
-      margin-block-end: calc(0.5 * var(--cards-gap));
+    @media (min-width: 640px) {
+      .is-collapsed & {
+        block-size: 100%;
+        display: block;
+        margin-block-end: 0;
+      }
     }
   }
 
@@ -266,8 +306,10 @@
       opacity: 1;
     }
 
-    .cards.is-collapsed & {
-      display: none;
+    @media (min-width: 640px) {
+      .is-collapsed & {
+        display: none;
+      }
     }
   }
 
@@ -291,6 +333,8 @@
     font-weight: 600;
     gap: 0.5ch;
     grid-area: expander;
+    inline-size: 100%;
+    justify-content: center;
     outline-offset: -2px;
     position: relative;
     text-transform: uppercase;
@@ -298,6 +342,13 @@
     @media (any-hover: hover) {
       &:hover {
         filter: brightness(0.9);
+      }
+    }
+
+    @media (min-width: 640px) {
+      .is-collapsed & {
+        inline-size: auto;
+        justify-content: flex-start;
       }
     }
 
@@ -324,34 +375,31 @@
       transition: none;
     }
 
-    .cards.is-collapsed & {
-      block-size: 100%;
-      flex-direction: column;
-      inline-size: var(--column-width-collapsed);
-      justify-content: start;
-      letter-spacing: 0.05em;
-
-      /* Guitar string */
-      &:before {
-        background-color: var(--column-color);
+    @media (min-width: 640px) {
+      .is-collapsed & {
         block-size: 100%;
-        content: "";
-        inline-size: 1px;
-        inset: 0 auto;
-        position: absolute;
-        z-index: -2;
-      }
-
-      &:after {
-        block-size: calc(var(--column-width-collapsed) + var(--card-count) * var(--progress-increment));
-        opacity: 1;
+        flex-direction: column;
         inline-size: var(--column-width-collapsed);
-      }
-    }
+        justify-content: start;
+        letter-spacing: 0.05em;
 
-    .cards:not(.is-collapsed) & {
-      inline-size: 100%;
-      justify-content: center;
+        /* Guitar string */
+        &:before {
+          background-color: var(--column-color);
+          block-size: 100%;
+          content: "";
+          inline-size: 1px;
+          inset: 0 auto;
+          position: absolute;
+          z-index: -2;
+        }
+
+        &:after {
+          block-size: calc(var(--column-width-collapsed) + var(--card-count) * var(--progress-increment));
+          opacity: 1;
+          inline-size: var(--column-width-collapsed);
+        }
+      }
     }
 
     .cards:is(.cards--considering) &:hover {
@@ -361,32 +409,35 @@
   }
 
   .cards__expander-count {
+    display: none;
     line-height: var(--column-width-collapsed);
     inline-size: var(--column-width-collapsed);
 
-    .cards:not(.is-collapsed) & {
-      display: none;
+    @media (min-width: 640px) {
+      .is-collapsed & {
+        display: block;
+      }
     }
   }
 
   .cards__expander-title {
-    font-weight: inherit;
+    align-items: center;
+    display: flex;
     font-size: inherit;
+    font-weight: inherit;
+    gap: 0.25ch;
     line-height: var(--column-width-collapsed);
+    max-inline-size: calc(100% - var(--column-width-collapsed) * 2);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 
-    .cards.is-collapsed & {
-      max-inline-size: 50vh;
-      writing-mode: vertical-rl;
-    }
-
-    .cards:not(.is-collapsed, .cards--considering) & {
-      align-items: center;
-      display: flex;
-      gap: 0.25ch;
-      max-inline-size: calc(100% - var(--column-width-collapsed) * 2);
+    @media (min-width: 640px) {
+      .is-collapsed & {
+        align-items: flex-start;
+        max-inline-size: 50vh;
+        writing-mode: vertical-rl;
+      }
     }
 
     .icon--collapse {
@@ -397,13 +448,15 @@
       transition: 150ms ease-out;
       transition-property: opacity, scale;
 
-      .cards.is-collapsed & {
-        display: none;
-      }
-
-      .cards:not(.is-collapsed) .cards__expander:hover & {
+      .cards__expander:hover & {
         opacity: 0.66;
         scale: 1;
+      }
+
+      @media (min-width: 640px) {
+        .is-collapsed & {
+          display: none;
+        }
       }
     }
   }
@@ -531,6 +584,12 @@
 
     position: relative;
 
+    @media (max-width: 639px) {
+      .cards__list {
+        overflow-y: auto;
+      }
+    }
+
     .card {
       --avatar-size: 2.75em;
       --text-small: 1.1em;
@@ -653,36 +712,31 @@
     }
   }
 
-  /* Closed (Done)
-  /* ------------------------------------------------------------------------ */
-
-  .cards--closed {
-
-  }
-
   /* Doing
   /* -------------------------------------------------------------------------- */
 
   /* Surface a mini bubble if there are cards with bubbles inside */
-  .cards--considering:has(.bubble:not([hidden])),
-  .cards--doing.is-collapsed:has(.bubble:not([hidden])) {
-    .cards__transition-container {
-      --bubble-color: var(--card-color, oklch(var(--lch-blue-medium)));
-      --bubble-shape: 54% 46% 61% 39% / 57% 49% 51% 43%;
+  @media (min-width: 640px) {
+    .cards--considering:has(.bubble:not([hidden])),
+    .cards--doing.is-collapsed:has(.bubble:not([hidden])) {
+      .cards__transition-container {
+        --bubble-color: var(--card-color, oklch(var(--lch-blue-medium)));
+        --bubble-shape: 54% 46% 61% 39% / 57% 49% 51% 43%;
 
-      &:before {
-        background: radial-gradient(
-          color-mix(in srgb, var(--bubble-color) 8%, var(--color-canvas)) 50%,
-          color-mix(in srgb, var(--bubble-color) 48%, var(--color-canvas)) 100%
-        );
-        block-size: 1em;
-        border-radius: var(--bubble-shape);
-        content: "";
-        inline-size: 1em;
-        inset: 0 0 auto auto;
-        position: absolute;
-        translate: 20% -20%;
-        z-index: 1;
+        &:before {
+          background: radial-gradient(
+            color-mix(in srgb, var(--bubble-color) 8%, var(--color-canvas)) 50%,
+            color-mix(in srgb, var(--bubble-color) 48%, var(--color-canvas)) 100%
+          );
+          block-size: 1em;
+          border-radius: var(--bubble-shape);
+          content: "";
+          inline-size: 1em;
+          inset: 0 0 auto auto;
+          position: absolute;
+          translate: 20% -20%;
+          z-index: 1;
+        }
       }
 
       .cards--considering &:before {
@@ -690,10 +744,6 @@
         translate: 100% 75%;
       }
     }
-  }
-
-  .cards--considering:has(.bubble:not([hidden])) .cards__expander-title:before {
-    translate: 120% 50%;
   }
 
   /* Card column indicators
@@ -734,6 +784,21 @@
   /* Mobile columns
   /* -------------------------------------------------------------------------- */
 
+  .mobile-column-select {
+    display: none;
+
+    @media (min-width: 640px) {
+      display: none;
+    }
+
+    .popup {
+      padding-inline: 0;
+      padding-block: 1ch;
+      inline-size: 100%;
+      top: 2.5em;
+    }
+  }
+
   .mobile-card-columns {
     --column-gap: 8px;
     --column-padding-expanded: calc(var(--column-gap) * 2);
@@ -742,10 +807,13 @@
     --progress-max-cards: 20;
     --progress-max-width: 100%;
 
+    &:not(.popup &) {
+      display: none;
+    }
+
     padding-inline: 3vw;
 
-    /* Hide on larger devices with cursors */
-    @media (min-width: 520px) {
+    @media (min-width: 640px) {
       display: none;
     }
 
@@ -759,6 +827,7 @@
 
         flex-direction: row;
         inline-size: auto;
+        justify-content: flex-start;
 
         &:before {
           block-size: 1px;
@@ -772,11 +841,16 @@
           inline-size: calc(var(--column-width-collapsed) + var(--card-count) * var(--progress-increment));
           margin-inline-start: 0;
           max-inline-size: var(--progress-max-width);
+          opacity: 1;
         }
       }
 
       .cards__expander-title {
         writing-mode: revert;
+      }
+
+      .cards__expander-count {
+        display: block;
       }
     }
   }
