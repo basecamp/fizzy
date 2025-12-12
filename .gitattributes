@@ -1,6 +1,6 @@
 # See https://git-scm.com/docs/gitattributes for more about git attribute files.
 
-# Protect workspace template on main branch during merges
+# Protect workspace template and other files on main branch during merges
 dev/workspace/** merge=ours
 .claude/config/** merge=ours
 README.md merge=ours

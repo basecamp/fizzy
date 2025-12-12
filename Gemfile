@@ -1,1 +1,1 @@
-gem 'claude_hooks', '~> 1.0'
+gem "claude_hooks", "~> 1.0"
