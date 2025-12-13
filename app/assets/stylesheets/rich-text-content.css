@@ -28,6 +28,10 @@
       }
     }
 
+    :where(p:has(+ p)) {
+      margin: 0;
+    }
+
     :where(ol, ul) {
       list-style: disc;
       padding-inline-start: 3ch;
