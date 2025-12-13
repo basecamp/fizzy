@@ -1,9 +1,9 @@
 <div class="card-perma__notch card-perma__notch--bottom flex-column" id="<%= dom_id(card, :card_closure_toggle) %>">
   <% if card.closed? %>
     <div class="flex gap-half margin-block-start-double margin-block-end">
-      <span class="card-perma__closure-message">Completed by <%= card.closed_by.name %> on <%= local_datetime_tag(card.closed_at, style: :shortdate) %>.</span>
+      <span class="card-perma__closure-message"><%= t("cards.closure.completed_by", name: card.closed_by.name) %> <%= local_datetime_tag(card.closed_at, style: :shortdate) %>.</span>
       <%= button_to card_closure_path(card), method: :delete, class: "btn btn--plain borderless fill-transparent" do %>
-        <span class="pad-inline-end">Undo</span>
+        <span class="pad-inline-end"><%= t("cards.closure.undo") %></span>
       <% end %>
     </div>
   <% else %>
@@ -12,7 +12,7 @@
     <div id="<%= dom_id(card, :closure_notice) %>">
       <% if card.entropic? && card.open? && !card.postponed? %>
         <div class="card-perma__closure-message">
-          Moves to “Not Now” <%= local_datetime_tag(card.entropy.auto_clean_at, style: :indays) -%> if there’s no activity.
+          <%= t("cards.closure.moves_to_not_now") %> <%= local_datetime_tag(card.entropy.auto_clean_at, style: :indays) -%> <%= t("cards.closure.if_no_activity") %>
         </div>
       <% end %>
     </div>

@@ -193,6 +193,29 @@ vi:
     move_to_board:
       title: "Chuyển thẻ này đến…"
 
+    add_card: "Thêm thẻ"
+
+    meta:
+      by: "Bởi"
+      updated: "Cập nhật"
+      assigned_to: "Giao cho"
+      not_assigned: "Chưa giao"
+      assign: "Giao"
+
+    closure:
+      completed_by: "Hoàn thành bởi %{name} vào"
+      undo: "Hoàn tác"
+      moves_to_not_now: "Chuyển sang \"Tạm hoãn\""
+      if_no_activity: "nếu không có hoạt động."
+
+    pins:
+      unpin: "Bỏ ghim thẻ này (shift+p)"
+      pin: "Ghim thẻ này (shift+p)"
+
+    watches:
+      stop_watching: "Ngừng theo dõi (shift+n)"
+      watch_this: "Theo dõi thẻ này (shift+n)"
+
   # ============================================================================
   # COLUMNS
   # ============================================================================
@@ -362,6 +385,14 @@ vi:
       settings_link: "Cài đặt thông báo"
       invalid_link: "Link hủy đăng ký không hợp lệ"
 
+    tray:
+      settings_title: "Cài đặt thông báo"
+      see_more_new: "Xem thêm mục mới"
+      see_older: "Xem các mục cũ hơn"
+      mark_all_read: "Đánh dấu tất cả thông báo đã đọc"
+      clear_all: "Xóa tất cả"
+      toggle: "Bật/tắt ngăn thông báo"
+
   # ============================================================================
   # MAILERS
   # ============================================================================
@@ -447,6 +478,14 @@ vi:
     new:
       title: "Thiết lập Webhook"
       create_button: "Tạo Webhook"
+    show:
+      reactivate: "Kích hoạt lại"
+      secret: "Bí mật"
+      secret_description: "Chúng tôi sẽ gửi header X-Webhook-Signature với mỗi request. Bạn có thể tạo HMAC sử dụng SHA256 của body request với bí mật này để xác minh request đến từ chúng tôi."
+      subscribed_to: "Đã đăng ký"
+      no_subscriptions: "Webhook này chưa đăng ký sự kiện nào. Nó sẽ không bao giờ được kích hoạt."
+      deliveries: "Gửi đi"
+      no_deliveries: "Webhook này chưa được kích hoạt"
     form:
       name_placeholder: "Đặt tên Webhook này…"
       payload_url: "URL nhận dữ liệu"
@@ -494,11 +533,23 @@ vi:
     forms:
       filter_placeholder: "Lọc…"
 
-    errors:
-      changes_not_saved: "Các thay đổi của bạn không thể được lưu:"
-      try_again_later: "Vui lòng thử lại sau."
+  # ============================================================================
+  # FILTERS
+  # ============================================================================
+  filters:
+    assigned_to: "Giao cho"
+    assigned_to_placeholder: "Giao cho…"
+    no_one: "Không ai"
+    clear_all: "Xóa tất cả"
 
-    time:
+  # ============================================================================
+  # COMMON ERRORS & TIME
+  # ============================================================================
+  errors:
+    changes_not_saved: "Các thay đổi của bạn không thể được lưu:"
+    try_again_later: "Vui lòng thử lại sau."
+
+  time:
       minutes: "phút"
       hours: "giờ"
       days: "ngày"

@@ -9,21 +9,21 @@
 <article class="panel panel--wide center txt-align-start" style="view-transition-name: <%= dom_id(@webhook) %>">
   <%= form_with model: @webhook, url: @webhook, method: :put, data: { controller: "form" }, html: { class: "flex flex-column gap" } do |form| %>
     <h2 class="txt-large margin-none">
-      <%= form.text_field :name, required: true, autofocus: true, class: "input full-width", placeholder: "Name your Webhook…", data: { action: "keydown.esc@document->form#cancel" } %>
+      <%= form.text_field :name, required: true, autofocus: true, class: "input full-width", placeholder: t("webhooks.form.name_placeholder"), data: { action: "keydown.esc@document->form#cancel" } %>
     </h2>
 
     <div class="flex flex-column gap-half">
       <%= form.label :actions do %>
-        <strong>Events</strong><br>
-        <p class="margin-none txt-x-small txt-subtle">Trigger a call to the Payload URL when these things occur:</p>
+        <strong><%= t("webhooks.form.events") %></strong><br>
+        <p class="margin-none txt-x-small txt-subtle"><%= t("webhooks.form.events_description") %></p>
       <% end %>
       <%= render "webhooks/form/actions", form: form %>
     </div>
 
     <%= form.button type: :submit, class: "btn btn--link center txt-medium" do %>
-      <span>Save Changes</span>
+      <span><%= t("common.buttons.save_changes") %></span>
     <% end %>
 
-    <%= link_to "Go back", board_webhooks_path, data: { form_target: "cancel" }, hidden: true %>
+    <%= link_to t("common.buttons.go_back"), board_webhooks_path, data: { form_target: "cancel" }, hidden: true %>
   <% end %>
 </article>

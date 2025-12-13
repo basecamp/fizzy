@@ -2,12 +2,12 @@
   <% if card.watched_by? Current.user %>
     <%= button_to card_watch_path(card), method: :delete, class: "btn btn--reversed", data: { controller: "tooltip hotkey", action: "keydown.shift+n@document->hotkey#click" } do %>
       <%= icon_tag "bell" %>
-      <span class="for-screen-reader">Stop watching (shift+n)</span>
+      <span class="for-screen-reader"><%= t("cards.watches.stop_watching") %></span>
     <% end %>
   <% else %>
     <%= button_to card_watch_path(card), class: "btn", data: { controller: "tooltip hotkey", action: "keydown.shift+n@document->hotkey#click" } do %>
       <%= icon_tag "bell-off" %>
-      <span class="for-screen-reader">Watch this (shift+n)</span>
+      <span class="for-screen-reader"><%= t("cards.watches.watch_this") %></span>
     <% end %>
   <% end %>
 </div>
