@@ -1,0 +1,3 @@
+<% column.adjacent_columns.each do |adjacent_column| %>
+  <%= turbo_stream.replace(dom_id(adjacent_column), partial: "boards/show/column", method: :morph, locals: { column: adjacent_column }) %>
+<% end %>

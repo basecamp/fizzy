@@ -1,4 +1,5 @@
 <% if @left_column %>
   <%= turbo_stream.remove(dom_id(@column)) %>
   <%= turbo_stream.before(@left_column, partial: "boards/show/column", locals: { column: @column }) %>
+  <%= render "columns/refresh_adjacent_columns", column: @column %>
 <% end %>

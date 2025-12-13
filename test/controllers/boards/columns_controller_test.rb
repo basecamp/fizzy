@@ -19,6 +19,17 @@ class Boards::ColumnsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "New Column", boards(:writebook).columns.last.name
   end
 
+  test "create refreshes adjacent columns" do
+    board = boards(:writebook)
+
+    post board_columns_path(board), params: { column: { name: "New Column" } }, as: :turbo_stream
+
+    new_column = board.columns.find_by!(name: "New Column")
+    new_column.adjacent_columns.each do |adjacent_column|
+      assert_turbo_stream action: :replace, target: dom_id(adjacent_column)
+    end
+  end
+
   test "update" do
     column = columns(:writebook_in_progress)
 
@@ -29,12 +40,12 @@ class Boards::ColumnsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "destroy" do
-    column = columns(:writebook_on_hold)
+    column = columns(:writebook_in_progress)
+    adjacent_columns = column.adjacent_columns.to_a
 
-    assert_difference -> { boards(:writebook).columns.count }, -1 do
-      delete board_column_path(boards(:writebook), column), as: :turbo_stream
-      assert_response :success
-    end
+    delete board_column_path(column.board, column), as: :turbo_stream
+
+    assert_redirected_to board_path(column.board)
   end
 
   test "index as JSON" do

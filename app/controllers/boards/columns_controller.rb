@@ -35,7 +35,7 @@ class Boards::ColumnsController < ApplicationController
     @column.destroy
 
     respond_to do |format|
-      format.turbo_stream
+      format.html { redirect_back_or_to @board }
       format.json { head :no_content }
     end
   end
