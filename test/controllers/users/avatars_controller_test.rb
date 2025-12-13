@@ -12,17 +12,10 @@ class Users::AvatarsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to ActionController::Base.helpers.image_path("system_user.png")
   end
 
-  test "show own initials without caching" do
+  test "show initials with public caching" do
     get user_avatar_path(users(:david))
     assert_match "image/svg+xml", @response.content_type
-    assert @response.cache_control[:private]
-    assert_equal "0", @response.cache_control[:max_age]
-  end
-
-  test "show other initials with caching" do
-    get user_avatar_path(users(:kevin))
-    assert_match "image/svg+xml", @response.content_type
-    assert @response.cache_control[:private]
+    assert @response.cache_control[:public]
     assert_equal 30.minutes.to_s, @response.cache_control[:max_age]
   end
 

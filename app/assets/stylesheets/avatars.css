@@ -22,6 +22,11 @@
       max-inline-size: 100%;
       object-fit: cover;
     }
+
+    span[data-creator-id] {
+      display: grid;
+      place-items: center;
+    }
   }
 
   .avatar__form {
