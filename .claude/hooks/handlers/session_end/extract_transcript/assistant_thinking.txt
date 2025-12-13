@@ -1,5 +1,5 @@
 
-[ASSISTANT 💬]
-<%= message.content[0].text %>
+[ASSISTANT THINKING 🧠]
+<%= message.content[0].thinking %>
 
 ------------------------------------------------------------
