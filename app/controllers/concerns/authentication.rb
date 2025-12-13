@@ -118,7 +118,19 @@ module Authentication
     end
 
     def email_address_pending_authentication
-      session[:email_address_pending_authentication]
+      if request.format.json?
+        verified_pending_authentication_token
+      else
+        session[:email_address_pending_authentication]
+      end
+    end
+
+    def pending_authentication_token_for(email_address)
+      Rails.application.message_verifier(:pending_authentication).generate(email_address, expires_in: 10.minutes)
+    end
+
+    def verified_pending_authentication_token
+      Rails.application.message_verifier(:pending_authentication).verified(params[:pending_authentication_token])
     end
 
     def redirect_to_session_magic_link(magic_link, return_to: nil)
@@ -129,8 +141,9 @@ module Authentication
     end
 
     def serve_development_magic_link(magic_link)
-      if Rails.env.development?
-        flash[:magic_link_code] = magic_link&.code
+      if Rails.env.development? && magic_link.present?
+        flash[:magic_link_code] = magic_link.code
+        response.set_header("X-Magic-Link-Code", magic_link.code)
       end
     end
 end
