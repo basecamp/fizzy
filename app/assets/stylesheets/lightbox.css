@@ -67,7 +67,7 @@
   }
 
   .lightbox__caption {
-    color: var(--color-ink-inverted);
+    color: var(--color-white);
 
     &:empty {
       display: none;

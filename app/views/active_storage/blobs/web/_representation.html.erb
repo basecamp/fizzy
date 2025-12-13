@@ -15,7 +15,7 @@
     <source src="<%= rails_blob_url(blob) %>" type="<%= blob.content_type %>">
   </audio>
 <% elsif blob.variable? %>
-  <%= link_to url_for(blob.variant(variant)), data: { action: "lightbox#open:prevent", lightbox_target: "image" } do %>
+  <%= link_to url_for(blob.variant(variant)), data: { lightbox_target: "image", lightbox_caption_value: blob.filename.to_s } do %>
     <%= image_tag url_for(blob.variant(variant)), width: width, height: height %>
   <% end %>
 <% elsif blob.previewable? %>
