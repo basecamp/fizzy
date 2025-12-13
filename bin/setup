@@ -111,6 +111,7 @@ gum style --foreground 153 "   ˚ ∘             ∘ ˚   "
 gum style --foreground 111 --bold "  ∘˚˳°∘°  𝒻𝒾𝓏𝓏𝓎  °∘°˳˚∘  "
 echo
 
+step "Trusting mise config" mise trust
 step "Installing Ruby" mise install --yes
 eval "$(mise hook-env -s bash)"
 
