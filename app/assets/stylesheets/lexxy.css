@@ -38,13 +38,17 @@
   }
 
   .lexxy-editor__content {
-    margin: var(--block-space-half) 0;
+    margin-block-start: var(--block-space-half);
     min-block-size: calc(7lh + var(--block-space));
     outline: 0;
 
     /* Allow color highlights to show through a bit */
     ::selection {
       background: oklch(var(--lch-blue-light) / 0.5);
+    }
+
+    > :last-child {
+      margin-block-end: 0;
     }
   }
 
@@ -227,11 +231,14 @@
     [data-button-group] {
       display: flex;
       flex-direction: row;
-      flex-wrap: wrap;
       gap: var(--gap);
 
       + & {
         margin-block-start: var(--gap);
+      }
+
+      @media (max-width: 639px) {
+        flex-wrap: wrap;
       }
     }
   }
@@ -297,17 +304,12 @@
     font-size: var(--text-small);
     list-style: none;
     margin: 0;
+    max-height: 200px;
     min-inline-size: var(--lexxy-prompt-min-width);
+    overflow: auto;
     padding: var(--lexxy-prompt-padding);
     visibility: hidden;
     z-index: var(--z-popup);
-
-    max-height: 200px;
-    overflow: scroll;
-  
-    &:is(.lexxy-prompt-menu--visible) {
-      padding: var(--lexxy-prompt-padding);
-    }
   }
 
   .lexxy-prompt-menu--visible {
