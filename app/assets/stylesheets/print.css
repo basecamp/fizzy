@@ -125,7 +125,7 @@
   .card--new,
   .cards__decoration,
   .card-columns:before,
-  .cards--considering:before {
+  .cards--maybe:before {
     display: none;
   }
 
@@ -140,7 +140,7 @@
     padding-inline: 0;
   }
 
-  .cards--considering {
+  .cards--maybe {
     background: none;
     margin: 0;
     padding-inline: 1ch;

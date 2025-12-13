@@ -2,10 +2,11 @@ import { Controller } from "@hotwired/stimulus"
 import { nextFrame, debounce } from "helpers/timing_helpers";
 
 export default class extends Controller {
-  static classes = [ "collapsed", "noTransitions", "titleNotVisible" ]
-  static targets = [ "column", "button", "title" ]
+  static classes = [ "collapsed", "expanded", "noTransitions", "titleNotVisible" ]
+  static targets = [ "column", "button", "title", "maybeColumn" ]
   static values = {
-    board: String
+    board: String,
+    desktopBreakpoint: { type: String, default: "(min-width: 640px)" }
   }
 
   initialize() {
@@ -15,6 +16,11 @@ export default class extends Controller {
   async connect() {
     await this.#restoreColumnsDisablingTransitions()
     this.#setupIntersectionObserver()
+
+    this.mediaQuery = window.matchMedia(this.desktopBreakpointValue)
+    this.handleDesktop = this.#handleDesktop.bind(this)
+    this.mediaQuery.addEventListener("change", this.handleDesktop)
+    this.handleDesktop(this.mediaQuery)
   }
 
   disconnect() {
@@ -22,10 +28,11 @@ export default class extends Controller {
       this._intersectionObserver.disconnect()
       this._intersectionObserver = null
     }
+    this.mediaQuery.removeEventListener("change", this.handleDesktop)
   }
 
   toggle({ target }) {
-    const column = target.closest('[data-collapsible-columns-target="column"]')
+    const column = target.closest('[data-collapsible-columns-target~="column"]')
     this.#toggleColumn(column);
   }
 
@@ -74,7 +81,9 @@ export default class extends Controller {
   }
 
   #collapseAllExcept(clickedColumn) {
-    this.columnTargets.forEach(column => {
+    const columns = this.#isDesktop ? this.columnTargets.filter(c => c !== this.maybeColumnTarget) : this.columnTargets
+
+    columns.forEach(column => {
       if (column !== clickedColumn) {
         this.#collapse(column)
       }
@@ -89,6 +98,7 @@ export default class extends Controller {
     const key = this.#localStorageKeyFor(column)
 
     this.#buttonFor(column).setAttribute("aria-expanded", "false")
+    column.classList.remove(this.expandedClass)
     column.classList.add(this.collapsedClass)
     localStorage.removeItem(key)
   }
@@ -98,6 +108,7 @@ export default class extends Controller {
 
     this.#buttonFor(column).setAttribute("aria-expanded", "true")
     column.classList.remove(this.collapsedClass)
+    column.classList.add(this.expandedClass)
     localStorage.setItem(key, true)
   }
 
@@ -139,5 +150,27 @@ export default class extends Controller {
     }, { threshold: [0] })
 
     this.titleTargets.forEach(title => this._intersectionObserver.observe(title))
+  }
+
+  get #isDesktop() {
+    return this.mediaQuery?.matches
+  }
+
+  #handleDesktop() {
+    this.#isDesktop ? this.#handleDesktopMode() : this.#handleMobileMode()
+  }
+
+  async #handleDesktopMode() {
+    this.#expand(this.maybeColumnTarget)
+    this.#maybeButton.setAttribute("disabled", true)
+  }
+
+  #handleMobileMode() {
+    this.columnTargets.forEach(column => this.#collapse(column))
+    this.#maybeButton.removeAttribute("disabled")
+  }
+
+  get #maybeButton() {
+    return this.maybeColumnTarget.querySelector('[data-collapsible-columns-target="button"]')
   }
 }

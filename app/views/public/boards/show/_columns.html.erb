@@ -10,7 +10,7 @@
       <%= render "public/boards/show/not_now", board: board %>
     </div>
 
-    <%= render "public/boards/show/stream", board: board, page: page %>
+    <%= render "public/boards/show/maybe", board: board, page: page %>
 
     <div class="card-columns__right">
       <%= render partial: "public/boards/show/column", collection: board.columns, cached: true %>
