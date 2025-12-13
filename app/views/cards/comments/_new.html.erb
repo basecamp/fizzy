@@ -16,9 +16,9 @@
 
         <span class="flex-inline align-center gap">
           <%= form.button class: "comment__submit btn btn--reversed",
-              title: "Post this comment (#{ hotkey_label(["ctrl", "enter"]) })",
+              title: "#{t("comments.post_title")} (#{ hotkey_label(["ctrl", "enter"]) })",
               data: { form_target: "submit" }, disabled: true do %>
-            <span>Post</span>
+            <span><%= t("comments.post") %></span>
           <% end %>
         </span>
       <% end %>

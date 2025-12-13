@@ -11,9 +11,9 @@
 
   <%= form_with model: user, url: user_role_path(user), data: { controller: "form" }, method: :patch do | form | %>
     <span title="<%= role_display_name(user) %>">
-      <label class="btn btn--circle" for="<%= dom_id(user, :role) %>" aria-label="Role: <%= role_display_name(user) %>">
+      <label class="btn btn--circle" for="<%= dom_id(user, :role) %>" aria-label="<%= t("account.people.role_label", role: role_display_name(user)) %>">
         <%= icon_tag "crown" %>
-        <span class="for-screen-reader">Role: <%= role_display_name(user) %></span>
+        <span class="for-screen-reader"><%= t("account.people.role_label", role: role_display_name(user)) %></span>
         <%= form.check_box :role, { data: { action: "form#submit" }, disabled: !Current.user.can_administer?(user), checked: user.admin?, hidden: true, id: dom_id(user, :role) }, "admin", "member" %>
       </label>
     </span>
@@ -22,8 +22,8 @@
   <%# FIXME: Move this Current.user check to a stimulus controller that just checks for admin? or the like we so we can cache user list %>
   <%= button_to user, method: :delete, class: "btn btn--circle btn--negative",
         disabled: !Current.user.can_administer?(user),
-        data: { turbo_confirm: "Are you sure you want to permanently remove this person from the account?" } do %>
+        data: { turbo_confirm: t("account.people.remove_confirm") } do %>
     <%= icon_tag "minus" %>
-    <span class="for-screen-reader">Remove <%= user.name %> from the account</span>
+    <span class="for-screen-reader"><%= t("account.people.remove_user", name: user.name) %></span>
   <% end %>
 </li>

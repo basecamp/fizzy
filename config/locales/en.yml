@@ -29,3 +29,30 @@
 
 en:
   hello: "Hello world"
+
+  notifications:
+    body:
+      assigned_to: "Assigned to %{assignees}"
+      self: "self"
+      unassigned_by: "Unassigned by %{creator}"
+      added_by: "Added by %{creator}"
+      moved_to_done: "Moved to Done by %{creator}"
+      reopened_by: "Reopened by %{creator}"
+      moved_to_not_now: "Moved to Not Now by %{creator}"
+      auto_postponed: "Moved to Not Now due to inactivity"
+      renamed_by: "Renamed by %{creator}"
+      moved_by: "Moved by %{creator}"
+      moved_to_column: "Moved to %{column} by %{creator}"
+      moved_back_to_triage: "Moved back to Maybe? by %{creator}"
+      mentioned_you: "%{name} @mentioned you"
+      card_number: "Card %{number}"
+
+    buttons:
+      mark_read: "Mark as read"
+      mark_unread: "Mark as unread"
+
+    frequency:
+      never: "Never"
+      every_few_hours: "Every few hours"
+      daily: "Every day"
+      weekly: "Every week"

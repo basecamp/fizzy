@@ -1,9 +1,9 @@
 <%= form_with url: search_path, method: :get, class: "search__form flex align-center justify-center gap-half", data: { bar_target: "form", turbo_frame: "bar_content" } do |form| %>
-  <%= form.label :q, "Search Fizzy", class: "font-weight-black txt-nowrap" %>
+  <%= form.label :q, t("search.label"), class: "font-weight-black txt-nowrap" %>
   <%= text_field_tag :q, query_terms,
         class: "search__input input",
         type: "search",
-        placeholder: "Find something…",
+        placeholder: t("search.find_placeholder"),
         autocomplete: "off",
         autofocus: true,
         data: {
@@ -11,6 +11,6 @@
           action: "keydown.enter->bar#showModalAndSubmit:prevent keydown.esc->bar#reset" } %>
   <button class="search__reset btn btn--circle borderless" data-action="bar#clearInput">
     <%= icon_tag "close" %>
-    <span class="for-screen-reader">Close search</span>
+    <span class="for-screen-reader"><%= t("search.close") %></span>
   </button>
 <% end %>

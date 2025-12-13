@@ -12,17 +12,17 @@
             <%= general_prompts(@card.board) %>
           <% end %>
           <div class="flex gap-half justify-start align-center">
-            <%= form.button class: "btn btn--reversed", type: :submit, title: "Save changes (#{ hotkey_label(["ctrl", "enter"]) })" do %>
-              <span>Save</span>
+            <%= form.button class: "btn btn--reversed", type: :submit, title: "#{t("common.buttons.save_changes")} (#{ hotkey_label(["ctrl", "enter"]) })" do %>
+              <span><%= t("common.buttons.save") %></span>
             <% end %>
-            <%= link_to card_comment_path(@card, @comment), class: "btn", data: { form_target: "cancel" },title: "Cancel (#{ hotkey_label(["esc"]) })" do %>
-              <span>Cancel</span>
+            <%= link_to card_comment_path(@card, @comment), class: "btn", data: { form_target: "cancel" },title: "#{t("common.buttons.cancel")} (#{ hotkey_label(["esc"]) })" do %>
+              <span><%= t("common.buttons.cancel") %></span>
             <% end %>
 
             <%= tag.button type: :submit, class: "btn btn--negative flex-item-justify-end", form: dom_id(@comment, :delete_form),
-                  data: { turbo_confirm: "Are you sure you want to delete this comment?" } do %>
+                  data: { turbo_confirm: t("comments.delete_confirm") } do %>
               <%= icon_tag "trash" %>
-              <span class="for-screen-reader">Delete</span>
+              <span class="for-screen-reader"><%= t("common.buttons.delete") %></span>
             <% end %>
           </div>
         <% end %>

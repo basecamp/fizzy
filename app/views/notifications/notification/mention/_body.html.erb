@@ -1,6 +1,6 @@
 <% mention = notification.source %>
 
-<strong class="card__title overflow-ellipsis"><mark class="card__notification-mentioner"><%= mention.mentioner.first_name %> @mentioned you</mark></strong>
+<strong class="card__title overflow-ellipsis"><mark class="card__notification-mentioner"><%= t("notifications.body.mentioned_you", name: mention.mentioner.first_name) %></mark></strong>
 <div class="card__notification-body overflow-ellipsis">
   <%= mention.source.mentionable_content.truncate(200) %>
 </div>

@@ -92,6 +92,13 @@ Rails.application.configure do
 
   config.action_mailer.perform_caching = false
 
+  # URL options for generating absolute URLs
+  # Set APPLICATION_HOST environment variable to your domain (e.g., "do.chip.vn")
+  if application_host = ENV["APPLICATION_HOST"].presence
+    config.action_controller.default_url_options = { host: application_host }
+    config.action_mailer.default_url_options = { host: application_host }
+  end
+
   # Ignore bad email addresses and do not raise email delivery errors.
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.
   # config.action_mailer.raise_delivery_errors = false

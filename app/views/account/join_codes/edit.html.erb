@@ -1,15 +1,15 @@
-<% @page_title = "Change usage limit" %>
+<% @page_title = t("account.join_codes.change_limit_title") %>
 
 <% content_for :header do %>
   <div class="header__actions header__actions--start">
-    <%= back_link_to "Invite link", account_join_code_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+    <%= back_link_to t("account.join_codes.invite_link"), account_join_code_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
   </div>
 <% end %>
 
 <article class="panel panel--wide center shadow flex flex-column gap-half" style="view-transition-name: <%= dom_id(@join_code) %>">
   <header class="margin-block-end-half">
     <h2 class="txt-large margin-none font-weight-black"><%= @page_title %></h2>
-    <p class="txt-medium margin-none">How many times can this link be used to join the account?</p>
+    <p class="txt-medium margin-none"><%= t("account.join_codes.change_limit_label") %></p>
   </header>
 
   <%= form_with model: @join_code, url: account_join_code_path, method: :patch, data: { controller: "form" }, html: { class: "flex flex-column gap" } do |form| %>
@@ -28,13 +28,13 @@
     <% end %>
 
     <p class="margin-none txt-subtle">
-      This code has been used <%= @join_code.usage_count %>/<%= @join_code.usage_limit_in_database %> times.
+      <%= t("account.join_codes.used_times") %> <%= @join_code.usage_count %>/<%= @join_code.usage_limit_in_database %> <%= t("account.join_codes.times") %>.
     </p>
 
     <%= form.button type: :submit, class: "btn btn--link center txt-medium", data: { form_target: "submit" } do %>
-      <span>Save changes</span>
+      <span><%= t("common.buttons.save_changes") %></span>
     <% end %>
 
-    <%= link_to "Go back", account_join_code_path, data: { form_target: "cancel" }, hidden: true %>
+    <%= link_to t("account.join_codes.go_back"), account_join_code_path, data: { form_target: "cancel" }, hidden: true %>
   <% end %>
 </article>

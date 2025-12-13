@@ -1,22 +1,22 @@
 <section>
-  <strong class="divider txt-large">Appearance</strong>
+  <strong class="divider txt-large"><%= t("users.theme.title") %></strong>
 
   <div class="theme-switcher flex gap max-width justify-center txt-small margin-block-start-half">
     <label class="btn theme-switcher__btn">
       <%= icon_tag "sun" %>
-      <span class="overflow-ellipsis">Always light</span>
+      <span class="overflow-ellipsis"><%= t("users.theme.always_light") %></span>
       <input type="radio" name="theme" data-action="click->theme#setLight" data-theme-target="lightButton">
     </label>
 
     <label class="btn theme-switcher__btn" >
       <%= icon_tag "moon" %>
-      <span class="overflow-ellipsis">Always dark</span>
+      <span class="overflow-ellipsis"><%= t("users.theme.always_dark") %></span>
       <input type="radio" name="theme" data-action="click->theme#setDark" data-theme-target="darkButton">
     </label>
 
     <label class="btn theme-switcher__btn">
       <%= icon_tag "monitor" %>
-      <span class="overflow-ellipsis">Same as OS</span>
+      <span class="overflow-ellipsis"><%= t("users.theme.same_as_os") %></span>
       <input type="radio" name="theme" data-action="click->theme#setAuto" data-theme-target="autoButton">
     </label>
   </div>

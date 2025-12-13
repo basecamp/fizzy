@@ -1,4 +1,4 @@
-<% @page_title = "Home" %>
+<% @page_title = t("events.index.home") %>
 <% @header_class = "header--events header--mobile-actions-stack" %>
 
 <%= render "cards/broadcasts", filter: @filter %>
@@ -8,9 +8,9 @@
 
   <h1 class="header__title">
     <% if @user_filtering.boards.many? %>
-      <span>Activity <%= @user_filtering.filter.boards.any? ? "in" : "across" %></span>
+      <span><%= t("events.index.activity") %> <%= @user_filtering.filter.boards.any? ? t("events.index.in") : t("events.index.across") %></span>
     <% else %>
-      <span>Latest Activity</span>
+      <span><%= t("events.index.latest_activity") %></span>
     <% end %>
 
     <%= render "events/index/filter", user_filtering: @user_filtering %>

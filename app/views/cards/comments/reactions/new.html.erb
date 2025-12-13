@@ -1,7 +1,7 @@
 <%= turbo_frame_tag @comment, :new_reaction do %>
   <%= form_with model: [ @comment.card, @comment, Reaction.new ],
         class: "reaction reaction__form expanded",
-        html: { aria: { label: "New reaction" } },
+        html: { aria: { label: t("reactions.new_reaction") } },
         data: { controller: "form reaction-emoji", turbo_frame: dom_id(@comment, :reacting), action: "keydown.esc->form#cancel submit->form#preventEmptySubmit submit->form#preventComposingSubmit" } do |form| %>
     <label class="reaction__form-label flex gap" style="--column-gap: 0.4ch;">
       <figure class="reaction__avatar margin-none flex-item-no-shrink">
@@ -9,18 +9,18 @@
       </figure>
 
       <%= form.text_field :content, autofocus: true, autocomplete: "off", autocorrect: "off", maxlength: 16,
-            pattern: /\S+.*/, class: "input reaction__input txt-small", data: { form_target: "input", reaction_emoji_target: "input", action: "compositionstart->form#compositionStart compositionend->form#compositionEnd" }, aria: { label: "Add a reaction" } %>
+            pattern: /\S+.*/, class: "input reaction__input txt-small", data: { form_target: "input", reaction_emoji_target: "input", action: "compositionstart->form#compositionStart compositionend->form#compositionEnd" }, aria: { label: t("reactions.add_reaction") } %>
     </label>
 
     <%= render "cards/comments/reactions/menu", comment: @comment %>
 
     <%= form.button class: "reaction__submit-btn btn btn--circle borderless", type: "submit", data: { form_target: "submit" } do %>
-      <%= icon_tag "check-circle" %> <span class="for-screen-reader">Submit</span>
+      <%= icon_tag "check-circle" %> <span class="for-screen-reader"><%= t("common.buttons.submit") %></span>
     <% end %>
 
     <%= link_to card_comment_reactions_path(@comment.card, @comment), role: "button",
           data: { turbo_frame: dom_id(@comment, :reacting), form_target: "cancel" }, class: "reaction__cancel-btn btn btn--circle borderless" do %>
-      <%= icon_tag "close-circle" %> <span class="for-screen-reader">Cancel</span>
+      <%= icon_tag "close-circle" %> <span class="for-screen-reader"><%= t("common.buttons.cancel") %></span>
     <% end %>
   <% end %>
 <% end %>

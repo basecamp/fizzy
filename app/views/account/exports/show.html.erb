@@ -1,12 +1,12 @@
 <% if @export.present? %>
-  <% @page_title = "Download Export" %>
+  <% @page_title = t("account.export.download_title") %>
 <% else %>
-  <% @page_title = "Download Expired" %>
+  <% @page_title = t("account.export.expired_title") %>
 <% end %>
 
 <% content_for :header do %>
   <div class="header__actions header__actions--start">
-    <%= back_link_to "Account Settings", account_settings_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+    <%= back_link_to t("account.settings.title"), account_settings_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
   </div>
 <% end %>
 
@@ -14,16 +14,16 @@
   <h2 class="txt-large margin-none font-weight-black"><%= @page_title %></h2>
 
   <% if @export.present? %>
-    <p class="margin-none-block-start">Your export is ready. The download should start automatically.</p>
+    <p class="margin-none-block-start"><%= t("account.export.ready_message") %></p>
 
     <%= link_to rails_blob_path(@export.file, disposition: "attachment"),
           id: "download-link",
           class: "btn btn--link",
           data: { turbo: false, controller: "auto-click" } do %>
-      Download your data
+      <%= t("account.export.download_data") %>
     <% end %>
   <% else %>
-    <p class="margin-none-block-start">That download link has expired. You’ll need to <%= link_to "request a new export", account_settings_path, class: "txt-lnk" %>.</p>
+    <p class="margin-none-block-start"><%= t("account.export.expired_message_html", link: link_to(t("account.export.request_new"), account_settings_path, class: "txt-lnk")).html_safe %></p>
   <% end %>
 
 </div>

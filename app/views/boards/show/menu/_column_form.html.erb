@@ -1,6 +1,6 @@
 <%= form_with model: [board, column], data: { controller: "form", action: "turbo:submit-end->dialog#close turbo:submit-end->form#reset keydown->dialog#captureKey" } do |form| %>
-  <%= form.text_field :name, class: "input", placeholder: "Name this column", value: column.name,
-        required: true, autocomplete: "off", pattern: ".*\\S.*", title: "Column name cannot be blank", data: { action: "focus->form#select" } %>
+  <%= form.text_field :name, class: "input", placeholder: t("columns.name_placeholder"), value: column.name,
+        required: true, autocomplete: "off", pattern: ".*\\S.*", title: t("columns.validation_blank"), data: { action: "focus->form#select" } %>
 
   <div class="color-picker__colors">
     <% Color::COLORS.each do |color| %>

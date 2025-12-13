@@ -26,5 +26,10 @@ module Fizzy
     end
 
     config.mission_control.jobs.http_basic_auth_enabled = false
+
+    # Internationalization (i18n) configuration
+    config.i18n.default_locale = :vi
+    config.i18n.available_locales = [:vi, :en]
+    config.i18n.fallbacks = true
   end
 end

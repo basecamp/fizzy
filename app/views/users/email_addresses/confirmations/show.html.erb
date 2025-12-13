@@ -1,18 +1,18 @@
-<% @page_title = "Confirm email change" %>
+<% @page_title = t("users.email_change.confirming_title") %>
 
 <div class="panel panel--centered center flex flex-column gap-half" style="--panel-size: 45ch;">
   <header>
     <h1 class="txt-x-large font-weight-black margin-none">
       <%= @page_title %>
     </h1>
-    <p class="margin-none-block-start margin-block-end-half">Just a sec while we confirm your new email address.</p>
+    <p class="margin-none-block-start margin-block-end-half"><%= t("users.email_change.confirming_message") %></p>
   </header>
 
   <%= form_with url: user_email_address_confirmation_path(user_id: @user.id), method: :post, data: { controller: "form auto-submit" } do |form| %>
     <%= form.hidden_field :email_address_token, value: params[:email_address_token] %>
 
     <button type="submit" class="btn btn--link center" data-form-target="submit">
-      <span>Done</span>
+      <span><%= t("common.buttons.done") %></span>
     </button>
   <% end %>
 </div>

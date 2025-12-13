@@ -1,4 +1,4 @@
-<% @page_title = "Edit your profile" %>
+<% @page_title = t("users.profile.edit_title") %>
 
 <% content_for :header do %>
   <div class="header__actions header__actions--start">
@@ -20,28 +20,28 @@
         </label>
 
         <% if @user.avatar.attached? %>
-          <%= tag.button type: :submit, form: "avatar-delete-form", class: "btn btn--negative txt-small", data: { turbo_confirm: "Are you sure you want to remove your avatar? This can't be undone." } do %>
+          <%= tag.button type: :submit, form: "avatar-delete-form", class: "btn btn--negative txt-small", data: { turbo_confirm: t("users.profile.delete_avatar_confirm") } do %>
             <%= icon_tag "minus" %>
-            <span class="for-screen-reader">Delete avatar</span>
+            <span class="for-screen-reader"><%= t("users.profile.delete_avatar") %></span>
           <% end %>
         <% end %>
       </div>
 
       <div class="flex align-center gap">
         <label class="flex align-center gap input input--actor">
-          <%= form.text_field :name, class: "input full-width", autocomplete: "name", placeholder: "Name", autofocus: true, required: true, data: { "1p-ignore": true, action: "keydown.esc@document->form#cancel" } %>
+          <%= form.text_field :name, class: "input full-width", autocomplete: "name", placeholder: t("users.profile.name_placeholder"), autofocus: true, required: true, data: { "1p-ignore": true, action: "keydown.esc@document->form#cancel" } %>
         </label>
       </div>
       <div class="flex align-center gap">
         <div class="flex align-center gap input input--actor">
-          <%= form.email_field :email_address, class: "input full-width", autocomplete: "username", placeholder: "Email address", required: true, readonly: true, value: @user.identity.email_address %>
-          <%= link_to "Change email", new_user_email_address_path(user_id: Current.user.id), class: "btn btn--plain txt-link txt-small txt-nowrap" %>
+          <%= form.email_field :email_address, class: "input full-width", autocomplete: "username", placeholder: t("users.profile.email_placeholder"), required: true, readonly: true, value: @user.identity.email_address %>
+          <%= link_to t("users.profile.change_email"), new_user_email_address_path(user_id: Current.user.id), class: "btn btn--plain txt-link txt-small txt-nowrap" %>
         </div>
       </div>
 
       <% if @user.errors.any? %>
         <div class="margin-block-half txt-negative txt-small" style="text-align: left;">
-          <p class="margin-block-none font-weight-bold">Your changes couldn't be saved:</p>
+          <p class="margin-block-none font-weight-bold"><%= t("common.errors.changes_not_saved") %></p>
           <ul class="margin-block-none">
             <% @user.errors.full_messages.each do |message| %>
               <li><%= message %></li>
@@ -51,10 +51,10 @@
       <% end %>
 
       <button type="submit" id="log_in" class="btn btn--reversed center" data-form-target="submit">
-        <span>Save changes</span>
+        <span><%= t("common.buttons.save_changes") %></span>
       </button>
 
-      <%= link_to "Cancel and go back", user_path(@user), data: { form_target: "cancel", turbo_frame: "_top" }, hidden: true %>
+      <%= link_to t("common.buttons.go_back"), user_path(@user), data: { form_target: "cancel", turbo_frame: "_top" }, hidden: true %>
     <% end %>
 
     <%= form_with url: user_avatar_url(@user), method: :delete, id: "avatar-delete-form" %>

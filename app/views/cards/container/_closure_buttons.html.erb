@@ -1,7 +1,7 @@
 <div class="flex gap-half">
   <%= link_to edit_card_path(card), class: "btn btn--circle-mobile borderless", data: { controller: "hotkey", action: "keydown.e@document->hotkey#click", turbo_frame: dom_id(card, :edit) } do %>
     <%= icon_tag "pencil", class: "icon--mobile-only" %>
-    <span>Edit</span>
+    <span><%= t("cards.edit.edit_button") %></span>
     <kbd class="txt-x-small hide-on-touch">e</kbd>
   <% end %>
 
@@ -9,7 +9,7 @@
         data: { controller: "hotkey", form_target: "submit", action: "keydown.d@document->hotkey#click" },
         form: { data: { controller: "form" } } do %>
     <%= icon_tag "check", class: "icon--mobile-only" %>
-    <span class="overflow-ellipsis">Mark as Done</span>
+    <span class="overflow-ellipsis"><%= t("cards.edit.mark_done") %></span>
     <kbd class="txt-x-small hide-on-touch">d</kbd>
   <% end %>
 </div>

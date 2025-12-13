@@ -1,12 +1,12 @@
-<% @page_title = "That code is all used up" %>
+<% @page_title = t("signups.join_codes.code_inactive.title") %>
 
 <div class="panel panel--centered flex flex-column gap-half">
   <h1 class="txt-x-large font-weight-black margin-none"><%= @page_title %></h1>
 
-  <p class="txt-medium margin-none">Ask someone from <%= @join_code.account.name %> to send you a new link or increase the limit.</p>
+  <p class="txt-medium margin-none"><%= t("signups.join_codes.code_inactive.message_1") %> <%= @join_code.account.name %> <%= t("signups.join_codes.code_inactive.message_2") %></p>
 
   <p class="txt-medium">
-    <%= link_to "OK", "https://www.fizzy.do", class: "btn btn--link" %>
+    <%= link_to t("common.buttons.done"), "https://www.fizzy.do", class: "btn btn--link" %>
   </p>
 </div>
 

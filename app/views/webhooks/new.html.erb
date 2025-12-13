@@ -1,8 +1,8 @@
-<% @page_title = "Set up a Webhook" %>
+<% @page_title = t("webhooks.new.title") %>
 
 <% content_for :header do %>
   <div class="header__actions header__actions--start">
-    <%= back_link_to "Webhooks", board_webhooks_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+    <%= back_link_to t("webhooks.index.title"), board_webhooks_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
   </div>
 
   <h1 class="header__title"><%= @page_title %></h1>
@@ -11,18 +11,18 @@
 <article class="panel panel--wide center txt-align-start" style="view-transition-name: <%= dom_id(@webhook) %>">
   <%= form_with model: @webhook, url: board_webhooks_path, data: { controller: "form" }, html: { class: "flex flex-column gap" } do |form| %>
     <h2 class="txt-large margin-none">
-      <%= form.text_field :name, required: true, autofocus: true, class: "input", placeholder: "Name this Webhook…", data: { action: "keydown.esc@document->form#cancel" } %>
+      <%= form.text_field :name, required: true, autofocus: true, class: "input", placeholder: t("webhooks.form.name_placeholder"), data: { action: "keydown.esc@document->form#cancel" } %>
     </h2>
 
     <div class="flex flex-column gap-half">
       <%= form.label :url do %>
-        <strong>Payload URL</strong><br>
-        <p class="margin-none txt-x-small txt-subtle">This is the URL for the app that will receive payloads from Fizzy.</p>
+        <strong><%= t("webhooks.form.payload_url") %></strong><br>
+        <p class="margin-none txt-x-small txt-subtle"><%= t("webhooks.form.payload_url_description") %></p>
       <% end %>
       <%= form.url_field :url,
             required: true,
             pattern: "https?://.*",
-            title: "Must be an http:// or https:// URL",
+            title: t("webhooks.form.url_validation"),
             class: "input",
             placeholder: "https://example.com",
             data: { action: "keydown.esc@document->form#cancel" } %>
@@ -30,16 +30,16 @@
 
     <div class="flex flex-column gap-half">
       <%= form.label :actions do %>
-        <strong>Events</strong><br>
-        <p class="margin-none txt-x-small txt-subtle">Trigger a call to the Payload URL when:</p>
+        <strong><%= t("webhooks.form.events") %></strong><br>
+        <p class="margin-none txt-x-small txt-subtle"><%= t("webhooks.form.events_description") %></p>
       <% end %>
       <%= render "webhooks/form/actions", form: form %>
     </div>
 
     <%= form.button type: :submit, class: "btn btn--link center txt-medium" do %>
-      <span>Create Webhook</span>
+      <span><%= t("webhooks.new.create_button") %></span>
     <% end %>
 
-    <%= link_to "Go back", board_webhooks_path, data: { form_target: "cancel" }, hidden: true %>
+    <%= link_to t("common.buttons.go_back"), board_webhooks_path, data: { form_target: "cancel" }, hidden: true %>
   <% end %>
 </article>

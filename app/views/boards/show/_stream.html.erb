@@ -1,11 +1,11 @@
-<%= column_tag id: "the-stream", name: "Maybe?", drop_url: columns_card_drops_stream_path("__id__"), collapsed: false, selected: "true", class: "cards--considering" do %>
+<%= column_tag id: "the-stream", name: t("cards.status.maybe"), drop_url: columns_card_drops_stream_path("__id__"), collapsed: false, selected: "true", class: "cards--considering" do %>
   <header class="cards__header">
     <div class="cards__expander">
-      <h2 class="cards__expander-title" data-collapsible-columns-target="title">Maybe?</h2>
+      <h2 class="cards__expander-title" data-collapsible-columns-target="title"><%= t("cards.status.maybe") %></h2>
     </div>
     <%= link_to board_columns_stream_path(board), class: "cards__maximize-button btn btn--circle txt-x-small borderless", data: { turbo_frame: "_top" } do %>
       <%= icon_tag "grid", class: "translucent" %>
-      <span class="for-screen-reader">Expand column</span>
+      <span class="for-screen-reader"><%= t("columns.expand") %></span>
     <% end %>
   </header>
   <%= render "columns/show/add_card_button", board: board %>
