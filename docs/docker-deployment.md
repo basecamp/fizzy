@@ -78,17 +78,15 @@ You can then plug all your SMTP settings from that provider into Fizzy via the f
 
 - `MAILER_FROM_ADDRESS` - the "from" address that Fizzy should use to send email
 - `SMTP_ADDRESS` - the address of the SMTP server you'll send through
-- `SMTP_PORT` - the port number you use to connect to that SMTP server (the default is 587)
+- `SMTP_PORT` - the port number (defaults to 465 when `SMTP_TLS` is set, 587 otherwise)
 - `SMTP_USERNAME`/`SMTP_PASSWORD` - the credentials for logging in to the SMTP server
 
 Less commonly, you might also need to set some of the following:
 
+- `SMTP_TLS` - set to `true` only for servers requiring implicit TLS (SMTPS on port 465); STARTTLS is used automatically by default so most servers don't need this
 - `SMTP_DOMAIN` - the domain name advertised to the server when connecting
 - `SMTP_AUTHENTICATION` - if you need an authentication method other than the default `plain`
-- `SMTP_ENABLE_STARTTLS_AUTO` - if you need to disable TLS on the SMTP connection
-- `SMTP_SSL` - if you need to enable SSL on the SMTP connection
-- `SMTP_TLS` - if you need to enable TLS on the SMTP connection
-- `SMTP_SSL_VERIFY_MODE` - specify the verification mode for openssl (`'none'`, or `'peer'`)
+- `SMTP_SSL_VERIFY_MODE` - set to `none` to skip certificate verification (for self-signed certs)
 
 You can find out more about all these settings in the [Rails Action Mailer documentation](https://guides.rubyonrails.org/action_mailer_basics.html#action-mailer-configuration).
 
