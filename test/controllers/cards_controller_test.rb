@@ -145,6 +145,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     assert_equal card.title, @response.parsed_body["title"]
+    assert_equal card.closed?, @response.parsed_body["closed"]
     assert_equal 2, @response.parsed_body["steps"].size
   end
 
