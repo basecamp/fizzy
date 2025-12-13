@@ -15,6 +15,7 @@ json.cache! card do
   json.board card.board, partial: "boards/board", as: :board
   json.column card.column, partial: "columns/column", as: :column if card.column
   json.creator card.creator, partial: "users/user", as: :user
+  json.assignees card.assignees, partial: "users/user", as: :user
 
   json.comments_url card_comments_url(card)
 end
