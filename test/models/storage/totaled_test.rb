@@ -273,4 +273,85 @@ class Storage::TotaledTest < ActiveSupport::TestCase
     assert_not_nil entry
     assert_equal(-5000, entry.delta)
   end
+
+  test "reconcile_storage aborts when entry added during scan" do
+    board = @account.boards.create!(name: "Test Board", creator: users(:david))
+    card = board.cards.create!(title: "Test Card", creator: users(:david))
+    card.image.attach io: StringIO.new("x" * 1000), filename: "test.png", content_type: "image/png"
+
+    # Delete entry to create drift
+    Storage::Entry.where(board: board).delete_all
+
+    # Intercept calculate_real_storage_bytes to insert a new entry mid-scan,
+    # faithfully simulating a concurrent upload that changes the cursor
+    board.define_singleton_method(:calculate_real_storage_bytes) do
+      Storage::Entry.create!(
+        account_id: account.id,
+        board_id: id,
+        delta: 500,
+        operation: "attach"
+      )
+      super()
+    end
+
+    # Should abort and return false without creating reconcile entry
+    assert_no_difference "Storage::Entry.where(operation: 'reconcile').count" do
+      result = board.reconcile_storage
+      assert_equal false, result
+    end
+  end
+
+  test "reconcile_storage returns true on success" do
+    board = @account.boards.create!(name: "Test Board", creator: users(:david))
+
+    result = board.reconcile_storage
+
+    assert_equal true, result
+  end
+
+
+  # ensure_storage_total race safety
+
+  test "ensure_storage_total handles concurrent creation" do
+    @account.storage_total&.destroy
+
+    threads = 3.times.map do
+      Thread.new do
+        ActiveRecord::Base.connection_pool.with_connection do
+          @account.bytes_used_exact
+        end
+      end
+    end
+
+    threads.each(&:join)
+    assert_equal 1, Storage::Total.where(owner: @account).count
+  end
+
+
+  # per-attachment reconcile
+
+  test "reconcile counts each attachment separately" do
+    board = @account.boards.create!(name: "Test", creator: users(:david))
+
+    # Create 3 distinct blobs (one per card) - no reuse
+    file = file_fixture("moon.jpg")
+    expected_bytes = file.size
+
+    3.times do |i|
+      blob = ActiveStorage::Blob.create_and_upload! \
+        io: file.open,
+        filename: "image_#{i}.jpg",
+        content_type: "image/jpeg"
+
+      embed = ActionText::Attachment.from_attachable(blob).to_html
+      board.cards.create!(title: "Card #{i}", description: "<p>#{embed}</p>", creator: users(:david))
+    end
+
+    Storage::Entry.where(board: board).delete_all
+    board.reconcile_storage
+
+    entry = Storage::Entry.find_by(board: board, operation: "reconcile")
+    # 3 attachments x file_size bytes
+    assert_equal expected_bytes * 3, entry.delta
+  end
 end

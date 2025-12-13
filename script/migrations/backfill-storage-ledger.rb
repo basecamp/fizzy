@@ -8,7 +8,21 @@
 # Run via Kamal:
 #   kamal app exec -d <stage> -p --reuse "bin/rails runner script/migrations/backfill-storage-ledger.rb"
 #
-# Safe to re-run: skips attachments that already have entries (by blob_id).
+# Safe to re-run: skips attachments that already have entries (by blob_id + recordable).
+#
+# IMPORTANT: Before running in production, verify zero historic blob reuse in tracked contexts:
+#
+#   ActiveStorage::Attachment
+#     .joins(:blob)
+#     .where(record_type: Storage::TRACKED_RECORD_TYPES)
+#     .where.not(active_storage_blobs: { account_id: Storage::TEMPLATE_ACCOUNT_ID })
+#     .select(:blob_id)
+#     .group(:blob_id)
+#     .having("COUNT(*) > 1")
+#     .count
+#   # Should return empty hash if no reuse exists in tracked contexts
+#
+# If reuse exists (excluding template blobs), fix the data first.
 class BackfillStorageLedger
   def run
     puts "Backfilling storage entries…"
@@ -26,7 +40,10 @@ class BackfillStorageLedger
       ActiveStorage::Attachment.includes(:blob).find_each do |attachment|
         record = attachment.record.try(:storage_tracked_record)
 
-        if record.nil? || Storage::Entry.exists?(blob_id: attachment.blob_id)
+        # Backfill creates one entry PER ATTACHMENT (not per blob) to match the ledger model.
+        # Storage tracking is a business abstraction at the attachment level.
+        # IMPORTANT: This assumes no historic blob reuse. Run pre-check query above first.
+        if record.nil? || Storage::Entry.exists?(blob_id: attachment.blob_id, recordable: record)
           skipped += 1
           next
         end

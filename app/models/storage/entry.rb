@@ -5,30 +5,26 @@ class Storage::Entry < ApplicationRecord
 
   scope :pending, ->(last_entry_id) { where.not(id: ..last_entry_id) if last_entry_id }
 
-  # Accepts either objects or _id params (for after_destroy_commit snapshots)
-  def self.record(delta:, operation:, account: nil, account_id: nil, board: nil, board_id: nil,
-                   recordable: nil, recordable_type: nil, recordable_id: nil, blob: nil, blob_id: nil)
+  # Records may be destroyed (during cascading deletes) but .id still works.
+  # Skip entirely if account is destroyed - no need to track storage for deleted accounts.
+  # Skip materialize jobs for destroyed boards since there's nothing to update.
+  def self.record(delta:, operation:, account:, board: nil, recordable: nil, blob: nil)
     return if delta.zero?
-
-    account_id ||= account&.id
-    board_id ||= board&.id
-    blob_id ||= blob&.id
+    return if account.destroyed?
 
     entry = create! \
-      account_id: account_id,
-      board_id: board_id,
-      recordable_type: recordable_type || recordable&.class&.name,
-      recordable_id: recordable_id || recordable&.id,
-      blob_id: blob_id,
+      account_id: account.id,
+      board_id: board&.id,
+      recordable_type: recordable&.class&.name,
+      recordable_id: recordable&.id,
+      blob_id: blob&.id,
       delta: delta,
       operation: operation,
       user_id: Current.user&.id,
       request_id: Current.request_id
 
-    # Enqueue materialization - use find_by to handle cascading deletes
-    # (Account/Board may be destroyed while attachments are still being cleaned up)
-    Account.find_by(id: account_id)&.materialize_storage_later
-    Board.find_by(id: board_id)&.materialize_storage_later if board_id
+    account.materialize_storage_later
+    board&.materialize_storage_later unless board&.destroyed?
 
     entry
   end

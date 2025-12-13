@@ -26,24 +26,23 @@ module Storage::AttachmentTracking
       return unless @storage_snapshot
 
       Storage::Entry.record \
-        account_id: @storage_snapshot[:account_id],
-        board_id: @storage_snapshot[:board_id],
-        recordable_type: @storage_snapshot[:recordable_type],
-        recordable_id: @storage_snapshot[:recordable_id],
-        blob_id: @storage_snapshot[:blob_id],
+        account: @storage_snapshot[:account],
+        board: @storage_snapshot[:board],
+        recordable: @storage_snapshot[:recordable],
+        blob: blob,
         delta: -blob.byte_size,
         operation: "detach"
     end
 
+    # Snapshot records in before_destroy since parent may be deleted by the time
+    # after_destroy_commit runs. The records may be destroyed but .id still works.
     def snapshot_storage_context
       return unless storage_tracked_record
 
       @storage_snapshot = {
-        account_id: storage_tracked_record.account.id,
-        board_id: storage_tracked_record.board_for_storage_tracking&.id,
-        recordable_type: storage_tracked_record.class.name,
-        recordable_id: storage_tracked_record.id,
-        blob_id: blob.id
+        account: storage_tracked_record.account,
+        board: storage_tracked_record.board_for_storage_tracking,
+        recordable: storage_tracked_record
       }
     end
 
