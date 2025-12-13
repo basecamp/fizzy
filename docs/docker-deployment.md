@@ -86,6 +86,9 @@ Less commonly, you might also need to set some of the following:
 - `SMTP_DOMAIN` - the domain name advertised to the server when connecting
 - `SMTP_AUTHENTICATION` - if you need an authentication method other than the default `plain`
 - `SMTP_ENABLE_STARTTLS_AUTO` - if you need to disable TLS on the SMTP connection
+- `SMTP_SSL` - if you need to enable SSL on the SMTP connection
+- `SMTP_TLS` - if you need to enable TLS on the SMTP connection
+- `SMTP_SSL_VERIFY_MODE` - specify the verification mode for openssl (`'none'`, or `'peer'`)
 
 You can find out more about all these settings in the [Rails Action Mailer documentation](https://guides.rubyonrails.org/action_mailer_basics.html#action-mailer-configuration).
 

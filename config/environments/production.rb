@@ -16,6 +16,9 @@ Rails.application.configure do
       user_name: ENV.fetch("SMTP_USERNAME", nil),
       password: ENV.fetch("SMTP_PASSWORD", nil),
       authentication: ENV.fetch("SMTP_AUTHENTICATION", "plain"),
+      ssl: ENV.fetch("SMTP_SSL", "false"),
+      tls: ENV.fetch("SMTP_TLS", "false"),
+      openssl_verify_mode: ENV.fetch("SMTP_SSL_VERIFY_MODE", "none"),
       enable_starttls_auto: ENV.fetch("SMTP_ENABLE_STARTTLS_AUTO", "true") == "true"
     }
   end
