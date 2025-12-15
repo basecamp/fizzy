@@ -6,11 +6,15 @@ allowed-tools: bash(), Task(), Read(), Write()
 
 ## Pre-loaded Context
 
-!`git branch --show-current`
+!`git branch`
 !`git status --short`
 !`ls -la dev/branches/ 2>/dev/null || echo "No archives yet"`
 
 ## Workflow
+
+### Step 0: Load previous report (if exists)
+
+$ARGUMENTS
 
 ### Step 1: Validate Basic Git State
 
@@ -24,7 +28,8 @@ Exit
 Check the working tree is clean.
 
 If uncommitted changes:
-Note for report: ⚠️ Uncommitted changes exist
+Note for report: ⚠️ Uncommitted changes exist 
+(ignore merge-preflight.md review)
 
 ### Step 2: Archive Workspace (Conditional)
 
@@ -118,21 +123,21 @@ Note configuration for report.
 ### Step 5: Validate Git State
 
 Check working tree clean:
-git status --short
+`git status --short`
 
 If uncommitted changes:
 Note for report: ❌ Uncommitted changes exist
 BLOCKING ISSUE
 
 Check all commits pushed:
-git status | grep "ahead of"
+`git status | grep "ahead of"`
 
 If ahead of origin:
 Note for report: ⚠️ Unpushed commits exist
 ATTENTION REQUIRED
 
-Check for merge conflicts with main:
-git fetch origin main
+Check for merge conflicts with command or main (if using):
+git fetch origin command (main)
 git merge-tree $(git merge-base HEAD origin/main) HEAD origin/main
 
 If conflicts detected:
@@ -143,6 +148,9 @@ BLOCKING ISSUE
 
 Check if PR exists:
 gh pr view --json number,state,title,isDraft 2>/dev/null
+
+If no PR:
+SKIP
 
 If PR exists:
 
