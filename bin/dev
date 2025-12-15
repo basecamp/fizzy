@@ -17,6 +17,8 @@ if [ -f tmp/oss-config.txt ]; then
   export OSS_CONFIG=1
 fi
 
+echo "Login with david@example.com to:"
+
 if [ "$USE_TAILSCALE" = "1" ]; then
   if ! command -v tailscale >/dev/null 2>&1; then
     echo "Error: tailscale not found" >&2
@@ -40,9 +42,16 @@ if [ "$USE_TAILSCALE" = "1" ]; then
     echo "Error: tailscale serve failed. On Linux, run once: sudo tailscale set --operator=\$USER" >&2
     exit 1
   fi
-  echo "Login with david@example.com to: https://$TS_HOSTNAME:$TS_PORT/"
+  echo "  Tailscale: https://$TS_HOSTNAME:$TS_PORT/"
 else
-  echo "Login with david@example.com to: http://fizzy.localhost:$PORT/"
+  echo "  Local: http://fizzy.localhost:$PORT/"
 fi
 
-./bin/rails server -p $PORT
+bin/rails runner - <<EOF
+  require 'socket'
+  local_ip = Socket.ip_address_list.find { |ai| ai.ipv4? && !ai.ipv4_loopback? }&.ip_address
+  puts "  Network: http://#{local_ip}:3006/" if local_ip
+EOF
+
+
+./bin/rails server -b 0.0.0.0 -p $PORT

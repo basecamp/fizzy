@@ -75,6 +75,9 @@ Rails.application.configure do
   # Raise error when a before_action's only/except options reference missing actions
   config.action_controller.raise_on_missing_callback_actions = true
 
+  # Disable forgery protection in development for easier testing on local network devices
+  config.action_controller.allow_forgery_protection = false
+
   # Prepend all log lines with the following tags.
   config.log_tags = [ :request_id ]
 
@@ -89,6 +92,8 @@ Rails.application.configure do
     "fizzy.localhost",
     "localhost",
     "127.0.0.1",
+    /^192\.168\.\d+\.\d+(:\d+)?$/, # Local network access
+    /^10\.\d+\.\d+\.\d+(:\d+)?$/, # VPN/tailscale network
     /fizzy-\d+/,  # review apps: fizzy-123, fizzy-456:3000
     /.*\.ts\.net/ # tailscale serve: hostname.tail1234.ts.net
   ]
