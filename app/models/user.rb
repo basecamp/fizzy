@@ -14,8 +14,6 @@ class User < ApplicationRecord
   has_many :pinned_cards, through: :pins, source: :card
   has_many :exports, class_name: "Account::Export", dependent: :destroy
 
-  scope :with_avatars, -> { preload(:account, :avatar_attachment) }
-
   def deactivate
     transaction do
       accesses.destroy_all

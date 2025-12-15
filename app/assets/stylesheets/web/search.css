@@ -69,8 +69,8 @@ summary {
 
   .search__empty {
     margin-block: 3em;
-    opacity: 0.66;
-    text-align: center;
+    margin-inline: auto;
+    inline-size: fit-content;
   }
 
   .search__excerpt {

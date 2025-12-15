@@ -14,7 +14,7 @@
     --markup-deleted: lch(39.64 68.17 31.45);
 
     /* Redefine named color values for dark mode */
-    @media (prefers-color-scheme: dark) {
+    html[data-theme="dark"] {
       --keyword: lch(67.63 58.99 30.64);
       --entity: lch(75.13 46.73 306.74);
       --constant: lch(74.9 39.71 255.53);
@@ -26,6 +26,22 @@
       --markup-list: lch(83.84 57.9 85.03);
       --markup-inserted: lch(83.65 59.31 141.61);
       --markup-deleted: lch(73.8% 65 29.18);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      html:not([data-theme]) {
+        --keyword: lch(67.63 58.99 30.64);
+        --entity: lch(75.13 46.73 306.74);
+        --constant: lch(74.9 39.71 255.53);
+        --string: lch(74.9 39.71 255.53);
+        --variable: lch(76.17 61.1 61.97);
+        --comment: lch(60.83 6.66 254.46);
+        --entity-tag: lch(83.65 59.31 141.61);
+        --markup-heading: lch(47.93 71.67 280.72);
+        --markup-list: lch(83.84 57.9 85.03);
+        --markup-inserted: lch(83.65 59.31 141.61);
+        --markup-deleted: lch(73.8% 65 29.18);
+      }
     }
 
     color: var(--color-ink);

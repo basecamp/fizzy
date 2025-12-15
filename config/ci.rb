@@ -11,6 +11,7 @@ CI.run do
 
   step "Style: Ruby", "bin/rubocop"
 
+  step "Gemfile: Drift check", "bin/bundle-drift check"
   step "Security: Gem audit", "bin/bundler-audit check --update"
   step "Security: Importmap audit", "bin/importmap audit"
   step "Security: Brakeman audit", "bin/brakeman --quiet --no-pager --exit-on-warn --exit-on-error"

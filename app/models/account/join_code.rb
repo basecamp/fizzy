@@ -11,8 +11,8 @@ class Account::JoinCode < ApplicationRecord
   before_create :generate_code, if: -> { code.blank? }
 
   def redeem_if(&block)
-    transaction do
-      increment!(:usage_count) if block.call(account)
+    with_lock do
+      increment!(:usage_count) if active? && block.call(account)
     end
   end
 

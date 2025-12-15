@@ -1,6 +1,6 @@
 <% cache comment do %>
   <%= turbo_frame_tag comment, :container do %>
-    <%# Bump for CSS changes: 2025-06-30 -%>
+    <%# Cache bump 2025-12-14: action text attachment rendering changed for lightbox -%>
     <div id="<%= dom_id(comment) %>" data-creator-id="<%= comment.creator_id %>"  class="comment flex align-start full-width <%= "comment--system" if comment.creator.system? %>">
       <figure class="comment__avatar flex-item-no-shrink" aria-hidden="true">
         <%= avatar_tag comment.creator, hidden_for_screen_reader: true %>

@@ -21,7 +21,7 @@ GIT
 
 GIT
   remote: https://github.com/basecamp/fizzy-saas
-  revision: a14df11b57818697df4b2cc7b6a43e762ebaa196
+  revision: f0bc5d811ff80b45dc44b88a13a0a17a3e823143
   specs:
     fizzy-saas (0.1.0)
       audits1984
@@ -43,14 +43,14 @@ GIT
 
 GIT
   remote: https://github.com/basecamp/lexxy
-  revision: d292280b6d2c5d8a924327adf8bb9f0b25953539
+  revision: 7c197c0afc7095c89df9cb6e24484df9e7212ac8
   specs:
-    lexxy (0.1.23.beta)
+    lexxy (0.1.24.beta)
       rails (>= 8.0.2)
 
 GIT
   remote: https://github.com/basecamp/queenbee-plugin
-  revision: 15faf03a876c5e66b67753d2e1ddb24f1eb5abb2
+  revision: 14312a940471e20617b38cdec7c092a01567d18b
   specs:
     queenbee (3.2.0)
       activeresource
@@ -82,8 +82,8 @@ GIT
 
 GIT
   remote: https://github.com/rails/rails.git
-  revision: 0636a79d1bf268db6cdbbc6327106d08c3ff3751
-  branch: ast-immediate-variants-process-locally
+  revision: 4f4e0acaf558f6adf7df3ac23a51beb470463901
+  branch: main
   specs:
     actioncable (8.2.0.alpha)
       actionpack (= 8.2.0.alpha)

@@ -496,6 +496,7 @@ Creates a new card in a board.
 | `image` | file | No | Header image for the card |
 | `tag_ids` | array | No | Array of tag IDs to apply to the card |
 | `created_at` | datetime | No | Override creation timestamp (ISO 8601 format) |
+| `last_active_at` | datetime | No | Override last activity timestamp (ISO 8601 format) |
 
 __Request:__
 
@@ -523,6 +524,7 @@ Updates a card.
 | `status` | string | No | Card status: `drafted`, `published` |
 | `image` | file | No | Header image for the card |
 | `tag_ids` | array | No | Array of tag IDs to apply to the card |
+| `last_active_at` | datetime | No | Override last activity timestamp (ISO 8601 format) |
 
 __Request:__
 

@@ -67,4 +67,7 @@ Rails.application.configure do
 
   # Load test helpers
   config.autoload_paths += %w[ test/test_helpers ]
+
+  # Enable multi-tenant mode for tests
+  config.x.multi_tenant.enabled = true
 end

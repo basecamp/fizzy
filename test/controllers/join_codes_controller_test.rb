@@ -94,4 +94,12 @@ class JoinCodesControllerTest < ActionDispatch::IntegrationTest
       assert_response :unprocessable_entity
     end
   end
+
+  test "create is rate limited" do
+    Rails.cache.stubs(:increment).returns(11)
+
+    post join_path(code: @join_code.code, script_name: @account.slug), params: { email_address: "test@example.com" }
+
+    assert_response :too_many_requests
+  end
 end

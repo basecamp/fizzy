@@ -65,7 +65,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_response :forbidden
   end
 
-  test "update with invalid avatar shows validation error" do
+  test "update with invalid avatar content type shows validation error" do
     sign_in_as :kevin
 
     svg_file = fixture_file_upload("avatar.svg", "image/svg+xml")
@@ -74,6 +74,18 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
     assert_select "form[action='#{user_path(users(:kevin))}']"
     assert_select ".txt-negative", text: /must be a JPEG, PNG, GIF, or WebP image/
+  end
+
+  test "update with oversized avatar shows validation error" do
+    sign_in_as :kevin
+
+    png_file = fixture_file_upload("avatar.png", "image/png")
+
+    ActiveStorage::Analyzer::ImageAnalyzer::Vips.any_instance.stubs(:metadata).returns({ width: 5000, height: 100 })
+
+    put user_path(users(:kevin)), params: { user: { avatar: png_file } }
+    assert_response :unprocessable_entity
+    assert_select ".txt-negative", text: /width must be less than 4096px/
   end
 
   test "update with valid avatar" do

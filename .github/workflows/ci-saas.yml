@@ -18,4 +18,4 @@ jobs:
     with:
       saas: true
     secrets:
-      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      FIZZY_GH_TOKEN: ${{ secrets.FIZZY_GH_TOKEN }}
