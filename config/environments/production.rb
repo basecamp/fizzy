@@ -8,15 +8,15 @@ Rails.application.configure do
   # Configure these according to whichever email provider you use. An example setup
   # using SMTP looks like the following:
   #
-  # config.action_mailer.smtp_settings = {
-  #   address:              'smtp.example.com', # The address of your email provider's SMTP server
-  #   port:                 2525,
-  #   domain:               'example.com',      # Your domain, which Fizzy will send email from
-  #   user_name:            ENV["SMTP_USERNAME"],
-  #   password:             ENV["SMTP_PASSWORD"],
-  #   authentication:       :plain,
-  #   enable_starttls_auto: true
-  # }
+  config.action_mailer.smtp_settings = {
+    address:              ENV['SMTP_ADDRESS'],
+    port:                 ENV['SMTP_PORT']&.to_i || 587,
+    domain:               ENV['SMTP_DOMAIN'],
+    user_name:            ENV['SMTP_USERNAME'],
+    password:             ENV['SMTP_PASSWORD'],
+    authentication:       ENV['SMTP_AUTHENTICATION']&.to_sym || :plain,
+    enable_starttls_auto: ENV['SMTP_ENABLE_STARTTLS'] != 'false'
+  }
 
   # Code is not reloaded between requests.
   config.enable_reloading = false
