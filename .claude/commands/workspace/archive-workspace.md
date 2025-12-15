@@ -43,13 +43,19 @@ Exit
 
 ### Step 3: Create or Update Archive
 
-Create archive directory (if doesn't exist):
-`mkdir -p dev/branches/{archive-name}`
+Find existing archive for this branch (matching pattern `*_\[type\]_description`):
+`ls -d dev/branches/*_\{type\s}_{description} 2>/dev/null`
 
-Sync workspace to archive:
+If found:
+- Rename to current date: `mv "{existing}" "dev/branches/{archive-name}"`
+
+If not found:
+- Create: `mkdir -p dev/branches/{archive-name}`
+
+Sync workspace:
 `rsync -av --delete dev/workspace/ dev/branches/{archive-name}/`
 
-This overwrites existing archive with current workspace state.
+This overwrites the existing archive with the current workspace state.
 
 ### Step 4: Confirm Success
 

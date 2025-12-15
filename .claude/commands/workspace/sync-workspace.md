@@ -24,14 +24,24 @@ allowed-tools: bash()
 
 ### Step 2: Run Command
 
-IF on either a clean `command` or `main` branch run:
+IF checked out on a clean `command` or `main` branch run:
+
 ```bash
-git pull workspace main -m "🔄 chore: sync workspace from upstream"`
+git fetch workspace main
+git merge workspace/main --allow-unrelated-histories --squash
 ```
 
 ### Step 3: Merge Conflicts
 
-IF merge conflicts exist, work through them interactively with the user.
+IF merge conflicts exist, suggest user resolve conflicts in their IDE, or work through them interactively with the user. Then continue.
+
+### Step 5: Commit Merge
+
+Once any merge conflicts are resolved:
+
+```bash
+git commit -m "🔄 chore: sync workspace from upstream"
+```
 
 ### Step 4: Confirm Success
 

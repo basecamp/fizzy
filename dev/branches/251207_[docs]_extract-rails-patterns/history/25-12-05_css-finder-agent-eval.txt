@@ -1,7 +1,7 @@
 Session: 2240523c-f8dc-447b-9873-ad256160ad37
 Date: 2025-12-05 15:53
 Branch: docs/extract-rails-patterns
-CWD: /Users/dylangraham/Projects/37signals/fizzy
+CWD: ~/Projects/37signals/fizzy
 
 ============================================================
 [SUMMARY]
@@ -56,7 +56,7 @@ Based on my search through the stylesheets, here are all the available button cl
 
 ### Core Button Class
 
-**`.btn`** - Base button class (defined in `/Users/dylangraham/Projects/37signals/fizzy/app/assets/stylesheets/buttons.css`)
+**`.btn`** - Base button class (defined in `~/Projects/37signals/fizzy/app/assets/stylesheets/buttons.css`)
 - Rounded pill-shaped button with 99rem border radius
 - Default padding: 0.5em 1.1em
 - Font weight: 600
@@ -204,7 +204,7 @@ The `.btn` class exposes these CSS variables for per-instance customization:
 <button class="btn" style="--btn-size: 3em">Large</button>
 ```
 
-All button classes are defined in `/Users/dylangraham/Projects/37signals/fizzy/app/assets/stylesheets/buttons.css` with the default sizing in `/Users/dylangraham/Projects/37signals/fizzy/app/assets/stylesheets/_global.css`.
+All button classes are defined in `~/Projects/37signals/fizzy/app/assets/stylesheets/buttons.css` with the default sizing in `~/Projects/37signals/fizzy/app/assets/stylesheets/_global.css`.
 
 ------------------------------------------------------------
 
@@ -217,11 +217,11 @@ Excellent! Now I have a comprehensive understanding of the card and panel stylin
 
 ## Card and Panel Styling Classes in Fizzy
 
-Based on my analysis of `/Users/dylangraham/Projects/37signals/fizzy/app/assets/stylesheets/`, here are the available container classes for creating boxed/elevated content areas:
+Based on my analysis of `~/Projects/37signals/fizzy/app/assets/stylesheets/`, here are the available container classes for creating boxed/elevated content areas:
 
 ### Primary Panel Classes
 
-**File:** `/Users/dylangraham/Projects/37signals/fizzy/app/assets/stylesheets/panels.css`
+**File:** `~/Projects/37signals/fizzy/app/assets/stylesheets/panels.css`
 
 1. **`.panel`** - Base panel container
    - Creates a boxed content area with border and background
@@ -242,7 +242,7 @@ Based on my analysis of `/Users/dylangraham/Projects/37signals/fizzy/app/assets/
 
 ### Card Classes (Kanban-style)
 
-**File:** `/Users/dylangraham/Projects/37signals/fizzy/app/assets/stylesheets/cards.css`
+**File:** `~/Projects/37signals/fizzy/app/assets/stylesheets/cards.css`
 
 4. **`.card`** - Full-featured card component
    - Sophisticated kanban card with color theming
@@ -257,7 +257,7 @@ Based on my analysis of `/Users/dylangraham/Projects/37signals/fizzy/app/assets/
 
 ### Supporting Classes
 
-**File:** `/Users/dylangraham/Projects/37signals/fizzy/app/assets/stylesheets/bubble.css`
+**File:** `~/Projects/37signals/fizzy/app/assets/stylesheets/bubble.css`
 
 6. **`.bubble`** - Decorative bubble element
    - Organic shaped badge/number display
@@ -266,7 +266,7 @@ Based on my analysis of `/Users/dylangraham/Projects/37signals/fizzy/app/assets/
 
 ### Elevation & Effects
 
-**File:** `/Users/dylangraham/Projects/37signals/fizzy/app/assets/stylesheets/utilities.css`
+**File:** `~/Projects/37signals/fizzy/app/assets/stylesheets/utilities.css`
 
 7. **`.shadow`** - Box shadow utility
    - Applies layered shadow effect: `var(--shadow)`
@@ -292,7 +292,7 @@ Based on view usage patterns:
 
 ### Modifier Utilities (to combine with panels)
 
-From `/Users/dylangraham/Projects/37signals/fizzy/app/assets/stylesheets/utilities.css`:
+From `~/Projects/37signals/fizzy/app/assets/stylesheets/utilities.css`:
 
 - **`.shadow`** - Add box shadow elevation
 - **`.center`** - Horizontal centering (margin-inline: auto)
@@ -303,7 +303,7 @@ From `/Users/dylangraham/Projects/37signals/fizzy/app/assets/stylesheets/utiliti
 
 ### Settings-Specific Panel
 
-**File:** `/Users/dylangraham/Projects/37signals/fizzy/app/assets/stylesheets/settings.css`
+**File:** `~/Projects/37signals/fizzy/app/assets/stylesheets/settings.css`
 
 8. **`.settings__panel`** - Settings page panel variant
    - Extends `.panel` with settings-specific spacing
@@ -357,12 +357,12 @@ Perfect! Now I have a comprehensive understanding of the form input styling in F
 
 ## Form Input CSS Classes in Fizzy
 
-Based on my analysis of `/Users/dylangraham/Projects/37signals/fizzy/app/assets/stylesheets/inputs.css` and related files, here are all available form input styling classes:
+Based on my analysis of `~/Projects/37signals/fizzy/app/assets/stylesheets/inputs.css` and related files, here are all available form input styling classes:
 
 ### Primary Input Classes
 
 **`.input`** - Base class for all text inputs, textareas, and selects
-- Defined in: `/Users/dylangraham/Projects/37signals/fizzy/app/assets/stylesheets/inputs.css` (lines 3-58)
+- Defined in: `~/Projects/37signals/fizzy/app/assets/stylesheets/inputs.css` (lines 3-58)
 - Features:
   - 0.5em border radius
   - 1px solid border with `--color-ink-medium`
@@ -377,7 +377,7 @@ Based on my analysis of `/Users/dylangraham/Projects/37signals/fizzy/app/assets/
 ### Input Variants
 
 **`.input--select`** - Select dropdown styling
-- Defined in: `/Users/dylangraham/Projects/37signals/fizzy/app/assets/stylesheets/inputs.css` (lines 104-124)
+- Defined in: `~/Projects/37signals/fizzy/app/assets/stylesheets/inputs.css` (lines 104-124)
 - Features:
   - Rounded pill shape (`--input-border-radius: 2em`)
   - Custom dropdown arrow SVG (auto-switches for dark mode)
@@ -388,7 +388,7 @@ Based on my analysis of `/Users/dylangraham/Projects/37signals/fizzy/app/assets/
 - Combine with: `.input` class
 
 **`.input--textarea`** - Textarea-specific styling
-- Defined in: `/Users/dylangraham/Projects/37signals/fizzy/app/assets/stylesheets/inputs.css` (lines 126-140)
+- Defined in: `~/Projects/37signals/fizzy/app/assets/stylesheets/inputs.css` (lines 126-140)
 - Features:
   - No padding override (`--input-padding: 0`)
   - Min height: 3 lines
@@ -398,7 +398,7 @@ Based on my analysis of `/Users/dylangraham/Projects/37signals/fizzy/app/assets/
 - Combine with: `.input` class
 
 **`.input--file`** - File input styling (overlays on images)
-- Defined in: `/Users/dylangraham/Projects/37signals/fizzy/app/assets/stylesheets/inputs.css` (lines 60-102)
+- Defined in: `~/Projects/37signals/fizzy/app/assets/stylesheets/inputs.css` (lines 60-102)
 - Features:
   - Grid layout for overlay effect
   - Transparent border, cursor pointer
@@ -409,7 +409,7 @@ Based on my analysis of `/Users/dylangraham/Projects/37signals/fizzy/app/assets/
 - Example: `<label class="input--file"><input type="file"></label>`
 
 **`.input--actor`** - Container that wraps inputs (focus behavior on parent)
-- Defined in: `/Users/dylangraham/Projects/37signals/fizzy/app/assets/stylesheets/inputs.css` (lines 222-250)
+- Defined in: `~/Projects/37signals/fizzy/app/assets/stylesheets/inputs.css` (lines 222-250)
 - Features:
   - Focus-within styling (shows focus on container instead of input)
   - Nested `.input` has transparent background, no border, no padding
@@ -419,7 +419,7 @@ Based on my analysis of `/Users/dylangraham/Projects/37signals/fizzy/app/assets/
 - Common pattern: `<label class="input input--actor"><input class="input"></label>`
 
 **`.input--invisible`** - Hidden input (screen reader only)
-- Defined in: `/Users/dylangraham/Projects/37signals/fizzy/app/assets/stylesheets/inputs.css` (lines 142-152)
+- Defined in: `~/Projects/37signals/fizzy/app/assets/stylesheets/inputs.css` (lines 142-152)
 - Features:
   - 5px x 5px, opacity 0.1
   - No border, transparent background
@@ -427,7 +427,7 @@ Based on my analysis of `/Users/dylangraham/Projects/37signals/fizzy/app/assets/
 - Use for: Accessibility/hidden inputs
 
 **`.input--hidden`** - Completely hidden input
-- Defined in: `/Users/dylangraham/Projects/37signals/fizzy/app/assets/stylesheets/inputs.css` (lines 252-257)
+- Defined in: `~/Projects/37signals/fizzy/app/assets/stylesheets/inputs.css` (lines 252-257)
 - Features:
   - 0 width/height, opacity 0, no padding
 - Use for: Inputs that should be in DOM but not visible
@@ -440,7 +440,7 @@ Based on my analysis of `/Users/dylangraham/Projects/37signals/fizzy/app/assets/
 ### Switch/Toggle Components
 
 **`.switch`** - Toggle switch container
-- Defined in: `/Users/dylangraham/Projects/37signals/fizzy/app/assets/stylesheets/inputs.css` (lines 155-169)
+- Defined in: `~/Projects/37signals/fizzy/app/assets/stylesheets/inputs.css` (lines 155-169)
 - Dimensions: `1.75em` height x `3em` width
 - Features:
   - Rounded pill shape
@@ -448,12 +448,12 @@ Based on my analysis of `/Users/dylangraham/Projects/37signals/fizzy/app/assets/
   - Color: `--color-ink-medium` default, `--color-link` when checked
 
 **`.switch__input`** - Hidden checkbox input for switch
-- Defined in: `/Users/dylangraham/Projects/37signals/fizzy/app/assets/stylesheets/inputs.css` (lines 172-176)
+- Defined in: `~/Projects/37signals/fizzy/app/assets/stylesheets/inputs.css` (lines 172-176)
 - Features: 0 width/height, opacity 0.1
 - Use on: `<input type="checkbox">` inside `.switch`
 
 **`.switch__btn`** - Visual switch button
-- Defined in: `/Users/dylangraham/Projects/37signals/fizzy/app/assets/stylesheets/inputs.css` (lines 178-219)
+- Defined in: `~/Projects/37signals/fizzy/app/assets/stylesheets/inputs.css` (lines 178-219)
 - Features:
   - Absolute positioned, fills container
   - Animated sliding dot via `::before` pseudo-element
@@ -464,7 +464,7 @@ Based on my analysis of `/Users/dylangraham/Projects/37signals/fizzy/app/assets/
 ### Special Purpose Input Classes
 
 **`.boost__input`** - Inline numeric input (very compact)
-- Defined in: `/Users/dylangraham/Projects/37signals/fizzy/app/assets/stylesheets/inputs.css` (lines 259-286)
+- Defined in: `~/Projects/37signals/fizzy/app/assets/stylesheets/inputs.css` (lines 259-286)
 - Features:
   - No border, no padding, no border radius
   - Min width: `1ch`, max: `3ch` (or content-sized if supported)
@@ -474,7 +474,7 @@ Based on my analysis of `/Users/dylangraham/Projects/37signals/fizzy/app/assets/
 - Use for: Inline editable numbers in text
 
 **`[autocomplete='one-time-code']`** - OTP/verification code styling
-- Defined in: `/Users/dylangraham/Projects/37signals/fizzy/app/assets/stylesheets/inputs.css` (lines 32-42)
+- Defined in: `~/Projects/37signals/fizzy/app/assets/stylesheets/inputs.css` (lines 32-42)
 - Features (when applied to `.input`):
   - Monospace font
   - Large text size
@@ -544,7 +544,7 @@ Based on actual usage in views:
 
 ### Related Utility Classes
 
-From `/Users/dylangraham/Projects/37signals/fizzy/app/assets/stylesheets/utilities.css`:
+From `~/Projects/37signals/fizzy/app/assets/stylesheets/utilities.css`:
 
 - `.full-width` - Makes input 100% width
 - `.flex` / `.flex-inline` - Flexbox layout
@@ -558,7 +558,7 @@ From `/Users/dylangraham/Projects/37signals/fizzy/app/assets/stylesheets/utiliti
 - No explicit `.label` class exists - labels use utility classes like `.flex`, `.align-center`, `.gap`
 - No `.field` or form wrapper classes - forms use generic layout utilities
 - The codebase uses modern CSS features: `field-sizing`, logical properties (`inline-size`, `padding-inline`), `:has()` selector
-- Focus styling is consistent across all inputs via base layer in `/Users/dylangraham/Projects/37signals/fizzy/app/assets/stylesheets/base.css`
+- Focus styling is consistent across all inputs via base layer in `~/Projects/37signals/fizzy/app/assets/stylesheets/base.css`
 
 ------------------------------------------------------------
 

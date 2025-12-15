@@ -36,7 +36,15 @@ class User < ApplicationRecord
     name != identity.email_address
   end
 
-  private
+  def verified?
+    verified_at.present?
+  end
+
+  def verify
+    update!(verified_at: Time.current) unless verified?
+  end
+
+private
     def close_remote_connections
       ActionCable.server.remote_connections.where(current_user: self).disconnect(reconnect: false)
     end

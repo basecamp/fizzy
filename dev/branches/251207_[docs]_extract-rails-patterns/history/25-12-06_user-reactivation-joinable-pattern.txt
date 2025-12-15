@@ -1,7 +1,7 @@
 Session: 94f12486-f167-47a6-8ade-f73baede34c8
 Date: 2025-12-06 16:00
 Branch: docs/extract-rails-patterns
-CWD: /Users/dylangraham/Projects/37signals/fizzy
+CWD: ~/Projects/37signals/fizzy
 
 ============================================================
 [SUMMARY]
@@ -24,12 +24,12 @@ Looking at this conversation, you raise a good point. Let me check the actual ca
 ------------------------------------------------------------
 
 [READ TOOL]
-File: /Users/dylangraham/Projects/37signals/fizzy/app/controllers/users_controller.rb
+File: ~/Projects/37signals/fizzy/app/controllers/users_controller.rb
 
 ------------------------------------------------------------
 
 [READ TOOL]
-File: /Users/dylangraham/Projects/37signals/fizzy/app/models/identity.rb
+File: ~/Projects/37signals/fizzy/app/models/identity.rb
 
 ------------------------------------------------------------
 
@@ -469,7 +469,7 @@ Let me check the current `join` implementation:
 ------------------------------------------------------------
 
 [READ TOOL]
-File: /Users/dylangraham/Projects/37signals/fizzy/app/models/identity/joinable.rb
+File: ~/Projects/37signals/fizzy/app/models/identity/joinable.rb
 
 ------------------------------------------------------------
 
@@ -529,7 +529,7 @@ So the filebox `joinable.rb` is needed - it handles the reactivation case:
 ------------------------------------------------------------
 
 [READ TOOL]
-File: /Users/dylangraham/Projects/37signals/fizzy/dev/workspace/filebox/joinable_refactor/joinable.rb
+File: ~/Projects/37signals/fizzy/dev/workspace/filebox/joinable_refactor/joinable.rb
 
 ------------------------------------------------------------
 
@@ -665,13 +665,13 @@ Let me trace through the race condition logic:
 ------------------------------------------------------------
 
 [BASH TOOL]
-Command: git -C /Users/dylangraham/Projects/37signals/fizzy show 6e9381abb --stat && echo "---FULL MESSAGE---" && git -C /Users/dylangraham/Projects/37signals/fizzy log -1 --format="%B" 6e9381abb
+Command: git -C ~/Projects/37signals/fizzy show 6e9381abb --stat && echo "---FULL MESSAGE---" && git -C ~/Projects/37signals/fizzy log -1 --format="%B" 6e9381abb
 Description: Check the race condition fix commit
 
 ------------------------------------------------------------
 
 [BASH TOOL]
-Command: git -C /Users/dylangraham/Projects/37signals/fizzy show 6e9381abb -- app/models/identity/joinable.rb
+Command: git -C ~/Projects/37signals/fizzy show 6e9381abb -- app/models/identity/joinable.rb
 Description: See the joinable change for race condition
 
 ------------------------------------------------------------
@@ -682,7 +682,7 @@ Now let me check the unique constraint:
 ------------------------------------------------------------
 
 [READ TOOL]
-File: /Users/dylangraham/Projects/37signals/fizzy/db/migrate/20251114183203_ensure_an_identit_can_only_have_one_user_in_an_account.rb
+File: ~/Projects/37signals/fizzy/db/migrate/20251114183203_ensure_an_identit_can_only_have_one_user_in_an_account.rb
 
 ------------------------------------------------------------
 
@@ -879,7 +879,7 @@ The flow:
 ------------------------------------------------------------
 
 [READ TOOL]
-File: /Users/dylangraham/Projects/37signals/fizzy/dev/workspace/filebox/joinable_refactor/joinable.rb
+File: ~/Projects/37signals/fizzy/dev/workspace/filebox/joinable_refactor/joinable.rb
 
 ------------------------------------------------------------
 
@@ -889,7 +889,7 @@ The file already has the Alternative Solution implemented. Let me add a comment 
 ------------------------------------------------------------
 
 [EDIT TOOL]
-File: /Users/dylangraham/Projects/37signals/fizzy/dev/workspace/filebox/joinable_refactor/joinable.rb
+File: ~/Projects/37signals/fizzy/dev/workspace/filebox/joinable_refactor/joinable.rb
 
 ------------------------------------------------------------
 
@@ -1199,32 +1199,32 @@ Ok so to finish off can you review my comments in the joinable_refactor files. l
 ------------------------------------------------------------
 
 [READ TOOL]
-File: /Users/dylangraham/Projects/37signals/fizzy/dev/workspace/filebox/joinable_refactor/joinable.rb
+File: ~/Projects/37signals/fizzy/dev/workspace/filebox/joinable_refactor/joinable.rb
 
 ------------------------------------------------------------
 
 [READ TOOL]
-File: /Users/dylangraham/Projects/37signals/fizzy/dev/workspace/filebox/joinable_refactor/user.rb
+File: ~/Projects/37signals/fizzy/dev/workspace/filebox/joinable_refactor/user.rb
 
 ------------------------------------------------------------
 
 [READ TOOL]
-File: /Users/dylangraham/Projects/37signals/fizzy/dev/workspace/filebox/joinable_refactor/identity.rb
+File: ~/Projects/37signals/fizzy/dev/workspace/filebox/joinable_refactor/identity.rb
 
 ------------------------------------------------------------
 
 [EDIT TOOL]
-File: /Users/dylangraham/Projects/37signals/fizzy/dev/workspace/filebox/joinable_refactor/joinable.rb
+File: ~/Projects/37signals/fizzy/dev/workspace/filebox/joinable_refactor/joinable.rb
 
 ------------------------------------------------------------
 
 [EDIT TOOL]
-File: /Users/dylangraham/Projects/37signals/fizzy/dev/workspace/filebox/joinable_refactor/user.rb
+File: ~/Projects/37signals/fizzy/dev/workspace/filebox/joinable_refactor/user.rb
 
 ------------------------------------------------------------
 
 [EDIT TOOL]
-File: /Users/dylangraham/Projects/37signals/fizzy/dev/workspace/filebox/joinable_refactor/identity.rb
+File: ~/Projects/37signals/fizzy/dev/workspace/filebox/joinable_refactor/identity.rb
 
 ------------------------------------------------------------
 

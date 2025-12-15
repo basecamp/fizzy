@@ -8,6 +8,7 @@ vendor/* linguist-vendored
 config/credentials/*.yml.enc diff=rails_credentials
 config/credentials.yml.enc diff=rails_credentials
 
-# Protect workspace template on main branch during merges
-dev/workspace/** merge=ours
+# Protect workspace template and other files on main branch during merges
+dev/workspace/** merge=protect
 .claude/config/** merge=ours
+README.md merge=ours

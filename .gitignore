@@ -40,10 +40,6 @@
 /config/master.key
 
 /config/credentials/*.key
-*.DS_Store
-
-# Ignore jet brains ide config
-.idea/
 
 # Ignore auto-generated tree file in workspace context
 dev/workspace/context/tree.md

@@ -14,11 +14,11 @@ allowed-tools: bash(), Task(), Read(), Write()
 
 ### Step 1: Validate Basic Git State
 
-Check the current branch is not main or development.
+Check the current branch is not main or command.
 
-If on main/development:
+If on main/command:
 STOP
-Output: "❌ Cannot run preflight from main/development branch"
+Output: "❌ Cannot run preflight from main/command branch"
 Exit
 
 Check the working tree is clean.
