@@ -132,9 +132,6 @@ Si quieres una instalación completa y funcional:
    # URL de tu aplicación
    APP_HOST=fizzy.tudominio.com
    
-   # Base de datos
-   MYSQL_ROOT_PASSWORD=mi_password_super_segura_123
-   
    # Rails secret (generada en paso 2.1)
    SECRET_KEY_BASE=tu_secret_key_base_de_64_caracteres...
    
@@ -301,16 +298,9 @@ Esto significa que la variable `SECRET_KEY_BASE` no está configurada o está va
 
 ### Error: "caching_sha2_password requires either TCP with TLS"
 
-MySQL 8.0 usa un método de autenticación que requiere TLS, pero el cliente no lo soporta.
+**SOLUCIONADO**: Ahora el setup usa **SQLite** en lugar de MySQL para simplificar. No verás más este error.
 
-**Solución**: El `docker-compose.yml` ya está configurado con el fix. Asegúrate de tener la versión actualizada del repo y redeploya.
-
-Si modificaste el docker-compose manualmente, agrega esta línea al servicio `db`:
-
-```yaml
-db:
-  command: --default-authentication-plugin=mysql_native_password
-```
+Si quieres usar MySQL para producción, consulta la versión completa de la guía en el repositorio original.
 
 ### Error: "port is already allocated" o "Bind for 0.0.0.0:80 failed"
 
@@ -353,9 +343,11 @@ docker logs NOMBRE_CONTENEDOR_DB
 - Verifica que `MYSQL_ROOT_PASSWORD` sea el mismo en todos lados
 - El host de la BD debe ser `db` (nombre del servicio en docker-compose)
 - Espera a que MySQL esté completamente iniciado (puede tomar 30-60 segundos)
+**NOTA**: Este setup ahora usa SQLite en lugar de MySQL para simplificar.
 
-### No llegan los emails
-
+Si ves errores de base de datos:
+- Asegúrate que el volumen `fizzy_storage` tenga permisos de escritura
+- Verifica los logs para mensajes específicos
 1. Verifica las credenciales SMTP en las variables de entorno
 2. Revisa los logs de la aplicación para errores de SMTP
 3. Confirma que tu proveedor SMTP permite envíos desde tu IP

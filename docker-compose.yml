@@ -1,25 +1,7 @@
 version: '3.8'
 
 services:
-  # Base de datos MySQL
-  db:
-    image: mysql:8.0
-    restart: unless-stopped
-    command: --default-authentication-plugin=mysql_native_password
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: fizzy_production
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ./db/init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
-      timeout: 20s
-      retries: 10
-    networks:
-      - fizzy_network
-
-  # Aplicación Fizzy
+  # Aplicación Fizzy (usando SQLite - más simple para testing)
   app:
     build:
       context: .
@@ -34,21 +16,14 @@ services:
       - "traefik.http.routers.fizzy.entrypoints=websecure"
       - "traefik.http.routers.fizzy.tls.certresolver=letsencrypt"
       - "traefik.http.services.fizzy.loadbalancer.server.port=80"
-    depends_on:
-      db:
-        condition: service_healthy
     environment:
       # Rails configuration
       RAILS_ENV: production
       RAILS_LOG_TO_STDOUT: "true"
       RAILS_SERVE_STATIC_FILES: "true"
       
-      # Database
-      DATABASE_ADAPTER: mysql
-      MYSQL_HOST: db
-      MYSQL_PORT: 3306
-      MYSQL_USER: root
-      MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      # Database (SQLite - más simple para testing)
+      DATABASE_ADAPTER: sqlite
       
       # Application secrets
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
@@ -85,8 +60,6 @@ services:
       start_period: 60s
 
 volumes:
-  mysql_data:
-    driver: local
   fizzy_storage:
     driver: local
   fizzy_public:

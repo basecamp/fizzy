@@ -7,11 +7,12 @@
 cp .env.testing .env
 ```
 
-### 2. Edita SOLO estos 2 valores en `.env`:
+### 2. Edita SOLO este valor en `.env`:
 ```bash
 APP_HOST=tu-dominio-en-dokploy.com
-MYSQL_ROOT_PASSWORD=cambia_esto_por_algo_diferente
 ```
+
+**Nota**: Ahora usa SQLite (más simple), ya no necesitas configurar MySQL.
 
 ### 3. En Dokploy:
 
@@ -31,7 +32,6 @@ Copia TODAS las líneas de tu archivo `.env` local a Dokploy:
 **Mínimo necesario**:
 ```
 APP_HOST=tu-dominio.com
-MYSQL_ROOT_PASSWORD=tu_password
 SECRET_KEY_BASE=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
 VAPID_PUBLIC_KEY=BNxDS7H-s3bPScDK0glRe7wyH0H0e9CqW5zvLCPsLM_ZGCwuXF8c3VJBcEGI5g4dKH8cEqnJX5jJQj2mz7lH8kQ
 VAPID_PRIVATE_KEY=b_Xs8i7m5fZbxT7UlR2qN9kVwE5pQ3jL8mC6hF4tG2A
