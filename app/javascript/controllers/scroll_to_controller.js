@@ -10,8 +10,8 @@ export default class extends Controller {
   #scrollTargetIntoView() {
     if(this.hasTargetTarget) {
       this.element.scrollTo({
-        top: this.targetTarget.offsetTop,
-        left: this.targetTarget.offsetLeft,
+        top: this.targetTarget.offsetTop - this.element.offsetHeight / 2 + this.targetTarget.offsetHeight / 2,
+        left: this.targetTarget.offsetLeft - this.element.offsetWidth / 2 + this.targetTarget.offsetWidth / 2,
         behavior: "instant"
       })
     }
