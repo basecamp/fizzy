@@ -116,6 +116,14 @@
       }
     }
 
+    &:nth-child(1 of &):not(:has(&) ~ * *):not(:has(&) ~ *):not(& ~ * *):not(& *) {
+      /* Targets the first system comment in the document to effectively */
+      /* hide the "Show history" button if there's only one entry */
+      .comment__history  {
+        display: none;
+      }
+    }
+
     &::before {
       /* Make up space for lack of avatar */
       content: "";
