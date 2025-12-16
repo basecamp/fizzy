@@ -1,0 +1,25 @@
+name: Lint
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  rubocop:
+    name: Rubocop
+    runs-on: ubuntu-latest
+
+    env:
+      BUNDLE_GITHUB__COM: ${{ format('x-access-token:{0}', secrets.FIZZY_GH_TOKEN) }}
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      - name: Run Rubocop
+        run: bundle exec rubocop
