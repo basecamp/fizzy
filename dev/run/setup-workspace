@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# This config file only needs to be run once to initialise workspace settings.
+
+# Merge driver (idempotent). Use the `protect` driver in .gitattributes on dev/workspace
+# to prevent a feature branch from overwriting the parent branch with new files or changes.
+git config merge.protect.name "Protect from merging"
+git config merge.protect.driver true
+
+# Remote workspace repository (add or update). Pull workspace updates from the `workspace` origin.
+git remote add workspace https://github.com/dilberryhoundog/dev-workspace.git 2>/dev/null || git remote set-url workspace https://github.com/dilberryhoundog/dev-workspace.git
+
+echo "Setup complete."

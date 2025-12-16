@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# run to parse through txt files in the dev (parent) directory
+find ../ -name "*.txt" -exec sed -i '' 's|/Users/{username}/|~/|g' {} +
