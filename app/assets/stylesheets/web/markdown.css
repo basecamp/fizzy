@@ -3,7 +3,7 @@
     --opacity: 0.5;
     --size: 0.8em;
 
-    background: url(link.svg) no-repeat center bottom 0.2em;
+    background: url("/link.svg") no-repeat center bottom 0.2em;
     background-size: var(--size);
     block-size: 1em;
     color: var(--color-link);

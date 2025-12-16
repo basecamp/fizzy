@@ -1,0 +1,5 @@
+@layer android {
+  .hide-in-android-app {
+    display: none;
+  }
+}

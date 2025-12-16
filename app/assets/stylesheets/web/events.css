@@ -221,6 +221,7 @@
     background-color: var(--color-canvas);
     grid-row-start: 1;
     inset-block-start: calc(var(--block-space) * -1);
+    margin-inline: calc(var(--main-padding) * -1);
     margin-block-end: var(--events-gap);
     padding-block: calc(var(--events-gap) * 3) var(--events-gap);
     position: sticky;

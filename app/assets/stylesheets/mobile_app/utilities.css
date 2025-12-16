@@ -1,0 +1,9 @@
+@layer mobile_app {
+  .hide-in-mobile-app {
+    display: none;
+  }
+
+  .show-in-mobile-app {
+    display: unset;
+  }
+}
