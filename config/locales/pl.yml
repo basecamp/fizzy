@@ -6,7 +6,7 @@ pl:
     my:
       menu:
         footer:
-          designed_by: "zaprojektowane, zbudowane i wspierane przez"
+          designed_by: "zostało zaprojektowane, zbudowane i jest wspierane przez"
       menus:
         jump:
           home: "Strona główna"

@@ -6,6 +6,7 @@ class ApplicationController < ActionController::Base
   include RequestForgeryProtection
   include TurboFlash, ViewTransitions
   include RoutingHeaders
+  include Locales
 
   etag { "v1" }
   stale_when_importmap_changes
