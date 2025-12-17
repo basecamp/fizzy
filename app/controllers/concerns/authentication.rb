@@ -6,8 +6,9 @@ module Authentication
     before_action :require_authentication
     after_action :ensure_development_magic_link_not_leaked
     helper_method :authenticated?
+    helper_method :email_address_pending_authentication
 
-    etag { Current.session.id if authenticated? }
+    etag { Current.identity.id if authenticated? }
 
     include LoginHelper
   end
@@ -32,17 +33,17 @@ module Authentication
 
   private
     def authenticated?
-      Current.session.present?
+      Current.identity.present?
     end
 
     def require_account
       unless Current.account.present?
-        redirect_to session_menu_url(script_name: nil)
+        redirect_to main_app.session_menu_path(script_name: nil)
       end
     end
 
     def require_authentication
-      resume_session || request_authentication
+      resume_session || authenticate_by_bearer_token || request_authentication
     end
 
     def resume_session
@@ -53,6 +54,16 @@ module Authentication
 
     def find_session_by_cookie
       Session.find_signed(cookies.signed[:session_token])
+    end
+
+    def authenticate_by_bearer_token
+      if request.authorization.to_s.include?("Bearer")
+        authenticate_or_request_with_http_token do |token|
+          if identity = Identity.find_by_permissable_access_token(token, method: request.method)
+            Current.identity = identity
+          end
+        end
+      end
     end
 
     def request_authentication
@@ -68,11 +79,11 @@ module Authentication
     end
 
     def redirect_authenticated_user
-      redirect_to root_url if authenticated?
+      redirect_to main_app.root_url if authenticated?
     end
 
     def redirect_tenanted_request
-      redirect_to root_url if Current.account.present?
+      redirect_to main_app.root_url if Current.account.present?
     end
 
     def start_new_session_for(identity)
@@ -95,6 +106,26 @@ module Authentication
       unless Rails.env.development?
         raise "Leaking magic link via flash in #{Rails.env}?" if flash[:magic_link_code].present?
       end
+    end
+
+    def email_address_pending_authentication_matches?(email_address)
+      if ActiveSupport::SecurityUtils.secure_compare(email_address, email_address_pending_authentication || "")
+        session.delete(:email_address_pending_authentication)
+        true
+      else
+        false
+      end
+    end
+
+    def email_address_pending_authentication
+      session[:email_address_pending_authentication]
+    end
+
+    def redirect_to_session_magic_link(magic_link, return_to: nil)
+      serve_development_magic_link(magic_link)
+      session[:email_address_pending_authentication] = magic_link.identity.email_address if magic_link
+      session[:return_to_after_authenticating] = return_to if return_to
+      redirect_to main_app.session_magic_link_path(script_name: nil)
     end
 
     def serve_development_magic_link(magic_link)

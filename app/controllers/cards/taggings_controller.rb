@@ -9,6 +9,11 @@ class Cards::TaggingsController < ApplicationController
 
   def create
     @card.toggle_tag_with sanitized_tag_title_param
+
+    respond_to do |format|
+      format.turbo_stream
+      format.json { head :no_content }
+    end
   end
 
   private

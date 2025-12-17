@@ -16,11 +16,14 @@ export default class extends Controller {
     await nextFrame()
     this.dragItem = this.#itemContaining(event.target)
     this.sourceContainer = this.#containerContaining(this.dragItem)
+    this.originalDraggedItemCssVariable = this.#containerCssVariableFor(this.sourceContainer)
     this.dragItem.classList.add(this.draggedItemClass)
   }
 
   dragOver(event) {
     event.preventDefault()
+    if (!this.dragItem) { return }
+
     const container = this.#containerContaining(event.target)
     this.#clearContainerHoverClasses()
 
@@ -28,32 +31,39 @@ export default class extends Controller {
 
     if (container !== this.sourceContainer) {
       container.classList.add(this.hoverContainerClass)
+      this.#applyContainerCssVariableToDraggedItem(container)
+    } else {
+      this.#restoreOriginalDraggedItemCssVariable()
     }
   }
 
   async drop(event) {
-    const container = this.#containerContaining(event.target)
+    const targetContainer = this.#containerContaining(event.target)
 
-    if (!container || container === this.sourceContainer) { return }
+    if (!targetContainer || targetContainer === this.sourceContainer) { return }
 
     this.wasDropped = true
+    this.#increaseCounter(targetContainer)
     this.#decreaseCounter(this.sourceContainer)
+
     const sourceContainer = this.sourceContainer
-    await this.#submitDropRequest(this.dragItem, container)
-    this.#reloadSourceFrame(sourceContainer);
+    this.#insertDraggedItem(targetContainer, this.dragItem)
+    await this.#submitDropRequest(this.dragItem, targetContainer)
+    this.#reloadSourceFrame(sourceContainer)
   }
 
   dragEnd() {
     this.dragItem.classList.remove(this.draggedItemClass)
     this.#clearContainerHoverClasses()
 
-    if (this.wasDropped) {
-      this.dragItem.remove()
+    if (!this.wasDropped) {
+      this.#restoreOriginalDraggedItemCssVariable()
     }
 
     this.sourceContainer = null
     this.dragItem = null
     this.wasDropped = false
+    this.originalDraggedItemCssVariable = null
   }
 
   #itemContaining(element) {
@@ -68,6 +78,63 @@ export default class extends Controller {
     this.containerTargets.forEach(container => container.classList.remove(this.hoverContainerClass))
   }
 
+  #applyContainerCssVariableToDraggedItem(container) {
+    const cssVariable = this.#containerCssVariableFor(container)
+    if (cssVariable) {
+      this.dragItem.style.setProperty(cssVariable.name, cssVariable.value)
+    }
+  }
+
+  #restoreOriginalDraggedItemCssVariable() {
+    if (this.originalDraggedItemCssVariable) {
+      const { name, value } = this.originalDraggedItemCssVariable
+      this.dragItem.style.setProperty(name, value)
+    }
+  }
+
+  #containerCssVariableFor(container) {
+    const { dragAndDropCssVariableName, dragAndDropCssVariableValue } = container.dataset
+    if (dragAndDropCssVariableName && dragAndDropCssVariableValue) {
+      return { name: dragAndDropCssVariableName, value: dragAndDropCssVariableValue }
+    }
+    return null
+  }
+
+  #increaseCounter(container) {
+    this.#modifyCounter(container, count => count + 1)
+  }
+
+  #decreaseCounter(container) {
+    this.#modifyCounter(container, count => Math.max(0, count - 1))
+  }
+
+  #modifyCounter(container, fn) {
+    const counterElement = container.querySelector("[data-drag-and-drop-counter]")
+    if (counterElement) {
+      const currentValue = counterElement.textContent.trim()
+
+      if (!/^\d+$/.test(currentValue)) return
+
+      counterElement.textContent = fn(parseInt(currentValue))
+    }
+  }
+
+  #insertDraggedItem(container, item) {
+    const itemContainer = container.querySelector("[data-drag-drop-item-container]")
+    const topItems = itemContainer.querySelectorAll("[data-drag-and-drop-top]")
+    const firstTopItem = topItems[0]
+    const lastTopItem = topItems[topItems.length - 1]
+
+    const isTopItem = item.hasAttribute("data-drag-and-drop-top")
+    const referenceItem = isTopItem ? firstTopItem : lastTopItem
+
+    if (referenceItem) {
+      referenceItem[isTopItem ? "before" : "after"](item)
+    } else {
+      itemContainer.prepend(item)
+    }
+  }
+
   async #submitDropRequest(item, container) {
     const body = new FormData()
     const id = item.dataset.id
@@ -79,19 +146,5 @@ export default class extends Controller {
   #reloadSourceFrame(sourceContainer) {
     const frame = sourceContainer.querySelector("[data-drag-and-drop-refresh]")
     if (frame) frame.reload()
-  }
-
-  #decreaseCounter(sourceContainer) {
-    const counterElement = sourceContainer.querySelector("[data-drag-and-drop-counter]")
-    if (counterElement) {
-      const currentValue = counterElement.textContent.trim()
-
-      if (!/^\d+$/.test(currentValue)) return
-
-      const count = parseInt(currentValue)
-      if (count > 0) {
-        counterElement.textContent = count - 1
-      }
-    }
   }
 }

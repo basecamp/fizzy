@@ -1,10 +1,11 @@
-<div class="flex flex-column align-center gap txt-medium--responsive txt-medium">
+<div class="flex flex-column gap align-center margin-block-double">
   <% url = session_transfer_url(user.identity.transfer_id, script_name: nil) %>
 
   <label class="flex flex-column gap full-width">
-    <div class="flex align-center gap justify-center">
-      <strong id="session_transfer_label" class="txt-medium">Link to automatically log in on another device</strong>
-    </div>
+    <header>
+      <strong class="divider txt-large">Devices</strong>
+      <p class="margin-none" id="session_transfer_label">Link to automatically log in on another device.</p>
+    </header>
     <span class="flex align-center gap margin-inline">
       <input type="text" class="input fill-white" id="session_transfer_url" value="<%= url %>" aria-labelledby="session_transfer_label" readonly>
     </span>

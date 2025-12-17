@@ -49,5 +49,9 @@ class User::SettingsTest < ActiveSupport::TestCase
 
     @user.update!(role: :member, active: false)
     assert_not @user.settings.bundling_emails?, "Inactive users should not receive bundled emails"
+
+    @user.update!(active: true)
+    @user.update_column(:verified_at, nil)
+    assert_not @user.settings.bundling_emails?, "Unverified users should not receive bundled emails"
   end
 end

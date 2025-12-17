@@ -1,4 +1,5 @@
-<%= column_tag id: dom_id(column), name: column.name, drop_url: columns_card_drops_column_path("__id__", column_id: column.id), class: "cards--doing", style: "--card-color: #{column.color};",
+<%= column_tag id: dom_id(column), name: column.name, drop_url: columns_card_drops_column_path("__id__", column_id: column.id), card_color: column.color.to_s,
+      class: "cards--doing", style: "--card-color: #{column.color};",
   data: {
     drag_and_strum_target: "container",
     collapsible_columns_target: "column",

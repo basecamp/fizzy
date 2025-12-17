@@ -1,0 +1,125 @@
+<%
+  if ENV["MIGRATE"].present?
+    mysql_app_user_key = "MYSQL_ALTER_USER"
+    mysql_app_password_key = "MYSQL_ALTER_PASSWORD"
+    max_execution_time_ms = 0 # No limit
+  else
+    mysql_app_user_key = "MYSQL_APP_USER"
+    mysql_app_password_key = "MYSQL_APP_PASSWORD"
+    max_execution_time_ms = 5_000
+  end
+
+  mysql_app_user = ENV[mysql_app_user_key]
+  mysql_app_password = ENV[mysql_app_password_key]
+
+  gem_path = Gem::Specification.find_by_name("fizzy-saas").gem_dir
+%>
+
+default: &default
+  adapter: trilogy
+  host: <%= ENV.fetch "FIZZY_DB_HOST", "127.0.0.1" %>
+  port: <%= ENV.fetch "FIZZY_DB_PORT", 3306 %>
+  pool: 50
+  timeout: 5000
+  variables:
+    transaction_isolation: READ-COMMITTED
+    max_execution_time: <%= max_execution_time_ms %>
+
+development:
+  primary:
+    <<: *default
+    database: fizzy_development
+    port: <%= ENV.fetch "FIZZY_DB_PORT", 33380 %>
+  replica:
+    <<: *default
+    database: fizzy_development
+    port: <%= ENV.fetch "FIZZY_DB_PORT", 33380 %>
+    replica: true
+  cable:
+    <<: *default
+    database: development_cable
+    port: <%= ENV.fetch "FIZZY_DB_PORT", 33380 %>
+    migrations_paths: db/cable_migrate
+  cache:
+    <<: *default
+    database: development_cache
+    port: <%= ENV.fetch "FIZZY_DB_PORT", 33380 %>
+    migrations_paths: db/cache_migrate
+  queue:
+    <<: *default
+    database: development_queue
+    port: <%= ENV.fetch "FIZZY_DB_PORT", 33380 %>
+    migrations_paths: db/queue_migrate
+  saas:
+    <<: *default
+    database: fizzy_saas_development
+    port: <%= ENV.fetch "FIZZY_DB_PORT", 33380 %>
+    migrations_paths: <%= File.join(gem_path, "db", "migrate") %>
+    schema_dump: <%= File.join(gem_path, "db", "saas_schema.rb") %>
+
+# Warning: The database defined as "test" will be erased and
+# re-generated from your development database when you run "rake".
+# Do not set this db to the same as development or production.
+test:
+  primary:
+    <<: *default
+    database: fizzy_test
+    port: <%= ENV.fetch "FIZZY_DB_PORT", 33380 %>
+  replica:
+    <<: *default
+    database: fizzy_test
+    port: <%= ENV.fetch "FIZZY_DB_PORT", 33380 %>
+    replica: true
+  saas:
+    <<: *default
+    database: fizzy_saas_test
+    port: <%= ENV.fetch "FIZZY_DB_PORT", 33380 %>
+    migrations_paths: <%= File.join(gem_path, "db", "migrate") %>
+    schema_dump: <%= File.join(gem_path, "db", "saas_schema.rb") %>
+
+production: &production
+  primary:
+    <<: *default
+    database: fizzy_production
+    host: <%= ENV["MYSQL_DATABASE_HOST"] %>
+    username: <%= mysql_app_user %>
+    password: <%= mysql_app_password %>
+  replica:
+    <<: *default
+    database: fizzy_production
+    host: <%= ENV["MYSQL_DATABASE_REPLICA_HOST"] %>
+    username: <%= ENV["MYSQL_READONLY_USER"] %>
+    password: <%= ENV["MYSQL_READONLY_PASSWORD"] %>
+    replica: true
+  cable:
+    <<: *default
+    database: fizzy_solidcable_production
+    host: <%= ENV["MYSQL_SOLID_CABLE_HOST"] %>
+    username: <%= mysql_app_user %>
+    password: <%= mysql_app_password %>
+    migrations_paths: db/cable_migrate
+  queue:
+    <<: *default
+    database: fizzy_solidqueue_production
+    host: <%= ENV["MYSQL_SOLID_QUEUE_HOST"] %>
+    username: <%= mysql_app_user %>
+    password: <%= mysql_app_password %>
+    migrations_paths: db/queue_migrate
+  cache:
+    <<: *default
+    database: fizzy_solidcache_production
+    host: <%= ENV["MYSQL_SOLID_CACHE_HOST"] %>
+    username: <%= mysql_app_user %>
+    password: <%= mysql_app_password %>
+    migrations_paths: db/cache_migrate
+  saas:
+    <<: *default
+    database: fizzy_saas_production
+    host: <%= ENV["MYSQL_DATABASE_HOST"] %>
+    username: <%= mysql_app_user %>
+    password: <%= mysql_app_password %>
+    migrations_paths: <%= File.join(gem_path, "db", "migrate") %>
+    schema_dump: <%= File.join(gem_path, "db", "saas_schema.rb") %>
+
+beta: *production
+staging: *production

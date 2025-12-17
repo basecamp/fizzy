@@ -32,7 +32,7 @@ class Users::AvatarsControllerTest < ActionDispatch::IntegrationTest
 
     get user_avatar_path(users(:david))
 
-    assert_redirected_to rails_blob_url(users(:david).avatar.variant(:thumb), disposition: "inline")
+    assert_redirected_to rails_blob_url(users(:david).avatar_thumbnail, disposition: "inline")
   end
 
   test "show other image redirects to the blob url" do
@@ -41,7 +41,7 @@ class Users::AvatarsControllerTest < ActionDispatch::IntegrationTest
 
     get user_avatar_path(users(:kevin))
 
-    assert_redirected_to rails_blob_url(users(:kevin).avatar.variant(:thumb), disposition: "inline")
+    assert_redirected_to rails_blob_url(users(:kevin).avatar_thumbnail, disposition: "inline")
   end
 
   test "delete self" do

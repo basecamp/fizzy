@@ -31,21 +31,21 @@ class TimeWindowParser
   def parse(string)
     case normalize(string)
     when "today"
-      now.beginning_of_day..now.end_of_day
+      now.all_day
     when "yesterday"
-      (now - 1.day).beginning_of_day..(now - 1.day).end_of_day
+      (now - 1.day).all_day
     when "thisweek"
-      now.beginning_of_week..now.end_of_week
+      now.all_week
     when "thismonth"
-      now.beginning_of_month..now.end_of_month
+      now.all_month
     when "thisyear"
-      now.beginning_of_year..now.end_of_year
+      now.all_year
     when "lastweek"
-      (now - 1.week).beginning_of_week..(now - 1.week).end_of_week
+      (now - 1.week).all_week
     when "lastmonth"
-      (now - 1.month).beginning_of_month..(now - 1.month).end_of_month
+      (now - 1.month).all_month
     when "lastyear"
-      (now - 1.year).beginning_of_year..(now - 1.year).end_of_year
+      (now - 1.year).all_year
     end
   end
 

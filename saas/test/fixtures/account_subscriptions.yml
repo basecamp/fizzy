@@ -1,0 +1,11 @@
+_fixture:
+  model_class: Account::Subscription
+
+signals_monthly:
+  id: <%= ActiveRecord::FixtureSet.identify("signals_monthly", :uuid) %>
+  account_id: <%= ActiveRecord::FixtureSet.identify("37s", :uuid) %>
+  plan_key: monthly_v1
+  status: active
+  stripe_customer_id: cus_test_37signals
+  created_at: <%= Time.current %>
+  updated_at: <%= Time.current %>

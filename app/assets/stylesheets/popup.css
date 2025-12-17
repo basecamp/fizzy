@@ -10,8 +10,8 @@
 
     inset: 0 auto auto 50%;
     max-block-size: 70dvh;
-    max-inline-size: min(55ch, calc(100vw - (var(--panel-padding) * 2)));
-    min-inline-size: min(25ch, calc(100vw - (var(--panel-padding) * 2)));
+    max-inline-size: min(55ch, calc(100vw - (var(--panel-padding))));
+    min-inline-size: min(25ch, calc(100vw - (var(--panel-padding))));
     overflow: auto;
     position: absolute;
     transform: translateX(-50%);

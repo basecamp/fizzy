@@ -2,9 +2,9 @@ Rails.application.routes.draw do
   root "events#index"
 
   namespace :account do
+    resource :entropy
     resource :join_code
     resource :settings
-    resource :entropy
     resources :exports, only: [ :create, :show ]
   end
 
@@ -94,6 +94,8 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :tags, only: :index
+
   namespace :notifications do
     resource :settings
     resource :unsubscribe
@@ -139,6 +141,7 @@ Rails.application.routes.draw do
   namespace :users do
     resource :locale
     resources :joins
+    resources :verifications, only: %i[ new create ]
   end
 
   resource :session do
@@ -162,6 +165,8 @@ Rails.application.routes.draw do
   resource :landing
 
   namespace :my do
+    resource :identity, only: :show
+    resources :access_tokens
     resources :pins
     resource :timezone
     resource :menu
@@ -235,6 +240,5 @@ Rails.application.routes.draw do
 
   namespace :admin do
     mount MissionControl::Jobs::Engine, at: "/jobs"
-    get "stats", to: "stats#show"
   end
 end

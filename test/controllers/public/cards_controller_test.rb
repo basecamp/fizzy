@@ -18,4 +18,10 @@ class Public::CardsControllerTest < ActionDispatch::IntegrationTest
     get public_board_card_path(@board.publication.key, @card)
     assert_response :not_found
   end
+
+  test "not found if the card is drafted" do
+    @card.update!(status: :drafted)
+    get public_board_card_path(@board.publication.key, @card)
+    assert_response :not_found
+  end
 end

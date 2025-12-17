@@ -23,8 +23,14 @@
           background: var(--color-ink-lighter);
         }
 
-        @media (prefers-color-scheme: dark) {
+        html[data-theme="dark"] & {
           --input-background: var(--color-ink-lighter);
+        }
+
+        @media (prefers-color-scheme: dark) {
+          html:not([data-theme]) & {
+            --input-background: var(--color-ink-lighter);
+          }
         }
       }
     }
@@ -178,6 +184,7 @@
       aspect-ratio: 5/3;
       background-color: var(--color-ink-lightest);
       border-radius: 0.5em;
+      container-type: inline-size;
       flex-basis: calc((100% - var(--gap) * 2) / 3);
       flex-direction: column;
       font-size: var(--text-small);
@@ -212,8 +219,18 @@
 
       @media (max-width: 639px) {
         font-size: var(--text-x-small);
+        font-size: clamp(var(--text-xx-small), 3.15cqi, var(--text-small));
         font-weight: 500;
       }
+    }
+  }
+
+  .nav__blank-slate {
+    font-size: var(--text-small);
+    margin: 2rem auto;
+
+    .nav:has(.popup__item:not([hidden])) & {
+      display: none;
     }
   }
 

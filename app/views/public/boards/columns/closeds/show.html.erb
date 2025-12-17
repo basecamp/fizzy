@@ -17,9 +17,7 @@
         <%= render "public/boards/columns/list", cards: @page.records %>
       <% end %>
     <% else %>
-      <div class="card blank-slate blank-slate--card">
-        <p class="txt-align-center txt-normal">No cards here</p>
-      </div>
+      <div class="blank-slate blank-slate--empty">No cards here</div>
     <% end %>
   <% end %>
 </section>

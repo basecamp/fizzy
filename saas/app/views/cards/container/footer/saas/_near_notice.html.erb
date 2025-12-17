@@ -1,0 +1,9 @@
+<% if Current.account.nearing_plan_cards_limit? %>
+  <div class="settings_subscription__warning full-width pad-inline center margin-block-half">
+    <% if Current.user.admin? %>
+      You’ve used <%= Current.account.billed_cards_count %> out of <%= Plan.free.card_limit %> free cards. <strong><%= link_to "Upgrade to unlimited", account_settings_path(anchor: "subscription") %></strong>.
+    <% else %>
+      This account has used <%= Current.account.billed_cards_count %> out of <%= Plan.free.card_limit %> free cards. <strong>Upgrade soon</strong>
+    <% end %>
+  </div>
+<% end %>

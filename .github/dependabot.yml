@@ -5,7 +5,7 @@ registries:
     type: git
     url: https://github.com
     username: x-access-token
-    password: ${{secrets.GH_TOKEN}}
+    password: ${{secrets.FIZZY_GH_TOKEN}}
 
 updates:
   - package-ecosystem: bundler
@@ -20,8 +20,13 @@ updates:
         dependency-type: "development"
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
+      semver-major-days: 14
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
       interval: weekly
     open-pull-requests-limit: 10
+    cooldown:
+      default-days: 7

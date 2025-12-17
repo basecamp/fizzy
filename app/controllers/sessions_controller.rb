@@ -9,17 +9,17 @@ class SessionsController < ApplicationController
   end
 
   def create
-    identity = Identity.find_by_email_address(email_address)
-
-    magic_link = if identity
-      identity.send_magic_link
+    if identity = Identity.find_by_email_address(email_address)
+      redirect_to_session_magic_link identity.send_magic_link
     else
-      Signup.new(email_address: email_address).create_identity
+      signup = Signup.new(email_address: email_address)
+      if signup.valid?(:identity_creation)
+        magic_link = signup.create_identity if Account.accepting_signups?
+        redirect_to_session_magic_link magic_link
+      else
+        head :unprocessable_entity
+      end
     end
-
-    serve_development_magic_link(magic_link)
-
-    redirect_to session_magic_link_path
   end
 
   def destroy

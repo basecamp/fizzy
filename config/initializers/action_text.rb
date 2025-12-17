@@ -7,9 +7,14 @@ module ActionText
         # This overrides the default :embeds association!
         has_many_attached :embeds do |attachable|
           ::Attachments::VARIANTS.each do |variant_name, variant_options|
-            attachable.variant variant_name, variant_options.merge(preprocessed: true)
+            attachable.variant variant_name, **variant_options, process: :immediately
           end
         end
+      end
+
+      # Delegate storage tracking to the parent record (Card, Comment, Board, etc.)
+      def storage_tracked_record
+        record.try(:storage_tracked_record)
       end
     end
   end

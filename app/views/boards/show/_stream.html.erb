@@ -13,5 +13,8 @@
     <%= with_automatic_pagination "the-stream", @page do %>
       <%= render "boards/columns/list", cards: page.records, draggable: true %>
     <% end %>
+  <% else %>
+    <div class="cards__list" data-drag-drop-item-container>
+    </div>
   <% end %>
 <% end %>

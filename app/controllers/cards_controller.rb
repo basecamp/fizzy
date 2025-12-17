@@ -10,8 +10,17 @@ class CardsController < ApplicationController
   end
 
   def create
-    card = @board.cards.find_or_create_by!(creator: Current.user, status: "drafted")
-    redirect_to card
+    respond_to do |format|
+      format.html do
+        card = @board.cards.find_or_create_by!(creator: Current.user, status: "drafted")
+        redirect_to card
+      end
+
+      format.json do
+        card = @board.cards.create! card_params.merge(creator: Current.user, status: "published")
+        head :created, location: card_path(card, format: :json)
+      end
+    end
   end
 
   def show
@@ -22,11 +31,20 @@ class CardsController < ApplicationController
 
   def update
     @card.update! card_params
+
+    respond_to do |format|
+      format.turbo_stream
+      format.json { render :show }
+    end
   end
 
   def destroy
     @card.destroy!
-    redirect_to @card.board, notice: "Card deleted"
+
+    respond_to do |format|
+      format.html { redirect_to @card.board, notice: "Card deleted" }
+      format.json { head :no_content }
+    end
   end
 
   private
@@ -43,6 +61,6 @@ class CardsController < ApplicationController
     end
 
     def card_params
-      params.expect(card: [ :status, :title, :description, :image, tag_ids: [] ])
+      params.expect(card: [ :status, :title, :description, :image, :created_at, :last_active_at, tag_ids: [] ])
     end
 end

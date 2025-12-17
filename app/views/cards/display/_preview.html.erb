@@ -1,6 +1,6 @@
 <% draggable = local_assigns.fetch(:draggable, false) && card.published? %>
 
-<%= card_article_tag card, class: "card", draggable: draggable, data: { id: card.number, drag_and_drop_target: "item", navigable_list_target: "item" }, tabindex: 0 do %>
+<%= card_article_tag card, class: "card", draggable: draggable, data: { id: card.number, drag_and_drop_target: "item", navigable_list_target: "item", css_variable_counter_target: "item" }, tabindex: 0 do %>
   <div class="flex flex-column flex-item-grow max-inline-size">
     <%= link_to card_path(card), draggable: false, class: "card__link", title: card_title_tag(card), data: { action: "dialog#close", turbo_frame: "_top" } do %>
       <span class="for-screen-reader"><%= card.title %></span>

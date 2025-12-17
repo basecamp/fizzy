@@ -1,5 +1,5 @@
-<% cache card do %>
-  <section id="<%= dom_id(card, :card_container) %>" class="card-perma" style="--card-color: <%= card.color %>;">
+<section id="<%= dom_id(card, :card_container) %>" class="card-perma" style="--card-color: <%= card.color %>;">
+  <% cache card do %>
     <div class="card-perma__actions card-perma__actions--left">
       <%= render "cards/container/gild", card: card if card.published? && !card.closed? %>
       <%= render "cards/container/image", card: card %>
@@ -33,11 +33,15 @@
         <%= render "cards/display/preview/bubble", card: card %>
       <% end %>
     </div>
+  <% end %>
 
-    <% if card.published? %>
-      <%= render "cards/container/footer/published", card: card %>
-    <% elsif card.drafted? %>
-      <%= render "cards/container/footer/draft", card: card %>
+  <% if card.published? %>
+    <%= render "cards/container/footer/published", card: card %>
+  <% elsif card.drafted? %>
+    <% if Fizzy.saas? %>
+      <%= render "cards/container/footer/saas/create", card: card %>
+    <% else %>
+      <%= render "cards/container/footer/create", card: card %>
     <% end %>
-  </section>
-<% end %>
+  <% end %>
+</section>

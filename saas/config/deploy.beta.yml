@@ -1,0 +1,68 @@
+retain_containers: 1
+
+servers:
+  web:
+    hosts:
+      - fizzy-beta-app-01.sc-chi-int.37signals.com: sc_chi
+      - fizzy-beta-app-101.df-iad-int.37signals.com: df_iad
+    labels:
+      otel_scrape_enabled: true
+
+# we don't run the jobs role in beta
+allow_empty_roles: true
+
+proxy:
+  ssl: false
+
+ssh:
+  user: app
+
+env:
+  clear:
+    RAILS_ENV: beta
+    MYSQL_DATABASE_HOST: fizzy-mysql-primary
+    MYSQL_DATABASE_REPLICA_HOST: fizzy-mysql-replica
+    MYSQL_SOLID_CABLE_HOST: fizzy-mysql-primary
+    MYSQL_SOLID_QUEUE_HOST: fizzy-mysql-primary
+    MYSQL_SOLID_CACHE_HOST: fizzy-beta-solidcache-db-101
+  secret:
+    - RAILS_MASTER_KEY
+    - MYSQL_ALTER_PASSWORD
+    - MYSQL_ALTER_USER
+    - MYSQL_APP_PASSWORD
+    - MYSQL_APP_USER
+    - MYSQL_READONLY_PASSWORD
+    - MYSQL_READONLY_USER
+    - SECRET_KEY_BASE
+    - VAPID_PUBLIC_KEY
+    - VAPID_PRIVATE_KEY
+    - ACTIVE_STORAGE_ACCESS_KEY_ID
+    - ACTIVE_STORAGE_SECRET_ACCESS_KEY
+    - QUEENBEE_API_TOKEN
+    - SIGNAL_ID_SECRET
+    - SENTRY_DSN
+    - ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY
+    - ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY
+    - ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT
+    - STRIPE_MONTHLY_V1_PRICE_ID
+    - STRIPE_SECRET_KEY
+    - STRIPE_WEBHOOK_SECRET
+  tags:
+    sc_chi: {}
+    df_iad:
+      PRIMARY_DATACENTER: true
+
+accessories:
+  load-balancer:
+    image: basecamp/kamal-proxy:lb
+    host: fizzy-beta-lb-01.sc-chi-int.37signals.com
+    labels:
+      otel_role: load-balancer
+      otel_service: fizzy-load-balancer
+      otel_scrape_enabled: true
+    options:
+      publish:
+        - 80:80
+        - 443:443
+    volumes:
+      - load-balancer:/home/kamal-proxy/.config/kamal-proxy

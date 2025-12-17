@@ -1,0 +1,12 @@
+<div class="settings-subscription__notch card-perma__notch card-perma__notch--bottom">
+  <% if Current.user.admin? %>
+    <strong>You’ve used your <u><%= Plan.free.card_limit %></u> free cards.</strong>
+    <%= link_to account_settings_path(anchor: "subscription"), class: "btn settings-subscription__button" do %>
+      <span>Upgrade to Unlimited</span>
+    <% end %>
+  <% else %>
+    <div class="pad-inline pad-block-half">
+      <strong>This account has used <u><%= Plan.free.card_limit %></u> free cards. Upgrade to get more.</strong>
+    </div>
+  <% end %>
+</div>

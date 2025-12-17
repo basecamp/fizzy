@@ -1,0 +1,39 @@
+<div class="panel shadow center" style="--panel-size: 50ch;">
+  <div class="flex flex-column gap txt-medium">
+    <h1 class="txt-x-large font-weight-black margin-block-none">Edit Account <%= @account.external_account_id %></h1>
+
+    <dl class="flex flex-column gap-half margin-block-none">
+      <div class="flex gap-half">
+        <dt class="font-weight-bold">Name:</dt>
+        <dd class="margin-inline-start-none"><%= @account.name %></dd>
+      </div>
+      <div class="flex gap-half">
+        <dt class="font-weight-bold">Actual card count:</dt>
+        <dd class="margin-inline-start-none"><%= @account.cards_count %></dd>
+      </div>
+    </dl>
+
+    <%= form_with model: @account, url: saas.admin_account_path(@account.external_account_id), class: "flex flex-column gap" do |form| %>
+      <div class="flex flex-column gap-half">
+        <%= form.label :overridden_card_count, "Override card count", class: "font-weight-bold" %>
+        <div class="flex align-center gap input input--actor">
+          <%= form.number_field :overridden_card_count, value: @account.overridden_limits&.card_count, class: "input full-width" %>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn--reversed">Save</button>
+    <% end %>
+
+    <% if @account.overridden_limits %>
+      <%= button_to "Reset limits", saas.admin_account_overridden_limits_path(@account.external_account_id), method: :delete, class: "btn btn--negative" %>
+    <% end %>
+
+    <% if @account.comped? %>
+      <%= button_to "Uncomp account", saas.admin_account_billing_waiver_path(@account.external_account_id), method: :delete, class: "btn btn--negative" %>
+    <% else %>
+      <%= button_to "Comp account", saas.admin_account_billing_waiver_path(@account.external_account_id), method: :post, class: "btn btn--positive" %>
+    <% end %>
+
+    <%= link_to "Back to accounts", saas.admin_accounts_path, class: "btn btn--plain txt-link" %>
+  </div>
+</div>

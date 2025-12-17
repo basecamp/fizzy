@@ -136,8 +136,7 @@ bundle config set --local auto_install true
 step "Installing RubyGems" bundle install
 
 if [ -n "$SAAS" ]; then
-  saas_setup=$(bundle show fizzy-saas)/bin/setup
-  source "$saas_setup"
+  source "$app_root/saas/bin/setup"
 else
   if [ "$DATABASE_ADAPTER" = "mysql" ]; then
     oss_mysql_setup

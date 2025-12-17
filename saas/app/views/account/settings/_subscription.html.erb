@@ -1,0 +1,7 @@
+<p hidden>Status: <strong><%= subscription.status.titleize %></strong></p>
+
+<% if subscription.current_period_end %>
+  <p class="txt-medium margin-none-block-start"><%= subscription_period_end_action(subscription) %> <strong><%= subscription.current_period_end.to_date.to_fs(:long) %></strong></p>
+<% end %>
+
+<%= link_to "Manage Billing", account_billing_portal_path, class: "btn", data: { turbo_prefetch: false } %>

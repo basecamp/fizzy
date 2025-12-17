@@ -1,0 +1,64 @@
+/* Subscriptions
+/* ------------------------------------------------------------------------ */
+:root {
+  --settings-subscription-background: linear-gradient(to bottom, var(--color-canvas), oklch(var(--lch-violet-lighter)));
+  --settings-subscription-color: oklch(var(--lch-violet-medium));
+  --settings-subscription-text-color: oklch(var(--lch-violet-dark));
+
+  .settings-subscription__button {
+    --btn-background: var(--settings-subscription-color);
+    --btn-border-color: var(--color-canvas);
+    --btn-color: var(--color-canvas);
+    --focus-ring-color: var(--color-ink);
+  }
+
+  .settings-subscription__divider {
+    --divider-color: currentColor;
+
+    color: var(--settings-subscription-color);
+    margin-block-start: calc(var(--block-space-half) * -1);
+  }
+
+  .settings-subscription__footer {
+    color: var(--settings-subscription-text-color);
+
+    &::before {
+      content: "————";
+      display: block;
+      margin: auto;
+      text-align: center;
+    }
+  }
+
+  .settings-subscription__notch {
+    animation: wiggle 500ms ease;
+    background: var(--settings-subscription-background);
+    box-shadow: 0 0 0.3em 0.2em var(--settings-subscription-color);
+    border-radius: 3em;
+    color: var(--settings-subscription-text-color);
+    margin-inline: auto;
+    padding: 0 0.3em 0 1.2em;
+    transform: rotate(-1deg);
+
+    @media (max-width: 640px) {
+      padding-block: 0.6em;
+      padding-inline-start: 0.3em;
+    }
+
+    .btn {
+      margin-block: 0.3em;
+    }
+  }
+
+  .settings-subscription__panel {
+    background: var(--settings-subscription-background);
+  }
+
+  .settings_subscription__warning {
+    color: var(--settings-subscription-text-color);
+
+    a {
+      color: var(--settings-subscription-text-color);
+    }
+  }
+}

@@ -245,6 +245,9 @@ export default class extends Controller {
       }
     },
     Enter(event) {
+      // Skip handling during IME composition (e.g., Japanese input)
+      if (event.isComposing) { return }
+
       if (event.shiftKey) {
         this.#toggleCurrentItem(event)
       } else {

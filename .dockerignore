@@ -6,6 +6,14 @@
 # Ignore bundler config.
 /.bundle
 
+# Ignore documentation
+/docs/
+/README.md
+/CLAUDE.md
+/AGENTS.md
+/STYLE.md
+/CONTRIBUTING.md
+
 # Ignore all environment files (except templates).
 /.env*
 !/.env*.erb

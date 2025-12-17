@@ -9,6 +9,15 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "new redirects authenticated users" do
+    sign_in_as :kevin
+
+    untenanted do
+      get new_session_path
+      assert_redirected_to root_url
+    end
+  end
+
   test "create" do
     identity = identities(:kevin)
 
@@ -36,15 +45,44 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  private
-    test "destroy" do
-      sign_in_as :kevin
-
+  test "create for a new user when single tenant mode already has a tenant" do
+    with_multi_tenant_mode(false) do
       untenanted do
-        delete session_path
+        assert_no_difference -> { MagicLink.count } do
+          assert_no_difference -> { Identity.count } do
+            post session_path,
+              params: { email_address: "nonexistent-#{SecureRandom.hex(6)}@example.com" }
+          end
+        end
 
-        assert_redirected_to new_session_path
-        assert_not cookies[:session_token].present?
+        assert_redirected_to session_magic_link_path
       end
     end
+  end
+
+  test "create with invalid email address" do
+    # Avoid Sentry exceptions when attackers try to stuff invalid emails. The browser performs form
+    # field validation that should normally prevent this from occurring, so I'm not worried about
+    # returning proper validation errors.
+    without_action_dispatch_exception_handling do
+      untenanted do
+        assert_no_difference -> { Identity.count } do
+          post session_path, params: { email_address: "not-a-valid-email" }
+        end
+
+        assert_response :unprocessable_entity
+      end
+    end
+  end
+
+  test "destroy" do
+    sign_in_as :kevin
+
+    untenanted do
+      delete session_path
+
+      assert_redirected_to new_session_path
+      assert_not cookies[:session_token].present?
+    end
+  end
 end

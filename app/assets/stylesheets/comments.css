@@ -23,6 +23,7 @@
   }
 
   .comment {
+    display: flex;
     margin-inline: auto;
     max-inline-size: var(--comment-max);
     position: relative;
@@ -48,7 +49,6 @@
   }
 
   .comment__body {
-    padding-inline-end: var(--reaction-size);
     text-align: start;
 
     .action-text-content {
@@ -59,6 +59,10 @@
       > :last-child {
         margin-block-end: 0;
       }
+    }
+
+    &:not:has(lexxy-editor) {
+      padding-inline-end: var(--reaction-size);
     }
   }
 
@@ -82,11 +86,43 @@
     background-color: var(--color-ink-lightest);
   }
 
+  .comment__history {
+    background-color: var(--color-ink-lightest);
+    display: none;
+    inset: calc(var(--comment-padding-inline) / 2.5) calc(var(--comment-padding-inline) / 1.5) auto auto;    margin-inline-end: calc(var(--comment-padding-inline) / -2.5);
+    position: absolute;
+  }
+
   .comment--system {
     --comment-padding-block: var(--block-space-half);
 
+    display: none;
     max-inline-size: var(--comment-max);
     text-align: center;
+    transition: var(--dialog-duration) allow-discrete;
+    transition-property: display;
+
+    .comments--system-expanded & {
+      display: flex;
+    }
+
+    &:nth-last-child(1 of &):not(:has(~ * &) *):not(:has(~ &) *):not(:has(~ * &)):not(:has(&)) {
+      /* This unholy selector targets the last system comment in the document */
+      /* Hat-tip, https://css-tip.com/last-element-dom/ */
+      display: flex;
+
+      .comment__history  {
+        display: grid;
+      }
+    }
+
+    &:nth-child(1 of &):not(:has(&) ~ * *):not(:has(&) ~ *):not(& ~ * *):not(& *) {
+      /* Targets the first system comment in the document to effectively */
+      /* hide the "Show history" button if there's only one entry */
+      .comment__history  {
+        display: none;
+      }
+    }
 
     &::before {
       /* Make up space for lack of avatar */
@@ -119,12 +155,21 @@
     }
 
     .comment__content {
+      --stripe-color: var(--color-ink-lightest);
+
       background-image: repeating-linear-gradient(
         45deg in srgb,
         var(--color-canvas) 0 1px,
-        var(--color-ink-lightest) 1px 10px
-      );
+        var(--stripe-color) 1px 10px);
       padding-inline: var(--comment-padding-inline);
+
+      .comments--system-expanded .comment--system & {
+        --stripe-color: color-mix(in srgb, var(--card-color) 10%, var(--color-canvas));
+      }
+
+      .comment__history {
+        background-color: var(--stripe-color);
+      }
     }
 
     .reactions {

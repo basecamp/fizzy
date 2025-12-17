@@ -1,7 +1,8 @@
 <% cache comment do %>
+  <%# Helper Dependency Updated: avatar_image_tag 2025-12-15 %>
   <%= turbo_frame_tag comment, :container do %>
-    <%# Bump for CSS changes: 2025-06-30 -%>
-    <div id="<%= dom_id(comment) %>" data-creator-id="<%= comment.creator_id %>"  class="comment flex align-start full-width <%= "comment--system" if comment.creator.system? %>">
+    <%# Cache bump 2025-12-14: action text attachment rendering changed for lightbox -%>
+    <div id="<%= dom_id(comment) %>" data-creator-id="<%= comment.creator_id %>"  class="comment align-start full-width <%= "comment--system" if comment.creator.system? %>">
       <figure class="comment__avatar flex-item-no-shrink" aria-hidden="true">
         <%= avatar_tag comment.creator, hidden_for_screen_reader: true %>
       </figure>
@@ -18,6 +19,11 @@
               <%= local_datetime_tag comment.created_at, style: :time %>
             <% end %>
           </h3>
+
+          <button class="comment__history btn btn--circle-mobile borderless txt-x-small" data-action="toggle-class#toggle">
+            <%= icon_tag "history", class: "icon--mobile-only" %>
+            <span>Full history</span>
+          </button>
 
           <%= link_to edit_card_comment_path(comment.card, comment),
                 class: "comment__edit btn btn--circle borderless translucent", data: { only_visible_to_you: true } do %>

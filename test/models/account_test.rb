@@ -44,6 +44,8 @@ class AccountTest < ActiveSupport::TestCase
       assert owner.admin?, "owner should also be considered an admin"
 
       assert_predicate account.system_user, :present?
+
+      assert owner.verified?, "owner should be verified on account creation"
     end
   end
 

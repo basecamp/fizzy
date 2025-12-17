@@ -1,3 +1,4 @@
+<% disabled = !Current.user.can_administer_board?(board) %>
 <header>
   <h2 class="divider txt-medium margin-block-start">Who can access this board?</h2>
 </header>
@@ -16,7 +17,7 @@
     <hr class="separator--horizontal flex-item-grow" style="--border-color: var(--color-ink-medium); --border-style: dashed" aria-hidden="true" />
 
     <label for="board_all_access" class="switch">
-      <%= form.check_box :all_access, class: "switch__input", checked: board.all_access?, disabled: !Current.user.can_administer_board?(board), data: { action: "change->toggle-class#toggle" } %>
+      <%= form.check_box :all_access, class: "switch__input", checked: board.all_access?, disabled:, data: { action: "change->toggle-class#toggle" } %>
       <span class="switch__btn round"></span>
       <span class="for-screen-reader">Give everyone access to this board</span>
     </label>
@@ -26,14 +27,14 @@
 
   <div class="toggler__visible-when-off">
     <div class="flex align-center justify-end gap-half">
-      <button type="button" class="btn btn--plain txt-x-small txt-link font-weight-normal" data-action="click->toggle-class#checkAll">Select all</button>
+      <%= button_tag "Select all", type: "button", class: "btn btn--plain txt-x-small txt-link font-weight-normal", data: { action: "click->toggle-class#checkAll" }, disabled: %>
       <span class="txt-subtle">&middot;</span>
-      <button type="button" class="btn btn--plain txt-x-small txt-link font-weight-normal" data-action="click->toggle-class#checkNone">Select none</button>
+      <%= button_tag "Select none", type: "button", class: "btn btn--plain txt-x-small txt-link font-weight-normal", data: { action: "click->toggle-class#checkNone" }, disabled: %>
     </div>
   </div>
 
   <ul class="settings__user-list" data-filter-target="list">
-    <%= access_toggles_for selected_users, selected: true, disabled: !Current.user.can_administer_board?(board) %>
-    <%= access_toggles_for unselected_users, selected: false, disabled: !Current.user.can_administer_board?(board) %>
+    <%= access_toggles_for selected_users, selected: true, disabled: %>
+    <%= access_toggles_for unselected_users, selected: false, disabled: %>
   </ul>
 <% end %>

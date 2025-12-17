@@ -1,8 +1,10 @@
 class JoinCodesController < ApplicationController
   allow_unauthenticated_access
+  rate_limit to: 10, within: 3.minutes, only: :create, with: -> { head :too_many_requests }
 
   before_action :set_join_code
   before_action :ensure_join_code_is_valid
+  before_action :set_identity, only: :create
 
   layout "public"
 
@@ -10,22 +12,35 @@ class JoinCodesController < ApplicationController
   end
 
   def create
-    identity = Identity.find_or_create_by!(email_address: params.expect(:email_address))
+    @join_code.redeem_if { |account| @identity.join(account) }
+    user = User.active.find_by!(account: @join_code.account, identity: @identity)
 
-    @join_code.redeem_if { |account| identity.join(account) }
-    user = User.active.find_by!(account: @join_code.account, identity: identity)
-
-    if identity == Current.identity && user.setup?
+    if @identity == Current.identity && user.setup?
       redirect_to landing_url(script_name: @join_code.account.slug)
-    elsif identity == Current.identity
-      redirect_to new_users_join_url(script_name: @join_code.account.slug)
+    elsif @identity == Current.identity
+      redirect_to new_users_verification_url(script_name: @join_code.account.slug)
     else
-      logout_and_send_new_magic_link(identity)
-      redirect_to session_magic_link_url(script_name: nil)
+      terminate_session if Current.identity
+
+      redirect_to_session_magic_link \
+        @identity.send_magic_link,
+        return_to: new_users_verification_url(script_name: @join_code.account.slug)
     end
   end
 
   private
+    def set_identity
+      @identity = Identity.find_or_initialize_by(email_address: params.expect(:email_address))
+
+      if @identity.new_record?
+        if @identity.invalid?
+          head :unprocessable_entity
+        else
+          @identity.save!
+        end
+      end
+    end
+
     def set_join_code
       @join_code ||= Account::JoinCode.find_by(code: params.expect(:code), account: Current.account)
     end
@@ -36,14 +51,5 @@ class JoinCodesController < ApplicationController
       elsif !@join_code.active?
         render :inactive, status: :gone
       end
-    end
-
-    def logout_and_send_new_magic_link(identity)
-      terminate_session if Current.identity
-
-      magic_link = identity.send_magic_link
-      serve_development_magic_link(magic_link)
-
-      session[:return_to_after_authenticating] = new_users_join_url(script_name: @join_code.account.slug)
     end
 end

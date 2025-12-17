@@ -3,6 +3,10 @@ class Cards::NotNowsController < ApplicationController
 
   def create
     @card.postpone
-    render_card_replacement
+
+    respond_to do |format|
+      format.turbo_stream { render_card_replacement }
+      format.json { head :no_content }
+    end
   end
 end

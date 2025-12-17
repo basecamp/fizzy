@@ -1,0 +1,28 @@
+<% if Current.user.admin? && !Current.account.comped? %>
+  <section class="panel panel--wide settings-subscription__panel shadow center margin-block-double">
+    <h2 id="subscription" class="divider settings-subscription__divider txt-small txt-uppercase margin-none">Subscription</h2>
+
+    <% if Current.account.plan.free? %>
+      <% if Current.account.exceeding_card_limit? %>
+        <h3 class="margin-block-start margin-block-end-half txt-large font-weight-black">You’ve used up your <u><%= Plan.free.card_limit %></u> free cards</h3>
+      <% else %>
+        <h3 class="margin-block-start margin-block-end-half txt-large font-weight-black">You’ve used <u><%= Current.account.billed_cards_count %></u> free cards out of <%= Plan.free.card_limit %></h3>
+      <% end %>
+
+      <p class="margin-none-block-start">If you’d like to keep using Fizzy past <%= Plan.free.card_limit %> cards, it’s only <strong>$<%= Plan.paid.price %>/month</strong> for <strong>unlimited cards</strong> + <strong>unlimited users</strong>. You'll also get <strong><%= plan_storage_limit(Plan.paid) %></strong> of storage. </p>
+
+      <%= button_to "Upgrade to #{Plan.paid.name} for $#{ Plan.paid.price }/month", account_subscription_path, class: "btn settings-subscription__button txt-medium", form: { data: { turbo: false } } %>
+
+      <p>Cancel anytime, no contracts, take your data with you whenever.</p>
+      <p class="settings-subscription__footer txt-small margin-none-block-end">Right now you’re on the <strong><%= Current.account.plan.name %></strong> plan which includes <%= Plan.free.card_limit %> cards, unlimited users, and <%= plan_storage_limit(Plan.free) %> of storage.</p>
+    <% else %>
+      <h3 class="margin-block-start margin-block-end-half txt-x-large font-weight-black">Thank you for buying Fizzy</h3>
+
+      <% if Current.account.subscription %>
+        <%= render "account/settings/subscription", subscription: Current.account.subscription %>
+        <p class="settings-subscription__footer txt-small">Right now you’re on the <strong><%= Current.account.plan.name %></strong> plan which includes unlimited cards, unlimited users, and <%= plan_storage_limit(Plan.paid) %> of storage.</p>
+      <% end %>
+    <% end %>
+
+  </section>
+<% end %>

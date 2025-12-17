@@ -1,26 +1,34 @@
 GIT
-  remote: https://github.com/basecamp/fizzy-saas
-  revision: f516ae03f981e080e5b4e55a8a2d8afb28de6f1d
+  remote: https://github.com/basecamp/audits1984
+  revision: c790eaec0716c8df56b3d0ab5bf5d75e3e1b0ed0
   specs:
-    fizzy-saas (0.1.0)
-      prometheus-client-mmap (~> 1.4.0)
-      queenbee
-      rails (>= 8.1.0.beta1)
-      rails_structured_logging
-      sentry-rails
-      sentry-ruby
-      yabeda
-      yabeda-actioncable
-      yabeda-activejob
-      yabeda-gc
-      yabeda-http_requests
-      yabeda-prometheus-mmap
-      yabeda-puma-plugin
-      yabeda-rails (>= 0.10)
+    audits1984 (0.1.7)
+      console1984
+      importmap-rails (>= 1.2.1)
+      rinku
+      rouge
+      turbo-rails
+
+GIT
+  remote: https://github.com/basecamp/console1984
+  revision: 02b1b9ee7fd7050174b6a98c2b43057553621dc4
+  specs:
+    console1984 (0.2.2)
+      irb (~> 1.13)
+      parser
+      rails (>= 7.0)
+      rainbow
+
+GIT
+  remote: https://github.com/basecamp/lexxy
+  revision: 7c197c0afc7095c89df9cb6e24484df9e7212ac8
+  specs:
+    lexxy (0.1.24.beta)
+      rails (>= 8.0.2)
 
 GIT
   remote: https://github.com/basecamp/queenbee-plugin
-  revision: 15faf03a876c5e66b67753d2e1ddb24f1eb5abb2
+  revision: 14312a940471e20617b38cdec7c092a01567d18b
   specs:
     queenbee (3.2.0)
       activeresource
@@ -52,7 +60,7 @@ GIT
 
 GIT
   remote: https://github.com/rails/rails.git
-  revision: 690ec8898318b8f50714e86676353ebe1551261e
+  revision: 4f4e0acaf558f6adf7df3ac23a51beb470463901
   branch: main
   specs:
     actioncable (8.2.0.alpha)
@@ -150,6 +158,27 @@ GIT
       thor (~> 1.0, >= 1.2.2)
       tsort (>= 0.2)
       zeitwerk (~> 2.6)
+
+PATH
+  remote: saas
+  specs:
+    fizzy-saas (0.1.0)
+      audits1984
+      console1984
+      prometheus-client-mmap (~> 1.4.0)
+      queenbee
+      rails (>= 8.1.0.beta1)
+      rails_structured_logging
+      sentry-rails
+      sentry-ruby
+      yabeda
+      yabeda-actioncable
+      yabeda-activejob
+      yabeda-gc
+      yabeda-http_requests
+      yabeda-prometheus-mmap
+      yabeda-puma-plugin
+      yabeda-rails (>= 0.10)
 
 GEM
   remote: https://rubygems.org/
@@ -269,7 +298,7 @@ GEM
       actionview (>= 7.0.0)
       activesupport (>= 7.0.0)
     jmespath (1.6.2)
-    json (2.16.0)
+    json (2.17.1)
     jwt (3.1.2)
       base64
     kamal (2.9.0)
@@ -290,8 +319,6 @@ GEM
       logger (~> 1.6)
     letter_opener (1.10.0)
       launchy (>= 2.2, < 4)
-    lexxy (0.1.20.beta)
-      rails (>= 8.0.2)
     lint_roller (1.1.0)
     logger (1.7.0)
     loofah (2.24.1)
@@ -440,6 +467,7 @@ GEM
     reline (0.6.3)
       io-console (~> 0.5)
     rexml (3.4.4)
+    rinku (2.0.6)
     rouge (4.6.1)
     rqrcode (3.1.0)
       chunky_png (~> 1.0)
@@ -528,12 +556,13 @@ GEM
       ostruct
     stimulus-rails (1.3.4)
       railties (>= 6.0.0)
-    stringio (3.1.8)
+    stringio (3.1.9)
+    stripe (18.0.1)
     thor (1.4.0)
-    thruster (0.1.16)
-    thruster (0.1.16-aarch64-linux)
-    thruster (0.1.16-arm64-darwin)
-    thruster (0.1.16-x86_64-linux)
+    thruster (0.1.17)
+    thruster (0.1.17-aarch64-linux)
+    thruster (0.1.17-arm64-darwin)
+    thruster (0.1.17-x86_64-linux)
     timeout (0.4.4)
     trilogy (2.9.0)
     tsort (0.2.0)
@@ -610,6 +639,7 @@ PLATFORMS
 
 DEPENDENCIES
   activeresource
+  audits1984!
   autotuner
   aws-sdk-s3
   bcrypt (~> 3.1.7)
@@ -618,6 +648,7 @@ DEPENDENCIES
   brakeman
   bundler-audit
   capybara
+  console1984!
   debug
   faker
   fizzy-saas!
@@ -627,7 +658,7 @@ DEPENDENCIES
   jbuilder
   kamal
   letter_opener
-  lexxy
+  lexxy!
   mission_control-jobs
   mittens
   mocha
@@ -653,6 +684,7 @@ DEPENDENCIES
   solid_queue (~> 1.2)
   sqlite3 (>= 2.0)
   stimulus-rails
+  stripe (~> 18.0)
   thruster
   trilogy (~> 2.9)
   turbo-rails

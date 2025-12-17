@@ -1,5 +1,5 @@
 class Account < ApplicationRecord
-  include Entropic, Seedeable
+  include Account::Storage, Entropic, MultiTenantable, Seedeable
 
   has_one :join_code
   has_many :users, dependent: :destroy
@@ -10,8 +10,6 @@ class Account < ApplicationRecord
   has_many :columns, dependent: :destroy
   has_many :exports, class_name: "Account::Export", dependent: :destroy
 
-  has_many_attached :uploads
-
   before_create :assign_external_account_id
   after_create :create_join_code
 
@@ -21,7 +19,7 @@ class Account < ApplicationRecord
     def create_with_owner(account:, owner:)
       create!(**account).tap do |account|
         account.users.create!(role: :system, name: "System")
-        account.users.create!(**owner.reverse_merge(role: "owner"))
+        account.users.create!(**owner.reverse_merge(role: "owner", verified_at: Time.current))
       end
     end
   end

@@ -1,0 +1,6 @@
+<h1>Find Account</h1>
+
+<%= form_with url: saas.admin_account_search_path do |form| %>
+  <%= form.text_field :q, placeholder: "Account ID", autofocus: true %>
+  <%= form.submit "Search" %>
+<% end %>

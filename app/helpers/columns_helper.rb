@@ -10,14 +10,16 @@ module ColumnsHelper
       data: { turbo_frame: "_top" }
   end
 
-  def column_tag(id:, name:, drop_url:, collapsed: true, selected: nil, data: {}, **properties, &block)
+  def column_tag(id:, name:, drop_url:, collapsed: true, selected: nil, card_color: "var(--color-card-default)", data: {}, **properties, &block)
     classes = token_list("cards", properties.delete(:class), "is-collapsed": collapsed)
 
     data = {
       drag_and_drop_target: "container",
       navigable_list_target: "item",
       column_name: name,
-      drag_and_drop_url: drop_url
+      drag_and_drop_url: drop_url,
+      drag_and_drop_css_variable_name: "--card-color",
+      drag_and_drop_css_variable_value: card_color
     }.merge(data)
 
     data[:action] = token_list(
@@ -28,7 +30,8 @@ module ColumnsHelper
 
     tag.section(id: id, class: classes, tabindex: "0", "aria-selected": selected, data: data, **properties) do
       tag.div(class: "cards__transition-container", data: {
-        controller: "navigable-list",
+        controller: "navigable-list css-variable-counter",
+        css_variable_counter_property_name_value: "--card-count",
         navigable_list_supports_horizontal_navigation_value: "false",
         navigable_list_prevent_handled_keys_value: "true",
         navigable_list_auto_select_value: "false",

@@ -1,1 +1,2 @@
 <%= turbo_stream.before("closed-cards", partial: "boards/show/column", method: :morph, locals: { column: @column }) %>
+<%= render "columns/refresh_adjacent_columns", column: @column %>

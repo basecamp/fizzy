@@ -9,5 +9,10 @@ class Cards::AssignmentsController < ApplicationController
 
   def create
     @card.toggle_assignment @board.users.active.find(params[:assignee_id])
+
+    respond_to do |format|
+      format.turbo_stream
+      format.json { head :no_content }
+    end
   end
 end
