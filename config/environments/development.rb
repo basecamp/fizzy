@@ -97,4 +97,13 @@ Rails.application.configure do
 
   # Canonical host for mailer URLs (emails always link here, not personal Tailscale URLs)
   config.action_mailer.default_url_options = { host: "#{config.hosts.first}:3006" }
+
+  config.action_dispatch.trusted_proxies = [
+    IPAddr.new("127.0.0.1"),       # localhost IPv4
+    IPAddr.new("::1")             # localhost IPv6
+  ]
+
+  # Always be SSL'ing (unless told not to)
+  config.assume_ssl = ENV["DISABLE_SSL"].blank?
+  config.force_ssl  = ENV["DISABLE_SSL"].blank?
 end
