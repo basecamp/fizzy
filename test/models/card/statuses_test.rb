@@ -11,22 +11,6 @@ class Card::StatusesTest < ActiveSupport::TestCase
     assert card.drafted?
   end
 
-  test "cards are only visible to the creator when drafted" do
-    card = boards(:writebook).cards.create! creator: users(:kevin), title: "Drafted Card"
-    card.drafted!
-
-    assert_includes Card.published_or_drafted_by(users(:kevin)), card
-    assert_not_includes Card.published_or_drafted_by(users(:jz)), card
-  end
-
-  test "cards are visible to everyone when published" do
-    card = boards(:writebook).cards.create! creator: users(:kevin), title: "Published Card"
-    card.published!
-
-    assert_includes Card.published_or_drafted_by(users(:kevin)), card
-    assert_includes Card.published_or_drafted_by(users(:jz)), card
-  end
-
   test "an event is created when a card is created in the published state" do
     assert_no_difference(-> { Event.count }) do
       boards(:writebook).cards.create! creator: users(:kevin), title: "Draft Card"

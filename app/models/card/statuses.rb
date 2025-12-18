@@ -6,8 +6,6 @@ module Card::Statuses
 
     before_save :mark_if_just_published
     after_create -> { track_event :published }, if: :published?
-
-    scope :published_or_drafted_by, ->(user) { where(status: :published).or(where(status: :drafted, creator: user)) }
   end
 
   attr_accessor :was_just_published
