@@ -1,6 +1,6 @@
 <% @page_title = "Choose an account" %>
 
-<% cache [ Current.identity, @accounts ] do %>
+<% cache [ Current.identity, @accounts, I18n.locale ] do %>
   <div
     class="panel panel--centered flex flex-column gap-half"
     style="--popup-icon-size: 24px; --popup-item-padding-inline: 0.5rem;"

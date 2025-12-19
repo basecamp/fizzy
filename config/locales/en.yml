@@ -13,6 +13,7 @@ en:
           assigned_to_me: "Assigned to me"
           added_by_me: "Added by me"
           close_menu: "Close menu"
+          nothing_matches: "Nothing matches that filter"
         settings:
           title: "Settings"
           account_settings: "Account Settings"
@@ -56,6 +57,38 @@ en:
         mark_all_read: "Mark all notifications as read"
     bar:
       search: "Search"
+    users:
+      show:
+        edit_profile: "Edit profile"
+        profile_avatar: "Profile avatar for %{name}"
+        no_longer_on_account: "%{name} is no longer on this account"
+        unverified: "Unverified"
+        unverified_description: "A sign-in code has been sent to this email address, but the user has not yet logged in to confirm their identity."
+        cards_assigned_to: "Which cards are assigned to %{name}?"
+        cards_added_by: "Which cards were added by %{name}?"
+        sign_out: "Sign out of Fizzy on this device"
+        locale:
+          title: "Language"
+        theme:
+          title: "Appearance"
+          always_light: "Always light"
+          always_dark: "Always dark"
+          same_as_os: "Same as OS"
+        transfer:
+          title: "Devices"
+          description: "Link to automatically log in on another device."
+          display_qr_code: "Display auto-login QR code"
+          close_dialog: "Close dialog"
+          copy_link: "Copy auto-login link"
+        access_tokens:
+          title: "Developer"
+          description: "Manage %{link} used with the Fizzy developer API."
+          personal_access_tokens: "personal access tokens"
+        activity_timeline:
+          load_more: "Load more…"
+        events:
+          what_have_you_been_up_to: "What have you been up to?"
+          what_has_been_up_to: "What has %{name} been up to?"
   helpers:
     my:
       menu:

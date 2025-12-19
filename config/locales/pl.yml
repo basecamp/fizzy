@@ -13,6 +13,7 @@ pl:
           assigned_to_me: "Przypisane do mnie"
           added_by_me: "Dodane przeze mnie"
           close_menu: "Zamknij menu"
+          nothing_matches: "Nic nie pasuje do tego filtra"
         settings:
           title: "Ustawienia"
           account_settings: "Ustawienia konta"
@@ -49,13 +50,45 @@ pl:
         notifications: "Powiadomienia"
         toggle_label: "Przełącz stos powiadomień"
         settings: "Ustawienia"
-        notification_settings: "Ustawienia powiadomień"
-        see_more_new_items: "Zobacz więcej nowych elementów"
+        notification_settings: "Ustawienia"
+        see_more_new_items: "Zobacz więcej"
         see_older_items: "Zobacz starsze elementy"
-        clear_all: "Wyczyść wszystko"
-        mark_all_read: "Oznacz wszystkie powiadomienia jako przeczytane"
+        clear_all: "Wyczyść"
+        mark_all_read: "Oznacz jako przeczytane"
     bar:
       search: "Szukaj"
+    users:
+      show:
+        edit_profile: "Edytuj profil"
+        profile_avatar: "Awatar profilu dla %{name}"
+        no_longer_on_account: "%{name} nie jest już na tym koncie"
+        unverified: "Niezweryfikowany"
+        unverified_description: "Kod logowania został wysłany na ten adres e-mail, ale użytkownik jeszcze się nie zalogował, aby potwierdzić swoją tożsamość."
+        cards_assigned_to: "Przypisane karty"
+        cards_added_by: "Dodane karty"
+        sign_out: "Wyloguj się z Fizzy na tym urządzeniu"
+        locale:
+          title: "Język"
+        theme:
+          title: "Wygląd"
+          always_light: "Jasny"
+          always_dark: "Ciemny"
+          same_as_os: "Tak jak system"
+        transfer:
+          title: "Urządzenia"
+          description: "Link do automatycznego logowania na innym urządzeniu."
+          display_qr_code: "Wyświetl kod QR do automatycznego logowania"
+          close_dialog: "Zamknij okno dialogowe"
+          copy_link: "Skopiuj link do automatycznego logowania"
+        access_tokens:
+          title: "Deweloper"
+          description: "Zarządzaj %{link} używanymi z deweloperskim interfejsem API Fizzy."
+          personal_access_tokens: "osobistymi tokenami dostępu"
+        activity_timeline:
+          load_more: "Załaduj więcej…"
+        events:
+          what_have_you_been_up_to: "Co robiłeś?"
+          what_has_been_up_to: "Co robił %{name}?"
   helpers:
     my:
       menu:

@@ -1,0 +1,13 @@
+<section>
+  <strong class="divider txt-large"><%= t("views.users.show.locale.title") %></strong>
+
+  <div class="locale-switcher flex gap max-width justify-center txt-small margin-block-start-half">
+    <%= link_to user_path(user, locale: "en"), class: "btn locale-switcher__btn#{' active' if I18n.locale == :en}", data: {turbo: false} do %>
+      <span class="overflow-ellipsis">English</span>
+    <% end %>
+
+    <%= link_to user_path(user, locale: "pl"), class: "btn locale-switcher__btn#{' active' if I18n.locale == :pl}", data: {turbo: false} do %>
+      <span class="overflow-ellipsis">Polski</span>
+    <% end %>
+  </div>
+</section>

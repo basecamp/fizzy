@@ -1,5 +1,5 @@
 <% if accounts.many? %>
-  <% cache [ Current.identity, accounts, Current.account ] do %>
+  <% cache [ Current.identity, accounts, Current.account, I18n.locale ] do %>
     <%= collapsible_nav_section t("views.my.menus.accounts.title") do %>
       <%# Bust cache 1 Dec 2025 %>
       <% accounts.each do |account| %>

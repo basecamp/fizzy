@@ -1,4 +1,4 @@
-<% cache [ day_timeline.events ] do %>
+<% cache [ day_timeline.events, I18n.locale ] do %>
   <% if day_timeline.has_activity? %>
     <div class="events__columns">
       <%= render "events/day_timeline/column", column: day_timeline.added_column %>

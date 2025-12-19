@@ -1,4 +1,4 @@
-json.cache! comment do
+json.cache! [ comment, I18n.locale ] do
   json.(comment, :id)
 
   json.created_at comment.created_at.utc

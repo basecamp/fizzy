@@ -1,4 +1,4 @@
-json.cache! card do
+json.cache! [ card, I18n.locale ] do
   json.(card, :id, :number, :title, :status)
   json.description card.description.to_plain_text
   json.description_html card.description.to_s

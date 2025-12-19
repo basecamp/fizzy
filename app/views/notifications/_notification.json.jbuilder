@@ -1,4 +1,4 @@
-json.cache! notification do
+json.cache! [ notification, I18n.locale ] do
   json.(notification, :id)
   json.read notification.read?
   json.read_at notification.read_at&.utc

@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
-  root "events#index"
+  scope "(:locale)", locale: /en|pl/ do
+    root "events#index"
 
   namespace :account do
     resource :entropy
@@ -139,7 +140,6 @@ Rails.application.routes.draw do
   post "join/:code", to: "join_codes#create"
 
   namespace :users do
-    resource :locale
     resources :joins
     resources :verifications, only: %i[ new create ]
   end
@@ -200,6 +200,12 @@ Rails.application.routes.draw do
     end
   end
 
+    # Support for legacy URLs
+    get "/collections/:collection_id/cards/:id", to: redirect { |params, request| "#{request.script_name}/cards/#{params[:id]}" }
+    get "/collections/:id", to: redirect { |params, request| "#{request.script_name}/boards/#{params[:id]}" }
+    get "/public/collections/:id", to: redirect { |params, request| "#{request.script_name}/public/boards/#{params[:id]}" }
+  end
+
   direct :published_board do |board, options|
     route_for :public_board, board.publication.key
   end
@@ -228,11 +234,6 @@ Rails.application.routes.draw do
   resolve "Webhook" do |webhook, options|
     route_for :board_webhook, webhook.board, webhook, options
   end
-
-  # Support for legacy URLs
-  get "/collections/:collection_id/cards/:id", to: redirect { |params, request| "#{request.script_name}/cards/#{params[:id]}" }
-  get "/collections/:id", to: redirect { |params, request| "#{request.script_name}/boards/#{params[:id]}" }
-  get "/public/collections/:id", to: redirect { |params, request| "#{request.script_name}/public/boards/#{params[:id]}" }
 
   get "up", to: "rails/health#show", as: :rails_health_check
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest

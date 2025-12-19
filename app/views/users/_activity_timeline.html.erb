@@ -3,7 +3,7 @@
     <%= render "events/day", day_timeline: day_timeline %>
 
     <% if day_timeline.next_day %>
-      <%= link_to "Load more…", user_path(user, day: day_timeline.next_day.strftime("%Y-%m-%d"), **filter.as_params),
+      <%= link_to t("views.users.show.activity_timeline.load_more"), user_path(user, day: day_timeline.next_day.strftime("%Y-%m-%d"), **filter.as_params),
             class: "day-timeline-pagination-link", data: { frame: day_timeline_pagination_frame_id_for(day_timeline.next_day), pagination_target: "paginationLink" } %>
     <% end %>
   <% end %>
