@@ -4,6 +4,7 @@ module Filter::Resources
   included do
     has_and_belongs_to_many :tags
     has_and_belongs_to_many :boards
+    has_and_belongs_to_many :columns
     has_and_belongs_to_many :assignees, class_name: "User", join_table: "assignees_filters", association_foreign_key: "assignee_id"
     has_and_belongs_to_many :creators, class_name: "User", join_table: "creators_filters", association_foreign_key: "creator_id"
     has_and_belongs_to_many :closers, class_name: "User", join_table: "closers_filters", association_foreign_key: "closer_id"

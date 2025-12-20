@@ -499,6 +499,7 @@ __Query Parameters:__
 | Parameter | Description |
 |-----------|-------------|
 | `board_ids[]` | Filter by board ID(s) |
+| `column_ids[]` | Filter by column ID(s) |
 | `tag_ids[]` | Filter by tag ID(s) |
 | `assignee_ids[]` | Filter by assignee user ID(s) |
 | `creator_ids[]` | Filter by card creator ID(s) |
