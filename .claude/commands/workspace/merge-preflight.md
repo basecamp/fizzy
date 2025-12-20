@@ -137,8 +137,8 @@ Note for report: ⚠️ Unpushed commits exist
 ATTENTION REQUIRED
 
 Check for merge conflicts with command or main (if using):
-git fetch origin command (main)
-git merge-tree $(git merge-base HEAD origin/main) HEAD origin/main
+`git fetch origin command` (main)
+`git merge-tree $(git merge-base HEAD origin/main) HEAD origin/main`
 
 If conflicts detected:
 Note for report: ❌ Merge conflicts with main

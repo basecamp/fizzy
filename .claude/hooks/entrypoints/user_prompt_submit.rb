@@ -13,6 +13,7 @@ require 'json'
 # Add additional handler requires here as needed:
 
 require_relative '../handlers/user_prompt_submit/claude_space'
+require_relative '../handlers/user_prompt_submit/check_working'
 require_relative '../handlers/user_prompt_submit/show_working'
 require_relative '../handlers/user_prompt_submit/show_strategy'
 require_relative '../handlers/user_prompt_submit/show_options'
@@ -26,6 +27,8 @@ begin
   # Initialize and execute all handlers
   claude_space = ClaudeSpace.new(input_data)
   claude_space.call
+  check_working = CheckWorking.new(input_data)
+  check_working.call
   show_working = ShowWorking.new(input_data)
   show_working.call
   show_strategy = ShowStrategy.new(input_data)
@@ -43,6 +46,7 @@ begin
   # merge multiple if you add more handlers
   merged_output = ClaudeHooks::Output::UserPromptSubmit.merge(
     claude_space.output,
+    check_working.output,
     show_working.output,
     show_strategy.output,
     show_options.output,

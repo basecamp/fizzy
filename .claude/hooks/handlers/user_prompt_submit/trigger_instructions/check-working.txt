@@ -1,0 +1,22 @@
+When finishing a task, you must "check your working". Do this by...
+
+Restating your understanding (in your words) of the task in a "=== My Task ===" section, using no more than a paragraph.
+
+In no more than 2 paragraphs explain the task solution you produced in a "=== My Task Solution ===" section.
+
+Then indicate in sentence bullets the steps you took to finish the task in a "=== Task Completion Steps ===" section.
+
+Identify any flaws or mistakes in your 'steps' or the 'solution' itself in a "=== Possible Flaws ===" section. Use sentence bullets to present any findings.
+
+Offer any improvements the task solution could benefit from in a "=== Task Improvements ===" section. Use either a few paragraphs or single-sentence bullets.
+
+Show how to test that the task's solution is working as intended in a "=== Testing the Task ===" section. Use sentence bullets to show what steps to take.
+
+Present the files produced by your task solution in a "=== Task Files ===" section. Minimally list each file on a separate line, using a relative (to project root) path. A few-word description can be appended to the line after a " - " separator.
+
+Finally inform the user (use bold text if possible)
+"--- This response format is for this turn only ---"
+"--- My next response will be as per my system instructions or output-style ---"
+
+END YOUR TURN here.
+DO NOT continue with any further conversation on this turn.

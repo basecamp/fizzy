@@ -1,0 +1,3 @@
+#!/bin/bash
+
+# checkout 'dev/branches' archives from command if exists: else main

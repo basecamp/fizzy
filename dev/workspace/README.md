@@ -18,14 +18,23 @@ gem install claude_hooks
 1. Copy the `dev/workspace/` template to a main or "parent" branch of your repository
 2. Overwrite `.claude/` directory in your main or "parent" branch
 3. Overwrite with `.gitattributes` and `.gitignore` to the main branch also.
+4. If using Rails, place `gem "claude_hooks", "~> 1.0"` in a Gemfile in the root of your project and run `bundle install`
+5. run `chmod +x ./dev/setup.sh && ./setup.sh` to initialise the setup script. This is a one-time setup only, can delete the file afterwards. Sets up a 'workspace' remote and merge protection rules for .gitattributes
 
 If this causes conflicts, copy sections manually.
 I recommend not mixing hook systems.
 Use only 'Claude_hooks' or don't use it all.
 
+### Keeping workspace up to date
+
+run `git merge workspace/main --allow-unrelated-histories --squash` on your main or parent branch. To merge in the latest changes from upstream.
+run `git commit -m "🔄 chore: sync workspace from upstream"` to commit the merge.
+
+Or alternatively use the `workspace:sync-workspace` command in Claude Code.
+
 ### Hook Configuration
 
-If you want to maintain your settings. Just copy this section to your settings.json
+If you want to maintain your settings without overwriting. Just copy this section to your settings.json
 
 Add to `.claude/settings.json`:
 
@@ -71,8 +80,9 @@ Add to `.claude/settings.json`:
 Add to `.gitattributes` on Main branch:
 
 ```gitattributes
-dev/workspace/** merge=ours
+dev/workspace/** merge=protect
 .claude/config/** merge=ours
+README.md merge=ours
 ```
 
 Add to `.gitignore` on main branch:
@@ -84,7 +94,7 @@ dev/workspace/context/tree.md
 ### Context Configuration
 
 Create `.claude/config/config.json`:
-( The tree folders are setup for rails codebases, adjust as needed)
+(The tree folders are setup for rails codebases, adjust as needed)
 
 ```json
 {
@@ -114,7 +124,7 @@ Create `.claude/config/config.json`:
 }
 ```
 
-## How to get started
+## Workspace - How to
 
 ### Setup your workspace
 
@@ -142,5 +152,20 @@ Create `.claude/config/config.json`:
 - At any time or once your branch is finished enter `/workspace:archive-workspace` to save your workspace as a snapshot in `dev/branches/`, commit to parent branch
 - Do `/workspace:merge-preflight` process to prepare branch.
 - Finally `/workspace:merge-branch` to merge your changes into the parent branch.
-
 - All the context and conversations you have generated will be preserved permanently, ready to reference or re-use.
+
+### Other Tricks
+
+- Load previous conversations into context using `@` tool. This allows you to keep conversations singular focused and then reuse for next steps. Prevents context bloat
+
+## Other Commands
+
+### Replace user paths in your conversations with ~/
+
+Claude Automatically outputs your user paths in transcript records. This small script sanitizes them to ~/
+
+From the dev/ directory run:
+
+```bash
+./replace_user_path.sh
+```
