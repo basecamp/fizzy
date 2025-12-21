@@ -32,17 +32,9 @@ class Filter < ApplicationRecord
       result = result.where(cards: { created_at: creation_window }) if creation_window
       result = result.closed_at_window(closure_window) if closure_window
       result = result.closed_by(closers) if closers.present?
-      result = result.mentioning(combined_fts_query, user: creator) if terms.present?
+      result = result.mentioning_all(terms, user: creator) if terms.present?
       result.distinct
     end
-  end
-
-  def combined_fts_query
-    terms.map { |term| sanitize_fts_term(term) }.join(' AND ')
-  end
-
-  def sanitize_fts_term(term)
-    term.gsub('"', '""').then { |t| "\"#{t}\"*" }
   end
 
   def empty?
