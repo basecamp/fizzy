@@ -3,7 +3,9 @@ class Columns::Cards::Drops::StreamsController < ApplicationController
 
   def create
     ActiveRecord::Base.transaction do
-      @card.send_back_to_triage unless @card.awaiting_triage?
+      unless @card.awaiting_triage?
+        @card.send_back_to_triage
+      end
 
       relation = @board.cards.awaiting_triage
       relation = if @card.golden?
@@ -12,11 +14,18 @@ class Columns::Cards::Drops::StreamsController < ApplicationController
         relation.where.missing(:goldness)
       end
 
-      Card::Positioner
-        .new(relation: relation, fallback_order: { last_active_at: :desc, id: :desc })
-        .reposition!(card: @card, before_number: params[:before_id], after_number: params[:after_id])
+      if @board.manual_sorting_enabled?
+        Card::Positioner
+          .new(relation: relation, fallback_order: { last_active_at: :desc, id: :desc })
+          .reposition!(card: @card, before_number: params[:before_id], after_number: params[:after_id])
+      end
     end
 
-    set_page_and_extract_portion_from @board.cards.awaiting_triage.with_golden_first.ordered_by_position(last_active_at: :desc, id: :desc)
+    cards = if @board.manual_sorting_enabled?
+      @board.cards.awaiting_triage.with_golden_first.ordered_by_position(last_active_at: :desc, id: :desc)
+    else
+      @board.cards.awaiting_triage.latest.with_golden_first
+    end
+    set_page_and_extract_portion_from cards
   end
 end

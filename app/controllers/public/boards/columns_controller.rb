@@ -2,8 +2,12 @@ class Public::Boards::ColumnsController < Public::BaseController
   before_action :set_column
 
   def show
-    set_page_and_extract_portion_from \
+    cards = if @board.manual_sorting_enabled?
       @column.cards.active.with_golden_first.ordered_by_position(last_active_at: :desc, id: :desc)
+    else
+      @column.cards.active.latest.with_golden_first
+    end
+    set_page_and_extract_portion_from cards
   end
 
   private

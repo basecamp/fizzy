@@ -16,6 +16,7 @@ class Columns::Cards::Drops::StreamsControllerTest < ActionDispatch::Integration
 
   test "reorders within stream without side effects" do
     board = boards(:writebook)
+    board.update!(manual_sorting_enabled: true)
     card = cards(:buy_domain)
     other = with_current_user(:kevin) do
       board.cards.create!(
@@ -37,6 +38,31 @@ class Columns::Cards::Drops::StreamsControllerTest < ActionDispatch::Integration
             as: :turbo_stream
           assert_response :success
         end
+      end
+    end
+  end
+
+  test "does not reorder within stream when manual sorting is disabled" do
+    board = boards(:writebook)
+    card = cards(:buy_domain)
+    other = with_current_user(:kevin) do
+      board.cards.create!(
+        title: "Another stream card",
+        creator: users(:kevin),
+        status: "published",
+        last_active_at: 2.days.ago
+      )
+    end
+
+    other.update!(position: 1024)
+    card.update!(position: 2048)
+
+    assert_no_changes -> { card.reload.triaged? } do
+      assert_no_changes -> { card.reload.position } do
+        post columns_card_drops_stream_path(card),
+          params: { before_id: other.number },
+          as: :turbo_stream
+        assert_response :success
       end
     end
   end

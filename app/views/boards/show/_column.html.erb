@@ -2,6 +2,7 @@
       class: "cards--doing", style: "--card-color: #{column.color};",
   data: {
     drag_and_strum_target: "container",
+    drag_and_drop_reorder_enabled: column.board.manual_sorting_enabled?,
     collapsible_columns_target: "column",
     controller: "clicker",
     action: "turbo:before-stream-render@document->collapsible-columns#restoreState focus->collapsible-columns#focusOnColumn"

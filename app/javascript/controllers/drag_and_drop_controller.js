@@ -35,7 +35,9 @@ export default class extends Controller {
       return;
     }
 
-    this.#repositionDraggedItem(container, event.clientY);
+    if (container !== this.sourceContainer || this.#reorderEnabled(container)) {
+      this.#repositionDraggedItem(container, event.clientY);
+    }
 
     if (container !== this.sourceContainer) {
       container.classList.add(this.hoverContainerClass);
@@ -49,6 +51,13 @@ export default class extends Controller {
     const targetContainer = this.#containerContaining(event.target);
 
     if (!targetContainer) {
+      return;
+    }
+
+    if (
+      targetContainer === this.sourceContainer &&
+      !this.#reorderEnabled(targetContainer)
+    ) {
       return;
     }
 
@@ -194,14 +203,20 @@ export default class extends Controller {
     const id = item.dataset.id;
     const url = container.dataset.dragAndDropUrl.replaceAll("__id__", id);
 
-    const { beforeId, afterId } = this.#neighborIdsFor(item);
-    if (beforeId) body.append("before_id", beforeId);
-    if (afterId) body.append("after_id", afterId);
+    if (this.#reorderEnabled(container)) {
+      const { beforeId, afterId } = this.#neighborIdsFor(item);
+      if (beforeId) body.append("before_id", beforeId);
+      if (afterId) body.append("after_id", afterId);
+    }
 
     return post(url, {
       body,
       headers: { Accept: "text/vnd.turbo-stream.html" },
     });
+  }
+
+  #reorderEnabled(container) {
+    return container.dataset.dragAndDropReorderEnabled === "true";
   }
 
   #neighborIdsFor(item) {

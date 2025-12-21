@@ -1,0 +1,37 @@
+<%= turbo_frame_tag @board, :manual_sorting do %>
+  <header>
+    <h2 class="divider txt-large">Manual sorting</h2>
+    <div>Turn on Manual sorting to enable drag-and-drop ordering within each list on this board.</div>
+  </header>
+
+  <% if board.manual_sorting_enabled? %>
+    <div class="border-radius pad fill-selected">
+      <%= form_with url: board_manual_sorting_path(board), method: :delete, class: "flex-inline center justify-between gap", data: { controller: "form" } do |form| %>
+        <label class="flex gap cursor-pointer">
+          <span class="txt-large"><%= icon_tag "lock" %></span>
+          <span class="switch flex align-center justify-between">
+            <%= form.check_box :manual_sorting_enabled, class: "switch__input", checked: true, data: { action: "change->form#submit" }, disabled: !Current.user.can_administer_board?(@board) %>
+            <span class="switch__btn round"></span>
+          </span>
+          <span class="for-screen-reader">Turn off manual sorting</span>
+        </label>
+        <span class="txt-large" aria-hidden="true"><%= icon_tag "move" %></span>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="border-radius pad fill-shade">
+      <%= form_with url: board_manual_sorting_path(board), method: :post, class: "flex-inline center justify-between gap", data: { controller: "form" } do |form| %>
+        <span class="txt-large" aria-hidden="true"><%= icon_tag "lock" %></span>
+        <label class="flex gap cursor-pointer">
+          <span class="switch flex align-center justify-between">
+            <%= form.check_box :manual_sorting_enabled, class: "switch__input", checked: false, data: { action: "change->form#submit" }, disabled: !Current.user.can_administer_board?(@board) %>
+            <span class="switch__btn round"></span>
+          </span>
+          <span class="txt-large"><%= icon_tag "move" %></span>
+          <span class="for-screen-reader">Turn on manual sorting</span>
+        </label>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>
+

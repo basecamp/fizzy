@@ -9,8 +9,12 @@ class Boards::ColumnsController < ApplicationController
   end
 
   def show
-    set_page_and_extract_portion_from \
+    cards = if @board.manual_sorting_enabled?
       @column.cards.active.with_golden_first.ordered_by_position(last_active_at: :desc, id: :desc).preloaded
+    else
+      @column.cards.active.latest.with_golden_first.preloaded
+    end
+    set_page_and_extract_portion_from cards
     fresh_when etag: @page.records
   end
 

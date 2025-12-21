@@ -1,0 +1,3 @@
+<%= turbo_stream.replace([ @board, :manual_sorting ], partial: "boards/edit/manual_sorting", locals:{ board: @board }) %>
+<%= turbo_stream_flash(notice: "Saved") %>
+

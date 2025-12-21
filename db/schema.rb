@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2025_12_21_090000) do
+ActiveRecord::Schema[8.2].define(version: 2025_12_21_093000) do
   create_table "accesses", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -147,6 +147,7 @@ ActiveRecord::Schema[8.2].define(version: 2025_12_21_090000) do
     t.boolean "all_access", default: false, null: false
     t.datetime "created_at", null: false
     t.uuid "creator_id", null: false
+    t.boolean "manual_sorting_enabled", default: false, null: false
     t.string "name", null: false
     t.datetime "updated_at", null: false
     t.index ["account_id"], name: "index_boards_on_account_id"

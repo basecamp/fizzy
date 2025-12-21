@@ -17,6 +17,7 @@ class Columns::Cards::Drops::ClosuresControllerTest < ActionDispatch::Integratio
   test "reorders within done without side effects" do
     card = cards(:logo)
     other = cards(:layout)
+    card.board.update!(manual_sorting_enabled: true)
 
     with_current_user(:kevin) do
       card.close
@@ -34,6 +35,28 @@ class Columns::Cards::Drops::ClosuresControllerTest < ActionDispatch::Integratio
             as: :turbo_stream
           assert_response :success
         end
+      end
+    end
+  end
+
+  test "does not reorder within done when manual sorting is disabled" do
+    card = cards(:logo)
+    other = cards(:layout)
+
+    with_current_user(:kevin) do
+      card.close
+      other.close
+    end
+
+    other.update!(position: 1024)
+    card.update!(position: 2048)
+
+    assert_no_changes -> { card.reload.closed? } do
+      assert_no_changes -> { card.reload.position } do
+        post columns_card_drops_closure_path(card),
+          params: { before_id: other.number },
+          as: :turbo_stream
+        assert_response :success
       end
     end
   end
