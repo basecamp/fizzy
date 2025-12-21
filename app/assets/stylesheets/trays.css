@@ -6,8 +6,6 @@
     --tray-duration: 350ms;
     --tray-margin: 0.5rem;
     --tray-radius: 0.25rem;
-    --tray-item-height: 76px; /* FIXME: Magic number */
-
     align-items: end;
     block-size: var(--footer-height);
     display: grid;

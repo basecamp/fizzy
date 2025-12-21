@@ -47,6 +47,7 @@
   --btn-size: 2.65em;
   --footer-height: 2.65rem;
   --tray-size: clamp(12rem, 25dvw, 24rem);
+  --tray-item-height: 4.75rem; /* Tray card height; keep in sync with tray card layout. */
 
   /* Focus rings for keyboard navigation */
   --focus-ring-color: var(--color-link);
