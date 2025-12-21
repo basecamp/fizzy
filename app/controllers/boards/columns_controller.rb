@@ -9,7 +9,8 @@ class Boards::ColumnsController < ApplicationController
   end
 
   def show
-    set_page_and_extract_portion_from @column.cards.active.latest.with_golden_first.preloaded
+    set_page_and_extract_portion_from \
+      @column.cards.active.with_golden_first.ordered_by_position(last_active_at: :desc, id: :desc).preloaded
     fresh_when etag: @page.records
   end
 

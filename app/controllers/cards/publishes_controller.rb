@@ -2,7 +2,25 @@ class Cards::PublishesController < ApplicationController
   include CardScoped
 
   def create
-    @card.publish
+    ActiveRecord::Base.transaction do
+      @card.publish
+
+      relation = if @card.triaged?
+        @card.column.cards.active
+      else
+        @board.cards.awaiting_triage
+      end
+
+      relation = if @card.golden?
+        relation.joins(:goldness)
+      else
+        relation.where.missing(:goldness)
+      end
+
+      Card::Positioner
+        .new(relation: relation, fallback_order: { last_active_at: :desc, id: :desc })
+        .reposition!(card: @card, before_number: nil, after_number: nil)
+    end
 
     if add_another_param?
       redirect_to @board.cards.create!, notice: "Card added"
