@@ -51,7 +51,7 @@ if ! command -v gh &>/dev/null; then
   echo
   echo "▸ Installing GitHub CLI"
   if command -v pacman &>/dev/null; then
-    sudo pacman -S --noconfirm gh
+    sudo pacman -S --noconfirm github-cli
   elif command -v brew &>/dev/null; then
     brew install gh
   else
