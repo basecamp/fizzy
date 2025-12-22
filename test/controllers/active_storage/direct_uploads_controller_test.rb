@@ -54,19 +54,33 @@ class ActiveStorage::DirectUploadsControllerTest < ActionDispatch::IntegrationTe
 
   test "create unauthenticated" do
     post rails_direct_uploads_path,
-      params: @blob_params.merge(authenticity_token: csrf_token),
+      params: @blob_params,
       as: :json
 
     assert_response :redirect
   end
 
+  test "create in another account is forbidden" do
+    sign_in_as :david
+
+    post rails_direct_uploads_path(script_name: "/#{ActiveRecord::FixtureSet.identify("initech")}"),
+      params: @blob_params,
+      as: :json
+
+    assert_response :forbidden
+  end
+
+  test "create with valid access token in another account is forbidden" do
+    post rails_direct_uploads_path(script_name: "/#{ActiveRecord::FixtureSet.identify("initech")}"),
+      params: @blob_params,
+      headers: bearer_token_header(identity_access_tokens(:davids_api_token).token),
+      as: :json
+
+    assert_response :forbidden
+  end
+
   private
     def bearer_token_header(token)
       { "Authorization" => "Bearer #{token}" }
-    end
-
-    def csrf_token
-      get new_session_url
-      response.body[/name="csrf-token" content="([^"]+)"/, 1]
     end
 end

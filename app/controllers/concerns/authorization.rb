@@ -26,7 +26,12 @@ module Authorization
     end
 
     def ensure_can_access_account
-      redirect_to session_menu_path(script_name: nil) if Current.user.blank? || !Current.user.active?
+      if Current.user.blank? || !Current.user.active?
+        respond_to do |format|
+          format.html { redirect_to session_menu_path(script_name: nil) }
+          format.json { head :forbidden }
+        end
+      end
     end
 
     def redirect_existing_user

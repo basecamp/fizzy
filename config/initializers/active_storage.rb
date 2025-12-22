@@ -40,6 +40,7 @@ module ActiveStorageDirectUploadsControllerExtensions
 
   included do
     include Authentication
+    include Authorization
     skip_forgery_protection if: :authenticate_by_bearer_token
   end
 end
