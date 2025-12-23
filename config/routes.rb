@@ -27,6 +27,7 @@ Rails.application.routes.draw do
       resource :subscriptions
       resource :involvement
       resource :publication
+      resource :manual_sorting, only: %i[ create destroy ]
       resource :entropy
 
       namespace :columns do

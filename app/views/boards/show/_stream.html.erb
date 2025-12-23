@@ -1,4 +1,5 @@
-<%= column_tag id: "the-stream", name: "Maybe?", drop_url: columns_card_drops_stream_path("__id__"), collapsed: false, selected: "true", class: "cards--considering" do %>
+<%= column_tag id: "the-stream", name: "Maybe?", drop_url: columns_card_drops_stream_path("__id__"), collapsed: false, selected: "true", class: "cards--considering",
+  data: { drag_and_drop_reorder_enabled: board.manual_sorting_enabled? } do %>
   <header class="cards__header">
     <div class="cards__expander">
       <h2 class="cards__expander-title" data-collapsible-columns-target="title">Maybe?</h2>
