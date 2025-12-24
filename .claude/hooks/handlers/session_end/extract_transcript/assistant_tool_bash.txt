@@ -1,6 +1,0 @@
-
-[BASH TOOL]
-Command: <%= message.content[0].input.command %>
-Description: <%= message.content[0].input.description %>
-
-------------------------------------------------------------

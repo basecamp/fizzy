@@ -1,5 +1,0 @@
-<% command_name = message.content.match(/<command-name>([^<]+)<\/command-name>/)&.[](1) || 'unknown' %><% command_args = message.content.match(/<command-args>([^<]+)<\/command-args>/)&.[](1) || 'unknown' %>
-[USER] [SLASH COMMAND]
-<%= command_name %> <%= command_args %>
-
-------------------------------------------------------------

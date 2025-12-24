@@ -1,5 +1,0 @@
-
-[<%= message.content[0].name.upcase %> TOOL]
-File: <%= message.content[0].input.file_path %>
-
-------------------------------------------------------------

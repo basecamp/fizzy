@@ -1,9 +1,0 @@
-
-[TASK RESULT]  [<%= toolUseResult.status.upcase %>]
---- Task Prompt ---
-<%= toolUseResult.prompt %>
-
---- Task Result ---
-<%= toolUseResult.content[0].text %>
-
-------------------------------------------------------------

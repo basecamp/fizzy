@@ -1,6 +1,0 @@
-
-[TASK TOOL]
-Sub Agent: <%= message.content[0].input.subagent_type %>
-Task Description: "<%= message.content[0].input.description %>"
-
-------------------------------------------------------------

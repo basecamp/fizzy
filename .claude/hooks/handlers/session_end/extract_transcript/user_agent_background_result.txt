@@ -1,9 +1,0 @@
-
-[BACKGROUND TASK RESULT]  [<%= toolUseResult.task.status.upcase %>]
---- Task Prompt ---
-<%= toolUseResult.task.prompt %>
-
---- Task Result ---
-<% result_string = toolUseResult.task.result.split("--- RESULT ---", 2).last.strip %><%= result_string %>
-
-------------------------------------------------------------
