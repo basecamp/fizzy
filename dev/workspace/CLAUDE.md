@@ -2,10 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-# Workspace
+# Feature: Event API Setup
 
-**Branch:** `{type}/{branch-name}`
-**Started:** `{yyyy-mm-dd}`
+**Branch:** `feature/event-api`
+**Started:** `2025-12-24`
 **Status:**
 
 - [x] In Progress
@@ -14,7 +14,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Purpose
 
-[Place the workspace purpose here]
+Setup and explore the Fizzy Events API - investigating endpoints, authentication, and integration patterns.
 
 ## Discoveries
 

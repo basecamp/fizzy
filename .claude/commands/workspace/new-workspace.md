@@ -62,8 +62,8 @@ git checkout -b {branch-name} origin/main
 ```
 **IF** on `command` branch:
 ```bash
-git fetch origin command
-git checkout -b {branch-name} origin/command
+git fetch fork command
+git checkout -b {branch-name} fork/command
 ```
 
 If branch exists, checkout existing.
