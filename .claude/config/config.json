@@ -8,7 +8,7 @@
   "preLoadSeparator": "\n\n------- Context File -------\n",
   "preLoadEnd": "\n✓ Context loaded successfully",
   "treeFolders": [
-    "dev",
+    "dev/workspace",
     "docs",
     "app",
     "config",
