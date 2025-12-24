@@ -1,0 +1,37 @@
+<% if Current.user.owner? %>
+  <header class="margin-block-start-double">
+    <h2 class="divider txt-large txt-negative">Delete account</h2>
+    <p class="margin-none-block">Permanently delete your Fizzy account and all its data.</p>
+  </header>
+
+  <% if Current.account.cancelled? %>
+    <div class="panel fill-caution margin-block-half">
+      <p class="txt-medium margin-none">
+        <strong>Account scheduled for deletion</strong><br>
+        Your account will be permanently deleted in <%= distance_of_time_in_words_to_now(Current.account.cancellation.created_at + Account::Cancellable::INCINERATION_GRACE_PERIOD) %>.
+      </p>
+    </div>
+
+    <%= button_to "Cancel deletion", account_cancellation_path, method: :delete, class: "btn", data: { turbo_confirm: "Are you sure you want to cancel the account deletion?" } %>
+  <% else %>
+    <div data-controller="dialog" data-dialog-modal-value="true">
+      <button type="button" class="btn btn--negative" data-action="dialog#open">Delete account...</button>
+
+      <dialog class="dialog panel panel--wide shadow" data-dialog-target="dialog">
+        <h2 class="margin-none txt-large txt-negative">Delete your account?</h2>
+        <p class="margin-none-block-start">This will schedule your account for permanent deletion.</p>
+        <ul class="margin-block-half">
+          <li>Your subscription will be canceled immediately</li>
+          <li>All users will lose access</li>
+          <li>After 30 days, all data will be permanently deleted</li>
+        </ul>
+        <p class="txt-bold">This cannot be undone. Contact support if you need to recover your account within the 30-day grace period.</p>
+
+        <div class="flex gap justify-center">
+          <button type="button" class="btn" data-action="dialog#close">Cancel</button>
+          <%= button_to "Delete my account", account_cancellation_path, method: :post, class: "btn btn--negative", form: { data: { action: "submit->dialog#close", turbo: false } } %>
+        </div>
+      </dialog>
+    </div>
+  <% end %>
+<% end %>
