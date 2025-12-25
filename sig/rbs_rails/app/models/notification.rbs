@@ -1,0 +1,381 @@
+class Notification < ::ApplicationRecord
+  extend ::_ActiveRecord_Relation_ClassMethods[::Notification, ::Notification::ActiveRecord_Relation, ::String]
+
+  module GeneratedAttributeMethods
+    def id: () -> ::String
+
+    def id=: (::String) -> ::String
+
+    def id?: () -> bool
+
+    def id_changed?: () -> bool
+
+    def id_change: () -> [ ::String?, ::String? ]
+
+    def id_will_change!: () -> void
+
+    def id_was: () -> ::String?
+
+    def id_previously_changed?: () -> bool
+
+    def id_previous_change: () -> ::Array[::String?]?
+
+    def id_previously_was: () -> ::String?
+
+    def id_before_last_save: () -> ::String?
+
+    def id_change_to_be_saved: () -> ::Array[::String?]?
+
+    def id_in_database: () -> ::String?
+
+    def saved_change_to_id: () -> ::Array[::String?]?
+
+    def saved_change_to_id?: () -> bool
+
+    def will_save_change_to_id?: () -> bool
+
+    def restore_id!: () -> void
+
+    def clear_id_change: () -> void
+
+    def account_id: () -> ::String
+
+    def account_id=: (::String) -> ::String
+
+    def account_id?: () -> bool
+
+    def account_id_changed?: () -> bool
+
+    def account_id_change: () -> [ ::String?, ::String? ]
+
+    def account_id_will_change!: () -> void
+
+    def account_id_was: () -> ::String?
+
+    def account_id_previously_changed?: () -> bool
+
+    def account_id_previous_change: () -> ::Array[::String?]?
+
+    def account_id_previously_was: () -> ::String?
+
+    def account_id_before_last_save: () -> ::String?
+
+    def account_id_change_to_be_saved: () -> ::Array[::String?]?
+
+    def account_id_in_database: () -> ::String?
+
+    def saved_change_to_account_id: () -> ::Array[::String?]?
+
+    def saved_change_to_account_id?: () -> bool
+
+    def will_save_change_to_account_id?: () -> bool
+
+    def restore_account_id!: () -> void
+
+    def clear_account_id_change: () -> void
+
+    def created_at: () -> ::ActiveSupport::TimeWithZone
+
+    def created_at=: (::ActiveSupport::TimeWithZone) -> ::ActiveSupport::TimeWithZone
+
+    def created_at?: () -> bool
+
+    def created_at_changed?: () -> bool
+
+    def created_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
+
+    def created_at_will_change!: () -> void
+
+    def created_at_was: () -> ::ActiveSupport::TimeWithZone?
+
+    def created_at_previously_changed?: () -> bool
+
+    def created_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def created_at_previously_was: () -> ::ActiveSupport::TimeWithZone?
+
+    def created_at_before_last_save: () -> ::ActiveSupport::TimeWithZone?
+
+    def created_at_change_to_be_saved: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def created_at_in_database: () -> ::ActiveSupport::TimeWithZone?
+
+    def saved_change_to_created_at: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def saved_change_to_created_at?: () -> bool
+
+    def will_save_change_to_created_at?: () -> bool
+
+    def restore_created_at!: () -> void
+
+    def clear_created_at_change: () -> void
+
+    def creator_id: () -> ::String?
+
+    def creator_id=: (::String?) -> ::String?
+
+    def creator_id?: () -> bool
+
+    def creator_id_changed?: () -> bool
+
+    def creator_id_change: () -> [ ::String?, ::String? ]
+
+    def creator_id_will_change!: () -> void
+
+    def creator_id_was: () -> ::String?
+
+    def creator_id_previously_changed?: () -> bool
+
+    def creator_id_previous_change: () -> ::Array[::String?]?
+
+    def creator_id_previously_was: () -> ::String?
+
+    def creator_id_before_last_save: () -> ::String?
+
+    def creator_id_change_to_be_saved: () -> ::Array[::String?]?
+
+    def creator_id_in_database: () -> ::String?
+
+    def saved_change_to_creator_id: () -> ::Array[::String?]?
+
+    def saved_change_to_creator_id?: () -> bool
+
+    def will_save_change_to_creator_id?: () -> bool
+
+    def restore_creator_id!: () -> void
+
+    def clear_creator_id_change: () -> void
+
+    def read_at: () -> ::ActiveSupport::TimeWithZone?
+
+    def read_at=: (::ActiveSupport::TimeWithZone?) -> ::ActiveSupport::TimeWithZone?
+
+    def read_at?: () -> bool
+
+    def read_at_changed?: () -> bool
+
+    def read_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
+
+    def read_at_will_change!: () -> void
+
+    def read_at_was: () -> ::ActiveSupport::TimeWithZone?
+
+    def read_at_previously_changed?: () -> bool
+
+    def read_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def read_at_previously_was: () -> ::ActiveSupport::TimeWithZone?
+
+    def read_at_before_last_save: () -> ::ActiveSupport::TimeWithZone?
+
+    def read_at_change_to_be_saved: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def read_at_in_database: () -> ::ActiveSupport::TimeWithZone?
+
+    def saved_change_to_read_at: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def saved_change_to_read_at?: () -> bool
+
+    def will_save_change_to_read_at?: () -> bool
+
+    def restore_read_at!: () -> void
+
+    def clear_read_at_change: () -> void
+
+    def source_id: () -> ::String
+
+    def source_id=: (::String) -> ::String
+
+    def source_id?: () -> bool
+
+    def source_id_changed?: () -> bool
+
+    def source_id_change: () -> [ ::String?, ::String? ]
+
+    def source_id_will_change!: () -> void
+
+    def source_id_was: () -> ::String?
+
+    def source_id_previously_changed?: () -> bool
+
+    def source_id_previous_change: () -> ::Array[::String?]?
+
+    def source_id_previously_was: () -> ::String?
+
+    def source_id_before_last_save: () -> ::String?
+
+    def source_id_change_to_be_saved: () -> ::Array[::String?]?
+
+    def source_id_in_database: () -> ::String?
+
+    def saved_change_to_source_id: () -> ::Array[::String?]?
+
+    def saved_change_to_source_id?: () -> bool
+
+    def will_save_change_to_source_id?: () -> bool
+
+    def restore_source_id!: () -> void
+
+    def clear_source_id_change: () -> void
+
+    def source_type: () -> ::String
+
+    def source_type=: (::String) -> ::String
+
+    def source_type?: () -> bool
+
+    def source_type_changed?: () -> bool
+
+    def source_type_change: () -> [ ::String?, ::String? ]
+
+    def source_type_will_change!: () -> void
+
+    def source_type_was: () -> ::String?
+
+    def source_type_previously_changed?: () -> bool
+
+    def source_type_previous_change: () -> ::Array[::String?]?
+
+    def source_type_previously_was: () -> ::String?
+
+    def source_type_before_last_save: () -> ::String?
+
+    def source_type_change_to_be_saved: () -> ::Array[::String?]?
+
+    def source_type_in_database: () -> ::String?
+
+    def saved_change_to_source_type: () -> ::Array[::String?]?
+
+    def saved_change_to_source_type?: () -> bool
+
+    def will_save_change_to_source_type?: () -> bool
+
+    def restore_source_type!: () -> void
+
+    def clear_source_type_change: () -> void
+
+    def updated_at: () -> ::ActiveSupport::TimeWithZone
+
+    def updated_at=: (::ActiveSupport::TimeWithZone) -> ::ActiveSupport::TimeWithZone
+
+    def updated_at?: () -> bool
+
+    def updated_at_changed?: () -> bool
+
+    def updated_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
+
+    def updated_at_will_change!: () -> void
+
+    def updated_at_was: () -> ::ActiveSupport::TimeWithZone?
+
+    def updated_at_previously_changed?: () -> bool
+
+    def updated_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def updated_at_previously_was: () -> ::ActiveSupport::TimeWithZone?
+
+    def updated_at_before_last_save: () -> ::ActiveSupport::TimeWithZone?
+
+    def updated_at_change_to_be_saved: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def updated_at_in_database: () -> ::ActiveSupport::TimeWithZone?
+
+    def saved_change_to_updated_at: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def saved_change_to_updated_at?: () -> bool
+
+    def will_save_change_to_updated_at?: () -> bool
+
+    def restore_updated_at!: () -> void
+
+    def clear_updated_at_change: () -> void
+
+    def user_id: () -> ::String
+
+    def user_id=: (::String) -> ::String
+
+    def user_id?: () -> bool
+
+    def user_id_changed?: () -> bool
+
+    def user_id_change: () -> [ ::String?, ::String? ]
+
+    def user_id_will_change!: () -> void
+
+    def user_id_was: () -> ::String?
+
+    def user_id_previously_changed?: () -> bool
+
+    def user_id_previous_change: () -> ::Array[::String?]?
+
+    def user_id_previously_was: () -> ::String?
+
+    def user_id_before_last_save: () -> ::String?
+
+    def user_id_change_to_be_saved: () -> ::Array[::String?]?
+
+    def user_id_in_database: () -> ::String?
+
+    def saved_change_to_user_id: () -> ::Array[::String?]?
+
+    def saved_change_to_user_id?: () -> bool
+
+    def will_save_change_to_user_id?: () -> bool
+
+    def restore_user_id!: () -> void
+
+    def clear_user_id_change: () -> void
+  end
+  include GeneratedAttributeMethods
+
+  def account: () -> ::Account
+  def account=: (::Account?) -> ::Account?
+  def reload_account: () -> ::Account?
+  def build_account: (untyped) -> ::Account
+  def create_account: (untyped) -> ::Account
+  def create_account!: (untyped) -> ::Account
+  def user: () -> ::User
+  def user=: (::User?) -> ::User?
+  def reload_user: () -> ::User?
+  def build_user: (untyped) -> ::User
+  def create_user: (untyped) -> ::User
+  def create_user!: (untyped) -> ::User
+  def creator: () -> ::User
+  def creator=: (::User?) -> ::User?
+  def reload_creator: () -> ::User?
+  def build_creator: (untyped) -> ::User
+  def create_creator: (untyped) -> ::User
+  def create_creator!: (untyped) -> ::User
+  def source: () -> untyped
+  def source=: (untyped?) -> untyped?
+  def reload_source: () -> untyped?
+  module GeneratedAssociationMethods
+  end
+  include GeneratedAssociationMethods
+
+  def self.unread: () -> ::Notification::ActiveRecord_Relation
+  def self.read: () -> ::Notification::ActiveRecord_Relation
+  def self.ordered: () -> ::Notification::ActiveRecord_Relation
+  def self.preloaded: () -> ::Notification::ActiveRecord_Relation
+
+  module GeneratedRelationMethods
+    def unread: () -> ::Notification::ActiveRecord_Relation
+
+    def read: () -> ::Notification::ActiveRecord_Relation
+
+    def ordered: () -> ::Notification::ActiveRecord_Relation
+
+    def preloaded: () -> ::Notification::ActiveRecord_Relation
+  end
+
+  class ActiveRecord_Relation < ::ActiveRecord::Relation
+    include ::Notification::GeneratedRelationMethods
+    include ::_ActiveRecord_Relation[::Notification, ::String]
+    include ::Enumerable[::Notification]
+  end
+
+  class ActiveRecord_Associations_CollectionProxy < ::ActiveRecord::Associations::CollectionProxy
+    include ::Notification::GeneratedRelationMethods
+    include ::_ActiveRecord_Relation[::Notification, ::String]
+  end
+end

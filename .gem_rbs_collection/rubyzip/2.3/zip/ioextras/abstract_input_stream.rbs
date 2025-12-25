@@ -1,0 +1,38 @@
+module Zip
+  module IOExtras
+    # Implements many of the convenience methods of IO
+    # such as gets, getc, readline and readlines
+    # depends on: input_finished?, produce_input and read
+    module AbstractInputStream
+      include Enumerable[untyped]
+
+      include FakeIO
+
+      def initialize: () -> void
+
+      attr_accessor lineno: untyped
+
+      attr_reader pos: untyped
+
+      def read: (?untyped? number_of_bytes, ?::String buf) -> (nil | "" | untyped)
+
+      def readlines: (?untyped a_sep_string) -> untyped
+
+      def gets: (?untyped a_sep_string, ?untyped? number_of_bytes) -> String?
+
+      def ungetc: (untyped byte) -> untyped
+
+      def flush: () -> untyped
+
+      def readline: (?untyped a_sep_string) -> untyped
+
+      def each_line: (?untyped a_sep_string) { (untyped) -> untyped } -> untyped
+
+      alias each each_line
+
+      def eof: () -> untyped
+
+      alias eof? eof
+    end
+  end
+end

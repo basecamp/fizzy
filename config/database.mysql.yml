@@ -15,6 +15,10 @@ development:
     <<: *default
     database: fizzy_development_cable
     migrations_paths: db/cable_migrate
+  cache:
+    <<: *default
+    database: fizzy_development_cache
+    migrations_paths: db/cache_migrate
 
 test:
   primary:

@@ -1,0 +1,6 @@
+dependencies:
+  - name: logger
+  - name: tempfile
+  - name: tmpdir
+  - name: uri
+  - name: pathname

@@ -1,0 +1,190 @@
+module Zip
+  class Entry
+    STORED: 0
+
+    DEFLATED: 8
+
+    # Language encoding flag (EFS) bit
+    EFS: 2048
+
+    attr_accessor comment: String
+
+    attr_accessor compressed_size: Integer
+
+    attr_accessor crc: Integer
+
+    attr_accessor extra: untyped
+
+    attr_accessor compression_method: untyped
+
+    attr_accessor name: String
+
+    attr_accessor size: Integer
+
+    attr_accessor local_header_offset: Integer
+
+    attr_accessor zipfile: untyped
+
+    attr_accessor fstype: untyped
+
+    attr_accessor external_file_attributes: Integer
+
+    attr_accessor internal_file_attributes: Integer
+
+    attr_accessor gp_flags: untyped
+
+    attr_accessor header_signature: untyped
+
+    attr_accessor follow_symlinks: bool
+
+    attr_accessor restore_times: bool
+
+    attr_accessor restore_permissions: bool
+
+    attr_accessor restore_ownership: bool
+
+    attr_accessor unix_uid: untyped
+
+    attr_accessor unix_gid: untyped
+
+    attr_accessor unix_perms: untyped
+
+    attr_accessor dirty: bool
+
+    attr_reader ftype: untyped
+
+    attr_reader filepath: untyped
+
+    def set_default_vars_values: () -> untyped
+
+    def check_name: (untyped name) -> (nil | untyped)
+
+    def initialize: (*untyped args) -> void
+
+    def encrypted?: () -> untyped
+
+    def incomplete?: () -> untyped
+
+    def time: () -> untyped
+
+    alias mtime time
+
+    def time=: (untyped value) -> untyped
+
+    def file_type_is?: (untyped type) -> untyped
+
+    def name_is_directory?: () -> untyped
+
+    # Is the name a relative path, free of `..` patterns that could lead to
+    # path traversal attacks? This does NOT handle symlinks; if the path
+    # contains symlinks, this check is NOT enough to guarantee safety.
+    def name_safe?: () -> (false | untyped)
+
+    def local_entry_offset: () -> untyped
+
+    def name_size: () -> (untyped | 0)
+
+    def extra_size: () -> (untyped | 0)
+
+    def comment_size: () -> (untyped | 0)
+
+    def calculate_local_header_size: () -> untyped
+
+    # check before rewriting an entry (after file sizes are known)
+    # that we didn't change the header size (and thus clobber file data or something)
+    def verify_local_header_size!: () -> (nil | untyped)
+
+    def cdir_header_size: () -> untyped
+
+    def next_header_offset: () -> untyped
+
+    # Extracts entry to file dest_path (defaults to @name).
+    # NB: The caller is responsible for making sure dest_path is safe, if it
+    # is passed.
+    def extract: (?untyped? dest_path) ?{ () -> untyped } -> self
+
+    def to_s: () -> untyped
+
+    def self.read_zip_short: (untyped io) -> untyped
+
+    def self.read_zip_long: (untyped io) -> untyped
+
+    def self.read_zip_64_long: (untyped io) -> untyped
+
+    def self.read_c_dir_entry: (untyped io) -> untyped
+
+    def self.read_local_entry: (untyped io) -> untyped
+
+    def unpack_local_entry: (untyped buf) -> untyped
+
+    def read_local_entry: (untyped io) -> untyped
+
+    def pack_local_entry: () -> untyped
+
+    def write_local_entry: (untyped io, ?bool rewrite) -> untyped
+
+    def unpack_c_dir_entry: (untyped buf) -> untyped
+
+    def set_ftype_from_c_dir_entry: () -> untyped
+
+    def check_c_dir_entry_static_header_length: (untyped buf) -> (nil | untyped)
+
+    def check_c_dir_entry_signature: () -> (nil | untyped)
+
+    def check_c_dir_entry_comment_size: () -> (nil | untyped)
+
+    def read_c_dir_extra_field: (untyped io) -> untyped
+
+    def read_c_dir_entry: (untyped io) -> untyped
+
+    def file_stat: (untyped path) -> untyped
+
+    def get_extra_attributes_from_path: (untyped path) -> (nil | untyped)
+
+    def set_unix_attributes_on_path: (untyped dest_path) -> untyped
+
+    def set_extra_attributes_on_path: (untyped dest_path) -> (nil | untyped)
+
+    def pack_c_dir_entry: () -> untyped
+
+    def write_c_dir_entry: (untyped io) -> untyped
+
+    def ==: (untyped other) -> (false | untyped)
+
+    def <=>: (untyped other) -> untyped
+
+    # Returns an IO like object for the given ZipEntry.
+    # Warning: may behave weird with symlinks.
+    def get_input_stream: () ?{ (untyped) -> untyped } -> untyped
+
+    def gather_fileinfo_from_srcpath: (untyped src_path) -> untyped
+
+    def write_to_zip_output_stream: (untyped zip_output_stream) -> untyped
+
+    def parent_as_string: () -> untyped
+
+    def get_raw_input_stream: () { (untyped) -> untyped } -> untyped
+
+    def clean_up: () -> nil
+
+    private
+
+    def set_time: (untyped binary_dos_date, untyped binary_dos_time) -> untyped
+
+    def create_file: (untyped dest_path, ?untyped _continue_on_exists_proc) { (untyped, untyped) -> untyped } -> untyped
+
+    def create_directory: (untyped dest_path) ?{ (untyped, untyped) -> untyped } -> (nil | untyped)
+
+    # BUG: create_symlink() does not use &block
+    def create_symlink: (untyped dest_path) -> untyped
+
+    # apply missing data from the zip64 extra information field, if present
+    # (required when file sizes exceed 2**32, but can be used for all files)
+    def parse_zip64_extra: (untyped for_local_header) -> (nil | untyped)
+
+    def data_descriptor_size: () -> (16 | 0)
+
+    # create a zip64 extra information field if we need one
+    def prep_zip64_extra: (untyped for_local_header) -> (nil | untyped)
+  end
+end

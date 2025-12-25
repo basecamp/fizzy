@@ -1,0 +1,371 @@
+module Search
+  class Record < ::ApplicationRecord
+    extend ::_ActiveRecord_Relation_ClassMethods[::Search::Record, ::Search::Record::ActiveRecord_Relation, ::Integer]
+
+    module GeneratedAttributeMethods
+      def id: () -> ::Integer
+
+      def id=: (::Integer) -> ::Integer
+
+      def id?: () -> bool
+
+      def id_changed?: () -> bool
+
+      def id_change: () -> [ ::Integer?, ::Integer? ]
+
+      def id_will_change!: () -> void
+
+      def id_was: () -> ::Integer?
+
+      def id_previously_changed?: () -> bool
+
+      def id_previous_change: () -> ::Array[::Integer?]?
+
+      def id_previously_was: () -> ::Integer?
+
+      def id_before_last_save: () -> ::Integer?
+
+      def id_change_to_be_saved: () -> ::Array[::Integer?]?
+
+      def id_in_database: () -> ::Integer?
+
+      def saved_change_to_id: () -> ::Array[::Integer?]?
+
+      def saved_change_to_id?: () -> bool
+
+      def will_save_change_to_id?: () -> bool
+
+      def restore_id!: () -> void
+
+      def clear_id_change: () -> void
+
+      def account_id: () -> ::String
+
+      def account_id=: (::String) -> ::String
+
+      def account_id?: () -> bool
+
+      def account_id_changed?: () -> bool
+
+      def account_id_change: () -> [ ::String?, ::String? ]
+
+      def account_id_will_change!: () -> void
+
+      def account_id_was: () -> ::String?
+
+      def account_id_previously_changed?: () -> bool
+
+      def account_id_previous_change: () -> ::Array[::String?]?
+
+      def account_id_previously_was: () -> ::String?
+
+      def account_id_before_last_save: () -> ::String?
+
+      def account_id_change_to_be_saved: () -> ::Array[::String?]?
+
+      def account_id_in_database: () -> ::String?
+
+      def saved_change_to_account_id: () -> ::Array[::String?]?
+
+      def saved_change_to_account_id?: () -> bool
+
+      def will_save_change_to_account_id?: () -> bool
+
+      def restore_account_id!: () -> void
+
+      def clear_account_id_change: () -> void
+
+      def searchable_type: () -> ::String
+
+      def searchable_type=: (::String) -> ::String
+
+      def searchable_type?: () -> bool
+
+      def searchable_type_changed?: () -> bool
+
+      def searchable_type_change: () -> [ ::String?, ::String? ]
+
+      def searchable_type_will_change!: () -> void
+
+      def searchable_type_was: () -> ::String?
+
+      def searchable_type_previously_changed?: () -> bool
+
+      def searchable_type_previous_change: () -> ::Array[::String?]?
+
+      def searchable_type_previously_was: () -> ::String?
+
+      def searchable_type_before_last_save: () -> ::String?
+
+      def searchable_type_change_to_be_saved: () -> ::Array[::String?]?
+
+      def searchable_type_in_database: () -> ::String?
+
+      def saved_change_to_searchable_type: () -> ::Array[::String?]?
+
+      def saved_change_to_searchable_type?: () -> bool
+
+      def will_save_change_to_searchable_type?: () -> bool
+
+      def restore_searchable_type!: () -> void
+
+      def clear_searchable_type_change: () -> void
+
+      def searchable_id: () -> ::String
+
+      def searchable_id=: (::String) -> ::String
+
+      def searchable_id?: () -> bool
+
+      def searchable_id_changed?: () -> bool
+
+      def searchable_id_change: () -> [ ::String?, ::String? ]
+
+      def searchable_id_will_change!: () -> void
+
+      def searchable_id_was: () -> ::String?
+
+      def searchable_id_previously_changed?: () -> bool
+
+      def searchable_id_previous_change: () -> ::Array[::String?]?
+
+      def searchable_id_previously_was: () -> ::String?
+
+      def searchable_id_before_last_save: () -> ::String?
+
+      def searchable_id_change_to_be_saved: () -> ::Array[::String?]?
+
+      def searchable_id_in_database: () -> ::String?
+
+      def saved_change_to_searchable_id: () -> ::Array[::String?]?
+
+      def saved_change_to_searchable_id?: () -> bool
+
+      def will_save_change_to_searchable_id?: () -> bool
+
+      def restore_searchable_id!: () -> void
+
+      def clear_searchable_id_change: () -> void
+
+      def card_id: () -> ::String
+
+      def card_id=: (::String) -> ::String
+
+      def card_id?: () -> bool
+
+      def card_id_changed?: () -> bool
+
+      def card_id_change: () -> [ ::String?, ::String? ]
+
+      def card_id_will_change!: () -> void
+
+      def card_id_was: () -> ::String?
+
+      def card_id_previously_changed?: () -> bool
+
+      def card_id_previous_change: () -> ::Array[::String?]?
+
+      def card_id_previously_was: () -> ::String?
+
+      def card_id_before_last_save: () -> ::String?
+
+      def card_id_change_to_be_saved: () -> ::Array[::String?]?
+
+      def card_id_in_database: () -> ::String?
+
+      def saved_change_to_card_id: () -> ::Array[::String?]?
+
+      def saved_change_to_card_id?: () -> bool
+
+      def will_save_change_to_card_id?: () -> bool
+
+      def restore_card_id!: () -> void
+
+      def clear_card_id_change: () -> void
+
+      def board_id: () -> ::String
+
+      def board_id=: (::String) -> ::String
+
+      def board_id?: () -> bool
+
+      def board_id_changed?: () -> bool
+
+      def board_id_change: () -> [ ::String?, ::String? ]
+
+      def board_id_will_change!: () -> void
+
+      def board_id_was: () -> ::String?
+
+      def board_id_previously_changed?: () -> bool
+
+      def board_id_previous_change: () -> ::Array[::String?]?
+
+      def board_id_previously_was: () -> ::String?
+
+      def board_id_before_last_save: () -> ::String?
+
+      def board_id_change_to_be_saved: () -> ::Array[::String?]?
+
+      def board_id_in_database: () -> ::String?
+
+      def saved_change_to_board_id: () -> ::Array[::String?]?
+
+      def saved_change_to_board_id?: () -> bool
+
+      def will_save_change_to_board_id?: () -> bool
+
+      def restore_board_id!: () -> void
+
+      def clear_board_id_change: () -> void
+
+      def title: () -> ::String?
+
+      def title=: (::String?) -> ::String?
+
+      def title?: () -> bool
+
+      def title_changed?: () -> bool
+
+      def title_change: () -> [ ::String?, ::String? ]
+
+      def title_will_change!: () -> void
+
+      def title_was: () -> ::String?
+
+      def title_previously_changed?: () -> bool
+
+      def title_previous_change: () -> ::Array[::String?]?
+
+      def title_previously_was: () -> ::String?
+
+      def title_before_last_save: () -> ::String?
+
+      def title_change_to_be_saved: () -> ::Array[::String?]?
+
+      def title_in_database: () -> ::String?
+
+      def saved_change_to_title: () -> ::Array[::String?]?
+
+      def saved_change_to_title?: () -> bool
+
+      def will_save_change_to_title?: () -> bool
+
+      def restore_title!: () -> void
+
+      def clear_title_change: () -> void
+
+      def content: () -> ::String?
+
+      def content=: (::String?) -> ::String?
+
+      def content?: () -> bool
+
+      def content_changed?: () -> bool
+
+      def content_change: () -> [ ::String?, ::String? ]
+
+      def content_will_change!: () -> void
+
+      def content_was: () -> ::String?
+
+      def content_previously_changed?: () -> bool
+
+      def content_previous_change: () -> ::Array[::String?]?
+
+      def content_previously_was: () -> ::String?
+
+      def content_before_last_save: () -> ::String?
+
+      def content_change_to_be_saved: () -> ::Array[::String?]?
+
+      def content_in_database: () -> ::String?
+
+      def saved_change_to_content: () -> ::Array[::String?]?
+
+      def saved_change_to_content?: () -> bool
+
+      def will_save_change_to_content?: () -> bool
+
+      def restore_content!: () -> void
+
+      def clear_content_change: () -> void
+
+      def created_at: () -> ::ActiveSupport::TimeWithZone
+
+      def created_at=: (::ActiveSupport::TimeWithZone) -> ::ActiveSupport::TimeWithZone
+
+      def created_at?: () -> bool
+
+      def created_at_changed?: () -> bool
+
+      def created_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
+
+      def created_at_will_change!: () -> void
+
+      def created_at_was: () -> ::ActiveSupport::TimeWithZone?
+
+      def created_at_previously_changed?: () -> bool
+
+      def created_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def created_at_previously_was: () -> ::ActiveSupport::TimeWithZone?
+
+      def created_at_before_last_save: () -> ::ActiveSupport::TimeWithZone?
+
+      def created_at_change_to_be_saved: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def created_at_in_database: () -> ::ActiveSupport::TimeWithZone?
+
+      def saved_change_to_created_at: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def saved_change_to_created_at?: () -> bool
+
+      def will_save_change_to_created_at?: () -> bool
+
+      def restore_created_at!: () -> void
+
+      def clear_created_at_change: () -> void
+    end
+    include GeneratedAttributeMethods
+
+    def search_records_fts: () -> ::Search::Record::SQLite::Fts?
+    def search_records_fts=: (::Search::Record::SQLite::Fts?) -> ::Search::Record::SQLite::Fts?
+    def build_search_records_fts: (?untyped) -> ::Search::Record::SQLite::Fts
+    def create_search_records_fts: (untyped) -> ::Search::Record::SQLite::Fts
+    def create_search_records_fts!: (untyped) -> ::Search::Record::SQLite::Fts
+    def reload_search_records_fts: () -> ::Search::Record::SQLite::Fts?
+    def searchable: () -> untyped
+    def searchable=: (untyped?) -> untyped?
+    def reload_searchable: () -> untyped?
+    def card: () -> ::Card
+    def card=: (::Card?) -> ::Card?
+    def reload_card: () -> ::Card?
+    def build_card: (untyped) -> ::Card
+    def create_card: (untyped) -> ::Card
+    def create_card!: (untyped) -> ::Card
+    module GeneratedAssociationMethods
+    end
+    include GeneratedAssociationMethods
+
+    def self.for_query: (untyped query, user: untyped) -> ::Search::Record::ActiveRecord_Relation
+    def self.search: (untyped query, user: untyped) -> ::Search::Record::ActiveRecord_Relation
+
+    module GeneratedRelationMethods
+      def for_query: (untyped query, user: untyped) -> ::Search::Record::ActiveRecord_Relation
+
+      def search: (untyped query, user: untyped) -> ::Search::Record::ActiveRecord_Relation
+    end
+
+    class ActiveRecord_Relation < ::ActiveRecord::Relation
+      include ::Search::Record::GeneratedRelationMethods
+      include ::_ActiveRecord_Relation[::Search::Record, ::Integer]
+      include ::Enumerable[::Search::Record]
+    end
+
+    class ActiveRecord_Associations_CollectionProxy < ::ActiveRecord::Associations::CollectionProxy
+      include ::Search::Record::GeneratedRelationMethods
+      include ::_ActiveRecord_Relation[::Search::Record, ::Integer]
+    end
+  end
+end

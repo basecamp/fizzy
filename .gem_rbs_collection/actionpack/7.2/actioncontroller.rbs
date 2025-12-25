@@ -1,0 +1,290 @@
+module ActionController
+  interface _API_and_Base
+    def flash: () -> untyped
+  end
+
+  class Base < Metal
+    include _API_and_Base
+
+    # https://github.com/rails/rails/blob/v6.0.3.2/actionpack/lib/action_controller/base.rb#L205-L255
+    include AbstractController::Rendering
+    include AbstractController::Translation
+    include AbstractController::AssetPaths
+    include Helpers
+    extend Helpers::ClassMethods
+    extend AbstractController::Helpers::ClassMethods
+    include UrlFor
+    include Redirecting
+    include ActionView::Layouts
+    extend ::ActionView::Layouts::ClassMethods
+    include Rendering
+    extend Rendering::ClassMethods
+    include Renderers::All
+    include ConditionalGet
+    extend ConditionalGet::ClassMethods
+    include EtagWithTemplateDigest
+    include EtagWithFlash
+    include Caching
+    include AbstractController::Caching
+    extend AbstractController::Caching::ClassMethods
+    extend AbstractController::Caching::Fragments::ClassMethods
+    include MimeResponds
+    include ImplicitRender
+    include StrongParameters
+    include ParameterEncoding
+    extend ParameterEncoding::ClassMethods
+    include Cookies
+    include Flash
+    extend Flash::ClassMethods
+    include FormBuilder
+    extend FormBuilder::ClassMethods
+    include RequestForgeryProtection
+    extend RequestForgeryProtection::ClassMethods
+    include ContentSecurityPolicy
+    extend ContentSecurityPolicy::ClassMethods
+    include ForceSSL
+    extend ForceSSL::ClassMethods
+    include Streaming
+    include DataStreaming
+    include HttpAuthentication::Basic::ControllerMethods
+    extend HttpAuthentication::Basic::ControllerMethods::ClassMethods
+    include HttpAuthentication::Digest::ControllerMethods
+    include HttpAuthentication::Token::ControllerMethods
+    include DefaultHeaders
+    extend DefaultHeaders::ClassMethods
+    include AbstractController::Callbacks
+    extend AbstractController::Callbacks::ClassMethods
+    include Rescue
+    include ActiveSupport::Rescuable
+    extend ActiveSupport::Rescuable::ClassMethods
+    include Instrumentation
+    extend Instrumentation::ClassMethods
+    include ParamsWrapper
+    extend ParamsWrapper::ClassMethods
+  end
+
+  class API < Metal
+    include _API_and_Base
+
+    # https://github.com/rails/rails/blob/v6.0.3.2/actionpack/lib/action_controller/api.rb#L112-L145
+    include AbstractController::Rendering
+    include UrlFor
+    include Redirecting
+    include ApiRendering
+    include Renderers::All
+    include ConditionalGet
+    extend ConditionalGet::ClassMethods
+    include BasicImplicitRender
+    include StrongParameters
+    include ForceSSL
+    extend ForceSSL::ClassMethods
+    include DataStreaming
+    include DefaultHeaders
+    extend DefaultHeaders::ClassMethods
+    include AbstractController::Callbacks
+    extend AbstractController::Callbacks::ClassMethods
+    include Rescue
+    include ActiveSupport::Rescuable
+    extend ActiveSupport::Rescuable::ClassMethods
+    include Instrumentation
+    extend Instrumentation::ClassMethods
+    include ParamsWrapper
+    extend ParamsWrapper::ClassMethods
+  end
+
+  module HttpAuthentication
+    module Token
+      TOKEN_KEY: ::String
+      TOKEN_REGEX: ::Regexp
+      AUTHN_PAIR_DELIMITERS: ::Regexp
+
+      extend ::ActionController::HttpAuthentication::Token
+
+      module ControllerMethods
+        def authenticate_or_request_with_http_token: (?String realm, ?String? message) { (String token, ActiveSupport::HashWithIndifferentAccess[untyped, untyped] options) -> boolish } -> untyped
+
+        def authenticate_with_http_token: () { (String token, ActiveSupport::HashWithIndifferentAccess[untyped, untyped] options) -> boolish } -> boolish
+
+        def request_http_token_authentication: (?String realm, ?String? message) -> void
+      end
+
+      def authenticate: (instance controller) { (String token, ActiveSupport::HashWithIndifferentAccess[untyped, untyped] options) -> boolish } -> boolish
+
+      def token_and_options: (ActionDispatch::Request request) -> [String, ActiveSupport::HashWithIndifferentAccess[untyped, untyped]]?
+
+      def token_params_from: (String auth) -> Array[String]
+
+      def raw_params: (String auth) -> Array[String]
+
+      def params_array_from: (Array[String] raw_params) -> Array[String]
+
+      def rewrite_param_values: (Array[String] array_params) -> Array[String]
+
+      def encode_credentials: (String token, ?::Hash[untyped, untyped] options) -> ::String
+
+      def authentication_request: (instance controller, String realm, ?String? message) -> void
+    end
+  end
+end
+
+module AbstractController::Callbacks::ClassMethods
+  interface _BeforeActionCallback
+    def before: (ActionController::Base controller) -> void
+  end
+
+  interface _AroundActionCallback
+    def around: (ActionController::Base controller) { () -> void } -> void
+  end
+
+  interface _AfterActionCallback
+    def after: (ActionController::Base controller) -> void
+  end
+
+  type before_action_callback[T] = Symbol | ^(T controller) [self: T] -> void | _BeforeActionCallback
+  type around_action_callback[T] = Symbol | ^(T controller, ^() -> void) [self: T] -> void | _AroundActionCallback
+  type after_action_callback[T] = Symbol | ^(T controller) [self: T] -> void | _AfterActionCallback
+
+  def before_action: (*before_action_callback[instance], ?if: before_action_callback[instance], ?unless: before_action_callback[instance], **untyped) ?{ (instance controller) [self: instance] -> void } -> void
+  def around_action: (*around_action_callback[instance], ?if: around_action_callback[instance], ?unless: around_action_callback[instance], **untyped) ?{ (instance controller, ^() -> void) [self: instance] -> void } -> void
+  def after_action: (*after_action_callback[instance], ?if: after_action_callback[instance], ?unless: after_action_callback[instance], **untyped) ?{ (instance controller) [self: instance] -> void } -> void
+  def skip_before_action: (*before_action_callback[instance], ?if: before_action_callback[instance], ?unless: before_action_callback[instance], **untyped) ?{ (instance controller) [self: instance] -> void } -> void
+  def skip_around_action: (*around_action_callback[instance], ?if: around_action_callback[instance], ?unless: around_action_callback[instance], **untyped) ?{ (instance controller, ^() -> void) [self: instance] -> void } -> void
+  def skip_after_action: (*after_action_callback[instance], ?if: after_action_callback[instance], ?unless: after_action_callback[instance], **untyped) ?{ (instance controller) [self: instance] -> void } -> void
+  def prepend_before_action: (*before_action_callback[instance], ?if: before_action_callback[instance], ?unless: before_action_callback[instance], **untyped) ?{ (instance controller) [self: instance] -> void } -> void
+  def prepend_around_action: (*around_action_callback[instance], ?if: around_action_callback[instance], ?unless: around_action_callback[instance], **untyped) ?{ (instance controller, ^() -> void) [self: instance] -> void } -> void
+  def prepend_after_action: (*after_action_callback[instance], ?if: after_action_callback[instance], ?unless: after_action_callback[instance], **untyped) ?{ (instance controller) [self: instance] -> void } -> void
+
+  alias append_before_action before_action
+  alias append_around_action around_action
+  alias append_after_action after_action
+end
+
+module ActionController
+  class Parameters
+    # Deletes a key-value pair from +Parameters+ and returns the value. If
+    # +key+ is not found, returns +nil+ (or, with optional code block, yields
+    # +key+ and returns the result). Cf. +#extract!+, which returns the
+    # corresponding +ActionController::Parameters+ object.
+    def delete: (untyped key) ?{ (untyped key) -> untyped } -> untyped
+
+    def keys: () -> Array[untyped]
+    def key?: (untyped key) -> bool
+    def has_key?: (untyped key) -> bool
+    def values: () -> Array[untyped]
+    def has_value?: (untyped value) -> bool
+    def empty?: () -> bool
+    def include?: (untyped key) -> bool
+    def as_json: () -> String
+    def to_s: () -> String
+    def each_key: () { (untyped) -> untyped } -> Hash[untyped, untyped]
+                | () -> Enumerator[untyped, self]
+    def fetch: (untyped key, *untyped args) ?{ () -> untyped } -> untyped
+  end
+end
+
+module AbstractController
+  module Helpers
+    module ClassMethods
+      # The +helper+ class method can take a series of helper module names, a block, or both.
+      #
+      # ==== Options
+      # * <tt>*args</tt> - Module, Symbol, String
+      # * <tt>block</tt> - A block defining helper methods
+      #
+      # When the argument is a module it will be included directly in the template class.
+      #   helper FooHelper # => includes FooHelper
+      #
+      # When the argument is a string or symbol, the method will provide the "_helper" suffix, require the file
+      # and include the module in the template class. The second form illustrates how to include custom helpers
+      # when working with namespaced controllers, or other cases where the file containing the helper definition is not
+      # in one of Rails' standard load paths:
+      #   helper :foo             # => requires 'foo_helper' and includes FooHelper
+      #   helper 'resources/foo'  # => requires 'resources/foo_helper' and includes Resources::FooHelper
+      #
+      # Additionally, the +helper+ class method can receive and evaluate a block, making the methods defined available
+      # to the template.
+      #
+      #   # One line
+      #   helper { def hello() "Hello, world!" end }
+      #
+      #   # Multi-line
+      #   helper do
+      #     def foo(bar)
+      #       "#{bar} is the very best"
+      #     end
+      #   end
+      #
+      # Finally, all the above styles can be mixed together, and the +helper+ method can be invoked with a mix of
+      # +symbols+, +strings+, +modules+ and blocks.
+      #
+      #   helper(:three, BlindHelper) { def mice() 'mice' end }
+      #
+      def helper: (*untyped args) ?{ () -> untyped } -> untyped
+    end
+  end
+end
+
+module AbstractController
+  module Caching
+    module Fragments
+      module ClassMethods
+        # Allows you to specify controller-wide key prefixes for
+        # cache fragments. Pass either a constant +value+, or a block
+        # which computes a value each time a cache key is generated.
+        #
+        # For example, you may want to prefix all fragment cache keys
+        # with a global version identifier, so you can easily
+        # invalidate all caches.
+        #
+        #   class ApplicationController
+        #     fragment_cache_key "v1"
+        #   end
+        #
+        # When it's time to invalidate all fragments, simply change
+        # the string constant. Or, progressively roll out the cache
+        # invalidation using a computed value:
+        #
+        #   class ApplicationController
+        #     fragment_cache_key do
+        #       @account.id.odd? ? "v1" : "v2"
+        #     end
+        #   end
+        def fragment_cache_key: (?untyped? value) ?{ () -> untyped } -> untyped
+      end
+    end
+  end
+end
+
+module AbstractController
+  module Rendering
+    def render_to_string: (*untyped args) ?{ () -> untyped } -> ::String
+  end
+end
+
+module ActionController
+  module Caching
+    extend AbstractController::Caching::ClassMethods
+    extend AbstractController::Caching::Fragments::ClassMethods
+  end
+end
+
+module ActionController
+  module ContentSecurityPolicy
+    module ClassMethods
+      def content_security_policy: (?bool enabled, **untyped options) ?{ (untyped) -> untyped } -> untyped
+    end
+  end
+end
+
+module ActionController
+  class TestSession < Rack::Session::Abstract::PersistedSecure::SecureSessionHash
+    def fetch: (untyped key) ?{ () -> untyped } -> untyped
+             | (untyped key, untyped args) -> untyped
+  end
+end
+
+module ActionController
+  module Rendering
+    def render_to_string: (*untyped args) ?{ () -> untyped } -> ::String
+  end
+end

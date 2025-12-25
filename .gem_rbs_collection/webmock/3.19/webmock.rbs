@@ -1,0 +1,9 @@
+module WebMock
+  VERSION: String
+
+  def self.version: () -> String
+
+  def self.disable!: (?Hash[Symbol, untyped] options) -> void
+
+  def self.enable!: (?Hash[Symbol, untyped] options) -> void
+end

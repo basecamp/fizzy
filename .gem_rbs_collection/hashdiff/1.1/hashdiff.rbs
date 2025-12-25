@@ -1,0 +1,3 @@
+module Hashdiff
+  def self.diff: (::Hash[untyped, untyped] obj1, ::Hash[untyped, untyped] obj2, ?::Hash[::Symbol, untyped] options) ?{ () -> untyped } -> ( ::Array[untyped] )
+end

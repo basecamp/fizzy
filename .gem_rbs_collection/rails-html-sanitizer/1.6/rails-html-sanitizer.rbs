@@ -1,0 +1,53 @@
+module Rails
+  module Html = HTML
+end
+
+module Rails
+  module HTML
+    class Sanitizer
+      def sanitize: (String html, ?Hash[untyped, untyped] options) -> String
+    end
+
+    module Concern
+      module ComposedSanitize
+        def sanitize: (String html, ?Hash[untyped, untyped] options) -> String
+      end
+    end
+
+    class FullSanitizer = HTML4::FullSanitizer
+    class LinkSanitizer = HTML4::LinkSanitizer
+    class SafeListSanitizer = HTML4::SafeListSanitizer
+    class WhiteListSanitizer = SafeListSanitizer
+  end
+
+  module HTML4
+    class FullSanitizer < Rails::HTML::Sanitizer
+      include HTML::Concern::ComposedSanitize
+    end
+
+    class LinkSanitizer < Rails::HTML::Sanitizer
+      include HTML::Concern::ComposedSanitize
+    end
+
+    class SafeListSanitizer < Rails::HTML::Sanitizer
+      include HTML::Concern::ComposedSanitize
+    end
+  end
+
+  module HTML5
+    class Sanitizer
+    end
+
+    class FullSanitizer < Rails::HTML::Sanitizer
+      include HTML::Concern::ComposedSanitize
+    end
+
+    class LinkSanitizer < Rails::HTML::Sanitizer
+      include HTML::Concern::ComposedSanitize
+    end
+
+    class SafeListSanitizer < Rails::HTML::Sanitizer
+      include HTML::Concern::ComposedSanitize
+    end
+  end
+end

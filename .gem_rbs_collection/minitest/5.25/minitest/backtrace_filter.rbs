@@ -1,0 +1,23 @@
+# <!-- rdoc-file=lib/minitest.rb -->
+# The standard backtrace filter for minitest.
+#
+# See Minitest.backtrace_filter=.
+#
+class Minitest::BacktraceFilter
+  def initialize: (?untyped regexp) -> void
+
+  # <!--
+  #   rdoc-file=lib/minitest.rb
+  #   - filter(bt)
+  # -->
+  # Filter `bt` to something useful. Returns the whole thing if $DEBUG (ruby) or
+  # $MT_DEBUG (env).
+  #
+  def filter: (untyped bt) -> (::Array["No backtrace"] | untyped)
+
+  # <!-- rdoc-file=lib/minitest.rb -->
+  # The regular expression to use to filter backtraces. Defaults to `MT_RE`.
+  #
+  attr_accessor regexp: untyped
+  MT_RE: Regexp
+end

@@ -1,0 +1,480 @@
+module ChunkyPNG
+  module Color
+    extend ::ChunkyPNG::Color
+
+    # @return [Integer] The maximum value of each color component.
+    MAX: Integer
+
+    # Parses a color value given a numeric or string argument.
+    #
+    # It supports color numbers, colors in hex notation and named HTML colors.
+    #
+    # @param [Integer, String] source The color value.
+    # @return [Integer] The color value, with the opacity applied if one was
+    #   given.
+    def parse: (Integer | String source) -> Integer
+
+    # Creates a new color using an r, g, b triple and an alpha value.
+    # @param [Integer] r The r-component (0-255)
+    # @param [Integer] g The g-component (0-255)
+    # @param [Integer] b The b-component (0-255)
+    # @param [Integer] a The opacity (0-255)
+    # @return [Integer] The newly constructed color value.
+    def rgba: (Integer r, Integer g, Integer b, Integer a) -> Integer
+
+    # Creates a new color using an r, g, b triple.
+    # @param [Integer] r The r-component (0-255)
+    # @param [Integer] g The g-component (0-255)
+    # @param [Integer] b The b-component (0-255)
+    # @return [Integer] The newly constructed color value.
+    def rgb: (Integer r, Integer g, Integer b) -> Integer
+
+    # Creates a new color using a grayscale teint.
+    # @param [Integer] teint The grayscale teint (0-255), will be used as r, g,
+    #   and b value.
+    # @return [Integer] The newly constructed color value.
+    def grayscale: (Integer teint) -> Integer
+
+    # Creates a new color using a grayscale teint and alpha value.
+    # @param [Integer] teint The grayscale teint (0-255), will be used as r, g,
+    #   and b value.
+    # @param [Integer] a The opacity (0-255)
+    # @return [Integer] The newly constructed color value.
+    def grayscale_alpha: (Integer teint, Integer a) -> Integer
+
+    # Creates a color by unpacking an rgb triple from a string.
+    #
+    # @param [String] stream The string to load the color from. It should be
+    #     at least 3 + pos bytes long.
+    # @param [Integer] pos The position in the string to load the triple from.
+    # @return [Integer] The newly constructed color value.
+    def from_rgb_stream: (String stream, ?Integer pos) -> Integer
+
+    # Creates a color by unpacking an rgba triple from a string
+    #
+    # @param [String] stream The string to load the color from. It should be
+    #      at least 4 + pos bytes long.
+    # @param [Integer] pos The position in the string to load the triple from.
+    # @return [Integer] The newly constructed color value.
+    def from_rgba_stream: (String stream, ?Integer pos) -> Integer
+
+    # Creates a color by converting it from a string in hex notation.
+    #
+    # It supports colors with (#rrggbbaa) or without (#rrggbb) alpha channel
+    # as well as the 3-digit short format (#rgb) for those without.
+    # Color strings may include the prefix "0x" or "#".
+    #
+    # @param [String] hex_value The color in hex notation.
+    # @param [Integer] opacity The opacity value for the color. Overrides any
+    #    opacity value given in the hex value if given.
+    # @return [Integer] The color value.
+    # @raise [ArgumentError] if the value given is not a hex color notation.
+    def from_hex: (String hex_value, ?Integer? opacity) -> Integer
+
+    # Creates a new color from an HSV triple.
+    #
+    # Create a new color using an HSV (sometimes also called HSB) triple. The
+    # words `value` and `brightness` are used interchangeably and synonymously
+    # in descriptions of this colorspace. This implementation follows the modern
+    # convention of 0 degrees hue indicating red.
+    #
+    # @param [Fixnum] hue The hue component (0-360)
+    # @param [Fixnum] saturation The saturation component (0-1)
+    # @param [Fixnum] value The value (brightness) component (0-1)
+    # @param [Fixnum] alpha Defaults to opaque (255).
+    # @return [Integer] The newly constructed color value.
+    # @raise [ArgumentError] if the hsv triple is invalid.
+    # @see https://en.wikipedia.org/wiki/HSL_and_HSV
+    def from_hsv: (Integer hue, Integer saturation, Integer value, ?Integer alpha) -> Integer
+
+    alias from_hsb from_hsv
+
+    # Creates a new color from an HSL triple.
+    #
+    # This implementation follows the modern convention of 0 degrees hue
+    # indicating red.
+    #
+    # @param [Fixnum] hue The hue component (0-360)
+    # @param [Fixnum] saturation The saturation component (0-1)
+    # @param [Fixnum] lightness The lightness component (0-1)
+    # @param [Fixnum] alpha Defaults to opaque (255).
+    # @return [Integer] The newly constructed color value.
+    # @raise [ArgumentError] if the hsl triple is invalid.
+    # @see https://en.wikipedia.org/wiki/HSL_and_HSV
+    def from_hsl: (Integer hue, Integer saturation, Integer lightness, ?Integer alpha) -> Integer
+
+    public
+
+    # Returns the red-component from the color value.
+    #
+    # @param [Integer] value The color value.
+    # @return [Integer] A value between 0 and MAX.
+    def r: (Integer value) -> Integer
+
+    # Returns the green-component from the color value.
+    #
+    # @param [Integer] value The color value.
+    # @return [Integer] A value between 0 and MAX.
+    def g: (Integer value) -> Integer
+
+    # Returns the blue-component from the color value.
+    #
+    # @param [Integer] value The color value.
+    # @return [Integer] A value between 0 and MAX.
+    def b: (Integer value) -> Integer
+
+    # Returns the alpha channel value for the color value.
+    #
+    # @param [Integer] value The color value.
+    # @return [Integer] A value between 0 and MAX.
+    def a: (Integer value) -> Integer
+
+    # Returns true if this color is fully opaque.
+    #
+    # @param [Integer] value The color to test.
+    # @return [true, false] True if the alpha channel equals MAX.
+    def opaque?: (Integer value) -> bool
+
+    # Returns the opaque value of this color by removing the alpha channel.
+    # @param [Integer] value The color to transform.
+    # @return [Integer] The opaque color
+    def opaque!: (Integer value) -> Integer
+
+    # Returns true if this color is fully transparent.
+    #
+    # @param [Integer] value The color to test.
+    # @return [true, false] True if the r, g and b component are equal.
+    def grayscale?: (Integer value) -> bool
+
+    # Returns true if this color is fully transparent.
+    #
+    # @param [Integer] value The color to test.
+    # @return [true, false] True if the alpha channel equals 0.
+    def fully_transparent?: (Integer value) -> bool
+
+    # Multiplies two fractions using integer math, where the fractions are
+    # stored using an integer between 0 and 255. This method is used as a
+    # helper method for compositing colors using integer math.
+    #
+    # This is a quicker implementation of ((a * b) / 255.0).round.
+    #
+    # @param [Integer] a The first fraction.
+    # @param [Integer] b The second fraction.
+    # @return [Integer] The result of the multiplication.
+    def int8_mult: (Integer a, Integer b) -> Integer
+
+    # Composes two colors with an alpha channel using integer math.
+    #
+    # This version is faster than the version based on floating point math, so
+    # this compositing function is used by default.
+    #
+    # @param [Integer] fg The foreground color.
+    # @param [Integer] bg The background color.
+    # @return [Integer] The composited color.
+    # @see ChunkyPNG::Color#compose_precise
+    def compose_quick: (Integer fg, Integer bg) -> Integer
+
+    # Composes two colors with an alpha channel using floating point math.
+    #
+    # This method uses more precise floating point math, but this precision is
+    # lost when the result is converted back to an integer. Because it is
+    # slower than the version based on integer math, that version is preferred.
+    #
+    # @param [Integer] fg The foreground color.
+    # @param [Integer] bg The background color.
+    # @return [Integer] The composited color.
+    # @see ChunkyPNG::Color#compose_quick
+    def compose_precise: (Integer fg, Integer bg) -> Integer
+
+    alias compose compose_quick
+
+    # Blends the foreground and background color by taking the average of
+    # the components.
+    #
+    # @param [Integer] fg The foreground color.
+    # @param [Integer] bg The foreground color.
+    # @return [Integer] The blended color.
+    def blend: (Integer fg, Integer bg) -> Integer
+
+    # Interpolates the foreground and background colors by the given alpha
+    # value. This also blends the alpha channels themselves.
+    #
+    # A blending factor of 255 will give entirely the foreground,
+    # while a blending factor of 0 will give the background.
+    #
+    # @param [Integer] fg The foreground color.
+    # @param [Integer] bg The background color.
+    # @param [Integer] alpha The blending factor (fixed 8bit)
+    # @return [Integer] The interpolated color.
+    def interpolate_quick: (Integer fg, Integer bg, Integer alpha) -> Integer
+
+    # Calculates the grayscale teint of an RGB color.
+    #
+    # @param [Integer] color The color to convert.
+    # @return [Integer] The grayscale teint of the input color, 0-255.
+    def grayscale_teint: (Integer color) -> Integer
+
+    # Converts a color to a fiting grayscale value. It will conserve the alpha
+    # channel.
+    #
+    # This method will return a full color value, with the R, G, and B value
+    # set to the grayscale teint calcuated from the input color's R, G and B
+    # values.
+    #
+    # @param [Integer] color The color to convert.
+    # @return [Integer] The input color, converted to the best fitting
+    #   grayscale.
+    # @see #grayscale_teint
+    def to_grayscale: (Integer color) -> Integer
+
+    # Lowers the intensity of a color, by lowering its alpha by a given factor.
+    # @param [Integer] color The color to adjust.
+    # @param [Integer] factor Fade factor as an integer between 0 and 255.
+    # @return [Integer] The faded color.
+    def fade: (Integer color, Integer factor) -> Integer
+
+    # Decomposes a color, given a color, a mask color and a background color.
+    # The returned color will be a variant of the mask color, with the alpha
+    # channel set to the best fitting value. This basically is the reverse
+    # operation if alpha composition.
+    #
+    # If the color cannot be decomposed, this method will return the fully
+    # transparent variant of the mask color.
+    #
+    # @param [Integer] color The color that was the result of compositing.
+    # @param [Integer] mask The opaque variant of the color that was being
+    #   composed
+    # @param [Integer] bg The background color on which the color was composed.
+    # @param [Integer] tolerance The decomposition tolerance level, a value
+    #   between 0 and 255.
+    # @return [Integer] The decomposed color, a variant of the masked color
+    #   with the alpha channel set to an appropriate value.
+    def decompose_color: (Integer color, Integer mask, Integer bg, ?Integer tolerance) -> Integer
+
+    # Checks whether an alpha channel value can successfully be composed
+    # given the resulting color, the mask color and a background color,
+    # all of which should be opaque.
+    #
+    # @param [Integer] color The color that was the result of compositing.
+    # @param [Integer] mask The opaque variant of the color that was being
+    #   composed
+    # @param [Integer] bg The background color on which the color was composed.
+    # @param [Integer] tolerance The decomposition tolerance level, a value
+    #   between 0 and 255.
+    # @return [Boolean] True if the alpha component can be decomposed
+    #   successfully.
+    # @see #decompose_alpha
+    def alpha_decomposable?: (Integer color, Integer mask, Integer bg, ?Integer tolerance) -> bool
+
+    # Decomposes the alpha channel value given the resulting color, the mask
+    # color and a background color, all of which should be opaque.
+    #
+    # Make sure to call {#alpha_decomposable?} first to see if the alpha
+    # channel value can successfully decomposed with a given tolerance,
+    # otherwise the return value of this method is undefined.
+    #
+    # @param [Integer] color The color that was the result of compositing.
+    # @param [Integer] mask The opaque variant of the color that was being
+    #   composed
+    # @param [Integer] bg The background color on which the color was composed.
+    # @return [Integer] The best fitting alpha channel, a value between 0 and
+    #   255.
+    # @see #alpha_decomposable?
+    def decompose_alpha: (Integer color, Integer mask, Integer bg) -> Integer
+
+    # Decomposes an alpha channel for either the r, g or b color channel.
+    # @param [:r, :g, :b] channel The channel to decompose the alpha channel
+    #   from.
+    # @param [Integer] color The color that was the result of compositing.
+    # @param [Integer] mask The opaque variant of the color that was being
+    #   composed
+    # @param [Integer] bg The background color on which the color was composed.
+    # @return [Integer] The decomposed alpha value for the channel.
+    def decompose_alpha_component: (Integer channel, Integer color, Integer mask, Integer bg) -> Integer
+
+    # Decomposes the alpha channels for the r, g and b color channel.
+    # @param [Integer] color The color that was the result of compositing.
+    # @param [Integer] mask The opaque variant of the color that was being
+    #   composed
+    # @param [Integer] bg The background color on which the color was composed.
+    # @return [Array<Integer>] The decomposed alpha values for the r, g and b
+    #   channels.
+    def decompose_alpha_components: (Integer color, Integer mask, Integer bg) -> Array[Integer]
+
+    # Returns a string representing this color using hex notation (i.e.
+    # #rrggbbaa).
+    #
+    # @param [Integer] color The color to convert.
+    # @param [Boolean] include_alpha
+    # @return [String] The color in hex notation, starting with a pound sign.
+    def to_hex: (Integer color, ?bool include_alpha) -> String
+
+    # Returns an array with the separate HSV components of a color.
+    #
+    # Because ChunkyPNG internally handles colors as Integers for performance
+    # reasons, some rounding  occurs when importing or exporting HSV colors
+    # whose coordinates are float-based.  Because of this rounding, #to_hsv and
+    # #from_hsv may not be perfect inverses.
+    #
+    # This implementation follows the modern convention of 0 degrees hue
+    # indicating red.
+    #
+    # @param [Integer] color The ChunkyPNG color to convert.
+    # @param [Boolean] include_alpha Flag indicates whether a fourth element
+    #    representing alpha channel should be included in the returned array.
+    # @return [Array[0]] The hue of the color (0-360)
+    # @return [Array[1]] The saturation of the color (0-1)
+    # @return [Array[2]] The value of the color (0-1)
+    # @return [Array[3]] Optional fourth element for alpha, included if
+    #    include_alpha=true (0-255)
+    # @see https://en.wikipedia.org/wiki/HSL_and_HSV
+    def to_hsv: (Integer color, ?bool include_alpha) -> Array[Integer]
+
+    alias to_hsb to_hsv
+
+    # Returns an array with the separate HSL components of a color.
+    #
+    # Because ChunkyPNG internally handles colors as Integers for performance
+    # reasons, some rounding  occurs when importing or exporting HSL colors
+    # whose coordinates are float-based.  Because of this rounding, #to_hsl and
+    # #from_hsl may not be perfect inverses.
+    #
+    # This implementation follows the modern convention of 0 degrees hue indicating red.
+    #
+    # @param [Integer] color The ChunkyPNG color to convert.
+    # @param [Boolean] include_alpha Flag indicates whether a fourth element
+    #     representing alpha channel should be included in the returned array.
+    # @return [Array<Fixnum>[0]] The hue of the color (0-360)
+    # @return [Array<Fixnum>[1]] The saturation of the color (0-1)
+    # @return [Array<Fixnum>[2]] The lightness of the color (0-1)
+    # @return [Array<Fixnum>[3]] Optional fourth element for alpha, included if
+    #     include_alpha=true (0-255)
+    # @see https://en.wikipedia.org/wiki/HSL_and_HSV
+    def to_hsl: (Integer color, ?bool include_alpha) -> Array[Integer]
+
+    public
+
+    # Returns an array with the separate RGBA values for this color.
+    #
+    # @param [Integer] color The color to convert.
+    # @return [Array<Integer>] An array with 4 Integer elements.
+    def to_truecolor_alpha_bytes: (Integer color) -> Array[Integer]
+
+    # Returns an array with the separate RGB values for this color. The alpha
+    # channel will be discarded.
+    #
+    # @param [Integer] color The color to convert.
+    # @return [Array<Integer>] An array with 3 Integer elements.
+    def to_truecolor_bytes: (Integer color) -> Array[Integer]
+
+    # Returns an array with the grayscale teint value for this color.
+    #
+    # This method expects the r, g, and b value to be equal, and the alpha
+    # channel will be discarded.
+    #
+    # @param [Integer] color The grayscale color to convert.
+    # @return [Array<Integer>] An array with 1 Integer element.
+    def to_grayscale_bytes: (Integer color) -> Array[Integer]
+
+    # Returns an array with the grayscale teint and alpha channel values for
+    # this color.
+    #
+    # This method expects the color to be grayscale, i.e. r, g, and b value to
+    # be equal and uses only the B channel. If you need to convert a color to
+    # grayscale first, see {#to_grayscale}.
+    #
+    # @param [Integer] color The grayscale color to convert.
+    # @return [Array<Integer>] An array with 2 Integer elements.
+    # @see #to_grayscale
+    def to_grayscale_alpha_bytes: (Integer color) -> Array[Integer]
+
+    # Compute the Euclidean distance between 2 colors in RGBA
+    #
+    # This method simply takes the Euclidean distance between the RGBA channels
+    # of 2 colors, which gives us a measure of how different the two colors
+    # are.
+    #
+    # Although it would be more perceptually accurate to calculate a proper
+    # Delta E in Lab colorspace, this method should serve many use-cases while
+    # avoiding the overhead of converting RGBA to Lab.
+    #
+    # @param pixel_after [Integer]
+    # @param pixel_before [Integer]
+    # @return [Float]
+    def euclidean_distance_rgba: (Integer pixel_after, Integer pixel_before) -> Float
+
+    # Could be simplified as MAX * 2, but this format mirrors the math in
+    # {#euclidean_distance_rgba}
+    # @return [Float] The maximum Euclidean distance of two RGBA colors.
+    MAX_EUCLIDEAN_DISTANCE_RGBA: Float
+
+    # @return [Hash<Symbol, Integer>] All the predefined color names in HTML.
+    PREDEFINED_COLORS: Hash[Symbol, Integer]
+
+    # Gets a color value based on a HTML color name.
+    #
+    # The color name is flexible. E.g. <tt>'yellowgreen'</tt>, <tt>'Yellow
+    # green'</tt>, <tt>'YellowGreen'</tt>, <tt>'YELLOW_GREEN'</tt> and
+    # <tt>:yellow_green</tt> will all return the same color value.
+    #
+    # You can include a opacity level in the color name (e.g. <tt>'red @
+    # 0.5'</tt>) or give an explicit opacity value as second argument. If no
+    # opacity value is given, the color will be fully opaque.
+    #
+    # @param [Symbol, String] color_name The color name. It may include an
+    #   opacity specifier like <tt>@ 0.8</tt> to set the color's opacity.
+    # @param [Integer] opacity The opacity value for the color between 0 and
+    #   255. Overrides any opacity value given in the color name.
+    # @return [Integer] The color value.
+    # @raise [ChunkyPNG::Exception] If the color name was not recognized.
+    def html_color: (Symbol | String color_name, ?Integer? opacity) -> Integer
+
+    # @return [Integer] Black pixel/color
+    BLACK: Integer
+
+    # @return [Integer] White pixel/color
+    WHITE: Integer
+
+    # @return [Integer] Fully transparent pixel/color
+    TRANSPARENT: Integer
+
+    # Returns the number of sample values per pixel.
+    # @param [Integer] color_mode The color mode being used.
+    # @return [Integer] The number of sample values per pixel.
+    def samples_per_pixel: (Integer color_mode) -> Integer
+
+    # Returns the size in bytes of a pixel when it is stored using a given
+    # color mode.
+    #
+    # @param [Integer] color_mode The color mode in which the pixels are
+    #   stored.
+    # @return [Integer] The number of bytes used per pixel in a datastream.
+    def pixel_bytesize: (Integer color_mode, ?Integer depth) -> Integer
+
+    # Returns the size in bits of a pixel when it is stored using a given color
+    # mode.
+    #
+    # @param [Integer] color_mode The color mode in which the pixels are
+    #   stored.
+    # @param [Integer] depth The color depth of the pixels.
+    # @return [Integer] The number of bytes used per pixel in a datastream.
+    def pixel_bitsize: (Integer color_mode, ?Integer depth) -> Integer
+
+    # Returns the number of bytes used per scanline.
+    # @param [Integer] color_mode The color mode in which the pixels are
+    #   stored.
+    # @param [Integer] depth The color depth of the pixels.
+    # @param [Integer] width The number of pixels per scanline.
+    # @return [Integer] The number of bytes used per scanline in a datastream.
+    def scanline_bytesize: (Integer color_mode, Integer depth, Integer width) -> Integer
+
+    # Returns the number of bytes used for an image pass
+    # @param [Integer] color_mode The color mode in which the pixels are
+    #   stored.
+    # @param [Integer] depth The color depth of the pixels.
+    # @param [Integer] width The width of the image pass.
+    # @param [Integer] height The height of the image pass.
+    # @return [Integer] The number of bytes used per scanline in a datastream.
+    def pass_bytesize: (Integer color_mode, Integer depth, Integer width, Integer height) -> Integer
+  end
+end

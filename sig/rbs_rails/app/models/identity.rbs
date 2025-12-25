@@ -1,0 +1,243 @@
+class Identity < ::ApplicationRecord
+  extend ::_ActiveRecord_Relation_ClassMethods[::Identity, ::Identity::ActiveRecord_Relation, ::String]
+
+  module GeneratedAttributeMethods
+    def id: () -> ::String
+
+    def id=: (::String) -> ::String
+
+    def id?: () -> bool
+
+    def id_changed?: () -> bool
+
+    def id_change: () -> [ ::String?, ::String? ]
+
+    def id_will_change!: () -> void
+
+    def id_was: () -> ::String?
+
+    def id_previously_changed?: () -> bool
+
+    def id_previous_change: () -> ::Array[::String?]?
+
+    def id_previously_was: () -> ::String?
+
+    def id_before_last_save: () -> ::String?
+
+    def id_change_to_be_saved: () -> ::Array[::String?]?
+
+    def id_in_database: () -> ::String?
+
+    def saved_change_to_id: () -> ::Array[::String?]?
+
+    def saved_change_to_id?: () -> bool
+
+    def will_save_change_to_id?: () -> bool
+
+    def restore_id!: () -> void
+
+    def clear_id_change: () -> void
+
+    def created_at: () -> ::ActiveSupport::TimeWithZone
+
+    def created_at=: (::ActiveSupport::TimeWithZone) -> ::ActiveSupport::TimeWithZone
+
+    def created_at?: () -> bool
+
+    def created_at_changed?: () -> bool
+
+    def created_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
+
+    def created_at_will_change!: () -> void
+
+    def created_at_was: () -> ::ActiveSupport::TimeWithZone?
+
+    def created_at_previously_changed?: () -> bool
+
+    def created_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def created_at_previously_was: () -> ::ActiveSupport::TimeWithZone?
+
+    def created_at_before_last_save: () -> ::ActiveSupport::TimeWithZone?
+
+    def created_at_change_to_be_saved: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def created_at_in_database: () -> ::ActiveSupport::TimeWithZone?
+
+    def saved_change_to_created_at: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def saved_change_to_created_at?: () -> bool
+
+    def will_save_change_to_created_at?: () -> bool
+
+    def restore_created_at!: () -> void
+
+    def clear_created_at_change: () -> void
+
+    def email_address: () -> ::String
+
+    def email_address=: (::String) -> ::String
+
+    def email_address?: () -> bool
+
+    def email_address_changed?: () -> bool
+
+    def email_address_change: () -> [ ::String?, ::String? ]
+
+    def email_address_will_change!: () -> void
+
+    def email_address_was: () -> ::String?
+
+    def email_address_previously_changed?: () -> bool
+
+    def email_address_previous_change: () -> ::Array[::String?]?
+
+    def email_address_previously_was: () -> ::String?
+
+    def email_address_before_last_save: () -> ::String?
+
+    def email_address_change_to_be_saved: () -> ::Array[::String?]?
+
+    def email_address_in_database: () -> ::String?
+
+    def saved_change_to_email_address: () -> ::Array[::String?]?
+
+    def saved_change_to_email_address?: () -> bool
+
+    def will_save_change_to_email_address?: () -> bool
+
+    def restore_email_address!: () -> void
+
+    def clear_email_address_change: () -> void
+
+    def updated_at: () -> ::ActiveSupport::TimeWithZone
+
+    def updated_at=: (::ActiveSupport::TimeWithZone) -> ::ActiveSupport::TimeWithZone
+
+    def updated_at?: () -> bool
+
+    def updated_at_changed?: () -> bool
+
+    def updated_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
+
+    def updated_at_will_change!: () -> void
+
+    def updated_at_was: () -> ::ActiveSupport::TimeWithZone?
+
+    def updated_at_previously_changed?: () -> bool
+
+    def updated_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def updated_at_previously_was: () -> ::ActiveSupport::TimeWithZone?
+
+    def updated_at_before_last_save: () -> ::ActiveSupport::TimeWithZone?
+
+    def updated_at_change_to_be_saved: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def updated_at_in_database: () -> ::ActiveSupport::TimeWithZone?
+
+    def saved_change_to_updated_at: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def saved_change_to_updated_at?: () -> bool
+
+    def will_save_change_to_updated_at?: () -> bool
+
+    def restore_updated_at!: () -> void
+
+    def clear_updated_at_change: () -> void
+
+    def staff: () -> bool
+
+    def staff=: (bool) -> bool
+
+    def staff?: () -> bool
+
+    def staff_changed?: () -> bool
+
+    def staff_change: () -> [ bool?, bool? ]
+
+    def staff_will_change!: () -> void
+
+    def staff_was: () -> bool?
+
+    def staff_previously_changed?: () -> bool
+
+    def staff_previous_change: () -> ::Array[bool?]?
+
+    def staff_previously_was: () -> bool?
+
+    def staff_before_last_save: () -> bool?
+
+    def staff_change_to_be_saved: () -> ::Array[bool?]?
+
+    def staff_in_database: () -> bool?
+
+    def saved_change_to_staff: () -> ::Array[bool?]?
+
+    def saved_change_to_staff?: () -> bool
+
+    def will_save_change_to_staff?: () -> bool
+
+    def restore_staff!: () -> void
+
+    def clear_staff_change: () -> void
+  end
+  include GeneratedAttributeMethods
+  def magic_links: () -> ::MagicLink::ActiveRecord_Associations_CollectionProxy
+  def magic_links=: (::MagicLink::ActiveRecord_Associations_CollectionProxy | ::Array[::MagicLink]) -> (::MagicLink::ActiveRecord_Associations_CollectionProxy | ::Array[::MagicLink])
+  def magic_link_ids: () -> ::Array[::Integer]
+  def magic_link_ids=: (::Array[::Integer]) -> ::Array[::Integer]
+  def sessions: () -> ::Session::ActiveRecord_Associations_CollectionProxy
+  def sessions=: (::Session::ActiveRecord_Associations_CollectionProxy | ::Array[::Session]) -> (::Session::ActiveRecord_Associations_CollectionProxy | ::Array[::Session])
+  def session_ids: () -> ::Array[::Integer]
+  def session_ids=: (::Array[::Integer]) -> ::Array[::Integer]
+  def users: () -> ::User::ActiveRecord_Associations_CollectionProxy
+  def users=: (::User::ActiveRecord_Associations_CollectionProxy | ::Array[::User]) -> (::User::ActiveRecord_Associations_CollectionProxy | ::Array[::User])
+  def user_ids: () -> ::Array[::Integer]
+  def user_ids=: (::Array[::Integer]) -> ::Array[::Integer]
+  def accounts: () -> ::Account::ActiveRecord_Associations_CollectionProxy
+  def accounts=: (::Account::ActiveRecord_Associations_CollectionProxy | ::Array[::Account]) -> (::Account::ActiveRecord_Associations_CollectionProxy | ::Array[::Account])
+  def account_ids: () -> ::Array[::Integer]
+  def account_ids=: (::Array[::Integer]) -> ::Array[::Integer]
+  def avatar_attachment: () -> ::ActiveStorage::Attachment?
+  def avatar_attachment=: (::ActiveStorage::Attachment?) -> ::ActiveStorage::Attachment?
+  def build_avatar_attachment: (?untyped) -> ::ActiveStorage::Attachment
+  def create_avatar_attachment: (untyped) -> ::ActiveStorage::Attachment
+  def create_avatar_attachment!: (untyped) -> ::ActiveStorage::Attachment
+  def reload_avatar_attachment: () -> ::ActiveStorage::Attachment?
+  def avatar_blob: () -> ::ActiveStorage::Blob?
+  def avatar_blob=: (::ActiveStorage::Blob?) -> ::ActiveStorage::Blob?
+  def build_avatar_blob: (?untyped) -> ::ActiveStorage::Blob
+  def create_avatar_blob: (untyped) -> ::ActiveStorage::Blob
+  def create_avatar_blob!: (untyped) -> ::ActiveStorage::Blob
+  def reload_avatar_blob: () -> ::ActiveStorage::Blob?
+
+  module GeneratedAssociationMethods
+    def avatar: () -> ::ActiveStorage::Attached::One
+
+    def avatar=: (::ActionDispatch::Http::UploadedFile) -> ::ActionDispatch::Http::UploadedFile
+               | (::Rack::Test::UploadedFile) -> ::Rack::Test::UploadedFile
+               | (::ActiveStorage::Blob) -> ::ActiveStorage::Blob
+               | (::String) -> ::String
+               | ({ io: ::IO, filename: ::String, content_type: ::String? }) -> { io: ::IO, filename: ::String, content_type: ::String? }
+               | (nil) -> nil
+  end
+  include GeneratedAssociationMethods
+
+  def self.with_attached_avatar: () -> ::Identity::ActiveRecord_Relation
+
+  module GeneratedRelationMethods
+    def with_attached_avatar: () -> ::Identity::ActiveRecord_Relation
+  end
+
+  class ActiveRecord_Relation < ::ActiveRecord::Relation
+    include ::Identity::GeneratedRelationMethods
+    include ::_ActiveRecord_Relation[::Identity, ::String]
+    include ::Enumerable[::Identity]
+  end
+
+  class ActiveRecord_Associations_CollectionProxy < ::ActiveRecord::Associations::CollectionProxy
+    include ::Identity::GeneratedRelationMethods
+    include ::_ActiveRecord_Relation[::Identity, ::String]
+  end
+end

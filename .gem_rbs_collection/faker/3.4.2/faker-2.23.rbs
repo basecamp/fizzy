@@ -1,0 +1,90 @@
+module Faker
+  class Base
+    def self.unique: () -> (UniqueGenerator & class)
+  end
+
+  class UniqueGenerator
+    def self.clear: () -> {}
+    def clear: () -> {}
+    def exclude: (Symbol, Array[String]|Array[Hash[Symbol, untyped]], Array[String]) -> void
+  end
+
+  class Config
+    def self.random=: (Random | nil) -> Random
+    def self.locale=: (Symbol | String) -> (Symbol | String)
+  end
+
+  class Alphanumeric < Base
+    # https://github.com/faker-ruby/faker/blob/v2.23.0/lib/faker/default/alphanumeric.rb#L4
+    def self.alpha: (?number: Integer) -> String
+    def self.alphanumeric: (?number: Integer, ?min_alpha: Integer, ?min_numeric: Integer) -> String
+  end
+
+  class Address < Base
+    def self.street_name: () -> String
+    def self.secondary_address: () -> String
+    def self.building_number: () -> String
+    def self.community: () -> String
+    def self.mail_box: () -> String
+  end
+
+  class Book < Base
+    # https://github.com/faker-ruby/faker/blob/v2.23.0/lib/faker/books/book.rb#L4
+    def self.title: () -> String
+  end
+
+  class Educator < Base
+    # https://github.com/faker-ruby/faker/blob/v2.23.0/lib/faker/default/educator.rb#L4
+    def self.degree: -> String
+    def self.subject: -> String
+  end
+
+  class Internet < Base
+    # https://github.com/faker-ruby/faker/blob/v2.23.0/lib/faker/default/internet.rb#L4
+    def self.email: (?name: String?, ?separators: Array[String]?, ?domain: String?) -> String
+    def self.private_ip_v4_address: -> String
+    def self.public_ip_v4_address: -> String
+    def self.url: (?host: String, ?path: String, ?scheme: String) -> String
+    def self.uuid: -> String
+    def self.username: (?specifier: Integer | Range[Integer] | String | nil, ?separators: Array[String]) -> String
+  end
+
+  class Job < Base
+    # https://github.com/faker-ruby/faker/blob/v2.23.0/lib/faker/default/job.rb#L4
+    def self.title: -> String
+  end
+
+  class Company < Base
+    # https://github.com/faker-ruby/faker/blob/v2.23.0/lib/faker/default/company.rb#L4
+    def self.name: () -> String
+    def self.catch_phrase: () -> String
+    def self.bs: () -> String
+  end
+
+  class Lorem < Base
+    # https://github.com/faker-ruby/faker/blob/v2.23.0/lib/faker/default/lorem.rb#L5
+    def self.character: -> String
+  end
+
+  class Marketing < Base
+    # https://github.com/faker-ruby/faker/blob/v2.23.0/lib/faker/default/marketing.rb#L4
+    def self.buzzwords: -> String
+  end
+
+  class Name < Base
+    # https://github.com/faker-ruby/faker/blob/v2.23.0/lib/faker/default/name.rb#L4
+    def self.name: () -> String
+    def self.first_name: -> String
+    def self.last_name: -> String
+  end
+
+  class PhoneNumber < Base
+    # https://github.com/faker-ruby/faker/blob/v2.23.0/lib/faker/default/phone_number.rb#L4
+    def self.cell_phone: -> String
+  end
+
+  class University < Base
+    # https://github.com/faker-ruby/faker/blob/v2.23.0/lib/faker/default/university.rb#L4
+    def self.name: -> String
+  end
+end

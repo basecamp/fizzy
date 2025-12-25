@@ -1,0 +1,16 @@
+module Zip
+  module IOExtras
+    CHUNK_SIZE: 131072
+
+    RANGE_ALL: ::Range[::Integer]
+
+    def self.copy_stream: (untyped ostream, untyped istream) -> untyped
+
+    def self.copy_stream_n: (untyped ostream, untyped istream, untyped nbytes) -> untyped
+
+    # Implements kind_of? in order to pretend to be an IO object
+    module FakeIO
+      def kind_of?: (untyped object) -> bool
+    end
+  end
+end

@@ -1,0 +1,4 @@
+module Concurrent
+  class Hash[K, V] < ::Hash[K, V]
+  end
+end

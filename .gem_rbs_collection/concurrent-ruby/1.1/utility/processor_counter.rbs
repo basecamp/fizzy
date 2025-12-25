@@ -1,0 +1,5 @@
+module Concurrent
+  def self.physical_processor_count: () -> Integer
+
+  def self.processor_count: () -> Integer
+end

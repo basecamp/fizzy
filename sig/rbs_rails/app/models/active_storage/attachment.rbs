@@ -1,0 +1,293 @@
+module ActiveStorage
+  class Attachment < ::ActiveStorage::Record
+    extend ::_ActiveRecord_Relation_ClassMethods[::ActiveStorage::Attachment, ::ActiveStorage::Attachment::ActiveRecord_Relation, ::String]
+
+    module GeneratedAttributeMethods
+      def id: () -> ::String
+
+      def id=: (::String) -> ::String
+
+      def id?: () -> bool
+
+      def id_changed?: () -> bool
+
+      def id_change: () -> [ ::String?, ::String? ]
+
+      def id_will_change!: () -> void
+
+      def id_was: () -> ::String?
+
+      def id_previously_changed?: () -> bool
+
+      def id_previous_change: () -> ::Array[::String?]?
+
+      def id_previously_was: () -> ::String?
+
+      def id_before_last_save: () -> ::String?
+
+      def id_change_to_be_saved: () -> ::Array[::String?]?
+
+      def id_in_database: () -> ::String?
+
+      def saved_change_to_id: () -> ::Array[::String?]?
+
+      def saved_change_to_id?: () -> bool
+
+      def will_save_change_to_id?: () -> bool
+
+      def restore_id!: () -> void
+
+      def clear_id_change: () -> void
+
+      def blob_id: () -> ::String
+
+      def blob_id=: (::String) -> ::String
+
+      def blob_id?: () -> bool
+
+      def blob_id_changed?: () -> bool
+
+      def blob_id_change: () -> [ ::String?, ::String? ]
+
+      def blob_id_will_change!: () -> void
+
+      def blob_id_was: () -> ::String?
+
+      def blob_id_previously_changed?: () -> bool
+
+      def blob_id_previous_change: () -> ::Array[::String?]?
+
+      def blob_id_previously_was: () -> ::String?
+
+      def blob_id_before_last_save: () -> ::String?
+
+      def blob_id_change_to_be_saved: () -> ::Array[::String?]?
+
+      def blob_id_in_database: () -> ::String?
+
+      def saved_change_to_blob_id: () -> ::Array[::String?]?
+
+      def saved_change_to_blob_id?: () -> bool
+
+      def will_save_change_to_blob_id?: () -> bool
+
+      def restore_blob_id!: () -> void
+
+      def clear_blob_id_change: () -> void
+
+      def created_at: () -> ::ActiveSupport::TimeWithZone
+
+      def created_at=: (::ActiveSupport::TimeWithZone) -> ::ActiveSupport::TimeWithZone
+
+      def created_at?: () -> bool
+
+      def created_at_changed?: () -> bool
+
+      def created_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
+
+      def created_at_will_change!: () -> void
+
+      def created_at_was: () -> ::ActiveSupport::TimeWithZone?
+
+      def created_at_previously_changed?: () -> bool
+
+      def created_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def created_at_previously_was: () -> ::ActiveSupport::TimeWithZone?
+
+      def created_at_before_last_save: () -> ::ActiveSupport::TimeWithZone?
+
+      def created_at_change_to_be_saved: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def created_at_in_database: () -> ::ActiveSupport::TimeWithZone?
+
+      def saved_change_to_created_at: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def saved_change_to_created_at?: () -> bool
+
+      def will_save_change_to_created_at?: () -> bool
+
+      def restore_created_at!: () -> void
+
+      def clear_created_at_change: () -> void
+
+      def name: () -> ::String
+
+      def name=: (::String) -> ::String
+
+      def name?: () -> bool
+
+      def name_changed?: () -> bool
+
+      def name_change: () -> [ ::String?, ::String? ]
+
+      def name_will_change!: () -> void
+
+      def name_was: () -> ::String?
+
+      def name_previously_changed?: () -> bool
+
+      def name_previous_change: () -> ::Array[::String?]?
+
+      def name_previously_was: () -> ::String?
+
+      def name_before_last_save: () -> ::String?
+
+      def name_change_to_be_saved: () -> ::Array[::String?]?
+
+      def name_in_database: () -> ::String?
+
+      def saved_change_to_name: () -> ::Array[::String?]?
+
+      def saved_change_to_name?: () -> bool
+
+      def will_save_change_to_name?: () -> bool
+
+      def restore_name!: () -> void
+
+      def clear_name_change: () -> void
+
+      def record_id: () -> ::String
+
+      def record_id=: (::String) -> ::String
+
+      def record_id?: () -> bool
+
+      def record_id_changed?: () -> bool
+
+      def record_id_change: () -> [ ::String?, ::String? ]
+
+      def record_id_will_change!: () -> void
+
+      def record_id_was: () -> ::String?
+
+      def record_id_previously_changed?: () -> bool
+
+      def record_id_previous_change: () -> ::Array[::String?]?
+
+      def record_id_previously_was: () -> ::String?
+
+      def record_id_before_last_save: () -> ::String?
+
+      def record_id_change_to_be_saved: () -> ::Array[::String?]?
+
+      def record_id_in_database: () -> ::String?
+
+      def saved_change_to_record_id: () -> ::Array[::String?]?
+
+      def saved_change_to_record_id?: () -> bool
+
+      def will_save_change_to_record_id?: () -> bool
+
+      def restore_record_id!: () -> void
+
+      def clear_record_id_change: () -> void
+
+      def record_type: () -> ::String
+
+      def record_type=: (::String) -> ::String
+
+      def record_type?: () -> bool
+
+      def record_type_changed?: () -> bool
+
+      def record_type_change: () -> [ ::String?, ::String? ]
+
+      def record_type_will_change!: () -> void
+
+      def record_type_was: () -> ::String?
+
+      def record_type_previously_changed?: () -> bool
+
+      def record_type_previous_change: () -> ::Array[::String?]?
+
+      def record_type_previously_was: () -> ::String?
+
+      def record_type_before_last_save: () -> ::String?
+
+      def record_type_change_to_be_saved: () -> ::Array[::String?]?
+
+      def record_type_in_database: () -> ::String?
+
+      def saved_change_to_record_type: () -> ::Array[::String?]?
+
+      def saved_change_to_record_type?: () -> bool
+
+      def will_save_change_to_record_type?: () -> bool
+
+      def restore_record_type!: () -> void
+
+      def clear_record_type_change: () -> void
+
+      def account_id: () -> ::String
+
+      def account_id=: (::String) -> ::String
+
+      def account_id?: () -> bool
+
+      def account_id_changed?: () -> bool
+
+      def account_id_change: () -> [ ::String?, ::String? ]
+
+      def account_id_will_change!: () -> void
+
+      def account_id_was: () -> ::String?
+
+      def account_id_previously_changed?: () -> bool
+
+      def account_id_previous_change: () -> ::Array[::String?]?
+
+      def account_id_previously_was: () -> ::String?
+
+      def account_id_before_last_save: () -> ::String?
+
+      def account_id_change_to_be_saved: () -> ::Array[::String?]?
+
+      def account_id_in_database: () -> ::String?
+
+      def saved_change_to_account_id: () -> ::Array[::String?]?
+
+      def saved_change_to_account_id?: () -> bool
+
+      def will_save_change_to_account_id?: () -> bool
+
+      def restore_account_id!: () -> void
+
+      def clear_account_id_change: () -> void
+    end
+    include GeneratedAttributeMethods
+
+    def record: () -> untyped
+    def record=: (untyped?) -> untyped?
+    def reload_record: () -> untyped?
+    def blob: () -> ::ActiveStorage::Blob
+    def blob=: (::ActiveStorage::Blob?) -> ::ActiveStorage::Blob?
+    def reload_blob: () -> ::ActiveStorage::Blob?
+    def build_blob: (untyped) -> ::ActiveStorage::Blob
+    def create_blob: (untyped) -> ::ActiveStorage::Blob
+    def create_blob!: (untyped) -> ::ActiveStorage::Blob
+    def account: () -> ::Account
+    def account=: (::Account?) -> ::Account?
+    def reload_account: () -> ::Account?
+    def build_account: (untyped) -> ::Account
+    def create_account: (untyped) -> ::Account
+    def create_account!: (untyped) -> ::Account
+    module GeneratedAssociationMethods
+    end
+    include GeneratedAssociationMethods
+
+    module GeneratedRelationMethods
+    end
+
+    class ActiveRecord_Relation < ::ActiveRecord::Relation
+      include ::ActiveStorage::Attachment::GeneratedRelationMethods
+      include ::_ActiveRecord_Relation[::ActiveStorage::Attachment, ::String]
+      include ::Enumerable[::ActiveStorage::Attachment]
+    end
+
+    class ActiveRecord_Associations_CollectionProxy < ::ActiveRecord::Associations::CollectionProxy
+      include ::ActiveStorage::Attachment::GeneratedRelationMethods
+      include ::_ActiveRecord_Relation[::ActiveStorage::Attachment, ::String]
+    end
+  end
+end

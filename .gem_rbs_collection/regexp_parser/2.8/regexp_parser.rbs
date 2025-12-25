@@ -1,0 +1,17 @@
+class Regexp::Parser
+  def parse: [T] (Regexp | String input, ?String? syntax, ?options: Integer?) { (Regexp::Expression::Root) -> T } -> T
+           | (Regexp | String input, ?String? syntax, ?options: Integer?) -> Regexp::Expression::Root
+  def self.parse: [T] (Regexp | String input, ?String? syntax, ?options: Integer?) { (Regexp::Expression::Root) -> T } -> T
+                | (Regexp | String input, ?String? syntax, ?options: Integer?) -> Regexp::Expression::Root
+end
+
+module Regexp::Expression
+  class Root < Subexpression
+  end
+
+  class Subexpression < Base
+  end
+
+  class Base
+  end
+end

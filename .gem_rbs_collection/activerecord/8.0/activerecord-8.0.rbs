@@ -1,0 +1,424 @@
+module ActiveRecord
+  class Base
+    include Encryption::EncryptableRecord
+    extend Encryption::EncryptableRecord::ClassMethods
+    include Normalization
+    extend Normalization::ClassMethods
+    include SecurePassword
+    extend SecurePassword::ClassMethods
+    include TokenFor
+    extend TokenFor::ClassMethods
+
+    module ClassMethods[Model, Relation, PrimaryKey]
+      def and: (::ActiveRecord::Relation) -> Relation
+      def strict_loading: (?bool value) -> Relation
+      def sole: () -> Model
+      def from: (untyped value, ?untyped? subquery_name) -> untyped
+    end
+  end
+
+  module Core
+    def values_at: (*Symbol | String) -> Array[untyped]
+    def strict_loading!: (?bool value, ?mode: Symbol) -> bool
+    def strict_loading?: () -> bool
+  end
+
+  class Relation
+    include TokenFor::RelationMethods
+
+    def insert: (untyped attributes, ?unique_by: untyped?, ?returning: untyped?, ?record_timestamps: bool?) -> untyped
+    def insert_all: (untyped attributes, ?unique_by: untyped?, ?returning: untyped?, ?record_timestamps: bool?) -> untyped
+    def insert!: (untyped attributes, ?returning: untyped?, ?record_timestamps: bool?) -> untyped
+    def insert_all!: (untyped attributes, ?returning: untyped?, ?record_timestamps: bool?) -> untyped
+    def upsert: (untyped attributes, ?unique_by: untyped?, ?returning: untyped?, ?record_timestamps: bool?) -> untyped
+    def upsert_all: (untyped attributes, ?unique_by: untyped?, ?returning: untyped?, ?record_timestamps: bool?) -> untyped
+    def load_async: () -> Relation
+  end
+
+  module Inheritance
+    module ClassMethods
+      def primary_abstract_class: () -> void
+    end
+  end
+
+  module Enum
+    def enum: (**untyped options) -> void
+            | ((String | Symbol) name, **untyped options) -> void
+            | ((String | Symbol) name, (Hash[(Symbol | String), untyped] | Array[Symbol | String]) values, **untyped options) -> void
+  end
+
+  module RuntimeRegistry
+    def sql_runtime: () -> untyped
+
+    def sql_runtime=: (untyped runtime) -> untyped
+
+    extend RuntimeRegistry
+  end
+
+  module QueryMethods
+    def with_recursive: (*untyped) -> untyped
+    def with_recursive!: (*untyped) -> untyped
+  end
+
+  module QueryMethods
+    class WhereChain[Relation]
+      def associated: (*Symbol associations) -> Relation
+      def missing: (*Symbol associations) -> Relation
+    end
+  end
+
+  module AttributeMethods
+    module Read
+      # Returns the value of the attribute identified by <tt>attr_name</tt> after
+      # it has been typecast (for example, "2004-12-12" in a date column is cast
+      # to a date object, like Date.new(2004, 12, 12)).
+      def read_attribute: (untyped attr_name) ?{ () -> untyped } -> untyped
+
+      def _read_attribute: (untyped attr_name) ?{ () -> untyped } -> untyped
+
+      alias attribute _read_attribute
+    end
+  end
+
+  module Encryption
+    module EncryptableRecord
+      module ClassMethods
+        @deterministic_encrypted_attributes: untyped
+
+        def encrypts: (*untyped names, ?key_provider: untyped?, ?key: untyped?, ?deterministic: bool, ?support_unencrypted_data: untyped?, ?downcase: bool, ?ignore_case: bool, ?previous: untyped, **untyped context_properties) -> untyped
+
+        def deterministic_encrypted_attributes: () -> untyped
+
+        def source_attribute_from_preserved_attribute: (untyped attribute_name) -> untyped
+      end
+
+      def encrypted_attribute?: (untyped attribute_name) -> untyped
+
+      def ciphertext_for: (untyped attribute_name) -> untyped
+
+      def encrypt: () -> untyped
+
+      def decrypt: () -> untyped
+    end
+  end
+
+  module Normalization
+    def normalize_attribute: (untyped name) -> void
+
+    module ClassMethods
+      def normalizes: (*untyped names, with: untyped, ?apply_to_nil: bool) -> void
+      def normalize_value_for: (untyped name, untyped value) -> untyped
+    end
+  end
+
+  class AdapterError < ActiveRecordError
+    def initialize: (?untyped? message, ?connection_pool: ConnectionAdapters::ConnectionPool?) -> void
+
+    attr_reader connection_pool: ConnectionAdapters::ConnectionPool?
+  end
+
+  class ConnectionNotEstablished < AdapterError
+  end
+
+  class StatementInvalid < AdapterError
+    def initialize: (?untyped? message, ?sql: untyped?, ?binds: untyped?, ?connection_pool: ConnectionAdapters::ConnectionPool?) -> void
+
+    attr_reader sql: untyped
+    attr_reader binds: untyped
+
+    def set_query: (untyped sql, untyped binds) -> self
+  end
+
+  class MismatchedForeignKey < StatementInvalid
+    def initialize: (?message: untyped?, ?sql: untyped?, ?binds: untyped?, ?table: untyped?,
+                     ?foreign_key: untyped?, ?target_table: untyped?, ?primary_key: untyped?,
+                     ?primary_key_column: untyped?, ?query_parser: untyped?,
+                     ?connection_pool: ConnectionAdapters::ConnectionPool?) -> void
+  end
+
+  module Querying
+    def insert: (untyped attributes, ?unique_by: untyped?, ?returning: untyped?, ?record_timestamps: bool?) -> untyped
+
+    def insert_all: (untyped attributes, ?unique_by: untyped?, ?returning: untyped?, ?record_timestamps: bool?) -> untyped
+
+    def insert!: (untyped attributes, ?returning: untyped?, ?record_timestamps: bool?) -> untyped
+
+    def insert_all!: (untyped attributes, ?returning: untyped?, ?record_timestamps: bool?) -> untyped
+
+    def upsert: (untyped attributes, ?unique_by: untyped?, ?returning: untyped?, ?record_timestamps: bool?) -> untyped
+
+    def upsert_all: (untyped attributes, ?unique_by: untyped?, ?returning: untyped?, ?record_timestamps: bool?) -> untyped
+  end
+
+  module Querying
+    def with_recursive: (*untyped) -> untyped
+  end
+
+  module Persistence
+    def previously_persisted?: () -> bool
+  end
+
+  class InsertAll
+    @record_timestamps: bool
+
+    def initialize: (untyped model, untyped inserts, on_duplicate: untyped, ?unique_by: untyped?, ?returning: untyped?, ?record_timestamps: bool?) -> untyped
+
+    def record_timestamps?: () -> bool
+
+    def keys_including_timestamps: () -> Set[String]
+
+    def timestamps_for_create: () -> Hash[String, String]
+  end
+
+  module SecurePassword
+    module ClassMethods
+      def authenticate_by: (untyped attributes) -> instance?
+    end
+  end
+
+  module TokenFor
+    module RelationMethods
+      def find_by_token_for: (Symbol purpose, String token) -> untyped
+      def find_by_token_for!: (Symbol purpose, String token) -> untyped
+    end
+
+    module ClassMethods
+      def generates_token_for: (Symbol purpose, ?expires_in: ActiveSupport::Duration) ? { () [self: instance] -> untyped } -> untyped
+      def find_by_token_for: (Symbol purpose, String token) -> untyped
+      def find_by_token_for!: (Symbol purpose, String token) -> untyped
+    end
+
+    def generate_token_for: (Symbol purpose) -> String
+  end
+
+  module ConnectionHandling
+    def connects_to: (?database: ::Hash[Symbol, Symbol]) -> Array[ConnectionAdapters::ConnectionPool]
+                   | (?shards: ::Hash[Symbol, ::Hash[Symbol, Symbol]]) -> Array[ConnectionAdapters::ConnectionPool]
+    def lease_connection: () -> ActiveRecord::ConnectionAdapters::AbstractAdapter
+  end
+end
+
+module Arel
+  class Table
+    def initialize: (untyped name, ?type_caster: untyped type_caster, ?as: untyped? as, ?klass: untyped?) -> void
+  end
+
+  class InsertManager < Arel::TreeManager
+    def initialize: (?Arel::Table? table) -> untyped
+  end
+
+  class UpdateManager < Arel::TreeManager
+    def initialize: (?Arel::Table? table) -> untyped
+  end
+
+  class DeleteManager < Arel::TreeManager
+    def initialize: (?Arel::Table? table) -> untyped
+  end
+
+  module FactoryMethods
+    def cast: (untyped name, untyped type) -> Nodes::NamedFunction
+  end
+end
+
+module ActiveRecord
+  class Relation
+    module Methods[Model, PrimaryKey]
+      def and: (::ActiveRecord::Relation) -> self
+      def authenticate_by: (untyped attributes) -> Model?
+      def with: (*untyped args) -> self
+      def with_recursive: (*untyped) -> self
+      def with_recursive!: (*untyped) -> self
+      def sole: () -> Model
+    end
+  end
+
+  class Base
+    module ClassMethods[Model, Relation, PrimaryKey]
+      def with: (*untyped args) -> Relation
+      def with_recursive: (*untyped) -> Relation
+    end
+  end
+end
+
+interface _ActiveRecord_Relation[Model, PrimaryKey] # rubocop:disable RBS/Lint/TopLevelInterface
+  def all: () -> self
+  def ids: () -> Array[PrimaryKey]
+  def none: () -> self
+  def pluck: (Symbol | String | Arel::Nodes::t column) -> Array[untyped]
+           | (*Symbol | String | Arel::Nodes::t columns) -> Array[Array[untyped]]
+  def where: () -> ::ActiveRecord::QueryMethods::WhereChain[self]
+           | (*untyped) -> self
+  def exists?: (*untyped) -> bool
+  def order: (*untyped) -> self
+  def group: (*Symbol | String) -> untyped
+  def in_order_of: (Symbol, Array[untyped]) -> self
+  def distinct: () -> self
+  def or: (::ActiveRecord::Relation) -> self
+  def merge: (Array[untyped] | Hash[untyped, untyped] | ActiveRecord::Relation | Proc) -> self
+  def joins: (*String | Symbol | Hash[untyped, untyped]) -> self
+  def left_joins: (*String | Symbol | Hash[untyped, untyped]) -> self
+  def left_outer_joins: (*String | Symbol | Hash[untyped, untyped]) -> self
+  def includes: (*String | Symbol | Array[untyped] | Hash[untyped, untyped], **(String | Symbol | Array[untyped] | Hash[untyped, untyped])) -> self
+  def eager_load: (*String | Symbol | Array[untyped] | Hash[untyped, untyped], **(String | Symbol | Array[untyped] | Hash[untyped, untyped])) -> self
+  def preload: (*String | Symbol | Array[untyped] | Hash[untyped, untyped], **(String | Symbol | Array[untyped] | Hash[untyped, untyped])) -> self
+  def find_by: (untyped, *untyped) -> Model?
+  def find_by!: (untyped, *untyped) -> Model
+  def find: (PrimaryKey id) -> Model
+          | (Array[PrimaryKey]) -> Array[Model]
+          | (*PrimaryKey) -> Array[Model]
+          | () { (Model) -> boolish } -> Model?
+  def find_or_create_by: (untyped) -> Model
+                       | (untyped) { (Model) -> void } -> Model
+  def find_or_create_by!: (untyped) -> Model
+                        | (untyped) { (Model) -> void } -> Model
+  def find_or_initialize_by: (untyped) -> Model
+                           | (untyped) { (Model) -> void } -> Model
+  def create_or_find_by: (untyped) -> Model
+                       | (untyped) { (Model) -> void } -> Model
+  def create_or_find_by!: (untyped) -> Model
+                        | (untyped) { (Model) -> void } -> Model
+  def take: () -> Model
+          | (Integer limit) -> Array[Model]
+  def take!: () -> Model
+  def first: () -> Model?
+           | (Integer count) -> Array[Model]
+  def first!: () -> Model
+  def second: () -> Model?
+  def second!: () -> Model
+  def third: () -> Model?
+  def third!: () -> Model
+  def fourth: () -> Model?
+  def fourth!: () -> Model
+  def fifth: () -> Model?
+  def fifth!: () -> Model
+  def forty_two: () -> Model?
+  def forty_two!: () -> Model
+  def second_to_last: () -> Model?
+  def second_to_last!: () -> Model
+  def third_to_last: () -> Model?
+  def third_to_last!: () -> Model
+  def last: () -> Model?
+          | (Integer count) -> Array[Model]
+  def last!: () -> Model
+  def limit: (Integer | Arel::Nodes::SqlLiteral | nil) -> self
+  def limit!: (Integer | Arel::Nodes::SqlLiteral | nil) -> self
+  def offset: (Integer) -> self
+  def offset!: (Integer) -> self
+  def find_each: (?batch_size: Integer, ?start: Integer, ?finish: Integer, ?error_on_ignore: bool) { (Model) -> void } -> nil
+               | (?batch_size: Integer, ?start: Integer, ?finish: Integer, ?error_on_ignore: bool) -> Enumerator[Model, nil]
+  def find_in_batches: (?batch_size: Integer, ?start: Integer, ?finish: Integer, ?error_on_ignore: bool) { (Array[Model]) -> void } -> nil
+  def in_batches: (?of: Integer, ?start: Integer, ?finish: Integer, ?load: bool, ?error_on_ignore: bool, ?order: untyped) { (self) -> void } -> nil
+  def sum: (?untyped? column_name) -> untyped
+         | [T] (?T initial_value) { (Model) -> T } -> T
+  def destroy_all: () -> untyped
+  def delete_all: () -> untyped
+  def update_all: (untyped) -> untyped
+  def touch_all: (*untyped, ?time: untyped) -> untyped
+  def destroy_by: (*untyped) -> untyped
+  def delete_by: (*untyped) -> untyped
+  def each: () { (Model) -> void } -> self
+  def select: (*Symbol | String | Arel::Nodes::t) -> self
+            | () { (Model) -> boolish } -> Array[Model]
+  def reselect: (*Symbol | String | Arel::Nodes::t) -> self
+  def count: () -> ::Integer
+           | () { (Model) -> boolish } -> ::Integer
+           | (Symbol | String column_name) -> ::Integer
+  def sole: () -> Model
+
+  def order_values: () -> Array[String | Symbol]?
+  def joins_values: () -> Array[String | Symbol]?
+  def left_outer_joins_values: () -> Array[String | Symbol]?
+end
+
+interface _ActiveRecord_Relation_ClassMethods[Model, Relation, PrimaryKey] # rubocop:disable RBS/Lint/TopLevelInterface
+  def all: () -> Relation
+  def ids: () -> Array[PrimaryKey]
+  def none: () -> Relation
+  def pluck: (Symbol | String | Arel::Nodes::t column) -> Array[untyped]
+           | (*Symbol | String | Arel::Nodes::t columns) -> Array[Array[untyped]]
+  def where: () -> ::ActiveRecord::QueryMethods::WhereChain[Relation]
+           | (*untyped) -> Relation
+  def exists?: (*untyped) -> bool
+  def any?: () -> bool
+          | () { (Model) -> boolish } -> bool
+  def many?: () -> bool
+           | () { (Model) -> boolish } -> bool
+  def none?: () -> bool
+           | () { (Model) -> boolish } -> bool
+  def one?: () -> bool
+          | () { (Model) -> boolish } -> bool
+  def order: (*untyped) -> Relation
+  def group: (*Symbol | String) -> untyped
+  def in_order_of: (Symbol, Array[untyped]) -> Relation
+  def distinct: () -> Relation
+  def or: (::ActiveRecord::Relation) -> Relation
+  def merge: (Array[untyped] | Hash[untyped, untyped] | ActiveRecord::Relation | Proc) -> Relation
+  def joins: (*String | Symbol | Hash[untyped, untyped]) -> Relation
+  def left_joins: (*String | Symbol | Hash[untyped, untyped]) -> Relation
+  def left_outer_joins: (*String | Symbol | Hash[untyped, untyped]) -> Relation
+  def includes: (*String | Symbol | Array[untyped] | Hash[untyped, untyped], **(String | Symbol | Array[untyped] | Hash[untyped, untyped])) -> Relation
+  def eager_load: (*String | Symbol | Array[untyped] | Hash[untyped, untyped], **(String | Symbol | Array[untyped] | Hash[untyped, untyped])) -> Relation
+  def preload: (*String | Symbol | Array[untyped] | Hash[untyped, untyped], **(String | Symbol | Array[untyped] | Hash[untyped, untyped])) -> Relation
+  def find_by: (untyped) -> Model?
+  def find_by!: (untyped) -> Model
+  def find: (PrimaryKey id) -> Model
+          | (Array[PrimaryKey]) -> Array[Model]
+          | (*PrimaryKey) -> Array[Model]
+  def find_or_create_by: (untyped) -> Model
+                       | (untyped) { (Model) -> void } -> Model
+  def find_or_create_by!: (untyped) -> Model
+                        | (untyped) { (Model) -> void } -> Model
+  def find_or_initialize_by: (untyped) -> Model
+                           | (untyped) { (Model) -> void } -> Model
+  def create_or_find_by: (untyped) -> Model
+                       | (untyped) { (Model) -> void } -> Model
+  def create_or_find_by!: (untyped) -> Model
+                        | (untyped) { (Model) -> void } -> Model
+  def take: () -> Model
+          | (Integer limit) -> Array[Model]
+  def take!: () -> Model
+  def first: () -> Model?
+           | (Integer count) -> Array[Model]
+  def first!: () -> Model
+  def second: () -> Model?
+  def second!: () -> Model
+  def third: () -> Model?
+  def third!: () -> Model
+  def fourth: () -> Model?
+  def fourth!: () -> Model
+  def fifth: () -> Model?
+  def fifth!: () -> Model
+  def forty_two: () -> Model?
+  def forty_two!: () -> Model
+  def second_to_last: () -> Model?
+  def second_to_last!: () -> Model
+  def third_to_last: () -> Model?
+  def third_to_last!: () -> Model
+  def last: () -> Model?
+          | (Integer count) -> Array[Model]
+  def last!: () -> Model
+  def limit: (Integer | Arel::Nodes::SqlLiteral | nil) -> Relation
+  def offset: (Integer) -> Relation
+  def lock: (?untyped locks) -> Relation
+  def find_each: (?batch_size: Integer, ?start: Integer, ?finish: Integer, ?error_on_ignore: bool) { (Model) -> void } -> nil
+               | (?batch_size: Integer, ?start: Integer, ?finish: Integer, ?error_on_ignore: bool) -> Enumerator[Model, nil]
+  def find_in_batches: (?batch_size: Integer, ?start: Integer, ?finish: Integer, ?error_on_ignore: bool) { (Array[Model]) -> void } -> nil
+  def in_batches: (?of: Integer, ?start: Integer, ?finish: Integer, ?load: bool, ?error_on_ignore: bool, ?order: untyped) { (Relation) -> void } -> nil
+  def sum: (?untyped? column_name) -> untyped
+         | [T] (?T initial_value) { (Model) -> T } -> T
+  def destroy_all: () -> untyped
+  def delete_all: () -> untyped
+  def update_all: (untyped) -> untyped
+  def touch_all: (*untyped, ?time: untyped) -> untyped
+  def destroy_by: (*untyped) -> untyped
+  def delete_by: (*untyped) -> untyped
+  def select: (*Symbol | String | Arel::Nodes::t) -> Relation
+            | () { (Model) -> boolish } -> Array[Model]
+  def reselect: (*Symbol | String | Arel::Nodes::t) -> Relation
+  def scope: (Symbol, ^(*untyped, **untyped) [self: Relation] -> void | ActiveRecord::Base::_Callable[Relation]) ?{ (Module extention) [self: Relation] -> void } -> void
+  def count: () -> ::Integer
+           | () { (Model) -> boolish } -> ::Integer
+           | (Symbol | String column_name) -> ::Integer
+  def create_with: (nil | Hash[untyped, untyped]) -> Relation
+  def sole: () -> Model
+end

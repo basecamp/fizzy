@@ -1,0 +1,374 @@
+class Webhook < ::ApplicationRecord
+  class Delivery < ::ApplicationRecord
+    extend ::_ActiveRecord_Relation_ClassMethods[::Webhook::Delivery, ::Webhook::Delivery::ActiveRecord_Relation, ::String]
+
+    module GeneratedAttributeMethods
+      def id: () -> ::String
+
+      def id=: (::String) -> ::String
+
+      def id?: () -> bool
+
+      def id_changed?: () -> bool
+
+      def id_change: () -> [ ::String?, ::String? ]
+
+      def id_will_change!: () -> void
+
+      def id_was: () -> ::String?
+
+      def id_previously_changed?: () -> bool
+
+      def id_previous_change: () -> ::Array[::String?]?
+
+      def id_previously_was: () -> ::String?
+
+      def id_before_last_save: () -> ::String?
+
+      def id_change_to_be_saved: () -> ::Array[::String?]?
+
+      def id_in_database: () -> ::String?
+
+      def saved_change_to_id: () -> ::Array[::String?]?
+
+      def saved_change_to_id?: () -> bool
+
+      def will_save_change_to_id?: () -> bool
+
+      def restore_id!: () -> void
+
+      def clear_id_change: () -> void
+
+      def created_at: () -> ::ActiveSupport::TimeWithZone
+
+      def created_at=: (::ActiveSupport::TimeWithZone) -> ::ActiveSupport::TimeWithZone
+
+      def created_at?: () -> bool
+
+      def created_at_changed?: () -> bool
+
+      def created_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
+
+      def created_at_will_change!: () -> void
+
+      def created_at_was: () -> ::ActiveSupport::TimeWithZone?
+
+      def created_at_previously_changed?: () -> bool
+
+      def created_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def created_at_previously_was: () -> ::ActiveSupport::TimeWithZone?
+
+      def created_at_before_last_save: () -> ::ActiveSupport::TimeWithZone?
+
+      def created_at_change_to_be_saved: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def created_at_in_database: () -> ::ActiveSupport::TimeWithZone?
+
+      def saved_change_to_created_at: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def saved_change_to_created_at?: () -> bool
+
+      def will_save_change_to_created_at?: () -> bool
+
+      def restore_created_at!: () -> void
+
+      def clear_created_at_change: () -> void
+
+      def event_id: () -> ::String
+
+      def event_id=: (::String) -> ::String
+
+      def event_id?: () -> bool
+
+      def event_id_changed?: () -> bool
+
+      def event_id_change: () -> [ ::String?, ::String? ]
+
+      def event_id_will_change!: () -> void
+
+      def event_id_was: () -> ::String?
+
+      def event_id_previously_changed?: () -> bool
+
+      def event_id_previous_change: () -> ::Array[::String?]?
+
+      def event_id_previously_was: () -> ::String?
+
+      def event_id_before_last_save: () -> ::String?
+
+      def event_id_change_to_be_saved: () -> ::Array[::String?]?
+
+      def event_id_in_database: () -> ::String?
+
+      def saved_change_to_event_id: () -> ::Array[::String?]?
+
+      def saved_change_to_event_id?: () -> bool
+
+      def will_save_change_to_event_id?: () -> bool
+
+      def restore_event_id!: () -> void
+
+      def clear_event_id_change: () -> void
+
+      def request: () -> ::String?
+
+      def request=: (::String?) -> ::String?
+
+      def request?: () -> bool
+
+      def request_changed?: () -> bool
+
+      def request_change: () -> [ ::String?, ::String? ]
+
+      def request_will_change!: () -> void
+
+      def request_was: () -> ::String?
+
+      def request_previously_changed?: () -> bool
+
+      def request_previous_change: () -> ::Array[::String?]?
+
+      def request_previously_was: () -> ::String?
+
+      def request_before_last_save: () -> ::String?
+
+      def request_change_to_be_saved: () -> ::Array[::String?]?
+
+      def request_in_database: () -> ::String?
+
+      def saved_change_to_request: () -> ::Array[::String?]?
+
+      def saved_change_to_request?: () -> bool
+
+      def will_save_change_to_request?: () -> bool
+
+      def restore_request!: () -> void
+
+      def clear_request_change: () -> void
+
+      def response: () -> ::String?
+
+      def response=: (::String?) -> ::String?
+
+      def response?: () -> bool
+
+      def response_changed?: () -> bool
+
+      def response_change: () -> [ ::String?, ::String? ]
+
+      def response_will_change!: () -> void
+
+      def response_was: () -> ::String?
+
+      def response_previously_changed?: () -> bool
+
+      def response_previous_change: () -> ::Array[::String?]?
+
+      def response_previously_was: () -> ::String?
+
+      def response_before_last_save: () -> ::String?
+
+      def response_change_to_be_saved: () -> ::Array[::String?]?
+
+      def response_in_database: () -> ::String?
+
+      def saved_change_to_response: () -> ::Array[::String?]?
+
+      def saved_change_to_response?: () -> bool
+
+      def will_save_change_to_response?: () -> bool
+
+      def restore_response!: () -> void
+
+      def clear_response_change: () -> void
+
+      def state: () -> ::String
+
+      def state=: (::String) -> ::String
+
+      def state?: () -> bool
+
+      def state_changed?: () -> bool
+
+      def state_change: () -> [ ::String?, ::String? ]
+
+      def state_will_change!: () -> void
+
+      def state_was: () -> ::String?
+
+      def state_previously_changed?: () -> bool
+
+      def state_previous_change: () -> ::Array[::String?]?
+
+      def state_previously_was: () -> ::String?
+
+      def state_before_last_save: () -> ::String?
+
+      def state_change_to_be_saved: () -> ::Array[::String?]?
+
+      def state_in_database: () -> ::String?
+
+      def saved_change_to_state: () -> ::Array[::String?]?
+
+      def saved_change_to_state?: () -> bool
+
+      def will_save_change_to_state?: () -> bool
+
+      def restore_state!: () -> void
+
+      def clear_state_change: () -> void
+
+      def updated_at: () -> ::ActiveSupport::TimeWithZone
+
+      def updated_at=: (::ActiveSupport::TimeWithZone) -> ::ActiveSupport::TimeWithZone
+
+      def updated_at?: () -> bool
+
+      def updated_at_changed?: () -> bool
+
+      def updated_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
+
+      def updated_at_will_change!: () -> void
+
+      def updated_at_was: () -> ::ActiveSupport::TimeWithZone?
+
+      def updated_at_previously_changed?: () -> bool
+
+      def updated_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def updated_at_previously_was: () -> ::ActiveSupport::TimeWithZone?
+
+      def updated_at_before_last_save: () -> ::ActiveSupport::TimeWithZone?
+
+      def updated_at_change_to_be_saved: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def updated_at_in_database: () -> ::ActiveSupport::TimeWithZone?
+
+      def saved_change_to_updated_at: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def saved_change_to_updated_at?: () -> bool
+
+      def will_save_change_to_updated_at?: () -> bool
+
+      def restore_updated_at!: () -> void
+
+      def clear_updated_at_change: () -> void
+
+      def webhook_id: () -> ::String
+
+      def webhook_id=: (::String) -> ::String
+
+      def webhook_id?: () -> bool
+
+      def webhook_id_changed?: () -> bool
+
+      def webhook_id_change: () -> [ ::String?, ::String? ]
+
+      def webhook_id_will_change!: () -> void
+
+      def webhook_id_was: () -> ::String?
+
+      def webhook_id_previously_changed?: () -> bool
+
+      def webhook_id_previous_change: () -> ::Array[::String?]?
+
+      def webhook_id_previously_was: () -> ::String?
+
+      def webhook_id_before_last_save: () -> ::String?
+
+      def webhook_id_change_to_be_saved: () -> ::Array[::String?]?
+
+      def webhook_id_in_database: () -> ::String?
+
+      def saved_change_to_webhook_id: () -> ::Array[::String?]?
+
+      def saved_change_to_webhook_id?: () -> bool
+
+      def will_save_change_to_webhook_id?: () -> bool
+
+      def restore_webhook_id!: () -> void
+
+      def clear_webhook_id_change: () -> void
+
+      def account_id: () -> ::String
+
+      def account_id=: (::String) -> ::String
+
+      def account_id?: () -> bool
+
+      def account_id_changed?: () -> bool
+
+      def account_id_change: () -> [ ::String?, ::String? ]
+
+      def account_id_will_change!: () -> void
+
+      def account_id_was: () -> ::String?
+
+      def account_id_previously_changed?: () -> bool
+
+      def account_id_previous_change: () -> ::Array[::String?]?
+
+      def account_id_previously_was: () -> ::String?
+
+      def account_id_before_last_save: () -> ::String?
+
+      def account_id_change_to_be_saved: () -> ::Array[::String?]?
+
+      def account_id_in_database: () -> ::String?
+
+      def saved_change_to_account_id: () -> ::Array[::String?]?
+
+      def saved_change_to_account_id?: () -> bool
+
+      def will_save_change_to_account_id?: () -> bool
+
+      def restore_account_id!: () -> void
+
+      def clear_account_id_change: () -> void
+    end
+    include GeneratedAttributeMethods
+
+    def account: () -> ::Account
+    def account=: (::Account?) -> ::Account?
+    def reload_account: () -> ::Account?
+    def build_account: (untyped) -> ::Account
+    def create_account: (untyped) -> ::Account
+    def create_account!: (untyped) -> ::Account
+    def webhook: () -> ::Webhook
+    def webhook=: (::Webhook?) -> ::Webhook?
+    def reload_webhook: () -> ::Webhook?
+    def build_webhook: (untyped) -> ::Webhook
+    def create_webhook: (untyped) -> ::Webhook
+    def create_webhook!: (untyped) -> ::Webhook
+    def event: () -> ::Event
+    def event=: (::Event?) -> ::Event?
+    def reload_event: () -> ::Event?
+    def build_event: (untyped) -> ::Event
+    def create_event: (untyped) -> ::Event
+    def create_event!: (untyped) -> ::Event
+    module GeneratedAssociationMethods
+    end
+    include GeneratedAssociationMethods
+
+    def self.ordered: () -> ::Webhook::Delivery::ActiveRecord_Relation
+    def self.stale: () -> ::Webhook::Delivery::ActiveRecord_Relation
+
+    module GeneratedRelationMethods
+      def ordered: () -> ::Webhook::Delivery::ActiveRecord_Relation
+
+      def stale: () -> ::Webhook::Delivery::ActiveRecord_Relation
+    end
+
+    class ActiveRecord_Relation < ::ActiveRecord::Relation
+      include ::Webhook::Delivery::GeneratedRelationMethods
+      include ::_ActiveRecord_Relation[::Webhook::Delivery, ::String]
+      include ::Enumerable[::Webhook::Delivery]
+    end
+
+    class ActiveRecord_Associations_CollectionProxy < ::ActiveRecord::Associations::CollectionProxy
+      include ::Webhook::Delivery::GeneratedRelationMethods
+      include ::_ActiveRecord_Relation[::Webhook::Delivery, ::String]
+    end
+  end
+end

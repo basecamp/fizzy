@@ -1,0 +1,16 @@
+module ActionText
+  module Attribute
+    module ClassMethods
+      def has_rich_text: (String | Symbol name, ?encrypted: bool, ?strict_loading: bool) -> void
+      def with_all_rich_text: () -> untyped
+      def rich_text_association_names: () -> Array[String]
+    end
+  end
+end
+
+module ActiveRecord
+  class Base
+    include ActionText::Attribute
+    extend ActionText::Attribute::ClassMethods
+  end
+end

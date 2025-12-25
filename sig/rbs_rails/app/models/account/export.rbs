@@ -1,0 +1,319 @@
+class Account < ::ApplicationRecord
+  class Export < ::ApplicationRecord
+    extend ::_ActiveRecord_Relation_ClassMethods[::Account::Export, ::Account::Export::ActiveRecord_Relation, ::String]
+
+    module GeneratedAttributeMethods
+      def id: () -> ::String
+
+      def id=: (::String) -> ::String
+
+      def id?: () -> bool
+
+      def id_changed?: () -> bool
+
+      def id_change: () -> [ ::String?, ::String? ]
+
+      def id_will_change!: () -> void
+
+      def id_was: () -> ::String?
+
+      def id_previously_changed?: () -> bool
+
+      def id_previous_change: () -> ::Array[::String?]?
+
+      def id_previously_was: () -> ::String?
+
+      def id_before_last_save: () -> ::String?
+
+      def id_change_to_be_saved: () -> ::Array[::String?]?
+
+      def id_in_database: () -> ::String?
+
+      def saved_change_to_id: () -> ::Array[::String?]?
+
+      def saved_change_to_id?: () -> bool
+
+      def will_save_change_to_id?: () -> bool
+
+      def restore_id!: () -> void
+
+      def clear_id_change: () -> void
+
+      def account_id: () -> ::String
+
+      def account_id=: (::String) -> ::String
+
+      def account_id?: () -> bool
+
+      def account_id_changed?: () -> bool
+
+      def account_id_change: () -> [ ::String?, ::String? ]
+
+      def account_id_will_change!: () -> void
+
+      def account_id_was: () -> ::String?
+
+      def account_id_previously_changed?: () -> bool
+
+      def account_id_previous_change: () -> ::Array[::String?]?
+
+      def account_id_previously_was: () -> ::String?
+
+      def account_id_before_last_save: () -> ::String?
+
+      def account_id_change_to_be_saved: () -> ::Array[::String?]?
+
+      def account_id_in_database: () -> ::String?
+
+      def saved_change_to_account_id: () -> ::Array[::String?]?
+
+      def saved_change_to_account_id?: () -> bool
+
+      def will_save_change_to_account_id?: () -> bool
+
+      def restore_account_id!: () -> void
+
+      def clear_account_id_change: () -> void
+
+      def user_id: () -> ::String
+
+      def user_id=: (::String) -> ::String
+
+      def user_id?: () -> bool
+
+      def user_id_changed?: () -> bool
+
+      def user_id_change: () -> [ ::String?, ::String? ]
+
+      def user_id_will_change!: () -> void
+
+      def user_id_was: () -> ::String?
+
+      def user_id_previously_changed?: () -> bool
+
+      def user_id_previous_change: () -> ::Array[::String?]?
+
+      def user_id_previously_was: () -> ::String?
+
+      def user_id_before_last_save: () -> ::String?
+
+      def user_id_change_to_be_saved: () -> ::Array[::String?]?
+
+      def user_id_in_database: () -> ::String?
+
+      def saved_change_to_user_id: () -> ::Array[::String?]?
+
+      def saved_change_to_user_id?: () -> bool
+
+      def will_save_change_to_user_id?: () -> bool
+
+      def restore_user_id!: () -> void
+
+      def clear_user_id_change: () -> void
+
+      def status: () -> ::String
+
+      def status=: (::String) -> ::String
+
+      def status?: () -> bool
+
+      def status_changed?: () -> bool
+
+      def status_change: () -> [ ::String?, ::String? ]
+
+      def status_will_change!: () -> void
+
+      def status_was: () -> ::String?
+
+      def status_previously_changed?: () -> bool
+
+      def status_previous_change: () -> ::Array[::String?]?
+
+      def status_previously_was: () -> ::String?
+
+      def status_before_last_save: () -> ::String?
+
+      def status_change_to_be_saved: () -> ::Array[::String?]?
+
+      def status_in_database: () -> ::String?
+
+      def saved_change_to_status: () -> ::Array[::String?]?
+
+      def saved_change_to_status?: () -> bool
+
+      def will_save_change_to_status?: () -> bool
+
+      def restore_status!: () -> void
+
+      def clear_status_change: () -> void
+
+      def completed_at: () -> ::ActiveSupport::TimeWithZone?
+
+      def completed_at=: (::ActiveSupport::TimeWithZone?) -> ::ActiveSupport::TimeWithZone?
+
+      def completed_at?: () -> bool
+
+      def completed_at_changed?: () -> bool
+
+      def completed_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
+
+      def completed_at_will_change!: () -> void
+
+      def completed_at_was: () -> ::ActiveSupport::TimeWithZone?
+
+      def completed_at_previously_changed?: () -> bool
+
+      def completed_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def completed_at_previously_was: () -> ::ActiveSupport::TimeWithZone?
+
+      def completed_at_before_last_save: () -> ::ActiveSupport::TimeWithZone?
+
+      def completed_at_change_to_be_saved: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def completed_at_in_database: () -> ::ActiveSupport::TimeWithZone?
+
+      def saved_change_to_completed_at: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def saved_change_to_completed_at?: () -> bool
+
+      def will_save_change_to_completed_at?: () -> bool
+
+      def restore_completed_at!: () -> void
+
+      def clear_completed_at_change: () -> void
+
+      def created_at: () -> ::ActiveSupport::TimeWithZone
+
+      def created_at=: (::ActiveSupport::TimeWithZone) -> ::ActiveSupport::TimeWithZone
+
+      def created_at?: () -> bool
+
+      def created_at_changed?: () -> bool
+
+      def created_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
+
+      def created_at_will_change!: () -> void
+
+      def created_at_was: () -> ::ActiveSupport::TimeWithZone?
+
+      def created_at_previously_changed?: () -> bool
+
+      def created_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def created_at_previously_was: () -> ::ActiveSupport::TimeWithZone?
+
+      def created_at_before_last_save: () -> ::ActiveSupport::TimeWithZone?
+
+      def created_at_change_to_be_saved: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def created_at_in_database: () -> ::ActiveSupport::TimeWithZone?
+
+      def saved_change_to_created_at: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def saved_change_to_created_at?: () -> bool
+
+      def will_save_change_to_created_at?: () -> bool
+
+      def restore_created_at!: () -> void
+
+      def clear_created_at_change: () -> void
+
+      def updated_at: () -> ::ActiveSupport::TimeWithZone
+
+      def updated_at=: (::ActiveSupport::TimeWithZone) -> ::ActiveSupport::TimeWithZone
+
+      def updated_at?: () -> bool
+
+      def updated_at_changed?: () -> bool
+
+      def updated_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
+
+      def updated_at_will_change!: () -> void
+
+      def updated_at_was: () -> ::ActiveSupport::TimeWithZone?
+
+      def updated_at_previously_changed?: () -> bool
+
+      def updated_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def updated_at_previously_was: () -> ::ActiveSupport::TimeWithZone?
+
+      def updated_at_before_last_save: () -> ::ActiveSupport::TimeWithZone?
+
+      def updated_at_change_to_be_saved: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def updated_at_in_database: () -> ::ActiveSupport::TimeWithZone?
+
+      def saved_change_to_updated_at: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def saved_change_to_updated_at?: () -> bool
+
+      def will_save_change_to_updated_at?: () -> bool
+
+      def restore_updated_at!: () -> void
+
+      def clear_updated_at_change: () -> void
+    end
+    include GeneratedAttributeMethods
+
+    def file_attachment: () -> ::ActiveStorage::Attachment?
+    def file_attachment=: (::ActiveStorage::Attachment?) -> ::ActiveStorage::Attachment?
+    def build_file_attachment: (?untyped) -> ::ActiveStorage::Attachment
+    def create_file_attachment: (untyped) -> ::ActiveStorage::Attachment
+    def create_file_attachment!: (untyped) -> ::ActiveStorage::Attachment
+    def reload_file_attachment: () -> ::ActiveStorage::Attachment?
+    def file_blob: () -> ::ActiveStorage::Blob?
+    def file_blob=: (::ActiveStorage::Blob?) -> ::ActiveStorage::Blob?
+    def build_file_blob: (?untyped) -> ::ActiveStorage::Blob
+    def create_file_blob: (untyped) -> ::ActiveStorage::Blob
+    def create_file_blob!: (untyped) -> ::ActiveStorage::Blob
+    def reload_file_blob: () -> ::ActiveStorage::Blob?
+    def account: () -> ::Account
+    def account=: (::Account?) -> ::Account?
+    def reload_account: () -> ::Account?
+    def build_account: (untyped) -> ::Account
+    def create_account: (untyped) -> ::Account
+    def create_account!: (untyped) -> ::Account
+    def user: () -> ::User
+    def user=: (::User?) -> ::User?
+    def reload_user: () -> ::User?
+    def build_user: (untyped) -> ::User
+    def create_user: (untyped) -> ::User
+    def create_user!: (untyped) -> ::User
+    module GeneratedAssociationMethods
+      def file: () -> ::ActiveStorage::Attached::One
+
+      def file=: (::ActionDispatch::Http::UploadedFile) -> ::ActionDispatch::Http::UploadedFile
+               | (::Rack::Test::UploadedFile) -> ::Rack::Test::UploadedFile
+               | (::ActiveStorage::Blob) -> ::ActiveStorage::Blob
+               | (::String) -> ::String
+               | ({ io: ::IO, filename: ::String, content_type: ::String? }) -> { io: ::IO, filename: ::String, content_type: ::String? }
+               | (nil) -> nil
+    end
+    include GeneratedAssociationMethods
+
+    def self.current: () -> ::Account::Export::ActiveRecord_Relation
+    def self.expired: () -> ::Account::Export::ActiveRecord_Relation
+    def self.with_attached_file: () -> ::Account::Export::ActiveRecord_Relation
+
+    module GeneratedRelationMethods
+      def current: () -> ::Account::Export::ActiveRecord_Relation
+
+      def expired: () -> ::Account::Export::ActiveRecord_Relation
+
+      def with_attached_file: () -> ::Account::Export::ActiveRecord_Relation
+    end
+
+    class ActiveRecord_Relation < ::ActiveRecord::Relation
+      include ::Account::Export::GeneratedRelationMethods
+      include ::_ActiveRecord_Relation[::Account::Export, ::String]
+      include ::Enumerable[::Account::Export]
+    end
+
+    class ActiveRecord_Associations_CollectionProxy < ::ActiveRecord::Associations::CollectionProxy
+      include ::Account::Export::GeneratedRelationMethods
+      include ::_ActiveRecord_Relation[::Account::Export, ::String]
+    end
+  end
+end

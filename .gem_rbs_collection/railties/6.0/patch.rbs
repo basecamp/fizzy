@@ -1,0 +1,17 @@
+# rbs gem has erb library but it doesn't have ERB::Compiler definition.
+class ERB
+  class Compiler
+  end
+end
+
+# Remove the fake RDoc type
+# if the real type of Minitest is available
+module RDoc
+  module Generator
+    class SDoc
+    end
+  end
+
+  class Task
+  end
+end

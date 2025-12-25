@@ -1,0 +1,1362 @@
+module ChunkyPNG
+  # Indicates that the PNG image uses grayscale colors, i.e. only a
+  # single teint channel.
+  # @private
+  COLOR_GRAYSCALE: Integer
+
+  # Indicates that the PNG image uses true color, composed of a red
+  # green and blue channel.
+  # @private
+  COLOR_TRUECOLOR: Integer
+
+  # Indicates that the PNG image uses indexed colors, where the values
+  # point to colors defined on a palette.
+  # @private
+  COLOR_INDEXED: Integer
+
+  # Indicates that the PNG image uses grayscale colors with opacity, i.e.
+  # a teint channel with an alpha channel.
+  # @private
+  COLOR_GRAYSCALE_ALPHA: Integer
+
+  # Indicates that the PNG image uses true color with opacity, composed of
+  # a red, green and blue channel, and an alpha value.
+  # @private
+  COLOR_TRUECOLOR_ALPHA: Integer
+
+  # Indicates that the PNG specification's default compression
+  # method is used (Zlib/Deflate)
+  # @private
+  COMPRESSION_DEFAULT: Integer
+
+  # Indicates that the PNG chunk content is not compressed
+  # flag used in iTXt chunk
+  # @private
+  UNCOMPRESSED_CONTENT: Integer
+
+  # Indicates that the PNG chunk content is compressed
+  # flag used in iTXt chunk
+  # @private
+  COMPRESSED_CONTENT: Integer
+
+  # Indicates that the image does not use interlacing.
+  # @private
+  INTERLACING_NONE: Integer
+
+  # Indicates that the image uses Adam7 interlacing.
+  # @private
+  INTERLACING_ADAM7: Integer
+
+  ### Filter method constants
+
+  # Indicates that the PNG specification's default filtering are
+  # being used in the image.
+  # @private
+  FILTERING_DEFAULT: Integer
+
+  # Indicates that no filtering is used for the scanline.
+  # @private
+  FILTER_NONE: Integer
+
+  # Indicates that SUB filtering is used for the scanline.
+  # @private
+  FILTER_SUB: Integer
+
+  # Indicates that UP filtering is used for the scanline.
+  # @private
+  FILTER_UP: Integer
+
+  # Indicates that AVERAGE filtering is used for the scanline.
+  # @private
+  FILTER_AVERAGE: Integer
+
+  # Indicates that PAETH filtering is used for the scanline.
+  # @private
+  FILTER_PAETH: Integer
+  def self.Color: (Integer r, Integer g, Integer b, ?Integer a) -> Integer
+                | (String, ?Integer? opacity ) -> Integer
+  def self.Dimension: (Integer width, Integer height) -> ChunkyPNG::Dimension
+                    | (String | Array[untyped] | Hash[untyped, untyped]) -> ChunkyPNG::Dimension
+  def self.Point: (Integer x, Integer y) -> ChunkyPNG::Point
+                | (String | Array[untyped] | Hash[untyped, untyped]) -> ChunkyPNG::Point
+  def self.Vector: (*untyped args) -> instance
+
+  def self.build_point_from_object: (untyped source) -> untyped
+
+  # Simple class that represents a point on a canvas using an x and y coordinate.
+  #
+  # This class implements some basic methods to handle comparison, the splat operator and
+  # bounds checking that make it easier to work with coordinates.
+  #
+  # @see ChunkyPNG.Point
+  class Point
+    # @return [Regexp] The regexp to parse points from a string.
+    # @private
+    POINT_REGEXP: untyped
+
+    # @return [Integer] The x-coordinate of the point.
+    attr_accessor x: untyped
+
+    # @return [Integer] The y-coordinate of the point.
+    attr_accessor y: untyped
+
+    # Initializes a new point instance.
+    # @param [Integer, :to_i] x The x-coordinate.
+    # @param [Integer, :to_i] y The y-coordinate.
+    def initialize: (Integer | untyped x, Integer | untyped y) -> instance
+
+    # Checks whether 2 points are identical.
+    # @return [true, false] <tt>true</tt> iff the x and y coordinates match
+    def eql?: (untyped other) -> bool
+
+    alias == eql?
+
+    # Compares 2 points.
+    #
+    # It will first compare the y coordinate, and it only takes the x-coordinate into
+    # account if the y-coordinates of the points are identical. This way, an array of
+    # points will be sorted into the order in which they would occur in the pixels
+    # array returned by {ChunkyPNG::Canvas#pixels}.
+    #
+    # @param [ChunkyPNG::Point] other The point to compare this point with.
+    # @return [-1, 0, 1] <tt>-1</tt> If this point comes before the other one, <tt>1</tt>
+    #   if after, and <tt>0</tt> if the points are identical.
+    def <=>: (instance other) -> (-1 | 0 | 1)
+
+    # Converts the point instance to an array.
+    # @return [Array] A 2-element array, i.e. <tt>[x, y]</tt>.
+    def to_a: () -> Array[untyped]
+
+    alias to_ary to_a
+
+    # Checks whether the point falls into a dimension
+    # @param [ChunkyPNG::Dimension, ...] dimension_like The dimension of which the bounds
+    #   should be taken for the check.
+    # @return [true, false] <tt>true</tt> iff the x and y coordinate fall width the width
+    #   and height of the dimension.
+    def within_bounds?: (*untyped dimension_like) -> bool
+  end
+
+  class Dimension
+    # @return [Integer] The width-component of this dimension.
+    # attr_accessor :width
+    def width: () -> Integer
+
+    def width=: (Integer width) -> Integer
+
+    # @return [Integer] The height-component of this dimension.
+    # attr_accessor :height
+    def height: () -> Integer
+
+    def height=: (Integer height) -> Integer
+
+    # Returns the area of this dimension.
+    # @return [Integer] The area in number of pixels.
+    def area: () -> Integer
+
+    # Checks whether a point is within bounds of this dimension.
+    # @param [ChunkyPNG::Point, ...] point_like A point-like to bounds-check.
+    # @return [true, false] True iff the x and y coordinate fall in this dimension.
+    # @see ChunkyPNG.Point
+    def include?: (*untyped point_like) -> untyped
+
+    # Checks whether 2 dimensions are identical.
+    # @param [ChunkyPNG::Dimension] other The dimension to compare with.
+    # @return [true, false] <tt>true</tt> iff width and height match.
+    def eql?: (untyped other) -> bool
+
+    alias == eql?
+
+    # Calculates a hash for the dimension object, based on width and height
+    # @return [Integer] A hashed value of the dimensions
+    def hash: () -> Integer
+
+    # Compares the size of 2 dimensions.
+    # @param [ChunkyPNG::Dimension] other The dimension to compare with.
+    # @return [-1, 0, 1] -1 if the other dimension has a larger area, 1 of this
+    #   dimension is larger, 0 if both are identical in size.
+    def <=>: (instance other) -> Integer
+
+    # Casts this dimension into an array.
+    # @return [Array<Integer>] <tt>[width, height]</tt> for this dimension.
+    def to_a: () -> ::Array[Integer]
+
+    alias to_ary to_a
+
+    # Initializes a new dimension instance.
+    # @param [Integer] width The width-component of the new dimension.
+    # @param [Integer] height The height-component of the new dimension.
+    def initialize: (Integer width, Integer height) -> instance
+  end
+
+  # Class that represents a vector of points, i.e. a list of {ChunkyPNG::Point} instances.
+  #
+  # Vectors can be created quite flexibly. See the {ChunkyPNG.Vector} factory methods for
+  # more information on how to construct vectors.
+  class Vector
+    include Enumerable[untyped]
+
+    # @return [Array<ChunkyPNG::Point>] The array that holds all the points in this vector.
+    attr_reader points: Array[ChunkyPNG::Point]
+
+    # Initializes a vector based on a list of Point instances.
+    #
+    # You usually do not want to use this method directly, but call {ChunkyPNG.Vector} instead.
+    #
+    # @param [Array<ChunkyPNG::Point>] points
+    # @see ChunkyPNG.Vector
+    def initialize: (?Array[ChunkyPNG::Point] points) -> instance
+
+    # Iterates over all the edges in this vector.
+    #
+    # An edge is a combination of two subsequent points in the vector. Together, they will form
+    # a path from the first point to the last point
+    #
+    # @param [true, false] close Whether to close the path, i.e. return an edge that connects the last
+    #   point in the vector back to the first point.
+    # @return [void]
+    # @raise [ChunkyPNG::ExpectationFailed] if the vector contains less than two points.
+    # @see #edges
+    def each_edge: (?bool close) { (untyped, untyped) -> void } -> void
+
+    # Returns the point with the given indexof this vector.
+    # @param [Integer] index The 0-based index of the point in this vector.
+    # @return [ChunkyPNG::Point] The point instance.
+    def []: (Integer index) -> ChunkyPNG::Point
+
+    # Returns an enumerator that will iterate over all the edges in this vector.
+    # @param (see #each_edge)
+    # @return [Enumerator] The enumerator that iterates over the edges.
+    # @raise [ChunkyPNG::ExpectationFailed] if the vector contains less than two points.
+    # @see #each_edge
+    def edges: (?bool close) -> Enumerator[untyped, void]
+
+    # Returns the number of points in this vector.
+    # @return [Integer] The length of the points array.
+    def length: () -> Integer
+
+    # Iterates over all the points in this vector
+    # @yield [ChunkyPNG::Point] The points in the correct order.
+    # @return [void]
+    def each: () { (ChunkyPNG::Point point) -> void } -> void
+
+    # Comparison between two vectors for quality.
+    # @param [ChunkyPNG::Vector] other The vector to compare with.
+    # @return [true, false] true if the list of points are identical
+    def eql?: (untyped other) -> bool
+
+    alias == eql?
+
+    # Returns the range in x-coordinates for all the points in this vector.
+    # @return [Range] The (inclusive) range of x-coordinates.
+    def x_range: () -> Range[Integer]
+
+    # Returns the range in y-coordinates for all the points in this vector.
+    # @return [Range] The (inclusive) range of y-coordinates.
+    def y_range: () -> Range[Integer]
+
+    # Finds the lowest x-coordinate in this vector.
+    # @return [Integer] The lowest x-coordinate of all the points in the vector.
+    def min_x: () -> Integer
+
+    # Finds the highest x-coordinate in this vector.
+    # @return [Integer] The highest x-coordinate of all the points in the vector.
+    def max_x: () -> Integer
+
+    # Finds the lowest y-coordinate in this vector.
+    # @return [Integer] The lowest y-coordinate of all the points in the vector.
+    def min_y: () -> Integer
+
+    # Finds the highest y-coordinate in this vector.
+    # @return [Integer] The highest y-coordinate of all the points in the vector.
+    def max_y: () -> Integer
+
+    # Returns the offset from (0,0) of the minimal bounding box of all the
+    # points in this vector
+    # @return [ChunkyPNG::Point] A point that describes the top left corner if a
+    #    minimal bounding box would be drawn around all the points in the vector.
+    def offset: () -> Integer
+
+    # Returns the width of the minimal bounding box of all the points in this vector.
+    # @return [Integer] The x-distance between the points that are farthest from each other.
+    def width: () -> Integer
+
+    # Returns the height of the minimal bounding box of all the points in this vector.
+    # @return [Integer] The y-distance between the points that are farthest from each other.
+    def height: () -> Integer
+
+    # Returns the dimension of the minimal bounding rectangle of the points in this vector.
+    # @return [ChunkyPNG::Dimension] The dimension instance with the width and height
+    def dimension: () -> ChunkyPNG::Dimension
+
+    # @return [Array<ChunkyPNG::Point>] The list of points interpreted from the input array.
+    def self.multiple_from_array: (Array[untyped] source) -> Array[ChunkyPNG::Point]
+
+    # @return [Array<ChunkyPNG::Point>] The list of points parsed from the string.
+    def self.multiple_from_string: (String source_str) -> Array[ChunkyPNG::Point]
+  end
+
+  class Palette
+    # Builds a palette instance from a PLTE chunk and optionally a tRNS chunk
+    # from a PNG datastream.
+    #
+    # This method will cerate a palette that is suitable for decoding an image.
+    #
+    # @param palette_chunk [ChunkyPNG::Chunk::Palette] The palette chunk to
+    #   load from
+    # @param transparency_chunk [ChunkyPNG::Chunk::Transparency, nil] The
+    #   optional transparency chunk.
+    # @return [ChunkyPNG::Palette] The loaded palette instance.
+    # @see ChunkyPNG::Palette#can_decode?
+    def self.from_chunks: (ChunkyPNG::Chunk::Palette palette_chunk, ?ChunkyPNG::Chunk::Transparency? transparency_chunk) -> instance
+
+    # Builds a palette instance from a given canvas.
+    # @param canvas [ChunkyPNG::Canvas] The canvas to create a palette for.
+    # @return [ChunkyPNG::Palette] The palette instance.
+    def self.from_canvas: (ChunkyPNG::Canvas canvas) -> instance
+
+    # Builds a palette instance from a given set of pixels.
+    # @param pixels [Enumerable<Integer>] An enumeration of pixels to create a
+    #   palette for
+    # @return [ChunkyPNG::Palette] The palette instance.
+    def self.from_pixels: (Enumerable[Integer] pixels) -> instance
+
+    # Checks whether the size of this palette is suitable for indexed storage.
+    # @return [true, false] True if the number of colors in this palette is at
+    #   most 256.
+    def indexable?: () -> bool
+
+    # Check whether this palette only contains opaque colors.
+    # @return [true, false] True if all colors in this palette are opaque.
+    # @see ChunkyPNG::Color#opaque?
+    def opaque?: () -> bool
+
+    # Check whether this palette only contains grayscale colors.
+    # @return [true, false] True if all colors in this palette are grayscale
+    #   teints.
+    # @see ChunkyPNG::Color#grayscale??
+    def grayscale?: () -> bool
+
+    # Check whether this palette only contains black and white.
+    # @return [true, false] True if all colors in this palette are grayscale
+    #   teints.
+    # @see ChunkyPNG::Color#grayscale??
+    def black_and_white?: () -> bool
+
+    # Checks whether this palette is suitable for decoding an image from a
+    # datastream.
+    #
+    # This requires that the positions of the colors in the original palette
+    # chunk is known, which is stored as an array in the +@decoding_map+
+    # instance variable.
+    #
+    # @return [true, false] True if a decoding map was built when this palette
+    #   was loaded.
+    def can_decode?: () -> bool
+
+    # Checks whether this palette is suitable for encoding an image from to
+    # datastream.
+    #
+    # This requires that the position of the color in the future palette chunk
+    # is known, which is stored as a hash in the +@encoding_map+ instance
+    # variable.
+    #
+    # @return [true, false] True if a encoding map was built when this palette
+    #   was loaded.
+    def can_encode?: () -> bool
+
+    # Returns a color, given the position in the original palette chunk.
+    # @param index [Integer] The 0-based position of the color in the palette.
+    # @return [ChunkyPNG::Color] The color that is stored in the palette under
+    #   the given index
+    # @see ChunkyPNG::Palette#can_decode?
+    def []: (Integer index) -> untyped
+
+    # Returns the position of a color in the palette
+    # @param color [ChunkyPNG::Color] The color for which to look up the index.
+    # @return [Integer] The 0-based position of the color in the palette.
+    # @see ChunkyPNG::Palette#can_encode?
+    def index: (ChunkyPNG::Color color) -> Integer
+
+    # Determines the most suitable colormode for this palette.
+    # @return [Integer] The colormode which would create the smallest possible
+    #  file for images that use this exact palette.
+    def best_color_settings: () -> Integer
+
+    # Determines the minimal bit depth required for an indexed image
+    # @return [Integer] Number of bits per pixel, i.e. 1, 2, 4 or 8, or nil if
+    #   this image cannot be saved as an indexed image.
+    def determine_bit_depth: () -> Integer
+
+    # Builds a new palette given a set (Enumerable instance) of colors.
+    #
+    # @param enum [Enumerable<Integer>] The set of colors to include in this
+    #   palette.This Enumerable can contain duplicates.
+    # @param decoding_map [Array] An array of colors in the exact order at
+    #   which they appeared in the palette chunk, so that this array can be
+    #   used for decoding.
+    def initialize: (Enumerable[Integer] enum, ?Array[Integer]? decoding_map) -> instance
+  end
+
+  class Datastream
+    # The signature that each PNG file or stream should begin with.
+    SIGNATURE: String
+
+    # The header chunk of this datastream.
+    # @return [ChunkyPNG::Chunk::Header]
+    attr_accessor header_chunk: ChunkyPNG::Chunk::Header
+
+    # All other chunks in this PNG file.
+    # @return [Array<ChunkyPNG::Chunk::Generic>]
+    attr_accessor other_chunks: Array[ChunkyPNG::Chunk::Generic]
+
+    # The chunk containing the image's palette.
+    # @return [ChunkyPNG::Chunk::Palette]
+    attr_accessor palette_chunk: ChunkyPNG::Chunk::Palette
+
+    # The chunk containing the transparency information of the palette.
+    # @return [ChunkyPNG::Chunk::Transparency]
+    attr_accessor transparency_chunk: ChunkyPNG::Chunk::Transparency
+
+    # The chunk containing the physical dimensions of the PNG's pixels.
+    # @return [ChunkyPNG::Chunk::Physical]
+    attr_accessor physical_chunk: ChunkyPNG::Chunk::Physical
+
+    # The chunks that together compose the images pixel data.
+    # @return [Array<ChunkyPNG::Chunk::ImageData>]
+    attr_accessor data_chunks: Array[ChunkyPNG::Chunk::ImageData]
+
+    # The empty chunk that signals the end of this datastream
+    # @return [ChunkyPNG::Chunk::Header]
+    attr_accessor end_chunk: ChunkyPNG::Chunk::Header
+
+    # Initializes a new Datastream instance.
+    def initialize: () -> instance
+
+    # Reads a PNG datastream from a string.
+    # @param [String] str The PNG encoded string to load from.
+    # @return [ChunkyPNG::Datastream] The loaded datastream instance.
+    def self.from_blob: (String str) -> instance
+
+    alias self.from_string self.from_blob
+
+    # Reads a PNG datastream from a file.
+    # @param [String] filename The path of the file to load from.
+    # @return [ChunkyPNG::Datastream] The loaded datastream instance.
+    def self.from_file: (String filename) -> instance
+
+    # Reads a PNG datastream from an input stream
+    # @param [IO] io The stream to read from.
+    # @return [ChunkyPNG::Datastream] The loaded datastream instance.
+    def self.from_io: (IO io) -> instance
+
+    # Verifies that the current stream is a PNG datastream by checking its signature.
+    #
+    # This method reads the PNG signature from the stream, setting the current position
+    # of the stream directly after the signature, where the IHDR chunk should begin.
+    #
+    # @param [IO] io The stream to read the PNG signature from.
+    # @raise [RuntimeError] An exception is raised if the PNG signature is not found at
+    #    the beginning of the stream.
+    def self.verify_signature!: (IO io) -> void
+
+    # Enumerates the chunks in this datastream.
+    #
+    # This will iterate over the chunks using the order in which the chunks
+    # should appear in the PNG file.
+    #
+    # @yield [chunk] Yields the chunks in this datastream, one by one in the correct order.
+    # @yieldparam [ChunkyPNG::Chunk::Base] chunk A chunk in this datastream.
+    # @see ChunkyPNG::Datastream#chunks
+    def each_chunk: () { (ChunkyPNG::Chunk::Base) -> void } -> nil
+
+    # Returns an enumerator instance for this datastream's chunks.
+    # @return [Enumerable::Enumerator] An enumerator for the :each_chunk method.
+    # @see ChunkyPNG::Datastream#each_chunk
+    def chunks: () -> Enumerator[ChunkyPNG::Chunk::Base, ChunkyPNG::Chunk::Base]
+
+    # Returns all the textual metadata key/value pairs as hash.
+    # @return [Hash] A hash containing metadata fields and their values.
+    def metadata: () -> Hash[untyped, untyped]
+
+    # Writes the datastream to the given output stream.
+    # @param [IO] io The output stream to write to.
+    def write: (IO io) -> void
+
+    # Saves this datastream as a PNG file.
+    # @param [String] filename The filename to use.
+    def save: (String filename) -> void
+
+    # Encodes this datastream into a string.
+    # @return [String] The encoded PNG datastream.
+    def to_blob: () -> String
+
+    alias to_string to_blob
+
+    alias to_s to_blob
+  end
+  class Canvas
+    include PNGEncoding
+
+    include Drawing
+
+    include Resampling
+
+    include Masking
+
+    include DataUrlExporting
+
+    include Operations
+
+    extend Adam7Interlacing
+
+    extend StreamImporting
+
+    extend PNGDecoding
+
+    extend DataUrlImporting
+
+    module PNGEncoding
+      type constraints = Hash[Symbol | String, untyped] | Symbol
+
+      def write: (IO io, ?constraints constraints) -> void
+
+      def to_blob: (?constraints constraints) -> String
+
+      def save: (String filename, ?constraints constraints) -> void
+    end
+
+    module Drawing
+      # Composes a pixel on the canvas by alpha blending a color with its
+      # background color.
+      #
+      # @param [Integer] x The x-coordinate of the pixel to blend.
+      # @param [Integer] y The y-coordinate of the pixel to blend.
+      # @param [Integer] color The foreground color to blend with
+      # @return [Integer] The composed color.
+      def compose_pixel: (Integer x, Integer y, Integer color) -> Integer
+
+      # Composes a pixel on the canvas by alpha blending a color with its
+      # background color, without bounds checking.
+      #
+      # @param (see #compose_pixel)
+      # @return [Integer] The composed color.
+      def compose_pixel_unsafe: (Integer x, Integer y, Integer color) -> Integer
+
+      # Draws a Bezier curve
+      # @param [Array, Point] points A collection of control points
+      # @param [Integer] stroke_color
+      # @return [Chunky:PNG::Canvas] Itself, with the curve drawn
+      def bezier_curve: (Array[untyped] | untyped points, ?Integer stroke_color) -> instance
+
+      # Draws an anti-aliased line using Xiaolin Wu's algorithm.
+      #
+      # @param [Integer] x0 The x-coordinate of the first control point.
+      # @param [Integer] y0 The y-coordinate of the first control point.
+      # @param [Integer] x1 The x-coordinate of the second control point.
+      # @param [Integer] y1 The y-coordinate of the second control point.
+      # @param [Integer] stroke_color The color to use for this line.
+      # @param [true, false] inclusive Whether to draw the last pixel. Set to
+      #   false when drawing multiple lines in a path.
+      # @return [ChunkyPNG::Canvas] Itself, with the line drawn.
+      def line_xiaolin_wu: (Integer x0, Integer y0, Integer x1, Integer y1, Integer stroke_color, ?bool inclusive) -> instance
+
+      alias line line_xiaolin_wu
+
+      # Draws a polygon on the canvas using the stroke_color, filled using the
+      # fill_color if any.
+      #
+      # @param [Array, String] path The control point vector. Accepts everything
+      #   {ChunkyPNG.Vector} accepts.
+      # @param [Integer] stroke_color The stroke color to use for this polygon.
+      # @param [Integer] fill_color The fill color to use for this polygon.
+      # @return [ChunkyPNG::Canvas] Itself, with the polygon drawn.
+      def polygon: (Array[untyped] | String path, ?Integer stroke_color, ?Integer fill_color) -> instance
+
+      # Draws a rectangle on the canvas, using two control points.
+      #
+      # @param [Integer] x0 The x-coordinate of the first control point.
+      # @param [Integer] y0 The y-coordinate of the first control point.
+      # @param [Integer] x1 The x-coordinate of the second control point.
+      # @param [Integer] y1 The y-coordinate of the second control point.
+      # @param [Integer] stroke_color The line color to use for this rectangle.
+      # @param [Integer] fill_color The fill color to use for this rectangle.
+      # @return [ChunkyPNG::Canvas] Itself, with the rectangle drawn.
+      def rect: (Integer x0, Integer y0, Integer x1, Integer y1, ?Integer stroke_color, ?Integer fill_color) -> instance
+
+      # Draws a circle on the canvas.
+      #
+      # @param [Integer] x0 The x-coordinate of the center of the circle.
+      # @param [Integer] y0 The y-coordinate of the center of the circle.
+      # @param [Integer] radius The radius of the circle from the center point.
+      # @param [Integer] stroke_color The color to use for the line.
+      # @param [Integer] fill_color The color to use that fills the circle.
+      # @return [ChunkyPNG::Canvas] Itself, with the circle drawn.
+      def circle: (Integer x0, Integer y0, Integer radius, ?Integer stroke_color, ?Integer fill_color) -> instance
+
+      private
+
+      # Calculates the binomial coefficient for n over k.
+      #
+      # @param [Integer] n first parameter in coeffient (the number on top when
+      #   looking at the mathematic formula)
+      # @param [Integer] k k-element, second parameter in coeffient (the number
+      #   on the bottom when looking at the mathematic formula)
+      # @return [Integer] The binomial coeffcient of (n,k)
+      def binomial_coefficient: (Integer n, Integer k) -> Integer
+    end
+
+    module Resampling
+      # Integer Interpolation between two values
+      #
+      # Used for generating indicies for interpolation (eg, nearest
+      # neighbour).
+      #
+      # @param [Integer] width The width of the source
+      # @param [Integer] new_width The width of the destination
+      # @return [Array<Integer>] An Array of Integer indicies
+      def steps: (Integer width, Integer new_width) -> Array[Integer]
+
+      # Fractional Interpolation between two values
+      #
+      # Used for generating values for interpolation (eg, bilinear).
+      # Produces both the indices and the interpolation factors (residues).
+      #
+      # @param [Integer] width The width of the source
+      # @param [Integer] new_width The width of the destination
+      # @return [Array<Integer>, Array<Integer>] Two arrays of indicies and residues
+      def steps_residues: (Integer width, Integer new_width) -> [Array[Integer], Array[Integer]]
+
+      # Resamples the canvas using nearest neighbor interpolation.
+      # @param [Integer] new_width The width of the resampled canvas.
+      # @param [Integer] new_height The height of the resampled canvas.
+      # @return [ChunkyPNG::Canvas] A new canvas instance with the resampled pixels.
+      def resample_nearest_neighbor!: (Integer new_width, Integer new_height) -> instance
+
+      def resample_nearest_neighbor: (Integer new_width, Integer new_height) -> instance
+
+      # Resamples the canvas with bilinear interpolation.
+      # @param [Integer] new_width The width of the resampled canvas.
+      # @param [Integer] new_height The height of the resampled canvas.
+      # @return [ChunkyPNG::Canvas] A new canvas instance with the resampled pixels.
+      def resample_bilinear!: (Integer new_width, Integer new_height) -> instance
+
+      def resample_bilinear: (Integer new_width, Integer new_height) -> instance
+
+      alias resample resample_nearest_neighbor
+
+      alias resize resample
+    end
+
+    module Masking
+      # Creates a new image, based on the current image but with a new theme color.
+      #
+      # This method will replace one color in an image with another image. This is done by
+      # first extracting the pixels with a color close to the original theme color as a mask
+      # image, changing the color of this mask image and then apply it on the original image.
+      #
+      # Mask extraction works best when the theme colored pixels are clearly distinguishable
+      # from a background color (preferably white). You can set a tolerance level to influence
+      # the extraction process.
+      #
+      # @param [Integer] old_theme_color The original theme color in this image.
+      # @param [Integer] new_theme_color The color to replace the old theme color with.
+      # @param [Integer] bg_color The background color on which the theme colored pixels are placed.
+      # @param [Integer] tolerance The tolerance level to use when extracting the mask image. Five is
+      #    the default; increase this if the masked image does not extract all the required pixels,
+      #    decrease it if too many pixels get extracted.
+      # @return [ChunkyPNG::Canvas] Returns itself, but with the theme colored pixels changed.
+      # @see #change_theme_color!
+      # @see #change_mask_color!
+      def change_theme_color!: (Integer old_theme_color, Integer new_theme_color, ?Integer bg_color, ?Integer tolerance) -> instance
+
+      # Creates a base image and a mask image from an original image that has a particular theme color.
+      # This can be used to easily change a theme color in an image.
+      #
+      # It will extract all the pixels that look like the theme color (with a tolerance level) and put
+      # these in a mask image. All the other pixels will be stored in a base image. Both images will be
+      # of the exact same size as the original image. The original image will be left untouched.
+      #
+      # The color of the mask image can be changed with {#change_mask_color!}. This new mask image can
+      # then be composed upon the base image to create an image with a new theme color. A call to
+      # {#change_theme_color!} will perform this in one go.
+      #
+      # @param [Integer] mask_color The current theme color.
+      # @param [Integer] bg_color The background color on which the theme colored pixels are applied.
+      # @param [Integer] tolerance The tolerance level to use when extracting the mask image. Five is
+      #    the default; increase this if the masked image does not extract all the required pixels,
+      #    decrease it if too many pixels get extracted.
+      # @return [Array<ChunkyPNG::Canvas, ChunkyPNG::Canvas>] An array with the base canvas and the mask
+      #    canvas as elements.
+      # @see #change_theme_color!
+      # @see #change_mask_color!
+      def extract_mask: (Integer mask_color, ?Integer bg_color, ?Integer tolerance) -> [instance, instance]
+
+      # Changes the color of a mask image.
+      #
+      # This method works on a canvas extracted out of another image using the {#extract_mask} method.
+      # It can then be applied on the extracted base image. See {#change_theme_color!} to perform
+      # these operations in one go.
+      #
+      # @param [Integer] new_color The color to replace the original mask color with.
+      # @raise [ChunkyPNG::ExpectationFailed] when this canvas is not a mask image, i.e. its palette
+      #    has more than once color, disregarding transparency.
+      # @see #change_theme_color!
+      # @see #extract_mask
+      def change_mask_color!: (Integer new_color) -> instance
+    end
+
+    module DataUrlExporting
+      # Exports the canvas as a data url (e.g. data:image/png;base64,<data>) that can
+      # easily be used inline in CSS or HTML.
+      # @return [String] The canvas formatted as a data URL string.
+      def to_data_url: () -> String
+    end
+
+    module Operations
+      # Converts the canvas to grayscale.
+      #
+      # This method will modify the canvas. The obtain a new canvas and leave
+      # the current instance intact, use {#grayscale} instead.
+      #
+      # @return [ChunkyPNG::Canvas] Returns itself, converted to grayscale.
+      # @see #grayscale
+      # @see ChunkyPNG::Color#to_grayscale
+      def grayscale!: () -> instance
+
+      # Converts the canvas to grayscale, returning a new canvas.
+      #
+      # This method will not modify the canvas. To modift the current canvas,
+      # use {#grayscale!} instead.
+      #
+      # @return [ChunkyPNG::Canvas] A copy of the canvas, converted to
+      #   grayscale.
+      # @see #grayscale!
+      # @see ChunkyPNG::Color#to_grayscale
+      def grayscale: () -> instance
+
+      # Composes another image onto this image using alpha blending. This will
+      # modify the current canvas.
+      #
+      # If you simply want to replace pixels or when the other image does not
+      # have transparency, it is faster to use {#replace!}.
+      #
+      # @param [ChunkyPNG::Canvas] other The foreground canvas to compose on
+      #   the current canvas, using alpha compositing.
+      # @param [Integer] offset_x The x-offset to apply the new foreground on.
+      # @param [Integer] offset_y The y-offset to apply the new foreground on.
+      # @return [ChunkyPNG::Canvas] Returns itself, but with the other canvas
+      #   composed onto it.
+      # @raise [ChunkyPNG::OutOfBounds] when the other canvas doesn't fit on
+      #   this one, given the offset and size of the other canvas.
+      # @see #replace!
+      # @see #compose
+      def compose!: (ChunkyPNG::Canvas other, ?Integer offset_x, ?Integer offset_y) -> instance
+
+      # Composes another image onto this image using alpha blending. This will
+      # return a new canvas and leave the original intact.
+      #
+      # If you simply want to replace pixels or when the other image does not
+      # have transparency, it is faster to use {#replace}.
+      #
+      # @param (see #compose!)
+      # @return [ChunkyPNG::Canvas] Returns the new canvas, composed of the
+      #   other 2.
+      # @raise [ChunkyPNG::OutOfBounds] when the other canvas doesn't fit on
+      #   this one, given the offset and size of the other canvas.
+      #
+      # @note API changed since 1.0 - This method now no longer is in place,
+      #   but returns a new canvas and leaves the original intact. Use
+      #   {#compose!} if you want to compose on the canvas in place.
+      # @see #replace
+      def compose: (ChunkyPNG::Canvas other, ?Integer offset_x, ?Integer offset_y) -> instance
+
+      # Replaces pixels on this image by pixels from another pixels, on a given
+      # offset. This method will modify the current canvas.
+      #
+      # This will completely replace the pixels of the background image. If you
+      # want to blend them with semi-transparent pixels from the foreground
+      # image, see {#compose!}.
+      #
+      # @param [ChunkyPNG::Canvas] other The foreground canvas to get the
+      #   pixels from.
+      # @param [Integer] offset_x The x-offset to apply the new foreground on.
+      # @param [Integer] offset_y The y-offset to apply the new foreground on.
+      # @return [ChunkyPNG::Canvas] Returns itself, but with the other canvas
+      #   placed onto it.
+      # @raise [ChunkyPNG::OutOfBounds] when the other canvas doesn't fit on
+      #   this one, given the offset and size of the other canvas.
+      # @see #compose!
+      # @see #replace
+      def replace!: (ChunkyPNG::Canvas other, ?Integer offset_x, ?Integer offset_y) -> instance
+
+      # Replaces pixels on this image by pixels from another pixels, on a given
+      # offset. This method will modify the current canvas.
+      #
+      # This will completely replace the pixels of the background image. If you
+      # want to blend them with semi-transparent pixels from the foreground
+      # image, see {#compose!}.
+      #
+      # @param (see #replace!)
+      # @return [ChunkyPNG::Canvas] Returns a new, combined canvas.
+      # @raise [ChunkyPNG::OutOfBounds] when the other canvas doesn't fit on
+      #   this one, given the offset and size of the other canvas.
+      #
+      # @note API changed since 1.0 - This method now no longer is in place,
+      #   but returns a new canvas and leaves the original intact. Use
+      #   {#replace!} if you want to replace pixels on the canvas in place.
+      # @see #compose
+      def replace: (ChunkyPNG::Canvas other, ?Integer offset_x, ?Integer offset_y) -> instance
+
+      # Crops an image, given the coordinates and size of the image that needs
+      # to be cut out. This will leave the original image intact and return a
+      # new, cropped image with pixels copied from the original image.
+      #
+      # @param [Integer] x The x-coordinate of the top left corner of the image
+      #   to be cropped.
+      # @param [Integer] y The y-coordinate of the top left corner of the image
+      #   to be cropped.
+      # @param [Integer] crop_width The width of the image to be cropped.
+      # @param [Integer] crop_height The height of the image to be cropped.
+      # @return [ChunkyPNG::Canvas] Returns the newly created cropped image.
+      # @raise [ChunkyPNG::OutOfBounds] when the crop dimensions plus the given
+      #   coordinates are bigger then the original image.
+      def crop: (Integer x, Integer y, Integer crop_width, Integer crop_height) -> instance
+
+      # Crops an image, given the coordinates and size of the image that needs
+      # to be cut out.
+      #
+      # This will change the size and content of the current canvas. Use
+      # {#crop} if you want to have a new canvas returned instead, leaving the
+      # current canvas intact.
+      #
+      # @param [Integer] x The x-coordinate of the top left corner of the image
+      #   to be cropped.
+      # @param [Integer] y The y-coordinate of the top left corner of the image
+      #   to be cropped.
+      # @param [Integer] crop_width The width of the image to be cropped.
+      # @param [Integer] crop_height The height of the image to be cropped.
+      # @return [ChunkyPNG::Canvas] Returns itself, but cropped.
+      # @raise [ChunkyPNG::OutOfBounds] when the crop dimensions plus the given
+      #   coordinates are bigger then the original image.
+      def crop!: (Integer x, Integer y, Integer crop_width, Integer crop_height) -> instance
+
+      # Flips the image horizontally, leaving the original intact.
+      #
+      # This will flip the image on its horizontal axis, e.g. pixels on the top
+      # will now be pixels on the bottom. Chaining this method twice will
+      # return the original canvas. This method will leave the original object
+      # intact and return a new canvas.
+      #
+      # @return [ChunkyPNG::Canvas] The flipped image
+      # @see #flip_horizontally!
+      def flip_horizontally: () -> instance
+
+      # Flips the image horizontally in place.
+      #
+      # This will flip the image on its horizontal axis, e.g. pixels on the top
+      # will now be pixels on the bottom. Chaining this method twice will
+      # return the original canvas. This method will leave the original object
+      # intact and return a new canvas.
+      #
+      # @return [ChunkyPNG::Canvas] Itself, but flipped
+      # @see #flip_horizontally
+      def flip_horizontally!: () -> instance
+
+      alias flip! flip_horizontally!
+
+      alias flip flip_horizontally
+
+      # Flips the image vertically, leaving the original intact.
+      #
+      # This will flip the image on its vertical axis, e.g. pixels on the left
+      # will now be pixels on the right. Chaining this method twice will return
+      # the original canvas. This method will leave the original object intact
+      # and return a new canvas.
+      #
+      # @return [ChunkyPNG::Canvas] The flipped image
+      # @see #flip_vertically!
+      def flip_vertically: () -> instance
+
+      # Flips the image vertically in place.
+      #
+      # This will flip the image on its vertical axis, e.g. pixels on the left
+      # will now be pixels on the right. Chaining this method twice will return
+      # the original canvas. This method will leave the original object intact
+      # and return a new canvas.
+      #
+      # @return [ChunkyPNG::Canvas] Itself, but flipped
+      # @see #flip_vertically
+      def flip_vertically!: () -> instance
+
+      alias mirror! flip_vertically!
+
+      alias mirror flip_vertically
+
+      # Returns a new canvas instance that is rotated 90 degrees clockwise.
+      #
+      # This method will return a new canvas and leaves the original intact.
+      #
+      # @return [ChunkyPNG::Canvas] A clockwise-rotated copy.
+      # @see #rotate_right! for the in place version.
+      def rotate_right: () -> instance
+
+      # Rotates the image 90 degrees clockwise in place.
+      #
+      # This method will change the current canvas.
+      #
+      # @return [ChunkyPNG::Canvas] Itself, but rotated clockwise.
+      # @see #rotate_right for a version that leaves the current canvas intact
+      def rotate_right!: () -> instance
+
+      alias rotate_clockwise rotate_right
+
+      alias rotate_clockwise! rotate_right!
+
+      # Returns an image that is rotated 90 degrees counter-clockwise.
+      #
+      # This method will leave the original object intact and return a new
+      # canvas.
+      #
+      # @return [ChunkyPNG::Canvas] A rotated copy of itself.
+      # @see #rotate_left! for the in-place version.
+      def rotate_left: () -> instance
+
+      # Rotates the image 90 degrees counter-clockwise in place.
+      #
+      # This method will change the original canvas. See {#rotate_left} for a
+      # version that leaves the canvas intact and returns a new rotated canvas
+      # instead.
+      #
+      # @return [ChunkyPNG::Canvas] Itself, but rotated.
+      def rotate_left!: () -> instance
+
+      alias rotate_counter_clockwise rotate_left
+
+      alias rotate_counter_clockwise! rotate_left!
+
+      # Rotates the image 180 degrees.
+      #
+      # This method will leave the original object intact and return a new
+      # canvas.
+      #
+      # @return [ChunkyPNG::Canvas] The rotated image.
+      # @see #rotate_180!
+      def rotate_180: () -> instance
+
+      # Rotates the image 180 degrees in place.
+      #
+      # @return [ChunkyPNG::Canvas] Itself, but rotated 180 degrees.
+      # @see #rotate_180
+      def rotate_180!: () -> instance
+
+      # Trims the border around the image, presumed to be the color of the
+      # first pixel.
+      #
+      # @param [Integer] border The color to attempt to trim.
+      # @return [ChunkyPNG::Canvas] The trimmed image.
+      # @see #trim!
+      def trim: (?Integer border) -> instance
+
+      # Trims the border around the image in place.
+      #
+      # @param [Integer] border The color to attempt to trim.
+      # @return [ChunkyPNG::Canvas] Returns itself, but with the border
+      #  trimmed.
+      # @see #trim
+      def trim!: (?Integer border) -> instance
+
+      # Draws a border around the image.
+      #
+      # @param [Integer] size The size of the border.
+      # @param [Integer] color The color of the border.
+      # @return [ChunkyPNG::Canvas] Returns a bordered version of the image.
+      # @see #border!
+      def border: (Integer size, ?Integer color) -> instance
+
+      # Draws a border around the image in place.
+      #
+      # @param [Integer] size The size of the border.
+      # @param [Integer] color The color of the border.
+      # @return [ChunkyPNG::Canvas] Returns itself with the border added.
+      # @see #border
+      def border!: (Integer size, ?Integer color) -> instance
+    end
+
+    module Adam7Interlacing
+      # Returns an array with the x-shift, x-offset, y-shift and y-offset for the requested pass.
+      # @param [Integer] pass The pass number, should be in 0..6.
+      def adam7_multiplier_offset: (Integer pass) -> [Integer, Integer, Integer, Integer]
+
+      # Returns the pixel dimensions of the requested pass.
+      # @param [Integer] pass The pass number, should be in 0..6.
+      # @param [Integer] original_width The width of the original image.
+      # @param [Integer] original_height The height of the original image.
+      def adam7_pass_size: (Integer pass, Integer original_width, Integer original_height) -> [Integer, Integer]
+
+      # Returns an array of the dimension of all the pass images.
+      # @param [Integer] original_width The width of the original image.
+      # @param [Integer] original_height The height of the original image.
+      # @return [Array<Array<Integer>>] Returns an array with 7 pairs of dimensions.
+      # @see #adam7_pass_size
+      def adam7_pass_sizes: (Integer original_width, Integer original_height) -> Array[Array[Integer]]
+
+      # Merges a pass image into a total image that is being constructed.
+      # @param [Integer] pass The pass number, should be in 0..6.
+      # @param [ChunkyPNG::Canvas] canvas The image that is being constructed.
+      # @param [ChunkyPNG::Canvas] subcanvas The pass image that should be merged
+      def adam7_merge_pass: (Integer pass, instance canvas, instance subcanvas) -> untyped
+
+      # Extracts a pass from a complete image
+      # @param [Integer] pass The pass number, should be in 0..6.
+      # @param [ChunkyPNG::Canvas] canvas The image that is being deconstructed.
+      # @return [ChunkyPNG::Canvas] The extracted pass image.
+      def adam7_extract_pass: (Integer pass, instance canvas) -> instance
+    end
+
+    module StreamExporting
+      # Creates an RGB-formatted pixelstream with the pixel data from this canvas.
+      #
+      # Note that this format is fast but bloated, because no compression is used
+      # and the internal representation is left intact. To reconstruct the
+      # canvas, the width and height should be known.
+      #
+      # @return [String] The RGBA-formatted pixel data.
+      def to_rgba_stream: () -> String
+
+      # Creates an RGB-formatted pixelstream with the pixel data from this canvas.
+      #
+      # Note that this format is fast but bloated, because no compression is used
+      # and the internal representation is almost left intact. To reconstruct
+      # the canvas, the width and height should be known.
+      #
+      # @return [String] The RGB-formatted pixel data.
+      def to_rgb_stream: () -> String
+
+      # Creates a stream of the alpha channel of this canvas.
+      #
+      # @return [String] The 0-255 alpha values of all pixels packed as string
+      def to_alpha_channel_stream: () -> String
+
+      # Creates a grayscale stream of this canvas.
+      #
+      # This method assume sthat this image is fully grayscale, i.e. R = G = B for
+      # every pixel. The alpha channel will not be included in the stream.
+      #
+      # @return [String] The 0-255 grayscale values of all pixels packed as string.
+      def to_grayscale_stream: () -> String
+
+      # Creates an ABGR-formatted pixelstream with the pixel data from this canvas.
+      #
+      # Note that this format is fast but bloated, because no compression is used
+      # and the internal representation is left intact. To reconstruct the
+      # canvas, the width and height should be known.
+      #
+      # @return [String] The RGBA-formatted pixel data.
+      def to_abgr_stream: () -> String
+    end
+
+    module StreamImporting
+      # Creates a canvas by reading pixels from an RGB formatted stream with a
+      # provided with and height.
+      #
+      # Every pixel should be represented by 3 bytes in the stream, in the correct
+      # RGB order. This format closely resembles the internal representation of a
+      # canvas object, so this kind of stream can be read extremely quickly.
+      #
+      # @param [Integer] width The width of the new canvas.
+      # @param [Integer] height The height of the new canvas.
+      # @param [#read, String] stream The stream to read the pixel data from.
+      # @return [ChunkyPNG::Canvas] The newly constructed canvas instance.
+      def from_rgb_stream: (Integer width, Integer height, String stream) -> instance
+
+      # Creates a canvas by reading pixels from an RGBA formatted stream with a
+      # provided with and height.
+      #
+      # Every pixel should be represented by 4 bytes in the stream, in the correct
+      # RGBA order. This format is exactly like the internal representation of a
+      # canvas object, so this kind of stream can be read extremely quickly.
+      #
+      # @param [Integer] width The width of the new canvas.
+      # @param [Integer] height The height of the new canvas.
+      # @param [#read, String] stream The stream to read the pixel data from.
+      # @return [ChunkyPNG::Canvas] The newly constructed canvas instance.
+      def from_rgba_stream: (Integer width, Integer height, String stream) -> instance
+
+      # Creates a canvas by reading pixels from an BGR formatted stream with a
+      # provided with and height.
+      #
+      # Every pixel should be represented by 3 bytes in the stream, in the correct
+      # BGR order. This format closely resembles the internal representation of a
+      # canvas object, so this kind of stream can be read extremely quickly.
+      #
+      # @param [Integer] width The width of the new canvas.
+      # @param [Integer] height The height of the new canvas.
+      # @param [#read, String] stream The stream to read the pixel data from.
+      # @return [ChunkyPNG::Canvas] The newly constructed canvas instance.
+      def from_bgr_stream: (Integer width, Integer height, String stream) -> instance
+
+      # Creates a canvas by reading pixels from an ARGB formatted stream with a
+      # provided with and height.
+      #
+      # Every pixel should be represented by 4 bytes in the stream, in the correct
+      # ARGB order. This format is almost like the internal representation of a
+      # canvas object, so this kind of stream can be read extremely quickly.
+      #
+      # @param [Integer] width The width of the new canvas.
+      # @param [Integer] height The height of the new canvas.
+      # @param [#read, String] stream The stream to read the pixel data from.
+      # @return [ChunkyPNG::Canvas] The newly constructed canvas instance.
+      def from_abgr_stream: (Integer width, Integer height, String stream) -> instance
+    end
+
+    module PNGDecoding
+      # Decodes a Canvas from a PNG encoded string.
+      # @param [String] str The string to read from.
+      # @return [ChunkyPNG::Canvas] The canvas decoded from the PNG encoded string.
+      def from_blob: (String str) -> instance
+
+      alias from_string from_blob
+
+      # Decodes a Canvas from a PNG encoded file.
+      # @param [String] filename The file to read from.
+      # @return [ChunkyPNG::Canvas] The canvas decoded from the PNG file.
+      def from_file: (String filename) -> instance
+
+      # Decodes a Canvas from a PNG encoded stream.
+      # @param [IO, #read] io The stream to read from.
+      # @return [ChunkyPNG::Canvas] The canvas decoded from the PNG stream.
+      def from_io: (IO io) -> instance
+
+      alias from_stream from_io
+
+      # Decodes the Canvas from a PNG datastream instance.
+      # @param [ChunkyPNG::Datastream] ds The datastream to decode.
+      # @return [ChunkyPNG::Canvas] The canvas decoded from the PNG datastream.
+      def from_datastream: (ChunkyPNG::Datastream ds) -> instance
+    end
+
+    module DataUrlImporting
+      # Imports a canvas from a PNG data URL.
+      # @param [String] string The data URL string to load from.
+      # @return [Canvas] The imported canvas.
+      # @raise ChunkyPNG::SignatureMismatch if the provides string is not a properly
+      #    formatted PNG data URL (i.e. it should start with "data:image/png;base64,")
+      def from_data_url: (String string) -> instance
+    end
+
+    # Creates a new canvas instance by duplicating another instance.
+    # @param [ChunkyPNG::Canvas] canvas The canvas to duplicate
+    # @return [ChunkyPNG::Canvas] The newly constructed canvas instance.
+    def self.from_canvas: (instance canvas) -> instance
+
+    public
+
+    alias == eql?
+
+    # Returns a single pixel's color value from this canvas.
+    # @param [Integer] x The x-coordinate of the pixel (column)
+    # @param [Integer] y The y-coordinate of the pixel (row)
+    # @return [Integer] The current color value at the provided coordinates.
+    def []: (Integer x, Integer y) -> Integer
+
+    # Replaces a single pixel in this canvas.
+    # @param [Integer] x The x-coordinate of the pixel (column)
+    # @param [Integer] y The y-coordinate of the pixel (row)
+    # @param [Integer] color The new color for the provided coordinates.
+    # @return [Integer] The new color value for this pixel, i.e.
+    #   <tt>color</tt>.
+    def []=: (Integer x, Integer y, Integer color) -> Integer
+
+    # Returns the area of this canvas in number of pixels.
+    # @return [Integer] The number of pixels in this canvas
+    def area: () -> Integer
+
+    # Returns an extracted column as vector of pixels.
+    # @param [Integer] x The 0-based column index.
+    # @return [Array<Integer>] The vector of pixels in the requested column.
+    def column: (Integer x) -> Array[Integer]
+
+    # Returns the dimension (width x height) for this canvas.
+    # @return [ChunkyPNG::Dimension] A dimension instance with the width and
+    #   height set for this canvas.
+    def dimension: () -> ChunkyPNG::Dimension
+
+    # Equality check to compare this canvas with other matrices.
+    # @param other The object to compare this Matrix to.
+    # @return [true, false] True if the size and pixel values of the other
+    #   canvas are exactly the same as this canvas's size and pixel values.
+    # TODO: Try to add general cases for type level computation optimization
+    def eql?: (untyped other) -> bool
+
+    # Returns a single pixel from this canvas, without checking bounds. The
+    # return value for this method is undefined if the coordinates are out of
+    # bounds.
+    #
+    # @param (see #[])
+    # @return [Integer] The current pixel at the provided coordinates.
+    def get_pixel: (Integer x, Integer y) -> Integer
+
+    # attr_reader :height
+    # @height: Integer
+    # @return [Integer] The number of rows in this canvas
+    def height: () -> Integer
+
+    alias include? include_point?
+
+    # Checks whether the given coordinates are in the range of the canvas
+    # @param [ChunkyPNG::Point, Array, Hash, String] point_like The point to
+    #   check.
+    # @return [true, false] True if the x and y coordinates of the point are
+    #   within the limits of this canvas.
+    # @see ChunkyPNG.Point
+    def include_point?: (*untyped point_like) -> bool
+
+    # Checks whether the given x-coordinate is in the range of the canvas
+    ## Below is corrected documentation
+    # @param [Integer] x The x-coordinate of the pixel (column)
+    # @return [true, false] True if the x-coordinate is in the range of this
+    #   canvas.
+    def include_x?: (Integer x) -> bool
+
+    # Checks whether the given x- and y-coordinate are in the range of the
+    # canvas
+    #
+    # @param [Integer] x The x-coordinate of the pixel (column)
+    # @param [Integer] y The y-coordinate of the pixel (row)
+    # @return [true, false] True if the x- and y-coordinate is in the range of
+    #   this canvas.
+    def include_xy?: (Integer x, Integer y) -> bool
+
+    # Checks whether the given y-coordinate is in the range of the canvas
+    # @param [Integer] y The y-coordinate of the pixel (row)
+    # @return [true, false] True if the y-coordinate is in the range of this
+    #   canvas.
+    def include_y?: (Integer y) -> bool
+
+    # Returns the palette used for this canvas.
+    # @return [ChunkyPNG::Palette] A palette which contains all the colors that
+    #   are being used for this image.
+    def palette: () -> ChunkyPNG::Palette
+
+    # attr_reader :pixels
+    # @pixels: Array[ChunkyPNG::Color]
+    # @return [Array<ChunkyPNG::Color>] The list of pixels in this canvas
+    def pixels: () -> Array[Integer]
+
+    # Replaces a column of pixels on this canvas.
+    # @param [Integer] x The 0-based column index.
+    # @param [Array<Integer>] vector The vector of pixels to replace the column
+    #   with.
+    # @return [void]
+    def replace_column!: (Integer x, Array[Integer] vector) -> void
+
+    # Replaces a row of pixels on this canvas.
+    # @param [Integer] y The 0-based row index.
+    # @param [Array<Integer>] vector The vector of pixels to replace the row
+    #   with.
+    # @return [void]
+    def replace_row!: (Integer y, Array[Integer] vector) -> void
+
+    # Returns an extracted row as vector of pixels
+    # @param [Integer] y The 0-based row index
+    # @return [Array<Integer>] The vector of pixels in the requested row
+    def row: (Integer y) -> Integer
+
+    # Creates an ChunkyPNG::Image object from this canvas.
+    # @return [ChunkyPNG::Image] This canvas wrapped in an Image instance.
+    def to_image: () -> ChunkyPNG::Image
+
+    # attr_reader :width
+    # @width: Integer
+    # @return [Integer] The number of columns in this canvas
+    def width: () -> Integer
+
+    private
+
+    # Initializes a new Canvas instance.
+    #
+    # @overload initialize(width, height, background_color)
+    #   @param [Integer] width The width in pixels of this canvas
+    #   @param [Integer] height The height in pixels of this canvas
+    #   @param [Integer, ...] background_color The initial background color of
+    #     this canvas. This can be a color value or any value that
+    #     {ChunkyPNG::Color#parse} can handle.
+    #
+    # @overload initialize(width, height, initial)
+    #   @param [Integer] width The width in pixels of this canvas
+    #   @param [Integer] height The height in pixels of this canvas
+    #   @param [Array<Integer>] initial The initial pizel values. Must be an
+    #     array with <tt>width * height</tt> elements.
+    # TODO: Check if third parameter should be String/untyped
+    def initialize: (Integer width, Integer height, ?Array[Integer] initial) -> untyped
+                  | (Integer width, Integer height, ?untyped initial) -> untyped
+
+    # Initializes a new Canvas instances when being cloned.
+    # @param [ChunkyPNG::Canvas] other The canvas to duplicate
+    # @return [void]
+    # @private
+    def initialize_copy: (instance other) -> void
+
+    # Alternative implementation of the inspect method.
+    # @return [String] A nicely formatted string representation of this canvas.
+    # @private
+    def inspect: () -> String
+  end
+
+  class Image < Canvas
+    # include ChunkyPNG::Canvas
+
+    # Reads a ChunkyPNG::Image instance from a data stream.
+    #
+    # Besides decoding the canvas, this will also read the metadata fields
+    # from the datastream.
+    #
+    # @param [ChunkyPNG::Datastream] ds The datastream to read from.
+    def self.from_datastream: (ChunkyPNG::Datastream ds) -> void
+
+    public
+
+    ::METADATA_COMPRESSION_TRESHOLD: Integer
+    # attr_accessor :metadata
+    # @return [Hash] The hash of metadata fields for this PNG image.
+    def metadata: () -> Hash[untyped, untyped]
+
+    def metadata=: (Hash[untyped, untyped]) -> Hash[untyped, untyped]
+
+    # Returns the metadata for this image as PNG chunks.
+    #
+    # Chunks will either be of the {ChunkyPNG::Chunk::Text} type for small
+    # values (in bytes), or of the {ChunkyPNG::Chunk::CompressedText} type
+    # for values that are larger in size.
+    #
+    # @return [Array<ChunkyPNG::Chunk>] An array of metadata chunks.
+    # @see ChunkyPNG::Image::METADATA_COMPRESSION_TRESHOLD
+    def metadata_chunks: () -> Array[ChunkyPNG::Chunk]
+
+    # Encodes the image to a PNG datastream for saving to disk or writing to an IO stream.
+    #
+    # Besides encoding the canvas, it will also encode the metadata fields to text chunks.
+    #
+    # @param [Hash] constraints The constraints to use when encoding the canvas.
+    # @return [ChunkyPNG::Datastream] The datastream that contains this image.
+    # @see ChunkyPNG::Canvas::PNGEncoding#to_datastream
+    # @see #metadata_chunks
+    def to_datastream: (?Hash[untyped, untyped] constraints) -> ChunkyPNG::Datastream
+    private
+
+    # Initializes a new ChunkyPNG::Image instance.
+    # @param [Integer] width The width of the new image.
+    # @param [Integer] height The height of the new image.
+    # @param [Integer] bg_color The background color of the new image.
+    # @param [Hash] metadata A hash of metadata fields and values for this image.
+    # @see ChunkyPNG::Canvas#initialize
+    # TODO: Check for correctness
+    def initialize: (Integer width, Integer height, ?Integer bg_color, ?Hash[untyped, untyped] metadata) -> instance
+
+    # Initializes a copy of another ChunkyPNG::Image instance.
+    #
+    # @param [ChunkyPNG::Image] other The other image to copy.
+    def initialize_copy: (instance other) -> instance
+  end
+end

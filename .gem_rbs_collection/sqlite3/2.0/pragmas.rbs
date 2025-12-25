@@ -1,0 +1,5 @@
+module SQLite3
+  module Pragmas
+    def busy_timeout=: (Integer) -> void
+  end
+end

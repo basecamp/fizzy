@@ -1,0 +1,20 @@
+module SQLite3
+  type row_value_type = String | Integer | Float | nil
+  type result_as_hash = Hash[String, row_value_type]
+  type result_as_array = Array[row_value_type]
+
+  class Database[ResultType]
+    include Pragmas
+
+    def self.new: (String file, results_as_hash: true, **untyped) ?{ (Database[result_as_hash]) -> void } -> Database[result_as_hash]
+                | (String file, results_as_hash: false, **untyped) ?{ (Database[result_as_array]) -> void } -> Database[result_as_array]
+                | (String file, **untyped) ?{ (Database[result_as_array]) -> void } -> Database[result_as_array]
+
+    def execute: (String sql, *untyped) -> Array[ResultType]
+               | (String sql, *untyped) { (ResultType) -> void } -> void
+
+    def get_first_row: (String sql, *untyped) -> ResultType?
+
+    def changes: () -> Integer
+  end
+end

@@ -1,0 +1,1940 @@
+module ActionView
+  module Helpers
+    module CaptureHelper
+      # Calling <tt>content_for</tt> stores a block of markup in an identifier for later use.
+      # In order to access this stored content in other templates, helper modules
+      # or the layout, you would pass the identifier as an argument to <tt>content_for</tt>.
+      #
+      # Note: <tt>yield</tt> can still be used to retrieve the stored content, but calling
+      # <tt>yield</tt> doesn't work in helper modules, while <tt>content_for</tt> does.
+      #
+      #   <% content_for :not_authorized do %>
+      #     alert('You are not authorized to do that!')
+      #   <% end %>
+      #
+      # You can then use <tt>content_for :not_authorized</tt> anywhere in your templates.
+      #
+      #   <%= content_for :not_authorized if current_user.nil? %>
+      #
+      # This is equivalent to:
+      #
+      #   <%= yield :not_authorized if current_user.nil? %>
+      #
+      # <tt>content_for</tt>, however, can also be used in helper modules.
+      #
+      #   module StorageHelper
+      #     def stored_content
+      #       content_for(:storage) || "Your storage is empty"
+      #     end
+      #   end
+      #
+      # This helper works just like normal helpers.
+      #
+      #   <%= stored_content %>
+      #
+      # You can also use the <tt>yield</tt> syntax alongside an existing call to
+      # <tt>yield</tt> in a layout. For example:
+      #
+      #   <%# This is the layout %>
+      #   <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+      #   <head>
+      #     <title>My Website</title>
+      #     <%= yield :script %>
+      #   </head>
+      #   <body>
+      #     <%= yield %>
+      #   </body>
+      #   </html>
+      #
+      # And now, we'll create a view that has a <tt>content_for</tt> call that
+      # creates the <tt>script</tt> identifier.
+      #
+      #   <%# This is our view %>
+      #   Please login!
+      #
+      #   <% content_for :script do %>
+      #     <script>alert('You are not authorized to view this page!')</script>
+      #   <% end %>
+      #
+      # Then, in another view, you could to do something like this:
+      #
+      #   <%= link_to 'Logout', action: 'logout', remote: true %>
+      #
+      #   <% content_for :script do %>
+      #     <%= javascript_include_tag :defaults %>
+      #   <% end %>
+      #
+      # That will place +script+ tags for your default set of JavaScript files on the page;
+      # this technique is useful if you'll only be using these scripts in a few views.
+      #
+      # Note that <tt>content_for</tt> concatenates (default) the blocks it is given for a particular
+      # identifier in order. For example:
+      #
+      #   <% content_for :navigation do %>
+      #     <li><%= link_to 'Home', action: 'index' %></li>
+      #   <% end %>
+      #
+      #  And in another place:
+      #
+      #   <% content_for :navigation do %>
+      #     <li><%= link_to 'Login', action: 'login' %></li>
+      #   <% end %>
+      #
+      # Then, in another template or layout, this code would render both links in order:
+      #
+      #   <ul><%= content_for :navigation %></ul>
+      #
+      # If the flush parameter is +true+ <tt>content_for</tt> replaces the blocks it is given. For example:
+      #
+      #   <% content_for :navigation do %>
+      #     <li><%= link_to 'Home', action: 'index' %></li>
+      #   <% end %>
+      #
+      #   <%#  Add some other content, or use a different template: %>
+      #
+      #   <% content_for :navigation, flush: true do %>
+      #     <li><%= link_to 'Login', action: 'login' %></li>
+      #   <% end %>
+      #
+      # Then, in another template or layout, this code would render only the last link:
+      #
+      #   <ul><%= content_for :navigation %></ul>
+      #
+      # Lastly, simple content can be passed as a parameter:
+      #
+      #   <% content_for :script, javascript_include_tag(:defaults) %>
+      #
+      # WARNING: <tt>content_for</tt> is ignored in caches. So you shouldn't use it for elements that will be fragment cached.
+      def content_for: (untyped name, ?untyped? content, ?::Hash[untyped, untyped] options) ?{ () -> untyped } -> void
+    end
+  end
+end
+
+module ActionView
+  module Helpers
+    class FormBuilder
+      def text_field: (untyped method, ?Hash[untyped, untyped] options) -> String
+      def password_field: (untyped method, ?Hash[untyped, untyped] options) -> String
+      def text_area: (untyped method, ?Hash[untyped, untyped] options) -> String
+      def color_field: (untyped method, ?Hash[untyped, untyped] options) -> String
+      def search_field: (untyped method, ?Hash[untyped, untyped] options) -> String
+      def telephone_field: (untyped method, ?Hash[untyped, untyped] options) -> String
+      def phone_field: (untyped method, ?Hash[untyped, untyped] options) -> String
+      def date_field: (untyped method, ?Hash[untyped, untyped] options) -> String
+      def time_field: (untyped method, ?Hash[untyped, untyped] options) -> String
+      def datetime_field: (untyped method, ?Hash[untyped, untyped] options) -> String
+      def datetime_local_field: (untyped method, ?Hash[untyped, untyped] options) -> String
+      def month_field: (untyped method, ?Hash[untyped, untyped] options) -> String
+      def week_field: (untyped method, ?Hash[untyped, untyped] options) -> String
+      def url_field: (untyped method, ?Hash[untyped, untyped] options) -> String
+      def email_field: (untyped method, ?Hash[untyped, untyped] options) -> String
+      def number_field: (untyped method, ?Hash[untyped, untyped] options) -> String
+      def range_field: (untyped method, ?Hash[untyped, untyped] options) -> String
+
+      # Add the submit button for the given form. When no value is given, it checks
+      # if the object is a new resource or not to create the proper label:
+      #
+      #   <%= form_for @post do |f| %>
+      #     <%= f.button %>
+      #   <% end %>
+      #
+      # In the example above, if <tt>@post</tt> is a new record, it will use "Create Post" as
+      # button label; otherwise, it uses "Update Post".
+      #
+      # Those labels can be customized using I18n under the +helpers.submit+ key
+      # (the same as submit helper) and using <tt>%{model}</tt> for translation interpolation:
+      #
+      #   en:
+      #     helpers:
+      #       submit:
+      #         create: "Create a %{model}"
+      #         update: "Confirm changes to %{model}"
+      #
+      # It also searches for a key specific to the given object:
+      #
+      #   en:
+      #     helpers:
+      #       submit:
+      #         post:
+      #           create: "Add %{model}"
+      #
+      # ==== Examples
+      #   button("Create post")
+      #   # => <button name='button' type='submit'>Create post</button>
+      #
+      #   button do
+      #     content_tag(:strong, 'Ask me!')
+      #   end
+      #   # => <button name='button' type='submit'>
+      #   #      <strong>Ask me!</strong>
+      #   #    </button>
+      #
+      def button: (?untyped? value, ?::Hash[untyped, untyped] options) ?{ () -> untyped } -> untyped
+
+      # Returns a label tag tailored for labelling an input field for a specified attribute (identified by +method+) on an object
+      # assigned to the template (identified by +object+). The text of label will default to the attribute name unless a translation
+      # is found in the current I18n locale (through helpers.label.<modelname>.<attribute>) or you specify it explicitly.
+      # Additional options on the label tag can be passed as a hash with +options+. These options will be tagged
+      # onto the HTML as an HTML element attribute as in the example shown, except for the <tt>:value</tt> option, which is designed to
+      # target labels for radio_button tags (where the value is used in the ID of the input tag).
+      #
+      # ==== Examples
+      #   label(:title)
+      #   # => <label for="post_title">Title</label>
+      #
+      # You can localize your labels based on model and attribute names.
+      # For example you can define the following in your locale (e.g. en.yml)
+      #
+      #   helpers:
+      #     label:
+      #       post:
+      #         body: "Write your entire text here"
+      #
+      # Which then will result in
+      #
+      #   label(:body)
+      #   # => <label for="post_body">Write your entire text here</label>
+      #
+      # Localization can also be based purely on the translation of the attribute-name
+      # (if you are using ActiveRecord):
+      #
+      #   activerecord:
+      #     attributes:
+      #       post:
+      #         cost: "Total cost"
+      #
+      #   label(:cost)
+      #   # => <label for="post_cost">Total cost</label>
+      #
+      #   label(:title, "A short title")
+      #   # => <label for="post_title">A short title</label>
+      #
+      #   label(:title, "A short title", class: "title_label")
+      #   # => <label for="post_title" class="title_label">A short title</label>
+      #
+      #   label(:privacy, "Public Post", value: "public")
+      #   # => <label for="post_privacy_public">Public Post</label>
+      #
+      #   label(:terms) do
+      #     raw('Accept <a href="/terms">Terms</a>.')
+      #   end
+      #   # => <label for="post_terms">Accept <a href="/terms">Terms</a>.</label>
+      def label: (untyped method, ?untyped? text, ?::Hash[untyped, untyped] options) ?{ () -> untyped } -> untyped
+
+      # Wraps ActionView::Helpers::FormOptionsHelper#select for form builders:
+      #
+      #   <%= form_for @post do |f| %>
+      #     <%= f.select :person_id, Person.all.collect { |p| [ p.name, p.id ] }, include_blank: true %>
+      #     <%= f.submit %>
+      #   <% end %>
+      #
+      # Please refer to the documentation of the base helper for details.
+      def select: (untyped method, ?untyped? choices, ?::Hash[untyped, untyped] options, ?::Hash[untyped, untyped] html_options) ?{ () -> untyped } -> untyped
+
+      # Wraps ActionView::Helpers::FormOptionsHelper#collection_check_boxes for form builders:
+      #
+      #   <%= form_for @post do |f| %>
+      #     <%= f.collection_check_boxes :author_ids, Author.all, :id, :name_with_initial %>
+      #     <%= f.submit %>
+      #   <% end %>
+      #
+      # Please refer to the documentation of the base helper for details.
+      def collection_check_boxes: (untyped method, untyped collection, untyped value_method, untyped text_method, ?::Hash[untyped, untyped] options, ?::Hash[untyped, untyped] html_options) ?{ (ActionView::Helpers::Tags::CollectionCheckBoxes::CheckBoxBuilder) -> String } -> String
+
+      # Wraps ActionView::Helpers::FormOptionsHelper#collection_radio_buttons for form builders:
+      #
+      #   <%= form_for @post do |f| %>
+      #     <%= f.collection_radio_buttons :author_id, Author.all, :id, :name_with_initial %>
+      #     <%= f.submit %>
+      #   <% end %>
+      #
+      # Please refer to the documentation of the base helper for details.
+      def collection_radio_buttons: (untyped method, untyped collection, untyped value_method, untyped text_method, ?::Hash[untyped, untyped] options, ?::Hash[untyped, untyped] html_options) ?{ (ActionView::Helpers::Tags::CollectionRadioButtons::RadioButtonBuilder) -> String } -> String
+    end
+  end
+end
+
+module ActionView
+  module Helpers
+    # = Action View Form Option Helpers
+    # nodoc:
+    # Provides a number of methods for turning different kinds of containers into a set of option tags.
+    #
+    # The <tt>collection_select</tt>, <tt>select</tt> and <tt>time_zone_select</tt> methods take an <tt>options</tt> parameter, a hash:
+    #
+    # * <tt>:include_blank</tt> - set to true or a prompt string if the first option element of the select element is a blank. Useful if there is not a default value required for the select element.
+    #
+    #     select("post", "category", Post::CATEGORIES, { include_blank: true })
+    #
+    #   could become:
+    #
+    #     <select name="post[category]" id="post_category">
+    #       <option value=""></option>
+    #       <option value="joke">joke</option>
+    #       <option value="poem">poem</option>
+    #     </select>
+    #
+    #   Another common case is a select tag for a <tt>belongs_to</tt>-associated object.
+    #
+    #   Example with <tt>@post.person_id => 2</tt>:
+    #
+    #     select("post", "person_id", Person.all.collect { |p| [ p.name, p.id ] }, { include_blank: 'None' })
+    #
+    #   could become:
+    #
+    #     <select name="post[person_id]" id="post_person_id">
+    #       <option value="">None</option>
+    #       <option value="1">David</option>
+    #       <option value="2" selected="selected">Eileen</option>
+    #       <option value="3">Rafael</option>
+    #     </select>
+    #
+    # * <tt>:prompt</tt> - set to true or a prompt string. When the select element doesn't have a value yet, this prepends an option with a generic prompt -- "Please select" -- or the given prompt string.
+    #
+    #     select("post", "person_id", Person.all.collect { |p| [ p.name, p.id ] }, { prompt: 'Select Person' })
+    #
+    #   could become:
+    #
+    #     <select name="post[person_id]" id="post_person_id">
+    #       <option value="">Select Person</option>
+    #       <option value="1">David</option>
+    #       <option value="2">Eileen</option>
+    #       <option value="3">Rafael</option>
+    #     </select>
+    #
+    # * <tt>:index</tt> - like the other form helpers, +select+ can accept an <tt>:index</tt> option to manually set the ID used in the resulting output. Unlike other helpers, +select+ expects this
+    #   option to be in the +html_options+ parameter.
+    #
+    #     select("album[]", "genre", %w[rap rock country], {}, { index: nil })
+    #
+    #   becomes:
+    #
+    #     <select name="album[][genre]" id="album__genre">
+    #       <option value="rap">rap</option>
+    #       <option value="rock">rock</option>
+    #       <option value="country">country</option>
+    #     </select>
+    #
+    # * <tt>:disabled</tt> - can be a single value or an array of values that will be disabled options in the final output.
+    #
+    #     select("post", "category", Post::CATEGORIES, { disabled: 'restricted' })
+    #
+    #   could become:
+    #
+    #     <select name="post[category]" id="post_category">
+    #       <option value=""></option>
+    #       <option value="joke">joke</option>
+    #       <option value="poem">poem</option>
+    #       <option disabled="disabled" value="restricted">restricted</option>
+    #     </select>
+    #
+    #   When used with the <tt>collection_select</tt> helper, <tt>:disabled</tt> can also be a Proc that identifies those options that should be disabled.
+    #
+    #     collection_select(:post, :category_id, Category.all, :id, :name, { disabled: -> (category) { category.archived? } })
+    #
+    #   If the categories "2008 stuff" and "Christmas" return true when the method <tt>archived?</tt> is called, this would return:
+    #     <select name="post[category_id]" id="post_category_id">
+    #       <option value="1" disabled="disabled">2008 stuff</option>
+    #       <option value="2" disabled="disabled">Christmas</option>
+    #       <option value="3">Jokes</option>
+    #       <option value="4">Poems</option>
+    #     </select>
+    #
+    module FormOptionsHelper
+      # ERB::Util can mask some helpers like textilize. Make sure to include them.
+      include TextHelper
+
+      # Create a select tag and a series of contained option tags for the provided object and method.
+      # The option currently held by the object will be selected, provided that the object is available.
+      #
+      # There are two possible formats for the +choices+ parameter, corresponding to other helpers' output:
+      #
+      # * A flat collection (see +options_for_select+).
+      #
+      # * A nested collection (see +grouped_options_for_select+).
+      #
+      # For example:
+      #
+      #   select("post", "person_id", Person.all.collect { |p| [ p.name, p.id ] }, { include_blank: true })
+      #
+      # would become:
+      #
+      #   <select name="post[person_id]" id="post_person_id">
+      #     <option value=""></option>
+      #     <option value="1" selected="selected">David</option>
+      #     <option value="2">Eileen</option>
+      #     <option value="3">Rafael</option>
+      #   </select>
+      #
+      # assuming the associated person has ID 1.
+      #
+      # This can be used to provide a default set of options in the standard way: before rendering the create form, a
+      # new model instance is assigned the default options and bound to @model_name. Usually this model is not saved
+      # to the database. Instead, a second model object is created when the create request is received.
+      # This allows the user to submit a form page more than once with the expected results of creating multiple records.
+      # In addition, this allows a single partial to be used to generate form inputs for both edit and create forms.
+      #
+      # By default, <tt>post.person_id</tt> is the selected option. Specify <tt>selected: value</tt> to use a different selection
+      # or <tt>selected: nil</tt> to leave all options unselected. Similarly, you can specify values to be disabled in the option
+      # tags by specifying the <tt>:disabled</tt> option. This can either be a single value or an array of values to be disabled.
+      #
+      # A block can be passed to +select+ to customize how the options tags will be rendered. This
+      # is useful when the options tag has complex attributes.
+      #
+      #   select(report, "campaign_ids") do
+      #     available_campaigns.each do |c|
+      #       content_tag(:option, c.name, value: c.id, data: { tags: c.tags.to_json })
+      #     end
+      #   end
+      #
+      # ==== Gotcha
+      #
+      # The HTML specification says when +multiple+ parameter passed to select and all options got deselected
+      # web browsers do not send any value to server. Unfortunately this introduces a gotcha:
+      # if an +User+ model has many +roles+ and have +role_ids+ accessor, and in the form that edits roles of the user
+      # the user deselects all roles from +role_ids+ multiple select box, no +role_ids+ parameter is sent. So,
+      # any mass-assignment idiom like
+      #
+      #   @user.update(params[:user])
+      #
+      # wouldn't update roles.
+      #
+      # To prevent this the helper generates an auxiliary hidden field before
+      # every multiple select. The hidden field has the same name as multiple select and blank value.
+      #
+      # <b>Note:</b> The client either sends only the hidden field (representing
+      # the deselected multiple select box), or both fields. This means that the resulting array
+      # always contains a blank string.
+      #
+      # In case if you don't want the helper to generate this hidden field you can specify
+      # <tt>include_hidden: false</tt> option.
+      #
+      def select: (untyped object, untyped method, ?untyped? choices, ?::Hash[untyped, untyped] options, ?::Hash[untyped, untyped] html_options) ?{ () -> untyped } -> untyped
+
+      # Returns radio button tags for the collection of existing return values
+      # of +method+ for +object+'s class. The value returned from calling
+      # +method+ on the instance +object+ will be selected. If calling +method+
+      # returns +nil+, no selection is made.
+      #
+      # The <tt>:value_method</tt> and <tt>:text_method</tt> parameters are
+      # methods to be called on each member of +collection+. The return values
+      # are used as the +value+ attribute and contents of each radio button tag,
+      # respectively. They can also be any object that responds to +call+, such
+      # as a +proc+, that will be called for each member of the +collection+ to
+      # retrieve the value/text.
+      #
+      # Example object structure for use with this method:
+      #   class Post < ActiveRecord::Base
+      #     belongs_to :author
+      #   end
+      #   class Author < ActiveRecord::Base
+      #     has_many :posts
+      #     def name_with_initial
+      #       "#{first_name.first}. #{last_name}"
+      #     end
+      #   end
+      #
+      # Sample usage (selecting the associated Author for an instance of Post, <tt>@post</tt>):
+      #   collection_radio_buttons(:post, :author_id, Author.all, :id, :name_with_initial)
+      #
+      # If <tt>@post.author_id</tt> is already <tt>1</tt>, this would return:
+      #   <input id="post_author_id_1" name="post[author_id]" type="radio" value="1" checked="checked" />
+      #   <label for="post_author_id_1">D. Heinemeier Hansson</label>
+      #   <input id="post_author_id_2" name="post[author_id]" type="radio" value="2" />
+      #   <label for="post_author_id_2">D. Thomas</label>
+      #   <input id="post_author_id_3" name="post[author_id]" type="radio" value="3" />
+      #   <label for="post_author_id_3">M. Clark</label>
+      #
+      # It is also possible to customize the way the elements will be shown by
+      # giving a block to the method:
+      #   collection_radio_buttons(:post, :author_id, Author.all, :id, :name_with_initial) do |b|
+      #     b.label { b.radio_button }
+      #   end
+      #
+      # The argument passed to the block is a special kind of builder for this
+      # collection, which has the ability to generate the label and radio button
+      # for the current item in the collection, with proper text and value.
+      # Using it, you can change the label and radio button display order or
+      # even use the label as wrapper, as in the example above.
+      #
+      # The builder methods <tt>label</tt> and <tt>radio_button</tt> also accept
+      # extra HTML options:
+      #   collection_radio_buttons(:post, :author_id, Author.all, :id, :name_with_initial) do |b|
+      #     b.label(class: "radio_button") { b.radio_button(class: "radio_button") }
+      #   end
+      #
+      # There are also three special methods available: <tt>object</tt>, <tt>text</tt> and
+      # <tt>value</tt>, which are the current item being rendered, its text and value methods,
+      # respectively. You can use them like this:
+      #   collection_radio_buttons(:post, :author_id, Author.all, :id, :name_with_initial) do |b|
+      #      b.label(:"data-value" => b.value) { b.radio_button + b.text }
+      #   end
+      #
+      # ==== Gotcha
+      #
+      # The HTML specification says when nothing is selected on a collection of radio buttons
+      # web browsers do not send any value to server.
+      # Unfortunately this introduces a gotcha:
+      # if a +User+ model has a +category_id+ field and in the form no category is selected, no +category_id+ parameter is sent. So,
+      # any strong parameters idiom like:
+      #
+      #   params.require(:user).permit(...)
+      #
+      # will raise an error since no <tt>{user: ...}</tt> will be present.
+      #
+      # To prevent this the helper generates an auxiliary hidden field before
+      # every collection of radio buttons. The hidden field has the same name as collection radio button and blank value.
+      #
+      # In case if you don't want the helper to generate this hidden field you can specify
+      # <tt>include_hidden: false</tt> option.
+      def collection_radio_buttons: (untyped object, untyped method, untyped collection, untyped value_method, untyped text_method, ?::Hash[untyped, untyped] options, ?::Hash[untyped, untyped] html_options) ?{ (ActionView::Helpers::Tags::CollectionRadioButtons::RadioButtonBuilder) -> String } -> String
+
+      # Returns check box tags for the collection of existing return values of
+      # +method+ for +object+'s class. The value returned from calling +method+
+      # on the instance +object+ will be selected. If calling +method+ returns
+      # +nil+, no selection is made.
+      #
+      # The <tt>:value_method</tt> and <tt>:text_method</tt> parameters are
+      # methods to be called on each member of +collection+. The return values
+      # are used as the +value+ attribute and contents of each check box tag,
+      # respectively. They can also be any object that responds to +call+, such
+      # as a +proc+, that will be called for each member of the +collection+ to
+      # retrieve the value/text.
+      #
+      # Example object structure for use with this method:
+      #   class Post < ActiveRecord::Base
+      #     has_and_belongs_to_many :authors
+      #   end
+      #   class Author < ActiveRecord::Base
+      #     has_and_belongs_to_many :posts
+      #     def name_with_initial
+      #       "#{first_name.first}. #{last_name}"
+      #     end
+      #   end
+      #
+      # Sample usage (selecting the associated Author for an instance of Post, <tt>@post</tt>):
+      #   collection_check_boxes(:post, :author_ids, Author.all, :id, :name_with_initial)
+      #
+      # If <tt>@post.author_ids</tt> is already <tt>[1]</tt>, this would return:
+      #   <input id="post_author_ids_1" name="post[author_ids][]" type="checkbox" value="1" checked="checked" />
+      #   <label for="post_author_ids_1">D. Heinemeier Hansson</label>
+      #   <input id="post_author_ids_2" name="post[author_ids][]" type="checkbox" value="2" />
+      #   <label for="post_author_ids_2">D. Thomas</label>
+      #   <input id="post_author_ids_3" name="post[author_ids][]" type="checkbox" value="3" />
+      #   <label for="post_author_ids_3">M. Clark</label>
+      #   <input name="post[author_ids][]" type="hidden" value="" />
+      #
+      # It is also possible to customize the way the elements will be shown by
+      # giving a block to the method:
+      #   collection_check_boxes(:post, :author_ids, Author.all, :id, :name_with_initial) do |b|
+      #     b.label { b.check_box }
+      #   end
+      #
+      # The argument passed to the block is a special kind of builder for this
+      # collection, which has the ability to generate the label and check box
+      # for the current item in the collection, with proper text and value.
+      # Using it, you can change the label and check box display order or even
+      # use the label as wrapper, as in the example above.
+      #
+      # The builder methods <tt>label</tt> and <tt>check_box</tt> also accept
+      # extra HTML options:
+      #   collection_check_boxes(:post, :author_ids, Author.all, :id, :name_with_initial) do |b|
+      #     b.label(class: "check_box") { b.check_box(class: "check_box") }
+      #   end
+      #
+      # There are also three special methods available: <tt>object</tt>, <tt>text</tt> and
+      # <tt>value</tt>, which are the current item being rendered, its text and value methods,
+      # respectively. You can use them like this:
+      #   collection_check_boxes(:post, :author_ids, Author.all, :id, :name_with_initial) do |b|
+      #      b.label(:"data-value" => b.value) { b.check_box + b.text }
+      #   end
+      #
+      # ==== Gotcha
+      #
+      # When no selection is made for a collection of checkboxes most
+      # web browsers will not send any value.
+      #
+      # For example, if we have a +User+ model with +category_ids+ field and we
+      # have the following code in our update action:
+      #
+      #   @user.update(params[:user])
+      #
+      # If no +category_ids+ are selected then we can safely assume this field
+      # will not be updated.
+      #
+      # This is possible thanks to a hidden field generated by the helper method
+      # for every collection of checkboxes.
+      # This hidden field is given the same field name as the checkboxes with a
+      # blank value.
+      #
+      # In the rare case you don't want this hidden field, you can pass the
+      # <tt>include_hidden: false</tt> option to the helper method.
+      def collection_check_boxes: (untyped object, untyped method, untyped collection, untyped value_method, untyped text_method, ?::Hash[untyped, untyped] options, ?::Hash[untyped, untyped] html_options) ?{ (ActionView::Helpers::Tags::CollectionCheckBoxes::CheckBoxBuilder) -> String } -> String
+    end
+  end
+end
+
+module ActionView
+  module Helpers
+    module FormTagHelper
+      # Creates a label element. Accepts a block.
+      #
+      # ==== Options
+      # * Creates standard HTML attributes for the tag.
+      #
+      # ==== Examples
+      #   label_tag 'name'
+      #   # => <label for="name">Name</label>
+      #
+      #   label_tag 'name', 'Your name'
+      #   # => <label for="name">Your name</label>
+      #
+      #   label_tag 'name', nil, class: 'small_label'
+      #   # => <label for="name" class="small_label">Name</label>
+      def label_tag: (?untyped? name, ?untyped? content_or_options, ?untyped? options) ?{ () -> untyped } -> untyped
+
+      # Creates a button element that defines a <tt>submit</tt> button,
+      # <tt>reset</tt> button or a generic button which can be used in
+      # JavaScript, for example. You can use the button tag as a regular
+      # submit tag but it isn't supported in legacy browsers. However,
+      # the button tag does allow for richer labels such as images and emphasis,
+      # so this helper will also accept a block. By default, it will create
+      # a button tag with type <tt>submit</tt>, if type is not given.
+      #
+      # ==== Options
+      # * <tt>:data</tt> - This option can be used to add custom data attributes.
+      # * <tt>:disabled</tt> - If true, the user will not be able to
+      #   use this input.
+      # * Any other key creates standard HTML options for the tag.
+      #
+      # ==== Data attributes
+      #
+      # * <tt>confirm: 'question?'</tt> - If present, the
+      #   unobtrusive JavaScript drivers will provide a prompt with
+      #   the question specified. If the user accepts, the form is
+      #   processed normally, otherwise no action is taken.
+      # * <tt>:disable_with</tt> - Value of this parameter will be
+      #   used as the value for a disabled version of the submit
+      #   button when the form is submitted. This feature is provided
+      #   by the unobtrusive JavaScript driver.
+      #
+      # ==== Examples
+      #   button_tag
+      #   # => <button name="button" type="submit">Button</button>
+      #
+      #   button_tag 'Reset', type: 'reset'
+      #   # => <button name="button" type="reset">Reset</button>
+      #
+      #   button_tag 'Button', type: 'button'
+      #   # => <button name="button" type="button">Button</button>
+      #
+      #   button_tag 'Reset', type: 'reset', disabled: true
+      #   # => <button name="button" type="reset" disabled="disabled">Reset</button>
+      #
+      #   button_tag(type: 'button') do
+      #     content_tag(:strong, 'Ask me!')
+      #   end
+      #   # => <button name="button" type="button">
+      #   #     <strong>Ask me!</strong>
+      #   #    </button>
+      #
+      #   button_tag "Save", data: { confirm: "Are you sure?" }
+      #   # => <button name="button" type="submit" data-confirm="Are you sure?">Save</button>
+      #
+      #   button_tag "Checkout", data: { disable_with: "Please wait..." }
+      #   # => <button data-disable-with="Please wait..." name="button" type="submit">Checkout</button>
+      #
+      def button_tag: (?untyped? content_or_options, ?untyped? options) ?{ () -> untyped } -> untyped
+    end
+  end
+end
+
+module ActionView
+  module Helpers
+    module FormHelper
+      # Creates a scope around a specific model object like form_for, but
+      # doesn't create the form tags themselves. This makes fields_for suitable
+      # for specifying additional model objects in the same form.
+      #
+      # Although the usage and purpose of +fields_for+ is similar to +form_for+'s,
+      # its method signature is slightly different. Like +form_for+, it yields
+      # a FormBuilder object associated with a particular model object to a block,
+      # and within the block allows methods to be called on the builder to
+      # generate fields associated with the model object. Fields may reflect
+      # a model object in two ways - how they are named (hence how submitted
+      # values appear within the +params+ hash in the controller) and what
+      # default values are shown when the form the fields appear in is first
+      # displayed. In order for both of these features to be specified independently,
+      # both an object name (represented by either a symbol or string) and the
+      # object itself can be passed to the method separately -
+      #
+      #   <%= form_for @person do |person_form| %>
+      #     First name: <%= person_form.text_field :first_name %>
+      #     Last name : <%= person_form.text_field :last_name %>
+      #
+      #     <%= fields_for :permission, @person.permission do |permission_fields| %>
+      #       Admin?  : <%= permission_fields.check_box :admin %>
+      #     <% end %>
+      #
+      #     <%= person_form.submit %>
+      #   <% end %>
+      #
+      # In this case, the checkbox field will be represented by an HTML +input+
+      # tag with the +name+ attribute <tt>permission[admin]</tt>, and the submitted
+      # value will appear in the controller as <tt>params[:permission][:admin]</tt>.
+      # If <tt>@person.permission</tt> is an existing record with an attribute
+      # +admin+, the initial state of the checkbox when first displayed will
+      # reflect the value of <tt>@person.permission.admin</tt>.
+      #
+      # Often this can be simplified by passing just the name of the model
+      # object to +fields_for+ -
+      #
+      #   <%= fields_for :permission do |permission_fields| %>
+      #     Admin?: <%= permission_fields.check_box :admin %>
+      #   <% end %>
+      #
+      # ...in which case, if <tt>:permission</tt> also happens to be the name of an
+      # instance variable <tt>@permission</tt>, the initial state of the input
+      # field will reflect the value of that variable's attribute <tt>@permission.admin</tt>.
+      #
+      # Alternatively, you can pass just the model object itself (if the first
+      # argument isn't a string or symbol +fields_for+ will realize that the
+      # name has been omitted) -
+      #
+      #   <%= fields_for @person.permission do |permission_fields| %>
+      #     Admin?: <%= permission_fields.check_box :admin %>
+      #   <% end %>
+      #
+      # and +fields_for+ will derive the required name of the field from the
+      # _class_ of the model object, e.g. if <tt>@person.permission</tt>, is
+      # of class +Permission+, the field will still be named <tt>permission[admin]</tt>.
+      #
+      # Note: This also works for the methods in FormOptionsHelper and
+      # DateHelper that are designed to work with an object as base, like
+      # FormOptionsHelper#collection_select and DateHelper#datetime_select.
+      #
+      # === Nested Attributes Examples
+      #
+      # When the object belonging to the current scope has a nested attribute
+      # writer for a certain attribute, fields_for will yield a new scope
+      # for that attribute. This allows you to create forms that set or change
+      # the attributes of a parent object and its associations in one go.
+      #
+      # Nested attribute writers are normal setter methods named after an
+      # association. The most common way of defining these writers is either
+      # with +accepts_nested_attributes_for+ in a model definition or by
+      # defining a method with the proper name. For example: the attribute
+      # writer for the association <tt>:address</tt> is called
+      # <tt>address_attributes=</tt>.
+      #
+      # Whether a one-to-one or one-to-many style form builder will be yielded
+      # depends on whether the normal reader method returns a _single_ object
+      # or an _array_ of objects.
+      #
+      # ==== One-to-one
+      #
+      # Consider a Person class which returns a _single_ Address from the
+      # <tt>address</tt> reader method and responds to the
+      # <tt>address_attributes=</tt> writer method:
+      #
+      #   class Person
+      #     def address
+      #       @address
+      #     end
+      #
+      #     def address_attributes=(attributes)
+      #       # Process the attributes hash
+      #     end
+      #   end
+      #
+      # This model can now be used with a nested fields_for, like so:
+      #
+      #   <%= form_for @person do |person_form| %>
+      #     ...
+      #     <%= person_form.fields_for :address do |address_fields| %>
+      #       Street  : <%= address_fields.text_field :street %>
+      #       Zip code: <%= address_fields.text_field :zip_code %>
+      #     <% end %>
+      #     ...
+      #   <% end %>
+      #
+      # When address is already an association on a Person you can use
+      # +accepts_nested_attributes_for+ to define the writer method for you:
+      #
+      #   class Person < ActiveRecord::Base
+      #     has_one :address
+      #     accepts_nested_attributes_for :address
+      #   end
+      #
+      # If you want to destroy the associated model through the form, you have
+      # to enable it first using the <tt>:allow_destroy</tt> option for
+      # +accepts_nested_attributes_for+:
+      #
+      #   class Person < ActiveRecord::Base
+      #     has_one :address
+      #     accepts_nested_attributes_for :address, allow_destroy: true
+      #   end
+      #
+      # Now, when you use a form element with the <tt>_destroy</tt> parameter,
+      # with a value that evaluates to +true+, you will destroy the associated
+      # model (eg. 1, '1', true, or 'true'):
+      #
+      #   <%= form_for @person do |person_form| %>
+      #     ...
+      #     <%= person_form.fields_for :address do |address_fields| %>
+      #       ...
+      #       Delete: <%= address_fields.check_box :_destroy %>
+      #     <% end %>
+      #     ...
+      #   <% end %>
+      #
+      # ==== One-to-many
+      #
+      # Consider a Person class which returns an _array_ of Project instances
+      # from the <tt>projects</tt> reader method and responds to the
+      # <tt>projects_attributes=</tt> writer method:
+      #
+      #   class Person
+      #     def projects
+      #       [@project1, @project2]
+      #     end
+      #
+      #     def projects_attributes=(attributes)
+      #       # Process the attributes hash
+      #     end
+      #   end
+      #
+      # Note that the <tt>projects_attributes=</tt> writer method is in fact
+      # required for fields_for to correctly identify <tt>:projects</tt> as a
+      # collection, and the correct indices to be set in the form markup.
+      #
+      # When projects is already an association on Person you can use
+      # +accepts_nested_attributes_for+ to define the writer method for you:
+      #
+      #   class Person < ActiveRecord::Base
+      #     has_many :projects
+      #     accepts_nested_attributes_for :projects
+      #   end
+      #
+      # This model can now be used with a nested fields_for. The block given to
+      # the nested fields_for call will be repeated for each instance in the
+      # collection:
+      #
+      #   <%= form_for @person do |person_form| %>
+      #     ...
+      #     <%= person_form.fields_for :projects do |project_fields| %>
+      #       <% if project_fields.object.active? %>
+      #         Name: <%= project_fields.text_field :name %>
+      #       <% end %>
+      #     <% end %>
+      #     ...
+      #   <% end %>
+      #
+      # It's also possible to specify the instance to be used:
+      #
+      #   <%= form_for @person do |person_form| %>
+      #     ...
+      #     <% @person.projects.each do |project| %>
+      #       <% if project.active? %>
+      #         <%= person_form.fields_for :projects, project do |project_fields| %>
+      #           Name: <%= project_fields.text_field :name %>
+      #         <% end %>
+      #       <% end %>
+      #     <% end %>
+      #     ...
+      #   <% end %>
+      #
+      # Or a collection to be used:
+      #
+      #   <%= form_for @person do |person_form| %>
+      #     ...
+      #     <%= person_form.fields_for :projects, @active_projects do |project_fields| %>
+      #       Name: <%= project_fields.text_field :name %>
+      #     <% end %>
+      #     ...
+      #   <% end %>
+      #
+      # If you want to destroy any of the associated models through the
+      # form, you have to enable it first using the <tt>:allow_destroy</tt>
+      # option for +accepts_nested_attributes_for+:
+      #
+      #   class Person < ActiveRecord::Base
+      #     has_many :projects
+      #     accepts_nested_attributes_for :projects, allow_destroy: true
+      #   end
+      #
+      # This will allow you to specify which models to destroy in the
+      # attributes hash by adding a form element for the <tt>_destroy</tt>
+      # parameter with a value that evaluates to +true+
+      # (eg. 1, '1', true, or 'true'):
+      #
+      #   <%= form_for @person do |person_form| %>
+      #     ...
+      #     <%= person_form.fields_for :projects do |project_fields| %>
+      #       Delete: <%= project_fields.check_box :_destroy %>
+      #     <% end %>
+      #     ...
+      #   <% end %>
+      #
+      # When a collection is used you might want to know the index of each
+      # object into the array. For this purpose, the <tt>index</tt> method
+      # is available in the FormBuilder object.
+      #
+      #   <%= form_for @person do |person_form| %>
+      #     ...
+      #     <%= person_form.fields_for :projects do |project_fields| %>
+      #       Project #<%= project_fields.index %>
+      #       ...
+      #     <% end %>
+      #     ...
+      #   <% end %>
+      #
+      # Note that fields_for will automatically generate a hidden field
+      # to store the ID of the record. There are circumstances where this
+      # hidden field is not needed and you can pass <tt>include_id: false</tt>
+      # to prevent fields_for from rendering it automatically.
+      def fields_for: (untyped record_name, ?untyped? record_object, ?::Hash[untyped, untyped] options) { (Helpers::FormBuilder) -> untyped } -> String
+
+      # Creates a form that allows the user to create or update the attributes
+      # of a specific model object.
+      #
+      # The method can be used in several slightly different ways, depending on
+      # how much you wish to rely on Rails to infer automatically from the model
+      # how the form should be constructed. For a generic model object, a form
+      # can be created by passing +form_for+ a string or symbol representing
+      # the object we are concerned with:
+      #
+      #   <%= form_for :person do |f| %>
+      #     First name: <%= f.text_field :first_name %><br />
+      #     Last name : <%= f.text_field :last_name %><br />
+      #     Biography : <%= f.text_area :biography %><br />
+      #     Admin?    : <%= f.check_box :admin %><br />
+      #     <%= f.submit %>
+      #   <% end %>
+      #
+      # The variable +f+ yielded to the block is a FormBuilder object that
+      # incorporates the knowledge about the model object represented by
+      # <tt>:person</tt> passed to +form_for+. Methods defined on the FormBuilder
+      # are used to generate fields bound to this model. Thus, for example,
+      #
+      #   <%= f.text_field :first_name %>
+      #
+      # will get expanded to
+      #
+      #   <%= text_field :person, :first_name %>
+      #
+      # which results in an HTML <tt><input></tt> tag whose +name+ attribute is
+      # <tt>person[first_name]</tt>. This means that when the form is submitted,
+      # the value entered by the user will be available in the controller as
+      # <tt>params[:person][:first_name]</tt>.
+      #
+      # For fields generated in this way using the FormBuilder,
+      # if <tt>:person</tt> also happens to be the name of an instance variable
+      # <tt>@person</tt>, the default value of the field shown when the form is
+      # initially displayed (e.g. in the situation where you are editing an
+      # existing record) will be the value of the corresponding attribute of
+      # <tt>@person</tt>.
+      #
+      # The rightmost argument to +form_for+ is an
+      # optional hash of options -
+      #
+      # * <tt>:url</tt> - The URL the form is to be submitted to. This may be
+      #   represented in the same way as values passed to +url_for+ or +link_to+.
+      #   So for example you may use a named route directly. When the model is
+      #   represented by a string or symbol, as in the example above, if the
+      #   <tt>:url</tt> option is not specified, by default the form will be
+      #   sent back to the current URL (We will describe below an alternative
+      #   resource-oriented usage of +form_for+ in which the URL does not need
+      #   to be specified explicitly).
+      # * <tt>:namespace</tt> - A namespace for your form to ensure uniqueness of
+      #   id attributes on form elements. The namespace attribute will be prefixed
+      #   with underscore on the generated HTML id.
+      # * <tt>:method</tt> - The method to use when submitting the form, usually
+      #   either "get" or "post". If "patch", "put", "delete", or another verb
+      #   is used, a hidden input with name <tt>_method</tt> is added to
+      #   simulate the verb over post.
+      # * <tt>:authenticity_token</tt> - Authenticity token to use in the form.
+      #   Use only if you need to pass custom authenticity token string, or to
+      #   not add authenticity_token field at all (by passing <tt>false</tt>).
+      #   Remote forms may omit the embedded authenticity token by setting
+      #   <tt>config.action_view.embed_authenticity_token_in_remote_forms = false</tt>.
+      #   This is helpful when you're fragment-caching the form. Remote forms
+      #   get the authenticity token from the <tt>meta</tt> tag, so embedding is
+      #   unnecessary unless you support browsers without JavaScript.
+      # * <tt>:remote</tt> - If set to true, will allow the Unobtrusive
+      #   JavaScript drivers to control the submit behavior. By default this
+      #   behavior is an ajax submit.
+      # * <tt>:enforce_utf8</tt> - If set to false, a hidden input with name
+      #   utf8 is not output.
+      # * <tt>:html</tt> - Optional HTML attributes for the form tag.
+      #
+      # Also note that +form_for+ doesn't create an exclusive scope. It's still
+      # possible to use both the stand-alone FormHelper methods and methods
+      # from FormTagHelper. For example:
+      #
+      #   <%= form_for :person do |f| %>
+      #     First name: <%= f.text_field :first_name %>
+      #     Last name : <%= f.text_field :last_name %>
+      #     Biography : <%= text_area :person, :biography %>
+      #     Admin?    : <%= check_box_tag "person[admin]", "1", @person.company.admin? %>
+      #     <%= f.submit %>
+      #   <% end %>
+      #
+      # This also works for the methods in FormOptionsHelper and DateHelper that
+      # are designed to work with an object as base, like
+      # FormOptionsHelper#collection_select and DateHelper#datetime_select.
+      #
+      # === #form_for with a model object
+      #
+      # In the examples above, the object to be created or edited was
+      # represented by a symbol passed to +form_for+, and we noted that
+      # a string can also be used equivalently. It is also possible, however,
+      # to pass a model object itself to +form_for+. For example, if <tt>@post</tt>
+      # is an existing record you wish to edit, you can create the form using
+      #
+      #   <%= form_for @post do |f| %>
+      #     ...
+      #   <% end %>
+      #
+      # This behaves in almost the same way as outlined previously, with a
+      # couple of small exceptions. First, the prefix used to name the input
+      # elements within the form (hence the key that denotes them in the +params+
+      # hash) is actually derived from the object's _class_, e.g. <tt>params[:post]</tt>
+      # if the object's class is +Post+. However, this can be overwritten using
+      # the <tt>:as</tt> option, e.g. -
+      #
+      #   <%= form_for(@person, as: :client) do |f| %>
+      #     ...
+      #   <% end %>
+      #
+      # would result in <tt>params[:client]</tt>.
+      #
+      # Secondly, the field values shown when the form is initially displayed
+      # are taken from the attributes of the object passed to +form_for+,
+      # regardless of whether the object is an instance
+      # variable. So, for example, if we had a _local_ variable +post+
+      # representing an existing record,
+      #
+      #   <%= form_for post do |f| %>
+      #     ...
+      #   <% end %>
+      #
+      # would produce a form with fields whose initial state reflect the current
+      # values of the attributes of +post+.
+      #
+      # === Resource-oriented style
+      #
+      # In the examples just shown, although not indicated explicitly, we still
+      # need to use the <tt>:url</tt> option in order to specify where the
+      # form is going to be sent. However, further simplification is possible
+      # if the record passed to +form_for+ is a _resource_, i.e. it corresponds
+      # to a set of RESTful routes, e.g. defined using the +resources+ method
+      # in <tt>config/routes.rb</tt>. In this case Rails will simply infer the
+      # appropriate URL from the record itself. For example,
+      #
+      #   <%= form_for @post do |f| %>
+      #     ...
+      #   <% end %>
+      #
+      # is then equivalent to something like:
+      #
+      #   <%= form_for @post, as: :post, url: post_path(@post), method: :patch, html: { class: "edit_post", id: "edit_post_45" } do |f| %>
+      #     ...
+      #   <% end %>
+      #
+      # And for a new record
+      #
+      #   <%= form_for(Post.new) do |f| %>
+      #     ...
+      #   <% end %>
+      #
+      # is equivalent to something like:
+      #
+      #   <%= form_for @post, as: :post, url: posts_path, html: { class: "new_post", id: "new_post" } do |f| %>
+      #     ...
+      #   <% end %>
+      #
+      # However you can still overwrite individual conventions, such as:
+      #
+      #   <%= form_for(@post, url: super_posts_path) do |f| %>
+      #     ...
+      #   <% end %>
+      #
+      # You can also set the answer format, like this:
+      #
+      #   <%= form_for(@post, format: :json) do |f| %>
+      #     ...
+      #   <% end %>
+      #
+      # For namespaced routes, like +admin_post_url+:
+      #
+      #   <%= form_for([:admin, @post]) do |f| %>
+      #    ...
+      #   <% end %>
+      #
+      # If your resource has associations defined, for example, you want to add comments
+      # to the document given that the routes are set correctly:
+      #
+      #   <%= form_for([@document, @comment]) do |f| %>
+      #    ...
+      #   <% end %>
+      #
+      # Where <tt>@document = Document.find(params[:id])</tt> and
+      # <tt>@comment = Comment.new</tt>.
+      #
+      # === Setting the method
+      #
+      # You can force the form to use the full array of HTTP verbs by setting
+      #
+      #    method: (:get|:post|:patch|:put|:delete)
+      #
+      # in the options hash. If the verb is not GET or POST, which are natively
+      # supported by HTML forms, the form will be set to POST and a hidden input
+      # called _method will carry the intended verb for the server to interpret.
+      #
+      # === Unobtrusive JavaScript
+      #
+      # Specifying:
+      #
+      #    remote: true
+      #
+      # in the options hash creates a form that will allow the unobtrusive JavaScript drivers to modify its
+      # behavior. The expected default behavior is an XMLHttpRequest in the background instead of the regular
+      # POST arrangement, but ultimately the behavior is the choice of the JavaScript driver implementor.
+      # Even though it's using JavaScript to serialize the form elements, the form submission will work just like
+      # a regular submission as viewed by the receiving side (all elements available in <tt>params</tt>).
+      #
+      # Example:
+      #
+      #   <%= form_for(@post, remote: true) do |f| %>
+      #     ...
+      #   <% end %>
+      #
+      # The HTML generated for this would be:
+      #
+      #   <form action='http://www.example.com' method='post' data-remote='true'>
+      #     <input name='_method' type='hidden' value='patch' />
+      #     ...
+      #   </form>
+      #
+      # === Setting HTML options
+      #
+      # You can set data attributes directly by passing in a data hash, but all other HTML options must be wrapped in
+      # the HTML key. Example:
+      #
+      #   <%= form_for(@post, data: { behavior: "autosave" }, html: { name: "go" }) do |f| %>
+      #     ...
+      #   <% end %>
+      #
+      # The HTML generated for this would be:
+      #
+      #   <form action='http://www.example.com' method='post' data-behavior='autosave' name='go'>
+      #     <input name='_method' type='hidden' value='patch' />
+      #     ...
+      #   </form>
+      #
+      # === Removing hidden model id's
+      #
+      # The form_for method automatically includes the model id as a hidden field in the form.
+      # This is used to maintain the correlation between the form data and its associated model.
+      # Some ORM systems do not use IDs on nested models so in this case you want to be able
+      # to disable the hidden id.
+      #
+      # In the following example the Post model has many Comments stored within it in a NoSQL database,
+      # thus there is no primary key for comments.
+      #
+      # Example:
+      #
+      #   <%= form_for(@post) do |f| %>
+      #     <%= f.fields_for(:comments, include_id: false) do |cf| %>
+      #       ...
+      #     <% end %>
+      #   <% end %>
+      #
+      # === Customized form builders
+      #
+      # You can also build forms using a customized FormBuilder class. Subclass
+      # FormBuilder and override or define some more helpers, then use your
+      # custom builder. For example, let's say you made a helper to
+      # automatically add labels to form inputs.
+      #
+      #   <%= form_for @person, url: { action: "create" }, builder: LabellingFormBuilder do |f| %>
+      #     <%= f.text_field :first_name %>
+      #     <%= f.text_field :last_name %>
+      #     <%= f.text_area :biography %>
+      #     <%= f.check_box :admin %>
+      #     <%= f.submit %>
+      #   <% end %>
+      #
+      # In this case, if you use this:
+      #
+      #   <%= render f %>
+      #
+      # The rendered template is <tt>people/_labelling_form</tt> and the local
+      # variable referencing the form builder is called
+      # <tt>labelling_form</tt>.
+      #
+      # The custom FormBuilder class is automatically merged with the options
+      # of a nested fields_for call, unless it's explicitly set.
+      #
+      # In many cases you will want to wrap the above in another helper, so you
+      # could do something like the following:
+      #
+      #   def labelled_form_for(record_or_name_or_array, *args, &block)
+      #     options = args.extract_options!
+      #     form_for(record_or_name_or_array, *(args << options.merge(builder: LabellingFormBuilder)), &block)
+      #   end
+      #
+      # If you don't need to attach a form to a model instance, then check out
+      # FormTagHelper#form_tag.
+      #
+      # === Form to external resources
+      #
+      # When you build forms to external resources sometimes you need to set an authenticity token or just render a form
+      # without it, for example when you submit data to a payment gateway number and types of fields could be limited.
+      #
+      # To set an authenticity token you need to pass an <tt>:authenticity_token</tt> parameter
+      #
+      #   <%= form_for @invoice, url: external_url, authenticity_token: 'external_token' do |f| %>
+      #     ...
+      #   <% end %>
+      #
+      # If you don't want to an authenticity token field be rendered at all just pass <tt>false</tt>:
+      #
+      #   <%= form_for @invoice, url: external_url, authenticity_token: false do |f| %>
+      #     ...
+      #   <% end %>
+      def form_for: (untyped record, ?::Hash[untyped, untyped] options) { (Helpers::FormBuilder) -> untyped } -> String
+
+      # Creates a form tag based on mixing URLs, scopes, or models.
+      #
+      #   # Using just a URL:
+      #   <%= form_with url: posts_path do |form| %>
+      #     <%= form.text_field :title %>
+      #   <% end %>
+      #   # =>
+      #   <form action="/posts" method="post" data-remote="true">
+      #     <input type="text" name="title">
+      #   </form>
+      #
+      #   # Adding a scope prefixes the input field names:
+      #   <%= form_with scope: :post, url: posts_path do |form| %>
+      #     <%= form.text_field :title %>
+      #   <% end %>
+      #   # =>
+      #   <form action="/posts" method="post" data-remote="true">
+      #     <input type="text" name="post[title]">
+      #   </form>
+      #
+      #   # Using a model infers both the URL and scope:
+      #   <%= form_with model: Post.new do |form| %>
+      #     <%= form.text_field :title %>
+      #   <% end %>
+      #   # =>
+      #   <form action="/posts" method="post" data-remote="true">
+      #     <input type="text" name="post[title]">
+      #   </form>
+      #
+      #   # An existing model makes an update form and fills out field values:
+      #   <%= form_with model: Post.first do |form| %>
+      #     <%= form.text_field :title %>
+      #   <% end %>
+      #   # =>
+      #   <form action="/posts/1" method="post" data-remote="true">
+      #     <input type="hidden" name="_method" value="patch">
+      #     <input type="text" name="post[title]" value="<the title of the post>">
+      #   </form>
+      #
+      #   # Though the fields don't have to correspond to model attributes:
+      #   <%= form_with model: Cat.new do |form| %>
+      #     <%= form.text_field :cats_dont_have_gills %>
+      #     <%= form.text_field :but_in_forms_they_can %>
+      #   <% end %>
+      #   # =>
+      #   <form action="/cats" method="post" data-remote="true">
+      #     <input type="text" name="cat[cats_dont_have_gills]">
+      #     <input type="text" name="cat[but_in_forms_they_can]">
+      #   </form>
+      #
+      # The parameters in the forms are accessible in controllers according to
+      # their name nesting. So inputs named +title+ and <tt>post[title]</tt> are
+      # accessible as <tt>params[:title]</tt> and <tt>params[:post][:title]</tt>
+      # respectively.
+      #
+      # By default +form_with+ attaches the <tt>data-remote</tt> attribute
+      # submitting the form via an XMLHTTPRequest in the background if an
+      # Unobtrusive JavaScript driver, like rails-ujs, is used. See the
+      # <tt>:local</tt> option for more.
+      #
+      # For ease of comparison the examples above left out the submit button,
+      # as well as the auto generated hidden fields that enable UTF-8 support
+      # and adds an authenticity token needed for cross site request forgery
+      # protection.
+      #
+      # === Resource-oriented style
+      #
+      # In many of the examples just shown, the +:model+ passed to +form_with+
+      # is a _resource_. It corresponds to a set of RESTful routes, most likely
+      # defined via +resources+ in <tt>config/routes.rb</tt>.
+      #
+      # So when passing such a model record, Rails infers the URL and method.
+      #
+      #   <%= form_with model: @post do |form| %>
+      #     ...
+      #   <% end %>
+      #
+      # is then equivalent to something like:
+      #
+      #   <%= form_with scope: :post, url: post_path(@post), method: :patch do |form| %>
+      #     ...
+      #   <% end %>
+      #
+      # And for a new record
+      #
+      #   <%= form_with model: Post.new do |form| %>
+      #     ...
+      #   <% end %>
+      #
+      # is equivalent to something like:
+      #
+      #   <%= form_with scope: :post, url: posts_path do |form| %>
+      #     ...
+      #   <% end %>
+      #
+      # ==== +form_with+ options
+      #
+      # * <tt>:url</tt> - The URL the form submits to. Akin to values passed to
+      #   +url_for+ or +link_to+. For example, you may use a named route
+      #   directly. When a <tt>:scope</tt> is passed without a <tt>:url</tt> the
+      #   form just submits to the current URL.
+      # * <tt>:method</tt> - The method to use when submitting the form, usually
+      #   either "get" or "post". If "patch", "put", "delete", or another verb
+      #   is used, a hidden input named <tt>_method</tt> is added to
+      #   simulate the verb over post.
+      # * <tt>:format</tt> - The format of the route the form submits to.
+      #   Useful when submitting to another resource type, like <tt>:json</tt>.
+      #   Skipped if a <tt>:url</tt> is passed.
+      # * <tt>:scope</tt> - The scope to prefix input field names with and
+      #   thereby how the submitted parameters are grouped in controllers.
+      # * <tt>:namespace</tt> - A namespace for your form to ensure uniqueness of
+      #   id attributes on form elements. The namespace attribute will be prefixed
+      #   with underscore on the generated HTML id.
+      # * <tt>:model</tt> - A model object to infer the <tt>:url</tt> and
+      #   <tt>:scope</tt> by, plus fill out input field values.
+      #   So if a +title+ attribute is set to "Ahoy!" then a +title+ input
+      #   field's value would be "Ahoy!".
+      #   If the model is a new record a create form is generated, if an
+      #   existing record, however, an update form is generated.
+      #   Pass <tt>:scope</tt> or <tt>:url</tt> to override the defaults.
+      #   E.g. turn <tt>params[:post]</tt> into <tt>params[:article]</tt>.
+      # * <tt>:authenticity_token</tt> - Authenticity token to use in the form.
+      #   Override with a custom authenticity token or pass <tt>false</tt> to
+      #   skip the authenticity token field altogether.
+      #   Useful when submitting to an external resource like a payment gateway
+      #   that might limit the valid fields.
+      #   Remote forms may omit the embedded authenticity token by setting
+      #   <tt>config.action_view.embed_authenticity_token_in_remote_forms = false</tt>.
+      #   This is helpful when fragment-caching the form. Remote forms
+      #   get the authenticity token from the <tt>meta</tt> tag, so embedding is
+      #   unnecessary unless you support browsers without JavaScript.
+      # * <tt>:local</tt> - By default form submits are remote and unobtrusive XHRs.
+      #   Disable remote submits with <tt>local: true</tt>.
+      # * <tt>:skip_enforcing_utf8</tt> - If set to true, a hidden input with name
+      #   utf8 is not output.
+      # * <tt>:builder</tt> - Override the object used to build the form.
+      # * <tt>:id</tt> - Optional HTML id attribute.
+      # * <tt>:class</tt> - Optional HTML class attribute.
+      # * <tt>:data</tt> - Optional HTML data attributes.
+      # * <tt>:html</tt> - Other optional HTML attributes for the form tag.
+      #
+      # === Examples
+      #
+      # When not passing a block, +form_with+ just generates an opening form tag.
+      #
+      #   <%= form_with(model: @post, url: super_posts_path) %>
+      #   <%= form_with(model: @post, scope: :article) %>
+      #   <%= form_with(model: @post, format: :json) %>
+      #   <%= form_with(model: @post, authenticity_token: false) %> # Disables the token.
+      #
+      # For namespaced routes, like +admin_post_url+:
+      #
+      #   <%= form_with(model: [ :admin, @post ]) do |form| %>
+      #     ...
+      #   <% end %>
+      #
+      # If your resource has associations defined, for example, you want to add comments
+      # to the document given that the routes are set correctly:
+      #
+      #   <%= form_with(model: [ @document, Comment.new ]) do |form| %>
+      #     ...
+      #   <% end %>
+      #
+      # Where <tt>@document = Document.find(params[:id])</tt>.
+      #
+      # === Mixing with other form helpers
+      #
+      # While +form_with+ uses a FormBuilder object it's possible to mix and
+      # match the stand-alone FormHelper methods and methods
+      # from FormTagHelper:
+      #
+      #   <%= form_with scope: :person do |form| %>
+      #     <%= form.text_field :first_name %>
+      #     <%= form.text_field :last_name %>
+      #
+      #     <%= text_area :person, :biography %>
+      #     <%= check_box_tag "person[admin]", "1", @person.company.admin? %>
+      #
+      #     <%= form.submit %>
+      #   <% end %>
+      #
+      # Same goes for the methods in FormOptionsHelper and DateHelper designed
+      # to work with an object as a base, like
+      # FormOptionsHelper#collection_select and DateHelper#datetime_select.
+      #
+      # === Setting the method
+      #
+      # You can force the form to use the full array of HTTP verbs by setting
+      #
+      #    method: (:get|:post|:patch|:put|:delete)
+      #
+      # in the options hash. If the verb is not GET or POST, which are natively
+      # supported by HTML forms, the form will be set to POST and a hidden input
+      # called _method will carry the intended verb for the server to interpret.
+      #
+      # === Setting HTML options
+      #
+      # You can set data attributes directly in a data hash, but HTML options
+      # besides id and class must be wrapped in an HTML key:
+      #
+      #   <%= form_with(model: @post, data: { behavior: "autosave" }, html: { name: "go" }) do |form| %>
+      #     ...
+      #   <% end %>
+      #
+      # generates
+      #
+      #   <form action="/posts/123" method="post" data-behavior="autosave" name="go">
+      #     <input name="_method" type="hidden" value="patch" />
+      #     ...
+      #   </form>
+      #
+      # === Removing hidden model id's
+      #
+      # The +form_with+ method automatically includes the model id as a hidden field in the form.
+      # This is used to maintain the correlation between the form data and its associated model.
+      # Some ORM systems do not use IDs on nested models so in this case you want to be able
+      # to disable the hidden id.
+      #
+      # In the following example the Post model has many Comments stored within it in a NoSQL database,
+      # thus there is no primary key for comments.
+      #
+      #   <%= form_with(model: @post) do |form| %>
+      #     <%= form.fields(:comments, skip_id: true) do |fields| %>
+      #       ...
+      #     <% end %>
+      #   <% end %>
+      #
+      # === Customized form builders
+      #
+      # You can also build forms using a customized FormBuilder class. Subclass
+      # FormBuilder and override or define some more helpers, then use your
+      # custom builder. For example, let's say you made a helper to
+      # automatically add labels to form inputs.
+      #
+      #   <%= form_with model: @person, url: { action: "create" }, builder: LabellingFormBuilder do |form| %>
+      #     <%= form.text_field :first_name %>
+      #     <%= form.text_field :last_name %>
+      #     <%= form.text_area :biography %>
+      #     <%= form.check_box :admin %>
+      #     <%= form.submit %>
+      #   <% end %>
+      #
+      # In this case, if you use:
+      #
+      #   <%= render form %>
+      #
+      # The rendered template is <tt>people/_labelling_form</tt> and the local
+      # variable referencing the form builder is called
+      # <tt>labelling_form</tt>.
+      #
+      # The custom FormBuilder class is automatically merged with the options
+      # of a nested +fields+ call, unless it's explicitly set.
+      #
+      # In many cases you will want to wrap the above in another helper, so you
+      # could do something like the following:
+      #
+      #   def labelled_form_with(**options, &block)
+      #     form_with(**options.merge(builder: LabellingFormBuilder), &block)
+      #   end
+      def form_with: (?format: untyped? format, ?url: untyped? url, ?scope: untyped? scope, ?model: untyped? model, **untyped options) { (Helpers::FormBuilder) -> String } -> String
+
+      # Returns a label tag tailored for labelling an input field for a specified attribute (identified by +method+) on an object
+      # assigned to the template (identified by +object+). The text of label will default to the attribute name unless a translation
+      # is found in the current I18n locale (through helpers.label.<modelname>.<attribute>) or you specify it explicitly.
+      # Additional options on the label tag can be passed as a hash with +options+. These options will be tagged
+      # onto the HTML as an HTML element attribute as in the example shown, except for the <tt>:value</tt> option, which is designed to
+      # target labels for radio_button tags (where the value is used in the ID of the input tag).
+      #
+      # ==== Examples
+      #   label(:post, :title)
+      #   # => <label for="post_title">Title</label>
+      #
+      # You can localize your labels based on model and attribute names.
+      # For example you can define the following in your locale (e.g. en.yml)
+      #
+      #   helpers:
+      #     label:
+      #       post:
+      #         body: "Write your entire text here"
+      #
+      # Which then will result in
+      #
+      #   label(:post, :body)
+      #   # => <label for="post_body">Write your entire text here</label>
+      #
+      # Localization can also be based purely on the translation of the attribute-name
+      # (if you are using ActiveRecord):
+      #
+      #   activerecord:
+      #     attributes:
+      #       post:
+      #         cost: "Total cost"
+      #
+      #   label(:post, :cost)
+      #   # => <label for="post_cost">Total cost</label>
+      #
+      #   label(:post, :title, "A short title")
+      #   # => <label for="post_title">A short title</label>
+      #
+      #   label(:post, :title, "A short title", class: "title_label")
+      #   # => <label for="post_title" class="title_label">A short title</label>
+      #
+      #   label(:post, :privacy, "Public Post", value: "public")
+      #   # => <label for="post_privacy_public">Public Post</label>
+      #
+      #   label(:post, :terms) do
+      #     raw('Accept <a href="/terms">Terms</a>.')
+      #   end
+      #   # => <label for="post_terms">Accept <a href="/terms">Terms</a>.</label>
+      def label: (untyped object_name, untyped method, ?untyped? content_or_options, ?untyped? options) ?{ () -> untyped } -> untyped
+    end
+  end
+end
+
+module ActionView
+  module Helpers
+    module RenderingHelper
+      # Returns the result of a render that's dictated by the options hash. The primary options are:
+      #
+      # * <tt>:partial</tt> - See <tt>ActionView::PartialRenderer</tt>.
+      # * <tt>:file</tt> - Renders an explicit template file (this used to be the old default), add :locals to pass in those.
+      # * <tt>:inline</tt> - Renders an inline template similar to how it's done in the controller.
+      # * <tt>:plain</tt> - Renders the text passed in out. Setting the content
+      #   type as <tt>text/plain</tt>.
+      # * <tt>:html</tt> - Renders the HTML safe string passed in out, otherwise
+      #   performs HTML escape on the string first. Setting the content type as
+      #   <tt>text/html</tt>.
+      # * <tt>:body</tt> - Renders the text passed in, and inherits the content
+      #   type of <tt>text/plain</tt> from <tt>ActionDispatch::Response</tt>
+      #   object.
+      #
+      # If no options hash is passed or :update specified, the default is to render a partial and use the second parameter
+      # as the locals hash.
+      def render: (?(String | Symbol) | ::Hash[untyped, untyped] options, ?::Hash[untyped, untyped] locals) ?{ () -> untyped } -> String
+    end
+  end
+end
+
+module ActionView
+  module Helpers
+    module TagHelper
+      # Returns an HTML block tag of type +name+ surrounding the +content+. Add
+      # HTML attributes by passing an attributes hash to +options+.
+      # Instead of passing the content as an argument, you can also use a block
+      # in which case, you pass your +options+ as the second parameter.
+      # Set escape to false to disable attribute value escaping.
+      # Note: this is legacy syntax, see +tag+ method description for details.
+      #
+      # ==== Options
+      # The +options+ hash can be used with attributes with no value like (<tt>disabled</tt> and
+      # <tt>readonly</tt>), which you can give a value of true in the +options+ hash. You can use
+      # symbols or strings for the attribute names.
+      #
+      # ==== Examples
+      #   content_tag(:p, "Hello world!")
+      #    # => <p>Hello world!</p>
+      #   content_tag(:div, content_tag(:p, "Hello world!"), class: "strong")
+      #    # => <div class="strong"><p>Hello world!</p></div>
+      #   content_tag(:div, "Hello world!", class: ["strong", "highlight"])
+      #    # => <div class="strong highlight">Hello world!</div>
+      #   content_tag("select", options, multiple: true)
+      #    # => <select multiple="multiple">...options...</select>
+      #
+      #   <%= content_tag :div, class: "strong" do -%>
+      #     Hello world!
+      #   <% end -%>
+      #    # => <div class="strong">Hello world!</div>
+      def content_tag: (untyped name, ?untyped? content_or_options_with_block, ?untyped? options, ?bool escape) ?{ () -> untyped } -> untyped
+    end
+  end
+end
+
+module ActionView
+  module Helpers
+    module UrlHelper
+      # Creates an anchor element of the given +name+ using a URL created by the set of +options+.
+      # See the valid options in the documentation for +url_for+. It's also possible to
+      # pass a String instead of an options hash, which generates an anchor element that uses the
+      # value of the String as the href for the link. Using a <tt>:back</tt> Symbol instead
+      # of an options hash will generate a link to the referrer (a JavaScript back link
+      # will be used in place of a referrer if none exists). If +nil+ is passed as the name
+      # the value of the link itself will become the name.
+      #
+      # ==== Signatures
+      #
+      #   link_to(body, url, html_options = {})
+      #     # url is a String; you can use URL helpers like
+      #     # posts_path
+      #
+      #   link_to(body, url_options = {}, html_options = {})
+      #     # url_options, except :method, is passed to url_for
+      #
+      #   link_to(options = {}, html_options = {}) do
+      #     # name
+      #   end
+      #
+      #   link_to(url, html_options = {}) do
+      #     # name
+      #   end
+      #
+      # ==== Options
+      # * <tt>:data</tt> - This option can be used to add custom data attributes.
+      # * <tt>method: symbol of HTTP verb</tt> - This modifier will dynamically
+      #   create an HTML form and immediately submit the form for processing using
+      #   the HTTP verb specified. Useful for having links perform a POST operation
+      #   in dangerous actions like deleting a record (which search bots can follow
+      #   while spidering your site). Supported verbs are <tt>:post</tt>, <tt>:delete</tt>, <tt>:patch</tt>, and <tt>:put</tt>.
+      #   Note that if the user has JavaScript disabled, the request will fall back
+      #   to using GET. If <tt>href: '#'</tt> is used and the user has JavaScript
+      #   disabled clicking the link will have no effect. If you are relying on the
+      #   POST behavior, you should check for it in your controller's action by using
+      #   the request object's methods for <tt>post?</tt>, <tt>delete?</tt>, <tt>patch?</tt>, or <tt>put?</tt>.
+      # * <tt>remote: true</tt> - This will allow the unobtrusive JavaScript
+      #   driver to make an Ajax request to the URL in question instead of following
+      #   the link. The drivers each provide mechanisms for listening for the
+      #   completion of the Ajax request and performing JavaScript operations once
+      #   they're complete
+      #
+      # ==== Data attributes
+      #
+      # * <tt>confirm: 'question?'</tt> - This will allow the unobtrusive JavaScript
+      #   driver to prompt with the question specified (in this case, the
+      #   resulting text would be <tt>question?</tt>. If the user accepts, the
+      #   link is processed normally, otherwise no action is taken.
+      # * <tt>:disable_with</tt> - Value of this parameter will be used as the
+      #   name for a disabled version of the link. This feature is provided by
+      #   the unobtrusive JavaScript driver.
+      #
+      # ==== Examples
+      # Because it relies on +url_for+, +link_to+ supports both older-style controller/action/id arguments
+      # and newer RESTful routes. Current Rails style favors RESTful routes whenever possible, so base
+      # your application on resources and use
+      #
+      #   link_to "Profile", profile_path(@profile)
+      #   # => <a href="/profiles/1">Profile</a>
+      #
+      # or the even pithier
+      #
+      #   link_to "Profile", @profile
+      #   # => <a href="/profiles/1">Profile</a>
+      #
+      # in place of the older more verbose, non-resource-oriented
+      #
+      #   link_to "Profile", controller: "profiles", action: "show", id: @profile
+      #   # => <a href="/profiles/show/1">Profile</a>
+      #
+      # Similarly,
+      #
+      #   link_to "Profiles", profiles_path
+      #   # => <a href="/profiles">Profiles</a>
+      #
+      # is better than
+      #
+      #   link_to "Profiles", controller: "profiles"
+      #   # => <a href="/profiles">Profiles</a>
+      #
+      # When name is +nil+ the href is presented instead
+      #
+      #   link_to nil, "http://example.com"
+      #   # => <a href="http://www.example.com">http://www.example.com</a>
+      #
+      # You can use a block as well if your link target is hard to fit into the name parameter. ERB example:
+      #
+      #   <%= link_to(@profile) do %>
+      #     <strong><%= @profile.name %></strong> -- <span>Check it out!</span>
+      #   <% end %>
+      #   # => <a href="/profiles/1">
+      #          <strong>David</strong> -- <span>Check it out!</span>
+      #        </a>
+      #
+      # Classes and ids for CSS are easy to produce:
+      #
+      #   link_to "Articles", articles_path, id: "news", class: "article"
+      #   # => <a href="/articles" class="article" id="news">Articles</a>
+      #
+      # Be careful when using the older argument style, as an extra literal hash is needed:
+      #
+      #   link_to "Articles", { controller: "articles" }, id: "news", class: "article"
+      #   # => <a href="/articles" class="article" id="news">Articles</a>
+      #
+      # Leaving the hash off gives the wrong link:
+      #
+      #   link_to "WRONG!", controller: "articles", id: "news", class: "article"
+      #   # => <a href="/articles/index/news?class=article">WRONG!</a>
+      #
+      # +link_to+ can also produce links with anchors or query strings:
+      #
+      #   link_to "Comment wall", profile_path(@profile, anchor: "wall")
+      #   # => <a href="/profiles/1#wall">Comment wall</a>
+      #
+      #   link_to "Ruby on Rails search", controller: "searches", query: "ruby on rails"
+      #   # => <a href="/searches?query=ruby+on+rails">Ruby on Rails search</a>
+      #
+      #   link_to "Nonsense search", searches_path(foo: "bar", baz: "quux")
+      #   # => <a href="/searches?foo=bar&amp;baz=quux">Nonsense search</a>
+      #
+      # The only option specific to +link_to+ (<tt>:method</tt>) is used as follows:
+      #
+      #   link_to("Destroy", "http://www.example.com", method: :delete)
+      #   # => <a href='http://www.example.com' rel="nofollow" data-method="delete">Destroy</a>
+      #
+      # You can also use custom data attributes using the <tt>:data</tt> option:
+      #
+      #   link_to "Visit Other Site", "http://www.rubyonrails.org/", data: { confirm: "Are you sure?" }
+      #   # => <a href="http://www.rubyonrails.org/" data-confirm="Are you sure?">Visit Other Site</a>
+      #
+      # Also you can set any link attributes such as <tt>target</tt>, <tt>rel</tt>, <tt>type</tt>:
+      #
+      #   link_to "External link", "http://www.rubyonrails.org/", target: "_blank", rel: "nofollow"
+      #   # => <a href="http://www.rubyonrails.org/" target="_blank" rel="nofollow">External link</a>
+      def link_to: (?untyped? name, ?untyped? options, ?untyped? html_options) ?{ () -> untyped } -> untyped
+
+      # Generates a form containing a single button that submits to the URL created
+      # by the set of +options+. This is the safest method to ensure links that
+      # cause changes to your data are not triggered by search bots or accelerators.
+      # If the HTML button does not work with your layout, you can also consider
+      # using the +link_to+ method with the <tt>:method</tt> modifier as described in
+      # the +link_to+ documentation.
+      #
+      # By default, the generated form element has a class name of <tt>button_to</tt>
+      # to allow styling of the form itself and its children. This can be changed
+      # using the <tt>:form_class</tt> modifier within +html_options+. You can control
+      # the form submission and input element behavior using +html_options+.
+      # This method accepts the <tt>:method</tt> modifier described in the +link_to+ documentation.
+      # If no <tt>:method</tt> modifier is given, it will default to performing a POST operation.
+      # You can also disable the button by passing <tt>disabled: true</tt> in +html_options+.
+      # If you are using RESTful routes, you can pass the <tt>:method</tt>
+      # to change the HTTP verb used to submit the form.
+      #
+      # ==== Options
+      # The +options+ hash accepts the same options as +url_for+.
+      #
+      # There are a few special +html_options+:
+      # * <tt>:method</tt> - Symbol of HTTP verb. Supported verbs are <tt>:post</tt>, <tt>:get</tt>,
+      #   <tt>:delete</tt>, <tt>:patch</tt>, and <tt>:put</tt>. By default it will be <tt>:post</tt>.
+      # * <tt>:disabled</tt> - If set to true, it will generate a disabled button.
+      # * <tt>:data</tt> - This option can be used to add custom data attributes.
+      # * <tt>:remote</tt> -  If set to true, will allow the Unobtrusive JavaScript drivers to control the
+      #   submit behavior. By default this behavior is an ajax submit.
+      # * <tt>:form</tt> - This hash will be form attributes
+      # * <tt>:form_class</tt> - This controls the class of the form within which the submit button will
+      #   be placed
+      # * <tt>:params</tt> - Hash of parameters to be rendered as hidden fields within the form.
+      #
+      # ==== Data attributes
+      #
+      # * <tt>:confirm</tt> - This will use the unobtrusive JavaScript driver to
+      #   prompt with the question specified. If the user accepts, the link is
+      #   processed normally, otherwise no action is taken.
+      # * <tt>:disable_with</tt> - Value of this parameter will be
+      #   used as the value for a disabled version of the submit
+      #   button when the form is submitted. This feature is provided
+      #   by the unobtrusive JavaScript driver.
+      #
+      # ==== Examples
+      #   <%= button_to "New", action: "new" %>
+      #   # => "<form method="post" action="/controller/new" class="button_to">
+      #   #      <input value="New" type="submit" />
+      #   #    </form>"
+      #
+      #   <%= button_to "New", new_article_path %>
+      #   # => "<form method="post" action="/articles/new" class="button_to">
+      #   #      <input value="New" type="submit" />
+      #   #    </form>"
+      #
+      #   <%= button_to [:make_happy, @user] do %>
+      #     Make happy <strong><%= @user.name %></strong>
+      #   <% end %>
+      #   # => "<form method="post" action="/users/1/make_happy" class="button_to">
+      #   #      <button type="submit">
+      #   #        Make happy <strong><%= @user.name %></strong>
+      #   #      </button>
+      #   #    </form>"
+      #
+      #   <%= button_to "New", { action: "new" }, form_class: "new-thing" %>
+      #   # => "<form method="post" action="/controller/new" class="new-thing">
+      #   #      <input value="New" type="submit" />
+      #   #    </form>"
+      #
+      #
+      #   <%= button_to "Create", { action: "create" }, remote: true, form: { "data-type" => "json" } %>
+      #   # => "<form method="post" action="/images/create" class="button_to" data-remote="true" data-type="json">
+      #   #      <input value="Create" type="submit" />
+      #   #      <input name="authenticity_token" type="hidden" value="10f2163b45388899ad4d5ae948988266befcb6c3d1b2451cf657a0c293d605a6"/>
+      #   #    </form>"
+      #
+      #
+      #   <%= button_to "Delete Image", { action: "delete", id: @image.id },
+      #                                   method: :delete, data: { confirm: "Are you sure?" } %>
+      #   # => "<form method="post" action="/images/delete/1" class="button_to">
+      #   #      <input type="hidden" name="_method" value="delete" />
+      #   #      <input data-confirm='Are you sure?' value="Delete Image" type="submit" />
+      #   #      <input name="authenticity_token" type="hidden" value="10f2163b45388899ad4d5ae948988266befcb6c3d1b2451cf657a0c293d605a6"/>
+      #   #    </form>"
+      #
+      #
+      #   <%= button_to('Destroy', 'http://www.example.com',
+      #             method: "delete", remote: true, data: { confirm: 'Are you sure?', disable_with: 'loading...' }) %>
+      #   # => "<form class='button_to' method='post' action='http://www.example.com' data-remote='true'>
+      #   #       <input name='_method' value='delete' type='hidden' />
+      #   #       <input value='Destroy' type='submit' data-disable-with='loading...' data-confirm='Are you sure?' />
+      #   #       <input name="authenticity_token" type="hidden" value="10f2163b45388899ad4d5ae948988266befcb6c3d1b2451cf657a0c293d605a6"/>
+      #   #     </form>"
+      #   #
+      def button_to: (?untyped? name, ?untyped? options, ?untyped? html_options) ?{ () -> untyped } -> untyped
+
+      # Creates a link tag of the given +name+ using a URL created by the set of
+      # +options+ unless the current request URI is the same as the links, in
+      # which case only the name is returned (or the given block is yielded, if
+      # one exists). You can give +link_to_unless_current+ a block which will
+      # specialize the default behavior (e.g., show a "Start Here" link rather
+      # than the link's text).
+      #
+      # ==== Examples
+      # Let's say you have a navigation menu...
+      #
+      #   <ul id="navbar">
+      #     <li><%= link_to_unless_current("Home", { action: "index" }) %></li>
+      #     <li><%= link_to_unless_current("About Us", { action: "about" }) %></li>
+      #   </ul>
+      #
+      # If in the "about" action, it will render...
+      #
+      #   <ul id="navbar">
+      #     <li><a href="/controller/index">Home</a></li>
+      #     <li>About Us</li>
+      #   </ul>
+      #
+      # ...but if in the "index" action, it will render:
+      #
+      #   <ul id="navbar">
+      #     <li>Home</li>
+      #     <li><a href="/controller/about">About Us</a></li>
+      #   </ul>
+      #
+      # The implicit block given to +link_to_unless_current+ is evaluated if the current
+      # action is the action given. So, if we had a comments page and wanted to render a
+      # "Go Back" link instead of a link to the comments page, we could do something like this...
+      #
+      #    <%=
+      #        link_to_unless_current("Comment", { controller: "comments", action: "new" }) do
+      #           link_to("Go back", { controller: "posts", action: "index" })
+      #        end
+      #     %>
+      def link_to_unless_current: (untyped name, ?::Hash[untyped, untyped] options, ?::Hash[untyped, untyped] html_options) ?{ () -> untyped } -> untyped
+
+      # Creates a link tag of the given +name+ using a URL created by the set of
+      # +options+ unless +condition+ is true, in which case only the name is
+      # returned. To specialize the default behavior (i.e., show a login link rather
+      # than just the plaintext link text), you can pass a block that
+      # accepts the name or the full argument list for +link_to_unless+.
+      #
+      # ==== Examples
+      #   <%= link_to_unless(@current_user.nil?, "Reply", { action: "reply" }) %>
+      #   # If the user is logged in...
+      #   # => <a href="/controller/reply/">Reply</a>
+      #
+      #   <%=
+      #      link_to_unless(@current_user.nil?, "Reply", { action: "reply" }) do |name|
+      #        link_to(name, { controller: "accounts", action: "signup" })
+      #      end
+      #   %>
+      #   # If the user is logged in...
+      #   # => <a href="/controller/reply/">Reply</a>
+      #   # If not...
+      #   # => <a href="/accounts/signup">Reply</a>
+      def link_to_unless: (untyped condition, untyped name, ?::Hash[untyped, untyped] options, ?::Hash[untyped, untyped] html_options) ?{ () -> untyped } -> untyped
+
+      # Creates a link tag of the given +name+ using a URL created by the set of
+      # +options+ if +condition+ is true, otherwise only the name is
+      # returned. To specialize the default behavior, you can pass a block that
+      # accepts the name or the full argument list for +link_to_unless+ (see the examples
+      # in +link_to_unless+).
+      #
+      # ==== Examples
+      #   <%= link_to_if(@current_user.nil?, "Login", { controller: "sessions", action: "new" }) %>
+      #   # If the user isn't logged in...
+      #   # => <a href="/sessions/new/">Login</a>
+      #
+      #   <%=
+      #      link_to_if(@current_user.nil?, "Login", { controller: "sessions", action: "new" }) do
+      #        link_to(@current_user.login, { controller: "accounts", action: "show", id: @current_user })
+      #      end
+      #   %>
+      #   # If the user isn't logged in...
+      #   # => <a href="/sessions/new/">Login</a>
+      #   # If they are logged in...
+      #   # => <a href="/accounts/show/3">my_username</a>
+      def link_to_if: (untyped condition, untyped name, ?::Hash[untyped, untyped] options, ?::Hash[untyped, untyped] html_options) ?{ () -> untyped } -> untyped
+
+      # Creates a mailto link tag to the specified +email_address+, which is
+      # also used as the name of the link unless +name+ is specified. Additional
+      # HTML attributes for the link can be passed in +html_options+.
+      #
+      # +mail_to+ has several methods for customizing the email itself by
+      # passing special keys to +html_options+.
+      #
+      # ==== Options
+      # * <tt>:subject</tt> - Preset the subject line of the email.
+      # * <tt>:body</tt> - Preset the body of the email.
+      # * <tt>:cc</tt> - Carbon Copy additional recipients on the email.
+      # * <tt>:bcc</tt> - Blind Carbon Copy additional recipients on the email.
+      # * <tt>:reply_to</tt> - Preset the Reply-To field of the email.
+      #
+      # ==== Obfuscation
+      # Prior to Rails 4.0, +mail_to+ provided options for encoding the address
+      # in order to hinder email harvesters.  To take advantage of these options,
+      # install the +actionview-encoded_mail_to+ gem.
+      #
+      # ==== Examples
+      #   mail_to "me@domain.com"
+      #   # => <a href="mailto:me@domain.com">me@domain.com</a>
+      #
+      #   mail_to "me@domain.com", "My email"
+      #   # => <a href="mailto:me@domain.com">My email</a>
+      #
+      #   mail_to "me@domain.com", "My email", cc: "ccaddress@domain.com",
+      #            subject: "This is an example email"
+      #   # => <a href="mailto:me@domain.com?cc=ccaddress@domain.com&subject=This%20is%20an%20example%20email">My email</a>
+      #
+      # You can use a block as well if your link target is hard to fit into the name parameter. ERB example:
+      #
+      #   <%= mail_to "me@domain.com" do %>
+      #     <strong>Email me:</strong> <span>me@domain.com</span>
+      #   <% end %>
+      #   # => <a href="mailto:me@domain.com">
+      #          <strong>Email me:</strong> <span>me@domain.com</span>
+      #        </a>
+      def mail_to: (untyped email_address, ?untyped? name, ?::Hash[untyped, untyped] html_options) ?{ () -> untyped } -> untyped
+    end
+  end
+end

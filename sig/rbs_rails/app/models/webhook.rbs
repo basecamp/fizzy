@@ -1,0 +1,411 @@
+class Webhook < ::ApplicationRecord
+  extend ::_ActiveRecord_Relation_ClassMethods[::Webhook, ::Webhook::ActiveRecord_Relation, ::String]
+
+  module GeneratedAttributeMethods
+    def id: () -> ::String
+
+    def id=: (::String) -> ::String
+
+    def id?: () -> bool
+
+    def id_changed?: () -> bool
+
+    def id_change: () -> [ ::String?, ::String? ]
+
+    def id_will_change!: () -> void
+
+    def id_was: () -> ::String?
+
+    def id_previously_changed?: () -> bool
+
+    def id_previous_change: () -> ::Array[::String?]?
+
+    def id_previously_was: () -> ::String?
+
+    def id_before_last_save: () -> ::String?
+
+    def id_change_to_be_saved: () -> ::Array[::String?]?
+
+    def id_in_database: () -> ::String?
+
+    def saved_change_to_id: () -> ::Array[::String?]?
+
+    def saved_change_to_id?: () -> bool
+
+    def will_save_change_to_id?: () -> bool
+
+    def restore_id!: () -> void
+
+    def clear_id_change: () -> void
+
+    def account_id: () -> ::String
+
+    def account_id=: (::String) -> ::String
+
+    def account_id?: () -> bool
+
+    def account_id_changed?: () -> bool
+
+    def account_id_change: () -> [ ::String?, ::String? ]
+
+    def account_id_will_change!: () -> void
+
+    def account_id_was: () -> ::String?
+
+    def account_id_previously_changed?: () -> bool
+
+    def account_id_previous_change: () -> ::Array[::String?]?
+
+    def account_id_previously_was: () -> ::String?
+
+    def account_id_before_last_save: () -> ::String?
+
+    def account_id_change_to_be_saved: () -> ::Array[::String?]?
+
+    def account_id_in_database: () -> ::String?
+
+    def saved_change_to_account_id: () -> ::Array[::String?]?
+
+    def saved_change_to_account_id?: () -> bool
+
+    def will_save_change_to_account_id?: () -> bool
+
+    def restore_account_id!: () -> void
+
+    def clear_account_id_change: () -> void
+
+    def active: () -> bool
+
+    def active=: (bool) -> bool
+
+    def active?: () -> bool
+
+    def active_changed?: () -> bool
+
+    def active_change: () -> [ bool?, bool? ]
+
+    def active_will_change!: () -> void
+
+    def active_was: () -> bool?
+
+    def active_previously_changed?: () -> bool
+
+    def active_previous_change: () -> ::Array[bool?]?
+
+    def active_previously_was: () -> bool?
+
+    def active_before_last_save: () -> bool?
+
+    def active_change_to_be_saved: () -> ::Array[bool?]?
+
+    def active_in_database: () -> bool?
+
+    def saved_change_to_active: () -> ::Array[bool?]?
+
+    def saved_change_to_active?: () -> bool
+
+    def will_save_change_to_active?: () -> bool
+
+    def restore_active!: () -> void
+
+    def clear_active_change: () -> void
+
+    def board_id: () -> ::String
+
+    def board_id=: (::String) -> ::String
+
+    def board_id?: () -> bool
+
+    def board_id_changed?: () -> bool
+
+    def board_id_change: () -> [ ::String?, ::String? ]
+
+    def board_id_will_change!: () -> void
+
+    def board_id_was: () -> ::String?
+
+    def board_id_previously_changed?: () -> bool
+
+    def board_id_previous_change: () -> ::Array[::String?]?
+
+    def board_id_previously_was: () -> ::String?
+
+    def board_id_before_last_save: () -> ::String?
+
+    def board_id_change_to_be_saved: () -> ::Array[::String?]?
+
+    def board_id_in_database: () -> ::String?
+
+    def saved_change_to_board_id: () -> ::Array[::String?]?
+
+    def saved_change_to_board_id?: () -> bool
+
+    def will_save_change_to_board_id?: () -> bool
+
+    def restore_board_id!: () -> void
+
+    def clear_board_id_change: () -> void
+
+    def created_at: () -> ::ActiveSupport::TimeWithZone
+
+    def created_at=: (::ActiveSupport::TimeWithZone) -> ::ActiveSupport::TimeWithZone
+
+    def created_at?: () -> bool
+
+    def created_at_changed?: () -> bool
+
+    def created_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
+
+    def created_at_will_change!: () -> void
+
+    def created_at_was: () -> ::ActiveSupport::TimeWithZone?
+
+    def created_at_previously_changed?: () -> bool
+
+    def created_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def created_at_previously_was: () -> ::ActiveSupport::TimeWithZone?
+
+    def created_at_before_last_save: () -> ::ActiveSupport::TimeWithZone?
+
+    def created_at_change_to_be_saved: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def created_at_in_database: () -> ::ActiveSupport::TimeWithZone?
+
+    def saved_change_to_created_at: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def saved_change_to_created_at?: () -> bool
+
+    def will_save_change_to_created_at?: () -> bool
+
+    def restore_created_at!: () -> void
+
+    def clear_created_at_change: () -> void
+
+    def name: () -> ::String?
+
+    def name=: (::String?) -> ::String?
+
+    def name?: () -> bool
+
+    def name_changed?: () -> bool
+
+    def name_change: () -> [ ::String?, ::String? ]
+
+    def name_will_change!: () -> void
+
+    def name_was: () -> ::String?
+
+    def name_previously_changed?: () -> bool
+
+    def name_previous_change: () -> ::Array[::String?]?
+
+    def name_previously_was: () -> ::String?
+
+    def name_before_last_save: () -> ::String?
+
+    def name_change_to_be_saved: () -> ::Array[::String?]?
+
+    def name_in_database: () -> ::String?
+
+    def saved_change_to_name: () -> ::Array[::String?]?
+
+    def saved_change_to_name?: () -> bool
+
+    def will_save_change_to_name?: () -> bool
+
+    def restore_name!: () -> void
+
+    def clear_name_change: () -> void
+
+    def signing_secret: () -> ::String
+
+    def signing_secret=: (::String) -> ::String
+
+    def signing_secret?: () -> bool
+
+    def signing_secret_changed?: () -> bool
+
+    def signing_secret_change: () -> [ ::String?, ::String? ]
+
+    def signing_secret_will_change!: () -> void
+
+    def signing_secret_was: () -> ::String?
+
+    def signing_secret_previously_changed?: () -> bool
+
+    def signing_secret_previous_change: () -> ::Array[::String?]?
+
+    def signing_secret_previously_was: () -> ::String?
+
+    def signing_secret_before_last_save: () -> ::String?
+
+    def signing_secret_change_to_be_saved: () -> ::Array[::String?]?
+
+    def signing_secret_in_database: () -> ::String?
+
+    def saved_change_to_signing_secret: () -> ::Array[::String?]?
+
+    def saved_change_to_signing_secret?: () -> bool
+
+    def will_save_change_to_signing_secret?: () -> bool
+
+    def restore_signing_secret!: () -> void
+
+    def clear_signing_secret_change: () -> void
+
+    def subscribed_actions: () -> ::String?
+
+    def subscribed_actions=: (::String?) -> ::String?
+
+    def subscribed_actions?: () -> bool
+
+    def subscribed_actions_changed?: () -> bool
+
+    def subscribed_actions_change: () -> [ ::String?, ::String? ]
+
+    def subscribed_actions_will_change!: () -> void
+
+    def subscribed_actions_was: () -> ::String?
+
+    def subscribed_actions_previously_changed?: () -> bool
+
+    def subscribed_actions_previous_change: () -> ::Array[::String?]?
+
+    def subscribed_actions_previously_was: () -> ::String?
+
+    def subscribed_actions_before_last_save: () -> ::String?
+
+    def subscribed_actions_change_to_be_saved: () -> ::Array[::String?]?
+
+    def subscribed_actions_in_database: () -> ::String?
+
+    def saved_change_to_subscribed_actions: () -> ::Array[::String?]?
+
+    def saved_change_to_subscribed_actions?: () -> bool
+
+    def will_save_change_to_subscribed_actions?: () -> bool
+
+    def restore_subscribed_actions!: () -> void
+
+    def clear_subscribed_actions_change: () -> void
+
+    def updated_at: () -> ::ActiveSupport::TimeWithZone
+
+    def updated_at=: (::ActiveSupport::TimeWithZone) -> ::ActiveSupport::TimeWithZone
+
+    def updated_at?: () -> bool
+
+    def updated_at_changed?: () -> bool
+
+    def updated_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
+
+    def updated_at_will_change!: () -> void
+
+    def updated_at_was: () -> ::ActiveSupport::TimeWithZone?
+
+    def updated_at_previously_changed?: () -> bool
+
+    def updated_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def updated_at_previously_was: () -> ::ActiveSupport::TimeWithZone?
+
+    def updated_at_before_last_save: () -> ::ActiveSupport::TimeWithZone?
+
+    def updated_at_change_to_be_saved: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def updated_at_in_database: () -> ::ActiveSupport::TimeWithZone?
+
+    def saved_change_to_updated_at: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def saved_change_to_updated_at?: () -> bool
+
+    def will_save_change_to_updated_at?: () -> bool
+
+    def restore_updated_at!: () -> void
+
+    def clear_updated_at_change: () -> void
+
+    def url: () -> ::String
+
+    def url=: (::String) -> ::String
+
+    def url?: () -> bool
+
+    def url_changed?: () -> bool
+
+    def url_change: () -> [ ::String?, ::String? ]
+
+    def url_will_change!: () -> void
+
+    def url_was: () -> ::String?
+
+    def url_previously_changed?: () -> bool
+
+    def url_previous_change: () -> ::Array[::String?]?
+
+    def url_previously_was: () -> ::String?
+
+    def url_before_last_save: () -> ::String?
+
+    def url_change_to_be_saved: () -> ::Array[::String?]?
+
+    def url_in_database: () -> ::String?
+
+    def saved_change_to_url: () -> ::Array[::String?]?
+
+    def saved_change_to_url?: () -> bool
+
+    def will_save_change_to_url?: () -> bool
+
+    def restore_url!: () -> void
+
+    def clear_url_change: () -> void
+  end
+  include GeneratedAttributeMethods
+  def deliveries: () -> ::Webhook::Delivery::ActiveRecord_Associations_CollectionProxy
+  def deliveries=: (::Webhook::Delivery::ActiveRecord_Associations_CollectionProxy | ::Array[::Webhook::Delivery]) -> (::Webhook::Delivery::ActiveRecord_Associations_CollectionProxy | ::Array[::Webhook::Delivery])
+  def delivery_ids: () -> ::Array[::Integer]
+  def delivery_ids=: (::Array[::Integer]) -> ::Array[::Integer]
+  def delinquency_tracker: () -> ::Webhook::DelinquencyTracker?
+  def delinquency_tracker=: (::Webhook::DelinquencyTracker?) -> ::Webhook::DelinquencyTracker?
+  def build_delinquency_tracker: (?untyped) -> ::Webhook::DelinquencyTracker
+  def create_delinquency_tracker: (untyped) -> ::Webhook::DelinquencyTracker
+  def create_delinquency_tracker!: (untyped) -> ::Webhook::DelinquencyTracker
+  def reload_delinquency_tracker: () -> ::Webhook::DelinquencyTracker?
+  def account: () -> ::Account
+  def account=: (::Account?) -> ::Account?
+  def reload_account: () -> ::Account?
+  def build_account: (untyped) -> ::Account
+  def create_account: (untyped) -> ::Account
+  def create_account!: (untyped) -> ::Account
+  def board: () -> ::Board
+  def board=: (::Board?) -> ::Board?
+  def reload_board: () -> ::Board?
+  def build_board: (untyped) -> ::Board
+  def create_board: (untyped) -> ::Board
+  def create_board!: (untyped) -> ::Board
+  module GeneratedAssociationMethods
+  end
+  include GeneratedAssociationMethods
+
+  def self.ordered: () -> ::Webhook::ActiveRecord_Relation
+  def self.active: () -> ::Webhook::ActiveRecord_Relation
+
+  module GeneratedRelationMethods
+    def ordered: () -> ::Webhook::ActiveRecord_Relation
+
+    def active: () -> ::Webhook::ActiveRecord_Relation
+  end
+
+  class ActiveRecord_Relation < ::ActiveRecord::Relation
+    include ::Webhook::GeneratedRelationMethods
+    include ::_ActiveRecord_Relation[::Webhook, ::String]
+    include ::Enumerable[::Webhook]
+  end
+
+  class ActiveRecord_Associations_CollectionProxy < ::ActiveRecord::Associations::CollectionProxy
+    include ::Webhook::GeneratedRelationMethods
+    include ::_ActiveRecord_Relation[::Webhook, ::String]
+  end
+end

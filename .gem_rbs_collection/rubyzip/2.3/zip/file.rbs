@@ -1,0 +1,151 @@
+module Zip
+  class File < CentralDirectory
+    CREATE: true
+
+    SPLIT_SIGNATURE: 134695760
+
+    ZIP64_EOCD_SIGNATURE: 101075792
+
+    MAX_SEGMENT_SIZE: 3221225472
+
+    MIN_SEGMENT_SIZE: 65536
+
+    DATA_BUFFER_SIZE: 8192
+
+    IO_METHODS: ::Array[:tell | :seek | :read | :eof | :close]
+
+    DEFAULT_OPTIONS: { restore_ownership: false, restore_permissions: false, restore_times: false }
+
+    attr_reader name: untyped
+
+    # default -> false.
+    attr_accessor restore_ownership: untyped
+
+    # default -> false, but will be set to true in a future version.
+    attr_accessor restore_permissions: untyped
+
+    # default -> false, but will be set to true in a future version.
+    attr_accessor restore_times: untyped
+
+    # Returns the zip files comment, if it has one
+    attr_accessor comment: untyped
+
+    # Opens a zip archive. Pass true as the second parameter to create
+    # a new archive if it doesn't exist already.
+    def initialize: (untyped path_or_io, ?bool create, ?bool buffer, ?::Hash[untyped, untyped] options) -> void
+
+    # Similar to ::new. If a block is passed the Zip::File object is passed
+    # to the block and is automatically closed afterwards, just as with
+    # ruby's builtin File::open method.
+    def self.open: (untyped file_name, ?bool create, ?::Hash[untyped, untyped] options) ?{ (File) -> void } -> File
+
+    # Same as #open. But outputs data to a buffer instead of a file
+    def self.add_buffer: () { (untyped) -> untyped } -> untyped
+
+    # Like #open, but reads zip archive contents from a String or open IO
+    # stream, and outputs data to a buffer.
+    # (This can be used to extract data from a
+    # downloaded zip archive without first saving it to disk.)
+    def self.open_buffer: (untyped io, ?::Hash[untyped, untyped] options) ?{ (untyped) -> untyped } -> untyped
+
+    # Iterates over the contents of the ZipFile. This is more efficient
+    # than using a ZipInputStream since this methods simply iterates
+    # through the entries in the central directory structure in the archive
+    # whereas ZipInputStream jumps through the entire archive accessing the
+    # local entry headers (which contain the same information as the
+    # central directory).
+    def self.foreach: (untyped zip_file_name) { () -> untyped } -> untyped
+
+    def self.get_segment_size_for_split: (untyped segment_size) -> untyped
+
+    def self.get_partial_zip_file_name: (untyped zip_file_name, untyped partial_zip_file_name) -> untyped
+
+    def self.get_segment_count_for_split: (untyped zip_file_size, untyped segment_size) -> Integer
+
+    def self.put_split_signature: (untyped szip_file, untyped segment_size) -> untyped
+
+    #
+    # TODO: Make the code more understandable
+    #
+    def self.save_splited_part: (untyped zip_file, untyped partial_zip_file_name, untyped zip_file_size, untyped szip_file_index, untyped segment_size, untyped segment_count) ?{ (Integer segment_count, Integer szip_file_index, Integer chunk_bytes, Integer ssegment_size) -> void } -> void
+
+    # Splits an archive into parts with segment size
+    def self.split: (String zip_file_name, ?Integer segment_size, ?bool delete_zip_file, ?String? partial_zip_file_name) ?{ (Integer segment_count, Integer szip_file_index, Integer chunk_bytes, Integer ssegment_size) -> void } -> Integer
+
+    # Returns an input stream to the specified entry. If a block is passed
+    # the stream object is passed to the block and the stream is automatically
+    # closed afterwards just as with ruby's builtin File.open method.
+    def get_input_stream: (untyped entry) { () -> untyped } -> untyped
+
+    # Returns an output stream to the specified entry. If entry is not an instance
+    # of Zip::Entry, a new Zip::Entry will be initialized using the arguments
+    # specified. If a block is passed the stream object is passed to the block and
+    # the stream is automatically closed afterwards just as with ruby's builtin
+    # File.open method.
+    def get_output_stream: (untyped entry, ?untyped? permission_int, ?untyped? comment, ?untyped? extra, ?untyped? compressed_size, ?untyped? crc, ?untyped? compression_method, ?untyped? size, ?untyped? time) { () -> untyped } -> untyped
+
+    # Returns the name of the zip archive
+    def to_s: () -> untyped
+
+    # Returns a string containing the contents of the specified entry
+    def read: (untyped entry) -> untyped
+
+    # Convenience method for adding the contents of a file to the archive
+    def add: (String entry, String src_path) ?{ () -> untyped } -> untyped
+
+    # Convenience method for adding the contents of a file to the archive
+    # in Stored format (uncompressed)
+    def add_stored: (String entry, untyped src_path) { () -> untyped } -> untyped
+
+    # Removes the specified entry.
+    def remove: (String entry) -> untyped
+
+    # Renames the specified entry.
+    def rename: (String entry, String new_name) ?{ () -> untyped } -> untyped
+
+    # Replaces the specified entry with the contents of src_path (from
+    # the file system).
+    def replace: (untyped entry, untyped src_path) -> untyped
+
+    # Extracts entry to file dest_path.
+    def extract: (untyped entry, untyped dest_path) ?{ () -> untyped } -> untyped
+
+    # Commits changes that has been made since the previous commit to
+    # the zip archive.
+    def commit: () -> (nil | untyped)
+
+    # Write buffer write changes to buffer and return
+    def write_buffer: (?untyped io) -> untyped
+
+    # Closes the zip file committing any changes that has been made.
+    def close: () -> untyped
+
+    # Returns true if any changes has been made to this archive since
+    # the previous commit
+    def commit_required?: () -> (true | untyped)
+
+    # Searches for entry with the specified name. Returns nil if
+    # no entry is found. See also get_entry
+    def find_entry: (untyped entry_name) -> (nil | untyped)
+
+    # Searches for entries given a glob
+    def glob: (*untyped args) { () -> untyped } -> untyped
+
+    # Searches for an entry just as find_entry, but throws Errno::ENOENT
+    # if no entry is found.
+    def get_entry: (untyped entry) -> untyped
+
+    # Creates a directory
+    def mkdir: (untyped entry_name, ?::Integer permission) -> untyped
+
+    private
+
+    def directory?: (untyped new_entry, untyped src_path) -> untyped
+
+    def check_entry_exists: (untyped entry_name, untyped continue_on_exists_proc, untyped proc_name) -> (nil | untyped)
+
+    def check_file: (untyped path) -> (untyped | nil)
+
+    def on_success_replace: () { (untyped) -> untyped } -> untyped
+  end
+end

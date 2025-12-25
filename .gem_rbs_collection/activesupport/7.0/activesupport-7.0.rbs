@@ -1,0 +1,381 @@
+module ActiveSupport
+  module Cache
+    module Strategy
+      module LocalCache
+        module LocalCacheRegistry
+          def cache_for: (untyped local_cache_key) -> untyped
+          def set_cache_for: (untyped local_cache_key, untyped value) -> untyped
+          extend LocalCacheRegistry
+        end
+      end
+    end
+  end
+
+  module Notifications
+    interface _Callable5
+      def call: (String, Time, Time, String, Hash[untyped, untyped]) -> void
+    end
+
+    interface _Callable1
+      def call: (untyped event) -> void
+    end
+
+    # Subscribe to a given event name with the passed +block+.
+    #
+    # You can subscribe to events by passing a String to match exact event
+    # names, or by passing a Regexp to match all events that match a pattern.
+    #
+    #   ActiveSupport::Notifications.subscribe(/render/) do |*args|
+    #     @event = ActiveSupport::Notifications::Event.new(*args)
+    #   end
+    #
+    # The +block+ will receive five parameters with information about the event:
+    #
+    #   ActiveSupport::Notifications.subscribe('render') do |name, start, finish, id, payload|
+    #     name    # => String, name of the event (such as 'render' from above)
+    #     start   # => Time, when the instrumented block started execution
+    #     finish  # => Time, when the instrumented block ended execution
+    #     id      # => String, unique ID for the instrumenter that fired the event
+    #     payload # => Hash, the payload
+    #   end
+    #
+    # If the block passed to the method only takes one parameter,
+    # it will yield an event object to the block:
+    #
+    #   ActiveSupport::Notifications.subscribe(/render/) do |event|
+    #     @event = event
+    #   end
+    def self.subscribe: (String | Regexp, _Callable5 | _Callable1) -> Subscriber
+                      | ...
+  end
+
+  class TimeWithZone
+    # Returns a string of the object's date and time.
+    #
+    # This method is aliased to <tt>to_formatted_s</tt>.
+    #
+    # Accepts an optional <tt>format</tt>:
+    # * <tt>:default</tt> - default value, mimics Ruby Time#to_s format.
+    # * <tt>:db</tt> - format outputs time in UTC :db time. See Time#to_fs(:db).
+    # * Any key in +Time::DATE_FORMATS+ can be used. See active_support/core_ext/time/conversions.rb.
+    def to_fs: (?Symbol format) -> String
+  end
+
+  class TimeZone
+    # Locate a specific time zone object. If the argument is a string, it
+    # is interpreted to mean the name of the timezone to locate. If it is a
+    # numeric value it is either the hour offset, or the second offset, of the
+    # timezone to find. (The first one with that offset will be returned.)
+    # Returns +nil+ if no such time zone is known to the system.
+    def self.[]: (instance | TZInfo::Timezone | String | real | Duration) -> instance?
+  end
+end
+
+# activesupport/lib/active_support/core_ext/time/zones.rb
+class Time
+  # Returns a TimeZone instance matching the time zone provided.
+  # Accepts the time zone in any format supported by <tt>Time.zone=</tt>.
+  # Raises an +ArgumentError+ for invalid time zones.
+  #
+  #   Time.find_zone! "America/New_York" # => #<ActiveSupport::TimeZone @name="America/New_York" ...>
+  #   Time.find_zone! "EST"              # => #<ActiveSupport::TimeZone @name="EST" ...>
+  #   Time.find_zone! -5.hours           # => #<ActiveSupport::TimeZone @name="Bogota" ...>
+  #   Time.find_zone! nil                # => nil
+  #   Time.find_zone! false              # => false
+  #   Time.find_zone! "NOT-A-TIMEZONE"   # => ArgumentError: Invalid Timezone: NOT-A-TIMEZONE
+  def self.find_zone!: (ActiveSupport::TimeZone | TZInfo::Timezone | String | real | ActiveSupport::Duration) -> ActiveSupport::TimeZone
+
+  # Returns a TimeZone instance matching the time zone provided.
+  # Accepts the time zone in any format supported by <tt>Time.zone=</tt>.
+  # Returns +nil+ for invalid time zones.
+  #
+  #   Time.find_zone "America/New_York" # => #<ActiveSupport::TimeZone @name="America/New_York" ...>
+  #   Time.find_zone "NOT-A-TIMEZONE"   # => nil
+  def self.find_zone: (ActiveSupport::TimeZone | TZInfo::Timezone | String | real | ActiveSupport::Duration | nil) -> ActiveSupport::TimeZone?
+end
+
+module Enumerable[unchecked out Elem]
+  # Returns a new +Array+ without the blank items.
+  # Uses Object#blank? for determining if an item is blank.
+  #
+  #   [1, "", nil, 2, " ", [], {}, false, true].compact_blank
+  #   # =>  [1, 2, true]
+  #
+  #   Set.new([nil, "", 1, false]).compact_blank
+  #   # => [1]
+  #
+  # When called on a +Hash+, returns a new +Hash+ without the blank values.
+  #
+  #   { a: "", b: 1, c: nil, d: [], e: false, f: true }.compact_blank
+  #   # => { b: 1, f: true }
+  def compact_blank: () -> Array[Elem]
+end
+
+class Hash[unchecked out K, unchecked out V]
+  # Hash#reject has its own definition, so this needs one too.
+  def compact_blank: () -> Hash[K, V]
+
+  # Removes all blank values from the +Hash+ in place and returns self.
+  # Uses Object#blank? for determining if a value is blank.
+  #
+  #   h = { a: "", b: 1, c: nil, d: [], e: false, f: true }
+  #   h.compact_blank!
+  #   # => { b: 1, f: true }
+  def compact_blank!: () -> Hash[K, V]
+end
+
+class Array[unchecked out Elem]
+  # Removes all blank elements from the +Array+ in place and returns self.
+  # Uses Object#blank? for determining if an item is blank.
+  #
+  #   a = [1, "", nil, 2, " ", [], {}, false, true]
+  #   a.compact_blank!
+  #   # =>  [1, 2, true]
+  def compact_blank!: () -> Array[Elem]
+end
+
+# active_support/core_ext/string/inflections.rb
+class String
+  def downcase_first: () -> String
+end
+
+# active_support/core_ext/array/conversions.rb
+class Array[unchecked out Elem]
+  # Extends <tt>Array#to_s</tt> to convert a collection of elements into a
+  # comma separated id list if <tt>:db</tt> argument is given as the format.
+  #
+  # This method is aliased to <tt>to_formatted_s</tt>.
+  #
+  #   Blog.all.to_fs(:db)  # => "1,2,3"
+  #   Blog.none.to_fs(:db) # => "null"
+  #   [1,2].to_fs          # => "[1, 2]"
+  def to_fs: (?Symbol format) -> String
+end
+
+# active_support/core_ext/numeric/conversions.rb
+class Numeric
+  # \Numeric With Format
+  #
+  # Provides options for converting numbers into formatted strings.
+  # Options are provided for phone numbers, currency, percentage,
+  # precision, positional notation, file size, and pretty printing.
+  #
+  # This method is aliased to <tt>to_formatted_s</tt>.
+  #
+  # ==== Options
+  #
+  # For details on which formats use which options, see ActiveSupport::NumberHelper
+  #
+  # ==== Examples
+  #
+  #  Phone Numbers:
+  #  5551234.to_fs(:phone)                                     # => "555-1234"
+  #  1235551234.to_fs(:phone)                                  # => "123-555-1234"
+  #  1235551234.to_fs(:phone, area_code: true)                 # => "(123) 555-1234"
+  #  1235551234.to_fs(:phone, delimiter: ' ')                  # => "123 555 1234"
+  #  1235551234.to_fs(:phone, area_code: true, extension: 555) # => "(123) 555-1234 x 555"
+  #  1235551234.to_fs(:phone, country_code: 1)                 # => "+1-123-555-1234"
+  #  1235551234.to_fs(:phone, country_code: 1, extension: 1343, delimiter: '.')
+  #  # => "+1.123.555.1234 x 1343"
+  #
+  #  Currency:
+  #  1234567890.50.to_fs(:currency)                     # => "$1,234,567,890.50"
+  #  1234567890.506.to_fs(:currency)                    # => "$1,234,567,890.51"
+  #  1234567890.506.to_fs(:currency, precision: 3)      # => "$1,234,567,890.506"
+  #  1234567890.506.to_fs(:currency, round_mode: :down) # => "$1,234,567,890.50"
+  #  1234567890.506.to_fs(:currency, locale: :fr)       # => "1 234 567 890,51 €"
+  #  -1234567890.50.to_fs(:currency, negative_format: '(%u%n)')
+  #  # => "($1,234,567,890.50)"
+  #  1234567890.50.to_fs(:currency, unit: '&pound;', separator: ',', delimiter: '')
+  #  # => "&pound;1234567890,50"
+  #  1234567890.50.to_fs(:currency, unit: '&pound;', separator: ',', delimiter: '', format: '%n %u')
+  #  # => "1234567890,50 &pound;"
+  #
+  #  Percentage:
+  #  100.to_fs(:percentage)                                  # => "100.000%"
+  #  100.to_fs(:percentage, precision: 0)                    # => "100%"
+  #  1000.to_fs(:percentage, delimiter: '.', separator: ',') # => "1.000,000%"
+  #  302.24398923423.to_fs(:percentage, precision: 5)        # => "302.24399%"
+  #  302.24398923423.to_fs(:percentage, round_mode: :down)   # => "302.243%"
+  #  1000.to_fs(:percentage, locale: :fr)                    # => "1 000,000%"
+  #  100.to_fs(:percentage, format: '%n  %')                 # => "100.000  %"
+  #
+  #  Delimited:
+  #  12345678.to_fs(:delimited)                     # => "12,345,678"
+  #  12345678.05.to_fs(:delimited)                  # => "12,345,678.05"
+  #  12345678.to_fs(:delimited, delimiter: '.')     # => "12.345.678"
+  #  12345678.to_fs(:delimited, delimiter: ',')     # => "12,345,678"
+  #  12345678.05.to_fs(:delimited, separator: ' ')  # => "12,345,678 05"
+  #  12345678.05.to_fs(:delimited, locale: :fr)     # => "12 345 678,05"
+  #  98765432.98.to_fs(:delimited, delimiter: ' ', separator: ',')
+  #  # => "98 765 432,98"
+  #
+  #  Rounded:
+  #  111.2345.to_fs(:rounded)                                      # => "111.235"
+  #  111.2345.to_fs(:rounded, precision: 2)                        # => "111.23"
+  #  111.2345.to_fs(:rounded, precision: 2, round_mode: :up)       # => "111.24"
+  #  13.to_fs(:rounded, precision: 5)                              # => "13.00000"
+  #  389.32314.to_fs(:rounded, precision: 0)                       # => "389"
+  #  111.2345.to_fs(:rounded, significant: true)                   # => "111"
+  #  111.2345.to_fs(:rounded, precision: 1, significant: true)     # => "100"
+  #  13.to_fs(:rounded, precision: 5, significant: true)           # => "13.000"
+  #  111.234.to_fs(:rounded, locale: :fr)                          # => "111,234"
+  #  13.to_fs(:rounded, precision: 5, significant: true, strip_insignificant_zeros: true)
+  #  # => "13"
+  #  389.32314.to_fs(:rounded, precision: 4, significant: true)    # => "389.3"
+  #  1111.2345.to_fs(:rounded, precision: 2, separator: ',', delimiter: '.')
+  #  # => "1.111,23"
+  #
+  #  Human-friendly size in Bytes:
+  #  123.to_fs(:human_size)                                    # => "123 Bytes"
+  #  1234.to_fs(:human_size)                                   # => "1.21 KB"
+  #  12345.to_fs(:human_size)                                  # => "12.1 KB"
+  #  1234567.to_fs(:human_size)                                # => "1.18 MB"
+  #  1234567890.to_fs(:human_size)                             # => "1.15 GB"
+  #  1234567890123.to_fs(:human_size)                          # => "1.12 TB"
+  #  1234567890123456.to_fs(:human_size)                       # => "1.1 PB"
+  #  1234567890123456789.to_fs(:human_size)                    # => "1.07 EB"
+  #  1234567.to_fs(:human_size, precision: 2)                  # => "1.2 MB"
+  #  1234567.to_fs(:human_size, precision: 2, round_mode: :up) # => "1.3 MB"
+  #  483989.to_fs(:human_size, precision: 2)                   # => "470 KB"
+  #  1234567.to_fs(:human_size, precision: 2, separator: ',')  # => "1,2 MB"
+  #  1234567890123.to_fs(:human_size, precision: 5)            # => "1.1228 TB"
+  #  524288000.to_fs(:human_size, precision: 5)                # => "500 MB"
+  #
+  #  Human-friendly format:
+  #  123.to_fs(:human)                                       # => "123"
+  #  1234.to_fs(:human)                                      # => "1.23 Thousand"
+  #  12345.to_fs(:human)                                     # => "12.3 Thousand"
+  #  1234567.to_fs(:human)                                   # => "1.23 Million"
+  #  1234567890.to_fs(:human)                                # => "1.23 Billion"
+  #  1234567890123.to_fs(:human)                             # => "1.23 Trillion"
+  #  1234567890123456.to_fs(:human)                          # => "1.23 Quadrillion"
+  #  1234567890123456789.to_fs(:human)                       # => "1230 Quadrillion"
+  #  489939.to_fs(:human, precision: 2)                      # => "490 Thousand"
+  #  489939.to_fs(:human, precision: 2, round_mode: :down)   # => "480 Thousand"
+  #  489939.to_fs(:human, precision: 4)                      # => "489.9 Thousand"
+  #  1234567.to_fs(:human, precision: 4,
+  #                   significant: false)                             # => "1.2346 Million"
+  #  1234567.to_fs(:human, precision: 1,
+  #                   separator: ',',
+  #                   significant: false)                             # => "1,2 Million"
+  def to_fs: (?Symbol format, **untyped) -> String
+end
+
+# active_support/core_ext/range/conversions.rb
+class Range[out Elem]
+  # Convert range to a formatted string. See RANGE_FORMATS for predefined formats.
+  #
+  # This method is aliased to <tt>to_formatted_s</tt>.
+  #
+  #   range = (1..100)           # => 1..100
+  #
+  #   range.to_s                 # => "1..100"
+  #   range.to_fs(:db)           # => "BETWEEN '1' AND '100'"
+  #
+  #   range = (1..)              # => 1..
+  #   range.to_fs(:db)           # => ">= '1'"
+  #
+  #   range = (..100)            # => ..100
+  #   range.to_fs(:db)           # => "<= '100'"
+  #
+  # == Adding your own range formats to to_fs
+  # You can add your own formats to the Range::RANGE_FORMATS hash.
+  # Use the format name as the hash key and a Proc instance.
+  #
+  #   # config/initializers/range_formats.rb
+  #   Range::RANGE_FORMATS[:short] = ->(start, stop) { "Between #{start.to_fs(:db)} and #{stop.to_fs(:db)}" }
+  def to_fs: (?Symbol format) -> String
+
+  alias to_formatted_s to_fs
+end
+
+# active_support/core_ext/date/conversions.rb
+class Date
+  # Convert to a formatted string. See DATE_FORMATS for predefined formats.
+  #
+  # This method is aliased to <tt>to_formatted_s</tt>.
+  #
+  #   date = Date.new(2007, 11, 10)       # => Sat, 10 Nov 2007
+  #
+  #   date.to_fs(:db)                     # => "2007-11-10"
+  #   date.to_formatted_s(:db)            # => "2007-11-10"
+  #
+  #   date.to_fs(:short)         # => "10 Nov"
+  #   date.to_fs(:number)        # => "20071110"
+  #   date.to_fs(:long)          # => "November 10, 2007"
+  #   date.to_fs(:long_ordinal)  # => "November 10th, 2007"
+  #   date.to_fs(:rfc822)        # => "10 Nov 2007"
+  #   date.to_fs(:iso8601)       # => "2007-11-10"
+  #
+  # == Adding your own date formats to to_fs
+  # You can add your own formats to the Date::DATE_FORMATS hash.
+  # Use the format name as the hash key and either a strftime string
+  # or Proc instance that takes a date argument as the value.
+  #
+  #   # config/initializers/date_formats.rb
+  #   Date::DATE_FORMATS[:month_and_year] = '%B %Y'
+  #   Date::DATE_FORMATS[:short_ordinal] = ->(date) { date.strftime("%B #{date.day.ordinalize}") }
+  def to_fs: (?Symbol format) -> String
+end
+
+# active_support/core_ext/time/conversions.rb
+class Time
+  # Converts to a formatted string. See DATE_FORMATS for built-in formats.
+  #
+  # This method is aliased to <tt>to_formatted_s</tt>.
+  #
+  #   time = Time.now                    # => 2007-01-18 06:10:17 -06:00
+  #
+  #   time.to_fs(:time)                  # => "06:10"
+  #   time.to_formatted_s(:time)         # => "06:10"
+  #
+  #   time.to_fs(:db)           # => "2007-01-18 06:10:17"
+  #   time.to_fs(:number)       # => "20070118061017"
+  #   time.to_fs(:short)        # => "18 Jan 06:10"
+  #   time.to_fs(:long)         # => "January 18, 2007 06:10"
+  #   time.to_fs(:long_ordinal) # => "January 18th, 2007 06:10"
+  #   time.to_fs(:rfc822)       # => "Thu, 18 Jan 2007 06:10:17 -0600"
+  #   time.to_fs(:rfc2822)       # => "Thu, 18 Jan 2007 06:10:17 -0600"
+  #   time.to_fs(:iso8601)      # => "2007-01-18T06:10:17-06:00"
+  #
+  # == Adding your own time formats to +to_fs+
+  # You can add your own formats to the Time::DATE_FORMATS hash.
+  # Use the format name as the hash key and either a strftime string
+  # or Proc instance that takes a time argument as the value.
+  #
+  #   # config/initializers/time_formats.rb
+  #   Time::DATE_FORMATS[:month_and_year] = '%B %Y'
+  #   Time::DATE_FORMATS[:short_ordinal]  = ->(time) { time.strftime("%B #{time.day.ordinalize}") }
+  def to_fs: (?Symbol format) -> String
+end
+
+# active_support/core_ext/date_time/conversions.rb
+class DateTime
+  # Convert to a formatted string. See Time::DATE_FORMATS for predefined formats.
+  #
+  # This method is aliased to <tt>to_formatted_s</tt>.
+  #
+  # === Examples
+  #   datetime = DateTime.civil(2007, 12, 4, 0, 0, 0, 0)   # => Tue, 04 Dec 2007 00:00:00 +0000
+  #
+  #   datetime.to_fs(:db)            # => "2007-12-04 00:00:00"
+  #   datetime.to_formatted_s(:db)   # => "2007-12-04 00:00:00"
+  #   datetime.to_fs(:number)        # => "20071204000000"
+  #   datetime.to_fs(:short)         # => "04 Dec 00:00"
+  #   datetime.to_fs(:long)          # => "December 04, 2007 00:00"
+  #   datetime.to_fs(:long_ordinal)  # => "December 4th, 2007 00:00"
+  #   datetime.to_fs(:rfc822)        # => "Tue, 04 Dec 2007 00:00:00 +0000"
+  #   datetime.to_fs(:iso8601)       # => "2007-12-04T00:00:00+00:00"
+  #
+  # == Adding your own datetime formats to to_fs
+  # DateTime formats are shared with Time. You can add your own to the
+  # Time::DATE_FORMATS hash. Use the format name as the hash key and
+  # either a strftime string or Proc instance that takes a time or
+  # datetime argument as the value.
+  #
+  #   # config/initializers/time_formats.rb
+  #   Time::DATE_FORMATS[:month_and_year] = '%B %Y'
+  #   Time::DATE_FORMATS[:short_ordinal] = lambda { |time| time.strftime("%B #{time.day.ordinalize}") }
+  def to_fs: (?Symbol format) -> String
+end

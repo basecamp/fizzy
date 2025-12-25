@@ -1,0 +1,115 @@
+# <!-- rdoc-file=lib/minitest.rb -->
+# The top-level namespace for Minitest. Also the location of the main runtime.
+# See `Minitest.run` for more information.
+#
+module Minitest
+  @@installed_at_exit: untyped
+
+  @@after_run: untyped
+
+  self.@extensions: untyped
+
+  def self.cattr_accessor: (untyped name) -> untyped
+
+  # <!--
+  #   rdoc-file=lib/minitest.rb
+  #   - autorun()
+  # -->
+  # Registers Minitest to run at process exit
+  #
+  def self.autorun: () -> untyped
+
+  # <!--
+  #   rdoc-file=lib/minitest.rb
+  #   - after_run(&block)
+  # -->
+  # A simple hook allowing you to run a block of code after everything is done
+  # running. Eg:
+  #
+  #     Minitest.after_run { p $debugging_info }
+  #
+  def self.after_run: () { (?) -> untyped } -> untyped
+
+  # <!--
+  #   rdoc-file=lib/minitest.rb
+  #   - register_plugin(name_or_mod)
+  # -->
+  # Register a plugin to be used. Does NOT require / load it.
+  #
+  def self.register_plugin: (untyped name_or_mod) -> nil
+
+  def self.load_plugins: () -> (nil | untyped)
+
+  def self.init_plugins: (untyped options) -> untyped
+
+  def self.process_args: (?untyped args) -> untyped
+
+  # <!--
+  #   rdoc-file=lib/minitest.rb
+  #   - run(args = [])
+  # -->
+  # This is the top-level run method. Everything starts from here. It tells each
+  # Runnable sub-class to run, and each of those are responsible for doing
+  # whatever they do.
+  #
+  # The overall structure of a run looks like this:
+  #
+  #     Minitest.autorun
+  #       Minitest.run(args)
+  #         Minitest.load_plugins
+  #         Minitest.process_args
+  #         Minitest.init_plugins
+  #         Minitest.__run(reporter, options)
+  #           Runnable.runnables.each
+  #             runnable_klass.run(reporter, options)
+  #               self.runnable_methods.each
+  #                 self.run_one_method(self, runnable_method, reporter)
+  #                   Minitest.run_one_method(klass, runnable_method)
+  #                     klass.new(runnable_method).run
+  #
+  def self.run: (?untyped args) -> untyped
+
+  def self.empty_run!: (untyped options) -> untyped
+
+  # <!--
+  #   rdoc-file=lib/minitest.rb
+  #   - __run(reporter, options)
+  # -->
+  # Internal run method. Responsible for telling all Runnable sub-classes to run.
+  #
+  def self.__run: (untyped reporter, untyped options) -> untyped
+
+  def self.filter_backtrace: (untyped bt) -> untyped
+
+  def self.run_one_method: (untyped klass, untyped method_name) -> untyped
+
+  def self.clock_time: () -> untyped
+
+  # <!--
+  #   rdoc-file=lib/minitest/manual_plugins.rb
+  #   - load(*names)
+  # -->
+  # Manually load plugins by name.
+  #
+  def self.load: (*untyped names) -> untyped
+
+  def self.plugin_pride_options: (untyped opts, untyped _options) -> untyped
+
+  def self.plugin_pride_init: (untyped options) -> (nil | untyped)
+
+  attr_accessor self.seed: untyped
+
+  attr_accessor self.parallel_executor: untyped
+
+  attr_accessor self.backtrace_filter: untyped
+
+  attr_accessor self.reporter: untyped
+
+  attr_accessor self.extensions: untyped
+
+  attr_accessor self.info_signal: untyped
+
+  attr_accessor self.allow_fork: untyped
+
+  VERSION: String
+end

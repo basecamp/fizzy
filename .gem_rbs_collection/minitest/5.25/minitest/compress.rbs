@@ -1,0 +1,13 @@
+# <!-- rdoc-file=lib/minitest/compress.rb -->
+# Compresses backtraces.
+#
+module Minitest::Compress
+  # <!--
+  #   rdoc-file=lib/minitest/compress.rb
+  #   - compress(orig)
+  # -->
+  # Takes a backtrace (array of strings) and compresses repeating cycles in it to
+  # make it more readable.
+  #
+  def compress: (untyped orig) -> untyped
+end

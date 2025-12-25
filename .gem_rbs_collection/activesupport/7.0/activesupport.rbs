@@ -1,0 +1,724 @@
+module ActiveSupport
+  interface _IncludeP
+    def include?: (untyped value) -> bool
+  end
+end
+
+module ActiveSupport
+  module Callbacks
+    module ClassMethods
+      # Manual definition to make block optional
+      def set_callback: (untyped name, *untyped filter_list) ?{ () -> untyped } -> untyped
+                      | ...
+
+      # Manual definition to make block optional
+      def skip_callback: (untyped name, *untyped filter_list) ?{ () -> untyped } -> untyped
+                       | ...
+    end
+  end
+
+  module Configurable
+    extend Concern
+
+    class Configuration < InheritableOptions
+      def compile_methods!: () -> void
+
+      # Compiles reader methods so we don't have to go through method_missing.
+      def self.compile_methods!: (Array[Symbol | String] keys) -> void
+    end
+
+    module ClassMethods
+      def config: () -> InheritableOptions
+
+      def configure: () { (InheritableOptions config) -> void } -> void
+
+      private
+
+      # TODO: Fix to use `interned` in names params after releasing ruby/rbs#1499
+      def config_accessor: (*(String | Symbol) names, ?instance_accessor: bool instance_accessor, ?instance_writer: bool instance_writer, ?instance_reader: bool instance_reader) ?{ () -> untyped } -> void
+    end
+
+    def config: () -> InheritableOptions
+  end
+
+  class Deprecation
+    class DeprecatedConstantProxy
+      # Manual definition to make block optional
+      def self.new: (*untyped args, **untyped kwargs) ?{ () -> untyped } -> untyped
+                  | ...
+    end
+  end
+
+  class HashWithIndifferentAccess[T, U] < Hash[T, U]
+    # Manual definition to make block optional
+    def fetch_values: (*untyped indices) ?{ () -> untyped } -> untyped
+                    | ...
+
+    # Manual definition to make block optional
+    def merge: (untyped hash) ?{ () -> untyped } -> untyped
+             | ...
+
+    # Manual definition to make block optional
+    def select: (*untyped args) ?{ () -> untyped } -> untyped
+              | ...
+
+    # Manual definition to make block optional
+    def reject: (*untyped args) ?{ () -> untyped } -> untyped
+              | ...
+
+    # Manual definition to make block optional
+    def transform_values: (*untyped args) ?{ () -> untyped } -> untyped
+                        | ...
+
+    # Manual definition to make block optional
+    def transform_keys: (*untyped args) ?{ () -> untyped } -> untyped
+                      | ...
+
+    # Manual definition to make block optional
+    def transform_keys!: () ?{ (untyped) -> untyped } -> untyped
+                       | ...
+  end
+
+  module Testing
+    module TimeHelpers
+      # Manual definition to make block optional
+      def travel: (untyped duration) ?{ () -> untyped } -> untyped
+                | ...
+
+      # Manual definition to make block optional
+      def travel_to: (untyped date_or_time) ?{ () -> untyped } -> untyped
+                   | ...
+
+      # Manual definition to make block optional
+      def freeze_time: () ?{ () -> untyped } -> untyped
+                     | ...
+    end
+  end
+
+  class TimeWithZone
+    include DateAndTime::Calculations
+
+    # Returns a <tt>Time</tt> instance that represents the time in +time_zone+.
+    def time: () -> ::Time
+
+    # Returns a <tt>Time</tt> instance of the simultaneous time in the UTC timezone.
+    def utc: () -> ::Time
+
+    # Returns a <tt>Time</tt> instance of the simultaneous time in the system timezone.
+    def localtime: (?::String utc_offset) -> ::Time
+                 | (?::Integer utc_offset) -> ::Time
+
+    # Returns true if the current time is within Daylight Savings Time for the
+    # specified time zone.
+    #
+    #   Time.zone = 'Eastern Time (US & Canada)'    # => 'Eastern Time (US & Canada)'
+    #   Time.zone.parse("2012-5-30").dst?           # => true
+    #   Time.zone.parse("2012-11-30").dst?          # => false
+    def dst?: () -> bool
+
+    # Returns true if the current time zone is set to UTC.
+    #
+    #   Time.zone = 'UTC'                           # => 'UTC'
+    #   Time.zone.now.utc?                          # => true
+    #   Time.zone = 'Eastern Time (US & Canada)'    # => 'Eastern Time (US & Canada)'
+    #   Time.zone.now.utc?                          # => false
+    def utc?: () -> bool
+
+    # Returns the offset from current time to UTC time in seconds.
+    def utc_offset: () -> ::Integer
+
+    # Returns the time zone abbreviation.
+    #
+    #   Time.zone = 'Eastern Time (US & Canada)'   # => "Eastern Time (US & Canada)"
+    #   Time.zone.now.zone # => "EST"
+    def zone: () -> ::String
+
+    # Returns a string of the object's date and time in the format used by
+    # HTTP requests.
+    #
+    #   Time.zone.now.httpdate  # => "Tue, 01 Jan 2013 04:39:43 GMT"
+    def httpdate: () -> ::String
+
+    # Returns a string of the object's date and time in the RFC 2822 standard
+    # format.
+    #
+    #   Time.zone.now.rfc2822  # => "Tue, 01 Jan 2013 04:51:39 +0000"
+    def rfc2822: () -> ::String
+
+    # Replaces <tt>%Z</tt> directive with +zone before passing to Time#strftime,
+    # so that zone information is correct.
+    def strftime: (::String arg0) -> ::String
+
+    # Returns Array of parts of Time in sequence of
+    # [seconds, minutes, hours, day, month, year, weekday, yearday, dst?, zone].
+    #
+    #   now = Time.zone.now     # => Tue, 18 Aug 2015 02:29:27 UTC +00:00
+    #   now.to_a                # => [27, 29, 2, 18, 8, 2015, 2, 230, false, "UTC"]
+    def to_a: () -> [ ::Integer, ::Integer, ::Integer, ::Integer, ::Integer, ::Integer, ::Integer, ::Integer, bool, ::String ]
+
+    # Returns the object's date and time as a floating point number of seconds
+    # since the Epoch (January 1, 1970 00:00 UTC).
+    #
+    #   Time.zone.now.to_f # => 1417709320.285418
+    def to_f: () -> ::Float
+
+    # Returns the object's date and time as an integer number of seconds
+    # since the Epoch (January 1, 1970 00:00 UTC).
+    #
+    #   Time.zone.now.to_i # => 1417709320
+    def to_i: () -> ::Integer
+
+    # Returns the object's date and time as a rational number of seconds
+    # since the Epoch (January 1, 1970 00:00 UTC).
+    #
+    #   Time.zone.now.to_r # => (708854548642709/500000)
+    def to_r: () -> ::Rational
+
+    # Returns an instance of DateTime with the timezone's UTC offset
+    #
+    #   Time.zone.now.to_datetime                         # => Tue, 18 Aug 2015 02:32:20 +0000
+    #   Time.current.in_time_zone('Hawaii').to_datetime   # => Mon, 17 Aug 2015 16:32:20 -1000
+    def to_datetime: () -> ::DateTime
+
+    # Returns an instance of +Time+, either with the same UTC offset
+    # as +self+ or in the local system timezone depending on the setting
+    # of +ActiveSupport.to_time_preserves_timezone+.
+    def to_time: () -> ::Time
+
+    # class_eval
+    def year: () -> Integer
+    def mon: () -> Integer
+    def month: () -> Integer
+    def day: () -> Integer
+    def mday: () -> Integer
+    def wday: () -> Integer
+    def yday: () -> Integer
+    def hour: () -> Integer
+    def min: () -> Integer
+    def sec: () -> Integer
+    def usec: () -> Integer
+    def nsec: () -> Integer
+    def to_date: () -> Date
+
+    # method_missing
+    def asctime: () -> String
+    alias at_beginning_of_day beginning_of_day
+    alias at_beginning_of_hour beginning_of_hour
+    alias at_beginning_of_minute beginning_of_minute
+    alias at_end_of_day end_of_day
+    alias at_end_of_hour end_of_hour
+    alias at_end_of_minute end_of_minute
+    alias at_midday middle_of_day
+    alias at_middle_of_day middle_of_day
+    alias at_midnight beginning_of_day
+    alias at_noon middle_of_day
+    def beginning_of_day: () -> self
+    def beginning_of_hour: () -> self
+    def beginning_of_minute: () -> self
+    def ceil: (?int ndigits) -> self
+    def compare_with_coercion: (untyped other) -> (-1 | 0 | 1 | nil)
+    def compare_without_coercion: (untyped other) -> (-1 | 0 | 1 | nil)
+    def ctime: () -> String
+    def end_of_day: () -> self
+    def end_of_hour: () -> self
+    def end_of_minute: () -> self
+    def eql_with_coercion: (untyped other) -> bool
+    def eql_without_coercion: (untyped other) -> bool
+    def floor: (?int ndigits) -> self
+    def friday?: () -> bool
+    alias midday middle_of_day
+    def middle_of_day: () -> self
+    alias midnight beginning_of_day
+    def minus_with_coercion: (Time | self arg0) -> Float
+                           | (Numeric arg0) -> self
+    def minus_with_duration: (Time | self arg0) -> Float
+                           | (Numeric arg0) -> self
+    def minus_without_coercion: (Time | self arg0) -> Float
+                              | (Numeric arg0) -> self
+    def minus_without_duration: (Time | self arg0) -> Float
+                              | (Numeric arg0) -> self
+    def monday?: () -> bool
+    def next_day: () -> self
+    def next_month: () -> self
+    def next_year: () -> self
+    alias noon middle_of_day
+    def plus_without_duration: (Time | self arg0) -> Float
+                             | (Numeric arg0) -> self
+    def prev_day: () -> self
+    def prev_month: () -> self
+    def prev_year: () -> self
+    def round: (?int ndigits) -> self
+    def saturday?: () -> bool
+    def seconds_since_midnight: () -> Float
+    def seconds_until_end_of_day: () -> Integer
+    def sec_fraction: () -> (Integer | Rational)
+    def subsec: () -> (Integer | Rational)
+    def sunday?: () -> bool
+    def thursday?: () -> bool
+    def to_default_s: () -> String
+    def tuesday?: () -> bool
+    def tv_nsec: () -> Integer
+    def tv_usec: () -> Integer
+    def wednesday?: () -> bool
+  end
+
+  module SecurityUtils
+    def self?.fixed_length_secure_compare: (String a, String b) -> bool
+
+    def self?.secure_compare: (String a, String b) -> bool
+  end
+
+  class OrderedOptions < Hash[Symbol, untyped]
+    alias _get []
+
+    # TODO: Fix to use `interned` in key params after releasing ruby/rbs#1499
+    def []=: ((String | Symbol) key, untyped value) -> untyped
+
+    # TODO: Fix to use `interned` in key params after releasing ruby/rbs#1499
+    def []: ((String | Symbol) key) -> untyped
+
+    def method_missing: (Symbol name, *untyped args) -> untyped
+
+    def respond_to_missing?: (Symbol name, ?bool include_private) -> true
+
+    def extractable_options?: () -> true
+  end
+
+  class InheritableOptions < OrderedOptions
+    # TODO: Fix to use `interned` in parent params after releasing ruby/rbs#1499
+    def initialize: (?Hash[(String | Symbol), untyped]? parent) -> void
+
+    def inheritable_copy: () -> self
+  end
+end
+
+class Hash[unchecked out K, unchecked out V]
+  # Manual definition to make block optional
+  def deep_merge: (untyped other_hash) ?{ () -> untyped } -> untyped
+                | ...
+
+  # Manual definition to make block optional
+  def deep_merge!: (untyped other_hash) ?{ () -> untyped } -> untyped
+                 | ...
+
+  def stringify_keys: () -> Hash[String, V]
+
+  def stringify_keys!: () -> self
+
+  def symbolize_keys: () -> Hash[Symbol, V]
+  alias to_options symbolize_keys
+
+  def symbolize_keys!: () -> self
+  alias to_options! symbolize_keys!
+
+  def deep_stringify_keys: () -> Hash[String, untyped]
+
+  def deep_stringify_keys!: () -> self
+
+  def deep_symbolize_keys: () -> Hash[Symbol, untyped]
+
+  def deep_symbolize_keys!: () -> self
+end
+
+class Module
+  # Manual definition to make block optional
+  def mattr_reader: (*untyped syms, ?default: untyped? default, ?instance_accessor: bool instance_accessor, ?instance_reader: bool instance_reader) ?{ () -> untyped } -> untyped
+                  | ...
+
+  # Manual definition to make block optional
+  def mattr_writer: (*untyped syms, ?default: untyped? default, ?instance_accessor: bool instance_accessor, ?instance_writer: bool instance_writer) ?{ () -> untyped } -> untyped
+                  | ...
+
+  # Manual definition to make block optional
+  def mattr_accessor: (*untyped syms, ?default: untyped? default, ?instance_accessor: bool instance_accessor, ?instance_writer: bool instance_writer, ?instance_reader: bool instance_reader) ?{ () -> untyped } -> untyped
+                    | ...
+
+  # TODO: Fix to use `interned` in attrs params after releasing ruby/rbs#1499
+  def attr_internal_reader: (*(Symbol | String) attrs) -> void
+
+  # TODO: Fix to use `interned` in attrs params after releasing ruby/rbs#1499
+  def attr_internal_writer: (*(Symbol | String) attrs) -> void
+
+  # TODO: Fix to use `interned` in attrs params after releasing ruby/rbs#1499
+  def attr_internal_accessor: (*(Symbol | String) attrs) -> void
+
+  alias attr_internal attr_internal_accessor
+
+  attr_accessor self.attr_internal_naming_format: String
+
+  private
+
+  # TODO: Fix to use `interned` in attr params after releasing ruby/rbs#1499
+  def attr_internal_ivar_name: ((Symbol | String) attr) -> String
+
+  type access_type = :reader | :writer
+  # TODO: Fix to use `interned` in attr params after releasing ruby/rbs#1499
+  def attr_internal_define: ((Symbol | String) attr_name, access_type `type`) -> void
+end
+
+module ActiveSupport
+  module Tryable : BasicObject
+    def try: [T] () { (self) -> T } -> T # When yield self
+           | [T] () { () -> T } -> T # When instance_eval
+           | ((String | Symbol) method_name, *untyped args) ?{ (*untyped) -> untyped } -> untyped
+
+    def try!: [T] () { (self) -> T } -> T # When yield self
+            | [T] () { () -> T } -> T # When instance_eval
+            | ((String | Symbol) method_name, *untyped args) ?{ (*untyped) -> untyped } -> untyped
+  end
+end
+
+class NilClass
+  def try: () { (untyped) -> untyped } -> nil
+         | () { () -> untyped } -> nil
+         | ((String | Symbol) method_name, *untyped args) ?{ (*untyped) -> untyped } -> nil
+
+  def try!: () { (untyped) -> untyped } -> nil
+          | () { () -> untyped } -> nil
+          | ((String | Symbol) method_name, *untyped args) ?{ (*untyped) -> untyped } -> nil
+end
+
+class Array[unchecked out Elem]
+  # Manual definition to make block optional
+  def in_groups: (untyped number, ?untyped? fill_with) ?{ (untyped) -> untyped } -> untyped
+
+  # Returns a string that represents the array in XML by invoking +to_xml+
+  # on each element. Active Record collections delegate their representation
+  # in XML to this method.
+  #
+  # All elements are expected to respond to +to_xml+, if any of them does
+  # not then an exception is raised.
+  #
+  # The root node reflects the class name of the first element in plural
+  # if all elements belong to the same type and that's not Hash:
+  #
+  #   customer.projects.to_xml
+  #
+  #   <?xml version="1.0" encoding="UTF-8"?>
+  #   <projects type="array">
+  #     <project>
+  #       <amount type="decimal">20000.0</amount>
+  #       <customer-id type="integer">1567</customer-id>
+  #       <deal-date type="date">2008-04-09</deal-date>
+  #       ...
+  #     </project>
+  #     <project>
+  #       <amount type="decimal">57230.0</amount>
+  #       <customer-id type="integer">1567</customer-id>
+  #       <deal-date type="date">2008-04-15</deal-date>
+  #       ...
+  #     </project>
+  #   </projects>
+  #
+  # Otherwise the root element is "objects":
+  #
+  #   [{ foo: 1, bar: 2}, { baz: 3}].to_xml
+  #
+  #   <?xml version="1.0" encoding="UTF-8"?>
+  #   <objects type="array">
+  #     <object>
+  #       <bar type="integer">2</bar>
+  #       <foo type="integer">1</foo>
+  #     </object>
+  #     <object>
+  #       <baz type="integer">3</baz>
+  #     </object>
+  #   </objects>
+  #
+  # If the collection is empty the root element is "nil-classes" by default:
+  #
+  #   [].to_xml
+  #
+  #   <?xml version="1.0" encoding="UTF-8"?>
+  #   <nil-classes type="array"/>
+  #
+  # To ensure a meaningful root element use the <tt>:root</tt> option:
+  #
+  #   customer_with_no_projects.projects.to_xml(root: 'projects')
+  #
+  #   <?xml version="1.0" encoding="UTF-8"?>
+  #   <projects type="array"/>
+  #
+  # By default name of the node for the children of root is <tt>root.singularize</tt>.
+  # You can change it with the <tt>:children</tt> option.
+  #
+  # The +options+ hash is passed downwards:
+  #
+  #   Message.all.to_xml(skip_types: true)
+  #
+  #   <?xml version="1.0" encoding="UTF-8"?>
+  #   <messages>
+  #     <message>
+  #       <created-at>2008-03-07T09:58:18+01:00</created-at>
+  #       <id>1</id>
+  #       <name>1</name>
+  #       <updated-at>2008-03-07T09:58:18+01:00</updated-at>
+  #       <user-id>1</user-id>
+  #     </message>
+  #   </messages>
+  #
+  def to_xml: (?::Hash[untyped, untyped] options) ?{ (untyped) -> untyped } -> untyped
+end
+
+# active_support/core_ext/object/blank.rb
+class Object
+  def blank?: () -> bool
+  def present?: () -> bool
+  def presence: () -> self?
+end
+
+# active_support/core_ext/object/inclusion.rb
+class Object
+  def in?: (ActiveSupport::_IncludeP another_object) -> bool
+  def presence_in: (ActiveSupport::_IncludeP another_object) -> (self | nil)
+end
+
+class NilClass
+  def blank?: () -> true
+  def present?: () -> false
+end
+
+class FalseClass
+  def blank?: () -> true
+  def present?: () -> false
+end
+
+class TrueClass
+  def blank?: () -> false
+  def present?: () -> true
+end
+
+class Array[unchecked out Elem]
+  alias blank? empty?
+  def present?: () -> bool
+end
+
+class Hash[unchecked out K, unchecked out V]
+  alias blank? empty?
+  def present?: () -> bool
+
+  # Returns a string containing an XML representation of its receiver:
+  #
+  #   { foo: 1, bar: 2 }.to_xml
+  #   # =>
+  #   # <?xml version="1.0" encoding="UTF-8"?>
+  #   # <hash>
+  #   #   <foo type="integer">1</foo>
+  #   #   <bar type="integer">2</bar>
+  #   # </hash>
+  #
+  # To do so, the method loops over the pairs and builds nodes that depend on
+  # the _values_. Given a pair +key+, +value+:
+  #
+  # * If +value+ is a hash there's a recursive call with +key+ as <tt>:root</tt>.
+  #
+  # * If +value+ is an array there's a recursive call with +key+ as <tt>:root</tt>,
+  #   and +key+ singularized as <tt>:children</tt>.
+  #
+  # * If +value+ is a callable object it must expect one or two arguments. Depending
+  #   on the arity, the callable is invoked with the +options+ hash as first argument
+  #   with +key+ as <tt>:root</tt>, and +key+ singularized as second argument. The
+  #   callable can add nodes by using <tt>options[:builder]</tt>.
+  #
+  #     {foo: lambda { |options, key| options[:builder].b(key) }}.to_xml
+  #     # => "<b>foo</b>"
+  #
+  # * If +value+ responds to +to_xml+ the method is invoked with +key+ as <tt>:root</tt>.
+  #
+  #     class Foo
+  #       def to_xml(options)
+  #         options[:builder].bar 'fooing!'
+  #       end
+  #     end
+  #
+  #     { foo: Foo.new }.to_xml(skip_instruct: true)
+  #     # =>
+  #     # <hash>
+  #     #   <bar>fooing!</bar>
+  #     # </hash>
+  #
+  # * Otherwise, a node with +key+ as tag is created with a string representation of
+  #   +value+ as text node. If +value+ is +nil+ an attribute "nil" set to "true" is added.
+  #   Unless the option <tt>:skip_types</tt> exists and is true, an attribute "type" is
+  #   added as well according to the following mapping:
+  #
+  #     XML_TYPE_NAMES = {
+  #       "Symbol"     => "symbol",
+  #       "Integer"    => "integer",
+  #       "BigDecimal" => "decimal",
+  #       "Float"      => "float",
+  #       "TrueClass"  => "boolean",
+  #       "FalseClass" => "boolean",
+  #       "Date"       => "date",
+  #       "DateTime"   => "dateTime",
+  #       "Time"       => "dateTime"
+  #     }
+  #
+  # By default the root node is "hash", but that's configurable via the <tt>:root</tt> option.
+  #
+  # The default XML builder is a fresh instance of <tt>Builder::XmlMarkup</tt>. You can
+  # configure your own builder with the <tt>:builder</tt> option. The method also accepts
+  # options like <tt>:dasherize</tt> and friends, they are forwarded to the builder.
+  def to_xml: (?::Hash[untyped, untyped] options) ?{ (untyped) -> untyped } -> untyped
+end
+
+class String
+  BLANK_RE: Regexp
+  ENCODED_BLANKS: Concurrent::Map[Encoding, Regexp]
+  def blank?: () -> bool
+  def present?: () -> bool
+end
+
+class Numeric
+  def blank?: () -> false
+end
+
+class Time
+  def blank?: () -> false
+end
+
+# active_support/core_ext/string/inflections.rb
+class String
+  def camelize: (?Symbol first_letter) -> String
+  alias camelcase camelize
+  def underscore: () -> String
+  def dasherize: () -> String
+  def pluralize: (?Integer | Symbol? count, ?Symbol locale) -> String
+  def singularize: (?Symbol locale) -> String
+  def constantize: () -> untyped
+  def safe_constantize: () -> untyped
+  def titleize: (?keep_id_suffix: boolish) -> String
+  alias titlecase titleize
+  def demodulize: () -> String
+  def deconstantize: () -> String
+  def parameterize: (?separator: String, ?preserve_case: boolish, ?locale: Symbol) -> String
+  def tableize: () -> String
+  def classify: () -> String
+  def humanize: (?capitalize: boolish, ?keep_id_suffix: boolish) -> String
+  def upcase_first: () -> String
+  def foreign_key: (?boolish separate_class_name_and_id_with_underscore) -> String
+end
+
+class Array[unchecked out Elem]
+  # Wraps its argument in an array unless it is already an array (or array-like).
+  #
+  # Specifically:
+  #
+  # * If the argument is +nil+ an empty array is returned.
+  # * Otherwise, if the argument responds to +to_ary+ it is invoked, and its result returned.
+  # * Otherwise, returns an array with the argument as its single element.
+  #
+  #     Array.wrap(nil)       # => []
+  #     Array.wrap([1, 2, 3]) # => [1, 2, 3]
+  #     Array.wrap(0)         # => [0]
+  #
+  # This method is similar in purpose to <tt>Kernel#Array</tt>, but there are some differences:
+  #
+  # * If the argument responds to +to_ary+ the method is invoked. <tt>Kernel#Array</tt>
+  #   moves on to try +to_a+ if the returned value is +nil+, but <tt>Array.wrap</tt> returns
+  #   an array with the argument as its single element right away.
+  # * If the returned value from +to_ary+ is neither +nil+ nor an +Array+ object, <tt>Kernel#Array</tt>
+  #   raises an exception, while <tt>Array.wrap</tt> does not, it just returns the value.
+  # * It does not call +to_a+ on the argument, if the argument does not respond to +to_ary+
+  #   it returns an array with the argument as its single element.
+  #
+  # The last point is easily explained with some enumerables:
+  #
+  #   Array(foo: :bar)      # => [[:foo, :bar]]
+  #   Array.wrap(foo: :bar) # => [{:foo=>:bar}]
+  #
+  # There's also a related idiom that uses the splat operator:
+  #
+  #   [*object]
+  #
+  # which returns <tt>[]</tt> for +nil+, but calls to <tt>Array(object)</tt> otherwise.
+  #
+  # The differences with <tt>Kernel#Array</tt> explained above
+  # apply to the rest of <tt>object</tt>s.
+  def self.wrap: (nil) -> Array[untyped]
+               | [T] (_ToAry[T] array_like) -> Array[T]
+               | [T] (T ele) -> Array[T]
+end
+
+module ActiveSupport
+  # Rescuable module adds support for easier exception handling.
+  module Rescuable
+    extend Concern
+
+    module ClassMethods
+      # Rescue exceptions raised in controller actions.
+      #
+      # <tt>rescue_from</tt> receives a series of exception classes or class
+      # names, and a trailing <tt>:with</tt> option with the name of a method
+      # or a Proc object to be called to handle them. Alternatively a block can
+      # be given.
+      #
+      # Handlers that take one argument will be called with the exception, so
+      # that the exception can be inspected when dealing with it.
+      #
+      # Handlers are inherited. They are searched from right to left, from
+      # bottom to top, and up the hierarchy. The handler of the first class for
+      # which <tt>exception.is_a?(klass)</tt> holds true is the one invoked, if
+      # any.
+      #
+      #   class ApplicationController < ActionController::Base
+      #     rescue_from User::NotAuthorized, with: :deny_access # self defined exception
+      #     rescue_from ActiveRecord::RecordInvalid, with: :show_errors
+      #
+      #     rescue_from 'MyAppError::Base' do |exception|
+      #       render xml: exception, status: 500
+      #     end
+      #
+      #     private
+      #       def deny_access
+      #         ...
+      #       end
+      #
+      #       def show_errors(exception)
+      #         exception.record.new_record? ? ...
+      #       end
+      #   end
+      #
+      # Exceptions raised inside exception handlers are not propagated up.
+      def rescue_from: (*Class) { (Exception) [self: instance] -> void } -> void
+                     | (*Class, with: Symbol | ^(Exception) [self: instance] -> void) -> void
+
+      # Matches an exception to a handler based on the exception class.
+      #
+      # If no handler matches the exception, check for a handler matching the
+      # (optional) exception.cause. If no handler matches the exception or its
+      # cause, this returns +nil+, so you can deal with unhandled exceptions.
+      # Be sure to re-raise unhandled exceptions if this is what you expect.
+      #
+      #     begin
+      #       (trim non-ascii characters)
+      #     rescue => exception
+      #       rescue_with_handler(exception) || raise
+      #     end
+      #
+      # Returns the exception if it was handled and +nil+ if it was not.
+      def rescue_with_handler: (untyped exception, ?visited_exceptions: untyped visited_exceptions, ?object: untyped object) -> untyped
+
+      def handler_for_rescue: (untyped exception, ?object: untyped object) -> untyped
+
+      private
+
+      def find_rescue_handler: (untyped exception) -> untyped
+
+      def constantize_rescue_handler_class: (untyped class_or_name) -> untyped
+    end
+
+    # Delegates to the class method, but uses the instance as the subject for
+    # rescue_from handlers (method calls, instance_exec blocks).
+    def rescue_with_handler: (untyped exception) -> untyped
+
+    def handler_for_rescue: (untyped exception) -> untyped
+  end
+end
+
+module ActiveSupport
+  module Messages
+    module Metadata
+    end
+  end
+end

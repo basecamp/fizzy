@@ -1,0 +1,44 @@
+module Zip
+  class EntrySet
+    include Enumerable[Entry]
+
+    attr_accessor entry_set: untyped
+
+    attr_accessor entry_order: untyped
+
+    def initialize: (?untyped an_enumerable) -> void
+
+    def include?: (untyped entry) -> bool
+
+    def find_entry: (untyped entry) -> untyped
+
+    def <<: (untyped entry) -> (untyped | nil)
+
+    alias push <<
+
+    def size: () -> untyped
+
+    alias length size
+
+    def delete: (untyped entry) -> (untyped | nil)
+
+    def each: () { (Entry) -> void } -> void
+
+    def entries: () -> Array[Entry]
+
+    # deep clone
+    def dup: () -> untyped
+
+    def ==: (untyped other) -> (false | untyped)
+
+    def parent: (untyped entry) -> untyped
+
+    def glob: (untyped pattern, ?untyped flags) ?{ (untyped) -> untyped } -> untyped
+
+    def sorted_entries: () -> untyped
+
+    private
+
+    def to_key: (untyped entry) -> untyped
+  end
+end

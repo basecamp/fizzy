@@ -1,0 +1,34 @@
+class ConnectionPool[T]
+  class Error < ::RuntimeError
+  end
+
+  class PoolShuttingDownError < ::ConnectionPool::Error
+  end
+
+  class TimeoutError < ::Timeout::Error
+  end
+
+  class Wrapper[T]
+    def initialize: (pool: ConnectionPool[T]) -> void
+                  | (?size: Integer, ?timeout: Numeric, ?auto_reload_after_fork: bool) { () -> T } -> void
+    def wrapped_pool: () -> ConnectionPool[T]
+    def with: [A] () { (T) -> A } -> A
+    def pool_shutdown: () { (T) -> void } -> void
+    def pool_size: () -> Integer
+    def pool_available: () -> Integer
+  end
+
+  def initialize: (?size: Integer, ?timeout: Numeric, ?auto_reload_after_fork: bool) { () -> T } -> void
+  def with: [A] (?timeout: Numeric) { (T) -> A } -> A
+  def checkout: (?timeout: Numeric) -> T
+  def checkin: (?force: bool) -> void
+  def shutdown: () { (T) -> void } -> void
+  def reload: () { (T) -> void } -> void
+
+  attr_reader size: Integer
+  attr_reader auto_reload_after_fork: bool
+
+  def available: () -> Integer
+
+  alias then with
+end

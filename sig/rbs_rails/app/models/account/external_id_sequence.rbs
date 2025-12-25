@@ -1,0 +1,98 @@
+class Account < ::ApplicationRecord
+  class ExternalIdSequence < ::ApplicationRecord
+    extend ::_ActiveRecord_Relation_ClassMethods[::Account::ExternalIdSequence, ::Account::ExternalIdSequence::ActiveRecord_Relation, ::String]
+
+    module GeneratedAttributeMethods
+      def id: () -> ::String
+
+      def id=: (::String) -> ::String
+
+      def id?: () -> bool
+
+      def id_changed?: () -> bool
+
+      def id_change: () -> [ ::String?, ::String? ]
+
+      def id_will_change!: () -> void
+
+      def id_was: () -> ::String?
+
+      def id_previously_changed?: () -> bool
+
+      def id_previous_change: () -> ::Array[::String?]?
+
+      def id_previously_was: () -> ::String?
+
+      def id_before_last_save: () -> ::String?
+
+      def id_change_to_be_saved: () -> ::Array[::String?]?
+
+      def id_in_database: () -> ::String?
+
+      def saved_change_to_id: () -> ::Array[::String?]?
+
+      def saved_change_to_id?: () -> bool
+
+      def will_save_change_to_id?: () -> bool
+
+      def restore_id!: () -> void
+
+      def clear_id_change: () -> void
+
+      def value: () -> ::Integer
+
+      def value=: (::Integer) -> ::Integer
+
+      def value?: () -> bool
+
+      def value_changed?: () -> bool
+
+      def value_change: () -> [ ::Integer?, ::Integer? ]
+
+      def value_will_change!: () -> void
+
+      def value_was: () -> ::Integer?
+
+      def value_previously_changed?: () -> bool
+
+      def value_previous_change: () -> ::Array[::Integer?]?
+
+      def value_previously_was: () -> ::Integer?
+
+      def value_before_last_save: () -> ::Integer?
+
+      def value_change_to_be_saved: () -> ::Array[::Integer?]?
+
+      def value_in_database: () -> ::Integer?
+
+      def saved_change_to_value: () -> ::Array[::Integer?]?
+
+      def saved_change_to_value?: () -> bool
+
+      def will_save_change_to_value?: () -> bool
+
+      def restore_value!: () -> void
+
+      def clear_value_change: () -> void
+    end
+    include GeneratedAttributeMethods
+
+    module GeneratedAssociationMethods
+    end
+    include GeneratedAssociationMethods
+
+    module GeneratedRelationMethods
+    end
+
+    class ActiveRecord_Relation < ::ActiveRecord::Relation
+      include ::Account::ExternalIdSequence::GeneratedRelationMethods
+      include ::_ActiveRecord_Relation[::Account::ExternalIdSequence, ::String]
+      include ::Enumerable[::Account::ExternalIdSequence]
+    end
+
+    class ActiveRecord_Associations_CollectionProxy < ::ActiveRecord::Associations::CollectionProxy
+      include ::Account::ExternalIdSequence::GeneratedRelationMethods
+      include ::_ActiveRecord_Relation[::Account::ExternalIdSequence, ::String]
+    end
+  end
+end

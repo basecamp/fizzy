@@ -1,0 +1,65 @@
+module Concurrent
+  class Map[unchecked out K, unchecked out V]
+    def initialize: (?Hash[Symbol, untyped] options) ?{ (self, untyped) -> V } -> void
+
+    def []: (untyped key) -> V?
+    def []=: (K key, V value) -> V
+
+    alias get []
+    alias put []=
+
+    def compute: (K key) { (V? old_value) -> V } -> V
+               | (K key) { (V? old_value) -> nil } -> nil
+
+    def compute_if_absent: (K key) { () -> V } -> V
+
+    def compute_if_present: (K key) { (V old_value) -> V? } -> V?
+
+    def fetch: (untyped key) -> V
+             | [D] (untyped key, D default_value) -> (V | D)
+             | [T, D] (T key) { (T key) -> D } -> (V | D)
+
+    def fetch_or_store: (untyped key) -> V
+                      | (K key, V default_value) -> V
+                      | (K key) { (K key) -> V } -> V
+
+    def put_if_absent: (K key, V value) -> V?
+
+    def value?: (untyped value) -> bool
+
+    def keys: () -> Array[K]
+
+    def values: () -> Array[V]
+
+    def each_key: () { (K key) -> void } -> self
+
+    def each_value: () { (V value) -> void } -> self
+
+    def each_pair: () { (K key, V value) -> void } -> self
+
+    alias each each_pair
+
+    def key: (untyped value) -> K?
+
+    def empty?: () -> bool
+
+    def size: () -> Integer
+
+    def marshal_dump: () -> Hash[K, V]
+    def marshal_load: (Hash[K, V] hash) -> self
+
+    # undef :freeze
+
+    def inspect: () -> String
+
+    private
+
+    def raise_fetch_no_key: () -> bot
+
+    def initialize_copy: (instance other) -> void
+
+    def populate_from: (Hash[K, V] hash) -> self
+
+    def validate_options_hash!: (Hash[Symbol, untyped] options) -> void
+  end
+end

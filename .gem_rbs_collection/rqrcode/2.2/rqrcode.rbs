@@ -1,0 +1,14 @@
+module RQRCode
+  class QRCode
+    type level = :l | :m | :q | :h
+    type mode = :number | :alphanumeric | :byte_8bit | :kanji
+    type segment = { data: String, mode: mode }
+
+    def initialize: (String, *untyped) -> void
+    def as_svg: (?offset: Integer, ?fill: String | :white | :currentColor, ?color: String | :black | :currentColor, ?module_size: Integer, ?shape_rendering: "auto" | "optimizeSpeed" | "crispEdges" | "geometricPrecision", ?standalone: bool, ?use_path: bool, ?viewbox: bool, ?svg_attributes: Hash[untyped, untyped]) -> String
+    def as_png: (?fill: untyped, ?color: untyped, ?size: Integer, ?border_modules: Integer, ?module_px_size: Integer, ?border: Integer, ?resize_exactly_to: bool, ?resize_gte_to: bool) -> ChunkyPNG::Image
+              | (file: untyped, ?fill: untyped, ?color: untyped, ?color_mode: Integer, ?bit_depth: Integer, ?interlace: bool, ?compression: untyped, ?size: Integer, ?border_modules: Integer, ?module_px_size: Integer, ?border: Integer, ?resize_exactly_to: bool, ?resize_gte_to: bool) -> ChunkyPNG::Image
+    def as_ansi: (?light: String, ?dark: String, ?fill_character: String, ?quiet_zone_size: Integer) -> String
+    def to_s: () -> String
+  end
+end

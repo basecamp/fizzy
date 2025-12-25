@@ -1,0 +1,246 @@
+class Session < ::ApplicationRecord
+  extend ::_ActiveRecord_Relation_ClassMethods[::Session, ::Session::ActiveRecord_Relation, ::String]
+
+  module GeneratedAttributeMethods
+    def id: () -> ::String
+
+    def id=: (::String) -> ::String
+
+    def id?: () -> bool
+
+    def id_changed?: () -> bool
+
+    def id_change: () -> [ ::String?, ::String? ]
+
+    def id_will_change!: () -> void
+
+    def id_was: () -> ::String?
+
+    def id_previously_changed?: () -> bool
+
+    def id_previous_change: () -> ::Array[::String?]?
+
+    def id_previously_was: () -> ::String?
+
+    def id_before_last_save: () -> ::String?
+
+    def id_change_to_be_saved: () -> ::Array[::String?]?
+
+    def id_in_database: () -> ::String?
+
+    def saved_change_to_id: () -> ::Array[::String?]?
+
+    def saved_change_to_id?: () -> bool
+
+    def will_save_change_to_id?: () -> bool
+
+    def restore_id!: () -> void
+
+    def clear_id_change: () -> void
+
+    def created_at: () -> ::ActiveSupport::TimeWithZone
+
+    def created_at=: (::ActiveSupport::TimeWithZone) -> ::ActiveSupport::TimeWithZone
+
+    def created_at?: () -> bool
+
+    def created_at_changed?: () -> bool
+
+    def created_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
+
+    def created_at_will_change!: () -> void
+
+    def created_at_was: () -> ::ActiveSupport::TimeWithZone?
+
+    def created_at_previously_changed?: () -> bool
+
+    def created_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def created_at_previously_was: () -> ::ActiveSupport::TimeWithZone?
+
+    def created_at_before_last_save: () -> ::ActiveSupport::TimeWithZone?
+
+    def created_at_change_to_be_saved: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def created_at_in_database: () -> ::ActiveSupport::TimeWithZone?
+
+    def saved_change_to_created_at: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def saved_change_to_created_at?: () -> bool
+
+    def will_save_change_to_created_at?: () -> bool
+
+    def restore_created_at!: () -> void
+
+    def clear_created_at_change: () -> void
+
+    def identity_id: () -> ::String
+
+    def identity_id=: (::String) -> ::String
+
+    def identity_id?: () -> bool
+
+    def identity_id_changed?: () -> bool
+
+    def identity_id_change: () -> [ ::String?, ::String? ]
+
+    def identity_id_will_change!: () -> void
+
+    def identity_id_was: () -> ::String?
+
+    def identity_id_previously_changed?: () -> bool
+
+    def identity_id_previous_change: () -> ::Array[::String?]?
+
+    def identity_id_previously_was: () -> ::String?
+
+    def identity_id_before_last_save: () -> ::String?
+
+    def identity_id_change_to_be_saved: () -> ::Array[::String?]?
+
+    def identity_id_in_database: () -> ::String?
+
+    def saved_change_to_identity_id: () -> ::Array[::String?]?
+
+    def saved_change_to_identity_id?: () -> bool
+
+    def will_save_change_to_identity_id?: () -> bool
+
+    def restore_identity_id!: () -> void
+
+    def clear_identity_id_change: () -> void
+
+    def ip_address: () -> ::String?
+
+    def ip_address=: (::String?) -> ::String?
+
+    def ip_address?: () -> bool
+
+    def ip_address_changed?: () -> bool
+
+    def ip_address_change: () -> [ ::String?, ::String? ]
+
+    def ip_address_will_change!: () -> void
+
+    def ip_address_was: () -> ::String?
+
+    def ip_address_previously_changed?: () -> bool
+
+    def ip_address_previous_change: () -> ::Array[::String?]?
+
+    def ip_address_previously_was: () -> ::String?
+
+    def ip_address_before_last_save: () -> ::String?
+
+    def ip_address_change_to_be_saved: () -> ::Array[::String?]?
+
+    def ip_address_in_database: () -> ::String?
+
+    def saved_change_to_ip_address: () -> ::Array[::String?]?
+
+    def saved_change_to_ip_address?: () -> bool
+
+    def will_save_change_to_ip_address?: () -> bool
+
+    def restore_ip_address!: () -> void
+
+    def clear_ip_address_change: () -> void
+
+    def updated_at: () -> ::ActiveSupport::TimeWithZone
+
+    def updated_at=: (::ActiveSupport::TimeWithZone) -> ::ActiveSupport::TimeWithZone
+
+    def updated_at?: () -> bool
+
+    def updated_at_changed?: () -> bool
+
+    def updated_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
+
+    def updated_at_will_change!: () -> void
+
+    def updated_at_was: () -> ::ActiveSupport::TimeWithZone?
+
+    def updated_at_previously_changed?: () -> bool
+
+    def updated_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def updated_at_previously_was: () -> ::ActiveSupport::TimeWithZone?
+
+    def updated_at_before_last_save: () -> ::ActiveSupport::TimeWithZone?
+
+    def updated_at_change_to_be_saved: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def updated_at_in_database: () -> ::ActiveSupport::TimeWithZone?
+
+    def saved_change_to_updated_at: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def saved_change_to_updated_at?: () -> bool
+
+    def will_save_change_to_updated_at?: () -> bool
+
+    def restore_updated_at!: () -> void
+
+    def clear_updated_at_change: () -> void
+
+    def user_agent: () -> ::String?
+
+    def user_agent=: (::String?) -> ::String?
+
+    def user_agent?: () -> bool
+
+    def user_agent_changed?: () -> bool
+
+    def user_agent_change: () -> [ ::String?, ::String? ]
+
+    def user_agent_will_change!: () -> void
+
+    def user_agent_was: () -> ::String?
+
+    def user_agent_previously_changed?: () -> bool
+
+    def user_agent_previous_change: () -> ::Array[::String?]?
+
+    def user_agent_previously_was: () -> ::String?
+
+    def user_agent_before_last_save: () -> ::String?
+
+    def user_agent_change_to_be_saved: () -> ::Array[::String?]?
+
+    def user_agent_in_database: () -> ::String?
+
+    def saved_change_to_user_agent: () -> ::Array[::String?]?
+
+    def saved_change_to_user_agent?: () -> bool
+
+    def will_save_change_to_user_agent?: () -> bool
+
+    def restore_user_agent!: () -> void
+
+    def clear_user_agent_change: () -> void
+  end
+  include GeneratedAttributeMethods
+
+  def identity: () -> ::Identity
+  def identity=: (::Identity?) -> ::Identity?
+  def reload_identity: () -> ::Identity?
+  def build_identity: (untyped) -> ::Identity
+  def create_identity: (untyped) -> ::Identity
+  def create_identity!: (untyped) -> ::Identity
+  module GeneratedAssociationMethods
+  end
+  include GeneratedAssociationMethods
+
+  module GeneratedRelationMethods
+  end
+
+  class ActiveRecord_Relation < ::ActiveRecord::Relation
+    include ::Session::GeneratedRelationMethods
+    include ::_ActiveRecord_Relation[::Session, ::String]
+    include ::Enumerable[::Session]
+  end
+
+  class ActiveRecord_Associations_CollectionProxy < ::ActiveRecord::Associations::CollectionProxy
+    include ::Session::GeneratedRelationMethods
+    include ::_ActiveRecord_Relation[::Session, ::String]
+  end
+end

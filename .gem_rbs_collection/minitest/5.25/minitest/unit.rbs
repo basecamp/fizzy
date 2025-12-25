@@ -1,0 +1,4 @@
+class Minitest::Unit
+  def self.autorun: () -> untyped
+  def self.after_tests: () { (?) -> untyped } -> untyped
+end

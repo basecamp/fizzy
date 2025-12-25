@@ -1,0 +1,600 @@
+module TZInfo
+  VERSION: ::String
+
+  def self.eager_load!: () -> void
+
+  class Country
+    include ::Comparable
+
+    def self.all: () -> ::Array[Country]
+
+    def self.all_codes: () -> ::Array[::String]
+
+    def self.get: (::String code) -> Country
+
+    def self._load: (::String data) -> Country
+
+    def initialize: (untyped info) -> void
+
+    def <=>: (Country c) -> (-1 | 0 | 1)
+           | (untyped c) -> nil
+
+    def =~: (::Regexp regexp) -> ::Integer?
+
+    def _dump: (::Integer limit) -> ::String
+
+    def code: () -> ::String
+
+    def eql?: (untyped c) -> bool
+
+    def hash: () -> ::Integer
+
+    def inspect: () -> ::String
+
+    def name: () -> ::String
+
+    def to_s: () -> ::String
+
+    def zone_identifiers: () -> ::Array[::String]
+
+    def zone_info: () -> ::Array[CountryTimezone]
+
+    def zones: () -> ::Array[Timezone]
+
+    alias zone_names zone_identifiers
+  end
+
+  class CountryTimezone
+    attr_reader description: ::String?
+
+    attr_reader identifier: ::String
+
+    attr_reader latitude: ::Rational
+
+    attr_reader longitude: ::Rational
+
+    def initialize: (::String identifier, ::Rational latitude, ::Rational longitude, ?::String? description) -> void
+
+    def ==: (untyped ct) -> bool
+
+    def description_or_friendly_identifier: () -> ::String
+
+    def eql?: (untyped ct) -> bool
+
+    def hash: () -> ::Integer
+
+    def timezone: () -> Timezone
+  end
+
+  class DataSource
+    def self.get: () -> DataSource
+
+    def self.set: (:ruby data_source_or_type) -> void
+                | (:zoneinfo data_source_or_type, ?::String? zoneinfo_dir, ?::String? iso3166_tab_file) -> void
+                | (DataSource data_source_or_type) -> void
+
+    def country_codes: () -> ::Array[::String]
+
+    def timezone_identifier_encoding: () -> ::Array[::String]
+
+    def eager_load!: () -> void
+
+    def get_country_info: (::String code) -> DataSources::CountryInfo
+
+    def get_timezone_info: (::String identifier) -> DataSources::TimezoneInfo
+
+    def inspect: () -> ::String
+
+    def linked_timezone_identifiers: () -> ::Array[::String]
+
+    def timezone_identifiers: () -> ::Array[::String]
+
+    def to_s: () -> ::String
+  end
+
+  class DataTimezone < InfoTimezone
+    def canonical_zone: () -> self
+
+    def period_for: ((::Time | ::DateTime | Timestamp) time) -> TimezonePeriod
+
+    def periods_for_local: ((::Time | ::DateTime | Timestamp) local_time) -> ::Array[TimezonePeriod]
+
+    def transitions_up_to: ((::Time | ::DateTime | Timestamp) to, ?(::Time | ::DateTime | Timestamp)? from) -> ::Array[TimezoneTransition]
+  end
+
+  class DateTimeWithOffset < ::DateTime
+    include WithOffset
+
+    attr_reader timezone_offset: TimezoneOffset
+
+    def england: () -> DateTimeWithOffset
+
+    def gregorian: () -> DateTimeWithOffset
+
+    def italy: () -> DateTimeWithOffset
+
+    def julian: () -> DateTimeWithOffset
+
+    def new_start: (?Integer start) -> DateTimeWithOffset
+
+    def set_timezone_offset: (TimezoneOffset timezone_offset) -> self
+
+    def to_time: () -> ::Time
+  end
+
+  class InfoTimezone < Timezone
+    def identifier: () -> ::String
+  end
+
+  class LinkedTimezone < InfoTimezone
+    def canonical_zone: () -> Timezone
+
+    def period_for: ((::Time | ::DateTime | Timestamp) time) -> TimezonePeriod
+
+    def periods_for_local: ((::Time | ::DateTime | Timestamp) local_time) -> ::Array[TimezonePeriod]
+
+    def transitions_up_to: ((::Time | ::DateTime | Timestamp) to, ?(::Time | ::DateTime | Timestamp)? from) -> ::Array[TimezoneTransition]
+  end
+
+  class OffsetTimezonePeriod < TimezonePeriod
+    def initialize: (TimezoneOffset offset) -> void
+
+    def ==: (untyped p) -> bool
+
+    def end_transition: () -> nil
+
+    def hash: () -> ::Integer
+
+    def start_transition: () -> nil
+
+    alias eql? ==
+  end
+
+  class TimeWithOffset < ::Time
+    include WithOffset
+
+    attr_reader timezone_offset: TimezoneOffset
+
+    def dst?: () -> bool
+
+    def getlocal: (*untyped args) -> ::Time
+
+    def gmtime: () -> self
+
+    def localtime: (*untyped args) -> self
+
+    def round: (?::Integer ndigits) -> ::Time
+
+    def set_timezone_offset: (untyped timezone_offset) -> self
+
+    def to_a: () -> [ Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, bool, String? ]
+
+    def to_datetime: () -> ::DateTime
+
+    def utc: () -> self
+
+    def zone: () -> ::String
+
+    alias isdst dst?
+  end
+
+  class Timestamp
+    include ::Comparable
+
+    attr_reader sub_second: (::Rational | 0)
+
+    attr_reader utc_offset: ::Integer?
+
+    attr_reader value: ::Integer
+
+    def self.create: (::Integer year, ?::Integer month, ?::Integer day, ?::Integer hour, ?::Integer minute, ?::Integer second, ?(::Rational | 0) sub_second, ?(::Integer | :utc)? utc_offset) -> Timestamp
+
+    def self.for: ((::Time | ::DateTime | Timestamp) value, ?(:preserve | :ignore | :treat_as_utc) offset) -> Timestamp
+                | (::Time value, ?(:preserve | :ignore | :treat_as_utc) offset) { (Timestamp) -> Timestamp } -> ::Time
+                | (::DateTime value, ?(:preserve | :ignore | :treat_as_utc) offset) { (Timestamp) -> Timestamp } -> ::DateTime
+                | (Timestamp value, ?(:preserve | :ignore | :treat_as_utc) offset) { (Timestamp) -> Timestamp } -> Timestamp
+
+    def self.utc: (::Integer value, ?(::Rational | 0) sub_second) -> untyped
+
+    def <=>: (Timestamp t) -> (-1 | 0 | 1)?
+           | (untyped t) -> nil
+
+    def add_and_set_utc_offset: (::Integer seconds, (::Integer | :utc)? utc_offset) -> Timestamp
+
+    def hash: () -> ::Integer
+
+    def inspect: () -> ::String
+
+    def strftime: (::String format) -> ::String
+
+    def to_datetime: () -> ::DateTime
+
+    def to_i: () -> ::Integer
+
+    def to_s: () -> ::String
+
+    def to_time: () -> ::Time
+
+    def utc: () -> Timestamp
+
+    def utc?: () -> bool?
+  end
+
+  class TimestampWithOffset < Timestamp
+    include WithOffset
+
+    attr_reader timezone_offset: TimezoneOffset
+
+    def self.set_timezone_offset: (Timestamp timestamp, TimezoneOffset timezone_offset) -> TimestampWithOffset
+
+    def set_timezone_offset: (TimezoneOffset timezone_offset) -> self
+
+    def to_datetime: () -> ::DateTime
+
+    def to_time: () -> ::Time
+  end
+
+  class Timezone
+    include ::Comparable
+
+    def self._load: (::String data) -> Timezone
+
+    def self.all: () -> ::Array[Timezone]
+
+    def self.all_country_zone_identifiers: () -> ::Array[::String]
+
+    def self.all_country_zones: () -> ::Array[Timezone]
+
+    def self.all_data_zone_identifiers: () -> ::Array[::String]
+
+    def self.all_data_zones: () -> ::Array[Timezone]
+
+    def self.all_identifiers: () -> ::Array[::String]
+
+    def self.all_linked_zone_identifiers: () -> ::Array[::String]
+
+    def self.all_linked_zones: () -> ::Array[Timezone]
+
+    def self.default_dst: () -> bool?
+
+    def self.default_dst=: (bool? value) -> void
+
+    def self.get: (::String identifier) -> Timezone
+
+    def self.get_proxy: (::String identifier) -> TimezoneProxy
+
+    def <=>: (Timezone tz) -> (1 | 0 | -1)
+           | (untyped) -> nil
+
+    def =~: (::Regexp regexp) -> ::Integer?
+
+    def _dump: (::Integer limit) -> ::String
+
+    def abbreviation: (?(::Time | ::DateTime | Timestamp) time) -> ::String
+
+    def base_utc_offset: (?(::Time | ::DateTime | Timestamp) time) -> ::Integer
+
+    def canonical_identifier: () -> ::String
+
+    def canonical_zone: () -> Timezone
+
+    def current_period: () -> TimezonePeriod
+
+    def current_time_and_period: () -> [ TimeWithOffset, TimezonePeriod ]
+
+    def dst?: (?(::Time | ::DateTime | Timestamp) time) -> bool
+
+    def eql?: (untyped tz) -> bool
+
+    def friendly_identifier: (?bool skip_first_part) -> ::String
+
+    def hash: () -> ::Integer
+
+    def identifier: () -> ::String
+
+    def inspect: () -> ::String
+
+    def local_datetime: (::Integer year, ?::Integer month, ?::Integer day, ?::Integer hour, ?::Integer minute, ?::Integer second, ?(::Rational | 0) sub_second, ?bool? dst) ?{ (::Array[TimezonePeriod]) -> (TimezonePeriod | ::Array[TimezonePeriod])? } -> DateTimeWithOffset
+
+    def local_time: (::Integer year, ?::Integer month, ?::Integer day, ?::Integer hour, ?::Integer minute, ?::Integer second, ?(::Rational | 0) sub_second, ?bool? dst) ?{ (::Array[TimezonePeriod]) -> (TimezonePeriod | ::Array[TimezonePeriod])? } -> TimeWithOffset
+
+    def local_timestamp: (::Integer year, ?::Integer month, ?::Integer day, ?::Integer hour, ?::Integer minute, ?::Integer second, ?(::Rational | 0) sub_second, ?bool? dst) ?{ (::Array[TimezonePeriod]) -> (TimezonePeriod | ::Array[TimezonePeriod])? } -> TimestampWithOffset
+
+    def local_to_utc: (::Time local_time, ?bool? dst) ?{ (::Array[TimezonePeriod]) -> (TimezonePeriod | ::Array[TimezonePeriod])? } -> ::Time
+                    | (::DateTime local_time, ?bool? dst) ?{ (::Array[TimezonePeriod]) -> (TimezonePeriod | ::Array[TimezonePeriod])? } -> ::DateTime
+                    | (Timestamp local_time, ?bool? dst) ?{ (::Array[TimezonePeriod]) -> (TimezonePeriod | ::Array[TimezonePeriod])? } -> Timestamp
+
+    def name: () -> ::String
+
+    def now: () -> TimeWithOffset
+
+    def observed_utc_offset: (?(::Time | ::DateTime | Timestamp) time) -> ::Integer
+
+    def offsets_up_to: ((::Time | ::DateTime | Timestamp) to, ?(::Time | ::DateTime | Timestamp)? from) -> ::Array[TimezoneOffset]
+
+    def period_for: ((::Time | ::DateTime | Timestamp) time) -> TimezonePeriod
+
+    def period_for_local: ((::Time | ::DateTime | Timestamp) local_time, ?bool? dst) ?{ (::Array[TimezonePeriod]) -> (TimezonePeriod | ::Array[TimezonePeriod])? } -> TimezonePeriod
+
+    def period_for_utc: ((::Time | ::DateTime | Timestamp) utc_time) -> TimezonePeriod
+
+    def periods_for_local: ((::Time | ::DateTime | Timestamp) local_time) -> ::Array[TimezonePeriod]
+
+    def strftime: (::String format, ?(::Time | ::DateTime | Timestamp) time) -> ::String
+
+    def to_local: (::Time time) -> TimeWithOffset
+                | (::DateTime time) -> DateTimeWithOffset
+                | (Timestamp time) -> TimestampWithOffset
+
+    def to_s: () -> ::String
+
+    def transitions_up_to: ((::Time | ::DateTime | Timestamp) to, ?(::Time | ::DateTime | Timestamp)? from) -> ::Array[TimezoneTransition]
+
+    def utc_to_local: (::Time time) -> TimeWithOffset
+                    | (::DateTime time) -> DateTimeWithOffset
+                    | (Timestamp time) -> TimestampWithOffset
+
+    alias abbr abbreviation
+
+    alias current_period_and_time current_time_and_period
+
+    alias utc_offset observed_utc_offset
+  end
+
+  class TimezoneOffset
+    attr_reader abbreviation: untyped
+
+    attr_reader base_utc_offset: untyped
+
+    attr_reader observed_utc_offset: untyped
+
+    attr_reader std_offset: untyped
+
+    def initialize: (::Integer base_utc_offset, ::Integer std_offset, ::String abbreviation) -> void
+
+    def ==: (untyped toi) -> bool
+
+    def dst?: () -> bool
+
+    def eql?: (untyped toi) -> bool
+
+    def hash: () -> ::Integer
+
+    def inspect: () -> ::String
+
+    alias abbr abbreviation
+
+    alias utc_offset base_utc_offset
+
+    alias utc_total_offset observed_utc_offset
+  end
+
+  class TimezonePeriod
+    attr_reader offset: TimezoneOffset
+
+    def abbreviation: () -> ::String
+
+    def base_utc_offset: () -> ::Integer
+
+    def dst?: () -> bool
+
+    def end_transition: () -> TimezoneTransition?
+
+    def ends_at: () -> Timestamp?
+
+    def local_ends_at: () -> TimestampWithOffset?
+
+    def local_starts_at: () -> TimestampWithOffset?
+
+    def observed_utc_offset: () -> ::Integer
+
+    def start_transition: () -> TimezoneTransition?
+
+    def starts_at: () -> Timestamp?
+
+    def std_offset: () -> ::Integer
+
+    alias abbr abbreviation
+
+    alias zone_identifier abbreviation
+
+    alias utc_offset base_utc_offset
+
+    alias utc_total_offset observed_utc_offset
+  end
+
+  class TimezoneProxy < Timezone
+    def initialize: (::String identifier) -> void
+
+    def self._load: (::String data) -> TimezoneProxy
+
+    def _dump: (::Integer limit) -> ::String
+
+    def canonical_zone: () -> Timezone
+
+    def identifier: () -> ::String
+
+    def period_for: ((::Time | ::DateTime | Timestamp) time) -> TimezonePeriod
+
+    def periods_for_local: ((::Time | ::DateTime | Timestamp) local_time) -> ::Array[TimezonePeriod]
+
+    def transitions_up_to: ((::Time | ::DateTime | Timestamp) to, ?(::Time | ::DateTime | Timestamp)? from) -> ::Array[TimezoneTransition]
+  end
+
+  class TimezoneTransition
+    attr_reader offset: TimezoneOffset
+
+    attr_reader previous_offset: TimezoneOffset
+
+    attr_reader timestamp_value: ::Integer
+
+    def initialize: (TimezoneOffset offset, TimezoneOffset previous_offset, ::Integer timestamp_value) -> void
+
+    def ==: (untyped tti) -> bool
+
+    def at: () -> Timestamp
+
+    def hash: () -> ::Integer
+
+    def local_end_at: () -> TimestampWithOffset
+
+    def local_start_at: () -> TimestampWithOffset
+
+    alias eql? ==
+  end
+
+  class TransitionsTimezonePeriod < TimezonePeriod
+    attr_reader end_transition: TimezoneTransition
+
+    attr_reader start_transition: TimezoneTransition
+
+    def initialize: (TimezoneTransition start_transition, TimezoneTransition end_transition) -> void
+
+    def ==: (untyped p) -> bool
+
+    def hash: () -> ::Integer
+
+    def inspect: () -> ::String
+
+    alias eql? ==
+  end
+
+  module WithOffset
+    def strftime: (::String format) -> ::String
+  end
+
+  module DataSources
+    class ConstantOffsetDataTimezoneInfo < DataTimezoneInfo
+      attr_reader constant_offset: TimezoneOffset
+
+      def initialize: (untyped identifier, untyped constant_offset) -> void
+
+      def period_for: (untyped timestamp) -> TimezonePeriod
+
+      def periods_for_local: (untyped local_timestamp) -> ::Array[TimezonePeriod]
+
+      def transitions_up_to: (untyped to_timestamp, ?untyped? from_timestamp) -> [ ]
+    end
+
+    class CountryInfo
+      attr_reader code: ::String
+
+      attr_reader name: ::String
+
+      attr_reader zones: ::Array[CountryTimezone]
+
+      def initialize: (::String code, ::String name, ::Array[CountryTimezone] zones) -> void
+
+      def inspect: () -> ::String
+    end
+
+    class DataTimezoneInfo < TimezoneInfo
+      def create_timezone: () -> DataTimezone
+
+      def period_for: (Timestamp timestamp) -> TimezonePeriod
+
+      def periods_for_local: (Timestamp local_timestamp) -> ::Array[TimezonePeriod]
+
+      def transitions_up_to: (Timestamp to_timestamp, ?Timestamp? from_timestamp) -> ::Array[TimezoneTransition]
+    end
+
+    class LinkedTimezoneInfo < TimezoneInfo
+      attr_reader link_to_identifier: ::String
+
+      def initialize: (::String identifier, ::String link_to_identifier) -> void
+
+      def create_timezone: () -> LinkedTimezone
+    end
+
+    class RubyDataSource < DataSource
+      attr_reader data_timezone_identifiers: ::Array[::String]
+
+      attr_reader linked_timezone_identifiers: ::Array[::String]
+
+      attr_reader country_codes: ::Array[::String]
+
+      def initialize: () -> void
+
+      def inspect: () -> ::String
+
+      def to_s: () -> ::String
+    end
+
+    class TimezoneInfo
+      attr_reader identifier: ::String
+
+      def inspect: () -> ::String
+
+      def create_timezone: () -> Timezone
+    end
+
+    class TransitionsDataTimezoneInfo < DataTimezoneInfo
+      attr_reader transitions: ::Array[TimezoneTransition]
+
+      def initialize: (::String identifier, ::Array[TimezoneTransition] transitions) -> void
+
+      def period_for: (Timestamp timestamp) -> TimezonePeriod
+
+      def periods_for_local: (Timestamp local_timestamp) -> TimezonePeriod
+
+      def transitions_up_to: (Timestamp to_timestamp, ?Timestamp? from_timestamp) -> ::Array[TimezoneTransition]
+    end
+
+    class ZoneinfoDataSource < DataSource
+      attr_reader country_codes: ::Array[::String]
+
+      attr_reader zoneinfo_dir: ::String
+
+      def self.alternate_iso3166_tab_search_path: () -> ::Array[::String]
+
+      def self.alternate_iso3166_tab_search_path=: ((::Array[::String] | ::String)? alternate_iso3166_tab_search_path) -> void
+
+      def self.search_path: () -> ::Array[::String]
+
+      def self.search_path=: ((::Array[::String] | ::String)? search_path) -> void
+
+      def initialize: (?::String? zoneinfo_dir, ?::String? alternate_iso3166_tab_path) -> void
+
+      def data_timezone_identifiers: () -> ::Array[::String]
+
+      def inspect: () -> ::String
+
+      def linked_timezone_identifiers: () -> [ ]
+
+      def to_s: () -> ::String
+    end
+
+    class InvalidZoneinfoDirectory < StandardError
+    end
+
+    class InvalidZoneinfoFile < StandardError
+    end
+
+    class TZInfoDataNotFound < StandardError
+    end
+
+    class ZoneinfoDirectoryNotFound < StandardError
+    end
+  end
+
+  class AmbiguousTime < StandardError
+  end
+
+  class DataSourceNotFound < StandardError
+  end
+
+  class InvalidCountryCode < StandardError
+  end
+
+  class InvalidDataSource < StandardError
+  end
+
+  class InvalidTimezoneIdentifier < StandardError
+  end
+
+  class PeriodNotFound < StandardError
+  end
+
+  class UnknownTimezone < StandardError
+  end
+end

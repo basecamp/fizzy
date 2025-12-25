@@ -1,0 +1,226 @@
+module MiniMagick
+  class Error < RuntimeError
+  end
+
+  class Invalid < StandardError
+  end
+
+  class TimeoutError < Error
+  end
+
+  extend Configuration
+
+  def self.imagemagick7?: () -> bool
+
+  def self.cli_version: () -> String
+
+  # Define methods for dynamically generated
+
+  def self.animate: (?errors: bool, ?warnings: bool, ?stdin: _ToS, ?timeout: Integer?, **untyped options) -> Tool
+                  | (?errors: bool, ?warnings: bool, ?stdin: _ToS, ?timeout: Integer?, **untyped options) { (Tool) -> void } -> String
+  def self.compare: (?errors: bool, ?warnings: bool, ?stdin: _ToS, ?timeout: Integer?, **untyped options) -> Tool
+                  | (?errors: bool, ?warnings: bool, ?stdin: _ToS, ?timeout: Integer?, **untyped options) { (Tool) -> void } -> String
+  def self.composite: (?errors: bool, ?warnings: bool, ?stdin: _ToS, ?timeout: Integer?, **untyped options) -> Tool
+                    | (?errors: bool, ?warnings: bool, ?stdin: _ToS, ?timeout: Integer?, **untyped options) { (Tool) -> void } -> String
+  def self.conjure: (?errors: bool, ?warnings: bool, ?stdin: _ToS, ?timeout: Integer?, **untyped options) -> Tool
+                  | (?errors: bool, ?warnings: bool, ?stdin: _ToS, ?timeout: Integer?, **untyped options) { (Tool) -> void } -> String
+  def self.convert: (?errors: bool, ?warnings: bool, ?stdin: _ToS, ?timeout: Integer?, **untyped options) -> Tool
+                  | (?errors: bool, ?warnings: bool, ?stdin: _ToS, ?timeout: Integer?, **untyped options) { (Tool) -> void } -> String
+  def self.display: (?errors: bool, ?warnings: bool, ?stdin: _ToS, ?timeout: Integer?, **untyped options) -> Tool
+                  | (?errors: bool, ?warnings: bool, ?stdin: _ToS, ?timeout: Integer?, **untyped options) { (Tool) -> void } -> String
+  def self.identify: (?errors: bool, ?warnings: bool, ?stdin: _ToS, ?timeout: Integer?, **untyped options) -> Tool
+                   | (?errors: bool, ?warnings: bool, ?stdin: _ToS, ?timeout: Integer?, **untyped options) { (Tool) -> void } -> String
+  def self.import: (?errors: bool, ?warnings: bool, ?stdin: _ToS, ?timeout: Integer?, **untyped options) -> Tool
+                 | (?errors: bool, ?warnings: bool, ?stdin: _ToS, ?timeout: Integer?, **untyped options) { (Tool) -> void } -> String
+  def self.mogrify: (?errors: bool, ?warnings: bool, ?stdin: _ToS, ?timeout: Integer?, **untyped options) -> Tool
+                  | (?errors: bool, ?warnings: bool, ?stdin: _ToS, ?timeout: Integer?, **untyped options) { (Tool) -> void } -> String
+  def self.montage: (?errors: bool, ?warnings: bool, ?stdin: _ToS, ?timeout: Integer?, **untyped options) -> Tool
+                  | (?errors: bool, ?warnings: bool, ?stdin: _ToS, ?timeout: Integer?, **untyped options) { (Tool) -> void } -> String
+  def self.stream: (?errors: bool, ?warnings: bool, ?stdin: _ToS, ?timeout: Integer?, **untyped options) -> Tool
+                 | (?errors: bool, ?warnings: bool, ?stdin: _ToS, ?timeout: Integer?, **untyped options) { (Tool) -> void } -> String
+end
+
+module MiniMagick
+  def self.version: () -> Gem::Version
+end
+
+module MiniMagick
+  module Configuration
+    attr_accessor cli_prefix: (String | Array[String])?
+
+    attr_accessor timeout: Integer?
+
+    attr_accessor logger: Logger
+
+    attr_accessor tmpdir: String
+
+    attr_accessor errors: bool
+
+    attr_accessor warnings: bool
+
+    def configure: () { (self) -> void } -> void
+  end
+end
+
+module MiniMagick
+  class Tool
+    CREATION_OPERATORS: ::Array["xc" | "canvas" | "logo" | "rose" | "gradient" | "radial-gradient" | "plasma" | "pattern" | "text" | "pango"]
+
+    def self.new: (String name, *untyped args) -> instance
+                | (String name, *untyped args) { (instance) -> void } -> String
+
+    def initialize: (String name, **untyped options) -> void
+
+    def call: (?errors: bool, ?warnings: bool, ?stdin: _ToS, ?timeout: Integer?, **untyped options) ?{ (String, String, Process::Status) -> void } -> String
+
+    def command: () -> Array[String]
+
+    def executable: () -> Array[String]
+
+    def <<: (_ToS arg) -> self
+
+    def merge!: (Array[_ToS] new_args) -> self
+
+    def +: (*_ToS values) -> self
+
+    def stack: (*untyped args) ?{ (self) -> void } -> self
+
+    def stdin: () -> self
+
+    def stdout: () -> self
+
+    # Define methods for dynamically generated
+
+    def xc: (?_ToS value) -> self
+    def canvas: (?_ToS value) -> self
+    def logo: (?_ToS value) -> self
+    def rose: (?_ToS value) -> self
+    def gradient: (?_ToS value) -> self
+    def radial_gradient: (?_ToS value) -> self
+    def plasma: (?_ToS value) -> self
+    def pattern: (?_ToS value) -> self
+    def text: (?_ToS value) -> self
+    def pango: (?_ToS value) -> self
+
+    # Define deprecated tool subclasses for dynamically generated
+
+    class Animate < Tool
+    end
+    class Compare < Tool
+    end
+    class Composite < Tool
+    end
+    class Conjure < Tool
+    end
+    class Convert < Tool
+    end
+    class Display < Tool
+    end
+    class Identify < Tool
+    end
+    class Import < Tool
+    end
+    class Magick < Tool
+    end
+    class Mogrify < Tool
+    end
+    class Montage < Tool
+    end
+    class Stream < Tool
+    end
+  end
+end
+
+module MiniMagick
+  class Image
+    def self.read: (String | _Reader stream, ?String? ext) -> instance
+
+    def self.import_pixels: (String | _Reader blob, Integer columns, Integer rows, Integer depth, String map, ?::String format) -> instance
+
+    def self.open: (_ToS | URI::Generic path_or_url, ?String? ext, **untyped options) -> instance
+
+    def self.create: (?String? ext) { (Tempfile) -> void } -> instance
+
+    attr_reader path: String
+
+    attr_reader tempfile: Tempfile
+
+    def initialize: (_ToS input_path, ?Tempfile? tempfile) ?{ (Tool) -> void } -> void
+
+    def to_blob: () -> String
+
+    def valid?: () -> bool
+
+    def validate!: () -> void
+
+    def []: (_ToS value) -> String
+
+    alias info []
+
+    def layers: () -> Array[instance]
+
+    alias pages layers
+
+    alias frames layers
+
+    def get_pixels: (?::String map) -> Array[untyped]
+
+    def self.get_image_from_pixels: (Array[untyped] pixels, Array[Integer] dimension, String map, Integer depth, String format) -> instance
+
+    def format: (String format, ?::Integer page, ?::Hash[untyped, untyped] read_opts, **untyped) ?{ (Tool) -> void } -> self
+
+    def combine_options: () { (Tool) -> void } -> self
+
+    def write: (String | Pathname | _Writer output_to) -> untyped
+
+    def composite: (instance other_image, ?String output_extension, ?untyped? mask) ?{ (Tool) -> void } -> instance
+
+    def collapse!: (?::Integer frame) -> self
+
+    def destroy!: () -> void
+
+    def identify: () ?{ (Tool) -> void } -> String
+
+    def mogrify: (?Integer? page) ?{ (Tool) -> void } -> self
+
+    def layer?: () -> bool
+
+    def landscape?: () -> bool
+
+    def portrait?: () -> bool
+
+    # Define dynamically methods
+
+    def type: () -> String
+            | (*untyped) -> instance
+
+    def width: () -> Integer
+             | (*untyped) -> instance
+
+    def height: () -> Integer
+              | (*untyped) -> instance
+
+    def dimensions: () -> Array[Integer]
+                  | (*untyped) -> instance
+
+    def size: () -> Integer
+            | (*untyped) -> instance
+
+    def human_size: () -> String
+                  | (*untyped) -> instance
+
+    def colorspace: () -> String
+                  | (*untyped) -> instance
+
+    def exif: () -> Hash[untyped, untyped]
+            | (*untyped) -> instance
+
+    def resolution: (*untyped) -> Array[Integer]
+
+    def signature: () -> String
+                 | (*untyped) -> instance
+
+    def data: () -> Hash[untyped, untyped]
+            | (*untyped) -> instance
+  end
+end

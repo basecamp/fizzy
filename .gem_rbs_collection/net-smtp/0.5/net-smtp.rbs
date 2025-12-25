@@ -1,0 +1,55 @@
+module Net
+  # Module mixed in to all SMTP error classes
+  module SMTPError
+    attr_reader response: Response
+
+    def initialize: (Response response, ?message: String) -> void
+
+    def message: () -> String?
+  end
+
+  # Represents an SMTP authentication error.
+  class SMTPAuthenticationError < ProtoAuthError
+    include SMTPError
+  end
+
+  # Represents SMTP error code 4xx, a temporary error.
+  class SMTPServerBusy < ProtoServerError
+    include SMTPError
+  end
+
+  # Represents an SMTP command syntax error (error code 500)
+  class SMTPSyntaxError < ProtoSyntaxError
+    include SMTPError
+  end
+
+  # Represents a fatal SMTP error (error code 5xx, except for 500)
+  class SMTPFatalError < ProtoFatalError
+    include SMTPError
+  end
+
+  # Unexpected reply code returned from server.
+  class SMTPUnknownError < ProtoUnknownError
+    include SMTPError
+  end
+
+  # Command is not supported on server.
+  class SMTPUnsupportedCommand < ProtocolError
+    include SMTPError
+  end
+
+  class SMTP < Protocol
+    def self.start: (String address, ?Integer port, ?tls_verify: bool, ?tls_hostname: String?, ?helo: String, ?user: String?, ?password: String?, ?auth_type: Symbol) -> instance
+                  | [T] (String address, ?Integer port, ?tls_verify: bool, ?tls_hostname: String?, ?helo: String, ?user: String?, ?password: String?, ?auth_type: Symbol) { (instance) -> T } -> T
+                  | (String address, ?Integer port, ?String helo, ?String? user, ?String? password, ?Symbol auth_type) -> instance
+                  | [T] (String address, ?Integer port, ?String helo, ?String? user, ?String? password, ?Symbol auth_type) { (instance) -> T } -> T
+
+    def initialize: (String address, ?Integer port) -> void
+    def send_message: (_Each[String] mail_src, String from_addr, *String to_addrs) -> void
+  end
+
+  class Response
+  end
+
+  class SMTPSession = SMTP
+end

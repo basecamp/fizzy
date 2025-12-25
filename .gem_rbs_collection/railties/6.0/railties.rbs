@@ -1,0 +1,44 @@
+module Rails
+  module Configuration
+    class MiddlewareStackProxy
+      def delete: (*untyped args) ?{ () -> untyped } -> untyped
+
+      def insert_before: (*untyped args) ?{ () -> untyped } -> untyped
+
+      alias insert insert_before
+
+      def insert_after: (*untyped args) ?{ () -> untyped } -> untyped
+
+      def swap: (*untyped args) ?{ () -> untyped } -> untyped
+
+      def unshift: (*untyped args) ?{ () -> untyped } -> untyped
+
+      def use: (*untyped args) ?{ () -> untyped } -> untyped
+    end
+  end
+end
+
+module Rails
+  class Engine
+    # Defines the routes for this engine. If a block is given to
+    # routes, it is appended to the engine.
+    def routes: () ?{ () [self: ActionDispatch::Routing::Mapper] -> void } -> ActionDispatch::Routing::RouteSet
+  end
+end
+
+module Rails
+  module Generators
+    class PluginGenerator < AppBase
+      # It is necessary to satisfy alias target.
+      def app_path: () -> untyped
+    end
+  end
+end
+
+module Rails
+  def self.application: () -> Rails::Application
+
+  class Railties
+    extend Initializable::ClassMethods
+  end
+end

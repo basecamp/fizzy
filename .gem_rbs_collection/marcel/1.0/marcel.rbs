@@ -1,0 +1,13 @@
+module Marcel
+  class Magic
+    attr_reader type: String
+    attr_reader mediatype: String
+    attr_reader subtype: String
+
+    def self.by_magic: (IO | StringIO) -> instance
+  end
+
+  class MimeType
+    def self.for: (?Pathname | IO | StringIO pathname_or_io, ?name: String, ?extension: String, ?declared_type: String) -> String
+  end
+end

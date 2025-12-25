@@ -1,0 +1,110 @@
+class Filter < ::ApplicationRecord
+  class HABTM_Boards < ::ActiveRecord::Base
+    extend ::_ActiveRecord_Relation_ClassMethods[::Filter::HABTM_Boards, ::Filter::HABTM_Boards::ActiveRecord_Relation, top]
+
+    module GeneratedAttributeMethods
+      def board_id: () -> ::String
+
+      def board_id=: (::String) -> ::String
+
+      def board_id?: () -> bool
+
+      def board_id_changed?: () -> bool
+
+      def board_id_change: () -> [ ::String?, ::String? ]
+
+      def board_id_will_change!: () -> void
+
+      def board_id_was: () -> ::String?
+
+      def board_id_previously_changed?: () -> bool
+
+      def board_id_previous_change: () -> ::Array[::String?]?
+
+      def board_id_previously_was: () -> ::String?
+
+      def board_id_before_last_save: () -> ::String?
+
+      def board_id_change_to_be_saved: () -> ::Array[::String?]?
+
+      def board_id_in_database: () -> ::String?
+
+      def saved_change_to_board_id: () -> ::Array[::String?]?
+
+      def saved_change_to_board_id?: () -> bool
+
+      def will_save_change_to_board_id?: () -> bool
+
+      def restore_board_id!: () -> void
+
+      def clear_board_id_change: () -> void
+
+      def filter_id: () -> ::String
+
+      def filter_id=: (::String) -> ::String
+
+      def filter_id?: () -> bool
+
+      def filter_id_changed?: () -> bool
+
+      def filter_id_change: () -> [ ::String?, ::String? ]
+
+      def filter_id_will_change!: () -> void
+
+      def filter_id_was: () -> ::String?
+
+      def filter_id_previously_changed?: () -> bool
+
+      def filter_id_previous_change: () -> ::Array[::String?]?
+
+      def filter_id_previously_was: () -> ::String?
+
+      def filter_id_before_last_save: () -> ::String?
+
+      def filter_id_change_to_be_saved: () -> ::Array[::String?]?
+
+      def filter_id_in_database: () -> ::String?
+
+      def saved_change_to_filter_id: () -> ::Array[::String?]?
+
+      def saved_change_to_filter_id?: () -> bool
+
+      def will_save_change_to_filter_id?: () -> bool
+
+      def restore_filter_id!: () -> void
+
+      def clear_filter_id_change: () -> void
+    end
+    include GeneratedAttributeMethods
+
+    def left_side: () -> ::Filter?
+    def left_side=: (::Filter?) -> ::Filter?
+    def reload_left_side: () -> ::Filter?
+    def build_left_side: (untyped) -> ::Filter
+    def create_left_side: (untyped) -> ::Filter
+    def create_left_side!: (untyped) -> ::Filter
+    def board: () -> ::Board?
+    def board=: (::Board?) -> ::Board?
+    def reload_board: () -> ::Board?
+    def build_board: (untyped) -> ::Board
+    def create_board: (untyped) -> ::Board
+    def create_board!: (untyped) -> ::Board
+    module GeneratedAssociationMethods
+    end
+    include GeneratedAssociationMethods
+
+    module GeneratedRelationMethods
+    end
+
+    class ActiveRecord_Relation < ::ActiveRecord::Relation
+      include ::Filter::HABTM_Boards::GeneratedRelationMethods
+      include ::_ActiveRecord_Relation[::Filter::HABTM_Boards, top]
+      include ::Enumerable[::Filter::HABTM_Boards]
+    end
+
+    class ActiveRecord_Associations_CollectionProxy < ::ActiveRecord::Associations::CollectionProxy
+      include ::Filter::HABTM_Boards::GeneratedRelationMethods
+      include ::_ActiveRecord_Relation[::Filter::HABTM_Boards, top]
+    end
+  end
+end

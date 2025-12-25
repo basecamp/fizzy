@@ -1,0 +1,475 @@
+class User < ::ApplicationRecord
+  extend ::_ActiveRecord_Relation_ClassMethods[::User, ::User::ActiveRecord_Relation, ::String]
+
+  module GeneratedAttributeMethods
+    def id: () -> ::String
+
+    def id=: (::String) -> ::String
+
+    def id?: () -> bool
+
+    def id_changed?: () -> bool
+
+    def id_change: () -> [ ::String?, ::String? ]
+
+    def id_will_change!: () -> void
+
+    def id_was: () -> ::String?
+
+    def id_previously_changed?: () -> bool
+
+    def id_previous_change: () -> ::Array[::String?]?
+
+    def id_previously_was: () -> ::String?
+
+    def id_before_last_save: () -> ::String?
+
+    def id_change_to_be_saved: () -> ::Array[::String?]?
+
+    def id_in_database: () -> ::String?
+
+    def saved_change_to_id: () -> ::Array[::String?]?
+
+    def saved_change_to_id?: () -> bool
+
+    def will_save_change_to_id?: () -> bool
+
+    def restore_id!: () -> void
+
+    def clear_id_change: () -> void
+
+    def account_id: () -> ::String
+
+    def account_id=: (::String) -> ::String
+
+    def account_id?: () -> bool
+
+    def account_id_changed?: () -> bool
+
+    def account_id_change: () -> [ ::String?, ::String? ]
+
+    def account_id_will_change!: () -> void
+
+    def account_id_was: () -> ::String?
+
+    def account_id_previously_changed?: () -> bool
+
+    def account_id_previous_change: () -> ::Array[::String?]?
+
+    def account_id_previously_was: () -> ::String?
+
+    def account_id_before_last_save: () -> ::String?
+
+    def account_id_change_to_be_saved: () -> ::Array[::String?]?
+
+    def account_id_in_database: () -> ::String?
+
+    def saved_change_to_account_id: () -> ::Array[::String?]?
+
+    def saved_change_to_account_id?: () -> bool
+
+    def will_save_change_to_account_id?: () -> bool
+
+    def restore_account_id!: () -> void
+
+    def clear_account_id_change: () -> void
+
+    def active: () -> bool
+
+    def active=: (bool) -> bool
+
+    def active?: () -> bool
+
+    def active_changed?: () -> bool
+
+    def active_change: () -> [ bool?, bool? ]
+
+    def active_will_change!: () -> void
+
+    def active_was: () -> bool?
+
+    def active_previously_changed?: () -> bool
+
+    def active_previous_change: () -> ::Array[bool?]?
+
+    def active_previously_was: () -> bool?
+
+    def active_before_last_save: () -> bool?
+
+    def active_change_to_be_saved: () -> ::Array[bool?]?
+
+    def active_in_database: () -> bool?
+
+    def saved_change_to_active: () -> ::Array[bool?]?
+
+    def saved_change_to_active?: () -> bool
+
+    def will_save_change_to_active?: () -> bool
+
+    def restore_active!: () -> void
+
+    def clear_active_change: () -> void
+
+    def created_at: () -> ::ActiveSupport::TimeWithZone
+
+    def created_at=: (::ActiveSupport::TimeWithZone) -> ::ActiveSupport::TimeWithZone
+
+    def created_at?: () -> bool
+
+    def created_at_changed?: () -> bool
+
+    def created_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
+
+    def created_at_will_change!: () -> void
+
+    def created_at_was: () -> ::ActiveSupport::TimeWithZone?
+
+    def created_at_previously_changed?: () -> bool
+
+    def created_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def created_at_previously_was: () -> ::ActiveSupport::TimeWithZone?
+
+    def created_at_before_last_save: () -> ::ActiveSupport::TimeWithZone?
+
+    def created_at_change_to_be_saved: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def created_at_in_database: () -> ::ActiveSupport::TimeWithZone?
+
+    def saved_change_to_created_at: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def saved_change_to_created_at?: () -> bool
+
+    def will_save_change_to_created_at?: () -> bool
+
+    def restore_created_at!: () -> void
+
+    def clear_created_at_change: () -> void
+
+    def name: () -> ::String
+
+    def name=: (::String) -> ::String
+
+    def name?: () -> bool
+
+    def name_changed?: () -> bool
+
+    def name_change: () -> [ ::String?, ::String? ]
+
+    def name_will_change!: () -> void
+
+    def name_was: () -> ::String?
+
+    def name_previously_changed?: () -> bool
+
+    def name_previous_change: () -> ::Array[::String?]?
+
+    def name_previously_was: () -> ::String?
+
+    def name_before_last_save: () -> ::String?
+
+    def name_change_to_be_saved: () -> ::Array[::String?]?
+
+    def name_in_database: () -> ::String?
+
+    def saved_change_to_name: () -> ::Array[::String?]?
+
+    def saved_change_to_name?: () -> bool
+
+    def will_save_change_to_name?: () -> bool
+
+    def restore_name!: () -> void
+
+    def clear_name_change: () -> void
+
+    def role: () -> ::String
+
+    def role=: (::String) -> ::String
+
+    def role?: () -> bool
+
+    def role_changed?: () -> bool
+
+    def role_change: () -> [ ::String?, ::String? ]
+
+    def role_will_change!: () -> void
+
+    def role_was: () -> ::String?
+
+    def role_previously_changed?: () -> bool
+
+    def role_previous_change: () -> ::Array[::String?]?
+
+    def role_previously_was: () -> ::String?
+
+    def role_before_last_save: () -> ::String?
+
+    def role_change_to_be_saved: () -> ::Array[::String?]?
+
+    def role_in_database: () -> ::String?
+
+    def saved_change_to_role: () -> ::Array[::String?]?
+
+    def saved_change_to_role?: () -> bool
+
+    def will_save_change_to_role?: () -> bool
+
+    def restore_role!: () -> void
+
+    def clear_role_change: () -> void
+
+    def updated_at: () -> ::ActiveSupport::TimeWithZone
+
+    def updated_at=: (::ActiveSupport::TimeWithZone) -> ::ActiveSupport::TimeWithZone
+
+    def updated_at?: () -> bool
+
+    def updated_at_changed?: () -> bool
+
+    def updated_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
+
+    def updated_at_will_change!: () -> void
+
+    def updated_at_was: () -> ::ActiveSupport::TimeWithZone?
+
+    def updated_at_previously_changed?: () -> bool
+
+    def updated_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def updated_at_previously_was: () -> ::ActiveSupport::TimeWithZone?
+
+    def updated_at_before_last_save: () -> ::ActiveSupport::TimeWithZone?
+
+    def updated_at_change_to_be_saved: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def updated_at_in_database: () -> ::ActiveSupport::TimeWithZone?
+
+    def saved_change_to_updated_at: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def saved_change_to_updated_at?: () -> bool
+
+    def will_save_change_to_updated_at?: () -> bool
+
+    def restore_updated_at!: () -> void
+
+    def clear_updated_at_change: () -> void
+
+    def identity_id: () -> ::String?
+
+    def identity_id=: (::String?) -> ::String?
+
+    def identity_id?: () -> bool
+
+    def identity_id_changed?: () -> bool
+
+    def identity_id_change: () -> [ ::String?, ::String? ]
+
+    def identity_id_will_change!: () -> void
+
+    def identity_id_was: () -> ::String?
+
+    def identity_id_previously_changed?: () -> bool
+
+    def identity_id_previous_change: () -> ::Array[::String?]?
+
+    def identity_id_previously_was: () -> ::String?
+
+    def identity_id_before_last_save: () -> ::String?
+
+    def identity_id_change_to_be_saved: () -> ::Array[::String?]?
+
+    def identity_id_in_database: () -> ::String?
+
+    def saved_change_to_identity_id: () -> ::Array[::String?]?
+
+    def saved_change_to_identity_id?: () -> bool
+
+    def will_save_change_to_identity_id?: () -> bool
+
+    def restore_identity_id!: () -> void
+
+    def clear_identity_id_change: () -> void
+
+    def verified_at: () -> ::ActiveSupport::TimeWithZone?
+
+    def verified_at=: (::ActiveSupport::TimeWithZone?) -> ::ActiveSupport::TimeWithZone?
+
+    def verified_at?: () -> bool
+
+    def verified_at_changed?: () -> bool
+
+    def verified_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
+
+    def verified_at_will_change!: () -> void
+
+    def verified_at_was: () -> ::ActiveSupport::TimeWithZone?
+
+    def verified_at_previously_changed?: () -> bool
+
+    def verified_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def verified_at_previously_was: () -> ::ActiveSupport::TimeWithZone?
+
+    def verified_at_before_last_save: () -> ::ActiveSupport::TimeWithZone?
+
+    def verified_at_change_to_be_saved: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def verified_at_in_database: () -> ::ActiveSupport::TimeWithZone?
+
+    def saved_change_to_verified_at: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def saved_change_to_verified_at?: () -> bool
+
+    def will_save_change_to_verified_at?: () -> bool
+
+    def restore_verified_at!: () -> void
+
+    def clear_verified_at_change: () -> void
+  end
+  include GeneratedAttributeMethods
+  def watches: () -> ::Watch::ActiveRecord_Associations_CollectionProxy
+  def watches=: (::Watch::ActiveRecord_Associations_CollectionProxy | ::Array[::Watch]) -> (::Watch::ActiveRecord_Associations_CollectionProxy | ::Array[::Watch])
+  def watch_ids: () -> ::Array[::Integer]
+  def watch_ids=: (::Array[::Integer]) -> ::Array[::Integer]
+  def search_queries: () -> ::Search::Query::ActiveRecord_Associations_CollectionProxy
+  def search_queries=: (::Search::Query::ActiveRecord_Associations_CollectionProxy | ::Array[::Search::Query]) -> (::Search::Query::ActiveRecord_Associations_CollectionProxy | ::Array[::Search::Query])
+  def search_query_ids: () -> ::Array[::Integer]
+  def search_query_ids=: (::Array[::Integer]) -> ::Array[::Integer]
+  def notifications: () -> ::Notification::ActiveRecord_Associations_CollectionProxy
+  def notifications=: (::Notification::ActiveRecord_Associations_CollectionProxy | ::Array[::Notification]) -> (::Notification::ActiveRecord_Associations_CollectionProxy | ::Array[::Notification])
+  def notification_ids: () -> ::Array[::Integer]
+  def notification_ids=: (::Array[::Integer]) -> ::Array[::Integer]
+  def notification_bundles: () -> ::Notification::Bundle::ActiveRecord_Associations_CollectionProxy
+  def notification_bundles=: (::Notification::Bundle::ActiveRecord_Associations_CollectionProxy | ::Array[::Notification::Bundle]) -> (::Notification::Bundle::ActiveRecord_Associations_CollectionProxy | ::Array[::Notification::Bundle])
+  def notification_bundle_ids: () -> ::Array[::Integer]
+  def notification_bundle_ids=: (::Array[::Integer]) -> ::Array[::Integer]
+  def mentions: () -> ::Mention::ActiveRecord_Associations_CollectionProxy
+  def mentions=: (::Mention::ActiveRecord_Associations_CollectionProxy | ::Array[::Mention]) -> (::Mention::ActiveRecord_Associations_CollectionProxy | ::Array[::Mention])
+  def mention_ids: () -> ::Array[::Integer]
+  def mention_ids=: (::Array[::Integer]) -> ::Array[::Integer]
+  def push_subscriptions: () -> ::Push::Subscription::ActiveRecord_Associations_CollectionProxy
+  def push_subscriptions=: (::Push::Subscription::ActiveRecord_Associations_CollectionProxy | ::Array[::Push::Subscription]) -> (::Push::Subscription::ActiveRecord_Associations_CollectionProxy | ::Array[::Push::Subscription])
+  def push_subscription_ids: () -> ::Array[::Integer]
+  def push_subscription_ids=: (::Array[::Integer]) -> ::Array[::Integer]
+  def assignments: () -> ::Assignment::ActiveRecord_Associations_CollectionProxy
+  def assignments=: (::Assignment::ActiveRecord_Associations_CollectionProxy | ::Array[::Assignment]) -> (::Assignment::ActiveRecord_Associations_CollectionProxy | ::Array[::Assignment])
+  def assignment_ids: () -> ::Array[::Integer]
+  def assignment_ids=: (::Array[::Integer]) -> ::Array[::Integer]
+  def assignings: () -> ::Assignment::ActiveRecord_Associations_CollectionProxy
+  def assignings=: (::Assignment::ActiveRecord_Associations_CollectionProxy | ::Array[::Assignment]) -> (::Assignment::ActiveRecord_Associations_CollectionProxy | ::Array[::Assignment])
+  def assigning_ids: () -> ::Array[::Integer]
+  def assigning_ids=: (::Array[::Integer]) -> ::Array[::Integer]
+  def assigned_cards: () -> ::Card::ActiveRecord_Associations_CollectionProxy
+  def assigned_cards=: (::Card::ActiveRecord_Associations_CollectionProxy | ::Array[::Card]) -> (::Card::ActiveRecord_Associations_CollectionProxy | ::Array[::Card])
+  def assigned_card_ids: () -> ::Array[::Integer]
+  def assigned_card_ids=: (::Array[::Integer]) -> ::Array[::Integer]
+  def accesses: () -> ::Access::ActiveRecord_Associations_CollectionProxy
+  def accesses=: (::Access::ActiveRecord_Associations_CollectionProxy | ::Array[::Access]) -> (::Access::ActiveRecord_Associations_CollectionProxy | ::Array[::Access])
+  def access_ids: () -> ::Array[::Integer]
+  def access_ids=: (::Array[::Integer]) -> ::Array[::Integer]
+  def boards: () -> ::Board::ActiveRecord_Associations_CollectionProxy
+  def boards=: (::Board::ActiveRecord_Associations_CollectionProxy | ::Array[::Board]) -> (::Board::ActiveRecord_Associations_CollectionProxy | ::Array[::Board])
+  def board_ids: () -> ::Array[::Integer]
+  def board_ids=: (::Array[::Integer]) -> ::Array[::Integer]
+  def accessible_columns: () -> ::Column::ActiveRecord_Associations_CollectionProxy
+  def accessible_columns=: (::Column::ActiveRecord_Associations_CollectionProxy | ::Array[::Column]) -> (::Column::ActiveRecord_Associations_CollectionProxy | ::Array[::Column])
+  def accessible_column_ids: () -> ::Array[::Integer]
+  def accessible_column_ids=: (::Array[::Integer]) -> ::Array[::Integer]
+  def accessible_cards: () -> ::Card::ActiveRecord_Associations_CollectionProxy
+  def accessible_cards=: (::Card::ActiveRecord_Associations_CollectionProxy | ::Array[::Card]) -> (::Card::ActiveRecord_Associations_CollectionProxy | ::Array[::Card])
+  def accessible_card_ids: () -> ::Array[::Integer]
+  def accessible_card_ids=: (::Array[::Integer]) -> ::Array[::Integer]
+  def accessible_comments: () -> ::Comment::ActiveRecord_Associations_CollectionProxy
+  def accessible_comments=: (::Comment::ActiveRecord_Associations_CollectionProxy | ::Array[::Comment]) -> (::Comment::ActiveRecord_Associations_CollectionProxy | ::Array[::Comment])
+  def accessible_comment_ids: () -> ::Array[::Integer]
+  def accessible_comment_ids=: (::Array[::Integer]) -> ::Array[::Integer]
+  def accessible_events: () -> ::Event::ActiveRecord_Associations_CollectionProxy
+  def accessible_events=: (::Event::ActiveRecord_Associations_CollectionProxy | ::Array[::Event]) -> (::Event::ActiveRecord_Associations_CollectionProxy | ::Array[::Event])
+  def accessible_event_ids: () -> ::Array[::Integer]
+  def accessible_event_ids=: (::Array[::Integer]) -> ::Array[::Integer]
+  def comments: () -> ::Comment::ActiveRecord_Associations_CollectionProxy
+  def comments=: (::Comment::ActiveRecord_Associations_CollectionProxy | ::Array[::Comment]) -> (::Comment::ActiveRecord_Associations_CollectionProxy | ::Array[::Comment])
+  def comment_ids: () -> ::Array[::Integer]
+  def comment_ids=: (::Array[::Integer]) -> ::Array[::Integer]
+  def filters: () -> ::Filter::ActiveRecord_Associations_CollectionProxy
+  def filters=: (::Filter::ActiveRecord_Associations_CollectionProxy | ::Array[::Filter]) -> (::Filter::ActiveRecord_Associations_CollectionProxy | ::Array[::Filter])
+  def filter_ids: () -> ::Array[::Integer]
+  def filter_ids=: (::Array[::Integer]) -> ::Array[::Integer]
+  def closures: () -> ::Closure::ActiveRecord_Associations_CollectionProxy
+  def closures=: (::Closure::ActiveRecord_Associations_CollectionProxy | ::Array[::Closure]) -> (::Closure::ActiveRecord_Associations_CollectionProxy | ::Array[::Closure])
+  def closure_ids: () -> ::Array[::Integer]
+  def closure_ids=: (::Array[::Integer]) -> ::Array[::Integer]
+  def pins: () -> ::Pin::ActiveRecord_Associations_CollectionProxy
+  def pins=: (::Pin::ActiveRecord_Associations_CollectionProxy | ::Array[::Pin]) -> (::Pin::ActiveRecord_Associations_CollectionProxy | ::Array[::Pin])
+  def pin_ids: () -> ::Array[::Integer]
+  def pin_ids=: (::Array[::Integer]) -> ::Array[::Integer]
+  def pinned_cards: () -> ::Card::ActiveRecord_Associations_CollectionProxy
+  def pinned_cards=: (::Card::ActiveRecord_Associations_CollectionProxy | ::Array[::Card]) -> (::Card::ActiveRecord_Associations_CollectionProxy | ::Array[::Card])
+  def pinned_card_ids: () -> ::Array[::Integer]
+  def pinned_card_ids=: (::Array[::Integer]) -> ::Array[::Integer]
+  def exports: () -> ::Account::Export::ActiveRecord_Associations_CollectionProxy
+  def exports=: (::Account::Export::ActiveRecord_Associations_CollectionProxy | ::Array[::Account::Export]) -> (::Account::Export::ActiveRecord_Associations_CollectionProxy | ::Array[::Account::Export])
+  def export_ids: () -> ::Array[::Integer]
+  def export_ids=: (::Array[::Integer]) -> ::Array[::Integer]
+  def settings: () -> ::User::Settings?
+  def settings=: (::User::Settings?) -> ::User::Settings?
+  def build_settings: (?untyped) -> ::User::Settings
+  def create_settings: (untyped) -> ::User::Settings
+  def create_settings!: (untyped) -> ::User::Settings
+  def reload_settings: () -> ::User::Settings?
+  def avatar_attachment: () -> ::ActiveStorage::Attachment?
+  def avatar_attachment=: (::ActiveStorage::Attachment?) -> ::ActiveStorage::Attachment?
+  def build_avatar_attachment: (?untyped) -> ::ActiveStorage::Attachment
+  def create_avatar_attachment: (untyped) -> ::ActiveStorage::Attachment
+  def create_avatar_attachment!: (untyped) -> ::ActiveStorage::Attachment
+  def reload_avatar_attachment: () -> ::ActiveStorage::Attachment?
+  def avatar_blob: () -> ::ActiveStorage::Blob?
+  def avatar_blob=: (::ActiveStorage::Blob?) -> ::ActiveStorage::Blob?
+  def build_avatar_blob: (?untyped) -> ::ActiveStorage::Blob
+  def create_avatar_blob: (untyped) -> ::ActiveStorage::Blob
+  def create_avatar_blob!: (untyped) -> ::ActiveStorage::Blob
+  def reload_avatar_blob: () -> ::ActiveStorage::Blob?
+  def account: () -> ::Account
+  def account=: (::Account?) -> ::Account?
+  def reload_account: () -> ::Account?
+  def build_account: (untyped) -> ::Account
+  def create_account: (untyped) -> ::Account
+  def create_account!: (untyped) -> ::Account
+  def identity: () -> ::Identity?
+  def identity=: (::Identity?) -> ::Identity?
+  def reload_identity: () -> ::Identity?
+  def build_identity: (untyped) -> ::Identity
+  def create_identity: (untyped) -> ::Identity
+  def create_identity!: (untyped) -> ::Identity
+  module GeneratedAssociationMethods
+    def avatar: () -> ::ActiveStorage::Attached::One
+
+    def avatar=: (::ActionDispatch::Http::UploadedFile) -> ::ActionDispatch::Http::UploadedFile
+               | (::Rack::Test::UploadedFile) -> ::Rack::Test::UploadedFile
+               | (::ActiveStorage::Blob) -> ::ActiveStorage::Blob
+               | (::String) -> ::String
+               | ({ io: ::IO, filename: ::String, content_type: ::String? }) -> { io: ::IO, filename: ::String, content_type: ::String? }
+               | (nil) -> nil
+  end
+  include GeneratedAssociationMethods
+
+  def self.with_avatars: () -> ::User::ActiveRecord_Relation
+  def self.with_attached_avatar: () -> ::User::ActiveRecord_Relation
+
+  module GeneratedRelationMethods
+    def with_avatars: () -> ::User::ActiveRecord_Relation
+
+    def with_attached_avatar: () -> ::User::ActiveRecord_Relation
+  end
+
+  class ActiveRecord_Relation < ::ActiveRecord::Relation
+    include ::User::GeneratedRelationMethods
+    include ::_ActiveRecord_Relation[::User, ::String]
+    include ::Enumerable[::User]
+  end
+
+  class ActiveRecord_Associations_CollectionProxy < ::ActiveRecord::Associations::CollectionProxy
+    include ::User::GeneratedRelationMethods
+    include ::_ActiveRecord_Relation[::User, ::String]
+  end
+end

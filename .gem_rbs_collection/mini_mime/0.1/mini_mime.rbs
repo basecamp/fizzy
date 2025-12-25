@@ -1,0 +1,14 @@
+module MiniMime
+  def self.lookup_by_filename: (String filename) -> Info?
+  def self.lookup_by_extension: (String extension) -> Info?
+  def self.lookup_by_content_type: (String mime) -> Info?
+
+  class Info
+    attr_accessor extension: String
+    attr_accessor content_type: String
+    attr_accessor encoding: String
+
+    def []: (Integer idx) -> String
+    def binary?: () -> bool
+  end
+end

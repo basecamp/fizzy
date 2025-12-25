@@ -1,0 +1,362 @@
+module Push
+  class Subscription < ::ApplicationRecord
+    extend ::_ActiveRecord_Relation_ClassMethods[::Push::Subscription, ::Push::Subscription::ActiveRecord_Relation, ::String]
+
+    module GeneratedAttributeMethods
+      def id: () -> ::String
+
+      def id=: (::String) -> ::String
+
+      def id?: () -> bool
+
+      def id_changed?: () -> bool
+
+      def id_change: () -> [ ::String?, ::String? ]
+
+      def id_will_change!: () -> void
+
+      def id_was: () -> ::String?
+
+      def id_previously_changed?: () -> bool
+
+      def id_previous_change: () -> ::Array[::String?]?
+
+      def id_previously_was: () -> ::String?
+
+      def id_before_last_save: () -> ::String?
+
+      def id_change_to_be_saved: () -> ::Array[::String?]?
+
+      def id_in_database: () -> ::String?
+
+      def saved_change_to_id: () -> ::Array[::String?]?
+
+      def saved_change_to_id?: () -> bool
+
+      def will_save_change_to_id?: () -> bool
+
+      def restore_id!: () -> void
+
+      def clear_id_change: () -> void
+
+      def account_id: () -> ::String
+
+      def account_id=: (::String) -> ::String
+
+      def account_id?: () -> bool
+
+      def account_id_changed?: () -> bool
+
+      def account_id_change: () -> [ ::String?, ::String? ]
+
+      def account_id_will_change!: () -> void
+
+      def account_id_was: () -> ::String?
+
+      def account_id_previously_changed?: () -> bool
+
+      def account_id_previous_change: () -> ::Array[::String?]?
+
+      def account_id_previously_was: () -> ::String?
+
+      def account_id_before_last_save: () -> ::String?
+
+      def account_id_change_to_be_saved: () -> ::Array[::String?]?
+
+      def account_id_in_database: () -> ::String?
+
+      def saved_change_to_account_id: () -> ::Array[::String?]?
+
+      def saved_change_to_account_id?: () -> bool
+
+      def will_save_change_to_account_id?: () -> bool
+
+      def restore_account_id!: () -> void
+
+      def clear_account_id_change: () -> void
+
+      def auth_key: () -> ::String?
+
+      def auth_key=: (::String?) -> ::String?
+
+      def auth_key?: () -> bool
+
+      def auth_key_changed?: () -> bool
+
+      def auth_key_change: () -> [ ::String?, ::String? ]
+
+      def auth_key_will_change!: () -> void
+
+      def auth_key_was: () -> ::String?
+
+      def auth_key_previously_changed?: () -> bool
+
+      def auth_key_previous_change: () -> ::Array[::String?]?
+
+      def auth_key_previously_was: () -> ::String?
+
+      def auth_key_before_last_save: () -> ::String?
+
+      def auth_key_change_to_be_saved: () -> ::Array[::String?]?
+
+      def auth_key_in_database: () -> ::String?
+
+      def saved_change_to_auth_key: () -> ::Array[::String?]?
+
+      def saved_change_to_auth_key?: () -> bool
+
+      def will_save_change_to_auth_key?: () -> bool
+
+      def restore_auth_key!: () -> void
+
+      def clear_auth_key_change: () -> void
+
+      def created_at: () -> ::ActiveSupport::TimeWithZone
+
+      def created_at=: (::ActiveSupport::TimeWithZone) -> ::ActiveSupport::TimeWithZone
+
+      def created_at?: () -> bool
+
+      def created_at_changed?: () -> bool
+
+      def created_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
+
+      def created_at_will_change!: () -> void
+
+      def created_at_was: () -> ::ActiveSupport::TimeWithZone?
+
+      def created_at_previously_changed?: () -> bool
+
+      def created_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def created_at_previously_was: () -> ::ActiveSupport::TimeWithZone?
+
+      def created_at_before_last_save: () -> ::ActiveSupport::TimeWithZone?
+
+      def created_at_change_to_be_saved: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def created_at_in_database: () -> ::ActiveSupport::TimeWithZone?
+
+      def saved_change_to_created_at: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def saved_change_to_created_at?: () -> bool
+
+      def will_save_change_to_created_at?: () -> bool
+
+      def restore_created_at!: () -> void
+
+      def clear_created_at_change: () -> void
+
+      def endpoint: () -> ::String?
+
+      def endpoint=: (::String?) -> ::String?
+
+      def endpoint?: () -> bool
+
+      def endpoint_changed?: () -> bool
+
+      def endpoint_change: () -> [ ::String?, ::String? ]
+
+      def endpoint_will_change!: () -> void
+
+      def endpoint_was: () -> ::String?
+
+      def endpoint_previously_changed?: () -> bool
+
+      def endpoint_previous_change: () -> ::Array[::String?]?
+
+      def endpoint_previously_was: () -> ::String?
+
+      def endpoint_before_last_save: () -> ::String?
+
+      def endpoint_change_to_be_saved: () -> ::Array[::String?]?
+
+      def endpoint_in_database: () -> ::String?
+
+      def saved_change_to_endpoint: () -> ::Array[::String?]?
+
+      def saved_change_to_endpoint?: () -> bool
+
+      def will_save_change_to_endpoint?: () -> bool
+
+      def restore_endpoint!: () -> void
+
+      def clear_endpoint_change: () -> void
+
+      def p256dh_key: () -> ::String?
+
+      def p256dh_key=: (::String?) -> ::String?
+
+      def p256dh_key?: () -> bool
+
+      def p256dh_key_changed?: () -> bool
+
+      def p256dh_key_change: () -> [ ::String?, ::String? ]
+
+      def p256dh_key_will_change!: () -> void
+
+      def p256dh_key_was: () -> ::String?
+
+      def p256dh_key_previously_changed?: () -> bool
+
+      def p256dh_key_previous_change: () -> ::Array[::String?]?
+
+      def p256dh_key_previously_was: () -> ::String?
+
+      def p256dh_key_before_last_save: () -> ::String?
+
+      def p256dh_key_change_to_be_saved: () -> ::Array[::String?]?
+
+      def p256dh_key_in_database: () -> ::String?
+
+      def saved_change_to_p256dh_key: () -> ::Array[::String?]?
+
+      def saved_change_to_p256dh_key?: () -> bool
+
+      def will_save_change_to_p256dh_key?: () -> bool
+
+      def restore_p256dh_key!: () -> void
+
+      def clear_p256dh_key_change: () -> void
+
+      def updated_at: () -> ::ActiveSupport::TimeWithZone
+
+      def updated_at=: (::ActiveSupport::TimeWithZone) -> ::ActiveSupport::TimeWithZone
+
+      def updated_at?: () -> bool
+
+      def updated_at_changed?: () -> bool
+
+      def updated_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
+
+      def updated_at_will_change!: () -> void
+
+      def updated_at_was: () -> ::ActiveSupport::TimeWithZone?
+
+      def updated_at_previously_changed?: () -> bool
+
+      def updated_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def updated_at_previously_was: () -> ::ActiveSupport::TimeWithZone?
+
+      def updated_at_before_last_save: () -> ::ActiveSupport::TimeWithZone?
+
+      def updated_at_change_to_be_saved: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def updated_at_in_database: () -> ::ActiveSupport::TimeWithZone?
+
+      def saved_change_to_updated_at: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def saved_change_to_updated_at?: () -> bool
+
+      def will_save_change_to_updated_at?: () -> bool
+
+      def restore_updated_at!: () -> void
+
+      def clear_updated_at_change: () -> void
+
+      def user_agent: () -> ::String?
+
+      def user_agent=: (::String?) -> ::String?
+
+      def user_agent?: () -> bool
+
+      def user_agent_changed?: () -> bool
+
+      def user_agent_change: () -> [ ::String?, ::String? ]
+
+      def user_agent_will_change!: () -> void
+
+      def user_agent_was: () -> ::String?
+
+      def user_agent_previously_changed?: () -> bool
+
+      def user_agent_previous_change: () -> ::Array[::String?]?
+
+      def user_agent_previously_was: () -> ::String?
+
+      def user_agent_before_last_save: () -> ::String?
+
+      def user_agent_change_to_be_saved: () -> ::Array[::String?]?
+
+      def user_agent_in_database: () -> ::String?
+
+      def saved_change_to_user_agent: () -> ::Array[::String?]?
+
+      def saved_change_to_user_agent?: () -> bool
+
+      def will_save_change_to_user_agent?: () -> bool
+
+      def restore_user_agent!: () -> void
+
+      def clear_user_agent_change: () -> void
+
+      def user_id: () -> ::String
+
+      def user_id=: (::String) -> ::String
+
+      def user_id?: () -> bool
+
+      def user_id_changed?: () -> bool
+
+      def user_id_change: () -> [ ::String?, ::String? ]
+
+      def user_id_will_change!: () -> void
+
+      def user_id_was: () -> ::String?
+
+      def user_id_previously_changed?: () -> bool
+
+      def user_id_previous_change: () -> ::Array[::String?]?
+
+      def user_id_previously_was: () -> ::String?
+
+      def user_id_before_last_save: () -> ::String?
+
+      def user_id_change_to_be_saved: () -> ::Array[::String?]?
+
+      def user_id_in_database: () -> ::String?
+
+      def saved_change_to_user_id: () -> ::Array[::String?]?
+
+      def saved_change_to_user_id?: () -> bool
+
+      def will_save_change_to_user_id?: () -> bool
+
+      def restore_user_id!: () -> void
+
+      def clear_user_id_change: () -> void
+    end
+    include GeneratedAttributeMethods
+
+    def account: () -> ::Account
+    def account=: (::Account?) -> ::Account?
+    def reload_account: () -> ::Account?
+    def build_account: (untyped) -> ::Account
+    def create_account: (untyped) -> ::Account
+    def create_account!: (untyped) -> ::Account
+    def user: () -> ::User
+    def user=: (::User?) -> ::User?
+    def reload_user: () -> ::User?
+    def build_user: (untyped) -> ::User
+    def create_user: (untyped) -> ::User
+    def create_user!: (untyped) -> ::User
+    module GeneratedAssociationMethods
+    end
+    include GeneratedAssociationMethods
+
+    module GeneratedRelationMethods
+    end
+
+    class ActiveRecord_Relation < ::ActiveRecord::Relation
+      include ::Push::Subscription::GeneratedRelationMethods
+      include ::_ActiveRecord_Relation[::Push::Subscription, ::String]
+      include ::Enumerable[::Push::Subscription]
+    end
+
+    class ActiveRecord_Associations_CollectionProxy < ::ActiveRecord::Associations::CollectionProxy
+      include ::Push::Subscription::GeneratedRelationMethods
+      include ::_ActiveRecord_Relation[::Push::Subscription, ::String]
+    end
+  end
+end

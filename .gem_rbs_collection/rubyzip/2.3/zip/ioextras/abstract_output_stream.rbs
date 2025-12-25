@@ -1,0 +1,19 @@
+module Zip
+  module IOExtras
+    # Implements many of the output convenience methods of IO.
+    # relies on <<
+    module AbstractOutputStream
+      include FakeIO
+
+      def write: (untyped data) -> untyped
+
+      def print: (*untyped params) -> untyped
+
+      def printf: (untyped a_format_string, *untyped params) -> untyped
+
+      def putc: (untyped an_object) -> untyped
+
+      def puts: (*untyped params) -> untyped
+    end
+  end
+end

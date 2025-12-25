@@ -1,0 +1,18 @@
+module Faker
+  class Lorem < Faker::Base
+    type exclude_words_filter = String | Array[String] | nil
+    # https://github.com/faker-ruby/faker/blob/v3.4.2/lib/faker/default/lorem.rb#L5
+    def self.word: (?exclude_words: exclude_words_filter) -> String
+    def self.words: (?number: Integer, ?supplemental: bool, ?exclude_words: exclude_words_filter) -> Array[String]
+    def self.sentence: (?word_count: Integer, ?supplemental: bool, ?random_words_to_add: Integer, ?exclude_words: exclude_words_filter) -> String
+    def self.paragraph: (?sentence_count: Integer, ?supplemental: bool, ?random_sentences_to_add: Integer, ?exclude_words: exclude_words_filter) -> String
+  end
+  class Theater < Faker::Base
+    # https://github.com/faker-ruby/faker/blob/main/lib/faker/default/theater.rb#L5
+    def self.play: -> String
+  end
+  class Vehicle < Faker::Base
+    # https://github.com/faker-ruby/faker/blob/v3.4.2/lib/faker/default/vehicle.rb#L54
+    def self.manufacturer: -> String
+  end
+end

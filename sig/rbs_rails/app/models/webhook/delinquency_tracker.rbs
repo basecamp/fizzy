@@ -1,0 +1,290 @@
+class Webhook < ::ApplicationRecord
+  class DelinquencyTracker < ::ApplicationRecord
+    extend ::_ActiveRecord_Relation_ClassMethods[::Webhook::DelinquencyTracker, ::Webhook::DelinquencyTracker::ActiveRecord_Relation, ::String]
+
+    module GeneratedAttributeMethods
+      def id: () -> ::String
+
+      def id=: (::String) -> ::String
+
+      def id?: () -> bool
+
+      def id_changed?: () -> bool
+
+      def id_change: () -> [ ::String?, ::String? ]
+
+      def id_will_change!: () -> void
+
+      def id_was: () -> ::String?
+
+      def id_previously_changed?: () -> bool
+
+      def id_previous_change: () -> ::Array[::String?]?
+
+      def id_previously_was: () -> ::String?
+
+      def id_before_last_save: () -> ::String?
+
+      def id_change_to_be_saved: () -> ::Array[::String?]?
+
+      def id_in_database: () -> ::String?
+
+      def saved_change_to_id: () -> ::Array[::String?]?
+
+      def saved_change_to_id?: () -> bool
+
+      def will_save_change_to_id?: () -> bool
+
+      def restore_id!: () -> void
+
+      def clear_id_change: () -> void
+
+      def consecutive_failures_count: () -> ::Integer?
+
+      def consecutive_failures_count=: (::Integer?) -> ::Integer?
+
+      def consecutive_failures_count?: () -> bool
+
+      def consecutive_failures_count_changed?: () -> bool
+
+      def consecutive_failures_count_change: () -> [ ::Integer?, ::Integer? ]
+
+      def consecutive_failures_count_will_change!: () -> void
+
+      def consecutive_failures_count_was: () -> ::Integer?
+
+      def consecutive_failures_count_previously_changed?: () -> bool
+
+      def consecutive_failures_count_previous_change: () -> ::Array[::Integer?]?
+
+      def consecutive_failures_count_previously_was: () -> ::Integer?
+
+      def consecutive_failures_count_before_last_save: () -> ::Integer?
+
+      def consecutive_failures_count_change_to_be_saved: () -> ::Array[::Integer?]?
+
+      def consecutive_failures_count_in_database: () -> ::Integer?
+
+      def saved_change_to_consecutive_failures_count: () -> ::Array[::Integer?]?
+
+      def saved_change_to_consecutive_failures_count?: () -> bool
+
+      def will_save_change_to_consecutive_failures_count?: () -> bool
+
+      def restore_consecutive_failures_count!: () -> void
+
+      def clear_consecutive_failures_count_change: () -> void
+
+      def created_at: () -> ::ActiveSupport::TimeWithZone
+
+      def created_at=: (::ActiveSupport::TimeWithZone) -> ::ActiveSupport::TimeWithZone
+
+      def created_at?: () -> bool
+
+      def created_at_changed?: () -> bool
+
+      def created_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
+
+      def created_at_will_change!: () -> void
+
+      def created_at_was: () -> ::ActiveSupport::TimeWithZone?
+
+      def created_at_previously_changed?: () -> bool
+
+      def created_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def created_at_previously_was: () -> ::ActiveSupport::TimeWithZone?
+
+      def created_at_before_last_save: () -> ::ActiveSupport::TimeWithZone?
+
+      def created_at_change_to_be_saved: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def created_at_in_database: () -> ::ActiveSupport::TimeWithZone?
+
+      def saved_change_to_created_at: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def saved_change_to_created_at?: () -> bool
+
+      def will_save_change_to_created_at?: () -> bool
+
+      def restore_created_at!: () -> void
+
+      def clear_created_at_change: () -> void
+
+      def first_failure_at: () -> ::ActiveSupport::TimeWithZone?
+
+      def first_failure_at=: (::ActiveSupport::TimeWithZone?) -> ::ActiveSupport::TimeWithZone?
+
+      def first_failure_at?: () -> bool
+
+      def first_failure_at_changed?: () -> bool
+
+      def first_failure_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
+
+      def first_failure_at_will_change!: () -> void
+
+      def first_failure_at_was: () -> ::ActiveSupport::TimeWithZone?
+
+      def first_failure_at_previously_changed?: () -> bool
+
+      def first_failure_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def first_failure_at_previously_was: () -> ::ActiveSupport::TimeWithZone?
+
+      def first_failure_at_before_last_save: () -> ::ActiveSupport::TimeWithZone?
+
+      def first_failure_at_change_to_be_saved: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def first_failure_at_in_database: () -> ::ActiveSupport::TimeWithZone?
+
+      def saved_change_to_first_failure_at: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def saved_change_to_first_failure_at?: () -> bool
+
+      def will_save_change_to_first_failure_at?: () -> bool
+
+      def restore_first_failure_at!: () -> void
+
+      def clear_first_failure_at_change: () -> void
+
+      def updated_at: () -> ::ActiveSupport::TimeWithZone
+
+      def updated_at=: (::ActiveSupport::TimeWithZone) -> ::ActiveSupport::TimeWithZone
+
+      def updated_at?: () -> bool
+
+      def updated_at_changed?: () -> bool
+
+      def updated_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
+
+      def updated_at_will_change!: () -> void
+
+      def updated_at_was: () -> ::ActiveSupport::TimeWithZone?
+
+      def updated_at_previously_changed?: () -> bool
+
+      def updated_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def updated_at_previously_was: () -> ::ActiveSupport::TimeWithZone?
+
+      def updated_at_before_last_save: () -> ::ActiveSupport::TimeWithZone?
+
+      def updated_at_change_to_be_saved: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def updated_at_in_database: () -> ::ActiveSupport::TimeWithZone?
+
+      def saved_change_to_updated_at: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def saved_change_to_updated_at?: () -> bool
+
+      def will_save_change_to_updated_at?: () -> bool
+
+      def restore_updated_at!: () -> void
+
+      def clear_updated_at_change: () -> void
+
+      def webhook_id: () -> ::String
+
+      def webhook_id=: (::String) -> ::String
+
+      def webhook_id?: () -> bool
+
+      def webhook_id_changed?: () -> bool
+
+      def webhook_id_change: () -> [ ::String?, ::String? ]
+
+      def webhook_id_will_change!: () -> void
+
+      def webhook_id_was: () -> ::String?
+
+      def webhook_id_previously_changed?: () -> bool
+
+      def webhook_id_previous_change: () -> ::Array[::String?]?
+
+      def webhook_id_previously_was: () -> ::String?
+
+      def webhook_id_before_last_save: () -> ::String?
+
+      def webhook_id_change_to_be_saved: () -> ::Array[::String?]?
+
+      def webhook_id_in_database: () -> ::String?
+
+      def saved_change_to_webhook_id: () -> ::Array[::String?]?
+
+      def saved_change_to_webhook_id?: () -> bool
+
+      def will_save_change_to_webhook_id?: () -> bool
+
+      def restore_webhook_id!: () -> void
+
+      def clear_webhook_id_change: () -> void
+
+      def account_id: () -> ::String
+
+      def account_id=: (::String) -> ::String
+
+      def account_id?: () -> bool
+
+      def account_id_changed?: () -> bool
+
+      def account_id_change: () -> [ ::String?, ::String? ]
+
+      def account_id_will_change!: () -> void
+
+      def account_id_was: () -> ::String?
+
+      def account_id_previously_changed?: () -> bool
+
+      def account_id_previous_change: () -> ::Array[::String?]?
+
+      def account_id_previously_was: () -> ::String?
+
+      def account_id_before_last_save: () -> ::String?
+
+      def account_id_change_to_be_saved: () -> ::Array[::String?]?
+
+      def account_id_in_database: () -> ::String?
+
+      def saved_change_to_account_id: () -> ::Array[::String?]?
+
+      def saved_change_to_account_id?: () -> bool
+
+      def will_save_change_to_account_id?: () -> bool
+
+      def restore_account_id!: () -> void
+
+      def clear_account_id_change: () -> void
+    end
+    include GeneratedAttributeMethods
+
+    def account: () -> ::Account
+    def account=: (::Account?) -> ::Account?
+    def reload_account: () -> ::Account?
+    def build_account: (untyped) -> ::Account
+    def create_account: (untyped) -> ::Account
+    def create_account!: (untyped) -> ::Account
+    def webhook: () -> ::Webhook
+    def webhook=: (::Webhook?) -> ::Webhook?
+    def reload_webhook: () -> ::Webhook?
+    def build_webhook: (untyped) -> ::Webhook
+    def create_webhook: (untyped) -> ::Webhook
+    def create_webhook!: (untyped) -> ::Webhook
+    module GeneratedAssociationMethods
+    end
+    include GeneratedAssociationMethods
+
+    module GeneratedRelationMethods
+    end
+
+    class ActiveRecord_Relation < ::ActiveRecord::Relation
+      include ::Webhook::DelinquencyTracker::GeneratedRelationMethods
+      include ::_ActiveRecord_Relation[::Webhook::DelinquencyTracker, ::String]
+      include ::Enumerable[::Webhook::DelinquencyTracker]
+    end
+
+    class ActiveRecord_Associations_CollectionProxy < ::ActiveRecord::Associations::CollectionProxy
+      include ::Webhook::DelinquencyTracker::GeneratedRelationMethods
+      include ::_ActiveRecord_Relation[::Webhook::DelinquencyTracker, ::String]
+    end
+  end
+end

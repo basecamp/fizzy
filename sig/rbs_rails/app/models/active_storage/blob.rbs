@@ -1,0 +1,419 @@
+module ActiveStorage
+  class Blob < ::ActiveStorage::Record
+    extend ::_ActiveRecord_Relation_ClassMethods[::ActiveStorage::Blob, ::ActiveStorage::Blob::ActiveRecord_Relation, ::String]
+
+    module GeneratedAttributeMethods
+      def id: () -> ::String
+
+      def id=: (::String) -> ::String
+
+      def id?: () -> bool
+
+      def id_changed?: () -> bool
+
+      def id_change: () -> [ ::String?, ::String? ]
+
+      def id_will_change!: () -> void
+
+      def id_was: () -> ::String?
+
+      def id_previously_changed?: () -> bool
+
+      def id_previous_change: () -> ::Array[::String?]?
+
+      def id_previously_was: () -> ::String?
+
+      def id_before_last_save: () -> ::String?
+
+      def id_change_to_be_saved: () -> ::Array[::String?]?
+
+      def id_in_database: () -> ::String?
+
+      def saved_change_to_id: () -> ::Array[::String?]?
+
+      def saved_change_to_id?: () -> bool
+
+      def will_save_change_to_id?: () -> bool
+
+      def restore_id!: () -> void
+
+      def clear_id_change: () -> void
+
+      def byte_size: () -> ::Integer
+
+      def byte_size=: (::Integer) -> ::Integer
+
+      def byte_size?: () -> bool
+
+      def byte_size_changed?: () -> bool
+
+      def byte_size_change: () -> [ ::Integer?, ::Integer? ]
+
+      def byte_size_will_change!: () -> void
+
+      def byte_size_was: () -> ::Integer?
+
+      def byte_size_previously_changed?: () -> bool
+
+      def byte_size_previous_change: () -> ::Array[::Integer?]?
+
+      def byte_size_previously_was: () -> ::Integer?
+
+      def byte_size_before_last_save: () -> ::Integer?
+
+      def byte_size_change_to_be_saved: () -> ::Array[::Integer?]?
+
+      def byte_size_in_database: () -> ::Integer?
+
+      def saved_change_to_byte_size: () -> ::Array[::Integer?]?
+
+      def saved_change_to_byte_size?: () -> bool
+
+      def will_save_change_to_byte_size?: () -> bool
+
+      def restore_byte_size!: () -> void
+
+      def clear_byte_size_change: () -> void
+
+      def checksum: () -> ::String?
+
+      def checksum=: (::String?) -> ::String?
+
+      def checksum?: () -> bool
+
+      def checksum_changed?: () -> bool
+
+      def checksum_change: () -> [ ::String?, ::String? ]
+
+      def checksum_will_change!: () -> void
+
+      def checksum_was: () -> ::String?
+
+      def checksum_previously_changed?: () -> bool
+
+      def checksum_previous_change: () -> ::Array[::String?]?
+
+      def checksum_previously_was: () -> ::String?
+
+      def checksum_before_last_save: () -> ::String?
+
+      def checksum_change_to_be_saved: () -> ::Array[::String?]?
+
+      def checksum_in_database: () -> ::String?
+
+      def saved_change_to_checksum: () -> ::Array[::String?]?
+
+      def saved_change_to_checksum?: () -> bool
+
+      def will_save_change_to_checksum?: () -> bool
+
+      def restore_checksum!: () -> void
+
+      def clear_checksum_change: () -> void
+
+      def content_type: () -> ::String?
+
+      def content_type=: (::String?) -> ::String?
+
+      def content_type?: () -> bool
+
+      def content_type_changed?: () -> bool
+
+      def content_type_change: () -> [ ::String?, ::String? ]
+
+      def content_type_will_change!: () -> void
+
+      def content_type_was: () -> ::String?
+
+      def content_type_previously_changed?: () -> bool
+
+      def content_type_previous_change: () -> ::Array[::String?]?
+
+      def content_type_previously_was: () -> ::String?
+
+      def content_type_before_last_save: () -> ::String?
+
+      def content_type_change_to_be_saved: () -> ::Array[::String?]?
+
+      def content_type_in_database: () -> ::String?
+
+      def saved_change_to_content_type: () -> ::Array[::String?]?
+
+      def saved_change_to_content_type?: () -> bool
+
+      def will_save_change_to_content_type?: () -> bool
+
+      def restore_content_type!: () -> void
+
+      def clear_content_type_change: () -> void
+
+      def created_at: () -> ::ActiveSupport::TimeWithZone
+
+      def created_at=: (::ActiveSupport::TimeWithZone) -> ::ActiveSupport::TimeWithZone
+
+      def created_at?: () -> bool
+
+      def created_at_changed?: () -> bool
+
+      def created_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
+
+      def created_at_will_change!: () -> void
+
+      def created_at_was: () -> ::ActiveSupport::TimeWithZone?
+
+      def created_at_previously_changed?: () -> bool
+
+      def created_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def created_at_previously_was: () -> ::ActiveSupport::TimeWithZone?
+
+      def created_at_before_last_save: () -> ::ActiveSupport::TimeWithZone?
+
+      def created_at_change_to_be_saved: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def created_at_in_database: () -> ::ActiveSupport::TimeWithZone?
+
+      def saved_change_to_created_at: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+      def saved_change_to_created_at?: () -> bool
+
+      def will_save_change_to_created_at?: () -> bool
+
+      def restore_created_at!: () -> void
+
+      def clear_created_at_change: () -> void
+
+      def filename: () -> ::String
+
+      def filename=: (::String) -> ::String
+
+      def filename?: () -> bool
+
+      def filename_changed?: () -> bool
+
+      def filename_change: () -> [ ::String?, ::String? ]
+
+      def filename_will_change!: () -> void
+
+      def filename_was: () -> ::String?
+
+      def filename_previously_changed?: () -> bool
+
+      def filename_previous_change: () -> ::Array[::String?]?
+
+      def filename_previously_was: () -> ::String?
+
+      def filename_before_last_save: () -> ::String?
+
+      def filename_change_to_be_saved: () -> ::Array[::String?]?
+
+      def filename_in_database: () -> ::String?
+
+      def saved_change_to_filename: () -> ::Array[::String?]?
+
+      def saved_change_to_filename?: () -> bool
+
+      def will_save_change_to_filename?: () -> bool
+
+      def restore_filename!: () -> void
+
+      def clear_filename_change: () -> void
+
+      def key: () -> ::String
+
+      def key=: (::String) -> ::String
+
+      def key?: () -> bool
+
+      def key_changed?: () -> bool
+
+      def key_change: () -> [ ::String?, ::String? ]
+
+      def key_will_change!: () -> void
+
+      def key_was: () -> ::String?
+
+      def key_previously_changed?: () -> bool
+
+      def key_previous_change: () -> ::Array[::String?]?
+
+      def key_previously_was: () -> ::String?
+
+      def key_before_last_save: () -> ::String?
+
+      def key_change_to_be_saved: () -> ::Array[::String?]?
+
+      def key_in_database: () -> ::String?
+
+      def saved_change_to_key: () -> ::Array[::String?]?
+
+      def saved_change_to_key?: () -> bool
+
+      def will_save_change_to_key?: () -> bool
+
+      def restore_key!: () -> void
+
+      def clear_key_change: () -> void
+
+      def metadata: () -> ::String?
+
+      def metadata=: (::String?) -> ::String?
+
+      def metadata?: () -> bool
+
+      def metadata_changed?: () -> bool
+
+      def metadata_change: () -> [ ::String?, ::String? ]
+
+      def metadata_will_change!: () -> void
+
+      def metadata_was: () -> ::String?
+
+      def metadata_previously_changed?: () -> bool
+
+      def metadata_previous_change: () -> ::Array[::String?]?
+
+      def metadata_previously_was: () -> ::String?
+
+      def metadata_before_last_save: () -> ::String?
+
+      def metadata_change_to_be_saved: () -> ::Array[::String?]?
+
+      def metadata_in_database: () -> ::String?
+
+      def saved_change_to_metadata: () -> ::Array[::String?]?
+
+      def saved_change_to_metadata?: () -> bool
+
+      def will_save_change_to_metadata?: () -> bool
+
+      def restore_metadata!: () -> void
+
+      def clear_metadata_change: () -> void
+
+      def service_name: () -> ::String
+
+      def service_name=: (::String) -> ::String
+
+      def service_name?: () -> bool
+
+      def service_name_changed?: () -> bool
+
+      def service_name_change: () -> [ ::String?, ::String? ]
+
+      def service_name_will_change!: () -> void
+
+      def service_name_was: () -> ::String?
+
+      def service_name_previously_changed?: () -> bool
+
+      def service_name_previous_change: () -> ::Array[::String?]?
+
+      def service_name_previously_was: () -> ::String?
+
+      def service_name_before_last_save: () -> ::String?
+
+      def service_name_change_to_be_saved: () -> ::Array[::String?]?
+
+      def service_name_in_database: () -> ::String?
+
+      def saved_change_to_service_name: () -> ::Array[::String?]?
+
+      def saved_change_to_service_name?: () -> bool
+
+      def will_save_change_to_service_name?: () -> bool
+
+      def restore_service_name!: () -> void
+
+      def clear_service_name_change: () -> void
+
+      def account_id: () -> ::String
+
+      def account_id=: (::String) -> ::String
+
+      def account_id?: () -> bool
+
+      def account_id_changed?: () -> bool
+
+      def account_id_change: () -> [ ::String?, ::String? ]
+
+      def account_id_will_change!: () -> void
+
+      def account_id_was: () -> ::String?
+
+      def account_id_previously_changed?: () -> bool
+
+      def account_id_previous_change: () -> ::Array[::String?]?
+
+      def account_id_previously_was: () -> ::String?
+
+      def account_id_before_last_save: () -> ::String?
+
+      def account_id_change_to_be_saved: () -> ::Array[::String?]?
+
+      def account_id_in_database: () -> ::String?
+
+      def saved_change_to_account_id: () -> ::Array[::String?]?
+
+      def saved_change_to_account_id?: () -> bool
+
+      def will_save_change_to_account_id?: () -> bool
+
+      def restore_account_id!: () -> void
+
+      def clear_account_id_change: () -> void
+    end
+    include GeneratedAttributeMethods
+    def attachments: () -> ::ActiveStorage::Attachment::ActiveRecord_Associations_CollectionProxy
+    def attachments=: (::ActiveStorage::Attachment::ActiveRecord_Associations_CollectionProxy | ::Array[::ActiveStorage::Attachment]) -> (::ActiveStorage::Attachment::ActiveRecord_Associations_CollectionProxy | ::Array[::ActiveStorage::Attachment])
+    def attachment_ids: () -> ::Array[::Integer]
+    def attachment_ids=: (::Array[::Integer]) -> ::Array[::Integer]
+    def variant_records: () -> ::ActiveStorage::VariantRecord::ActiveRecord_Associations_CollectionProxy
+    def variant_records=: (::ActiveStorage::VariantRecord::ActiveRecord_Associations_CollectionProxy | ::Array[::ActiveStorage::VariantRecord]) -> (::ActiveStorage::VariantRecord::ActiveRecord_Associations_CollectionProxy | ::Array[::ActiveStorage::VariantRecord])
+    def variant_record_ids: () -> ::Array[::Integer]
+    def variant_record_ids=: (::Array[::Integer]) -> ::Array[::Integer]
+    def preview_image_attachment: () -> ::ActiveStorage::Attachment?
+    def preview_image_attachment=: (::ActiveStorage::Attachment?) -> ::ActiveStorage::Attachment?
+    def build_preview_image_attachment: (?untyped) -> ::ActiveStorage::Attachment
+    def create_preview_image_attachment: (untyped) -> ::ActiveStorage::Attachment
+    def create_preview_image_attachment!: (untyped) -> ::ActiveStorage::Attachment
+    def reload_preview_image_attachment: () -> ::ActiveStorage::Attachment?
+    def preview_image_blob: () -> ::ActiveStorage::Blob?
+    def preview_image_blob=: (::ActiveStorage::Blob?) -> ::ActiveStorage::Blob?
+    def build_preview_image_blob: (?untyped) -> ::ActiveStorage::Blob
+    def create_preview_image_blob: (untyped) -> ::ActiveStorage::Blob
+    def create_preview_image_blob!: (untyped) -> ::ActiveStorage::Blob
+    def reload_preview_image_blob: () -> ::ActiveStorage::Blob?
+    def account: () -> ::Account
+    def account=: (::Account?) -> ::Account?
+    def reload_account: () -> ::Account?
+    def build_account: (untyped) -> ::Account
+    def create_account: (untyped) -> ::Account
+    def create_account!: (untyped) -> ::Account
+    module GeneratedAssociationMethods
+      def preview_image: () -> ::ActiveStorage::Attached::One
+
+      def preview_image=: (::ActionDispatch::Http::UploadedFile) -> ::ActionDispatch::Http::UploadedFile
+                        | (::Rack::Test::UploadedFile) -> ::Rack::Test::UploadedFile
+                        | (::ActiveStorage::Blob) -> ::ActiveStorage::Blob
+                        | (::String) -> ::String
+                        | ({ io: ::IO, filename: ::String, content_type: ::String? }) -> { io: ::IO, filename: ::String, content_type: ::String? }
+                        | (nil) -> nil
+    end
+    include GeneratedAssociationMethods
+
+    module GeneratedRelationMethods
+    end
+
+    class ActiveRecord_Relation < ::ActiveRecord::Relation
+      include ::ActiveStorage::Blob::GeneratedRelationMethods
+      include ::_ActiveRecord_Relation[::ActiveStorage::Blob, ::String]
+      include ::Enumerable[::ActiveStorage::Blob]
+    end
+
+    class ActiveRecord_Associations_CollectionProxy < ::ActiveRecord::Associations::CollectionProxy
+      include ::ActiveStorage::Blob::GeneratedRelationMethods
+      include ::_ActiveRecord_Relation[::ActiveStorage::Blob, ::String]
+    end
+  end
+end

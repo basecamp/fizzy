@@ -1,0 +1,39 @@
+module Rake
+  class TaskLib
+    include Rake::DSL
+  end
+
+  class Task
+  end
+
+  class TaskArguments
+    include Enumerable[untyped]
+
+    def []: (untyped index) -> untyped
+    def each: () ?{ (untyped, untyped) -> void } -> void
+  end
+
+  module DSL
+    private
+
+    include FileUtils
+
+    def desc: (String description) -> void
+    def directory: (*untyped args) ?{ () -> void } -> void
+    def file: (*untyped args) ?{ () -> void } -> void
+    def file_create: (*untyped args) ?{ () -> void } -> void
+    def import: (*String fns) -> void
+    def multitask: (*untyped args) ?{ () -> void } -> void
+    def namespace: (?untyped name) ?{ () -> void } -> void
+    def rule: (*untyped args) ?{ () -> void } -> void
+    def task: (*untyped args) ?{ (Rake::Task, Rake::TaskArguments) -> void } -> void
+  end
+end
+
+module FileUtils
+  def sh: (*String cmd, **untyped options) ?{ (bool, Process::Status) -> void } -> void
+    | (Hash[String, String] env, *String cmd, **untyped options) ?{ (bool, Process::Status) -> void } -> void
+  def ruby: (*String args, **untyped options) ?{ (bool, Process::Status) -> void } -> void
+  def safe_ln: (*untyped args, **untyped options) -> void
+  def split_all: (String path) -> Array[String]
+end

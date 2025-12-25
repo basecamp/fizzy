@@ -1,0 +1,48 @@
+module Zip
+  class InputStream
+    CHUNK_SIZE: 32768
+
+    include ::Zip::IOExtras::AbstractInputStream
+
+    # Opens the indicated zip file. An exception is thrown
+    # if the specified offset in the specified filename is
+    # not a local zip entry header.
+    #
+    # @param context [String||IO||StringIO] file path or IO/StringIO object
+    # @param offset [Integer] offset in the IO/StringIO
+    def initialize: (untyped context, ?::Integer offset, ?untyped? decrypter) -> void
+
+    def close: () -> untyped
+
+    # Returns a Entry object. It is necessary to call this
+    # method on a newly created InputStream before reading from
+    # the first entry in the archive. Returns nil when there are
+    # no more entries.
+    def get_next_entry: () -> Entry?
+
+    # Rewinds the stream to the beginning of the current entry
+    def rewind: () -> Entry?
+
+    # Modeled after IO.sysread
+    def sysread: (?untyped? length, ?::String outbuf) -> untyped
+
+    # Same as #initialize but if a block is passed the opened
+    # stream is passed to the block and closed when the block
+    # returns.
+    def self.open: (untyped filename_or_io, ?::Integer offset, ?untyped? decrypter) ?{ (InputStream) -> void } -> InputStream
+
+    def self.open_buffer: (untyped filename_or_io, ?::Integer offset) -> untyped
+
+    def get_io: (untyped io_or_file, ?::Integer offset) -> untyped
+
+    def open_entry: () -> untyped
+
+    def get_decrypted_io: () -> untyped
+
+    def get_decompressor: () -> untyped
+
+    def produce_input: () -> untyped
+
+    def input_finished?: () -> untyped
+  end
+end

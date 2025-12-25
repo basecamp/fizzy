@@ -1,0 +1,349 @@
+module ActionDispatch
+  class Cookies
+    class CookieJar
+      def fetch: (untyped name, *untyped args) ?{ () -> untyped } -> untyped
+    end
+  end
+end
+
+module ActionDispatch
+  module Http
+    class Headers
+      # Returns the value for the given key mapped to @env.
+      #
+      # If the key is not found and an optional code block is not provided,
+      # raises a <tt>KeyError</tt> exception.
+      #
+      # If the code block is provided, then it will be run and
+      # its result returned.
+      def fetch: (untyped key) ?{ () -> untyped } -> untyped
+               | (untyped key, untyped default) -> untyped
+    end
+  end
+end
+
+module ActionDispatch
+  class Request
+    class Session
+      # Returns value of the given key from the session, or raises +KeyError+
+      # if can't find the given key and no default value is set.
+      # Returns default value if specified.
+      #
+      #   session.fetch(:foo)
+      #   # => KeyError: key not found: "foo"
+      #
+      #   session.fetch(:foo, :bar)
+      #   # => :bar
+      #
+      #   session.fetch(:foo) do
+      #     :bar
+      #   end
+      #   # => :bar
+      def fetch: (untyped key) ?{ () -> untyped } -> untyped
+               | (untyped key, untyped default) -> untyped
+    end
+  end
+end
+
+module ActionDispatch
+  class RequestId
+    X_REQUEST_ID: ::String
+
+    def initialize: (Rack::_Application app) -> void
+
+    def call: (Rack::env env) -> Rack::response
+
+    private
+
+    def make_request_id: (String? request_id) -> String
+
+    def internal_request_id: () -> String
+  end
+end
+
+module ActionDispatch
+  module Routing
+    module PolymorphicRoutes
+      def polymorphic_url: (untyped record_or_hash_or_array, ?::Hash[untyped, untyped] options) -> String
+      def polymorphic_path: (untyped record_or_hash_or_array, ?::Hash[untyped, untyped] options) -> String
+    end
+
+    class RouteSet
+      def draw: () { () [self: Mapper] -> untyped } -> nil
+
+      def url_helpers: (?bool supports_path) -> RouteSet_AnonymousModule
+
+      module RouteSet_AnonymousModule
+        include ActiveSupport::Concern
+        include UrlFor
+        # https://github.com/rails/rails/blob/v7.2.2.2/actionpack/lib/action_dispatch/routing/route_set.rb#L518
+      end
+    end
+
+    class Mapper
+      module HttpHelpers
+        # Define a route that only recognizes HTTP GET.
+        # For supported arguments, see match[rdoc-ref:Base#match]
+        #
+        #   get 'bacon', to: 'food#bacon'
+        def get: (*untyped args) ?{ () -> untyped } -> untyped
+
+        # Define a route that only recognizes HTTP POST.
+        # For supported arguments, see match[rdoc-ref:Base#match]
+        #
+        #   post 'bacon', to: 'food#bacon'
+        def post: (*untyped args) ?{ () -> untyped } -> untyped
+
+        # Define a route that only recognizes HTTP PATCH.
+        # For supported arguments, see match[rdoc-ref:Base#match]
+        #
+        #   patch 'bacon', to: 'food#bacon'
+        def patch: (*untyped args) ?{ () -> untyped } -> untyped
+
+        # Define a route that only recognizes HTTP PUT.
+        # For supported arguments, see match[rdoc-ref:Base#match]
+        #
+        #   put 'bacon', to: 'food#bacon'
+        def put: (*untyped args) ?{ () -> untyped } -> untyped
+
+        # Define a route that only recognizes HTTP DELETE.
+        # For supported arguments, see match[rdoc-ref:Base#match]
+        #
+        #   delete 'broccoli', to: 'food#broccoli'
+        def delete: (*untyped args) ?{ () -> untyped } -> untyped
+
+        private
+
+        def map_method: (untyped method, untyped args) ?{ () -> untyped } -> untyped
+      end
+
+      module Resources
+        # Sometimes, you have a resource that clients always look up without
+        # referencing an ID. A common example, /profile always shows the
+        # profile of the currently logged in user. In this case, you can use
+        # a singular resource to map /profile (rather than /profile/:id) to
+        # the show action:
+        #
+        #   resource :profile
+        #
+        # This creates six different routes in your application, all mapping to
+        # the +Profiles+ controller (note that the controller is named after
+        # the plural):
+        #
+        #   GET       /profile/new
+        #   GET       /profile
+        #   GET       /profile/edit
+        #   PATCH/PUT /profile
+        #   DELETE    /profile
+        #   POST      /profile
+        #
+        # === Options
+        # Takes same options as resources[rdoc-ref:#resources]
+        def resource: (*untyped resources) ?{ () -> untyped } -> untyped
+
+        # In Rails, a resourceful route provides a mapping between HTTP verbs
+        # and URLs and controller actions. By convention, each action also maps
+        # to particular CRUD operations in a database. A single entry in the
+        # routing file, such as
+        #
+        #   resources :photos
+        #
+        # creates seven different routes in your application, all mapping to
+        # the +Photos+ controller:
+        #
+        #   GET       /photos
+        #   GET       /photos/new
+        #   POST      /photos
+        #   GET       /photos/:id
+        #   GET       /photos/:id/edit
+        #   PATCH/PUT /photos/:id
+        #   DELETE    /photos/:id
+        #
+        # Resources can also be nested infinitely by using this block syntax:
+        #
+        #   resources :photos do
+        #     resources :comments
+        #   end
+        #
+        # This generates the following comments routes:
+        #
+        #   GET       /photos/:photo_id/comments
+        #   GET       /photos/:photo_id/comments/new
+        #   POST      /photos/:photo_id/comments
+        #   GET       /photos/:photo_id/comments/:id
+        #   GET       /photos/:photo_id/comments/:id/edit
+        #   PATCH/PUT /photos/:photo_id/comments/:id
+        #   DELETE    /photos/:photo_id/comments/:id
+        #
+        # === Options
+        # Takes same options as match[rdoc-ref:Base#match] as well as:
+        #
+        # [:path_names]
+        #   Allows you to change the segment component of the +edit+ and +new+ actions.
+        #   Actions not specified are not changed.
+        #
+        #     resources :posts, path_names: { new: "brand_new" }
+        #
+        #   The above example will now change /posts/new to /posts/brand_new.
+        #
+        # [:path]
+        #   Allows you to change the path prefix for the resource.
+        #
+        #     resources :posts, path: 'postings'
+        #
+        #   The resource and all segments will now route to /postings instead of /posts.
+        #
+        # [:only]
+        #   Only generate routes for the given actions.
+        #
+        #     resources :cows, only: :show
+        #     resources :cows, only: [:show, :index]
+        #
+        # [:except]
+        #   Generate all routes except for the given actions.
+        #
+        #     resources :cows, except: :show
+        #     resources :cows, except: [:show, :index]
+        #
+        # [:shallow]
+        #   Generates shallow routes for nested resource(s). When placed on a parent resource,
+        #   generates shallow routes for all nested resources.
+        #
+        #     resources :posts, shallow: true do
+        #       resources :comments
+        #     end
+        #
+        #   Is the same as:
+        #
+        #     resources :posts do
+        #       resources :comments, except: [:show, :edit, :update, :destroy]
+        #     end
+        #     resources :comments, only: [:show, :edit, :update, :destroy]
+        #
+        #   This allows URLs for resources that otherwise would be deeply nested such
+        #   as a comment on a blog post like <tt>/posts/a-long-permalink/comments/1234</tt>
+        #   to be shortened to just <tt>/comments/1234</tt>.
+        #
+        #   Set <tt>shallow: false</tt> on a child resource to ignore a parent's shallow parameter.
+        #
+        # [:shallow_path]
+        #   Prefixes nested shallow routes with the specified path.
+        #
+        #     scope shallow_path: "sekret" do
+        #       resources :posts do
+        #         resources :comments, shallow: true
+        #       end
+        #     end
+        #
+        #   The +comments+ resource here will have the following routes generated for it:
+        #
+        #     post_comments    GET       /posts/:post_id/comments(.:format)
+        #     post_comments    POST      /posts/:post_id/comments(.:format)
+        #     new_post_comment GET       /posts/:post_id/comments/new(.:format)
+        #     edit_comment     GET       /sekret/comments/:id/edit(.:format)
+        #     comment          GET       /sekret/comments/:id(.:format)
+        #     comment          PATCH/PUT /sekret/comments/:id(.:format)
+        #     comment          DELETE    /sekret/comments/:id(.:format)
+        #
+        # [:shallow_prefix]
+        #   Prefixes nested shallow route names with specified prefix.
+        #
+        #     scope shallow_prefix: "sekret" do
+        #       resources :posts do
+        #         resources :comments, shallow: true
+        #       end
+        #     end
+        #
+        #   The +comments+ resource here will have the following routes generated for it:
+        #
+        #     post_comments           GET       /posts/:post_id/comments(.:format)
+        #     post_comments           POST      /posts/:post_id/comments(.:format)
+        #     new_post_comment        GET       /posts/:post_id/comments/new(.:format)
+        #     edit_sekret_comment     GET       /comments/:id/edit(.:format)
+        #     sekret_comment          GET       /comments/:id(.:format)
+        #     sekret_comment          PATCH/PUT /comments/:id(.:format)
+        #     sekret_comment          DELETE    /comments/:id(.:format)
+        #
+        # [:format]
+        #   Allows you to specify the default value for optional +format+
+        #   segment or disable it by supplying +false+.
+        #
+        # [:param]
+        #   Allows you to override the default param name of +:id+ in the URL.
+        #
+        # === Examples
+        #
+        #   # routes call <tt>Admin::PostsController</tt>
+        #   resources :posts, module: "admin"
+        #
+        #   # resource actions are at /admin/posts.
+        #   resources :posts, path: "admin/posts"
+        def resources: (*untyped resources) ?{ () -> untyped } -> untyped
+      end
+    end
+  end
+end
+
+module ActionDispatch
+  module Routing
+    module Redirection
+      # Redirect any path to another path:
+      #
+      #   get "/stories" => redirect("/posts")
+      #
+      # This will redirect the user, while ignoring certain parts of the request, including query string, etc.
+      # <tt>/stories</tt>, <tt>/stories?foo=bar</tt>, etc all redirect to <tt>/posts</tt>.
+      #
+      # You can also use interpolation in the supplied redirect argument:
+      #
+      #   get 'docs/:article', to: redirect('/wiki/%{article}')
+      #
+      # Note that if you return a path without a leading slash then the URL is prefixed with the
+      # current SCRIPT_NAME environment variable. This is typically '/' but may be different in
+      # a mounted engine or where the application is deployed to a subdirectory of a website.
+      #
+      # Alternatively you can use one of the other syntaxes:
+      #
+      # The block version of redirect allows for the easy encapsulation of any logic associated with
+      # the redirect in question. Either the params and request are supplied as arguments, or just
+      # params, depending of how many arguments your block accepts. A string is required as a
+      # return value.
+      #
+      #   get 'jokes/:number', to: redirect { |params, request|
+      #     path = (params[:number].to_i.even? ? "wheres-the-beef" : "i-love-lamp")
+      #     "http://#{request.host_with_port}/#{path}"
+      #   }
+      #
+      # Note that the +do end+ syntax for the redirect block wouldn't work, as Ruby would pass
+      # the block to +get+ instead of +redirect+. Use <tt>{ ... }</tt> instead.
+      #
+      # The options version of redirect allows you to supply only the parts of the URL which need
+      # to change, it also supports interpolation of the path similar to the first example.
+      #
+      #   get 'stores/:name',       to: redirect(subdomain: 'stores', path: '/%{name}')
+      #   get 'stores/:name(*all)', to: redirect(subdomain: 'stores', path: '/%{name}%{all}')
+      #   get '/stories', to: redirect(path: '/posts')
+      #
+      # This will redirect the user, while changing only the specified parts of the request,
+      # for example the +path+ option in the last example.
+      # <tt>/stories</tt>, <tt>/stories?foo=bar</tt>, redirect to <tt>/posts</tt> and <tt>/posts?foo=bar</tt> respectively.
+      #
+      # Finally, an object which responds to call can be supplied to redirect, allowing you to reuse
+      # common redirect routes. The call method must accept two arguments, params and request, and return
+      # a string.
+      #
+      #   get 'accounts/:name' => redirect(SubdomainRedirector.new('api'))
+      #
+      def redirect: (*untyped args) ?{ () -> untyped } -> (OptionRedirect | PathRedirect | Redirect)
+    end
+  end
+end
+
+module ActionDispatch
+  module Http
+    module MimeNegotiation
+      class InvalidType < Mime::Type::InvalidMimeType
+      end
+    end
+  end
+end

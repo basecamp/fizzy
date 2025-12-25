@@ -1,0 +1,6 @@
+# <!-- rdoc-file=lib/minitest.rb -->
+# Assertion raised on warning when running in -Werror mode.
+#
+class Minitest::UnexpectedWarning < ::Minitest::Assertion
+  def result_label: () -> "Warning"
+end

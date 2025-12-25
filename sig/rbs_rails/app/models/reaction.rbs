@@ -1,0 +1,297 @@
+class Reaction < ::ApplicationRecord
+  extend ::_ActiveRecord_Relation_ClassMethods[::Reaction, ::Reaction::ActiveRecord_Relation, ::String]
+
+  module GeneratedAttributeMethods
+    def id: () -> ::String
+
+    def id=: (::String) -> ::String
+
+    def id?: () -> bool
+
+    def id_changed?: () -> bool
+
+    def id_change: () -> [ ::String?, ::String? ]
+
+    def id_will_change!: () -> void
+
+    def id_was: () -> ::String?
+
+    def id_previously_changed?: () -> bool
+
+    def id_previous_change: () -> ::Array[::String?]?
+
+    def id_previously_was: () -> ::String?
+
+    def id_before_last_save: () -> ::String?
+
+    def id_change_to_be_saved: () -> ::Array[::String?]?
+
+    def id_in_database: () -> ::String?
+
+    def saved_change_to_id: () -> ::Array[::String?]?
+
+    def saved_change_to_id?: () -> bool
+
+    def will_save_change_to_id?: () -> bool
+
+    def restore_id!: () -> void
+
+    def clear_id_change: () -> void
+
+    def comment_id: () -> ::String
+
+    def comment_id=: (::String) -> ::String
+
+    def comment_id?: () -> bool
+
+    def comment_id_changed?: () -> bool
+
+    def comment_id_change: () -> [ ::String?, ::String? ]
+
+    def comment_id_will_change!: () -> void
+
+    def comment_id_was: () -> ::String?
+
+    def comment_id_previously_changed?: () -> bool
+
+    def comment_id_previous_change: () -> ::Array[::String?]?
+
+    def comment_id_previously_was: () -> ::String?
+
+    def comment_id_before_last_save: () -> ::String?
+
+    def comment_id_change_to_be_saved: () -> ::Array[::String?]?
+
+    def comment_id_in_database: () -> ::String?
+
+    def saved_change_to_comment_id: () -> ::Array[::String?]?
+
+    def saved_change_to_comment_id?: () -> bool
+
+    def will_save_change_to_comment_id?: () -> bool
+
+    def restore_comment_id!: () -> void
+
+    def clear_comment_id_change: () -> void
+
+    def content: () -> ::String
+
+    def content=: (::String) -> ::String
+
+    def content?: () -> bool
+
+    def content_changed?: () -> bool
+
+    def content_change: () -> [ ::String?, ::String? ]
+
+    def content_will_change!: () -> void
+
+    def content_was: () -> ::String?
+
+    def content_previously_changed?: () -> bool
+
+    def content_previous_change: () -> ::Array[::String?]?
+
+    def content_previously_was: () -> ::String?
+
+    def content_before_last_save: () -> ::String?
+
+    def content_change_to_be_saved: () -> ::Array[::String?]?
+
+    def content_in_database: () -> ::String?
+
+    def saved_change_to_content: () -> ::Array[::String?]?
+
+    def saved_change_to_content?: () -> bool
+
+    def will_save_change_to_content?: () -> bool
+
+    def restore_content!: () -> void
+
+    def clear_content_change: () -> void
+
+    def created_at: () -> ::ActiveSupport::TimeWithZone
+
+    def created_at=: (::ActiveSupport::TimeWithZone) -> ::ActiveSupport::TimeWithZone
+
+    def created_at?: () -> bool
+
+    def created_at_changed?: () -> bool
+
+    def created_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
+
+    def created_at_will_change!: () -> void
+
+    def created_at_was: () -> ::ActiveSupport::TimeWithZone?
+
+    def created_at_previously_changed?: () -> bool
+
+    def created_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def created_at_previously_was: () -> ::ActiveSupport::TimeWithZone?
+
+    def created_at_before_last_save: () -> ::ActiveSupport::TimeWithZone?
+
+    def created_at_change_to_be_saved: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def created_at_in_database: () -> ::ActiveSupport::TimeWithZone?
+
+    def saved_change_to_created_at: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def saved_change_to_created_at?: () -> bool
+
+    def will_save_change_to_created_at?: () -> bool
+
+    def restore_created_at!: () -> void
+
+    def clear_created_at_change: () -> void
+
+    def reacter_id: () -> ::String
+
+    def reacter_id=: (::String) -> ::String
+
+    def reacter_id?: () -> bool
+
+    def reacter_id_changed?: () -> bool
+
+    def reacter_id_change: () -> [ ::String?, ::String? ]
+
+    def reacter_id_will_change!: () -> void
+
+    def reacter_id_was: () -> ::String?
+
+    def reacter_id_previously_changed?: () -> bool
+
+    def reacter_id_previous_change: () -> ::Array[::String?]?
+
+    def reacter_id_previously_was: () -> ::String?
+
+    def reacter_id_before_last_save: () -> ::String?
+
+    def reacter_id_change_to_be_saved: () -> ::Array[::String?]?
+
+    def reacter_id_in_database: () -> ::String?
+
+    def saved_change_to_reacter_id: () -> ::Array[::String?]?
+
+    def saved_change_to_reacter_id?: () -> bool
+
+    def will_save_change_to_reacter_id?: () -> bool
+
+    def restore_reacter_id!: () -> void
+
+    def clear_reacter_id_change: () -> void
+
+    def updated_at: () -> ::ActiveSupport::TimeWithZone
+
+    def updated_at=: (::ActiveSupport::TimeWithZone) -> ::ActiveSupport::TimeWithZone
+
+    def updated_at?: () -> bool
+
+    def updated_at_changed?: () -> bool
+
+    def updated_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
+
+    def updated_at_will_change!: () -> void
+
+    def updated_at_was: () -> ::ActiveSupport::TimeWithZone?
+
+    def updated_at_previously_changed?: () -> bool
+
+    def updated_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def updated_at_previously_was: () -> ::ActiveSupport::TimeWithZone?
+
+    def updated_at_before_last_save: () -> ::ActiveSupport::TimeWithZone?
+
+    def updated_at_change_to_be_saved: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def updated_at_in_database: () -> ::ActiveSupport::TimeWithZone?
+
+    def saved_change_to_updated_at: () -> ::Array[::ActiveSupport::TimeWithZone?]?
+
+    def saved_change_to_updated_at?: () -> bool
+
+    def will_save_change_to_updated_at?: () -> bool
+
+    def restore_updated_at!: () -> void
+
+    def clear_updated_at_change: () -> void
+
+    def account_id: () -> ::String
+
+    def account_id=: (::String) -> ::String
+
+    def account_id?: () -> bool
+
+    def account_id_changed?: () -> bool
+
+    def account_id_change: () -> [ ::String?, ::String? ]
+
+    def account_id_will_change!: () -> void
+
+    def account_id_was: () -> ::String?
+
+    def account_id_previously_changed?: () -> bool
+
+    def account_id_previous_change: () -> ::Array[::String?]?
+
+    def account_id_previously_was: () -> ::String?
+
+    def account_id_before_last_save: () -> ::String?
+
+    def account_id_change_to_be_saved: () -> ::Array[::String?]?
+
+    def account_id_in_database: () -> ::String?
+
+    def saved_change_to_account_id: () -> ::Array[::String?]?
+
+    def saved_change_to_account_id?: () -> bool
+
+    def will_save_change_to_account_id?: () -> bool
+
+    def restore_account_id!: () -> void
+
+    def clear_account_id_change: () -> void
+  end
+  include GeneratedAttributeMethods
+
+  def account: () -> ::Account
+  def account=: (::Account?) -> ::Account?
+  def reload_account: () -> ::Account?
+  def build_account: (untyped) -> ::Account
+  def create_account: (untyped) -> ::Account
+  def create_account!: (untyped) -> ::Account
+  def comment: () -> ::Comment
+  def comment=: (::Comment?) -> ::Comment?
+  def reload_comment: () -> ::Comment?
+  def build_comment: (untyped) -> ::Comment
+  def create_comment: (untyped) -> ::Comment
+  def create_comment!: (untyped) -> ::Comment
+  def reacter: () -> ::User
+  def reacter=: (::User?) -> ::User?
+  def reload_reacter: () -> ::User?
+  def build_reacter: (untyped) -> ::User
+  def create_reacter: (untyped) -> ::User
+  def create_reacter!: (untyped) -> ::User
+  module GeneratedAssociationMethods
+  end
+  include GeneratedAssociationMethods
+
+  def self.ordered: () -> ::Reaction::ActiveRecord_Relation
+
+  module GeneratedRelationMethods
+    def ordered: () -> ::Reaction::ActiveRecord_Relation
+  end
+
+  class ActiveRecord_Relation < ::ActiveRecord::Relation
+    include ::Reaction::GeneratedRelationMethods
+    include ::_ActiveRecord_Relation[::Reaction, ::String]
+    include ::Enumerable[::Reaction]
+  end
+
+  class ActiveRecord_Associations_CollectionProxy < ::ActiveRecord::Associations::CollectionProxy
+    include ::Reaction::GeneratedRelationMethods
+    include ::_ActiveRecord_Relation[::Reaction, ::String]
+  end
+end

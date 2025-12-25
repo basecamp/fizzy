@@ -1,0 +1,62 @@
+module Addressable
+  class Template
+    attr_reader pattern: String
+
+    def initialize: (String pattern) -> void
+    def extract: (URI uri, ?untyped processor) -> Hash[String, String]
+    def partial_expand: (Hash[untyped, untyped] mapping, ?untyped processor, ?bool normalize_values) -> self
+    def expand: (Hash[untyped, untyped] mapping, ?untyped processor, ?bool normalize_values) -> URI
+    def variables: () -> Array[String]
+    alias keys variables
+    alias names variables
+  end
+
+  class URI
+    def self.parse: (String | URI uri) -> instance
+
+    attr_reader scheme: String
+    def scheme=: (String new_scheme) -> String
+    attr_reader user: String?
+    def user=: (String? new_user) -> String?
+    attr_reader password: String?
+    def password=: (String? new_password) -> String?
+    def userinfo: () -> String?
+    def userinfo=: (String? new_userinfo) -> String?
+    attr_reader host: String
+    def host=: (String new_host) -> String
+    def hostname: () -> String
+    def hostname=: (String new_hostname) -> String
+    def tld: () -> String
+    def tld=: (String new_tld) -> String
+    def domain: () -> String
+    def authority: () -> String
+    def authority=: (String new_authority) -> String
+    def omit: (*Symbol components) -> URI
+    def omit!: (*Symbol components) -> URI
+    def origin: () -> String
+    def origin=: (String new_origin) -> String
+    attr_reader port: Integer
+    def port=: (String | Integer? new_port) -> Integer
+    def inferred_port: () -> Integer
+    def default_port: () -> Integer
+    def site: () -> String
+    def site=: (String new_site) -> String
+    attr_reader path: String
+    def path=: (String new_path) -> String
+    def basename: () -> String
+    def extname: () -> String?
+    attr_reader query: String?
+    def query=: (String? new_query) -> String?
+    def query_values: (?singleton(Hash) return_type) -> Hash[String, String]?
+                    | (singleton(Array) return_type) -> Array[String]
+    def query_values=: (Hash[String, String]? new_query_values) -> Hash[String, String]?
+                     | (Array[String] new_query_values) -> Array[String]
+                     | (Array[[String | Array[String]]] new_query_values) -> Array[[String | Array[String]]]
+    def request_uri: () -> String
+    def request_uri=: (String new_request_uri) -> String
+    def fragment: () -> String?
+    def fragment=: (String? new_fragment) -> String?
+
+    def normalize: () -> self
+  end
+end

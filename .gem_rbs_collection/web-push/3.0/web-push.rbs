@@ -1,0 +1,37 @@
+module WebPush
+  class Error < RuntimeError
+  end
+
+  class ConfigurationError < Error
+  end
+
+  class ResponseError < Error
+  end
+
+  class InvalidSubscription < ResponseError
+  end
+
+  class ExpiredSubscription < ResponseError
+  end
+
+  class Unauthorized < ResponseError
+  end
+
+  class PayloadTooLarge < ResponseError
+  end
+
+  class TooManyRequests < ResponseError
+  end
+
+  class PushServiceError < ResponseError
+  end
+
+  class VapidKey
+    def public_key: () -> String
+    def private_key: () -> String
+    def to_pem: () -> String
+  end
+
+  def self.generate_key: () -> VapidKey
+  def self.payload_send: (?message: String, endpoint: String, ?p256dh: String, ?auth: String, ?vapid: { subject: String, public_key: String, private_key: String }, **untyped) -> untyped
+end

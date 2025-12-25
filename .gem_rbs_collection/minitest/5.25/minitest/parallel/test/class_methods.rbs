@@ -1,0 +1,5 @@
+module Minitest::Parallel::Test::ClassMethods
+  def run_one_method: (untyped klass, untyped method_name, untyped reporter) -> untyped
+
+  def test_order: () -> :parallel
+end

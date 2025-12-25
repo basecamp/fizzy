@@ -1,0 +1,47 @@
+module Zip
+  class OutputStream
+    include ::Zip::IOExtras::AbstractOutputStream
+
+    attr_accessor comment: untyped
+
+    # Opens the indicated zip file. If a file with that name already
+    # exists it will be overwritten.
+    def initialize: (untyped file_name, ?bool stream, ?untyped? encrypter) -> void
+
+    def self.open: (untyped file_name, ?untyped? encrypter) ?{ (OutputStream) -> void } -> OutputStream
+
+    # Same as #open but writes to a filestream instead
+    def self.write_buffer: (?untyped io, ?untyped? encrypter) { (untyped) -> untyped } -> untyped
+
+    # Closes the stream and writes the central directory to the zip file
+    def close: () -> (nil | untyped)
+
+    # Closes the stream and writes the central directory to the zip file
+    def close_buffer: () -> untyped
+
+    # Closes the current entry and opens a new for writing.
+    # +entry+ can be a ZipEntry object or a string.
+    def put_next_entry: (String entry_name, ?untyped? comment, ?untyped? extra, ?untyped compression_method, ?untyped level) -> untyped
+
+    def copy_raw_entry: (untyped entry) -> untyped
+
+    private
+
+    def finalize_current_entry: () -> (nil | untyped)
+
+    def init_next_entry: (untyped entry, ?untyped level) -> untyped
+
+    def get_compressor: (untyped entry, untyped level) -> untyped
+
+    def update_local_headers: () -> untyped
+
+    def write_central_directory: () -> untyped
+
+    def finish: () -> untyped
+
+    public
+
+    # Modeled after IO.<<
+    def <<: (untyped data) -> self
+  end
+end

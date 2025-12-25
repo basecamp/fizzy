@@ -1,0 +1,11 @@
+module ActionCable
+  module Connection
+    class Base
+    end
+  end
+
+  module Channel
+    class Base
+    end
+  end
+end

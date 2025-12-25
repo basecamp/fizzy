@@ -1,0 +1,3 @@
+dependencies:
+  - name: stringio
+  - name: pathname
