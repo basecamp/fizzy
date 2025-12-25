@@ -3,7 +3,7 @@
 module Card::Assignable
   extend ActiveSupport::Concern
 
-  # @type self: singleton(Card::Concern)
+  # @type self: singleton(Card) & singleton(Card::Assignable)
 
   included do
     has_many :assignments, dependent: :delete_all
@@ -19,18 +19,18 @@ module Card::Assignable
   end
 
   def assigned_to?(user)
-    # @type self: Card::Concern
+    # @type self: Card & Card::Assignable
     assignments.any? { |a| a.assignee_id == user.id }
   end
 
   def assigned?
-    # @type self: Card::Concern
+    # @type self: Card & Card::Assignable
     assignments.any?
   end
 
   private
     def assign(user)
-      # @type self: Card::Concern
+      # @type self: Card & Card::Assignable
       assignments.create! assignee: user, assigner: Current.user
       watch_by user
 
@@ -40,7 +40,7 @@ module Card::Assignable
     end
 
     def unassign(user)
-      # @type self: Card::Concern
+      # @type self: Card & Card::Assignable
       destructions = assignments.destroy_by assignee: user
       track_event :unassigned, assignee_ids: [ user.id ] if destructions.any?
     end

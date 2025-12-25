@@ -1,0 +1,9 @@
+# Generated from app/models/user/accessor.rb with RBS::Inline
+
+module User::Accessor
+  extend ActiveSupport::Concern
+
+  private
+
+  def grant_access_to_boards: () -> untyped
+end
