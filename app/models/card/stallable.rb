@@ -13,6 +13,8 @@ module Card::Stallable
   #    def published?: -> bool
   #    def last_active_at_changed?: -> bool
   #    def open?: -> bool
+  #
+  #    def self.stalled: -> Card::ActiveRecord_Relation
 
   STALLED_AFTER_LAST_SPIKE_PERIOD = 14.days
 

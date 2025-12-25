@@ -1,0 +1,17 @@
+# Generated from app/controllers/concerns/request_forgery_protection.rb with RBS::Inline
+
+module RequestForgeryProtection
+  extend ActiveSupport::Concern
+
+  private
+
+  def append_sec_fetch_site_to_vary_header: () -> untyped
+
+  def verified_request?: () -> untyped
+
+  SAFE_FETCH_SITES: ::Array[untyped]
+
+  def safe_fetch_site?: () -> untyped
+
+  def sec_fetch_site_value: () -> untyped
+end

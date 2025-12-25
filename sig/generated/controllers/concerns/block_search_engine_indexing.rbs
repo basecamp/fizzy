@@ -1,0 +1,11 @@
+# Generated from app/controllers/concerns/block_search_engine_indexing.rb with RBS::Inline
+
+# Tell crawlers like Googlebot to drop pages entirely from search results, even
+# if other sites link to it
+module BlockSearchEngineIndexing
+  extend ActiveSupport::Concern
+
+  private
+
+  def block_search_engine_indexing: () -> untyped
+end

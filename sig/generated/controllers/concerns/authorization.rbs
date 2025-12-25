@@ -1,0 +1,21 @@
+# Generated from app/controllers/concerns/authorization.rb with RBS::Inline
+
+module Authorization
+  extend ActiveSupport::Concern
+
+  def allow_unauthorized_access: (**untyped options) -> untyped
+
+  def require_access_without_a_user: (**untyped options) -> untyped
+
+  private
+
+  def ensure_admin: () -> untyped
+
+  def ensure_staff: () -> untyped
+
+  def ensure_can_access_account: () -> untyped
+
+  def ensure_only_staff_can_access_non_production_remote_environments: () -> untyped
+
+  def redirect_existing_user: () -> untyped
+end

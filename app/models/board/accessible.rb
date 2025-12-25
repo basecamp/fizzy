@@ -3,22 +3,9 @@
 module Board::Accessible
   extend ActiveSupport::Concern
 
-  # @rbs!
-  #    extend _ActiveRecord_Relation_ClassMethods[::Board, ::Board::ActiveRecord_Relation, ::String]
-  #    extend ::ActiveRecord::Associations::ClassMethods
-  #
-  #    def accesses: -> Access::ActiveRecord_Associations_CollectionProxy
-  #    def users: -> User::ActiveRecord_Associations_CollectionProxy
-  #
-  #    def cards: -> Card::ActiveRecord_Associations_CollectionProxy
-  #
-  #    def creator: -> User
-  #
-  #    def id: -> String
-  #    def all_access_previously_changed?: -> bool
+  # @type self: singleton(Board::Concern)
 
   included do
-    # @type self: singleton(Board)
     has_many :accesses, dependent: :delete_all do
       def revise(granted: [], revoked: [])
         transaction do
@@ -46,10 +33,12 @@ module Board::Accessible
   end
 
   def accessed_by(user)
+    # @type self: Board::Concern
     access_for(user).accessed
   end
 
   def access_for(user)
+    # @type self: Board::Concern
     accesses.find_by(user: user)
   end
 
@@ -66,15 +55,18 @@ module Board::Accessible
   end
 
   def watchers
+    # @type self: Board::Concern
     users.active.where(accesses: { involvement: :watching })
   end
 
   private
     def grant_access_to_creator
+      # @type self: Board::Concern
       accesses.create(user: creator, involvement: :watching)
     end
 
     def grant_access_to_everyone
+      # @type self: Board::Concern
       accesses.grant_to(account.users.active) if all_access_previously_changed?(to: true)
     end
 
@@ -114,6 +106,7 @@ module Board::Accessible
     end
 
     def watches_for(user)
+      # @type self: Board::Concern
       Watch.where(card: cards, user: user)
     end
 end

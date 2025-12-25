@@ -1,0 +1,5 @@
+# Generated from app/controllers/concerns/current_request.rb with RBS::Inline
+
+module CurrentRequest
+  extend ActiveSupport::Concern
+end

@@ -3,10 +3,6 @@
 module Card::Assignable
   extend ActiveSupport::Concern
 
-  def assignments: () -> Assignment::ActiveRecord_Associations_CollectionProxy
-
-  def assignees: () -> User::ActiveRecord_Associations_CollectionProxy
-
   def toggle_assignment: (untyped user) -> untyped
 
   def assigned_to?: (untyped user) -> untyped

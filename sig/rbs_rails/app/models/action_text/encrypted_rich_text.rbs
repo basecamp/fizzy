@@ -11,7 +11,7 @@ module ::ActionText
 
       def id?: () -> bool
 
-      def id_changed?: () -> bool
+      def id_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def id_change: () -> [ ::String?, ::String? ]
 
@@ -19,7 +19,7 @@ module ::ActionText
 
       def id_was: () -> ::String?
 
-      def id_previously_changed?: () -> bool
+      def id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def id_previous_change: () -> ::Array[::String?]?
 
@@ -51,7 +51,7 @@ module ::ActionText
 
       def body?: () -> bool
 
-      def body_changed?: () -> bool
+      def body_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def body_change: () -> [ ::String?, ::String? ]
 
@@ -59,7 +59,7 @@ module ::ActionText
 
       def body_was: () -> ::String?
 
-      def body_previously_changed?: () -> bool
+      def body_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def body_previous_change: () -> ::Array[::String?]?
 
@@ -91,7 +91,7 @@ module ::ActionText
 
       def created_at?: () -> bool
 
-      def created_at_changed?: () -> bool
+      def created_at_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def created_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
 
@@ -99,7 +99,7 @@ module ::ActionText
 
       def created_at_was: () -> ::ActiveSupport::TimeWithZone?
 
-      def created_at_previously_changed?: () -> bool
+      def created_at_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def created_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
 
@@ -131,7 +131,7 @@ module ::ActionText
 
       def name?: () -> bool
 
-      def name_changed?: () -> bool
+      def name_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def name_change: () -> [ ::String?, ::String? ]
 
@@ -139,7 +139,7 @@ module ::ActionText
 
       def name_was: () -> ::String?
 
-      def name_previously_changed?: () -> bool
+      def name_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def name_previous_change: () -> ::Array[::String?]?
 
@@ -171,7 +171,7 @@ module ::ActionText
 
       def record_id?: () -> bool
 
-      def record_id_changed?: () -> bool
+      def record_id_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def record_id_change: () -> [ ::String?, ::String? ]
 
@@ -179,7 +179,7 @@ module ::ActionText
 
       def record_id_was: () -> ::String?
 
-      def record_id_previously_changed?: () -> bool
+      def record_id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def record_id_previous_change: () -> ::Array[::String?]?
 
@@ -211,7 +211,7 @@ module ::ActionText
 
       def record_type?: () -> bool
 
-      def record_type_changed?: () -> bool
+      def record_type_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def record_type_change: () -> [ ::String?, ::String? ]
 
@@ -219,7 +219,7 @@ module ::ActionText
 
       def record_type_was: () -> ::String?
 
-      def record_type_previously_changed?: () -> bool
+      def record_type_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def record_type_previous_change: () -> ::Array[::String?]?
 
@@ -251,7 +251,7 @@ module ::ActionText
 
       def updated_at?: () -> bool
 
-      def updated_at_changed?: () -> bool
+      def updated_at_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def updated_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
 
@@ -259,7 +259,7 @@ module ::ActionText
 
       def updated_at_was: () -> ::ActiveSupport::TimeWithZone?
 
-      def updated_at_previously_changed?: () -> bool
+      def updated_at_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def updated_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
 
@@ -291,7 +291,7 @@ module ::ActionText
 
       def account_id?: () -> bool
 
-      def account_id_changed?: () -> bool
+      def account_id_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def account_id_change: () -> [ ::String?, ::String? ]
 
@@ -299,7 +299,7 @@ module ::ActionText
 
       def account_id_was: () -> ::String?
 
-      def account_id_previously_changed?: () -> bool
+      def account_id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def account_id_previous_change: () -> ::Array[::String?]?
 

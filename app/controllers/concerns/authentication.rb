@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 module Authentication
   extend ActiveSupport::Concern
 

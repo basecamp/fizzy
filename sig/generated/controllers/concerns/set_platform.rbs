@@ -1,0 +1,9 @@
+# Generated from app/controllers/concerns/set_platform.rb with RBS::Inline
+
+module SetPlatform
+  extend ActiveSupport::Concern
+
+  private
+
+  def platform: () -> untyped
+end

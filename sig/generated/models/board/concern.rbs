@@ -1,0 +1,5 @@
+class Board
+  class Concern < Board
+    extend ActiveSupport::Concern
+  end
+end

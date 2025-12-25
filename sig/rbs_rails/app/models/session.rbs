@@ -10,7 +10,7 @@ class ::Session < ::ApplicationRecord
 
     def id?: () -> bool
 
-    def id_changed?: () -> bool
+    def id_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def id_change: () -> [ ::String?, ::String? ]
 
@@ -18,7 +18,7 @@ class ::Session < ::ApplicationRecord
 
     def id_was: () -> ::String?
 
-    def id_previously_changed?: () -> bool
+    def id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def id_previous_change: () -> ::Array[::String?]?
 
@@ -50,7 +50,7 @@ class ::Session < ::ApplicationRecord
 
     def created_at?: () -> bool
 
-    def created_at_changed?: () -> bool
+    def created_at_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def created_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
 
@@ -58,7 +58,7 @@ class ::Session < ::ApplicationRecord
 
     def created_at_was: () -> ::ActiveSupport::TimeWithZone?
 
-    def created_at_previously_changed?: () -> bool
+    def created_at_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def created_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
 
@@ -90,7 +90,7 @@ class ::Session < ::ApplicationRecord
 
     def identity_id?: () -> bool
 
-    def identity_id_changed?: () -> bool
+    def identity_id_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def identity_id_change: () -> [ ::String?, ::String? ]
 
@@ -98,7 +98,7 @@ class ::Session < ::ApplicationRecord
 
     def identity_id_was: () -> ::String?
 
-    def identity_id_previously_changed?: () -> bool
+    def identity_id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def identity_id_previous_change: () -> ::Array[::String?]?
 
@@ -130,7 +130,7 @@ class ::Session < ::ApplicationRecord
 
     def ip_address?: () -> bool
 
-    def ip_address_changed?: () -> bool
+    def ip_address_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def ip_address_change: () -> [ ::String?, ::String? ]
 
@@ -138,7 +138,7 @@ class ::Session < ::ApplicationRecord
 
     def ip_address_was: () -> ::String?
 
-    def ip_address_previously_changed?: () -> bool
+    def ip_address_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def ip_address_previous_change: () -> ::Array[::String?]?
 
@@ -170,7 +170,7 @@ class ::Session < ::ApplicationRecord
 
     def updated_at?: () -> bool
 
-    def updated_at_changed?: () -> bool
+    def updated_at_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def updated_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
 
@@ -178,7 +178,7 @@ class ::Session < ::ApplicationRecord
 
     def updated_at_was: () -> ::ActiveSupport::TimeWithZone?
 
-    def updated_at_previously_changed?: () -> bool
+    def updated_at_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def updated_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
 
@@ -210,7 +210,7 @@ class ::Session < ::ApplicationRecord
 
     def user_agent?: () -> bool
 
-    def user_agent_changed?: () -> bool
+    def user_agent_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def user_agent_change: () -> [ ::String?, ::String? ]
 
@@ -218,7 +218,7 @@ class ::Session < ::ApplicationRecord
 
     def user_agent_was: () -> ::String?
 
-    def user_agent_previously_changed?: () -> bool
+    def user_agent_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def user_agent_previous_change: () -> ::Array[::String?]?
 

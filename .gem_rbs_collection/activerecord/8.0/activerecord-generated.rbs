@@ -19174,7 +19174,7 @@ module ActiveRecord
     # {ActiveRecord::Base.create!}[rdoc-ref:Persistence::ClassMethods#create!].
     def create!: (?untyped? attributes) { () -> untyped } -> untyped
 
-    def first_or_create: (?untyped? attributes) { () -> untyped } -> untyped
+    def first_or_create: (?untyped? attributes) ?{ () -> untyped } -> untyped
 
     def first_or_create!: (?untyped? attributes) { () -> untyped } -> untyped
 

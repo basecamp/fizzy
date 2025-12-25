@@ -1,0 +1,12 @@
+# Generated from app/controllers/concerns/view_transitions.rb with RBS::Inline
+
+# FIXME: Upstream this fix to turbo-rails
+module ViewTransitions
+  extend ActiveSupport::Concern
+
+  private
+
+  def disable_view_transitions: () -> untyped
+
+  def page_refresh?: () -> untyped
+end

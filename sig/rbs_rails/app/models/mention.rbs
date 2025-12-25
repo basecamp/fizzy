@@ -10,7 +10,7 @@ class ::Mention < ::ApplicationRecord
 
     def id?: () -> bool
 
-    def id_changed?: () -> bool
+    def id_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def id_change: () -> [ ::String?, ::String? ]
 
@@ -18,7 +18,7 @@ class ::Mention < ::ApplicationRecord
 
     def id_was: () -> ::String?
 
-    def id_previously_changed?: () -> bool
+    def id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def id_previous_change: () -> ::Array[::String?]?
 
@@ -50,7 +50,7 @@ class ::Mention < ::ApplicationRecord
 
     def created_at?: () -> bool
 
-    def created_at_changed?: () -> bool
+    def created_at_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def created_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
 
@@ -58,7 +58,7 @@ class ::Mention < ::ApplicationRecord
 
     def created_at_was: () -> ::ActiveSupport::TimeWithZone?
 
-    def created_at_previously_changed?: () -> bool
+    def created_at_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def created_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
 
@@ -90,7 +90,7 @@ class ::Mention < ::ApplicationRecord
 
     def mentionee_id?: () -> bool
 
-    def mentionee_id_changed?: () -> bool
+    def mentionee_id_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def mentionee_id_change: () -> [ ::String?, ::String? ]
 
@@ -98,7 +98,7 @@ class ::Mention < ::ApplicationRecord
 
     def mentionee_id_was: () -> ::String?
 
-    def mentionee_id_previously_changed?: () -> bool
+    def mentionee_id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def mentionee_id_previous_change: () -> ::Array[::String?]?
 
@@ -130,7 +130,7 @@ class ::Mention < ::ApplicationRecord
 
     def mentioner_id?: () -> bool
 
-    def mentioner_id_changed?: () -> bool
+    def mentioner_id_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def mentioner_id_change: () -> [ ::String?, ::String? ]
 
@@ -138,7 +138,7 @@ class ::Mention < ::ApplicationRecord
 
     def mentioner_id_was: () -> ::String?
 
-    def mentioner_id_previously_changed?: () -> bool
+    def mentioner_id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def mentioner_id_previous_change: () -> ::Array[::String?]?
 
@@ -170,7 +170,7 @@ class ::Mention < ::ApplicationRecord
 
     def source_id?: () -> bool
 
-    def source_id_changed?: () -> bool
+    def source_id_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def source_id_change: () -> [ ::String?, ::String? ]
 
@@ -178,7 +178,7 @@ class ::Mention < ::ApplicationRecord
 
     def source_id_was: () -> ::String?
 
-    def source_id_previously_changed?: () -> bool
+    def source_id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def source_id_previous_change: () -> ::Array[::String?]?
 
@@ -210,7 +210,7 @@ class ::Mention < ::ApplicationRecord
 
     def source_type?: () -> bool
 
-    def source_type_changed?: () -> bool
+    def source_type_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def source_type_change: () -> [ ::String?, ::String? ]
 
@@ -218,7 +218,7 @@ class ::Mention < ::ApplicationRecord
 
     def source_type_was: () -> ::String?
 
-    def source_type_previously_changed?: () -> bool
+    def source_type_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def source_type_previous_change: () -> ::Array[::String?]?
 
@@ -250,7 +250,7 @@ class ::Mention < ::ApplicationRecord
 
     def updated_at?: () -> bool
 
-    def updated_at_changed?: () -> bool
+    def updated_at_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def updated_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
 
@@ -258,7 +258,7 @@ class ::Mention < ::ApplicationRecord
 
     def updated_at_was: () -> ::ActiveSupport::TimeWithZone?
 
-    def updated_at_previously_changed?: () -> bool
+    def updated_at_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def updated_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
 
@@ -290,7 +290,7 @@ class ::Mention < ::ApplicationRecord
 
     def account_id?: () -> bool
 
-    def account_id_changed?: () -> bool
+    def account_id_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def account_id_change: () -> [ ::String?, ::String? ]
 
@@ -298,7 +298,7 @@ class ::Mention < ::ApplicationRecord
 
     def account_id_was: () -> ::String?
 
-    def account_id_previously_changed?: () -> bool
+    def account_id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def account_id_previous_change: () -> ::Array[::String?]?
 

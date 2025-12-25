@@ -1,3 +1,6 @@
+# rbs_inline: enabled
+
+
 # Tell crawlers like Googlebot to drop pages entirely from search results, even
 # if other sites link to it
 module BlockSearchEngineIndexing

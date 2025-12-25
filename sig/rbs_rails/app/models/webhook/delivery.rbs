@@ -11,7 +11,7 @@ class ::Webhook < ::ApplicationRecord
 
       def id?: () -> bool
 
-      def id_changed?: () -> bool
+      def id_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def id_change: () -> [ ::String?, ::String? ]
 
@@ -19,7 +19,7 @@ class ::Webhook < ::ApplicationRecord
 
       def id_was: () -> ::String?
 
-      def id_previously_changed?: () -> bool
+      def id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def id_previous_change: () -> ::Array[::String?]?
 
@@ -51,7 +51,7 @@ class ::Webhook < ::ApplicationRecord
 
       def created_at?: () -> bool
 
-      def created_at_changed?: () -> bool
+      def created_at_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def created_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
 
@@ -59,7 +59,7 @@ class ::Webhook < ::ApplicationRecord
 
       def created_at_was: () -> ::ActiveSupport::TimeWithZone?
 
-      def created_at_previously_changed?: () -> bool
+      def created_at_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def created_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
 
@@ -91,7 +91,7 @@ class ::Webhook < ::ApplicationRecord
 
       def event_id?: () -> bool
 
-      def event_id_changed?: () -> bool
+      def event_id_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def event_id_change: () -> [ ::String?, ::String? ]
 
@@ -99,7 +99,7 @@ class ::Webhook < ::ApplicationRecord
 
       def event_id_was: () -> ::String?
 
-      def event_id_previously_changed?: () -> bool
+      def event_id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def event_id_previous_change: () -> ::Array[::String?]?
 
@@ -131,7 +131,7 @@ class ::Webhook < ::ApplicationRecord
 
       def request?: () -> bool
 
-      def request_changed?: () -> bool
+      def request_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def request_change: () -> [ ::String?, ::String? ]
 
@@ -139,7 +139,7 @@ class ::Webhook < ::ApplicationRecord
 
       def request_was: () -> ::String?
 
-      def request_previously_changed?: () -> bool
+      def request_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def request_previous_change: () -> ::Array[::String?]?
 
@@ -171,7 +171,7 @@ class ::Webhook < ::ApplicationRecord
 
       def response?: () -> bool
 
-      def response_changed?: () -> bool
+      def response_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def response_change: () -> [ ::String?, ::String? ]
 
@@ -179,7 +179,7 @@ class ::Webhook < ::ApplicationRecord
 
       def response_was: () -> ::String?
 
-      def response_previously_changed?: () -> bool
+      def response_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def response_previous_change: () -> ::Array[::String?]?
 
@@ -211,7 +211,7 @@ class ::Webhook < ::ApplicationRecord
 
       def state?: () -> bool
 
-      def state_changed?: () -> bool
+      def state_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def state_change: () -> [ ::String?, ::String? ]
 
@@ -219,7 +219,7 @@ class ::Webhook < ::ApplicationRecord
 
       def state_was: () -> ::String?
 
-      def state_previously_changed?: () -> bool
+      def state_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def state_previous_change: () -> ::Array[::String?]?
 
@@ -251,7 +251,7 @@ class ::Webhook < ::ApplicationRecord
 
       def updated_at?: () -> bool
 
-      def updated_at_changed?: () -> bool
+      def updated_at_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def updated_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
 
@@ -259,7 +259,7 @@ class ::Webhook < ::ApplicationRecord
 
       def updated_at_was: () -> ::ActiveSupport::TimeWithZone?
 
-      def updated_at_previously_changed?: () -> bool
+      def updated_at_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def updated_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
 
@@ -291,7 +291,7 @@ class ::Webhook < ::ApplicationRecord
 
       def webhook_id?: () -> bool
 
-      def webhook_id_changed?: () -> bool
+      def webhook_id_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def webhook_id_change: () -> [ ::String?, ::String? ]
 
@@ -299,7 +299,7 @@ class ::Webhook < ::ApplicationRecord
 
       def webhook_id_was: () -> ::String?
 
-      def webhook_id_previously_changed?: () -> bool
+      def webhook_id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def webhook_id_previous_change: () -> ::Array[::String?]?
 
@@ -331,7 +331,7 @@ class ::Webhook < ::ApplicationRecord
 
       def account_id?: () -> bool
 
-      def account_id_changed?: () -> bool
+      def account_id_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def account_id_change: () -> [ ::String?, ::String? ]
 
@@ -339,7 +339,7 @@ class ::Webhook < ::ApplicationRecord
 
       def account_id_was: () -> ::String?
 
-      def account_id_previously_changed?: () -> bool
+      def account_id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def account_id_previous_change: () -> ::Array[::String?]?
 

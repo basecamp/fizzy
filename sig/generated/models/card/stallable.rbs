@@ -17,6 +17,8 @@ module Card::Stallable
 
   def open?: () -> bool
 
+  def self.stalled: () -> Card::ActiveRecord_Relation
+
   STALLED_AFTER_LAST_SPIKE_PERIOD: untyped
 
   # : -> bool?

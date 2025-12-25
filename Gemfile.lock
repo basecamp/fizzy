@@ -5,15 +5,6 @@ GIT
     useragent (0.16.11)
 
 GIT
-  remote: https://github.com/pocke/rbs_rails
-  revision: cd3d692b0f1c17cfc1dc8569629b94eb9ad7307c
-  branch: master
-  specs:
-    rbs_rails (0.12.1)
-      parser
-      rbs (>= 1)
-
-GIT
   remote: https://github.com/rails/rails.git
   revision: 3c3f6c8a253c8a0f346695374f927c9ab32fbefb
   branch: main
@@ -113,6 +104,13 @@ GIT
       thor (~> 1.0, >= 1.2.2)
       tsort (>= 0.2)
       zeitwerk (~> 2.6)
+
+PATH
+  remote: /home/felix/workspaces/ruby-workspace/rbs_rails
+  specs:
+    rbs_rails (0.12.1)
+      parser
+      rbs (>= 1)
 
 GEM
   remote: https://rubygems.org/

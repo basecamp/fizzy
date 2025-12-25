@@ -1,8 +1,15 @@
+# rbs_inline: enabled
+
 class Board < ApplicationRecord
-  include Accessible, AutoPostponing, Broadcastable, Cards, Entropic, Filterable, Publishable, Triageable
+  include AutoPostponing, Broadcastable, Entropic, Filterable, Publishable, Triageable
+  include Accessible
+  include Cards
 
   belongs_to :creator, class_name: "User", default: -> { Current.user }
-  belongs_to :account, default: -> { creator.account }
+  belongs_to :account, default: -> do
+    # @type self: Board
+    creator.account
+  end
 
   has_rich_text :public_description
 

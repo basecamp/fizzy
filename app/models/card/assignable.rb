@@ -3,13 +3,9 @@
 module Card::Assignable
   extend ActiveSupport::Concern
 
-  # @rbs!
-  #   def assignments: -> Assignment::ActiveRecord_Associations_CollectionProxy
-  #   def assignees: -> User::ActiveRecord_Associations_CollectionProxy
+  # @type self: singleton(Card::Concern)
 
   included do
-    # @type self: singleton(Card)
-
     has_many :assignments, dependent: :delete_all
     has_many :assignees, through: :assignments
 
@@ -23,15 +19,18 @@ module Card::Assignable
   end
 
   def assigned_to?(user)
+    # @type self: Card::Concern
     assignments.any? { |a| a.assignee_id == user.id }
   end
 
   def assigned?
+    # @type self: Card::Concern
     assignments.any?
   end
 
   private
     def assign(user)
+      # @type self: Card::Concern
       assignments.create! assignee: user, assigner: Current.user
       watch_by user
 
@@ -41,6 +40,7 @@ module Card::Assignable
     end
 
     def unassign(user)
+      # @type self: Card::Concern
       destructions = assignments.destroy_by assignee: user
       track_event :unassigned, assignee_ids: [ user.id ] if destructions.any?
     end

@@ -11,7 +11,7 @@ module ::ActiveStorage
 
       def id?: () -> bool
 
-      def id_changed?: () -> bool
+      def id_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def id_change: () -> [ ::String?, ::String? ]
 
@@ -19,7 +19,7 @@ module ::ActiveStorage
 
       def id_was: () -> ::String?
 
-      def id_previously_changed?: () -> bool
+      def id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def id_previous_change: () -> ::Array[::String?]?
 
@@ -51,7 +51,7 @@ module ::ActiveStorage
 
       def byte_size?: () -> bool
 
-      def byte_size_changed?: () -> bool
+      def byte_size_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def byte_size_change: () -> [ ::Integer?, ::Integer? ]
 
@@ -59,7 +59,7 @@ module ::ActiveStorage
 
       def byte_size_was: () -> ::Integer?
 
-      def byte_size_previously_changed?: () -> bool
+      def byte_size_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def byte_size_previous_change: () -> ::Array[::Integer?]?
 
@@ -91,7 +91,7 @@ module ::ActiveStorage
 
       def checksum?: () -> bool
 
-      def checksum_changed?: () -> bool
+      def checksum_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def checksum_change: () -> [ ::String?, ::String? ]
 
@@ -99,7 +99,7 @@ module ::ActiveStorage
 
       def checksum_was: () -> ::String?
 
-      def checksum_previously_changed?: () -> bool
+      def checksum_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def checksum_previous_change: () -> ::Array[::String?]?
 
@@ -131,7 +131,7 @@ module ::ActiveStorage
 
       def content_type?: () -> bool
 
-      def content_type_changed?: () -> bool
+      def content_type_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def content_type_change: () -> [ ::String?, ::String? ]
 
@@ -139,7 +139,7 @@ module ::ActiveStorage
 
       def content_type_was: () -> ::String?
 
-      def content_type_previously_changed?: () -> bool
+      def content_type_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def content_type_previous_change: () -> ::Array[::String?]?
 
@@ -171,7 +171,7 @@ module ::ActiveStorage
 
       def created_at?: () -> bool
 
-      def created_at_changed?: () -> bool
+      def created_at_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def created_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
 
@@ -179,7 +179,7 @@ module ::ActiveStorage
 
       def created_at_was: () -> ::ActiveSupport::TimeWithZone?
 
-      def created_at_previously_changed?: () -> bool
+      def created_at_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def created_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
 
@@ -211,7 +211,7 @@ module ::ActiveStorage
 
       def filename?: () -> bool
 
-      def filename_changed?: () -> bool
+      def filename_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def filename_change: () -> [ ::String?, ::String? ]
 
@@ -219,7 +219,7 @@ module ::ActiveStorage
 
       def filename_was: () -> ::String?
 
-      def filename_previously_changed?: () -> bool
+      def filename_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def filename_previous_change: () -> ::Array[::String?]?
 
@@ -251,7 +251,7 @@ module ::ActiveStorage
 
       def key?: () -> bool
 
-      def key_changed?: () -> bool
+      def key_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def key_change: () -> [ ::String?, ::String? ]
 
@@ -259,7 +259,7 @@ module ::ActiveStorage
 
       def key_was: () -> ::String?
 
-      def key_previously_changed?: () -> bool
+      def key_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def key_previous_change: () -> ::Array[::String?]?
 
@@ -291,7 +291,7 @@ module ::ActiveStorage
 
       def metadata?: () -> bool
 
-      def metadata_changed?: () -> bool
+      def metadata_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def metadata_change: () -> [ ::String?, ::String? ]
 
@@ -299,7 +299,7 @@ module ::ActiveStorage
 
       def metadata_was: () -> ::String?
 
-      def metadata_previously_changed?: () -> bool
+      def metadata_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def metadata_previous_change: () -> ::Array[::String?]?
 
@@ -331,7 +331,7 @@ module ::ActiveStorage
 
       def service_name?: () -> bool
 
-      def service_name_changed?: () -> bool
+      def service_name_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def service_name_change: () -> [ ::String?, ::String? ]
 
@@ -339,7 +339,7 @@ module ::ActiveStorage
 
       def service_name_was: () -> ::String?
 
-      def service_name_previously_changed?: () -> bool
+      def service_name_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def service_name_previous_change: () -> ::Array[::String?]?
 
@@ -371,7 +371,7 @@ module ::ActiveStorage
 
       def account_id?: () -> bool
 
-      def account_id_changed?: () -> bool
+      def account_id_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def account_id_change: () -> [ ::String?, ::String? ]
 
@@ -379,7 +379,7 @@ module ::ActiveStorage
 
       def account_id_was: () -> ::String?
 
-      def account_id_previously_changed?: () -> bool
+      def account_id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def account_id_previous_change: () -> ::Array[::String?]?
 

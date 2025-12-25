@@ -11,7 +11,7 @@ module ::Push
 
       def id?: () -> bool
 
-      def id_changed?: () -> bool
+      def id_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def id_change: () -> [ ::String?, ::String? ]
 
@@ -19,7 +19,7 @@ module ::Push
 
       def id_was: () -> ::String?
 
-      def id_previously_changed?: () -> bool
+      def id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def id_previous_change: () -> ::Array[::String?]?
 
@@ -51,7 +51,7 @@ module ::Push
 
       def account_id?: () -> bool
 
-      def account_id_changed?: () -> bool
+      def account_id_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def account_id_change: () -> [ ::String?, ::String? ]
 
@@ -59,7 +59,7 @@ module ::Push
 
       def account_id_was: () -> ::String?
 
-      def account_id_previously_changed?: () -> bool
+      def account_id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def account_id_previous_change: () -> ::Array[::String?]?
 
@@ -91,7 +91,7 @@ module ::Push
 
       def auth_key?: () -> bool
 
-      def auth_key_changed?: () -> bool
+      def auth_key_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def auth_key_change: () -> [ ::String?, ::String? ]
 
@@ -99,7 +99,7 @@ module ::Push
 
       def auth_key_was: () -> ::String?
 
-      def auth_key_previously_changed?: () -> bool
+      def auth_key_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def auth_key_previous_change: () -> ::Array[::String?]?
 
@@ -131,7 +131,7 @@ module ::Push
 
       def created_at?: () -> bool
 
-      def created_at_changed?: () -> bool
+      def created_at_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def created_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
 
@@ -139,7 +139,7 @@ module ::Push
 
       def created_at_was: () -> ::ActiveSupport::TimeWithZone?
 
-      def created_at_previously_changed?: () -> bool
+      def created_at_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def created_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
 
@@ -171,7 +171,7 @@ module ::Push
 
       def endpoint?: () -> bool
 
-      def endpoint_changed?: () -> bool
+      def endpoint_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def endpoint_change: () -> [ ::String?, ::String? ]
 
@@ -179,7 +179,7 @@ module ::Push
 
       def endpoint_was: () -> ::String?
 
-      def endpoint_previously_changed?: () -> bool
+      def endpoint_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def endpoint_previous_change: () -> ::Array[::String?]?
 
@@ -211,7 +211,7 @@ module ::Push
 
       def p256dh_key?: () -> bool
 
-      def p256dh_key_changed?: () -> bool
+      def p256dh_key_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def p256dh_key_change: () -> [ ::String?, ::String? ]
 
@@ -219,7 +219,7 @@ module ::Push
 
       def p256dh_key_was: () -> ::String?
 
-      def p256dh_key_previously_changed?: () -> bool
+      def p256dh_key_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def p256dh_key_previous_change: () -> ::Array[::String?]?
 
@@ -251,7 +251,7 @@ module ::Push
 
       def updated_at?: () -> bool
 
-      def updated_at_changed?: () -> bool
+      def updated_at_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def updated_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
 
@@ -259,7 +259,7 @@ module ::Push
 
       def updated_at_was: () -> ::ActiveSupport::TimeWithZone?
 
-      def updated_at_previously_changed?: () -> bool
+      def updated_at_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def updated_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
 
@@ -291,7 +291,7 @@ module ::Push
 
       def user_agent?: () -> bool
 
-      def user_agent_changed?: () -> bool
+      def user_agent_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def user_agent_change: () -> [ ::String?, ::String? ]
 
@@ -299,7 +299,7 @@ module ::Push
 
       def user_agent_was: () -> ::String?
 
-      def user_agent_previously_changed?: () -> bool
+      def user_agent_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def user_agent_previous_change: () -> ::Array[::String?]?
 
@@ -331,7 +331,7 @@ module ::Push
 
       def user_id?: () -> bool
 
-      def user_id_changed?: () -> bool
+      def user_id_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def user_id_change: () -> [ ::String?, ::String? ]
 
@@ -339,7 +339,7 @@ module ::Push
 
       def user_id_was: () -> ::String?
 
-      def user_id_previously_changed?: () -> bool
+      def user_id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def user_id_previous_change: () -> ::Array[::String?]?
 

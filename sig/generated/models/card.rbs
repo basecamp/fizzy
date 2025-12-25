@@ -1,11 +1,33 @@
 # Generated from app/models/card.rb with RBS::Inline
 
 class Card < ApplicationRecord
+  include Assignable
+
   include Closeable
+
+  include Colored
+
+  include Entropic
+
+  include Eventable
+
+  include Exportable
+
+  include Golden
+
+  include Mentions
+
+  include Multistep
+
+  include Postponable
 
   include Readable
 
   include Stallable
+
+  include Triageable
+
+  include Watchable
 
   def description: () -> ActionText::RichText
 

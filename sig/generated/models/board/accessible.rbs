@@ -3,22 +3,6 @@
 module Board::Accessible
   extend ActiveSupport::Concern
 
-  extend _ActiveRecord_Relation_ClassMethods[::Board, ::Board::ActiveRecord_Relation, ::String]
-
-  extend ::ActiveRecord::Associations::ClassMethods
-
-  def accesses: () -> Access::ActiveRecord_Associations_CollectionProxy
-
-  def users: () -> User::ActiveRecord_Associations_CollectionProxy
-
-  def cards: () -> Card::ActiveRecord_Associations_CollectionProxy
-
-  def creator: () -> User
-
-  def id: () -> String
-
-  def all_access_previously_changed?: () -> bool
-
   def revise: (?granted: untyped, ?revoked: untyped) -> untyped
 
   def grant_to: (untyped users) -> untyped

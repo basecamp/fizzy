@@ -43,7 +43,8 @@ gem "mission_control-jobs"
 gem "benchmark" # indirect dependency, being removed from Ruby 3.5 stdlib so here to quash warnings
 
 gem "rbs-inline", require: false
-gem "rbs_rails", git: "https://github.com/pocke/rbs_rails", branch: "master", require: false
+# gem "rbs_rails", git: "https://github.com/pocke/rbs_rails", branch: "master", require: false
+gem "rbs_rails", path: "/home/felix/workspaces/ruby-workspace/rbs_rails", require: false
 gem "steep", require: false
 
 group :development, :test do

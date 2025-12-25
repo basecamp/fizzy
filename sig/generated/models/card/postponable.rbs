@@ -1,0 +1,19 @@
+# Generated from app/models/card/postponable.rb with RBS::Inline
+
+module Card::Postponable
+  extend ActiveSupport::Concern
+
+  def postponed?: () -> untyped
+
+  def postponed_at: () -> untyped
+
+  def postponed_by: () -> untyped
+
+  def active?: () -> untyped
+
+  def auto_postpone: (**untyped args) -> untyped
+
+  def postpone: (?user: untyped, ?event_name: untyped) -> untyped
+
+  def resume: () -> untyped
+end

@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 module DayTimelinesScoped
   extend ActiveSupport::Concern
 

@@ -1,0 +1,15 @@
+# Generated from app/controllers/concerns/filter_scoped.rb with RBS::Inline
+
+module FilterScoped
+  extend ActiveSupport::Concern
+
+  private
+
+  def set_filter: () -> untyped
+
+  def filter_params: () -> untyped
+
+  def set_user_filtering: () -> untyped
+
+  def expanded_param: () -> untyped
+end

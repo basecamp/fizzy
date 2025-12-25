@@ -1,0 +1,13 @@
+# Generated from app/controllers/concerns/day_timelines_scoped.rb with RBS::Inline
+
+module DayTimelinesScoped
+  extend ActiveSupport::Concern
+
+  include FilterScoped
+
+  private
+
+  def set_day_timeline: () -> untyped
+
+  def day: () -> untyped
+end

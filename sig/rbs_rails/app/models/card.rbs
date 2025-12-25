@@ -10,7 +10,7 @@ class ::Card < ::ApplicationRecord
 
     def id?: () -> bool
 
-    def id_changed?: () -> bool
+    def id_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def id_change: () -> [ ::String?, ::String? ]
 
@@ -18,7 +18,7 @@ class ::Card < ::ApplicationRecord
 
     def id_was: () -> ::String?
 
-    def id_previously_changed?: () -> bool
+    def id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def id_previous_change: () -> ::Array[::String?]?
 
@@ -50,7 +50,7 @@ class ::Card < ::ApplicationRecord
 
     def account_id?: () -> bool
 
-    def account_id_changed?: () -> bool
+    def account_id_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def account_id_change: () -> [ ::String?, ::String? ]
 
@@ -58,7 +58,7 @@ class ::Card < ::ApplicationRecord
 
     def account_id_was: () -> ::String?
 
-    def account_id_previously_changed?: () -> bool
+    def account_id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def account_id_previous_change: () -> ::Array[::String?]?
 
@@ -90,7 +90,7 @@ class ::Card < ::ApplicationRecord
 
     def board_id?: () -> bool
 
-    def board_id_changed?: () -> bool
+    def board_id_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def board_id_change: () -> [ ::String?, ::String? ]
 
@@ -98,7 +98,7 @@ class ::Card < ::ApplicationRecord
 
     def board_id_was: () -> ::String?
 
-    def board_id_previously_changed?: () -> bool
+    def board_id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def board_id_previous_change: () -> ::Array[::String?]?
 
@@ -130,7 +130,7 @@ class ::Card < ::ApplicationRecord
 
     def column_id?: () -> bool
 
-    def column_id_changed?: () -> bool
+    def column_id_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def column_id_change: () -> [ ::String?, ::String? ]
 
@@ -138,7 +138,7 @@ class ::Card < ::ApplicationRecord
 
     def column_id_was: () -> ::String?
 
-    def column_id_previously_changed?: () -> bool
+    def column_id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def column_id_previous_change: () -> ::Array[::String?]?
 
@@ -170,7 +170,7 @@ class ::Card < ::ApplicationRecord
 
     def created_at?: () -> bool
 
-    def created_at_changed?: () -> bool
+    def created_at_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def created_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
 
@@ -178,7 +178,7 @@ class ::Card < ::ApplicationRecord
 
     def created_at_was: () -> ::ActiveSupport::TimeWithZone?
 
-    def created_at_previously_changed?: () -> bool
+    def created_at_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def created_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
 
@@ -210,7 +210,7 @@ class ::Card < ::ApplicationRecord
 
     def creator_id?: () -> bool
 
-    def creator_id_changed?: () -> bool
+    def creator_id_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def creator_id_change: () -> [ ::String?, ::String? ]
 
@@ -218,7 +218,7 @@ class ::Card < ::ApplicationRecord
 
     def creator_id_was: () -> ::String?
 
-    def creator_id_previously_changed?: () -> bool
+    def creator_id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def creator_id_previous_change: () -> ::Array[::String?]?
 
@@ -250,7 +250,7 @@ class ::Card < ::ApplicationRecord
 
     def due_on?: () -> bool
 
-    def due_on_changed?: () -> bool
+    def due_on_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def due_on_change: () -> [ ::Date?, ::Date? ]
 
@@ -258,7 +258,7 @@ class ::Card < ::ApplicationRecord
 
     def due_on_was: () -> ::Date?
 
-    def due_on_previously_changed?: () -> bool
+    def due_on_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def due_on_previous_change: () -> ::Array[::Date?]?
 
@@ -290,7 +290,7 @@ class ::Card < ::ApplicationRecord
 
     def last_active_at?: () -> bool
 
-    def last_active_at_changed?: () -> bool
+    def last_active_at_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def last_active_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
 
@@ -298,7 +298,7 @@ class ::Card < ::ApplicationRecord
 
     def last_active_at_was: () -> ::ActiveSupport::TimeWithZone?
 
-    def last_active_at_previously_changed?: () -> bool
+    def last_active_at_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def last_active_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
 
@@ -330,7 +330,7 @@ class ::Card < ::ApplicationRecord
 
     def status?: () -> bool
 
-    def status_changed?: () -> bool
+    def status_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def status_change: () -> [ ::String?, ::String? ]
 
@@ -338,7 +338,7 @@ class ::Card < ::ApplicationRecord
 
     def status_was: () -> ::String?
 
-    def status_previously_changed?: () -> bool
+    def status_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def status_previous_change: () -> ::Array[::String?]?
 
@@ -370,7 +370,7 @@ class ::Card < ::ApplicationRecord
 
     def title?: () -> bool
 
-    def title_changed?: () -> bool
+    def title_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def title_change: () -> [ ::String?, ::String? ]
 
@@ -378,7 +378,7 @@ class ::Card < ::ApplicationRecord
 
     def title_was: () -> ::String?
 
-    def title_previously_changed?: () -> bool
+    def title_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def title_previous_change: () -> ::Array[::String?]?
 
@@ -410,7 +410,7 @@ class ::Card < ::ApplicationRecord
 
     def updated_at?: () -> bool
 
-    def updated_at_changed?: () -> bool
+    def updated_at_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def updated_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
 
@@ -418,7 +418,7 @@ class ::Card < ::ApplicationRecord
 
     def updated_at_was: () -> ::ActiveSupport::TimeWithZone?
 
-    def updated_at_previously_changed?: () -> bool
+    def updated_at_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def updated_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
 
@@ -450,7 +450,7 @@ class ::Card < ::ApplicationRecord
 
     def number?: () -> bool
 
-    def number_changed?: () -> bool
+    def number_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def number_change: () -> [ ::Integer?, ::Integer? ]
 
@@ -458,7 +458,7 @@ class ::Card < ::ApplicationRecord
 
     def number_was: () -> ::Integer?
 
-    def number_previously_changed?: () -> bool
+    def number_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def number_previous_change: () -> ::Array[::Integer?]?
 
@@ -529,14 +529,6 @@ class ::Card < ::ApplicationRecord
     alias id_value_for_database id_for_database
   end
   include ::Card::GeneratedAliasAttributeMethods
-  def watches: () -> ::Watch::ActiveRecord_Associations_CollectionProxy
-  def watches=: (::Watch::ActiveRecord_Associations_CollectionProxy | ::Array[::Watch]) -> (::Watch::ActiveRecord_Associations_CollectionProxy | ::Array[::Watch])
-  def watch_ids: () -> ::Array[::Integer]
-  def watch_ids=: (::Array[::Integer]) -> ::Array[::Integer]
-  def watchers: () -> ::User::ActiveRecord_Associations_CollectionProxy
-  def watchers=: (::User::ActiveRecord_Associations_CollectionProxy | ::Array[::User]) -> (::User::ActiveRecord_Associations_CollectionProxy | ::Array[::User])
-  def watcher_ids: () -> ::Array[::Integer]
-  def watcher_ids=: (::Array[::Integer]) -> ::Array[::Integer]
   def taggings: () -> ::Tagging::ActiveRecord_Associations_CollectionProxy
   def taggings=: (::Tagging::ActiveRecord_Associations_CollectionProxy | ::Array[::Tagging]) -> (::Tagging::ActiveRecord_Associations_CollectionProxy | ::Array[::Tagging])
   def tagging_ids: () -> ::Array[::Integer]
@@ -549,22 +541,6 @@ class ::Card < ::ApplicationRecord
   def pins=: (::Pin::ActiveRecord_Associations_CollectionProxy | ::Array[::Pin]) -> (::Pin::ActiveRecord_Associations_CollectionProxy | ::Array[::Pin])
   def pin_ids: () -> ::Array[::Integer]
   def pin_ids=: (::Array[::Integer]) -> ::Array[::Integer]
-  def steps: () -> ::Step::ActiveRecord_Associations_CollectionProxy
-  def steps=: (::Step::ActiveRecord_Associations_CollectionProxy | ::Array[::Step]) -> (::Step::ActiveRecord_Associations_CollectionProxy | ::Array[::Step])
-  def step_ids: () -> ::Array[::Integer]
-  def step_ids=: (::Array[::Integer]) -> ::Array[::Integer]
-  def mentions: () -> ::Mention::ActiveRecord_Associations_CollectionProxy
-  def mentions=: (::Mention::ActiveRecord_Associations_CollectionProxy | ::Array[::Mention]) -> (::Mention::ActiveRecord_Associations_CollectionProxy | ::Array[::Mention])
-  def mention_ids: () -> ::Array[::Integer]
-  def mention_ids=: (::Array[::Integer]) -> ::Array[::Integer]
-  def mentionees: () -> ::User::ActiveRecord_Associations_CollectionProxy
-  def mentionees=: (::User::ActiveRecord_Associations_CollectionProxy | ::Array[::User]) -> (::User::ActiveRecord_Associations_CollectionProxy | ::Array[::User])
-  def mentionee_ids: () -> ::Array[::Integer]
-  def mentionee_ids=: (::Array[::Integer]) -> ::Array[::Integer]
-  def events: () -> ::Event::ActiveRecord_Associations_CollectionProxy
-  def events=: (::Event::ActiveRecord_Associations_CollectionProxy | ::Array[::Event]) -> (::Event::ActiveRecord_Associations_CollectionProxy | ::Array[::Event])
-  def event_ids: () -> ::Array[::Integer]
-  def event_ids=: (::Array[::Integer]) -> ::Array[::Integer]
   def assignments: () -> ::Assignment::ActiveRecord_Associations_CollectionProxy
   def assignments=: (::Assignment::ActiveRecord_Associations_CollectionProxy | ::Array[::Assignment]) -> (::Assignment::ActiveRecord_Associations_CollectionProxy | ::Array[::Assignment])
   def assignment_ids: () -> ::Array[::Integer]
@@ -573,29 +549,53 @@ class ::Card < ::ApplicationRecord
   def assignees=: (::User::ActiveRecord_Associations_CollectionProxy | ::Array[::User]) -> (::User::ActiveRecord_Associations_CollectionProxy | ::Array[::User])
   def assignee_ids: () -> ::Array[::Integer]
   def assignee_ids=: (::Array[::Integer]) -> ::Array[::Integer]
+  def events: () -> ::Event::ActiveRecord_Associations_CollectionProxy
+  def events=: (::Event::ActiveRecord_Associations_CollectionProxy | ::Array[::Event]) -> (::Event::ActiveRecord_Associations_CollectionProxy | ::Array[::Event])
+  def event_ids: () -> ::Array[::Integer]
+  def event_ids=: (::Array[::Integer]) -> ::Array[::Integer]
+  def mentions: () -> ::Mention::ActiveRecord_Associations_CollectionProxy
+  def mentions=: (::Mention::ActiveRecord_Associations_CollectionProxy | ::Array[::Mention]) -> (::Mention::ActiveRecord_Associations_CollectionProxy | ::Array[::Mention])
+  def mention_ids: () -> ::Array[::Integer]
+  def mention_ids=: (::Array[::Integer]) -> ::Array[::Integer]
+  def mentionees: () -> ::User::ActiveRecord_Associations_CollectionProxy
+  def mentionees=: (::User::ActiveRecord_Associations_CollectionProxy | ::Array[::User]) -> (::User::ActiveRecord_Associations_CollectionProxy | ::Array[::User])
+  def mentionee_ids: () -> ::Array[::Integer]
+  def mentionee_ids=: (::Array[::Integer]) -> ::Array[::Integer]
+  def steps: () -> ::Step::ActiveRecord_Associations_CollectionProxy
+  def steps=: (::Step::ActiveRecord_Associations_CollectionProxy | ::Array[::Step]) -> (::Step::ActiveRecord_Associations_CollectionProxy | ::Array[::Step])
+  def step_ids: () -> ::Array[::Integer]
+  def step_ids=: (::Array[::Integer]) -> ::Array[::Integer]
+  def watches: () -> ::Watch::ActiveRecord_Associations_CollectionProxy
+  def watches=: (::Watch::ActiveRecord_Associations_CollectionProxy | ::Array[::Watch]) -> (::Watch::ActiveRecord_Associations_CollectionProxy | ::Array[::Watch])
+  def watch_ids: () -> ::Array[::Integer]
+  def watch_ids=: (::Array[::Integer]) -> ::Array[::Integer]
+  def watchers: () -> ::User::ActiveRecord_Associations_CollectionProxy
+  def watchers=: (::User::ActiveRecord_Associations_CollectionProxy | ::Array[::User]) -> (::User::ActiveRecord_Associations_CollectionProxy | ::Array[::User])
+  def watcher_ids: () -> ::Array[::Integer]
+  def watcher_ids=: (::Array[::Integer]) -> ::Array[::Integer]
   def comments: () -> ::Comment::ActiveRecord_Associations_CollectionProxy
   def comments=: (::Comment::ActiveRecord_Associations_CollectionProxy | ::Array[::Comment]) -> (::Comment::ActiveRecord_Associations_CollectionProxy | ::Array[::Comment])
   def comment_ids: () -> ::Array[::Integer]
   def comment_ids=: (::Array[::Integer]) -> ::Array[::Integer]
 
-  def not_now: () -> ::Card::NotNow?
-  def not_now=: (::Card::NotNow?) -> ::Card::NotNow?
-  def build_not_now: (?untyped) -> ::Card::NotNow
-  def create_not_now: (?untyped) -> ::Card::NotNow
-  def create_not_now!: (?untyped) -> ::Card::NotNow
-  def reload_not_now: () -> ::Card::NotNow?
-  def goldness: () -> ::Card::Goldness?
-  def goldness=: (::Card::Goldness?) -> ::Card::Goldness?
-  def build_goldness: (?untyped) -> ::Card::Goldness
-  def create_goldness: (?untyped) -> ::Card::Goldness
-  def create_goldness!: (?untyped) -> ::Card::Goldness
-  def reload_goldness: () -> ::Card::Goldness?
   def closure: () -> ::Closure?
   def closure=: (::Closure?) -> ::Closure?
   def build_closure: (?untyped) -> ::Closure
   def create_closure: (?untyped) -> ::Closure
   def create_closure!: (?untyped) -> ::Closure
   def reload_closure: () -> ::Closure?
+  def goldness: () -> ::Card::Goldness?
+  def goldness=: (::Card::Goldness?) -> ::Card::Goldness?
+  def build_goldness: (?untyped) -> ::Card::Goldness
+  def create_goldness: (?untyped) -> ::Card::Goldness
+  def create_goldness!: (?untyped) -> ::Card::Goldness
+  def reload_goldness: () -> ::Card::Goldness?
+  def not_now: () -> ::Card::NotNow?
+  def not_now=: (::Card::NotNow?) -> ::Card::NotNow?
+  def build_not_now: (?untyped) -> ::Card::NotNow
+  def create_not_now: (?untyped) -> ::Card::NotNow
+  def create_not_now!: (?untyped) -> ::Card::NotNow
+  def reload_not_now: () -> ::Card::NotNow?
   def activity_spike: () -> ::Card::ActivitySpike?
   def activity_spike=: (::Card::ActivitySpike?) -> ::Card::ActivitySpike?
   def build_activity_spike: (?untyped) -> ::Card::ActivitySpike

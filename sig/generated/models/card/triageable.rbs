@@ -1,0 +1,13 @@
+# Generated from app/models/card/triageable.rb with RBS::Inline
+
+module Card::Triageable
+  extend ActiveSupport::Concern
+
+  def triaged?: () -> untyped
+
+  def awaiting_triage?: () -> untyped
+
+  def triage_into: (untyped column) -> untyped
+
+  def send_back_to_triage: (?skip_event: untyped) -> untyped
+end

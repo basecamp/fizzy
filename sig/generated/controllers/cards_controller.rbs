@@ -1,0 +1,31 @@
+# Generated from app/controllers/cards_controller.rb with RBS::Inline
+
+class CardsController < ApplicationController
+  include FilterScoped
+
+  @board: Board
+
+  @card: Card
+
+  def index: () -> untyped
+
+  def create: () -> untyped
+
+  def show: () -> untyped
+
+  def edit: () -> untyped
+
+  def update: () -> untyped
+
+  def destroy: () -> untyped
+
+  private
+
+  def set_board: () -> untyped
+
+  def set_card: () -> untyped
+
+  def ensure_permission_to_administer_card: () -> untyped
+
+  def card_params: () -> untyped
+end

@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 # FIXME: This should move upstream to Rails. It's a good pattern.
 module CurrentTimezone
   extend ActiveSupport::Concern

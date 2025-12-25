@@ -11,7 +11,7 @@ module ::Search
 
       def id?: () -> bool
 
-      def id_changed?: () -> bool
+      def id_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def id_change: () -> [ ::String?, ::String? ]
 
@@ -19,7 +19,7 @@ module ::Search
 
       def id_was: () -> ::String?
 
-      def id_previously_changed?: () -> bool
+      def id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def id_previous_change: () -> ::Array[::String?]?
 
@@ -51,7 +51,7 @@ module ::Search
 
       def created_at?: () -> bool
 
-      def created_at_changed?: () -> bool
+      def created_at_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def created_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
 
@@ -59,7 +59,7 @@ module ::Search
 
       def created_at_was: () -> ::ActiveSupport::TimeWithZone?
 
-      def created_at_previously_changed?: () -> bool
+      def created_at_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def created_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
 
@@ -91,7 +91,7 @@ module ::Search
 
       def terms?: () -> bool
 
-      def terms_changed?: () -> bool
+      def terms_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def terms_change: () -> [ ::String?, ::String? ]
 
@@ -99,7 +99,7 @@ module ::Search
 
       def terms_was: () -> ::String?
 
-      def terms_previously_changed?: () -> bool
+      def terms_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def terms_previous_change: () -> ::Array[::String?]?
 
@@ -131,7 +131,7 @@ module ::Search
 
       def updated_at?: () -> bool
 
-      def updated_at_changed?: () -> bool
+      def updated_at_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def updated_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
 
@@ -139,7 +139,7 @@ module ::Search
 
       def updated_at_was: () -> ::ActiveSupport::TimeWithZone?
 
-      def updated_at_previously_changed?: () -> bool
+      def updated_at_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def updated_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
 
@@ -171,7 +171,7 @@ module ::Search
 
       def user_id?: () -> bool
 
-      def user_id_changed?: () -> bool
+      def user_id_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def user_id_change: () -> [ ::String?, ::String? ]
 
@@ -179,7 +179,7 @@ module ::Search
 
       def user_id_was: () -> ::String?
 
-      def user_id_previously_changed?: () -> bool
+      def user_id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def user_id_previous_change: () -> ::Array[::String?]?
 
@@ -211,7 +211,7 @@ module ::Search
 
       def account_id?: () -> bool
 
-      def account_id_changed?: () -> bool
+      def account_id_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def account_id_change: () -> [ ::String?, ::String? ]
 
@@ -219,7 +219,7 @@ module ::Search
 
       def account_id_was: () -> ::String?
 
-      def account_id_previously_changed?: () -> bool
+      def account_id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def account_id_previous_change: () -> ::Array[::String?]?
 

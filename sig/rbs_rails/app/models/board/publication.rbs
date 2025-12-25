@@ -11,7 +11,7 @@ class ::Board < ::ApplicationRecord
 
       def id?: () -> bool
 
-      def id_changed?: () -> bool
+      def id_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def id_change: () -> [ ::String?, ::String? ]
 
@@ -19,7 +19,7 @@ class ::Board < ::ApplicationRecord
 
       def id_was: () -> ::String?
 
-      def id_previously_changed?: () -> bool
+      def id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def id_previous_change: () -> ::Array[::String?]?
 
@@ -51,7 +51,7 @@ class ::Board < ::ApplicationRecord
 
       def board_id?: () -> bool
 
-      def board_id_changed?: () -> bool
+      def board_id_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def board_id_change: () -> [ ::String?, ::String? ]
 
@@ -59,7 +59,7 @@ class ::Board < ::ApplicationRecord
 
       def board_id_was: () -> ::String?
 
-      def board_id_previously_changed?: () -> bool
+      def board_id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def board_id_previous_change: () -> ::Array[::String?]?
 
@@ -91,7 +91,7 @@ class ::Board < ::ApplicationRecord
 
       def created_at?: () -> bool
 
-      def created_at_changed?: () -> bool
+      def created_at_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def created_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
 
@@ -99,7 +99,7 @@ class ::Board < ::ApplicationRecord
 
       def created_at_was: () -> ::ActiveSupport::TimeWithZone?
 
-      def created_at_previously_changed?: () -> bool
+      def created_at_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def created_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
 
@@ -131,7 +131,7 @@ class ::Board < ::ApplicationRecord
 
       def key?: () -> bool
 
-      def key_changed?: () -> bool
+      def key_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def key_change: () -> [ ::String?, ::String? ]
 
@@ -139,7 +139,7 @@ class ::Board < ::ApplicationRecord
 
       def key_was: () -> ::String?
 
-      def key_previously_changed?: () -> bool
+      def key_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def key_previous_change: () -> ::Array[::String?]?
 
@@ -171,7 +171,7 @@ class ::Board < ::ApplicationRecord
 
       def updated_at?: () -> bool
 
-      def updated_at_changed?: () -> bool
+      def updated_at_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def updated_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
 
@@ -179,7 +179,7 @@ class ::Board < ::ApplicationRecord
 
       def updated_at_was: () -> ::ActiveSupport::TimeWithZone?
 
-      def updated_at_previously_changed?: () -> bool
+      def updated_at_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def updated_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
 
@@ -211,7 +211,7 @@ class ::Board < ::ApplicationRecord
 
       def account_id?: () -> bool
 
-      def account_id_changed?: () -> bool
+      def account_id_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def account_id_change: () -> [ ::String?, ::String? ]
 
@@ -219,7 +219,7 @@ class ::Board < ::ApplicationRecord
 
       def account_id_was: () -> ::String?
 
-      def account_id_previously_changed?: () -> bool
+      def account_id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def account_id_previous_change: () -> ::Array[::String?]?
 

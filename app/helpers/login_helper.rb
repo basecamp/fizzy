@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 module LoginHelper
   def login_url
     # Use main_app because this helper may be invoked from an engine controller

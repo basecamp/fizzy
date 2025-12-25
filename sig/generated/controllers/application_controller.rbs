@@ -1,0 +1,17 @@
+# Generated from app/controllers/application_controller.rb with RBS::Inline
+
+class ApplicationController < ActionController::Base
+  include Authentication
+
+  include Authorization
+
+  include BlockSearchEngineIndexing
+
+  include RequestForgeryProtection
+
+  include RoutingHeaders
+
+  def set_page_and_extract_portion_from: (ActiveRecord::Relation) -> void
+
+  def self.stale_when_importmap_changes: () -> void
+end

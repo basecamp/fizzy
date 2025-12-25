@@ -11,7 +11,7 @@ class ::Account < ::ApplicationRecord
 
       def id?: () -> bool
 
-      def id_changed?: () -> bool
+      def id_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def id_change: () -> [ ::String?, ::String? ]
 
@@ -19,7 +19,7 @@ class ::Account < ::ApplicationRecord
 
       def id_was: () -> ::String?
 
-      def id_previously_changed?: () -> bool
+      def id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def id_previous_change: () -> ::Array[::String?]?
 
@@ -51,7 +51,7 @@ class ::Account < ::ApplicationRecord
 
       def value?: () -> bool
 
-      def value_changed?: () -> bool
+      def value_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def value_change: () -> [ ::Integer?, ::Integer? ]
 
@@ -59,7 +59,7 @@ class ::Account < ::ApplicationRecord
 
       def value_was: () -> ::Integer?
 
-      def value_previously_changed?: () -> bool
+      def value_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def value_previous_change: () -> ::Array[::Integer?]?
 

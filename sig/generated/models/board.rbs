@@ -1,0 +1,7 @@
+# Generated from app/models/board.rb with RBS::Inline
+
+class Board < ApplicationRecord
+  include Accessible
+
+  include Cards
+end

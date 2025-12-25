@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 class ApplicationController < ActionController::Base
   include Authentication
   include Authorization
@@ -6,6 +8,10 @@ class ApplicationController < ActionController::Base
   include RequestForgeryProtection
   include TurboFlash, ViewTransitions
   include RoutingHeaders
+
+  # @rbs!
+  #   def set_page_and_extract_portion_from: (ActiveRecord::Relation) -> void
+  #   def self.stale_when_importmap_changes: -> void
 
   etag { "v1" }
   stale_when_importmap_changes

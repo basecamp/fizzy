@@ -1,0 +1,9 @@
+# Generated from app/controllers/concerns/turbo_flash.rb with RBS::Inline
+
+module TurboFlash
+  extend ActiveSupport::Concern
+
+  private
+
+  def turbo_stream_flash: (**untyped flash_options) -> untyped
+end

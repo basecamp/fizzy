@@ -1,12 +1,23 @@
 # rbs_inline: enabled
 
 class Card < ApplicationRecord
-  include Assignable, Attachments, Broadcastable, Colored, Entropic, Eventable,
-    Exportable, Golden, Mentions, Multistep, Pinnable, Postponable, Promptable, Searchable, Statuses, Taggable, Triageable, Watchable
+  include Attachments, Broadcastable,
+    Pinnable, Promptable, Searchable, Statuses, Taggable
 
+  include Assignable
   include Closeable
+  include Colored
+  include Entropic
+  include Eventable
+  include Exportable
+  include Golden
+  include Mentions
+  include Multistep
+  include Postponable
   include Readable
   include Stallable
+  include Triageable
+  include Watchable
 
   belongs_to :account, default: -> do
     # @type self: Card

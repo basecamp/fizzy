@@ -1,0 +1,12 @@
+# Generated from app/controllers/concerns/current_timezone.rb with RBS::Inline
+
+# FIXME: This should move upstream to Rails. It's a good pattern.
+module CurrentTimezone
+  extend ActiveSupport::Concern
+
+  private
+
+  def set_current_timezone: () ?{ (?) -> untyped } -> untyped
+
+  def timezone_from_cookie: () -> untyped
+end

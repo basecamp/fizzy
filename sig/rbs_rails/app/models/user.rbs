@@ -10,7 +10,7 @@ class ::User < ::ApplicationRecord
 
     def id?: () -> bool
 
-    def id_changed?: () -> bool
+    def id_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def id_change: () -> [ ::String?, ::String? ]
 
@@ -18,7 +18,7 @@ class ::User < ::ApplicationRecord
 
     def id_was: () -> ::String?
 
-    def id_previously_changed?: () -> bool
+    def id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def id_previous_change: () -> ::Array[::String?]?
 
@@ -50,7 +50,7 @@ class ::User < ::ApplicationRecord
 
     def account_id?: () -> bool
 
-    def account_id_changed?: () -> bool
+    def account_id_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def account_id_change: () -> [ ::String?, ::String? ]
 
@@ -58,7 +58,7 @@ class ::User < ::ApplicationRecord
 
     def account_id_was: () -> ::String?
 
-    def account_id_previously_changed?: () -> bool
+    def account_id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def account_id_previous_change: () -> ::Array[::String?]?
 
@@ -90,7 +90,7 @@ class ::User < ::ApplicationRecord
 
     def active?: () -> bool
 
-    def active_changed?: () -> bool
+    def active_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def active_change: () -> [ bool?, bool? ]
 
@@ -98,7 +98,7 @@ class ::User < ::ApplicationRecord
 
     def active_was: () -> bool?
 
-    def active_previously_changed?: () -> bool
+    def active_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def active_previous_change: () -> ::Array[bool?]?
 
@@ -130,7 +130,7 @@ class ::User < ::ApplicationRecord
 
     def created_at?: () -> bool
 
-    def created_at_changed?: () -> bool
+    def created_at_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def created_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
 
@@ -138,7 +138,7 @@ class ::User < ::ApplicationRecord
 
     def created_at_was: () -> ::ActiveSupport::TimeWithZone?
 
-    def created_at_previously_changed?: () -> bool
+    def created_at_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def created_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
 
@@ -170,7 +170,7 @@ class ::User < ::ApplicationRecord
 
     def name?: () -> bool
 
-    def name_changed?: () -> bool
+    def name_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def name_change: () -> [ ::String?, ::String? ]
 
@@ -178,7 +178,7 @@ class ::User < ::ApplicationRecord
 
     def name_was: () -> ::String?
 
-    def name_previously_changed?: () -> bool
+    def name_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def name_previous_change: () -> ::Array[::String?]?
 
@@ -210,7 +210,7 @@ class ::User < ::ApplicationRecord
 
     def role?: () -> bool
 
-    def role_changed?: () -> bool
+    def role_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def role_change: () -> [ ::String?, ::String? ]
 
@@ -218,7 +218,7 @@ class ::User < ::ApplicationRecord
 
     def role_was: () -> ::String?
 
-    def role_previously_changed?: () -> bool
+    def role_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def role_previous_change: () -> ::Array[::String?]?
 
@@ -250,7 +250,7 @@ class ::User < ::ApplicationRecord
 
     def updated_at?: () -> bool
 
-    def updated_at_changed?: () -> bool
+    def updated_at_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def updated_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
 
@@ -258,7 +258,7 @@ class ::User < ::ApplicationRecord
 
     def updated_at_was: () -> ::ActiveSupport::TimeWithZone?
 
-    def updated_at_previously_changed?: () -> bool
+    def updated_at_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def updated_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
 
@@ -290,7 +290,7 @@ class ::User < ::ApplicationRecord
 
     def identity_id?: () -> bool
 
-    def identity_id_changed?: () -> bool
+    def identity_id_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def identity_id_change: () -> [ ::String?, ::String? ]
 
@@ -298,7 +298,7 @@ class ::User < ::ApplicationRecord
 
     def identity_id_was: () -> ::String?
 
-    def identity_id_previously_changed?: () -> bool
+    def identity_id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def identity_id_previous_change: () -> ::Array[::String?]?
 
@@ -330,7 +330,7 @@ class ::User < ::ApplicationRecord
 
     def verified_at?: () -> bool
 
-    def verified_at_changed?: () -> bool
+    def verified_at_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def verified_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
 
@@ -338,7 +338,7 @@ class ::User < ::ApplicationRecord
 
     def verified_at_was: () -> ::ActiveSupport::TimeWithZone?
 
-    def verified_at_previously_changed?: () -> bool
+    def verified_at_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
     def verified_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
 

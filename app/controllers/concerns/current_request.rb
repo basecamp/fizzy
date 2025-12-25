@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 module CurrentRequest
   extend ActiveSupport::Concern
 

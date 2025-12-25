@@ -11,7 +11,7 @@ module ::Search
 
       def id?: () -> bool
 
-      def id_changed?: () -> bool
+      def id_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def id_change: () -> [ ::Integer?, ::Integer? ]
 
@@ -19,7 +19,7 @@ module ::Search
 
       def id_was: () -> ::Integer?
 
-      def id_previously_changed?: () -> bool
+      def id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def id_previous_change: () -> ::Array[::Integer?]?
 
@@ -51,7 +51,7 @@ module ::Search
 
       def account_id?: () -> bool
 
-      def account_id_changed?: () -> bool
+      def account_id_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def account_id_change: () -> [ ::String?, ::String? ]
 
@@ -59,7 +59,7 @@ module ::Search
 
       def account_id_was: () -> ::String?
 
-      def account_id_previously_changed?: () -> bool
+      def account_id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def account_id_previous_change: () -> ::Array[::String?]?
 
@@ -91,7 +91,7 @@ module ::Search
 
       def searchable_type?: () -> bool
 
-      def searchable_type_changed?: () -> bool
+      def searchable_type_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def searchable_type_change: () -> [ ::String?, ::String? ]
 
@@ -99,7 +99,7 @@ module ::Search
 
       def searchable_type_was: () -> ::String?
 
-      def searchable_type_previously_changed?: () -> bool
+      def searchable_type_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def searchable_type_previous_change: () -> ::Array[::String?]?
 
@@ -131,7 +131,7 @@ module ::Search
 
       def searchable_id?: () -> bool
 
-      def searchable_id_changed?: () -> bool
+      def searchable_id_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def searchable_id_change: () -> [ ::String?, ::String? ]
 
@@ -139,7 +139,7 @@ module ::Search
 
       def searchable_id_was: () -> ::String?
 
-      def searchable_id_previously_changed?: () -> bool
+      def searchable_id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def searchable_id_previous_change: () -> ::Array[::String?]?
 
@@ -171,7 +171,7 @@ module ::Search
 
       def card_id?: () -> bool
 
-      def card_id_changed?: () -> bool
+      def card_id_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def card_id_change: () -> [ ::String?, ::String? ]
 
@@ -179,7 +179,7 @@ module ::Search
 
       def card_id_was: () -> ::String?
 
-      def card_id_previously_changed?: () -> bool
+      def card_id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def card_id_previous_change: () -> ::Array[::String?]?
 
@@ -211,7 +211,7 @@ module ::Search
 
       def board_id?: () -> bool
 
-      def board_id_changed?: () -> bool
+      def board_id_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def board_id_change: () -> [ ::String?, ::String? ]
 
@@ -219,7 +219,7 @@ module ::Search
 
       def board_id_was: () -> ::String?
 
-      def board_id_previously_changed?: () -> bool
+      def board_id_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def board_id_previous_change: () -> ::Array[::String?]?
 
@@ -251,7 +251,7 @@ module ::Search
 
       def title?: () -> bool
 
-      def title_changed?: () -> bool
+      def title_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def title_change: () -> [ ::String?, ::String? ]
 
@@ -259,7 +259,7 @@ module ::Search
 
       def title_was: () -> ::String?
 
-      def title_previously_changed?: () -> bool
+      def title_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def title_previous_change: () -> ::Array[::String?]?
 
@@ -291,7 +291,7 @@ module ::Search
 
       def content?: () -> bool
 
-      def content_changed?: () -> bool
+      def content_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def content_change: () -> [ ::String?, ::String? ]
 
@@ -299,7 +299,7 @@ module ::Search
 
       def content_was: () -> ::String?
 
-      def content_previously_changed?: () -> bool
+      def content_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def content_previous_change: () -> ::Array[::String?]?
 
@@ -331,7 +331,7 @@ module ::Search
 
       def created_at?: () -> bool
 
-      def created_at_changed?: () -> bool
+      def created_at_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def created_at_change: () -> [ ::ActiveSupport::TimeWithZone?, ::ActiveSupport::TimeWithZone? ]
 
@@ -339,7 +339,7 @@ module ::Search
 
       def created_at_was: () -> ::ActiveSupport::TimeWithZone?
 
-      def created_at_previously_changed?: () -> bool
+      def created_at_previously_changed?: (?from: untyped, ?to: untyped) -> bool
 
       def created_at_previous_change: () -> ::Array[::ActiveSupport::TimeWithZone?]?
 

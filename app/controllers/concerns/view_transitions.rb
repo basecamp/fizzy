@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 # FIXME: Upstream this fix to turbo-rails
 module ViewTransitions
   extend ActiveSupport::Concern
