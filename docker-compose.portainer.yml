@@ -1,0 +1,141 @@
+version: '3.8'
+
+services:
+  # Fizzy Application
+  fizzy:
+    image: ghcr.io/basecamp/fizzy:latest
+    container_name: fizzy_app
+    restart: unless-stopped
+
+    # Networks
+    networks:
+      - digital_network
+      - traefik_public
+
+    # Environment Variables
+    environment:
+      # Rails Configuration
+      - RAILS_ENV=production
+      - RAILS_LOG_TO_STDOUT=true
+      - RAILS_SERVE_STATIC_FILES=true
+
+      # Database Configuration (MySQL)
+      - DATABASE_ADAPTER=mysql
+      - MYSQL_HOST=fizzy_db
+      - MYSQL_PORT=3306
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=Slay159753
+      - MYSQL_DATABASE=fizzy_production
+
+      # Rails Secrets (ALTERE ESTES VALORES!)
+      # Gere com: docker run --rm ghcr.io/basecamp/fizzy:latest bin/rails secret
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE:-change-me-run-rails-secret-to-generate}
+
+      # Email Configuration (SMTP)
+      - SMTP_ADDRESS=${SMTP_ADDRESS:-smtp.gmail.com}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USERNAME=${SMTP_USERNAME:-your-email@gmail.com}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-your-app-password}
+      - SMTP_DOMAIN=${SMTP_DOMAIN:-gmail.com}
+      - SMTP_AUTHENTICATION=plain
+      - SMTP_ENABLE_STARTTLS_AUTO=true
+      - MAILER_FROM_ADDRESS=${MAILER_FROM_ADDRESS:-noreply@fizzy.local}
+
+      # Web Push Notifications (VAPID Keys)
+      # Gere com: docker run --rm ghcr.io/basecamp/fizzy:latest bin/rails runner "puts WebPush.generate_key.to_json"
+      - VAPID_PUBLIC_KEY=${VAPID_PUBLIC_KEY:-}
+      - VAPID_PRIVATE_KEY=${VAPID_PRIVATE_KEY:-}
+
+      # SSL Configuration (desabilitar para usar com Traefik)
+      - DISABLE_SSL=true
+      - ASSUME_SSL=false
+      - FORCE_SSL=false
+
+      # Multi-Tenancy
+      - MULTI_TENANT=true
+
+      # Solid Queue (run jobs in app container)
+      - SOLID_QUEUE_IN_PUMA=true
+
+      # Host Configuration
+      - FIZZY_HOST=${FIZZY_HOST:-fizzy.localhost}
+
+    # Volumes
+    volumes:
+      - fizzy_storage:/rails/storage
+      - fizzy_public:/rails/public
+
+    # Traefik Labels
+    labels:
+      - "traefik.enable=true"
+
+      # HTTP Router
+      - "traefik.http.routers.fizzy.rule=Host(`${FIZZY_HOST:-fizzy.localhost}`)"
+      - "traefik.http.routers.fizzy.entrypoints=websecure"
+      - "traefik.http.routers.fizzy.tls=true"
+      - "traefik.http.routers.fizzy.tls.certresolver=letsencrypt"
+
+      # Service
+      - "traefik.http.services.fizzy.loadbalancer.server.port=80"
+
+      # Middleware (opcional - adicione conforme necessário)
+      # - "traefik.http.routers.fizzy.middlewares=fizzy-compress"
+      # - "traefik.http.middlewares.fizzy-compress.compress=true"
+
+    # Health Check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/up"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # MySQL Database
+  db:
+    image: mysql:8.0
+    container_name: fizzy_db
+    restart: unless-stopped
+
+    networks:
+      - digital_network
+
+    environment:
+      - MYSQL_ROOT_PASSWORD=Slay159753
+      - MYSQL_DATABASE=fizzy_production
+      - MYSQL_CHARACTER_SET_SERVER=utf8mb4
+      - MYSQL_COLLATION_SERVER=utf8mb4_unicode_ci
+
+    volumes:
+      - fizzy_db_data:/var/lib/mysql
+
+    # Health Check
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pSlay159753"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+    # Security - não expor porta publicamente
+    # ports:
+    #   - "3306:3306"  # Descomente apenas para debug local
+
+# Networks
+networks:
+  digital_network:
+    external: true
+  traefik_public:
+    external: true
+
+# Volumes
+volumes:
+  fizzy_storage:
+    driver: local
+  fizzy_public:
+    driver: local
+  fizzy_db_data:
+    driver: local
