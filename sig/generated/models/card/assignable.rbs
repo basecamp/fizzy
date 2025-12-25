@@ -3,15 +3,20 @@
 module Card::Assignable
   extend ActiveSupport::Concern
 
-  def toggle_assignment: (untyped user) -> untyped
+  # : (User) -> void
+  def toggle_assignment: (User) -> void
 
-  def assigned_to?: (untyped user) -> untyped
+  # : (User) -> bool
+  def assigned_to?: (User) -> bool
 
-  def assigned?: () -> untyped
+  # : -> bool
+  def assigned?: () -> bool
 
   private
 
-  def assign: (untyped user) -> untyped
+  # : (User) -> void
+  def assign: (User) -> void
 
-  def unassign: (untyped user) -> untyped
+  # : (User) -> void
+  def unassign: (User) -> void
 end

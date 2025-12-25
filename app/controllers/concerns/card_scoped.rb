@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 module CardScoped
   extend ActiveSupport::Concern
 

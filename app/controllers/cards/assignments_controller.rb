@@ -1,13 +1,17 @@
-class Cards::AssignmentsController < ApplicationController
-  include CardScoped
+# rbs_inline: enabled
 
-  def new
-    @assigned_to = @card.assignees.active.alphabetically.where.not(id: Current.user)
-    @users = @board.users.active.alphabetically.where.not(id: @card.assignees).where.not(id: Current.user)
-    fresh_when etag: [ @users, @card.assignees ]
-  end
+module Cards
+  class AssignmentsController < ApplicationController
+    include CardScoped
 
-  def create
-    @card.toggle_assignment @board.users.active.find(params[:assignee_id])
+    def new
+      @assigned_to = @card.assignees.active.alphabetically.where.not(id: Current.user)
+      @users = @board.users.active.alphabetically.where.not(id: @card.assignees).where.not(id: Current.user)
+      fresh_when etag: [ @users, @card.assignees ]
+    end
+
+    def create
+      @card.toggle_assignment @board.users.active.find(params[:assignee_id])
+    end
   end
 end

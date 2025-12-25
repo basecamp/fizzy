@@ -14,21 +14,25 @@ module Card::Assignable
     scope :assigned_by, ->(users) { joins(:assignments).where(assignments: { assigner: users }).distinct }
   end
 
+  #: (User) -> void
   def toggle_assignment(user)
     assigned_to?(user) ? unassign(user) : assign(user)
   end
 
+  #: (User) -> bool
   def assigned_to?(user)
     # @type self: Card & Card::Assignable
     assignments.any? { |a| a.assignee_id == user.id }
   end
 
+  #: -> bool
   def assigned?
     # @type self: Card & Card::Assignable
     assignments.any?
   end
 
   private
+    #: (User) -> void
     def assign(user)
       # @type self: Card & Card::Assignable
       assignments.create! assignee: user, assigner: Current.user
@@ -39,6 +43,7 @@ module Card::Assignable
       # Already assigned
     end
 
+    #: (User) -> void
     def unassign(user)
       # @type self: Card & Card::Assignable
       destructions = assignments.destroy_by assignee: user

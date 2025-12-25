@@ -2,7 +2,7 @@
 
 class Card::Eventable::SystemCommenter
   attr_reader :card #: Card
-  attr_reader :event #: Event::Eventable
+  attr_reader :event #: ::Eventable
 
   #: (Card::Eventable, Event) -> void
   def initialize(card, event)
