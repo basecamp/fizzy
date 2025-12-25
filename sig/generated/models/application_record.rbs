@@ -1,0 +1,7 @@
+# Generated from app/models/application_record.rb with RBS::Inline
+
+class ApplicationRecord < ActiveRecord::Base
+  def self.configure_replica_connections: () -> void
+
+  def self.suppressing_turbo_broadcasts: () { () -> untyped } -> void
+end
