@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2025_12_10_054934) do
+ActiveRecord::Schema[8.2].define(version: 2025_12_25_200314) do
   create_table "accesses", id: :uuid, force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -186,6 +186,18 @@ ActiveRecord::Schema[8.2].define(version: 2025_12_10_054934) do
     t.datetime "updated_at", null: false
     t.index ["account_id"], name: "index_card_goldnesses_on_account_id"
     t.index ["card_id"], name: "index_card_goldnesses_on_card_id", unique: true
+  end
+
+  create_table "card_links", id: :uuid, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "link_type", default: 0, null: false
+    t.uuid "source_card_id", null: false
+    t.uuid "target_card_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["source_card_id", "target_card_id", "link_type"], name: "index_card_links_unique", unique: true
+    t.index ["source_card_id"], name: "index_card_links_on_source_card_id"
+    t.index ["target_card_id"], name: "index_card_links_on_target_card_id"
+    t.check_constraint "source_card_id != target_card_id", name: "no_self_links"
   end
 
   create_table "card_not_nows", id: :uuid, force: :cascade do |t|
@@ -479,7 +491,7 @@ ActiveRecord::Schema[8.2].define(version: 2025_12_10_054934) do
     t.string "operation", limit: 255, null: false
     t.uuid "recordable_id"
     t.string "recordable_type", limit: 255
-    t.string "request_id"
+    t.string "request_id", limit: 255
     t.uuid "user_id"
     t.index ["account_id"], name: "index_storage_entries_on_account_id"
     t.index ["blob_id"], name: "index_storage_entries_on_blob_id"
@@ -595,6 +607,9 @@ ActiveRecord::Schema[8.2].define(version: 2025_12_10_054934) do
     t.index ["account_id"], name: "index_webhooks_on_account_id"
     t.index ["board_id", "subscribed_actions"], name: "index_webhooks_on_board_id_and_subscribed_actions"
   end
+
+  add_foreign_key "card_links", "cards", column: "source_card_id", on_delete: :cascade
+  add_foreign_key "card_links", "cards", column: "target_card_id", on_delete: :cascade
   execute "CREATE VIRTUAL TABLE search_records_fts USING fts5(\n        title,\n        content,\n        tokenize='porter'\n      )"
 
 end

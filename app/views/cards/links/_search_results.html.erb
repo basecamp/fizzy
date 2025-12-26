@@ -1,0 +1,20 @@
+<ul class="popup__list" data-filter-target="list">
+  <% cards.each do |target| %>
+    <li class="popup__item" data-navigable-list-target="item" data-filter-value="<%= target.title %> <%= target.number %>">
+      <%= button_to card_links_path(card),
+            method: :post,
+            params: { target_card_id: target.id, link_type: link_type },
+            class: "btn popup__btn full-width flex align-center gap-half",
+            data: { turbo_frame: "_top" } do %>
+        <span class="link-card-badge" style="background: <%= target.column&.color || 'var(--fill-gray)' %>">
+          #<%= target.number %>
+        </span>
+        <span class="min-width overflow-ellipsis"><%= target.title %></span>
+      <% end %>
+    </li>
+  <% end %>
+
+  <% if cards.empty? %>
+    <li class="popup__item txt-gray txt-small">No cards found</li>
+  <% end %>
+</ul>

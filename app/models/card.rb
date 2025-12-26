@@ -1,6 +1,6 @@
 class Card < ApplicationRecord
   include Assignable, Attachments, Broadcastable, Closeable, Colored, Entropic, Eventable,
-    Exportable, Golden, Mentions, Multistep, Pinnable, Postponable, Promptable,
+    Exportable, Golden, Linkable, Mentions, Multistep, Pinnable, Postponable, Promptable,
     Readable, Searchable, Stallable, Statuses, Storage::Tracked, Taggable, Triageable, Watchable
 
   belongs_to :account, default: -> { board.account }
@@ -24,6 +24,11 @@ class Card < ApplicationRecord
   scope :latest,                  -> { order last_active_at: :desc, id: :desc }
   scope :with_users,              -> { preload(creator: [ :avatar_attachment, :account ], assignees: [ :avatar_attachment, :account ]) }
   scope :preloaded,               -> { with_users.preload(:column, :tags, :steps, :closure, :goldness, :activity_spike, :image_attachment, board: [ :entropy, :columns ], not_now: [ :user ]).with_rich_text_description_and_embeds }
+
+  scope :search_by_title_or_number, ->(query) {
+    sanitized = sanitize_sql_like(query)
+    where("LOWER(title) LIKE LOWER(?) OR CAST(number AS TEXT) LIKE ?", "%#{sanitized}%", "#{query}%")
+  }
 
   scope :indexed_by, ->(index) do
     case index

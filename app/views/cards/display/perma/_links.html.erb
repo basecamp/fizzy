@@ -1,0 +1,40 @@
+<div id="<%= dom_id(card, :links) %>" class="card__links">
+  <div class="position-relative" data-controller="dialog"
+        data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside mouseenter->dialog#loadLazyFrames" <%= "hidden" if card.closed? %>>
+    <button class="link-picker__button btn card__hide-on-index" style="--btn-background: var(--card-bg-color);"
+        data-controller="tooltip hotkey" data-action="click->dialog#open:stop keydown.l@document->hotkey#click">
+      <%= icon_tag "link" %>
+      <span class="for-screen-reader">Link to another card</span>
+    </button>
+
+    <dialog class="popup panel flex-column align-start justify-start fill-white shadow txt-small"
+        data-dialog-target="dialog"
+        data-action="turbo:before-morph-attribute->dialog#preventCloseOnMorphing turbo:submit-end->dialog#close">
+      <%= turbo_frame_tag card, :linking, src: new_card_link_path(card), loading: :lazy, refresh: :morph %>
+    </dialog>
+  </div>
+
+  <% if card.parents.any? %>
+    <div class="links-group">
+      <% card.parents.each do |parent| %>
+        <%= render "cards/links/link_row", linked_card: parent, type: :parent, card: card %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <% if card.children.any? %>
+    <div class="links-group">
+      <% card.children.each do |child| %>
+        <%= render "cards/links/link_row", linked_card: child, type: :child, card: card %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <% if card.related_cards.any? %>
+    <div class="links-group">
+      <% card.related_cards.each do |rel| %>
+        <%= render "cards/links/link_row", linked_card: rel, type: :related, card: card %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

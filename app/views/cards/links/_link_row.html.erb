@@ -1,0 +1,19 @@
+<div class="link-row">
+  <span class="link-type-icon txt-gray">
+    <%= type == :parent ? "↑" : type == :child ? "↓" : "↔" %>
+  </span>
+
+  <%= link_to card_path(linked_card), class: "link-card min-width flex align-center gap-quarter" do %>
+    <span class="link-card-badge" style="background: <%= linked_card.column&.color || 'var(--fill-gray)' %>">
+      #<%= linked_card.number %>
+    </span>
+    <span class="min-width overflow-ellipsis"><%= truncate(linked_card.title, length: 40) %></span>
+  <% end %>
+
+  <% link = card.outgoing_links.find_by(target_card: linked_card, link_type: type) %>
+  <% if link %>
+    <%= button_to card_link_path(card, link), method: :delete, class: "btn btn--icon link-remove" do %>
+      <%= icon_tag "cross" %>
+    <% end %>
+  <% end %>
+</div>
