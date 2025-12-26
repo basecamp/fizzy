@@ -1,11 +1,43 @@
 version: '3.8'
 
 services:
+  # MySQL Database
+  db:
+    image: mysql:8.0
+    networks:
+      - digital_network
+
+    environment:
+      - MYSQL_ROOT_PASSWORD=Slay159753
+      - MYSQL_DATABASE=fizzy_production
+      - MYSQL_CHARACTER_SET_SERVER=utf8mb4
+      - MYSQL_COLLATION_SERVER=utf8mb4_unicode_ci
+
+    volumes:
+      - fizzy_db_data:/var/lib/mysql
+
+    # Health Check
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pSlay159753"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+    # Deploy configuration (Swarm mode)
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      placement:
+        constraints:
+          - node.role == manager
+
   # Fizzy Application
   fizzy:
     image: ghcr.io/basecamp/fizzy:latest
-    container_name: fizzy_app
-    restart: unless-stopped
 
     # Networks
     networks:
@@ -21,15 +53,15 @@ services:
 
       # Database Configuration (MySQL)
       - DATABASE_ADAPTER=mysql
-      - MYSQL_HOST=fizzy_db
+      - MYSQL_HOST=tasks.db
       - MYSQL_PORT=3306
       - MYSQL_USER=root
       - MYSQL_PASSWORD=Slay159753
       - MYSQL_DATABASE=fizzy_production
 
       # Rails Secrets (ALTERE ESTES VALORES!)
-      # Gere com: docker run --rm ghcr.io/basecamp/fizzy:latest bin/rails secret
-      - SECRET_KEY_BASE=${SECRET_KEY_BASE:-change-me-run-rails-secret-to-generate}
+      # Gere com: ./scripts/generate-secrets.sh
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE:-change-me-run-generate-secrets-script}
 
       # Email Configuration (SMTP)
       - SMTP_ADDRESS=${SMTP_ADDRESS:-smtp.gmail.com}
@@ -42,7 +74,7 @@ services:
       - MAILER_FROM_ADDRESS=${MAILER_FROM_ADDRESS:-noreply@fizzy.local}
 
       # Web Push Notifications (VAPID Keys)
-      # Gere com: docker run --rm ghcr.io/basecamp/fizzy:latest bin/rails runner "puts WebPush.generate_key.to_json"
+      # Gere com: ./scripts/generate-secrets.sh
       - VAPID_PUBLIC_KEY=${VAPID_PUBLIC_KEY:-}
       - VAPID_PRIVATE_KEY=${VAPID_PRIVATE_KEY:-}
 
@@ -65,23 +97,6 @@ services:
       - fizzy_storage:/rails/storage
       - fizzy_public:/rails/public
 
-    # Traefik Labels
-    labels:
-      - "traefik.enable=true"
-
-      # HTTP Router
-      - "traefik.http.routers.fizzy.rule=Host(`${FIZZY_HOST:-fizzy.localhost}`)"
-      - "traefik.http.routers.fizzy.entrypoints=websecure"
-      - "traefik.http.routers.fizzy.tls=true"
-      - "traefik.http.routers.fizzy.tls.certresolver=letsencrypt"
-
-      # Service
-      - "traefik.http.services.fizzy.loadbalancer.server.port=80"
-
-      # Middleware (opcional - adicione conforme necessário)
-      # - "traefik.http.routers.fizzy.middlewares=fizzy-compress"
-      # - "traefik.http.middlewares.fizzy-compress.compress=true"
-
     # Health Check
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/up"]
@@ -90,39 +105,32 @@ services:
       retries: 3
       start_period: 40s
 
-    depends_on:
-      db:
-        condition: service_healthy
+    # Deploy configuration (Swarm mode)
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      labels:
+        # Traefik Labels (Swarm mode usa deploy.labels)
+        - "traefik.enable=true"
 
-  # MySQL Database
-  db:
-    image: mysql:8.0
-    container_name: fizzy_db
-    restart: unless-stopped
+        # Docker Swarm specific
+        - "traefik.docker.network=traefik_public"
 
-    networks:
-      - digital_network
+        # HTTP Router
+        - "traefik.http.routers.fizzy.rule=Host(`${FIZZY_HOST:-fizzy.localhost}`)"
+        - "traefik.http.routers.fizzy.entrypoints=websecure"
+        - "traefik.http.routers.fizzy.tls=true"
+        - "traefik.http.routers.fizzy.tls.certresolver=letsencrypt"
 
-    environment:
-      - MYSQL_ROOT_PASSWORD=Slay159753
-      - MYSQL_DATABASE=fizzy_production
-      - MYSQL_CHARACTER_SET_SERVER=utf8mb4
-      - MYSQL_COLLATION_SERVER=utf8mb4_unicode_ci
+        # Service (precisa especificar a porta do serviço)
+        - "traefik.http.services.fizzy.loadbalancer.server.port=80"
 
-    volumes:
-      - fizzy_db_data:/var/lib/mysql
-
-    # Health Check
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pSlay159753"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-
-    # Security - não expor porta publicamente
-    # ports:
-    #   - "3306:3306"  # Descomente apenas para debug local
+        # Middleware (opcional - adicione conforme necessário)
+        # - "traefik.http.routers.fizzy.middlewares=fizzy-compress"
+        # - "traefik.http.middlewares.fizzy-compress.compress=true"
 
 # Networks
 networks:

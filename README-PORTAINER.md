@@ -2,13 +2,23 @@
 
 Este guia explica como fazer o deploy do Fizzy usando Portainer com Traefik como proxy reverso.
 
+## ⚠️ Importante: Docker Swarm Mode
+
+Esta stack foi configurada para **Docker Swarm mode** (não Docker Compose standalone).
+
+Se você vê o erro `Services.fizzy.depends_on must be a list`, é porque está usando Swarm mode - e isso está correto! ✅
+
 ## Pré-requisitos
 
 - Portainer instalado e configurado
+- **Docker Swarm inicializado** (obrigatório para overlay networks)
+  ```bash
+  # Se não inicializou ainda:
+  docker swarm init
+  ```
 - Traefik configurado com as networks:
-  - `traefik_public` (proxy reverso)
+  - `traefik_public` (proxy reverso - overlay network)
   - `digital_network` (overlay network)
-- Docker Swarm inicializado (para networks overlay)
 - Domínio apontando para seu servidor
 
 ## Arquivos Necessários
@@ -128,6 +138,41 @@ Para usar Gmail como SMTP:
 2. Vá em **Segurança** → **Verificação em duas etapas**
 3. Em **Senhas de app**, gere uma senha específica
 4. Use essa senha no `SMTP_PASSWORD`
+
+## 🐳 Sobre Docker Swarm Mode
+
+### Por que usar Swarm?
+
+Esta stack foi configurada para Docker Swarm porque:
+- ✅ Suporta **overlay networks** (necessário para `digital_network` e `traefik_public`)
+- ✅ Melhor integração com Traefik em ambientes de produção
+- ✅ Permite escalar serviços facilmente se necessário
+- ✅ Restart automático e healthchecks nativos
+
+### Diferenças importantes
+
+**No Docker Swarm:**
+- Serviços se comunicam via **DNS interno**: `tasks.db` (não `fizzy_db`)
+- Labels do Traefik vão em `deploy.labels` (não em `labels` direto)
+- Usa `deploy.restart_policy` (não `restart: unless-stopped`)
+- Não usa `container_name` (Swarm gerencia nomes automaticamente)
+
+### Comandos úteis Swarm
+
+```bash
+# Ver status dos serviços
+docker stack services fizzy
+
+# Ver logs
+docker service logs fizzy_fizzy
+docker service logs fizzy_db
+
+# Escalar serviços (se precisar)
+docker service scale fizzy_fizzy=2
+
+# Remover a stack
+docker stack rm fizzy
+```
 
 ## Troubleshooting
 
