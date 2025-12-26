@@ -4,7 +4,7 @@ class CardLink < ApplicationRecord
   belongs_to :source_card, class_name: "Card", touch: true
   belongs_to :target_card, class_name: "Card", touch: true
 
-  validates :source_card_id, uniqueness: { scope: [:target_card_id, :link_type] }
+  validates :source_card_id, uniqueness: { scope: [ :target_card_id, :link_type ] }
   validate :no_self_links
   validate :same_account
   validate :no_circular_parent_chain, if: :parent?
@@ -29,7 +29,7 @@ class CardLink < ApplicationRecord
       return unless parent?
 
       visited = Set.new
-      queue = [target_card_id]
+      queue = [ target_card_id ]
 
       while (current_id = queue.shift)
         return errors.add(:target_card, "would create circular parent chain") if current_id == source_card_id

@@ -4,11 +4,11 @@ class Cards::LinksController < ApplicationController
   def new
     existing_ids = @card.linked_cards.pluck(:id) + @card.linking_cards.pluck(:id)
     @available_cards = Current.account.cards
-                              .where.not(id: [@card.id] + existing_ids)
+                              .where.not(id: [ @card.id ] + existing_ids)
                               .order(number: :desc)
                               .limit(50)
     @link_type = params[:link_type] || "related"
-    fresh_when etag: [@available_cards, @card.outgoing_links]
+    fresh_when etag: [ @available_cards, @card.outgoing_links ]
   end
 
   def create
