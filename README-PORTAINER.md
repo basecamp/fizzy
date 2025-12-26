@@ -18,58 +18,54 @@ Este guia explica como fazer o deploy do Fizzy usando Portainer com Traefik como
 
 ## Passo a Passo
 
-### 1. Configurar Variáveis de Ambiente
+### 1. Gerar Secrets (SUPER FÁCIL!)
 
-Primeiro, gere os valores necessários:
-
-#### a) SECRET_KEY_BASE
+Execute o script gerador (não precisa do container rodando!):
 
 ```bash
+./scripts/generate-secrets.sh
+```
+
+O script vai:
+- ✅ Gerar SECRET_KEY_BASE automaticamente
+- ✅ Gerar chaves VAPID para notificações push
+- ✅ Exibir os valores para você copiar
+- ✅ Opcionalmente criar arquivo `.env.portainer` pronto para usar
+
+**Alternativa manual** (sem script):
+
+```bash
+# SECRET_KEY_BASE (qualquer string aleatória de 128 chars)
+openssl rand -hex 64
+
+# Se preferir usar o container do Fizzy:
 docker run --rm ghcr.io/basecamp/fizzy:latest bin/rails secret
-```
-
-#### b) Chaves VAPID (para notificações push)
-
-```bash
 docker run --rm ghcr.io/basecamp/fizzy:latest bin/rails runner "puts WebPush.generate_key.to_json"
-```
-
-Isso vai retornar algo como:
-```json
-{
-  "public_key": "BPxxx...",
-  "private_key": "xxx..."
-}
 ```
 
 ### 2. Preparar o Arquivo .env
 
-Copie o arquivo de exemplo:
+Se não usou o script acima, copie o arquivo de exemplo:
 
 ```bash
-cp .env.portainer.example .env
+cp .env.portainer.example .env.portainer
 ```
 
-Edite `.env` e configure:
+Edite `.env.portainer` e configure **apenas**:
 
 ```env
-# Host do seu domínio
+# Host do seu domínio (OBRIGATÓRIO!)
 FIZZY_HOST=fizzy.seudominio.com
 
-# Secret key gerada no passo 1a
-SECRET_KEY_BASE=sua-secret-key-aqui
-
-# Configuração de Email (exemplo com Gmail)
+# Configuração de Email (OBRIGATÓRIO para magic links funcionarem!)
 SMTP_ADDRESS=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USERNAME=seu-email@gmail.com
 SMTP_PASSWORD=sua-senha-de-app-do-gmail
 MAILER_FROM_ADDRESS=noreply@fizzy.seudominio.com
-
-# Chaves VAPID geradas no passo 1b
-VAPID_PUBLIC_KEY=sua-chave-publica
-VAPID_PRIVATE_KEY=sua-chave-privada
 ```
+
+**Nota:** Se usou o script `generate-secrets.sh`, os valores SECRET_KEY_BASE e VAPID já estão preenchidos automaticamente! ✨
 
 ### 3. Deploy no Portainer
 
