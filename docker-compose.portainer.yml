@@ -1,40 +1,6 @@
 version: '3.8'
 
 services:
-  # MySQL Database
-  db:
-    image: mysql:8.0
-    networks:
-      - digital_network
-
-    environment:
-      - MYSQL_ROOT_PASSWORD=Slay159753
-      - MYSQL_DATABASE=fizzy_production
-      - MYSQL_CHARACTER_SET_SERVER=utf8mb4
-      - MYSQL_COLLATION_SERVER=utf8mb4_unicode_ci
-
-    volumes:
-      - fizzy_db_data:/var/lib/mysql
-
-    # Health Check
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pSlay159753"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-
-    # Deploy configuration (Swarm mode)
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-      placement:
-        constraints:
-          - node.role == manager
-
   # Fizzy Application
   fizzy:
     image: ghcr.io/basecamp/fizzy:latest
@@ -51,23 +17,23 @@ services:
       - RAILS_LOG_TO_STDOUT=true
       - RAILS_SERVE_STATIC_FILES=true
 
-      # Database Configuration (MySQL)
+      # Database Configuration (MySQL Externo)
       - DATABASE_ADAPTER=mysql
-      - MYSQL_HOST=tasks.db
-      - MYSQL_PORT=3306
-      - MYSQL_USER=root
-      - MYSQL_PASSWORD=Slay159753
-      - MYSQL_DATABASE=fizzy_production
+      - MYSQL_HOST=${MYSQL_HOST:-mysql}
+      - MYSQL_PORT=${MYSQL_PORT:-3306}
+      - MYSQL_USER=${MYSQL_USER:-root}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-Slay159753}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-fizzy_production}
 
-      # Rails Secrets (ALTERE ESTES VALORES!)
+      # Rails Secrets
       # Gere com: ./scripts/generate-secrets.sh
-      - SECRET_KEY_BASE=${SECRET_KEY_BASE:-change-me-run-generate-secrets-script}
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
 
       # Email Configuration (SMTP)
       - SMTP_ADDRESS=${SMTP_ADDRESS:-smtp.gmail.com}
       - SMTP_PORT=${SMTP_PORT:-587}
-      - SMTP_USERNAME=${SMTP_USERNAME:-your-email@gmail.com}
-      - SMTP_PASSWORD=${SMTP_PASSWORD:-your-app-password}
+      - SMTP_USERNAME=${SMTP_USERNAME}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
       - SMTP_DOMAIN=${SMTP_DOMAIN:-gmail.com}
       - SMTP_AUTHENTICATION=plain
       - SMTP_ENABLE_STARTTLS_AUTO=true
@@ -75,8 +41,8 @@ services:
 
       # Web Push Notifications (VAPID Keys)
       # Gere com: ./scripts/generate-secrets.sh
-      - VAPID_PUBLIC_KEY=${VAPID_PUBLIC_KEY:-}
-      - VAPID_PRIVATE_KEY=${VAPID_PRIVATE_KEY:-}
+      - VAPID_PUBLIC_KEY=${VAPID_PUBLIC_KEY}
+      - VAPID_PRIVATE_KEY=${VAPID_PRIVATE_KEY}
 
       # SSL Configuration (desabilitar para usar com Traefik)
       - DISABLE_SSL=true
@@ -144,6 +110,4 @@ volumes:
   fizzy_storage:
     driver: local
   fizzy_public:
-    driver: local
-  fizzy_db_data:
     driver: local

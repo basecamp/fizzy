@@ -19,6 +19,9 @@ Se você vê o erro `Services.fizzy.depends_on must be a list`, é porque está 
 - Traefik configurado com as networks:
   - `traefik_public` (proxy reverso - overlay network)
   - `digital_network` (overlay network)
+- **MySQL 8.0** (externo - você já deve ter configurado)
+  - O Fizzy vai se conectar no seu MySQL existente
+  - Certifique-se que o MySQL está acessível pela network `digital_network`
 - Domínio apontando para seu servidor
 
 ## Arquivos Necessários
@@ -76,6 +79,30 @@ MAILER_FROM_ADDRESS=noreply@fizzy.seudominio.com
 ```
 
 **Nota:** Se usou o script `generate-secrets.sh`, os valores SECRET_KEY_BASE e VAPID já estão preenchidos automaticamente! ✨
+
+Também configure a **conexão com o MySQL**:
+
+```env
+# Nome do serviço/container do seu MySQL
+# Se seu MySQL está em um serviço Swarm chamado "mysql": tasks.mysql
+# Se está em outro nome: tasks.nome-do-servico
+MYSQL_HOST=mysql
+
+# Porta (geralmente 3306)
+MYSQL_PORT=3306
+
+# Credenciais do MySQL
+MYSQL_USER=root
+MYSQL_PASSWORD=Slay159753
+
+# Nome do banco (será criado automaticamente se não existir)
+MYSQL_DATABASE=fizzy_production
+```
+
+**⚠️ Importante:** Certifique-se que seu MySQL:
+1. Está na network `digital_network` (ou adicione à network)
+2. Aceita conexões remotas (não apenas localhost)
+3. O usuário tem permissão para criar banco de dados
 
 ### 3. Deploy no Portainer
 
@@ -163,9 +190,11 @@ Esta stack foi configurada para Docker Swarm porque:
 # Ver status dos serviços
 docker stack services fizzy
 
-# Ver logs
-docker service logs fizzy_fizzy
-docker service logs fizzy_db
+# Ver logs do Fizzy
+docker service logs fizzy_fizzy -f
+
+# Ver detalhes do serviço
+docker service ps fizzy_fizzy
 
 # Escalar serviços (se precisar)
 docker service scale fizzy_fizzy=2
@@ -181,15 +210,50 @@ docker stack rm fizzy
 Verifique os logs:
 
 ```bash
-docker service logs fizzy_fizzy --tail 100
+docker service logs fizzy_fizzy --tail 100 -f
 ```
 
-### Erro de conexão com o banco
+### Erro de conexão com MySQL
 
-Verifique se o MySQL está saudável:
+**1. Verifique se o Fizzy consegue alcançar o MySQL:**
 
 ```bash
-docker service ps fizzy_db
+# Entre no container do Fizzy
+docker exec -it $(docker ps -q -f name=fizzy_fizzy) sh
+
+# Teste a conexão
+ping mysql
+# ou teste o MySQL diretamente
+nc -zv mysql 3306
+```
+
+**2. Verifique as variáveis de ambiente:**
+
+```bash
+docker service inspect fizzy_fizzy --pretty
+```
+
+Procure por `MYSQL_HOST`, `MYSQL_PORT`, etc.
+
+**3. Certifique-se que o MySQL está na network correta:**
+
+```bash
+# Listar networks do seu MySQL
+docker inspect <nome-container-mysql> | grep NetworkMode
+
+# Adicionar MySQL à network digital_network se necessário
+docker network connect digital_network <nome-container-mysql>
+```
+
+**4. Verifique permissões do usuário MySQL:**
+
+```bash
+# Conecte no MySQL
+mysql -u root -p
+
+# Verifique/crie permissões
+GRANT ALL PRIVILEGES ON fizzy_production.* TO 'root'@'%' IDENTIFIED BY 'Slay159753';
+FLUSH PRIVILEGES;
 ```
 
 ### Traefik não roteia
