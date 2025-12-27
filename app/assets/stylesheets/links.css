@@ -86,7 +86,9 @@
     gap: calc(var(--inline-space) / 2);
 
     .btn--active {
-      background-color: var(--fill-gray);
+      background-color: var(--color-ink);
+      border-color: var(--color-ink);
+      color: var(--color-ink-inverted);
     }
   }
 }
