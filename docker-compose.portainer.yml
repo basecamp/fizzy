@@ -1,0 +1,113 @@
+version: '3.8'
+
+services:
+  # Fizzy Application
+  fizzy:
+    image: ghcr.io/basecamp/fizzy:latest
+
+    # Networks
+    networks:
+      - digital_network
+      - traefik_public
+
+    # Environment Variables
+    environment:
+      # Rails Configuration
+      - RAILS_ENV=production
+      - RAILS_LOG_TO_STDOUT=true
+      - RAILS_SERVE_STATIC_FILES=true
+
+      # Database Configuration (MySQL Externo)
+      - DATABASE_ADAPTER=mysql
+      - MYSQL_HOST=${MYSQL_HOST:-mysql}
+      - MYSQL_PORT=${MYSQL_PORT:-3306}
+      - MYSQL_USER=${MYSQL_USER:-root}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-Slay159753}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-fizzy_production}
+
+      # Rails Secrets
+      # Gere com: ./scripts/generate-secrets.sh
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
+
+      # Email Configuration (SMTP)
+      - SMTP_ADDRESS=${SMTP_ADDRESS:-smtp.gmail.com}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USERNAME=${SMTP_USERNAME}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_DOMAIN=${SMTP_DOMAIN:-gmail.com}
+      - SMTP_AUTHENTICATION=plain
+      - SMTP_ENABLE_STARTTLS_AUTO=true
+      - MAILER_FROM_ADDRESS=${MAILER_FROM_ADDRESS:-noreply@fizzy.local}
+
+      # Web Push Notifications (VAPID Keys)
+      # Gere com: ./scripts/generate-secrets.sh
+      - VAPID_PUBLIC_KEY=${VAPID_PUBLIC_KEY}
+      - VAPID_PRIVATE_KEY=${VAPID_PRIVATE_KEY}
+
+      # SSL Configuration (desabilitar para usar com Traefik)
+      - DISABLE_SSL=true
+      - ASSUME_SSL=false
+      - FORCE_SSL=false
+
+      # Multi-Tenancy
+      - MULTI_TENANT=true
+
+      # Solid Queue (run jobs in app container)
+      - SOLID_QUEUE_IN_PUMA=true
+
+      # Host Configuration
+      - FIZZY_HOST=${FIZZY_HOST:-fizzy.localhost}
+
+    # Volumes
+    volumes:
+      - fizzy_storage:/rails/storage
+      - fizzy_public:/rails/public
+
+    # Health Check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/up"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+    # Deploy configuration (Swarm mode)
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      labels:
+        # Traefik Labels (Swarm mode usa deploy.labels)
+        - "traefik.enable=true"
+
+        # Docker Swarm specific
+        - "traefik.docker.network=traefik_public"
+
+        # HTTP Router
+        - "traefik.http.routers.fizzy.rule=Host(`${FIZZY_HOST:-fizzy.localhost}`)"
+        - "traefik.http.routers.fizzy.entrypoints=websecure"
+        - "traefik.http.routers.fizzy.tls=true"
+        - "traefik.http.routers.fizzy.tls.certresolver=letsencrypt"
+
+        # Service (precisa especificar a porta do serviço)
+        - "traefik.http.services.fizzy.loadbalancer.server.port=80"
+
+        # Middleware (opcional - adicione conforme necessário)
+        # - "traefik.http.routers.fizzy.middlewares=fizzy-compress"
+        # - "traefik.http.middlewares.fizzy-compress.compress=true"
+
+# Networks
+networks:
+  digital_network:
+    external: true
+  traefik_public:
+    external: true
+
+# Volumes
+volumes:
+  fizzy_storage:
+    driver: local
+  fizzy_public:
+    driver: local
