@@ -63,6 +63,7 @@
   .icon--home { --svg: url("home.svg "); }
   .icon--install-edge { --svg: url("install-edge.svg "); }
   .icon--lifebuoy { --svg: url("lifebuoy.svg "); }
+  .icon--link { --svg: url("link.svg"); }
   .icon--lock { --svg: url("lock.svg "); }
   .icon--logout { --svg: url("logout.svg "); }
   .icon--marker { --svg: url("marker.svg "); }

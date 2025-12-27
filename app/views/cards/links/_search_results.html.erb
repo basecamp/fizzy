@@ -1,4 +1,4 @@
-<ul class="popup__list" data-filter-target="list">
+<ul class="popup__list margin-block-start-half" data-filter-target="list">
   <% cards.each do |target| %>
     <li class="popup__item" data-navigable-list-target="item" data-filter-value="<%= target.title %> <%= target.number %>">
       <%= button_to card_links_path(card),

@@ -1,11 +1,10 @@
 <%= turbo_frame_tag @card, :linking do %>
-  <%= tag.div class: "max-width full-width", data: {
-        action: "turbo:before-cache@document->dialog#close dialog:show@document->navigable-list#reset keydown->navigable-list#navigate filter:changed->navigable-list#reset",
-        controller: "filter navigable-list",
-        dialog_target: "dialog",
-        navigable_list_focus_on_selection_value: false,
-        navigable_list_actionable_items_value: true } do %>
-
+  <div class="flex-column full-width"
+    data-controller="filter navigable-list"
+    data-navigable-list-focus-on-selection-value="false"
+    data-navigable-list-actionable-items-value="true"
+    data-action="keydown->navigable-list#navigate filter:changed->navigable-list#reset dialog:show@document->navigable-list#reset"
+  >
     <div class="flex align-start justify-space-between">
       <strong class="popup__title">Link to…</strong>
       <kbd class="txt-xx-small hide-on-touch">l</kbd>
@@ -22,7 +21,7 @@
 
     <%= form_with url: search_card_links_path(@card), method: :get,
           data: { turbo_frame: dom_id(@card, :link_results) },
-          class: "margin-block-half" do |form| %>
+          class: "full-width margin-block-half" do |form| %>
       <%= form.search_field :q, placeholder: "Search by title or card #…",
             class: "input input--transparent txt-small full-width",
             autofocus: true, autocomplete: "off",
@@ -34,5 +33,5 @@
     <%= turbo_frame_tag dom_id(@card, :link_results) do %>
       <%= render "search_results", cards: @available_cards, card: @card, link_type: @link_type %>
     <% end %>
-  <% end %>
+  </div>
 <% end %>

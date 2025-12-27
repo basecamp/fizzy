@@ -7,13 +7,25 @@
     margin-block-start: var(--block-space);
   }
 
+  .link-picker {
+    --panel-border-radius: 1em;
+    --panel-padding: 0.75em;
+    --panel-size: max-content;
+
+    inline-size: auto !important;
+    inset: 0 auto auto 0;
+    min-inline-size: 28ch;
+    position: absolute;
+    z-index: 2;
+
+    &[open] {
+      display: flex;
+    }
+  }
+
   .link-picker__button {
     font-size: 0.6em;
     margin-block-start: 0.1em;
-
-    + .panel {
-      --panel-size: 24ch;
-    }
   }
 
   .links-group {

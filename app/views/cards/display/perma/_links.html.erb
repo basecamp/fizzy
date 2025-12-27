@@ -7,7 +7,7 @@
       <span class="for-screen-reader">Link to another card</span>
     </button>
 
-    <dialog class="popup panel flex-column align-start justify-start fill-white shadow txt-small"
+    <dialog class="link-picker popup panel flex-column align-start justify-start fill-white shadow txt-small"
         data-dialog-target="dialog"
         data-action="turbo:before-morph-attribute->dialog#preventCloseOnMorphing turbo:submit-end->dialog#close">
       <%= turbo_frame_tag card, :linking, src: new_card_link_path(card), loading: :lazy, refresh: :morph %>
