@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 class User < ApplicationRecord
   include Accessor, Assignee, Attachable, Avatar, Configurable, EmailAddressChangeable,
     Mentionable, Named, Notifiable, Role, Searcher, Watcher
@@ -16,6 +18,7 @@ class User < ApplicationRecord
 
   scope :with_avatars, -> { preload(:account, :avatar_attachment) }
 
+  #: -> void
   def deactivate
     transaction do
       accesses.destroy_all
@@ -24,19 +27,23 @@ class User < ApplicationRecord
     end
   end
 
+  #: -> bool
   def setup?
-    name != identity.email_address
+    name != identity&.email_address
   end
 
+  #: -> bool
   def verified?
     verified_at.present?
   end
 
+  #: -> void
   def verify
     update!(verified_at: Time.current) unless verified?
   end
 
   private
+    #: -> void
     def close_remote_connections
       ActionCable.server.remote_connections.where(current_user: self).disconnect(reconnect: false)
     end

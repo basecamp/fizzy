@@ -1,5 +1,6 @@
 class Card::NotNow < ApplicationRecord
   belongs_to :account, default: -> do
+    # @type self: Card::NotNow
     card.account
   end
 

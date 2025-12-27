@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 class Tag < ApplicationRecord
   include Attachable, Filterable
 
@@ -12,7 +14,12 @@ class Tag < ApplicationRecord
   scope :unused, -> { left_outer_joins(:taggings).where(taggings: { id: nil }) }
 
   def hashtag
-    "#" + title
+    "#" + title!
+  end
+
+  #: -> String
+  def title!
+    title or raise
   end
 
   def cards_count

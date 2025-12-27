@@ -17,7 +17,7 @@ class Card::Eventable::SystemCommenter
   end
 
   private
-    #: -> String
+    #: -> String?
     def comment_body
       case event.action
       when "card_assigned"
@@ -40,8 +40,6 @@ class Card::Eventable::SystemCommenter
         "#{event.creator.name} <strong>moved</strong> this to “#{event.particulars.dig('particulars', 'column')}”"
       when "card_sent_back_to_triage"
         "#{event.creator.name} <strong>moved</strong> this back to “Maybe?”"
-      else
-        raise "Unsupported event action for system commenter: #{event.action}"
       end
     end
 end

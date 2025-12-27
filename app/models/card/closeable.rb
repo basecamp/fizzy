@@ -3,17 +3,9 @@
 module Card::Closeable
   extend ActiveSupport::Concern
 
-  # @rbs!
-  #    extend _ActiveRecord_Relation_ClassMethods[::Card, ::Card::ActiveRecord_Relation, ::String]
-  #
-  #    def closure: -> Closure?
-  #
-  #    def self.closed: -> Card::ActiveRecord_Relation
-  #    def self.open: -> Card::ActiveRecord_Relation
+  # @type self: singleton(Card) & singleton(Card::Closeable)
 
   included do
-    # @type self: singleton(Card)
-
     has_one :closure, dependent: :destroy
 
     scope :closed, -> { joins(:closure) }
@@ -24,23 +16,33 @@ module Card::Closeable
     scope :closed_by, ->(users) { closed.where("closures.user_id": Array(users)) }
   end
 
+  #: -> bool
   def closed?
+    # @type self: Card & Card::Closeable
     closure.present?
   end
 
+  #: -> bool
   def open?
     !closed?
   end
 
+  #: -> User?
   def closed_by
+    # @type self: Card & Card::Closeable
     closure&.user
   end
 
+  #: -> ActiveSupport::TimeWithZone?
   def closed_at
+    # @type self: Card & Card::Closeable
     closure&.created_at
   end
 
+  #: (?user: User) -> void
   def close(user: Current.user)
+    # @type self: Card & Card::Closeable
+
     unless closed?
       transaction do
         create_closure! user: user
@@ -49,7 +51,10 @@ module Card::Closeable
     end
   end
 
+  #: (?user: User) -> void
   def reopen(user: Current.user)
+    # @type self: Card & Card::Closeable
+
     if closed?
       transaction do
         closure&.destroy

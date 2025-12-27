@@ -3,8 +3,6 @@
 module Card::Golden
   extend ActiveSupport::Concern
 
-  def goldness: () -> Card::Goldness?
-
   # : -> bool
   def golden?: () -> bool
 

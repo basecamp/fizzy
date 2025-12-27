@@ -1,0 +1,17 @@
+# Generated from app/models/card/pinnable.rb with RBS::Inline
+
+module Card::Pinnable
+  extend ActiveSupport::Concern
+
+  def pinned_by?: (untyped user) -> untyped
+
+  def pin_for: (untyped user) -> untyped
+
+  def pin_by: (untyped user) -> untyped
+
+  def unpin_by: (untyped user) -> untyped
+
+  private
+
+  def broadcast_pin_updates: () -> untyped
+end

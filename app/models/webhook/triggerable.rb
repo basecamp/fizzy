@@ -1,5 +1,9 @@
+# rbs_inline: enabled
+
 module Webhook::Triggerable
   extend ActiveSupport::Concern
+
+  # @type self: singleton(Webhook) & singleton(Webhook::Triggerable)
 
   included do
     scope :triggered_by, ->(event) { where(board: event.board).triggered_by_action(event.action) }

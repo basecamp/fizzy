@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 module ExcerptHelper
   def format_excerpt(content, length: 200)
     return "" if content.blank?

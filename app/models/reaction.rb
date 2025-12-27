@@ -1,5 +1,8 @@
 class Reaction < ApplicationRecord
-  belongs_to :account, default: -> { comment.account }
+  belongs_to :account, default: -> do
+    # @type self: Reaction
+    comment.account
+  end
   belongs_to :comment, touch: true
   belongs_to :reacter, class_name: "User", default: -> { Current.user }
 

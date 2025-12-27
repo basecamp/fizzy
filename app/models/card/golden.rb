@@ -3,12 +3,9 @@
 module Card::Golden
   extend ActiveSupport::Concern
 
-  # @rbs!
-  #   def goldness: -> Card::Goldness?
+  # @type self: singleton(Card) & singleton(Card::Golden)
 
   included do
-    # @type self: singleton(Card)
-
     has_one :goldness, dependent: :destroy, class_name: "Card::Goldness"
 
     scope :golden, -> { joins(:goldness) }
@@ -17,16 +14,19 @@ module Card::Golden
 
   #: -> bool
   def golden?
+    # @type self: Card & Card::Golden
     goldness.present?
   end
 
   #: -> Card::Goldness?
   def gild
+    # @type self: Card & Card::Golden
     create_goldness! unless golden?
   end
 
   #: -> bool?
   def ungild
+    # @type self: Card & Card::Golden
     goldness&.destroy
   end
 end

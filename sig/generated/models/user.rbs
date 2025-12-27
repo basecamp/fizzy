@@ -1,0 +1,22 @@
+# Generated from app/models/user.rb with RBS::Inline
+
+class User < ApplicationRecord
+  include Timelined
+
+  # : -> void
+  def deactivate: () -> void
+
+  # : -> bool
+  def setup?: () -> bool
+
+  # : -> bool
+  def verified?: () -> bool
+
+  # : -> void
+  def verify: () -> void
+
+  private
+
+  # : -> void
+  def close_remote_connections: () -> void
+end

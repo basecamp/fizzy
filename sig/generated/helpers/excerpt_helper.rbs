@@ -1,0 +1,5 @@
+# Generated from app/helpers/excerpt_helper.rb with RBS::Inline
+
+module ExcerptHelper
+  def format_excerpt: (untyped content, ?length: untyped) -> untyped
+end

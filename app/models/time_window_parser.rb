@@ -1,5 +1,7 @@
+# rbs_inline: enabled
+
 class TimeWindowParser
-  attr_reader :now
+  attr_reader :now #: ActiveSupport::TimeWithZone
 
   HUMAN_NAMES_BY_VALUE = {
     "today" => "Today",
@@ -24,6 +26,7 @@ class TimeWindowParser
     end
   end
 
+  #: (?now: ActiveSupport::TimeWithZone) -> void
   def initialize(now: Time.current)
     @now = now
   end
@@ -50,6 +53,7 @@ class TimeWindowParser
   end
 
   private
+    #: (String?) -> String?
     def normalize(string)
       if string
         string.downcase.gsub(/[\s_\-]/, "")

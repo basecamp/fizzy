@@ -1,0 +1,49 @@
+# Generated from app/models/signup.rb with RBS::Inline
+
+class Signup
+  include ActiveModel::Model
+
+  include ActiveModel::Attributes
+
+  include ActiveModel::Validations
+
+  extend ActiveModel::Validations::ClassMethods
+
+  attr_accessor full_name: untyped
+
+  attr_accessor email_address: untyped
+
+  attr_accessor identity: untyped
+
+  attr_reader account: untyped
+
+  attr_reader user: untyped
+
+  def initialize: () -> untyped
+
+  def create_identity: () -> untyped
+
+  # : -> bool
+  def complete: () -> bool
+
+  private
+
+  # Override to customize the handling of external accounts associated to the account.
+  def create_tenant: () -> untyped
+
+  # Override to inject custom handling for account creation errors
+  def handle_account_creation_error: (untyped error) -> untyped
+
+  # : -> void
+  def create_account: () -> void
+
+  # : -> String
+  def generate_account_name: () -> String
+
+  def destroy_account: () -> untyped
+
+  # parece não ser utilizado
+  def subscription_attributes: () -> untyped
+
+  def request_attributes: () -> untyped
+end

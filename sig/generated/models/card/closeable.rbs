@@ -3,23 +3,21 @@
 module Card::Closeable
   extend ActiveSupport::Concern
 
-  extend _ActiveRecord_Relation_ClassMethods[::Card, ::Card::ActiveRecord_Relation, ::String]
+  # : -> bool
+  def closed?: () -> bool
 
-  def closure: () -> Closure?
+  # : -> bool
+  def open?: () -> bool
 
-  def self.closed: () -> Card::ActiveRecord_Relation
+  # : -> User?
+  def closed_by: () -> User?
 
-  def self.open: () -> Card::ActiveRecord_Relation
+  # : -> ActiveSupport::TimeWithZone?
+  def closed_at: () -> ActiveSupport::TimeWithZone?
 
-  def closed?: () -> untyped
+  # : (?user: User) -> void
+  def close: (?user: User) -> void
 
-  def open?: () -> untyped
-
-  def closed_by: () -> untyped
-
-  def closed_at: () -> untyped
-
-  def close: (?user: untyped) -> untyped
-
-  def reopen: (?user: untyped) -> untyped
+  # : (?user: User) -> void
+  def reopen: (?user: User) -> void
 end

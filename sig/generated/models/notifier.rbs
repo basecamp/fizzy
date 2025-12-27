@@ -1,0 +1,15 @@
+# Generated from app/models/notifier.rb with RBS::Inline
+
+class Notifier
+  attr_reader source: untyped
+
+  def self.for: (untyped source) -> untyped
+
+  def notify: () -> untyped
+
+  private
+
+  def initialize: (untyped source) -> untyped
+
+  def should_notify?: () -> untyped
+end

@@ -13,6 +13,6 @@ class Card::Eventable::SystemCommenter
 
   private
 
-  # : -> String
-  def comment_body: () -> String
+  # : -> String?
+  def comment_body: () -> String?
 end

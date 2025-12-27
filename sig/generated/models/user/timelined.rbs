@@ -1,0 +1,7 @@
+# Generated from app/models/user/timelined.rb with RBS::Inline
+
+module User::Timelined
+  extend ActiveSupport::Concern
+
+  def timeline_for: (untyped day, filter: untyped) -> untyped
+end

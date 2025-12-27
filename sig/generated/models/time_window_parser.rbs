@@ -1,0 +1,23 @@
+# Generated from app/models/time_window_parser.rb with RBS::Inline
+
+class TimeWindowParser
+  attr_reader now: ActiveSupport::TimeWithZone
+
+  HUMAN_NAMES_BY_VALUE: ::Hash[untyped, untyped]
+
+  VALUES: untyped
+
+  def self.parse: (untyped string) -> untyped
+
+  def self.human_name_for: (untyped value) -> untyped
+
+  # : (?now: ActiveSupport::TimeWithZone) -> void
+  def initialize: (?now: ActiveSupport::TimeWithZone) -> void
+
+  def parse: (untyped string) -> untyped
+
+  private
+
+  # : (String?) -> String?
+  def normalize: (String?) -> String?
+end

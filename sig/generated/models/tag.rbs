@@ -1,0 +1,10 @@
+# Generated from app/models/tag.rb with RBS::Inline
+
+class Tag < ApplicationRecord
+  def hashtag: () -> untyped
+
+  # : -> String
+  def title!: () -> String
+
+  def cards_count: () -> untyped
+end

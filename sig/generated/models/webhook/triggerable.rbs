@@ -1,0 +1,7 @@
+# Generated from app/models/webhook/triggerable.rb with RBS::Inline
+
+module Webhook::Triggerable
+  extend ActiveSupport::Concern
+
+  def trigger: (untyped event) -> untyped
+end

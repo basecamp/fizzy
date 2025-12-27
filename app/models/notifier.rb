@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 class Notifier
   attr_reader :source
 

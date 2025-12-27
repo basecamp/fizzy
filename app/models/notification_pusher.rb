@@ -1,13 +1,17 @@
+# rbs_inline: enabled
+
 class NotificationPusher
   include Rails.application.routes.url_helpers
   include ExcerptHelper
 
-  attr_reader :notification
+  attr_reader :notification #: Notification
 
+  #: (Notification) -> void
   def initialize(notification)
     @notification = notification
   end
 
+  #: -> void
   def push
     return unless should_push?
 
@@ -17,12 +21,14 @@ class NotificationPusher
   end
 
   private
+    #: -> bool
     def should_push?
       notification.user.push_subscriptions.any? &&
         !notification.creator.system? &&
         notification.user.active?
     end
 
+    #: -> Hash
     def build_payload
       case notification.source_type
       when "Event"
@@ -34,6 +40,7 @@ class NotificationPusher
       end
     end
 
+    #: -> Hash
     def build_event_payload
       event = notification.source
       card = event.card
@@ -73,6 +80,7 @@ class NotificationPusher
       end
     end
 
+    #: -> Hash
     def build_mention_payload
       mention = notification.source
       card = mention.card
@@ -84,6 +92,7 @@ class NotificationPusher
       }
     end
 
+    #: -> Hash
     def build_default_payload
       {
         title: "New notification",
@@ -92,27 +101,33 @@ class NotificationPusher
       }
     end
 
+    #: (Hash) -> void
     def push_to_user(payload)
       subscriptions = notification.user.push_subscriptions
       enqueue_payload_for_delivery(payload, subscriptions)
     end
 
+    #: (Hash, ::Push::Subscription::ActiveRecord_Associations_CollectionProxy) -> void
     def enqueue_payload_for_delivery(payload, subscriptions)
       Rails.configuration.x.web_push_pool.queue(payload, subscriptions)
     end
 
+    #: (Card) -> String
     def card_notification_title(card)
       card.title.presence || "Card #{card.number}"
     end
 
+    #: (Event) -> String
     def comment_notification_body(event)
       format_excerpt(event.eventable.body, length: 200)
     end
 
+    #: (Card) -> String
     def card_path(card)
       Rails.application.routes.url_helpers.card_path(card, script_name: notification.account.slug)
     end
 
+    #: (Comment) -> String
     def card_path_with_comment_anchor(comment)
       Rails.application.routes.url_helpers.card_path(
         comment.card,

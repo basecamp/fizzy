@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 module User::Timelined
   extend ActiveSupport::Concern
 

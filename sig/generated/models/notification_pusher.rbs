@@ -1,0 +1,48 @@
+# Generated from app/models/notification_pusher.rb with RBS::Inline
+
+class NotificationPusher
+  include ExcerptHelper
+
+  attr_reader notification: Notification
+
+  # : (Notification) -> void
+  def initialize: (Notification) -> void
+
+  # : -> void
+  def push: () -> void
+
+  private
+
+  # : -> bool
+  def should_push?: () -> bool
+
+  # : -> Hash
+  def build_payload: () -> Hash
+
+  # : -> Hash
+  def build_event_payload: () -> Hash
+
+  # : -> Hash
+  def build_mention_payload: () -> Hash
+
+  # : -> Hash
+  def build_default_payload: () -> Hash
+
+  # : (Hash) -> void
+  def push_to_user: (Hash) -> void
+
+  # : (Hash, ::Push::Subscription::ActiveRecord_Associations_CollectionProxy) -> void
+  def enqueue_payload_for_delivery: (Hash, ::Push::Subscription::ActiveRecord_Associations_CollectionProxy) -> void
+
+  # : (Card) -> String
+  def card_notification_title: (Card) -> String
+
+  # : (Event) -> String
+  def comment_notification_body: (Event) -> String
+
+  # : (Card) -> String
+  def card_path: (Card) -> String
+
+  # : (Comment) -> String
+  def card_path_with_comment_anchor: (Comment) -> String
+end
