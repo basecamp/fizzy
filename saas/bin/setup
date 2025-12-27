@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+# SaaS-specific setup tasks
+# This script is called from the main Fizzy bin/setup when SAAS is enabled
+
+if [ -e tmp/minio-dev.txt ]; then
+  step "Starting Docker services" bash -c "[ -d ~/Work/basecamp/docker-dev ] && git -C ~/Work/basecamp/docker-dev pull || gh repo clone basecamp/docker-dev ~/Work/basecamp/docker-dev && ~/Work/basecamp/docker-dev/setup minio"
+  step "Configuring MinIO" bin/minio-setup
+fi
+
+step "Starting mysql" bash -c "[ -d ~/Work/basecamp/docker-dev ] && git -C ~/Work/basecamp/docker-dev pull || gh repo clone basecamp/docker-dev ~/Work/basecamp/docker-dev && ~/Work/basecamp/docker-dev/setup mysql80"

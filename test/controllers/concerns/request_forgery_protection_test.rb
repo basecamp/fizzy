@@ -12,17 +12,17 @@ class RequestForgeryProtectionTest < ActionDispatch::IntegrationTest
     ActionController::Base.allow_forgery_protection = @original_allow_forgery_protection
   end
 
-  test "succeeds when CSRF token is valid" do
-    assert_difference -> { Board.count }, +1 do
+  test "fails if Sec-Fetch-Site is cross-site" do
+    assert_no_difference -> { Board.count } do
       post boards_path,
-        params: { board: { name: "Test Board" }, authenticity_token: csrf_token },
+        params: { board: { name: "Test Board" } },
         headers: { "Sec-Fetch-Site" => "cross-site" }
     end
 
-    assert_response :redirect
+    assert_response :unprocessable_entity
   end
 
-  test "succeeds with same-origin Sec-Fetch-Site even without CSRF token" do
+  test "succeeds with same-origin Sec-Fetch-Site" do
     assert_difference -> { Board.count }, +1 do
       post boards_path,
         params: { board: { name: "Test Board" } },
@@ -32,7 +32,7 @@ class RequestForgeryProtectionTest < ActionDispatch::IntegrationTest
     assert_response :redirect
   end
 
-  test "succeeds with same-site Sec-Fetch-Site even without CSRF token" do
+  test "succeeds with same-site Sec-Fetch-Site" do
     assert_difference -> { Board.count }, +1 do
       post boards_path,
         params: { board: { name: "Test Board" } },
@@ -42,17 +42,7 @@ class RequestForgeryProtectionTest < ActionDispatch::IntegrationTest
     assert_response :redirect
   end
 
-  test "fails with cross-site Sec-Fetch-Site and no CSRF token" do
-    assert_no_difference -> { Board.count } do
-      post boards_path,
-        params: { board: { name: "Test Board" } },
-        headers: { "Sec-Fetch-Site" => "cross-site" }
-    end
-
-    assert_response :unprocessable_entity
-  end
-
-  test "fails with none Sec-Fetch-Site and no CSRF token" do
+  test "fails with none Sec-Fetch-Site" do
     assert_no_difference -> { Board.count } do
       post boards_path,
         params: { board: { name: "Test Board" } },
@@ -62,19 +52,9 @@ class RequestForgeryProtectionTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
   end
 
-  test "fails when Sec-Fetch-Site header is missing and no CSRF token" do
+  test "fails when Sec-Fetch-Site header is missing" do
     assert_no_difference -> { Board.count } do
       post boards_path, params: { board: { name: "Test Board" } }
-    end
-
-    assert_response :unprocessable_entity
-  end
-
-  test "fails with invalid CSRF token and cross-site Sec-Fetch-Site" do
-    assert_no_difference -> { Board.count } do
-      post boards_path,
-        params: { board: { name: "Test Board" }, authenticity_token: "invalid-token" },
-        headers: { "Sec-Fetch-Site" => "cross-site" }
     end
 
     assert_response :unprocessable_entity
@@ -100,6 +80,27 @@ class RequestForgeryProtectionTest < ActionDispatch::IntegrationTest
 
     assert_response :redirect
     assert_includes response.headers["Vary"], "Sec-Fetch-Site"
+  end
+
+  test "JSON request succeeds with missing Sec-Fetch-Site" do
+    assert_difference -> { Board.count }, +1 do
+      post boards_path,
+        params: { board: { name: "Test Board" } },
+        as: :json
+    end
+
+    assert_response :created
+  end
+
+  test "JSON request fails with cross-site Sec-Fetch-Site" do
+    assert_no_difference -> { Board.count } do
+      post boards_path,
+        params: { board: { name: "Test Board" } },
+        headers: { "Sec-Fetch-Site" => "cross-site" },
+        as: :json
+    end
+
+    assert_response :unprocessable_entity
   end
 
   private

@@ -31,6 +31,36 @@ if ! command -v gum &>/dev/null; then
   echo
 fi
 
+# Install mise if needed
+if ! command -v mise &>/dev/null; then
+  echo
+  echo "▸ Installing mise"
+  if command -v pacman &>/dev/null; then
+    sudo pacman -S --noconfirm mise
+  elif command -v brew &>/dev/null; then
+    brew install mise
+  else
+    echo "Please install mise: https://mise.jdx.dev/installing-mise.html#installation-methods"
+    exit 1
+  fi
+  echo
+fi
+
+# Install gh if needed
+if ! command -v gh &>/dev/null; then
+  echo
+  echo "▸ Installing GitHub CLI"
+  if command -v pacman &>/dev/null; then
+    sudo pacman -S --noconfirm github-cli
+  elif command -v brew &>/dev/null; then
+    brew install gh
+  else
+    echo "Please install GitHub CLI: https://github.com/cli/cli#installation"
+    exit 1
+  fi
+  echo
+fi
+
 step() {
   local step_name="$1"
   shift
@@ -90,17 +120,24 @@ if which pacman >/dev/null 2>&1; then
   if ! pacman -Q "${packages[@]}" >/dev/null 2>&1; then
     step "Installing packages" sudo pacman -S --noconfirm --needed "${packages[@]}"
   fi
+elif which brew >/dev/null 2>&1; then
+  packages=(imagemagick openslide vips gitleaks)
+  missing_packages=()
+  for pkg in "${packages[@]}"; do
+    if ! brew list "$pkg" &>/dev/null; then
+      missing_packages+=("$pkg")
+    fi
+  done
+  if [ ${#missing_packages[@]} -gt 0 ]; then
+    step "Installing packages" brew install "${missing_packages[@]}"
+  fi
 fi
-
-# Ensure gh-signoff is installed and up to date
-step "Set up gh-signoff" bash -c "gh extension install basecamp/gh-signoff || gh extension upgrade basecamp/gh-signoff"
 
 bundle config set --local auto_install true
 step "Installing RubyGems" bundle install
 
 if [ -n "$SAAS" ]; then
-  saas_setup=$(bundle show fizzy-saas)/bin/setup
-  source "$saas_setup"
+  source "$app_root/saas/bin/setup"
 else
   if [ "$DATABASE_ADAPTER" = "mysql" ]; then
     oss_mysql_setup

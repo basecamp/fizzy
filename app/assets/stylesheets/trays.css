@@ -300,9 +300,16 @@
         border-radius: 0;
       }
 
-      @media (prefers-color-scheme: dark) {
+      html[data-theme="dark"] & {
         box-shadow: 0 0 0 1px var(--color-ink-lighter);
       }
+
+      @media (prefers-color-scheme: dark) {
+        html:not([data-theme]) & {
+          box-shadow: 0 0 0 1px var(--color-ink-lighter);
+        }
+      }
+
     }
 
     .card__background {
@@ -417,6 +424,7 @@
     .card__meta-text:not(.card__meta-text--updated),
     .card__stages,
     .card__steps,
+    .card__comments,
     .card__closed {
       display: none;
     }

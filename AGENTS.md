@@ -15,7 +15,7 @@ bin/dev                # Start development server (runs on port 3006)
 ```
 
 Development URL: http://fizzy.localhost:3006
-Login with: david@37signals.com (development fixtures), password will appear in the browser console
+Login with: david@example.com (development fixtures), password will appear in the browser console
 
 ### Testing
 ```bash
@@ -142,10 +142,10 @@ Key recurring tasks (via `config/recurring.yml`):
 ### Chrome MCP (Local Dev)
 
 URL: `http://fizzy.localhost:3006`
-Login: david@37signals.com (passwordless magic link auth - check rails console for link)
+Login: david@example.com (passwordless magic link auth - check rails console for link)
 
 Use Chrome MCP tools to interact with the running dev app for UI testing and debugging.
 
 ## Coding style
 
-Please read the separate file `STYLE.md` for some guidance on coding style.
+@STYLE.md

@@ -1,5 +1,5 @@
 <%= tag.div class: "card-columns hide-scrollbar", data: {
-      controller: "collapsible-columns drag-and-drop drag-and-strum navigable-list",
+      controller: "collapsible-columns drag-and-drop drag-and-strum navigable-list card-hotkeys",
       drag_and_drop_dragged_item_class: "drag-and-drop__dragged-item",
       drag_and_drop_hover_container_class: "drag-and-drop__hover-container",
       collapsible_columns_board_value: board.id,
@@ -11,8 +11,11 @@
       navigable_list_prevent_handled_keys_value: true,
       navigable_list_auto_select_value: false,
       navigable_list_auto_scroll_value: false,
+      card_hotkeys_navigable_list_outlet: ".cards__transition-container",
       action: "
         keydown->navigable-list#navigate
+        keydown->card-hotkeys#handleKeydown
+        turbo:morph@document->card-hotkeys#handleMorphComplete
         dragstart->drag-and-drop#dragStart
         dragover->drag-and-drop#dragOver
         dragenter->drag-and-strum#dragEnter

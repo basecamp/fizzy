@@ -4,6 +4,7 @@ module User::Accessor
   included do
     has_many :accesses, dependent: :destroy
     has_many :boards, through: :accesses
+    has_many :accessible_columns, through: :boards, source: :columns
     has_many :accessible_cards, through: :boards, source: :cards
     has_many :accessible_comments, through: :accessible_cards, source: :comments
 

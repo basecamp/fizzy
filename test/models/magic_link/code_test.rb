@@ -5,7 +5,7 @@ class MagicLink::CodeTest < ActiveSupport::TestCase
     code = MagicLink::Code.generate(6)
 
     assert_equal 6, code.length
-    assert_match(/\A[#{MagicLink::Code::CODE_ALPHABET.join}]+\z/, code)
+    assert_match(/\A[#{SecureRandom::BASE32_ALPHABET.join}]+\z/, code)
   end
 
   test "sanitize" do

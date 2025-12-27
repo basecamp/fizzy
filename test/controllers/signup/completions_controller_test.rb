@@ -29,7 +29,19 @@ class Signup::CompletionsControllerTest < ActionDispatch::IntegrationTest
     assert_response :redirect, "Valid params should redirect"
   end
 
-  test "create with invalid params" do
+  test "shows welcome letter after signup" do
+    untenanted do
+      post signup_completion_path, params: {
+        signup: {
+          full_name: @signup.full_name
+        }
+      }
+    end
+
+    assert flash[:welcome_letter]
+  end
+
+  test "create with blank name" do
     untenanted do
       post signup_completion_path, params: {
         signup: {
@@ -38,6 +50,9 @@ class Signup::CompletionsControllerTest < ActionDispatch::IntegrationTest
       }
     end
 
-    assert_response :unprocessable_entity, "Invalid params should return unprocessable entity"
+    assert_response :unprocessable_entity
+    assert_select ".txt-negative" do
+      assert_select "li", text: "Full name can't be blank"
+    end
   end
 end

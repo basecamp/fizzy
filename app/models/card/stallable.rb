@@ -7,7 +7,7 @@ module Card::Stallable
     has_one :activity_spike, class_name: "Card::ActivitySpike", dependent: :destroy
 
     scope :with_activity_spikes, -> { joins(:activity_spike) }
-    scope :stalled, -> { open.active.with_activity_spikes.where("card_activity_spikes.updated_at": ..STALLED_AFTER_LAST_SPIKE_PERIOD.ago, updated_at: ..STALLED_AFTER_LAST_SPIKE_PERIOD.ago) }
+    scope :stalled, -> { open.active.with_activity_spikes.where(card_activity_spikes: { updated_at: ..STALLED_AFTER_LAST_SPIKE_PERIOD.ago }, updated_at: ..STALLED_AFTER_LAST_SPIKE_PERIOD.ago) }
 
     before_update :remember_to_detect_activity_spikes
     after_update_commit :detect_activity_spikes_later, if: :should_detect_activity_spikes?

@@ -762,8 +762,7 @@ class Import
         mapping[:taggings] ||= {}
 
         import.tags.find_each do |old_tag|
-          new_tag = Tag.find_or_create_by!(title: old_tag.title) do |t|
-            t.account_id = account.id
+          new_tag = account.tags.find_or_create_by!(title: old_tag.title) do |t|
             t.created_at = old_tag.created_at
             t.updated_at = old_tag.updated_at
           end

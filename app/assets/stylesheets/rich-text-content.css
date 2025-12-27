@@ -1,8 +1,8 @@
 @layer components {
-  .rich-text-content {
+  :where(.rich-text-content) {
     --block-margin: 0.5lh;
 
-    :where(h1, h2, h3, h4, h5, h6) {
+    h1, h2, h3, h4, h5, h6 {
       display: block;
       font-weight: 800;
       letter-spacing: -0.02ch;
@@ -12,14 +12,14 @@
       text-wrap: balance;
     }
 
-    :where(h1) { font-size: 2em; }
-    :where(h2) { font-size: 1.5em; }
-    :where(h3) { font-size: 1.17em; }
-    :where(h4) { font-size: 1em; }
-    :where(h5) { font-size: 0.83em; }
-    :where(h6) { font-size: 0.67em; }
+    h1 { font-size: 2em; }
+    h2 { font-size: 1.5em; }
+    h3 { font-size: 1.17em; }
+    h4 { font-size: 1em; }
+    h5 { font-size: 0.83em; }
+    h6 { font-size: 0.67em; }
 
-    :where(p, ul, ol, dl, blockquote, figure, .attachment) {
+    p, ul, ol, dl, blockquote, figure, .attachment {
       margin-block: 0 var(--block-margin);
 
       &:not(lexxy-editor &) {
@@ -28,31 +28,65 @@
       }
     }
 
-    :where(b, strong, .lexxy-content__bold) {
+    p:has(+ p) {
+      margin: 0;
+    }
+
+    ol, ul {
+      padding-inline-start: 3ch;
+    }
+
+    ol {
+      list-style: decimal;
+    }
+
+    ul {
+      list-style: disc;
+    }
+
+    li:has(li) {
+      list-style: none;
+
+      ol, ul {
+        margin: 0;
+        padding-inline-start: 2ch;
+      }
+    }
+
+    b, strong, .lexxy-content__bold {
       font-weight: 700;
     }
 
-    :where(i, em, .lexxy-content__italic) {
+    i, em, .lexxy-content__italic {
       font-style: italic;
     }
 
-    :where(s, .lexxy-content__strikethrough) {
+    s, .lexxy-content__strikethrough {
       text-decoration: line-through;
     }
 
+    mark, .lexxy-content__highlight {
+      background-color: transparent;
+      color: inherit;
+    }
 
-    :where(p, blockquote) {
+    p, blockquote {
       letter-spacing: -0.005ch;
     }
 
-    :where(blockquote) {
+    /* Avoid extra space due to empty paragraphs */
+    p:empty {
+      display: none;
+    }
+
+    blockquote {
       border-inline-start: 0.25em solid var(--color-ink-lighter);
       font-style: italic;
       margin: var(--block-margin) 0;
       padding-inline-start: 2ch;
     }
 
-    :where(img, video, embed, object) {
+    img, video, embed, object {
       inline-size: auto;
       margin-inline: auto;
       max-block-size: 32rem;
@@ -62,15 +96,11 @@
     /* Links should hug media contained within */
     a:has(img),
     a:has(video) {
-      display: inline-block;
+      inline-size: fit-content;
+      margin-inline: auto;
     }
 
-    /* Avoid extra space due to empty paragraphs */
-    p:empty {
-      display: none;
-    }
-
-    :where(hr) {
+    hr {
       color: currentColor;
       block-size: 0;
       border: none;
@@ -85,7 +115,7 @@
     }
 
     /* Code */
-    :where(code, pre) {
+    code, pre {
       background-color: var(--color-canvas);
       border: 1px solid var(--color-ink-lighter);
       border-radius: 0.3em;
@@ -191,7 +221,7 @@
     position: relative;
     max-inline-size: 100%;
 
-    :where(progress) {
+    progress {
       inline-size: 100%;
       margin: auto;
     }
@@ -201,14 +231,17 @@
     color: color-mix(in oklch, var(--color-ink) 66%, transparent);
     font-size: var(--text-small);
 
-    .input {
+    textarea {
       --input-border-radius: 0.3em;
       --input-border-size: 0;
       --input-padding: 0;
 
+      background-color: var(--input-background, transparent);
+      border: none;
       color: inherit;
       inline-size: 100%;
       max-inline-size: 100%;
+      resize: none;
       text-align: center;
 
       &:focus {
@@ -263,7 +296,7 @@
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      margin-block-start: var(--block-space-half);
+      margin-block-start: 0.5ch;
     }
   }
 
@@ -274,7 +307,8 @@
     display: flex;
     flex-wrap: wrap;
     gap: 1ch;
-    inline-size: auto;
+    inline-size: 100%;
+    margin-inline: 0;
 
     .attachment__caption {
       display: grid;

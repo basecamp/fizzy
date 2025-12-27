@@ -1,0 +1,33 @@
+@layer components {
+  .theme-switcher {
+    @media (max-width: 479px) {
+      --row-gap: 1ch;
+
+      flex-direction: column;
+    }
+  }
+
+  .theme-switcher__btn {
+    --btn-background: var(--color-ink-lightest);
+    --btn-border-radius: 0.4em;
+    --btn-border-size: 0;
+    --btn-gap: 0.1lh;
+    --btn-padding: 1em;
+    --icon-size: 2em;
+
+    column-gap: var(--inline-space);
+    flex: 1;
+    flex-direction: column;
+    position: relative;
+    white-space: nowrap;
+
+    &:has(input:checked) {
+      --btn-background: var(--color-selected);
+      --btn-color: var(--color-ink);
+    }
+
+    @media (max-width: 479px) {
+      flex-direction: row;
+    }
+  }
+}

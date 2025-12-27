@@ -1,0 +1,28 @@
+<div data-controller="dialog" data-dialog-auto-open-value="true" data-dialog-modal-value="true">
+  <dialog class="welcome-letter panel panel--wide shadow dialog" data-dialog-target="dialog">
+    <button class="welcome-letter__close btn txt-x-small" data-action="dialog#close">
+      <%= icon_tag "close" %>
+      <span class="for-screen-reader">Close dialog</span>
+    </button>
+
+    <div class="txt-align-center margin-block-end">
+      <span class="welcome-letter__avatar txt-xx-large avatar center"><%= image_tag "jf-avatar.jpg", size: 36%></span>
+    </div>
+
+    <h2 class="txt-medium margin-none txt-tight-lines">Welcome, and thanks for signing up for Fizzy.</h2>
+
+    <p></p>
+
+    <p>To get you started, we set you up with a Fizzy board called <em>Playground</em>. It’s got a few cards designed to help you learn Fizzy itself. Open each card, go through the simple steps, and you’ll be an expert in Fizzy in no time. You’ll see the <em>Playground</em> when you close this message.</p>
+
+    <p>If you ever need a hand, please contact me directly at jason@37signals.com. I'm here for you, we’re all here for you.</p>
+
+    <p>Thanks again and all the best,</p>
+
+    <span class="welcome-letter__signature"></span>
+
+    <p><strong>Jason Fried</strong>, jason@37signals.com<br>
+      <em>CEO &amp; co-founder of 37signals, makers of Fizzy, Basecamp, and HEY</em>
+    </p>
+  </dialog>
+</div>

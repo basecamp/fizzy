@@ -29,12 +29,12 @@ class Account::Seeder
 
       # Cards
       playground.cards.create! creator: creator, title: "Finally, watch this Fizzy orientation video", status: "published", description: <<~HTML
-        <p>There’s a whole lot more you can do in Fizzy. In the video below 37signals founder and CEO, Jason Fried, will walk you through the basics in just 8 minutes.</p>
+        <p>There’s a whole lot more you can do in Fizzy. In the video below, 37signals founder and CEO, Jason Fried, will walk you through the basics in just 17 minutes.</p>
         <action-text-attachment url="https://videos.37signals.com/fizzy/assets/videos/fizzyorientation-4k.mp4" caption="Fizzy orientation" content-type="video/mp4" filename="fizzyorientation-4k.mp4"></action-text-attachment>
       HTML
 
       playground.cards.create! creator: creator, title: "Now, grab the invite link to invite someone else", status: "published", description: <<~HTML
-        <p>Open Fizzy menu, select “<b><strong>+ Add people</b></strong>”, then copy the invite link. You can give this link to someone else so they can make an login for themselves in your account.</p>
+        <p>Open the Fizzy menu, select “<b><strong>+ Add people</b></strong>”, then copy the invite link. You can give this link to someone else so they can make a login for themselves in your account.</p>
         <action-text-attachment url="https://videos.37signals.com/fizzy/assets/images/invite-link.gif" alt="Demo of copying invite link" caption="Get a link to invite co-workers" content-type="image/*" filename="invite-link.gif" presentation="gallery"></action-text-attachment>
       HTML
 
@@ -43,7 +43,7 @@ class Account::Seeder
         <action-text-attachment url="https://videos.37signals.com/fizzy/assets/images/back-to-home.gif" alt="Demo of visiting Home" caption="Go back to Home for Latest Activity" content-type="image/*" filename="back-to-home.gif" presentation="gallery"></action-text-attachment>
       HTML
 
-      playground.cards.create! creator: creator, title: "Now,check out all cards assigned to you", status: "published", description: <<~HTML
+      playground.cards.create! creator: creator, title: "Now, check out all cards assigned to you", status: "published", description: <<~HTML
         <p>Pull down the Fizzy menu at the top of the screen, and select “<b><strong>Assigned to me</b></strong>” or just hit “2” on your keyboard any time.</p>
         <action-text-attachment url="https://videos.37signals.com/fizzy/assets/images/all-assigned.gif" alt="Demo of navigating to 'Assigned to Me'" caption="See all cards assigned to me" content-type="image/*" filename="all-assigned.gif" presentation="gallery"></action-text-attachment>
       HTML
@@ -54,7 +54,7 @@ class Account::Seeder
       HTML
 
       playground.cards.create! creator: creator, title: "Next, assign this card to yourself", status: "published", description: <<~HTML
-        <p>Click the little head with the + next to it, pick yourself.</p>
+        <p>Click the little head with the + next to it, then pick yourself.</p>
         <action-text-attachment url="https://videos.37signals.com/fizzy/assets/images/assign-to-self.gif" alt="Demo of assigning a card" caption="Assign this to yourself" content-type="image/*" filename="assign-to-self.gif" presentation="gallery"></action-text-attachment>
       HTML
 
@@ -69,6 +69,7 @@ class Account::Seeder
           <li>Make another called "Working on"</li>
         </ol>
         <p>Go back to the Board view, click the little “+” to the right of the DONE column, name the column, pick a color, then do it again.</p>
+        <p><br></p>
         <p>After that, drag this card to “DONE” or select “DONE” in the sidebar.</p>
         <action-text-attachment url="https://videos.37signals.com/fizzy/assets/images/make-columns.gif" alt="Demo of adding columns" caption="Make two more columns" content-type="image/*" filename="make-columns.gif" presentation="gallery"></action-text-attachment>
       HTML

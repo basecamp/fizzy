@@ -14,7 +14,7 @@ class Event::Description
   end
 
   def to_plain_text
-    to_sentence(creator_name, card.title)
+    to_sentence(creator_name, h(card.title))
   end
 
   private

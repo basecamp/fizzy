@@ -8,8 +8,19 @@ export default class extends Controller {
     debounceTimeout: { type: Number, default: 300 }
   }
 
+  #isComposing = false
+
   initialize() {
     this.debouncedSubmit = debounce(this.debouncedSubmit.bind(this), this.debounceTimeoutValue)
+  }
+
+  // IME Composition tracking
+  compositionStart() {
+    this.#isComposing = true
+  }
+
+  compositionEnd() {
+    this.#isComposing = false
   }
 
   submit() {
@@ -21,9 +32,20 @@ export default class extends Controller {
 
     if (input) {
       const value = (input.value || "").trim()
-      if (value.length === 0) {
+      const isEmpty = value.length === 0
+
+      if (isEmpty) {
         event.preventDefault()
+        input.setCustomValidity(input.dataset.validationMessage || "Please fill out this field")
+        input.reportValidity()
+        input.addEventListener("input", () => input.setCustomValidity(""), { once: true })
       }
+    }
+  }
+
+  preventComposingSubmit(event) {
+    if (this.#isComposing) {
+      event.preventDefault()
     }
   }
 

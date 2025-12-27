@@ -16,7 +16,7 @@ module FilterScoped
     end
 
     def filter_params
-      params.reverse_merge(**Filter.default_values).permit(*Filter::PERMITTED_PARAMS)
+      params.with_defaults(**Filter.default_values).permit(*Filter::PERMITTED_PARAMS)
     end
 
     def set_user_filtering

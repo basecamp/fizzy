@@ -1,0 +1,13 @@
+<div class="panel panel--centered">
+  <div class="flex flex-column gap txt-medium">
+    <h1 class="txt-x-large font-weight-black margin-none">Find an account</h1>
+
+    <%= form_with url: saas.admin_account_search_path, class: "flex flex-column gap" do |form| %>
+      <%= form.text_field :q, placeholder: "Account ID", autofocus: true, class: "input" %>
+      <%= form.submit "Search", class: "btn btn--link" %>
+    <% end %>
+  </div>
+</div>
+
+
+

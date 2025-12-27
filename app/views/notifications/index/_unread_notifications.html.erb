@@ -5,8 +5,8 @@
       <%= button_to "Mark all as read", bulk_reading_path, class: "btn txt-small", form: { data: { turbo: false } }, data: { action: "badge#clear" } %>
     </div>
   <% else %>
-    <div class="notifications-list__empty-message pad border-radius border translucent" style="--border-style: dashed; --border-color: var(--color-ink); --border-radius: 0.2em;">
-      <strong>Nothing new for you.</strong>
+    <div class="notifications-list__empty-message blank-slate blank-slate--empty align-self-center">
+      Nothing new for you
     </div>
   <% end %>
 

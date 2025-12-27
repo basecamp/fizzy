@@ -9,7 +9,7 @@ module Card::Taggable
   end
 
   def toggle_tag_with(title)
-    tag = Tag.find_or_create_by!(title: title)
+    tag = account.tags.find_or_create_by!(title: title)
 
     transaction do
       if tagged_with?(tag)

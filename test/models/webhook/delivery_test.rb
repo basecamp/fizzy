@@ -1,6 +1,12 @@
 require "test_helper"
 
 class Webhook::DeliveryTest < ActiveSupport::TestCase
+  PUBLIC_TEST_IP = "93.184.216.34" # example.com's real IP, used as a public IP stand-in
+
+  setup do
+    stub_dns_resolution(PUBLIC_TEST_IP)
+  end
+
   test "create" do
     webhook = webhooks(:active)
     event = events(:layout_commented)
@@ -258,4 +264,85 @@ class Webhook::DeliveryTest < ActiveSupport::TestCase
 
     assert_requested request_stub
   end
+
+  test "blocks DNS rebinding attack where hostname resolves to private IP after validation" do
+    webhook = Webhook.create!(
+      board: boards(:writebook),
+      name: "Rebind Attack",
+      url: "https://rebind.attacker.example/webhook"
+    )
+    event = events(:layout_commented)
+    delivery = Webhook::Delivery.create!(webhook: webhook, event: event)
+
+    # Stub DNS to return a private IP (simulating rebind to internal host)
+    stub_dns_resolution("169.254.169.254") # AWS IMDS link-local address
+
+    delivery.deliver
+
+    assert_equal "completed", delivery.state
+    assert_equal "private_uri", delivery.response[:error]
+    assert_not delivery.succeeded?
+  end
+
+  test "connects to the pinned IP address preventing DNS re-resolution" do
+    webhook = Webhook.create!(
+      board: boards(:writebook),
+      name: "Pinned IP",
+      url: "https://example.com/webhook"
+    )
+    event = events(:layout_commented)
+    delivery = Webhook::Delivery.create!(webhook: webhook, event: event)
+
+    stub_dns_resolution(PUBLIC_TEST_IP)
+
+    # Verify Net::HTTP.new is called with the pinned IP
+    response_mock = stub(code: "200")
+    response_mock.stubs(:read_body)
+
+    http_mock = mock("http")
+    http_mock.stubs(:use_ssl=)
+    http_mock.stubs(:ipaddr=)
+    http_mock.stubs(:open_timeout=)
+    http_mock.stubs(:read_timeout=)
+    http_mock.stubs(:request).yields(response_mock).returns(response_mock)
+
+    Net::HTTP.expects(:new).with("example.com", 443).returns(http_mock)
+
+    delivery.deliver
+
+    assert delivery.succeeded?
+  end
+
+  test "handles response too large error" do
+    delivery = webhook_deliveries(:pending)
+
+    large_body = "x" * 200.kilobytes
+    stub_request(:post, delivery.webhook.url).to_return(status: 200, body: large_body)
+
+    delivery.deliver
+
+    assert_equal "completed", delivery.state
+    assert_equal "response_too_large", delivery.response[:error]
+    assert_not delivery.succeeded?
+  end
+
+  test "allows responses within size limit" do
+    delivery = webhook_deliveries(:pending)
+
+    small_body = "x" * 50.kilobytes
+    stub_request(:post, delivery.webhook.url).to_return(status: 200, body: small_body)
+
+    delivery.deliver
+
+    assert_equal "completed", delivery.state
+    assert_equal 200, delivery.response[:code]
+    assert delivery.succeeded?
+  end
+
+  private
+    def stub_dns_resolution(*ips)
+      dns_mock = mock("dns")
+      dns_mock.stubs(:each_address).multiple_yields(*ips)
+      Resolv::DNS.stubs(:open).yields(dns_mock)
+    end
 end

@@ -11,7 +11,7 @@ class Public::BaseController < ApplicationController
     end
 
     def set_card
-      @card = @board.cards.find_by!(number: params[:id]) if params[:board_id] && params[:id]
+      @card = @board.cards.published.find_by!(number: params[:id]) if params[:board_id] && params[:id]
     end
 
     def set_public_cache_expiration

@@ -1,0 +1,27 @@
+@layer components {
+  .welcome-letter {
+    position: relative;
+    view-transition-name: welcome-letter;
+    z-index: var(--z-welcome);
+
+    h2, p {
+      text-wrap: pretty;
+    }
+  }
+
+  .welcome-letter__close {
+    inset: var(--block-space) var(--block-space) auto auto;
+    position: absolute;
+  }
+
+  .welcome-letter__signature {
+    background-color: currentColor;
+    block-size: 3em;
+    display: inline-block;
+    inline-size: 8em;
+    mask-image: url("jf-signature.svg");
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: 8em 3em;
+  }
+}

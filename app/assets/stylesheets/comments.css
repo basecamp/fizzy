@@ -23,16 +23,62 @@
   }
 
   .comment {
-    margin-inline: auto;
-    max-inline-size: var(--comment-max);
-    position: relative;
-
-    house-md-toolbar {
-      margin-block-start: calc(var(--comment-padding-block) * -0.5);
+    /* Distinguish from the .comment class used for code formatting without extra specificity */
+    &:where(.comments &) {
+      display: flex;
+      margin-inline: auto;
+      max-inline-size: var(--comment-max);
+      position: relative;
     }
 
-    .house-md-content {
-      padding: var(--comment-padding-block) 0 0;
+    .comment-by-system & {
+      --comment-padding-block: var(--block-space-half);
+
+      text-align: center;
+
+      &::before {
+        /* Make up space for lack of avatar */
+        content: "";
+        display: flex;
+        inline-size: calc(var(--comment-padding-inline) * 0.9);
+      }
+
+      .comment__avatar {
+        display: none;
+      }
+
+      .comment__author {
+        a { margin: 0 auto; }
+        h3 { margin-inline: auto; }
+        strong { display: none; }
+      }
+
+      .comment__body {
+        padding: 0;
+        text-align: center;
+      }
+
+      .comment__content {
+        --stripe-color: var(--color-ink-lightest);
+
+        background-image: repeating-linear-gradient(
+          45deg in srgb,
+          var(--color-canvas) 0 1px,
+          var(--stripe-color) 1px 10px);
+        padding-inline: var(--comment-padding-inline);
+
+        .comments--system-expanded .comment-by-system & {
+          --stripe-color: color-mix(in srgb, var(--card-color) 10%, var(--color-canvas));
+        }
+
+        .comment__history {
+          background-color: var(--stripe-color);
+        }
+      }
+
+      .reactions {
+        display: none !important;
+      }
     }
   }
 
@@ -48,15 +94,20 @@
   }
 
   .comment__body {
-    padding-inline-end: var(--reaction-size);
     text-align: start;
 
-    :first-child {
-      margin-block-start: 0;
+    .action-text-content {
+      > action-text-attachment:first-child figure {
+        margin-block-start: 0.5ch;
+      }
+
+      > :last-child {
+        margin-block-end: 0;
+      }
     }
 
-    :last-child {
-      margin-block-end: 0;
+    &:not:has(lexxy-editor) {
+      padding-inline-end: var(--reaction-size);
     }
   }
 
@@ -68,6 +119,7 @@
 
     background-color: var(--comment-bg-color);
     border-radius: 0.2em;
+    max-inline-size: calc(100% - calc(var(--comment-padding-inline) * 0.75));
     padding:
       var(--comment-padding-block)
       calc(var(--comment-padding-inline) / 2)
@@ -80,53 +132,36 @@
     background-color: var(--color-ink-lightest);
   }
 
-  .comment--system {
-    --comment-padding-block: var(--block-space-half);
+  .comment__history {
+    background-color: var(--color-ink-lightest);
+    display: none;
+    inset: calc(var(--comment-padding-inline) / 2.5) calc(var(--comment-padding-inline) / 1.5) auto auto;    margin-inline-end: calc(var(--comment-padding-inline) / -2.5);
+    position: absolute;
+  }
 
-    max-inline-size: var(--comment-max);
-    text-align: center;
+  .comment-by-system {
+    display: none;
+    transition: var(--dialog-duration) allow-discrete;
+    transition-property: display;
 
-    &::before {
-      /* Make up space for lack of avatar */
-      content: "";
-      display: flex;
-      inline-size: calc(var(--comment-padding-inline) * 0.75);
+    .comments--system-expanded & {
+      display: contents;
     }
+  }
 
-    .comment__avatar {
+  /* Show the last system comment */
+  :nth-last-child(1 of .comment-by-system) {
+    display: contents;
+
+    .comment__history {
+      display: grid;
+    }
+  }
+
+  /* Hide the "Show history" button if there's only one system comment */
+  :nth-child(1 of .comment-by-system) {
+    .comment__history {
       display: none;
-    }
-
-    .comment__author {
-      a {
-        margin: 0 auto;
-      }
-
-      h3 {
-        margin-inline: auto;
-      }
-
-      strong {
-        display: none;
-      }
-    }
-
-    .comment__body {
-      padding: 0;
-      text-align: center;
-    }
-
-    .comment__content {
-      background-image: repeating-linear-gradient(
-        45deg in srgb,
-        var(--color-canvas) 0 1px,
-        var(--color-ink-lightest) 1px 10px
-      );
-      padding-inline: var(--comment-padding-inline);
-    }
-
-    .reactions {
-      display: none !important;
     }
   }
 }

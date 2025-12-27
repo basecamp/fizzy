@@ -1,4 +1,4 @@
-<li class="popup__item" data-filter-target="item" data-navigable-list-target="item" aria-checked="<%= card.assignees.include?(user) %>">
+<li class="popup__item" data-filter-target="item" data-navigable-list-target="item" <%= tag.attributes(data: local_assigns.fetch(:data, {})) %> aria-checked="<%= card.assignees.include?(user) %>">
   <%= button_to card_assignments_path(card, params: { assignee_id: user.id }), method: :post,
         class: "popup__btn btn", form_class: "max-width flex-item-grow" do %>
     <span class="overflow-ellipsis flex-item-grow"><%= local_assigns.fetch(:user_label, user.name) %></span>

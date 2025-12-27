@@ -1,0 +1,9 @@
+<%= turbo_stream.replace("not-now", partial: "boards/show/not_now", method: :morph, locals: { board: @card.board }) %>
+
+<% if @source_column %>
+  <%= turbo_stream.replace(dom_id(@source_column), partial: "boards/show/column", method: :morph, locals: { column: @source_column }) %>
+<% elsif @was_in_stream %>
+  <%= turbo_stream.replace("the-stream", partial: "boards/show/stream", method: :morph, locals: { board: @card.board, page: @page }) %>
+<% end %>
+
+<%= turbo_stream.replace([ @card, :card_container ], partial: "cards/container", method: :morph, locals: { card: @card.reload }) %>

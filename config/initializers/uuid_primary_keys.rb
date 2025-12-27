@@ -1,4 +1,30 @@
-# Automatically use UUID type for all binary(16) columns
+# Automatically use UUID type for all binary(16) columns and generate defaults
+
+module UuidPrimaryKeyDefault
+  def load_schema!
+    define_uuid_primary_key_pending_default
+    super
+  end
+
+  private
+    def define_uuid_primary_key_pending_default
+      if uuid_primary_key?
+        pending_attribute_modifications << PendingUuidDefault.new(primary_key)
+      end
+    rescue ActiveRecord::StatementInvalid
+      # Table doesn't exist yet
+    end
+
+    def uuid_primary_key?
+      table_name && primary_key && schema_cache.columns_hash(table_name)[primary_key]&.type == :uuid
+    end
+
+    PendingUuidDefault = Struct.new(:name) do
+      def apply_to(attribute_set)
+        attribute_set[name] = attribute_set[name].with_user_default(-> { ActiveRecord::Type::Uuid.generate })
+      end
+    end
+end
 
 module MysqlUuidAdapter
   extend ActiveSupport::Concern
@@ -7,6 +33,20 @@ module MysqlUuidAdapter
   def lookup_cast_type(sql_type)
     if sql_type == "binary(16)"
       ActiveRecord::Type.lookup(:uuid, adapter: :trilogy)
+    else
+      super
+    end
+  end
+
+  # Override fetch_type_metadata to preserve UUID type and limit
+  def fetch_type_metadata(sql_type, extra = "")
+    if sql_type == "binary(16)"
+      simple_type = ActiveRecord::ConnectionAdapters::SqlTypeMetadata.new(
+        sql_type: sql_type,
+        type: :uuid,
+        limit: 16
+      )
+      ActiveRecord::ConnectionAdapters::MySQL::TypeMetadata.new(simple_type, extra: extra)
     else
       super
     end
@@ -69,6 +109,7 @@ module TableDefinitionUuidSupport
 end
 
 ActiveSupport.on_load(:active_record) do
+  ActiveRecord::Base.singleton_class.prepend(UuidPrimaryKeyDefault)
   ActiveRecord::ConnectionAdapters::TableDefinition.prepend(TableDefinitionUuidSupport)
 end
 

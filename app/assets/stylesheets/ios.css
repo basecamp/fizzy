@@ -1,0 +1,7 @@
+@layer platform {
+  [data-platform~=ios] {
+    .hide-on-ios {
+      display: none;
+    }
+  }
+}

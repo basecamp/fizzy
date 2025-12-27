@@ -3,9 +3,9 @@
 require_relative "../config/environment"
 
 domains = {
-  "production" => "box-car.com",
-  "beta" => "fizzy-beta.37signals.com",
-  "staging" => "fizzy.37signals-staging.com"
+  "production" => "app.fizzy.do",
+  "beta" => ENV.fetch("APP_FQDN", "beta1.fizzy-beta.com"),
+  "staging" => "app.fizzy-staging.com"
 }
 
 def fix_attachments(rich_text)

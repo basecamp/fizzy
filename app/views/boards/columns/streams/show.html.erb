@@ -17,9 +17,7 @@
         <%= render "boards/columns/list", cards: @page.records, draggable: true %>
       <% end %>
     <% else %>
-      <div class="card blank-slate blank-slate--card">
-        <p class="txt-align-center blank-slate-for-grid">Nothing here</p>
-      </div>
+      <%= render "boards/columns/empty_placeholder" %>
     <% end %>
   <% end %>
 </section>

@@ -10,11 +10,19 @@ class Account::JoinCodeTest < ActiveSupport::TestCase
     assert_equal 3, parts.count
   end
 
-  test "redeem" do
+  test "redeem_if increments usage_count when block returns true" do
     join_code = account_join_codes(:"37s")
 
-    assert_difference -> { join_code.reload.usage_count }, 1 do
-      join_code.redeem
+    assert_difference -> { join_code.reload.usage_count }, +1 do
+      join_code.redeem_if { true }
+    end
+  end
+
+  test "redeem_if does not increment usage_count when block returns false" do
+    join_code = account_join_codes(:"37s")
+
+    assert_no_difference -> { join_code.reload.usage_count } do
+      join_code.redeem_if { false }
     end
   end
 

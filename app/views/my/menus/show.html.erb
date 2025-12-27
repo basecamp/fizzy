@@ -5,7 +5,7 @@
     <%= render "my/menus/people", users: @users %>
     <%= render "my/menus/settings" %>
     <%= render "my/menus/shortcuts" %>
-    <%= render "my/menus/accounts", accounts: Current.identity.accounts %>
+    <%= render "my/menus/accounts", accounts: @accounts %>
   <% end %>
 
   <footer class="nav__footer">

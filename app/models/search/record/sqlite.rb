@@ -2,8 +2,6 @@ module Search::Record::SQLite
   extend ActiveSupport::Concern
 
   included do
-    # Override default UUID id attribute, as FTS5 uses rowid integer primary key
-    attribute :id, :integer, default: nil
     attribute :result_title, :string
     attribute :result_content, :string
 

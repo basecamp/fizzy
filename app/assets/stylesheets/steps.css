@@ -93,17 +93,14 @@
   }
 
   .steps__icon {
+    --icon-size: 0.875em;
+
     background-color: var(--card-color);
     block-size: 1.3em;
     border-radius: 50%;
+    color: var(--color-ink-inverted);
     display: grid;
     inline-size: 1.3em;
     place-content: center;
-
-    .icon {
-      background-color: var(--color-ink-inverted);
-      block-size: 0.8em;
-      inline-size: 0.8em;
-    }
   }
 }

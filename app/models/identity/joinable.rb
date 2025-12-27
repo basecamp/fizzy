@@ -5,11 +5,9 @@ module Identity::Joinable
     attributes[:name] ||= email_address
 
     transaction do
-      account.users.create!(**attributes, identity: self)
+      account.users.find_or_create_by!(identity: self) do |user|
+        user.assign_attributes(attributes)
+      end.previously_new_record?
     end
-  end
-
-  def member_of?(account)
-    account.users.exists?(identity: self)
   end
 end

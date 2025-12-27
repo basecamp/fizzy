@@ -1,0 +1,4 @@
+<strong>You’ve run out of <%= Current.account.plan.free? ? "free storage" : "storage" %>.</strong>
+<%= link_to account_settings_path(anchor: "subscription"), class: "btn settings-subscription__button" do %>
+  <span>Upgrade to get more</span>
+<% end %>

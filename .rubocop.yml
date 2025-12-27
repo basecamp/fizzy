@@ -11,3 +11,5 @@ AllCops:
   Exclude:
     - 'db/migrate/**/*'
     - 'db/schema*.rb'
+    - 'saas/db/migrate/**/*'
+    - 'saas/db/saas_schema.rb'

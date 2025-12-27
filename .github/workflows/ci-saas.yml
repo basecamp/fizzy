@@ -3,6 +3,9 @@ name: CI (SaaS)
 on:
   push:
 
+permissions:
+  contents: read
+
 jobs:
   test_oss:
     name: Test (OSS)
@@ -15,4 +18,4 @@ jobs:
     with:
       saas: true
     secrets:
-      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      FIZZY_GH_TOKEN: ${{ secrets.FIZZY_GH_TOKEN }}

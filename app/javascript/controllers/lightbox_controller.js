@@ -3,17 +3,22 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = [ "caption", "image", "dialog", "zoomedImage" ]
 
-  connect() {
-    this.dialogTarget.addEventListener('transitionend', this.handleTransitionEnd.bind(this))
+  imageTargetConnected(element) {
+    element.addEventListener("click", this.#handleImageClick)
   }
 
-  disconnect() {
-    this.dialogTarget.removeEventListener('transitionend', this.handleTransitionEnd.bind(this))
+  imageTargetDisconnected(element) {
+    element.removeEventListener("click", this.#handleImageClick)
   }
 
-  open(event) {
+  #handleImageClick = (event) => {
+    event.preventDefault()
+    this.#open(event.currentTarget)
+  }
+
+  #open(link) {
     this.dialogTarget.showModal()
-    this.#set(event.target.closest("a"))
+    this.#set(link)
   }
 
   // Wait for the transition to finish before resetting the image

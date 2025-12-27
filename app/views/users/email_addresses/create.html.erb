@@ -6,10 +6,10 @@
   </div>
 <% end %>
 
-<div class="panel panel--centered flex flex-column gap-half">
+<div class="panel panel--centered flex flex-column gap-half" style="--panel-size: 50ch;">
   <h1 class="txt-x-large font-weight-black margin-none">Check your email</h1>
   <p class="margin-none">We just sent an email to <strong><%= params[:email_address] %></strong></p>
-  <p class="margin-none-block-start">Hit the link in the email to confirm this is the email address you want to use with Fizzy going forward.</p>
+  <p class="margin-none-block-start margin-block-end-half">Hit the link in the email to confirm this is the email address you want to use with Fizzy going forward.</p>
 
   <%= link_to "Done", edit_user_path(@user, script_name: @user.account.slug), class: "btn btn--link center" %>
 </div>

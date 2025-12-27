@@ -24,7 +24,7 @@ module Filter::Resources
 
   def board_titles
     if boards.none?
-      Board.one? ? [ Board.first.name ] : [ "all boards" ]
+      creator.boards.one? ? [ creator.boards.first.name ] : [ "all boards" ]
     else
       boards.map(&:name)
     end

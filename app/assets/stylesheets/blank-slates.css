@@ -1,0 +1,46 @@
+@layer components {
+  .blank-slate--drag {
+    box-shadow: none !important;
+    color: color-mix(in srgb, var(--card-color) 70%, var(--color-canvas));
+
+    p {
+      font-size: var(--text-small);
+      overflow: hidden;
+      text-align: center;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .cards--considering & {
+      background-color: var(--card-bg-color) !important;
+    }
+
+    .cards--grid & {
+      display: none;
+    }
+  }
+
+  .blank-slate--empty {
+    border: 2px dashed var(--color-ink-light);
+    border-radius: 1ch;
+    color: var(--color-ink-dark);
+    margin-block-start: 5dvh;
+    padding: 1ch 2ch;
+    rotate: -3deg;
+    font-weight: 500;
+
+    .cards:not(.cards--grid) & {
+      display: none;
+    }
+  }
+
+  .blank-slate--filters {
+    .cards--grid:has(.card) & {
+      display: none;
+    }
+  }
+
+  .cards__list:has(> :not(.blank-slate)) .card--hide-unless-empty {
+    display: none;
+  }
+}

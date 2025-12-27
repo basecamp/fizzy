@@ -5,6 +5,7 @@ default: &default
   username: <%= ENV.fetch("MYSQL_USER", "root") %>
   password: <%= ENV["MYSQL_PASSWORD"] %>
   pool: 50
+  ssl_mode: <%= ENV["MYSQL_SSL_MODE"] %>
   timeout: 5000
 
 development:
@@ -33,3 +34,11 @@ production:
     <<: *default
     database: fizzy_production_cable
     migrations_paths: db/cable_migrate
+  queue:
+    <<: *default
+    database: fizzy_production_queue
+    migrations_paths: db/queue_migrate
+  cache:
+    <<: *default
+    database: fizzy_production_cache
+    migrations_paths: db/cache_migrate

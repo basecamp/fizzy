@@ -3,7 +3,7 @@
     <%= column.title %>
 
     <% if column.events_by_hour.any? %>
-      <%= link_to events_day_timeline_column_path(id: column.base_title_for_route, day: column.day_timeline.day.to_date), class: "events__maximize-button btn btn--circle txt-x-small borderless", data: { turbo_frame: "_top" } do %>
+      <%= link_to events_day_timeline_column_path(column, day: column.day_timeline.day.to_date), class: "events__maximize-button btn btn--circle txt-x-small borderless", data: { turbo_frame: "_top" } do %>
         <%= icon_tag "grid", class: "translucent" %>
         <span class="for-screen-reader">Expand column</span>
       <% end %>

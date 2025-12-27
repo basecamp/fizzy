@@ -1,5 +1,5 @@
 class Comment < ApplicationRecord
-  include Attachments, Eventable, Mentions, Promptable, Searchable
+  include Attachments, Eventable, Mentions, Promptable, Searchable, Storage::Tracked
 
   belongs_to :account, default: -> { card.account }
   belongs_to :card, touch: true
@@ -10,8 +10,8 @@ class Comment < ApplicationRecord
 
   scope :chronologically, -> { order created_at: :asc, id: :desc }
   scope :preloaded, -> { with_rich_text_body.includes(reactions: :reacter) }
-  scope :by_system, -> { joins(:creator).where(creator: { role: "system" }) }
-  scope :by_user, -> { joins(:creator).where.not(creator: { role: "system" }) }
+  scope :by_system, -> { joins(:creator).where(creator: { role: :system }) }
+  scope :by_user, -> { joins(:creator).where.not(creator: { role: :system }) }
 
   after_create_commit :watch_card_by_creator
 

@@ -1,11 +1,11 @@
 <% @page_title = "Confirm email change" %>
 
-<div class="panel shadow center flex flex-column gap-half" style="--panel-size: 45ch;">
+<div class="panel panel--centered center flex flex-column gap-half" style="--panel-size: 45ch;">
   <header>
     <h1 class="txt-x-large font-weight-black margin-none">
       <%= @page_title %>
     </h1>
-    <p class="margin-none">Just a sec while we confirm your new email address.</p>
+    <p class="margin-none-block-start margin-block-end-half">Just a sec while we confirm your new email address.</p>
   </header>
 
   <%= form_with url: user_email_address_confirmation_path(user_id: @user.id), method: :post, data: { controller: "form auto-submit" } do |form| %>

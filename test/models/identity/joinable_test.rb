@@ -1,25 +1,37 @@
 require "test_helper"
 
 class Identity::JoinableTest < ActiveSupport::TestCase
-  test "join" do
+  test "join creates a new user and returns true" do
     identity = identities(:david)
 
-    user = identity.join(accounts(:initech))
-    assert_kind_of User, user
-    assert_equal accounts(:initech), user.account
-    assert_equal identity.email_address, user.name
+    assert_difference -> { User.count }, 1 do
+      result = identity.join(accounts(:initech))
+      assert result, "join should return true when creating a new user"
+    end
 
+    user = identity.users.find_by!(account: accounts(:initech))
+    assert_equal identity.email_address, user.name
+  end
+
+  test "join with custom attributes" do
     identity = identities(:mike)
 
-    user = identity.join(accounts("37s"), name: "Mike")
-    assert_kind_of User, user
-    assert_equal accounts("37s"), user.account
+    result = identity.join(accounts("37s"), name: "Mike")
+    assert result
+
+    user = identity.users.find_by!(account: accounts("37s"))
     assert_equal "Mike", user.name
   end
 
-  test "member_of?" do
+  test "join returns false if user already exists" do
     identity = identities(:david)
-    assert identity.member_of?(accounts("37s"))
-    assert_not identity.member_of?(accounts(:initech))
+    account = accounts("37s")
+
+    assert identity.users.exists?(account: account), "David should already be a member of 37s"
+
+    assert_no_difference -> { User.count } do
+      result = identity.join(account)
+      assert_not result, "join should return false when user already exists"
+    end
   end
 end

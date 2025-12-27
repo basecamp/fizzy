@@ -14,8 +14,9 @@ module Card::Readable
   end
 
   def remove_inaccessible_notifications
-    User.find_each do |user|
-      all_notifications_for(user).destroy_all unless accessible_to?(user)
+    accessible_user_ids = board.accesses.pluck(:user_id)
+    notification_sources.each do |sources|
+      inaccessible_notifications_from(sources, accessible_user_ids).in_batches.destroy_all
     end
   end
 
@@ -42,6 +43,14 @@ module Card::Readable
 
     def comment_creation_events
       Event.where(eventable: comments)
+    end
+
+    def inaccessible_notifications_from(sources, accessible_user_ids)
+      Notification.where(source: sources).where.not(user_id: accessible_user_ids)
+    end
+
+    def notification_sources
+      [ events, comment_creation_events, mentions, comment_mentions ]
     end
 
     def mention_notification_sources

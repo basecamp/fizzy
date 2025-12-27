@@ -1,11 +1,11 @@
 create_tenant "Honcho"
 
-david = find_or_create_user "David Heinemeier Hansson", "david@37signals.com"
-jason = find_or_create_user "Jason Fried", "jason@37signals.com"
-jz    = find_or_create_user "Jason Zimdars", "jz@37signals.com"
-kevin = find_or_create_user "Kevin McConnell", "kevin@37signals.com"
-jorge = find_or_create_user "Jorge Manrubia", "jorge@37signals.com"
-mike  = find_or_create_user "Mike Dalessio", "mike@37signals.com"
+david = find_or_create_user "David Heinemeier Hansson", "david@example.com"
+jason = find_or_create_user "Jason Fried", "jason@example.com"
+jz    = find_or_create_user "Jason Zimdars", "jz@example.com"
+kevin = find_or_create_user "Kevin McConnell", "kevin@example.com"
+jorge = find_or_create_user "Jorge Manrubia", "jorge@example.com"
+mike  = find_or_create_user "Mike Dalessio", "mike@example.com"
 
 login_as david
 

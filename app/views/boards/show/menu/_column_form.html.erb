@@ -1,4 +1,4 @@
-<%= form_with model: [board, column], data: { controller: "form", action: "turbo:submit-end->dialog#close turbo:submit-end->form#reset" } do |form| %>
+<%= form_with model: [board, column], data: { controller: "form", action: "turbo:submit-end->dialog#close turbo:submit-end->form#reset keydown->dialog#captureKey" } do |form| %>
   <%= form.text_field :name, class: "input", placeholder: "Name this column", value: column.name,
         required: true, autocomplete: "off", pattern: ".*\\S.*", title: "Column name cannot be blank", data: { action: "focus->form#select" } %>
 

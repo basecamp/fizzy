@@ -1,0 +1,33 @@
+service: fizzy
+image: basecamp/fizzy
+asset_path: /rails/public/assets
+hooks_path: <%= File.join(Gem::Specification.find_by_name("fizzy-saas").gem_dir, ".kamal", "hooks") %>
+secrets_path: <%= File.join(Gem::Specification.find_by_name("fizzy-saas").gem_dir, ".kamal/secrets") %>
+
+servers:
+  jobs:
+    cmd: bin/jobs
+
+volumes:
+  - fizzy:/rails/storage
+
+proxy:
+  ssl: true
+
+registry:
+  server: registry.37signals.com
+  username: robot$harbor-bot
+  password:
+    - BASECAMP_REGISTRY_PASSWORD
+
+builder:
+  arch: amd64
+  dockerfile: <%= File.join(Gem::Specification.find_by_name("fizzy-saas").gem_dir, "Dockerfile") %>
+  secrets:
+    - GITHUB_TOKEN
+  remote: ssh://app@docker-builder-102
+  local: <%= ENV.fetch("KAMAL_BUILDER_LOCAL", "true") %>
+
+aliases:
+  console: app exec -i --reuse -e CONSOLE_USER:<%= ENV["USER"] %> "bin/rails console"
+  ssh: app exec -i --reuse -e CONSOLE_USER:<%= ENV["USER"] %> /bin/bash

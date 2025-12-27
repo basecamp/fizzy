@@ -22,5 +22,6 @@
     <%= with_automatic_pagination :cards_paginated_container, @page do %>
       <%= render "cards/display/previews", cards: @page.records, draggable: true %>
     <% end %>
+    <div class="blank-slate blank-slate--empty blank-slate--filters">No cards match this filter</div>
   </section>
 <% end %>

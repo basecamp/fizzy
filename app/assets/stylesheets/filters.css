@@ -18,7 +18,7 @@
       --input-background: var(--color-canvas);
     }
 
-    &:has(.filter-toggle:hover) {
+    &:has([data-controller~="tooltip"]:hover) {
       z-index: calc(var(--z-nav) + 1);
     }
   }
@@ -150,9 +150,6 @@
       display: none !important;
     }
 
-    @media (max-width: 80ch) {
-      display: none;
-    }
   }
 
   .filters:not(.filters--expanded) {
