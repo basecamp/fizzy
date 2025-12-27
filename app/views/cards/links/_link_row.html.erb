@@ -13,7 +13,7 @@
   <% link = card.outgoing_links.find_by(target_card: linked_card, link_type: type) %>
   <% if link %>
     <%= button_to card_link_path(card, link), method: :delete, class: "btn btn--icon link-remove" do %>
-      <%= icon_tag "cross" %>
+      <%= icon_tag "close" %>
     <% end %>
   <% end %>
 </div>
