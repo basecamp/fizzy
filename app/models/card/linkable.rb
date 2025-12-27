@@ -9,16 +9,22 @@ module Card::Linkable
   end
 
   # Return ActiveRecord::Relations for chainability (not arrays)
+  # Parents: cards I marked as parent + cards that marked me as child
   def parents
     Card.where(id: outgoing_links.parent.select(:target_card_id))
+        .or(Card.where(id: incoming_links.child.select(:source_card_id)))
   end
 
+  # Children: cards I marked as child + cards that marked me as parent
   def children
     Card.where(id: outgoing_links.child.select(:target_card_id))
+        .or(Card.where(id: incoming_links.parent.select(:source_card_id)))
   end
 
+  # Related: bidirectional - both outgoing and incoming related links
   def related_cards
     Card.where(id: outgoing_links.related.select(:target_card_id))
+        .or(Card.where(id: incoming_links.related.select(:source_card_id)))
   end
 
   def linked_cards
