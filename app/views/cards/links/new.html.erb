@@ -1,9 +1,9 @@
 <%= turbo_frame_tag @card, :linking do %>
   <div class="flex-column full-width"
-    data-controller="filter navigable-list"
+    data-controller="navigable-list"
     data-navigable-list-focus-on-selection-value="false"
     data-navigable-list-actionable-items-value="true"
-    data-action="keydown->navigable-list#navigate filter:changed->navigable-list#reset dialog:show@document->navigable-list#reset"
+    data-action="keydown->navigable-list#navigate dialog:show@document->navigable-list#reset"
   >
     <div class="flex align-start justify-space-between">
       <strong class="popup__title">Link to…</strong>
@@ -20,13 +20,13 @@
     </div>
 
     <%= form_with url: search_card_links_path(@card), method: :get,
-          data: { turbo_frame: dom_id(@card, :link_results) },
+          data: { controller: "form", turbo_frame: dom_id(@card, :link_results) },
           class: "full-width margin-block-half" do |form| %>
       <%= form.search_field :q, placeholder: "Search by title or card #…",
             class: "input input--transparent txt-small full-width",
             autofocus: true, autocomplete: "off",
-            data: { "1p-ignore": "true", filter_target: "input",
-                    action: "input->filter#filter" } %>
+            data: { "1p-ignore": "true",
+                    action: "input->form#debouncedSubmit" } %>
       <%= form.hidden_field :link_type, value: @link_type %>
     <% end %>
 

@@ -1,0 +1,3 @@
+<%= turbo_frame_tag dom_id(@card, :link_results) do %>
+  <%= render "search_results", cards: @cards, card: @card, link_type: @link_type %>
+<% end %>

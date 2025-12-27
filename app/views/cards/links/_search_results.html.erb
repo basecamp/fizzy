@@ -1,6 +1,6 @@
-<ul class="popup__list margin-block-start-half" data-filter-target="list">
+<ul class="popup__list margin-block-start-half">
   <% cards.each do |target| %>
-    <li class="popup__item" data-filter-target="item" data-navigable-list-target="item" data-filter-value="<%= target.title %> <%= target.number %>">
+    <li class="popup__item" data-navigable-list-target="item">
       <%= button_to card_links_path(card),
             method: :post,
             params: { target_card_id: target.id, link_type: link_type },

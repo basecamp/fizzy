@@ -7,3 +7,5 @@
     partial: "cards/display/perma/links",
     method: :morph,
     locals: { card: @target.reload } %>
+
+<%= turbo_stream.action :remove, dom_id(@card, :linking) %>

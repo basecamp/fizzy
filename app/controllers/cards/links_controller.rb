@@ -38,12 +38,11 @@ class Cards::LinksController < ApplicationController
   def search
     query = params[:q].to_s.strip
     @link_type = params[:link_type] || "related"
+    existing_ids = @card.linked_cards.pluck(:id) + @card.linking_cards.pluck(:id)
     @cards = Current.account.cards
-                    .where.not(id: @card.id)
+                    .where.not(id: [ @card.id ] + existing_ids)
                     .search_by_title_or_number(query)
                     .order(number: :desc)
                     .limit(20)
-
-    render partial: "cards/links/search_results", locals: { cards: @cards, card: @card, link_type: @link_type }
   end
 end
