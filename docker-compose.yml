@@ -1,0 +1,70 @@
+services:
+  db:
+    image: mysql:8.4
+    container_name: fizzy-mysql
+    restart: always
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      secrets:
+        - GITHUB_TOKEN
+    container_name: fizzy-app
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_ADAPTER: mysql
+      MYSQL_HOST: db
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      RAILS_ENV: development
+      PORT: 3006
+    ports:
+      - "3006:3006"
+    volumes:
+      - .:/rails
+      - bundle_cache:/usr/local/bundle
+    stdin_open: true
+    tty: true
+    command:
+      ["./bin/thrust", "./bin/rails", "server", "-p", "3006", "-b", "0.0.0.0"]
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      secrets:
+        - GITHUB_TOKEN
+    container_name: fizzy-worker
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_ADAPTER: mysql
+      MYSQL_HOST: db
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      RAILS_ENV: development
+    volumes:
+      - .:/rails
+      - bundle_cache:/usr/local/bundle
+    command: ["./bin/jobs"]
+
+volumes:
+  mysql_data:
+  bundle_cache:
+
+secrets:
+  GITHUB_TOKEN:
+    environment: GITHUB_TOKEN
