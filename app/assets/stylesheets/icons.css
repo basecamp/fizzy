@@ -24,6 +24,7 @@
   .icon--arrow-left { --svg: url("arrow-left.svg "); }
   .icon--arrow-right { --svg: url("arrow-right.svg "); }
   .icon--arrow-up { --svg: url("arrow-up.svg "); }
+  .icon--arrow-down { --svg: url("arrow-down.svg"); }
   .icon--art { --svg: url("art.svg "); }
   .icon--assigned { --svg: url("assigned.svg "); }
   .icon--attachment { --svg: url("attachment.svg "); }
