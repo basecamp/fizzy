@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-PORT=3006
+PORT=${1:-3006}
 USE_TAILSCALE=0
 
 for arg in "$@"; do
