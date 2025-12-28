@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 class Cards::NotNowsController < ApplicationController
   include CardScoped
 

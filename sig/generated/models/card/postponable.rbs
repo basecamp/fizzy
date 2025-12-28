@@ -3,17 +3,24 @@
 module Card::Postponable
   extend ActiveSupport::Concern
 
-  def postponed?: () -> untyped
+  # : -> bool
+  def postponed?: () -> bool
 
-  def postponed_at: () -> untyped
+  # : -> ActiveSupport::TimeWithZone?
+  def postponed_at: () -> ActiveSupport::TimeWithZone?
 
-  def postponed_by: () -> untyped
+  # : -> User?
+  def postponed_by: () -> User?
 
-  def active?: () -> untyped
+  # : -> bool
+  def active?: () -> bool
 
-  def auto_postpone: (**untyped args) -> untyped
+  # : (**untyped) -> void
+  def auto_postpone: (**untyped) -> void
 
-  def postpone: (?user: untyped, ?event_name: untyped) -> untyped
+  # : (?user: User, ?event_name: Symbol) -> void
+  def postpone: (?user: User, ?event_name: Symbol) -> void
 
-  def resume: () -> untyped
+  # : -> void
+  def resume: () -> void
 end

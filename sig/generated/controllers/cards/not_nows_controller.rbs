@@ -1,0 +1,7 @@
+# Generated from app/controllers/cards/not_nows_controller.rb with RBS::Inline
+
+class Cards::NotNowsController < ApplicationController
+  include CardScoped
+
+  def create: () -> untyped
+end
