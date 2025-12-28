@@ -45,10 +45,12 @@ class Webhook < ApplicationRecord
   validates :name, presence: true
   validate :validate_url
 
+  #: -> void
   def activate
     update! active: true unless active?
   end
 
+  #: -> void
   def deactivate
     update! active: false
   end
@@ -57,26 +59,37 @@ class Webhook < ApplicationRecord
     @renderer ||= ApplicationController.renderer.new(script_name: account.slug, https: !Rails.env.local?)
   end
 
+  #: -> bool
   def for_basecamp?
     url.match? BASECAMP_CAMPFIRE_WEBHOOK_URL_REGEX
   end
 
+  #: -> bool
   def for_campfire?
     url.match? CAMPFIRE_WEBHOOK_URL_REGEX
   end
 
+  #: -> bool
   def for_slack?
     url.match? SLACK_WEBHOOK_URL_REGEX
   end
 
   private
+    #: -> void
     def validate_url
-      uri = URI.parse(url.presence)
+      add_error_not_a_url and return if url.blank?
+
+      uri = URI.parse(url)
 
       if PERMITTED_SCHEMES.exclude?(uri.scheme)
         errors.add :url, "must use #{PERMITTED_SCHEMES.to_choice_sentence}"
       end
     rescue URI::InvalidURIError
+      add_error_not_a_url
+    end
+
+    #: -> void
+    def add_error_not_a_url
       errors.add :url, "not a URL"
     end
 end

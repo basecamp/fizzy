@@ -1,0 +1,15 @@
+# Generated from app/models/comment/eventable.rb with RBS::Inline
+
+module Comment::Eventable
+  extend ActiveSupport::Concern
+
+  include ::Eventable
+
+  def event_was_created: (untyped event) -> untyped
+
+  private
+
+  def should_track_event?: () -> untyped
+
+  def track_creation: () -> untyped
+end

@@ -1,5 +1,9 @@
+# rbs_inline: enabled
+
 module Filter::Params
   extend ActiveSupport::Concern
+
+  # @type self: singleton(Filter) & singleton(Filter::Params)
 
   PERMITTED_PARAMS = [
     :assignment_status,
@@ -18,6 +22,7 @@ module Filter::Params
 
   class_methods do
     def find_by_params(params)
+      # @type self: singleton(Filter) & singleton(Filter::Params)
       find_by params_digest: digest_params(params)
     end
 
@@ -41,6 +46,7 @@ module Filter::Params
   end
 
   def used?(ignore_boards: false)
+    # @type self: Filter & Filter::Params
     tags.any? || assignees.any? || creators.any? || closers.any? ||
       terms.any? || card_ids&.any? || (!ignore_boards && boards.present?) ||
       assignment_status.unassigned? || !indexed_by.all? || !sorted_by.latest?
@@ -49,6 +55,7 @@ module Filter::Params
   # +as_params+ uses `resource#ids` instead of `#resource_ids`
   # because the latter won't work on unpersisted filters.
   def as_params
+    # @type self: Filter & Filter::Params
     @as_params ||= {}.tap do |params|
       params[:indexed_by]        = indexed_by
       params[:sorted_by]         = sorted_by

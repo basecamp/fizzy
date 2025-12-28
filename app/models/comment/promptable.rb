@@ -1,11 +1,16 @@
+# rbs_inline: enabled
+
 module Comment::Promptable
   extend ActiveSupport::Concern
+
+  # @type self: singleton(Comment) & singleton(Comment::Promptable)
 
   included do
     include Rails.application.routes.url_helpers
   end
 
   def to_prompt
+    # @type self: Comment & Comment::Promptable
     <<~PROMPT
         BEGIN OF COMMENT #{id}
 

@@ -1,0 +1,10 @@
+# Generated from app/models/notifier/comment_event_notifier.rb with RBS::Inline
+
+class Notifier::CommentEventNotifier < Notifier
+  private
+
+  def recipients: () -> untyped
+
+  # -> Card
+  def card: () -> untyped
+end

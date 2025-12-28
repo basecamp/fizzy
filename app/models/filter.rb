@@ -19,7 +19,6 @@ class Filter < ApplicationRecord
   end
 
   def cards
-    Filter.find_by_params
     @cards ||= begin
       result = creator.accessible_cards.preloaded.published
       result = result.indexed_by(indexed_by)

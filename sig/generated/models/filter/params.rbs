@@ -1,0 +1,23 @@
+# Generated from app/models/filter/params.rb with RBS::Inline
+
+module Filter::Params
+  extend ActiveSupport::Concern
+
+  PERMITTED_PARAMS: ::Array[untyped]
+
+  def find_by_params: (untyped params) -> untyped
+
+  def digest_params: (untyped params) -> untyped
+
+  def normalize_params: (untyped params) -> untyped
+
+  def used?: (?ignore_boards: untyped) -> untyped
+
+  # +as_params+ uses `resource#ids` instead of `#resource_ids`
+  # because the latter won't work on unpersisted filters.
+  def as_params: () -> untyped
+
+  def as_params_without: (untyped key, untyped value) -> untyped
+
+  def params_digest: () -> untyped
+end

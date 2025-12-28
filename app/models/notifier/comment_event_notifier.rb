@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 class Notifier::CommentEventNotifier < Notifier
   delegate :creator, to: :source
 
@@ -6,6 +8,7 @@ class Notifier::CommentEventNotifier < Notifier
       card.watchers.without(creator, *source.eventable.mentionees)
     end
 
+    # -> Card
     def card
       source.eventable.card
     end

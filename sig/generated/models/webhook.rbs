@@ -13,19 +13,28 @@ class Webhook < ApplicationRecord
 
   PERMITTED_ACTIONS: untyped
 
-  def activate: () -> untyped
+  # : -> void
+  def activate: () -> void
 
-  def deactivate: () -> untyped
+  # : -> void
+  def deactivate: () -> void
 
   def renderer: () -> untyped
 
-  def for_basecamp?: () -> untyped
+  # : -> bool
+  def for_basecamp?: () -> bool
 
-  def for_campfire?: () -> untyped
+  # : -> bool
+  def for_campfire?: () -> bool
 
-  def for_slack?: () -> untyped
+  # : -> bool
+  def for_slack?: () -> bool
 
   private
 
-  def validate_url: () -> untyped
+  # : -> void
+  def validate_url: () -> void
+
+  # : -> void
+  def add_error_not_a_url: () -> void
 end

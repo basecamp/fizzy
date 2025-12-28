@@ -1,0 +1,41 @@
+# Generated from app/models/filter/fields.rb with RBS::Inline
+
+module Filter::Fields
+  extend ActiveSupport::Concern
+
+  INDEXES: ::Array[untyped]
+
+  SORTED_BY: ::Array[untyped]
+
+  def default_values: () -> untyped
+
+  def default_value?: (untyped key, untyped value) -> untyped
+
+  def indexed_by_human_name: (untyped index) -> untyped
+
+  def assignment_status: () -> untyped
+
+  def indexed_by: () -> untyped
+
+  def sorted_by: () -> untyped
+
+  def creation_window: () -> untyped
+
+  def closure_window: () -> untyped
+
+  def terms: () -> untyped
+
+  def terms=: (untyped value) -> untyped
+
+  def with: (**untyped fields) -> untyped
+
+  def default_indexed_by: () -> untyped
+
+  # : -> bool
+  def default_indexed_by?: () -> bool
+
+  def default_sorted_by: () -> untyped
+
+  # : -> bool
+  def default_sorted_by?: () -> bool
+end

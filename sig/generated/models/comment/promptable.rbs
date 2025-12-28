@@ -1,0 +1,7 @@
+# Generated from app/models/comment/promptable.rb with RBS::Inline
+
+module Comment::Promptable
+  extend ActiveSupport::Concern
+
+  def to_prompt: () -> untyped
+end

@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 module Comment::Mentions
   extend ActiveSupport::Concern
 
@@ -5,6 +7,7 @@ module Comment::Mentions
     include ::Mentions
 
     def mentionable?
+      # @type self: Comment & Comment::Mentions
       card.published?
     end
   end

@@ -1,0 +1,9 @@
+# Generated from app/models/comment/mentions.rb with RBS::Inline
+
+module Comment::Mentions
+  extend ActiveSupport::Concern
+
+  include ::Mentions
+
+  def mentionable?: () -> untyped
+end

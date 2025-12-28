@@ -5,11 +5,13 @@ class Notifier
 
   def self.for: (untyped source) -> untyped
 
-  def notify: () -> untyped
+  # : -> Array[ApplicationRecord]?
+  def notify: () -> Array[ApplicationRecord]?
 
   private
 
   def initialize: (untyped source) -> untyped
 
-  def should_notify?: () -> untyped
+  # : -> bool
+  def should_notify?: () -> bool
 end
