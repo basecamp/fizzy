@@ -3,6 +3,8 @@
 class Cards::PinsController < ApplicationController
   include CardScoped
 
+  @pin: Pin
+
   def show: () -> untyped
 
   def create: () -> untyped

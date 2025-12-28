@@ -29,7 +29,7 @@ module Card::Pinnable
     pins.find_or_create_by!(user: user)
   end
 
-  #: (User) -> void
+  #: (User) -> Pin
   def unpin_by(user)
     # @type self: Card & Card::Pinnable
     pins.find_by!(user: user).tap do |it|

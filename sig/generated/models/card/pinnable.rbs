@@ -12,8 +12,8 @@ module Card::Pinnable
   # : (User) -> Pin
   def pin_by: (User) -> Pin
 
-  # : (User) -> void
-  def unpin_by: (User) -> void
+  # : (User) -> Pin
+  def unpin_by: (User) -> Pin
 
   private
 
