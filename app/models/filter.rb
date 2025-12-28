@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 class Filter < ApplicationRecord
   include Fields, Params, Resources, Summarized
 
@@ -17,6 +19,7 @@ class Filter < ApplicationRecord
   end
 
   def cards
+    Filter.find_by_params
     @cards ||= begin
       result = creator.accessible_cards.preloaded.published
       result = result.indexed_by(indexed_by)
@@ -48,6 +51,7 @@ class Filter < ApplicationRecord
     boards.first if boards.one?
   end
 
+  # esse método parece não ser usado
   def single_workflow
     boards.first.workflow if boards.pluck(:workflow_id).uniq.one?
   end

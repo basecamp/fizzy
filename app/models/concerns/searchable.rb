@@ -1,5 +1,9 @@
+# rbs_inline: enabled
+
 module Searchable
   extend ActiveSupport::Concern
+
+  # @type self: singleton(ActiveRecord::Base) & singleton(Searchable)
 
   included do
     after_create_commit :create_in_search_index
@@ -25,6 +29,7 @@ module Searchable
     end
 
     def search_record_attributes
+      # @type self: ActiveRecord::Base & Searchable
       {
         account_id: account_id,
         searchable_type: self.class.name,
@@ -40,6 +45,14 @@ module Searchable
     def search_record_class
       Search::Record.for(account_id)
     end
+
+  # @rbs!
+  #    def account_id: () -> String
+  #    def search_title: () -> (String?)
+  #    def search_content: () -> String
+  #    def search_card_id: () -> String
+  #    def search_board_id: () -> String
+  #    def created_at: () -> ActiveSupport::TimeWithZone
 
   # Models must implement these methods:
   # - account_id: returns the account id

@@ -1,0 +1,17 @@
+# Generated from app/models/comment/searchable.rb with RBS::Inline
+
+module Comment::Searchable
+  extend ActiveSupport::Concern
+
+  include ::Searchable
+
+  def search_title: () -> untyped
+
+  def search_content: () -> untyped
+
+  # : -> String
+  def search_card_id: () -> String
+
+  # : -> String
+  def search_board_id: () -> String
+end

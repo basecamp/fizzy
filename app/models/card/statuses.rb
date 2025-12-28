@@ -1,5 +1,9 @@
+# rbs_inline: enabled
+
 module Card::Statuses
   extend ActiveSupport::Concern
+
+  # @type self: singleton(Card) & singleton(Card::Statuses)
 
   included do
     enum :status, %w[ drafted published ].index_by(&:itself)
@@ -14,6 +18,7 @@ module Card::Statuses
   end
 
   def publish
+    # @type self: Card & Card::Statuses
     transaction do
       published!
       track_event :published
@@ -21,11 +26,13 @@ module Card::Statuses
   end
 
   def was_just_published?
+    # @type self: Card & Card::Statuses
     initial_status&.drafted? && status_in_database.inquiry.published?
   end
 
   private
     def update_created_at_on_publication
+      # @type self: Card & Card::Statuses
       if will_save_change_to_status? && status_in_database.inquiry.drafted?
         self.created_at = Time.current
       end
@@ -33,6 +40,7 @@ module Card::Statuses
 
     # So that we can check it in callbacks when other operations in the transaction clean the changes.
     def remember_initial_status
+      # @type self: Card & Card::Statuses
       if will_save_change_to_status?
         @initial_status ||= status_in_database.to_s.inquiry
       end

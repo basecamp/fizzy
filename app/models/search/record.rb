@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 class Search::Record < ApplicationRecord
   include const_get(connection.adapter_name)
 
@@ -7,16 +9,18 @@ class Search::Record < ApplicationRecord
   validates :account_id, :searchable_type, :searchable_id, :card_id, :board_id, :created_at, presence: true
 
   class << self
+    #: (Hash[untyped, untyped]) -> Search::Record
     def upsert!(attributes)
       record = find_by(searchable_type: attributes[:searchable_type], searchable_id: attributes[:searchable_id])
       if record
         record.update!(attributes)
         record
       else
-        create!(attributes)
+        create!(**attributes)
       end
     end
 
+    #: -> String
     def card_join
       "INNER JOIN #{table_name} ON #{table_name}.card_id = cards.id"
     end

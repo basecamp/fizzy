@@ -1,0 +1,15 @@
+# Generated from app/models/card/searchable.rb with RBS::Inline
+
+module Card::Searchable
+  extend ActiveSupport::Concern
+
+  include ::Searchable
+
+  def search_title: () -> untyped
+
+  def search_content: () -> untyped
+
+  def search_card_id: () -> untyped
+
+  def search_board_id: () -> untyped
+end

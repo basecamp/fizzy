@@ -1,0 +1,18 @@
+# Generated from app/models/card/statuses.rb with RBS::Inline
+
+module Card::Statuses
+  extend ActiveSupport::Concern
+
+  attr_reader initial_status: untyped
+
+  def publish: () -> untyped
+
+  def was_just_published?: () -> untyped
+
+  private
+
+  def update_created_at_on_publication: () -> untyped
+
+  # So that we can check it in callbacks when other operations in the transaction clean the changes.
+  def remember_initial_status: () -> untyped
+end

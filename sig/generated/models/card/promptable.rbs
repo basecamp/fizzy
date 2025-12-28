@@ -1,0 +1,12 @@
+# Generated from app/models/card/promptable.rb with RBS::Inline
+
+module Card::Promptable
+  extend ActiveSupport::Concern
+
+  # parece não ser utilizado
+  def to_prompt: () -> untyped
+
+  private
+
+  def column_prompt_label: () -> untyped
+end

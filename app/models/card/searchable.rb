@@ -1,5 +1,9 @@
+# rbs_inline: enabled
+
 module Card::Searchable
   extend ActiveSupport::Concern
+
+  # @type self: singleton(Card) & singleton(Card::Searchable)
 
   included do
     include ::Searchable
@@ -11,18 +15,22 @@ module Card::Searchable
   end
 
   def search_title
+    # @type self: Card & Card::Searchable
     title
   end
 
   def search_content
+    # @type self: Card & Card::Searchable
     description.to_plain_text
   end
 
   def search_card_id
+    # @type self: Card & Card::Searchable
     id
   end
 
   def search_board_id
+    # @type self: Card & Card::Searchable
     board_id
   end
 end

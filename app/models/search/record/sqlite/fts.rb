@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 class Search::Record::SQLite::Fts < ApplicationRecord
   self.table_name = "search_records_fts"
   self.primary_key = "rowid"

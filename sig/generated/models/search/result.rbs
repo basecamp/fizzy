@@ -1,0 +1,17 @@
+# Generated from app/models/search/result.rb with RBS::Inline
+
+class Search::Result < ApplicationRecord
+  def card_title: () -> untyped
+
+  def card_description: () -> untyped
+
+  def comment_body: () -> untyped
+
+  def source: () -> untyped
+
+  def readonly?: () -> untyped
+
+  private
+
+  def highlight: (untyped text, show: untyped) -> untyped
+end

@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 class Search::Result < ApplicationRecord
   attribute :card_id, :uuid
   attribute :comment_id, :uuid

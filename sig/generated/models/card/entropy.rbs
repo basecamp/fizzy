@@ -1,0 +1,17 @@
+# Generated from app/models/card/entropy.rb with RBS::Inline
+
+class Card::Entropy
+  attr_reader card: Card
+
+  attr_reader auto_clean_period: ActiveSupport::Duration
+
+  # : (Card) -> Card::Entropy?
+  def self.for: (Card) -> Card::Entropy?
+
+  # : (Card, ActiveSupport::Duration) -> void
+  def initialize: (Card, ActiveSupport::Duration) -> void
+
+  def auto_clean_at: () -> untyped
+
+  def days_before_reminder: () -> untyped
+end

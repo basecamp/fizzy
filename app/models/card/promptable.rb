@@ -1,11 +1,17 @@
+# rbs_inline: enabled
+
 module Card::Promptable
   extend ActiveSupport::Concern
+
+  # @type self: singleton(Card) & singleton(Card::Promptable)
 
   included do
     include Rails.application.routes.url_helpers
   end
 
+  # parece não ser utilizado
   def to_prompt
+    # @type self: Card & Card::Promptable
     <<~PROMPT
       BEGIN OF CARD #{id}
 
@@ -32,6 +38,7 @@ module Card::Promptable
 
   private
     def column_prompt_label
+      # @type self: Card & Card::Promptable
       if open?
         if postponed?
           "Not now"

@@ -1,0 +1,13 @@
+# Generated from app/models/search/record.rb with RBS::Inline
+
+class Search::Record < ApplicationRecord
+  # : (Hash[untyped, untyped]) -> Search::Record
+  def self.upsert!: (Hash[untyped, untyped]) -> Search::Record
+
+  # : -> String
+  def self.card_join: () -> String
+
+  def source: () -> untyped
+
+  def comment: () -> untyped
+end

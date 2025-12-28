@@ -1,0 +1,31 @@
+# Generated from app/models/concerns/searchable.rb with RBS::Inline
+
+module Searchable
+  extend ActiveSupport::Concern
+
+  def reindex: () -> untyped
+
+  private
+
+  def create_in_search_index: () -> untyped
+
+  def update_in_search_index: () -> untyped
+
+  def remove_from_search_index: () -> untyped
+
+  def search_record_attributes: () -> untyped
+
+  def search_record_class: () -> untyped
+
+  def account_id: () -> String
+
+  def search_title: () -> String?
+
+  def search_content: () -> String
+
+  def search_card_id: () -> String
+
+  def search_board_id: () -> String
+
+  def created_at: () -> ActiveSupport::TimeWithZone
+end

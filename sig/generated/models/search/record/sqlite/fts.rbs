@@ -1,0 +1,5 @@
+# Generated from app/models/search/record/sqlite/fts.rb with RBS::Inline
+
+class Search::Record::SQLite::Fts < ApplicationRecord
+  def self.upsert: (untyped rowid, untyped title, untyped content) -> untyped
+end

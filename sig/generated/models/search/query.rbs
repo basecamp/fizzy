@@ -1,0 +1,20 @@
+# Generated from app/models/search/query.rb with RBS::Inline
+
+class Search::Query < ApplicationRecord
+  # : (untyped) -> Search::Query
+  def self.wrap: (untyped) -> Search::Query
+
+  private
+
+  # : -> void
+  def sanitize_terms: () -> void
+
+  # : (String?) -> String?
+  def sanitize: (String?) -> String?
+
+  # : (String) -> String
+  def remove_invalid_search_characters: (String) -> String
+
+  # : (String) -> String
+  def remove_unbalanced_quotes: (String) -> String
+end

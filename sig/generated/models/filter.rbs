@@ -1,0 +1,28 @@
+# Generated from app/models/filter.rb with RBS::Inline
+
+class Filter < ApplicationRecord
+  def self.from_params: (untyped params) -> untyped
+
+  def self.remember: (untyped attrs) -> untyped
+
+  def cards: () -> untyped
+
+  def empty?: () -> untyped
+
+  def single_board: () -> untyped
+
+  # esse método parece não ser usado
+  def single_workflow: () -> untyped
+
+  def cacheable?: () -> untyped
+
+  def cache_key: () -> untyped
+
+  def only_closed?: () -> untyped
+
+  private
+
+  def include_closed_cards?: () -> untyped
+
+  def include_not_now_cards?: () -> untyped
+end

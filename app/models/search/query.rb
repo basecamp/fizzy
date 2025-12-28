@@ -1,5 +1,10 @@
+# rbs_inline: enabled
+
 class Search::Query < ApplicationRecord
-  belongs_to :account, default: -> { user&.account || Current.account }
+  belongs_to :account, default: -> do
+    # @type self: Search::Query
+    user&.account || Current.account
+  end
   belongs_to :user, optional: true
 
   validates :terms, presence: true
@@ -8,6 +13,7 @@ class Search::Query < ApplicationRecord
   delegate :to_s, to: :terms
 
   class << self
+    #: (untyped) -> Search::Query
     def wrap(query)
       if query.is_a?(self)
         query
@@ -18,10 +24,14 @@ class Search::Query < ApplicationRecord
   end
 
   private
+    #: -> void
     def sanitize_terms
+      # mais um caso de nilable que deve ser tratado no design
+      terms
       self.terms = sanitize(terms)
     end
 
+    #: (String?) -> String?
     def sanitize(terms)
       if terms.present?
         terms = remove_invalid_search_characters(self.terms)
@@ -32,10 +42,12 @@ class Search::Query < ApplicationRecord
       end
     end
 
+    #: (String) -> String
     def remove_invalid_search_characters(terms)
       terms.gsub(/[^\w"]/, " ")
     end
 
+    #: (String) -> String
     def remove_unbalanced_quotes(terms)
       if terms.count("\"").even?
         terms
