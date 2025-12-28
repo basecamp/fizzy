@@ -60,6 +60,7 @@ end
 class ActionDispatch::IntegrationTest
   setup do
     integration_session.default_url_options[:script_name] = "/#{ActiveRecord::FixtureSet.identify("37signals")}"
+    ActionController::Base.cache_store.clear
   end
 
   private

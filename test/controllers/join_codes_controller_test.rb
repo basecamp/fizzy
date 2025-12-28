@@ -96,7 +96,7 @@ class JoinCodesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "create is rate limited" do
-    Rails.cache.stubs(:increment).returns(11)
+    ActionController::Base.cache_store.stubs(:increment).returns(11)
 
     post join_path(code: @join_code.code, script_name: @account.slug), params: { email_address: "test@example.com" }
 
