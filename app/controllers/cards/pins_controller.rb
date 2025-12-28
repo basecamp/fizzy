@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 class Cards::PinsController < ApplicationController
   include CardScoped
 

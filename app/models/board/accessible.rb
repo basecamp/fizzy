@@ -8,13 +8,14 @@ module Board::Accessible
   included do
     has_many :accesses, dependent: :delete_all do
       def revise(granted: [], revoked: [])
+        # @type self: Access::ActiveRecord_Associations_CollectionProxy & singleton(Board)
         transaction do
           grant_to granted
           revoke_from revoked
         end
       end
 
-      #: (User::ActiveRecord_Relation) -> void
+      #: (User::ActiveRecord_Relation | ::User::ActiveRecord_Associations_CollectionProxy) -> void
       def grant_to(users)
         # @type self: Access::ActiveRecord_Associations_CollectionProxy
         Access.insert_all Array(users).collect { |user| { id: ActiveRecord::Type::Uuid.generate, board_id: proxy_association.owner.id, user_id: user.id, account_id: proxy_association.owner.account.id } }

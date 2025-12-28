@@ -1,0 +1,21 @@
+# Generated from app/models/notifier/card_event_notifier.rb with RBS::Inline
+
+class Notifier::CardEventNotifier < Notifier
+  def creator: () -> User
+
+  def board: () -> Board
+
+  private
+
+  # : -> Array[::Notifier::_Recipient]
+  def recipients: () -> Array[::Notifier::_Recipient]
+
+  # : (::Notifier::_Recipient) -> void
+  def teste: (::Notifier::_Recipient) -> void
+
+  # : -> void
+  def teste2: () -> void
+
+  # : -> Card
+  def card: () -> Card
+end

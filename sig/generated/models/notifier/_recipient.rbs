@@ -1,0 +1,5 @@
+interface Notifier::_Recipient
+  # include ActiveRecord::Base
+
+  def account: -> Account
+end

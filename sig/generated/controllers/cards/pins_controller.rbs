@@ -1,0 +1,19 @@
+# Generated from app/controllers/cards/pins_controller.rb with RBS::Inline
+
+class Cards::PinsController < ApplicationController
+  include CardScoped
+
+  def show: () -> untyped
+
+  def create: () -> untyped
+
+  def destroy: () -> untyped
+
+  private
+
+  def broadcast_add_pin_to_tray: () -> untyped
+
+  def broadcast_remove_pin_from_tray: () -> untyped
+
+  def render_pin_button_replacement: () -> untyped
+end

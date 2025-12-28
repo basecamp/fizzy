@@ -1,8 +1,7 @@
 # rbs_inline: enabled
 
 class Card < ApplicationRecord
-  include Attachments, Broadcastable,
-    Pinnable, Promptable, Searchable, Statuses, Taggable
+  include Attachments, Broadcastable, Prontable
 
   include Assignable
   include Closeable
@@ -13,9 +12,12 @@ class Card < ApplicationRecord
   include Golden
   include Mentions
   include Multistep
+  include Pinnable
   include Postponable
   include Readable
+  include Searchable
   include Stallable
+  include Statuses
   include Triageable
   include Watchable
 
@@ -107,7 +109,7 @@ class Card < ApplicationRecord
 
     #: -> void
     def handle_board_change
-      old_board = account.boards.find_by(id: board_id_before_last_save)
+      old_board = account.boards.find_by!(id: board_id_before_last_save)
 
       transaction do
         update! column: nil

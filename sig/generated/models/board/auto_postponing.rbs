@@ -1,0 +1,11 @@
+# Generated from app/models/board/auto_postponing.rb with RBS::Inline
+
+module Board::AutoPostponing
+  extend ActiveSupport::Concern
+
+  private
+
+  DEFAULT_AUTO_POSTPONE_PERIOD: untyped
+
+  def set_default_auto_postpone_period: () -> untyped
+end

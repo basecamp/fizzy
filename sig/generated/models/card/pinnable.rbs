@@ -3,15 +3,20 @@
 module Card::Pinnable
   extend ActiveSupport::Concern
 
-  def pinned_by?: (untyped user) -> untyped
+  # : (User) -> bool
+  def pinned_by?: (User) -> bool
 
-  def pin_for: (untyped user) -> untyped
+  # : (User) -> Pin?
+  def pin_for: (User) -> Pin?
 
-  def pin_by: (untyped user) -> untyped
+  # : (User) -> Pin
+  def pin_by: (User) -> Pin
 
-  def unpin_by: (untyped user) -> untyped
+  # : (User) -> void
+  def unpin_by: (User) -> void
 
   private
 
-  def broadcast_pin_updates: () -> untyped
+  # : -> void
+  def broadcast_pin_updates: () -> void
 end

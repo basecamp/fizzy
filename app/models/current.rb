@@ -11,6 +11,10 @@ class Current < ActiveSupport::CurrentAttributes
   #   attr_accessor user: (User?)
   #   attr_accessor account: (Account?)
   #
+  #   def self.session: () -> (Session)
+  #   def self.user: () -> (User)
+  #   def self.account: () -> (Account)
+  #
   #   def identity: () -> Identity?
   #
   #   def with: (untyped) ?{ () -> untyped } -> untyped

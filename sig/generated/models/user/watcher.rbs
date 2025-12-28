@@ -1,0 +1,5 @@
+# Generated from app/models/user/watcher.rb with RBS::Inline
+
+module User::Watcher
+  extend ActiveSupport::Concern
+end

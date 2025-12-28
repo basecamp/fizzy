@@ -11,27 +11,34 @@ module Card::Pinnable
     after_update_commit :broadcast_pin_updates, if: :preview_changed?
   end
 
+  #: (User) -> bool
   def pinned_by?(user)
     # @type self: Card & Card::Pinnable
     pins.exists?(user: user)
   end
 
+  #: (User) -> Pin?
   def pin_for(user)
     # @type self: Card & Card::Pinnable
     pins.find_by(user: user)
   end
 
+  #: (User) -> Pin
   def pin_by(user)
     # @type self: Card & Card::Pinnable
     pins.find_or_create_by!(user: user)
   end
 
+  #: (User) -> void
   def unpin_by(user)
     # @type self: Card & Card::Pinnable
-    pins.find_by(user: user).tap { it.destroy }
+    pins.find_by!(user: user).tap do |it|
+      it.destroy
+    end
   end
 
   private
+    #: -> void
     def broadcast_pin_updates
       # @type self: Card & Card::Pinnable
       pins.find_each do |pin|

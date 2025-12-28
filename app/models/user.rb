@@ -5,6 +5,9 @@ class User < ApplicationRecord
     Mentionable, Named, Notifiable, Role, Searcher, Watcher
   include Timelined # Depends on Accessor
 
+  # @rbs!
+  #   include ::Notifier::_Recipient
+
   belongs_to :account
   belongs_to :identity, optional: true
 

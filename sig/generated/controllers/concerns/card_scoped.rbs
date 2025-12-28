@@ -3,6 +3,10 @@
 module CardScoped
   extend ActiveSupport::Concern
 
+  @board: Board
+
+  @card: Card
+
   private
 
   def set_card: () -> untyped

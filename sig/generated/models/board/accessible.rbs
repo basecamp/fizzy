@@ -5,8 +5,8 @@ module Board::Accessible
 
   def revise: (?granted: untyped, ?revoked: untyped) -> untyped
 
-  # : (User::ActiveRecord_Relation) -> void
-  def grant_to: (User::ActiveRecord_Relation) -> void
+  # : (User::ActiveRecord_Relation | ::User::ActiveRecord_Associations_CollectionProxy) -> void
+  def grant_to: (User::ActiveRecord_Relation | ::User::ActiveRecord_Associations_CollectionProxy) -> void
 
   def revoke_from: (untyped users) -> untyped
 

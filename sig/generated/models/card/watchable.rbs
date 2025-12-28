@@ -3,15 +3,20 @@
 module Card::Watchable
   extend ActiveSupport::Concern
 
-  def watched_by?: (untyped user) -> untyped
+  # : (User) -> bool?
+  def watched_by?: (User) -> bool?
 
-  def watch_for: (untyped user) -> untyped
+  # : (User) -> Watch?
+  def watch_for: (User) -> Watch?
 
-  def watch_by: (untyped user) -> untyped
+  # : (User) -> void
+  def watch_by: (User) -> void
 
-  def unwatch_by: (untyped user) -> untyped
+  # : (User) -> void
+  def unwatch_by: (User) -> void
 
   private
 
-  def subscribe_creator: () -> untyped
+  # : -> void
+  def subscribe_creator: () -> void
 end

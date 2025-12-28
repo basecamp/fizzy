@@ -19,11 +19,17 @@ class Card < ApplicationRecord
 
   include Multistep
 
+  include Pinnable
+
   include Postponable
 
   include Readable
 
+  include Searchable
+
   include Stallable
+
+  include Statuses
 
   include Triageable
 

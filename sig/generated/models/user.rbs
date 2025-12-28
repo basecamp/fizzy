@@ -3,6 +3,8 @@
 class User < ApplicationRecord
   include Timelined
 
+  include ::Notifier::_Recipient
+
   # : -> void
   def deactivate: () -> void
 
