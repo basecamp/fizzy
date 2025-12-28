@@ -1,5 +1,11 @@
+# rbs_inline: enabled
+
 class Notification::Bundle < ApplicationRecord
-  belongs_to :account, default: -> { user.account }
+  belongs_to :account, default: -> do
+    # @type self: Notification::Bundle
+    user.account
+  end
+
   belongs_to :user
 
   enum :status, %i[ pending processing delivered ]
@@ -63,6 +69,7 @@ class Notification::Bundle < ApplicationRecord
   end
 
   private
+    #: -> Range[ActiveSupport::TimeWithZone]
     def window
       starts_at..ends_at
     end

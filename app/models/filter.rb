@@ -1,7 +1,10 @@
 # rbs_inline: enabled
 
 class Filter < ApplicationRecord
-  include Fields, Params, Resources, Summarized
+  include Fields, Resources, Summarized
+
+  include Params
+  extend Params
 
   belongs_to :creator, class_name: "User", default: -> { Current.user }
   belongs_to :account, default: -> { creator.account }

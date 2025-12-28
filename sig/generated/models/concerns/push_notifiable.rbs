@@ -1,0 +1,9 @@
+# Generated from app/models/concerns/push_notifiable.rb with RBS::Inline
+
+module PushNotifiable
+  extend ActiveSupport::Concern
+
+  private
+
+  def push_notification_later: () -> untyped
+end

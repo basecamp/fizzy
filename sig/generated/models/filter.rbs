@@ -1,6 +1,10 @@
 # Generated from app/models/filter.rb with RBS::Inline
 
 class Filter < ApplicationRecord
+  include Params
+
+  extend Params
+
   def self.from_params: (untyped params) -> untyped
 
   def self.remember: (untyped attrs) -> untyped

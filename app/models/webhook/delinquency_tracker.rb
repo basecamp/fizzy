@@ -1,8 +1,13 @@
+# rbs_inline: enabled
+
 class Webhook::DelinquencyTracker < ApplicationRecord
   DELINQUENCY_THRESHOLD = 10
   DELINQUENCY_DURATION = 1.hour
 
-  belongs_to :account, default: -> { webhook.account }
+  belongs_to :account, default: -> do
+    # @type self: Webhook::DelinquencyTracker
+    webhook.account
+  end
   belongs_to :webhook
 
   def record_delivery_of(delivery)

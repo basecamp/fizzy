@@ -1,0 +1,28 @@
+# Generated from app/models/notification/bundle.rb with RBS::Inline
+
+class Notification::Bundle < ApplicationRecord
+  def self.deliver_all: () -> untyped
+
+  def self.deliver_all_later: () -> untyped
+
+  def notifications: () -> untyped
+
+  def deliver: () -> untyped
+
+  def deliver_later: () -> untyped
+
+  def flush: () -> untyped
+
+  def set_default_window: () -> untyped
+
+  private
+
+  # : -> Range[ActiveSupport::TimeWithZone]
+  def window: () -> Range[ActiveSupport::TimeWithZone]
+
+  def validate_no_overlapping: () -> untyped
+
+  def deliverable?: () -> untyped
+
+  def overlapping_bundles: () -> untyped
+end

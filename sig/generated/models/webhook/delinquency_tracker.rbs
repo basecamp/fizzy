@@ -1,0 +1,21 @@
+# Generated from app/models/webhook/delinquency_tracker.rb with RBS::Inline
+
+class Webhook::DelinquencyTracker < ApplicationRecord
+  DELINQUENCY_THRESHOLD: ::Integer
+
+  DELINQUENCY_DURATION: untyped
+
+  def record_delivery_of: (untyped delivery) -> untyped
+
+  private
+
+  def reset: () -> untyped
+
+  def mark_first_failure_time: () -> untyped
+
+  def delinquent?: () -> untyped
+
+  def failing_for_too_long?: () -> untyped
+
+  def too_many_consecutive_failures?: () -> untyped
+end

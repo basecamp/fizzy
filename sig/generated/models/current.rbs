@@ -1,0 +1,21 @@
+# Generated from app/models/current.rb with RBS::Inline
+
+class Current < ActiveSupport::CurrentAttributes
+  attr_reader session: Session?
+
+  attr_accessor user: User?
+
+  attr_accessor account: Account?
+
+  def identity: () -> Identity?
+
+  def with: (untyped) ?{ () -> untyped } -> untyped
+
+  def session=: (untyped value) -> untyped
+
+  # : (untyped) ?{ () -> untyped } -> self
+  def with_account: (untyped) ?{ () -> untyped } -> self
+
+  # : (untyped) ?{ () -> untyped } -> self
+  def without_account: (untyped) ?{ () -> untyped } -> self
+end

@@ -1,7 +1,12 @@
+# rbs_inline: enabled
+
 class Notification < ApplicationRecord
   include PushNotifiable
 
-  belongs_to :account, default: -> { user.account }
+  belongs_to :account, default: -> do
+    # @type self: Notification
+    user.account
+  end
   belongs_to :user
   belongs_to :creator, class_name: "User"
   belongs_to :source, polymorphic: true
@@ -19,33 +24,40 @@ class Notification < ApplicationRecord
   delegate :notifiable_target, to: :source
   delegate :card, to: :source
 
+  #: -> void
   def self.read_all
     all.each { |notification| notification.read }
   end
 
+  #: -> void
   def read
     update!(read_at: Time.current)
     broadcast_read
   end
 
+  #: -> void
   def unread
     update!(read_at: nil)
     broadcast_unread
   end
 
+  #: -> bool
   def read?
     read_at.present?
   end
 
   private
+    #: -> void
     def broadcast_unread
       broadcast_prepend_later_to user, :notifications, target: "notifications"
     end
 
+    #: -> void
     def broadcast_read
       broadcast_remove_to user, :notifications
     end
 
+    #: -> void
     def bundle
       user.bundle(self) if user.settings.bundling_emails?
     end

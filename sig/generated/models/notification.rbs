@@ -1,0 +1,28 @@
+# Generated from app/models/notification.rb with RBS::Inline
+
+class Notification < ApplicationRecord
+  include PushNotifiable
+
+  # : -> void
+  def self.read_all: () -> void
+
+  # : -> void
+  def read: () -> void
+
+  # : -> void
+  def unread: () -> void
+
+  # : -> bool
+  def read?: () -> bool
+
+  private
+
+  # : -> void
+  def broadcast_unread: () -> void
+
+  # : -> void
+  def broadcast_read: () -> void
+
+  # : -> void
+  def bundle: () -> void
+end
