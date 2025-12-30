@@ -51,6 +51,38 @@ class SsrfProtectionTest < ActiveSupport::TestCase
     assert_equal "93.184.216.34", SsrfProtection.resolve_public_ip("multi.example.com")
   end
 
+  # IPv6 address format tests (SSRF bypass prevention)
+
+  test "blocks IPv4-mapped IPv6 addresses with private IPs" do
+    stub_dns_resolution("::ffff:192.168.1.1")
+    assert_nil SsrfProtection.resolve_public_ip("mapped-private.example.com")
+  end
+
+  test "blocks IPv4-mapped IPv6 addresses with link-local IPs" do
+    stub_dns_resolution("::ffff:169.254.169.254")
+    assert_nil SsrfProtection.resolve_public_ip("mapped-metadata.example.com")
+  end
+
+  test "blocks IPv4-mapped IPv6 addresses even with public IPs" do
+    stub_dns_resolution("::ffff:93.184.216.34")
+    assert_nil SsrfProtection.resolve_public_ip("mapped-public.example.com")
+  end
+
+  test "blocks IPv4-compatible IPv6 addresses with private IPs" do
+    stub_dns_resolution("::192.168.1.1")
+    assert_nil SsrfProtection.resolve_public_ip("compat-private.example.com")
+  end
+
+  test "blocks IPv4-compatible IPv6 addresses with link-local IPs" do
+    stub_dns_resolution("::169.254.169.254")
+    assert_nil SsrfProtection.resolve_public_ip("compat-metadata.example.com")
+  end
+
+  test "blocks IPv4-compatible IPv6 addresses even with public IPs" do
+    stub_dns_resolution("::93.184.216.34")
+    assert_nil SsrfProtection.resolve_public_ip("compat-public.example.com")
+  end
+
   private
     def stub_dns_resolution(*ips)
       dns_mock = mock("dns")
