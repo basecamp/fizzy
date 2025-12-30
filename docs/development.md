@@ -72,9 +72,3 @@ bin/rails dev:email
 
 Under the hood, this will create or remove `tmp/email-dev.txt`.
 
-## SaaS gem
-
-37signals bundles Fizzy with [`fizzy-saas`](https://github.com/basecamp/fizzy/tree/main/saas), a companion gem that links Fizzy with our billing system and contains our production setup.
-
-This gem depends on some private git repositories and it is not meant to be used by third parties. But we hope it can serve as inspiration for anyone wanting to run fizzy on their own infrastructure.
-
