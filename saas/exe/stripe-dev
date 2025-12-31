@@ -27,7 +27,7 @@ end
 # Fetch secrets from 1Password
 secrets_escaped = `kamal secrets fetch \
   --adapter 1password \
-  --account QD4RCFQ2PRAQZON5BNHAXJSBS4 \
+  --account 23QPQDKZC5BKBIIG7UGT5GR5RM \
   --from "Deploy/Fizzy" \
   "Development/STRIPE_SECRET_KEY" \
   "Development/STRIPE_MONTHLY_V1_PRICE_ID" \
