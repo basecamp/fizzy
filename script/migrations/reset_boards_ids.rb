@@ -40,7 +40,7 @@ ApplicationRecord.with_each_tenant do |tenant|
     ApplicationRecord.connection.execute("SELECT board_id FROM boards_filters").each do |row|
       old_id = row[0]
       if id_mapping[old_id]
-        ApplicationRecord.connection.execute("UPDATE boards_filters SET board_id = #{id_mapping[old_id]} WHERE board_id = #{old_id}")
+        ApplicationRecord.connection.execute("UPDATE boards_filters SET board_id = ? WHERE board_id = ?", [id_mapping[old_id], old_id])
       end
     end
 
@@ -91,13 +91,13 @@ ApplicationRecord.with_each_tenant do |tenant|
     boards.each do |board|
       new_id = id_mapping[board.id]
       # Use direct SQL to update the ID to avoid ActiveRecord validations
-      ApplicationRecord.connection.execute("UPDATE boards SET id = #{new_id} WHERE id = #{board.id}")
+      ApplicationRecord.connection.execute("UPDATE boards SET id = ? WHERE id = ?", [new_id, board.id])
     end
 
     # Reset the SQLite sequence for the boards table
     ApplicationRecord.connection.execute("DELETE FROM sqlite_sequence WHERE name = 'boards'")
     max_id = Board.maximum(:id) || 0
-    ApplicationRecord.connection.execute("INSERT INTO sqlite_sequence (name, seq) VALUES ('boards', #{max_id})")
+    ApplicationRecord.connection.execute("INSERT INTO sqlite_sequence (name, seq) VALUES ('boards', ?)", [max_id])
 
     puts "Board IDs have been reset successfully!"
   rescue => e
