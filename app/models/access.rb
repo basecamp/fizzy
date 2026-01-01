@@ -1,10 +1,7 @@
 # rbs_inline: enabled
 
 class Access < ApplicationRecord
-  belongs_to :account, default: -> do
-    # @type self: Access
-    user.account
-  end
+  belongs_to :account, default: -> { user.account }
   belongs_to :board, touch: true
   belongs_to :user, touch: true
 

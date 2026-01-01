@@ -1,8 +1,5 @@
 class Step < ApplicationRecord
-  belongs_to :account, default: -> do
-    # @type self: Step
-    card.account
-  end
+  belongs_to :account, default: -> { card.account }
   belongs_to :card, touch: true
 
   scope :completed, -> { where(completed: true) }

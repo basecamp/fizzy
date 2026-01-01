@@ -3,10 +3,7 @@
 class Notification < ApplicationRecord
   include PushNotifiable
 
-  belongs_to :account, default: -> do
-    # @type self: Notification
-    user.account
-  end
+  belongs_to :account, default: -> { user.account }
   belongs_to :user
   belongs_to :creator, class_name: "User"
   belongs_to :source, polymorphic: true

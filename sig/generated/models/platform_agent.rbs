@@ -1,0 +1,9 @@
+class PlatformAgent
+  def user_agent: () -> untyped
+
+  def os: () -> String
+
+  private
+
+  def match?: (::Regexp) -> bool
+end

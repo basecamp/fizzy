@@ -13,4 +13,6 @@ class ApplicationRecord < ActiveRecord::Base
   #   def broadcast_replace_later_to: (untyped, **untyped) -> void
   #   def broadcast_prepend_to: (untyped, **untyped) -> void
   #   def broadcast_remove_to: (untyped, **untyped) -> void
+  #
+  #   def self.due_to_be_postponed: () -> void
 end

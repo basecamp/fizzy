@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 # Provides sequential IDs for +external_account_id+ when creating accounts without one.
 class Account::ExternalIdSequence < ApplicationRecord
   class << self

@@ -1,0 +1,10 @@
+# Generated from app/models/column/colored.rb with RBS::Inline
+
+module Column::Colored
+  extend ActiveSupport::Concern
+
+  DEFAULT_COLOR: untyped
+
+  # : -> Color
+  def color: () -> Color
+end

@@ -1,0 +1,26 @@
+# Generated from app/models/application_platform.rb with RBS::Inline
+
+class ApplicationPlatform < PlatformAgent
+  # : -> bool
+  def ios?: () -> bool
+
+  def android?: () -> untyped
+
+  def mac?: () -> untyped
+
+  def chrome?: () -> untyped
+
+  def edge?: () -> untyped
+
+  def firefox?: () -> untyped
+
+  def safari?: () -> untyped
+
+  def mobile?: () -> untyped
+
+  def desktop?: () -> untyped
+
+  def windows?: () -> untyped
+
+  def operating_system: () -> untyped
+end

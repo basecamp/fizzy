@@ -3,9 +3,9 @@
 module Card::Entropic
   extend ActiveSupport::Concern
 
+  # @type self: singleton(Card) & singleton(Card::Entropic)
+  # @type instance: Card & Card::Entropic
   included do
-    # @type self: singleton(Card)
-
     scope :due_to_be_postponed, -> do
       active
         .joins(board: :account)
@@ -29,6 +29,7 @@ module Card::Entropic
 
   class_methods do
     def auto_postpone_all_due
+      # @type self: singleton(Card) & singleton(Card::Entropic)
       due_to_be_postponed.find_each do |card|
         card.auto_postpone(user: card.account.system_user)
       end

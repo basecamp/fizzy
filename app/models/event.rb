@@ -5,11 +5,7 @@ class Event < ApplicationRecord
   include Particulars
   include Promptable
 
-  belongs_to :account, default: -> do
-    # @type self: Event
-    board.account
-  end
-
+  belongs_to :account, default: -> { board.account }
   belongs_to :board
   belongs_to :creator, class_name: "User"
   belongs_to :eventable, polymorphic: true

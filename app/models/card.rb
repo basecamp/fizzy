@@ -1,9 +1,10 @@
 # rbs_inline: enabled
 
 class Card < ApplicationRecord
-  include Attachments, Broadcastable, Prontable
+  include Attachments, Prontable
 
   include Assignable
+  include Broadcastable
   include Closeable
   include Colored
   include Entropic
@@ -21,10 +22,7 @@ class Card < ApplicationRecord
   include Triageable
   include Watchable
 
-  belongs_to :account, default: -> do
-    # @type self: Card
-    board.account
-  end
+  belongs_to :account, default: -> { board.account }
 
   belongs_to :board
   belongs_to :creator, class_name: "User", default: -> { Current.user }
@@ -33,14 +31,24 @@ class Card < ApplicationRecord
   has_one_attached :image, dependent: :purge_later
 
   has_rich_text :description
+
   # @rbs!
   #   def description: () -> ActionText::RichText
   #   def description=: (ActionText::RichText) -> ActionText::RichText
+  #
+  #   class ::Card::ActiveRecord_Relation < ActiveRecord::Relation
+  #     def connection: () -> untyped
+  #   end
+
+  validates :title, length: { maximum: 255 }
+  validates :number, presence: true, uniqueness: { scope: :account_id }
+  validates :board, presence: true
 
   before_save :set_default_title, if: :published?
   before_create :assign_number
 
-  after_save   -> { board.touch }, if: :published?
+  after_save   -> { board.touch }, if: -> { published? }
+
   after_touch  -> { board.touch }, if: :published?
   after_update :handle_board_change, if: :saved_change_to_board_id?
 

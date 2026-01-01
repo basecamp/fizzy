@@ -3,6 +3,8 @@
 class Card < ApplicationRecord
   include Assignable
 
+  include Broadcastable
+
   include Closeable
 
   include Colored
@@ -38,6 +40,10 @@ class Card < ApplicationRecord
   def description: () -> ActionText::RichText
 
   def description=: (ActionText::RichText) -> ActionText::RichText
+
+  class ::Card::ActiveRecord_Relation < ActiveRecord::Relation
+    def connection: () -> untyped
+  end
 
   # : -> Card
   def card: () -> Card

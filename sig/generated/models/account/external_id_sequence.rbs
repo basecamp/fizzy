@@ -1,0 +1,12 @@
+# Generated from app/models/account/external_id_sequence.rb with RBS::Inline
+
+# Provides sequential IDs for +external_account_id+ when creating accounts without one.
+class Account::ExternalIdSequence < ApplicationRecord
+  def self.next: () -> untyped
+
+  def self.value: () -> untyped
+
+  private def self.with_lock: () -> untyped
+
+  private def self.initial_value: () -> untyped
+end

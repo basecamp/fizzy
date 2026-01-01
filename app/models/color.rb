@@ -1,12 +1,16 @@
+# rbs_inline: enabled
+
 Color = Struct.new(:name, :value)
 
 class Color
   class << self
+    #: (String) -> Color?
     def for_value(value)
       COLORS.find { |it| it.value == value }
     end
   end
 
+  #: -> String
   def to_s
     value
   end

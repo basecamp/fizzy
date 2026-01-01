@@ -1,0 +1,20 @@
+# Generated from app/models/color.rb with RBS::Inline
+
+class Color < Struct[untyped]
+  attr_accessor name(): untyped
+
+  attr_accessor value(): untyped
+
+  def self.new: (?untyped name, ?untyped value) -> instance
+              | (?name: untyped, ?value: untyped) -> instance
+end
+
+class Color
+  # : (String) -> Color?
+  def self.for_value: (String) -> Color?
+
+  # : -> String
+  def to_s: () -> String
+
+  COLORS: untyped
+end

@@ -14,10 +14,7 @@ class Board < ApplicationRecord
   #
 
   belongs_to :creator, class_name: "User", default: -> { Current.user }
-  belongs_to :account, default: -> do
-    # @type self: Board
-    creator.account
-  end
+  belongs_to :account, default: -> { creator.account }
 
   has_rich_text :public_description
 

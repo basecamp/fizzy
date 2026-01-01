@@ -1,4 +1,7 @@
+# rbs_inline: enabled
+
 class ApplicationPlatform < PlatformAgent
+  #: -> bool
   def ios?
     match? /iPhone|iPad/
   end

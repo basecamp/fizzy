@@ -3,7 +3,6 @@
 module Card::Colored
   extend ActiveSupport::Concern
 
-  def column: () -> Column?
-
-  def color: () -> untyped
+  # : -> Color
+  def color: () -> Color
 end

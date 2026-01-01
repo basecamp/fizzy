@@ -1,8 +1,5 @@
 class Assignment < ApplicationRecord
-  belongs_to :account, default: -> do
-    # @type self: Assignment
-    card.account
-  end
+  belongs_to :account, default: -> { card.account }
   belongs_to :card, touch: true
 
   belongs_to :assignee, class_name: "User"
