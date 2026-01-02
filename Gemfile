@@ -8,7 +8,7 @@ gem "rails", github: "rails/rails", branch: "main"
 gem "importmap-rails"
 gem "propshaft"
 gem "stimulus-rails"
-gem "turbo-rails"
+gem "turbo-rails", github: "hotwired/turbo-rails", branch: "offline-cache"
 
 # Deployment and drivers
 gem "bootsnap", require: false
