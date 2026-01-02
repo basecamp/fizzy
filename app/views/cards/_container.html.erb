@@ -16,6 +16,7 @@
           <div class="card__content">
             <%= render "cards/container/content", card: card %>
             <%= render "cards/display/perma/steps", card: card %>
+            <%= render "cards/display/perma/links", card: card %>
           </div>
 
           <% if card.published? %>

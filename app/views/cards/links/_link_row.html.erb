@@ -1,0 +1,24 @@
+<div class="link-row">
+  <span class="link-type-icon txt-gray">
+    <%= icon_tag(type == :parent ? "arrow-up" : type == :child ? "arrow-down" : "arrows-horizontal") %>
+  </span>
+
+  <%= link_to card_path(linked_card), class: "link-card min-width flex align-center gap-quarter" do %>
+    <span class="link-card-badge" style="background: <%= linked_card.column&.color || 'var(--fill-gray)' %>">
+      #<%= linked_card.number %>
+    </span>
+    <span class="min-width overflow-ellipsis"><%= truncate(linked_card.title, length: 40) %></span>
+  <% end %>
+
+  <%# Find link in outgoing_links first, then check incoming_links with inverse type %>
+  <% link = card.outgoing_links.find_by(target_card: linked_card, link_type: type) %>
+  <% unless link %>
+    <% inverse_type = type == :parent ? :child : type == :child ? :parent : :related %>
+    <% link = card.incoming_links.find_by(source_card: linked_card, link_type: inverse_type) %>
+  <% end %>
+  <% if link %>
+    <%= button_to card_link_path(link.source_card, link), method: :delete, class: "btn btn--icon link-remove" do %>
+      <%= icon_tag "close" %>
+    <% end %>
+  <% end %>
+</div>

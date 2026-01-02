@@ -1,0 +1,7 @@
+<%= turbo_stream.replace [@card, :links],
+    partial: "cards/display/perma/links",
+    locals: { card: @card.reload } %>
+
+<%= turbo_stream.replace [@target, :links],
+    partial: "cards/display/perma/links",
+    locals: { card: @target.reload } %>

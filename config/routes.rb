@@ -88,6 +88,12 @@ Rails.application.routes.draw do
       resources :steps
       resources :taggings
 
+      resources :links, only: [:new, :create, :destroy] do
+        collection do
+          get :search
+        end
+      end
+
       resources :comments do
         resources :reactions, module: :comments
       end

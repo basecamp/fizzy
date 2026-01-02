@@ -24,6 +24,8 @@
   .icon--arrow-left { --svg: url("arrow-left.svg "); }
   .icon--arrow-right { --svg: url("arrow-right.svg "); }
   .icon--arrow-up { --svg: url("arrow-up.svg "); }
+  .icon--arrow-down { --svg: url("arrow-down.svg"); }
+  .icon--arrows-horizontal { --svg: url("arrows-horizontal.svg"); }
   .icon--art { --svg: url("art.svg "); }
   .icon--assigned { --svg: url("assigned.svg "); }
   .icon--attachment { --svg: url("attachment.svg "); }
@@ -63,6 +65,7 @@
   .icon--home { --svg: url("home.svg "); }
   .icon--install-edge { --svg: url("install-edge.svg "); }
   .icon--lifebuoy { --svg: url("lifebuoy.svg "); }
+  .icon--link { --svg: url("link.svg"); }
   .icon--lock { --svg: url("lock.svg "); }
   .icon--logout { --svg: url("logout.svg "); }
   .icon--marker { --svg: url("marker.svg "); }
