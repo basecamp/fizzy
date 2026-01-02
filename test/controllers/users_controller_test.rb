@@ -37,7 +37,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
       delete user_path(users(:david))
     end
 
-    assert_redirected_to users_path
+    assert_redirected_to account_settings_path
     assert_nil User.active.find_by(id: users(:david).id)
   end
 

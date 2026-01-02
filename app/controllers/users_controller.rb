@@ -30,7 +30,7 @@ class UsersController < ApplicationController
     @user.deactivate
 
     respond_to do |format|
-      format.html { redirect_to users_path }
+      format.html { redirect_to account_settings_path }
       format.json { head :no_content }
     end
   end

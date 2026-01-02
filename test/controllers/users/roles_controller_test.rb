@@ -10,7 +10,7 @@ class Users::RolesControllerTest < ActionDispatch::IntegrationTest
 
     put user_role_path(users(:david)), params: { user: { role: "admin" } }
 
-    assert_redirected_to users_path
+    assert_redirected_to account_settings_path
     assert users(:david).reload.admin?
   end
 
