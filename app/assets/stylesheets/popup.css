@@ -106,6 +106,7 @@
 
     details & {
       margin-inline-start: 0.75ch;
+      margin-block-start: 0.35ch;
     }
   }
 
