@@ -461,10 +461,14 @@
     .icon--collapse {
     --icon-size: 1.15em;
 
-      opacity: 0;
-      scale: 1.5;
+      opacity: 0.66;
       transition: 150ms ease-out;
       transition-property: opacity, scale;
+
+      @media (min-width: 640px) {
+        opacity: 0;
+        scale: 1.5;
+      }
 
       .cards.is-collapsed & {
         display: none;
