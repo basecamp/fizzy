@@ -1,0 +1,5 @@
+@layer components {
+  .pins-list {
+    --panel-size: 45ch;
+  }
+}

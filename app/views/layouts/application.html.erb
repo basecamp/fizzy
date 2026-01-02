@@ -3,7 +3,7 @@
   <%= render "layouts/shared/head" %>
 
   <body data-controller="local-time timezone-cookie turbo-navigation theme" data-action="turbo:morph@window->local-time#refreshAll turbo:before-visit@document->turbo-navigation#rememberLocation" data-platform="<%= platform.type %>">
-    <header class="header <%= @header_class %>" id="header">
+    <header class="header header--mobile-actions-stack <%= @header_class %>" id="header">
       <a href="#main" class="header__skip-navigation btn" data-turbo="false">Skip to main content</a>
       <%= render "my/menu" if Current.user %>
       <%= yield :header %>
@@ -16,7 +16,7 @@
       <%= yield %>
     </main>
 
-    <footer id="footer">
+    <footer id="footer" class="hide-on-native">
       <%= yield :footer %>
 
       <% if Current.user && !@hide_footer_frames %>

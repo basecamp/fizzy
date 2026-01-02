@@ -225,6 +225,11 @@
     padding-block: calc(var(--events-gap) * 3) var(--events-gap);
     position: sticky;
     z-index: var(--z-events-column-header);
+
+    @media (max-width: 639px) {
+      margin-inline: calc(var(--main-padding) * -1);
+      padding-inline: var(--main-padding);
+    }
   }
 
   .events__column-footer {

@@ -1,7 +1,20 @@
-<%= turbo_frame_tag "bar_content" do %>
-  <% if @card %>
-    <%= auto_submit_form_with url: card_path(@card), method: :get, data: { turbo_action: "advance", turbo_frame: "_top", search_redirect: true } %>
-  <% else %>
-    <%= render "results", page: @page %>
-  <% end %>
+<% @page_title = params.has_key?(:q) ? "Search results for \"#{params[:q]}\"" : "Search" %>
+
+<% content_for :header do %>
+  <div class="header__actions header__actions--start">
+    <%= back_link_to "Home", root_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+  </div>
+
+  <h1 class="header__title"><%= @page_title %></h1>
 <% end %>
+
+<div class="search-perma margin-block-start">
+  <%= render "form", query_terms: params[:q] %>
+  <%= turbo_frame_tag "bar_content" do %>
+    <% if @card %>
+      <%= auto_submit_form_with url: card_path(@card), method: :get, data: { turbo_action: "advance", turbo_frame: "_top", search_redirect: true } %>
+    <% else %>
+      <%= render "results", page: @page %>
+    <% end %>
+  <% end %>
+</div>

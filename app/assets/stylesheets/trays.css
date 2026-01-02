@@ -156,11 +156,11 @@
     --tray-item-scale: calc(1 - (var(--tray-item-index) - 1) / 30);
     --tray-item-z: calc(6 - var(--tray-item-index));
 
+    font-size: 10px;
+    margin-block-end: var(--tray-item-margin);
     position: relative;
 
     .tray__dialog & {
-      font-size: 10px;
-      margin-block-end: var(--tray-item-margin);
       transition: var(--tray-duration) var(--ease-out-overshoot-subtle);
       transition-delay: var(--tray-item-delay);
       transition-property: margin, opacity, scale;
@@ -285,7 +285,7 @@
   /* Tray cards
   /* ------------------------------------------------------------------------ */
 
-  .tray {
+  .tray__item {
     .card {
       --card-padding-block: 1.5ch;
       --card-padding-inline: 1.5ch;
@@ -345,52 +345,69 @@
       inset-inline-start: -100%;
     }
 
-    .tray__item {
-      --tray-item-z: calc(10 - var(--tray-item-index));
+    /* Disable the expander if there aren't items to show */
+    .tray__dialog:not(:has(.tray__item)) ~ .tray__toggle {
+      opacity: 0.5;
 
-      position: relative;
-
-      [open] &[aria-selected] {
-        outline: 0;
-        z-index: calc(var(--tray-item-z) + 2);
-
-        .card__link {
-          border-radius: 0.25ch;
-          outline: var(--focus-ring-size) solid var(--focus-ring-color);
-          outline-offset: var(--focus-ring-offset);
-          z-index: 1;
-        }
+      &, .tray__toggle-btn {
+        pointer-events: none;
       }
+    }
 
-      /* Show 6 max items on smallest devices */
-      @media (max-height: 578px) {
-        &:nth-child(1n + 7) { display: none; }
+    /* Add a border on mobile */
+    @media (max-width: 799px) {
+      .tray__dialog:not([open]) ~ .tray__toggle {
+        border-inline-end: 1px dashed var(--color-ink-light);
+        translate: calc(-1 * var(--tray-margin)) 0;
       }
+    }
+  }
 
-      /* 7 max */
-      @media (min-height: 578px) and (max-height: 656px) {
-        &:nth-child(1n + 8) { display: none; }
-      }
+  .tray__item--pin {
+    --tray-item-z: calc(10 - var(--tray-item-index));
 
-      /* 8 max */
-      @media (min-height: 656px) and (max-height: 734px) {
-        &:nth-child(1n + 9) { display: none; }
-      }
+    position: relative;
 
-      /* 9 max */
-      @media (min-height: 734px) and (max-height: 812px) {
-        &:nth-child(1n + 10) { display: none; }
-      }
+    [open] &[aria-selected] {
+      outline: 0;
+      z-index: calc(var(--tray-item-z) + 2);
 
-      /* 10 max on larger screens */
-      @media (min-height: 812px) {
-        &:nth-child(1n + 11) { display: none; }
+      .card__link {
+        border-radius: 0.25ch;
+        outline: var(--focus-ring-size) solid var(--focus-ring-color);
+        outline-offset: var(--focus-ring-offset);
+        z-index: 1;
       }
+    }
 
-      &:not([aria-selected]) .card__link:focus-visible,
-      .tray__dialog:not([open]) & .card__link:focus-visible {
-        --focus-ring-size: 0;
-      }
+    /* Show 6 max items on smallest devices */
+    @media (max-height: 578px) {
+      &:nth-child(1n + 7) { display: none; }
+    }
+
+    /* 7 max */
+    @media (min-height: 578px) and (max-height: 656px) {
+      &:nth-child(1n + 8) { display: none; }
+    }
+
+    /* 8 max */
+    @media (min-height: 656px) and (max-height: 734px) {
+      &:nth-child(1n + 9) { display: none; }
+    }
+
+    /* 9 max */
+    @media (min-height: 734px) and (max-height: 812px) {
+      &:nth-child(1n + 10) { display: none; }
+    }
+
+    /* 10 max on larger screens */
+    @media (min-height: 812px) {
+      &:nth-child(1n + 11) { display: none; }
+    }
+
+    &:not([aria-selected]) .card__link:focus-visible,
+    .tray__dialog:not([open]) & .card__link:focus-visible {
+      --focus-ring-size: 0;
     }
 
     .tray__remove-pin-btn {
@@ -399,18 +416,17 @@
 
       background-color: var(--card-bg-color);
       inset: 0 0 auto auto;
-      opacity: 0;
-      pointer-events: none;
+      opacity: 0.66;
       position: absolute;
       z-index: 1;
 
-      .tray__dialog[open] & {
-        opacity: 0.66;
-        pointer-events: unset;
+      &:hover {
+        opacity: 1;
+      }
 
-        &:hover {
-          opacity: 1;
-        }
+      .tray__dialog:not([open]) & {
+        opacity: 0;
+        pointer-events: none;
       }
 
       [aria-busy] & {
@@ -451,9 +467,10 @@
       inline-size: fit-content;
       margin: 0 0 0 auto;
       transition: translate 150ms ease-out;
+      translate: -2em;
 
-      [open] & {
-        translate: -2em;
+      .tray__dialog:not([open]) & {
+        translate: 0;
       }
     }
 
@@ -490,24 +507,6 @@
 
     .card__bubble {
       display: none;
-    }
-
-    /* Disable the expander if there aren't items to show */
-    .tray__dialog:not(:has(.tray__item)) ~ .tray__toggle {
-      opacity: 0.5;
-
-      &, .tray__toggle-btn {
-        pointer-events: none;
-      }
-    }
-
-    /* Add a border on mobile */
-    @media (max-width: 799px) {
-      .tray__dialog:not([open]) ~ .tray__toggle {
-        border-inline-end: 1px dashed var(--color-ink-light);
-        translate: calc(-1 * var(--tray-margin)) 0;
-      }
-
     }
   }
 

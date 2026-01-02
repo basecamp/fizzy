@@ -5,6 +5,7 @@
     --actions-block-inset: 1.5rem;
     --actions-inline-inset: 4rem;
     --color-container: color-mix(in srgb, var(--card-color) 33%, var(--color-canvas));
+    --half-btn-height: 1.25rem;
     --padding-inline: calc(var(--block-space-double) + var(--block-space));
     --padding-block: calc(var(--block-space-double) + var(--block-space-half));
 
@@ -14,7 +15,8 @@
     grid-template-areas:
       "notch-top notch-top notch-top"
       "actions-left card actions-right"
-      "notch-bottom notch-bottom notch-bottom";
+      "notch-bottom notch-bottom notch-bottom"
+      "closure-message closure-message closure-message";
     grid-template-columns: 48px minmax(0, 1120px) 48px;
     inline-size: fit-content;
     margin-block-start: var(--block-space);
@@ -47,6 +49,7 @@
     .card__body {
       @media (max-width: 639px) {
         flex-direction: column;
+        padding-block-end: calc(var(--card-padding-block) * 1.5);
       }
     }
 
@@ -89,15 +92,30 @@
       @media (max-width: 639px) {
         border: 1px solid var(--card-color);
         border-radius: 0.25em;
-        overflow: hidden;
+        flex-direction: row;
+        gap: 0;
+        overflow: auto;
         max-inline-size: 100%;
         padding: 0;
+        position: relative;
+        white-space: nowrap;
+
+        & > form {
+          flex-grow: 1;
+          max-inline-size: 25ch;
+          min-block-size: 2.5em;
+        }
+
+        & > form + form:not(:has(.card__column-name--current)) {
+          box-shadow: -1px 0 0 0 var(--color-container);
+        }
       }
     }
 
     .card__column-name {
       @media (max-width: 639px) {
         --btn-border-radius: 0;
+        justify-content: center;
       }
     }
 
@@ -127,13 +145,15 @@
     }
 
     @media (max-width: 799px) {
+      --half-btn-height: 1.5rem;
       --padding-inline: 1.5ch;
 
       column-gap: 0;
       grid-template-areas:
         "notch-top notch-top notch-top"
         "card card card"
-        "actions-left notch-bottom actions-right";
+        "actions-left notch-bottom actions-right"
+        "closure-message closure-message closure-message";
       grid-template-columns: 1fr auto 1fr;
       inline-size: calc(100% + 2 * var(--padding-inline));
       margin-inline: calc(-1 * var(--padding-inline));
@@ -151,7 +171,12 @@
     grid-area: card;
     padding: clamp(2rem, 4vw, var(--padding-block));
 
-    @media (max-width: 799px) {
+    @media (max-width: 639px) {
+      padding: clamp(0.25rem, 2vw, var(--padding-block));
+      padding-block-end: clamp(2.5rem, 4vw, var(--padding-block));
+    }
+
+    @media (min-width: 640px) and (max-width: 799px) {
       padding-inline: var(--padding-inline);
     }
   }
@@ -263,13 +288,14 @@
   }
 
   .card-perma__notch--bottom {
-    --half-btn-height: 1.25rem;
-
     grid-area: notch-bottom;
 
     /* Overlap the card BG by half the button height */
     &:has(.btn) {
-      translate: 0 calc(-1 * var(--half-btn-height));
+      &,
+      ~ .card-perma__closure-message {
+        translate: 0 calc(-1 * var(--half-btn-height));
+      }
     }
 
     form {
@@ -314,5 +340,8 @@
 
   .card-perma__closure-message {
     color: var(--card-color);
+    grid-area: closure-message;
+    margin-block-start: 0.5ch;
+    padding-inline: 1ch;
   }
 }

@@ -6,8 +6,40 @@
     --custom-safe-inset-bottom: var(--injected-safe-inset-bottom, env(safe-area-inset-bottom, 0px));
     --custom-safe-inset-left: var(--injected-safe-inset-left, env(safe-area-inset-left, 0px));
 
+    -webkit-tap-highlight-color: transparent;
+
     .hide-on-native {
       display: none;
+    }
+
+    /* Header
+    /* ------------------------------------------------------------------------ */
+
+    .header:is(
+      :not(:has(.header__title, .header__actions)),
+      :not(:has(.header__title, .header__actions--end)):has(.header__actions--start .btn--back:only-child)
+    ) {
+      display: none;
+    }
+
+    .header__actions {
+      .btn--back {
+        display: none;
+      }
+    }
+
+    /* Card perma
+    /* ------------------------------------------------------------------------ */
+
+    .card-perma {
+      margin-block-start: 0;
+    }
+
+    /* Search
+    /* ------------------------------------------------------------------------ */
+
+    .search__title {
+      text-decoration: none;
     }
   }
 }

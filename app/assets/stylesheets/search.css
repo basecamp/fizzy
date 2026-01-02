@@ -26,7 +26,7 @@ summary {
     max-block-size: 100%;
     overflow-y: auto;
     overscroll-behavior: contain;
-    padding: var(--block-space) calc(var(--block-space-double) + var(--btn-size));
+    padding: var(--block-space);
   }
 
   /* Form
@@ -34,17 +34,21 @@ summary {
 
   .search__input {
     --clear-icon-size: 1em;
-    --focus-ring-size: 0;
-    --input-border-color: var(--color-ink-light);
-    --input-border-radius: 0;
-    --input-padding: 0.1em;
 
-    border-width: 0 0 1px;
     max-inline-size: 50ch;
     position: relative;
 
     &::-webkit-search-cancel-button {
       display: none;
+    }
+
+    .bar__input & {
+      --focus-ring-size: 0;
+      --input-border-color: var(--color-ink-light);
+      --input-border-radius: 0;
+      --input-padding: 0.1em;
+
+      border-width: 0 0 1px;
     }
   }
 
@@ -106,5 +110,23 @@ summary {
 
   .search__title {
     text-decoration: underline;
+  }
+
+  /* Perma
+  /* ------------------------------------------------------------------------ */
+
+  .search-perma {
+    .search__form > label,
+    .search__reset {
+      display: none;
+    }
+
+    .search__input {
+      max-inline-size: min(80ch, 100%);
+    }
+
+    .search {
+      padding-inline: 0;
+    }
   }
 }

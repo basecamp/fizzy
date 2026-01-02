@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import { nextFrame } from "helpers/timing_helpers"
+import { isMobile } from "helpers/platform_helpers"
 
 export default class extends Controller {
   static targets = [ "item", "input" ]
@@ -16,6 +17,11 @@ export default class extends Controller {
     autoSelect: { type: Boolean, default: true },
     autoScroll: { type: Boolean, default: true },
     onlyActOnFocusedItems: { type: Boolean, default: false }
+  }
+
+  // Don't load for mobile devices
+  static get shouldLoad() {
+    return !isMobile()
   }
 
   connect() {

@@ -6,8 +6,8 @@ module ColumnsHelper
       method: :post,
       class: [ "card__column-name btn", { "card__column-name--current": column == card.column && card.open? } ],
       style: "--column-color: #{column.color}",
-      form_class: "flex align-center gap-half",
-      data: { turbo_frame: "_top" }
+      form_class: "flex gap-half",
+      data: { turbo_frame: "_top", scroll_to_target: column == card.column && card.open? ? "target" : nil }
   end
 
   def column_tag(id:, name:, drop_url:, collapsed: true, selected: nil, card_color: "var(--color-card-default)", data: {}, **properties, &block)

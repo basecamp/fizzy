@@ -8,7 +8,7 @@
   </div>
 
   <div class="bar__input" data-bar-target="search" hidden>
-    <%= render "searches/form", query_terms: "" %>
+    <%= render "searches/form", query_terms: "", target_turbo_frame: "bar_content" %>
   </div>
 
   <%= tag.dialog id: "bar-modal", class: "bar__modal", data: {
