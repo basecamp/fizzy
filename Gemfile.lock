@@ -12,6 +12,15 @@ GIT
     useragent (0.16.11)
 
 GIT
+  remote: https://github.com/hotwired/turbo-rails.git
+  revision: e3795ef6aac6a3d18039751febe6a301cfe71a7b
+  branch: offline-cache
+  specs:
+    turbo-rails (2.0.20)
+      actionpack (>= 7.1.0)
+      railties (>= 7.1.0)
+
+GIT
   remote: https://github.com/rails/rails.git
   revision: 60d92e4e7dfe923528ccdccc18820ccfe841b7b8
   branch: main
@@ -449,9 +458,6 @@ GEM
     timeout (0.6.0)
     trilogy (2.9.0)
     tsort (0.2.0)
-    turbo-rails (2.0.21)
-      actionpack (>= 7.1.0)
-      railties (>= 7.1.0)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     unicode-display_width (3.2.0)
@@ -532,7 +538,7 @@ DEPENDENCIES
   stimulus-rails
   thruster
   trilogy (~> 2.9)
-  turbo-rails
+  turbo-rails!
   useragent!
   vcr
   web-console
