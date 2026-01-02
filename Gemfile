@@ -2,6 +2,8 @@ source "https://rubygems.org"
 
 git_source(:bc) { |repo| "https://github.com/basecamp/#{repo}" }
 
+ruby file: ".ruby-version"
+
 gem "rails", github: "rails/rails", branch: "main"
 
 # Assets & front end
@@ -32,7 +34,7 @@ gem "lexxy", bc: "lexxy"
 gem "image_processing", "~> 1.14"
 gem "platform_agent"
 gem "aws-sdk-s3", require: false
-gem "web-push"
+gem "web-push", ">= 3.1.0"
 gem "net-http-persistent"
 gem "rubyzip", require: "zip"
 gem "mittens"
@@ -50,6 +52,7 @@ group :development, :test do
   gem "faker"
   gem "letter_opener"
   gem "rack-mini-profiler"
+  gem "rubocop", ">= 1.82.0", require: false
   gem "rubocop-rails-omakase", require: false
 end
 
@@ -62,5 +65,6 @@ group :test do
   gem "selenium-webdriver"
   gem "webmock"
   gem "vcr"
+  gem "cgi" # Indirect vcr dep removed Ruby 4.0 stdlib
   gem "mocha"
 end
