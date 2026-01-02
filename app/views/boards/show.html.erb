@@ -1,4 +1,5 @@
 <% @page_title = @board.name %>
+<% @body_class = "contained-scrolling" %>
 <% turbo_exempts_page_from_cache %>
 
 <%= turbo_stream_from @board %>
@@ -26,6 +27,5 @@
     <%= render "boards/show/filtered_cards", page: @page %>
   <% else %>
     <%= render "boards/show/columns", page: @page, board: @board %>
-    <%= render "boards/show/mobile_columns", page: @page, board: @board %>
   <% end %>
 <% end %>

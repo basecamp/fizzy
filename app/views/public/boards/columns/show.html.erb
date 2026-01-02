@@ -12,13 +12,15 @@
 
 <section class="cards cards--grid">
   <%= turbo_frame_tag @column, :cards do %>
-    <% if @page.used? %>
-      <%= with_automatic_pagination dom_id(@column, :cards), @page do %>
-        <%= render "public/boards/columns/list", cards: @page.records %>
+    <div class="cards__list hide-scrollbar">
+      <% if @page.used? %>
+        <%= with_automatic_pagination dom_id(@column, :cards), @page do %>
+          <%= render "cards/display/public_previews", cards: @page.records %>
+        <% end %>
+      <% else %>
+        <div class="blank-slate blank-slate--empty">No cards here</div>
       <% end %>
-    <% else %>
-      <div class="blank-slate blank-slate--empty">No cards here</div>
-    <% end %>
+    </div>
   <% end %>
 </section>
 

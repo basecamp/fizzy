@@ -96,12 +96,6 @@
   .overflow-clip { text-overflow: clip; white-space: nowrap; overflow: hidden; }
   .overflow-ellipsis { text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
 
-  .overflow-hide-scrollbar::-webkit-scrollbar {
-    @media (pointer: course) {
-      display: none;
-    }
-  }
-
   .overflow-line-clamp {
     -webkit-line-clamp: var(--lines, 2);
     -webkit-box-orient: vertical;

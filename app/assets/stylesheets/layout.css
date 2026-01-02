@@ -8,6 +8,16 @@
     }
   }
 
+  /* Required for the card column page on mobile, but not needed otherwise */
+  :where(#global-container) {
+    display: contents;
+  }
+
+  :where(#header) {
+    position: relative;
+    z-index: var(--z-nav);
+  }
+
   :where(#main) {
     inline-size: 100dvw;
     margin-inline: auto;

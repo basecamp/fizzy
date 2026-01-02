@@ -207,7 +207,7 @@
   --color-terminal-text: var(--color-ink);
   --color-terminal-text-light: var(--color-ink-lighter);
   --color-golden: oklch(89.1% 0.178 95.7);
-  --color-considering: oklch(var(--lch-blue-medium));
+  --color-maybe: oklch(var(--lch-blue-medium));
 
   /* Colors: Cards */
   --color-card-default: oklch(var(--lch-blue-dark));

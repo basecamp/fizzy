@@ -7,11 +7,11 @@
     align-items: center;
     display: flex;
     flex-wrap: wrap;
-    gap: 1ch;
     gap: var(--inline-space-half);
     justify-content: center;
+    padding-block-start: 2px; /* prevents input focus-ring clipping on mobile */
     position: relative;
-    view-transition-name: "filters";
+    view-transition-name: filters;
 
     .btn {
       --btn-border-color: var(--color-ink-medium);
