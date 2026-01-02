@@ -10,7 +10,7 @@
   --block-space-double: calc(var(--block-space) * 2);
 
   /* Text */
-  --font-sans: "Adwaita Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  --font-sans: "Adwaita Sans", -apple-system, BlinkMacSystemFont, "Segoe UI Variable Fizzy", "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
   --font-serif: ui-serif, serif;
   --font-mono: ui-monospace, monospace;
 
