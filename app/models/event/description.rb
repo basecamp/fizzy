@@ -14,7 +14,7 @@ class Event::Description
   end
 
   def to_plain_text
-    to_sentence(creator_name, h(card.title))
+    to_sentence(creator_name, quoted(card.title))
   end
 
   private
@@ -39,6 +39,10 @@ class Event::Description
 
     def creator_name
       h(event.creator.name)
+    end
+
+    def quoted(text)
+      %("#{h text}")
     end
 
     def card
