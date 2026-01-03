@@ -1,0 +1,111 @@
+<% @page_title = "Add GitHub Repository" %>
+
+<% content_for :header do %>
+  <div class="header__actions header__actions--start">
+    <%= back_link_to "GitHub Integrations", board_github_integrations_path(@board), "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+  </div>
+
+  <h1 class="header__title"><%= @page_title %></h1>
+<% end %>
+
+<article class="panel panel--wide center txt-align-start" style="view-transition-name: <%= dom_id(@integration) %>">
+  <%= form_with model: @integration, url: board_github_integrations_path(@board), data: { controller: "form" }, html: { class: "flex flex-column gap" } do |form| %>
+    <% if @integration.errors.any? %>
+      <div class="margin-block-half txt-negative txt-small" style="text-align: left;">
+        <p class="margin-block-none font-weight-bold">The integration couldn't be created:</p>
+        <ul class="margin-block-none">
+          <% @integration.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="flex flex-column gap-half">
+      <%= form.label :color do %>
+        <strong>Color</strong><br>
+        <p class="margin-none txt-x-small txt-subtle">Choose a color to identify this integration</p>
+      <% end %>
+
+      <div class="color-picker__colors">
+        <% Color::COLORS.each do |color| %>
+          <label class="btn txt-small borderless" style="--btn-background: <%= color %>" title="<%= color.name %>">
+            <%= form.radio_button :color, color.value, checked: (color == GithubIntegration::Colored::DEFAULT_COLOR) %>
+            <%= icon_tag "check", class: "checked" %>
+            <span class="for-screen-reader"><%= color.name %></span>
+          </label>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="flex flex-column gap-half">
+      <%= form.label :repository_full_name do %>
+        <strong>Repository</strong><br>
+        <p class="margin-none txt-x-small txt-subtle">Enter the repository in the format: owner/repo (e.g., basecamp/fizzy)</p>
+      <% end %>
+      <%= form.text_field :repository_full_name,
+            required: true,
+            autofocus: true,
+            class: "input",
+            placeholder: "owner/repository",
+            pattern: "[\\w\\-\\.]+/[\\w\\-\\.]+",
+            title: "Must be in format: owner/repo",
+            data: { action: "keydown.esc@document->form#cancel" } %>
+    </div>
+
+    <div class="flex flex-column gap-half">
+      <%= form.label :sync_pull_requests do %>
+        <strong>Event Synchronization</strong><br>
+        <p class="margin-none txt-x-small txt-subtle">Select which GitHub events should create or update Fizzy cards:</p>
+      <% end %>
+
+      <ul class="flex flex-column align-start gap-half margin-none unpad">
+        <li class="list-style-none margin-none">
+          <label class="toggler__visible-when-off flex align-center gap cursor-pointer">
+            <span class="switch txt-x-small flex-item-no-shrink">
+              <%= form.check_box :sync_pull_requests, { checked: true, class: "switch__input" } %>
+              <span class="switch__btn round"></span>
+            </span>
+            <span class="min-width">Pull Requests (opened, edited, closed, merged, reopened)</span>
+          </label>
+        </li>
+
+        <li class="list-style-none margin-none">
+          <label class="toggler__visible-when-off flex align-center gap cursor-pointer">
+            <span class="switch txt-x-small flex-item-no-shrink">
+              <%= form.check_box :sync_issues, { checked: true, class: "switch__input" } %>
+              <span class="switch__btn round"></span>
+            </span>
+            <span class="min-width">Issues (opened, edited, closed, reopened)</span>
+          </label>
+        </li>
+
+        <li class="list-style-none margin-none">
+          <label class="toggler__visible-when-off flex align-center gap cursor-pointer">
+            <span class="switch txt-x-small flex-item-no-shrink">
+              <%= form.check_box :sync_comments, { checked: true, class: "switch__input" } %>
+              <span class="switch__btn round"></span>
+            </span>
+            <span class="min-width">Comments on Pull Requests and Issues</span>
+          </label>
+        </li>
+
+        <li class="list-style-none margin-none">
+          <label class="toggler__visible-when-off flex align-center gap cursor-pointer">
+            <span class="switch txt-x-small flex-item-no-shrink">
+              <%= form.check_box :sync_reviews, { checked: true, class: "switch__input" } %>
+              <span class="switch__btn round"></span>
+            </span>
+            <span class="min-width">Pull Request Reviews</span>
+          </label>
+        </li>
+      </ul>
+    </div>
+
+    <%= form.button type: :submit, class: "btn btn--link center txt-medium" do %>
+      <span>Add Repository</span>
+    <% end %>
+
+    <%= link_to "Go back", board_github_integrations_path(@board), data: { form_target: "cancel" }, hidden: true %>
+  <% end %>
+</article>

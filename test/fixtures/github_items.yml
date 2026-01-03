@@ -1,0 +1,29 @@
+pull_request_one:
+  account: 37s_uuid
+  card: logo_uuid
+  github_integration: first
+  github_id: 123456789
+  github_type: pull_request
+  github_url: https://github.com/basecamp/fizzy/pull/1
+  github_number: 1
+  state: open
+
+issue_one:
+  account: 37s_uuid
+  card: layout_uuid
+  github_integration: first
+  github_id: 987654321
+  github_type: issue
+  github_url: https://github.com/basecamp/fizzy/issues/10
+  github_number: 10
+  state: open
+
+closed_pr:
+  account: 37s_uuid
+  card: features_uuid
+  github_integration: first
+  github_id: 111222333
+  github_type: pull_request
+  github_url: https://github.com/basecamp/fizzy/pull/5
+  github_number: 5
+  state: closed

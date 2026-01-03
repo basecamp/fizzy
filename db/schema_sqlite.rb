@@ -41,6 +41,17 @@ ActiveRecord::Schema[8.2].define(version: 2025_12_10_054934) do
     t.index ["value"], name: "index_account_external_id_sequences_on_value", unique: true
   end
 
+  create_table "account_github_settings", id: :uuid, force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.boolean "allow_comments", default: true, null: false
+    t.boolean "allow_issues", default: true, null: false
+    t.boolean "allow_pull_requests", default: true, null: false
+    t.boolean "allow_reviews", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_account_github_settings_on_account_id", unique: true
+  end
+
   create_table "account_join_codes", id: :uuid, force: :cascade do |t|
     t.uuid "account_id", null: false
     t.string "code", limit: 255, null: false
@@ -49,6 +60,16 @@ ActiveRecord::Schema[8.2].define(version: 2025_12_10_054934) do
     t.bigint "usage_count", default: 0, null: false
     t.bigint "usage_limit", default: 10, null: false
     t.index ["account_id", "code"], name: "index_account_join_codes_on_account_id_and_code", unique: true
+  end
+
+  create_table "account_slack_settings", id: :uuid, force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.boolean "allow_messages", default: true, null: false
+    t.boolean "allow_reactions", default: true, null: false
+    t.boolean "allow_thread_replies", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_account_slack_settings_on_account_id", unique: true
   end
 
   create_table "accounts", id: :uuid, force: :cascade do |t|
@@ -313,6 +334,56 @@ ActiveRecord::Schema[8.2].define(version: 2025_12_10_054934) do
     t.index ["tag_id"], name: "index_filters_tags_on_tag_id"
   end
 
+  create_table "github_integration_deliveries", id: :uuid, force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.datetime "created_at", null: false
+    t.string "event_type", limit: 255, null: false
+    t.uuid "github_integration_id", null: false
+    t.json "request"
+    t.json "response"
+    t.string "state", limit: 255, null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_github_integration_deliveries_on_account_id"
+    t.index ["created_at"], name: "index_github_integration_deliveries_on_created_at"
+    t.index ["github_integration_id"], name: "index_github_integration_deliveries_on_github_integration_id"
+  end
+
+  create_table "github_integrations", id: :uuid, force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.boolean "active", default: true, null: false
+    t.uuid "board_id", null: false
+    t.string "color", default: "var(--color-card-7)"
+    t.datetime "created_at", null: false
+    t.string "repository_full_name", limit: 255, null: false
+    t.boolean "sync_comments", default: true, null: false
+    t.boolean "sync_issues", default: true, null: false
+    t.boolean "sync_pull_requests", default: true, null: false
+    t.boolean "sync_reviews", default: true, null: false
+    t.datetime "updated_at", null: false
+    t.string "webhook_secret", limit: 255, null: false
+    t.index ["account_id"], name: "index_github_integrations_on_account_id"
+    t.index ["board_id", "repository_full_name"], name: "index_github_integrations_on_board_id_and_repository_full_name", unique: true
+    t.index ["board_id"], name: "index_github_integrations_on_board_id"
+  end
+
+  create_table "github_items", id: :uuid, force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.uuid "card_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "github_id", null: false
+    t.uuid "github_integration_id", null: false
+    t.integer "github_number", null: false
+    t.string "github_type", limit: 255, null: false
+    t.string "github_url", limit: 255, null: false
+    t.datetime "last_synced_at"
+    t.string "state", limit: 255
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_github_items_on_account_id"
+    t.index ["card_id"], name: "index_github_items_on_card_id", unique: true
+    t.index ["github_integration_id", "github_id"], name: "index_github_items_on_github_integration_id_and_github_id", unique: true
+    t.index ["github_integration_id", "github_type", "github_number"], name: "idx_on_github_integration_id_github_type_github_num_6642afca00"
+  end
+
   create_table "identities", id: :uuid, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email_address", limit: 255, null: false
@@ -458,6 +529,58 @@ ActiveRecord::Schema[8.2].define(version: 2025_12_10_054934) do
     t.index ["identity_id"], name: "index_sessions_on_identity_id"
   end
 
+  create_table "slack_integration_deliveries", id: :uuid, force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.datetime "created_at", null: false
+    t.string "event_type", limit: 255, null: false
+    t.json "request"
+    t.json "response"
+    t.uuid "slack_integration_id", null: false
+    t.string "state", limit: 255, null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_slack_integration_deliveries_on_account_id"
+    t.index ["created_at"], name: "index_slack_integration_deliveries_on_created_at"
+    t.index ["slack_integration_id"], name: "index_slack_integration_deliveries_on_slack_integration_id"
+  end
+
+  create_table "slack_integrations", id: :uuid, force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.boolean "active", default: true, null: false
+    t.uuid "board_id", null: false
+    t.string "bot_oauth_token"
+    t.string "bot_user_id"
+    t.string "channel_id", limit: 255, null: false
+    t.string "channel_name", limit: 255, null: false
+    t.string "color", limit: 255
+    t.datetime "created_at", null: false
+    t.json "emoji_action_mappings"
+    t.boolean "sync_messages", default: true, null: false
+    t.boolean "sync_reactions", default: true, null: false
+    t.boolean "sync_thread_replies", default: true, null: false
+    t.datetime "updated_at", null: false
+    t.string "webhook_secret", limit: 255, null: false
+    t.string "workspace_domain", limit: 255
+    t.index ["account_id"], name: "index_slack_integrations_on_account_id"
+    t.index ["board_id", "channel_id"], name: "index_slack_integrations_on_board_id_and_channel_id", unique: true
+    t.index ["board_id"], name: "index_slack_integrations_on_board_id"
+  end
+
+  create_table "slack_items", id: :uuid, force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.uuid "card_id", null: false
+    t.string "channel_id", limit: 255, null: false
+    t.datetime "created_at", null: false
+    t.datetime "last_synced_at"
+    t.uuid "slack_integration_id", null: false
+    t.string "slack_message_ts", limit: 255, null: false
+    t.string "slack_user_id", limit: 255
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_slack_items_on_account_id"
+    t.index ["card_id"], name: "index_slack_items_on_card_id", unique: true
+    t.index ["channel_id"], name: "index_slack_items_on_channel_id"
+    t.index ["slack_integration_id", "slack_message_ts"], name: "index_slack_items_on_slack_integration_id_and_slack_message_ts", unique: true
+  end
+
   create_table "steps", id: :uuid, force: :cascade do |t|
     t.uuid "account_id", null: false
     t.uuid "card_id", null: false
@@ -479,7 +602,7 @@ ActiveRecord::Schema[8.2].define(version: 2025_12_10_054934) do
     t.string "operation", limit: 255, null: false
     t.uuid "recordable_id"
     t.string "recordable_type", limit: 255
-    t.string "request_id"
+    t.string "request_id", limit: 255
     t.uuid "user_id"
     t.index ["account_id"], name: "index_storage_entries_on_account_id"
     t.index ["blob_id"], name: "index_storage_entries_on_blob_id"

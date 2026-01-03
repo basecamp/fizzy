@@ -1,0 +1,17 @@
+<header>
+  <h3 class="divider txt-medium">GitHub</h3>
+  <div>Sync GitHub pull requests and issues to this board automatically.</div>
+</header>
+
+<p class="txt-subtle margin-none">
+  <% if board.github_integrations.any? %>
+    <%= pluralize(board.github_integrations.count, 'repository', 'repositories') %> connected
+  <% else %>
+    No repositories connected
+  <% end %>
+</p>
+
+<%= link_to board_github_integrations_path(board), class: "btn btn--link center", disabled: !Current.user.can_administer_board?(board) do %>
+  <%= icon_tag "add" %>
+  <span>Manage GitHub Integrations</span>
+<% end %>

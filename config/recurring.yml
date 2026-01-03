@@ -24,6 +24,9 @@ production: &production
   cleanup_webhook_deliveries:
     command: "Webhook::Delivery.cleanup"
     schedule: every 4 hours at minute 51
+  cleanup_github_integration_deliveries:
+    command: "GithubIntegration::Delivery.cleanup"
+    schedule: every 4 hours at minute 55
   cleanup_magic_links:
     command: "MagicLink.cleanup"
     schedule: every 4 hours

@@ -1,0 +1,140 @@
+<% @page_title = "Add Slack Channel" %>
+
+<% content_for :header do %>
+  <div class="header__actions header__actions--start">
+    <%= back_link_to "Slack Integrations", board_slack_integrations_path(@board), "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+  </div>
+
+  <h1 class="header__title"><%= @page_title %></h1>
+<% end %>
+
+<article class="panel panel--wide center txt-align-start" style="view-transition-name: <%= dom_id(@integration) %>">
+  <%= form_with model: @integration, url: board_slack_integrations_path(@board), data: { controller: "form" }, html: { class: "flex flex-column gap" } do |form| %>
+    <% if @integration.errors.any? %>
+      <div class="margin-block-half txt-negative txt-small" style="text-align: left;">
+        <p class="margin-block-none font-weight-bold">The integration couldn't be created:</p>
+        <ul class="margin-block-none">
+          <% @integration.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="flex flex-column gap-half">
+      <%= form.label :color do %>
+        <strong>Color</strong><br>
+        <p class="margin-none txt-x-small txt-subtle">Choose a color to identify this integration</p>
+      <% end %>
+
+      <div class="color-picker__colors">
+        <% Color::COLORS.each do |color| %>
+          <label class="btn txt-small borderless" style="--btn-background: <%= color %>" title="<%= color.name %>">
+            <%= form.radio_button :color, color.value, checked: (color == SlackIntegration::Colored::DEFAULT_COLOR) %>
+            <%= icon_tag "check", class: "checked" %>
+            <span class="for-screen-reader"><%= color.name %></span>
+          </label>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="flex flex-column gap-half">
+      <%= form.label :channel_id do %>
+        <strong>Channel ID</strong><br>
+        <p class="margin-none txt-x-small txt-subtle">Enter the Slack channel ID (e.g., C1234567890)</p>
+      <% end %>
+      <%= form.text_field :channel_id,
+            required: true,
+            autofocus: true,
+            class: "input",
+            placeholder: "C1234567890",
+            data: { action: "keydown.esc@document->form#cancel" } %>
+    </div>
+
+    <div class="flex flex-column gap-half">
+      <%= form.label :channel_name do %>
+        <strong>Channel Name</strong><br>
+        <p class="margin-none txt-x-small txt-subtle">Enter the channel name (without #, e.g., general)</p>
+      <% end %>
+      <%= form.text_field :channel_name,
+            required: true,
+            class: "input",
+            placeholder: "general" %>
+    </div>
+
+    <div class="flex flex-column gap-half">
+      <%= form.label :workspace_domain do %>
+        <strong>Workspace Domain (Optional)</strong><br>
+        <p class="margin-none txt-x-small txt-subtle">Your Slack workspace domain (e.g., mycompany) for generating message links</p>
+      <% end %>
+      <%= form.text_field :workspace_domain,
+            class: "input",
+            placeholder: "mycompany" %>
+    </div>
+
+    <div class="flex flex-column gap-half">
+      <%= form.label :webhook_secret do %>
+        <strong>Signing Secret</strong><br>
+        <p class="margin-none txt-x-small txt-subtle">Copy your Slack app's signing secret from <a href="https://api.slack.com/apps" target="_blank">api.slack.com/apps</a> → Your App → Basic Information → App Credentials</p>
+      <% end %>
+      <%= form.text_field :webhook_secret,
+            required: true,
+            class: "input",
+            placeholder: "1234567890abcdef1234567890abcdef" %>
+    </div>
+
+    <div class="flex flex-column gap-half">
+      <%= form.label :sync_messages do %>
+        <strong>Event Synchronization</strong><br>
+        <p class="margin-none txt-x-small txt-subtle">Select which Slack events should create or update Fizzy cards:</p>
+      <% end %>
+
+      <ul class="flex flex-column align-start gap-half margin-none unpad">
+        <li class="list-style-none margin-none">
+          <label class="toggler__visible-when-off flex align-center gap cursor-pointer">
+            <span class="switch txt-x-small flex-item-no-shrink">
+              <%= form.check_box :sync_messages, { checked: true, class: "switch__input" } %>
+              <span class="switch__btn round"></span>
+            </span>
+            <span class="min-width">Messages (new messages in the channel)</span>
+          </label>
+        </li>
+
+        <li class="list-style-none margin-none">
+          <label class="toggler__visible-when-off flex align-center gap cursor-pointer">
+            <span class="switch txt-x-small flex-item-no-shrink">
+              <%= form.check_box :sync_thread_replies, { checked: true, class: "switch__input" } %>
+              <span class="switch__btn round"></span>
+            </span>
+            <span class="min-width">Thread Replies (comments on message cards)</span>
+          </label>
+        </li>
+
+        <li class="list-style-none margin-none">
+          <label class="toggler__visible-when-off flex align-center gap cursor-pointer">
+            <span class="switch txt-x-small flex-item-no-shrink">
+              <%= form.check_box :sync_reactions, { checked: true, class: "switch__input" } %>
+              <span class="switch__btn round"></span>
+            </span>
+            <span class="min-width">Reactions (emoji reactions on messages)</span>
+          </label>
+        </li>
+      </ul>
+    </div>
+
+    <div class="flex flex-column gap-half">
+      <label>
+        <strong>Emoji Reaction Actions (Optional)</strong><br>
+        <p class="margin-none txt-x-small txt-subtle">Map Slack emoji reactions to automatically perform actions on Fizzy cards. When you react to a message with a mapped emoji, the corresponding action will be executed.</p>
+      </label>
+
+      <%= render "slack_integrations/emoji_mappings", form: form, integration: @integration, board: @board %>
+    </div>
+
+    <%= form.button type: :submit, class: "btn btn--link center txt-medium" do %>
+      <span>Add Channel</span>
+    <% end %>
+
+    <%= link_to "Go back", board_slack_integrations_path(@board), data: { form_target: "cancel" }, hidden: true %>
+  <% end %>
+</article>

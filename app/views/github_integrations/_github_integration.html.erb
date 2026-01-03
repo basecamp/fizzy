@@ -1,0 +1,35 @@
+<li id="<%= dom_id(github_integration) %>" class="flex align-center gap-half" data-filter-target="item" data-navigable-list-target="item" role="option">
+  <%= link_to [ github_integration.board, github_integration ], class: "flex gap-half align-center min-width" do %>
+    <div class="txt-align-start overflow-ellipsis">
+      <strong style="color: <%= github_integration.color %>"><%= github_integration.repository_full_name %></strong>
+      <div class="txt-x-small txt-subtle">Active</div>
+    </div>
+  <% end %>
+
+  <hr class="separator--horizontal flex-item-grow" style="--border-color: var(--color-ink-medium); --border-style: dashed" aria-hidden="true">
+
+  <div data-controller="dialog" data-dialog-modal-value="true">
+    <button type="button" class="btn btn--circle" style="background-color: <%= github_integration.color %>" data-action="click->dialog#open" aria-label="Change color" title="Change color">
+      <span class="for-screen-reader">Change color</span>
+    </button>
+    <dialog class="popup panel flex-column gap fill-white shadow popup--animated" data-dialog-target="dialog">
+      <%= form_with model: github_integration, url: board_github_integration_path(github_integration.board, github_integration), data: { controller: "form", action: "turbo:submit-end->dialog#close" }, method: :patch do |form| %>
+        <div class="color-picker__colors">
+          <% Color::COLORS.each do |color| %>
+            <label class="btn txt-small borderless" style="--btn-background: <%= color %>" title="<%= color.name %>">
+              <%= form.radio_button :color, color.value, checked: (github_integration.color == color), data: { action: "change->form#submit" } %>
+              <%= icon_tag "check", class: "checked" %>
+              <span class="for-screen-reader"><%= color.name %></span>
+            </label>
+          <% end %>
+        </div>
+      <% end %>
+    </dialog>
+  </div>
+
+  <%= button_to [ github_integration.board, github_integration ], method: :delete, class: "btn btn--circle btn--negative",
+        data: { turbo_confirm: "Are you sure you want to remove this GitHub integration?" } do %>
+    <%= icon_tag "minus" %>
+    <span class="for-screen-reader">Remove <%= github_integration.repository_full_name %></span>
+  <% end %>
+</li>

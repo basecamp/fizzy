@@ -1,0 +1,131 @@
+<% @page_title = "Edit Slack Integration" %>
+
+<% content_for :header do %>
+  <div class="header__actions header__actions--start">
+    <%= back_link_to "##{@integration.channel_name}", [@integration.board, @integration], "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+  </div>
+
+  <h1 class="header__title"><%= @page_title %></h1>
+<% end %>
+
+<article class="panel panel--wide center txt-align-start">
+  <%= form_with model: @integration, url: board_slack_integration_path(@board, @integration), data: { controller: "form" }, html: { class: "flex flex-column gap" } do |form| %>
+    <% if @integration.errors.any? %>
+      <div class="margin-block-half txt-negative txt-small" style="text-align: left;">
+        <p class="margin-block-none font-weight-bold">The integration couldn't be updated:</p>
+        <ul class="margin-block-none">
+          <% @integration.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="flex flex-column gap-half">
+      <%= form.label :channel_name do %>
+        <strong>Channel Name</strong><br>
+        <p class="margin-none txt-x-small txt-subtle">The channel name (without #)</p>
+      <% end %>
+      <%= form.text_field :channel_name,
+            required: true,
+            class: "input" %>
+    </div>
+
+    <div class="flex flex-column gap-half">
+      <%= form.label :workspace_domain do %>
+        <strong>Workspace Domain (Optional)</strong><br>
+        <p class="margin-none txt-x-small txt-subtle">Your Slack workspace domain for generating message links</p>
+      <% end %>
+      <%= form.text_field :workspace_domain,
+            class: "input",
+            placeholder: "mycompany" %>
+    </div>
+
+    <div class="flex flex-column gap-half">
+      <%= form.label :webhook_secret do %>
+        <strong>Signing Secret</strong><br>
+        <p class="margin-none txt-x-small txt-subtle">Your Slack app's signing secret from <a href="https://api.slack.com/apps" target="_blank">api.slack.com/apps</a> → Basic Information → App Credentials</p>
+      <% end %>
+      <%= form.text_field :webhook_secret,
+            required: true,
+            class: "input",
+            placeholder: "1234567890abcdef1234567890abcdef" %>
+    </div>
+
+    <div class="flex flex-column gap-half">
+      <%= form.label :bot_user_id do %>
+        <strong>Bot User ID (Auto-detected)</strong><br>
+        <p class="margin-none txt-x-small txt-subtle">
+          This is automatically detected from incoming Slack webhooks. You don't need to configure this manually.
+        </p>
+      <% end %>
+      <%= form.text_field :bot_user_id,
+            class: "input",
+            placeholder: "Will be auto-detected from first webhook",
+            readonly: true,
+            style: "background-color: var(--color-background-secondary);" %>
+    </div>
+
+    <div class="flex flex-column gap-half">
+      <%= form.label :bot_oauth_token do %>
+        <strong>Bot OAuth Token</strong><br>
+        <p class="margin-none txt-x-small txt-subtle">Your bot's OAuth token from <a href="https://api.slack.com/apps" target="_blank">api.slack.com/apps</a> → OAuth & Permissions → "Bot User OAuth Token" (starts with xoxb-)</p>
+      <% end %>
+      <%= form.text_field :bot_oauth_token,
+            class: "input",
+            placeholder: "xoxb-your-token-here" %>
+    </div>
+
+    <div class="flex flex-column gap-half">
+      <%= form.label :sync_messages do %>
+        <strong>Event Synchronization</strong><br>
+        <p class="margin-none txt-x-small txt-subtle">Select which Slack events should create or update Fizzy cards:</p>
+      <% end %>
+
+      <ul class="flex flex-column align-start gap-half margin-none unpad">
+        <li class="list-style-none margin-none">
+          <label class="toggler__visible-when-off flex align-center gap cursor-pointer">
+            <span class="switch txt-x-small flex-item-no-shrink">
+              <%= form.check_box :sync_messages, { class: "switch__input" } %>
+              <span class="switch__btn round"></span>
+            </span>
+            <span class="min-width">Messages (new messages in the channel)</span>
+          </label>
+        </li>
+
+        <li class="list-style-none margin-none">
+          <label class="toggler__visible-when-off flex align-center gap cursor-pointer">
+            <span class="switch txt-x-small flex-item-no-shrink">
+              <%= form.check_box :sync_thread_replies, { class: "switch__input" } %>
+              <span class="switch__btn round"></span>
+            </span>
+            <span class="min-width">Thread Replies (comments on message cards)</span>
+          </label>
+        </li>
+
+        <li class="list-style-none margin-none">
+          <label class="toggler__visible-when-off flex align-center gap cursor-pointer">
+            <span class="switch txt-x-small flex-item-no-shrink">
+              <%= form.check_box :sync_reactions, { class: "switch__input" } %>
+              <span class="switch__btn round"></span>
+            </span>
+            <span class="min-width">Reactions (emoji reactions on messages)</span>
+          </label>
+        </li>
+      </ul>
+    </div>
+
+    <div class="flex flex-column gap-half">
+      <label>
+        <strong>Emoji Reaction Actions</strong><br>
+        <p class="margin-none txt-x-small txt-subtle">Map Slack emoji reactions to automatically perform actions on Fizzy cards. When you react to a message with a mapped emoji, the corresponding action will be executed.</p>
+      </label>
+
+      <%= render "slack_integrations/emoji_mappings", form: form, integration: @integration, board: @board %>
+    </div>
+
+    <%= form.button "Save Changes", class: "btn btn--link center txt-medium" %>
+
+    <%= link_to "Go back", [@integration.board, @integration], data: { form_target: "cancel" }, hidden: true %>
+  <% end %>
+</article>

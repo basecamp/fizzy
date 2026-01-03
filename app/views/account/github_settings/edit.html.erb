@@ -1,0 +1,72 @@
+<% @page_title = "GitHub Settings" %>
+
+<% content_for :header do %>
+  <h1 class="header__title"><%= @page_title %></h1>
+<% end %>
+
+<section class="settings">
+  <div class="settings__panel panel shadow center">
+    <header>
+      <h2 class="divider txt-large">Global GitHub Event Settings</h2>
+      <div>These settings apply to all GitHub integrations in your account. Disabling an event type here will prevent it from syncing, even if enabled on individual integrations.</div>
+    </header>
+
+    <%= form_with model: @setting, url: account_github_setting_path, html: { class: "flex flex-column gap" } do |form| %>
+      <ul class="flex flex-column align-start gap margin-none unpad">
+        <li class="list-style-none margin-none">
+          <label class="toggler__visible-when-off flex align-center gap cursor-pointer">
+            <span class="switch txt-x-small flex-item-no-shrink">
+              <%= form.check_box :allow_pull_requests, {}, true, false, class: "switch__input" %>
+              <span class="switch__btn round"></span>
+            </span>
+            <div class="flex flex-column min-width">
+              <strong>Allow Pull Request Sync</strong>
+              <span class="txt-small txt-subtle">When disabled, no pull requests will sync from any GitHub integration</span>
+            </div>
+          </label>
+        </li>
+
+        <li class="list-style-none margin-none">
+          <label class="toggler__visible-when-off flex align-center gap cursor-pointer">
+            <span class="switch txt-x-small flex-item-no-shrink">
+              <%= form.check_box :allow_issues, {}, true, false, class: "switch__input" %>
+              <span class="switch__btn round"></span>
+            </span>
+            <div class="flex flex-column min-width">
+              <strong>Allow Issue Sync</strong>
+              <span class="txt-small txt-subtle">When disabled, no issues will sync from any GitHub integration</span>
+            </div>
+          </label>
+        </li>
+
+        <li class="list-style-none margin-none">
+          <label class="toggler__visible-when-off flex align-center gap cursor-pointer">
+            <span class="switch txt-x-small flex-item-no-shrink">
+              <%= form.check_box :allow_comments, {}, true, false, class: "switch__input" %>
+              <span class="switch__btn round"></span>
+            </span>
+            <div class="flex flex-column min-width">
+              <strong>Allow Comment Sync</strong>
+              <span class="txt-small txt-subtle">When disabled, no comments will sync from any GitHub integration</span>
+            </div>
+          </label>
+        </li>
+
+        <li class="list-style-none margin-none">
+          <label class="toggler__visible-when-off flex align-center gap cursor-pointer">
+            <span class="switch txt-x-small flex-item-no-shrink">
+              <%= form.check_box :allow_reviews, {}, true, false, class: "switch__input" %>
+              <span class="switch__btn round"></span>
+            </span>
+            <div class="flex flex-column min-width">
+              <strong>Allow Review Sync</strong>
+              <span class="txt-small txt-subtle">When disabled, no pull request reviews will sync from any GitHub integration</span>
+            </div>
+          </label>
+        </li>
+      </ul>
+
+      <%= form.button "Save Settings", class: "btn btn--link" %>
+    <% end %>
+  </div>
+</section>

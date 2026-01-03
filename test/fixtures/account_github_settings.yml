@@ -1,0 +1,22 @@
+_fixture:
+  model_class: Account::GithubSetting
+
+first_account:
+  id: <%= ActiveRecord::FixtureSet.identify("first_account_github_setting", :uuid) %>
+  account_id: <%= ActiveRecord::FixtureSet.identify("37s", :uuid) %>
+  allow_pull_requests: true
+  allow_issues: true
+  allow_comments: true
+  allow_reviews: true
+  created_at: <%= 1.week.ago %>
+  updated_at: <%= 1.week.ago %>
+
+second_account:
+  id: <%= ActiveRecord::FixtureSet.identify("second_account_github_setting", :uuid) %>
+  account_id: <%= ActiveRecord::FixtureSet.identify("initech", :uuid) %>
+  allow_pull_requests: true
+  allow_issues: false
+  allow_comments: true
+  allow_reviews: false
+  created_at: <%= 1.week.ago %>
+  updated_at: <%= 1.week.ago %>

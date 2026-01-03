@@ -1,0 +1,121 @@
+<% @page_title = @integration.repository_full_name %>
+
+<% content_for :header do %>
+  <div class="header__actions header__actions--start">
+    <div class="header__actions header__actions--start">
+      <%= back_link_to "GitHub Integrations", board_github_integrations_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+    </div>
+  </div>
+
+  <div class="header__actions header__actions--end">
+    <%= link_to edit_board_github_integration_path(@integration.board_id, @integration), class: "btn" do %>
+      <%= icon_tag "pencil" %>
+      <span class="for-screen-reader">Edit</span>
+    <% end %>
+  </div>
+<% end %>
+
+<div class="panel panel--wide shadow center flex flex-column gap txt-align-start">
+  <header>
+    <h1 class="txt-x-large margin-none"><%= @integration.repository_full_name %></h1>
+    <% unless @integration.active? %>
+      <span class="badge badge--muted">Inactive</span>
+    <% end %>
+  </header>
+
+  <% unless @integration.active? %>
+    <div>
+      <%= button_to "Activate", board_github_integration_activation_path(@integration.board_id, @integration), method: :post, class: "btn btn--link" %>
+    </div>
+  <% else %>
+    <div>
+      <%= button_to "Deactivate", board_github_integration_activation_path(@integration.board_id, @integration), method: :post, class: "btn" %>
+    </div>
+  <% end %>
+
+  <div>
+    <h2 class="margin-none txt-uppercase txt-medium">Webhook URL</h2>
+    <p class="txt-small txt-subtle margin-none">
+      Add this webhook URL to your GitHub repository settings (Settings → Webhooks → Add webhook).
+    </p>
+    <strong><code class="txt-break"><%= @integration.webhook_url %></code></strong>
+  </div>
+
+  <div>
+    <h2 class="margin-none txt-uppercase txt-medium">Webhook Secret</h2>
+    <strong><code><%= @integration.webhook_secret %></code></strong>
+    <p class="txt-small txt-subtle margin-none">
+      Use this secret when configuring the webhook in GitHub to ensure requests are authenticated.
+    </p>
+  </div>
+
+  <div class="flex flex-column">
+    <h2 class="margin-none txt-uppercase txt-medium">GitHub Configuration</h2>
+    <p class="txt-small txt-subtle margin-none">
+      In your GitHub repository webhook settings, configure:
+    </p>
+    <ul class="txt-small">
+      <li><strong>Payload URL:</strong> The webhook URL above</li>
+      <li><strong>Content type:</strong> application/json</li>
+      <li><strong>Secret:</strong> The webhook secret above</li>
+      <li><strong>Events:</strong> Select "Let me select individual events" and check:
+        <ul>
+          <% if @integration.sync_pull_requests %>
+            <li>Pull requests</li>
+          <% end %>
+          <% if @integration.sync_issues %>
+            <li>Issues</li>
+          <% end %>
+          <% if @integration.sync_comments %>
+            <li>Issue comments</li>
+            <li>Pull request review comments</li>
+          <% end %>
+          <% if @integration.sync_reviews %>
+            <li>Pull request reviews</li>
+          <% end %>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <div class="flex flex-column">
+    <h2 class="margin-none txt-uppercase txt-medium">Synced Events</h2>
+    <ul class="margin-none unpad-block">
+      <% if @integration.sync_pull_requests %>
+        <li>Pull Requests (opened, edited, closed, merged, reopened)</li>
+      <% end %>
+      <% if @integration.sync_issues %>
+        <li>Issues (opened, edited, closed, reopened)</li>
+      <% end %>
+      <% if @integration.sync_comments %>
+        <li>Comments on Pull Requests and Issues</li>
+      <% end %>
+      <% if @integration.sync_reviews %>
+        <li>Pull Request Reviews</li>
+      <% end %>
+    </ul>
+    <% unless @integration.sync_pull_requests || @integration.sync_issues || @integration.sync_comments || @integration.sync_reviews %>
+      <p class="margin-none txt-subtle">No events are being synced. Edit this integration to enable event synchronization.</p>
+    <% end %>
+  </div>
+
+  <div class="flex flex-column">
+    <h2 class="margin-none txt-uppercase txt-medium">Recent Deliveries</h2>
+    <% if @integration.deliveries.empty? %>
+      <p class="margin-none txt-subtle">No webhooks have been received yet</p>
+    <% else %>
+      <ul class="margin-none unpad-block">
+        <%= render partial: "github_integrations/delivery", collection: @integration.deliveries.ordered.limit(20), as: :delivery %>
+      </ul>
+    <% end %>
+  </div>
+
+  <div class="flex gap">
+    <%= link_to "Edit settings", edit_board_github_integration_path(@integration.board, @integration), class: "btn btn--link" %>
+    <%= button_to "Delete integration",
+        board_github_integration_path(@integration.board, @integration),
+        method: :delete,
+        form: { data: { turbo_confirm: "Are you sure you want to delete this GitHub integration? This cannot be undone." } },
+        class: "btn" %>
+  </div>
+</div>

@@ -1,0 +1,25 @@
+<% @page_title = "Slack Integrations" %>
+
+<% content_for :header do %>
+  <div class="header__actions header__actions--start">
+    <%= link_back_to_board(@board) %>
+  </div>
+
+  <h1 class="header__title"><%= @page_title %></h1>
+<% end %>
+
+<%= tag.section class: "panel panel--wide shadow center slack-integrations" do %>
+  <% if @integrations.any? %>
+    <ul class="flex flex-column gap-half margin-none-block-start unpad">
+      <%= render partial: "slack_integrations/slack_integration", collection: @integrations %>
+    </ul>
+  <% else %>
+    <p>Connect Slack channels to automatically sync messages to Fizzy cards.</p>
+    <p>When you create a Slack integration, Fizzy will provide a webhook URL that you can add to your Slack app's event subscriptions. Messages from the channel will automatically create cards on this board.</p>
+  <% end %>
+
+  <%= link_to new_board_slack_integration_path(@board), class: "btn btn--link" do %>
+    <%= icon_tag "add" %>
+    <span>Add Slack channel</span>
+  <% end %>
+<% end %>

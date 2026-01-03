@@ -1,0 +1,32 @@
+first:
+  account_id: <%= ActiveRecord::FixtureSet.identify("37s", :uuid) %>
+  board_id: <%= ActiveRecord::FixtureSet.identify("writebook", :uuid) %>
+  repository_full_name: basecamp/fizzy
+  webhook_secret: test_secret_abc123
+  active: true
+  sync_pull_requests: true
+  sync_issues: true
+  sync_comments: true
+  sync_reviews: true
+
+second:
+  account_id: <%= ActiveRecord::FixtureSet.identify("initech", :uuid) %>
+  board_id: <%= ActiveRecord::FixtureSet.identify("miltons_wish_list", :uuid) %>
+  repository_full_name: owner/repository
+  webhook_secret: test_secret_xyz789
+  active: true
+  sync_pull_requests: true
+  sync_issues: false
+  sync_comments: true
+  sync_reviews: false
+
+inactive:
+  account_id: <%= ActiveRecord::FixtureSet.identify("37s", :uuid) %>
+  board_id: <%= ActiveRecord::FixtureSet.identify("writebook", :uuid) %>
+  repository_full_name: github/test-repo
+  webhook_secret: test_secret_inactive
+  active: false
+  sync_pull_requests: true
+  sync_issues: true
+  sync_comments: true
+  sync_reviews: true

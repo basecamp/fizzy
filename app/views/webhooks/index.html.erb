@@ -8,18 +8,34 @@
   <h1 class="header__title"><%= @page_title %></h1>
 <% end %>
 
-<%= tag.section class: "panel panel--wide shadow center webhooks" do %>
-  <% if @page.records.any? %>
-    <ul class="flex flex-column align-start gap margin-none-block-start unpad webhooks-list">
-      <%= render partial: "webhooks/webhook", collection: @page.records %>
-    </ul>
-  <% else %>
-    <p>Webhooks can notify another application when something happens in this Fizzy board. You’ll choose which events to subscribe to and provide a URL to receive the data.</p>
-    <p>For example, you could create a webhook that posts to a Campfire chat in Basecamp when new cards are added to Fizzy.</p>
-  <% end %>
+<section class="settings">
+  <div class="settings__panel panel shadow center">
+    <header>
+      <h2 class="divider txt-large">Incoming Webhooks</h2>
+      <div>Receive events from external services and automatically create cards in this board.</div>
+    </header>
 
-  <%= link_to new_board_webhook_path, class: "btn btn--link" do %>
-    <%= icon_tag "add" %>
-    <span>Set up a new webhook</span>
+    <%= render "webhooks/incoming/github", board: @board %>
+    <%= render "webhooks/incoming/slack", board: @board %>
+  </div>
+
+  <%= tag.section class: "settings__panel panel shadow center webhooks" do %>
+    <header>
+      <h2 class="divider txt-large">Outgoing Webhooks</h2>
+      <div>Send events to external services when something happens in this board.</div>
+    </header>
+
+    <% if @page.records.any? %>
+      <ul class="flex flex-column align-start gap margin-none-block-start unpad webhooks-list">
+        <%= render partial: "webhooks/webhook", collection: @page.records %>
+      </ul>
+    <% else %>
+      <p class="txt-subtle margin-none">No outgoing webhooks configured. Create one to notify another application when events happen in this board.</p>
+    <% end %>
+
+    <%= link_to new_board_webhook_path, class: "btn btn--link center", disabled: !Current.user.can_administer_board?(@board) do %>
+      <%= icon_tag "add" %>
+      <span>Set up a new webhook</span>
+    <% end %>
   <% end %>
-<% end %>
+</section>

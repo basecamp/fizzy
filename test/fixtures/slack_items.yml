@@ -1,0 +1,23 @@
+message_one:
+  account: 37s_uuid
+  card: logo_uuid
+  slack_integration: first
+  slack_message_ts: "1234567890.123456"
+  slack_user_id: U1234567890
+  channel_id: C1234567890
+
+message_two:
+  account: 37s_uuid
+  card: layout_uuid
+  slack_integration: first
+  slack_message_ts: "1234567891.123456"
+  slack_user_id: U0987654321
+  channel_id: C1234567890
+
+thread_message:
+  account: initech_uuid
+  card: features_uuid
+  slack_integration: second
+  slack_message_ts: "9876543210.654321"
+  slack_user_id: U1111111111
+  channel_id: C0987654321
