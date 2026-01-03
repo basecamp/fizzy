@@ -8,14 +8,14 @@
     <div class="border-radius pad fill-selected">
       <%= form_with url: board_manual_sorting_path(board), method: :delete, class: "flex-inline center justify-between gap", data: { controller: "form" } do |form| %>
         <label class="flex gap cursor-pointer">
-          <span class="txt-small txt-uppercase font-weight-black flex align-center" aria-hidden="true">ON</span>
+          <span class="txt-small txt-uppercase font-weight-black flex align-center" aria-hidden="true">OFF</span>
           <span class="switch flex align-center justify-between">
             <%= form.check_box :manual_sorting_enabled, class: "switch__input", checked: true, data: { action: "change->form#submit" }, disabled: !Current.user.can_administer_board?(@board) %>
             <span class="switch__btn round"></span>
           </span>
           <span class="for-screen-reader">Turn off manual sorting</span>
         </label>
-        <span class="txt-small txt-uppercase font-weight-black flex align-center" aria-hidden="true">OFF</span>
+        <span class="txt-small txt-uppercase font-weight-black flex align-center" aria-hidden="true">ON</span>
       <% end %>
     </div>
   <% else %>
@@ -34,4 +34,3 @@
     </div>
   <% end %>
 <% end %>
-
