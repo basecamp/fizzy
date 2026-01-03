@@ -8,7 +8,10 @@ class Account::SettingsController < ApplicationController
 
   def update
     @account.update!(account_params)
-    redirect_to account_settings_path
+    respond_to do |format|
+      format.html { redirect_to account_settings_path }
+      format.turbo_stream # Renders update.turbo_stream.erb
+    end
   end
 
   private
@@ -17,6 +20,6 @@ class Account::SettingsController < ApplicationController
     end
 
     def account_params
-      params.expect account: %i[ name ]
+      params.expect account: %i[ name signups_enabled ]
     end
 end

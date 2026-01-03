@@ -1,0 +1,19 @@
+<%= turbo_frame_tag account, :signups do %>
+  <header>
+    <h2 class="divider txt-large">New Account Signups</h2>
+    <p class="margin-none-block-start">Control whether new users can create accounts on this Fizzy installation. When disabled, only existing users can sign in.</p>
+  </header>
+
+  <%= form_with model: account, url: account_settings_path, method: :put, scope: :account, data: { controller: "form" } do |form| %>
+    <label class="flex align-center justify-center gap cursor-pointer center">
+      <span class="switch txt-x-small flex-item-no-shrink">
+        <%= form.check_box :signups_enabled, class: "switch__input", checked: account.signups_enabled, data: { action: "change->form#submit" }, disabled: !Current.user.admin? %>
+        <span class="switch__btn round"></span>
+      </span>
+      <div class="flex flex-column min-width">
+        <strong>Allow New Account Signups</strong>
+        <span class="txt-small txt-subtle">When enabled, new users can create accounts</span>
+      </div>
+    </label>
+  <% end %>
+<% end %>
