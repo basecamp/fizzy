@@ -410,44 +410,6 @@
     }
   }
 
-  /* TODO: I think this is legacy now? */
-  .cards__heading {
-    display: flex;
-    font-size: var(--text-medium);
-    inset-block-start: 0;
-    justify-content: center;
-    margin-block-start: 1px;
-    margin-inline: -8px; /* enough to cover card shadows, but avoid overlapping bubbles */
-    padding-block: var(--cards-gap) 0;
-    position: sticky;
-    z-index: 3;
-
-    /* Cover bubbles and cards on small viewports */
-    @media (max-width: 639px) {
-      margin-inline: calc(-1 * var(--cards-gap) - var(--main-padding));
-    }
-
-    &, .cards__filter {
-      font-weight: bold;
-      text-transform: uppercase;
-    }
-
-    .cards__filter {
-      --filter-block-padding: 0.5rem;
-
-      background-color: var(--color-canvas);
-      border-radius: 99rem;
-      inline-size: auto;
-      margin-block: calc(-1 * var(--filter-block-padding));
-      padding-block: var(--filter-block-padding);
-    }
-
-    dialog {
-      font-weight: normal;
-      text-transform: none;
-    }
-  }
-
   /* Override card styles within columns
   /* ------------------------------------------------------------------------ */
 
