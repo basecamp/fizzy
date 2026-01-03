@@ -33,7 +33,18 @@ class Account < ApplicationRecord
   end
 
   def system_user
-    users.find_by!(role: :system)
+    users.find_or_create_by!(role: :system) do |user|
+      user.name = "System"
+    end
+  end
+
+  # Virtual attribute to invert signups_disabled for better UX
+  def signups_enabled
+    !signups_disabled
+  end
+
+  def signups_enabled=(value)
+    self.signups_disabled = !ActiveModel::Type::Boolean.new.cast(value)
   end
 
   private

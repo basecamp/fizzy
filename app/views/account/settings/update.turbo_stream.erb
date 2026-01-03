@@ -1,0 +1,2 @@
+<%= turbo_stream.replace([ @account, :signups ], partial: "account/settings/signups", locals: { account: @account }) %>
+<%= turbo_stream_flash(notice: "Saved") %>
