@@ -1,0 +1,56 @@
+<%= tag.li id: dom_id(delivery), class: token_list("flex flex-column gap-quarter", delivery.succeeded? && "delivery--succeeded", delivery.failed? && "delivery--failed") do %>
+  <div class="flex gap align-center">
+    <% if delivery.succeeded? %>
+      <span class="txt-positive" title="Success">✅</span>
+    <% elsif delivery.failed? %>
+      <span class="txt-negative" title="Failed">❌</span>
+    <% else %>
+      <span class="txt-subtle" title="Pending">⏳</span>
+    <% end %>
+
+    <strong>
+      <%= delivery.event_type %>
+    </strong>
+
+    <span class="txt-subtle txt-x-small">
+      <%= delivery.state %>
+    </span>
+
+    <span class="txt-subtle txt-x-small">
+      <%= time_tag delivery.created_at, time_ago_in_words(delivery.created_at) %>
+    </span>
+  </div>
+
+  <% if delivery.failed? && delivery.response[:error].present? %>
+    <div class="txt-small txt-negative" style="margin-left: 1.5rem;">
+      <strong>Error:</strong> <%= delivery.response[:error] %>
+    </div>
+  <% end %>
+
+  <% if delivery.request.present? && delivery.request[:payload].present? %>
+    <details class="txt-x-small" style="margin-left: 1.5rem;">
+      <summary class="cursor-pointer txt-subtle">View payload details</summary>
+      <div class="margin-block-start-half">
+        <% payload = delivery.request[:payload] %>
+        <% if payload.is_a?(Hash) %>
+          <% event_data = payload["event"] %>
+          <% if event_data %>
+            <div><strong>Event:</strong> <%= event_data["type"] %></div>
+            <% if event_data["reaction"] %>
+              <div><strong>Emoji:</strong> :<%= event_data["reaction"] %>:</div>
+            <% end %>
+            <% if event_data["text"] %>
+              <div><strong>Text:</strong> <%= event_data["text"]&.truncate(100) %></div>
+            <% end %>
+            <% if event_data["user"] %>
+              <div><strong>User:</strong> <%= event_data["user"] %></div>
+            <% end %>
+            <% if event_data["ts"] || event_data.dig("item", "ts") %>
+              <div><strong>Message TS:</strong> <%= event_data["ts"] || event_data.dig("item", "ts") %></div>
+            <% end %>
+          <% end %>
+        <% end %>
+      </div>
+    </details>
+  <% end %>
+<% end %>

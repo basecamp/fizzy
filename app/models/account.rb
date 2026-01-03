@@ -11,10 +11,13 @@ class Account < ApplicationRecord
   has_many :exports, class_name: "Account::Export", dependent: :destroy
   has_many :github_integrations, dependent: :destroy
   has_one :github_setting, class_name: "Account::GithubSetting", dependent: :destroy
+  has_many :slack_integrations, dependent: :destroy
+  has_one :slack_setting, class_name: "Account::SlackSetting", dependent: :destroy
 
   before_create :assign_external_account_id
   after_create :create_join_code
   after_create :create_github_setting
+  after_create :create_slack_setting
 
   validates :name, presence: true
 
@@ -46,5 +49,9 @@ class Account < ApplicationRecord
 
     def create_github_setting
       build_github_setting.save!
+    end
+
+    def create_slack_setting
+      build_slack_setting.save!
     end
 end

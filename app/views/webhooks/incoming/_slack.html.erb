@@ -1,0 +1,17 @@
+<header>
+  <h3 class="divider txt-medium">Slack</h3>
+  <div>Sync Slack messages to this board automatically.</div>
+</header>
+
+<p class="txt-subtle margin-none">
+  <% if board.slack_integrations.any? %>
+    <%= pluralize(board.slack_integrations.count, 'channel') %> connected
+  <% else %>
+    No channels connected
+  <% end %>
+</p>
+
+<%= link_to board_slack_integrations_path(board), class: "btn btn--link center", disabled: !Current.user.can_administer_board?(board) do %>
+  <%= icon_tag "add" %>
+  <span>Manage Slack Integrations</span>
+<% end %>

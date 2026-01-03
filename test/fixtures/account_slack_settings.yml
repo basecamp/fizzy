@@ -1,0 +1,20 @@
+_fixture:
+  model_class: Account::SlackSetting
+
+first_account:
+  id: <%= ActiveRecord::FixtureSet.identify("first_account_slack_setting", :uuid) %>
+  account_id: <%= ActiveRecord::FixtureSet.identify("37s", :uuid) %>
+  allow_messages: true
+  allow_thread_replies: true
+  allow_reactions: true
+  created_at: <%= 1.week.ago %>
+  updated_at: <%= 1.week.ago %>
+
+second_account:
+  id: <%= ActiveRecord::FixtureSet.identify("second_account_slack_setting", :uuid) %>
+  account_id: <%= ActiveRecord::FixtureSet.identify("initech", :uuid) %>
+  allow_messages: true
+  allow_thread_replies: false
+  allow_reactions: true
+  created_at: <%= 1.week.ago %>
+  updated_at: <%= 1.week.ago %>

@@ -6,6 +6,7 @@ Rails.application.routes.draw do
     resource :join_code
     resource :settings
     resource :github_setting, only: %i[edit update]
+    resource :slack_setting, only: %i[edit update]
     resources :exports, only: [ :create, :show ]
   end
 
@@ -49,6 +50,12 @@ Rails.application.routes.draw do
 
     resources :github_integrations do
       scope module: :github_integrations do
+        resource :activation, only: :create
+      end
+    end
+
+    resources :slack_integrations do
+      scope module: :slack_integrations do
         resource :activation, only: :create
       end
     end
@@ -237,6 +244,11 @@ Rails.application.routes.draw do
 
   # GitHub webhook endpoint (unauthenticated)
   namespace :github do
+    resources :webhooks, only: :create
+  end
+
+  # Slack webhook endpoint (unauthenticated)
+  namespace :slack do
     resources :webhooks, only: :create
   end
 

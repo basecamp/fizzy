@@ -1,0 +1,282 @@
+<% @page_title = "##{@integration.channel_name}" %>
+
+<% content_for :header do %>
+  <div class="header__actions header__actions--start">
+    <div class="header__actions header__actions--start">
+      <%= back_link_to "Slack Integrations", board_slack_integrations_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+    </div>
+  </div>
+
+  <div class="header__actions header__actions--end">
+    <%= link_to edit_board_slack_integration_path(@integration.board_id, @integration), class: "btn" do %>
+      <%= icon_tag "pencil" %>
+      <span class="for-screen-reader">Edit</span>
+    <% end %>
+  </div>
+<% end %>
+
+<div class="panel panel--wide shadow center flex flex-column gap txt-align-start">
+  <header>
+    <h1 class="txt-x-large margin-none">#<%= @integration.channel_name %></h1>
+    <% unless @integration.active? %>
+      <span class="badge badge--muted">Inactive</span>
+    <% end %>
+  </header>
+
+  <% unless @integration.active? %>
+    <div>
+      <%= button_to "Activate", board_slack_integration_activation_path(@integration.board_id, @integration), method: :post, class: "btn btn--link" %>
+    </div>
+  <% else %>
+    <div>
+      <%= button_to "Deactivate", board_slack_integration_activation_path(@integration.board_id, @integration), method: :post, class: "btn" %>
+    </div>
+  <% end %>
+
+  <div>
+    <h2 class="margin-none txt-uppercase txt-medium">Webhook URL</h2>
+    <p class="txt-small txt-subtle margin-none">
+      Add this webhook URL to your Slack app's Event Subscriptions settings.
+    </p>
+    <strong><code class="txt-break"><%= @integration.webhook_url %></code></strong>
+  </div>
+
+  <div>
+    <h2 class="margin-none txt-uppercase txt-medium">Signing Secret</h2>
+    <p class="txt-small txt-subtle margin-none">
+      Your Slack app's signing secret is securely stored and used to verify incoming webhook requests.
+    </p>
+    <strong><code><%= @integration.webhook_secret.present? ? "••••••••••••••••" : "Not configured" %></code></strong>
+  </div>
+
+  <div class="flex flex-column">
+    <h2 class="margin-none txt-uppercase txt-medium">Bot Configuration</h2>
+    <ul class="margin-none unpad-block">
+      <li><strong>Bot User ID:</strong> <%= @integration.bot_user_id.present? ? @integration.bot_user_id : "Not yet detected" %>
+        <% if @integration.bot_user_id.blank? %>
+          <span class="txt-subtle txt-small"> (will be auto-detected from first webhook)</span>
+        <% else %>
+          <span class="txt-subtle txt-small"> (auto-detected)</span>
+        <% end %>
+      </li>
+      <li><strong>Bot OAuth Token:</strong> <%= @integration.bot_oauth_token.present? ? "xoxb-••••••••••••••••" : "Not configured" %>
+        <% if @integration.bot_oauth_token.blank? %>
+          <span class="txt-subtle txt-small"> (thread replies disabled)</span>
+        <% end %>
+      </li>
+    </ul>
+    <% if @integration.bot_user_id.present? %>
+      <p class="txt-small txt-subtle margin-block-start">
+        💡 Cards are only created when you @mention the bot in Slack. Messages without a mention will be ignored.
+      </p>
+    <% end %>
+  </div>
+
+  <div class="flex flex-column">
+    <h2 class="margin-none txt-uppercase txt-medium">Slack App Configuration</h2>
+    <p class="txt-small txt-subtle margin-none">
+      In your Slack app settings at <a href="https://api.slack.com/apps" target="_blank">api.slack.com/apps</a>, configure the following:
+    </p>
+    <ul class="txt-small">
+      <li>
+        <strong>1. OAuth & Permissions</strong> → Add these Bot Token Scopes:
+        <ul>
+          <li><code>channels:history</code> - Required to receive channel messages</li>
+          <li><code>reactions:read</code> - Required to receive emoji reactions</li>
+          <li><code>chat:write</code> - Required to send thread reply confirmations</li>
+        </ul>
+      </li>
+      <li>
+        <strong>2. Event Subscriptions</strong> → Enable and configure:
+        <ul>
+          <li><strong>Request URL:</strong> Paste the webhook URL from above</li>
+          <li><strong>Subscribe to bot events:</strong> Add only these 2 events:
+            <ul>
+              <li><code>message.channels</code> - Receives messages posted in channels</li>
+              <li><code>reaction_added</code> - Receives emoji reactions on messages</li>
+            </ul>
+            <em class="txt-subtle">Note: Do NOT add message.im, channel_history_changed, im_history_changed, or group_history_changed - these are not needed.</em>
+          </li>
+          <li>Click <strong>"Save Changes"</strong> at the bottom</li>
+        </ul>
+      </li>
+      <li>
+        <strong>3. Reinstall App</strong> → After making changes above:
+        <ul>
+          <li>You'll see a yellow banner: "Please reinstall your app"</li>
+          <li>Click the reinstall link or go to "Install App" → "Reinstall to Workspace"</li>
+        </ul>
+      </li>
+      <li>
+        <strong>4. Invite Bot to Channel</strong> → In Slack:
+        <ul>
+          <li>Go to #<%= @integration.channel_name %></li>
+          <li>Type: <code>/invite @YourBot</code></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <div class="flex flex-column">
+    <h2 class="margin-none txt-uppercase txt-medium">Channel Information</h2>
+    <ul class="margin-none unpad-block">
+      <li><strong>Channel ID:</strong> <%= @integration.channel_id %></li>
+      <li><strong>Channel Name:</strong> #<%= @integration.channel_name %></li>
+      <% if @integration.workspace_domain.present? %>
+        <li><strong>Workspace:</strong> <%= @integration.workspace_domain %>.slack.com</li>
+      <% end %>
+    </ul>
+  </div>
+
+  <div class="flex flex-column">
+    <h2 class="margin-none txt-uppercase txt-medium">Synced Events</h2>
+    <ul class="margin-none unpad-block">
+      <% if @integration.sync_messages %>
+        <li>✅ Channel Messages (new messages create cards)</li>
+      <% end %>
+      <% if @integration.sync_thread_replies %>
+        <li>✅ Thread Replies (replies become comments)</li>
+      <% end %>
+      <% if @integration.sync_reactions %>
+        <li>✅ Reactions (emoji reactions on messages)</li>
+      <% end %>
+    </ul>
+    <% unless @integration.sync_messages || @integration.sync_thread_replies || @integration.sync_reactions %>
+      <p class="margin-none txt-subtle">No events are being synced. Edit this integration to enable event synchronization.</p>
+    <% end %>
+  </div>
+
+  <% if @integration.emoji_action_mappings.present? %>
+    <div class="flex flex-column">
+      <h2 class="margin-none txt-uppercase txt-medium">Emoji Action Mappings</h2>
+      <p class="txt-small txt-subtle margin-none">
+        When you react to a Slack message with these emojis, the corresponding action will be performed on the card:
+      </p>
+      <ul class="margin-none unpad-block txt-small">
+        <% @integration.emoji_action_mappings.each do |emoji, config| %>
+          <% next unless config.is_a?(Hash) && config["action"].present? %>
+          <li>
+            <strong>:<%=emoji%>:</strong> →
+            <% case config["action"] %>
+            <% when "move_to_column" %>
+              <% column = @integration.board.columns.find_by(id: config["column_id"]) %>
+              <% if column %>
+                Move to column: <strong><%= column.name %></strong>
+              <% else %>
+                <span class="txt-negative">⚠️  Column not found (may have been deleted)</span>
+              <% end %>
+            <% when "close" %>
+              <strong>Close card</strong>
+            <% when "postpone" %>
+              <strong>Postpone</strong> (move to Not Now)
+            <% when "reopen" %>
+              <strong>Reopen card</strong>
+            <% else %>
+              Unknown action: <%= config["action"] %>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="flex flex-column">
+    <h2 class="margin-none txt-uppercase txt-medium">Recent Deliveries</h2>
+    <% if @integration.deliveries.empty? %>
+      <div class="txt-subtle margin-none">
+        <p>No webhooks have been received yet.</p>
+        <p class="txt-small">
+          If you've configured your Slack app but aren't seeing deliveries:
+        </p>
+        <ul class="txt-small">
+          <li>Verify the bot is invited to #<%= @integration.channel_name %> in Slack</li>
+          <li>Check that Event Subscriptions are enabled in your Slack app</li>
+          <li>Ensure the Request URL shows a green checkmark in Slack</li>
+          <li>Try posting a test message in the channel</li>
+        </ul>
+      </div>
+    <% else %>
+      <p class="txt-small txt-subtle margin-none">
+        Last <%= @integration.deliveries.count > 20 ? "20" : @integration.deliveries.count %> webhook deliveries:
+      </p>
+      <ul class="margin-none unpad-block">
+        <%= render partial: "slack_integrations/delivery", collection: @integration.deliveries.ordered.limit(20), as: :delivery %>
+      </ul>
+    <% end %>
+  </div>
+
+  <details class="flex flex-column">
+    <summary class="cursor-pointer">
+      <h2 class="margin-none txt-uppercase txt-medium" style="display: inline;">Troubleshooting</h2>
+    </summary>
+    <div class="margin-block-start txt-small">
+      <h3 class="txt-small margin-none">Check Docker Logs</h3>
+      <p class="txt-subtle margin-none">
+        To see detailed webhook processing logs:
+      </p>
+      <pre class="txt-x-small margin-block-start-half" style="background: var(--color-background-secondary); padding: 0.5rem; border-radius: 4px; overflow-x: auto;">docker logs -f &lt;container-name&gt; | grep "Slack"</pre>
+
+      <h3 class="txt-small margin-block-start">Common Issues</h3>
+      <dl class="txt-subtle margin-none">
+        <dt><strong>No webhooks received</strong></dt>
+        <dd>
+          • Bot not in channel - Run <code>/invite @YourBot</code> in Slack<br>
+          • Event Subscriptions not saved in Slack app settings<br>
+          • Request URL verification failed - check logs for verification challenge
+        </dd>
+
+        <dt class="margin-block-start-half"><strong>Signature verification failed</strong></dt>
+        <dd>
+          • Signing secret mismatch - verify it matches your Slack app exactly<br>
+          • Copy the secret fresh from Slack → Basic Information → App Credentials
+        </dd>
+
+        <dt class="margin-block-start-half"><strong>Emoji actions not working</strong></dt>
+        <dd>
+          • Check emoji name matches exactly (e.g., "white_check_mark" not "checkmark")<br>
+          • Verify the reaction is on a message that created a card<br>
+          • Check logs for "No action mapping found for emoji" message<br>
+          • Ensure target column exists (not deleted)
+        </dd>
+
+        <dt class="margin-block-start-half"><strong>Events not syncing</strong></dt>
+        <dd>
+          • Check event type is enabled in this integration settings<br>
+          • Verify event type is enabled in Account → Slack Settings<br>
+          • Check Recent Deliveries above for error messages
+        </dd>
+      </dl>
+
+      <h3 class="txt-small margin-block-start">Log Patterns to Look For</h3>
+      <dl class="txt-subtle margin-none txt-x-small">
+        <dt><strong>Success:</strong></dt>
+        <dd>
+          <code>✅ Signature verified successfully</code><br>
+          <code>✅ Webhook queued for processing</code><br>
+          <code>✅ Emoji action executed successfully</code>
+        </dd>
+
+        <dt class="margin-block-start-half"><strong>Errors:</strong></dt>
+        <dd>
+          <code>❌ Integration not found</code> - Wrong integration ID in URL<br>
+          <code>❌ Signature verification failed</code> - Secret mismatch<br>
+          <code>❌ Column not found</code> - Column was deleted<br>
+          <code>⚠️  No SlackItem found</code> - Reaction on non-synced message
+        </dd>
+      </dl>
+
+      <p class="margin-block-start">
+        For complete setup instructions, see <a href="https://github.com/basecamp/fizzy/blob/main/docs/slack-emoji-actions.md" target="_blank">docs/slack-emoji-actions.md</a>
+      </p>
+    </div>
+  </details>
+
+  <div class="flex gap">
+    <%= link_to "Edit settings", edit_board_slack_integration_path(@integration.board, @integration), class: "btn btn--link" %>
+    <%= button_to "Delete integration",
+        board_slack_integration_path(@integration.board, @integration),
+        method: :delete,
+        form: { data: { turbo_confirm: "Are you sure you want to delete this Slack integration? This cannot be undone." } },
+        class: "btn" %>
+  </div>
+</div>

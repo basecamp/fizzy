@@ -1,0 +1,35 @@
+<li id="<%= dom_id(slack_integration) %>" class="flex align-center gap-half" data-filter-target="item" data-navigable-list-target="item" role="option">
+  <%= link_to [ slack_integration.board, slack_integration ], class: "flex gap-half align-center min-width" do %>
+    <div class="txt-align-start overflow-ellipsis">
+      <strong style="color: <%= slack_integration.color %>">#<%= slack_integration.channel_name %></strong>
+      <div class="txt-x-small txt-subtle"><%= slack_integration.active? ? "Active" : "Inactive" %></div>
+    </div>
+  <% end %>
+
+  <hr class="separator--horizontal flex-item-grow" style="--border-color: var(--color-ink-medium); --border-style: dashed" aria-hidden="true">
+
+  <div data-controller="dialog" data-dialog-modal-value="true">
+    <button type="button" class="btn btn--circle" style="background-color: <%= slack_integration.color %>" data-action="click->dialog#open" aria-label="Change color" title="Change color">
+      <span class="for-screen-reader">Change color</span>
+    </button>
+    <dialog class="popup panel flex-column gap fill-white shadow popup--animated" data-dialog-target="dialog">
+      <%= form_with model: slack_integration, url: board_slack_integration_path(slack_integration.board, slack_integration), data: { controller: "form", action: "turbo:submit-end->dialog#close" }, method: :patch do |form| %>
+        <div class="color-picker__colors">
+          <% Color::COLORS.each do |color| %>
+            <label class="btn txt-small borderless" style="--btn-background: <%= color %>" title="<%= color.name %>">
+              <%= form.radio_button :color, color.value, checked: (slack_integration.color == color), data: { action: "change->form#submit" } %>
+              <%= icon_tag "check", class: "checked" %>
+              <span class="for-screen-reader"><%= color.name %></span>
+            </label>
+          <% end %>
+        </div>
+      <% end %>
+    </dialog>
+  </div>
+
+  <%= button_to [ slack_integration.board, slack_integration ], method: :delete, class: "btn btn--circle btn--negative",
+        data: { turbo_confirm: "Are you sure you want to remove this Slack integration?" } do %>
+    <%= icon_tag "minus" %>
+    <span class="for-screen-reader">Remove #<%= slack_integration.channel_name %></span>
+  <% end %>
+</li>

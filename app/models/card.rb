@@ -9,6 +9,7 @@ class Card < ApplicationRecord
 
   has_many :comments, dependent: :destroy
   has_one :github_item, dependent: :destroy
+  has_many :slack_items, dependent: :destroy
   has_one_attached :image, dependent: :purge_later
 
   has_rich_text :description
@@ -94,7 +95,32 @@ class Card < ApplicationRecord
     )
   end
 
+  def add_slack_comment(message_data)
+    comments.create!(
+      creator: account.system_user,
+      body: <<~HTML
+        <p><strong>Slack reply</strong></p>
+        <p>#{format_slack_text(message_data["text"])}</p>
+      HTML
+    )
+  end
+
+  def add_slack_reaction(event_data)
+    comments.create!(
+      creator: account.system_user,
+      body: "<p>Reacted with :#{event_data["reaction"]}:</p>"
+    )
+  end
+
   private
+    def format_slack_text(text)
+      # Basic Slack formatting conversion
+      text.to_s
+        .gsub(/\*([^*]+)\*/, '<strong>\1</strong>')  # Bold
+        .gsub(/_([^_]+)_/, '<em>\1</em>')             # Italic
+        .gsub(/~([^~]+)~/, '<del>\1</del>')           # Strikethrough
+        .gsub(/\n/, '<br>')                           # Line breaks
+    end
     STORAGE_BATCH_SIZE = 1000
 
     # Override to include comments, but only load comments that have attachments.

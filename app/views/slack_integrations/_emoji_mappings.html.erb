@@ -1,0 +1,72 @@
+<%
+  # Common emoji options for quick setup
+  emoji_options = [
+    { emoji: "white_check_mark", display: "✅ white_check_mark", label: "White Check Mark" },
+    { emoji: "eyes", display: "👀 eyes", label: "Eyes" },
+    { emoji: "x", display: "❌ x", label: "Red X" },
+    { emoji: "hourglass_flowing_sand", display: "⏳ hourglass_flowing_sand", label: "Hourglass" },
+    { emoji: "+1", display: "👍 +1", label: "Thumbs Up" },
+    { emoji: "tada", display: "🎉 tada", label: "Party Popper" },
+    { emoji: "rocket", display: "🚀 rocket", label: "Rocket" },
+    { emoji: "fire", display: "🔥 fire", label: "Fire" }
+  ]
+
+  # Action options
+  action_options = [
+    ["No action (just add comment)", ""],
+    ["Close card", "close"],
+    ["Postpone (move to Not Now)", "postpone"],
+    ["Reopen card", "reopen"]
+  ]
+
+  # Add column actions
+  board.columns.each do |column|
+    action_options << ["Move to: #{column.name}", "move_to_column_#{column.id}"]
+  end
+
+  # Ensure current_mappings is always a hash
+  current_mappings = integration.emoji_action_mappings
+  current_mappings = {} unless current_mappings.is_a?(Hash)
+%>
+
+<div class="flex flex-column gap-half" data-controller="emoji-mappings">
+  <div class="txt-x-small txt-subtle margin-block-start">
+    Configure which Slack reactions trigger which actions:
+  </div>
+
+  <ul class="flex flex-column gap-half margin-none unpad">
+    <% emoji_options.each do |emoji_option| %>
+      <%
+        emoji = emoji_option[:emoji]
+        current_action = current_mappings.dig(emoji, "action")
+        current_column_id = current_mappings.dig(emoji, "column_id")
+
+        # Determine the selected value for the dropdown
+        selected_value = if current_action == "move_to_column" && current_column_id
+          "move_to_column_#{current_column_id}"
+        elsif current_action.present?
+          current_action
+        else
+          ""
+        end
+      %>
+      <li class="list-style-none margin-none flex align-center gap">
+        <span class="txt-medium" style="min-width: 40px; text-align: center;"><%= emoji_option[:display].split.first %></span>
+        <span class="txt-small flex-item-grow" style="min-width: 150px;"><%= emoji_option[:label] %></span>
+        <%= select_tag "emoji_mapping_#{emoji}",
+              options_for_select(action_options, selected_value),
+              class: "input input--small",
+              style: "max-width: 300px;",
+              data: {
+                emoji_mappings_target: "select",
+                emoji: emoji,
+                action: "change->emoji-mappings#updateMappings"
+              } %>
+      </li>
+    <% end %>
+  </ul>
+
+  <%= form.hidden_field :emoji_action_mappings,
+        value: current_mappings.to_json,
+        data: { emoji_mappings_target: "hiddenField" } %>
+</div>

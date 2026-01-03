@@ -1,0 +1,59 @@
+<% @page_title = "Slack Settings" %>
+
+<% content_for :header do %>
+  <h1 class="header__title"><%= @page_title %></h1>
+<% end %>
+
+<section class="settings">
+  <div class="settings__panel panel shadow center">
+    <header>
+      <h2 class="divider txt-large">Global Slack Event Settings</h2>
+      <div>These settings apply to all Slack integrations in your account. Disabling an event type here will prevent it from syncing, even if enabled on individual integrations.</div>
+    </header>
+
+    <%= form_with model: @setting, url: account_slack_setting_path, html: { class: "flex flex-column gap" } do |form| %>
+      <ul class="flex flex-column align-start gap margin-none unpad">
+        <li class="list-style-none margin-none">
+          <label class="toggler__visible-when-off flex align-center gap cursor-pointer">
+            <span class="switch txt-x-small flex-item-no-shrink">
+              <%= form.check_box :allow_messages, {}, true, false, class: "switch__input" %>
+              <span class="switch__btn round"></span>
+            </span>
+            <div class="flex flex-column min-width">
+              <strong>Allow Message Sync</strong>
+              <span class="txt-small txt-subtle">When disabled, no messages will sync from any Slack integration</span>
+            </div>
+          </label>
+        </li>
+
+        <li class="list-style-none margin-none">
+          <label class="toggler__visible-when-off flex align-center gap cursor-pointer">
+            <span class="switch txt-x-small flex-item-no-shrink">
+              <%= form.check_box :allow_thread_replies, {}, true, false, class: "switch__input" %>
+              <span class="switch__btn round"></span>
+            </span>
+            <div class="flex flex-column min-width">
+              <strong>Allow Thread Reply Sync</strong>
+              <span class="txt-small txt-subtle">When disabled, no thread replies will sync from any Slack integration</span>
+            </div>
+          </label>
+        </li>
+
+        <li class="list-style-none margin-none">
+          <label class="toggler__visible-when-off flex align-center gap cursor-pointer">
+            <span class="switch txt-x-small flex-item-no-shrink">
+              <%= form.check_box :allow_reactions, {}, true, false, class: "switch__input" %>
+              <span class="switch__btn round"></span>
+            </span>
+            <div class="flex flex-column min-width">
+              <strong>Allow Reaction Sync</strong>
+              <span class="txt-small txt-subtle">When disabled, no reactions will sync from any Slack integration</span>
+            </div>
+          </label>
+        </li>
+      </ul>
+
+      <%= form.button "Save Settings", class: "btn btn--link" %>
+    <% end %>
+  </div>
+</section>

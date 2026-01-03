@@ -10,6 +10,7 @@ class Board < ApplicationRecord
   has_many :events
   has_many :webhooks, dependent: :destroy
   has_many :github_integrations, dependent: :destroy
+  has_many :slack_integrations, dependent: :destroy
 
   scope :alphabetically, -> { order("lower(name)") }
   scope :ordered_by_recently_accessed, -> { merge(Access.ordered_by_recently_accessed) }

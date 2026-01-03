@@ -1,0 +1,37 @@
+first:
+  account_id: <%= ActiveRecord::FixtureSet.identify("37s", :uuid) %>
+  board_id: <%= ActiveRecord::FixtureSet.identify("writebook", :uuid) %>
+  channel_id: C1234567890
+  channel_name: general
+  workspace_domain: acme
+  webhook_secret: test_slack_secret_abc123
+  active: true
+  color: var(--color-card-10)
+  sync_messages: true
+  sync_thread_replies: true
+  sync_reactions: true
+
+second:
+  account_id: <%= ActiveRecord::FixtureSet.identify("initech", :uuid) %>
+  board_id: <%= ActiveRecord::FixtureSet.identify("miltons_wish_list", :uuid) %>
+  channel_id: C0987654321
+  channel_name: engineering
+  workspace_domain: initech
+  webhook_secret: test_slack_secret_xyz789
+  active: true
+  color: var(--color-card-10)
+  sync_messages: true
+  sync_thread_replies: true
+  sync_reactions: true
+
+inactive:
+  account_id: <%= ActiveRecord::FixtureSet.identify("37s", :uuid) %>
+  board_id: <%= ActiveRecord::FixtureSet.identify("writebook", :uuid) %>
+  channel_id: C1111111111
+  channel_name: random
+  webhook_secret: test_slack_secret_inactive
+  active: false
+  color: var(--color-card-10)
+  sync_messages: true
+  sync_thread_replies: true
+  sync_reactions: true
