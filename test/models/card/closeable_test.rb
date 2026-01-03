@@ -31,4 +31,32 @@ class Card::CloseableTest < ActiveSupport::TestCase
     assert cards(:shipping).reload.open?
     assert cards(:shipping).events.last.action.card_reopened?
   end
+
+  test "close card from triage column" do
+    card = cards(:logo)
+    assert_equal columns(:writebook_triage), card.column
+
+    card.close
+    assert card.closed?
+  end
+
+  test "close card from active column" do
+    card = cards(:text)
+    assert_equal columns(:writebook_in_progress), card.column
+
+    card.close
+    assert card.closed?
+  end
+
+  test "close card from NOT NOW" do
+    card = cards(:logo)
+
+    card.postpone
+    assert card.postponed?
+    assert card.not_now.present?
+
+    card.close
+    assert card.closed?
+    assert_nil card.reload.not_now
+  end
 end

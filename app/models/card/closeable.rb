@@ -31,6 +31,7 @@ module Card::Closeable
   def close(user: Current.user)
     unless closed?
       transaction do
+        not_now&.destroy
         create_closure! user: user
         track_event :closed, creator: user
       end
