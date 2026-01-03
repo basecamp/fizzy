@@ -1,0 +1,93 @@
+<% @page_title = "Edit #{@integration.repository_full_name}" %>
+
+<% content_for :header do %>
+  <div class="header__actions header__actions--start">
+    <%= back_link_to @integration.repository_full_name, [ @integration.board, @integration ], "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+  </div>
+
+  <h1 class="header__title"><%= @page_title %></h1>
+<% end %>
+
+<article class="panel panel--wide center txt-align-start">
+  <%= form_with model: @integration, url: board_github_integration_path(@board, @integration), data: { controller: "form" }, html: { class: "flex flex-column gap" } do |form| %>
+    <div class="flex flex-column gap-half">
+      <%= form.label :color do %>
+        <strong>Color</strong><br>
+        <p class="margin-none txt-x-small txt-subtle">Choose a color to identify this integration</p>
+      <% end %>
+
+      <div class="color-picker__colors">
+        <% Color::COLORS.each do |color| %>
+          <label class="btn txt-small borderless" style="--btn-background: <%= color %>" title="<%= color.name %>">
+            <%= form.radio_button :color, color.value, checked: (@integration.color == color) %>
+            <%= icon_tag "check", class: "checked" %>
+            <span class="for-screen-reader"><%= color.name %></span>
+          </label>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="flex flex-column gap-half">
+      <%= form.label :repository_full_name do %>
+        <strong>Repository</strong>
+      <% end %>
+      <p class="margin-none txt-small txt-subtle"><%= @integration.repository_full_name %></p>
+      <p class="margin-none txt-x-small txt-subtle">The repository cannot be changed after creation. Create a new integration if you need to sync a different repository.</p>
+    </div>
+
+    <div class="flex flex-column gap-half">
+      <%= form.label :sync_pull_requests do %>
+        <strong>Event Synchronization</strong><br>
+        <p class="margin-none txt-x-small txt-subtle">Select which GitHub events should create or update Fizzy cards:</p>
+      <% end %>
+
+      <ul class="flex flex-column align-start gap-half margin-none unpad">
+        <li class="list-style-none margin-none">
+          <label class="toggler__visible-when-off flex align-center gap cursor-pointer">
+            <span class="switch txt-x-small flex-item-no-shrink">
+              <%= form.check_box :sync_pull_requests, { class: "switch__input" } %>
+              <span class="switch__btn round"></span>
+            </span>
+            <span class="min-width">Pull Requests (opened, edited, closed, merged, reopened)</span>
+          </label>
+        </li>
+
+        <li class="list-style-none margin-none">
+          <label class="toggler__visible-when-off flex align-center gap cursor-pointer">
+            <span class="switch txt-x-small flex-item-no-shrink">
+              <%= form.check_box :sync_issues, { class: "switch__input" } %>
+              <span class="switch__btn round"></span>
+            </span>
+            <span class="min-width">Issues (opened, edited, closed, reopened)</span>
+          </label>
+        </li>
+
+        <li class="list-style-none margin-none">
+          <label class="toggler__visible-when-off flex align-center gap cursor-pointer">
+            <span class="switch txt-x-small flex-item-no-shrink">
+              <%= form.check_box :sync_comments, { class: "switch__input" } %>
+              <span class="switch__btn round"></span>
+            </span>
+            <span class="min-width">Comments on Pull Requests and Issues</span>
+          </label>
+        </li>
+
+        <li class="list-style-none margin-none">
+          <label class="toggler__visible-when-off flex align-center gap cursor-pointer">
+            <span class="switch txt-x-small flex-item-no-shrink">
+              <%= form.check_box :sync_reviews, { class: "switch__input" } %>
+              <span class="switch__btn round"></span>
+            </span>
+            <span class="min-width">Pull Request Reviews</span>
+          </label>
+        </li>
+      </ul>
+    </div>
+
+    <%= form.button type: :submit, class: "btn btn--link center txt-medium" do %>
+      <span>Save Changes</span>
+    <% end %>
+
+    <%= link_to "Go back", [ @board, @integration ], data: { form_target: "cancel" }, hidden: true %>
+  <% end %>
+</article>

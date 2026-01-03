@@ -1,0 +1,16 @@
+<%= tag.li id: dom_id(delivery), class: token_list(delivery.succeeded? && "delivery--succeeded", delivery.failed? && "delivery--failed") do %>
+  <strong>
+    <%= delivery.event_type %>
+  </strong>
+  <span class="txt-subtle">
+    <%= delivery.state %>
+  </span>
+  <div class="txt-subtle txt-small">
+    <%= time_tag delivery.created_at, time_ago_in_words(delivery.created_at) %>
+  </div>
+  <% if delivery.failed? && delivery.response[:error].present? %>
+    <div class="txt-small txt-subtle">
+      Error: <%= delivery.response[:error] %>
+    </div>
+  <% end %>
+<% end %>

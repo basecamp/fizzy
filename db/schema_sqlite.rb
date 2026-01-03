@@ -41,6 +41,17 @@ ActiveRecord::Schema[8.2].define(version: 2025_12_10_054934) do
     t.index ["value"], name: "index_account_external_id_sequences_on_value", unique: true
   end
 
+  create_table "account_github_settings", id: :uuid, force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.boolean "allow_comments", default: true, null: false
+    t.boolean "allow_issues", default: true, null: false
+    t.boolean "allow_pull_requests", default: true, null: false
+    t.boolean "allow_reviews", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_account_github_settings_on_account_id", unique: true
+  end
+
   create_table "account_join_codes", id: :uuid, force: :cascade do |t|
     t.uuid "account_id", null: false
     t.string "code", limit: 255, null: false
@@ -311,6 +322,56 @@ ActiveRecord::Schema[8.2].define(version: 2025_12_10_054934) do
     t.uuid "tag_id", null: false
     t.index ["filter_id"], name: "index_filters_tags_on_filter_id"
     t.index ["tag_id"], name: "index_filters_tags_on_tag_id"
+  end
+
+  create_table "github_integration_deliveries", id: :uuid, force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.datetime "created_at", null: false
+    t.string "event_type", limit: 255, null: false
+    t.uuid "github_integration_id", null: false
+    t.json "request"
+    t.json "response"
+    t.string "state", limit: 255, null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_github_integration_deliveries_on_account_id"
+    t.index ["created_at"], name: "index_github_integration_deliveries_on_created_at"
+    t.index ["github_integration_id"], name: "index_github_integration_deliveries_on_github_integration_id"
+  end
+
+  create_table "github_integrations", id: :uuid, force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.boolean "active", default: true, null: false
+    t.uuid "board_id", null: false
+    t.string "color", default: "var(--color-card-7)"
+    t.datetime "created_at", null: false
+    t.string "repository_full_name", limit: 255, null: false
+    t.boolean "sync_comments", default: true, null: false
+    t.boolean "sync_issues", default: true, null: false
+    t.boolean "sync_pull_requests", default: true, null: false
+    t.boolean "sync_reviews", default: true, null: false
+    t.datetime "updated_at", null: false
+    t.string "webhook_secret", limit: 255, null: false
+    t.index ["account_id"], name: "index_github_integrations_on_account_id"
+    t.index ["board_id", "repository_full_name"], name: "index_github_integrations_on_board_id_and_repository_full_name", unique: true
+    t.index ["board_id"], name: "index_github_integrations_on_board_id"
+  end
+
+  create_table "github_items", id: :uuid, force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.uuid "card_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "github_id", null: false
+    t.uuid "github_integration_id", null: false
+    t.integer "github_number", null: false
+    t.string "github_type", limit: 255, null: false
+    t.string "github_url", limit: 255, null: false
+    t.datetime "last_synced_at"
+    t.string "state", limit: 255
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_github_items_on_account_id"
+    t.index ["card_id"], name: "index_github_items_on_card_id", unique: true
+    t.index ["github_integration_id", "github_id"], name: "index_github_items_on_github_integration_id_and_github_id", unique: true
+    t.index ["github_integration_id", "github_type", "github_number"], name: "idx_on_github_integration_id_github_type_github_num_6642afca00"
   end
 
   create_table "identities", id: :uuid, force: :cascade do |t|

@@ -8,6 +8,7 @@ class Card < ApplicationRecord
   belongs_to :creator, class_name: "User", default: -> { Current.user }
 
   has_many :comments, dependent: :destroy
+  has_one :github_item, dependent: :destroy
   has_one_attached :image, dependent: :purge_later
 
   has_rich_text :description
@@ -69,6 +70,28 @@ class Card < ApplicationRecord
 
   def filled?
     title.present? || description.present?
+  end
+
+  def add_github_comment(comment_data)
+    comments.create!(
+      creator: account.system_user,
+      body: <<~HTML
+        <p><strong>#{comment_data["user"]["login"]}</strong> commented on GitHub:</p>
+        <p>#{comment_data["body"]}</p>
+        <p><a href="#{comment_data["html_url"]}">View on GitHub</a></p>
+      HTML
+    )
+  end
+
+  def add_github_review(review_data)
+    comments.create!(
+      creator: account.system_user,
+      body: <<~HTML
+        <p><strong>#{review_data["user"]["login"]}</strong> reviewed on GitHub (#{review_data["state"]}):</p>
+        #{review_data["body"] ? "<p>#{review_data["body"]}</p>" : ""}
+        <p><a href="#{review_data["html_url"]}">View on GitHub</a></p>
+      HTML
+    )
   end
 
   private

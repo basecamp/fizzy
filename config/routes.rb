@@ -5,6 +5,7 @@ Rails.application.routes.draw do
     resource :entropy
     resource :join_code
     resource :settings
+    resource :github_setting, only: %i[edit update]
     resources :exports, only: [ :create, :show ]
   end
 
@@ -42,6 +43,12 @@ Rails.application.routes.draw do
 
     resources :webhooks do
       scope module: :webhooks do
+        resource :activation, only: :create
+      end
+    end
+
+    resources :github_integrations do
+      scope module: :github_integrations do
         resource :activation, only: :create
       end
     end
@@ -226,6 +233,11 @@ Rails.application.routes.draw do
 
   resolve "Webhook" do |webhook, options|
     route_for :board_webhook, webhook.board, webhook, options
+  end
+
+  # GitHub webhook endpoint (unauthenticated)
+  namespace :github do
+    resources :webhooks, only: :create
   end
 
   # Support for legacy URLs

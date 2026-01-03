@@ -9,9 +9,12 @@ class Account < ApplicationRecord
   has_many :tags, dependent: :destroy
   has_many :columns, dependent: :destroy
   has_many :exports, class_name: "Account::Export", dependent: :destroy
+  has_many :github_integrations, dependent: :destroy
+  has_one :github_setting, class_name: "Account::GithubSetting", dependent: :destroy
 
   before_create :assign_external_account_id
   after_create :create_join_code
+  after_create :create_github_setting
 
   validates :name, presence: true
 
@@ -39,5 +42,9 @@ class Account < ApplicationRecord
   private
     def assign_external_account_id
       self.external_account_id ||= ExternalIdSequence.next
+    end
+
+    def create_github_setting
+      build_github_setting.save!
     end
 end
