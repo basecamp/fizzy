@@ -29,7 +29,7 @@ module Storage::Tracked
     end
 
     def track_board_transfer
-      old_board = Board.find_by(id: attribute_in_database(:board_id))
+      old_board = Board.find(attribute_in_database(:board_id))
       records = storage_transfer_records.compact
       return if records.empty?
 
