@@ -5,9 +5,9 @@ class Account::IncinerateJob < ApplicationJob
 
   def perform
     step :incineration do |step|
-      Account.up_for_incineration.find_each do |account|
+      Account.due_for_incineration.find_each do |account|
         account.incinerate
-        step.advance!
+        step.checkpoint!
       end
     end
   end
