@@ -1,6 +1,12 @@
 Rails.application.routes.draw do
   root "events#index"
 
+  namespace :oauth do
+    resource :authorization, only: %i[ new create ]
+    resource :token, only: :create
+    resource :revocation, only: :create
+  end
+
   namespace :account do
     resource :cancellation, only: [ :create ]
     resource :entropy
