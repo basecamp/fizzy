@@ -57,14 +57,14 @@ class Account::CancellableTest < ActiveSupport::TestCase
     assert @account.cancelled?
   end
 
-  test "up_for_incineration finds old cancellations" do
+  test "due_for_incineration finds old cancellations" do
     @account.cancel(initiated_by: @user)
 
     @account.cancellation.update!(created_at: 31.days.ago)
-    assert_equal [ @account ], Account.up_for_incineration
+    assert_equal [ @account ], Account.due_for_incineration
 
     @account.cancellation.update!(created_at: 29.days.ago)
-    assert Account.up_for_incineration.empty?
+    assert Account.due_for_incineration.empty?
   end
 
   test "reactivate" do

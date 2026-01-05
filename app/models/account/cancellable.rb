@@ -7,7 +7,7 @@ module Account::Cancellable
     has_one :cancellation, dependent: :destroy
 
     scope :active, -> { where.missing(:cancellation) }
-    scope :up_for_incineration, -> { joins(:cancellation).where(account_cancellations: { created_at: ...INCINERATION_GRACE_PERIOD.ago }) }
+    scope :due_for_incineration, -> { joins(:cancellation).where(account_cancellations: { created_at: ...INCINERATION_GRACE_PERIOD.ago }) }
   end
 
   def cancel(initiated_by: Current.user)
