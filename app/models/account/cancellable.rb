@@ -14,7 +14,7 @@ module Account::Cancellable
       if cancellable? && active?
         cancellation = create_cancellation!(initiated_by: initiated_by)
         try(:subscription)&.pause
-        AccountMailer.deletion_scheduled(cancellation).deliver_later
+        AccountMailer.cancellation(cancellation).deliver_later
       end
     end
   end
