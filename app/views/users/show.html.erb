@@ -52,6 +52,7 @@
     <div class="settings__panel panel shadow hide-on-native">
       <%= render "users/theme" %>
       <%= render "users/transfer", user: @user %>
+      <%= render "users/connected_apps" if Current.identity.access_tokens.oauth.exists? %>
       <%= render "users/access_tokens" %>
       <%= render "users/data_export" %>
     </div>
