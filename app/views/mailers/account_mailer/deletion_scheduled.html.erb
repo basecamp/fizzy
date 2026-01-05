@@ -1,0 +1,30 @@
+<p>Hi <%= @user.first_name %>,</p>
+
+<p>Your Fizzy account <strong><%= @account.name %></strong> has been scheduled for deletion.</p>
+
+<h2>What happens now?</h2>
+
+<ul>
+  <li><strong>Your account is now suspended</strong> – No one can access it anymore</li>
+  <li><strong>Your subscription has been paused</strong> – You won't be charged</li>
+  <li><strong>Deletion date:</strong> <%= @deletion_date.strftime("%B %d, %Y") %> (<%= @days_remaining %> days from now)</li>
+</ul>
+
+<h2>What will be deleted?</h2>
+
+<p>After <%= @days_remaining %> days, all of your account data will be permanently deleted:</p>
+
+<ul>
+  <li>All boards and cards</li>
+  <li>All comments and attachments</li>
+  <li>All user accounts and settings</li>
+  <li>All webhooks and integrations</li>
+</ul>
+
+<p><strong>This action cannot be undone.</strong></p>
+
+<h2>Changed your mind?</h2>
+
+<p>If you want to cancel this deletion and restore your account, please contact us at <a href="mailto:support@fizzy.do">support@fizzy.do</a> before <%= @deletion_date.strftime("%B %d, %Y") %>.</p>
+
+<p>Thanks,<br>The Fizzy Team</p>

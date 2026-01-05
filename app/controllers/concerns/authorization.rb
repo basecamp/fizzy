@@ -26,7 +26,7 @@ module Authorization
     end
 
     def ensure_can_access_account
-      if Current.user.blank? || !Current.user.active?
+      if Current.account.cancelled? || Current.user.blank? || !Current.user.active?
         respond_to do |format|
           format.html { redirect_to session_menu_path(script_name: nil) }
           format.json { head :forbidden }

@@ -1,0 +1,27 @@
+Hi <%= @user.first_name %>,
+
+Your Fizzy account "<%= @account.name %>" has been scheduled for deletion.
+
+WHAT HAPPENS NOW?
+
+- Your account is now suspended – No one can access it anymore
+- Your subscription has been paused – You won't be charged  
+- Deletion date: <%= @deletion_date.strftime("%B %d, %Y") %> (<%= @days_remaining %> days from now)
+
+WHAT WILL BE DELETED?
+
+After <%= @days_remaining %> days, all of your account data will be permanently deleted:
+
+- All boards and cards
+- All comments and attachments
+- All user accounts and settings
+- All webhooks and integrations
+
+This action cannot be undone.
+
+CHANGED YOUR MIND?
+
+If you want to cancel this deletion and restore your account, please contact us at support@fizzy.do before <%= @deletion_date.strftime("%B %d, %Y") %>.
+
+Thanks,
+The Fizzy Team

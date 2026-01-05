@@ -6,11 +6,7 @@ class Account::Incineration
   end
 
   def perform
-    cancel_subscription
+    account.try(:subscription)&.cancel
     account.destroy
   end
-
-  private
-    def cancel_subscription
-    end
 end

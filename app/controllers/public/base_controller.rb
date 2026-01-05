@@ -2,6 +2,7 @@ class Public::BaseController < ApplicationController
   allow_unauthenticated_access
 
   before_action :set_board, :set_card, :set_public_cache_expiration
+  before_action :ensure_board_accessible
 
   layout "public"
 
@@ -16,5 +17,9 @@ class Public::BaseController < ApplicationController
 
     def set_public_cache_expiration
       expires_in 30.seconds, public: true
+    end
+
+    def ensure_board_accessible
+      raise ActionController::RoutingError, "Not Found" if @board&.account&.cancelled?
     end
 end

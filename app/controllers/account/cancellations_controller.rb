@@ -3,12 +3,7 @@ class Account::CancellationsController < ApplicationController
 
   def create
     Current.account.cancel
-    redirect_to account_settings_path, notice: "Your account is scheduled for deletion."
-  end
-
-  def destroy
-    Current.account.reactivate
-    redirect_to account_settings_path, notice: "Account deletion has been canceled."
+    redirect_to session_menu_url, notice: "Your account is scheduled for deletion."
   end
 
   private

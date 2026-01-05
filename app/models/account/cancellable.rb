@@ -6,14 +6,15 @@ module Account::Cancellable
   included do
     has_one :cancellation, dependent: :destroy
 
-    scope :up_for_incineration, -> { joins(:cancellation).where(cancellations: { created_at: ...INCINERATION_GRACE_PERIOD.ago }) }
+    scope :up_for_incineration, -> { joins(:cancellation).where(account_cancellations: { created_at: ...INCINERATION_GRACE_PERIOD.ago }) }
   end
 
-  def cancel(**attributes)
+  def cancel(initiated_by: Current.user)
     with_lock do
       if cancellable? && active?
-        create_cancellation!(**attributes)
-        pause_subscription
+        cancellation = create_cancellation!(initiated_by: initiated_by)
+        try(:subscription)&.pause
+        AccountMailer.deletion_scheduled(cancellation).deliver_later
       end
     end
   end
@@ -21,7 +22,7 @@ module Account::Cancellable
   def reactivate
     with_lock do
       if cancelled?
-        resume_subscription
+        try(:subscription)&.resume
         cancellation.destroy
       end
     end
@@ -38,11 +39,5 @@ module Account::Cancellable
 
     def cancellable?
       Account.accepting_signups?
-    end
-
-    def pause_subscription
-    end
-
-    def resume_subscription
     end
 end

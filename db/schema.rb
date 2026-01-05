@@ -28,10 +28,12 @@ ActiveRecord::Schema[8.2].define(version: 2025_12_19_120755) do
   create_table "account_cancellations", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.uuid "account_id", null: false
     t.datetime "created_at", null: false
+    t.uuid "initiated_by_id"
     t.text "reason"
     t.text "requested_by"
     t.datetime "updated_at", null: false
     t.index ["account_id"], name: "index_account_cancellations_on_account_id", unique: true
+    t.index ["initiated_by_id"], name: "index_account_cancellations_on_initiated_by_id"
   end
 
   create_table "account_exports", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
