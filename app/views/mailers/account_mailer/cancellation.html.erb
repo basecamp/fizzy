@@ -4,7 +4,7 @@
 
 <ul>
   <li>No one can access the account anymore</li>
-  <% if @account.subscription %>
+  <% if @account.try(:subscription) %>
   <li>We won't charge you anymore</li>
   <% end %>
   <li>Everything in the account will be deleted in <%= distance_of_time_in_words_to_now(Account::Cancellable::INCINERATION_GRACE_PERIOD.from_now) %></li>

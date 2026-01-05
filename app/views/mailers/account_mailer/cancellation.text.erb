@@ -3,7 +3,7 @@ Your Fizzy account "<%= @account.name %>" was cancelled.
 WHAT HAPPENS NOW?
 
 - No one can access the account anymore
-<% if @account.subscription %>
+<% if @account.try(:subscription) %>
 - We won't charge you anymore
 <% end %>
 - Everything in the account will be deleted in <%= distance_of_time_in_words_to_now(Account::Cancellable::INCINERATION_GRACE_PERIOD.from_now) %>
