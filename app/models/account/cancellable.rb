@@ -29,6 +29,10 @@ module Account::Cancellable
     end
   end
 
+  def active?
+    !cancelled?
+  end
+
   def cancelled?
     cancellation.present?
   end
@@ -36,9 +40,4 @@ module Account::Cancellable
   def cancellable?
     Account.accepting_signups?
   end
-
-  private
-    def active?
-      !cancelled?
-    end
 end
