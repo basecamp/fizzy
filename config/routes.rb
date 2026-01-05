@@ -194,6 +194,7 @@ Rails.application.routes.draw do
     resource :passkey_challenge, only: :create
     resource :identity, only: :show
     resources :access_tokens
+    resources :connected_apps, only: %i[ index destroy ]
     resources :passkeys, except: %i[ show new ]
     resources :pins
     resource :timezone
