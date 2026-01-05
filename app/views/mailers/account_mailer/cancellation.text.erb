@@ -6,7 +6,7 @@ WHAT HAPPENS NOW?
 <% if @account.subscription %>
 - We won't charge you anymore
 <% end %>
-- Everything in the account will be deleted in a few days
+- Everything in the account will be deleted in <%= distance_of_time_in_words_to_now(Account::Cancellable::INCINERATION_GRACE_PERIOD.from_now) %>
 
 CHANGED YOUR MIND?
 
