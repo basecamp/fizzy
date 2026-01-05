@@ -27,7 +27,7 @@ class My::AccessTokensController < ApplicationController
 
   private
     def my_access_tokens
-      Current.identity.access_tokens
+      Current.identity.access_tokens.personal
     end
 
     def access_token_params
