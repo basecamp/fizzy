@@ -4,13 +4,8 @@ class AccountMailerTest < ActionMailer::TestCase
   setup do
     @account = accounts(:"37s")
     @user = users(:david)
-    Account.multi_tenant = true
     @account.cancel(initiated_by: @user)
     @cancellation = @account.cancellation
-  end
-
-  teardown do
-    Account.multi_tenant = false
   end
 
   test "cancellation sends to initiating user" do

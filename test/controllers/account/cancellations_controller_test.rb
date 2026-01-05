@@ -6,15 +6,9 @@ class Account::CancellationsControllerTest < ActionDispatch::IntegrationTest
     @user = users(:jason)
     sign_in_as @user
 
-    Account.multi_tenant = true
-
     if @account.respond_to?(:subscription)
       Account.any_instance.stubs(:subscription).returns(nil)
     end
-  end
-
-  teardown do
-    Account.multi_tenant = false
   end
 
   test "an owner can cancel the account" do

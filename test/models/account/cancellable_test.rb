@@ -4,11 +4,6 @@ class Account::CancellableTest < ActiveSupport::TestCase
   setup do
     @account = accounts(:"37s")
     @user = users(:david)
-    Account.multi_tenant = true
-  end
-
-  teardown do
-    Account.multi_tenant = false
   end
 
   test "cancel" do

@@ -5,18 +5,11 @@ class Account::IncinerateJobTest < ActiveJob::TestCase
     @account = accounts(:"37s")
     @user = users(:david)
 
-    # Enable multi-tenant mode so cancellations are allowed
-    Account.multi_tenant = true
-
     # Stub Stripe methods only in SaaS mode
     if defined?(Stripe::Subscription)
       Stripe::Subscription.stubs(:update).returns(true)
       Stripe::Subscription.stubs(:cancel).returns(true)
     end
-  end
-
-  teardown do
-    Account.multi_tenant = false
   end
 
   test "finds accounts up for incineration" do

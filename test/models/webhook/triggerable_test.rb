@@ -17,13 +17,6 @@ class Webhook::TriggerableTest < ActiveSupport::TestCase
       action: "card_published"
     )
     @user = users(:david)
-
-    # Enable multi-tenant mode so cancellations are allowed
-    Account.multi_tenant = true
-  end
-
-  teardown do
-    Account.multi_tenant = false
   end
 
   test "trigger creates delivery for active accounts" do
