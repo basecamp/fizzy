@@ -25,6 +25,14 @@ ActiveRecord::Schema[8.2].define(version: 2025_12_19_120755) do
     t.index ["user_id"], name: "index_accesses_on_user_id"
   end
 
+  create_table "account_cancellations", id: :uuid, force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.datetime "created_at", null: false
+    t.uuid "initiated_by_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_account_cancellations_on_account_id", unique: true
+  end
+
   create_table "account_exports", id: :uuid, force: :cascade do |t|
     t.uuid "account_id", null: false
     t.datetime "completed_at"
@@ -469,7 +477,7 @@ ActiveRecord::Schema[8.2].define(version: 2025_12_19_120755) do
     t.string "operation", limit: 255, null: false
     t.uuid "recordable_id"
     t.string "recordable_type", limit: 255
-    t.string "request_id"
+    t.string "request_id", limit: 255
     t.uuid "user_id"
     t.index ["account_id"], name: "index_storage_entries_on_account_id"
     t.index ["blob_id"], name: "index_storage_entries_on_blob_id"
