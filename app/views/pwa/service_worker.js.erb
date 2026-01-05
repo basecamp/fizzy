@@ -1,0 +1,76 @@
+importScripts("<%= javascript_url("turbo-offline-umd.min") %>")
+
+TurboOffline.addRule({
+  match: /\/assets\/.+[-\.][0-9a-f]+\.(js|css|svg|png|jpg|webp|woff2?|ico)$/,
+  handler: TurboOffline.handlers.cacheFirst({
+    cacheName: "assets",
+    maxAge: 60 * 60 * 24 * 7
+  })
+})
+
+TurboOffline.addRule({
+  match: (request) => {
+    const url = request.url
+    return /\/(boards|cards|users)\//.test(url) && !/\/(edit|pin|watch|new)$/.test(url)
+  },
+  handler: TurboOffline.handlers.networkFirst({
+    cacheName: "cards",
+    maxAge: 60 * 60 * 24 * 3,
+    networkTimeout: 3
+  })
+})
+
+TurboOffline.addRule({
+  match: /\/rails\/active_storage\//,
+  handler: TurboOffline.handlers.networkFirst({
+    cacheName: "storage",
+    maxAge: 60 * 60 * 24 * 7,
+    networkTimeout: 3
+  })
+})
+
+// Everything else
+TurboOffline.addRule({
+  handler: TurboOffline.handlers.networkFirst({
+    cacheName: "misc",
+    maxAge: 60 * 60 * 24,
+    networkTimeout: 3
+  })
+})
+
+TurboOffline.start()
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(self.clients.claim())
+})
+
+self.addEventListener("push", (event) => {
+  const data = event.data.json()
+  event.waitUntil(Promise.all([ showNotification(data), updateBadgeCount(data.options) ]))
+})
+
+async function showNotification({ title, options }) {
+  return self.registration.showNotification(title, options)
+}
+
+async function updateBadgeCount({ data: { badge } }) {
+  return self.navigator.setAppBadge?.(badge || 0)
+}
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close()
+
+  const url = new URL(event.notification.data.path, self.location.origin).href
+  event.waitUntil(openURL(url))
+})
+
+async function openURL(url) {
+  const clients = await self.clients.matchAll({ type: "window" })
+  const focused = clients.find((client) => client.focused)
+
+  if (focused) {
+    await focused.navigate(url)
+  } else {
+    await self.clients.openWindow(url)
+  }
+}

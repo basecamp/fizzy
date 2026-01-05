@@ -13,10 +13,10 @@ GIT
 
 GIT
   remote: https://github.com/hotwired/turbo-rails.git
-  revision: e3795ef6aac6a3d18039751febe6a301cfe71a7b
+  revision: 49be3f2d43edeeedad48cb492b35242fdb27af74
   branch: offline-cache
   specs:
-    turbo-rails (2.0.20)
+    turbo-rails (2.0.21)
       actionpack (>= 7.1.0)
       railties (>= 7.1.0)
 
@@ -360,7 +360,7 @@ GEM
       nokogiri (>= 1.15.7, != 1.16.7, != 1.16.6, != 1.16.5, != 1.16.4, != 1.16.3, != 1.16.2, != 1.16.1, != 1.16.0.rc1, != 1.16.0)
     rainbow (3.1.1)
     rake (13.3.1)
-    rdoc (7.0.3)
+    rdoc (7.1.0)
       erb
       psych (>= 4.0.0)
       tsort
