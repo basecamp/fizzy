@@ -35,15 +35,12 @@ class Account::CancellationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "cancelling an account while in single-tenant mode does nothing" do
-    previous_multi_tenant_value = Account.multi_tenant
-    Account.multi_tenant = false
+    with_multi_tenant_mode(false) do
+      assert_no_difference -> { Account::Cancellation.count } do
+        post account_cancellation_url
+      end
 
-    assert_no_difference -> { Account::Cancellation.count } do
-      post account_cancellation_url
+      assert_not @account.reload.cancelled?
     end
-
-    assert_not @account.reload.cancelled?
-  ensure
-    Account.multi_tenant = previous_multi_tenant_value
   end
 end
