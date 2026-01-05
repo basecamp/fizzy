@@ -178,6 +178,7 @@ Rails.application.routes.draw do
   namespace :my do
     resource :identity, only: :show
     resources :access_tokens
+    resources :connected_apps, only: %i[ index destroy ]
     resources :pins
     resource :timezone
     resource :menu

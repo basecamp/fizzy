@@ -52,6 +52,7 @@
     <section class="panel shadow" style="--panel-size: 45ch;">
       <%= render "users/theme" %>
       <%= render "users/transfer", user: @user %>
+      <%= render "users/connected_apps" if Current.identity.access_tokens.oauth.exists? %>
       <%= render "users/access_tokens" %>
     </section>
   <% end %>
