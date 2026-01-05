@@ -98,4 +98,16 @@ class Account::CancellableTest < ActiveSupport::TestCase
 
     assert_not @account.cancelled?
   end
+
+  test "active scope excludes cancelled accounts" do
+    account2 = accounts(:initech)
+
+    initial_active_count = Account.active.count
+
+    @account.cancel(initiated_by: @user)
+
+    assert_equal initial_active_count - 1, Account.active.count
+    assert_not_includes Account.active, @account
+    assert_includes Account.active, account2
+  end
 end

@@ -78,4 +78,20 @@ class My::MenusControllerTest < ActionDispatch::IntegrationTest
     get my_menu_path, headers: { "If-None-Match" => etag }
     assert_response :not_modified
   end
+
+  test "show excludes cancelled accounts" do
+    # Create another account for the same identity
+    another_account = Account.create!(external_account_id: 9999996, name: "Cancelled Account")
+    another_user = @user.identity.users.create!(account: another_account, name: "Kevin", role: "owner")
+
+    # Cancel the other account
+    another_account.cancel(initiated_by: another_user)
+
+    get my_menu_path
+    assert_response :success
+
+    # The response should include active account but not cancelled one
+    assert_select "a[href*='#{@account.slug}']"
+    assert_select "a[href*='#{another_account.slug}']", count: 0
+  end
 end

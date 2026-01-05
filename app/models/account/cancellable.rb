@@ -6,6 +6,7 @@ module Account::Cancellable
   included do
     has_one :cancellation, dependent: :destroy
 
+    scope :active, -> { where.missing(:cancellation) }
     scope :up_for_incineration, -> { joins(:cancellation).where(account_cancellations: { created_at: ...INCINERATION_GRACE_PERIOD.ago }) }
   end
 
