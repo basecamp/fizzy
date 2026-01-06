@@ -3,6 +3,9 @@ Rails.application.routes.draw do
 
   get "/.well-known/oauth-authorization-server", to: "oauth/metadata#show"
   get "/.well-known/oauth-protected-resource", to: "oauth/protected_resource_metadata#show"
+  get "/.well-known/mcp.json", to: "mcp#discovery"
+
+  post "/mcp", to: "mcp#create"
 
   namespace :oauth do
     resource :authorization, only: %i[ new create ]

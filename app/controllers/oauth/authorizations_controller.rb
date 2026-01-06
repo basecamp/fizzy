@@ -8,9 +8,12 @@ class Oauth::AuthorizationsController < Oauth::BaseController
   before_action :validate_pkce
   before_action :validate_scope
   before_action :validate_state
+  before_action :allow_oauth_redirect_in_csp
 
   def new
-    @scope = params[:scope].presence || "read"
+    # Normalize scope: if "write" is requested, use "write" (which implies read)
+    requested_scopes = params[:scope].to_s.split
+    @scope = requested_scopes.include?("write") ? "write" : "read"
     @redirect_uri = params[:redirect_uri]
     @state = params[:state]
     @code_challenge = params[:code_challenge]
@@ -104,5 +107,16 @@ class Oauth::AuthorizationsController < Oauth::BaseController
       query_params.compact.each { |k, v| query << [ k.to_s, v ] }
       uri.query = URI.encode_www_form(query)
       uri.to_s
+    end
+
+    # Safari blocks form submission redirects to URLs not in form-action CSP.
+    # Add the validated redirect_uri to allow the OAuth callback redirect.
+    def allow_oauth_redirect_in_csp
+      return unless params[:redirect_uri].present?
+
+      redirect_origin = URI.parse(params[:redirect_uri]).then { "#{_1.scheme}://#{_1.host}:#{_1.port}" }
+      request.content_security_policy.form_action :self, redirect_origin
+    rescue URI::InvalidURIError
+      # Invalid URI will be caught by validate_redirect_uri
     end
 end

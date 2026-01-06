@@ -11,4 +11,8 @@ class Identity::AccessToken < ApplicationRecord
   def allows?(method)
     method.in?(%w[ GET HEAD ]) || write?
   end
+
+  def allows_operation?(operation)
+    operation == :read || write?
+  end
 end
