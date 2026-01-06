@@ -9,9 +9,11 @@
 
     <dialog class="dialog panel panel--wide shadow" data-dialog-target="dialog">
       <h2 class="margin-none txt-large txt-negative">Delete your account?</h2>
-      <ul class="margin-block-half">
+      <ul class="txt-align-start">
         <li>All users, including you, will lose access</li>
-        <li>Your subscription will be canceled</li>
+        <% if Current.account.try(:active_subscription) %>
+          <li>Your subscription will be canceled</li>
+        <% end %>
         <li>After 30 days your data will be permanently deleted</li>
       </ul>
 

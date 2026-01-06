@@ -1,20 +1,22 @@
 module Account::Cancellable
   extend ActiveSupport::Concern
 
-  INCINERATION_GRACE_PERIOD = 30.days
-
   included do
     has_one :cancellation, dependent: :destroy
 
     scope :active, -> { where.missing(:cancellation) }
-    scope :due_for_incineration, -> { joins(:cancellation).where(account_cancellations: { created_at: ...INCINERATION_GRACE_PERIOD.ago }) }
+
+    define_callbacks :cancel
+    define_callbacks :reactivate
   end
 
   def cancel(initiated_by: Current.user)
     with_lock do
       if cancellable? && active?
-        cancellation = create_cancellation!(initiated_by: initiated_by)
-        try(:subscription)&.pause
+        run_callbacks :cancel do
+          create_cancellation!(initiated_by: initiated_by)
+        end
+
         AccountMailer.cancellation(cancellation).deliver_later
       end
     end
@@ -23,8 +25,9 @@ module Account::Cancellable
   def reactivate
     with_lock do
       if cancelled?
-        try(:subscription)&.resume
-        cancellation.destroy
+        run_callbacks :reactivate do
+          cancellation.destroy
+        end
       end
     end
   end

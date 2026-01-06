@@ -1,5 +1,5 @@
 class Account < ApplicationRecord
-  include Account::Storage, Cancellable, Entropic, MultiTenantable, Seedeable
+  include Account::Storage, Cancellable, Entropic, Incineratable, MultiTenantable, Seedeable
 
   has_one :join_code, dependent: :destroy
   has_many :users, dependent: :destroy
@@ -34,10 +34,6 @@ class Account < ApplicationRecord
 
   def system_user
     users.find_by!(role: :system)
-  end
-
-  def incinerate
-    Incineration.new(self).perform
   end
 
   private
