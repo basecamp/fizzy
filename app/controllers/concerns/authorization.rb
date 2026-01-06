@@ -2,7 +2,7 @@ module Authorization
   extend ActiveSupport::Concern
 
   included do
-    before_action :ensure_can_access_account, if: -> { Current.account.present? && authenticated? }
+    before_action :ensure_can_access_account, if: :authenticated_account_access?
   end
 
   class_methods do
@@ -25,13 +25,25 @@ module Authorization
       head :forbidden unless Current.identity.staff?
     end
 
+    def authenticated_account_access?
+      Current.account.present? && authenticated?
+    end
+
     def ensure_can_access_account
-      if Current.account.cancelled? || Current.user.blank? || !Current.user.active?
+      unless account_accessible? && user_active?
         respond_to do |format|
           format.html { redirect_to session_menu_path(script_name: nil) }
           format.json { head :forbidden }
         end
       end
+    end
+
+    def account_accessible?
+      Current.account.active?
+    end
+
+    def user_active?
+      Current.user&.active?
     end
 
     def redirect_existing_user
