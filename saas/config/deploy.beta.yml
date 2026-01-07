@@ -75,6 +75,7 @@ ssh:
 env:
   clear:
     APP_FQDN: beta<%= @beta_number %>.fizzy-beta.com
+    CACHE_NAMESPACE: <%= @beta_number %>
     RAILS_ENV: beta
     RAILS_LOG_LEVEL: fatal # suppress unstructured log lines
     MYSQL_DATABASE_HOST: fizzy-mysql-primary
