@@ -695,6 +695,14 @@ __Response:__
 
 Returns `204 No Content` on success.
 
+### `DELETE /:account_slug/cards/:card_number/image`
+
+Removes the header image from a card.
+
+__Response:__
+
+Returns `204 No Content` on success.
+
 ### `POST /:account_slug/cards/:card_number/closure`
 
 Closes a card.
