@@ -1,6 +1,6 @@
 require "test_helper"
 
-class Account::IncinerateJobTest < ActiveJob::TestCase
+class Account::IncinerateDueJobTest < ActiveJob::TestCase
   setup do
     @account = accounts(:"37s")
     @user = users(:david)
@@ -18,7 +18,7 @@ class Account::IncinerateJobTest < ActiveJob::TestCase
 
     Account.any_instance.expects(:incinerate).once
 
-    Account::IncinerateJob.perform_now
+    Account::IncinerateDueJob.perform_now
   end
 
   test "incinerates each old cancelled account" do
@@ -28,7 +28,7 @@ class Account::IncinerateJobTest < ActiveJob::TestCase
 
     # Just verify it gets incinerated
     assert_difference -> { Account.count }, -1 do
-      Account::IncinerateJob.perform_now
+      Account::IncinerateDueJob.perform_now
     end
   end
 
@@ -37,7 +37,7 @@ class Account::IncinerateJobTest < ActiveJob::TestCase
     @account.cancellation.update!(created_at: 29.days.ago)
 
     assert_no_difference -> { Account.count } do
-      Account::IncinerateJob.perform_now
+      Account::IncinerateDueJob.perform_now
     end
   end
 
@@ -48,7 +48,7 @@ class Account::IncinerateJobTest < ActiveJob::TestCase
 
     # Verify it processes accounts in the scope
     assert_difference -> { Account.count }, -1 do
-      Account::IncinerateJob.perform_now
+      Account::IncinerateDueJob.perform_now
     end
   end
 
@@ -58,7 +58,7 @@ class Account::IncinerateJobTest < ActiveJob::TestCase
     @account.cancellation.update!(created_at: 29.days.ago)
 
     assert_no_difference -> { Account.count } do
-      Account::IncinerateJob.perform_now
+      Account::IncinerateDueJob.perform_now
     end
 
     # The account should still exist

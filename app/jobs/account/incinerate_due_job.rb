@@ -1,4 +1,4 @@
-class Account::IncinerateJob < ApplicationJob
+class Account::IncinerateDueJob < ApplicationJob
   include ActiveJob::Continuable
 
   queue_as :incineration
