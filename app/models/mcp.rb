@@ -1,0 +1,4 @@
+module Mcp
+  PROTOCOL_VERSION = "2025-06-18"
+  SUPPORTED_VERSIONS = %w[ 2025-06-18 2025-03-26 ].freeze
+end

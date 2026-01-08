@@ -58,7 +58,8 @@ class Oauth::ClientsController < Oauth::BaseController
       when Array then params[:scope].select { |s| s.is_a?(String) }
       else []
       end
-      requested.select { |s| s.presence_in %w[ read write ] }.presence || %w[ read ]
+      # Default to read+write for MCP clients (all DCR clients are MCP)
+      requested.select { |s| s.presence_in %w[ read write ] }.presence || %w[ read write ]
     end
 
     def dynamic_client_registration_response(client)
