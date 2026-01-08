@@ -54,7 +54,9 @@
 
 [data-bridge-components~=overflow-menu] {
   [data-controller~=bridge--overflow-menu] {
-    display: none;
+    [data-bridge--overflow-menu-target~=item] {
+      display: none;
+    }
   }
 }
 
