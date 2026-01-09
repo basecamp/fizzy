@@ -43,3 +43,25 @@
     }
   }
 }
+
+[data-bridge-components~=form] {
+  [data-controller~=bridge--form] {
+    [type=submit] {
+      display: none;
+    }
+  }
+}
+
+[data-bridge-components~=overflow-menu] {
+  [data-controller~=bridge--overflow-menu] {
+    [data-bridge--overflow-menu-target~=item] {
+      display: none;
+    }
+  }
+}
+
+[data-bridge-components~=buttons] {
+  [data-bridge--buttons-target~=button] {
+    display: none;
+  }
+}

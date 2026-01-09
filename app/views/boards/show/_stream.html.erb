@@ -7,7 +7,9 @@
     <%= render "boards/show/expander", title: "Maybe?", count: board.cards.awaiting_triage.count, column_id: "maybe" %>
     <%= render "boards/show/menu/maximize", column_path: board_columns_stream_path(board) %>
   </header>
-  <%= render "columns/show/add_card_button", board: board %>
+  <div data-bridge-disabled="true">
+    <%= render "columns/show/add_card_button", board: board %>
+  </div>
   <div class="cards__list hide-scrollbar" data-drag-drop-item-container>
     <% if page.used? %>
       <%= with_automatic_pagination "maybe", @page do %>
