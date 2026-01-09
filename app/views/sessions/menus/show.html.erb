@@ -13,7 +13,7 @@
         <% @accounts.each do |account| %>
           <li class="popup__item txt-medium">
             <%= icon_tag "marker", class: "popup__icon" %>
-            <%= link_to landing_url(script_name: account.slug), class: "btn overflow-ellipsis fill-transparent popup__btn" do %>
+            <%= link_to landing_path(script_name: account.slug), class: "btn overflow-ellipsis fill-transparent popup__btn" do %>
               <strong><%= account.name %></strong>
             <% end %>
           </li>

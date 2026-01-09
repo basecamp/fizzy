@@ -3,7 +3,7 @@
     <%= collapsible_nav_section "Accounts" do %>
       <%# Bust cache 1 Dec 2025 %>
       <% accounts.each do |account| %>
-        <%= filter_place_menu_item landing_url(script_name: account.slug), account.name, "marker", current: account == Current.account, turbo: false %>
+        <%= filter_place_menu_item landing_path(script_name: account.slug), account.name, "marker", current: account == Current.account, turbo: false %>
       <% end %>
     <% end %>
   <% end %>

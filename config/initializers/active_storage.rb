@@ -8,6 +8,17 @@ ActiveSupport.on_load(:active_storage_blob) do
   end
 end
 
+ActiveSupport.on_load(:action_text_content) do
+  # Install our extensions after ActionText::Engine's
+  ActiveSupport.on_load(:active_storage_blob) do
+    # Ensure all <action-text-attachment>s have a "url" attribute that's a relative
+    # path (for portability across host name changes, beta environments, etc).
+    def to_rich_text_attributes(*)
+      super.merge url: Rails.application.routes.url_helpers.polymorphic_url(self, only_path: true)
+    end
+  end
+end
+
 # Don't configure replica connections for ActiveStorage::Record.
 # When ActiveStorage uses `connects_to`, it creates a separate connection pool
 # from ApplicationRecord. This causes after_commit callbacks to fire in

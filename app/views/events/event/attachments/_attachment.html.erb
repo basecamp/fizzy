@@ -3,9 +3,9 @@
 <% height = attachment.metadata["height"] %>
 
 <% if attachment.previewable? %>
-  <%= image_tag url_for(attachment.preview(variant)), class: "attachment attachment--image", width: width, height: height %>
+  <%= image_tag rails_representation_path(attachment.preview(variant)), class: "attachment attachment--image", width: width, height: height %>
 <% elsif attachment.variable? %>
-  <%= image_tag url_for(attachment.variant(variant)), class: "attachment attachment--image", width: width, height: height %>
+  <%= image_tag rails_representation_path(attachment.variant(variant)), class: "attachment attachment--image", width: width, height: height %>
 <% else %>
   <div class="attachment attachment--file attachment--<%= attachment.filename.extension -%>">
     <span class="attachment__icon"><%= attachment.filename.extension&.downcase.presence || "unknown" %></span>
