@@ -1,7 +1,7 @@
-<%= turbo_frame_tag @board, :entropy do %>
+<%= turbo_frame_tag board, :entropy do %>
   <div class="margin-block-end">
     <h2 class="divider txt-large">Auto close</h2>
     <p class="margin-none-block-start">Fizzy doesn’t let stale cards stick around forever. Cards automatically move to “Not now” if no one updates, comments, or moves a card for…</p>
-    <%= render "entropy/auto_close", model: board, url: board_entropy_path(board), disabled: !Current.user.can_administer_board?(@board) %>
+    <%= render "entropy/auto_close", model: board, url: board_entropy_path(board), disabled: !Current.user.can_administer_board?(board) %>
   </div>
 <% end %>
