@@ -74,6 +74,8 @@ docker run --publish 80:80 --env DISABLE_SSL=true ...
 
 Fizzy needs to be able to send email for its sign up/sign in flow, and for its regular summary emails.
 The easiest way to set this up is to use a 3rd-party email provider (such as Postmark, Sendgrid, and so on).
+If email is not configured, you can still sign in by finding the 6-character verification code in your Docker container's logs.
+
 You can then plug all your SMTP settings from that provider into Fizzy via the following environment variables:
 
 - `MAILER_FROM_ADDRESS` - the "from" address that Fizzy should use to send email
