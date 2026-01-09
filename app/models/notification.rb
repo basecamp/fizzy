@@ -56,6 +56,7 @@ class Notification < ApplicationRecord
 
     #: -> void
     def bundle
+      # problema do design de tipos do activerecord para pensarmos aqui
       user.bundle(self) if user.settings.bundling_emails?
     end
 end

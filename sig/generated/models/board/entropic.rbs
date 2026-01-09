@@ -1,0 +1,9 @@
+# Generated from app/models/board/entropic.rb with RBS::Inline
+
+module Board::Entropic
+  extend ActiveSupport::Concern
+
+  def entropy: () -> untyped
+
+  def auto_postpone_period=: (untyped new_value) -> untyped
+end

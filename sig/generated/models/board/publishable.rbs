@@ -1,0 +1,13 @@
+# Generated from app/models/board/publishable.rb with RBS::Inline
+
+module Board::Publishable
+  extend ActiveSupport::Concern
+
+  def find_by_published_key: (untyped key) -> untyped
+
+  def published?: () -> untyped
+
+  def publish: () -> untyped
+
+  def unpublish: () -> untyped
+end

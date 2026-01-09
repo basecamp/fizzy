@@ -1,5 +1,10 @@
+#rbs_inline: enabled
+
 module Card::Taggable
   extend ActiveSupport::Concern
+
+  # @type self: singleton(Card) & singleton(Card::Taggable)
+  # @type instance: Card & Card::Taggable
 
   included do
     has_many :taggings, dependent: :destroy

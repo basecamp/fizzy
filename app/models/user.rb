@@ -2,7 +2,9 @@
 
 class User < ApplicationRecord
   include Accessor, Assignee, Attachable, Avatar, Configurable, EmailAddressChangeable,
-    Mentionable, Named, Notifiable, Role, Searcher, Watcher
+    Mentionable, Named, Role, Searcher, Watcher
+
+  include Notifiable
   include Timelined # Depends on Accessor
 
   # @rbs!

@@ -1,6 +1,8 @@
 # Generated from app/models/user.rb with RBS::Inline
 
 class User < ApplicationRecord
+  include Notifiable
+
   include Timelined
 
   include ::Notifier::_Recipient

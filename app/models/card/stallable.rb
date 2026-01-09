@@ -3,18 +3,8 @@
 module Card::Stallable
   extend ActiveSupport::Concern
 
-  # @rbs!
-  #    extend _ActiveRecord_Relation_ClassMethods[::Card, ::Card::ActiveRecord_Relation, ::String]
-  #    extend ::ActiveRecord::Associations::ClassMethods
-  #
-  #    def activity_spike: -> Card::ActivitySpike
-  #
-  #    def updated_at: -> ActiveSupport::TimeWithZone
-  #    def published?: -> bool
-  #    def last_active_at_changed?: -> bool
-  #    def open?: -> bool
-  #
-  #    def self.stalled: -> Card::ActiveRecord_Relation
+  # @type self: singleton(Card) & singleton(Card::Stallable)
+  # @type instance: Card & Card::Stallable
 
   STALLED_AFTER_LAST_SPIKE_PERIOD = 14.days
 

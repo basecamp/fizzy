@@ -1,0 +1,5 @@
+# Generated from app/models/board/broadcastable.rb with RBS::Inline
+
+module Board::Broadcastable
+  extend ActiveSupport::Concern
+end

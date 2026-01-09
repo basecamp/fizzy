@@ -3,14 +3,6 @@
 module Card::Readable
   extend ActiveSupport::Concern
 
-  def events: () -> Event::ActiveRecord_Associations_CollectionProxy
-
-  def comments: () -> Comment::ActiveRecord_Associations_CollectionProxy
-
-  def mentions: () -> Mention::ActiveRecord_Associations_CollectionProxy
-
-  def board: () -> Board
-
   # : (User) -> void
   def read_by: (User) -> void
 

@@ -1,0 +1,5 @@
+# Generated from app/models/board/triageable.rb with RBS::Inline
+
+module Board::Triageable
+  extend ActiveSupport::Concern
+end

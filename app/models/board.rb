@@ -1,9 +1,14 @@
 # rbs_inline: enabled
 
 class Board < ApplicationRecord
-  include AutoPostponing, Broadcastable, Entropic, Filterable, Publishable, Triageable
+  include AutoPostponing
   include Accessible
+  include Broadcastable
   include Cards
+  include Entropic
+  include Filterable
+  include Publishable
+  include Triageable
 
   # @rbs!
   #   class ::Access::ActiveRecord_Associations_CollectionProxy < ::ActiveRecord::Associations::CollectionProxy

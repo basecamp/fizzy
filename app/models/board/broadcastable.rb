@@ -1,5 +1,10 @@
+# rbs_inline: enabled
+
 module Board::Broadcastable
   extend ActiveSupport::Concern
+
+  # @type self: singleton(Board) & singleton(Board::Broadcastable)
+  # @type instance: Board & Board::Broadcastable
 
   included do
     broadcasts_refreshes

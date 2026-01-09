@@ -1,0 +1,41 @@
+# Generated from app/models/webhook/delivery.rb with RBS::Inline
+
+class Webhook::Delivery < ApplicationRecord
+  STALE_TRESHOLD: untyped
+
+  USER_AGENT: ::String
+
+  ENDPOINT_TIMEOUT: untyped
+
+  def self.cleanup: () -> untyped
+
+  def deliver_later: () -> untyped
+
+  def deliver: () -> untyped
+
+  def failed?: () -> untyped
+
+  def succeeded?: () -> untyped
+
+  private
+
+  def perform_request: () -> untyped
+
+  def resolved_ip: () -> untyped
+
+  def uri: () -> untyped
+
+  def http: () -> untyped
+
+  def headers: () -> untyped
+
+  def signature: () -> untyped
+
+  def content_type: () -> untyped
+
+  def payload: () -> untyped
+
+  def render_payload: (**untyped options) -> untyped
+
+  def convert_html_to_mrkdwn: (untyped html) -> untyped
+end

@@ -1,7 +1,7 @@
 # rbs_inline: enabled
 
 class Card < ApplicationRecord
-  include Attachments, Prontable
+  include Attachments, Promptable
 
   include Assignable
   include Broadcastable
@@ -19,6 +19,7 @@ class Card < ApplicationRecord
   include Searchable
   include Stallable
   include Statuses
+  include Taggable
   include Triageable
   include Watchable
 

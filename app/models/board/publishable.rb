@@ -1,5 +1,10 @@
+# rbs_inline: enabled
+
 module Board::Publishable
   extend ActiveSupport::Concern
+
+  # @type self: singleton(Board) & singleton(Board::Publishable)
+  # @type instance: Board & Board::Publishable
 
   included do
     has_one :publication, class_name: "Board::Publication", dependent: :destroy

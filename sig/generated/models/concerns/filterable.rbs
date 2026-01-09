@@ -1,0 +1,11 @@
+# Generated from app/models/concerns/filterable.rb with RBS::Inline
+
+module Filterable
+  extend ActiveSupport::Concern
+
+  private
+
+  # FIXME: This is too inefficient to have part of a destroy transaction.
+  # Need to find a way to use a job or a single query.
+  def remove_from_filters: () -> untyped
+end

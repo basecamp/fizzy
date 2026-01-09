@@ -3,11 +3,8 @@
 module Card::Readable
   extend ActiveSupport::Concern
 
-  # @rbs!
-  #    def events: -> Event::ActiveRecord_Associations_CollectionProxy
-  #    def comments: -> Comment::ActiveRecord_Associations_CollectionProxy
-  #    def mentions: -> Mention::ActiveRecord_Associations_CollectionProxy
-  #    def board: -> Board
+  # @type self: singleton(Card) & singleton(Card::Readable)
+  # @type instance: Card & Card::Readable
 
   #: (User) -> void
   def read_by(user)

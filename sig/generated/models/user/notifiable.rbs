@@ -1,0 +1,17 @@
+# Generated from app/models/user/notifiable.rb with RBS::Inline
+
+module User::Notifiable
+  extend ActiveSupport::Concern
+
+  def bundle: (untyped notification) -> untyped
+
+  private
+
+  def find_or_create_bundle_for: (untyped notification) -> untyped
+
+  def find_bundle_for: (untyped notification) -> untyped
+
+  def expand_pending_bundle_for: (untyped notification) -> untyped
+
+  def create_bundle_for: (untyped notification) -> untyped
+end

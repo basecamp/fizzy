@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 module User::Notifiable
   extend ActiveSupport::Concern
 
