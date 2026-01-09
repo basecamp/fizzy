@@ -574,6 +574,7 @@ __Response:__
   "description_html": "<div class=\"action-text-content\"><p>Hello, World!</p></div>",
   "image_url": null,
   "tags": ["programming"],
+  "closed": false,
   "golden": false,
   "last_active_at": "2025-12-05T19:38:48.553Z",
   "created_at": "2025-12-05T19:38:48.540Z",
@@ -593,6 +594,15 @@ __Response:__
       "created_at": "2025-12-05T19:36:35.401Z",
       "url": "http://fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
     }
+  },
+  "column": {
+    "id": "03f5v9zkft4hj9qq0lsn9ohcn",
+    "name": "In Progress",
+    "color": {
+      "name": "Lime",
+      "value": "var(--color-card-4)"
+    },
+    "created_at": "2025-12-05T19:36:35.534Z"
   },
   "creator": {
     "id": "03f5v9zjw7pz8717a4no1h8a7",
@@ -618,6 +628,8 @@ __Response:__
   ]
 }
 ```
+
+> **Note:** The `closed` field indicates whether the card is in the "Done" state. The `column` field is only present when the card has been triaged into a column; cards in "Maybe?", "Not Now" or "Done" will not have this field.
 
 ### `POST /:account_slug/boards/:board_id/cards`
 
@@ -678,6 +690,14 @@ Returns the updated card.
 ### `DELETE /:account_slug/cards/:card_number`
 
 Deletes a card. Only the card creator or board administrators can delete cards.
+
+__Response:__
+
+Returns `204 No Content` on success.
+
+### `DELETE /:account_slug/cards/:card_number/image`
+
+Removes the header image from a card.
 
 __Response:__
 
@@ -762,6 +782,22 @@ Returns `204 No Content` on success.
 ### `DELETE /:account_slug/cards/:card_number/watch`
 
 Unsubscribes the current user from notifications for this card.
+
+__Response:__
+
+Returns `204 No Content` on success.
+
+### `POST /:account_slug/cards/:card_number/goldness`
+
+Marks a card as golden.
+
+__Response:__
+
+Returns `204 No Content` on success.
+
+### `DELETE /:account_slug/cards/:card_number/goldness`
+
+Removes golden status from a card.
 
 __Response:__
 
