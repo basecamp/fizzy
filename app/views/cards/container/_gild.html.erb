@@ -1,10 +1,10 @@
 <% if card.golden? %>
-  <%= button_to card_goldness_path(card), method: :delete, class: "btn btn--reversed", data: { controller: "tooltip hotkey", action: "keydown.shift+g@document->hotkey#click" } do %>
+  <%= button_to card_goldness_path(card), method: :delete, class: "btn btn--reversed btn--circle-mobile", data: { controller: "tooltip hotkey", action: "keydown.shift+g@document->hotkey#click" } do %>
     <%= icon_tag "golden-ticket" %>
     <span class="for-screen-reader">Demote to normal (shift+g)</span>
   <% end %>
 <% else %>
-  <%= button_to card_goldness_path(card), class: "btn", data: { controller: "tooltip hotkey", action: "keydown.shift+g@document->hotkey#click" } do %>
+  <%= button_to card_goldness_path(card), class: "btn btn--circle-mobile", data: { controller: "tooltip hotkey", action: "keydown.shift+g@document->hotkey#click" } do %>
     <%= icon_tag "golden-ticket" %>
     <span class="for-screen-reader">Promote to Golden Ticket (shift+g)</span>
   <% end %>

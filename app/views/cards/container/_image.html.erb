@@ -5,7 +5,7 @@
   <% end %>
 <% elsif !card.closed? %>
   <%= form_with model: card, data: { controller: "form" } do |form| %>
-    <label class="card-perma__image-btn btn input--file" data-controller="tooltip">
+    <label class="card-perma__image-btn btn input--file btn--circle-mobile" data-controller="tooltip">
       <%= icon_tag "picture-add" %>
       <span class="for-screen-reader">Add background image</span>
 

@@ -29,7 +29,9 @@
   }
 
   .settings__panel--users {
-    max-height: 80dvh;
+    @media (min-width: 640px) {
+      max-height: 80dvh;
+    }
 
     @media (min-width: 960px) {
       max-height: calc(100dvh - 12rem);

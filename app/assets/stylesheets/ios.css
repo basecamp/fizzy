@@ -3,5 +3,15 @@
     .hide-on-ios {
       display: none;
     }
+
+    /* Events
+    /* ------------------------------------------------------------------------ */
+
+    .events__column-header {
+      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px);
+      background-color: oklch(from var(--color-canvas) l c h / 0.5);
+      border-radius: 10em;
+    }
   }
 }

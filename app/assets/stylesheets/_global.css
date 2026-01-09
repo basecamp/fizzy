@@ -1,6 +1,12 @@
 @layer reset, base, components, modules, utilities, native, platform;
 
 :root {
+  /* Insets - The mobile apps may inject their own custom insets based on native elements on screen, like a floating navigation */
+  --custom-safe-inset-top: var(--injected-safe-inset-top, env(safe-area-inset-top, 0px));
+  --custom-safe-inset-right: var(--injected-safe-inset-right, env(safe-area-inset-right, 0px));
+  --custom-safe-inset-bottom: var(--injected-safe-inset-bottom, env(safe-area-inset-bottom, 0px));
+  --custom-safe-inset-left: var(--injected-safe-inset-left, env(safe-area-inset-left, 0px));
+
   /* Spacing */
   --inline-space: 1ch;
   --inline-space-half: calc(var(--inline-space) / 2);
