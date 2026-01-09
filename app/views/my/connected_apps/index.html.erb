@@ -1,0 +1,32 @@
+<% @page_title = "Connected apps" %>
+
+<% content_for :header do %>
+  <div class="header__actions header__actions--start">
+    <%= back_link_to "My profile", user_path(Current.user), "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+  </div>
+
+  <h1 class="header__title"><%= @page_title %></h1>
+<% end %>
+
+<section class="panel panel--wide shadow center webhooks">
+  <% if @connected_apps.any? %>
+    <p class="margin-none-block-start">Apps you've authorized to access Fizzy on your behalf.</p>
+    <table class="access_tokens_table margin-block-end-double max-width txt-small">
+      <thead>
+        <tr>
+          <th>App</th>
+          <th>Permissions</th>
+          <th>Connected</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @connected_apps.each do |client, tokens| %>
+          <%= render "my/connected_apps/connected_app", client: client, tokens: tokens %>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <p class="margin-none-block-start">No apps are connected to your account. When you authorize an app to access Fizzy, it will appear here.</p>
+  <% end %>
+</section>
