@@ -82,6 +82,53 @@ class Search::HighlighterTest < ActiveSupport::TestCase
     assert_equal "&lt;script&gt;#{mark('test')}&lt;/script&gt;", result
   end
 
+  test "highlight CJK text" do
+    highlighter = Search::Highlighter.new("中文")
+    result = highlighter.highlight("这是中文测试")
+
+    assert_equal "这是#{mark('中文')}测试", result
+  end
+
+  test "highlight Japanese text" do
+    highlighter = Search::Highlighter.new("日本")
+    result = highlighter.highlight("これは日本語です")
+
+    assert_equal "これは#{mark('日本')}語です", result
+  end
+
+  test "highlight Korean text" do
+    highlighter = Search::Highlighter.new("한국")
+    result = highlighter.highlight("이것은 한국어입니다")
+
+    assert_equal "이것은 #{mark('한국')}어입니다", result
+  end
+
+  test "highlight mixed CJK and English" do
+    highlighter = Search::Highlighter.new("test 中文")
+    result = highlighter.highlight("This is a test about 中文内容")
+
+    assert_equal "This is a #{mark('test')} about #{mark('中文')}内容", result
+  end
+
+  test "snippet handles CJK text without spaces" do
+    highlighter = Search::Highlighter.new("中文")
+    text = "这是一段很长的中文文本用于测试摘要功能是否正常工作"
+    result = highlighter.snippet(text, max_words: 20)
+
+    assert_includes result, mark("中文")
+  end
+
+  test "snippet truncates long CJK text around match" do
+    highlighter = Search::Highlighter.new("目标")
+    # 100+ characters, match in the middle
+    text = "前面有很多很多很多很多很多的文字内容" + "目标词汇" + "后面也有很多很多很多很多很多的文字内容"
+    result = highlighter.snippet(text, max_words: 10)  # max_chars = 30
+
+    assert_includes result, mark("目标")
+    assert result.start_with?("...")
+    assert result.end_with?("...")
+  end
+
   private
     def mark(text)
       "#{Search::Highlighter::OPENING_MARK}#{text}#{Search::Highlighter::CLOSING_MARK}"
