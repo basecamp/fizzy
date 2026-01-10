@@ -7,7 +7,8 @@
     position: relative;
     overflow: visible;
 
-    figure.node--selected {
+    figure.node--selected,
+    div.node--selected {
       &:has(img) {
         img {
           outline: var(--focus-ring-size) solid var(--focus-ring-color);
@@ -18,6 +19,30 @@
       &:not(:has(img)) {
         outline: var(--focus-ring-size) solid var(--focus-ring-color);
         outline-offset: var(--focus-ring-offset);
+      }
+    }
+  }
+
+  .lexxy-content__table-wrapper {
+    margin-block: 1ch;
+    overflow-x: auto;
+  }
+
+  table {
+    th, td {
+      &.table-cell--selected {
+        background-color: var(--color-selected-light);
+      }
+
+      &.lexxy-content__table-cell--selected {
+        background-color: var(--color-selected);
+        border-color: var(--color-selected-dark);
+      }
+    }
+  
+    &.lexxy-content__table--selection {
+      ::selection {
+        background: transparent;
       }
     }
   }
@@ -115,7 +140,7 @@
     position: relative;
     position: sticky;
     inset-block-start: 0;
-    z-index: 1;
+    z-index: 2;
   }
 
   .lexxy-editor__toolbar-button {
@@ -166,7 +191,7 @@
     inset-inline-end: 0;
     padding: 4px;
     position: absolute;
-    z-index: 1;
+    z-index: 2;
   }
 
   .lexxy-editor__toolbar-spacer {
@@ -188,7 +213,7 @@
     font-size: var(--text-small);
     padding: var(--lexxy-dropdown-padding);
     position: absolute;
-    z-index: 1;
+    z-index: 2;
 
     button {
       block-size: var(--lexxy-dropdown-btn-size);
@@ -288,7 +313,130 @@
     }
   }
 
-  /* Prompt ,enu (@mentions, etc.)
+  .lexxy-table-handle-buttons {
+    --button-size: 2.5em;
+  
+    color: var(--color-ink-inverted);
+    display: none;
+    flex-direction: row;
+    font-size: var(--text-x-small);
+    gap: 0.25ch;
+    line-height: 1;
+    position: absolute;
+    transform: translate(-50%, -120%);
+    z-index: 1;
+
+    &:has([open]) {
+      z-index: 4;
+    }
+  
+    .lexxy-table-control {
+      align-items: center;
+      background-color: var(--color-ink);
+      border-radius: 0.75ch;
+      display: flex;
+      flex-direction: row;
+      gap: 1ch;
+      padding: 2px;
+      white-space: nowrap;
+  
+      button,
+      summary {
+        aspect-ratio: 1 / 1;
+        align-items: center;
+        background-color: transparent;
+        border-radius: 0.5ch;
+        border: 0;
+        color: var(--color-ink-inverted);
+        cursor: pointer;
+        display: flex;
+        font-size: inherit;
+        font-weight: 700;
+        justify-content: center;
+        line-height: 1;
+        list-style: none;
+        min-block-size: var(--button-size);
+        min-inline-size: var(--button-size);
+        padding: 0;
+        user-select: none;
+        -webkit-user-select: none;
+  
+        &:hover {
+          background-color: var(--color-ink-darker);
+        }
+
+        &:focus,
+        &:focus-visible {
+          background-color: var(--color-ink-darker);
+          outline: var(--focus-ring-size) solid var(--focus-ring-color);
+          outline-offset: var(--focus-ring-offset);
+        }
+  
+        svg {
+          block-size: 1em;
+          inline-size: 1em;
+          fill: currentColor;
+        }
+  
+        span {
+          display: none;
+        }
+      }
+    }
+  
+    .lexxy-table-control__more-menu {
+      gap: 0;
+      padding: 2px;
+      position: relative;
+      
+      summary {
+        &::-webkit-details-marker {
+          display: none;
+        }
+      }
+  
+      .lexxy-table-control__more-menu-details {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25ch;
+        inset-block-start: 105%;
+        inset-inline-end: 0;
+        padding: 0;
+        position: absolute;
+  
+        .lexxy-table-control__more-menu-section {
+          background: var(--color-ink);
+          border-radius: 0.75ch;
+          display: flex;
+          flex-direction: column;
+          padding: 2px;
+        }
+  
+        button {
+          aspect-ratio: unset;
+          align-items: center;
+          flex-direction: row;
+          font-weight: normal;
+          gap: 1ch;
+          justify-content: flex-start;
+          padding: 0.5ch 2ch;
+          padding-inline-start: 1ch;
+          white-space: nowrap;
+  
+          svg {
+            block-size: 1.3em;
+            inline-size: 1.3em;
+          }
+  
+          span {
+            display: inline-block;
+          }
+        }
+      }
+    }
+  }
+
+  /* Prompt menu (@mentions, etc.)
   /* ------------------------------------------------------------------------ */
 
   .lexxy-prompt-menu {

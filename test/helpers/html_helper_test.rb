@@ -119,4 +119,26 @@ class HtmlHelperTest < ActionView::TestCase
     assert_no_match(/<img/, output, "should not create an img element")
     assert_includes output, "&lt;img"
   end
+
+  test "wrap tables in table-wrapper div" do
+    assert_equal_html \
+      %(<div class="table-wrapper"><table><tbody><tr><td>test</td></tr></tbody></table></div>),
+      format_html("<table><tbody><tr><td>test</td></tr></tbody></table>")
+  end
+
+  test "wrap multiple tables in separate table-wrapper divs" do
+    html = "<table><tbody><tr><td>first</td></tr></tbody></table><p>text</p><table><tbody><tr><td>second</td></tr></tbody></table>"
+    output = format_html(html)
+
+    assert_match(/<div class="table-wrapper"><table>.*?first.*?<\/table><\/div>/, output)
+    assert_match(/<div class="table-wrapper"><table>.*?second.*?<\/table><\/div>/, output)
+  end
+
+  test "don't wrap tables that are already wrapped" do
+    html = %(<div class="table-wrapper"><table><tbody><tr><td>test</td></tr></tbody></table></div>)
+    output = format_html(html)
+
+    # Should not create nested wrappers
+    assert_equal 1, output.scan(/class="table-wrapper"/).length
+  end
 end

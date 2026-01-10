@@ -209,6 +209,40 @@
         }
       }
     }
+
+    /* Tables */
+    .table-wrapper {
+      margin-block: 1ch;
+      overflow-x: auto;
+    }
+    
+    table {
+      border-collapse: collapse;
+      border-spacing: 0;
+      inline-size: calc(100% - 0.5ch);
+      margin: 0.25ch;
+  
+      th,
+      td {
+        border: 1px solid var(--color-ink-light);
+        padding: 0.5ch 1ch;
+        text-align: start;
+        word-break: normal;
+      
+        *:last-child {
+          margin-block-end: 0;
+        }
+      }
+  
+      th,
+      .lexxy-content__table-cell--header {
+        background: var(--color-ink-lightest);
+      }
+  
+      td {
+        background: var(--color-canvas);
+      }
+    }
   }
 
   /* Attachments
