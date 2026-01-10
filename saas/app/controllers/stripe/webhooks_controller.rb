@@ -1,7 +1,7 @@
 class Stripe::WebhooksController < ApplicationController
   allow_unauthenticated_access
   skip_before_action :require_account
-  skip_before_action :verify_authenticity_token
+  skip_forgery_protection
 
   def create
     if event = verify_webhook_signature

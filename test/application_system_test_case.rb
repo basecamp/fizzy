@@ -28,4 +28,19 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   else
     driven_by :chrome_headless, screen_size: [ 1200, 1000 ]
   end
+
+  setup do
+    # Set ActiveStorage::Current.url_options for system tests
+    # This is normally set by ActiveStorageControllerExtensions in each request,
+    # but system tests need it set globally
+    Capybara.server_host = "127.0.0.1"
+    Capybara.app_host = "http://#{Capybara.server_host}:#{Capybara.server_port}"
+
+    ActiveStorage::Current.url_options = {
+      protocol: "http",
+      host: Capybara.server_host,
+      port: Capybara.server_port,
+      script_name: "" # Will be set per-test if needed
+    }
+  end
 end
