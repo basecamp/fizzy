@@ -1,7 +1,7 @@
 default_options: &default_options
   store_options:
     max_age: <%= 60.days.to_i %>
-    namespace: <%= Rails.env %>
+    namespace: <%= "#{Rails.env}#{"-#{ENV["BETA_NUMBER"]}" if ENV["BETA_NUMBER"] && !Rails.env.production?}" %>
 
 default_connection: &default_connection
   database: cache
