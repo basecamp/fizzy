@@ -205,6 +205,21 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_equal created_time, card.last_active_at
   end
 
+  test "create as JSON with tag_ids" do
+    assert_difference -> { Card.count }, +1 do
+      post board_cards_path(boards(:writebook)),
+        params: { card: { title: "Card with tags", tag_ids: [ tags(:mobile).id, tags(:web).id ] } },
+        as: :json
+      assert_response :created
+    end
+
+    card = Card.last
+    assert_equal "Card with tags", card.title
+    assert_equal 2, card.tags.count
+    assert_includes card.tags, tags(:mobile)
+    assert_includes card.tags, tags(:web)
+  end
+
   test "update as JSON with custom last_active_at" do
     card = cards(:logo)
     custom_time = Time.utc(2024, 3, 15, 14, 0, 0)
@@ -245,6 +260,20 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     assert_equal "Update test", card.reload.title
+  end
+
+  test "update as JSON with tag_ids" do
+    card = cards(:logo)
+    assert_equal 1, card.tags.count
+    assert_includes card.tags, tags(:web)
+
+    put card_path(card, format: :json), params: { card: { tag_ids: [ tags(:mobile).id, tags(:web).id ] } }
+    assert_response :success
+
+    card.reload
+    assert_equal 2, card.tags.count
+    assert_includes card.tags, tags(:mobile)
+    assert_includes card.tags, tags(:web)
   end
 
   test "delete as JSON" do
