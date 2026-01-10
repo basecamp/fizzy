@@ -44,7 +44,8 @@ class Card::SearchableTest < ActiveSupport::TestCase
     if search_record_class.connection.adapter_name == "SQLite"
       fts_entry = search_record.search_records_fts
       assert_not_nil fts_entry, "FTS entry should exist"
-      assert_equal card.title, fts_entry.title
+      # FTS stores stemmed content for search matching, not original text
+      assert_equal Search::Stemmer.stem(card.title), fts_entry.title
     end
 
     # Delete the card
