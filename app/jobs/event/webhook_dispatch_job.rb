@@ -5,6 +5,8 @@ class Event::WebhookDispatchJob < ApplicationJob
 
   queue_as :webhooks
 
+  discard_on ActiveJob::DeserializationError
+
   def perform(event)
     step :dispatch do |step|
       Webhook.active.triggered_by(event).find_each(start: step.cursor) do |webhook|

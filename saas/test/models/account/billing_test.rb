@@ -28,4 +28,44 @@ class Account::BillingTest < ActiveSupport::TestCase
     account.comp
     assert_equal 1, Account::BillingWaiver.where(account: account).count
   end
+
+  test "cancel callback pauses subscription" do
+    account = accounts(:"37s")
+    user = users(:david)
+
+    subscription = mock("subscription")
+    subscription.expects(:pause).once
+    account.stubs(:subscription).returns(subscription)
+
+    account.cancel(initiated_by: user)
+  end
+
+  test "reactivate callback resumes subscription" do
+    account = accounts(:"37s")
+    user = users(:david)
+
+    # First cancel with a subscription mock
+    subscription_for_cancel = mock("subscription")
+    subscription_for_cancel.expects(:pause).once
+    account.stubs(:subscription).returns(subscription_for_cancel)
+
+    account.cancel(initiated_by: user)
+
+    # Now stub for reactivation
+    subscription_for_reactivate = mock("subscription")
+    subscription_for_reactivate.expects(:resume).once
+    account.stubs(:subscription).returns(subscription_for_reactivate)
+
+    account.reactivate
+  end
+
+  test "incinerate callback cancels subscription before destroying account" do
+    account = accounts(:"37s")
+
+    subscription = mock("subscription")
+    subscription.expects(:cancel).once
+    account.stubs(:subscription).returns(subscription)
+
+    account.incinerate
+  end
 end

@@ -1,0 +1,26 @@
+<% if Current.account.cancellable? && Current.user.owner? %>
+  <header class="margin-block-start-double">
+    <h2 class="divider txt-large txt-negative">Cancel account</h2>
+    <p class="margin-none-block">Delete your Fizzy account</p>
+  </header>
+
+  <div data-controller="dialog" data-dialog-modal-value="true">
+    <button type="button" class="btn btn--negative" data-action="dialog#open">Delete account</button>
+
+    <dialog class="dialog panel panel--wide shadow" data-dialog-target="dialog">
+      <h2 class="margin-none txt-large txt-negative">Delete your account?</h2>
+      <ul class="txt-align-start">
+        <li>All users, including you, will lose access</li>
+        <% if Current.account.try(:active_subscription) %>
+          <li>Your subscription will be canceled</li>
+        <% end %>
+        <li>After 30 days your data will be permanently deleted</li>
+      </ul>
+
+      <div class="flex gap justify-center">
+        <button type="button" class="btn" data-action="dialog#close">Cancel</button>
+        <%= button_to "Delete my account", account_cancellation_path, method: :post, class: "btn btn--negative", form: { data: { action: "submit->dialog#close", turbo: false } } %>
+      </div>
+    </dialog>
+  </div>
+<% end %>

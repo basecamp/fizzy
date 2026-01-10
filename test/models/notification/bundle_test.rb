@@ -1,6 +1,8 @@
 require "test_helper"
 
 class Notification::BundleTest < ActiveSupport::TestCase
+  include ActionMailer::TestHelper
+
   setup do
     @user = users(:david)
     @user.settings.bundle_email_every_few_hours!
@@ -159,5 +161,20 @@ class Notification::BundleTest < ActiveSupport::TestCase
     assert_equal 2, @user.notification_bundles.last.notifications.count
     assert_includes @user.notification_bundles.last.notifications, first_notification
     assert_includes @user.notification_bundles.last.notifications, second_notification
+  end
+
+  test "deliver does not send email for cancelled accounts" do
+    @user.notifications.create!(source: events(:logo_published), creator: @user)
+    bundle = @user.notification_bundles.pending.last
+
+    @user.account.cancel(initiated_by: @user)
+
+    assert_no_emails do
+      deliver_enqueued_emails do
+        bundle.deliver
+      end
+    end
+
+    assert bundle.delivered?, "Bundle should be marked as delivered even if not sent"
   end
 end
