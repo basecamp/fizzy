@@ -133,6 +133,7 @@ elif which brew >/dev/null 2>&1; then
 fi
 
 bundle config set --local auto_install true
+bundle config set --local default_cli_command install
 step "Installing RubyGems" bundle install
 
 if [ -n "$SAAS" ]; then
