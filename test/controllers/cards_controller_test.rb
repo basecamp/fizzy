@@ -276,6 +276,57 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_includes card.tags, tags(:web)
   end
 
+  test "adding tags via tag_ids updates card timestamp" do
+    card = cards(:logo)
+    original_updated_at = card.updated_at
+
+    # Wait a small amount to ensure timestamp will be different
+    sleep 0.01
+
+    put card_path(card, format: :json), params: { card: { tag_ids: [ tags(:mobile).id, tags(:web).id ] } }
+    assert_response :success
+
+    card.reload
+    assert card.updated_at > original_updated_at, "Card updated_at should change when tags are added"
+  end
+
+  test "removing tags via tag_ids updates card timestamp" do
+    card = cards(:logo)
+    assert_equal 1, card.tags.count
+
+    original_updated_at = card.updated_at
+
+    # Wait a small amount to ensure timestamp will be different
+    sleep 0.01
+
+    put card_path(card, format: :json), params: { card: { tag_ids: [] } }
+    assert_response :success
+
+    card.reload
+    assert_equal 0, card.tags.count
+    assert card.updated_at > original_updated_at, "Card updated_at should change when tags are removed"
+  end
+
+  test "replacing tags via tag_ids updates card timestamp" do
+    card = cards(:logo)
+    assert_equal 1, card.tags.count
+    assert_includes card.tags, tags(:web)
+
+    original_updated_at = card.updated_at
+
+    # Wait a small amount to ensure timestamp will be different
+    sleep 0.01
+
+    put card_path(card, format: :json), params: { card: { tag_ids: [ tags(:mobile).id ] } }
+    assert_response :success
+
+    card.reload
+    assert_equal 1, card.tags.count
+    assert_includes card.tags, tags(:mobile)
+    assert_not_includes card.tags, tags(:web)
+    assert card.updated_at > original_updated_at, "Card updated_at should change when tags are replaced"
+  end
+
   test "delete as JSON" do
     card = cards(:logo)
 
