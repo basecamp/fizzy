@@ -8,6 +8,11 @@ module Card::Taggable
     scope :tagged_with, ->(tags) { joins(:taggings).where(taggings: { tag: tags }) }
   end
 
+  def tag_ids=(ids)
+    super
+    touch if persisted? && !new_record?
+  end
+
   def toggle_tag_with(title)
     tag = account.tags.find_or_create_by!(title: title)
 
