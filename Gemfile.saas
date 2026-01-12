@@ -9,6 +9,7 @@ gem "queenbee", bc: "queenbee-plugin"
 gem "fizzy-saas", path: "saas"
 gem "console1984", bc: "console1984"
 gem "audits1984", bc: "audits1984"
+gem "rinku", require: "rails_rinku", github: "maxprokopiev/rinku", branch: "fix-ruby-export" # FIXME: pending https://github.com/vmg/rinku/pull/97; audits1984 dependency
 
 # Telemetry
 gem "rails_structured_logging", bc: "rails-structured-logging"
