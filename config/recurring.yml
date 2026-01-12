@@ -28,7 +28,7 @@ production: &production
     command: "Account::Export.cleanup"
     schedule: every hour at minute 20
   incineration:
-    job: Account::IncinerateDueJob
+    class_name: Account::IncinerateDueJob
     schedule: every 8 hours at minute 16
 
 <% if Fizzy.saas? %>
