@@ -10,17 +10,19 @@
 #
 # Safe to re-run: skips attachments that already have entries (by blob_id + recordable).
 #
-# IMPORTANT: Before running in production, verify zero historic blob reuse in tracked contexts:
+# OPTIONAL: If you want to enforce no-reuse for direct attachments, verify there are
+# no existing violations (ActionText embeds may legitimately reuse blobs):
 #
 #   ActiveStorage::Attachment
 #     .joins(:blob)
 #     .where(record_type: Storage::TRACKED_RECORD_TYPES)
+#     .where.not(record_type: "ActionText::RichText")
 #     .where.not(active_storage_blobs: { account_id: Storage::TEMPLATE_ACCOUNT_ID })
 #     .select(:blob_id)
 #     .group(:blob_id)
 #     .having("COUNT(*) > 1")
 #     .count
-#   # Should return empty hash if no reuse exists in tracked contexts
+#   # Should return empty hash if no direct-attachment reuse exists
 #
 # If reuse exists (excluding template blobs), fix the data first.
 class BackfillStorageLedger

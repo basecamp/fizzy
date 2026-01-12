@@ -33,6 +33,83 @@ class Storage::NoReuseTest < ActiveSupport::TestCase
     assert_equal 1, ActiveStorage::Attachment.where(blob_id: blob.id).count
   end
 
+  test "allows reuse for ActionText embeds" do
+    file = file_fixture("moon.jpg")
+    blob = ActiveStorage::Blob.create_and_upload! \
+      io: file.open,
+      filename: "embed.jpg",
+      content_type: "image/jpeg"
+
+    embed_html = ActionText::Attachment.from_attachable(blob).to_html
+
+    card1 = @board.cards.create!(title: "Card 1", creator: users(:david))
+    card1.update!(description: "<p>#{embed_html}</p>")
+    card1.reload
+
+    card2 = @board.cards.create!(title: "Card 2", creator: users(:david))
+    card2.update!(description: "<p>#{embed_html}</p>")
+    card2.reload
+
+    assert_equal 2, ActiveStorage::Attachment.where(
+      record_type: "ActionText::RichText",
+      name: "embeds",
+      blob_id: blob.id
+    ).count
+  end
+
+  test "purge_later does not purge blob when still attached elsewhere" do
+    file = file_fixture("moon.jpg")
+    blob = ActiveStorage::Blob.create_and_upload! \
+      io: file.open,
+      filename: "embed.jpg",
+      content_type: "image/jpeg"
+
+    embed_html = ActionText::Attachment.from_attachable(blob).to_html
+
+    card1 = @board.cards.create!(title: "Card 1", creator: users(:david))
+    card1.update!(description: "<p>#{embed_html}</p>")
+
+    card2 = @board.cards.create!(title: "Card 2", creator: users(:david))
+    card2.update!(description: "<p>#{embed_html}</p>")
+
+    attachment = ActiveStorage::Attachment.find_by(
+      record: card1.rich_text_description,
+      name: "embeds",
+      blob_id: blob.id
+    )
+
+    assert_no_enqueued_jobs only: ActiveStorage::PurgeJob do
+      attachment.purge_later
+    end
+
+    assert ActiveStorage::Blob.exists?(blob.id)
+    assert_equal 1, ActiveStorage::Attachment.where(blob_id: blob.id).count
+  end
+
+  test "purge_later enqueues purge when last attachment is removed" do
+    file = file_fixture("moon.jpg")
+    blob = ActiveStorage::Blob.create_and_upload! \
+      io: file.open,
+      filename: "embed.jpg",
+      content_type: "image/jpeg"
+
+    embed_html = ActionText::Attachment.from_attachable(blob).to_html
+
+    card = @board.cards.create!(title: "Card", creator: users(:david))
+    card.update!(description: "<p>#{embed_html}</p>")
+    card.reload
+
+    attachment = ActiveStorage::Attachment.find_by(
+      record: card.rich_text_description,
+      name: "embeds",
+      blob_id: blob.id
+    )
+
+    assert_enqueued_with job: ActiveStorage::PurgeJob, args: [ blob ] do
+      attachment.purge_later
+    end
+  end
+
   test "rejects cross-account blob attachment" do
     other_account = Account.create!(name: "Other")
     other_board = other_account.boards.create!(name: "Other Board", creator: users(:david))

@@ -16,6 +16,8 @@
 # attached to an untracked type (avatar/export) could theoretically be reused in a tracked
 # context. This is acceptable - user-accessible blob IDs from untracked contexts are
 # basically nonexistent in practice.
+#
+# Exception: ActionText embeds are allowed to reuse blobs to support copy/paste.
 
 ActiveSupport.on_load(:active_storage_attachment) do
   validate :blob_account_matches_record, on: :create
@@ -29,30 +31,31 @@ ActiveSupport.on_load(:active_storage_attachment) do
     # bypass tenancy checks via try(:account) returning nil - this is intentional as
     # these classes don't participate in storage tracking.
     def blob_account_matches_record
-      return unless record&.try(:account).present?
-      return if whitelisted_for_cross_account?
-
-      unless blob&.account_id == record.account.id
-        errors.add(:blob_id, "blob account must match record account")
+      if record&.try(:account).present? && !whitelisted_for_cross_account?
+        unless blob&.account_id == record.account.id
+          errors.add(:blob_id, "blob account must match record account")
+        end
       end
     end
 
     # Ledger integrity: blob can only have one tracked attachment
     def no_tracked_blob_reuse
       tracked_record = record&.try(:storage_tracked_record)
-      return unless tracked_record.present?
-      return if whitelisted_for_cross_account?
+      if tracked_record.present? &&
+          !whitelisted_for_cross_account? &&
+          !(record_type == "ActionText::RichText" && name == "embeds")
 
-      # Check for existing attachment of this blob in tracked contexts
-      # Uses Storage::TRACKED_RECORD_TYPES constant to stay generic
-      existing = ActiveStorage::Attachment
-        .where(blob_id: blob_id)
-        .where(record_type: Storage::TRACKED_RECORD_TYPES)
-        .where.not(id: id)
-        .exists?
+        # Check for existing attachment of this blob in tracked contexts
+        # Uses Storage::TRACKED_RECORD_TYPES constant to stay generic
+        existing = ActiveStorage::Attachment
+          .where(blob_id: blob_id)
+          .where(record_type: Storage::TRACKED_RECORD_TYPES)
+          .where.not(id: id)
+          .exists?
 
-      if existing
-        errors.add(:blob_id, "cannot reuse blob in tracked storage context")
+        if existing
+          errors.add(:blob_id, "cannot reuse blob in tracked storage context")
+        end
       end
     end
 
