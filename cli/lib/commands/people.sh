@@ -7,9 +7,20 @@
 
 cmd_people() {
   local show_help=false
+  local page=""
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
+      --page|-p)
+        if [[ -z "${2:-}" ]]; then
+          die "--page requires a value" $EXIT_USAGE
+        fi
+        if ! [[ "$2" =~ ^[0-9]+$ ]] || [[ "$2" -lt 1 ]]; then
+          die "--page must be a positive integer" $EXIT_USAGE
+        fi
+        page="$2"
+        shift 2
+        ;;
       --help|-h)
         show_help=true
         shift
@@ -25,17 +36,26 @@ cmd_people() {
     return 0
   fi
 
+  local path="/users"
+  if [[ -n "$page" ]]; then
+    path="$path?page=$page"
+  fi
+
   local response
-  response=$(api_get "/users")
+  response=$(api_get "$path")
 
   local count
   count=$(echo "$response" | jq 'length')
 
   local summary="$count users"
+  [[ -n "$page" ]] && summary="$count users (page $page)"
+
+  local next_page=$((${page:-1} + 1))
   local breadcrumbs
   breadcrumbs=$(breadcrumbs \
     "$(breadcrumb "assign" "fizzy assign <card> --to <user_id>" "Assign user to card")" \
-    "$(breadcrumb "cards" "fizzy cards --assignee <user_id>" "Cards assigned to user")"
+    "$(breadcrumb "cards" "fizzy cards --assignee <user_id>" "Cards assigned to user")" \
+    "$(breadcrumb "next" "fizzy people --page $next_page" "Next page")"
   )
 
   output "$response" "$summary" "$breadcrumbs" "_people_md"
@@ -72,10 +92,12 @@ _people_help() {
     jq -n '{
       command: "fizzy people",
       description: "List users in the account",
-      options: [],
+      options: [
+        {flag: "--page, -p", description: "Page number for pagination"}
+      ],
       examples: [
         "fizzy people",
-        "fizzy people --json"
+        "fizzy people --page 2"
       ]
     }'
   else
@@ -90,13 +112,13 @@ List users in the account.
 
 ### Options
 
+    --page, -p    Page number for pagination
     --help, -h    Show this help
 
 ### Examples
 
     fizzy people              List all users
-    fizzy people --json       Output as JSON
-    fizzy people -q           Raw data only
+    fizzy people --page 2     Get second page
 EOF
   fi
 }

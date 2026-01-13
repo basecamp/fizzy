@@ -8,6 +8,7 @@
 cmd_notifications() {
   local action=""
   local show_help=false
+  local page=""
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -16,6 +17,16 @@ cmd_notifications() {
         shift
         _notifications_action "$action" "$@"
         return
+        ;;
+      --page|-p)
+        if [[ -z "${2:-}" ]]; then
+          die "--page requires a value" $EXIT_USAGE
+        fi
+        if ! [[ "$2" =~ ^[0-9]+$ ]] || [[ "$2" -lt 1 ]]; then
+          die "--page must be a positive integer" $EXIT_USAGE
+        fi
+        page="$2"
+        shift 2
         ;;
       --help|-h)
         show_help=true
@@ -32,19 +43,28 @@ cmd_notifications() {
     return 0
   fi
 
+  local path="/notifications"
+  if [[ -n "$page" ]]; then
+    path="$path?page=$page"
+  fi
+
   local response
-  response=$(api_get "/notifications")
+  response=$(api_get "$path")
 
   local count unread_count
   count=$(echo "$response" | jq 'length')
   unread_count=$(echo "$response" | jq '[.[] | select(.read == false)] | length')
 
   local summary="$count notifications ($unread_count unread)"
+  [[ -n "$page" ]] && summary="$count notifications ($unread_count unread, page $page)"
+
+  local next_page=$((${page:-1} + 1))
   local breadcrumbs
   breadcrumbs=$(breadcrumbs \
     "$(breadcrumb "read" "fizzy notifications read <id>" "Mark as read")" \
     "$(breadcrumb "read-all" "fizzy notifications read --all" "Mark all as read")" \
-    "$(breadcrumb "show" "fizzy show <card_number>" "View card")"
+    "$(breadcrumb "show" "fizzy show <card_number>" "View card")" \
+    "$(breadcrumb "next" "fizzy notifications --page $next_page" "Next page")"
   )
 
   output "$response" "$summary" "$breadcrumbs" "_notifications_md"
@@ -129,10 +149,12 @@ _notifications_help() {
         {name: "unread", description: "Mark notification as unread"}
       ],
       options: [
+        {flag: "--page, -p", description: "Page number for pagination"},
         {flag: "--all", description: "Mark all notifications as read (with read)"}
       ],
       examples: [
         "fizzy notifications",
+        "fizzy notifications --page 2",
         "fizzy notifications read abc123",
         "fizzy notifications read --all"
       ]
@@ -146,13 +168,19 @@ List and manage notifications.
 ### Usage
 
     fizzy notifications              List notifications
+    fizzy notifications --page 2     Get second page
     fizzy notifications read <id>    Mark as read
     fizzy notifications read --all   Mark all as read
     fizzy notifications unread <id>  Mark as unread
 
+### Options
+
+    --page, -p    Page number for pagination
+
 ### Examples
 
     fizzy notifications              List all notifications
+    fizzy notifications --page 2     Get second page
     fizzy notifications read abc123  Mark notification as read
     fizzy notifications read --all   Mark all as read
 EOF

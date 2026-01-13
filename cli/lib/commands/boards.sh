@@ -7,9 +7,20 @@
 
 cmd_boards() {
   local show_help=false
+  local page=""
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
+      --page|-p)
+        if [[ -z "${2:-}" ]]; then
+          die "--page requires a value" $EXIT_USAGE
+        fi
+        if ! [[ "$2" =~ ^[0-9]+$ ]] || [[ "$2" -lt 1 ]]; then
+          die "--page must be a positive integer" $EXIT_USAGE
+        fi
+        page="$2"
+        shift 2
+        ;;
       --help|-h)
         show_help=true
         shift
@@ -25,19 +36,27 @@ cmd_boards() {
     return 0
   fi
 
+  local path="/boards"
+  if [[ -n "$page" ]]; then
+    path="$path?page=$page"
+  fi
+
   local response
-  response=$(api_get "/boards")
+  response=$(api_get "$path")
 
   local count
   count=$(echo "$response" | jq 'length')
 
   local summary="$count boards"
+  [[ -n "$page" ]] && summary="$count boards (page $page)"
+
+  local next_page=$((${page:-1} + 1))
   local breadcrumbs
   breadcrumbs=$(breadcrumbs \
     "$(breadcrumb "show" "fizzy show board <id>" "View board details")" \
     "$(breadcrumb "cards" "fizzy cards --board <id>" "List cards on board")" \
     "$(breadcrumb "columns" "fizzy columns --board <id>" "List board columns")" \
-    "$(breadcrumb "create" "fizzy config set board_id <id>" "Set default board")"
+    "$(breadcrumb "next" "fizzy boards --page $next_page" "Next page")"
   )
 
   output "$response" "$summary" "$breadcrumbs" "_boards_md"
@@ -74,10 +93,12 @@ _boards_help() {
     jq -n '{
       command: "fizzy boards",
       description: "List boards in the account",
-      options: [],
+      options: [
+        {flag: "--page, -p", description: "Page number for pagination"}
+      ],
       examples: [
         "fizzy boards",
-        "fizzy boards --json"
+        "fizzy boards --page 2"
       ]
     }'
   else
@@ -92,13 +113,13 @@ List boards in the account.
 
 ### Options
 
+    --page, -p    Page number for pagination
     --help, -h    Show this help
 
 ### Examples
 
     fizzy boards              List all boards
-    fizzy boards --json       Output as JSON
-    fizzy boards -q           Raw data only
+    fizzy boards --page 2     Get second page
 EOF
   fi
 }

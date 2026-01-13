@@ -7,9 +7,20 @@
 
 cmd_tags() {
   local show_help=false
+  local page=""
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
+      --page|-p)
+        if [[ -z "${2:-}" ]]; then
+          die "--page requires a value" $EXIT_USAGE
+        fi
+        if ! [[ "$2" =~ ^[0-9]+$ ]] || [[ "$2" -lt 1 ]]; then
+          die "--page must be a positive integer" $EXIT_USAGE
+        fi
+        page="$2"
+        shift 2
+        ;;
       --help|-h)
         show_help=true
         shift
@@ -25,17 +36,26 @@ cmd_tags() {
     return 0
   fi
 
+  local path="/tags"
+  if [[ -n "$page" ]]; then
+    path="$path?page=$page"
+  fi
+
   local response
-  response=$(api_get "/tags")
+  response=$(api_get "$path")
 
   local count
   count=$(echo "$response" | jq 'length')
 
   local summary="$count tags"
+  [[ -n "$page" ]] && summary="$count tags (page $page)"
+
+  local next_page=$((${page:-1} + 1))
   local breadcrumbs
   breadcrumbs=$(breadcrumbs \
     "$(breadcrumb "filter" "fizzy cards --tag <id>" "Filter cards by tag")" \
-    "$(breadcrumb "add" "fizzy tag <card> --with \"name\"" "Add tag to card")"
+    "$(breadcrumb "add" "fizzy tag <card> --with \"name\"" "Add tag to card")" \
+    "$(breadcrumb "next" "fizzy tags --page $next_page" "Next page")"
   )
 
   output "$response" "$summary" "$breadcrumbs" "_tags_md"
@@ -72,10 +92,12 @@ _tags_help() {
     jq -n '{
       command: "fizzy tags",
       description: "List tags in the account",
-      options: [],
+      options: [
+        {flag: "--page, -p", description: "Page number for pagination"}
+      ],
       examples: [
         "fizzy tags",
-        "fizzy tags --json"
+        "fizzy tags --page 2"
       ]
     }'
   else
@@ -90,13 +112,13 @@ List tags in the account.
 
 ### Options
 
+    --page, -p    Page number for pagination
     --help, -h    Show this help
 
 ### Examples
 
     fizzy tags              List all tags
-    fizzy tags --json       Output as JSON
-    fizzy tags -q           Raw data only
+    fizzy tags --page 2     Get second page
 EOF
   fi
 }

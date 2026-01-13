@@ -36,6 +36,27 @@ load test_helper
 }
 
 
+# boards pagination validation
+
+@test "boards --page rejects non-numeric value" {
+  run fizzy boards --page abc
+  assert_failure
+  assert_output_contains "positive integer"
+}
+
+@test "boards --page rejects zero" {
+  run fizzy boards --page 0
+  assert_failure
+  assert_output_contains "positive integer"
+}
+
+@test "boards --page rejects negative" {
+  run fizzy boards --page -1
+  assert_failure
+  assert_output_contains "positive integer"
+}
+
+
 # columns --help
 
 @test "columns --help shows help" {

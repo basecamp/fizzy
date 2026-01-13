@@ -65,7 +65,14 @@ cmd_search() {
     board_id=$(get_board_id 2>/dev/null || true)
   fi
 
+  # Resolve board name to ID if provided
   if [[ -n "$board_id" ]]; then
+    local resolved_board
+    if resolved_board=$(resolve_board_id "$board_id"); then
+      board_id="$resolved_board"
+    else
+      die "$RESOLVE_ERROR" $EXIT_NOT_FOUND "Use: fizzy boards"
+    fi
     params+=("board_ids[]=$board_id")
   fi
 
