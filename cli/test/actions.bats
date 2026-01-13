@@ -195,6 +195,56 @@ load test_helper
 }
 
 
+# delete --help
+
+@test "delete --help shows help" {
+  run fizzy --md delete --help
+  assert_success
+  assert_output_contains "fizzy delete"
+  assert_output_contains "delete"
+}
+
+@test "delete -h shows help" {
+  run fizzy --md delete -h
+  assert_success
+  assert_output_contains "fizzy delete"
+}
+
+@test "delete --help --json outputs JSON" {
+  run fizzy --json delete --help
+  assert_success
+  is_valid_json
+  assert_json_not_null ".command"
+}
+
+@test "delete --help shows warning" {
+  run fizzy --md delete --help
+  assert_success
+  assert_output_contains "cannot be undone"
+}
+
+
+# delete requires card number
+
+@test "delete without number shows error" {
+  run fizzy delete
+  assert_failure
+  assert_output_contains "Card number required"
+}
+
+@test "delete requires authentication" {
+  run fizzy delete 123
+  assert_failure
+  assert_output_contains "Not authenticated"
+}
+
+@test "delete rejects unknown option" {
+  run fizzy delete --invalid
+  assert_failure
+  assert_output_contains "Unknown option"
+}
+
+
 # triage --help
 
 @test "triage --help shows help" {
