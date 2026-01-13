@@ -773,6 +773,104 @@ EOF
 }
 
 
+# fizzy delete-image <number>
+# Remove header image from card
+
+cmd_delete_image() {
+  local show_help=false
+  local card_number=""
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --help|-h)
+        show_help=true
+        shift
+        ;;
+      -*)
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy delete-image --help"
+        ;;
+      *)
+        if [[ -z "$card_number" ]]; then
+          card_number="$1"
+        fi
+        shift
+        ;;
+    esac
+  done
+
+  if [[ "$show_help" == "true" ]]; then
+    _delete_image_help
+    return 0
+  fi
+
+  if [[ -z "$card_number" ]]; then
+    die "Card number required" $EXIT_USAGE "Usage: fizzy delete-image <number>"
+  fi
+
+  # DELETE returns 204 No Content, fetch card after for response
+  api_delete "/cards/$card_number/image" > /dev/null
+  local response
+  response=$(api_get "/cards/$card_number")
+
+  local summary="Removed image from card #$card_number"
+
+  local breadcrumbs
+  breadcrumbs=$(breadcrumbs \
+    "$(breadcrumb "show" "fizzy show $card_number" "View card")" \
+    "$(breadcrumb "update" "fizzy update $card_number" "Update card")"
+  )
+
+  output "$response" "$summary" "$breadcrumbs" "_delete_image_md"
+}
+
+_delete_image_md() {
+  local data="$1"
+  local summary="$2"
+  local breadcrumbs="$3"
+
+  local card_number title image_url
+  card_number=$(echo "$data" | jq -r '.number')
+  title=$(echo "$data" | jq -r '.title')
+  image_url=$(echo "$data" | jq -r '.image_url // "none"')
+
+  md_heading 2 "Image Removed"
+  echo
+  md_kv "Card" "#$card_number" \
+        "Title" "$title" \
+        "Image" "$image_url"
+
+  md_breadcrumbs "$breadcrumbs"
+}
+
+_delete_image_help() {
+  local format
+  format=$(get_format)
+
+  if [[ "$format" == "json" ]]; then
+    jq -n '{
+      command: "fizzy delete-image",
+      description: "Remove header image from a card",
+      usage: "fizzy delete-image <number>",
+      examples: ["fizzy delete-image 123"]
+    }'
+  else
+    cat <<'EOF'
+## fizzy delete-image
+
+Remove header image from a card.
+
+### Usage
+
+    fizzy delete-image <number>
+
+### Examples
+
+    fizzy delete-image 123    Remove header image from card #123
+EOF
+  fi
+}
+
+
 # fizzy triage <number> --to <column_id>
 # Move card to a column
 

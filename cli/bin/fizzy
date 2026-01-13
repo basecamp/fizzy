@@ -78,6 +78,7 @@ main() {
     close)        cmd_close "$@" ;;
     reopen)       cmd_reopen "$@" ;;
     delete)       cmd_delete "$@" ;;
+    delete-image) cmd_delete_image "$@" ;;
     triage)       cmd_triage "$@" ;;
     untriage)     cmd_untriage "$@" ;;
     postpone)     cmd_postpone "$@" ;;
