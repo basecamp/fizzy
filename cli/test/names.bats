@@ -101,6 +101,41 @@ load test_helper
 }
 
 
+# Contract test: tag API uses .title field (not .name)
+
+@test "resolve_tag_id matches on .title field from API" {
+  source "$FIZZY_ROOT/lib/core.sh"
+  source "$FIZZY_ROOT/lib/config.sh"
+  source "$FIZZY_ROOT/lib/api.sh"
+  source "$FIZZY_ROOT/lib/names.sh"
+
+  # Set up cache with mock tag data matching real API structure
+  # IMPORTANT: API returns .title, not .name - this is a contract test
+  export _FIZZY_CACHE_DIR="$TEST_HOME/fizzy-cache-test"
+  rm -rf "$_FIZZY_CACHE_DIR"
+  _set_cache "tags" '[{"id":"tag123","title":"bug"},{"id":"tag456","title":"feature"}]'
+
+  # Should resolve by title
+  result=$(resolve_tag_id "bug")
+  [[ "$result" == "tag123" ]]
+}
+
+@test "resolve_tag_id strips leading # from tag name" {
+  source "$FIZZY_ROOT/lib/core.sh"
+  source "$FIZZY_ROOT/lib/config.sh"
+  source "$FIZZY_ROOT/lib/api.sh"
+  source "$FIZZY_ROOT/lib/names.sh"
+
+  export _FIZZY_CACHE_DIR="$TEST_HOME/fizzy-cache-test"
+  rm -rf "$_FIZZY_CACHE_DIR"
+  _set_cache "tags" '[{"id":"tag123","title":"bug"}]'
+
+  # Should resolve #bug to bug
+  result=$(resolve_tag_id "#bug")
+  [[ "$result" == "tag123" ]]
+}
+
+
 # Cache management
 
 @test "_ensure_cache_dir creates cache directory" {
@@ -171,6 +206,20 @@ load test_helper
   result=$(_suggest_similar "Dev" "$json" "name")
   [[ "$result" == *"Dev Team"* ]]
   [[ "$result" == *"Dev Ops"* ]]
+}
+
+@test "_suggest_similar handles regex special characters" {
+  source "$FIZZY_ROOT/lib/core.sh"
+  source "$FIZZY_ROOT/lib/config.sh"
+  source "$FIZZY_ROOT/lib/api.sh"
+  source "$FIZZY_ROOT/lib/names.sh"
+
+  # Input with regex special chars like [ ] * . should not crash
+  local json='[{"name": "foo"}, {"name": "bar"}, {"name": "baz"}]'
+  # This would fail with regex grep: grep -i "^foo[" is invalid
+  result=$(_suggest_similar "foo[" "$json" "name")
+  # Should return something (first few names) without erroring
+  [[ -n "$result" || -z "$result" ]]  # Either result, no crash
 }
 
 

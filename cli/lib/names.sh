@@ -58,12 +58,12 @@ resolve_board_id() {
     return 0
   fi
 
-  # Fetch boards (with cache)
+  # Fetch boards (with cache) - use api_get_all to handle pagination
   local boards
   boards=$(_get_cache "boards")
   if [[ -z "$boards" ]]; then
     # Don't suppress stderr - let auth errors propagate and exit
-    boards=$(api_get "/boards") || return 1
+    boards=$(api_get_all "/boards") || return 1
     _set_cache "boards" "$boards"
   fi
 
@@ -144,12 +144,12 @@ resolve_user_id() {
     return 0
   fi
 
-  # Fetch users (with cache)
+  # Fetch users (with cache) - use api_get_all to handle pagination
   local users
   users=$(_get_cache "users")
   if [[ -z "$users" ]]; then
     # Don't suppress stderr - let auth errors propagate and exit
-    users=$(api_get "/users") || return 1
+    users=$(api_get_all "/users") || return 1
     _set_cache "users" "$users"
   fi
 
@@ -322,19 +322,22 @@ resolve_tag_id() {
     return 0
   fi
 
-  # Fetch tags (with cache)
+  # Fetch tags (with cache) - use api_get_all to handle pagination
   local tags
   tags=$(_get_cache "tags")
   if [[ -z "$tags" ]]; then
     # Don't suppress stderr - let auth errors propagate and exit
-    tags=$(api_get "/tags") || return 1
+    tags=$(api_get_all "/tags") || return 1
     _set_cache "tags" "$tags"
   fi
 
-  # Try exact match first
+  # Strip leading # if present (users may type #bug or bug)
+  local search_term="${input#\#}"
+
+  # Try exact match first (API returns .title, not .name)
   local exact_match
-  exact_match=$(echo "$tags" | jq -r --arg name "$input" \
-    '.[] | select(.name == $name) | .id' | head -1)
+  exact_match=$(echo "$tags" | jq -r --arg name "$search_term" \
+    '.[] | select(.title == $name) | .id' | head -1)
   if [[ -n "$exact_match" ]]; then
     echo "$exact_match"
     return 0
@@ -342,8 +345,8 @@ resolve_tag_id() {
 
   # Try case-insensitive match
   local ci_matches
-  ci_matches=$(echo "$tags" | jq -r --arg name "$input" \
-    '.[] | select(.name | ascii_downcase == ($name | ascii_downcase)) | .id')
+  ci_matches=$(echo "$tags" | jq -r --arg name "$search_term" \
+    '.[] | select(.title | ascii_downcase == ($name | ascii_downcase)) | .id')
   local ci_count
   ci_count=0
   [[ -n "$ci_matches" ]] && ci_count=$(echo "$ci_matches" | grep -c . || true)
@@ -354,8 +357,8 @@ resolve_tag_id() {
 
   # Try partial match (contains)
   local partial_matches
-  partial_matches=$(echo "$tags" | jq -r --arg name "$input" \
-    '.[] | select(.name | ascii_downcase | contains($name | ascii_downcase)) | "\(.id):\(.name)"')
+  partial_matches=$(echo "$tags" | jq -r --arg name "$search_term" \
+    '.[] | select(.title | ascii_downcase | contains($name | ascii_downcase)) | "\(.id):\(.title)"')
   local partial_count
   partial_count=0
   [[ -n "$partial_matches" ]] && partial_count=$(echo "$partial_matches" | grep -c . || true)
@@ -366,14 +369,14 @@ resolve_tag_id() {
   elif [[ "$partial_count" -gt 1 ]]; then
     local names
     names=$(echo "$partial_matches" | cut -d: -f2- | tr '\n' ',' | sed 's/,$//')
-    RESOLVE_ERROR="Ambiguous tag name '$input' matches: $names"
+    RESOLVE_ERROR="Ambiguous tag '$search_term' matches: $names"
     return 1
   fi
 
   # Not found - provide suggestions
-  RESOLVE_ERROR="Tag not found: $input"
+  RESOLVE_ERROR="Tag not found: $search_term"
   local suggestions
-  suggestions=$(_suggest_similar "$input" "$tags" "name")
+  suggestions=$(_suggest_similar "$search_term" "$tags" "title")
   if [[ -n "$suggestions" ]]; then
     RESOLVE_ERROR="$RESOLVE_ERROR. Did you mean: $suggestions?"
   fi
@@ -398,13 +401,14 @@ _suggest_similar() {
   names=$(echo "$json_array" | jq -r ".[].$field")
 
   # Find names that share a common prefix (first 3 chars)
+  # Use grep -iF for fixed-string matching to avoid regex errors from special chars
   local prefix="${input:0:3}"
   local suggestions
-  suggestions=$(echo "$names" | grep -i "^$prefix" | head -3 | tr '\n' ',' | sed 's/,$//')
+  suggestions=$(echo "$names" | grep -iF "$prefix" | head -3 | tr '\n' ',' | sed 's/,$//')
 
   # If no prefix matches, try substring matches
   if [[ -z "$suggestions" ]]; then
-    suggestions=$(echo "$names" | grep -i "$input" | head -3 | tr '\n' ',' | sed 's/,$//')
+    suggestions=$(echo "$names" | grep -iF "$input" | head -3 | tr '\n' ',' | sed 's/,$//')
   fi
 
   # If still nothing, return first few available options
