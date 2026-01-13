@@ -328,13 +328,13 @@ cmd_card_update() {
     die "Nothing to update. Specify --title or --description" $EXIT_USAGE
   fi
 
-  # Build request body
+  # Build request body - Rails expects params[:card]
   local body
   body=$(jq -n \
     --arg title "$title" \
     --arg description "$description" \
-    '(if $title != "" then {title: $title} else {} end) +
-     (if $description != "" then {description: $description} else {} end)')
+    '{card: ((if $title != "" then {title: $title} else {} end) +
+             (if $description != "" then {description: $description} else {} end))}')
 
   local response
   response=$(api_patch "/cards/$card_number" "$body")
@@ -1371,8 +1371,10 @@ _comment_edit() {
   local body
   body=$(jq -n --arg body "$content" '{comment: {body: $body}}')
 
+  # PATCH returns 204 No Content, so fetch the comment after to show updated state
+  api_patch "/cards/$card_number/comments/$comment_id" "$body" > /dev/null
   local response
-  response=$(api_patch "/cards/$card_number/comments/$comment_id" "$body")
+  response=$(api_get "/cards/$card_number/comments/$comment_id")
 
   local summary="Comment updated on card #$card_number"
 
