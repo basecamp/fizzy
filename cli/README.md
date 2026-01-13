@@ -71,11 +71,13 @@ fizzy search "login bug"
 fizzy boards | jq '.data[0]'
 
 # Raw data only (--quiet or --data)
-fizzy boards --quiet | jq '.[0]'
+fizzy --quiet boards | jq '.[0]'
 
 # Force markdown
 fizzy --md boards
 ```
+
+**Note**: Global flags (`--quiet`, `--json`, `--md`) must come *before* the command name.
 
 ### JSON Envelope Structure
 
@@ -97,7 +99,7 @@ fizzy --md boards
 | Command | Description |
 |---------|-------------|
 | `boards` | List boards in the account |
-| `cards` | List or filter cards |
+| `cards` | List or filter cards (supports `--page` pagination) |
 | `columns` | List columns on a board |
 | `comments` | List comments on a card |
 | `notifications` | List notifications |
@@ -128,13 +130,15 @@ fizzy --md boards
 
 ## Global Flags
 
+Global flags must appear **before** the command name (e.g., `fizzy --json boards`, not `fizzy boards --json`).
+
 | Flag | Description |
 |------|-------------|
 | `--json`, `-j` | Force JSON output |
 | `--md`, `-m` | Force markdown output |
 | `--quiet`, `-q` | Raw data only (no envelope) |
 | `--verbose`, `-v` | Debug output |
-| `--board`, `-b`, `--in` | Board ID or name |
+| `--board`, `-b`, `--in` | Board ID or name (can also go after command) |
 | `--account`, `-a` | Account slug |
 
 ## Authentication
@@ -187,11 +191,11 @@ fizzy config path
 Point `fizzy` at different Fizzy instances using `FIZZY_BASE_URL`:
 
 ```bash
-# Production (default)
+# Local development (default: http://fizzy.localhost:3006)
 fizzy boards
 
-# Local development
-FIZZY_BASE_URL=http://fizzy.localhost:3006 fizzy auth login
+# Production
+FIZZY_BASE_URL=https://fizzy.37signals.com fizzy auth login
 ```
 
 OAuth endpoints are discovered automatically via `.well-known/oauth-authorization-server` (RFC 8414).
