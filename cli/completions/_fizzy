@@ -59,6 +59,7 @@ _fizzy() {
     '(-v --verbose)'{-v,--verbose}'[Debug output]' \
     '(-b --board --in)'{-b,--board,--in}'[Board ID or name]:board:' \
     '(-a --account)'{-a,--account}'[Account slug]:account:' \
+    '(-p --page)'{-p,--page}'[Page number]:page:' \
     '(-h --help)'{-h,--help}'[Show help]' \
     '1: :->command' \
     '*::arg:->args'

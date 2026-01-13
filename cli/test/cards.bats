@@ -45,6 +45,24 @@ load test_helper
   assert_output_contains "Unknown option"
 }
 
+@test "cards --page rejects non-numeric value" {
+  run fizzy cards --page abc
+  assert_failure
+  assert_output_contains "positive integer"
+}
+
+@test "cards --page rejects zero" {
+  run fizzy cards --page 0
+  assert_failure
+  assert_output_contains "positive integer"
+}
+
+@test "cards --page rejects negative" {
+  run fizzy cards --page -1
+  assert_failure
+  assert_output_contains "positive integer"
+}
+
 
 # show --help
 

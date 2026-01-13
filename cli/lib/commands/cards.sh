@@ -12,6 +12,7 @@ cmd_cards() {
   local status=""
   local search_terms=""
   local sort_by="latest"
+  local page=""
   local show_help=false
 
   while [[ $# -gt 0 ]]; do
@@ -56,6 +57,16 @@ cmd_cards() {
           die "--sort requires a value" $EXIT_USAGE
         fi
         sort_by="$2"
+        shift 2
+        ;;
+      --page|-p)
+        if [[ -z "${2:-}" ]]; then
+          die "--page requires a value" $EXIT_USAGE
+        fi
+        if ! [[ "$2" =~ ^[1-9][0-9]*$ ]]; then
+          die "--page must be a positive integer" $EXIT_USAGE
+        fi
+        page="$2"
         shift 2
         ;;
       --help|-h)
@@ -133,6 +144,10 @@ cmd_cards() {
     params+=("sorted_by=$sort_by")
   fi
 
+  if [[ -n "$page" ]]; then
+    params+=("page=$page")
+  fi
+
   # Build query string
   if [[ ${#params[@]} -gt 0 ]]; then
     local query_string
@@ -147,11 +162,24 @@ cmd_cards() {
   count=$(echo "$response" | jq 'length')
 
   local summary="$count cards"
+  [[ -n "$page" ]] && summary="$count cards (page $page)"
+
+  # Build next page command for breadcrumbs (preserve all filters)
+  local next_page_cmd="fizzy cards"
+  local next_page=$((${page:-1} + 1))
+  [[ -n "$board_id" ]] && next_page_cmd="$next_page_cmd --board $board_id"
+  [[ -n "$tag_id" ]] && next_page_cmd="$next_page_cmd --tag $tag_id"
+  [[ -n "$assignee_id" ]] && next_page_cmd="$next_page_cmd --assignee $assignee_id"
+  [[ -n "$status" ]] && next_page_cmd="$next_page_cmd --status $status"
+  [[ -n "$search_terms" ]] && next_page_cmd="$next_page_cmd --search \"$search_terms\""
+  [[ "$sort_by" != "latest" ]] && next_page_cmd="$next_page_cmd --sort $sort_by"
+  next_page_cmd="$next_page_cmd --page $next_page"
+
   local breadcrumbs
   breadcrumbs=$(breadcrumbs \
     "$(breadcrumb "show" "fizzy show <number>" "View card details")" \
     "$(breadcrumb "create" "fizzy card \"title\"" "Create new card")" \
-    "$(breadcrumb "filter" "fizzy cards --status closed" "Filter by status")" \
+    "$(breadcrumb "next" "$next_page_cmd" "Next page")" \
     "$(breadcrumb "search" "fizzy search \"query\"" "Search cards")"
   )
 
@@ -195,7 +223,8 @@ _cards_help() {
         {flag: "--assignee", description: "Filter by assignee name, email, or ID"},
         {flag: "--status", description: "Filter by status: all, closed, not_now, stalled, golden"},
         {flag: "--search, -s", description: "Search terms"},
-        {flag: "--sort", description: "Sort order: latest, newest, oldest"}
+        {flag: "--sort", description: "Sort order: latest, newest, oldest"},
+        {flag: "--page, -p", description: "Page number for pagination"}
       ],
       examples: [
         "fizzy cards",
@@ -223,6 +252,7 @@ List and filter cards.
     --status      Filter: all, closed, not_now, stalled, golden
     --search, -s  Search terms
     --sort        Sort: latest (default), newest, oldest
+    --page, -p    Page number for pagination
     --help, -h    Show this help
 
 ### Examples
