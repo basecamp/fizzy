@@ -10,7 +10,7 @@ cmd_card_create() {
   local description=""
   local board_id=""
   local column_id=""
-  local tag_ids=()
+  local tag_names=()
   local assignee_ids=()
   local show_help=false
 
@@ -18,14 +18,14 @@ cmd_card_create() {
     case "$1" in
       --board|-b|--in)
         if [[ -z "${2:-}" ]]; then
-          die "--board requires a board ID" $EXIT_USAGE
+          die "--board requires a board name or ID" $EXIT_USAGE
         fi
         board_id="$2"
         shift 2
         ;;
       --column|-c)
         if [[ -z "${2:-}" ]]; then
-          die "--column requires a column ID" $EXIT_USAGE
+          die "--column requires a column name or ID" $EXIT_USAGE
         fi
         column_id="$2"
         shift 2
@@ -39,14 +39,15 @@ cmd_card_create() {
         ;;
       --tag)
         if [[ -z "${2:-}" ]]; then
-          die "--tag requires a tag ID" $EXIT_USAGE
+          die "--tag requires a tag name" $EXIT_USAGE
         fi
-        tag_ids+=("$2")
+        # Store tag name (strip leading # if present) for taggings API
+        tag_names+=("${2#\#}")
         shift 2
         ;;
       --assign)
         if [[ -z "${2:-}" ]]; then
-          die "--assign requires a user ID" $EXIT_USAGE
+          die "--assign requires a user name or ID" $EXIT_USAGE
         fi
         assignee_ids+=("$2")
         shift 2
@@ -96,7 +97,7 @@ cmd_card_create() {
     die "$RESOLVE_ERROR" $EXIT_NOT_FOUND "Use: fizzy boards"
   fi
 
-  # Resolve column name to ID if provided
+  # Resolve column name to ID if provided (for triage follow-up)
   if [[ -n "$column_id" ]]; then
     local resolved_column
     if resolved_column=$(resolve_column_id "$column_id" "$board_id"); then
@@ -106,19 +107,7 @@ cmd_card_create() {
     fi
   fi
 
-  # Resolve tag names to IDs
-  local resolved_tag_ids=()
-  for tag in "${tag_ids[@]}"; do
-    local resolved_tag
-    if resolved_tag=$(resolve_tag_id "$tag"); then
-      resolved_tag_ids+=("$resolved_tag")
-    else
-      die "$RESOLVE_ERROR" $EXIT_NOT_FOUND "Use: fizzy tags"
-    fi
-  done
-  tag_ids=("${resolved_tag_ids[@]}")
-
-  # Resolve assignee names to IDs
+  # Resolve assignee names to IDs (for assignment follow-up)
   local resolved_assignee_ids=()
   for assignee in "${assignee_ids[@]}"; do
     local resolved_user
@@ -130,36 +119,56 @@ cmd_card_create() {
   done
   assignee_ids=("${resolved_assignee_ids[@]}")
 
-  # Build request body
+  # Build request body (API only accepts title, description)
   local body
   body=$(jq -n \
     --arg title "$title" \
     --arg description "${description:-}" \
-    --arg column_id "${column_id:-}" \
     '{title: $title} +
-     (if $description != "" then {description: $description} else {} end) +
-     (if $column_id != "" then {column_id: $column_id} else {} end)')
-
-  # Add tag_ids array if provided
-  if [[ ${#tag_ids[@]} -gt 0 ]]; then
-    local tags_json
-    tags_json=$(printf '%s\n' "${tag_ids[@]}" | jq -R . | jq -s '.')
-    body=$(echo "$body" | jq --argjson tag_ids "$tags_json" '. + {tag_ids: $tag_ids}')
-  fi
-
-  # Add assignee_ids array if provided
-  if [[ ${#assignee_ids[@]} -gt 0 ]]; then
-    local assignees_json
-    assignees_json=$(printf '%s\n' "${assignee_ids[@]}" | jq -R . | jq -s '.')
-    body=$(echo "$body" | jq --argjson assignee_ids "$assignees_json" '. + {assignee_ids: $assignee_ids}')
-  fi
+     (if $description != "" then {description: $description} else {} end)')
 
   local response
   response=$(api_post "/boards/$board_id/cards" "$body")
 
   local number
   number=$(echo "$response" | jq -r '.number')
+
+  # Chain follow-up actions after card creation
+  local actions_taken=()
+
+  # Triage to column if specified
+  if [[ -n "$column_id" ]]; then
+    local triage_body
+    triage_body=$(jq -n --arg column_id "$column_id" '{column_id: $column_id}')
+    api_post "/cards/$number/triage" "$triage_body" > /dev/null
+    actions_taken+=("triaged")
+  fi
+
+  # Add tags if specified
+  for tag_name in "${tag_names[@]}"; do
+    local tag_body
+    tag_body=$(jq -n --arg tag_title "$tag_name" '{tag_title: $tag_title}')
+    api_post "/cards/$number/taggings" "$tag_body" > /dev/null
+    actions_taken+=("tagged #$tag_name")
+  done
+
+  # Add assignments if specified
+  for assignee_id in "${assignee_ids[@]}"; do
+    local assign_body
+    assign_body=$(jq -n --arg assignee_id "$assignee_id" '{assignee_id: $assignee_id}')
+    api_post "/cards/$number/assignments" "$assign_body" > /dev/null
+    actions_taken+=("assigned")
+  done
+
+  # Fetch updated card if we made any follow-up changes
+  if [[ ${#actions_taken[@]} -gt 0 ]]; then
+    response=$(api_get "/cards/$number")
+  fi
+
   local summary="Created card #$number"
+  if [[ ${#actions_taken[@]} -gt 0 ]]; then
+    summary="Created card #$number (${actions_taken[*]})"
+  fi
 
   local breadcrumbs
   breadcrumbs=$(breadcrumbs \
@@ -197,26 +206,27 @@ _card_create_help() {
   if [[ "$format" == "json" ]]; then
     jq -n '{
       command: "fizzy card",
-      description: "Create a new card",
+      description: "Create a new card with optional follow-up actions",
       usage: "fizzy card \"title\" [options]",
       options: [
         {flag: "--board, -b, --in", description: "Board name or ID (required if not in config)"},
-        {flag: "--column, -c", description: "Column name or ID to triage directly"},
+        {flag: "--column, -c", description: "Column name or ID (chains triage after create)"},
         {flag: "--description, -d", description: "Card description"},
-        {flag: "--tag", description: "Tag name or ID (can be repeated)"},
-        {flag: "--assign", description: "Assignee name, email, or ID (can be repeated)"}
+        {flag: "--tag", description: "Tag name (chains tagging after create, repeatable)"},
+        {flag: "--assign", description: "Assignee name/email/ID (chains assignment after create, repeatable)"}
       ],
+      notes: "--column, --tag, and --assign execute follow-up API calls after card creation",
       examples: [
         "fizzy card \"Fix login bug\"",
         "fizzy card \"New feature\" --board \"My Board\" --column \"In Progress\"",
-        "fizzy card \"Task\" --tag \"bug\" --assign \"Jane Doe\""
+        "fizzy card \"Task\" --tag bug --assign \"Jane Doe\""
       ]
     }'
   else
     cat <<'EOF'
 ## fizzy card
 
-Create a new card.
+Create a new card with optional follow-up actions.
 
 ### Usage
 
@@ -225,17 +235,20 @@ Create a new card.
 ### Options
 
     --board, -b, --in    Board name or ID (required if not in config)
-    --column, -c      Column name or ID to triage directly
-    --description, -d Card description
-    --tag             Tag name or ID (can be repeated)
-    --assign          Assignee name, email, or ID (can be repeated)
-    --help, -h        Show this help
+    --column, -c         Column name or ID (chains triage after create)
+    --description, -d    Card description
+    --tag                Tag name (chains tagging, repeatable)
+    --assign             Assignee name/email/ID (chains assignment, repeatable)
+    --help, -h           Show this help
+
+Note: --column, --tag, and --assign trigger follow-up API calls after the
+card is created, since the create endpoint only accepts title and description.
 
 ### Examples
 
     fizzy card "Fix login bug"
     fizzy card "New feature" --board "My Board" --column "In Progress"
-    fizzy card "Task" --tag "bug" --assign "Jane Doe"
+    fizzy card "Task" --tag bug --tag urgent --assign "Jane Doe"
 EOF
   fi
 }
@@ -1133,6 +1146,9 @@ cmd_tag() {
   if [[ -z "$tag_name" ]]; then
     die "--with tag name required" $EXIT_USAGE "Usage: fizzy tag <number> --with <tag>"
   fi
+
+  # Strip leading # if present (users may type #bug or bug)
+  tag_name="${tag_name#\#}"
 
   # API expects tag_title (the tag name), not tag_id
   local body
