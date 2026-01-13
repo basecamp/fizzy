@@ -317,7 +317,7 @@ parse_global_flags() {
         (( ++GLOBAL_FLAGS_CONSUMED ))
         shift
         ;;
-      --board|-b)
+      --board|-b|--in)
         if [[ -z "${2:-}" ]]; then
           die "--board requires a value" $EXIT_USAGE
         fi

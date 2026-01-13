@@ -16,7 +16,7 @@ cmd_cards() {
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --board|-b)
+      --board|-b|--in)
         if [[ -z "${2:-}" ]]; then
           die "--board requires a value" $EXIT_USAGE
         fi
@@ -190,7 +190,7 @@ _cards_help() {
       command: "fizzy cards",
       description: "List and filter cards",
       options: [
-        {flag: "--board, -b", description: "Filter by board name or ID"},
+        {flag: "--board, -b, --in", description: "Filter by board name or ID"},
         {flag: "--tag", description: "Filter by tag name or ID"},
         {flag: "--assignee", description: "Filter by assignee name, email, or ID"},
         {flag: "--status", description: "Filter by status: all, closed, not_now, stalled, golden"},
@@ -217,7 +217,7 @@ List and filter cards.
 
 ### Options
 
-    --board, -b   Filter by board name or ID
+    --board, -b, --in   Filter by board name or ID
     --tag         Filter by tag name or ID
     --assignee    Filter by assignee name, email, or ID
     --status      Filter: all, closed, not_now, stalled, golden

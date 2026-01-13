@@ -13,7 +13,7 @@ cmd_search() {
   # First non-flag argument is the query
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --board|-b)
+      --board|-b|--in)
         if [[ -z "${2:-}" ]]; then
           die "--board requires a value" $EXIT_USAGE
         fi
@@ -125,7 +125,7 @@ _search_help() {
       description: "Search cards",
       usage: "fizzy search <query> [options]",
       options: [
-        {flag: "--board, -b", description: "Filter results to a specific board"}
+        {flag: "--board, -b, --in", description: "Filter results to a specific board"}
       ],
       examples: [
         "fizzy search \"bug fix\"",
@@ -144,7 +144,7 @@ Search cards by keywords.
 
 ### Options
 
-    --board, -b   Filter results to a specific board
+    --board, -b, --in   Filter results to a specific board
     --help, -h    Show this help
 
 ### Examples

@@ -16,7 +16,7 @@ cmd_card_create() {
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --board|-b)
+      --board|-b|--in)
         if [[ -z "${2:-}" ]]; then
           die "--board requires a board ID" $EXIT_USAGE
         fi
@@ -200,7 +200,7 @@ _card_create_help() {
       description: "Create a new card",
       usage: "fizzy card \"title\" [options]",
       options: [
-        {flag: "--board, -b", description: "Board name or ID (required if not in config)"},
+        {flag: "--board, -b, --in", description: "Board name or ID (required if not in config)"},
         {flag: "--column, -c", description: "Column name or ID to triage directly"},
         {flag: "--description, -d", description: "Card description"},
         {flag: "--tag", description: "Tag name or ID (can be repeated)"},
@@ -224,7 +224,7 @@ Create a new card.
 
 ### Options
 
-    --board, -b       Board name or ID (required if not in config)
+    --board, -b, --in    Board name or ID (required if not in config)
     --column, -c      Column name or ID to triage directly
     --description, -d Card description
     --tag             Tag name or ID (can be repeated)

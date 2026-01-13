@@ -70,7 +70,7 @@ _help_json() {
         {"flag": "--md/-m", "description": "Force markdown output"},
         {"flag": "--quiet/-q", "description": "Suppress non-essential output"},
         {"flag": "--verbose/-v", "description": "Debug output"},
-        {"flag": "--board/-b", "description": "Board ID or name"},
+        {"flag": "--board/-b/--in", "description": "Board ID or name"},
         {"flag": "--account/-a", "description": "Account slug"}
       ]
     }'
@@ -92,7 +92,7 @@ Agent-first CLI for Fizzy.
     --md, -m         Force markdown output
     --quiet, -q      Suppress non-essential output (data only)
     --verbose, -v    Debug output
-    --board, -b      Board ID or name
+    --board, -b, --in   Board ID or name
     --account, -a    Account slug
 
 ## COMMANDS

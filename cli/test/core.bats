@@ -147,6 +147,11 @@ load test_helper
   assert_success
 }
 
+@test "fizzy --in is alias for --board" {
+  run fizzy --json --in test-board
+  assert_success
+}
+
 @test "fizzy -a is alias for --account" {
   run fizzy --json -a 12345
   assert_success

@@ -113,7 +113,7 @@ cmd_columns() {
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --board|-b)
+      --board|-b|--in)
         if [[ -z "${2:-}" ]]; then
           die "--board requires a value" $EXIT_USAGE
         fi
@@ -201,7 +201,7 @@ _columns_help() {
       command: "fizzy columns",
       description: "List columns on a board",
       options: [
-        {flag: "--board, -b", description: "Board name or ID (required unless set in config)"}
+        {flag: "--board, -b, --in", description: "Board name or ID (required unless set in config)"}
       ],
       examples: [
         "fizzy columns --board \"My Board\"",
@@ -220,7 +220,7 @@ List columns on a board.
 
 ### Options
 
-    --board, -b   Board name or ID (required unless set in config)
+    --board, -b, --in   Board name or ID (required unless set in config)
     --help, -h    Show this help
 
 ### Examples
