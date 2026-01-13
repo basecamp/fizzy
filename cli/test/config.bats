@@ -425,3 +425,123 @@ load test_helper
   result=$(get_token_scope 2>/dev/null) || true
   [[ "$result" == "unknown" ]]
 }
+
+
+# fizzy config command
+
+@test "config --help shows help" {
+  run fizzy --md config --help
+  assert_success
+  assert_output_contains "fizzy config"
+  assert_output_contains "Manage configuration"
+}
+
+@test "config -h shows help" {
+  run fizzy --md config -h
+  assert_success
+  assert_output_contains "fizzy config"
+}
+
+@test "config --help --json outputs JSON" {
+  run fizzy --json config --help
+  assert_success
+  is_valid_json
+  assert_json_not_null ".command"
+}
+
+@test "config list shows configuration" {
+  create_global_config '{"account_slug": "12345"}'
+
+  run fizzy --md config
+  assert_success
+  assert_output_contains "Configuration"
+}
+
+@test "config list --json outputs JSON" {
+  create_global_config '{"account_slug": "12345"}'
+
+  run fizzy --json config list
+  assert_success
+  is_valid_json
+}
+
+@test "config get retrieves value" {
+  create_global_config '{"account_slug": "test-slug"}'
+  unset FIZZY_ACCOUNT_SLUG
+  unset FIZZY_ACCOUNT
+
+  run fizzy config get account_slug
+  assert_success
+  assert_output_contains "test-slug"
+}
+
+@test "config get missing key shows error" {
+  run fizzy config get nonexistent
+  assert_failure
+  assert_output_contains "Key not found"
+}
+
+@test "config set creates value" {
+  run fizzy config set my_key my_value
+  assert_success
+  assert_output_contains "Set my_key"
+
+  # Verify it was saved to local config (cwd/.fizzy/config.json)
+  local config_file="$TEST_PROJECT/.fizzy/config.json"
+  [[ -f "$config_file" ]]
+  result=$(jq -r '.my_key' "$config_file")
+  [[ "$result" == "my_value" ]]
+}
+
+@test "config set --global creates global value" {
+  run fizzy config set --global my_global_key my_value
+  assert_success
+  assert_output_contains "global"
+
+  # Verify it was saved to global config (~/.config/fizzy/config.json)
+  local config_file="$TEST_HOME/.config/fizzy/config.json"
+  [[ -f "$config_file" ]]
+  result=$(jq -r '.my_global_key' "$config_file")
+  [[ "$result" == "my_value" ]]
+}
+
+@test "config unset removes value" {
+  create_local_config '{"my_key": "my_value"}'
+
+  run fizzy config unset my_key
+  assert_success
+  assert_output_contains "Unset my_key"
+
+  # Verify it was removed from local config
+  local config_file="$TEST_PROJECT/.fizzy/config.json"
+  result=$(jq -r '.my_key // empty' "$config_file")
+  [[ -z "$result" ]]
+}
+
+@test "config path shows paths" {
+  run fizzy --md config path
+  assert_success
+  assert_output_contains "Config Paths"
+  assert_output_contains "global"
+  assert_output_contains "local"
+}
+
+@test "config path --json outputs JSON" {
+  run fizzy --json config path
+  assert_success
+  is_valid_json
+  assert_json_not_null ".global"
+  assert_json_not_null ".local"
+}
+
+@test "local config base_url overrides global" {
+  create_global_config '{"base_url": "http://global.example.com"}'
+  create_local_config '{"base_url": "http://local.example.com"}'
+  unset FIZZY_BASE_URL
+
+  source "$FIZZY_ROOT/lib/core.sh"
+  source "$FIZZY_ROOT/lib/config.sh"
+
+  # After loading full hierarchy, local should win
+  [[ "$FIZZY_BASE_URL" == "http://local.example.com" ]]
+}
