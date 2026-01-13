@@ -49,10 +49,10 @@ install_fizzy() {
   cp -r "$tmp"/* "$INSTALL_DIR/"
 
   # Make executable
-  chmod +x "$INSTALL_DIR/fizzy"
+  chmod +x "$INSTALL_DIR/bin/fizzy"
 
   # Create symlink in bin
-  ln -sf "$INSTALL_DIR/fizzy" "$BIN_DIR/fizzy"
+  ln -sf "$INSTALL_DIR/bin/fizzy" "$BIN_DIR/fizzy"
 
   info "Installed fizzy to $BIN_DIR/fizzy"
 }
