@@ -641,12 +641,13 @@ _select_account() {
     return
   fi
 
+  local account_slug=""
+
   if [[ "$count" -eq 1 ]]; then
-    local account_slug account_name
+    local account_name
     # Extract slug without leading slash
     account_slug=$(echo "$accounts" | jq -r '.[0].slug | ltrimstr("/")')
     account_name=$(echo "$accounts" | jq -r '.[0].name')
-    set_global_config "account_slug" "$account_slug"
     info "Selected account: $account_name ($account_slug)"
   elif [[ "$count" -gt 1 ]]; then
     # Multiple accounts - let user choose
@@ -659,17 +660,21 @@ _select_account() {
     read -rp "Select account (1-$count): " choice
 
     if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= count )); then
-      local account_slug account_name
+      local account_name
       account_slug=$(echo "$accounts" | jq -r ".[$((choice - 1))].slug | ltrimstr(\"/\")")
       account_name=$(echo "$accounts" | jq -r ".[$((choice - 1))].name")
-      set_global_config "account_slug" "$account_slug"
       info "Selected account: $account_name ($account_slug)"
     else
       warn "Invalid choice, using first account"
-      local account_slug
       account_slug=$(echo "$accounts" | jq -r '.[0].slug | ltrimstr("/")')
-      set_global_config "account_slug" "$account_slug"
     fi
+  fi
+
+  if [[ -n "$account_slug" ]]; then
+    # Store in per-origin credentials (primary) - ensures switching origins works
+    set_credential_account_slug "$account_slug"
+    # Also store in global config for backwards compatibility
+    set_global_config "account_slug" "$account_slug"
   fi
 
   # Save the base URL so fizzy knows which server to talk to

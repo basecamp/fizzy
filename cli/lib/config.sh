@@ -234,6 +234,19 @@ clear_credentials() {
   chmod 600 "$file"
 }
 
+# Add account_slug to per-origin credentials
+# This ensures switching FIZZY_BASE_URL picks up the right account
+set_credential_account_slug() {
+  local account_slug="$1"
+  local creds
+  creds=$(load_credentials)
+
+  # Add account_slug to existing credentials
+  local updated
+  updated=$(echo "$creds" | jq --arg slug "$account_slug" '. + {account_slug: $slug}')
+  save_credentials "$updated"
+}
+
 get_access_token() {
   if [[ -n "${FIZZY_ACCESS_TOKEN:-}" ]]; then
     echo "$FIZZY_ACCESS_TOKEN"
@@ -286,6 +299,7 @@ get_token_scope() {
 # Account Management
 
 get_account_slug() {
+  # Priority: env var → per-origin credentials → global config
   if [[ -n "${FIZZY_ACCOUNT:-}" ]]; then
     echo "$FIZZY_ACCOUNT"
     return
@@ -294,6 +308,18 @@ get_account_slug() {
     echo "$FIZZY_ACCOUNT_SLUG"
     return
   fi
+
+  # Check per-origin credentials (stored alongside access_token)
+  local creds
+  creds=$(load_credentials)
+  local origin_account
+  origin_account=$(echo "$creds" | jq -r '.account_slug // empty')
+  if [[ -n "$origin_account" ]]; then
+    echo "$origin_account"
+    return
+  fi
+
+  # Fall back to global config
   get_config "account_slug"
 }
 
