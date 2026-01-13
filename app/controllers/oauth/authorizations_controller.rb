@@ -1,4 +1,17 @@
 class Oauth::AuthorizationsController < Oauth::BaseController
+  # Allow form submission to the client's redirect_uri for OAuth callbacks
+  content_security_policy only: :new do |policy|
+    if (redirect_uri = params[:redirect_uri]).present?
+      begin
+        uri = URI.parse(redirect_uri)
+        origin = "#{uri.scheme}://#{uri.host}#{":#{uri.port}" if uri.port}"
+        policy.form_action :self, origin
+      rescue URI::InvalidURIError
+        # Invalid URI will be caught by validate_redirect_uri
+      end
+    end
+  end
+
   before_action :save_oauth_return_url
   before_action :require_authentication
 

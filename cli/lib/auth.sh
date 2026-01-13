@@ -343,6 +343,7 @@ _register_client() {
   local grant_types='["authorization_code"]'
 
   # Fizzy DCR only supports public clients (no client_secret)
+  # Request both read and write scopes so CLI can perform all operations
   local response
   response=$(curl -s -X POST \
     -H "Content-Type: application/json" \
@@ -357,7 +358,8 @@ _register_client() {
         redirect_uris: [$redirect],
         grant_types: $grants,
         response_types: ["code"],
-        token_endpoint_auth_method: "none"
+        token_endpoint_auth_method: "none",
+        scope: "read write"
       }')" \
     "$registration_endpoint")
 
@@ -459,16 +461,49 @@ _wait_for_callback() {
 
   info "Waiting for authorization (timeout: ${timeout_secs}s)..."
 
-  local response
+  # Create temp file for HTTP response (piping to nc doesn't block on macOS BSD nc)
+  local http_response_file
+  http_response_file=$(mktemp)
+  printf 'HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Authorization successful!</h1><p>You can close this window.</p></body></html>' > "$http_response_file"
+
+  local response exit_code=0
   response=$("$timeout_cmd" "$timeout_secs" bash -c '
+    response_file="'"$http_response_file"'"
+    port="'"$FIZZY_REDIRECT_PORT"'"
+    request_file=$(mktemp)
+    trap "rm -f $request_file" EXIT
+
     while true; do
-      request=$(echo -e "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Authorization successful!</h1><p>You can close this window.</p></body></html>" | nc -l '"$FIZZY_REDIRECT_PORT"' 2>/dev/null | head -1)
+      # Open response file for reading on fd3
+      exec 3<"$response_file" || exit 1
+
+      # nc -l PORT: listen for one connection
+      # <&3 redirects stdin from fd3 (response file) - nc sends this to client
+      # nc outputs what client sends (the HTTP request) to stdout
+      # Capture to file to avoid SIGPIPE from head -1 killing nc before response is sent
+      nc -l "$port" <&3 > "$request_file" 2>/dev/null
+
+      # Close the file descriptor
+      exec 3<&-
+
+      # Read the first line (HTTP request line) from captured output
+      request=$(head -1 "$request_file")
+
       if [[ "$request" == *"GET /callback"* ]]; then
         echo "$request"
         break
       fi
+
+      # Small delay before retry to avoid tight loop
+      sleep 0.1
     done
-  ') || die "Authorization timed out" $EXIT_AUTH
+  ') || exit_code=$?
+
+  rm -f "$http_response_file"
+
+  if [[ -z "$response" ]] || [[ $exit_code -ne 0 ]]; then
+    die "Authorization timed out" $EXIT_AUTH
+  fi
 
   # Parse callback URL
   local query_string
@@ -510,16 +545,24 @@ _exchange_code() {
   debug "Code verifier: $code_verifier"
   debug "Code verifier length: ${#code_verifier}"
 
+  # Build curl args - only include client_secret for confidential clients
+  local curl_args=(
+    -s -X POST
+    -H "Content-Type: application/x-www-form-urlencoded"
+    --data-urlencode "grant_type=authorization_code"
+    --data-urlencode "code=$code"
+    --data-urlencode "redirect_uri=$FIZZY_REDIRECT_URI"
+    --data-urlencode "client_id=$client_id"
+    --data-urlencode "code_verifier=$code_verifier"
+  )
+
+  # Only include client_secret for confidential clients (non-empty secret)
+  if [[ -n "$client_secret" ]]; then
+    curl_args+=(--data-urlencode "client_secret=$client_secret")
+  fi
+
   local response
-  response=$(curl -s -X POST \
-    -H "Content-Type: application/x-www-form-urlencoded" \
-    --data-urlencode "grant_type=authorization_code" \
-    --data-urlencode "code=$code" \
-    --data-urlencode "redirect_uri=$FIZZY_REDIRECT_URI" \
-    --data-urlencode "client_id=$client_id" \
-    --data-urlencode "client_secret=$client_secret" \
-    --data-urlencode "code_verifier=$code_verifier" \
-    "$token_endpoint")
+  response=$(curl "${curl_args[@]}" "$token_endpoint")
 
   local access_token refresh_token expires_in scope
   access_token=$(echo "$response" | jq -r '.access_token // empty')
