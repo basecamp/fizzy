@@ -221,7 +221,7 @@ _cards_help() {
         {flag: "--board, -b, --in", description: "Filter by board name or ID"},
         {flag: "--tag", description: "Filter by tag name or ID"},
         {flag: "--assignee", description: "Filter by assignee name, email, or ID"},
-        {flag: "--status", description: "Filter by status: all, closed, not_now, stalled, golden"},
+        {flag: "--status", description: "Filter by status: all, closed, not_now, stalled, golden, postponing_soon"},
         {flag: "--search, -s", description: "Search terms"},
         {flag: "--sort", description: "Sort order: latest, newest, oldest"},
         {flag: "--page, -p", description: "Page number for pagination"}
@@ -249,7 +249,7 @@ List and filter cards.
     --board, -b, --in   Filter by board name or ID
     --tag         Filter by tag name or ID
     --assignee    Filter by assignee name, email, or ID
-    --status      Filter: all, closed, not_now, stalled, golden
+    --status      Filter: all, closed, not_now, stalled, golden, postponing_soon
     --search, -s  Search terms
     --sort        Sort: latest (default), newest, oldest
     --page, -p    Page number for pagination

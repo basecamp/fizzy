@@ -32,7 +32,7 @@ _fizzy_completions() {
       return
       ;;
     --status)
-      COMPREPLY=($(compgen -W "all closed not_now stalled golden" -- "$cur"))
+      COMPREPLY=($(compgen -W "all closed not_now stalled golden postponing_soon" -- "$cur"))
       return
       ;;
     --scope)
@@ -47,7 +47,7 @@ _fizzy_completions() {
 
   # Handle flags
   if [[ "$cur" == -* ]]; then
-    local flags="--json -j --md -m --quiet -q --data --verbose -v --board -b --in --account -a --page -p --help -h"
+    local flags="--json -j --md -m --quiet -q --data --verbose -v --board -b --in --account -a --help -h"
     COMPREPLY=($(compgen -W "$flags" -- "$cur"))
     return
   fi
