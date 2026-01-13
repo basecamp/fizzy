@@ -9,9 +9,14 @@ cmd_notifications() {
   local action=""
   local show_help=false
   local page=""
+  local fetch_all=false
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
+      --all|-a)
+        fetch_all=true
+        shift
+        ;;
       read|unread)
         action="$1"
         shift
@@ -43,13 +48,16 @@ cmd_notifications() {
     return 0
   fi
 
-  local path="/notifications"
-  if [[ -n "$page" ]]; then
-    path="$path?page=$page"
-  fi
-
   local response
-  response=$(api_get "$path")
+  if [[ "$fetch_all" == "true" ]]; then
+    response=$(api_get_all "/notifications")
+  else
+    local path="/notifications"
+    if [[ -n "$page" ]]; then
+      path="$path?page=$page"
+    fi
+    response=$(api_get "$path")
+  fi
 
   local count unread_count
   count=$(echo "$response" | jq 'length')
@@ -57,15 +65,24 @@ cmd_notifications() {
 
   local summary="$count notifications ($unread_count unread)"
   [[ -n "$page" ]] && summary="$count notifications ($unread_count unread, page $page)"
+  [[ "$fetch_all" == "true" ]] && summary="$count notifications ($unread_count unread, all)"
 
   local next_page=$((${page:-1} + 1))
   local breadcrumbs
-  breadcrumbs=$(breadcrumbs \
-    "$(breadcrumb "read" "fizzy notifications read <id>" "Mark as read")" \
-    "$(breadcrumb "read-all" "fizzy notifications read --all" "Mark all as read")" \
-    "$(breadcrumb "show" "fizzy show <card_number>" "View card")" \
-    "$(breadcrumb "next" "fizzy notifications --page $next_page" "Next page")"
-  )
+  if [[ "$fetch_all" == "true" ]]; then
+    breadcrumbs=$(breadcrumbs \
+      "$(breadcrumb "read" "fizzy notifications read <id>" "Mark as read")" \
+      "$(breadcrumb "read-all" "fizzy notifications read --all" "Mark all as read")" \
+      "$(breadcrumb "show" "fizzy show <card_number>" "View card")"
+    )
+  else
+    breadcrumbs=$(breadcrumbs \
+      "$(breadcrumb "read" "fizzy notifications read <id>" "Mark as read")" \
+      "$(breadcrumb "read-all" "fizzy notifications read --all" "Mark all as read")" \
+      "$(breadcrumb "show" "fizzy show <card_number>" "View card")" \
+      "$(breadcrumb "next" "fizzy notifications --page $next_page" "Next page")"
+    )
+  fi
 
   output "$response" "$summary" "$breadcrumbs" "_notifications_md"
 }
@@ -149,11 +166,13 @@ _notifications_help() {
         {name: "unread", description: "Mark notification as unread"}
       ],
       options: [
+        {flag: "--all, -a", description: "Fetch all pages"},
         {flag: "--page, -p", description: "Page number for pagination"},
-        {flag: "--all", description: "Mark all notifications as read (with read)"}
+        {flag: "--all (with read)", description: "Mark all notifications as read"}
       ],
       examples: [
         "fizzy notifications",
+        "fizzy notifications --all",
         "fizzy notifications --page 2",
         "fizzy notifications read abc123",
         "fizzy notifications read --all"
@@ -168,6 +187,7 @@ List and manage notifications.
 ### Usage
 
     fizzy notifications              List notifications
+    fizzy notifications --all        Fetch all pages
     fizzy notifications --page 2     Get second page
     fizzy notifications read <id>    Mark as read
     fizzy notifications read --all   Mark all as read
@@ -175,11 +195,13 @@ List and manage notifications.
 
 ### Options
 
+    --all, -a     Fetch all pages
     --page, -p    Page number for pagination
 
 ### Examples
 
-    fizzy notifications              List all notifications
+    fizzy notifications              List notifications (first page)
+    fizzy notifications --all        Fetch all notifications
     fizzy notifications --page 2     Get second page
     fizzy notifications read abc123  Mark notification as read
     fizzy notifications read --all   Mark all as read

@@ -8,9 +8,14 @@
 cmd_people() {
   local show_help=false
   local page=""
+  local fetch_all=false
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
+      --all|-a)
+        fetch_all=true
+        shift
+        ;;
       --page|-p)
         if [[ -z "${2:-}" ]]; then
           die "--page requires a value" $EXIT_USAGE
@@ -36,27 +41,38 @@ cmd_people() {
     return 0
   fi
 
-  local path="/users"
-  if [[ -n "$page" ]]; then
-    path="$path?page=$page"
-  fi
-
   local response
-  response=$(api_get "$path")
+  if [[ "$fetch_all" == "true" ]]; then
+    response=$(api_get_all "/users")
+  else
+    local path="/users"
+    if [[ -n "$page" ]]; then
+      path="$path?page=$page"
+    fi
+    response=$(api_get "$path")
+  fi
 
   local count
   count=$(echo "$response" | jq 'length')
 
   local summary="$count users"
   [[ -n "$page" ]] && summary="$count users (page $page)"
+  [[ "$fetch_all" == "true" ]] && summary="$count users (all)"
 
   local next_page=$((${page:-1} + 1))
   local breadcrumbs
-  breadcrumbs=$(breadcrumbs \
-    "$(breadcrumb "assign" "fizzy assign <card> --to <user_id>" "Assign user to card")" \
-    "$(breadcrumb "cards" "fizzy cards --assignee <user_id>" "Cards assigned to user")" \
-    "$(breadcrumb "next" "fizzy people --page $next_page" "Next page")"
-  )
+  if [[ "$fetch_all" == "true" ]]; then
+    breadcrumbs=$(breadcrumbs \
+      "$(breadcrumb "assign" "fizzy assign <card> --to <user_id>" "Assign user to card")" \
+      "$(breadcrumb "cards" "fizzy cards --assignee <user_id>" "Cards assigned to user")"
+    )
+  else
+    breadcrumbs=$(breadcrumbs \
+      "$(breadcrumb "assign" "fizzy assign <card> --to <user_id>" "Assign user to card")" \
+      "$(breadcrumb "cards" "fizzy cards --assignee <user_id>" "Cards assigned to user")" \
+      "$(breadcrumb "next" "fizzy people --page $next_page" "Next page")"
+    )
+  fi
 
   output "$response" "$summary" "$breadcrumbs" "_people_md"
 }
@@ -93,10 +109,12 @@ _people_help() {
       command: "fizzy people",
       description: "List users in the account",
       options: [
+        {flag: "--all, -a", description: "Fetch all pages"},
         {flag: "--page, -p", description: "Page number for pagination"}
       ],
       examples: [
         "fizzy people",
+        "fizzy people --all",
         "fizzy people --page 2"
       ]
     }'
@@ -112,12 +130,14 @@ List users in the account.
 
 ### Options
 
+    --all, -a     Fetch all pages
     --page, -p    Page number for pagination
     --help, -h    Show this help
 
 ### Examples
 
-    fizzy people              List all users
+    fizzy people              List users (first page)
+    fizzy people --all        Fetch all users
     fizzy people --page 2     Get second page
 EOF
   fi
