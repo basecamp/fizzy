@@ -2249,9 +2249,34 @@ EOF
 # fizzy step "text" --on <number>
 # Add step to card
 
+# fizzy step "text" --on <number> [--completed]
+# fizzy step show <id> --on <number>
+# fizzy step update <id> --on <number> [--content "text"] [--completed|--uncompleted]
+# fizzy step delete <id> --on <number>
+
 cmd_step() {
+  if [[ "${1:-}" == "show" ]]; then
+    shift
+    _step_show "$@"
+    return
+  elif [[ "${1:-}" == "update" ]]; then
+    shift
+    _step_update "$@"
+    return
+  elif [[ "${1:-}" == "delete" ]]; then
+    shift
+    _step_delete "$@"
+    return
+  fi
+
+  # Default: create step
+  _step_create "$@"
+}
+
+_step_create() {
   local content=""
   local card_number=""
+  local completed=""
   local show_help=false
 
   while [[ $# -gt 0 ]]; do
@@ -2262,6 +2287,10 @@ cmd_step() {
         fi
         card_number="$2"
         shift 2
+        ;;
+      --completed)
+        completed="true"
+        shift
         ;;
       --help|-h)
         show_help=true
@@ -2292,9 +2321,15 @@ cmd_step() {
     die "--on card number required" $EXIT_USAGE "Usage: fizzy step \"text\" --on <number>"
   fi
 
+  # Build request body - Rails expects params[:step]
   local body
-  body=$(jq -n --arg content "$content" '{content: $content}')
+  if [[ "$completed" == "true" ]]; then
+    body=$(jq -n --arg content "$content" '{step: {content: $content, completed: true}}')
+  else
+    body=$(jq -n --arg content "$content" '{step: {content: $content}}')
+  fi
 
+  # POST returns 201 with Location header - api_post follows it automatically
   local response
   response=$(api_post "/cards/$card_number/steps" "$body")
 
@@ -2335,38 +2370,438 @@ _step_help() {
   if [[ "$format" == "json" ]]; then
     jq -n '{
       command: "fizzy step",
-      description: "Add step to a card",
-      usage: "fizzy step \"text\" --on <number>",
-      options: [{flag: "--on", description: "Card number to add step to"}],
-      examples: ["fizzy step \"Review PR\" --on 123"]
+      description: "Manage steps (checklist items) on a card",
+      usage: "fizzy step \"text\" --on <number> [--completed]",
+      subcommands: [
+        {name: "show", description: "Show step details"},
+        {name: "update", description: "Update a step"},
+        {name: "delete", description: "Delete a step"}
+      ],
+      options: [
+        {flag: "--on", description: "Card number (required)"},
+        {flag: "--completed", description: "Mark step as completed on creation"}
+      ],
+      examples: [
+        "fizzy step \"Review PR\" --on 123",
+        "fizzy step \"Done task\" --on 123 --completed",
+        "fizzy step show abc123 --on 123",
+        "fizzy step update abc123 --on 123 --completed",
+        "fizzy step delete abc123 --on 123"
+      ]
     }'
   else
     cat <<'EOF'
 ## fizzy step
 
-Add step (checklist item) to a card.
+Manage steps (checklist items) on a card.
 
 ### Usage
 
-    fizzy step "text" --on <number>
+    fizzy step "text" --on <number> [--completed]    Create step
+    fizzy step show <id> --on <number>               View step
+    fizzy step update <id> --on <number> [opts]      Update step
+    fizzy step delete <id> --on <number>             Delete step
 
-### Options
+### Options (create)
 
-    --on          Card number to add step to (required)
+    --on          Card number (required)
+    --completed   Mark step as completed
     --help, -h    Show this help
+
+### Options (update)
+
+    --content     New step text
+    --completed   Mark as completed
+    --uncompleted Mark as not completed
 
 ### Examples
 
-    fizzy step "Review PR" --on 123    Add step to card #123
+    fizzy step "Review PR" --on 123              Add uncompleted step
+    fizzy step "Done" --on 123 --completed       Add completed step
+    fizzy step show abc123 --on 123              View step details
+    fizzy step update abc123 --on 123 --completed  Mark step done
+    fizzy step delete abc123 --on 123            Remove step
+EOF
+  fi
+}
+
+# fizzy step show <id> --on <number>
+_step_show() {
+  local step_id=""
+  local card_number=""
+  local show_help=false
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --on)
+        if [[ -z "${2:-}" ]]; then
+          die "--on requires a card number" $EXIT_USAGE
+        fi
+        card_number="$2"
+        shift 2
+        ;;
+      --help|-h)
+        show_help=true
+        shift
+        ;;
+      -*)
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy step show --help"
+        ;;
+      *)
+        if [[ -z "$step_id" ]]; then
+          step_id="$1"
+        fi
+        shift
+        ;;
+    esac
+  done
+
+  if [[ "$show_help" == "true" ]]; then
+    _step_show_help
+    return 0
+  fi
+
+  if [[ -z "$step_id" ]]; then
+    die "Step ID required" $EXIT_USAGE "Usage: fizzy step show <id> --on <number>"
+  fi
+
+  if [[ -z "$card_number" ]]; then
+    die "--on card number required" $EXIT_USAGE "Usage: fizzy step show <id> --on <number>"
+  fi
+
+  local response
+  response=$(api_get "/cards/$card_number/steps/$step_id")
+
+  local summary="Step on card #$card_number"
+
+  local breadcrumbs
+  breadcrumbs=$(breadcrumbs \
+    "$(breadcrumb "show" "fizzy show $card_number" "View card")" \
+    "$(breadcrumb "update" "fizzy step update $step_id --on $card_number" "Update step")" \
+    "$(breadcrumb "delete" "fizzy step delete $step_id --on $card_number" "Delete step")"
+  )
+
+  output "$response" "$summary" "$breadcrumbs" "_step_show_md"
+}
+
+_step_show_md() {
+  local data="$1"
+  local summary="$2"
+  local breadcrumbs="$3"
+
+  local step_id content completed
+  step_id=$(echo "$data" | jq -r '.id')
+  content=$(echo "$data" | jq -r '.content')
+  completed=$(echo "$data" | jq -r 'if .completed then "Yes" else "No" end')
+
+  md_heading 2 "Step"
+  echo
+  md_kv "ID" "$step_id" \
+        "Content" "$content" \
+        "Completed" "$completed"
+
+  md_breadcrumbs "$breadcrumbs"
+}
+
+_step_show_help() {
+  local format
+  format=$(get_format)
+
+  if [[ "$format" == "json" ]]; then
+    jq -n '{
+      command: "fizzy step show",
+      description: "Show step details",
+      usage: "fizzy step show <id> --on <number>",
+      examples: ["fizzy step show abc123 --on 123"]
+    }'
+  else
+    cat <<'EOF'
+## fizzy step show
+
+Show step details.
+
+### Usage
+
+    fizzy step show <id> --on <number>
+
+### Examples
+
+    fizzy step show abc123 --on 123    View step abc123 on card #123
+EOF
+  fi
+}
+
+# fizzy step update <id> --on <number> [--content "text"] [--completed|--uncompleted]
+_step_update() {
+  local step_id=""
+  local card_number=""
+  local content=""
+  local completed=""
+  local show_help=false
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --on)
+        if [[ -z "${2:-}" ]]; then
+          die "--on requires a card number" $EXIT_USAGE
+        fi
+        card_number="$2"
+        shift 2
+        ;;
+      --content)
+        if [[ -z "${2:-}" ]]; then
+          die "--content requires text" $EXIT_USAGE
+        fi
+        content="$2"
+        shift 2
+        ;;
+      --completed)
+        completed="true"
+        shift
+        ;;
+      --uncompleted)
+        completed="false"
+        shift
+        ;;
+      --help|-h)
+        show_help=true
+        shift
+        ;;
+      -*)
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy step update --help"
+        ;;
+      *)
+        if [[ -z "$step_id" ]]; then
+          step_id="$1"
+        fi
+        shift
+        ;;
+    esac
+  done
+
+  if [[ "$show_help" == "true" ]]; then
+    _step_update_help
+    return 0
+  fi
+
+  if [[ -z "$step_id" ]]; then
+    die "Step ID required" $EXIT_USAGE "Usage: fizzy step update <id> --on <number> [options]"
+  fi
+
+  if [[ -z "$card_number" ]]; then
+    die "--on card number required" $EXIT_USAGE "Usage: fizzy step update <id> --on <number> [options]"
+  fi
+
+  if [[ -z "$content" && -z "$completed" ]]; then
+    die "Nothing to update. Specify --content, --completed, or --uncompleted" $EXIT_USAGE
+  fi
+
+  # Build request body - Rails expects params[:step]
+  local body
+  body=$(jq -n \
+    --arg content "$content" \
+    --arg completed "$completed" \
+    '{step: ((if $content != "" then {content: $content} else {} end) +
+             (if $completed != "" then {completed: ($completed == "true")} else {} end))}')
+
+  local response
+  response=$(api_patch "/cards/$card_number/steps/$step_id" "$body")
+
+  local summary="Step updated on card #$card_number"
+
+  local breadcrumbs
+  breadcrumbs=$(breadcrumbs \
+    "$(breadcrumb "show" "fizzy step show $step_id --on $card_number" "View step")" \
+    "$(breadcrumb "card" "fizzy show $card_number" "View card")"
+  )
+
+  output "$response" "$summary" "$breadcrumbs" "_step_updated_md"
+}
+
+_step_updated_md() {
+  local data="$1"
+  local summary="$2"
+  local breadcrumbs="$3"
+
+  local step_id content completed
+  step_id=$(echo "$data" | jq -r '.id')
+  content=$(echo "$data" | jq -r '.content')
+  completed=$(echo "$data" | jq -r 'if .completed then "Yes" else "No" end')
+
+  md_heading 2 "Step Updated"
+  echo
+  md_kv "ID" "$step_id" \
+        "Content" "$content" \
+        "Completed" "$completed"
+
+  md_breadcrumbs "$breadcrumbs"
+}
+
+_step_update_help() {
+  local format
+  format=$(get_format)
+
+  if [[ "$format" == "json" ]]; then
+    jq -n '{
+      command: "fizzy step update",
+      description: "Update a step",
+      usage: "fizzy step update <id> --on <number> [options]",
+      options: [
+        {flag: "--content", description: "New step text"},
+        {flag: "--completed", description: "Mark as completed"},
+        {flag: "--uncompleted", description: "Mark as not completed"}
+      ],
+      examples: [
+        "fizzy step update abc123 --on 123 --completed",
+        "fizzy step update abc123 --on 123 --content \"Updated text\""
+      ]
+    }'
+  else
+    cat <<'EOF'
+## fizzy step update
+
+Update a step.
+
+### Usage
+
+    fizzy step update <id> --on <number> [options]
+
+### Options
+
+    --content       New step text
+    --completed     Mark step as completed
+    --uncompleted   Mark step as not completed
+    --help, -h      Show this help
+
+### Examples
+
+    fizzy step update abc123 --on 123 --completed           Mark done
+    fizzy step update abc123 --on 123 --content "New text"  Update text
+EOF
+  fi
+}
+
+# fizzy step delete <id> --on <number>
+_step_delete() {
+  local step_id=""
+  local card_number=""
+  local show_help=false
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --on)
+        if [[ -z "${2:-}" ]]; then
+          die "--on requires a card number" $EXIT_USAGE
+        fi
+        card_number="$2"
+        shift 2
+        ;;
+      --help|-h)
+        show_help=true
+        shift
+        ;;
+      -*)
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy step delete --help"
+        ;;
+      *)
+        if [[ -z "$step_id" ]]; then
+          step_id="$1"
+        fi
+        shift
+        ;;
+    esac
+  done
+
+  if [[ "$show_help" == "true" ]]; then
+    _step_delete_help
+    return 0
+  fi
+
+  if [[ -z "$step_id" ]]; then
+    die "Step ID required" $EXIT_USAGE "Usage: fizzy step delete <id> --on <number>"
+  fi
+
+  if [[ -z "$card_number" ]]; then
+    die "--on card number required" $EXIT_USAGE "Usage: fizzy step delete <id> --on <number>"
+  fi
+
+  # DELETE returns 204 No Content
+  api_delete "/cards/$card_number/steps/$step_id" > /dev/null
+
+  local response
+  response=$(jq -n --arg id "$step_id" '{id: $id, deleted: true}')
+
+  local summary="Step deleted from card #$card_number"
+
+  local breadcrumbs
+  breadcrumbs=$(breadcrumbs \
+    "$(breadcrumb "show" "fizzy show $card_number" "View card")" \
+    "$(breadcrumb "step" "fizzy step \"text\" --on $card_number" "Add step")"
+  )
+
+  output "$response" "$summary" "$breadcrumbs" "_step_deleted_md"
+}
+
+_step_deleted_md() {
+  local data="$1"
+  local summary="$2"
+  local breadcrumbs="$3"
+
+  local step_id
+  step_id=$(echo "$data" | jq -r '.id')
+
+  md_heading 2 "Step Deleted"
+  echo
+  md_kv "ID" "$step_id" \
+        "Status" "Deleted"
+
+  md_breadcrumbs "$breadcrumbs"
+}
+
+_step_delete_help() {
+  local format
+  format=$(get_format)
+
+  if [[ "$format" == "json" ]]; then
+    jq -n '{
+      command: "fizzy step delete",
+      description: "Delete a step from a card",
+      usage: "fizzy step delete <id> --on <number>",
+      examples: ["fizzy step delete abc123 --on 123"]
+    }'
+  else
+    cat <<'EOF'
+## fizzy step delete
+
+Delete a step from a card.
+
+### Usage
+
+    fizzy step delete <id> --on <number>
+
+### Examples
+
+    fizzy step delete abc123 --on 123    Delete step from card #123
 EOF
   fi
 }
 
 
-# fizzy react "emoji" --comment <comment_id> --card <card_number>
-# Add reaction to comment
+# fizzy react "emoji" --card <card_number> --comment <comment_id>
+# fizzy react delete <reaction_id> --card <card_number> --comment <comment_id>
 
 cmd_react() {
+  if [[ "${1:-}" == "delete" ]]; then
+    shift
+    _react_delete "$@"
+    return
+  fi
+
+  # Default: add reaction
+  _react_add "$@"
+}
+
+_react_add() {
   local emoji=""
   local comment_id=""
   local card_number=""
@@ -2434,11 +2869,137 @@ cmd_react() {
 
   local breadcrumbs
   breadcrumbs=$(breadcrumbs \
-    "$(breadcrumb "comments" "fizzy comments --on $card_number" "View comments")" \
-    "$(breadcrumb "show" "fizzy show $card_number" "View card")"
+    "$(breadcrumb "reactions" "fizzy reactions --card $card_number --comment $comment_id" "View reactions")" \
+    "$(breadcrumb "comments" "fizzy comments --on $card_number" "View comments")"
   )
 
   output "$response" "$summary" "$breadcrumbs" "_react_md"
+}
+
+_react_delete() {
+  local reaction_id=""
+  local comment_id=""
+  local card_number=""
+  local show_help=false
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --comment)
+        if [[ -z "${2:-}" ]]; then
+          die "--comment requires a comment ID" $EXIT_USAGE
+        fi
+        comment_id="$2"
+        shift 2
+        ;;
+      --card)
+        if [[ -z "${2:-}" ]]; then
+          die "--card requires a card number" $EXIT_USAGE
+        fi
+        card_number="$2"
+        shift 2
+        ;;
+      --help|-h)
+        show_help=true
+        shift
+        ;;
+      -*)
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy react delete --help"
+        ;;
+      *)
+        if [[ -z "$reaction_id" ]]; then
+          reaction_id="$1"
+        fi
+        shift
+        ;;
+    esac
+  done
+
+  if [[ "$show_help" == "true" ]]; then
+    _react_delete_help
+    return 0
+  fi
+
+  if [[ -z "$reaction_id" ]]; then
+    die "Reaction ID required" $EXIT_USAGE "Usage: fizzy react delete <id> --card <num> --comment <id>"
+  fi
+
+  if [[ -z "$card_number" ]]; then
+    die "--card number required" $EXIT_USAGE "Usage: fizzy react delete <id> --card <num> --comment <id>"
+  fi
+
+  if [[ -z "$comment_id" ]]; then
+    die "--comment ID required" $EXIT_USAGE "Usage: fizzy react delete <id> --card <num> --comment <id>"
+  fi
+
+  # DELETE returns 204 No Content
+  api_delete "/cards/$card_number/comments/$comment_id/reactions/$reaction_id" > /dev/null
+
+  local response
+  response=$(jq -n --arg id "$reaction_id" '{id: $id, deleted: true}')
+
+  local summary="Reaction deleted"
+
+  local breadcrumbs
+  breadcrumbs=$(breadcrumbs \
+    "$(breadcrumb "reactions" "fizzy reactions --card $card_number --comment $comment_id" "View reactions")" \
+    "$(breadcrumb "react" "fizzy react \"👍\" --card $card_number --comment $comment_id" "Add reaction")"
+  )
+
+  output "$response" "$summary" "$breadcrumbs" "_react_deleted_md"
+}
+
+_react_deleted_md() {
+  local data="$1"
+  local summary="$2"
+  local breadcrumbs="$3"
+
+  local reaction_id
+  reaction_id=$(echo "$data" | jq -r '.id')
+
+  md_heading 2 "Reaction Deleted"
+  echo
+  md_kv "ID" "$reaction_id" \
+        "Status" "Deleted"
+
+  md_breadcrumbs "$breadcrumbs"
+}
+
+_react_delete_help() {
+  local format
+  format=$(get_format)
+
+  if [[ "$format" == "json" ]]; then
+    jq -n '{
+      command: "fizzy react delete",
+      description: "Delete a reaction from a comment",
+      usage: "fizzy react delete <id> --card <num> --comment <id>",
+      options: [
+        {flag: "--card", description: "Card number"},
+        {flag: "--comment", description: "Comment ID"}
+      ],
+      examples: ["fizzy react delete xyz789 --card 123 --comment abc456"]
+    }'
+  else
+    cat <<'EOF'
+## fizzy react delete
+
+Delete a reaction from a comment.
+
+### Usage
+
+    fizzy react delete <id> --card <num> --comment <id>
+
+### Options
+
+    --card        Card number (required)
+    --comment     Comment ID (required)
+    --help, -h    Show this help
+
+### Examples
+
+    fizzy react delete xyz789 --card 123 --comment abc456
+EOF
+  fi
 }
 
 _react_md() {
@@ -2467,33 +3028,41 @@ _react_help() {
   if [[ "$format" == "json" ]]; then
     jq -n '{
       command: "fizzy react",
-      description: "Add reaction to a comment",
+      description: "Manage reactions on comments",
       usage: "fizzy react \"emoji\" --card <number> --comment <id>",
+      subcommands: [
+        {name: "delete", description: "Delete a reaction"}
+      ],
       options: [
         {flag: "--card", description: "Card number"},
         {flag: "--comment", description: "Comment ID to react to"}
       ],
-      examples: ["fizzy react \"👍\" --card 123 --comment abc456"]
+      examples: [
+        "fizzy react \"👍\" --card 123 --comment abc456",
+        "fizzy react delete xyz789 --card 123 --comment abc456"
+      ]
     }'
   else
     cat <<'EOF'
 ## fizzy react
 
-Add reaction to a comment.
+Manage reactions on comments.
 
 ### Usage
 
-    fizzy react "emoji" --card <number> --comment <id>
+    fizzy react "emoji" --card <num> --comment <id>    Add reaction
+    fizzy react delete <id> --card <num> --comment <id>  Delete reaction
 
 ### Options
 
     --card        Card number (required)
-    --comment     Comment ID to react to (required)
+    --comment     Comment ID (required)
     --help, -h    Show this help
 
 ### Examples
 
-    fizzy react "👍" --card 123 --comment abc456
+    fizzy react "👍" --card 123 --comment abc456         Add thumbs up
+    fizzy react delete xyz789 --card 123 --comment abc456  Remove reaction
 EOF
   fi
 }

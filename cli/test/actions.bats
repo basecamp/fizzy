@@ -797,7 +797,7 @@ load test_helper
   run fizzy --md step --help
   assert_success
   assert_output_contains "fizzy step"
-  assert_output_contains "Add step"
+  assert_output_contains "Manage steps"
 }
 
 @test "step -h shows help" {
@@ -811,11 +811,11 @@ load test_helper
   assert_success
   is_valid_json
   assert_json_not_null ".command"
-  assert_json_not_null ".options"
+  assert_json_not_null ".subcommands"
 }
 
 
-# step requires parameters
+# step create requires parameters
 
 @test "step without text shows error" {
   run fizzy step
@@ -831,6 +831,96 @@ load test_helper
 
 @test "step requires authentication" {
   run fizzy step "Test" --on 123
+  assert_failure
+  assert_output_contains "Not authenticated"
+}
+
+
+# step show
+
+@test "step show --help shows help" {
+  run fizzy --md step show --help
+  assert_success
+  assert_output_contains "fizzy step show"
+  assert_output_contains "Show step"
+}
+
+@test "step show without id shows error" {
+  run fizzy step show
+  assert_failure
+  assert_output_contains "Step ID required"
+}
+
+@test "step show without --on shows error" {
+  run fizzy step show abc123
+  assert_failure
+  assert_output_contains "card number required"
+}
+
+@test "step show requires authentication" {
+  run fizzy step show abc123 --on 123
+  assert_failure
+  assert_output_contains "Not authenticated"
+}
+
+
+# step update
+
+@test "step update --help shows help" {
+  run fizzy --md step update --help
+  assert_success
+  assert_output_contains "fizzy step update"
+  assert_output_contains "Update a step"
+}
+
+@test "step update without id shows error" {
+  run fizzy step update
+  assert_failure
+  assert_output_contains "Step ID required"
+}
+
+@test "step update without --on shows error" {
+  run fizzy step update abc123
+  assert_failure
+  assert_output_contains "card number required"
+}
+
+@test "step update without changes shows error" {
+  run fizzy step update abc123 --on 123
+  assert_failure
+  assert_output_contains "Nothing to update"
+}
+
+@test "step update requires authentication" {
+  run fizzy step update abc123 --on 123 --completed
+  assert_failure
+  assert_output_contains "Not authenticated"
+}
+
+
+# step delete
+
+@test "step delete --help shows help" {
+  run fizzy --md step delete --help
+  assert_success
+  assert_output_contains "fizzy step delete"
+  assert_output_contains "Delete a step"
+}
+
+@test "step delete without id shows error" {
+  run fizzy step delete
+  assert_failure
+  assert_output_contains "Step ID required"
+}
+
+@test "step delete without --on shows error" {
+  run fizzy step delete abc123
+  assert_failure
+  assert_output_contains "card number required"
+}
+
+@test "step delete requires authentication" {
+  run fizzy step delete abc123 --on 123
   assert_failure
   assert_output_contains "Not authenticated"
 }
@@ -882,6 +972,85 @@ load test_helper
 
 @test "react requires authentication" {
   run fizzy react "👍" --card 123 --comment abc456
+  assert_failure
+  assert_output_contains "Not authenticated"
+}
+
+
+# react delete
+
+@test "react delete --help shows help" {
+  run fizzy --md react delete --help
+  assert_success
+  assert_output_contains "fizzy react delete"
+  assert_output_contains "Delete a reaction"
+}
+
+@test "react delete without id shows error" {
+  run fizzy react delete
+  assert_failure
+  assert_output_contains "Reaction ID required"
+}
+
+@test "react delete without --card shows error" {
+  run fizzy react delete xyz789
+  assert_failure
+  assert_output_contains "card"
+}
+
+@test "react delete without --comment shows error" {
+  run fizzy react delete xyz789 --card 123
+  assert_failure
+  assert_output_contains "comment"
+}
+
+@test "react delete requires authentication" {
+  run fizzy react delete xyz789 --card 123 --comment abc456
+  assert_failure
+  assert_output_contains "Not authenticated"
+}
+
+
+# reactions --help
+
+@test "reactions --help shows help" {
+  run fizzy --md reactions --help
+  assert_success
+  assert_output_contains "fizzy reactions"
+  assert_output_contains "List reactions"
+}
+
+@test "reactions -h shows help" {
+  run fizzy --md reactions -h
+  assert_success
+  assert_output_contains "fizzy reactions"
+}
+
+@test "reactions --help --json outputs JSON" {
+  run fizzy --json reactions --help
+  assert_success
+  is_valid_json
+  assert_json_not_null ".command"
+  assert_json_not_null ".options"
+}
+
+
+# reactions requires parameters
+
+@test "reactions without --card shows error" {
+  run fizzy reactions
+  assert_failure
+  assert_output_contains "card"
+}
+
+@test "reactions without --comment shows error" {
+  run fizzy reactions --card 123
+  assert_failure
+  assert_output_contains "comment"
+}
+
+@test "reactions requires authentication" {
+  run fizzy reactions --card 123 --comment abc456
   assert_failure
   assert_output_contains "Not authenticated"
 }

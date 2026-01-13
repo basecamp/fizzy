@@ -66,6 +66,7 @@ main() {
     cards)        cmd_cards "$@" ;;
     columns)      cmd_columns "$@" ;;
     comments)     cmd_comments "$@" ;;
+    reactions)    cmd_reactions "$@" ;;
     notifications) cmd_notifications "$@" ;;
     people)       cmd_people "$@" ;;
     search)       cmd_search "$@" ;;
