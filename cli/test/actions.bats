@@ -56,6 +56,63 @@ load test_helper
 }
 
 
+# update --help
+
+@test "update --help shows help" {
+  run fizzy --md update --help
+  assert_success
+  assert_output_contains "fizzy update"
+  assert_output_contains "Update"
+}
+
+@test "update -h shows help" {
+  run fizzy --md update -h
+  assert_success
+  assert_output_contains "fizzy update"
+}
+
+@test "update --help --json outputs JSON" {
+  run fizzy --json update --help
+  assert_success
+  is_valid_json
+  assert_json_not_null ".command"
+  assert_json_not_null ".options"
+}
+
+
+# update requires card number and options
+
+@test "update without number shows error" {
+  run fizzy update
+  assert_failure
+  assert_output_contains "Card number required"
+}
+
+@test "update without options shows error" {
+  run fizzy update 123
+  assert_failure
+  assert_output_contains "Nothing to update"
+}
+
+@test "update requires authentication" {
+  run fizzy update 123 --title "New"
+  assert_failure
+  assert_output_contains "Not authenticated"
+}
+
+@test "update rejects unknown option" {
+  run fizzy update --unknown-option
+  assert_failure
+  assert_output_contains "Unknown option"
+}
+
+@test "update --description-file with missing file shows error" {
+  run fizzy update 123 --description-file nonexistent.txt
+  assert_failure
+  assert_output_contains "File not found"
+}
+
+
 # close --help
 
 @test "close --help shows help" {

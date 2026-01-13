@@ -254,6 +254,170 @@ EOF
 }
 
 
+# fizzy update <number> [options]
+# Update a card's title or description
+
+cmd_card_update() {
+  local card_number=""
+  local title=""
+  local description=""
+  local description_file=""
+  local show_help=false
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --title|-t)
+        if [[ -z "${2:-}" ]]; then
+          die "--title requires a value" $EXIT_USAGE
+        fi
+        title="$2"
+        shift 2
+        ;;
+      --description|-d)
+        if [[ -z "${2:-}" ]]; then
+          die "--description requires text" $EXIT_USAGE
+        fi
+        description="$2"
+        shift 2
+        ;;
+      --description-file)
+        if [[ -z "${2:-}" ]]; then
+          die "--description-file requires a file path" $EXIT_USAGE
+        fi
+        description_file="$2"
+        shift 2
+        ;;
+      --help|-h)
+        show_help=true
+        shift
+        ;;
+      -*)
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy update --help"
+        ;;
+      *)
+        # First positional arg is card number
+        if [[ -z "$card_number" ]]; then
+          card_number="$1"
+          shift
+        else
+          die "Unexpected argument: $1" $EXIT_USAGE
+        fi
+        ;;
+    esac
+  done
+
+  if [[ "$show_help" == "true" ]]; then
+    _card_update_help
+    return 0
+  fi
+
+  if [[ -z "$card_number" ]]; then
+    die "Card number required" $EXIT_USAGE "Usage: fizzy update <number> [options]"
+  fi
+
+  # Read description from file if specified
+  if [[ -n "$description_file" ]]; then
+    if [[ ! -f "$description_file" ]]; then
+      die "File not found: $description_file" $EXIT_USAGE
+    fi
+    description=$(cat "$description_file")
+  fi
+
+  # Must specify at least one thing to update
+  if [[ -z "$title" && -z "$description" ]]; then
+    die "Nothing to update. Specify --title or --description" $EXIT_USAGE
+  fi
+
+  # Build request body
+  local body
+  body=$(jq -n \
+    --arg title "$title" \
+    --arg description "$description" \
+    '(if $title != "" then {title: $title} else {} end) +
+     (if $description != "" then {description: $description} else {} end)')
+
+  local response
+  response=$(api_patch "/cards/$card_number" "$body")
+
+  local summary="Card #$card_number updated"
+
+  local breadcrumbs
+  breadcrumbs=$(breadcrumbs \
+    "$(breadcrumb "show" "fizzy show $card_number" "View card details")" \
+    "$(breadcrumb "triage" "fizzy triage $card_number --to <column>" "Move to column")" \
+    "$(breadcrumb "comment" "fizzy comment \"text\" --on $card_number" "Add comment")"
+  )
+
+  output "$response" "$summary" "$breadcrumbs" "_card_updated_md"
+}
+
+_card_updated_md() {
+  local data="$1"
+  local summary="$2"
+  local breadcrumbs="$3"
+
+  local number title board_name
+  number=$(echo "$data" | jq -r '.number')
+  title=$(echo "$data" | jq -r '.title // .description[0:50]')
+  board_name=$(echo "$data" | jq -r '.board.name')
+
+  md_heading 2 "Card Updated"
+  echo
+  md_kv "Number" "#$number" \
+        "Title" "$title" \
+        "Board" "$board_name"
+
+  md_breadcrumbs "$breadcrumbs"
+}
+
+_card_update_help() {
+  local format
+  format=$(get_format)
+
+  if [[ "$format" == "json" ]]; then
+    jq -n '{
+      command: "fizzy update",
+      description: "Update a card'\''s title or description",
+      usage: "fizzy update <number> [options]",
+      options: [
+        {flag: "--title, -t", description: "New card title"},
+        {flag: "--description, -d", description: "New card description (HTML)"},
+        {flag: "--description-file", description: "Read description from file"}
+      ],
+      examples: [
+        "fizzy update 123 --title \"New title\"",
+        "fizzy update 123 --description \"<p>Updated content</p>\"",
+        "fizzy update 123 --title \"New\" --description \"Both\""
+      ]
+    }'
+  else
+    cat <<'EOF'
+## fizzy update
+
+Update a card's title or description.
+
+### Usage
+
+    fizzy update <number> [options]
+
+### Options
+
+    --title, -t           New card title
+    --description, -d     New card description (HTML)
+    --description-file    Read description from file
+    --help, -h            Show this help
+
+### Examples
+
+    fizzy update 123 --title "New title"
+    fizzy update 123 --description "<p>Updated content</p>"
+    fizzy update 123 --title "New" --description "Both"
+    fizzy update 123 --description-file notes.html
+EOF
+  fi
+}
+
+
 # fizzy close <number>
 # Close a card
 

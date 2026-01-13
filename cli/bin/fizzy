@@ -74,6 +74,7 @@ main() {
 
     # Action commands (using Fizzy's ubiquitous language)
     card)         cmd_card_create "$@" ;;
+    update)       cmd_card_update "$@" ;;
     close)        cmd_close "$@" ;;
     reopen)       cmd_reopen "$@" ;;
     triage)       cmd_triage "$@" ;;

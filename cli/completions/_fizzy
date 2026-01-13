@@ -19,6 +19,7 @@ _fizzy() {
     'show:Show card or board details'
     'tags:List tags'
     'card:Create a new card'
+    'update:Update a card'
     'close:Close a card'
     'reopen:Reopen a closed card'
     'triage:Move card to a column'
