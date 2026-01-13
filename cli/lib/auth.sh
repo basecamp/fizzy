@@ -196,14 +196,11 @@ _auth_login() {
 }
 
 _auth_logout() {
-  local creds_file
-  creds_file=$(get_credentials_path)
-
-  if [[ -f "$creds_file" ]]; then
-    rm -f "$creds_file"
-    info "Logged out successfully"
+  if get_access_token &>/dev/null; then
+    clear_credentials
+    info "Logged out from $FIZZY_BASE_URL"
   else
-    info "Not logged in"
+    info "Not logged in to $FIZZY_BASE_URL"
   fi
 }
 
@@ -374,25 +371,22 @@ _register_client() {
 
   debug "Registered client_id: $client_id"
 
-  ensure_global_config_dir
-  # Public clients may not have a client_secret
-  jq -n \
+  # Save using multi-origin aware save_client from config.sh
+  local client_json
+  client_json=$(jq -n \
     --arg client_id "$client_id" \
     --arg client_secret "${client_secret:-}" \
-    '{client_id: $client_id, client_secret: $client_secret}' \
-    > "$FIZZY_GLOBAL_CONFIG_DIR/$FIZZY_CLIENT_FILE"
-
-  chmod 600 "$FIZZY_GLOBAL_CONFIG_DIR/$FIZZY_CLIENT_FILE"
+    '{client_id: $client_id, client_secret: $client_secret}')
+  save_client "$client_json"
 }
 
 _load_client() {
-  local client_file="$FIZZY_GLOBAL_CONFIG_DIR/$FIZZY_CLIENT_FILE"
-  if [[ ! -f "$client_file" ]]; then
-    return 1
-  fi
+  # Use multi-origin aware load_client from config.sh
+  local client_data
+  client_data=$(load_client)
 
-  client_id=$(jq -r '.client_id' "$client_file")
-  client_secret=$(jq -r '.client_secret // ""' "$client_file")
+  client_id=$(echo "$client_data" | jq -r '.client_id // empty')
+  client_secret=$(echo "$client_data" | jq -r '.client_secret // ""')
 
   # Only client_id is required (public clients may not have secret)
   [[ -n "$client_id" ]]

@@ -58,14 +58,19 @@ load test_helper
 
 # Auth logout
 
-@test "auth logout removes credentials file" {
+@test "auth logout removes credentials for current origin" {
   create_credentials "test-token"
 
   run fizzy auth logout
   assert_success
   assert_output_contains "Logged out"
 
-  [[ ! -f "$TEST_HOME/.config/fizzy/credentials.json" ]]
+  # File still exists but credentials for current origin are gone
+  local base_url="${FIZZY_BASE_URL:-http://fizzy.localhost:3006}"
+  base_url="${base_url%/}"
+  local creds
+  creds=$(jq -r --arg url "$base_url" '.[$url] // empty' "$TEST_HOME/.config/fizzy/credentials.json")
+  [[ -z "$creds" || "$creds" == "{}" ]]
 }
 
 @test "auth logout when not logged in" {
@@ -172,10 +177,14 @@ load test_helper
 @test "account name shown in status with single account" {
   create_credentials "test-token" "$(($(date +%s) + 3600))"
   create_global_config '{"account_slug": "99999999"}'
-  cat > "$TEST_HOME/.config/fizzy/accounts.json" << 'EOF'
-[
-  {"id": "test-id", "name": "Test Account", "slug": "/99999999"}
-]
+  local base_url="${FIZZY_BASE_URL:-http://fizzy.localhost:3006}"
+  base_url="${base_url%/}"
+  cat > "$TEST_HOME/.config/fizzy/accounts.json" << EOF
+{
+  "$base_url": [
+    {"id": "test-id", "name": "Test Account", "slug": "/99999999"}
+  ]
+}
 EOF
 
   run fizzy --md auth status
@@ -235,12 +244,16 @@ EOF
 
 @test "auth status treats expires_at 0 as long-lived" {
   # Create credentials with expires_at: 0 (edge case)
+  local base_url="${FIZZY_BASE_URL:-http://fizzy.localhost:3006}"
+  base_url="${base_url%/}"
   cat > "$TEST_HOME/.config/fizzy/credentials.json" << EOF
 {
-  "access_token": "test-token",
-  "refresh_token": "",
-  "scope": "write",
-  "expires_at": 0
+  "$base_url": {
+    "access_token": "test-token",
+    "refresh_token": "",
+    "scope": "write",
+    "expires_at": 0
+  }
 }
 EOF
   chmod 600 "$TEST_HOME/.config/fizzy/credentials.json"
@@ -253,12 +266,16 @@ EOF
 
 @test "auth refresh treats expires_at 0 as long-lived" {
   # Create credentials with expires_at: 0 (edge case)
+  local base_url="${FIZZY_BASE_URL:-http://fizzy.localhost:3006}"
+  base_url="${base_url%/}"
   cat > "$TEST_HOME/.config/fizzy/credentials.json" << EOF
 {
-  "access_token": "test-token",
-  "refresh_token": "",
-  "scope": "write",
-  "expires_at": 0
+  "$base_url": {
+    "access_token": "test-token",
+    "refresh_token": "",
+    "scope": "write",
+    "expires_at": 0
+  }
 }
 EOF
   chmod 600 "$TEST_HOME/.config/fizzy/credentials.json"
@@ -271,12 +288,16 @@ EOF
 }
 
 @test "is_token_expired returns false for expires_at 0" {
+  local base_url="${FIZZY_BASE_URL:-http://fizzy.localhost:3006}"
+  base_url="${base_url%/}"
   cat > "$TEST_HOME/.config/fizzy/credentials.json" << EOF
 {
-  "access_token": "test-token",
-  "refresh_token": "",
-  "scope": "write",
-  "expires_at": 0
+  "$base_url": {
+    "access_token": "test-token",
+    "refresh_token": "",
+    "scope": "write",
+    "expires_at": 0
+  }
 }
 EOF
   chmod 600 "$TEST_HOME/.config/fizzy/credentials.json"
@@ -289,12 +310,16 @@ EOF
 
 @test "auth refresh without refresh_token but with expiry prompts re-login" {
   # Token has expiry but no refresh token - should prompt re-login
+  local base_url="${FIZZY_BASE_URL:-http://fizzy.localhost:3006}"
+  base_url="${base_url%/}"
   cat > "$TEST_HOME/.config/fizzy/credentials.json" << EOF
 {
-  "access_token": "test-token",
-  "refresh_token": "",
-  "scope": "write",
-  "expires_at": $(($(date +%s) + 3600))
+  "$base_url": {
+    "access_token": "test-token",
+    "refresh_token": "",
+    "scope": "write",
+    "expires_at": $(($(date +%s) + 3600))
+  }
 }
 EOF
   chmod 600 "$TEST_HOME/.config/fizzy/credentials.json"
@@ -310,12 +335,16 @@ EOF
   # rather than hardcoding the endpoint path
 
   # Create credentials with a refresh token
+  local base_url="${FIZZY_BASE_URL:-http://fizzy.localhost:3006}"
+  base_url="${base_url%/}"
   cat > "$TEST_HOME/.config/fizzy/credentials.json" << EOF
 {
-  "access_token": "old-token",
-  "refresh_token": "test-refresh-token",
-  "scope": "write",
-  "expires_at": $(($(date +%s) - 100))
+  "$base_url": {
+    "access_token": "old-token",
+    "refresh_token": "test-refresh-token",
+    "scope": "write",
+    "expires_at": $(($(date +%s) - 100))
+  }
 }
 EOF
   chmod 600 "$TEST_HOME/.config/fizzy/credentials.json"

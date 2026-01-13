@@ -143,6 +143,9 @@ create_credentials() {
   local access_token="${1:-test-token}"
   local expires_at="${2:-$(($(date +%s) + 3600))}"
   local scope="${3:-}"
+  local base_url="${FIZZY_BASE_URL:-http://fizzy.localhost:3006}"
+  # Remove trailing slash for consistent keys
+  base_url="${base_url%/}"
 
   local scope_field=""
   if [[ -n "$scope" ]]; then
@@ -151,10 +154,12 @@ create_credentials() {
 
   cat > "$TEST_HOME/.config/fizzy/credentials.json" << EOF
 {
-  "access_token": "$access_token",
-  "refresh_token": "test-refresh-token",
-  $scope_field
-  "expires_at": $expires_at
+  "$base_url": {
+    "access_token": "$access_token",
+    "refresh_token": "test-refresh-token",
+    $scope_field
+    "expires_at": $expires_at
+  }
 }
 EOF
   chmod 600 "$TEST_HOME/.config/fizzy/credentials.json"
@@ -164,31 +169,48 @@ EOF
 create_long_lived_credentials() {
   local access_token="${1:-test-token}"
   local scope="${2:-write}"
+  local base_url="${FIZZY_BASE_URL:-http://fizzy.localhost:3006}"
+  # Remove trailing slash for consistent keys
+  base_url="${base_url%/}"
 
   cat > "$TEST_HOME/.config/fizzy/credentials.json" << EOF
 {
-  "access_token": "$access_token",
-  "refresh_token": "",
-  "scope": "$scope",
-  "expires_at": null
+  "$base_url": {
+    "access_token": "$access_token",
+    "refresh_token": "",
+    "scope": "$scope",
+    "expires_at": null
+  }
 }
 EOF
   chmod 600 "$TEST_HOME/.config/fizzy/credentials.json"
 }
 
 create_accounts() {
-  cat > "$TEST_HOME/.config/fizzy/accounts.json" << 'EOF'
-[
-  {"id": "test-account-id", "name": "Test Account", "slug": "/99999999"}
-]
+  local base_url="${FIZZY_BASE_URL:-http://fizzy.localhost:3006}"
+  # Remove trailing slash for consistent keys
+  base_url="${base_url%/}"
+
+  cat > "$TEST_HOME/.config/fizzy/accounts.json" << EOF
+{
+  "$base_url": [
+    {"id": "test-account-id", "name": "Test Account", "slug": "/99999999"}
+  ]
+}
 EOF
 }
 
 create_client() {
-  cat > "$TEST_HOME/.config/fizzy/client.json" << 'EOF'
+  local base_url="${FIZZY_BASE_URL:-http://fizzy.localhost:3006}"
+  # Remove trailing slash for consistent keys
+  base_url="${base_url%/}"
+
+  cat > "$TEST_HOME/.config/fizzy/client.json" << EOF
 {
-  "client_id": "test-client-id",
-  "client_secret": ""
+  "$base_url": {
+    "client_id": "test-client-id",
+    "client_secret": ""
+  }
 }
 EOF
   chmod 600 "$TEST_HOME/.config/fizzy/client.json"

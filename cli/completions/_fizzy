@@ -68,7 +68,7 @@ _fizzy() {
       _describe -t commands 'fizzy command' commands
       ;;
     args)
-      case "$words[1]" in
+      case "$line[1]" in
         auth)
           _describe -t auth_commands 'auth subcommand' auth_commands
           ;;
