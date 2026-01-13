@@ -1,0 +1,83 @@
+#compdef fizzy
+# fizzy zsh completion
+# Place in a directory in your $fpath (e.g., ~/.zsh/completions/)
+
+_fizzy() {
+  local -a commands
+  commands=(
+    'auth:Authentication (login, logout, status)'
+    'config:Configuration management'
+    'help:Show help'
+    'version:Show version'
+    'boards:List boards in the account'
+    'cards:List or filter cards'
+    'columns:List columns on a board'
+    'comments:List comments on a card'
+    'notifications:List notifications'
+    'people:List users in account'
+    'search:Search cards'
+    'show:Show card or board details'
+    'tags:List tags'
+    'card:Create a new card'
+    'close:Close a card'
+    'reopen:Reopen a closed card'
+    'triage:Move card to a column'
+    'untriage:Move card back to triage'
+    'postpone:Move card to "not now"'
+    'comment:Add a comment to a card'
+    'assign:Assign a card to someone'
+    'tag:Add a tag to a card'
+    'watch:Subscribe to card notifications'
+    'unwatch:Unsubscribe from card'
+    'gild:Mark card as golden'
+    'ungild:Remove golden status'
+    'step:Add a step (checklist item) to a card'
+    'react:Add a reaction to a card or comment'
+  )
+
+  local -a auth_commands
+  auth_commands=(
+    'login:Authenticate via OAuth'
+    'logout:Clear credentials'
+    'status:Show auth status'
+    'refresh:Check token status'
+  )
+
+  local -a config_commands
+  config_commands=(
+    'list:List all configuration'
+    'get:Get a configuration value'
+    'set:Set a configuration value'
+    'unset:Remove a configuration value'
+    'path:Show configuration paths'
+  )
+
+  _arguments -C \
+    '(-j --json)'{-j,--json}'[Force JSON output]' \
+    '(-m --md)'{-m,--md}'[Force Markdown output]' \
+    '(-q --quiet --data)'{-q,--quiet,--data}'[Minimal output]' \
+    '(-v --verbose)'{-v,--verbose}'[Debug output]' \
+    '(-b --board --in)'{-b,--board,--in}'[Board ID or name]:board:' \
+    '(-a --account)'{-a,--account}'[Account slug]:account:' \
+    '(-h --help)'{-h,--help}'[Show help]' \
+    '1: :->command' \
+    '*::arg:->args'
+
+  case "$state" in
+    command)
+      _describe -t commands 'fizzy command' commands
+      ;;
+    args)
+      case "$words[1]" in
+        auth)
+          _describe -t auth_commands 'auth subcommand' auth_commands
+          ;;
+        config)
+          _describe -t config_commands 'config subcommand' config_commands
+          ;;
+      esac
+      ;;
+  esac
+}
+
+_fizzy "$@"
