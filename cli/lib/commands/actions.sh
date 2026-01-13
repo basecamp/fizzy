@@ -1,108 +1,1731 @@
 #!/usr/bin/env bash
 # actions.sh - Card action commands (Phase 3)
-# These are stub implementations that will be completed in Phase 3
 
 
 # fizzy card "title" [options]
 # Create a new card
+
 cmd_card_create() {
-  die "Not implemented yet" $EXIT_USAGE "Coming in Phase 3"
+  local title=""
+  local description=""
+  local board_id=""
+  local column_id=""
+  local tag_ids=()
+  local assignee_ids=()
+  local show_help=false
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --board|-b)
+        if [[ -z "${2:-}" ]]; then
+          die "--board requires a board ID" $EXIT_USAGE
+        fi
+        board_id="$2"
+        shift 2
+        ;;
+      --column|-c)
+        if [[ -z "${2:-}" ]]; then
+          die "--column requires a column ID" $EXIT_USAGE
+        fi
+        column_id="$2"
+        shift 2
+        ;;
+      --description|-d)
+        if [[ -z "${2:-}" ]]; then
+          die "--description requires text" $EXIT_USAGE
+        fi
+        description="$2"
+        shift 2
+        ;;
+      --tag)
+        if [[ -z "${2:-}" ]]; then
+          die "--tag requires a tag ID" $EXIT_USAGE
+        fi
+        tag_ids+=("$2")
+        shift 2
+        ;;
+      --assign)
+        if [[ -z "${2:-}" ]]; then
+          die "--assign requires a user ID" $EXIT_USAGE
+        fi
+        assignee_ids+=("$2")
+        shift 2
+        ;;
+      --help|-h)
+        show_help=true
+        shift
+        ;;
+      -*)
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy card --help"
+        ;;
+      *)
+        # First positional arg is title
+        if [[ -z "$title" ]]; then
+          title="$1"
+          shift
+        else
+          die "Unexpected argument: $1" $EXIT_USAGE
+        fi
+        ;;
+    esac
+  done
+
+  if [[ "$show_help" == "true" ]]; then
+    _card_create_help
+    return 0
+  fi
+
+  if [[ -z "$title" ]]; then
+    die "Card title required" $EXIT_USAGE "Usage: fizzy card \"title\""
+  fi
+
+  # Use board from config if not specified
+  if [[ -z "$board_id" ]]; then
+    board_id=$(get_board_id 2>/dev/null || true)
+  fi
+
+  if [[ -z "$board_id" ]]; then
+    die "No board specified. Use --board or set in .fizzy/config.json" $EXIT_USAGE
+  fi
+
+  # Build request body
+  local body
+  body=$(jq -n \
+    --arg title "$title" \
+    --arg description "${description:-}" \
+    --arg column_id "${column_id:-}" \
+    '{title: $title} +
+     (if $description != "" then {description: $description} else {} end) +
+     (if $column_id != "" then {column_id: $column_id} else {} end)')
+
+  # Add tag_ids array if provided
+  if [[ ${#tag_ids[@]} -gt 0 ]]; then
+    local tags_json
+    tags_json=$(printf '%s\n' "${tag_ids[@]}" | jq -R . | jq -s '.')
+    body=$(echo "$body" | jq --argjson tag_ids "$tags_json" '. + {tag_ids: $tag_ids}')
+  fi
+
+  # Add assignee_ids array if provided
+  if [[ ${#assignee_ids[@]} -gt 0 ]]; then
+    local assignees_json
+    assignees_json=$(printf '%s\n' "${assignee_ids[@]}" | jq -R . | jq -s '.')
+    body=$(echo "$body" | jq --argjson assignee_ids "$assignees_json" '. + {assignee_ids: $assignee_ids}')
+  fi
+
+  local response
+  response=$(api_post "/boards/$board_id/cards" "$body")
+
+  local number
+  number=$(echo "$response" | jq -r '.number')
+  local summary="Created card #$number"
+
+  local breadcrumbs
+  breadcrumbs=$(breadcrumbs \
+    "$(breadcrumb "show" "fizzy show $number" "View card details")" \
+    "$(breadcrumb "triage" "fizzy triage $number --to <column_id>" "Move to column")" \
+    "$(breadcrumb "comment" "fizzy comment \"text\" --on $number" "Add comment")"
+  )
+
+  output "$response" "$summary" "$breadcrumbs" "_card_created_md"
+}
+
+_card_created_md() {
+  local data="$1"
+  local summary="$2"
+  local breadcrumbs="$3"
+
+  local number title board_name
+  number=$(echo "$data" | jq -r '.number')
+  title=$(echo "$data" | jq -r '.title // .description[0:50]')
+  board_name=$(echo "$data" | jq -r '.board.name')
+
+  md_heading 2 "Card Created"
+  echo
+  md_kv "Number" "#$number" \
+        "Title" "$title" \
+        "Board" "$board_name"
+
+  md_breadcrumbs "$breadcrumbs"
+}
+
+_card_create_help() {
+  local format
+  format=$(get_format)
+
+  if [[ "$format" == "json" ]]; then
+    jq -n '{
+      command: "fizzy card",
+      description: "Create a new card",
+      usage: "fizzy card \"title\" [options]",
+      options: [
+        {flag: "--board, -b", description: "Board ID (required if not in config)"},
+        {flag: "--column, -c", description: "Column ID to triage directly"},
+        {flag: "--description, -d", description: "Card description"},
+        {flag: "--tag", description: "Tag ID (can be repeated)"},
+        {flag: "--assign", description: "Assignee user ID (can be repeated)"}
+      ],
+      examples: [
+        "fizzy card \"Fix login bug\"",
+        "fizzy card \"New feature\" --board abc123 --column def456",
+        "fizzy card \"Task\" --tag tag1 --tag tag2 --assign user1"
+      ]
+    }'
+  else
+    cat <<'EOF'
+## fizzy card
+
+Create a new card.
+
+### Usage
+
+    fizzy card "title" [options]
+
+### Options
+
+    --board, -b       Board ID (required if not in config)
+    --column, -c      Column ID to triage directly
+    --description, -d Card description
+    --tag             Tag ID (can be repeated)
+    --assign          Assignee user ID (can be repeated)
+    --help, -h        Show this help
+
+### Examples
+
+    fizzy card "Fix login bug"
+    fizzy card "New feature" --board abc123 --column def456
+    fizzy card "Task" --tag tag1 --assign user1
+EOF
+  fi
 }
 
 
 # fizzy close <number>
 # Close a card
+
 cmd_close() {
-  die "Not implemented yet" $EXIT_USAGE "Coming in Phase 3"
+  local show_help=false
+  local card_numbers=()
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --help|-h)
+        show_help=true
+        shift
+        ;;
+      -*)
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy close --help"
+        ;;
+      *)
+        card_numbers+=("$1")
+        shift
+        ;;
+    esac
+  done
+
+  if [[ "$show_help" == "true" ]]; then
+    _close_help
+    return 0
+  fi
+
+  if [[ ${#card_numbers[@]} -eq 0 ]]; then
+    die "Card number required" $EXIT_USAGE "Usage: fizzy close <number> [numbers...]"
+  fi
+
+  local results=()
+  local num
+  for num in "${card_numbers[@]}"; do
+    local response
+    response=$(api_post "/cards/$num/closure")
+    results+=("$(echo "$response" | jq '{number: .number, title: .title, closed: .closed}')")
+  done
+
+  local response_data
+  if [[ ${#results[@]} -eq 1 ]]; then
+    response_data="${results[0]}"
+    local summary="Closed card #${card_numbers[0]}"
+  else
+    response_data=$(printf '%s\n' "${results[@]}" | jq -s '.')
+    local summary="Closed ${#card_numbers[@]} cards"
+  fi
+
+  local breadcrumbs
+  breadcrumbs=$(breadcrumbs \
+    "$(breadcrumb "reopen" "fizzy reopen ${card_numbers[0]}" "Reopen card")" \
+    "$(breadcrumb "show" "fizzy show ${card_numbers[0]}" "View card")"
+  )
+
+  output "$response_data" "$summary" "$breadcrumbs" "_close_md"
+}
+
+_close_md() {
+  local data="$1"
+  local summary="$2"
+  local breadcrumbs="$3"
+
+  md_heading 2 "Card Closed"
+  echo "*$summary*"
+  echo
+
+  # Check if single card or array
+  local is_array
+  is_array=$(echo "$data" | jq 'if type == "array" then "yes" else "no" end' -r)
+
+  if [[ "$is_array" == "yes" ]]; then
+    echo "| # | Title | Status |"
+    echo "|---|-------|--------|"
+    echo "$data" | jq -r '.[] | "| #\(.number) | \(.title // "-")[0:40] | Closed |"'
+  else
+    local number title
+    number=$(echo "$data" | jq -r '.number')
+    title=$(echo "$data" | jq -r '.title // "-"')
+    md_kv "Card" "#$number" "Title" "$title" "Status" "Closed"
+  fi
+
+  echo
+  md_breadcrumbs "$breadcrumbs"
+}
+
+_close_help() {
+  local format
+  format=$(get_format)
+
+  if [[ "$format" == "json" ]]; then
+    jq -n '{
+      command: "fizzy close",
+      description: "Close card(s)",
+      usage: "fizzy close <number> [numbers...]",
+      examples: ["fizzy close 123", "fizzy close 123 124 125"]
+    }'
+  else
+    cat <<'EOF'
+## fizzy close
+
+Close card(s).
+
+### Usage
+
+    fizzy close <number> [numbers...]
+
+### Examples
+
+    fizzy close 123           Close card #123
+    fizzy close 123 124 125   Close multiple cards
+EOF
+  fi
 }
 
 
 # fizzy reopen <number>
 # Reopen a closed card
+
 cmd_reopen() {
-  die "Not implemented yet" $EXIT_USAGE "Coming in Phase 3"
+  local show_help=false
+  local card_numbers=()
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --help|-h)
+        show_help=true
+        shift
+        ;;
+      -*)
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy reopen --help"
+        ;;
+      *)
+        card_numbers+=("$1")
+        shift
+        ;;
+    esac
+  done
+
+  if [[ "$show_help" == "true" ]]; then
+    _reopen_help
+    return 0
+  fi
+
+  if [[ ${#card_numbers[@]} -eq 0 ]]; then
+    die "Card number required" $EXIT_USAGE "Usage: fizzy reopen <number>"
+  fi
+
+  local results=()
+  local num
+  for num in "${card_numbers[@]}"; do
+    local response
+    response=$(api_delete "/cards/$num/closure")
+    results+=("$(echo "$response" | jq '{number: .number, title: .title, closed: .closed}')")
+  done
+
+  local response_data
+  if [[ ${#results[@]} -eq 1 ]]; then
+    response_data="${results[0]}"
+    local summary="Reopened card #${card_numbers[0]}"
+  else
+    response_data=$(printf '%s\n' "${results[@]}" | jq -s '.')
+    local summary="Reopened ${#card_numbers[@]} cards"
+  fi
+
+  local breadcrumbs
+  breadcrumbs=$(breadcrumbs \
+    "$(breadcrumb "close" "fizzy close ${card_numbers[0]}" "Close card")" \
+    "$(breadcrumb "show" "fizzy show ${card_numbers[0]}" "View card")" \
+    "$(breadcrumb "triage" "fizzy triage ${card_numbers[0]} --to <column>" "Move to column")"
+  )
+
+  output "$response_data" "$summary" "$breadcrumbs" "_reopen_md"
+}
+
+_reopen_md() {
+  local data="$1"
+  local summary="$2"
+  local breadcrumbs="$3"
+
+  md_heading 2 "Card Reopened"
+  echo "*$summary*"
+  echo
+
+  local is_array
+  is_array=$(echo "$data" | jq 'if type == "array" then "yes" else "no" end' -r)
+
+  if [[ "$is_array" == "yes" ]]; then
+    echo "| # | Title | Status |"
+    echo "|---|-------|--------|"
+    echo "$data" | jq -r '.[] | "| #\(.number) | \(.title // "-")[0:40] | Active |"'
+  else
+    local number title
+    number=$(echo "$data" | jq -r '.number')
+    title=$(echo "$data" | jq -r '.title // "-"')
+    md_kv "Card" "#$number" "Title" "$title" "Status" "Active"
+  fi
+
+  echo
+  md_breadcrumbs "$breadcrumbs"
+}
+
+_reopen_help() {
+  local format
+  format=$(get_format)
+
+  if [[ "$format" == "json" ]]; then
+    jq -n '{
+      command: "fizzy reopen",
+      description: "Reopen closed card(s)",
+      usage: "fizzy reopen <number> [numbers...]",
+      examples: ["fizzy reopen 123", "fizzy reopen 123 124"]
+    }'
+  else
+    cat <<'EOF'
+## fizzy reopen
+
+Reopen closed card(s).
+
+### Usage
+
+    fizzy reopen <number> [numbers...]
+
+### Examples
+
+    fizzy reopen 123          Reopen card #123
+    fizzy reopen 123 124      Reopen multiple cards
+EOF
+  fi
 }
 
 
 # fizzy triage <number> --to <column_id>
 # Move card to a column
+
 cmd_triage() {
-  die "Not implemented yet" $EXIT_USAGE "Coming in Phase 3"
+  local card_number=""
+  local column_id=""
+  local show_help=false
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --to)
+        if [[ -z "${2:-}" ]]; then
+          die "--to requires a column ID" $EXIT_USAGE
+        fi
+        column_id="$2"
+        shift 2
+        ;;
+      --help|-h)
+        show_help=true
+        shift
+        ;;
+      -*)
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy triage --help"
+        ;;
+      *)
+        if [[ -z "$card_number" ]]; then
+          card_number="$1"
+        fi
+        shift
+        ;;
+    esac
+  done
+
+  if [[ "$show_help" == "true" ]]; then
+    _triage_help
+    return 0
+  fi
+
+  if [[ -z "$card_number" ]]; then
+    die "Card number required" $EXIT_USAGE "Usage: fizzy triage <number> --to <column_id>"
+  fi
+
+  if [[ -z "$column_id" ]]; then
+    # Try to get default column from config
+    column_id=$(get_column_id 2>/dev/null || true)
+    if [[ -z "$column_id" ]]; then
+      die "--to column ID required" $EXIT_USAGE "Usage: fizzy triage <number> --to <column_id>"
+    fi
+  fi
+
+  local body
+  body=$(jq -n --arg column_id "$column_id" '{column_id: $column_id}')
+
+  local response
+  response=$(api_post "/cards/$card_number/triage" "$body")
+
+  local column_name
+  column_name=$(echo "$response" | jq -r '.column.name // "column"')
+  local summary="Card #$card_number triaged to $column_name"
+
+  local breadcrumbs
+  breadcrumbs=$(breadcrumbs \
+    "$(breadcrumb "untriage" "fizzy untriage $card_number" "Send back to triage")" \
+    "$(breadcrumb "show" "fizzy show $card_number" "View card")" \
+    "$(breadcrumb "close" "fizzy close $card_number" "Close card")"
+  )
+
+  output "$response" "$summary" "$breadcrumbs" "_triage_md"
+}
+
+_triage_md() {
+  local data="$1"
+  local summary="$2"
+  local breadcrumbs="$3"
+
+  local number title column_name board_name
+  number=$(echo "$data" | jq -r '.number')
+  title=$(echo "$data" | jq -r '.title // .description[0:40]')
+  column_name=$(echo "$data" | jq -r '.column.name // "Triage"')
+  board_name=$(echo "$data" | jq -r '.board.name')
+
+  md_heading 2 "Card Triaged"
+  echo
+  md_kv "Card" "#$number" \
+        "Title" "$title" \
+        "Board" "$board_name" \
+        "Column" "$column_name"
+
+  md_breadcrumbs "$breadcrumbs"
+}
+
+_triage_help() {
+  local format
+  format=$(get_format)
+
+  if [[ "$format" == "json" ]]; then
+    jq -n '{
+      command: "fizzy triage",
+      description: "Move card to a column",
+      usage: "fizzy triage <number> --to <column_id>",
+      options: [{flag: "--to", description: "Column ID to triage to"}],
+      examples: ["fizzy triage 123 --to abc456"]
+    }'
+  else
+    cat <<'EOF'
+## fizzy triage
+
+Move card to a column.
+
+### Usage
+
+    fizzy triage <number> --to <column_id>
+
+### Options
+
+    --to          Column ID to triage to (required)
+    --help, -h    Show this help
+
+### Examples
+
+    fizzy triage 123 --to abc456    Move card #123 to column
+EOF
+  fi
 }
 
 
 # fizzy untriage <number>
 # Send card back to triage
+
 cmd_untriage() {
-  die "Not implemented yet" $EXIT_USAGE "Coming in Phase 3"
+  local card_number=""
+  local show_help=false
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --help|-h)
+        show_help=true
+        shift
+        ;;
+      -*)
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy untriage --help"
+        ;;
+      *)
+        if [[ -z "$card_number" ]]; then
+          card_number="$1"
+        fi
+        shift
+        ;;
+    esac
+  done
+
+  if [[ "$show_help" == "true" ]]; then
+    _untriage_help
+    return 0
+  fi
+
+  if [[ -z "$card_number" ]]; then
+    die "Card number required" $EXIT_USAGE "Usage: fizzy untriage <number>"
+  fi
+
+  local response
+  response=$(api_delete "/cards/$card_number/triage")
+
+  local summary="Card #$card_number sent back to triage"
+
+  local breadcrumbs
+  breadcrumbs=$(breadcrumbs \
+    "$(breadcrumb "triage" "fizzy triage $card_number --to <column_id>" "Move to column")" \
+    "$(breadcrumb "show" "fizzy show $card_number" "View card")"
+  )
+
+  output "$response" "$summary" "$breadcrumbs" "_untriage_md"
+}
+
+_untriage_md() {
+  local data="$1"
+  local summary="$2"
+  local breadcrumbs="$3"
+
+  local number title board_name
+  number=$(echo "$data" | jq -r '.number')
+  title=$(echo "$data" | jq -r '.title // .description[0:40]')
+  board_name=$(echo "$data" | jq -r '.board.name')
+
+  md_heading 2 "Card Untriaged"
+  echo
+  md_kv "Card" "#$number" \
+        "Title" "$title" \
+        "Board" "$board_name" \
+        "Status" "Back in Triage"
+
+  md_breadcrumbs "$breadcrumbs"
+}
+
+_untriage_help() {
+  local format
+  format=$(get_format)
+
+  if [[ "$format" == "json" ]]; then
+    jq -n '{
+      command: "fizzy untriage",
+      description: "Send card back to triage",
+      usage: "fizzy untriage <number>",
+      examples: ["fizzy untriage 123"]
+    }'
+  else
+    cat <<'EOF'
+## fizzy untriage
+
+Send card back to triage.
+
+### Usage
+
+    fizzy untriage <number>
+
+### Examples
+
+    fizzy untriage 123    Send card #123 back to triage
+EOF
+  fi
 }
 
 
 # fizzy postpone <number>
 # Move card to "Not Now"
+
 cmd_postpone() {
-  die "Not implemented yet" $EXIT_USAGE "Coming in Phase 3"
+  local card_number=""
+  local show_help=false
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --help|-h)
+        show_help=true
+        shift
+        ;;
+      -*)
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy postpone --help"
+        ;;
+      *)
+        if [[ -z "$card_number" ]]; then
+          card_number="$1"
+        fi
+        shift
+        ;;
+    esac
+  done
+
+  if [[ "$show_help" == "true" ]]; then
+    _postpone_help
+    return 0
+  fi
+
+  if [[ -z "$card_number" ]]; then
+    die "Card number required" $EXIT_USAGE "Usage: fizzy postpone <number>"
+  fi
+
+  local response
+  response=$(api_post "/cards/$card_number/not_now")
+
+  local summary="Card #$card_number moved to Not Now"
+
+  local breadcrumbs
+  breadcrumbs=$(breadcrumbs \
+    "$(breadcrumb "triage" "fizzy triage $card_number --to <column_id>" "Move to column")" \
+    "$(breadcrumb "show" "fizzy show $card_number" "View card")"
+  )
+
+  output "$response" "$summary" "$breadcrumbs" "_postpone_md"
+}
+
+_postpone_md() {
+  local data="$1"
+  local summary="$2"
+  local breadcrumbs="$3"
+
+  local number title board_name
+  number=$(echo "$data" | jq -r '.number')
+  title=$(echo "$data" | jq -r '.title // .description[0:40]')
+  board_name=$(echo "$data" | jq -r '.board.name')
+
+  md_heading 2 "Card Postponed"
+  echo
+  md_kv "Card" "#$number" \
+        "Title" "$title" \
+        "Board" "$board_name" \
+        "Status" "Not Now"
+
+  md_breadcrumbs "$breadcrumbs"
+}
+
+_postpone_help() {
+  local format
+  format=$(get_format)
+
+  if [[ "$format" == "json" ]]; then
+    jq -n '{
+      command: "fizzy postpone",
+      description: "Move card to Not Now",
+      usage: "fizzy postpone <number>",
+      examples: ["fizzy postpone 123"]
+    }'
+  else
+    cat <<'EOF'
+## fizzy postpone
+
+Move card to "Not Now".
+
+### Usage
+
+    fizzy postpone <number>
+
+### Examples
+
+    fizzy postpone 123    Move card #123 to Not Now
+EOF
+  fi
 }
 
 
 # fizzy comment "text" --on <number>
 # Add comment to a card
+
 cmd_comment_create() {
-  die "Not implemented yet" $EXIT_USAGE "Coming in Phase 3"
+  local content=""
+  local card_number=""
+  local show_help=false
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --on)
+        if [[ -z "${2:-}" ]]; then
+          die "--on requires a card number" $EXIT_USAGE
+        fi
+        card_number="$2"
+        shift 2
+        ;;
+      --help|-h)
+        show_help=true
+        shift
+        ;;
+      -*)
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy comment --help"
+        ;;
+      *)
+        if [[ -z "$content" ]]; then
+          content="$1"
+        fi
+        shift
+        ;;
+    esac
+  done
+
+  if [[ "$show_help" == "true" ]]; then
+    _comment_create_help
+    return 0
+  fi
+
+  if [[ -z "$content" ]]; then
+    die "Comment content required" $EXIT_USAGE "Usage: fizzy comment \"text\" --on <number>"
+  fi
+
+  if [[ -z "$card_number" ]]; then
+    die "--on card number required" $EXIT_USAGE "Usage: fizzy comment \"text\" --on <number>"
+  fi
+
+  local body
+  body=$(jq -n --arg content "$content" '{content: $content}')
+
+  local response
+  response=$(api_post "/cards/$card_number/comments" "$body")
+
+  local comment_id
+  comment_id=$(echo "$response" | jq -r '.id')
+  local summary="Comment added to card #$card_number"
+
+  local breadcrumbs
+  breadcrumbs=$(breadcrumbs \
+    "$(breadcrumb "show" "fizzy show $card_number" "View card")" \
+    "$(breadcrumb "comments" "fizzy comments --on $card_number" "View all comments")" \
+    "$(breadcrumb "react" "fizzy react \"👍\" --comment $comment_id" "Add reaction")"
+  )
+
+  output "$response" "$summary" "$breadcrumbs" "_comment_created_md"
+}
+
+_comment_created_md() {
+  local data="$1"
+  local summary="$2"
+  local breadcrumbs="$3"
+
+  local comment_id creator_name created_at
+  comment_id=$(echo "$data" | jq -r '.id')
+  creator_name=$(echo "$data" | jq -r '.creator.name // "You"')
+  created_at=$(echo "$data" | jq -r '.created_at | split("T")[0]')
+
+  md_heading 2 "Comment Added"
+  echo
+  md_kv "ID" "$comment_id" \
+        "Author" "$creator_name" \
+        "Date" "$created_at"
+
+  md_breadcrumbs "$breadcrumbs"
+}
+
+_comment_create_help() {
+  local format
+  format=$(get_format)
+
+  if [[ "$format" == "json" ]]; then
+    jq -n '{
+      command: "fizzy comment",
+      description: "Add comment to a card",
+      usage: "fizzy comment \"text\" --on <number>",
+      options: [{flag: "--on", description: "Card number to comment on"}],
+      examples: ["fizzy comment \"LGTM!\" --on 123"]
+    }'
+  else
+    cat <<'EOF'
+## fizzy comment
+
+Add comment to a card.
+
+### Usage
+
+    fizzy comment "text" --on <number>
+
+### Options
+
+    --on          Card number to comment on (required)
+    --help, -h    Show this help
+
+### Examples
+
+    fizzy comment "LGTM!" --on 123    Add comment to card #123
+EOF
+  fi
 }
 
 
 # fizzy assign <number> --to <user_id>
 # Toggle assignment
+
 cmd_assign() {
-  die "Not implemented yet" $EXIT_USAGE "Coming in Phase 3"
+  local card_number=""
+  local user_id=""
+  local show_help=false
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --to)
+        if [[ -z "${2:-}" ]]; then
+          die "--to requires a user ID" $EXIT_USAGE
+        fi
+        user_id="$2"
+        shift 2
+        ;;
+      --help|-h)
+        show_help=true
+        shift
+        ;;
+      -*)
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy assign --help"
+        ;;
+      *)
+        if [[ -z "$card_number" ]]; then
+          card_number="$1"
+        fi
+        shift
+        ;;
+    esac
+  done
+
+  if [[ "$show_help" == "true" ]]; then
+    _assign_help
+    return 0
+  fi
+
+  if [[ -z "$card_number" ]]; then
+    die "Card number required" $EXIT_USAGE "Usage: fizzy assign <number> --to <user_id>"
+  fi
+
+  if [[ -z "$user_id" ]]; then
+    die "--to user ID required" $EXIT_USAGE "Usage: fizzy assign <number> --to <user_id>"
+  fi
+
+  local body
+  body=$(jq -n --arg user_id "$user_id" '{user_id: $user_id}')
+
+  local response
+  response=$(api_post "/cards/$card_number/assignments" "$body")
+
+  local summary="Assignment toggled on card #$card_number"
+
+  local breadcrumbs
+  breadcrumbs=$(breadcrumbs \
+    "$(breadcrumb "show" "fizzy show $card_number" "View card")" \
+    "$(breadcrumb "people" "fizzy people" "List users")"
+  )
+
+  output "$response" "$summary" "$breadcrumbs" "_assign_md"
+}
+
+_assign_md() {
+  local data="$1"
+  local summary="$2"
+  local breadcrumbs="$3"
+
+  local number title
+  number=$(echo "$data" | jq -r '.number')
+  title=$(echo "$data" | jq -r '.title // .description[0:40]')
+
+  md_heading 2 "Assignment Toggled"
+  echo
+  md_kv "Card" "#$number" \
+        "Title" "$title"
+
+  md_breadcrumbs "$breadcrumbs"
+}
+
+_assign_help() {
+  local format
+  format=$(get_format)
+
+  if [[ "$format" == "json" ]]; then
+    jq -n '{
+      command: "fizzy assign",
+      description: "Toggle assignment on a card",
+      usage: "fizzy assign <number> --to <user_id>",
+      options: [{flag: "--to", description: "User ID to toggle assignment"}],
+      examples: ["fizzy assign 123 --to abc456"]
+    }'
+  else
+    cat <<'EOF'
+## fizzy assign
+
+Toggle assignment on a card (adds if not assigned, removes if assigned).
+
+### Usage
+
+    fizzy assign <number> --to <user_id>
+
+### Options
+
+    --to          User ID to toggle assignment (required)
+    --help, -h    Show this help
+
+### Examples
+
+    fizzy assign 123 --to abc456    Toggle assignment on card #123
+EOF
+  fi
 }
 
 
 # fizzy tag <number> --with "name"
 # Toggle tag on card
+
 cmd_tag() {
-  die "Not implemented yet" $EXIT_USAGE "Coming in Phase 3"
+  local card_number=""
+  local tag_id=""
+  local show_help=false
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --with)
+        if [[ -z "${2:-}" ]]; then
+          die "--with requires a tag ID" $EXIT_USAGE
+        fi
+        tag_id="$2"
+        shift 2
+        ;;
+      --help|-h)
+        show_help=true
+        shift
+        ;;
+      -*)
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy tag --help"
+        ;;
+      *)
+        if [[ -z "$card_number" ]]; then
+          card_number="$1"
+        fi
+        shift
+        ;;
+    esac
+  done
+
+  if [[ "$show_help" == "true" ]]; then
+    _tag_help
+    return 0
+  fi
+
+  if [[ -z "$card_number" ]]; then
+    die "Card number required" $EXIT_USAGE "Usage: fizzy tag <number> --with <tag_id>"
+  fi
+
+  if [[ -z "$tag_id" ]]; then
+    die "--with tag ID required" $EXIT_USAGE "Usage: fizzy tag <number> --with <tag_id>"
+  fi
+
+  local body
+  body=$(jq -n --arg tag_id "$tag_id" '{tag_id: $tag_id}')
+
+  local response
+  response=$(api_post "/cards/$card_number/taggings" "$body")
+
+  local summary="Tag toggled on card #$card_number"
+
+  local breadcrumbs
+  breadcrumbs=$(breadcrumbs \
+    "$(breadcrumb "show" "fizzy show $card_number" "View card")" \
+    "$(breadcrumb "tags" "fizzy tags" "List tags")"
+  )
+
+  output "$response" "$summary" "$breadcrumbs" "_tag_md"
+}
+
+_tag_md() {
+  local data="$1"
+  local summary="$2"
+  local breadcrumbs="$3"
+
+  local number title tags
+  number=$(echo "$data" | jq -r '.number')
+  title=$(echo "$data" | jq -r '.title // .description[0:40]')
+  tags=$(echo "$data" | jq -r '.tags | join(", ")')
+
+  md_heading 2 "Tag Toggled"
+  echo
+  md_kv "Card" "#$number" \
+        "Title" "$title" \
+        "Tags" "${tags:-None}"
+
+  md_breadcrumbs "$breadcrumbs"
+}
+
+_tag_help() {
+  local format
+  format=$(get_format)
+
+  if [[ "$format" == "json" ]]; then
+    jq -n '{
+      command: "fizzy tag",
+      description: "Toggle tag on a card",
+      usage: "fizzy tag <number> --with <tag_id>",
+      options: [{flag: "--with", description: "Tag ID to toggle"}],
+      examples: ["fizzy tag 123 --with abc456"]
+    }'
+  else
+    cat <<'EOF'
+## fizzy tag
+
+Toggle tag on a card (adds if not tagged, removes if tagged).
+
+### Usage
+
+    fizzy tag <number> --with <tag_id>
+
+### Options
+
+    --with        Tag ID to toggle (required)
+    --help, -h    Show this help
+
+### Examples
+
+    fizzy tag 123 --with abc456    Toggle tag on card #123
+EOF
+  fi
 }
 
 
 # fizzy watch <number>
 # Subscribe to card notifications
+
 cmd_watch() {
-  die "Not implemented yet" $EXIT_USAGE "Coming in Phase 3"
+  local card_number=""
+  local show_help=false
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --help|-h)
+        show_help=true
+        shift
+        ;;
+      -*)
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy watch --help"
+        ;;
+      *)
+        if [[ -z "$card_number" ]]; then
+          card_number="$1"
+        fi
+        shift
+        ;;
+    esac
+  done
+
+  if [[ "$show_help" == "true" ]]; then
+    _watch_help
+    return 0
+  fi
+
+  if [[ -z "$card_number" ]]; then
+    die "Card number required" $EXIT_USAGE "Usage: fizzy watch <number>"
+  fi
+
+  local response
+  response=$(api_post "/cards/$card_number/watch")
+
+  local summary="Subscribed to card #$card_number"
+
+  local breadcrumbs
+  breadcrumbs=$(breadcrumbs \
+    "$(breadcrumb "unwatch" "fizzy unwatch $card_number" "Unsubscribe")" \
+    "$(breadcrumb "show" "fizzy show $card_number" "View card")"
+  )
+
+  output "$response" "$summary" "$breadcrumbs" "_watch_md"
+}
+
+_watch_md() {
+  local data="$1"
+  local summary="$2"
+  local breadcrumbs="$3"
+
+  local number title
+  number=$(echo "$data" | jq -r '.number')
+  title=$(echo "$data" | jq -r '.title // .description[0:40]')
+
+  md_heading 2 "Subscribed"
+  echo
+  md_kv "Card" "#$number" \
+        "Title" "$title" \
+        "Watching" "Yes"
+
+  md_breadcrumbs "$breadcrumbs"
+}
+
+_watch_help() {
+  local format
+  format=$(get_format)
+
+  if [[ "$format" == "json" ]]; then
+    jq -n '{
+      command: "fizzy watch",
+      description: "Subscribe to card notifications",
+      usage: "fizzy watch <number>",
+      examples: ["fizzy watch 123"]
+    }'
+  else
+    cat <<'EOF'
+## fizzy watch
+
+Subscribe to card notifications.
+
+### Usage
+
+    fizzy watch <number>
+
+### Examples
+
+    fizzy watch 123    Subscribe to card #123
+EOF
+  fi
 }
 
 
 # fizzy unwatch <number>
 # Unsubscribe from card
+
 cmd_unwatch() {
-  die "Not implemented yet" $EXIT_USAGE "Coming in Phase 3"
+  local card_number=""
+  local show_help=false
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --help|-h)
+        show_help=true
+        shift
+        ;;
+      -*)
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy unwatch --help"
+        ;;
+      *)
+        if [[ -z "$card_number" ]]; then
+          card_number="$1"
+        fi
+        shift
+        ;;
+    esac
+  done
+
+  if [[ "$show_help" == "true" ]]; then
+    _unwatch_help
+    return 0
+  fi
+
+  if [[ -z "$card_number" ]]; then
+    die "Card number required" $EXIT_USAGE "Usage: fizzy unwatch <number>"
+  fi
+
+  local response
+  response=$(api_delete "/cards/$card_number/watch")
+
+  local summary="Unsubscribed from card #$card_number"
+
+  local breadcrumbs
+  breadcrumbs=$(breadcrumbs \
+    "$(breadcrumb "watch" "fizzy watch $card_number" "Subscribe")" \
+    "$(breadcrumb "show" "fizzy show $card_number" "View card")"
+  )
+
+  output "$response" "$summary" "$breadcrumbs" "_unwatch_md"
+}
+
+_unwatch_md() {
+  local data="$1"
+  local summary="$2"
+  local breadcrumbs="$3"
+
+  local number title
+  number=$(echo "$data" | jq -r '.number')
+  title=$(echo "$data" | jq -r '.title // .description[0:40]')
+
+  md_heading 2 "Unsubscribed"
+  echo
+  md_kv "Card" "#$number" \
+        "Title" "$title" \
+        "Watching" "No"
+
+  md_breadcrumbs "$breadcrumbs"
+}
+
+_unwatch_help() {
+  local format
+  format=$(get_format)
+
+  if [[ "$format" == "json" ]]; then
+    jq -n '{
+      command: "fizzy unwatch",
+      description: "Unsubscribe from card notifications",
+      usage: "fizzy unwatch <number>",
+      examples: ["fizzy unwatch 123"]
+    }'
+  else
+    cat <<'EOF'
+## fizzy unwatch
+
+Unsubscribe from card notifications.
+
+### Usage
+
+    fizzy unwatch <number>
+
+### Examples
+
+    fizzy unwatch 123    Unsubscribe from card #123
+EOF
+  fi
 }
 
 
 # fizzy gild <number>
 # Mark card as golden
+
 cmd_gild() {
-  die "Not implemented yet" $EXIT_USAGE "Coming in Phase 3"
+  local card_number=""
+  local show_help=false
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --help|-h)
+        show_help=true
+        shift
+        ;;
+      -*)
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy gild --help"
+        ;;
+      *)
+        if [[ -z "$card_number" ]]; then
+          card_number="$1"
+        fi
+        shift
+        ;;
+    esac
+  done
+
+  if [[ "$show_help" == "true" ]]; then
+    _gild_help
+    return 0
+  fi
+
+  if [[ -z "$card_number" ]]; then
+    die "Card number required" $EXIT_USAGE "Usage: fizzy gild <number>"
+  fi
+
+  local response
+  response=$(api_post "/cards/$card_number/goldness")
+
+  local summary="Card #$card_number marked as golden"
+
+  local breadcrumbs
+  breadcrumbs=$(breadcrumbs \
+    "$(breadcrumb "ungild" "fizzy ungild $card_number" "Remove golden")" \
+    "$(breadcrumb "show" "fizzy show $card_number" "View card")"
+  )
+
+  output "$response" "$summary" "$breadcrumbs" "_gild_md"
+}
+
+_gild_md() {
+  local data="$1"
+  local summary="$2"
+  local breadcrumbs="$3"
+
+  local number title
+  number=$(echo "$data" | jq -r '.number')
+  title=$(echo "$data" | jq -r '.title // .description[0:40]')
+
+  md_heading 2 "Card Gilded"
+  echo
+  md_kv "Card" "#$number" \
+        "Title" "$title" \
+        "Golden" "Yes ✨"
+
+  md_breadcrumbs "$breadcrumbs"
+}
+
+_gild_help() {
+  local format
+  format=$(get_format)
+
+  if [[ "$format" == "json" ]]; then
+    jq -n '{
+      command: "fizzy gild",
+      description: "Mark card as golden",
+      usage: "fizzy gild <number>",
+      examples: ["fizzy gild 123"]
+    }'
+  else
+    cat <<'EOF'
+## fizzy gild
+
+Mark card as golden (protects from auto-postponement).
+
+### Usage
+
+    fizzy gild <number>
+
+### Examples
+
+    fizzy gild 123    Mark card #123 as golden
+EOF
+  fi
 }
 
 
 # fizzy ungild <number>
 # Remove golden status
+
 cmd_ungild() {
-  die "Not implemented yet" $EXIT_USAGE "Coming in Phase 3"
+  local card_number=""
+  local show_help=false
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --help|-h)
+        show_help=true
+        shift
+        ;;
+      -*)
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy ungild --help"
+        ;;
+      *)
+        if [[ -z "$card_number" ]]; then
+          card_number="$1"
+        fi
+        shift
+        ;;
+    esac
+  done
+
+  if [[ "$show_help" == "true" ]]; then
+    _ungild_help
+    return 0
+  fi
+
+  if [[ -z "$card_number" ]]; then
+    die "Card number required" $EXIT_USAGE "Usage: fizzy ungild <number>"
+  fi
+
+  local response
+  response=$(api_delete "/cards/$card_number/goldness")
+
+  local summary="Golden status removed from card #$card_number"
+
+  local breadcrumbs
+  breadcrumbs=$(breadcrumbs \
+    "$(breadcrumb "gild" "fizzy gild $card_number" "Mark as golden")" \
+    "$(breadcrumb "show" "fizzy show $card_number" "View card")"
+  )
+
+  output "$response" "$summary" "$breadcrumbs" "_ungild_md"
+}
+
+_ungild_md() {
+  local data="$1"
+  local summary="$2"
+  local breadcrumbs="$3"
+
+  local number title
+  number=$(echo "$data" | jq -r '.number')
+  title=$(echo "$data" | jq -r '.title // .description[0:40]')
+
+  md_heading 2 "Card Ungilded"
+  echo
+  md_kv "Card" "#$number" \
+        "Title" "$title" \
+        "Golden" "No"
+
+  md_breadcrumbs "$breadcrumbs"
+}
+
+_ungild_help() {
+  local format
+  format=$(get_format)
+
+  if [[ "$format" == "json" ]]; then
+    jq -n '{
+      command: "fizzy ungild",
+      description: "Remove golden status from card",
+      usage: "fizzy ungild <number>",
+      examples: ["fizzy ungild 123"]
+    }'
+  else
+    cat <<'EOF'
+## fizzy ungild
+
+Remove golden status from card.
+
+### Usage
+
+    fizzy ungild <number>
+
+### Examples
+
+    fizzy ungild 123    Remove golden from card #123
+EOF
+  fi
 }
 
 
 # fizzy step "text" --on <number>
 # Add step to card
+
 cmd_step() {
-  die "Not implemented yet" $EXIT_USAGE "Coming in Phase 3"
+  local content=""
+  local card_number=""
+  local show_help=false
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --on)
+        if [[ -z "${2:-}" ]]; then
+          die "--on requires a card number" $EXIT_USAGE
+        fi
+        card_number="$2"
+        shift 2
+        ;;
+      --help|-h)
+        show_help=true
+        shift
+        ;;
+      -*)
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy step --help"
+        ;;
+      *)
+        if [[ -z "$content" ]]; then
+          content="$1"
+        fi
+        shift
+        ;;
+    esac
+  done
+
+  if [[ "$show_help" == "true" ]]; then
+    _step_help
+    return 0
+  fi
+
+  if [[ -z "$content" ]]; then
+    die "Step content required" $EXIT_USAGE "Usage: fizzy step \"text\" --on <number>"
+  fi
+
+  if [[ -z "$card_number" ]]; then
+    die "--on card number required" $EXIT_USAGE "Usage: fizzy step \"text\" --on <number>"
+  fi
+
+  local body
+  body=$(jq -n --arg content "$content" '{content: $content}')
+
+  local response
+  response=$(api_post "/cards/$card_number/steps" "$body")
+
+  local summary="Step added to card #$card_number"
+
+  local breadcrumbs
+  breadcrumbs=$(breadcrumbs \
+    "$(breadcrumb "show" "fizzy show $card_number" "View card")" \
+    "$(breadcrumb "step" "fizzy step \"text\" --on $card_number" "Add another step")"
+  )
+
+  output "$response" "$summary" "$breadcrumbs" "_step_md"
+}
+
+_step_md() {
+  local data="$1"
+  local summary="$2"
+  local breadcrumbs="$3"
+
+  local step_id content completed
+  step_id=$(echo "$data" | jq -r '.id')
+  content=$(echo "$data" | jq -r '.content')
+  completed=$(echo "$data" | jq -r 'if .completed then "Yes" else "No" end')
+
+  md_heading 2 "Step Added"
+  echo
+  md_kv "ID" "$step_id" \
+        "Content" "$content" \
+        "Completed" "$completed"
+
+  md_breadcrumbs "$breadcrumbs"
+}
+
+_step_help() {
+  local format
+  format=$(get_format)
+
+  if [[ "$format" == "json" ]]; then
+    jq -n '{
+      command: "fizzy step",
+      description: "Add step to a card",
+      usage: "fizzy step \"text\" --on <number>",
+      options: [{flag: "--on", description: "Card number to add step to"}],
+      examples: ["fizzy step \"Review PR\" --on 123"]
+    }'
+  else
+    cat <<'EOF'
+## fizzy step
+
+Add step (checklist item) to a card.
+
+### Usage
+
+    fizzy step "text" --on <number>
+
+### Options
+
+    --on          Card number to add step to (required)
+    --help, -h    Show this help
+
+### Examples
+
+    fizzy step "Review PR" --on 123    Add step to card #123
+EOF
+  fi
 }
 
 
-# fizzy react "emoji" --on <comment_id>
+# fizzy react "emoji" --comment <comment_id> --card <card_number>
 # Add reaction to comment
+
 cmd_react() {
-  die "Not implemented yet" $EXIT_USAGE "Coming in Phase 3"
+  local emoji=""
+  local comment_id=""
+  local card_number=""
+  local show_help=false
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --comment)
+        if [[ -z "${2:-}" ]]; then
+          die "--comment requires a comment ID" $EXIT_USAGE
+        fi
+        comment_id="$2"
+        shift 2
+        ;;
+      --card)
+        if [[ -z "${2:-}" ]]; then
+          die "--card requires a card number" $EXIT_USAGE
+        fi
+        card_number="$2"
+        shift 2
+        ;;
+      --help|-h)
+        show_help=true
+        shift
+        ;;
+      -*)
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy react --help"
+        ;;
+      *)
+        if [[ -z "$emoji" ]]; then
+          emoji="$1"
+        fi
+        shift
+        ;;
+    esac
+  done
+
+  if [[ "$show_help" == "true" ]]; then
+    _react_help
+    return 0
+  fi
+
+  if [[ -z "$emoji" ]]; then
+    die "Emoji required" $EXIT_USAGE "Usage: fizzy react \"👍\" --card <num> --comment <id>"
+  fi
+
+  if [[ -z "$card_number" ]]; then
+    die "--card number required" $EXIT_USAGE "Usage: fizzy react \"👍\" --card <num> --comment <id>"
+  fi
+
+  if [[ -z "$comment_id" ]]; then
+    die "--comment ID required" $EXIT_USAGE "Usage: fizzy react \"👍\" --card <num> --comment <id>"
+  fi
+
+  local body
+  body=$(jq -n --arg emoji "$emoji" '{emoji: $emoji}')
+
+  local response
+  response=$(api_post "/cards/$card_number/comments/$comment_id/reactions" "$body")
+
+  local summary="Reaction added to comment"
+
+  local breadcrumbs
+  breadcrumbs=$(breadcrumbs \
+    "$(breadcrumb "comments" "fizzy comments --on $card_number" "View comments")" \
+    "$(breadcrumb "show" "fizzy show $card_number" "View card")"
+  )
+
+  output "$response" "$summary" "$breadcrumbs" "_react_md"
+}
+
+_react_md() {
+  local data="$1"
+  local summary="$2"
+  local breadcrumbs="$3"
+
+  local reaction_id emoji
+  reaction_id=$(echo "$data" | jq -r '.id')
+  emoji=$(echo "$data" | jq -r '.emoji')
+
+  md_heading 2 "Reaction Added"
+  echo
+  md_kv "ID" "$reaction_id" \
+        "Emoji" "$emoji"
+
+  md_breadcrumbs "$breadcrumbs"
+}
+
+_react_help() {
+  local format
+  format=$(get_format)
+
+  if [[ "$format" == "json" ]]; then
+    jq -n '{
+      command: "fizzy react",
+      description: "Add reaction to a comment",
+      usage: "fizzy react \"emoji\" --card <number> --comment <id>",
+      options: [
+        {flag: "--card", description: "Card number"},
+        {flag: "--comment", description: "Comment ID to react to"}
+      ],
+      examples: ["fizzy react \"👍\" --card 123 --comment abc456"]
+    }'
+  else
+    cat <<'EOF'
+## fizzy react
+
+Add reaction to a comment.
+
+### Usage
+
+    fizzy react "emoji" --card <number> --comment <id>
+
+### Options
+
+    --card        Card number (required)
+    --comment     Comment ID to react to (required)
+    --help, -h    Show this help
+
+### Examples
+
+    fizzy react "👍" --card 123 --comment abc456
+EOF
+  fi
 }
