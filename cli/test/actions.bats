@@ -245,6 +245,50 @@ load test_helper
 }
 
 
+# delete-image --help
+
+@test "delete-image --help shows help" {
+  run fizzy --md delete-image --help
+  assert_success
+  assert_output_contains "fizzy delete-image"
+  assert_output_contains "image"
+}
+
+@test "delete-image -h shows help" {
+  run fizzy --md delete-image -h
+  assert_success
+  assert_output_contains "fizzy delete-image"
+}
+
+@test "delete-image --help --json outputs JSON" {
+  run fizzy --json delete-image --help
+  assert_success
+  is_valid_json
+  assert_json_not_null ".command"
+}
+
+
+# delete-image requires card number
+
+@test "delete-image without number shows error" {
+  run fizzy delete-image
+  assert_failure
+  assert_output_contains "Card number required"
+}
+
+@test "delete-image requires authentication" {
+  run fizzy delete-image 123
+  assert_failure
+  assert_output_contains "Not authenticated"
+}
+
+@test "delete-image rejects unknown option" {
+  run fizzy delete-image --invalid
+  assert_failure
+  assert_output_contains "Unknown option"
+}
+
+
 # triage --help
 
 @test "triage --help shows help" {
