@@ -176,10 +176,10 @@ load test_helper
   assert_output_contains "column ID required"
 }
 
-@test "triage requires authentication" {
+@test "triage without board context shows resolution error" {
   run fizzy triage 123 --to col456
   assert_failure
-  assert_output_contains "Not authenticated"
+  assert_output_contains "Cannot resolve column name without board context"
 }
 
 
@@ -384,7 +384,7 @@ load test_helper
 @test "tag without --with shows error" {
   run fizzy tag 123
   assert_failure
-  assert_output_contains "tag ID required"
+  assert_output_contains "tag name required"
 }
 
 @test "tag requires authentication" {

@@ -96,7 +96,8 @@ load test_helper
 @test "tag --help mentions name support" {
   run fizzy --md tag --help
   assert_success
-  assert_output_contains "name or ID"
+  # Tag only accepts names (API requires tag_title, not tag_id)
+  assert_output_contains "Tag name"
 }
 
 

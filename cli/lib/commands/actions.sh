@@ -276,8 +276,10 @@ cmd_close() {
   local results=()
   local num
   for num in "${card_numbers[@]}"; do
+    # POST closure returns 204 No Content, so fetch card after
+    api_post "/cards/$num/closure" > /dev/null
     local response
-    response=$(api_post "/cards/$num/closure")
+    response=$(api_get "/cards/$num")
     results+=("$(echo "$response" | jq '{number: .number, title: .title, closed: .closed}')")
   done
 
@@ -392,8 +394,10 @@ cmd_reopen() {
   local results=()
   local num
   for num in "${card_numbers[@]}"; do
+    # DELETE closure returns 204 No Content, so fetch card after
+    api_delete "/cards/$num/closure" > /dev/null
     local response
-    response=$(api_delete "/cards/$num/closure")
+    response=$(api_get "/cards/$num")
     results+=("$(echo "$response" | jq '{number: .number, title: .title, closed: .closed}')")
   done
 
@@ -524,13 +528,21 @@ cmd_triage() {
   fi
 
   # Resolve column name to ID if needed
-  # First, we need the board_id to resolve column within board context
+  # First, try to get board_id from config
   local board_id
   board_id=$(get_board_id 2>/dev/null || true)
   if [[ -n "$board_id" ]]; then
     local resolved_board
     if resolved_board=$(resolve_board_id "$board_id"); then
       board_id="$resolved_board"
+    fi
+  fi
+
+  # If no board context, fetch the card to get its board
+  if [[ -z "$board_id" ]]; then
+    local card_data
+    if card_data=$(api_get "/cards/$card_number" 2>/dev/null); then
+      board_id=$(echo "$card_data" | jq -r '.board.id // empty')
     fi
   fi
 
@@ -545,13 +557,21 @@ cmd_triage() {
         die "$RESOLVE_ERROR" $EXIT_NOT_FOUND "Use: fizzy columns --board $board_id"
       fi
     fi
+  else
+    # No board context and column looks like a name - warn user
+    if [[ ! "$column_id" =~ ^[a-z0-9]{20,}$ ]]; then
+      die "Cannot resolve column name without board context" $EXIT_USAGE \
+        "Use column ID directly, or set board context: fizzy config set board_id <id>"
+    fi
   fi
 
   local body
   body=$(jq -n --arg column_id "$column_id" '{column_id: $column_id}')
 
+  # POST triage returns 204 No Content, so fetch card after
+  api_post "/cards/$card_number/triage" "$body" > /dev/null
   local response
-  response=$(api_post "/cards/$card_number/triage" "$body")
+  response=$(api_get "/cards/$card_number")
 
   local column_name
   column_name=$(echo "$response" | jq -r '.column.name // "column"')
@@ -658,8 +678,10 @@ cmd_untriage() {
     die "Card number required" $EXIT_USAGE "Usage: fizzy untriage <number>"
   fi
 
+  # DELETE triage returns 204 No Content, so fetch card after
+  api_delete "/cards/$card_number/triage" > /dev/null
   local response
-  response=$(api_delete "/cards/$card_number/triage")
+  response=$(api_get "/cards/$card_number")
 
   local summary="Card #$card_number sent back to triage"
 
@@ -755,8 +777,10 @@ cmd_postpone() {
     die "Card number required" $EXIT_USAGE "Usage: fizzy postpone <number>"
   fi
 
+  # POST not_now returns 204 No Content, so fetch card after
+  api_post "/cards/$card_number/not_now" > /dev/null
   local response
-  response=$(api_post "/cards/$card_number/not_now")
+  response=$(api_get "/cards/$card_number")
 
   local summary="Card #$card_number moved to Not Now"
 
@@ -865,7 +889,7 @@ cmd_comment_create() {
   fi
 
   local body
-  body=$(jq -n --arg content "$content" '{content: $content}')
+  body=$(jq -n --arg body "$content" '{comment: {body: $body}}')
 
   local response
   response=$(api_post "/cards/$card_number/comments" "$body")
@@ -993,10 +1017,12 @@ cmd_assign() {
   fi
 
   local body
-  body=$(jq -n --arg user_id "$user_id" '{user_id: $user_id}')
+  body=$(jq -n --arg assignee_id "$user_id" '{assignee_id: $assignee_id}')
 
+  # POST assignments returns 204 No Content, so fetch card after
+  api_post "/cards/$card_number/assignments" "$body" > /dev/null
   local response
-  response=$(api_post "/cards/$card_number/assignments" "$body")
+  response=$(api_get "/cards/$card_number")
 
   local summary="Assignment toggled on card #$card_number"
 
@@ -1067,16 +1093,16 @@ EOF
 
 cmd_tag() {
   local card_number=""
-  local tag_id=""
+  local tag_name=""
   local show_help=false
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --with)
         if [[ -z "${2:-}" ]]; then
-          die "--with requires a tag ID" $EXIT_USAGE
+          die "--with requires a tag name" $EXIT_USAGE
         fi
-        tag_id="$2"
+        tag_name="$2"
         shift 2
         ;;
       --help|-h)
@@ -1104,23 +1130,18 @@ cmd_tag() {
     die "Card number required" $EXIT_USAGE "Usage: fizzy tag <number> --with <tag>"
   fi
 
-  if [[ -z "$tag_id" ]]; then
-    die "--with tag ID required" $EXIT_USAGE "Usage: fizzy tag <number> --with <tag>"
+  if [[ -z "$tag_name" ]]; then
+    die "--with tag name required" $EXIT_USAGE "Usage: fizzy tag <number> --with <tag>"
   fi
 
-  # Resolve tag name to ID
-  local resolved_tag
-  if resolved_tag=$(resolve_tag_id "$tag_id"); then
-    tag_id="$resolved_tag"
-  else
-    die "$RESOLVE_ERROR" $EXIT_NOT_FOUND "Use: fizzy tags"
-  fi
-
+  # API expects tag_title (the tag name), not tag_id
   local body
-  body=$(jq -n --arg tag_id "$tag_id" '{tag_id: $tag_id}')
+  body=$(jq -n --arg tag_title "$tag_name" '{tag_title: $tag_title}')
 
+  # POST taggings returns 204 No Content, so fetch card after
+  api_post "/cards/$card_number/taggings" "$body" > /dev/null
   local response
-  response=$(api_post "/cards/$card_number/taggings" "$body")
+  response=$(api_get "/cards/$card_number")
 
   local summary="Tag toggled on card #$card_number"
 
@@ -1160,9 +1181,9 @@ _tag_help() {
     jq -n '{
       command: "fizzy tag",
       description: "Toggle tag on a card",
-      usage: "fizzy tag <number> --with <tag>",
-      options: [{flag: "--with", description: "Tag name or ID to toggle"}],
-      examples: ["fizzy tag 123 --with \"bug\"", "fizzy tag 123 --with abc456"]
+      usage: "fizzy tag <number> --with <name>",
+      options: [{flag: "--with", description: "Tag name to toggle"}],
+      examples: ["fizzy tag 123 --with \"bug\"", "fizzy tag 123 --with \"feature\""]
     }'
   else
     cat <<'EOF'
@@ -1172,17 +1193,17 @@ Toggle tag on a card (adds if not tagged, removes if tagged).
 
 ### Usage
 
-    fizzy tag <number> --with <tag>
+    fizzy tag <number> --with <name>
 
 ### Options
 
-    --with        Tag name or ID to toggle (required)
+    --with        Tag name to toggle (required)
     --help, -h    Show this help
 
 ### Examples
 
-    fizzy tag 123 --with "bug"      Toggle tag by name
-    fizzy tag 123 --with abc456     Toggle tag by ID
+    fizzy tag 123 --with "bug"       Toggle "bug" tag
+    fizzy tag 123 --with "feature"   Toggle "feature" tag
 EOF
   fi
 }
@@ -1222,8 +1243,10 @@ cmd_watch() {
     die "Card number required" $EXIT_USAGE "Usage: fizzy watch <number>"
   fi
 
+  # POST watch returns 204 No Content, so fetch card after
+  api_post "/cards/$card_number/watch" > /dev/null
   local response
-  response=$(api_post "/cards/$card_number/watch")
+  response=$(api_get "/cards/$card_number")
 
   local summary="Subscribed to card #$card_number"
 
@@ -1317,8 +1340,10 @@ cmd_unwatch() {
     die "Card number required" $EXIT_USAGE "Usage: fizzy unwatch <number>"
   fi
 
+  # DELETE watch returns 204 No Content, so fetch card after
+  api_delete "/cards/$card_number/watch" > /dev/null
   local response
-  response=$(api_delete "/cards/$card_number/watch")
+  response=$(api_get "/cards/$card_number")
 
   local summary="Unsubscribed from card #$card_number"
 
@@ -1412,8 +1437,10 @@ cmd_gild() {
     die "Card number required" $EXIT_USAGE "Usage: fizzy gild <number>"
   fi
 
+  # POST goldness returns 204 No Content, so fetch card after
+  api_post "/cards/$card_number/goldness" > /dev/null
   local response
-  response=$(api_post "/cards/$card_number/goldness")
+  response=$(api_get "/cards/$card_number")
 
   local summary="Card #$card_number marked as golden"
 
@@ -1507,8 +1534,10 @@ cmd_ungild() {
     die "Card number required" $EXIT_USAGE "Usage: fizzy ungild <number>"
   fi
 
+  # DELETE goldness returns 204 No Content, so fetch card after
+  api_delete "/cards/$card_number/goldness" > /dev/null
   local response
-  response=$(api_delete "/cards/$card_number/goldness")
+  response=$(api_get "/cards/$card_number")
 
   local summary="Golden status removed from card #$card_number"
 
@@ -1744,10 +1773,13 @@ cmd_react() {
   fi
 
   local body
-  body=$(jq -n --arg emoji "$emoji" '{emoji: $emoji}')
+  body=$(jq -n --arg content "$emoji" '{reaction: {content: $content}}')
 
+  # POST reactions returns 201 with no body/Location, construct response
+  api_post "/cards/$card_number/comments/$comment_id/reactions" "$body" > /dev/null
   local response
-  response=$(api_post "/cards/$card_number/comments/$comment_id/reactions" "$body")
+  response=$(jq -n --arg emoji "$emoji" --arg card_number "$card_number" --arg comment_id "$comment_id" \
+    '{emoji: $emoji, card_number: $card_number, comment_id: $comment_id}')
 
   local summary="Reaction added to comment"
 
@@ -1765,14 +1797,16 @@ _react_md() {
   local summary="$2"
   local breadcrumbs="$3"
 
-  local reaction_id emoji
-  reaction_id=$(echo "$data" | jq -r '.id')
+  local emoji card_number comment_id
   emoji=$(echo "$data" | jq -r '.emoji')
+  card_number=$(echo "$data" | jq -r '.card_number')
+  comment_id=$(echo "$data" | jq -r '.comment_id')
 
   md_heading 2 "Reaction Added"
   echo
-  md_kv "ID" "$reaction_id" \
-        "Emoji" "$emoji"
+  md_kv "Emoji" "$emoji" \
+        "Card" "#$card_number" \
+        "Comment" "$comment_id"
 
   md_breadcrumbs "$breadcrumbs"
 }

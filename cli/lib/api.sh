@@ -321,6 +321,23 @@ _api_request() {
             debug "Cache: stored with ETag $etag"
           fi
         fi
+
+        # Follow Location header on 201 with empty body (RESTful create pattern)
+        if [[ "$http_code" == "201" ]] && [[ -z "$response" ]]; then
+          local location
+          location=$(grep -i '^location:' "$headers_file" 2>/dev/null | sed 's/^[^:]*:[[:space:]]*//' | tr -d '\r\n' || true)
+          if [[ -n "$location" ]]; then
+            # Convert relative URL to absolute
+            if [[ "$location" != http* ]]; then
+              location="$FIZZY_BASE_URL$location"
+            fi
+            # Strip .json suffix if present (API returns /cards/1.json but endpoint is /cards/1)
+            location="${location%.json}"
+            debug "Following Location header: $location"
+            response=$(curl -s -H "Authorization: Bearer $token" -H "Accept: application/json" "$location")
+          fi
+        fi
+
         echo "$response"
         return 0
         ;;
