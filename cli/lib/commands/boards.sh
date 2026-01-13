@@ -142,7 +142,15 @@ cmd_columns() {
 
   if [[ -z "$board_id" ]]; then
     die "No board specified" $EXIT_USAGE \
-      "Use: fizzy columns --board <id>"
+      "Use: fizzy columns --board <name>"
+  fi
+
+  # Resolve board name to ID if needed
+  local resolved_board
+  if resolved_board=$(resolve_board_id "$board_id"); then
+    board_id="$resolved_board"
+  else
+    die "$RESOLVE_ERROR" $EXIT_NOT_FOUND "Use: fizzy boards"
   fi
 
   local response
@@ -193,10 +201,10 @@ _columns_help() {
       command: "fizzy columns",
       description: "List columns on a board",
       options: [
-        {flag: "--board, -b", description: "Board ID (required unless set in config)"}
+        {flag: "--board, -b", description: "Board name or ID (required unless set in config)"}
       ],
       examples: [
-        "fizzy columns --board abc123",
+        "fizzy columns --board \"My Board\"",
         "fizzy columns -b abc123 --json"
       ]
     }'
@@ -212,13 +220,13 @@ List columns on a board.
 
 ### Options
 
-    --board, -b   Board ID (required unless set in config)
+    --board, -b   Board name or ID (required unless set in config)
     --help, -h    Show this help
 
 ### Examples
 
-    fizzy columns --board abc123    List columns on board
-    fizzy columns                   List columns on default board
+    fizzy columns --board "My Board"  List columns on board
+    fizzy columns                     List columns on default board
 EOF
   fi
 }

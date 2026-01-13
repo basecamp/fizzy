@@ -82,15 +82,36 @@ cmd_cards() {
     board_id=$(get_board_id 2>/dev/null || true)
   fi
 
+  # Resolve board name to ID if needed
   if [[ -n "$board_id" ]]; then
+    local resolved_board
+    if resolved_board=$(resolve_board_id "$board_id"); then
+      board_id="$resolved_board"
+    else
+      die "$RESOLVE_ERROR" $EXIT_NOT_FOUND "Use: fizzy boards"
+    fi
     params+=("board_ids[]=$board_id")
   fi
 
+  # Resolve tag name to ID if needed
   if [[ -n "$tag_id" ]]; then
+    local resolved_tag
+    if resolved_tag=$(resolve_tag_id "$tag_id"); then
+      tag_id="$resolved_tag"
+    else
+      die "$RESOLVE_ERROR" $EXIT_NOT_FOUND "Use: fizzy tags"
+    fi
     params+=("tag_ids[]=$tag_id")
   fi
 
+  # Resolve assignee name/email to ID if needed
   if [[ -n "$assignee_id" ]]; then
+    local resolved_user
+    if resolved_user=$(resolve_user_id "$assignee_id"); then
+      assignee_id="$resolved_user"
+    else
+      die "$RESOLVE_ERROR" $EXIT_NOT_FOUND "Use: fizzy people"
+    fi
     params+=("assignee_ids[]=$assignee_id")
   fi
 
@@ -169,16 +190,17 @@ _cards_help() {
       command: "fizzy cards",
       description: "List and filter cards",
       options: [
-        {flag: "--board, -b", description: "Filter by board ID"},
-        {flag: "--tag", description: "Filter by tag ID"},
-        {flag: "--assignee", description: "Filter by assignee ID"},
+        {flag: "--board, -b", description: "Filter by board name or ID"},
+        {flag: "--tag", description: "Filter by tag name or ID"},
+        {flag: "--assignee", description: "Filter by assignee name, email, or ID"},
         {flag: "--status", description: "Filter by status: all, closed, not_now, stalled, golden"},
         {flag: "--search, -s", description: "Search terms"},
         {flag: "--sort", description: "Sort order: latest, newest, oldest"}
       ],
       examples: [
         "fizzy cards",
-        "fizzy cards --board abc123",
+        "fizzy cards --board \"My Board\"",
+        "fizzy cards --assignee \"Jane Doe\"",
         "fizzy cards --search \"bug fix\"",
         "fizzy cards --status closed"
       ]
@@ -195,9 +217,9 @@ List and filter cards.
 
 ### Options
 
-    --board, -b   Filter by board ID
-    --tag         Filter by tag ID
-    --assignee    Filter by assignee ID
+    --board, -b   Filter by board name or ID
+    --tag         Filter by tag name or ID
+    --assignee    Filter by assignee name, email, or ID
     --status      Filter: all, closed, not_now, stalled, golden
     --search, -s  Search terms
     --sort        Sort: latest (default), newest, oldest
@@ -205,10 +227,11 @@ List and filter cards.
 
 ### Examples
 
-    fizzy cards                     List all cards
-    fizzy cards --board abc123      Filter by board
-    fizzy cards --search "bug"      Search for cards
-    fizzy cards --status closed     Show closed cards
+    fizzy cards                        List all cards
+    fizzy cards --board "My Board"     Filter by board name
+    fizzy cards --assignee "Jane"      Filter by assignee name
+    fizzy cards --search "bug"         Search for cards
+    fizzy cards --status closed        Show closed cards
 EOF
   fi
 }

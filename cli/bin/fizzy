@@ -35,6 +35,7 @@ source "$FIZZY_ROOT/lib/core.sh"
 source "$FIZZY_ROOT/lib/config.sh"
 source "$FIZZY_ROOT/lib/api.sh"
 source "$FIZZY_ROOT/lib/auth.sh"
+source "$FIZZY_ROOT/lib/names.sh"
 
 # Load command handlers
 for cmd_file in "$FIZZY_ROOT/lib/commands"/*.sh; do

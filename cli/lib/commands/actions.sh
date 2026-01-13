@@ -88,6 +88,48 @@ cmd_card_create() {
     die "No board specified. Use --board or set in .fizzy/config.json" $EXIT_USAGE
   fi
 
+  # Resolve board name to ID
+  local resolved_board
+  if resolved_board=$(resolve_board_id "$board_id"); then
+    board_id="$resolved_board"
+  else
+    die "$RESOLVE_ERROR" $EXIT_NOT_FOUND "Use: fizzy boards"
+  fi
+
+  # Resolve column name to ID if provided
+  if [[ -n "$column_id" ]]; then
+    local resolved_column
+    if resolved_column=$(resolve_column_id "$column_id" "$board_id"); then
+      column_id="$resolved_column"
+    else
+      die "$RESOLVE_ERROR" $EXIT_NOT_FOUND "Use: fizzy columns --board $board_id"
+    fi
+  fi
+
+  # Resolve tag names to IDs
+  local resolved_tag_ids=()
+  for tag in "${tag_ids[@]}"; do
+    local resolved_tag
+    if resolved_tag=$(resolve_tag_id "$tag"); then
+      resolved_tag_ids+=("$resolved_tag")
+    else
+      die "$RESOLVE_ERROR" $EXIT_NOT_FOUND "Use: fizzy tags"
+    fi
+  done
+  tag_ids=("${resolved_tag_ids[@]}")
+
+  # Resolve assignee names to IDs
+  local resolved_assignee_ids=()
+  for assignee in "${assignee_ids[@]}"; do
+    local resolved_user
+    if resolved_user=$(resolve_user_id "$assignee"); then
+      resolved_assignee_ids+=("$resolved_user")
+    else
+      die "$RESOLVE_ERROR" $EXIT_NOT_FOUND "Use: fizzy people"
+    fi
+  done
+  assignee_ids=("${resolved_assignee_ids[@]}")
+
   # Build request body
   local body
   body=$(jq -n \
@@ -158,16 +200,16 @@ _card_create_help() {
       description: "Create a new card",
       usage: "fizzy card \"title\" [options]",
       options: [
-        {flag: "--board, -b", description: "Board ID (required if not in config)"},
-        {flag: "--column, -c", description: "Column ID to triage directly"},
+        {flag: "--board, -b", description: "Board name or ID (required if not in config)"},
+        {flag: "--column, -c", description: "Column name or ID to triage directly"},
         {flag: "--description, -d", description: "Card description"},
-        {flag: "--tag", description: "Tag ID (can be repeated)"},
-        {flag: "--assign", description: "Assignee user ID (can be repeated)"}
+        {flag: "--tag", description: "Tag name or ID (can be repeated)"},
+        {flag: "--assign", description: "Assignee name, email, or ID (can be repeated)"}
       ],
       examples: [
         "fizzy card \"Fix login bug\"",
-        "fizzy card \"New feature\" --board abc123 --column def456",
-        "fizzy card \"Task\" --tag tag1 --tag tag2 --assign user1"
+        "fizzy card \"New feature\" --board \"My Board\" --column \"In Progress\"",
+        "fizzy card \"Task\" --tag \"bug\" --assign \"Jane Doe\""
       ]
     }'
   else
@@ -182,18 +224,18 @@ Create a new card.
 
 ### Options
 
-    --board, -b       Board ID (required if not in config)
-    --column, -c      Column ID to triage directly
+    --board, -b       Board name or ID (required if not in config)
+    --column, -c      Column name or ID to triage directly
     --description, -d Card description
-    --tag             Tag ID (can be repeated)
-    --assign          Assignee user ID (can be repeated)
+    --tag             Tag name or ID (can be repeated)
+    --assign          Assignee name, email, or ID (can be repeated)
     --help, -h        Show this help
 
 ### Examples
 
     fizzy card "Fix login bug"
-    fizzy card "New feature" --board abc123 --column def456
-    fizzy card "Task" --tag tag1 --assign user1
+    fizzy card "New feature" --board "My Board" --column "In Progress"
+    fizzy card "Task" --tag "bug" --assign "Jane Doe"
 EOF
   fi
 }
@@ -470,14 +512,38 @@ cmd_triage() {
   fi
 
   if [[ -z "$card_number" ]]; then
-    die "Card number required" $EXIT_USAGE "Usage: fizzy triage <number> --to <column_id>"
+    die "Card number required" $EXIT_USAGE "Usage: fizzy triage <number> --to <column>"
   fi
 
   if [[ -z "$column_id" ]]; then
     # Try to get default column from config
     column_id=$(get_column_id 2>/dev/null || true)
     if [[ -z "$column_id" ]]; then
-      die "--to column ID required" $EXIT_USAGE "Usage: fizzy triage <number> --to <column_id>"
+      die "--to column ID required" $EXIT_USAGE "Usage: fizzy triage <number> --to <column>"
+    fi
+  fi
+
+  # Resolve column name to ID if needed
+  # First, we need the board_id to resolve column within board context
+  local board_id
+  board_id=$(get_board_id 2>/dev/null || true)
+  if [[ -n "$board_id" ]]; then
+    local resolved_board
+    if resolved_board=$(resolve_board_id "$board_id"); then
+      board_id="$resolved_board"
+    fi
+  fi
+
+  # If we have a board context, try to resolve column name
+  if [[ -n "$board_id" ]]; then
+    local resolved_column
+    if resolved_column=$(resolve_column_id "$column_id" "$board_id"); then
+      column_id="$resolved_column"
+    else
+      # Only fail if it looks like a name (not UUID)
+      if [[ ! "$column_id" =~ ^[a-z0-9]{20,}$ ]]; then
+        die "$RESOLVE_ERROR" $EXIT_NOT_FOUND "Use: fizzy columns --board $board_id"
+      fi
     fi
   fi
 
@@ -530,9 +596,9 @@ _triage_help() {
     jq -n '{
       command: "fizzy triage",
       description: "Move card to a column",
-      usage: "fizzy triage <number> --to <column_id>",
-      options: [{flag: "--to", description: "Column ID to triage to"}],
-      examples: ["fizzy triage 123 --to abc456"]
+      usage: "fizzy triage <number> --to <column>",
+      options: [{flag: "--to", description: "Column name or ID to triage to"}],
+      examples: ["fizzy triage 123 --to \"In Progress\"", "fizzy triage 123 --to abc456"]
     }'
   else
     cat <<'EOF'
@@ -542,16 +608,17 @@ Move card to a column.
 
 ### Usage
 
-    fizzy triage <number> --to <column_id>
+    fizzy triage <number> --to <column>
 
 ### Options
 
-    --to          Column ID to triage to (required)
+    --to          Column name or ID to triage to (required)
     --help, -h    Show this help
 
 ### Examples
 
-    fizzy triage 123 --to abc456    Move card #123 to column
+    fizzy triage 123 --to "In Progress"   Move by column name
+    fizzy triage 123 --to abc456          Move by column ID
 EOF
   fi
 }
@@ -910,11 +977,19 @@ cmd_assign() {
   fi
 
   if [[ -z "$card_number" ]]; then
-    die "Card number required" $EXIT_USAGE "Usage: fizzy assign <number> --to <user_id>"
+    die "Card number required" $EXIT_USAGE "Usage: fizzy assign <number> --to <user>"
   fi
 
   if [[ -z "$user_id" ]]; then
-    die "--to user ID required" $EXIT_USAGE "Usage: fizzy assign <number> --to <user_id>"
+    die "--to user ID required" $EXIT_USAGE "Usage: fizzy assign <number> --to <user>"
+  fi
+
+  # Resolve user name/email to ID
+  local resolved_user
+  if resolved_user=$(resolve_user_id "$user_id"); then
+    user_id="$resolved_user"
+  else
+    die "$RESOLVE_ERROR" $EXIT_NOT_FOUND "Use: fizzy people"
   fi
 
   local body
@@ -959,9 +1034,9 @@ _assign_help() {
     jq -n '{
       command: "fizzy assign",
       description: "Toggle assignment on a card",
-      usage: "fizzy assign <number> --to <user_id>",
-      options: [{flag: "--to", description: "User ID to toggle assignment"}],
-      examples: ["fizzy assign 123 --to abc456"]
+      usage: "fizzy assign <number> --to <user>",
+      options: [{flag: "--to", description: "User name, email, or ID to toggle assignment"}],
+      examples: ["fizzy assign 123 --to \"Jane Doe\"", "fizzy assign 123 --to jane@example.com"]
     }'
   else
     cat <<'EOF'
@@ -971,16 +1046,17 @@ Toggle assignment on a card (adds if not assigned, removes if assigned).
 
 ### Usage
 
-    fizzy assign <number> --to <user_id>
+    fizzy assign <number> --to <user>
 
 ### Options
 
-    --to          User ID to toggle assignment (required)
+    --to          User name, email, or ID to toggle assignment (required)
     --help, -h    Show this help
 
 ### Examples
 
-    fizzy assign 123 --to abc456    Toggle assignment on card #123
+    fizzy assign 123 --to "Jane Doe"        Assign by name
+    fizzy assign 123 --to jane@example.com  Assign by email
 EOF
   fi
 }
@@ -1025,11 +1101,19 @@ cmd_tag() {
   fi
 
   if [[ -z "$card_number" ]]; then
-    die "Card number required" $EXIT_USAGE "Usage: fizzy tag <number> --with <tag_id>"
+    die "Card number required" $EXIT_USAGE "Usage: fizzy tag <number> --with <tag>"
   fi
 
   if [[ -z "$tag_id" ]]; then
-    die "--with tag ID required" $EXIT_USAGE "Usage: fizzy tag <number> --with <tag_id>"
+    die "--with tag ID required" $EXIT_USAGE "Usage: fizzy tag <number> --with <tag>"
+  fi
+
+  # Resolve tag name to ID
+  local resolved_tag
+  if resolved_tag=$(resolve_tag_id "$tag_id"); then
+    tag_id="$resolved_tag"
+  else
+    die "$RESOLVE_ERROR" $EXIT_NOT_FOUND "Use: fizzy tags"
   fi
 
   local body
@@ -1076,9 +1160,9 @@ _tag_help() {
     jq -n '{
       command: "fizzy tag",
       description: "Toggle tag on a card",
-      usage: "fizzy tag <number> --with <tag_id>",
-      options: [{flag: "--with", description: "Tag ID to toggle"}],
-      examples: ["fizzy tag 123 --with abc456"]
+      usage: "fizzy tag <number> --with <tag>",
+      options: [{flag: "--with", description: "Tag name or ID to toggle"}],
+      examples: ["fizzy tag 123 --with \"bug\"", "fizzy tag 123 --with abc456"]
     }'
   else
     cat <<'EOF'
@@ -1088,16 +1172,17 @@ Toggle tag on a card (adds if not tagged, removes if tagged).
 
 ### Usage
 
-    fizzy tag <number> --with <tag_id>
+    fizzy tag <number> --with <tag>
 
 ### Options
 
-    --with        Tag ID to toggle (required)
+    --with        Tag name or ID to toggle (required)
     --help, -h    Show this help
 
 ### Examples
 
-    fizzy tag 123 --with abc456    Toggle tag on card #123
+    fizzy tag 123 --with "bug"      Toggle tag by name
+    fizzy tag 123 --with abc456     Toggle tag by ID
 EOF
   fi
 }
