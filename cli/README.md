@@ -23,7 +23,7 @@ curl -fsSL https://raw.githubusercontent.com/basecamp/fizzy/main/cli/install.sh 
 
 ### Updating
 
-Run the installer again, or use `fizzy self-update` (if available).
+Run the installer again to update to the latest version.
 
 ## Quick Start
 
