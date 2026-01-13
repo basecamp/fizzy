@@ -1020,9 +1020,25 @@ EOF
 
 
 # fizzy comment "text" --on <number>
-# Add comment to a card
+# fizzy comment edit <id> --on <number> "new text"
+# fizzy comment delete <id> --on <number>
 
-cmd_comment_create() {
+cmd_comment() {
+  # Check for subcommand
+  case "${1:-}" in
+    edit)
+      shift
+      _comment_edit "$@"
+      return
+      ;;
+    delete)
+      shift
+      _comment_delete "$@"
+      return
+      ;;
+  esac
+
+  # Default: create comment
   local content=""
   local card_number=""
   local show_help=false
@@ -1083,6 +1099,240 @@ cmd_comment_create() {
   )
 
   output "$response" "$summary" "$breadcrumbs" "_comment_created_md"
+}
+
+_comment_edit() {
+  local comment_id=""
+  local card_number=""
+  local content=""
+  local show_help=false
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --on)
+        if [[ -z "${2:-}" ]]; then
+          die "--on requires a card number" $EXIT_USAGE
+        fi
+        card_number="$2"
+        shift 2
+        ;;
+      --help|-h)
+        show_help=true
+        shift
+        ;;
+      -*)
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy comment edit --help"
+        ;;
+      *)
+        if [[ -z "$comment_id" ]]; then
+          comment_id="$1"
+        elif [[ -z "$content" ]]; then
+          content="$1"
+        fi
+        shift
+        ;;
+    esac
+  done
+
+  if [[ "$show_help" == "true" ]]; then
+    _comment_edit_help
+    return 0
+  fi
+
+  if [[ -z "$comment_id" ]]; then
+    die "Comment ID required" $EXIT_USAGE "Usage: fizzy comment edit <id> --on <number> \"new text\""
+  fi
+
+  if [[ -z "$card_number" ]]; then
+    die "--on card number required" $EXIT_USAGE "Usage: fizzy comment edit <id> --on <number> \"new text\""
+  fi
+
+  if [[ -z "$content" ]]; then
+    die "New comment text required" $EXIT_USAGE "Usage: fizzy comment edit <id> --on <number> \"new text\""
+  fi
+
+  local body
+  body=$(jq -n --arg body "$content" '{comment: {body: $body}}')
+
+  local response
+  response=$(api_patch "/cards/$card_number/comments/$comment_id" "$body")
+
+  local summary="Comment updated on card #$card_number"
+
+  local breadcrumbs
+  breadcrumbs=$(breadcrumbs \
+    "$(breadcrumb "show" "fizzy show $card_number" "View card")" \
+    "$(breadcrumb "comments" "fizzy comments --on $card_number" "View all comments")"
+  )
+
+  output "$response" "$summary" "$breadcrumbs" "_comment_edited_md"
+}
+
+_comment_edited_md() {
+  local data="$1"
+  local summary="$2"
+  local breadcrumbs="$3"
+
+  local comment_id creator_name updated_at
+  comment_id=$(echo "$data" | jq -r '.id')
+  creator_name=$(echo "$data" | jq -r '.creator.name // "You"')
+  updated_at=$(echo "$data" | jq -r '.updated_at | split("T")[0]')
+
+  md_heading 2 "Comment Updated"
+  echo
+  md_kv "ID" "$comment_id" \
+        "Author" "$creator_name" \
+        "Updated" "$updated_at"
+
+  md_breadcrumbs "$breadcrumbs"
+}
+
+_comment_edit_help() {
+  local format
+  format=$(get_format)
+
+  if [[ "$format" == "json" ]]; then
+    jq -n '{
+      command: "fizzy comment edit",
+      description: "Update a comment",
+      usage: "fizzy comment edit <id> --on <number> \"new text\"",
+      options: [{flag: "--on", description: "Card number the comment belongs to"}],
+      examples: ["fizzy comment edit abc123 --on 123 \"Updated text\""]
+    }'
+  else
+    cat <<'EOF'
+## fizzy comment edit
+
+Update a comment.
+
+### Usage
+
+    fizzy comment edit <id> --on <number> "new text"
+
+### Options
+
+    --on          Card number the comment belongs to (required)
+    --help, -h    Show this help
+
+### Examples
+
+    fizzy comment edit abc123 --on 123 "Updated comment text"
+EOF
+  fi
+}
+
+_comment_delete() {
+  local comment_id=""
+  local card_number=""
+  local show_help=false
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --on)
+        if [[ -z "${2:-}" ]]; then
+          die "--on requires a card number" $EXIT_USAGE
+        fi
+        card_number="$2"
+        shift 2
+        ;;
+      --help|-h)
+        show_help=true
+        shift
+        ;;
+      -*)
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy comment delete --help"
+        ;;
+      *)
+        if [[ -z "$comment_id" ]]; then
+          comment_id="$1"
+        fi
+        shift
+        ;;
+    esac
+  done
+
+  if [[ "$show_help" == "true" ]]; then
+    _comment_delete_help
+    return 0
+  fi
+
+  if [[ -z "$comment_id" ]]; then
+    die "Comment ID required" $EXIT_USAGE "Usage: fizzy comment delete <id> --on <number>"
+  fi
+
+  if [[ -z "$card_number" ]]; then
+    die "--on card number required" $EXIT_USAGE "Usage: fizzy comment delete <id> --on <number>"
+  fi
+
+  # DELETE returns 204 No Content
+  api_delete "/cards/$card_number/comments/$comment_id" > /dev/null
+
+  local response
+  response=$(jq -n --arg comment_id "$comment_id" --arg card_number "$card_number" \
+    '{deleted: true, comment_id: $comment_id, card_number: $card_number}')
+
+  local summary="Comment deleted from card #$card_number"
+
+  local breadcrumbs
+  breadcrumbs=$(breadcrumbs \
+    "$(breadcrumb "show" "fizzy show $card_number" "View card")" \
+    "$(breadcrumb "comments" "fizzy comments --on $card_number" "View all comments")" \
+    "$(breadcrumb "comment" "fizzy comment \"text\" --on $card_number" "Add new comment")"
+  )
+
+  output "$response" "$summary" "$breadcrumbs" "_comment_deleted_md"
+}
+
+_comment_deleted_md() {
+  local data="$1"
+  local summary="$2"
+  local breadcrumbs="$3"
+
+  local comment_id card_number
+  comment_id=$(echo "$data" | jq -r '.comment_id')
+  card_number=$(echo "$data" | jq -r '.card_number')
+
+  md_heading 2 "Comment Deleted"
+  echo
+  md_kv "Comment ID" "$comment_id" \
+        "Card" "#$card_number" \
+        "Status" "Deleted"
+
+  md_breadcrumbs "$breadcrumbs"
+}
+
+_comment_delete_help() {
+  local format
+  format=$(get_format)
+
+  if [[ "$format" == "json" ]]; then
+    jq -n '{
+      command: "fizzy comment delete",
+      description: "Delete a comment",
+      usage: "fizzy comment delete <id> --on <number>",
+      options: [{flag: "--on", description: "Card number the comment belongs to"}],
+      examples: ["fizzy comment delete abc123 --on 123"]
+    }'
+  else
+    cat <<'EOF'
+## fizzy comment delete
+
+Delete a comment.
+
+### Usage
+
+    fizzy comment delete <id> --on <number>
+
+### Options
+
+    --on          Card number the comment belongs to (required)
+    --help, -h    Show this help
+
+### Examples
+
+    fizzy comment delete abc123 --on 123
+EOF
+  fi
 }
 
 _comment_created_md() {

@@ -80,7 +80,7 @@ main() {
     triage)       cmd_triage "$@" ;;
     untriage)     cmd_untriage "$@" ;;
     postpone)     cmd_postpone "$@" ;;
-    comment)      cmd_comment_create "$@" ;;
+    comment)      cmd_comment "$@" ;;
     assign)       cmd_assign "$@" ;;
     tag)          cmd_tag "$@" ;;
     watch)        cmd_watch "$@" ;;

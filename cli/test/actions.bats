@@ -361,6 +361,100 @@ load test_helper
 }
 
 
+# comment edit --help
+
+@test "comment edit --help shows help" {
+  run fizzy --md comment edit --help
+  assert_success
+  assert_output_contains "fizzy comment edit"
+  assert_output_contains "Update"
+}
+
+@test "comment edit -h shows help" {
+  run fizzy --md comment edit -h
+  assert_success
+  assert_output_contains "fizzy comment edit"
+}
+
+@test "comment edit --help --json outputs JSON" {
+  run fizzy --json comment edit --help
+  assert_success
+  is_valid_json
+  assert_json_not_null ".command"
+}
+
+
+# comment edit requires arguments
+
+@test "comment edit without args shows error" {
+  run fizzy comment edit
+  assert_failure
+  assert_output_contains "Comment ID required"
+}
+
+@test "comment edit without --on shows error" {
+  run fizzy comment edit abc123 "new text"
+  assert_failure
+  assert_output_contains "--on card number required"
+}
+
+@test "comment edit without new text shows error" {
+  run fizzy comment edit abc123 --on 123
+  assert_failure
+  assert_output_contains "New comment text required"
+}
+
+@test "comment edit requires authentication" {
+  run fizzy comment edit abc123 --on 123 "new text"
+  assert_failure
+  assert_output_contains "Not authenticated"
+}
+
+
+# comment delete --help
+
+@test "comment delete --help shows help" {
+  run fizzy --md comment delete --help
+  assert_success
+  assert_output_contains "fizzy comment delete"
+  assert_output_contains "Delete"
+}
+
+@test "comment delete -h shows help" {
+  run fizzy --md comment delete -h
+  assert_success
+  assert_output_contains "fizzy comment delete"
+}
+
+@test "comment delete --help --json outputs JSON" {
+  run fizzy --json comment delete --help
+  assert_success
+  is_valid_json
+  assert_json_not_null ".command"
+}
+
+
+# comment delete requires arguments
+
+@test "comment delete without args shows error" {
+  run fizzy comment delete
+  assert_failure
+  assert_output_contains "Comment ID required"
+}
+
+@test "comment delete without --on shows error" {
+  run fizzy comment delete abc123
+  assert_failure
+  assert_output_contains "--on card number required"
+}
+
+@test "comment delete requires authentication" {
+  run fizzy comment delete abc123 --on 123
+  assert_failure
+  assert_output_contains "Not authenticated"
+}
+
+
 # assign --help
 
 @test "assign --help shows help" {

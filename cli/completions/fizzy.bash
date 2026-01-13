@@ -13,6 +13,7 @@ _fizzy_completions() {
 
   local auth_subcommands="login logout status refresh"
   local config_subcommands="list get set unset path"
+  local comment_subcommands="edit delete"
 
   case "$prev" in
     fizzy)
@@ -25,6 +26,10 @@ _fizzy_completions() {
       ;;
     config)
       COMPREPLY=($(compgen -W "$config_subcommands" -- "$cur"))
+      return
+      ;;
+    comment)
+      COMPREPLY=($(compgen -W "$comment_subcommands" -- "$cur"))
       return
       ;;
     --board|-b|--in)

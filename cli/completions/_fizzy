@@ -25,7 +25,7 @@ _fizzy() {
     'triage:Move card to a column'
     'untriage:Move card back to triage'
     'postpone:Move card to "not now"'
-    'comment:Add a comment to a card'
+    'comment:Add, edit, or delete comments'
     'assign:Assign a card to someone'
     'tag:Add a tag to a card'
     'watch:Subscribe to card notifications'
@@ -83,6 +83,13 @@ _fizzy() {
             'unread:Mark notification as unread'
           )
           _describe -t notification_commands 'notifications subcommand' notification_commands
+          ;;
+        comment)
+          local comment_commands=(
+            'edit:Update a comment'
+            'delete:Delete a comment'
+          )
+          _describe -t comment_commands 'comment subcommand' comment_commands
           ;;
       esac
       ;;
