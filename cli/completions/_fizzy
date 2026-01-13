@@ -13,6 +13,7 @@ _fizzy() {
     'cards:List or filter cards'
     'columns:List columns on a board'
     'comments:List comments on a card'
+    'reactions:List reactions on a comment'
     'notifications:List notifications'
     'people:List users in account'
     'search:Search cards'
@@ -34,8 +35,8 @@ _fizzy() {
     'unwatch:Unsubscribe from card'
     'gild:Mark card as golden'
     'ungild:Remove golden status'
-    'step:Add a step (checklist item) to a card'
-    'react:Add a reaction to a card or comment'
+    'step:Manage steps (checklist items) on a card'
+    'react:Manage reactions on comments'
   )
 
   local -a auth_commands
@@ -92,6 +93,20 @@ _fizzy() {
             'delete:Delete a comment'
           )
           _describe -t comment_commands 'comment subcommand' comment_commands
+          ;;
+        step)
+          local step_commands=(
+            'show:Show step details'
+            'update:Update a step'
+            'delete:Delete a step'
+          )
+          _describe -t step_commands 'step subcommand' step_commands
+          ;;
+        react)
+          local react_commands=(
+            'delete:Delete a reaction'
+          )
+          _describe -t react_commands 'react subcommand' react_commands
           ;;
       esac
       ;;

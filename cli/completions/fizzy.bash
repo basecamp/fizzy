@@ -7,13 +7,15 @@ _fizzy_completions() {
 
   local commands="
     auth config help version
-    boards cards columns comments notifications people search show tags
+    boards cards columns comments reactions notifications people search show tags
     card update close reopen delete delete-image triage untriage postpone comment assign tag watch unwatch gild ungild step react
   "
 
   local auth_subcommands="login logout status refresh"
   local config_subcommands="list get set unset path"
   local comment_subcommands="edit delete"
+  local step_subcommands="show update delete"
+  local react_subcommands="delete"
 
   case "$prev" in
     fizzy)
@@ -30,6 +32,14 @@ _fizzy_completions() {
       ;;
     comment)
       COMPREPLY=($(compgen -W "$comment_subcommands" -- "$cur"))
+      return
+      ;;
+    step)
+      COMPREPLY=($(compgen -W "$step_subcommands" -- "$cur"))
+      return
+      ;;
+    react)
+      COMPREPLY=($(compgen -W "$react_subcommands" -- "$cur"))
       return
       ;;
     --board|-b|--in)
