@@ -283,6 +283,7 @@ _auth_status() {
       echo "Status: ✗ Not authenticated"
       echo
       echo "Run: fizzy auth login"
+      echo "  or export FIZZY_ACCESS_TOKEN=<pat>"
     fi
   fi
 }
@@ -724,6 +725,11 @@ Manage authentication.
 - `--scope write|read` - Token scope (default: write)
 - `--no-browser`       - Manual auth code entry mode
 
+### Environment Variables
+
+    FIZZY_ACCESS_TOKEN    Personal access token (bypasses stored credentials)
+    FIZZY_ACCOUNT_SLUG    Account slug from URL (e.g., 897362094)
+
 ### Notes
 
 Fizzy issues long-lived access tokens that do not expire. You only need
@@ -740,6 +746,10 @@ fizzy auth login --no-browser
 
 # Read-only access
 fizzy auth login --scope read
+
+# For CI/scripts: use env vars instead
+export FIZZY_ACCESS_TOKEN=fzt_...
+export FIZZY_ACCOUNT_SLUG=897362094
 
 # Check status
 fizzy auth status
