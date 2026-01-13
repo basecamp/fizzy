@@ -8,7 +8,7 @@ _fizzy_completions() {
   local commands="
     auth config help version
     boards cards columns comments notifications people search show tags
-    card update close reopen triage untriage postpone comment assign tag watch unwatch gild ungild step react
+    card update close reopen delete triage untriage postpone comment assign tag watch unwatch gild ungild step react
   "
 
   local auth_subcommands="login logout status refresh"

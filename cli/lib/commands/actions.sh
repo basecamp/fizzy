@@ -654,6 +654,125 @@ EOF
 }
 
 
+# fizzy delete <number>
+# Permanently delete a card
+
+cmd_delete() {
+  local show_help=false
+  local card_numbers=()
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --help|-h)
+        show_help=true
+        shift
+        ;;
+      -*)
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy delete --help"
+        ;;
+      *)
+        card_numbers+=("$1")
+        shift
+        ;;
+    esac
+  done
+
+  if [[ "$show_help" == "true" ]]; then
+    _delete_help
+    return 0
+  fi
+
+  if [[ ${#card_numbers[@]} -eq 0 ]]; then
+    die "Card number required" $EXIT_USAGE "Usage: fizzy delete <number>"
+  fi
+
+  local results=()
+  local num
+  for num in "${card_numbers[@]}"; do
+    # DELETE returns 204 No Content
+    api_delete "/cards/$num" > /dev/null
+    results+=("$(jq -n --arg num "$num" '{number: ($num | tonumber), deleted: true}')")
+  done
+
+  local response_data
+  if [[ ${#results[@]} -eq 1 ]]; then
+    response_data="${results[0]}"
+  else
+    response_data=$(printf '%s\n' "${results[@]}" | jq -s '.')
+  fi
+
+  local summary
+  if [[ ${#card_numbers[@]} -eq 1 ]]; then
+    summary="Deleted card #${card_numbers[0]}"
+  else
+    summary="Deleted ${#card_numbers[@]} cards"
+  fi
+
+  local breadcrumbs
+  breadcrumbs=$(breadcrumbs \
+    "$(breadcrumb "cards" "fizzy cards" "List cards")" \
+    "$(breadcrumb "card" "fizzy card \"title\" --in <board>" "Create new card")"
+  )
+
+  output "$response_data" "$summary" "$breadcrumbs" "_delete_md"
+}
+
+_delete_md() {
+  local data="$1"
+  local summary="$2"
+  local breadcrumbs="$3"
+
+  md_heading 2 "Card Deleted"
+  echo
+
+  # Single or multiple?
+  if echo "$data" | jq -e 'type == "array"' > /dev/null 2>&1; then
+    echo "| # | Status |"
+    echo "|---|--------|"
+    echo "$data" | jq -r '.[] | "| #\(.number) | Deleted |"'
+  else
+    local card_number
+    card_number=$(echo "$data" | jq -r '.number')
+    md_kv "Card" "#$card_number" \
+          "Status" "Deleted"
+  fi
+
+  md_breadcrumbs "$breadcrumbs"
+}
+
+_delete_help() {
+  local format
+  format=$(get_format)
+
+  if [[ "$format" == "json" ]]; then
+    jq -n '{
+      command: "fizzy delete",
+      description: "Permanently delete card(s)",
+      usage: "fizzy delete <number> [numbers...]",
+      warning: "This action cannot be undone",
+      examples: ["fizzy delete 123", "fizzy delete 123 124"]
+    }'
+  else
+    cat <<'EOF'
+## fizzy delete
+
+Permanently delete card(s).
+
+**Warning:** This action cannot be undone.
+
+### Usage
+
+    fizzy delete <number> [numbers...]
+
+### Examples
+
+    fizzy delete 123          Delete card #123
+    fizzy delete 123 124      Delete multiple cards
+EOF
+  fi
+}
+
+
 # fizzy triage <number> --to <column_id>
 # Move card to a column
 

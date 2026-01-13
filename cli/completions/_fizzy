@@ -22,6 +22,7 @@ _fizzy() {
     'update:Update a card'
     'close:Close a card'
     'reopen:Reopen a closed card'
+    'delete:Permanently delete a card'
     'triage:Move card to a column'
     'untriage:Move card back to triage'
     'postpone:Move card to "not now"'
