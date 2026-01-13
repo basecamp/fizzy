@@ -1,0 +1,110 @@
+#!/usr/bin/env bash
+# fizzy - Fizzy CLI
+# Agent-first CLI for Fizzy API interaction
+#
+# Usage: fizzy <command> [options]
+# Run 'fizzy' with no arguments for quick-start guide
+
+set -euo pipefail
+
+# Require bash 4+ for associative arrays
+if ((BASH_VERSINFO[0] < 4)); then
+  echo "fizzy requires bash 4.0 or later (found: $BASH_VERSION)" >&2
+  echo "" >&2
+  if [[ "$(uname)" == "Darwin" ]]; then
+    echo "macOS ships with bash 3.2. Install modern bash via Homebrew:" >&2
+    echo "  brew install bash" >&2
+    echo "" >&2
+    echo "Then run fizzy with:" >&2
+    echo "  /opt/homebrew/bin/bash $(realpath "$0") [args]" >&2
+    echo "" >&2
+    echo "Or add to your shell config (~/.zshrc or ~/.bash_profile):" >&2
+    echo "  alias fizzy='/opt/homebrew/bin/bash \$HOME/Work/basecamp/fizzy/cli/bin/fizzy'" >&2
+  else
+    echo "Install bash 4+ from your package manager." >&2
+  fi
+  exit 1
+fi
+
+# Determine script location for loading libs
+FIZZY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+FIZZY_VERSION="0.1.0"
+
+# Load libraries
+source "$FIZZY_ROOT/lib/core.sh"
+source "$FIZZY_ROOT/lib/config.sh"
+source "$FIZZY_ROOT/lib/api.sh"
+source "$FIZZY_ROOT/lib/auth.sh"
+
+# Load command handlers
+for cmd_file in "$FIZZY_ROOT/lib/commands"/*.sh; do
+  [[ -f "$cmd_file" ]] && source "$cmd_file"
+done
+
+
+main() {
+  # Parse global flags first
+  parse_global_flags "$@"
+  shift $GLOBAL_FLAGS_CONSUMED
+
+  # Reload config to pick up command-line flag overrides
+  load_config
+
+  # No arguments → quick-start
+  if [[ $# -eq 0 ]]; then
+    cmd_quick_start
+    exit 0
+  fi
+
+  local command="$1"
+  shift
+
+  case "$command" in
+    # Core query commands
+    boards)       cmd_boards "$@" ;;
+    cards)        cmd_cards "$@" ;;
+    columns)      cmd_columns "$@" ;;
+    comments)     cmd_comments "$@" ;;
+    notifications) cmd_notifications "$@" ;;
+    people)       cmd_people "$@" ;;
+    search)       cmd_search "$@" ;;
+    show)         cmd_show "$@" ;;
+    tags)         cmd_tags "$@" ;;
+
+    # Action commands (using Fizzy's ubiquitous language)
+    card)         cmd_card_create "$@" ;;
+    close)        cmd_close "$@" ;;
+    reopen)       cmd_reopen "$@" ;;
+    triage)       cmd_triage "$@" ;;
+    untriage)     cmd_untriage "$@" ;;
+    postpone)     cmd_postpone "$@" ;;
+    comment)      cmd_comment_create "$@" ;;
+    assign)       cmd_assign "$@" ;;
+    tag)          cmd_tag "$@" ;;
+    watch)        cmd_watch "$@" ;;
+    unwatch)      cmd_unwatch "$@" ;;
+    gild)         cmd_gild "$@" ;;
+    ungild)       cmd_ungild "$@" ;;
+    step)         cmd_step "$@" ;;
+    react)        cmd_react "$@" ;;
+
+    # Auth & config
+    auth)         cmd_auth "$@" ;;
+    config)       cmd_config "$@" ;;
+
+    # Meta
+    version)      echo "fizzy $FIZZY_VERSION" ;;
+    help|--help|-h)
+      cmd_help "$@"
+      ;;
+
+    *)
+      json_error "Unknown command: $command" "usage" \
+        "Run 'fizzy' for available commands"
+      exit 1
+      ;;
+  esac
+}
+
+# Run main with all arguments
+main "$@"
