@@ -57,6 +57,16 @@ load test_helper
 }
 
 
+# boards --all flag
+
+@test "boards --help documents --all flag" {
+  run fizzy --md boards --help
+  assert_success
+  assert_output_contains "--all"
+  assert_output_contains "Fetch all pages"
+}
+
+
 # columns --help
 
 @test "columns --help shows help" {

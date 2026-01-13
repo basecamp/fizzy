@@ -8,9 +8,14 @@
 cmd_boards() {
   local show_help=false
   local page=""
+  local fetch_all=false
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
+      --all|-a)
+        fetch_all=true
+        shift
+        ;;
       --page|-p)
         if [[ -z "${2:-}" ]]; then
           die "--page requires a value" $EXIT_USAGE
@@ -36,28 +41,40 @@ cmd_boards() {
     return 0
   fi
 
-  local path="/boards"
-  if [[ -n "$page" ]]; then
-    path="$path?page=$page"
-  fi
-
   local response
-  response=$(api_get "$path")
+  if [[ "$fetch_all" == "true" ]]; then
+    response=$(api_get_all "/boards")
+  else
+    local path="/boards"
+    if [[ -n "$page" ]]; then
+      path="$path?page=$page"
+    fi
+    response=$(api_get "$path")
+  fi
 
   local count
   count=$(echo "$response" | jq 'length')
 
   local summary="$count boards"
   [[ -n "$page" ]] && summary="$count boards (page $page)"
+  [[ "$fetch_all" == "true" ]] && summary="$count boards (all)"
 
   local next_page=$((${page:-1} + 1))
   local breadcrumbs
-  breadcrumbs=$(breadcrumbs \
-    "$(breadcrumb "show" "fizzy show board <id>" "View board details")" \
-    "$(breadcrumb "cards" "fizzy cards --board <id>" "List cards on board")" \
-    "$(breadcrumb "columns" "fizzy columns --board <id>" "List board columns")" \
-    "$(breadcrumb "next" "fizzy boards --page $next_page" "Next page")"
-  )
+  if [[ "$fetch_all" == "true" ]]; then
+    breadcrumbs=$(breadcrumbs \
+      "$(breadcrumb "show" "fizzy show board <id>" "View board details")" \
+      "$(breadcrumb "cards" "fizzy cards --board <id>" "List cards on board")" \
+      "$(breadcrumb "columns" "fizzy columns --board <id>" "List board columns")"
+    )
+  else
+    breadcrumbs=$(breadcrumbs \
+      "$(breadcrumb "show" "fizzy show board <id>" "View board details")" \
+      "$(breadcrumb "cards" "fizzy cards --board <id>" "List cards on board")" \
+      "$(breadcrumb "columns" "fizzy columns --board <id>" "List board columns")" \
+      "$(breadcrumb "next" "fizzy boards --page $next_page" "Next page")"
+    )
+  fi
 
   output "$response" "$summary" "$breadcrumbs" "_boards_md"
 }
@@ -94,10 +111,12 @@ _boards_help() {
       command: "fizzy boards",
       description: "List boards in the account",
       options: [
+        {flag: "--all, -a", description: "Fetch all pages"},
         {flag: "--page, -p", description: "Page number for pagination"}
       ],
       examples: [
         "fizzy boards",
+        "fizzy boards --all",
         "fizzy boards --page 2"
       ]
     }'
@@ -113,12 +132,14 @@ List boards in the account.
 
 ### Options
 
+    --all, -a     Fetch all pages
     --page, -p    Page number for pagination
     --help, -h    Show this help
 
 ### Examples
 
-    fizzy boards              List all boards
+    fizzy boards              List boards (first page)
+    fizzy boards --all        Fetch all boards
     fizzy boards --page 2     Get second page
 EOF
   fi

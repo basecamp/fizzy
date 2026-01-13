@@ -8,9 +8,14 @@
 cmd_tags() {
   local show_help=false
   local page=""
+  local fetch_all=false
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
+      --all|-a)
+        fetch_all=true
+        shift
+        ;;
       --page|-p)
         if [[ -z "${2:-}" ]]; then
           die "--page requires a value" $EXIT_USAGE
@@ -36,27 +41,38 @@ cmd_tags() {
     return 0
   fi
 
-  local path="/tags"
-  if [[ -n "$page" ]]; then
-    path="$path?page=$page"
-  fi
-
   local response
-  response=$(api_get "$path")
+  if [[ "$fetch_all" == "true" ]]; then
+    response=$(api_get_all "/tags")
+  else
+    local path="/tags"
+    if [[ -n "$page" ]]; then
+      path="$path?page=$page"
+    fi
+    response=$(api_get "$path")
+  fi
 
   local count
   count=$(echo "$response" | jq 'length')
 
   local summary="$count tags"
   [[ -n "$page" ]] && summary="$count tags (page $page)"
+  [[ "$fetch_all" == "true" ]] && summary="$count tags (all)"
 
   local next_page=$((${page:-1} + 1))
   local breadcrumbs
-  breadcrumbs=$(breadcrumbs \
-    "$(breadcrumb "filter" "fizzy cards --tag <id>" "Filter cards by tag")" \
-    "$(breadcrumb "add" "fizzy tag <card> --with \"name\"" "Add tag to card")" \
-    "$(breadcrumb "next" "fizzy tags --page $next_page" "Next page")"
-  )
+  if [[ "$fetch_all" == "true" ]]; then
+    breadcrumbs=$(breadcrumbs \
+      "$(breadcrumb "filter" "fizzy cards --tag <id>" "Filter cards by tag")" \
+      "$(breadcrumb "add" "fizzy tag <card> --with \"name\"" "Add tag to card")"
+    )
+  else
+    breadcrumbs=$(breadcrumbs \
+      "$(breadcrumb "filter" "fizzy cards --tag <id>" "Filter cards by tag")" \
+      "$(breadcrumb "add" "fizzy tag <card> --with \"name\"" "Add tag to card")" \
+      "$(breadcrumb "next" "fizzy tags --page $next_page" "Next page")"
+    )
+  fi
 
   output "$response" "$summary" "$breadcrumbs" "_tags_md"
 }
@@ -93,10 +109,12 @@ _tags_help() {
       command: "fizzy tags",
       description: "List tags in the account",
       options: [
+        {flag: "--all, -a", description: "Fetch all pages"},
         {flag: "--page, -p", description: "Page number for pagination"}
       ],
       examples: [
         "fizzy tags",
+        "fizzy tags --all",
         "fizzy tags --page 2"
       ]
     }'
@@ -112,12 +130,14 @@ List tags in the account.
 
 ### Options
 
+    --all, -a     Fetch all pages
     --page, -p    Page number for pagination
     --help, -h    Show this help
 
 ### Examples
 
-    fizzy tags              List all tags
+    fizzy tags              List tags (first page)
+    fizzy tags --all        Fetch all tags
     fizzy tags --page 2     Get second page
 EOF
   fi

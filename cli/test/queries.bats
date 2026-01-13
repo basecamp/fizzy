@@ -42,6 +42,16 @@ load test_helper
 }
 
 
+# tags --all flag
+
+@test "tags --help documents --all flag" {
+  run fizzy --md tags --help
+  assert_success
+  assert_output_contains "--all"
+  assert_output_contains "Fetch all pages"
+}
+
+
 # people --help
 
 @test "people --help shows help" {
@@ -80,6 +90,16 @@ load test_helper
 }
 
 
+# people --all flag
+
+@test "people --help documents --all flag" {
+  run fizzy --md people --help
+  assert_success
+  assert_output_contains "--all"
+  assert_output_contains "Fetch all pages"
+}
+
+
 # notifications --help
 
 @test "notifications --help shows help" {
@@ -115,4 +135,14 @@ load test_helper
   run fizzy notifications --page 0
   assert_failure
   assert_output_contains "positive integer"
+}
+
+
+# notifications --all flag
+
+@test "notifications --help documents --all flag" {
+  run fizzy --md notifications --help
+  assert_success
+  assert_output_contains "--all"
+  assert_output_contains "Fetch all pages"
 }
