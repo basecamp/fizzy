@@ -521,7 +521,9 @@ api_get_all() {
 
   local all_results="[]"
   local page=1
-  local url="$FIZZY_BASE_URL/$account_slug/$path"
+  local base_url="$FIZZY_BASE_URL/$account_slug/$path"
+  local url="$base_url"
+  local use_link_headers=true
 
   local headers_file
   headers_file=$(mktemp)
@@ -556,6 +558,14 @@ api_get_all() {
       die "API request failed (HTTP $http_code)" $EXIT_API
     fi
 
+    # Check for empty response (end of pagination)
+    local count
+    count=$(echo "$response" | jq 'if type == "array" then length else 1 end' 2>/dev/null || echo "1")
+    if [[ "$count" -eq 0 ]]; then
+      debug "Empty response, pagination complete"
+      break
+    fi
+
     if [[ "$all_results" == "[]" ]]; then
       all_results="$response"
     else
@@ -566,12 +576,31 @@ api_get_all() {
     local next_url
     next_url=$(grep -i '^Link:' "$headers_file" | sed -n 's/.*<\([^>]*\)>; rel="next".*/\1/p' | tr -d '\r')
 
-    if [[ -z "$next_url" ]]; then
+    if [[ -n "$next_url" ]]; then
+      url="$next_url"
+      ((page++))
+    elif [[ "$use_link_headers" == "true" ]] && [[ "$page" -eq 1 ]]; then
+      # No Link header on page 1 - fall back to ?page=N pagination
+      debug "No Link header, falling back to ?page=N"
+      use_link_headers=false
+      ((page++))
+      if [[ "$base_url" == *"?"* ]]; then
+        url="${base_url}&page=$page"
+      else
+        url="${base_url}?page=$page"
+      fi
+    elif [[ "$use_link_headers" == "false" ]]; then
+      # Using ?page=N fallback, try next page
+      ((page++))
+      if [[ "$base_url" == *"?"* ]]; then
+        url="${base_url}&page=$page"
+      else
+        url="${base_url}?page=$page"
+      fi
+    else
+      # No more pages
       break
     fi
-
-    url="$next_url"
-    ((page++))
   done
 
   echo "$all_results"

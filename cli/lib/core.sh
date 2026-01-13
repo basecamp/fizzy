@@ -391,5 +391,6 @@ require_command() {
 
 urlencode() {
   local string="$1"
-  python3 -c "import urllib.parse; print(urllib.parse.quote('''$string''', safe=''))"
+  # Use jq for URL encoding - no Python dependency needed
+  printf '%s' "$string" | jq -sRr @uri
 }
