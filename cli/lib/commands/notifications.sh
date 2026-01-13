@@ -1,0 +1,160 @@
+#!/usr/bin/env bash
+# notifications.sh - Notification query and action commands
+
+
+# fizzy notifications [options]
+# List notifications
+
+cmd_notifications() {
+  local action=""
+  local show_help=false
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      read|unread)
+        action="$1"
+        shift
+        _notifications_action "$action" "$@"
+        return
+        ;;
+      --help|-h)
+        show_help=true
+        shift
+        ;;
+      *)
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy notifications --help"
+        ;;
+    esac
+  done
+
+  if [[ "$show_help" == "true" ]]; then
+    _notifications_help
+    return 0
+  fi
+
+  local response
+  response=$(api_get "/notifications")
+
+  local count unread_count
+  count=$(echo "$response" | jq 'length')
+  unread_count=$(echo "$response" | jq '[.[] | select(.read == false)] | length')
+
+  local summary="$count notifications ($unread_count unread)"
+  local breadcrumbs
+  breadcrumbs=$(breadcrumbs \
+    "$(breadcrumb "read" "fizzy notifications read <id>" "Mark as read")" \
+    "$(breadcrumb "read-all" "fizzy notifications read --all" "Mark all as read")" \
+    "$(breadcrumb "show" "fizzy show <card_number>" "View card")"
+  )
+
+  output "$response" "$summary" "$breadcrumbs" "_notifications_md"
+}
+
+_notifications_action() {
+  local action="$1"
+  shift
+
+  local notification_id=""
+  local all=false
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --all)
+        all=true
+        shift
+        ;;
+      *)
+        if [[ -z "$notification_id" ]]; then
+          notification_id="$1"
+        fi
+        shift
+        ;;
+    esac
+  done
+
+  if [[ "$action" == "read" ]]; then
+    if [[ "$all" == "true" ]]; then
+      api_post "/notifications/bulk_reading"
+      info "All notifications marked as read"
+    elif [[ -n "$notification_id" ]]; then
+      api_post "/notifications/$notification_id/reading"
+      info "Notification marked as read"
+    else
+      die "Notification ID required" $EXIT_USAGE "Usage: fizzy notifications read <id> or --all"
+    fi
+  elif [[ "$action" == "unread" ]]; then
+    if [[ -z "$notification_id" ]]; then
+      die "Notification ID required" $EXIT_USAGE "Usage: fizzy notifications unread <id>"
+    fi
+    api_delete "/notifications/$notification_id/reading"
+    info "Notification marked as unread"
+  fi
+}
+
+_notifications_md() {
+  local data="$1"
+  local summary="$2"
+  local breadcrumbs="$3"
+
+  md_heading 2 "Notifications"
+  echo "*$summary*"
+  echo
+
+  local count
+  count=$(echo "$data" | jq 'length')
+
+  if [[ "$count" -eq 0 ]]; then
+    echo "No notifications."
+    echo
+  else
+    echo "| Status | Card | Title | From | Date |"
+    echo "|--------|------|-------|------|------|"
+    echo "$data" | jq -r '.[] | "| \(if .read then "Read" else "**Unread**" end) | #\(.card.id[0:8]) | \(.title[0:30]) | \(.creator.name) | \(.created_at | split("T")[0]) |"'
+    echo
+  fi
+
+  md_breadcrumbs "$breadcrumbs"
+}
+
+_notifications_help() {
+  local format
+  format=$(get_format)
+
+  if [[ "$format" == "json" ]]; then
+    jq -n '{
+      command: "fizzy notifications",
+      description: "List and manage notifications",
+      subcommands: [
+        {name: "read", description: "Mark notification as read"},
+        {name: "unread", description: "Mark notification as unread"}
+      ],
+      options: [
+        {flag: "--all", description: "Mark all notifications as read (with read)"}
+      ],
+      examples: [
+        "fizzy notifications",
+        "fizzy notifications read abc123",
+        "fizzy notifications read --all"
+      ]
+    }'
+  else
+    cat <<'EOF'
+## fizzy notifications
+
+List and manage notifications.
+
+### Usage
+
+    fizzy notifications              List notifications
+    fizzy notifications read <id>    Mark as read
+    fizzy notifications read --all   Mark all as read
+    fizzy notifications unread <id>  Mark as unread
+
+### Examples
+
+    fizzy notifications              List all notifications
+    fizzy notifications read abc123  Mark notification as read
+    fizzy notifications read --all   Mark all as read
+EOF
+  fi
+}
