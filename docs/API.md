@@ -191,8 +191,23 @@ When a request fails, the API response will communicate the source of the proble
 | `401 Unauthorized` | Authentication failed or access token is invalid |
 | `403 Forbidden` | You don't have permission to perform this action |
 | `404 Not Found` | The requested resource doesn't exist or you don't have access to it |
-| `422 Unprocessable Entity` | Validation failed (see error response format above) |
+| `422 Unprocessable Entity` | Validation failed (see error response format below) |
+| `429 Too Many Requests` | Rate limit exceeded (see endpoint-specific limits) |
 | `500 Internal Server Error` | An unexpected error occurred on the server |
+
+### Endpoint-Specific Error Codes
+
+| Endpoint | 403 | 422 | 429 |
+|----------|-----|-----|-----|
+| `POST /:account_slug/account/exports` | | | ✓ Max 10 concurrent |
+| `PUT /:account_slug/users/:id` | ✓ Not your profile or admin | ✓ Validation errors | |
+| `DELETE /:account_slug/users/:id` | ✓ Not your profile or admin | | |
+| `PUT /:account_slug/users/:id/role` | ✓ Not admin | | |
+| `DELETE /:account_slug/cards/:card_number` | ✓ Not card admin | | |
+| `POST /:account_slug/cards/:card_number/assignments` | | ✓ Invalid assignee | |
+| `DELETE /:account_slug/cards/:card_number/comments/:comment_id` | ✓ Not comment creator | | |
+| `DELETE /:account_slug/cards/:card_number/comments/:comment_id/reactions/:reaction_id` | ✓ Not reaction creator | | |
+| `PUT /:account_slug/account/join_code` | | ✓ Validation errors | |
 
 If a request contains invalid data for fields, such as entering a string into a number field, in most cases the API will respond with a `500 Internal Server Error`. Clients are expected to perform some validation on their end before making a request.
 
@@ -467,11 +482,11 @@ Updates a Board. Only board administrators can update a board.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `name` | string | No | The name of the board |
-| `all_access` | boolean | No | Whether any user in the account can access this board |
-| `auto_postpone_period` | integer | No | Number of days of inactivity before cards are automatically postponed |
-| `public_description` | string | No | Rich text description shown on the public board page |
-| `user_ids` | array | No | Array of *all* user IDs who should have access to this board (only applicable when `all_access` is `false`) |
+| `board[name]` | string | No | The name of the board |
+| `board[all_access]` | boolean | No | Whether any user in the account can access this board |
+| `board[auto_postpone_period]` | integer | No | Number of days of inactivity before cards are automatically postponed |
+| `board[public_description]` | string | No | Rich text description shown on the public board page |
+| `user_ids` | array | No | Array of *all* user IDs who should have access to this board (top-level parameter, only applicable when `all_access` is `false`) |
 
 __Request:__
 
@@ -481,12 +496,12 @@ __Request:__
     "name": "Updated board name",
     "auto_postpone_period": 14,
     "public_description": "This is a **public** description of the board.",
-    "all_access": false,
-    "user_ids": [
-      "03f5v9zppzlksuj4mxba2nbzn",
-      "03f5v9zjw7pz8717a4no1h8a7"
-    ]
-  }
+    "all_access": false
+  },
+  "user_ids": [
+    "03f5v9zppzlksuj4mxba2nbzn",
+    "03f5v9zjw7pz8717a4no1h8a7"
+  ]
 }
 ```
 
@@ -497,6 +512,51 @@ Returns `204 No Content` on success.
 ### `DELETE /:account_slug/boards/:board_id`
 
 Deletes a Board. Only board administrators can delete a board.
+
+__Response:__
+
+Returns `204 No Content` on success.
+
+### `POST /:account_slug/boards/:board_id/publication`
+
+Publishes a board publicly. Once published, the board can be viewed by anyone with the shareable link.
+
+__Response:__
+
+```json
+{
+  "key": "abc123def456",
+  "url": "https://app.fizzy.do/public/boards/abc123def456"
+}
+```
+
+The `key` is the shareable identifier and `url` is the full public URL.
+
+### `DELETE /:account_slug/boards/:board_id/publication`
+
+Unpublishes a board. The board will no longer be accessible via its public link.
+
+__Response:__
+
+Returns `204 No Content` on success.
+
+### `PUT /:account_slug/boards/:board_id/entropy`
+
+Updates the auto-postpone settings for a board. Cards on this board that have been inactive for the specified period will be automatically moved to "Not Now".
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `auto_postpone_period` | integer | No | Number of days of inactivity before cards are automatically postponed. Set to `null` to use the account default. |
+
+__Request:__
+
+```json
+{
+  "board": {
+    "auto_postpone_period": 14
+  }
+}
+```
 
 __Response:__
 
@@ -540,6 +600,7 @@ __Response:__
     "description_html": "<div class=\"action-text-content\"><p>Hello, World!</p></div>",
     "image_url": null,
     "tags": ["programming"],
+    "closed": false,
     "golden": false,
     "last_active_at": "2025-12-05T19:38:48.553Z",
     "created_at": "2025-12-05T19:38:48.540Z",
@@ -569,6 +630,8 @@ __Response:__
       "created_at": "2025-12-05T19:36:35.401Z",
       "url": "http://fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
     },
+    "assignees": [],
+    "has_more_assignees": false,
     "comments_url": "http://fizzy.localhost:3006/897362094/cards/4/comments",
     "reactions_url": "http://fizzy.localhost:3006/897362094/cards/4/reactions"
   },
@@ -630,6 +693,18 @@ __Response:__
     "created_at": "2025-12-05T19:36:35.401Z",
     "url": "http://fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
   },
+  "assignees": [
+    {
+      "id": "03f5v9zjysoy0fqs9yg0ei3hq",
+      "name": "Jason Fried",
+      "role": "member",
+      "active": true,
+      "email_address": "jason@example.com",
+      "created_at": "2025-12-05T19:36:35.419Z",
+      "url": "http://fizzy.localhost:3006/897362094/users/03f5v9zjysoy0fqs9yg0ei3hq"
+    }
+  ],
+  "has_more_assignees": false,
   "comments_url": "http://fizzy.localhost:3006/897362094/cards/4/comments",
   "reactions_url": "http://fizzy.localhost:3006/897362094/cards/4/reactions",
   "steps": [
@@ -647,7 +722,7 @@ __Response:__
 }
 ```
 
-> **Note:** The `closed` field indicates whether the card is in the "Done" state. The `column` field is only present when the card has been triaged into a column; cards in "Maybe?", "Not Now" or "Done" will not have this field.
+> **Note:** The `closed` field indicates whether the card is in the "Done" state. The `column` field is only present when the card has been triaged into a column; cards in "Maybe?", "Not Now" or "Done" will not have this field. The `assignees` array includes up to 5 assigned users; when there are more, `has_more_assignees` is `true`.
 
 ### `POST /:account_slug/boards/:board_id/cards`
 
@@ -657,11 +732,11 @@ Creates a new card in a board.
 |-----------|------|----------|-------------|
 | `title` | string | Yes | The title of the card |
 | `description` | string | No | Rich text description of the card |
-| `status` | string | No | Initial status: `published` (default), `drafted` |
 | `image` | file | No | Header image for the card |
-| `tag_ids` | array | No | Array of tag IDs to apply to the card |
 | `created_at` | datetime | No | Override creation timestamp (ISO 8601 format) |
 | `last_active_at` | datetime | No | Override last activity timestamp (ISO 8601 format) |
+
+> **Note:** Cards created via the API are automatically published. To tag a card, use the `POST /:account_slug/cards/:card_number/taggings` endpoint after creation.
 
 __Request:__
 
@@ -686,9 +761,7 @@ Updates a card.
 |-----------|------|----------|-------------|
 | `title` | string | No | The title of the card |
 | `description` | string | No | Rich text description of the card |
-| `status` | string | No | Card status: `drafted`, `published` |
 | `image` | file | No | Header image for the card |
-| `tag_ids` | array | No | Array of tag IDs to apply to the card |
 | `last_active_at` | datetime | No | Override last activity timestamp (ISO 8601 format) |
 
 __Request:__
@@ -816,6 +889,34 @@ Returns `204 No Content` on success.
 ### `DELETE /:account_slug/cards/:card_number/goldness`
 
 Removes golden status from a card.
+
+__Response:__
+
+Returns `204 No Content` on success.
+
+### `POST /:account_slug/cards/:card_number/publish`
+
+Publishes a drafted card. Cards with `status: drafted` are only visible to their creator until published.
+
+__Response:__
+
+Returns `204 No Content` on success.
+
+### `PUT /:account_slug/cards/:card_number/board`
+
+Moves a card to a different board.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `board_id` | string | Yes | The ID of the target board (top-level parameter) |
+
+__Request:__
+
+```json
+{
+  "board_id": "03f5v9zkft4hj9qq0lsn9ohcm"
+}
+```
 
 __Response:__
 
@@ -995,7 +1096,8 @@ Updates a comment. Only the comment creator can update their comments.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `body` | string | Yes | The updated comment body |
+| `body` | string | No | The updated comment body |
+| `created_at` | datetime | No | Override creation timestamp (ISO 8601 format) |
 
 __Request:__
 
@@ -1009,7 +1111,7 @@ __Request:__
 
 __Response:__
 
-Returns the updated comment.
+Returns `204 No Content` on success.
 
 ### `DELETE /:account_slug/cards/:card_number/comments/:comment_id`
 
@@ -1251,13 +1353,19 @@ __Response:__
   {
     "id": "03f5v9zkft4hj9qq0lsn9ohcm",
     "name": "Recording",
-    "color": "var(--color-card-default)",
+    "color": {
+      "name": "Blue",
+      "value": "var(--color-card-default)"
+    },
     "created_at": "2025-12-05T19:36:35.534Z"
   },
   {
     "id": "03f5v9zkft4hj9qq0lsn9ohcn",
     "name": "Published",
-    "color": "var(--color-card-4)",
+    "color": {
+      "name": "Lime",
+      "value": "var(--color-card-4)"
+    },
     "created_at": "2025-12-05T19:36:35.534Z"
   }
 ]
@@ -1273,7 +1381,10 @@ __Response:__
 {
   "id": "03f5v9zkft4hj9qq0lsn9ohcm",
   "name": "In Progress",
-  "color": "var(--color-card-default)",
+  "color": {
+    "name": "Blue",
+    "value": "var(--color-card-default)"
+  },
   "created_at": "2025-12-05T19:36:35.534Z"
 }
 ```
@@ -1328,6 +1439,22 @@ Returns `204 No Content` on success.
 ### `DELETE /:account_slug/boards/:board_id/columns/:column_id`
 
 Deletes a column.
+
+__Response:__
+
+Returns `204 No Content` on success.
+
+### `POST /:account_slug/columns/:column_id/left_position`
+
+Moves a column one position to the left in the board's column order.
+
+__Response:__
+
+Returns `204 No Content` on success.
+
+### `POST /:account_slug/columns/:column_id/right_position`
+
+Moves a column one position to the right in the board's column order.
 
 __Response:__
 
@@ -1433,6 +1560,28 @@ __Response:__
 
 Returns `204 No Content` on success.
 
+### `PUT /:account_slug/users/:user_id/role`
+
+Updates a user's role. Only account owners and admins can change user roles.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `role` | string | Yes | The new role: `admin` or `member` |
+
+__Request:__
+
+```json
+{
+  "user": {
+    "role": "admin"
+  }
+}
+```
+
+__Response:__
+
+Returns `204 No Content` on success.
+
 ## Notifications
 
 Notifications inform users about events that happened in the account, such as comments, assignments, and card updates.
@@ -1495,3 +1644,359 @@ Marks all unread notifications as read.
 __Response:__
 
 Returns `204 No Content` on success.
+
+## Account Settings
+
+Account settings allow administrators to manage account-wide configuration.
+
+### `GET /:account_slug/account/settings`
+
+Returns the account settings. Only administrators can view account settings.
+
+__Response:__
+
+```json
+{
+  "id": "03f5v9zjskhcii2r45ih3u1rq",
+  "name": "37signals"
+}
+```
+
+### `PUT /:account_slug/account/settings`
+
+Updates the account settings. Only administrators can update account settings.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `name` | string | No | The account name |
+
+__Request:__
+
+```json
+{
+  "account": {
+    "name": "New Account Name"
+  }
+}
+```
+
+__Response:__
+
+Returns `204 No Content` on success.
+
+### `PUT /:account_slug/account/entropy`
+
+Updates the account-wide auto-postpone settings. This sets the default entropy period for all boards in the account.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `auto_postpone_period` | integer | Yes | Number of days of inactivity before cards are automatically postponed |
+
+__Request:__
+
+```json
+{
+  "entropy": {
+    "auto_postpone_period": 30
+  }
+}
+```
+
+__Response:__
+
+Returns `204 No Content` on success.
+
+## Join Codes
+
+Join codes allow new users to join an account without an explicit invitation.
+
+### `GET /:account_slug/account/join_code`
+
+Returns the account's join code configuration.
+
+__Response:__
+
+```json
+{
+  "code": "ABC123",
+  "usage_limit": 50,
+  "usage_count": 12
+}
+```
+
+### `PUT /:account_slug/account/join_code`
+
+Updates the join code configuration. Only administrators can update join code settings.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `usage_limit` | integer | No | Maximum number of times the join code can be used |
+
+__Request:__
+
+```json
+{
+  "account_join_code": {
+    "usage_limit": 100
+  }
+}
+```
+
+__Response:__
+
+Returns `204 No Content` on success.
+
+### `DELETE /:account_slug/account/join_code`
+
+Resets the join code. The existing code is invalidated and a new code is generated.
+
+__Response:__
+
+```json
+{
+  "code": "XYZ789",
+  "usage_limit": 100,
+  "usage_count": 0
+}
+```
+
+## Exports
+
+Exports allow users to download a complete archive of their account data.
+
+### `GET /:account_slug/account/exports/:export_id`
+
+Returns the status of an export.
+
+__Response:__
+
+```json
+{
+  "id": "03f5v9zo9qlcwwpyc0ascnikz",
+  "status": "completed",
+  "created_at": "2025-12-05T19:36:35.534Z"
+}
+```
+
+### `POST /:account_slug/account/exports`
+
+Starts a new export. The export will be built asynchronously and the user will be notified by email when it's ready for download.
+
+__Response:__
+
+Returns `202 Accepted` with the export details:
+
+```json
+{
+  "id": "03f5v9zo9qlcwwpyc0ascnikz",
+  "status": "pending",
+  "created_at": "2025-12-05T19:36:35.534Z"
+}
+```
+
+## Webhooks
+
+Webhooks allow you to receive real-time notifications when events happen on a board.
+
+### `GET /:account_slug/boards/:board_id/webhooks`
+
+Returns a list of webhooks configured for the board. Only board administrators can view webhooks.
+
+__Response:__
+
+```json
+[
+  {
+    "id": "03f5v9zo9qlcwwpyc0ascnikz",
+    "name": "My Webhook",
+    "url": "https://example.com/webhook",
+    "subscribed_actions": ["card_closed", "card_reopened", "comment_created"],
+    "created_at": "2025-12-05T19:36:35.534Z"
+  }
+]
+```
+
+### `GET /:account_slug/boards/:board_id/webhooks/:webhook_id`
+
+Returns a specific webhook.
+
+__Response:__
+
+```json
+{
+  "id": "03f5v9zo9qlcwwpyc0ascnikz",
+  "name": "My Webhook",
+  "url": "https://example.com/webhook",
+  "subscribed_actions": ["card_closed", "card_reopened", "comment_created"],
+  "created_at": "2025-12-05T19:36:35.534Z",
+  "updated_at": "2025-12-05T19:36:35.534Z"
+}
+```
+
+### `POST /:account_slug/boards/:board_id/webhooks`
+
+Creates a new webhook for the board. Only board administrators can create webhooks.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `name` | string | Yes | A descriptive name for the webhook |
+| `url` | string | Yes | The URL to receive webhook payloads |
+| `subscribed_actions` | array | No | List of event types to subscribe to |
+
+__Available actions:__
+
+- `card_assigned` - A user was assigned to a card
+- `card_closed` - A card was closed
+- `card_postponed` - A card was manually moved to "Not Now"
+- `card_auto_postponed` - A card was automatically postponed due to inactivity
+- `card_board_changed` - A card was moved to a different board
+- `card_published` - A drafted card was published
+- `card_reopened` - A card was reopened
+- `card_sent_back_to_triage` - A card was sent back to triage
+- `card_triaged` - A card was moved to a column
+- `card_unassigned` - A user was unassigned from a card
+- `comment_created` - A comment was added
+
+__Request:__
+
+```json
+{
+  "webhook": {
+    "name": "CI Integration",
+    "url": "https://ci.example.com/fizzy/webhook",
+    "subscribed_actions": ["card_closed", "comment_created"]
+  }
+}
+```
+
+__Response:__
+
+Returns `201 Created` with the webhook details:
+
+```json
+{
+  "id": "03f5v9zo9qlcwwpyc0ascnikz",
+  "name": "CI Integration",
+  "url": "https://ci.example.com/fizzy/webhook",
+  "subscribed_actions": ["card_closed", "comment_created"],
+  "created_at": "2025-12-05T19:36:35.534Z"
+}
+```
+
+### `PUT /:account_slug/boards/:board_id/webhooks/:webhook_id`
+
+Updates a webhook. The webhook URL cannot be changed after creation.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `name` | string | No | A descriptive name for the webhook |
+| `subscribed_actions` | array | No | List of event types to subscribe to |
+
+__Request:__
+
+```json
+{
+  "webhook": {
+    "name": "Updated Webhook Name",
+    "subscribed_actions": ["card_closed", "card_reopened", "comment_created"]
+  }
+}
+```
+
+__Response:__
+
+Returns `204 No Content` on success.
+
+### `DELETE /:account_slug/boards/:board_id/webhooks/:webhook_id`
+
+Deletes a webhook.
+
+__Response:__
+
+Returns `204 No Content` on success.
+
+### Webhook Payload Format
+
+When an event occurs, Fizzy sends a POST request to your webhook URL with a JSON payload:
+
+```json
+{
+  "id": "evt_03f5v9zo9qlcwwpyc0ascnikz",
+  "action": "card_triaged",
+  "created_at": "2025-12-05T19:36:35.534Z",
+  "eventable": {
+    "id": "03f5vaeq985jlvwv3arl4srq2",
+    "number": 42,
+    "title": "New feature request",
+    "url": "http://fizzy.localhost:3006/897362094/cards/42"
+  },
+  "board": {
+    "id": "03f5v9zkft4hj9qq0lsn9ohcm",
+    "name": "Fizzy",
+    "url": "http://fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm"
+  },
+  "creator": {
+    "id": "03f5v9zjw7pz8717a4no1h8a7",
+    "name": "David Heinemeier Hansson",
+    "email_address": "david@example.com"
+  }
+}
+```
+
+Your endpoint should return a `2xx` status code to acknowledge receipt. Failed deliveries will be retried with exponential backoff.
+
+---
+
+## API Docs Maintenance
+
+Use this checklist when the API changes:
+
+### 1. Enumerate JSON endpoints
+
+```bash
+bin/rails routes > /tmp/fizzy_routes.txt
+rg -n "format\.json|render json|head :|respond_to :json" app/controllers
+rg -n "json.jbuilder" app/views  # find implicit JSON responses
+```
+
+### 2. Normalize paths before diff
+
+Routes use `:id`/`:card_id`; docs use `:card_number`. Normalize placeholders before comparing. Docs use `/:account_slug` prefix (stripped by middleware). Some nested routes (e.g., column reordering) use `shallow: true`.
+
+### 3. Validate request params
+
+Confirm `params.expect/require` and any **top-level params** (e.g., `params[:user_ids]`). Update docs to match exact nesting (top-level vs `resource: { ... }`).
+
+### 4. Validate responses
+
+- `head :no_content` → **204 No Content**
+- `head :created` + `location:` → **201 + Location header**
+- `head :accepted` → **202 Accepted**
+- Jbuilder view → verify fields in `app/views/**/*.json.jbuilder`
+
+### 5. Errors
+
+```bash
+rg -n "unprocessable_entity|forbidden|unauthorized|too_many_requests" app/controllers
+```
+
+Add 401/403/422/429 notes to each affected endpoint.
+
+### 6. Query parameters
+
+For `/cards`, verify `Filter::Params::PERMITTED_PARAMS` and document all `terms[]`, `indexed_by`, `sorted_by`, etc.
+
+### 7. Webhook actions
+
+Verify against `Webhook::PERMITTED_ACTIONS` (`app/models/webhook.rb`). Update both docs and CLI help (`cli/lib/commands/webhooks.sh`).
+
+### 8. CLI alignment
+
+Ensure CLI help/examples match docs (params, nesting, status codes).
+
+### 9. Regression check
+
+```bash
+bin/rails test test/controllers/**/*_test.rb
+bats cli/test/*.bats
+```
