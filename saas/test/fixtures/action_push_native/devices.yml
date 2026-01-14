@@ -1,0 +1,17 @@
+davids_iphone:
+  name: iPhone 15 Pro
+  token: abc123def456abc123def456abc123def456abc123def456abc123def456abcd
+  platform: apple
+  owner: david (User)
+
+davids_pixel:
+  name: Pixel 8
+  token: def456abc123def456abc123def456abc123def456abc123def456abc123defg
+  platform: google
+  owner: david (User)
+
+kevins_iphone:
+  name: iPhone 14
+  token: 789xyz789xyz789xyz789xyz789xyz789xyz789xyz789xyz789xyz789xyz7890
+  platform: apple
+  owner: kevin (User)

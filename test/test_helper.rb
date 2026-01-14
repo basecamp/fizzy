@@ -36,6 +36,10 @@ VCR.configure do |config|
   }
 end
 
+if Fizzy.saas?
+  require_relative "../saas/test/test_helpers/push_notification_test_helper"
+end
+
 module ActiveSupport
   class TestCase
     parallelize workers: :number_of_processors, work_stealing: ENV["WORK_STEALING"] != "false"
@@ -46,6 +50,7 @@ module ActiveSupport
     include ActiveJob::TestHelper
     include ActionTextTestHelper, CachingTestHelper, CardTestHelper, ChangeTestHelper, SessionTestHelper
     include Turbo::Broadcastable::TestHelper
+    include PushNotificationTestHelper if Fizzy.saas?
 
     setup do
       Current.account = accounts("37s")
