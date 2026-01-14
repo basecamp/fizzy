@@ -12,16 +12,20 @@ class NotificationPusher
     return unless should_push?
 
     build_payload.tap do |payload|
-      push_to_user(payload)
+      push_to_web(payload)
     end
   end
 
   private
     def should_push?
-      notification.user.push_subscriptions.any? &&
+      push_destination? &&
         !notification.creator.system? &&
         notification.user.active? &&
         notification.account.active?
+    end
+
+    def push_destination?
+      notification.user.push_subscriptions.any?
     end
 
     def build_payload
@@ -93,7 +97,7 @@ class NotificationPusher
       }
     end
 
-    def push_to_user(payload)
+    def push_to_web(payload)
       subscriptions = notification.user.push_subscriptions
       enqueue_payload_for_delivery(payload, subscriptions)
     end

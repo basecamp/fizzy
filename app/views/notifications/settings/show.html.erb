@@ -16,6 +16,7 @@
 
   <div class="settings__panel panel shadow">
     <%= render "notifications/settings/push_notifications" %>
+    <%= render "notifications/settings/native_devices" if Fizzy.saas? %>
     <%= render "notifications/settings/email", settings: @settings %>
   </div>
 </section>

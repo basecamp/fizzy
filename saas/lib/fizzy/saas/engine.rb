@@ -23,6 +23,10 @@ module Fizzy
           headers: app.config.public_file_server.headers
       end
 
+      initializer "fizzy_saas.push_config", before: "action_push_native.config" do |app|
+        app.paths.add "config/push", with: root.join("config/push.yml")
+      end
+
       initializer "fizzy.saas.routes", after: :add_routing_paths do |app|
         # Routes that rely on the implicit account tenant should go here instead of in +routes.rb+.
         app.routes.prepend do
@@ -38,6 +42,10 @@ module Fizzy
 
           namespace :stripe do
             resource :webhooks, only: :create
+          end
+
+          namespace :users do
+            resources :devices, only: [ :index, :create, :destroy ]
           end
         end
       end
@@ -148,6 +156,8 @@ module Fizzy
       config.to_prepare do
         ::Account.include Account::Billing, Account::Limited
         ::User.include User::NotifiesAccountOfEmailChange
+        ::User.include User::Devices
+        ::NotificationPusher.include NotificationPusher::Native
         ::Signup.prepend Fizzy::Saas::Signup
         CardsController.include(Card::LimitedCreation)
         Cards::PublishesController.include(Card::LimitedPublishing)
