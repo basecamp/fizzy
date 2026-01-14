@@ -3,7 +3,10 @@ class Account::EntropiesController < ApplicationController
 
   def update
     Current.account.entropy.update!(entropy_params)
-    redirect_to account_settings_path, notice: "Account updated"
+    respond_to do |format|
+      format.html { redirect_to account_settings_path, notice: "Account updated" }
+      format.json { head :no_content }
+    end
   end
 
   private

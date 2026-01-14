@@ -49,4 +49,27 @@ class Boards::PublicationsControllerTest < ActionDispatch::IntegrationTest
     assert_response :forbidden
     assert @board.reload.published?
   end
+
+  test "publish via JSON returns key and url" do
+    assert_not @board.published?
+
+    post board_publication_path(@board, format: :json)
+
+    assert_response :success
+    assert @board.reload.published?
+
+    json = response.parsed_body
+    assert_equal @board.publication.key, json["key"]
+    assert_match %r{/public/boards/#{@board.publication.key}}, json["url"]
+  end
+
+  test "unpublish via JSON returns no content" do
+    @board.publish
+    assert @board.published?
+
+    delete board_publication_path(@board, format: :json)
+
+    assert_response :no_content
+    assert_not @board.reload.published?
+  end
 end

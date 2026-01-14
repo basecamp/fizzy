@@ -28,4 +28,22 @@ class Cards::PinsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
   end
+
+  test "create via JSON returns no content" do
+    assert_not cards(:layout).pinned_by?(users(:kevin))
+
+    post card_pin_path(cards(:layout)), as: :json
+
+    assert_response :no_content
+    assert cards(:layout).pinned_by?(users(:kevin))
+  end
+
+  test "destroy via JSON returns no content" do
+    assert cards(:shipping).pinned_by?(users(:kevin))
+
+    delete card_pin_path(cards(:shipping)), as: :json
+
+    assert_response :no_content
+    assert_not cards(:shipping).pinned_by?(users(:kevin))
+  end
 end

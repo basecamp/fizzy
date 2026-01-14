@@ -8,15 +8,25 @@ class Cards::PinsController < ApplicationController
   def create
     @pin = @card.pin_by Current.user
 
-    broadcast_add_pin_to_tray
-    render_pin_button_replacement
+    respond_to do |format|
+      format.html do
+        broadcast_add_pin_to_tray
+        render_pin_button_replacement
+      end
+      format.json { head :no_content }
+    end
   end
 
   def destroy
     @pin = @card.unpin_by Current.user
 
-    broadcast_remove_pin_from_tray
-    render_pin_button_replacement
+    respond_to do |format|
+      format.html do
+        broadcast_remove_pin_from_tray
+        render_pin_button_replacement
+      end
+      format.json { head :no_content }
+    end
   end
 
   private

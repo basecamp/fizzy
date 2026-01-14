@@ -1,4 +1,21 @@
 class Oauth::AuthorizationsController < Oauth::BaseController
+  # Allow form submission to the client's redirect_uri for OAuth callbacks
+  # Only widen CSP if the client allows this redirect_uri (validated in before_action)
+  content_security_policy only: :new do |policy|
+    if (redirect_uri = params[:redirect_uri]).present? && (client_id = params[:client_id]).present?
+      client = Oauth::Client.find_by(client_id: client_id)
+      if client&.allows_redirect?(redirect_uri)
+        begin
+          uri = URI.parse(redirect_uri)
+          origin = "#{uri.scheme}://#{uri.host}#{":#{uri.port}" if uri.port}"
+          policy.form_action :self, origin
+        rescue URI::InvalidURIError
+          # Invalid URI - don't widen CSP
+        end
+      end
+    end
+  end
+
   before_action :save_oauth_return_url
   before_action :require_authentication
 
