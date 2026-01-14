@@ -28,7 +28,13 @@ fi
 
 # Determine script location for loading libs
 FIZZY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-FIZZY_VERSION="0.1.0"
+FIZZY_VERSION="$(cat "$FIZZY_ROOT/VERSION" 2>/dev/null || echo "dev")"
+
+# Handle --version early (before loading libs)
+if [[ "${1:-}" == "--version" || "${1:-}" == "-V" ]]; then
+  echo "fizzy $FIZZY_VERSION"
+  exit 0
+fi
 
 # Load libraries
 source "$FIZZY_ROOT/lib/core.sh"
@@ -72,6 +78,7 @@ main() {
     search)       cmd_search "$@" ;;
     show)         cmd_show "$@" ;;
     tags)         cmd_tags "$@" ;;
+    webhooks)     cmd_webhooks "$@" ;;
 
     # Action commands (using Fizzy's ubiquitous language)
     card)         cmd_card "$@" ;;
@@ -91,10 +98,12 @@ main() {
     ungild)       cmd_ungild "$@" ;;
     step)         cmd_step "$@" ;;
     react)        cmd_react "$@" ;;
+    webhook)      cmd_webhook "$@" ;;
 
     # Identity & users
     identity)     cmd_identity "$@" ;;
     user)         cmd_user "$@" ;;
+    account)      cmd_account "$@" ;;
 
     # Auth & config
     auth)         cmd_auth "$@" ;;
@@ -102,6 +111,7 @@ main() {
 
     # Meta
     version)      echo "fizzy $FIZZY_VERSION" ;;
+    self-update)  cmd_self_update "$@" ;;
     help|--help|-h)
       cmd_help "$@"
       ;;
