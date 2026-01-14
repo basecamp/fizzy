@@ -3,9 +3,39 @@
 # Output formatting, response envelope, global flags
 
 # Environment Configuration
+# FIZZY_URL      - Convenience: base URL + optional account slug (e.g., http://fizzy.localhost:3006/897362094)
 # FIZZY_BASE_URL - Base URL for Fizzy (web app + API)
 # In production: https://app.fizzy.do
 # In development: http://fizzy.localhost:3006
+
+# Parse FIZZY_URL into FIZZY_BASE_URL + FIZZY_ACCOUNT_SLUG (if not explicitly set)
+# Accepts: http://host or http://host/897362094 (numeric 7+ digit slug)
+if [[ -n "${FIZZY_URL:-}" ]]; then
+  _fizzy_url="${FIZZY_URL%%\#*}"  # Strip fragment
+  _fizzy_url="${_fizzy_url%%\?*}" # Strip query
+  _fizzy_url="${_fizzy_url%/}"    # Strip trailing slash
+
+  if [[ "$_fizzy_url" =~ ^(https?://[^/]+)(/.*)?$ ]]; then
+    _fizzy_base="${BASH_REMATCH[1]}"
+    _fizzy_path="${BASH_REMATCH[2]:-}"
+    _fizzy_path="${_fizzy_path#/}"
+    _fizzy_slug="${_fizzy_path%%/*}"
+
+    # Set base URL if not explicitly provided
+    if [[ -z "${FIZZY_BASE_URL:-}" ]]; then
+      FIZZY_BASE_URL="$_fizzy_base"
+    fi
+
+    # Set account slug if not explicitly provided and bases match
+    if [[ -z "${FIZZY_ACCOUNT_SLUG:-}" ]] && [[ "${FIZZY_BASE_URL:-}" == "$_fizzy_base" ]]; then
+      # Only accept numeric slugs (7+ digits = external_account_id)
+      if [[ "$_fizzy_slug" =~ ^[0-9]{7,}$ ]]; then
+        FIZZY_ACCOUNT_SLUG="$_fizzy_slug"
+      fi
+    fi
+  fi
+  unset _fizzy_url _fizzy_base _fizzy_path _fizzy_slug
+fi
 
 # Capture original env value before any modifications (used by config.sh)
 # This marker tells config.sh whether FIZZY_BASE_URL was explicitly set by user
@@ -330,14 +360,6 @@ parse_global_flags() {
           die "--account requires a value" $EXIT_USAGE
         fi
         FIZZY_ACCOUNT="$2"
-        (( GLOBAL_FLAGS_CONSUMED += 2 ))
-        shift 2
-        ;;
-      --token)
-        if [[ -z "${2:-}" ]]; then
-          die "--token requires a value" $EXIT_USAGE
-        fi
-        FIZZY_ACCESS_TOKEN="$2"
         (( GLOBAL_FLAGS_CONSUMED += 2 ))
         shift 2
         ;;

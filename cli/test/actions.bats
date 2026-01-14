@@ -56,23 +56,23 @@ load test_helper
 }
 
 
-# update --help
+# card update --help
 
-@test "update --help shows help" {
-  run fizzy --md update --help
+@test "card update --help shows help" {
+  run fizzy --md card update --help
   assert_success
-  assert_output_contains "fizzy update"
+  assert_output_contains "fizzy card update"
   assert_output_contains "Update"
 }
 
-@test "update -h shows help" {
-  run fizzy --md update -h
+@test "card update -h shows help" {
+  run fizzy --md card update -h
   assert_success
-  assert_output_contains "fizzy update"
+  assert_output_contains "fizzy card update"
 }
 
-@test "update --help --json outputs JSON" {
-  run fizzy --json update --help
+@test "card update --help --json outputs JSON" {
+  run fizzy --json card update --help
   assert_success
   is_valid_json
   assert_json_not_null ".command"
@@ -80,36 +80,72 @@ load test_helper
 }
 
 
-# update requires card number and options
+# card update requires card number and options
 
-@test "update without number shows error" {
-  run fizzy update
+@test "card update without number shows error" {
+  run fizzy card update
   assert_failure
   assert_output_contains "Card number required"
 }
 
-@test "update without options shows error" {
-  run fizzy update 123
+@test "card update without options shows error" {
+  run fizzy card update 123
   assert_failure
   assert_output_contains "Nothing to update"
 }
 
-@test "update requires authentication" {
-  run fizzy update 123 --title "New"
+@test "card update requires authentication" {
+  run fizzy card update 123 --title "New"
   assert_failure
   assert_output_contains "Not authenticated"
 }
 
-@test "update rejects unknown option" {
-  run fizzy update --unknown-option
+@test "card update rejects unknown option" {
+  run fizzy card update --unknown-option
   assert_failure
   assert_output_contains "Unknown option"
 }
 
-@test "update --description-file with missing file shows error" {
-  run fizzy update 123 --description-file nonexistent.txt
+@test "card update --description-file with missing file shows error" {
+  run fizzy card update 123 --description-file nonexistent.txt
   assert_failure
   assert_output_contains "File not found"
+}
+
+@test "card update --image with missing file shows error" {
+  run fizzy card update 123 --image nonexistent.png
+  assert_failure
+  assert_output_contains "File not found"
+}
+
+@test "card update --help documents --image flag" {
+  run fizzy --md card update --help
+  assert_success
+  assert_output_contains "--image"
+}
+
+@test "card create --image with missing file shows error" {
+  run fizzy card "Test card" --board testboard --image nonexistent.png
+  assert_failure
+  assert_output_contains "File not found"
+}
+
+@test "card create --help documents --image flag" {
+  run fizzy --md card --help
+  assert_success
+  assert_output_contains "--image"
+}
+
+# Regression test: non-file multipart fields must use --form-string to prevent
+# values starting with @ from being interpreted as file paths
+@test "multipart uploads use --form-string for non-file fields" {
+  # Check that card title/description don't use -F (which interprets @-prefix as file)
+  run grep -E '\-F ["\047]card\[(title|description)\]' lib/commands/actions.sh
+  assert_failure  # Should NOT find this pattern
+
+  # Check that user name doesn't use -F
+  run grep -E '\-F ["\047]user\[name\]' lib/commands/users.sh
+  assert_failure  # Should NOT find this pattern
 }
 
 
@@ -195,95 +231,136 @@ load test_helper
 }
 
 
-# delete --help
+# card delete --help
 
-@test "delete --help shows help" {
-  run fizzy --md delete --help
+@test "card delete --help shows help" {
+  run fizzy --md card delete --help
   assert_success
-  assert_output_contains "fizzy delete"
+  assert_output_contains "fizzy card delete"
   assert_output_contains "delete"
 }
 
-@test "delete -h shows help" {
-  run fizzy --md delete -h
+@test "card delete -h shows help" {
+  run fizzy --md card delete -h
   assert_success
-  assert_output_contains "fizzy delete"
+  assert_output_contains "fizzy card delete"
 }
 
-@test "delete --help --json outputs JSON" {
-  run fizzy --json delete --help
+@test "card delete --help --json outputs JSON" {
+  run fizzy --json card delete --help
   assert_success
   is_valid_json
   assert_json_not_null ".command"
 }
 
-@test "delete --help shows warning" {
-  run fizzy --md delete --help
+@test "card delete --help shows warning" {
+  run fizzy --md card delete --help
   assert_success
   assert_output_contains "cannot be undone"
 }
 
 
-# delete requires card number
+# card delete requires card number
 
-@test "delete without number shows error" {
-  run fizzy delete
+@test "card delete without number shows error" {
+  run fizzy card delete
   assert_failure
   assert_output_contains "Card number required"
 }
 
-@test "delete requires authentication" {
-  run fizzy delete 123
+@test "card delete requires authentication" {
+  run fizzy card delete 123
   assert_failure
   assert_output_contains "Not authenticated"
 }
 
-@test "delete rejects unknown option" {
-  run fizzy delete --invalid
+@test "card delete rejects unknown option" {
+  run fizzy card delete --invalid
   assert_failure
   assert_output_contains "Unknown option"
 }
 
+@test "card delete rejects non-numeric input" {
+  run fizzy card delete abc
+  assert_failure
+  assert_output_contains "Invalid card number"
+}
 
-# delete-image --help
+@test "card delete rejects zero" {
+  run fizzy card delete 0
+  assert_failure
+  assert_output_contains "Invalid card number: 0"
+}
 
-@test "delete-image --help shows help" {
-  run fizzy --md delete-image --help
+@test "card delete rejects mixed valid and invalid numbers" {
+  run fizzy card delete 123 abc 456
+  assert_failure
+  assert_output_contains "Invalid card number: abc"
+}
+
+
+# card image --help
+
+@test "card image --help shows subcommands" {
+  run fizzy --md card image --help
   assert_success
-  assert_output_contains "fizzy delete-image"
+  assert_output_contains "fizzy card image"
+  assert_output_contains "delete"
+}
+
+@test "card image without subcommand shows help" {
+  run fizzy --md card image
+  assert_success
+  assert_output_contains "Subcommands"
+}
+
+@test "card image --help --json outputs JSON" {
+  run fizzy --json card image --help
+  assert_success
+  is_valid_json
+  assert_json_not_null ".subcommands"
+}
+
+
+# card image delete --help
+
+@test "card image delete --help shows help" {
+  run fizzy --md card image delete --help
+  assert_success
+  assert_output_contains "fizzy card image delete"
   assert_output_contains "image"
 }
 
-@test "delete-image -h shows help" {
-  run fizzy --md delete-image -h
+@test "card image delete -h shows help" {
+  run fizzy --md card image delete -h
   assert_success
-  assert_output_contains "fizzy delete-image"
+  assert_output_contains "fizzy card image delete"
 }
 
-@test "delete-image --help --json outputs JSON" {
-  run fizzy --json delete-image --help
+@test "card image delete --help --json outputs JSON" {
+  run fizzy --json card image delete --help
   assert_success
   is_valid_json
   assert_json_not_null ".command"
 }
 
 
-# delete-image requires card number
+# card image delete requires card number
 
-@test "delete-image without number shows error" {
-  run fizzy delete-image
+@test "card image delete without number shows error" {
+  run fizzy card image delete
   assert_failure
   assert_output_contains "Card number required"
 }
 
-@test "delete-image requires authentication" {
-  run fizzy delete-image 123
+@test "card image delete requires authentication" {
+  run fizzy card image delete 123
   assert_failure
   assert_output_contains "Not authenticated"
 }
 
-@test "delete-image rejects unknown option" {
-  run fizzy delete-image --invalid
+@test "card image delete rejects unknown option" {
+  run fizzy card image delete --invalid
   assert_failure
   assert_output_contains "Unknown option"
 }

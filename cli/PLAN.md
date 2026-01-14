@@ -459,7 +459,7 @@ fizzy auth login --no-browser
 For simple scripts, users can generate tokens manually:
 1. Go to profile → API section → Personal access tokens
 2. Generate token with `read` or `read+write` scope
-3. Use via `FIZZY_ACCESS_TOKEN` env var or `--token` flag
+3. Use via `FIZZY_TOKEN` environment variable
 
 ### Token File Security
 

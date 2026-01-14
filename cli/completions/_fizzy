@@ -19,12 +19,11 @@ _fizzy() {
     'search:Search cards'
     'show:Show card or board details'
     'tags:List tags'
-    'card:Create a new card'
-    'update:Update a card'
+    'card:Manage cards (create, update, delete, image)'
+    'board:Manage boards (create, update, delete, show)'
+    'column:Manage columns on a board'
     'close:Close a card'
     'reopen:Reopen a closed card'
-    'delete:Permanently delete a card'
-    'delete-image:Remove header image from card'
     'triage:Move card to a column'
     'untriage:Move card back to triage'
     'postpone:Move card to "not now"'
@@ -79,6 +78,40 @@ _fizzy() {
           ;;
         config)
           _describe -t config_commands 'config subcommand' config_commands
+          ;;
+        card)
+          # Handle nested card subcommands
+          if [[ ${#words[@]} -ge 3 && "$words[2]" == "image" ]]; then
+            local card_image_commands=(
+              'delete:Remove header image from card'
+            )
+            _describe -t card_image_commands 'card image subcommand' card_image_commands
+          else
+            local card_commands=(
+              'update:Update a card'
+              'delete:Permanently delete a card'
+              'image:Manage card header image'
+            )
+            _describe -t card_commands 'card subcommand' card_commands
+          fi
+          ;;
+        board)
+          local board_commands=(
+            'create:Create a new board'
+            'update:Update a board'
+            'delete:Delete a board'
+            'show:Show board details'
+          )
+          _describe -t board_commands 'board subcommand' board_commands
+          ;;
+        column)
+          local column_commands=(
+            'create:Create a column'
+            'update:Update a column'
+            'delete:Delete a column'
+            'show:Show column details'
+          )
+          _describe -t column_commands 'column subcommand' column_commands
           ;;
         notifications)
           local notification_commands=(

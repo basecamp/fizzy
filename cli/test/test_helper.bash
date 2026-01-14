@@ -24,7 +24,8 @@ setup() {
 
   # Clear environment variables that might interfere with tests
   # Tests can set these as needed
-  unset FIZZY_ACCESS_TOKEN
+  unset FIZZY_URL
+  unset FIZZY_TOKEN
   unset FIZZY_ACCOUNT_SLUG
   unset FIZZY_BOARD_ID
   unset FIZZY_COLUMN_ID

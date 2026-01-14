@@ -71,10 +71,10 @@ load_config() {
   # Layer 5: Environment variables
   # Note: FIZZY_BASE_URL is handled separately in _update_base_url_from_config
   # because core.sh sets a default before we can capture the original env value
+  # Note: FIZZY_TOKEN is handled in get_access_token() directly, not via config
   [[ -n "${FIZZY_ACCOUNT_SLUG:-}" ]] && _FIZZY_CONFIG["account_slug"]="$FIZZY_ACCOUNT_SLUG" || true
   [[ -n "${FIZZY_BOARD_ID:-}" ]] && _FIZZY_CONFIG["board_id"]="$FIZZY_BOARD_ID" || true
   [[ -n "${FIZZY_COLUMN_ID:-}" ]] && _FIZZY_CONFIG["column_id"]="$FIZZY_COLUMN_ID" || true
-  [[ -n "${FIZZY_ACCESS_TOKEN:-}" ]] && _FIZZY_CONFIG["access_token"]="$FIZZY_ACCESS_TOKEN" || true
 
   # Layer 6: Command-line flags (already handled in global flag parsing)
   [[ -n "${FIZZY_ACCOUNT:-}" ]] && _FIZZY_CONFIG["account_slug"]="$FIZZY_ACCOUNT" || true
@@ -248,8 +248,9 @@ set_credential_account_slug() {
 }
 
 get_access_token() {
-  if [[ -n "${FIZZY_ACCESS_TOKEN:-}" ]]; then
-    echo "$FIZZY_ACCESS_TOKEN"
+  # Priority: FIZZY_TOKEN env → stored credentials
+  if [[ -n "${FIZZY_TOKEN:-}" ]]; then
+    echo "$FIZZY_TOKEN"
     return
   fi
 
@@ -265,7 +266,31 @@ get_access_token() {
   echo "$token"
 }
 
+# Detect auth type: "token_env" | "oauth" | "none"
+get_auth_type() {
+  if [[ -n "${FIZZY_TOKEN:-}" ]]; then
+    echo "token_env"
+    return
+  fi
+
+  local creds
+  creds=$(load_credentials)
+  local token
+  token=$(echo "$creds" | jq -r '.access_token // empty')
+  if [[ -n "$token" ]]; then
+    echo "oauth"
+    return
+  fi
+
+  echo "none"
+}
+
 is_token_expired() {
+  # Env var tokens never expire
+  if [[ -n "${FIZZY_TOKEN:-}" ]]; then
+    return 1  # Not expired
+  fi
+
   local creds
   creds=$(load_credentials)
   local expires_at
@@ -481,7 +506,6 @@ get_config_source() {
     account_slug) [[ -n "${FIZZY_ACCOUNT_SLUG:-}" ]] && echo "env" && return ;;
     board_id) [[ -n "${FIZZY_BOARD_ID:-}" ]] && echo "env" && return ;;
     column_id) [[ -n "${FIZZY_COLUMN_ID:-}" ]] && echo "env" && return ;;
-    access_token) [[ -n "${FIZZY_ACCESS_TOKEN:-}" ]] && echo "env" && return ;;
   esac
 
   # Check local (cwd) config

@@ -8,14 +8,26 @@ _fizzy_completions() {
   local commands="
     auth config help version
     boards cards columns comments reactions notifications people search show tags
-    card update close reopen delete delete-image triage untriage postpone comment assign tag watch unwatch gild ungild step react
+    card board column close reopen triage untriage postpone comment assign tag watch unwatch gild ungild step react
+    identity user
   "
 
   local auth_subcommands="login logout status refresh"
   local config_subcommands="list get set unset path"
+  local card_subcommands="update delete image"
+  local board_subcommands="create update delete show"
+  local column_subcommands="create update delete show"
+  local card_image_subcommands="delete"
   local comment_subcommands="edit delete"
   local step_subcommands="show update delete"
   local react_subcommands="delete"
+  local user_subcommands="show update delete"
+
+  # Handle two-level deep subcommands (card image)
+  if [[ ${#words[@]} -ge 3 && "${words[1]}" == "card" && "${words[2]}" == "image" ]]; then
+    COMPREPLY=($(compgen -W "$card_image_subcommands" -- "$cur"))
+    return
+  fi
 
   case "$prev" in
     fizzy)
@@ -30,6 +42,18 @@ _fizzy_completions() {
       COMPREPLY=($(compgen -W "$config_subcommands" -- "$cur"))
       return
       ;;
+    card)
+      COMPREPLY=($(compgen -W "$card_subcommands" -- "$cur"))
+      return
+      ;;
+    board)
+      COMPREPLY=($(compgen -W "$board_subcommands" -- "$cur"))
+      return
+      ;;
+    column)
+      COMPREPLY=($(compgen -W "$column_subcommands" -- "$cur"))
+      return
+      ;;
     comment)
       COMPREPLY=($(compgen -W "$comment_subcommands" -- "$cur"))
       return
@@ -40,6 +64,10 @@ _fizzy_completions() {
       ;;
     react)
       COMPREPLY=($(compgen -W "$react_subcommands" -- "$cur"))
+      return
+      ;;
+    user)
+      COMPREPLY=($(compgen -W "$user_subcommands" -- "$cur"))
       return
       ;;
     --board|-b|--in)

@@ -74,12 +74,11 @@ main() {
     tags)         cmd_tags "$@" ;;
 
     # Action commands (using Fizzy's ubiquitous language)
-    card)         cmd_card_create "$@" ;;
-    update)       cmd_card_update "$@" ;;
+    card)         cmd_card "$@" ;;
+    board)        cmd_board "$@" ;;
+    column)       cmd_column "$@" ;;
     close)        cmd_close "$@" ;;
     reopen)       cmd_reopen "$@" ;;
-    delete)       cmd_delete "$@" ;;
-    delete-image) cmd_delete_image "$@" ;;
     triage)       cmd_triage "$@" ;;
     untriage)     cmd_untriage "$@" ;;
     postpone)     cmd_postpone "$@" ;;
@@ -92,6 +91,10 @@ main() {
     ungild)       cmd_ungild "$@" ;;
     step)         cmd_step "$@" ;;
     react)        cmd_react "$@" ;;
+
+    # Identity & users
+    identity)     cmd_identity "$@" ;;
+    user)         cmd_user "$@" ;;
 
     # Auth & config
     auth)         cmd_auth "$@" ;;
