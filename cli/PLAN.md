@@ -380,6 +380,64 @@ The account slug is a 7+ digit numeric ID (e.g., `897362094`).
 | `fizzy notifications unread <id>` | `/:slug/notifications/:id/reading` | DELETE | Mark as unread |
 | `fizzy notifications read --all` | `/:slug/notifications/bulk_reading` | POST | Mark all as read |
 
+### Board Management Commands → API Endpoints
+
+| Command | API Endpoint | HTTP | Notes |
+|---------|--------------|------|-------|
+| `fizzy board create "name"` | `/:slug/boards` | POST | Create board |
+| `fizzy board update <id>` | `/:slug/boards/:id` | PUT | Update board |
+| `fizzy board delete <id>` | `/:slug/boards/:id` | DELETE | Delete board |
+| `fizzy board publish <id>` | `/:slug/boards/:id/publication` | POST | Publish publicly, returns `shareable_key` |
+| `fizzy board unpublish <id>` | `/:slug/boards/:id/publication` | DELETE | Unpublish board |
+| `fizzy board entropy <id> --days N` | `/:slug/boards/:id/entropy` | PUT | Set auto-postpone period |
+
+### Column Management Commands → API Endpoints
+
+| Command | API Endpoint | HTTP | Notes |
+|---------|--------------|------|-------|
+| `fizzy column create "name" --board <id>` | `/:slug/boards/:bid/columns` | POST | Create column |
+| `fizzy column update <id>` | `/:slug/boards/:bid/columns/:id` | PUT | Update column |
+| `fizzy column delete <id>` | `/:slug/boards/:bid/columns/:id` | DELETE | Delete column |
+| `fizzy column left <id>` | `/:slug/boards/:bid/columns/:id/left_position` | POST | Move column left |
+| `fizzy column right <id>` | `/:slug/boards/:bid/columns/:id/right_position` | POST | Move column right |
+
+### Card Extended Commands → API Endpoints
+
+| Command | API Endpoint | HTTP | Notes |
+|---------|--------------|------|-------|
+| `fizzy card publish <num>` | `/:slug/cards/:num/publish` | POST | Publish drafted card |
+| `fizzy card move <num> --board <id>` | `/:slug/cards/:num/board` | PUT | Move card to another board |
+
+### User Management Commands → API Endpoints
+
+| Command | API Endpoint | HTTP | Notes |
+|---------|--------------|------|-------|
+| `fizzy user show <id>` | `/:slug/users/:id` | GET | Show user details |
+| `fizzy user update <id>` | `/:slug/users/:id` | PUT | Update user |
+| `fizzy user delete <id>` | `/:slug/users/:id` | DELETE | Deactivate user |
+| `fizzy user role <id> --role admin` | `/:slug/users/:id/role` | PUT | Change user role |
+
+### Account Management Commands → API Endpoints
+
+| Command | API Endpoint | HTTP | Notes |
+|---------|--------------|------|-------|
+| `fizzy account show` | `/:slug/account/settings` | GET | Show account settings |
+| `fizzy account update` | `/:slug/account/settings` | PUT | Update account name |
+| `fizzy account entropy --days N` | `/:slug/account/entropy` | PUT | Set default auto-postpone |
+| `fizzy account join-code` | `/:slug/account/join_code` | GET | Show join code |
+| `fizzy account join-code reset` | `/:slug/account/join_code` | DELETE | Reset join code |
+| `fizzy account export` | `/:slug/account/exports` | POST | Start data export |
+
+### Webhook Commands → API Endpoints
+
+| Command | API Endpoint | HTTP | Notes |
+|---------|--------------|------|-------|
+| `fizzy webhooks --board <id>` | `/:slug/boards/:bid/webhooks` | GET | List webhooks |
+| `fizzy webhook show <id>` | `/:slug/boards/:bid/webhooks/:id` | GET | Show webhook |
+| `fizzy webhook create --url <url>` | `/:slug/boards/:bid/webhooks` | POST | Create webhook |
+| `fizzy webhook update <id>` | `/:slug/boards/:bid/webhooks/:id` | PUT | Update webhook |
+| `fizzy webhook delete <id>` | `/:slug/boards/:bid/webhooks/:id` | DELETE | Delete webhook |
+
 ### Card Query Parameters (Filters)
 
 The `GET /:slug/cards` endpoint supports rich filtering:
