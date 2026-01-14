@@ -6,6 +6,8 @@
 # fizzy card update <num> [options]      - update card
 # fizzy card delete <num> [nums...]      - delete card(s)
 # fizzy card image delete <num>          - remove header image
+# fizzy card publish <num>               - publish draft card
+# fizzy card move <num> --to <board>     - move card to different board
 
 cmd_card() {
   case "${1:-}" in
@@ -20,6 +22,14 @@ cmd_card() {
     image)
       shift
       _card_image "$@"
+      ;;
+    publish)
+      shift
+      _card_publish "$@"
+      ;;
+    move)
+      shift
+      _card_move "$@"
       ;;
     *)
       # Default: create card
@@ -608,6 +618,238 @@ Update a card's title, description, or header image.
     fizzy card update 123 --description "<p>Updated content</p>"
     fizzy card update 123 --image ~/header.png
     fizzy card update 123 --title "New" --image cover.jpg
+EOF
+  fi
+}
+
+
+# fizzy card publish <number>
+# Publish a draft card
+
+_card_publish() {
+  local show_help=false
+  local card_number=""
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --help|-h)
+        show_help=true
+        shift
+        ;;
+      -*)
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy card publish --help"
+        ;;
+      *)
+        if [[ -z "$card_number" ]]; then
+          card_number="$1"
+        fi
+        shift
+        ;;
+    esac
+  done
+
+  if [[ "$show_help" == "true" ]]; then
+    _card_publish_help
+    return 0
+  fi
+
+  if [[ -z "$card_number" ]]; then
+    die "Card number required" $EXIT_USAGE "Usage: fizzy card publish <number>"
+  fi
+
+  local response
+  response=$(api_post "/cards/$card_number/publish" "")
+
+  # Fetch updated card
+  response=$(api_get "/cards/$card_number")
+
+  local summary="Card #$card_number published"
+
+  local breadcrumbs
+  breadcrumbs=$(breadcrumbs \
+    "$(breadcrumb "show" "fizzy show $card_number" "View card")" \
+    "$(breadcrumb "triage" "fizzy triage $card_number --to <column>" "Move to column")"
+  )
+
+  output "$response" "$summary" "$breadcrumbs" "_card_published_md"
+}
+
+_card_published_md() {
+  local data="$1"
+  local summary="$2"
+  local breadcrumbs="$3"
+
+  local number title
+  number=$(echo "$data" | jq -r '.number')
+  title=$(echo "$data" | jq -r '.title // .description[0:50]')
+
+  md_heading 2 "Card Published"
+  echo
+  md_kv "Number" "#$number" \
+        "Title" "$title" \
+        "Status" "published"
+
+  md_breadcrumbs "$breadcrumbs"
+}
+
+_card_publish_help() {
+  local format
+  format=$(get_format)
+
+  if [[ "$format" == "json" ]]; then
+    jq -n '{
+      command: "fizzy card publish",
+      description: "Publish a draft card",
+      usage: "fizzy card publish <number>",
+      examples: [
+        "fizzy card publish 123"
+      ]
+    }'
+  else
+    cat <<'EOF'
+## fizzy card publish
+
+Publish a draft card, making it visible to all board members.
+
+### Usage
+
+    fizzy card publish <number>
+
+### Examples
+
+    fizzy card publish 123
+EOF
+  fi
+}
+
+
+# fizzy card move <number> --to <board>
+# Move a card to a different board
+
+_card_move() {
+  local show_help=false
+  local card_number=""
+  local target_board=""
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --to|--board|-b)
+        if [[ -z "${2:-}" ]]; then
+          die "--to requires a board name or ID" $EXIT_USAGE
+        fi
+        target_board="$2"
+        shift 2
+        ;;
+      --help|-h)
+        show_help=true
+        shift
+        ;;
+      -*)
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy card move --help"
+        ;;
+      *)
+        if [[ -z "$card_number" ]]; then
+          card_number="$1"
+        fi
+        shift
+        ;;
+    esac
+  done
+
+  if [[ "$show_help" == "true" ]]; then
+    _card_move_help
+    return 0
+  fi
+
+  if [[ -z "$card_number" ]]; then
+    die "Card number required" $EXIT_USAGE "Usage: fizzy card move <number> --to <board>"
+  fi
+
+  if [[ -z "$target_board" ]]; then
+    die "--to <board> required" $EXIT_USAGE "Usage: fizzy card move <number> --to <board>"
+  fi
+
+  # Resolve board name to ID
+  local board_id
+  board_id=$(resolve_board_id "$target_board") || exit $?
+
+  # Move card to new board
+  local body
+  body=$(jq -n --arg board_id "$board_id" '{board_id: $board_id}')
+  api_patch "/cards/$card_number/board" "$body" > /dev/null
+
+  # Fetch updated card
+  local response
+  response=$(api_get "/cards/$card_number")
+
+  local board_name
+  board_name=$(echo "$response" | jq -r '.board.name')
+
+  local summary="Card #$card_number moved to $board_name"
+
+  local breadcrumbs
+  breadcrumbs=$(breadcrumbs \
+    "$(breadcrumb "show" "fizzy show $card_number" "View card")" \
+    "$(breadcrumb "triage" "fizzy triage $card_number --to <column>" "Move to column")"
+  )
+
+  output "$response" "$summary" "$breadcrumbs" "_card_moved_md"
+}
+
+_card_moved_md() {
+  local data="$1"
+  local summary="$2"
+  local breadcrumbs="$3"
+
+  local number title board_name
+  number=$(echo "$data" | jq -r '.number')
+  title=$(echo "$data" | jq -r '.title // .description[0:50]')
+  board_name=$(echo "$data" | jq -r '.board.name')
+
+  md_heading 2 "Card Moved"
+  echo
+  md_kv "Number" "#$number" \
+        "Title" "$title" \
+        "Board" "$board_name"
+
+  md_breadcrumbs "$breadcrumbs"
+}
+
+_card_move_help() {
+  local format
+  format=$(get_format)
+
+  if [[ "$format" == "json" ]]; then
+    jq -n '{
+      command: "fizzy card move",
+      description: "Move a card to a different board",
+      usage: "fizzy card move <number> --to <board>",
+      options: [
+        {flag: "--to, --board, -b", description: "Target board name or ID"}
+      ],
+      examples: [
+        "fizzy card move 123 --to \"Other Board\"",
+        "fizzy card move 123 -b abc123"
+      ]
+    }'
+  else
+    cat <<'EOF'
+## fizzy card move
+
+Move a card to a different board.
+
+### Usage
+
+    fizzy card move <number> --to <board>
+
+### Options
+
+    --to, --board, -b    Target board name or ID
+
+### Examples
+
+    fizzy card move 123 --to "Other Board"
+    fizzy card move 123 -b abc123
 EOF
   fi
 }
