@@ -163,4 +163,48 @@ class CardTest < ActiveSupport::TestCase
 
     assert_not Card.new.filled?
   end
+
+  test "pins are deleted when card moves to a board user cannot access" do
+    card = cards(:logo)
+    kevin = users(:kevin)
+    david = users(:david)
+
+    # David pins the card (Kevin already has it pinned via fixture)
+    card.pin_by(david)
+
+    assert card.pinned_by?(kevin)
+    assert card.pinned_by?(david)
+
+    # Kevin has access to the private board, David does not
+    assert boards(:private).accessible_to?(kevin)
+    assert_not boards(:private).accessible_to?(david)
+
+    perform_enqueued_jobs only: Card::CleanInaccessibleDataJob do
+      card.move_to(boards(:private))
+    end
+
+    assert card.pinned_by?(kevin), "Kevin's pin should remain (has board access)"
+    assert_not card.pinned_by?(david), "David's pin should be deleted (no board access)"
+  end
+
+  test "watches are deleted when card moves to a board user cannot access" do
+    card = cards(:logo)
+    kevin = users(:kevin)
+    david = users(:david)
+
+    # Both watch the card via fixtures
+    assert card.watched_by?(kevin)
+    assert card.watched_by?(david)
+
+    # Kevin has access to the private board, David does not
+    assert boards(:private).accessible_to?(kevin)
+    assert_not boards(:private).accessible_to?(david)
+
+    perform_enqueued_jobs only: Card::CleanInaccessibleDataJob do
+      card.move_to(boards(:private))
+    end
+
+    assert card.watched_by?(kevin), "Kevin's watch should remain (has board access)"
+    assert_not card.watched_by?(david), "David's watch should be deleted (no board access)"
+  end
 end

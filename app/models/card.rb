@@ -1,5 +1,5 @@
 class Card < ApplicationRecord
-  include Assignable, Attachments, Broadcastable, Closeable, Colored, Entropic, Eventable,
+  include Accessible, Assignable, Attachments, Broadcastable, Closeable, Colored, Entropic, Eventable,
     Exportable, Golden, Mentions, Multistep, Pinnable, Postponable, Promptable,
     Readable, Searchable, Stallable, Statuses, Storage::Tracked, Taggable, Triageable, Watchable
 
@@ -44,12 +44,6 @@ class Card < ApplicationRecord
     when "latest" then latest
     else latest
     end
-  end
-
-  delegate :accessible_to?, to: :board
-
-  def publicly_accessible?
-    published? && board.publicly_accessible?
   end
 
   def card
@@ -135,14 +129,11 @@ class Card < ApplicationRecord
       end
 
       remove_inaccessible_notifications_later
+      clean_inaccessible_data_later
     end
 
     def track_board_change_event(old_board_name)
       track_event "board_changed", particulars: { old_board: old_board_name, new_board: board.name }
-    end
-
-    def grant_access_to_assignees
-      board.accesses.grant_to(assignees)
     end
 
     def assign_number
