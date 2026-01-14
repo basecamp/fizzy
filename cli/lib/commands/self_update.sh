@@ -53,31 +53,39 @@ cmd_self_update() {
   # Get current commit (short SHA)
   local current_commit="$FIZZY_COMMIT"
 
-  # Fetch remote commit
+  # Fetch remote commit (may fail due to rate limits or non-GitHub forks)
   local remote_commit
-  remote_commit=$(_fetch_remote_commit) || {
-    json_error "Failed to check for updates" "network" \
-      "Check your internet connection and try again"
-    return $EXIT_NETWORK
-  }
+  remote_commit=$(_fetch_remote_commit) || remote_commit=""
 
-  # Compare commits
-  if [[ "$current_commit" == "$remote_commit" ]] && [[ "$force" != "true" ]]; then
+  # If we couldn't get remote commit and not forcing, fail gracefully
+  if [[ -z "$remote_commit" ]] && [[ "$force" != "true" ]]; then
+    json_error "Failed to check for updates" "network" \
+      "GitHub API may be rate-limited. Use 'fizzy self-update --force' to update anyway"
+    return $EXIT_NETWORK
+  fi
+
+  # Compare commits (skip if no remote commit available)
+  if [[ -n "$remote_commit" ]] && [[ "$current_commit" == "$remote_commit" ]] && [[ "$force" != "true" ]]; then
     if [[ "$(get_format)" == "json" ]]; then
       json_output "true" '{
         "current_commit": "'"$current_commit"'",
         "remote_commit": "'"$remote_commit"'",
         "up_to_date": true,
         "updated": false
-      }' "fizzy is up to date (main $current_commit)"
+      }' "fizzy is up to date ($FIZZY_BRANCH $current_commit)"
     else
-      echo "fizzy is up to date (main $current_commit)"
+      echo "fizzy is up to date ($FIZZY_BRANCH $current_commit)"
     fi
     return 0
   fi
 
   # Check only mode
   if [[ "$check_only" == "true" ]]; then
+    if [[ -z "$remote_commit" ]]; then
+      json_error "Cannot check for updates" "network" \
+        "GitHub API unavailable. Use 'fizzy self-update --force' to update anyway"
+      return $EXIT_NETWORK
+    fi
     if [[ "$(get_format)" == "json" ]]; then
       json_output "true" '{
         "current_commit": "'"$current_commit"'",
@@ -93,23 +101,34 @@ cmd_self_update() {
   fi
 
   # Perform update
-  if [[ "$(get_format)" == "json" ]]; then
-    echo "Updating fizzy $current_commit → $remote_commit..." >&2
+  local update_msg
+  if [[ -n "$remote_commit" ]]; then
+    update_msg="Updating fizzy $current_commit → $remote_commit..."
   else
-    echo "Updating fizzy $current_commit → $remote_commit..."
+    update_msg="Updating fizzy to latest $FIZZY_BRANCH..."
+  fi
+
+  if [[ "$(get_format)" == "json" ]]; then
+    echo "$update_msg" >&2
+  else
+    echo "$update_msg"
   fi
 
   if _perform_update "$remote_commit"; then
+    # Re-read commit after update
+    local new_commit
+    new_commit="$(cat "$FIZZY_ROOT/.commit" 2>/dev/null || echo "unknown")"
+
     if [[ "$(get_format)" == "json" ]]; then
       json_output "true" '{
         "current_commit": "'"$current_commit"'",
-        "remote_commit": "'"$remote_commit"'",
-        "new_commit": "'"$remote_commit"'",
+        "remote_commit": "'"${remote_commit:-unknown}"'",
+        "new_commit": "'"$new_commit"'",
         "up_to_date": true,
         "updated": true
-      }' "Updated fizzy to main ($remote_commit)"
+      }' "Updated fizzy to $FIZZY_BRANCH ($new_commit)"
     else
-      echo "Updated fizzy to main ($remote_commit)"
+      echo "Updated fizzy to $FIZZY_BRANCH ($new_commit)"
     fi
     return 0
   else
@@ -120,9 +139,25 @@ cmd_self_update() {
 }
 
 # Fetch latest commit SHA from GitHub API (short form)
+# Returns empty string on failure (caller should handle)
 _fetch_remote_commit() {
-  curl -fsSL --max-time 10 "$FIZZY_API_URL/commits/$FIZZY_BRANCH" 2>/dev/null | \
-    grep '"sha"' | head -1 | cut -d'"' -f4 | cut -c1-7
+  local response sha
+
+  # Only works with GitHub API - non-GitHub forks need manual update
+  response=$(curl -fsSL --max-time 10 "$FIZZY_API_URL/commits/$FIZZY_BRANCH" 2>/dev/null) || return 1
+
+  # Check for API rate limit or error response
+  if [[ "$response" == *'"message":'* ]] && [[ "$response" != *'"sha":'* ]]; then
+    # API error (rate limit, not found, etc.)
+    return 1
+  fi
+
+  sha=$(echo "$response" | grep '"sha"' | head -1 | cut -d'"' -f4 | cut -c1-7)
+  if [[ -z "$sha" ]]; then
+    return 1
+  fi
+
+  echo "$sha"
 }
 
 # Perform the actual update
@@ -142,8 +177,15 @@ _perform_update() {
   cp -r "$tmp"/* "$FIZZY_ROOT/" || return 1
 
   # Write commit SHA for version tracking
+  # If not provided, try to fetch it (best-effort for --force case)
+  if [[ -z "$new_commit" ]]; then
+    new_commit=$(_fetch_remote_commit) || true
+  fi
   if [[ -n "$new_commit" ]]; then
     echo "$new_commit" > "$FIZZY_ROOT/.commit"
+  else
+    # Fallback: record the branch name if we can't get commit
+    echo "$FIZZY_BRANCH" > "$FIZZY_ROOT/.commit"
   fi
 
   # Ensure executable

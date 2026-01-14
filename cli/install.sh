@@ -1,10 +1,18 @@
 #!/usr/bin/env bash
 # fizzy CLI installer
 # Usage: curl -fsSL https://raw.githubusercontent.com/basecamp/fizzy/main/cli/install.sh | bash
+#
+# Environment variables:
+#   FIZZY_INSTALL_DIR  - Installation directory (default: ~/.local/share/fizzy)
+#   FIZZY_BIN_DIR      - Symlink directory (default: ~/.local/bin)
+#   FIZZY_REPO         - GitHub repo (default: basecamp/fizzy)
+#   FIZZY_REF          - Git ref to install (default: main)
+#   FIZZY_COMMIT       - Skip API call, use this commit SHA for version tracking
 
 set -euo pipefail
 
-REPO="basecamp/fizzy"
+REPO="${FIZZY_REPO:-basecamp/fizzy}"
+REF="${FIZZY_REF:-main}"
 INSTALL_DIR="${FIZZY_INSTALL_DIR:-$HOME/.local/share/fizzy}"
 BIN_DIR="${FIZZY_BIN_DIR:-$HOME/.local/bin}"
 
@@ -29,10 +37,22 @@ check_deps() {
   fi
 }
 
-# Get latest commit SHA from GitHub API
+# Get commit SHA from GitHub API (best-effort, not critical)
 get_commit_sha() {
-  curl -fsSL "https://api.github.com/repos/$REPO/commits/main" 2>/dev/null | \
-    grep '"sha"' | head -1 | cut -d'"' -f4 | cut -c1-7
+  # Allow override via environment (useful for CI/offline installs)
+  if [[ -n "${FIZZY_COMMIT:-}" ]]; then
+    echo "$FIZZY_COMMIT"
+    return 0
+  fi
+
+  # Try GitHub API (may fail due to rate limits)
+  local sha
+  sha=$(curl -fsSL --max-time 5 "https://api.github.com/repos/$REPO/commits/$REF" 2>/dev/null | \
+    grep '"sha"' | head -1 | cut -d'"' -f4 | cut -c1-7) || true
+
+  if [[ -n "$sha" ]]; then
+    echo "$sha"
+  fi
 }
 
 # Download and install
@@ -42,27 +62,36 @@ install_fizzy() {
   # Create directories
   mkdir -p "$INSTALL_DIR" "$BIN_DIR"
 
-  # Download latest from main branch
+  # Download from GitHub
   local tmp
   tmp=$(mktemp -d)
   trap "rm -rf $tmp" EXIT
 
-  info "Downloading from GitHub..."
-  curl -fsSL "https://github.com/$REPO/archive/refs/heads/main.tar.gz" | \
-    tar -xz -C "$tmp" --strip-components=2 "fizzy-main/cli"
+  # Determine archive name (branch uses refs/heads/, tags use refs/tags/)
+  local archive_url="https://github.com/$REPO/archive/refs/heads/$REF.tar.gz"
+  local strip_prefix="fizzy-$REF"
+
+  info "Downloading from GitHub ($REF)..."
+  if ! curl -fsSL "$archive_url" | tar -xz -C "$tmp" --strip-components=2 "$strip_prefix/cli" 2>/dev/null; then
+    # Try as tag instead
+    archive_url="https://github.com/$REPO/archive/refs/tags/$REF.tar.gz"
+    curl -fsSL "$archive_url" | tar -xz -C "$tmp" --strip-components=2 "$strip_prefix/cli" || \
+      die "Failed to download from $REPO at ref $REF"
+  fi
 
   # Copy files
   cp -r "$tmp"/* "$INSTALL_DIR/"
 
-  # Write commit SHA for version tracking
+  # Write commit SHA for version tracking (best-effort)
   local commit_sha
   commit_sha=$(get_commit_sha)
   if [[ -n "$commit_sha" ]]; then
     echo "$commit_sha" > "$INSTALL_DIR/.commit"
-    info "Installed fizzy main ($commit_sha)"
+    info "Installed fizzy $REF ($commit_sha)"
   else
-    echo "unknown" > "$INSTALL_DIR/.commit"
-    info "Installed fizzy main"
+    # No commit SHA available, just record the ref
+    echo "$REF" > "$INSTALL_DIR/.commit"
+    info "Installed fizzy $REF"
   fi
 
   # Make executable
