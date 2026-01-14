@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# self_update.bats - Tests for version and self-update commands
+# self_update.bats - Tests for version, self-update, and uninstall commands
 
 load test_helper
 
@@ -10,7 +10,7 @@ load test_helper
   run fizzy --version
   assert_success
   assert_output_contains "fizzy"
-  assert_output_contains "0."
+  assert_output_contains "main"
 }
 
 @test "fizzy -V shows version" {
@@ -70,15 +70,46 @@ load test_helper
 }
 
 
-# VERSION file
+# uninstall --help
 
-@test "VERSION file exists" {
-  [[ -f "$FIZZY_ROOT/VERSION" ]]
+@test "uninstall --help shows help" {
+  run fizzy --md uninstall --help
+  assert_success
+  assert_output_contains "fizzy uninstall"
+  assert_output_contains "Remove fizzy CLI"
 }
 
-@test "VERSION file contains valid semver" {
-  local version
-  version=$(cat "$FIZZY_ROOT/VERSION")
-  # Basic semver pattern: X.Y.Z
-  [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+@test "uninstall -h shows help" {
+  run fizzy --md uninstall -h
+  assert_success
+  assert_output_contains "fizzy uninstall"
+}
+
+@test "uninstall --help --json outputs JSON" {
+  run fizzy --json uninstall --help
+  assert_success
+  is_valid_json
+  assert_json_value ".command" "fizzy uninstall"
+}
+
+
+# uninstall guards
+
+@test "uninstall detects git checkout" {
+  mkdir -p "$FIZZY_ROOT/.git"
+  run fizzy --json uninstall
+  rmdir "$FIZZY_ROOT/.git"
+  assert_failure
+  assert_output_contains "git checkout"
+}
+
+@test "uninstall without --force shows confirmation" {
+  # Skip this test if running from git checkout (which it always is in dev)
+  if [[ -d "$FIZZY_ROOT/.git" ]]; then
+    skip "Running from git checkout"
+  fi
+  run fizzy --md uninstall
+  assert_success
+  assert_output_contains "This will remove fizzy"
+  assert_output_contains "--force"
 }

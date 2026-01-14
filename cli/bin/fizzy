@@ -28,7 +28,8 @@ fi
 
 # Determine script location for loading libs
 FIZZY_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-FIZZY_VERSION="$(cat "$FIZZY_ROOT/VERSION" 2>/dev/null || echo "dev")"
+FIZZY_COMMIT="$(cat "$FIZZY_ROOT/.commit" 2>/dev/null || echo "dev")"
+FIZZY_VERSION="main${FIZZY_COMMIT:+ ($FIZZY_COMMIT)}"
 
 # Handle --version early (before loading libs)
 if [[ "${1:-}" == "--version" || "${1:-}" == "-V" ]]; then
@@ -112,6 +113,7 @@ main() {
     # Meta
     version)      echo "fizzy $FIZZY_VERSION" ;;
     self-update)  cmd_self_update "$@" ;;
+    uninstall)    cmd_uninstall "$@" ;;
     help|--help|-h)
       cmd_help "$@"
       ;;

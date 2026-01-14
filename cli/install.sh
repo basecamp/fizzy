@@ -29,6 +29,12 @@ check_deps() {
   fi
 }
 
+# Get latest commit SHA from GitHub API
+get_commit_sha() {
+  curl -fsSL "https://api.github.com/repos/$REPO/commits/main" 2>/dev/null | \
+    grep '"sha"' | head -1 | cut -d'"' -f4 | cut -c1-7
+}
+
 # Download and install
 install_fizzy() {
   info "Installing fizzy to $INSTALL_DIR"
@@ -48,13 +54,22 @@ install_fizzy() {
   # Copy files
   cp -r "$tmp"/* "$INSTALL_DIR/"
 
+  # Write commit SHA for version tracking
+  local commit_sha
+  commit_sha=$(get_commit_sha)
+  if [[ -n "$commit_sha" ]]; then
+    echo "$commit_sha" > "$INSTALL_DIR/.commit"
+    info "Installed fizzy main ($commit_sha)"
+  else
+    echo "unknown" > "$INSTALL_DIR/.commit"
+    info "Installed fizzy main"
+  fi
+
   # Make executable
   chmod +x "$INSTALL_DIR/bin/fizzy"
 
   # Create symlink in bin
   ln -sf "$INSTALL_DIR/bin/fizzy" "$BIN_DIR/fizzy"
-
-  info "Installed fizzy to $BIN_DIR/fizzy"
 }
 
 # Setup completions hint
