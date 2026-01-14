@@ -3,7 +3,7 @@ class UsersController < ApplicationController
   before_action :ensure_permission_to_change_user, only: %i[ update destroy ]
 
   def index
-    set_page_and_extract_portion_from Current.account.users.active.alphabetically
+    set_page_and_extract_portion_from Current.account.users.active.alphabetically.includes(:identity)
   end
 
   def show

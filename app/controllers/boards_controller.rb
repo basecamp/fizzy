@@ -5,7 +5,7 @@ class BoardsController < ApplicationController
   before_action :ensure_permission_to_admin_board, only: %i[ update destroy ]
 
   def index
-    set_page_and_extract_portion_from Current.user.boards
+    set_page_and_extract_portion_from Current.user.boards.includes(creator: :identity)
   end
 
   def show
