@@ -89,7 +89,7 @@ load test_helper
 
 @test "loads credentials from file" {
   create_credentials "my-test-token" "$(($(date +%s) + 3600))"
-  unset FIZZY_ACCESS_TOKEN
+  unset FIZZY_TOKEN
 
   source "$FIZZY_ROOT/lib/core.sh"
   source "$FIZZY_ROOT/lib/config.sh"
@@ -98,9 +98,9 @@ load test_helper
   [[ "$result" == "my-test-token" ]]
 }
 
-@test "environment token overrides file" {
+@test "FIZZY_TOKEN overrides stored credentials" {
   create_credentials "file-token"
-  export FIZZY_ACCESS_TOKEN="env-token"
+  export FIZZY_TOKEN="env-token"
 
   source "$FIZZY_ROOT/lib/core.sh"
   source "$FIZZY_ROOT/lib/config.sh"

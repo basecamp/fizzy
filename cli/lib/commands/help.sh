@@ -40,13 +40,18 @@ _help_topic() {
     config) _help_config ;;
     cards) _help_cards ;;
     boards) _help_boards ;;
+    board) _board_help ;;
+    column) _column_help ;;
+    columns) _columns_help ;;
+    identity) _identity_help ;;
+    user) _user_help ;;
     *)
       if [[ "$format" == "json" ]]; then
         json_error "Unknown help topic: $topic" "not_found"
       else
         echo "Unknown help topic: $topic"
         echo
-        echo "Available topics: auth, config, cards, boards"
+        echo "Available topics: auth, config, cards, boards, board, column, columns, identity, user"
       fi
       exit 1
       ;;
@@ -61,8 +66,9 @@ _help_json() {
       version: $version,
       description: "Agent-first CLI for Fizzy",
       commands: {
-        query: ["boards", "cards", "columns", "comments", "notifications", "people", "search", "show", "tags"],
-        actions: ["card", "close", "reopen", "triage", "untriage", "postpone", "comment", "assign", "tag", "watch", "unwatch", "gild", "ungild", "step", "react"],
+        query: ["boards", "cards", "columns", "comments", "reactions", "notifications", "people", "search", "show", "tags"],
+        actions: ["card", "board", "column", "close", "reopen", "triage", "untriage", "postpone", "comment", "assign", "tag", "watch", "unwatch", "gild", "ungild", "step", "react"],
+        identity: ["identity", "user"],
         meta: ["auth", "config", "version", "help"]
       },
       global_flags: [
@@ -102,6 +108,7 @@ Agent-first CLI for Fizzy.
     cards            List or filter cards
     columns          List columns on a board
     comments         List comments on a card
+    reactions        List reactions on a comment
     notifications    List notifications
     people           List users in account
     search           Search cards
@@ -109,21 +116,27 @@ Agent-first CLI for Fizzy.
     tags             List tags
 
 ### Actions
-    card             Create a new card
+    card             Manage cards (create/update/delete/image)
+    board            Manage boards (create/update/delete/show)
+    column           Manage columns (create/update/delete/show)
     close            Close a card
     reopen           Reopen a closed card
     triage           Move card into a column
     untriage         Send card back to triage
     postpone         Move card to "Not Now"
-    comment          Add comment to a card
+    comment          Manage comments (add/edit/delete)
     assign           Assign/unassign user to card
     tag              Toggle tag on card
     watch            Subscribe to card notifications
     unwatch          Unsubscribe from card
     gild             Mark card as golden
     ungild           Remove golden status
-    step             Manage card steps
-    react            Add reaction to comment
+    step             Manage steps (add/show/update/delete)
+    react            Manage reactions (add/delete)
+
+### Identity
+    identity         Show current identity and accounts
+    user             Manage users (show/update/delete)
 
 ### Meta
     auth             Authentication management
@@ -138,7 +151,7 @@ Agent-first CLI for Fizzy.
     fizzy show 42                 Show card #42
     fizzy card "New feature"      Create a new card
     fizzy close 42                Close card #42
-    fizzy comment 42 "LGTM"       Comment on card #42
+    fizzy comment "LGTM" --on 42  Comment on card #42
 
 ## CONFIGURATION
 

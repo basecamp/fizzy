@@ -389,3 +389,115 @@ EOF
   assert_output_contains "Not authenticated"
   assert_output_contains "fizzy auth login"
 }
+
+
+# FIZZY_TOKEN environment variable
+
+@test "FIZZY_TOKEN takes precedence over stored credentials" {
+  create_credentials "stored-token" "$(($(date +%s) + 3600))" "write"
+
+  export FIZZY_TOKEN="env-token"
+
+  source "$FIZZY_ROOT/lib/core.sh"
+  source "$FIZZY_ROOT/lib/config.sh"
+
+  result=$(get_access_token)
+  [[ "$result" == "env-token" ]]
+}
+
+@test "get_auth_type returns token_env when FIZZY_TOKEN set" {
+  export FIZZY_TOKEN="env-token"
+
+  source "$FIZZY_ROOT/lib/core.sh"
+  source "$FIZZY_ROOT/lib/config.sh"
+
+  result=$(get_auth_type)
+  [[ "$result" == "token_env" ]]
+}
+
+@test "get_auth_type returns oauth when stored credentials" {
+  create_credentials "stored-token" "$(($(date +%s) + 3600))" "write"
+
+  source "$FIZZY_ROOT/lib/core.sh"
+  source "$FIZZY_ROOT/lib/config.sh"
+
+  result=$(get_auth_type)
+  [[ "$result" == "oauth" ]]
+}
+
+@test "get_auth_type returns none when no auth" {
+  source "$FIZZY_ROOT/lib/core.sh"
+  source "$FIZZY_ROOT/lib/config.sh"
+
+  result=$(get_auth_type)
+  [[ "$result" == "none" ]]
+}
+
+@test "is_token_expired returns false for FIZZY_TOKEN" {
+  export FIZZY_TOKEN="env-token"
+
+  source "$FIZZY_ROOT/lib/core.sh"
+  source "$FIZZY_ROOT/lib/config.sh"
+
+  ! is_token_expired
+}
+
+@test "auth status shows FIZZY_TOKEN indicator" {
+  export FIZZY_TOKEN="env-token"
+  export FIZZY_ACCOUNT_SLUG="99999999"
+
+  run fizzy --md auth status
+  assert_success
+  assert_output_contains "Authenticated"
+  assert_output_contains "FIZZY_TOKEN"
+}
+
+@test "auth status --json shows env auth type" {
+  export FIZZY_TOKEN="env-token"
+
+  run fizzy --json auth status
+  assert_success
+  is_valid_json
+  assert_json_value ".status" "authenticated"
+  assert_json_value ".auth" "env"
+}
+
+@test "auth logout warns about FIZZY_TOKEN still set" {
+  create_credentials "stored-token"
+  export FIZZY_TOKEN="env-token"
+
+  run fizzy auth logout
+  assert_success
+  assert_output_contains "Logged out"
+  assert_output_contains "FIZZY_TOKEN"
+  assert_output_contains "still set"
+}
+
+@test "auth refresh fails with FIZZY_TOKEN" {
+  export FIZZY_TOKEN="env-token"
+
+  run fizzy auth refresh
+  assert_failure
+  assert_output_contains "FIZZY_TOKEN does not support refresh"
+}
+
+@test "auth status shows coexistence note when both token sources exist" {
+  create_credentials "stored-token"
+  export FIZZY_TOKEN="env-token"
+
+  run fizzy --md auth status
+  assert_success
+  assert_output_contains "FIZZY_TOKEN"
+  assert_output_contains "precedence"
+  assert_output_contains "Stored OAuth credentials also exist"
+}
+
+@test "auth status --json includes has_stored_credentials when using FIZZY_TOKEN" {
+  create_credentials "stored-token"
+  export FIZZY_TOKEN="env-token"
+
+  run fizzy --json auth status
+  assert_success
+  is_valid_json
+  assert_json_value ".has_stored_credentials" "true"
+}

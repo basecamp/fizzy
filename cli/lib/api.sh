@@ -88,7 +88,7 @@ ensure_auth() {
     die "Not authenticated. Run: fizzy auth login" $EXIT_AUTH
   }
 
-  if is_token_expired && [[ -z "${FIZZY_ACCESS_TOKEN:-}" ]]; then
+  if is_token_expired && [[ -z "${FIZZY_TOKEN:-}" ]]; then
     debug "Token expired, refreshing..."
     if ! refresh_token; then
       die "Token expired and refresh failed. Run: fizzy auth login" $EXIT_AUTH
@@ -350,7 +350,7 @@ _api_request() {
         ((attempt++))
         ;;
       401)
-        if [[ $attempt -eq 1 ]] && [[ -z "${FIZZY_ACCESS_TOKEN:-}" ]] && [[ -n "$token" ]]; then
+        if [[ $attempt -eq 1 ]] && [[ -z "${FIZZY_TOKEN:-}" ]] && [[ -n "$token" ]]; then
           debug "401 received, attempting token refresh"
           if refresh_token; then
             token=$(get_access_token)
@@ -400,6 +400,68 @@ _api_request() {
   done
 
   die "Request failed after $FIZZY_MAX_RETRIES retries" $EXIT_API
+}
+
+
+# Multipart Upload Helper
+# Executes curl with retry logic for 429/5xx errors
+# Usage: api_multipart_request http_code_var response_var curl_args...
+
+api_multipart_request() {
+  local -n _http_code_ref=$1
+  local -n _response_ref=$2
+  shift 2
+
+  local attempt=1
+  local delay=$FIZZY_BASE_DELAY
+  local max_retries=3  # Fewer retries for uploads
+
+  while (( attempt <= max_retries )); do
+    debug "Multipart upload (attempt $attempt)"
+
+    local output curl_exit
+    output=$(curl "$@") || curl_exit=$?
+
+    if [[ -n "${curl_exit:-}" ]]; then
+      case "$curl_exit" in
+        6)  die "Could not resolve host" $EXIT_NETWORK ;;
+        7)  die "Connection refused" $EXIT_NETWORK ;;
+        28) die "Connection timed out" $EXIT_NETWORK ;;
+        35) die "SSL/TLS handshake failed" $EXIT_NETWORK ;;
+        *)  die "Network error (curl exit $curl_exit)" $EXIT_NETWORK ;;
+      esac
+    fi
+
+    _http_code_ref=$(echo "$output" | tail -n1)
+    _response_ref=$(echo "$output" | sed '$d')
+
+    debug "HTTP $_http_code_ref"
+
+    case "$_http_code_ref" in
+      200|201|204)
+        return 0
+        ;;
+      429)
+        delay=$((FIZZY_BASE_DELAY * 2 ** (attempt - 1)))
+        info "Rate limited, waiting ${delay}s..."
+        sleep "$delay"
+        ((attempt++))
+        ;;
+      502|503|504)
+        delay=$((FIZZY_BASE_DELAY * 2 ** (attempt - 1)))
+        info "Gateway error ($_http_code_ref), retrying in ${delay}s..."
+        sleep "$delay"
+        ((attempt++))
+        ;;
+      *)
+        # Non-retryable error - return and let caller handle
+        return 0
+        ;;
+    esac
+  done
+
+  # Exhausted retries - return last response for caller to handle
+  return 0
 }
 
 

@@ -67,6 +67,43 @@ load test_helper
 }
 
 
+# board --help
+
+@test "board --help shows help" {
+  run fizzy --md board --help
+  assert_success
+  assert_output_contains "fizzy board"
+  assert_output_contains "Manage boards"
+}
+
+
+# board validation
+
+@test "board create without name shows error" {
+  run fizzy board create
+  assert_failure
+  assert_output_contains "Board name required"
+}
+
+@test "board update without id shows error" {
+  run fizzy board update
+  assert_failure
+  assert_output_contains "Board ID required"
+}
+
+@test "board delete without id shows error" {
+  run fizzy board delete
+  assert_failure
+  assert_output_contains "Board ID required"
+}
+
+@test "board show without id shows error" {
+  run fizzy board show
+  assert_failure
+  assert_output_contains "Board ID required"
+}
+
+
 # columns --help
 
 @test "columns --help shows help" {
@@ -99,4 +136,53 @@ load test_helper
   run fizzy --md columns --help
   assert_success
   assert_output_contains "--board"
+}
+
+
+# column --help
+
+@test "column --help shows help" {
+  run fizzy --md column --help
+  assert_success
+  assert_output_contains "fizzy column"
+  assert_output_contains "Manage columns"
+}
+
+
+# column validation
+
+@test "column create without name shows error" {
+  run fizzy column create --board abc123
+  assert_failure
+  assert_output_contains "Column name required"
+}
+
+@test "column create without board shows error" {
+  run fizzy column create "In Progress"
+  assert_failure
+  assert_output_contains "No board specified"
+}
+
+@test "column update without id shows error" {
+  run fizzy column update
+  assert_failure
+  assert_output_contains "Column ID required"
+}
+
+@test "column update without board shows error" {
+  run fizzy column update abc123
+  assert_failure
+  assert_output_contains "No board specified"
+}
+
+@test "column delete without id shows error" {
+  run fizzy column delete
+  assert_failure
+  assert_output_contains "Column ID required"
+}
+
+@test "column show without id shows error" {
+  run fizzy column show
+  assert_failure
+  assert_output_contains "Column ID required"
 }

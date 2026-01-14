@@ -102,6 +102,7 @@ fizzy --md boards
 | `cards` | List or filter cards (supports `--page` pagination) |
 | `columns` | List columns on a board |
 | `comments` | List comments on a card |
+| `reactions` | List reactions on a comment |
 | `notifications` | List notifications |
 | `people` | List users in account |
 | `search` | Search cards |
@@ -112,21 +113,32 @@ fizzy --md boards
 
 | Command | Description |
 |---------|-------------|
-| `card` | Create a new card |
+| `card` | Manage cards (create/update/delete/image) |
+| `board` | Manage boards (create/update/delete/show) |
+| `column` | Manage columns on a board |
 | `close` | Close a card |
 | `reopen` | Reopen a closed card |
 | `triage` | Move card to a column |
 | `untriage` | Move card back to triage |
 | `postpone` | Move card to "not now" |
-| `comment` | Add a comment to a card |
+| `comment` | Manage comments (add/edit/delete) |
 | `assign` | Assign a card to someone |
 | `tag` | Add a tag to a card |
 | `watch` | Subscribe to card notifications |
 | `unwatch` | Unsubscribe from card |
 | `gild` | Mark card as golden |
 | `ungild` | Remove golden status |
-| `step` | Add a step (checklist item) to a card |
-| `react` | Add a reaction to a card or comment |
+| `step` | Manage steps (add/show/update/delete) |
+| `react` | Manage reactions (add/delete) |
+
+#### Card Subcommands
+
+| Command | Description |
+|---------|-------------|
+| `card "title"` | Create a new card (default) |
+| `card update <num>` | Update card title/description |
+| `card delete <num>` | Permanently delete a card |
+| `card image delete <num>` | Remove header image from card |
 
 ## Global Flags
 
@@ -156,6 +168,18 @@ fizzy auth status             # Shows current scope
 ```
 
 Fizzy issues long-lived tokens that don't expire, so you only need to re-authenticate if you explicitly logout or revoke your token.
+
+### Token for CI/Scripts
+
+For non-interactive environments, set `FIZZY_TOKEN`:
+
+```bash
+export FIZZY_URL=http://fizzy.localhost:3006/897362094
+export FIZZY_TOKEN=fzt_...
+fizzy cards --in "My Board"
+```
+
+Generate tokens at Profile → API → Personal access tokens.
 
 ## Configuration
 
@@ -188,7 +212,14 @@ fizzy config path
 
 ## Environment
 
-Point `fizzy` at different Fizzy instances using `FIZZY_BASE_URL`:
+| Variable | Description |
+|----------|-------------|
+| `FIZZY_URL` | Base URL + account slug (e.g., `http://fizzy.localhost:3006/897362094`) |
+| `FIZZY_BASE_URL` | Base URL only (default: `http://fizzy.localhost:3006`) |
+| `FIZZY_ACCOUNT_SLUG` | Account ID (7+ digit number) |
+| `FIZZY_TOKEN` | Personal access token for CI/scripts |
+
+`FIZZY_URL` is a convenience — it sets both `FIZZY_BASE_URL` and `FIZZY_ACCOUNT_SLUG` from a single URL. Explicit vars take precedence.
 
 ```bash
 # Local development (default: http://fizzy.localhost:3006)

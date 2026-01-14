@@ -115,13 +115,6 @@ _auth_login() {
 
   info "Starting authentication..."
 
-  # Check for existing valid token
-  if get_access_token &>/dev/null && ! is_token_expired; then
-    info "Already authenticated. Use 'fizzy auth logout' first to re-authenticate."
-    _auth_status
-    return 0
-  fi
-
   # Pre-fetch OAuth config (avoids repeated discovery in subshells)
   _ensure_oauth_config
 
@@ -196,11 +189,18 @@ _auth_login() {
 }
 
 _auth_logout() {
-  if get_access_token &>/dev/null; then
+  local creds
+  creds=$(load_credentials)
+  if [[ -n "$(echo "$creds" | jq -r '.access_token // empty')" ]]; then
     clear_credentials
     info "Logged out from $FIZZY_BASE_URL"
   else
     info "Not logged in to $FIZZY_BASE_URL"
+  fi
+
+  # Warn if env var will still override
+  if [[ -n "${FIZZY_TOKEN:-}" ]]; then
+    warn "FIZZY_TOKEN environment variable is still set and will be used for authentication"
   fi
 }
 
@@ -209,23 +209,34 @@ _auth_status() {
   format=$(get_format)
 
   local auth_status="unauthenticated"
-  local user_name=""
+  local auth_type="none"
   local account_slug=""
   local account_name=""
   local expires_at=""
   local token_status="none"
   local scope=""
+  local has_stored_creds=false
 
   if get_access_token &>/dev/null; then
     auth_status="authenticated"
+    auth_type=$(get_auth_type)
 
     local creds
     creds=$(load_credentials)
-    expires_at=$(echo "$creds" | jq -r '.expires_at // "null"')
-    scope=$(echo "$creds" | jq -r '.scope // empty')
+    local stored_token
+    stored_token=$(echo "$creds" | jq -r '.access_token // empty')
+    [[ -n "$stored_token" ]] && has_stored_creds=true
 
-    # Determine token status based on expiration
-    if [[ "$expires_at" == "null" ]] || [[ "$expires_at" == "0" ]]; then
+    # Only use stored creds metadata when not using env token
+    if [[ "$auth_type" != "token_env" ]]; then
+      expires_at=$(echo "$creds" | jq -r '.expires_at // "null"')
+      scope=$(echo "$creds" | jq -r '.scope // empty')
+    fi
+
+    # Env var tokens are always long-lived
+    if [[ "$auth_type" == "token_env" ]]; then
+      token_status="env"
+    elif [[ "$expires_at" == "null" ]] || [[ "$expires_at" == "0" ]]; then
       token_status="long-lived"
     elif is_token_expired; then
       token_status="expired"
@@ -246,15 +257,19 @@ _auth_status() {
   if [[ "$format" == "json" ]]; then
     jq -n \
       --arg status "$auth_status" \
+      --arg auth "$auth_type" \
       --arg token_status "$token_status" \
       --arg account_slug "$account_slug" \
       --arg account_name "$account_name" \
       --arg expires_at "$expires_at" \
       --arg scope "$scope" \
+      --argjson has_stored "$has_stored_creds" \
       '{
         status: $status,
+        auth: (if $auth == "token_env" then "env" else (if $auth == "oauth" then "oauth" else null end) end),
         token: $token_status,
         scope: (if $scope != "" then $scope else null end),
+        has_stored_credentials: (if $auth == "token_env" then $has_stored else null end),
         account: {
           slug: (if $account_slug != "" then $account_slug else null end),
           name: (if $account_name != "" then $account_name else null end)
@@ -265,7 +280,15 @@ _auth_status() {
     echo "## Authentication Status"
     echo
     if [[ "$auth_status" == "authenticated" ]]; then
-      echo "Status: ✓ Authenticated"
+      if [[ "$auth_type" == "token_env" ]]; then
+        echo "Status: ✓ Authenticated (FIZZY_TOKEN)"
+        echo "Source: Environment variable (takes precedence)"
+        if [[ "$has_stored_creds" == "true" ]]; then
+          echo "Note: Stored OAuth credentials also exist (ignored while FIZZY_TOKEN is set)"
+        fi
+      else
+        echo "Status: ✓ Authenticated"
+      fi
       [[ -n "$account_name" ]] && echo "Account: $account_name ($account_slug)" || true
       if [[ -n "$scope" ]]; then
         if [[ "$scope" == "read" ]]; then
@@ -283,7 +306,7 @@ _auth_status() {
       echo "Status: ✗ Not authenticated"
       echo
       echo "Run: fizzy auth login"
-      echo "  or export FIZZY_ACCESS_TOKEN=<pat>"
+      echo "  or export FIZZY_TOKEN=<token>"
     fi
   fi
 }
@@ -292,6 +315,14 @@ _auth_refresh() {
   # First check if we're authenticated at all
   if ! get_access_token &>/dev/null; then
     die "Not authenticated. Run: fizzy auth login" $EXIT_AUTH
+  fi
+
+  # Env var tokens cannot be refreshed
+  local auth_type
+  auth_type=$(get_auth_type)
+  if [[ "$auth_type" == "token_env" ]]; then
+    die "FIZZY_TOKEN does not support refresh" $EXIT_AUTH \
+      "Environment variable tokens are managed externally"
   fi
 
   # Check if we have a refresh token before attempting
@@ -705,6 +736,20 @@ _help_auth() {
         {flag: "--scope", values: ["write", "read"], description: "Token scope (default: write)"},
         {flag: "--no-browser", description: "Manual auth code entry mode"}
       ],
+      environment: [
+        {name: "FIZZY_TOKEN", description: "Access token (takes precedence over stored credentials)"},
+        {name: "FIZZY_ACCOUNT_SLUG", description: "Account slug from URL (e.g., 897362094)"}
+      ],
+      precedence: {
+        description: "When both FIZZY_TOKEN and stored OAuth credentials exist",
+        rules: [
+          "FIZZY_TOKEN is used for all API requests",
+          "Stored credentials are ignored (not deleted)",
+          "logout clears stored creds but warns about FIZZY_TOKEN",
+          "refresh errors (env tokens are externally managed)",
+          "Unset FIZZY_TOKEN to fall back to stored credentials"
+        ]
+      },
       notes: ["Fizzy issues long-lived access tokens that do not expire"]
     }'
   else
@@ -727,8 +772,18 @@ Manage authentication.
 
 ### Environment Variables
 
-    FIZZY_ACCESS_TOKEN    Personal access token (bypasses stored credentials)
+    FIZZY_TOKEN           Access token (takes precedence over stored credentials)
     FIZZY_ACCOUNT_SLUG    Account slug from URL (e.g., 897362094)
+
+### Precedence
+
+When both `FIZZY_TOKEN` and stored OAuth credentials exist:
+
+1. `FIZZY_TOKEN` is used for all API requests
+2. Stored credentials are ignored (not deleted)
+3. `fizzy auth logout` clears stored credentials but warns about FIZZY_TOKEN
+4. `fizzy auth refresh` errors (env tokens are externally managed)
+5. Unset `FIZZY_TOKEN` to fall back to stored credentials
 
 ### Notes
 
@@ -747,11 +802,11 @@ fizzy auth login --no-browser
 # Read-only access
 fizzy auth login --scope read
 
-# For CI/scripts: use env vars instead
-export FIZZY_ACCESS_TOKEN=fzt_...
+# For CI/scripts: use env vars
+export FIZZY_TOKEN=fzt_...
 export FIZZY_ACCOUNT_SLUG=897362094
 
-# Check status
+# Check status (shows which auth method is active)
 fizzy auth status
 ```
 EOF

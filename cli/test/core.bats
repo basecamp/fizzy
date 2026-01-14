@@ -156,3 +156,94 @@ load test_helper
   run fizzy --json -a 12345
   assert_success
 }
+
+
+# FIZZY_URL convenience env var
+
+@test "FIZZY_URL with slug sets base + account" {
+  unset FIZZY_BASE_URL
+  export FIZZY_URL="http://fizzy.localhost:3006/897362094"
+
+  source "$FIZZY_ROOT/lib/core.sh"
+
+  [[ "$FIZZY_BASE_URL" == "http://fizzy.localhost:3006" ]]
+  [[ "$FIZZY_ACCOUNT_SLUG" == "897362094" ]]
+}
+
+@test "FIZZY_URL without slug sets base only" {
+  unset FIZZY_BASE_URL
+  unset FIZZY_ACCOUNT_SLUG
+  export FIZZY_URL="http://fizzy.localhost:3006"
+
+  source "$FIZZY_ROOT/lib/core.sh"
+
+  [[ "$FIZZY_BASE_URL" == "http://fizzy.localhost:3006" ]]
+  [[ -z "${FIZZY_ACCOUNT_SLUG:-}" ]]
+}
+
+@test "FIZZY_BASE_URL overrides FIZZY_URL base" {
+  export FIZZY_BASE_URL="http://override.local"
+  export FIZZY_URL="http://fizzy.localhost:3006/897362094"
+  unset FIZZY_ACCOUNT_SLUG
+
+  source "$FIZZY_ROOT/lib/core.sh"
+
+  [[ "$FIZZY_BASE_URL" == "http://override.local" ]]
+  # Slug not set because bases don't match
+  [[ -z "${FIZZY_ACCOUNT_SLUG:-}" ]]
+}
+
+@test "FIZZY_ACCOUNT_SLUG overrides FIZZY_URL slug" {
+  unset FIZZY_BASE_URL
+  export FIZZY_ACCOUNT_SLUG="1234567"
+  export FIZZY_URL="http://fizzy.localhost:3006/897362094"
+
+  source "$FIZZY_ROOT/lib/core.sh"
+
+  [[ "$FIZZY_ACCOUNT_SLUG" == "1234567" ]]
+}
+
+@test "FIZZY_URL ignores non-numeric path segments" {
+  unset FIZZY_BASE_URL
+  unset FIZZY_ACCOUNT_SLUG
+  export FIZZY_URL="http://fizzy.localhost:3006/boards"
+
+  source "$FIZZY_ROOT/lib/core.sh"
+
+  [[ "$FIZZY_BASE_URL" == "http://fizzy.localhost:3006" ]]
+  [[ -z "${FIZZY_ACCOUNT_SLUG:-}" ]]
+}
+
+@test "FIZZY_URL with extra path uses first segment as slug" {
+  unset FIZZY_BASE_URL
+  unset FIZZY_ACCOUNT_SLUG
+  export FIZZY_URL="http://fizzy.localhost:3006/897362094/boards/123"
+
+  source "$FIZZY_ROOT/lib/core.sh"
+
+  [[ "$FIZZY_BASE_URL" == "http://fizzy.localhost:3006" ]]
+  [[ "$FIZZY_ACCOUNT_SLUG" == "897362094" ]]
+}
+
+@test "FIZZY_URL strips trailing slash" {
+  unset FIZZY_BASE_URL
+  unset FIZZY_ACCOUNT_SLUG
+  export FIZZY_URL="http://fizzy.localhost:3006/897362094/"
+
+  source "$FIZZY_ROOT/lib/core.sh"
+
+  [[ "$FIZZY_BASE_URL" == "http://fizzy.localhost:3006" ]]
+  [[ "$FIZZY_ACCOUNT_SLUG" == "897362094" ]]
+}
+
+@test "FIZZY_URL rejects short numeric slugs" {
+  unset FIZZY_BASE_URL
+  unset FIZZY_ACCOUNT_SLUG
+  export FIZZY_URL="http://fizzy.localhost:3006/123456"
+
+  source "$FIZZY_ROOT/lib/core.sh"
+
+  [[ "$FIZZY_BASE_URL" == "http://fizzy.localhost:3006" ]]
+  # 6 digits is too short
+  [[ -z "${FIZZY_ACCOUNT_SLUG:-}" ]]
+}

@@ -2,14 +2,83 @@
 # actions.sh - Card action commands (Phase 3)
 
 
-# fizzy card "title" [options]
-# Create a new card
+# fizzy card "title" [options]          - create card
+# fizzy card update <num> [options]      - update card
+# fizzy card delete <num> [nums...]      - delete card(s)
+# fizzy card image delete <num>          - remove header image
 
-cmd_card_create() {
+cmd_card() {
+  case "${1:-}" in
+    update)
+      shift
+      _card_update "$@"
+      ;;
+    delete)
+      shift
+      _card_delete "$@"
+      ;;
+    image)
+      shift
+      _card_image "$@"
+      ;;
+    *)
+      # Default: create card
+      _card_create "$@"
+      ;;
+  esac
+}
+
+_card_image() {
+  case "${1:-}" in
+    delete)
+      shift
+      _card_image_delete "$@"
+      ;;
+    --help|-h|"")
+      _card_image_help
+      ;;
+    *)
+      die "Unknown subcommand: card image $1" $EXIT_USAGE \
+        "Available: fizzy card image delete <number>"
+      ;;
+  esac
+}
+
+_card_image_help() {
+  local format
+  format=$(get_format)
+
+  if [[ "$format" == "json" ]]; then
+    jq -n '{
+      command: "fizzy card image",
+      description: "Manage card header images",
+      subcommands: [
+        {name: "delete", description: "Remove header image from a card"}
+      ]
+    }'
+  else
+    cat <<'EOF'
+## fizzy card image
+
+Manage card header images.
+
+### Subcommands
+
+    delete <number>   Remove header image from a card
+
+### Examples
+
+    fizzy card image delete 123   Remove image from card #123
+EOF
+  fi
+}
+
+_card_create() {
   local title=""
   local description=""
   local board_id=""
   local column_id=""
+  local image_path=""
   local tag_names=()
   local assignee_ids=()
   local show_help=false
@@ -35,6 +104,13 @@ cmd_card_create() {
           die "--description requires text" $EXIT_USAGE
         fi
         description="$2"
+        shift 2
+        ;;
+      --image|-i)
+        if [[ -z "${2:-}" ]]; then
+          die "--image requires a file path" $EXIT_USAGE
+        fi
+        image_path="$2"
         shift 2
         ;;
       --tag)
@@ -80,6 +156,11 @@ cmd_card_create() {
     die "Card title required" $EXIT_USAGE "Usage: fizzy card \"title\""
   fi
 
+  # Validate image file exists
+  if [[ -n "$image_path" ]] && [[ ! -f "$image_path" ]]; then
+    die "File not found: $image_path" $EXIT_USAGE
+  fi
+
   # Use board from config if not specified
   if [[ -z "$board_id" ]]; then
     board_id=$(get_board_id 2>/dev/null || true)
@@ -119,16 +200,64 @@ cmd_card_create() {
   done
   assignee_ids=("${resolved_assignee_ids[@]}")
 
-  # Build request body (API only accepts title, description)
-  local body
-  body=$(jq -n \
-    --arg title "$title" \
-    --arg description "${description:-}" \
-    '{title: $title} +
-     (if $description != "" then {description: $description} else {} end)')
-
   local response
-  response=$(api_post "/boards/$board_id/cards" "$body")
+
+  if [[ -n "$image_path" ]]; then
+    # Multipart POST for card with image
+    local account_slug
+    account_slug=$(get_account_slug)
+    if [[ -z "$account_slug" ]]; then
+      die "Account not configured" $EXIT_USAGE \
+        "Run: fizzy config set account_slug <slug>"
+    fi
+
+    local token
+    token=$(ensure_auth)
+
+    local curl_args=(
+      -s -w '\n%{http_code}'
+      -X POST
+      -H "Authorization: Bearer $token"
+      -H "User-Agent: $FIZZY_USER_AGENT"
+      -H "Accept: application/json"
+      --form-string "card[title]=$title"
+    )
+
+    if [[ -n "$description" ]]; then
+      curl_args+=(--form-string "card[description]=$description")
+    fi
+    curl_args+=(-F "card[image]=@$image_path")
+    curl_args+=("$FIZZY_BASE_URL/$account_slug/boards/$board_id/cards.json")
+
+    local http_code
+    api_multipart_request http_code response "${curl_args[@]}"
+
+    case "$http_code" in
+      200|201) ;;
+      401|403)
+        die "Not authorized to create card" $EXIT_FORBIDDEN
+        ;;
+      404)
+        die "Board not found" $EXIT_NOT_FOUND
+        ;;
+      422)
+        die "Validation error" $EXIT_API "Check the provided values"
+        ;;
+      *)
+        die "API error: HTTP $http_code" $EXIT_API
+        ;;
+    esac
+  else
+    # JSON POST for card without image (uses api_post with retry/auth)
+    local body
+    body=$(jq -n \
+      --arg title "$title" \
+      --arg description "${description:-}" \
+      '{title: $title} +
+       (if $description != "" then {description: $description} else {} end)')
+
+    response=$(api_post "/boards/$board_id/cards" "$body")
+  fi
 
   local number
   number=$(echo "$response" | jq -r '.number')
@@ -212,6 +341,7 @@ _card_create_help() {
         {flag: "--board, -b, --in", description: "Board name or ID (required if not in config)"},
         {flag: "--column, -c", description: "Column name or ID (chains triage after create)"},
         {flag: "--description, -d", description: "Card description"},
+        {flag: "--image, -i", description: "Path to header image file"},
         {flag: "--tag", description: "Tag name (chains tagging after create, repeatable)"},
         {flag: "--assign", description: "Assignee name/email/ID (chains assignment after create, repeatable)"}
       ],
@@ -237,6 +367,7 @@ Create a new card with optional follow-up actions.
     --board, -b, --in    Board name or ID (required if not in config)
     --column, -c         Column name or ID (chains triage after create)
     --description, -d    Card description
+    --image, -i          Path to header image file
     --tag                Tag name (chains tagging, repeatable)
     --assign             Assignee name/email/ID (chains assignment, repeatable)
     --help, -h           Show this help
@@ -254,14 +385,15 @@ EOF
 }
 
 
-# fizzy update <number> [options]
-# Update a card's title or description
+# fizzy card update <number> [options]
+# Update a card's title, description, or image
 
-cmd_card_update() {
+_card_update() {
   local card_number=""
   local title=""
   local description=""
   local description_file=""
+  local image_path=""
   local show_help=false
 
   while [[ $# -gt 0 ]]; do
@@ -287,12 +419,19 @@ cmd_card_update() {
         description_file="$2"
         shift 2
         ;;
+      --image|-i)
+        if [[ -z "${2:-}" ]]; then
+          die "--image requires a file path" $EXIT_USAGE
+        fi
+        image_path="$2"
+        shift 2
+        ;;
       --help|-h)
         show_help=true
         shift
         ;;
       -*)
-        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy update --help"
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy card update --help"
         ;;
       *)
         # First positional arg is card number
@@ -312,7 +451,7 @@ cmd_card_update() {
   fi
 
   if [[ -z "$card_number" ]]; then
-    die "Card number required" $EXIT_USAGE "Usage: fizzy update <number> [options]"
+    die "Card number required" $EXIT_USAGE "Usage: fizzy card update <number> [options]"
   fi
 
   # Read description from file if specified
@@ -323,21 +462,75 @@ cmd_card_update() {
     description=$(cat "$description_file")
   fi
 
-  # Must specify at least one thing to update
-  if [[ -z "$title" && -z "$description" ]]; then
-    die "Nothing to update. Specify --title or --description" $EXIT_USAGE
+  # Validate image file exists
+  if [[ -n "$image_path" ]] && [[ ! -f "$image_path" ]]; then
+    die "File not found: $image_path" $EXIT_USAGE
   fi
 
-  # Build request body - Rails expects params[:card]
-  local body
-  body=$(jq -n \
-    --arg title "$title" \
-    --arg description "$description" \
-    '{card: ((if $title != "" then {title: $title} else {} end) +
-             (if $description != "" then {description: $description} else {} end))}')
+  # Must specify at least one thing to update
+  if [[ -z "$title" && -z "$description" && -z "$image_path" ]]; then
+    die "Nothing to update. Specify --title, --description, or --image" $EXIT_USAGE
+  fi
 
-  local response
-  response=$(api_patch "/cards/$card_number" "$body")
+  local response http_code
+
+  if [[ -n "$image_path" ]]; then
+    # Multipart upload for image requires account_slug
+    local account_slug
+    account_slug=$(get_account_slug)
+    if [[ -z "$account_slug" ]]; then
+      die "Account not configured" $EXIT_USAGE \
+        "Run: fizzy config set account_slug <slug>"
+    fi
+
+    local token
+    token=$(ensure_auth)
+
+    local curl_args=(
+      -s -w '\n%{http_code}'
+      -X PATCH
+      -H "Authorization: Bearer $token"
+      -H "User-Agent: $FIZZY_USER_AGENT"
+      -H "Accept: application/json"
+    )
+
+    if [[ -n "$title" ]]; then
+      curl_args+=(--form-string "card[title]=$title")
+    fi
+    if [[ -n "$description" ]]; then
+      curl_args+=(--form-string "card[description]=$description")
+    fi
+    curl_args+=(-F "card[image]=@$image_path")
+    curl_args+=("$FIZZY_BASE_URL/$account_slug/cards/$card_number.json")
+
+    api_multipart_request http_code response "${curl_args[@]}"
+
+    case "$http_code" in
+      200) ;;
+      401|403)
+        die "Not authorized to update this card" $EXIT_FORBIDDEN
+        ;;
+      404)
+        die "Card not found: #$card_number" $EXIT_NOT_FOUND
+        ;;
+      422)
+        die "Validation error" $EXIT_API "Check the provided values"
+        ;;
+      *)
+        die "API error: HTTP $http_code" $EXIT_API
+        ;;
+    esac
+  else
+    # JSON update for title/description only (api_patch handles auth)
+    local body
+    body=$(jq -n \
+      --arg title "$title" \
+      --arg description "$description" \
+      '{card: ((if $title != "" then {title: $title} else {} end) +
+               (if $description != "" then {description: $description} else {} end))}')
+
+    response=$(api_patch "/cards/$card_number" "$body")
+  fi
 
   local summary="Card #$card_number updated"
 
@@ -376,43 +569,45 @@ _card_update_help() {
 
   if [[ "$format" == "json" ]]; then
     jq -n '{
-      command: "fizzy update",
-      description: "Update a card'\''s title or description",
-      usage: "fizzy update <number> [options]",
+      command: "fizzy card update",
+      description: "Update a card'\''s title, description, or image",
+      usage: "fizzy card update <number> [options]",
       options: [
         {flag: "--title, -t", description: "New card title"},
         {flag: "--description, -d", description: "New card description (HTML)"},
-        {flag: "--description-file", description: "Read description from file"}
+        {flag: "--description-file", description: "Read description from file"},
+        {flag: "--image, -i", description: "Path to header image file"}
       ],
       examples: [
-        "fizzy update 123 --title \"New title\"",
-        "fizzy update 123 --description \"<p>Updated content</p>\"",
-        "fizzy update 123 --title \"New\" --description \"Both\""
+        "fizzy card update 123 --title \"New title\"",
+        "fizzy card update 123 --description \"<p>Updated content</p>\"",
+        "fizzy card update 123 --image ~/header.png"
       ]
     }'
   else
     cat <<'EOF'
-## fizzy update
+## fizzy card update
 
-Update a card's title or description.
+Update a card's title, description, or header image.
 
 ### Usage
 
-    fizzy update <number> [options]
+    fizzy card update <number> [options]
 
 ### Options
 
     --title, -t           New card title
     --description, -d     New card description (HTML)
     --description-file    Read description from file
+    --image, -i           Path to header image file
     --help, -h            Show this help
 
 ### Examples
 
-    fizzy update 123 --title "New title"
-    fizzy update 123 --description "<p>Updated content</p>"
-    fizzy update 123 --title "New" --description "Both"
-    fizzy update 123 --description-file notes.html
+    fizzy card update 123 --title "New title"
+    fizzy card update 123 --description "<p>Updated content</p>"
+    fizzy card update 123 --image ~/header.png
+    fizzy card update 123 --title "New" --image cover.jpg
 EOF
   fi
 }
@@ -654,10 +849,10 @@ EOF
 }
 
 
-# fizzy delete <number>
+# fizzy card delete <number>
 # Permanently delete a card
 
-cmd_delete() {
+_card_delete() {
   local show_help=false
   local card_numbers=()
 
@@ -668,7 +863,7 @@ cmd_delete() {
         shift
         ;;
       -*)
-        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy delete --help"
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy card delete --help"
         ;;
       *)
         card_numbers+=("$1")
@@ -678,16 +873,23 @@ cmd_delete() {
   done
 
   if [[ "$show_help" == "true" ]]; then
-    _delete_help
+    _card_delete_help
     return 0
   fi
 
   if [[ ${#card_numbers[@]} -eq 0 ]]; then
-    die "Card number required" $EXIT_USAGE "Usage: fizzy delete <number>"
+    die "Card number required" $EXIT_USAGE "Usage: fizzy card delete <number>"
   fi
 
-  local results=()
+  # Validate all card numbers are positive integers (1+)
   local num
+  for num in "${card_numbers[@]}"; do
+    if ! [[ "$num" =~ ^[1-9][0-9]*$ ]]; then
+      die "Invalid card number: $num" $EXIT_USAGE "Card numbers must be positive integers"
+    fi
+  done
+
+  local results=()
   for num in "${card_numbers[@]}"; do
     # DELETE returns 204 No Content
     api_delete "/cards/$num" > /dev/null
@@ -714,10 +916,10 @@ cmd_delete() {
     "$(breadcrumb "card" "fizzy card \"title\" --in <board>" "Create new card")"
   )
 
-  output "$response_data" "$summary" "$breadcrumbs" "_delete_md"
+  output "$response_data" "$summary" "$breadcrumbs" "_card_delete_md"
 }
 
-_delete_md() {
+_card_delete_md() {
   local data="$1"
   local summary="$2"
   local breadcrumbs="$3"
@@ -740,21 +942,21 @@ _delete_md() {
   md_breadcrumbs "$breadcrumbs"
 }
 
-_delete_help() {
+_card_delete_help() {
   local format
   format=$(get_format)
 
   if [[ "$format" == "json" ]]; then
     jq -n '{
-      command: "fizzy delete",
+      command: "fizzy card delete",
       description: "Permanently delete card(s)",
-      usage: "fizzy delete <number> [numbers...]",
+      usage: "fizzy card delete <number> [numbers...]",
       warning: "This action cannot be undone",
-      examples: ["fizzy delete 123", "fizzy delete 123 124"]
+      examples: ["fizzy card delete 123", "fizzy card delete 123 124"]
     }'
   else
     cat <<'EOF'
-## fizzy delete
+## fizzy card delete
 
 Permanently delete card(s).
 
@@ -762,21 +964,21 @@ Permanently delete card(s).
 
 ### Usage
 
-    fizzy delete <number> [numbers...]
+    fizzy card delete <number> [numbers...]
 
 ### Examples
 
-    fizzy delete 123          Delete card #123
-    fizzy delete 123 124      Delete multiple cards
+    fizzy card delete 123          Delete card #123
+    fizzy card delete 123 124      Delete multiple cards
 EOF
   fi
 }
 
 
-# fizzy delete-image <number>
+# fizzy card image delete <number>
 # Remove header image from card
 
-cmd_delete_image() {
+_card_image_delete() {
   local show_help=false
   local card_number=""
 
@@ -787,7 +989,7 @@ cmd_delete_image() {
         shift
         ;;
       -*)
-        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy delete-image --help"
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy card image delete --help"
         ;;
       *)
         if [[ -z "$card_number" ]]; then
@@ -799,12 +1001,12 @@ cmd_delete_image() {
   done
 
   if [[ "$show_help" == "true" ]]; then
-    _delete_image_help
+    _card_image_delete_help
     return 0
   fi
 
   if [[ -z "$card_number" ]]; then
-    die "Card number required" $EXIT_USAGE "Usage: fizzy delete-image <number>"
+    die "Card number required" $EXIT_USAGE "Usage: fizzy card image delete <number>"
   fi
 
   # DELETE returns 204 No Content, fetch card after for response
@@ -817,13 +1019,13 @@ cmd_delete_image() {
   local breadcrumbs
   breadcrumbs=$(breadcrumbs \
     "$(breadcrumb "show" "fizzy show $card_number" "View card")" \
-    "$(breadcrumb "update" "fizzy update $card_number" "Update card")"
+    "$(breadcrumb "update" "fizzy card update $card_number" "Update card")"
   )
 
-  output "$response" "$summary" "$breadcrumbs" "_delete_image_md"
+  output "$response" "$summary" "$breadcrumbs" "_card_image_delete_md"
 }
 
-_delete_image_md() {
+_card_image_delete_md() {
   local data="$1"
   local summary="$2"
   local breadcrumbs="$3"
@@ -842,30 +1044,30 @@ _delete_image_md() {
   md_breadcrumbs "$breadcrumbs"
 }
 
-_delete_image_help() {
+_card_image_delete_help() {
   local format
   format=$(get_format)
 
   if [[ "$format" == "json" ]]; then
     jq -n '{
-      command: "fizzy delete-image",
+      command: "fizzy card image delete",
       description: "Remove header image from a card",
-      usage: "fizzy delete-image <number>",
-      examples: ["fizzy delete-image 123"]
+      usage: "fizzy card image delete <number>",
+      examples: ["fizzy card image delete 123"]
     }'
   else
     cat <<'EOF'
-## fizzy delete-image
+## fizzy card image delete
 
 Remove header image from a card.
 
 ### Usage
 
-    fizzy delete-image <number>
+    fizzy card image delete <number>
 
 ### Examples
 
-    fizzy delete-image 123    Remove header image from card #123
+    fizzy card image delete 123    Remove header image from card #123
 EOF
   fi
 }
