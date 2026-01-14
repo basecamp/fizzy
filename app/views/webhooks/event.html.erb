@@ -1,4 +1,4 @@
 <%= @event.description_for(Current.user).to_plain_text %>
 <% if @event.eventable %>
-<%= link_to "↗︎", polymorphic_url(@event.eventable, only_path: true) %>
+<%= link_to "↗︎", polymorphic_url(@event.eventable) %>
 <% end %>
