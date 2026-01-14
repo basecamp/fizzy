@@ -149,10 +149,11 @@ cmd_user() {
     show) _user_show "$@" ;;
     update) _user_update "$@" ;;
     delete) _user_delete "$@" ;;
+    role) _user_role "$@" ;;
     --help|-h|"") _user_help ;;
     *)
       die "Unknown subcommand: user $action" $EXIT_USAGE \
-        "Available: fizzy user show|update|delete"
+        "Available: fizzy user show|update|delete|role"
       ;;
   esac
 }
@@ -602,7 +603,8 @@ _user_help() {
       subcommands: [
         {name: "show", description: "Show user details"},
         {name: "update", description: "Update user profile"},
-        {name: "delete", description: "Deactivate a user"}
+        {name: "delete", description: "Deactivate a user"},
+        {name: "role", description: "Change user role (admin/member)"}
       ]
     }'
   else
@@ -616,12 +618,187 @@ Manage users in the account.
     show <id|email|name>              Show user details
     update <id|email|name> [options]  Update user profile
     delete <id|email|name>            Deactivate a user
+    role <id|email|name> <role>       Change user role (admin/member)
 
 ### Examples
 
     fizzy user show alice@example.com
     fizzy user update abc123 --name "New Name"
     fizzy user delete "Former Employee"
+    fizzy user role alice@example.com admin
+EOF
+  fi
+}
+
+
+# fizzy user role <id|email|name> <admin|member>
+
+_user_role() {
+  local show_help=false
+  local user_ref=""
+  local new_role=""
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --help|-h)
+        show_help=true
+        shift
+        ;;
+      -*)
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy user role --help"
+        ;;
+      *)
+        if [[ -z "$user_ref" ]]; then
+          user_ref="$1"
+        elif [[ -z "$new_role" ]]; then
+          new_role="$1"
+        fi
+        shift
+        ;;
+    esac
+  done
+
+  if [[ "$show_help" == "true" ]]; then
+    _user_role_help
+    return 0
+  fi
+
+  if [[ -z "$user_ref" ]]; then
+    die "User ID, email, or name required" $EXIT_USAGE \
+      "Usage: fizzy user role <id|email|name> <admin|member>"
+  fi
+
+  if [[ -z "$new_role" ]]; then
+    die "Role required (admin or member)" $EXIT_USAGE \
+      "Usage: fizzy user role <id|email|name> <admin|member>"
+  fi
+
+  # Validate role value
+  case "$new_role" in
+    admin|member) ;;
+    *)
+      die "Invalid role: $new_role" $EXIT_USAGE \
+        "Valid roles: admin, member"
+      ;;
+  esac
+
+  local account_slug
+  account_slug=$(get_account_slug)
+  if [[ -z "$account_slug" ]]; then
+    die "Account not configured" $EXIT_USAGE \
+      "Run: fizzy config set account_slug <slug>"
+  fi
+
+  # Resolve user reference to ID
+  local user_id
+  user_id=$(resolve_user_id "$user_ref") || exit $?
+
+  local token
+  token=$(ensure_auth)
+
+  # PUT to role endpoint
+  local body
+  body=$(jq -n --arg role "$new_role" '{user: {role: $role}}')
+
+  local response
+  response=$(curl -s -w '\n%{http_code}' \
+    -X PUT \
+    -H "Authorization: Bearer $token" \
+    -H "User-Agent: $FIZZY_USER_AGENT" \
+    -H "Content-Type: application/json" \
+    -H "Accept: application/json" \
+    -d "$body" \
+    "$FIZZY_BASE_URL/$account_slug/users/$user_id/role.json")
+
+  local http_code
+  http_code=$(echo "$response" | tail -n1)
+
+  case "$http_code" in
+    200|204|302) ;;
+    401|403)
+      die "Not authorized to change role" $EXIT_FORBIDDEN \
+        "Only admins/owners can change user roles"
+      ;;
+    404)
+      die "User not found: $user_ref" $EXIT_NOT_FOUND
+      ;;
+    422)
+      die "Cannot change role" $EXIT_API \
+        "Owner role cannot be changed"
+      ;;
+    *)
+      die "API error: HTTP $http_code" $EXIT_API
+      ;;
+  esac
+
+  # Fetch updated user
+  local updated_user
+  updated_user=$(api_get "/users/$user_id")
+
+  local user_name
+  user_name=$(echo "$updated_user" | jq -r '.name // "unknown"')
+
+  local summary="Changed $user_name role to $new_role"
+
+  local breadcrumbs
+  breadcrumbs=$(breadcrumbs \
+    "$(breadcrumb "show" "fizzy user show $user_id" "View user")" \
+    "$(breadcrumb "people" "fizzy people" "List users")"
+  )
+
+  output "$updated_user" "$summary" "$breadcrumbs" "_user_show_md"
+}
+
+_user_role_help() {
+  local format
+  format=$(get_format)
+
+  if [[ "$format" == "json" ]]; then
+    jq -n '{
+      command: "fizzy user role",
+      description: "Change user role",
+      usage: "fizzy user role <id|email|name> <admin|member>",
+      arguments: [
+        {name: "<user>", description: "User ID, email, or name"},
+        {name: "<role>", description: "New role: admin or member"}
+      ],
+      notes: [
+        "Only admins and owners can change user roles",
+        "Owner role cannot be changed",
+        "System role cannot be assigned"
+      ],
+      examples: [
+        "fizzy user role alice@example.com admin",
+        "fizzy user role \"Alice Smith\" member",
+        "fizzy user role abc123 admin"
+      ]
+    }'
+  else
+    cat <<'EOF'
+## fizzy user role
+
+Change user role.
+
+### Usage
+
+    fizzy user role <id|email|name> <admin|member>
+
+### Arguments
+
+    <user>    User ID, email, or name
+    <role>    New role: admin or member
+
+### Notes
+
+- Only admins and owners can change user roles
+- Owner role cannot be changed
+- System role cannot be assigned
+
+### Examples
+
+    fizzy user role alice@example.com admin
+    fizzy user role "Alice Smith" member
+    fizzy user role abc123 admin
 EOF
   fi
 }
