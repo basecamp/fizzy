@@ -167,12 +167,24 @@ cmd_board() {
       shift
       _board_show "$@"
       ;;
+    publish)
+      shift
+      _board_publish "$@"
+      ;;
+    unpublish)
+      shift
+      _board_unpublish "$@"
+      ;;
+    entropy)
+      shift
+      _board_entropy "$@"
+      ;;
     --help|-h|"")
       _board_help
       ;;
     *)
       die "Unknown subcommand: board ${1:-}" $EXIT_USAGE \
-        "Available: fizzy board create|update|delete|show"
+        "Available: fizzy board create|update|delete|show|publish|unpublish|entropy"
       ;;
   esac
 }
@@ -189,13 +201,18 @@ _board_help() {
         {name: "create", description: "Create a new board"},
         {name: "update", description: "Update a board"},
         {name: "delete", description: "Delete a board"},
-        {name: "show", description: "Show board details"}
+        {name: "show", description: "Show board details"},
+        {name: "publish", description: "Publish board publicly"},
+        {name: "unpublish", description: "Unpublish board"},
+        {name: "entropy", description: "Set auto-postpone period"}
       ],
       examples: [
         "fizzy board create \"New Board\"",
         "fizzy board update abc123 --name \"Renamed\"",
         "fizzy board delete abc123",
-        "fizzy board show abc123"
+        "fizzy board show abc123",
+        "fizzy board publish abc123",
+        "fizzy board entropy abc123 --period 14"
       ]
     }'
   else
@@ -206,10 +223,13 @@ Manage boards.
 
 ### Subcommands
 
-    create   Create a new board
-    update   Update a board
-    delete   Delete a board
-    show     Show board details
+    create       Create a new board
+    update       Update a board
+    delete       Delete a board
+    show         Show board details
+    publish      Publish board publicly (shareable link)
+    unpublish    Unpublish board
+    entropy      Set auto-postpone period
 
 ### Examples
 
@@ -217,6 +237,8 @@ Manage boards.
     fizzy board update abc123 --name "Renamed"
     fizzy board delete abc123
     fizzy board show abc123
+    fizzy board publish abc123
+    fizzy board entropy abc123 --period 14
 EOF
   fi
 }
@@ -750,6 +772,345 @@ _board_show() {
 }
 
 
+# fizzy board publish <board>
+# Publish board publicly (creates shareable link)
+
+_board_publish() {
+  local board_ref=""
+  local show_help=false
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --help|-h)
+        show_help=true
+        shift
+        ;;
+      -*)
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy board publish --help"
+        ;;
+      *)
+        if [[ -z "$board_ref" ]]; then
+          board_ref="$1"
+        fi
+        shift
+        ;;
+    esac
+  done
+
+  if [[ "$show_help" == "true" ]]; then
+    _board_publish_help
+    return 0
+  fi
+
+  if [[ -z "$board_ref" ]]; then
+    die "Board name or ID required" $EXIT_USAGE "Usage: fizzy board publish <board>"
+  fi
+
+  local board_id
+  board_id=$(resolve_board_id "$board_ref") || exit $?
+
+  local publish_response
+  publish_response=$(api_post "/boards/$board_id/publication")
+
+  local board_response
+  board_response=$(api_get "/boards/$board_id")
+
+  local board_name published_url
+  board_name=$(echo "$board_response" | jq -r '.name')
+  published_url=$(echo "$publish_response" | jq -r '.url')
+
+  # Merge the published_url into the board response for output
+  local response
+  response=$(echo "$board_response" | jq --arg url "$published_url" '. + {published_url: $url}')
+
+  local summary="Board \"$board_name\" published"
+
+  local breadcrumbs
+  breadcrumbs=$(breadcrumbs \
+    "$(breadcrumb "unpublish" "fizzy board unpublish $board_id" "Unpublish board")" \
+    "$(breadcrumb "show" "fizzy board show $board_id" "View board")"
+  )
+
+  output "$response" "$summary" "$breadcrumbs" "_board_publish_md"
+}
+
+_board_publish_md() {
+  local data="$1"
+  local summary="$2"
+  local breadcrumbs="$3"
+
+  local name published_url
+  name=$(echo "$data" | jq -r '.name')
+  published_url=$(echo "$data" | jq -r '.published_url // "pending"')
+
+  md_heading 2 "Board Published"
+  echo
+  md_kv "Board" "$name" \
+        "Public URL" "$published_url"
+
+  md_breadcrumbs "$breadcrumbs"
+}
+
+_board_publish_help() {
+  local format
+  format=$(get_format)
+
+  if [[ "$format" == "json" ]]; then
+    jq -n '{
+      command: "fizzy board publish",
+      description: "Publish board publicly",
+      usage: "fizzy board publish <board>",
+      examples: ["fizzy board publish \"My Board\""]
+    }'
+  else
+    cat <<'EOF'
+## fizzy board publish
+
+Publish board publicly, creating a shareable link.
+
+### Usage
+
+    fizzy board publish <board>
+
+### Examples
+
+    fizzy board publish "My Board"
+    fizzy board publish abc123
+EOF
+  fi
+}
+
+
+# fizzy board unpublish <board>
+# Unpublish board (remove public access)
+
+_board_unpublish() {
+  local board_ref=""
+  local show_help=false
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --help|-h)
+        show_help=true
+        shift
+        ;;
+      -*)
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy board unpublish --help"
+        ;;
+      *)
+        if [[ -z "$board_ref" ]]; then
+          board_ref="$1"
+        fi
+        shift
+        ;;
+    esac
+  done
+
+  if [[ "$show_help" == "true" ]]; then
+    _board_unpublish_help
+    return 0
+  fi
+
+  if [[ -z "$board_ref" ]]; then
+    die "Board name or ID required" $EXIT_USAGE "Usage: fizzy board unpublish <board>"
+  fi
+
+  local board_id
+  board_id=$(resolve_board_id "$board_ref") || exit $?
+
+  api_delete "/boards/$board_id/publication" > /dev/null
+
+  local response
+  response=$(api_get "/boards/$board_id")
+
+  local board_name
+  board_name=$(echo "$response" | jq -r '.name')
+
+  local summary="Board \"$board_name\" unpublished"
+
+  local breadcrumbs
+  breadcrumbs=$(breadcrumbs \
+    "$(breadcrumb "publish" "fizzy board publish $board_id" "Publish board")" \
+    "$(breadcrumb "show" "fizzy board show $board_id" "View board")"
+  )
+
+  output "$response" "$summary" "$breadcrumbs" "_board_unpublish_md"
+}
+
+_board_unpublish_md() {
+  local data="$1"
+  local summary="$2"
+  local breadcrumbs="$3"
+
+  local name
+  name=$(echo "$data" | jq -r '.name')
+
+  md_heading 2 "Board Unpublished"
+  echo
+  md_kv "Board" "$name" \
+        "Status" "Private"
+
+  md_breadcrumbs "$breadcrumbs"
+}
+
+_board_unpublish_help() {
+  local format
+  format=$(get_format)
+
+  if [[ "$format" == "json" ]]; then
+    jq -n '{
+      command: "fizzy board unpublish",
+      description: "Unpublish board",
+      usage: "fizzy board unpublish <board>",
+      examples: ["fizzy board unpublish \"My Board\""]
+    }'
+  else
+    cat <<'EOF'
+## fizzy board unpublish
+
+Unpublish board, removing public access.
+
+### Usage
+
+    fizzy board unpublish <board>
+
+### Examples
+
+    fizzy board unpublish "My Board"
+    fizzy board unpublish abc123
+EOF
+  fi
+}
+
+
+# fizzy board entropy <board> --period <days>
+# Set auto-postpone period for board
+
+_board_entropy() {
+  local board_ref=""
+  local period=""
+  local show_help=false
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --period|-p)
+        if [[ -z "${2:-}" ]]; then
+          die "--period requires a value (days)" $EXIT_USAGE
+        fi
+        period="$2"
+        shift 2
+        ;;
+      --help|-h)
+        show_help=true
+        shift
+        ;;
+      -*)
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy board entropy --help"
+        ;;
+      *)
+        if [[ -z "$board_ref" ]]; then
+          board_ref="$1"
+        fi
+        shift
+        ;;
+    esac
+  done
+
+  if [[ "$show_help" == "true" ]]; then
+    _board_entropy_help
+    return 0
+  fi
+
+  if [[ -z "$board_ref" ]]; then
+    die "Board name or ID required" $EXIT_USAGE "Usage: fizzy board entropy <board> --period <days>"
+  fi
+
+  if [[ -z "$period" ]]; then
+    die "--period <days> required" $EXIT_USAGE "Usage: fizzy board entropy <board> --period <days>"
+  fi
+
+  local board_id
+  board_id=$(resolve_board_id "$board_ref") || exit $?
+
+  local body
+  body=$(jq -n --argjson period "$period" '{board: {auto_postpone_period: $period}}')
+  api_patch "/boards/$board_id/entropy" "$body" > /dev/null
+
+  local response
+  response=$(api_get "/boards/$board_id")
+
+  local board_name
+  board_name=$(echo "$response" | jq -r '.name')
+
+  local summary="Board \"$board_name\" entropy set to $period days"
+
+  local breadcrumbs
+  breadcrumbs=$(breadcrumbs \
+    "$(breadcrumb "show" "fizzy board show $board_id" "View board")" \
+    "$(breadcrumb "cards" "fizzy cards --board $board_id" "List cards")"
+  )
+
+  output "$response" "$summary" "$breadcrumbs" "_board_entropy_md"
+}
+
+_board_entropy_md() {
+  local data="$1"
+  local summary="$2"
+  local breadcrumbs="$3"
+
+  local name period
+  name=$(echo "$data" | jq -r '.name')
+  period=$(echo "$data" | jq -r '.auto_postpone_period // "default"')
+
+  md_heading 2 "Board Entropy Updated"
+  echo
+  md_kv "Board" "$name" \
+        "Auto-postpone period" "$period days"
+
+  md_breadcrumbs "$breadcrumbs"
+}
+
+_board_entropy_help() {
+  local format
+  format=$(get_format)
+
+  if [[ "$format" == "json" ]]; then
+    jq -n '{
+      command: "fizzy board entropy",
+      description: "Set auto-postpone period for board",
+      usage: "fizzy board entropy <board> --period <days>",
+      options: [
+        {flag: "--period, -p", description: "Number of days before cards auto-postpone"}
+      ],
+      examples: [
+        "fizzy board entropy \"My Board\" --period 14",
+        "fizzy board entropy abc123 --period 7"
+      ]
+    }'
+  else
+    cat <<'EOF'
+## fizzy board entropy
+
+Set auto-postpone period for board. Cards without activity will
+automatically move to "Not Now" after this many days.
+
+### Usage
+
+    fizzy board entropy <board> --period <days>
+
+### Options
+
+    --period, -p    Number of days before cards auto-postpone
+
+### Examples
+
+    fizzy board entropy "My Board" --period 14
+    fizzy board entropy abc123 --period 7
+EOF
+  fi
+}
+
+
 # fizzy columns [options]
 # List columns on a board
 
@@ -899,12 +1260,20 @@ cmd_column() {
       shift
       _column_show "$@"
       ;;
+    left)
+      shift
+      _column_left "$@"
+      ;;
+    right)
+      shift
+      _column_right "$@"
+      ;;
     --help|-h|"")
       _column_help
       ;;
     *)
       die "Unknown subcommand: column ${1:-}" $EXIT_USAGE \
-        "Available: fizzy column create|update|delete|show"
+        "Available: fizzy column create|update|delete|show|left|right"
       ;;
   esac
 }
@@ -921,13 +1290,17 @@ _column_help() {
         {name: "create", description: "Create a column"},
         {name: "update", description: "Update a column"},
         {name: "delete", description: "Delete a column"},
-        {name: "show", description: "Show column details"}
+        {name: "show", description: "Show column details"},
+        {name: "left", description: "Move column left"},
+        {name: "right", description: "Move column right"}
       ],
       examples: [
         "fizzy column create \"In Progress\" --board \"My Board\"",
         "fizzy column update abc123 --board \"My Board\" --name \"Done\"",
         "fizzy column delete abc123 --board \"My Board\"",
-        "fizzy column show abc123 --board \"My Board\""
+        "fizzy column show abc123 --board \"My Board\"",
+        "fizzy column left abc123 --board \"My Board\"",
+        "fizzy column right abc123 --board \"My Board\""
       ]
     }'
   else
@@ -942,6 +1315,8 @@ Manage columns on a board.
     update   Update a column
     delete   Delete a column
     show     Show column details
+    left     Move column left (decrease position)
+    right    Move column right (increase position)
 
 ### Examples
 
@@ -949,6 +1324,8 @@ Manage columns on a board.
     fizzy column update abc123 --board "My Board" --name "Done"
     fizzy column delete abc123 --board "My Board"
     fizzy column show abc123 --board "My Board"
+    fizzy column left "In Progress" --board "My Board"
+    fizzy column right "In Progress" --board "My Board"
 EOF
   fi
 }
@@ -1467,4 +1844,234 @@ _column_md() {
         "Created" "$created_at"
 
   md_breadcrumbs "$breadcrumbs"
+}
+
+
+# fizzy column left <id> --board <board>
+# Move a column left (decrease position)
+
+_column_left() {
+  local column_id=""
+  local board_id=""
+  local show_help=false
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --board|-b|--in)
+        if [[ -z "${2:-}" ]]; then
+          die "--board requires a board name or ID" $EXIT_USAGE
+        fi
+        board_id="$2"
+        shift 2
+        ;;
+      --help|-h)
+        show_help=true
+        shift
+        ;;
+      -*)
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy column left --help"
+        ;;
+      *)
+        if [[ -z "$column_id" ]]; then
+          column_id="$1"
+          shift
+        else
+          die "Unexpected argument: $1" $EXIT_USAGE
+        fi
+        ;;
+    esac
+  done
+
+  if [[ "$show_help" == "true" ]]; then
+    _column_left_help
+    return 0
+  fi
+
+  if [[ -z "$column_id" ]]; then
+    die "Column ID or name required" $EXIT_USAGE "Usage: fizzy column left <id> --board <board>"
+  fi
+
+  board_id=$(_column_resolve_board "$board_id")
+
+  local resolved_column
+  if resolved_column=$(resolve_column_id "$column_id" "$board_id"); then
+    column_id="$resolved_column"
+  else
+    die "$RESOLVE_ERROR" $EXIT_NOT_FOUND "Use: fizzy columns --board $board_id"
+  fi
+
+  # POST to left_position endpoint
+  api_post "/columns/$column_id/left_position" > /dev/null
+
+  # Fetch updated column
+  local response
+  response=$(api_get "/boards/$board_id/columns/$column_id")
+
+  local column_name
+  column_name=$(echo "$response" | jq -r '.name // "unknown"')
+
+  local summary="Moved column $column_name left"
+
+  local breadcrumbs
+  breadcrumbs=$(breadcrumbs \
+    "$(breadcrumb "columns" "fizzy columns --board $board_id" "List columns")" \
+    "$(breadcrumb "show" "fizzy column show $column_id --board $board_id" "View column")" \
+    "$(breadcrumb "right" "fizzy column right $column_id --board $board_id" "Move right")"
+  )
+
+  output "$response" "$summary" "$breadcrumbs" "_column_md"
+}
+
+_column_left_help() {
+  local format
+  format=$(get_format)
+
+  if [[ "$format" == "json" ]]; then
+    jq -n '{
+      command: "fizzy column left",
+      description: "Move a column left (decrease position)",
+      usage: "fizzy column left <id|name> --board <board>",
+      options: [
+        {flag: "--board, -b", description: "Board containing the column (required)"}
+      ],
+      examples: [
+        "fizzy column left abc123 --board \"My Board\"",
+        "fizzy column left \"In Progress\" --board \"My Board\""
+      ]
+    }'
+  else
+    cat <<'EOF'
+## fizzy column left
+
+Move a column left (decrease position).
+
+### Usage
+
+    fizzy column left <id|name> --board <board>
+
+### Options
+
+    --board, -b   Board containing the column (required)
+
+### Examples
+
+    fizzy column left abc123 --board "My Board"
+    fizzy column left "In Progress" --board "My Board"
+EOF
+  fi
+}
+
+
+# fizzy column right <id> --board <board>
+# Move a column right (increase position)
+
+_column_right() {
+  local column_id=""
+  local board_id=""
+  local show_help=false
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --board|-b|--in)
+        if [[ -z "${2:-}" ]]; then
+          die "--board requires a board name or ID" $EXIT_USAGE
+        fi
+        board_id="$2"
+        shift 2
+        ;;
+      --help|-h)
+        show_help=true
+        shift
+        ;;
+      -*)
+        die "Unknown option: $1" $EXIT_USAGE "Run: fizzy column right --help"
+        ;;
+      *)
+        if [[ -z "$column_id" ]]; then
+          column_id="$1"
+          shift
+        else
+          die "Unexpected argument: $1" $EXIT_USAGE
+        fi
+        ;;
+    esac
+  done
+
+  if [[ "$show_help" == "true" ]]; then
+    _column_right_help
+    return 0
+  fi
+
+  if [[ -z "$column_id" ]]; then
+    die "Column ID or name required" $EXIT_USAGE "Usage: fizzy column right <id> --board <board>"
+  fi
+
+  board_id=$(_column_resolve_board "$board_id")
+
+  local resolved_column
+  if resolved_column=$(resolve_column_id "$column_id" "$board_id"); then
+    column_id="$resolved_column"
+  else
+    die "$RESOLVE_ERROR" $EXIT_NOT_FOUND "Use: fizzy columns --board $board_id"
+  fi
+
+  # POST to right_position endpoint
+  api_post "/columns/$column_id/right_position" > /dev/null
+
+  # Fetch updated column
+  local response
+  response=$(api_get "/boards/$board_id/columns/$column_id")
+
+  local column_name
+  column_name=$(echo "$response" | jq -r '.name // "unknown"')
+
+  local summary="Moved column $column_name right"
+
+  local breadcrumbs
+  breadcrumbs=$(breadcrumbs \
+    "$(breadcrumb "columns" "fizzy columns --board $board_id" "List columns")" \
+    "$(breadcrumb "show" "fizzy column show $column_id --board $board_id" "View column")" \
+    "$(breadcrumb "left" "fizzy column left $column_id --board $board_id" "Move left")"
+  )
+
+  output "$response" "$summary" "$breadcrumbs" "_column_md"
+}
+
+_column_right_help() {
+  local format
+  format=$(get_format)
+
+  if [[ "$format" == "json" ]]; then
+    jq -n '{
+      command: "fizzy column right",
+      description: "Move a column right (increase position)",
+      usage: "fizzy column right <id|name> --board <board>",
+      options: [
+        {flag: "--board, -b", description: "Board containing the column (required)"}
+      ],
+      examples: [
+        "fizzy column right abc123 --board \"My Board\"",
+        "fizzy column right \"In Progress\" --board \"My Board\""
+      ]
+    }'
+  else
+    cat <<'EOF'
+## fizzy column right
+
+Move a column right (increase position).
+
+### Usage
+
+    fizzy column right <id|name> --board <board>
+
+### Options
+
+    --board, -b   Board containing the column (required)
+
+### Examples
+
+    fizzy column right abc123 --board "My Board"
+    fizzy column right "In Progress" --board "My Board"
+EOF
+  fi
 }
