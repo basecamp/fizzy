@@ -309,7 +309,7 @@ _api_request() {
         fi
         die "304 received but no cached response available" $EXIT_API
         ;;
-      200|201|204)
+      200|201|202|204)
         # Cache successful GET responses with ETag
         if [[ "$method" == "GET" ]] && [[ -n "$cache_key" ]]; then
           local etag
@@ -438,7 +438,7 @@ api_multipart_request() {
     debug "HTTP $_http_code_ref"
 
     case "$_http_code_ref" in
-      200|201|204)
+      200|201|202|204)
         return 0
         ;;
       429)

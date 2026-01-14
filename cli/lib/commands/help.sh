@@ -45,13 +45,16 @@ _help_topic() {
     columns) _columns_help ;;
     identity) _identity_help ;;
     user) _user_help ;;
+    account) _account_help ;;
+    webhook) _webhook_help ;;
+    webhooks) _webhooks_list_help ;;
     *)
       if [[ "$format" == "json" ]]; then
         json_error "Unknown help topic: $topic" "not_found"
       else
         echo "Unknown help topic: $topic"
         echo
-        echo "Available topics: auth, config, cards, boards, board, column, columns, identity, user"
+        echo "Available topics: auth, config, cards, boards, board, column, columns, identity, user, account, webhook, webhooks"
       fi
       exit 1
       ;;
@@ -66,9 +69,9 @@ _help_json() {
       version: $version,
       description: "Agent-first CLI for Fizzy",
       commands: {
-        query: ["boards", "cards", "columns", "comments", "reactions", "notifications", "people", "search", "show", "tags"],
-        actions: ["card", "board", "column", "close", "reopen", "triage", "untriage", "postpone", "comment", "assign", "tag", "watch", "unwatch", "gild", "ungild", "step", "react"],
-        identity: ["identity", "user"],
+        query: ["boards", "cards", "columns", "comments", "reactions", "notifications", "people", "search", "show", "tags", "webhooks"],
+        actions: ["card", "board", "column", "close", "reopen", "triage", "untriage", "postpone", "comment", "assign", "tag", "watch", "unwatch", "gild", "ungild", "step", "react", "webhook"],
+        identity: ["identity", "user", "account"],
         meta: ["auth", "config", "version", "help"]
       },
       global_flags: [
@@ -114,11 +117,12 @@ Agent-first CLI for Fizzy.
     search           Search cards
     show             Show card details
     tags             List tags
+    webhooks         List webhooks for a board
 
 ### Actions
-    card             Manage cards (create/update/delete/image)
-    board            Manage boards (create/update/delete/show)
-    column           Manage columns (create/update/delete/show)
+    card             Manage cards (create/update/delete/image/move/publish)
+    board            Manage boards (create/update/delete/show/publish/entropy)
+    column           Manage columns (create/update/delete/show/left/right)
     close            Close a card
     reopen           Reopen a closed card
     triage           Move card into a column
@@ -133,10 +137,12 @@ Agent-first CLI for Fizzy.
     ungild           Remove golden status
     step             Manage steps (add/show/update/delete)
     react            Manage reactions (add/delete)
+    webhook          Manage webhooks (create/show/update/delete)
 
-### Identity
+### Identity & Account
     identity         Show current identity and accounts
-    user             Manage users (show/update/delete)
+    user             Manage users (show/update/delete/role)
+    account          Manage account (show/update/entropy/join-code/export)
 
 ### Meta
     auth             Authentication management
