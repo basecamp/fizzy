@@ -33,6 +33,11 @@ module Fizzy
           namespace :stripe do
             resource :webhooks, only: :create
           end
+
+          # Native push notification device registration
+          namespace :users do
+            resources :devices, only: [ :index, :create, :destroy ]
+          end
         end
       end
 
