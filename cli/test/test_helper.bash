@@ -125,6 +125,19 @@ assert_json_not_null() {
   fi
 }
 
+assert_json_contains() {
+  local path="$1"
+  local expected="$2"
+  local found
+  found=$(echo "$output" | jq -e "$path | select(. == \"$expected\")" 2>/dev/null)
+
+  if [[ -z "$found" ]]; then
+    echo "JSON path $path: expected to contain '$expected'"
+    echo "Actual values: $(echo "$output" | jq -r "$path" 2>/dev/null)"
+    return 1
+  fi
+}
+
 
 # Fixtures
 
