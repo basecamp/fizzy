@@ -49,13 +49,24 @@ load test_helper
 }
 
 
-# self-update --check (mocked)
+# self-update guards
 
-@test "self-update --check reports current version" {
-  # This test doesn't actually check remote - just verifies the command runs
-  # In CI, network may not be available, so we just test the help path
-  run fizzy --md self-update --help
-  assert_success
+@test "self-update detects git checkout and suggests git pull" {
+  # Create a fake .git directory to simulate git checkout
+  mkdir -p "$FIZZY_ROOT/.git"
+  run fizzy --json self-update
+  rmdir "$FIZZY_ROOT/.git"
+  assert_failure
+  assert_output_contains "git checkout"
+  assert_output_contains "git pull"
+}
+
+@test "self-update --check also detects git checkout" {
+  mkdir -p "$FIZZY_ROOT/.git"
+  run fizzy --json self-update --check
+  rmdir "$FIZZY_ROOT/.git"
+  assert_failure
+  assert_output_contains "git checkout"
 }
 
 

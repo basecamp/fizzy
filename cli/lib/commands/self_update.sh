@@ -31,6 +31,24 @@ cmd_self_update() {
     esac
   done
 
+  # Check if this is a git checkout
+  if [[ -d "$FIZZY_ROOT/.git" ]]; then
+    json_error "Cannot self-update a git checkout" "usage" \
+      "Use 'git pull' to update instead"
+    return $EXIT_USAGE
+  fi
+
+  # Check if FIZZY_ROOT is writable
+  if [[ ! -w "$FIZZY_ROOT" ]]; then
+    local hint="Check permissions or reinstall with: curl -fsSL $FIZZY_RAW_URL/cli/install.sh | bash"
+    # Detect Homebrew install
+    if [[ "$FIZZY_ROOT" == */Cellar/* ]] || [[ "$FIZZY_ROOT" == */homebrew/* ]]; then
+      hint="Use 'brew upgrade fizzy-cli' to update"
+    fi
+    json_error "Cannot update: $FIZZY_ROOT is not writable" "forbidden" "$hint"
+    return $EXIT_FORBIDDEN
+  fi
+
   # Get current version
   local current_version="$FIZZY_VERSION"
 
@@ -100,7 +118,7 @@ cmd_self_update() {
   else
     json_error "Update failed" "api_error" \
       "Try running the installer manually: curl -fsSL $FIZZY_RAW_URL/cli/install.sh | bash"
-    return $EXIT_API_ERROR
+    return $EXIT_API
   fi
 }
 
