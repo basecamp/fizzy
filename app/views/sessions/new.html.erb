@@ -3,23 +3,36 @@
 <div class="panel panel--centered flex flex-column gap-half">
   <h1 class="txt-x-large font-weight-black margin-block-end">Get into Fizzy</h1>
 
-  <%= form_with url: session_path, class: "flex flex-column gap-half txt-medium" do |form| %>
-    <div class="flex align-center gap">
-      <label class="flex align-center gap input input--actor">
-        <%= form.email_field :email_address, required: true, class: "input txt-large full-width", autofocus: true, autocomplete: "username", placeholder: "Enter your email address…" %>
-      </label>
-    </div>
+  <% if oidc_enabled? %>
+    <%= button_to "Sign in with OIDC", "/auth/oidc",
+        method: :post,
+        data: { turbo: false },
+        class: "btn btn--primary center txt-medium margin-block-end" %>
 
-    <% if Account.accepting_signups? %>
-      <p><strong>New here?</strong> <%= link_to "Sign up", new_signup_path %> to create an account. <strong>Already have an account?</strong> Enter your email and we’ll get you signed in.</p>
-    <% else %>
-      <p>Enter your email and we’ll get you signed in.</p>
+    <% unless oidc_required? %>
+      <p class="txt-small txt-center txt-muted">Or sign in with email</p>
     <% end %>
+  <% end %>
 
-    <button type="submit" id="log_in" class="btn btn--link center txt-medium">
-      <span>Let’s go</span>
-      <%= icon_tag "arrow-right" %>
-    </button>
+  <% unless oidc_required? %>
+    <%= form_with url: session_path, class: "flex flex-column gap-half txt-medium" do |form| %>
+      <div class="flex align-center gap">
+        <label class="flex align-center gap input input--actor">
+          <%= form.email_field :email_address, required: true, class: "input txt-large full-width", autofocus: true, autocomplete: "username", placeholder: "Enter your email address…" %>
+        </label>
+      </div>
+
+      <% if Account.accepting_signups? %>
+        <p><strong>New here?</strong> <%= link_to "Sign up", new_signup_path %> to create an account. <strong>Already have an account?</strong> Enter your email and we'll get you signed in.</p>
+      <% else %>
+        <p>Enter your email and we'll get you signed in.</p>
+      <% end %>
+
+      <button type="submit" id="log_in" class="btn btn--link center txt-medium">
+        <span>Let's go</span>
+        <%= icon_tag "arrow-right" %>
+      </button>
+    <% end %>
   <% end %>
 </div>
 

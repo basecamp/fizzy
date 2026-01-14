@@ -52,12 +52,7 @@ class Sessions::MagicLinksController < ApplicationController
 
     def email_address_mismatch
       clear_pending_authentication_token
-      alert_message = "Something went wrong. Please try again."
-
-      respond_to do |format|
-        format.html { redirect_to new_session_path, alert: alert_message }
-        format.json { render json: { message: alert_message }, status: :unauthorized }
-      end
+      authentication_failed
     end
 
     def invalid_code
@@ -76,11 +71,7 @@ class Sessions::MagicLinksController < ApplicationController
     end
 
     def rate_limit_exceeded
-      rate_limit_exceeded_message = "Try again in 15 minutes."
-      respond_to do |format|
-        format.html { redirect_to session_magic_link_path, alert: rate_limit_exceeded_message }
-        format.json { render json: { message: rate_limit_exceeded_message }, status: :too_many_requests }
-      end
+      super(message: "Try again in 15 minutes.", redirect_path: session_magic_link_path)
     end
 
     def requires_signup_completion?(magic_link)
