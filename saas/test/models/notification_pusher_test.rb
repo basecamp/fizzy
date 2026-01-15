@@ -120,6 +120,32 @@ class NotificationPusherNativeTest < ActiveSupport::TestCase
     end
   end
 
+  test "push delivers to both web and native when user has both" do
+    stub_push_services
+
+    # Set up web push subscription
+    @user.push_subscriptions.create!(
+      endpoint: "https://fcm.googleapis.com/fcm/send/test",
+      p256dh_key: "test_p256dh_key",
+      auth_key: "test_auth_key"
+    )
+
+    # Set up native device
+    @user.devices.create!(uuid: SecureRandom.uuid, token: "native_token", platform: "apple", name: "iPhone")
+
+    # Mock web push pool to verify it receives the payload
+    web_push_pool = mock("web_push_pool")
+    web_push_pool.expects(:queue).once.with do |payload, subscriptions|
+      payload.is_a?(Hash) && subscriptions.count == 1
+    end
+    Rails.configuration.x.stubs(:web_push_pool).returns(web_push_pool)
+
+    # Verify native push is also delivered
+    assert_native_push_delivery(count: 1) do
+      @pusher.push
+    end
+  end
+
   # === Native Notification Building ===
 
   test "native notification includes required fields" do
