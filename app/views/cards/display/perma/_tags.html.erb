@@ -7,7 +7,7 @@
       <span class="for-screen-reader">Add a tag</span>
     </button>
 
-    <dialog class="popup panel flex-column align-start justify-start fill-white shadow txt-small"
+    <dialog class="popup panel flex-column align-start justify-start fill-white shadow txt-small margin-block-double"
         data-dialog-target="dialog"
         data-action="turbo:before-morph-attribute->dialog#preventCloseOnMorphing turbo:submit-end->dialog#close">
       <%= turbo_frame_tag card, :tagging, src: new_card_tagging_path(card), loading: :lazy, refresh: :morph %>
