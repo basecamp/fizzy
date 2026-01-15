@@ -18,10 +18,14 @@ class NotificationPusher
 
   private
     def should_push?
-      notification.user.push_subscriptions.any? &&
+      push_destination? &&
         !notification.creator.system? &&
         notification.user.active? &&
         notification.account.active?
+    end
+
+    def push_destination?
+      notification.user.push_subscriptions.any?
     end
 
     def build_payload

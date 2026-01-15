@@ -1,19 +1,6 @@
 module NotificationPusher::Native
   extend ActiveSupport::Concern
 
-  included do
-    # Alias the original method so we can extend it
-    alias_method :original_should_push?, :should_push?
-  end
-
-  # Override should_push? to also check for native devices
-  def should_push?
-    has_any_push_destination? &&
-      !notification.creator.system? &&
-      notification.user.active? &&
-      notification.account.active?
-  end
-
   # Override push to also send to native devices
   def push
     return unless should_push?
@@ -25,7 +12,7 @@ module NotificationPusher::Native
   end
 
   private
-    def has_any_push_destination?
+    def push_destination?
       notification.user.push_subscriptions.any? || notification.user.devices.any?
     end
 

@@ -58,27 +58,27 @@ class NotificationPusherNativeTest < ActiveSupport::TestCase
 
   # === Has Any Push Destination ===
 
-  test "has_any_push_destination returns true when user has native devices" do
+  test "push_destination returns true when user has native devices" do
     @user.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
 
-    assert @pusher.send(:has_any_push_destination?)
+    assert @pusher.send(:push_destination?)
   end
 
-  test "has_any_push_destination returns true when user has web subscriptions" do
+  test "push_destination returns true when user has web subscriptions" do
     @user.push_subscriptions.create!(
       endpoint: "https://example.com/push",
       p256dh_key: "test_p256dh",
       auth_key: "test_auth"
     )
 
-    assert @pusher.send(:has_any_push_destination?)
+    assert @pusher.send(:push_destination?)
   end
 
-  test "has_any_push_destination returns false when user has neither" do
+  test "push_destination returns false when user has neither" do
     @user.devices.delete_all
     @user.push_subscriptions.delete_all
 
-    assert_not @pusher.send(:has_any_push_destination?)
+    assert_not @pusher.send(:push_destination?)
   end
 
   # === Push Delivery ===
