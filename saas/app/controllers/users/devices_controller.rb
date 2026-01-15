@@ -6,8 +6,17 @@ class Users::DevicesController < ApplicationController
 
   # POST /users/devices - API only (mobile apps register tokens)
   def create
-    device = Current.user.devices.find_or_initialize_by(token: device_params[:token])
-    device.update!(device_params)
+    attrs = device_params
+    device = ActionPushNative::Device.find_or_initialize_by(token: attrs[:token])
+    device.owner = Current.user
+    device.update!(attrs)
+    head :created
+  rescue ActiveRecord::RecordNotUnique
+    device = ActionPushNative::Device.find_by(token: attrs[:token])
+    raise unless device
+
+    device.owner = Current.user
+    device.update!(attrs)
     head :created
   rescue ActiveRecord::RecordInvalid
     head :unprocessable_entity

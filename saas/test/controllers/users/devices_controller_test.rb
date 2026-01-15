@@ -91,6 +91,27 @@ class Users::DevicesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "New iPhone", existing_device.reload.name
   end
 
+  test "reassigns device token from another user" do
+    other_user = users(:kevin)
+    device = other_user.devices.create!(
+      token: "shared_token_123",
+      platform: "apple",
+      name: "Other iPhone"
+    )
+
+    assert_no_difference "ActionPushNative::Device.count" do
+      post users_devices_path, params: {
+        token: "shared_token_123",
+        platform: "apple",
+        name: "My iPhone"
+      }, as: :json
+    end
+
+    assert_response :created
+    assert_equal @user, device.reload.owner
+    assert_equal "My iPhone", device.name
+  end
+
   test "rejects invalid platform" do
     post users_devices_path, params: {
       token: SecureRandom.hex(32),
