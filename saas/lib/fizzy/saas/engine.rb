@@ -17,6 +17,10 @@ module Fizzy
         app.config.assets.paths << root.join("app/assets/stylesheets")
       end
 
+      initializer "fizzy_saas.push_config", before: "action_push_native.config" do |app|
+        app.paths.add "config/push", with: root.join("config/push.yml")
+      end
+
       initializer "fizzy.saas.routes", after: :add_routing_paths do |app|
         # Routes that rely on the implicit account tenant should go here instead of in +routes.rb+.
         app.routes.prepend do
