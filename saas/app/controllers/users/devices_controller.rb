@@ -7,16 +7,8 @@ class Users::DevicesController < ApplicationController
   # POST /users/devices - API only (mobile apps register tokens)
   def create
     attrs = device_params
-    device = ActionPushNative::Device.find_or_initialize_by(token: attrs[:token])
-    device.owner = Current.user
-    device.update!(attrs)
-    head :created
-  rescue ActiveRecord::RecordNotUnique
-    device = ActionPushNative::Device.find_by(token: attrs[:token])
-    raise unless device
-
-    device.owner = Current.user
-    device.update!(attrs)
+    device = Current.user.devices.find_or_create_by(uuid: attrs[:uuid])
+    device.update!(token: attrs[:token], name: attrs[:name], platform: attrs[:platform])
     head :created
   rescue ActiveRecord::RecordInvalid
     head :unprocessable_entity
@@ -30,9 +22,10 @@ class Users::DevicesController < ApplicationController
 
   private
     def device_params
-      params.permit(:token, :platform, :name).tap do |p|
+      params.permit(:uuid, :token, :platform, :name).tap do |p|
         p[:platform] = p[:platform].to_s.downcase
         raise ActionController::BadRequest unless p[:platform].in?(%w[apple google])
+        raise ActionController::BadRequest if p[:uuid].blank?
         raise ActionController::BadRequest if p[:token].blank?
       end
     end

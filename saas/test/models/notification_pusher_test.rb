@@ -59,7 +59,7 @@ class NotificationPusherNativeTest < ActiveSupport::TestCase
   # === Has Any Push Destination ===
 
   test "push_destination returns true when user has native devices" do
-    @user.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
+    @user.devices.create!(uuid: SecureRandom.uuid, token: "test123", platform: "apple", name: "Test iPhone")
 
     assert @pusher.send(:push_destination?)
   end
@@ -85,7 +85,7 @@ class NotificationPusherNativeTest < ActiveSupport::TestCase
 
   test "push delivers to native devices when user has devices" do
     stub_push_services
-    @user.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
+    @user.devices.create!(uuid: SecureRandom.uuid, token: "test123", platform: "apple", name: "Test iPhone")
 
     assert_native_push_delivery(count: 1) do
       @pusher.push
@@ -102,7 +102,7 @@ class NotificationPusherNativeTest < ActiveSupport::TestCase
 
   test "push does not deliver when creator is system user" do
     stub_push_services
-    @user.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
+    @user.devices.create!(uuid: SecureRandom.uuid, token: "test123", platform: "apple", name: "Test iPhone")
     @notification.update!(creator: users(:system))
 
     result = @pusher.push
@@ -112,8 +112,8 @@ class NotificationPusherNativeTest < ActiveSupport::TestCase
 
   test "push delivers to multiple devices" do
     stub_push_services
-    @user.devices.create!(token: "token1", platform: "apple", name: "iPhone")
-    @user.devices.create!(token: "token2", platform: "google", name: "Pixel")
+    @user.devices.create!(uuid: SecureRandom.uuid, token: "token1", platform: "apple", name: "iPhone")
+    @user.devices.create!(uuid: SecureRandom.uuid, token: "token2", platform: "google", name: "Pixel")
 
     assert_native_push_delivery(count: 1) do
       @pusher.push
@@ -123,7 +123,7 @@ class NotificationPusherNativeTest < ActiveSupport::TestCase
   # === Native Notification Building ===
 
   test "native notification includes required fields" do
-    @user.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
+    @user.devices.create!(uuid: SecureRandom.uuid, token: "test123", platform: "apple", name: "Test iPhone")
     payload = @pusher.send(:build_payload)
     native = @pusher.send(:native_notification, payload)
 
@@ -133,7 +133,7 @@ class NotificationPusherNativeTest < ActiveSupport::TestCase
   end
 
   test "native notification sets thread_id from card" do
-    @user.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
+    @user.devices.create!(uuid: SecureRandom.uuid, token: "test123", platform: "apple", name: "Test iPhone")
     payload = @pusher.send(:build_payload)
     native = @pusher.send(:native_notification, payload)
 
@@ -142,7 +142,7 @@ class NotificationPusherNativeTest < ActiveSupport::TestCase
 
   test "native notification sets high_priority for assignments" do
     notification = notifications(:logo_assignment_kevin)
-    notification.user.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
+    notification.user.devices.create!(uuid: SecureRandom.uuid, token: "test123", platform: "apple", name: "Test iPhone")
     pusher = NotificationPusher.new(notification)
 
     payload = pusher.send(:build_payload)
@@ -152,7 +152,7 @@ class NotificationPusherNativeTest < ActiveSupport::TestCase
   end
 
   test "native notification sets normal priority for non-assignments" do
-    @user.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
+    @user.devices.create!(uuid: SecureRandom.uuid, token: "test123", platform: "apple", name: "Test iPhone")
     payload = @pusher.send(:build_payload)
     native = @pusher.send(:native_notification, payload)
 
@@ -162,7 +162,7 @@ class NotificationPusherNativeTest < ActiveSupport::TestCase
   # === Apple-specific Payload ===
 
   test "native notification includes apple-specific fields" do
-    @user.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
+    @user.devices.create!(uuid: SecureRandom.uuid, token: "test123", platform: "apple", name: "Test iPhone")
     payload = @pusher.send(:build_payload)
     native = @pusher.send(:native_notification, payload)
 
@@ -174,7 +174,7 @@ class NotificationPusherNativeTest < ActiveSupport::TestCase
   # === Google-specific Payload ===
 
   test "native notification sets android notification to nil for data-only" do
-    @user.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
+    @user.devices.create!(uuid: SecureRandom.uuid, token: "test123", platform: "apple", name: "Test iPhone")
     payload = @pusher.send(:build_payload)
     native = @pusher.send(:native_notification, payload)
 
@@ -184,7 +184,7 @@ class NotificationPusherNativeTest < ActiveSupport::TestCase
   # === Data Payload ===
 
   test "native notification includes data payload" do
-    @user.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
+    @user.devices.create!(uuid: SecureRandom.uuid, token: "test123", platform: "apple", name: "Test iPhone")
     payload = @pusher.send(:build_payload)
     native = @pusher.send(:native_notification, payload)
 
