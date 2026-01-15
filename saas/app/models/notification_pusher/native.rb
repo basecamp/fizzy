@@ -6,7 +6,7 @@ module NotificationPusher::Native
     return unless should_push?
 
     build_payload.tap do |payload|
-      push_to_web(payload)
+      push_to_user(payload) if notification.user.push_subscriptions.any?
       push_to_native(payload)
     end
   end
@@ -14,12 +14,6 @@ module NotificationPusher::Native
   private
     def push_destination?
       notification.user.push_subscriptions.any? || notification.user.devices.any?
-    end
-
-    def push_to_web(payload)
-      subscriptions = notification.user.push_subscriptions
-      return if subscriptions.empty?
-      enqueue_payload_for_delivery(payload, subscriptions)
     end
 
     def push_to_native(payload)
