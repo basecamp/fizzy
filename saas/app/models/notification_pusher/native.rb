@@ -1,7 +1,6 @@
 module NotificationPusher::Native
   extend ActiveSupport::Concern
 
-  # Override push to also send to native devices
   def push
     return unless should_push?
 
@@ -33,7 +32,6 @@ module NotificationPusher::Native
           }
         )
         .with_google(
-          # Data-only message - Android app handles notification display
           android: { notification: nil }
         )
         .with_data(

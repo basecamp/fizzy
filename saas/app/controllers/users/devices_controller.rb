@@ -1,10 +1,8 @@
 class Users::DevicesController < ApplicationController
-  # GET /users/devices - Web only (view registered devices)
   def index
     @devices = Current.user.devices.order(created_at: :desc)
   end
 
-  # POST /users/devices - API only (mobile apps register tokens)
   def create
     attrs = device_params
     device = Current.user.devices.find_or_create_by(uuid: attrs[:uuid])
@@ -14,7 +12,6 @@ class Users::DevicesController < ApplicationController
     head :unprocessable_entity
   end
 
-  # DELETE /users/devices/:id - Web only
   def destroy
     Current.user.devices.find_by(id: params[:id])&.destroy
     redirect_to users_devices_path, notice: "Device removed"
