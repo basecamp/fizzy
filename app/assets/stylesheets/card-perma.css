@@ -127,6 +127,7 @@
 
       + .panel {
         --panel-size: 18ch;
+        cursor: default; /* Override pointer cursor from parent .card__board */
       }
     }
 
