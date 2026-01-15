@@ -26,7 +26,12 @@ export default class extends Controller {
 
     this.loadLazyFrames()
     this.dialogTarget.setAttribute("aria-hidden", "false")
+    if (this.#isTouchDevice()) document.activeElement?.blur()
     this.dispatch("show")
+  }
+
+  #isTouchDevice() {
+    return "ontouchstart" in window || navigator.maxTouchPoints > 0
   }
 
   toggle() {
