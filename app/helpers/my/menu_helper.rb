@@ -66,8 +66,11 @@ module My::MenuHelper
 
       tag.span(class: "board-menu-counts") do
         counts = []
-        counts << board_count_tag(maybe_count) if maybe_count > 0 || columns.any?
-        counts += columns.map { |column| board_count_tag(column.cards.active.size, color: column.color) }
+        counts << board_count_tag(maybe_count) if maybe_count > 0
+        counts += columns.filter_map do |column|
+          count = column.cards.active.size
+          board_count_tag(count, color: column.color) if count > 0
+        end
         safe_join(counts)
       end
     end

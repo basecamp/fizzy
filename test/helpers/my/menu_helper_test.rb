@@ -17,9 +17,20 @@ class My::MenuHelperTest < ActionView::TestCase
   test "board_column_counts_tag shows column counts with colors" do
     html = send(:board_column_counts_tag, @board)
 
-    @board.columns.sorted.each do |column|
-      assert_match "--card-color: #{column.color};", html
-    end
+    # Verify that at least one column with cards shows its color
+    assert_match /--card-color:/, html
+  end
+
+  test "board_column_counts_tag excludes columns with zero cards" do
+    html = send(:board_column_counts_tag, @board)
+
+    # Count the number of colored badges in the output
+    colored_badges = html.scan(/--card-color:/).count
+
+    # Count columns that have active cards
+    columns_with_cards = @board.columns.sorted.count { |c| c.cards.active.size > 0 }
+
+    assert_equal columns_with_cards, colored_badges
   end
 
   test "board_column_counts_tag returns empty span when no columns and no cards" do
