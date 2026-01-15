@@ -66,18 +66,18 @@ module My::MenuHelper
 
       tag.span(class: "board-menu-counts") do
         counts = []
-        counts << board_count_tag(maybe_count) if maybe_count > 0
+        counts << board_count_tag(maybe_count, title: "Maybe?") if maybe_count > 0
         counts += columns.filter_map do |column|
           count = column.cards.active.size
-          board_count_tag(count, color: column.color) if count > 0
+          board_count_tag(count, color: column.color, title: column.name) if count > 0
         end
         safe_join(counts)
       end
     end
 
-    def board_count_tag(count, color: nil)
+    def board_count_tag(count, color: nil, title: nil)
       formatted_count = count > 99 ? "99+" : count.to_s
       style = "--card-color: #{color};" if color
-      tag.span(formatted_count, class: "board-menu-count", style: style)
+      tag.span(formatted_count, class: "board-menu-count", style: style, title: title)
     end
 end

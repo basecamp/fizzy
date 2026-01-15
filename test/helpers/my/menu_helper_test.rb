@@ -8,8 +8,8 @@ class My::MenuHelperTest < ActionView::TestCase
   test "board_column_counts_tag shows awaiting triage count first" do
     html = send(:board_column_counts_tag, @board)
 
-    # First count should be awaiting triage (no color style)
-    first_count = html.match(/<span class="board-menu-count">(\d+)<\/span>/)
+    # First count should be awaiting triage (no color style, has "Maybe?" title)
+    first_count = html.match(/<span class="board-menu-count" title="Maybe\?">(\d+)<\/span>/)
     assert first_count, "Should have a count without color for awaiting triage"
     assert_equal @board.cards.awaiting_triage.count.to_s, first_count[1]
   end
