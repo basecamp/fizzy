@@ -1,4 +1,4 @@
-<section id="<%= dom_id(card, :card_container) %>" class="card-perma" style="--card-color: <%= card.color %>;">
+<section id="<%= dom_id(card, :card_container) %>" class="card-perma" style="--card-color: <%= card.color %>;" data-controller="dialog-manager">
   <% cache card do %>
     <div class="card-perma__actions card-perma__actions--left">
       <%= render "cards/container/gild", card: card if card.published? && !card.closed? %>
