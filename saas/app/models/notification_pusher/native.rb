@@ -5,7 +5,7 @@ module NotificationPusher::Native
     return unless should_push?
 
     build_payload.tap do |payload|
-      push_to_user(payload) if notification.user.push_subscriptions.any?
+      push_to_web(payload) if notification.user.push_subscriptions.any?
       push_to_native(payload)
     end
   end

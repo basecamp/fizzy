@@ -12,7 +12,7 @@ class NotificationPusher
     return unless should_push?
 
     build_payload.tap do |payload|
-      push_to_user(payload)
+      push_to_web(payload)
     end
   end
 
@@ -97,7 +97,7 @@ class NotificationPusher
       }
     end
 
-    def push_to_user(payload)
+    def push_to_web(payload)
       subscriptions = notification.user.push_subscriptions
       enqueue_payload_for_delivery(payload, subscriptions)
     end
