@@ -13,8 +13,8 @@ done
 
 if [ "$USE_APNS" = "1" ]; then
   if [ ! -f tmp/saas.txt ]; then
-    echo "Error: --apns requires SaaS mode. Run: bin/rails saas:enable" >&2
-    exit 1
+    echo "Enabling SaaS mode for APNs..."
+    ./bin/rails saas:enable
   fi
   echo "Loading APNs credentials from 1Password..."
   eval "$(BUNDLE_GEMFILE=Gemfile.saas bundle exec apns-dev)"
