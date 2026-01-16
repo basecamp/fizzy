@@ -17,8 +17,8 @@ module Fizzy
         app.config.assets.paths << root.join("app/assets/stylesheets")
       end
 
-      initializer "fizzy_saas.push_config", before: "action_push_native.config" do |app|
-        app.paths.add "config/push", with: root.join("config/push.yml")
+      initializer "fizzy_saas.push_config", after: "action_push_native.config" do |app|
+        app.paths["config/push"].unshift(root.join("config/push.yml").to_s)
       end
 
       initializer "fizzy.saas.routes", after: :add_routing_paths do |app|
@@ -142,7 +142,7 @@ module Fizzy
       config.to_prepare do
         ::Account.include Account::Billing, Account::Limited
         ::User.include User::Devices
-        ::NotificationPusher.include NotificationPusher::Native
+        ::NotificationPusher.prepend NotificationPusher::Native
         ::Signup.prepend Fizzy::Saas::Signup
         CardsController.include(Card::LimitedCreation)
         Cards::PublishesController.include(Card::LimitedPublishing)
