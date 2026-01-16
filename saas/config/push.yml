@@ -1,11 +1,10 @@
 shared:
   apple:
     key_id: <%= ENV["APNS_KEY_ID"] || Rails.application.credentials.dig(:action_push_native, :apns, :key_id) %>
-    encryption_key: <%= (ENV["APNS_ENCRYPTION_KEY"] || Rails.application.credentials.dig(:action_push_native, :apns, :key))&.dump %>
-    team_id: YOUR_TEAM_ID        # Your 10-character Apple Developer Team ID (not secret)
-    topic: com.yourcompany.fizzy # Your app's bundle identifier (not secret)
-    # Uncomment for local development with Xcode builds (uses APNs sandbox):
-    # connect_to_development_server: true
+    encryption_key: <%= (ENV["APNS_ENCRYPTION_KEY"]&.gsub("\\n", "\n") || Rails.application.credentials.dig(:action_push_native, :apns, :key))&.dump %>
+    team_id: <%= ENV["APNS_TEAM_ID"] || Rails.application.credentials.dig(:action_push_native, :apns, :team_id) || "2WNYUYRS7G" %>
+    topic: <%= ENV["APNS_TOPIC"] || Rails.application.credentials.dig(:action_push_native, :apns, :topic) || "do.fizzy.app.ios" %>
+    connect_to_development_server: <%= Rails.env.local? %>
   google:
     encryption_key: <%= (ENV["FCM_ENCRYPTION_KEY"] || Rails.application.credentials.dig(:action_push_native, :fcm, :key))&.dump %>
     project_id: your-firebase-project  # Your Firebase project ID (not secret)

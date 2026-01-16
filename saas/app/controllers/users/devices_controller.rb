@@ -1,29 +1,30 @@
 class Users::DevicesController < ApplicationController
+  before_action :set_devices
+
   def index
-    @devices = Current.user.devices.order(created_at: :desc)
   end
 
   def create
-    attrs = device_params
-    device = Current.user.devices.find_or_create_by(uuid: attrs[:uuid])
-    device.update!(token: attrs[:token], name: attrs[:name], platform: attrs[:platform])
+    device = @devices.find_or_initialize_by(uuid: params.require(:uuid))
+    device.update!(device_params)
     head :created
-  rescue ActiveRecord::RecordInvalid
-    head :unprocessable_entity
+  rescue ArgumentError
+    head :bad_request
   end
 
   def destroy
-    Current.user.devices.find_by(id: params[:id])&.destroy
+    @devices.destroy_by(id: params[:id])
     redirect_to users_devices_path, notice: "Device removed"
   end
 
   private
+    def set_devices
+      @devices = Current.user.devices.order(created_at: :desc)
+    end
+
     def device_params
-      params.permit(:uuid, :token, :platform, :name).tap do |p|
-        p[:platform] = p[:platform].to_s.downcase
-        raise ActionController::BadRequest unless p[:platform].in?(%w[apple google])
-        raise ActionController::BadRequest if p[:uuid].blank?
-        raise ActionController::BadRequest if p[:token].blank?
+      params.permit(:token, :platform, :name).tap do |permitted|
+        permitted[:platform] = permitted[:platform].to_s.downcase if permitted[:platform].present?
       end
     end
 end

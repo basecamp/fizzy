@@ -1,0 +1,36 @@
+#!/usr/bin/env ruby
+#
+# Fetches APNs development environment variables from 1Password.
+#
+# Usage: eval "$(bundle exec apns-dev)"
+
+OP_ACCOUNT = "23QPQDKZC5BKBIIG7UGT5GR5RM"
+OP_VAULT = "Mobile"
+OP_ITEM = "37signals Push Notifications key"
+
+def op_read(field)
+  `op read "op://#{OP_VAULT}/#{OP_ITEM}/#{field}" --account #{OP_ACCOUNT} 2>/dev/null`.strip
+end
+
+key_id = op_read("key ID")
+team_id = op_read("team ID")
+encryption_key = op_read("AuthKey_3CR5J2W8Q6.p8")
+
+if key_id.empty? || encryption_key.empty?
+  warn "Error: Could not fetch APNs credentials from 1Password"
+  warn "Make sure you're signed in: op signin --account #{OP_ACCOUNT}"
+  exit 1
+end
+
+puts %Q(export APNS_KEY_ID="#{key_id}")
+puts %Q(export APNS_TEAM_ID="#{team_id}")
+puts %Q(export APNS_ENCRYPTION_KEY="#{encryption_key.gsub("\n", "\\n")}")
+puts %Q(export APNS_TOPIC="do.fizzy.app.ios")
+puts %Q(export ENABLE_NATIVE_PUSH="true")
+
+warn ""
+warn "APNs credentials loaded for development"
+warn "  Key ID: #{key_id}"
+warn "  Team ID: #{team_id}"
+warn "  Topic: do.fizzy.app.ios"
+warn "  Native push: enabled"
