@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2025_12_24_092315) do
+ActiveRecord::Schema[8.2].define(version: 2026_01_14_203313) do
   create_table "accesses", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -66,6 +66,19 @@ ActiveRecord::Schema[8.2].define(version: 2025_12_24_092315) do
     t.string "name", null: false
     t.datetime "updated_at", null: false
     t.index ["external_account_id"], name: "index_accounts_on_external_account_id", unique: true
+  end
+
+  create_table "action_push_native_devices", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name"
+    t.uuid "owner_id"
+    t.string "owner_type"
+    t.string "platform", null: false
+    t.string "token", null: false
+    t.datetime "updated_at", null: false
+    t.string "uuid", null: false
+    t.index ["owner_type", "owner_id", "uuid"], name: "idx_on_owner_type_owner_id_uuid_a42e3920d5", unique: true
+    t.index ["owner_type", "owner_id"], name: "index_action_push_native_devices_on_owner"
   end
 
   create_table "action_text_rich_texts", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
