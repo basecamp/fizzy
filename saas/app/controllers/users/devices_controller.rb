@@ -5,7 +5,7 @@ class Users::DevicesController < ApplicationController
 
   def create
     attrs = device_params
-    device = Current.user.devices.find_or_create_by(uuid: attrs[:uuid])
+    device = Current.user.devices.find_or_initialize_by(uuid: attrs[:uuid])
     device.update!(token: attrs[:token], name: attrs[:name], platform: attrs[:platform])
     head :created
   rescue ActiveRecord::RecordInvalid
