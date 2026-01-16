@@ -17,7 +17,14 @@ if [ "$USE_APNS" = "1" ]; then
     ./bin/rails saas:enable
   fi
   echo "Loading APNs credentials from 1Password..."
-  eval "$(BUNDLE_GEMFILE=Gemfile.saas bundle exec apns-dev)"
+  if ! eval "$(BUNDLE_GEMFILE=Gemfile.saas bundle exec apns-dev)"; then
+    echo "Error: failed to load APNs credentials. Are you signed into 1Password?" >&2
+    exit 1
+  fi
+  if [ -z "$APNS_ENCRYPTION_KEY" ] || [ -z "$APNS_KEY_ID" ]; then
+    echo "Error: APNs credentials not set. Missing APNS_ENCRYPTION_KEY or APNS_KEY_ID." >&2
+    exit 1
+  fi
 fi
 
 if [ ! -f tmp/solid-queue.txt ]; then
