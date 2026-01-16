@@ -2,12 +2,23 @@
 
 PORT=3006
 USE_TAILSCALE=0
+USE_APNS=0
 
 for arg in "$@"; do
   case $arg in
     --tailscale) USE_TAILSCALE=1 ;;
+    --apns) USE_APNS=1 ;;
   esac
 done
+
+if [ "$USE_APNS" = "1" ]; then
+  if [ ! -f tmp/saas.txt ]; then
+    echo "Error: --apns requires SaaS mode. Run: bin/rails saas:enable" >&2
+    exit 1
+  fi
+  echo "Loading APNs credentials from 1Password..."
+  eval "$(BUNDLE_GEMFILE=Gemfile.saas bundle exec apns-dev)"
+fi
 
 if [ ! -f tmp/solid-queue.txt ]; then
   export SOLID_QUEUE_IN_PUMA=false

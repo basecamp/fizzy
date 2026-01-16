@@ -26,9 +26,11 @@ puts %Q(export APNS_KEY_ID="#{key_id}")
 puts %Q(export APNS_TEAM_ID="#{team_id}")
 puts %Q(export APNS_ENCRYPTION_KEY="#{encryption_key.gsub("\n", "\\n")}")
 puts %Q(export APNS_TOPIC="do.fizzy.app.ios")
+puts %Q(export ENABLE_NATIVE_PUSH="true")
 
 warn ""
 warn "APNs credentials loaded for development"
 warn "  Key ID: #{key_id}"
 warn "  Team ID: #{team_id}"
 warn "  Topic: do.fizzy.app.ios"
+warn "  Native push: enabled"
