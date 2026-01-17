@@ -87,6 +87,8 @@ Less commonly, you might also need to set some of the following:
 - `SMTP_DOMAIN` - the domain name advertised to the server when connecting
 - `SMTP_AUTHENTICATION` - if you need an authentication method other than the default `plain`
 - `SMTP_SSL_VERIFY_MODE` - set to `none` to skip certificate verification (for self-signed certs)
+- `SMTP_OPEN_TIMEOUT` - number of seconds to wait when opening a connection to the SMTP server (default 5)
+- `SMTP_READ_TIMEOUT` - number of seconds to wait when reading a response from the SMTP server (default 5)
 
 You can find out more about all these settings in the [Rails Action Mailer documentation](https://guides.rubyonrails.org/action_mailer_basics.html#action-mailer-configuration).
 

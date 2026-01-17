@@ -17,7 +17,9 @@ Rails.application.configure do
       password: ENV.fetch("SMTP_PASSWORD", nil),
       authentication: ENV.fetch("SMTP_AUTHENTICATION", "plain"),
       tls: ENV["SMTP_TLS"] == "true",
-      openssl_verify_mode: ENV["SMTP_SSL_VERIFY_MODE"]
+      openssl_verify_mode: ENV["SMTP_SSL_VERIFY_MODE"],
+      open_timeout: ENV.fetch("SMTP_OPEN_TIMEOUT", "5").to_i,
+      read_timeout: ENV.fetch("SMTP_READ_TIMEOUT", "5").to_i
     }
   end
 
