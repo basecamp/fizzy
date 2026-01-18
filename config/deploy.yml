@@ -7,7 +7,7 @@ image: yorsant/rexie-labs
 # Where to deploy fizzy
 servers:
   web:
-    - 217.216.66.99  # Set your server name here
+    - 217.216.66.99
 
 # How you connect to your server
 ssh:
@@ -16,8 +16,8 @@ ssh:
 
 # Automatic SSL
 proxy:
-  ssl: true                # Set this to false if you *don't* want SSL
-  host: fizzy.rexielabs.com  # Set your server name here to use automatic SSL
+  ssl: true
+  host: fizzy.rexielabs.com
 
 # Your application configuration (secrets come from .kamal/secrets).
 env:
@@ -30,11 +30,11 @@ env:
     - S3_ACCESS_KEY_ID
     - S3_SECRET_ACCESS_KEY
   clear:
-    BASE_URL: https://fizzy.rexielabs.com # The public URL of your Fizzy instance
-    MAILER_FROM_ADDRESS: fizzy@rexielabs.com # The email "from" address that Fizzy sends email from
-    SMTP_ADDRESS: email-smtp.us-east-1.amazonaws.com # The SMTP server you'll use to send email
-    MULTI_TENANT: true # Set to true to allow multiple accounts to sign up
-    SOLID_QUEUE_IN_PUMA: true # Run background jobs in the app container
+    BASE_URL: https://fizzy.rexielabs.com
+    MAILER_FROM_ADDRESS: fizzy@rexielabs.com
+    SMTP_ADDRESS: email-smtp.us-east-1.amazonaws.com
+    MULTI_TENANT: true
+    SOLID_QUEUE_IN_PUMA: true
     ACTIVE_STORAGE_SERVICE: s3
 
 
