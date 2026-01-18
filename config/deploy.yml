@@ -39,6 +39,7 @@ env:
     SMTP_ADDRESS: email-smtp.us-east-1.amazonaws.com
     SMTP_DOMAIN: rexielabs.com
     SMTP_TLS: true
+    SMTP_PORT: 587
     MULTI_TENANT: true
     SOLID_QUEUE_IN_PUMA: true
     ACTIVE_STORAGE_SERVICE: s3
