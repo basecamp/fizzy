@@ -2,4 +2,5 @@
 idiomatic_version_file_enable_tools = ["ruby"]
 
 [env]
+MULTI_TENANT = true
 PROMETHEUS_EXPORTER_URL = "http://127.0.0.1:9306/metrics"
