@@ -8,6 +8,10 @@ image: yorsant/rexie-labs
 servers:
   web:
     - 217.216.66.99
+  job:
+    hosts:
+      - 217.216.66.99
+    cmd: bin/jobs
 
 # How you connect to your server
 ssh:
