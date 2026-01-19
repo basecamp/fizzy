@@ -1,5 +1,5 @@
 service: fizzy
-image: basecamp/fizzy
+image: yorsant/rexie-labs/fizzy
 asset_path: /rails/public/assets
 hooks_path: <%= File.join(Gem::Specification.find_by_name("fizzy-saas").gem_dir, ".kamal", "hooks") %>
 secrets_path: <%= File.join(Gem::Specification.find_by_name("fizzy-saas").gem_dir, ".kamal/secrets") %>
@@ -8,26 +8,27 @@ servers:
   jobs:
     cmd: bin/jobs
 
-volumes:
-  - fizzy:/rails/storage
+ssh:
+  keys: [ "~/.ssh/contabo.pem" ]
 
 proxy:
   ssl: true
+  host: fizzy.rexielabs.com
+
+volumes:
+  - "fizzy_storage:/rails/storage"
 
 registry:
-  server: registry.37signals.com
-  username: robot$harbor-bot
+  server: ghcr.io
+  username: yorsant
   password:
-    - BASECAMP_REGISTRY_PASSWORD
+    - KAMAL_REGISTRY_PASSWORD
 
 builder:
   arch: amd64
-  dockerfile: <%= File.join(Gem::Specification.find_by_name("fizzy-saas").gem_dir, "Dockerfile") %>
-  secrets:
-    - GITHUB_TOKEN
-  remote: ssh://app@docker-builder-102
-  local: <%= ENV.fetch("KAMAL_BUILDER_LOCAL", "true") %>
 
 aliases:
-  console: app exec -i --reuse -e CONSOLE_USER:<%= ENV["USER"] %> "bin/rails console"
-  ssh: app exec -i --reuse -e CONSOLE_USER:<%= ENV["USER"] %> /bin/bash
+  console: app exec --interactive --reuse "bin/rails console"
+  shell: app exec --interactive --reuse "bash"
+  logs: app logs -f
+  dbc: app exec --interactive --reuse "bin/rails dbconsole --include-password"
