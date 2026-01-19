@@ -6,7 +6,6 @@ require_relative "../../rails_ext/active_record_tasks_database_tasks.rb"
 module Fizzy
   module Saas
     class Engine < ::Rails::Engine
-
       initializer "fizzy_saas.content_security_policy", before: :load_config_initializers do |app|
         app.config.x.content_security_policy.form_action = "https://checkout.stripe.com https://billing.stripe.com"
       end
