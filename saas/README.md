@@ -49,28 +49,11 @@ This will ask for your 1password authorization to read and set the environment v
 
 Fizzy is deployed with [Kamal](https://kamal-deploy.org/). You'll need to have the 1Password CLI set up in order to access the secrets that are used when deploying. Provided you have that, it should be as simple as `bin/kamal deploy` to the correct environment.
 
-## Handbook
-
-See the [Fizzy handbook](https://handbooks.37signals.works/18/fizzy) for runbooks and more.
-
 ### Production
 
 - https://app.fizzy.do/
 
 This environment uses a FlashBlade bucket for blob storage.
-
-### Beta
-
-Beta is primarily intended for testing product features. It uses the same production database and Active Storage configuration.
-
-There are 4 beta environments:
-
-- https://beta1.fizzy-beta.com
-- https://beta2.fizzy-beta.com
-- https://beta3.fizzy-beta.com
-- https://beta4.fizzy-beta.com
-
-Deploy with: `bin/kamal deploy -d beta1` (or `-d beta2`, `-d beta3`, `-d beta4`)
 
 ### Staging
 
