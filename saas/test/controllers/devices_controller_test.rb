@@ -1,6 +1,6 @@
 require "test_helper"
 
-class Users::DevicesControllerTest < ActionDispatch::IntegrationTest
+class DevicesControllerTest < ActionDispatch::IntegrationTest
   setup do
     @user = users(:david)
     sign_in_as @user
@@ -11,7 +11,7 @@ class Users::DevicesControllerTest < ActionDispatch::IntegrationTest
   test "index shows user devices" do
     @user.devices.create!(token: "test_token_123", platform: "apple", name: "iPhone 15 Pro")
 
-    get users_devices_path
+    get devices_path
 
     assert_response :success
     assert_select "strong", "iPhone 15 Pro"
@@ -21,7 +21,7 @@ class Users::DevicesControllerTest < ActionDispatch::IntegrationTest
   test "index shows empty state when no devices" do
     @user.devices.delete_all
 
-    get users_devices_path
+    get devices_path
 
     assert_response :success
     assert_select "p", /No devices registered/
@@ -30,7 +30,7 @@ class Users::DevicesControllerTest < ActionDispatch::IntegrationTest
   test "index requires authentication" do
     sign_out
 
-    get users_devices_path
+    get devices_path
 
     assert_response :redirect
   end
@@ -41,7 +41,7 @@ class Users::DevicesControllerTest < ActionDispatch::IntegrationTest
     token = SecureRandom.hex(32)
 
     assert_difference "ActionPushNative::Device.count", 1 do
-      post users_devices_path, params: {
+      post devices_path, params: {
         token: token,
         platform: "apple",
         name: "iPhone 15 Pro"
@@ -58,7 +58,7 @@ class Users::DevicesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "creates android device" do
-    post users_devices_path, params: {
+    post devices_path, params: {
       token: SecureRandom.hex(32),
       platform: "google",
       name: "Pixel 8"
@@ -83,7 +83,7 @@ class Users::DevicesControllerTest < ActionDispatch::IntegrationTest
 
     # Current user registers the same token with their own device
     assert_difference "ActionPushNative::Device.count", 1 do
-      post users_devices_path, params: {
+      post devices_path, params: {
         token: shared_token,
         platform: "apple",
         name: "David's iPhone"
@@ -102,7 +102,7 @@ class Users::DevicesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "rejects invalid platform" do
-    post users_devices_path, params: {
+    post devices_path, params: {
       token: SecureRandom.hex(32),
       platform: "windows",
       name: "Surface"
@@ -112,7 +112,7 @@ class Users::DevicesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "rejects missing token" do
-    post users_devices_path, params: {
+    post devices_path, params: {
       platform: "apple",
       name: "iPhone"
     }, as: :json
@@ -123,7 +123,7 @@ class Users::DevicesControllerTest < ActionDispatch::IntegrationTest
   test "create requires authentication" do
     sign_out
 
-    post users_devices_path, params: {
+    post devices_path, params: {
       token: SecureRandom.hex(32),
       platform: "apple"
     }, as: :json
@@ -141,19 +141,19 @@ class Users::DevicesControllerTest < ActionDispatch::IntegrationTest
     )
 
     assert_difference "ActionPushNative::Device.count", -1 do
-      delete users_device_path(device)
+      delete device_path(device)
     end
 
-    assert_redirected_to users_devices_path
+    assert_redirected_to devices_path
     assert_not ActionPushNative::Device.exists?(device.id)
   end
 
   test "does nothing when device not found by id" do
     assert_no_difference "ActionPushNative::Device.count" do
-      delete users_device_path(id: "nonexistent")
+      delete device_path(id: "nonexistent")
     end
 
-    assert_redirected_to users_devices_path
+    assert_redirected_to devices_path
   end
 
   test "cannot destroy another user's device by id" do
@@ -165,10 +165,10 @@ class Users::DevicesControllerTest < ActionDispatch::IntegrationTest
     )
 
     assert_no_difference "ActionPushNative::Device.count" do
-      delete users_device_path(device)
+      delete device_path(device)
     end
 
-    assert_redirected_to users_devices_path
+    assert_redirected_to devices_path
     assert ActionPushNative::Device.exists?(device.id)
   end
 
@@ -181,7 +181,7 @@ class Users::DevicesControllerTest < ActionDispatch::IntegrationTest
 
     sign_out
 
-    delete users_device_path(device)
+    delete device_path(device)
 
     assert_response :redirect
     assert ActionPushNative::Device.exists?(device.id)
@@ -197,7 +197,7 @@ class Users::DevicesControllerTest < ActionDispatch::IntegrationTest
     )
 
     assert_difference "ActionPushNative::Device.count", -1 do
-      delete unregister_users_devices_path, params: { token: "token_to_unregister" }, as: :json
+      delete unregister_devices_path, params: { token: "token_to_unregister" }, as: :json
     end
 
     assert_response :no_content
@@ -206,7 +206,7 @@ class Users::DevicesControllerTest < ActionDispatch::IntegrationTest
 
   test "does nothing when device not found by token" do
     assert_no_difference "ActionPushNative::Device.count" do
-      delete unregister_users_devices_path, params: { token: "nonexistent_token" }, as: :json
+      delete unregister_devices_path, params: { token: "nonexistent_token" }, as: :json
     end
 
     assert_response :no_content
@@ -221,7 +221,7 @@ class Users::DevicesControllerTest < ActionDispatch::IntegrationTest
     )
 
     assert_no_difference "ActionPushNative::Device.count" do
-      delete unregister_users_devices_path, params: { token: "other_users_token" }, as: :json
+      delete unregister_devices_path, params: { token: "other_users_token" }, as: :json
     end
 
     assert_response :no_content
@@ -237,7 +237,7 @@ class Users::DevicesControllerTest < ActionDispatch::IntegrationTest
 
     sign_out
 
-    delete unregister_users_devices_path, params: { token: "my_token" }, as: :json
+    delete unregister_devices_path, params: { token: "my_token" }, as: :json
 
     assert_response :redirect
     assert ActionPushNative::Device.exists?(device.id)
