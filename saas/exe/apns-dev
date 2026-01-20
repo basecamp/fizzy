@@ -19,7 +19,7 @@ apns_team_id = op_read(OP_APNS_ITEM, "team ID")
 apns_encryption_key = op_read(OP_APNS_ITEM, "AuthKey_3CR5J2W8Q6.p8")
 
 # FCM credentials (JSON file attachment)
-fcm_encryption_key = `op document get "#{OP_FCM_ITEM}" --vault "#{OP_VAULT}" --account #{OP_ACCOUNT} 2>/dev/null`.strip
+fcm_encryption_key = op_read(OP_FCM_ITEM, "fizzy-a148c-firebase-adminsdk-fbsvc-bdc640ce13.json")
 
 if apns_key_id.empty? || apns_encryption_key.empty?
   warn "Error: Could not fetch APNs credentials from 1Password"
@@ -36,7 +36,7 @@ puts %Q(export APNS_KEY_ID="#{apns_key_id}")
 puts %Q(export APNS_TEAM_ID="#{apns_team_id}")
 puts %Q(export APNS_ENCRYPTION_KEY="#{apns_encryption_key.gsub("\n", "\\n")}")
 puts %Q(export APNS_TOPIC="do.fizzy.app.ios")
-puts %Q(export FCM_ENCRYPTION_KEY='#{fcm_encryption_key}')
+puts %Q(export FCM_ENCRYPTION_KEY='#{fcm_encryption_key.gsub("'", "'\\\\''")}')
 puts %Q(export ENABLE_NATIVE_PUSH="true")
 
 warn ""
