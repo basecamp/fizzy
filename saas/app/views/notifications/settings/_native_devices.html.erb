@@ -5,7 +5,7 @@
     <p class="txt-small">
       You have <%= pluralize(Current.user.devices.count, "mobile device") %> registered for push notifications.
     </p>
-    <%= link_to "Manage devices", users_devices_path, class: "btn txt-small" %>
+    <%= link_to "Manage devices", devices_path, class: "btn txt-small" %>
   <% else %>
     <p class="txt-small color-secondary">
       No mobile devices registered. Install the iOS or Android app to receive push notifications on your phone.
