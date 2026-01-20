@@ -1,11 +1,11 @@
 import { Controller } from "@hotwired/stimulus"
-import { signedDifferenceInDays } from "helpers/date_helpers"
+import { signedDifferenceInDays, differenceInDays } from "helpers/date_helpers"
 
 const REFRESH_INTERVAL = 3_600_000 // 1 hour (in milliseconds)
 
 export default class extends Controller {
   static targets = [ "entropy", "stalled", "top", "center", "bottom" ]
-  static values = { entropy: Object, stalled: Object }
+  static values = { entropy: Object, stalled: Object, up: Object }
 
   #timer
 
@@ -23,7 +23,9 @@ export default class extends Controller {
       this.#showEntropy()
     } else if (this.#isStalled) {
       this.#showStalled()
-    } else {
+    } else if (this.#isBubbling) {
+      this.#showBubbling()
+    }else {
       this.#hide()
     }
   }
@@ -65,6 +67,28 @@ export default class extends Controller {
       center: signedDifferenceInDays(new Date(this.stalledValue.lastActivitySpikeAt), new Date()),
       bottom: "days"
     })
+  }
+
+  get #isBubbling() {
+    if (!this.upValue.resurfaceAt) return false
+    return this.upValue.isPostponed || this.#hasBubbled
+  }
+
+  #showBubbling() {
+    const dayLabel = this.#resurfaceDayCount === 1 ? "day" : "days"
+    this.#render({
+      top: this.#hasBubbled ? "Bubbled Up" : this.#resurfaceDayCount < 1 ? "Bubbles Up" : "Bubbles Up in",
+      center: this.#resurfaceDayCount < 1 ? "!" : this.#resurfaceDayCount,
+      bottom: this.#resurfaceDayCount < 1 ? "Today" : this.#hasBubbled ? `${dayLabel} ago` : dayLabel
+    })
+  }
+
+  get #hasBubbled() {
+    return new Date() > new Date(this.upValue.resurfaceAt)
+  }
+
+  get #resurfaceDayCount() {
+    return differenceInDays(new Date(), new Date(this.upValue.resurfaceAt))
   }
 
   #hide() {

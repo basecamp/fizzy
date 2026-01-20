@@ -74,6 +74,7 @@ Rails.application.routes.draw do
     scope module: :cards do
       resource :draft, only: :show
       resource :board
+      resource :bubble_up
       resource :closure
       resource :column
       resource :goldness

@@ -32,6 +32,7 @@ module Card::Closeable
     unless closed?
       transaction do
         not_now&.destroy
+        bubble_up&.destroy
         create_closure! user: user
         track_event :closed, creator: user
       end

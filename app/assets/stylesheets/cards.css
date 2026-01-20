@@ -407,7 +407,7 @@
   .card-perma:has(.card--postponed) {
     --card-color: var(--color-card-complete) !important;
 
-    .bubble {
+    .bubble:not(.bubble--golden) {
       display: none;
     }
   }

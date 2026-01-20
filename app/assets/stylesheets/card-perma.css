@@ -248,7 +248,7 @@
 
     &:has([open]) {
       position: relative;
-      z-index: 1;
+      z-index: 2;
     }
 
     &:has([data-controller~="tooltip"]:hover) {
