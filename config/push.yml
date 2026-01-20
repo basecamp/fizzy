@@ -1,7 +1,0 @@
-<% if Fizzy.saas? %>
-<%= ERB.new(File.read(Rails.root.join("saas/config/push.yml"))).result %>
-<% else %>
-shared:
-  apple: {}
-  google: {}
-<% end %>
