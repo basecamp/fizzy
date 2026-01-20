@@ -9,14 +9,12 @@ TurboOffline.addRule({
 })
 
 TurboOffline.addRule({
-  match: (request) => {
-    const url = request.url
-    return /\/(boards|cards|users)\//.test(url) && !/\/(edit|pin|watch|new)$/.test(url)
-  },
+  match: /\/(boards|cards|users)\//,
+  except: /\/(edit|pin|watch|new)$/,
   handler: TurboOffline.handlers.networkFirst({
     cacheName: "cards",
     maxAge: 60 * 60 * 24 * 3,
-    networkTimeout: 3
+    networkTimeout: 2
   })
 })
 
@@ -25,7 +23,7 @@ TurboOffline.addRule({
   handler: TurboOffline.handlers.networkFirst({
     cacheName: "storage",
     maxAge: 60 * 60 * 24 * 7,
-    networkTimeout: 3
+    networkTimeout: 2
   })
 })
 
