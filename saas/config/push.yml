@@ -7,4 +7,4 @@ shared:
     connect_to_development_server: <%= Rails.env.local? %>
   google:
     encryption_key: <%= (ENV["FCM_ENCRYPTION_KEY"] || Rails.application.credentials.dig(:action_push_native, :fcm, :key))&.dump %>
-    project_id: your-firebase-project  # Your Firebase project ID (not secret)
+    project_id: fizzy-a148c
