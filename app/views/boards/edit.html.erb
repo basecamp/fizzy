@@ -5,7 +5,7 @@
     <%= link_back_to_board(@board) %>
   </div>
 
-  <h1 class="header__title">
+  <h1 class="header__title" data-bridge--title-target="header">
     <div><%= @page_title %></div>
     <% unless Current.user.can_administer_board?(@board) %>
       <div class="txt-normal font-weight-normal">Only admins can change these settings</div>

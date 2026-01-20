@@ -6,7 +6,7 @@
 <% content_for :header do %>
   <%= render "events/index/add_card_button", user_filtering: @user_filtering %>
 
-  <h1 class="header__title" data-controller="dialog-manager">
+  <h1 class="header__title" data-controller="dialog-manager" data-bridge--title-target="header">
     <% if @user_filtering.boards.many? %>
       <span>Activity <%= @user_filtering.filter.boards.any? ? "in" : "across" %></span>
     <% else %>

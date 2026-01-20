@@ -4,7 +4,7 @@
 <%= render "cards/broadcasts", filter: @filter %>
 
 <% content_for :header do %>
-  <h1 class="header__title divider divider--fade full-width">
+  <h1 class="header__title divider divider--fade full-width" data-bridge--title-target="header">
     <span class="overflow-ellipsis txt-capitalize-first-letter"><%= @user_filtering.selected_boards_label %></span>
   </h1>
 

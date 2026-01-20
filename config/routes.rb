@@ -87,6 +87,7 @@ Rails.application.routes.draw do
       resource :reading
 
       resources :assignments
+      resource :self_assignment, only: :create
       resources :steps
       resources :taggings
 

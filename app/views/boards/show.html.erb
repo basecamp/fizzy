@@ -5,15 +5,15 @@
 <%= turbo_stream_from @board %>
 
 <% content_for :header do %>
-  <div class="header__actions header__actions--start">
+  <div class="header__actions header__actions--start hide-on-native">
     <%= link_to_webhooks(@board) if Current.user.admin? %>
   </div>
 
-  <h1 class="header__title divider divider--fade full-width">
+  <h1 class="header__title divider divider--fade full-width" data-bridge--title-target="header">
     <span class="overflow-ellipsis"><%= @board.name %></span>
   </h1>
 
-  <div class="header__actions header__actions--end">
+  <div class="header__actions header__actions--end hide-on-native">
     <%= link_to_edit_board @board %>
   </div>
 <% end %>

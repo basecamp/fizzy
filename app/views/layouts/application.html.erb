@@ -2,8 +2,11 @@
 <html lang="en">
   <%= render "layouts/shared/head" %>
 
-  <body class="<%= @body_class %>" data-controller="local-time timezone-cookie turbo-navigation theme" data-action="turbo:morph@window->local-time#refreshAll turbo:before-visit@document->turbo-navigation#rememberLocation" data-platform="<%= platform.type %>">
-    <div id="global-container">
+  <body class="<%= @body_class %>"
+    data-controller="local-time timezone-cookie turbo-navigation theme bridge--title bridge--text-size bridge--insets"
+    data-action="turbo:morph@window->local-time#refreshAll turbo:before-visit@document->turbo-navigation#rememberLocation"
+    data-platform="<%= platform.type %>" data-bridge--title-title-value="<%= @page_title %>">
+    <div id="global-container" data-controller="bridge--buttons bridge--overflow-menu">
       <header class="header header--mobile-actions-stack <%= @header_class %>" id="header">
         <a href="#main" class="header__skip-navigation btn" data-turbo="false">Skip to main content</a>
         <%= render "my/menu" if Current.user %>

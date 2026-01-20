@@ -1,17 +1,13 @@
 <div class="display-contents" id="<%= dom_id(card, :card_closure_toggle) %>">
   <% if card.closed? %>
-    <div class="card-perma__notch card-perma__notch--bottom flex-column">
-      <div class="flex gap-half margin-block-start-double margin-block-end">
-        <span class="card-perma__closure-message">
-          Completed by <%= card.closed_by.name %> on <%= local_datetime_tag(card.closed_at, style: :shortdate) %>.
-          <%= button_to card_closure_path(card), method: :delete, class: "btn btn--plain borderless fill-transparent" do %>
-            <span class="pad-inline-end">Undo</span>
-          <% end %>
-        </span>
-      </div>
+    <div class="card-perma__closure-message flex gap-half justify-center">
+      <span>Completed by <%= card.closed_by.name %> on <%= local_datetime_tag(card.closed_at, style: :shortdate) %>.</span>
+      <%= button_to card_closure_path(card), method: :delete, class: "btn btn--plain borderless fill-transparent" do %>
+        <span class="pad-inline-end">Undo</span>
+      <% end %>
     </div>
   <% else %>
-    <div class="card-perma__notch card-perma__notch--bottom flex-column">
+    <div class="card-perma__notch card-perma__notch--bottom">
       <%= render "cards/container/closure_buttons", card: card %>
     </div>
     <% if card.entropic? && card.open? && !card.postponed? %>

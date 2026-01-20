@@ -5,7 +5,7 @@
     <%= back_link_to "My profile", user_path(Current.user), "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
   </div>
 
-  <h1 class="header__title"><%= @page_title %></h1>
+  <h1 class="header__title" data-bridge--title-target="header"><%= @page_title %></h1>
 <% end %>
 
 <section class="panel panel--wide shadow center webhooks">

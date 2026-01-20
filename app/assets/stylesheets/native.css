@@ -6,6 +6,8 @@
     --custom-safe-inset-bottom: var(--injected-safe-inset-bottom, env(safe-area-inset-bottom, 0px));
     --custom-safe-inset-left: var(--injected-safe-inset-left, env(safe-area-inset-left, 0px));
 
+    --footer-height: 0;
+
     -webkit-tap-highlight-color: transparent;
 
     .hide-on-native {
@@ -28,11 +30,27 @@
       }
     }
 
+    /* Card columns
+    /* ------------------------------------------------------------------------ */
+
+    .board-tools.card {
+      padding-block-start: 0;
+    }
+
     /* Card perma
     /* ------------------------------------------------------------------------ */
 
     .card-perma {
       margin-block-start: 0;
+
+      &:not(:has(.card-perma__notch-new-card-buttons)) .card-perma__bg {
+        padding-block: clamp(0.25rem, 2vw, var(--padding-block));
+      }
+    }
+
+    .card-perma__closure-message {
+      margin-block: var(--block-space);
+      translate: unset;
     }
 
     /* Search
@@ -41,5 +59,27 @@
     .search__title {
       text-decoration: none;
     }
+  }
+}
+
+[data-bridge-components~=form] {
+  [data-controller~=bridge--form] {
+    [data-bridge--form-target~=submit] {
+      display: none;
+    }
+  }
+}
+
+[data-bridge-components~=overflow-menu] {
+  [data-controller~=bridge--overflow-menu] {
+    [data-bridge--overflow-menu-target~=item] {
+      display: none;
+    }
+  }
+}
+
+[data-bridge-components~=buttons] {
+  [data-bridge--buttons-target~=button] {
+    display: none;
   }
 }

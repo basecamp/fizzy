@@ -35,6 +35,32 @@
 
       <div class="flex flex-column gap-half">
         <header>
+          <h2 class="divider txt-medium margin-block-start">Accounts Subscribed</h2>
+        </header>
+        <div class="flex gap-half">
+          <div class="flex flex-column gap-quarter flex-item-grow">
+            <div class="txt-x-small">Total</div>
+            <div class="txt-large">
+              <strong><%= @paid_accounts_total %></strong>
+            </div>
+          </div>
+          <div class="flex flex-column gap-quarter flex-item-grow">
+            <div class="txt-x-small">7 days</div>
+            <div class="txt-large">
+              <strong><%= @paid_accounts_last_7_days %></strong>
+            </div>
+          </div>
+          <div class="flex flex-column gap-quarter flex-item-grow">
+            <div class="txt-x-small">24 hours</div>
+            <div class="txt-large">
+              <strong><%= @paid_accounts_last_24_hours %></strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-column gap-half">
+        <header>
           <h2 class="divider txt-medium margin-block-start">Identities Created</h2>
         </header>
         <div class="flex gap-half">

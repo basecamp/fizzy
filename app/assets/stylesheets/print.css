@@ -164,8 +164,8 @@
   .comments__subscribers,
   .card__meta-avatars--assignees > div > div:last-child,
   .steps > .step:last-child,
-  div:has(> .tag-picker__button),
-  div:has(> .board-picker__button),
+  .card__board-name .icon,
+  div:has(> .card__tag-picker-button),
   .delete-card,
   .header--card .header__title {
     display: none;

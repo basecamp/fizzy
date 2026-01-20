@@ -40,6 +40,10 @@ module FiltersHelper
     }, &block
   end
 
+  def filter_title(title)
+    tag.strong title, class: "popup__title pad-inline-half", tabindex: "-1", data: { dialog_target: "focusTouch" }
+  end
+
   def collapsible_nav_section(title, **properties, &block)
     tag.details class: "nav__section popup__section", data: { action: "toggle->nav-section-expander#toggle", nav_section_expander_target: "section", nav_section_expander_key_value: title.parameterize }, open: true, **properties do
       concat(tag.summary(class: "popup__section-title") do

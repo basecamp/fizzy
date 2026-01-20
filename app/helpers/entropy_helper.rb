@@ -16,6 +16,7 @@ module EntropyHelper
       {
         stalledAfterDays: card.entropy.days_before_reminder,
         lastActivitySpikeAt: card.last_activity_spike_at.iso8601,
+        updatedAt: card.updated_at.iso8601,
         action: "Stalled"
       }
     end
