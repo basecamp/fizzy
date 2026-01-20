@@ -61,6 +61,19 @@ GIT
       yabeda (~> 0.6)
 
 GIT
+  remote: https://github.com/rails/action_push_native.git
+  revision: d5c44514e13faf919261ca7943fc43aedd8e992e
+  branch: use-registered-config-path
+  specs:
+    action_push_native (0.3.0)
+      activejob (>= 8.0)
+      activerecord (>= 8.0)
+      googleauth (~> 1.14)
+      httpx (~> 1.6)
+      jwt (>= 2)
+      railties (>= 8.0)
+
+GIT
   remote: https://github.com/rails/rails.git
   revision: 12e24eaf2f0a9613e015653f013dd131317d9bf5
   branch: main
@@ -195,13 +208,6 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    action_push_native (0.3.0)
-      activejob (>= 8.0)
-      activerecord (>= 8.0)
-      googleauth (~> 1.14)
-      httpx (~> 1.6)
-      jwt (>= 2)
-      railties (>= 8.0)
     action_text-trix (2.1.16)
       railties
     actionpack-xml_parser (2.0.1)
@@ -689,7 +695,7 @@ PLATFORMS
 
 DEPENDENCIES
   actionpack-xml_parser
-  action_push_native
+  action_push_native!
   activeresource
   audits1984!
   autotuner
