@@ -44,10 +44,8 @@ module Fizzy
             resource :webhooks, only: :create
           end
 
-          namespace :users do
-            resources :devices, only: [ :index, :create, :destroy ] do
-              delete :destroy, on: :collection, as: :unregister
-            end
+          resources :devices, only: [ :index, :create, :destroy ] do
+            delete :destroy, on: :collection, as: :unregister
           end
         end
       end
