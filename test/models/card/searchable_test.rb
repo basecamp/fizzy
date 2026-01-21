@@ -40,11 +40,12 @@ class Card::SearchableTest < ActiveSupport::TestCase
   end
 
   test "search content is truncated to a reasonable limit" do
+    Current.user = @user
     search_record_class = Search::Record.for(@user.account_id)
 
     # Create a card with unreasonably long content
     long_content = "asdf " * Searchable::SEARCH_CONTENT_LIMIT
-    card = @board.cards.create!(title: "Card with long description", creator: @user)
+    card = @board.cards.create!(title: "Card with long description", creator: @user, status: "published")
     card.description = ActionText::Content.new(long_content)
     card.save!
 
