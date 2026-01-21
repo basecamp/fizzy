@@ -16,10 +16,9 @@ module Notification::Pushable
 
     private
       def resolve_push_target(target)
-        if target.is_a?(Symbol)
-          "Notification::Push::#{target.to_s.classify}".constantize
+        if target.is_a?(Notification::PushTarget) then target
         else
-          target
+          "Notification::PushTarget::#{target.to_s.classify}".constantize
         end
       end
   end

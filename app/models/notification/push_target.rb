@@ -1,4 +1,4 @@
-class Notification::Push
+class Notification::PushTarget
   attr_reader :notification
 
   delegate :card, to: :notification

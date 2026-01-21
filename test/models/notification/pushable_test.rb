@@ -35,7 +35,7 @@ class Notification::PushableTest < ActiveSupport::TestCase
 
     Notification.register_push_target(:web)
 
-    assert_includes Notification.push_targets, Notification::Push::Web
+    assert_includes Notification.push_targets, Notification::PushTarget::Web
   ensure
     Notification.push_targets = original_targets
   end
