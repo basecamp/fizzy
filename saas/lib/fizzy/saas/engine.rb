@@ -154,7 +154,7 @@ module Fizzy
       config.to_prepare do
         ::Account.include Account::Billing, Account::Limited
         ::User.include User::NotifiesAccountOfEmailChange
-        ::User.include User::Devices
+        ::Identity.include Identity::Devices
         ::NotificationPusher.prepend NotificationPusher::Native
         ::Signup.prepend Fizzy::Saas::Signup
         CardsController.include(Card::LimitedCreation)
