@@ -1,11 +1,10 @@
 require "test_helper"
 
-class NotificationPusherNativeTest < ActiveSupport::TestCase
+class Notification::Push::NativeTest < ActiveSupport::TestCase
   setup do
     @user = users(:kevin)
     @identity = @user.identity
     @notification = notifications(:logo_published_kevin)
-    @pusher = NotificationPusher.new(@notification)
 
     # Ensure user has no web push subscriptions (we want to test native push independently)
     @user.push_subscriptions.delete_all
@@ -13,137 +12,100 @@ class NotificationPusherNativeTest < ActiveSupport::TestCase
 
   test "notification_category returns assignment for card_assigned" do
     notification = notifications(:logo_assignment_kevin)
-    pusher = NotificationPusher.new(notification)
+    @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
 
-    assert_equal "assignment", pusher.send(:notification_category)
+    push = Notification::Push::Native.new(notification)
+
+    assert_equal "assignment", push.send(:notification_category)
   end
 
   test "notification_category returns comment for comment_created" do
     notification = notifications(:layout_commented_kevin)
-    pusher = NotificationPusher.new(notification)
+    @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
 
-    assert_equal "comment", pusher.send(:notification_category)
+    push = Notification::Push::Native.new(notification)
+
+    assert_equal "comment", push.send(:notification_category)
   end
 
   test "notification_category returns mention for mentions" do
     notification = notifications(:logo_card_david_mention_by_jz)
-    pusher = NotificationPusher.new(notification)
+    notification.user.identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
 
-    assert_equal "mention", pusher.send(:notification_category)
+    push = Notification::Push::Native.new(notification)
+
+    assert_equal "mention", push.send(:notification_category)
   end
 
   test "notification_category returns card for other card events" do
-    notification = notifications(:logo_published_kevin)
-    pusher = NotificationPusher.new(notification)
+    @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
 
-    assert_equal "card", pusher.send(:notification_category)
+    push = Notification::Push::Native.new(@notification)
+
+    assert_equal "card", push.send(:notification_category)
   end
 
   test "interruption_level is time-sensitive for assignments" do
     notification = notifications(:logo_assignment_kevin)
-    pusher = NotificationPusher.new(notification)
+    @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
 
-    assert_equal "time-sensitive", pusher.send(:interruption_level)
+    push = Notification::Push::Native.new(notification)
+
+    assert_equal "time-sensitive", push.send(:interruption_level)
   end
 
   test "interruption_level is active for non-assignments" do
-    notification = notifications(:logo_published_kevin)
-    pusher = NotificationPusher.new(notification)
-
-    assert_equal "active", pusher.send(:interruption_level)
-  end
-
-  test "push_destination returns true when identity has native devices" do
     @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
 
-    assert @pusher.send(:push_destination?)
+    push = Notification::Push::Native.new(@notification)
+
+    assert_equal "active", push.send(:interruption_level)
   end
 
-  test "push_destination returns true when user has web subscriptions" do
-    @user.push_subscriptions.create!(
-      endpoint: "https://fcm.googleapis.com/fcm/send/test",
-      p256dh_key: "test_p256dh",
-      auth_key: "test_auth"
-    )
-
-    assert @pusher.send(:push_destination?)
-  end
-
-  test "push_destination returns false when user has neither" do
-    @identity.devices.delete_all
-    @user.push_subscriptions.delete_all
-
-    assert_not @pusher.send(:push_destination?)
-  end
-
-  test "push delivers to native devices when user has devices" do
+  test "pushes to native devices when user has devices" do
     stub_push_services
     @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
 
     assert_native_push_delivery(count: 1) do
-      @pusher.push
+      Notification::Push::Native.new(@notification).push
     end
   end
 
-  test "push does not deliver to native when user has no devices" do
+  test "does not push when user has no devices" do
     @identity.devices.delete_all
 
     assert_no_native_push_delivery do
-      @pusher.push
+      Notification::Push::Native.new(@notification).push
     end
   end
 
-  test "push does not deliver when creator is system user" do
+  test "does not push when creator is system user" do
     stub_push_services
     @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
     @notification.update!(creator: users(:system))
 
-    result = @pusher.push
-
-    assert_nil result
+    assert_no_native_push_delivery do
+      Notification::Push::Native.new(@notification).push
+    end
   end
 
-  test "push delivers to multiple devices" do
+  test "pushes to multiple devices" do
     stub_push_services
     @identity.devices.delete_all
     @identity.devices.create!(token: "token1", platform: "apple", name: "iPhone")
     @identity.devices.create!(token: "token2", platform: "google", name: "Pixel")
 
     assert_native_push_delivery(count: 2) do
-      @pusher.push
-    end
-  end
-
-  test "push delivers to both web and native when user has both" do
-    stub_push_services
-
-    # Set up web push subscription
-    @user.push_subscriptions.create!(
-      endpoint: "https://fcm.googleapis.com/fcm/send/test",
-      p256dh_key: "test_p256dh_key",
-      auth_key: "test_auth_key"
-    )
-
-    # Set up native device
-    @identity.devices.create!(token: "native_token", platform: "apple", name: "iPhone")
-
-    # Mock web push pool to verify it receives the payload
-    web_push_pool = mock("web_push_pool")
-    web_push_pool.expects(:queue).once.with do |payload, subscriptions|
-      payload.is_a?(Hash) && subscriptions.count == 1
-    end
-    Rails.configuration.x.stubs(:web_push_pool).returns(web_push_pool)
-
-    # Verify native push is also delivered
-    assert_native_push_delivery(count: 1) do
-      @pusher.push
+      Notification::Push::Native.new(@notification).push
     end
   end
 
   test "native notification includes required fields" do
     @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
-    payload = @pusher.send(:build_payload)
-    native = @pusher.send(:native_notification, payload)
+
+    push = Notification::Push::Native.new(@notification)
+    payload = push.send(:build_payload)
+    native = push.send(:native_notification, payload)
 
     assert_not_nil native.title
     assert_not_nil native.body
@@ -152,8 +114,10 @@ class NotificationPusherNativeTest < ActiveSupport::TestCase
 
   test "native notification sets thread_id from card" do
     @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
-    payload = @pusher.send(:build_payload)
-    native = @pusher.send(:native_notification, payload)
+
+    push = Notification::Push::Native.new(@notification)
+    payload = push.send(:build_payload)
+    native = push.send(:native_notification, payload)
 
     assert_equal @notification.card.id, native.thread_id
   end
@@ -161,26 +125,30 @@ class NotificationPusherNativeTest < ActiveSupport::TestCase
   test "native notification sets high_priority for assignments" do
     notification = notifications(:logo_assignment_kevin)
     notification.user.identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
-    pusher = NotificationPusher.new(notification)
 
-    payload = pusher.send(:build_payload)
-    native = pusher.send(:native_notification, payload)
+    push = Notification::Push::Native.new(notification)
+    payload = push.send(:build_payload)
+    native = push.send(:native_notification, payload)
 
     assert native.high_priority
   end
 
   test "native notification sets normal priority for non-assignments" do
     @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
-    payload = @pusher.send(:build_payload)
-    native = @pusher.send(:native_notification, payload)
+
+    push = Notification::Push::Native.new(@notification)
+    payload = push.send(:build_payload)
+    native = push.send(:native_notification, payload)
 
     assert_not native.high_priority
   end
 
   test "native notification includes apple-specific fields" do
     @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
-    payload = @pusher.send(:build_payload)
-    native = @pusher.send(:native_notification, payload)
+
+    push = Notification::Push::Native.new(@notification)
+    payload = push.send(:build_payload)
+    native = push.send(:native_notification, payload)
 
     assert_equal 1, native.apple_data.dig(:aps, :"mutable-content")
     assert_includes %w[active time-sensitive], native.apple_data.dig(:aps, :"interruption-level")
@@ -189,19 +157,29 @@ class NotificationPusherNativeTest < ActiveSupport::TestCase
 
   test "native notification sets android notification to nil for data-only" do
     @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
-    payload = @pusher.send(:build_payload)
-    native = @pusher.send(:native_notification, payload)
+
+    push = Notification::Push::Native.new(@notification)
+    payload = push.send(:build_payload)
+    native = push.send(:native_notification, payload)
 
     assert_nil native.google_data.dig(:android, :notification)
   end
 
   test "native notification includes data payload" do
     @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
-    payload = @pusher.send(:build_payload)
-    native = @pusher.send(:native_notification, payload)
+
+    push = Notification::Push::Native.new(@notification)
+    payload = push.send(:build_payload)
+    native = push.send(:native_notification, payload)
 
     assert_not_nil native.data[:url]
     assert_equal @notification.account.external_account_id, native.data[:account_id]
     assert_equal @notification.creator.name, native.data[:creator_name]
+  end
+
+  test "push_later enqueues Notification::NativePushJob" do
+    assert_enqueued_with(job: Notification::NativePushJob, args: [ @notification ]) do
+      Notification::Push::Native.push_later(@notification)
+    end
   end
 end
