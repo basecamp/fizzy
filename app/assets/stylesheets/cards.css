@@ -252,9 +252,11 @@
     padding-block: var(--block-space-half);
   }
 
-  /* Meta
+  /* Footer
   /* ------------------------------------------------------------------------ */
+  .card__footer { flex-wrap: wrap; }
 
+  /* Card metadata */
   .card__meta {
      --meta-spacer-block: 0.5ch;
      --meta-spacer-inline: 0.75ch;
@@ -361,6 +363,39 @@
       display: none;
     }
   }
+
+  /* Card reactions */
+  .card__reactions {
+    --reaction-size: 2rem;
+
+    .reactions {
+      margin-block-start: 0;
+
+      &:not(:has(.reaction)) {
+        inset-block-end: var(--card-padding-block);
+        inset-inline-end: var(--card-padding-inline);
+        margin: 0;
+        position: absolute;
+      }
+    }
+
+    &:has(.reaction) {
+      flex-basis: 100%;
+      order: 1;
+    }
+
+    @media (max-width: 639px) {
+      display: flex;
+      flex-basis: 100%;
+      justify-content: flex-end;
+      order: 1;
+
+      .reactions:not(:has(.reaction)) {
+        position: static;
+      }
+    }
+  }
+
 
   /* Closed stamp
   /* ------------------------------------------------------------------------ */

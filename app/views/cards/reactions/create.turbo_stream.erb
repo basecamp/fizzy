@@ -1,0 +1,3 @@
+<%= turbo_stream.replace([ @card, :reacting ]) do %>
+  <%= render "cards/reactions/reactions", card: @card.reload %>
+<% end %>

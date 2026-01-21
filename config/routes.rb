@@ -86,6 +86,8 @@ Rails.application.routes.draw do
       resource :watch
       resource :reading
 
+      resources :reactions
+
       resources :assignments
       resource :self_assignment, only: :create
       resources :steps

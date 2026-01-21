@@ -1,7 +1,5 @@
-class Cards::Comments::ReactionsController < ApplicationController
+class Cards::ReactionsController < ApplicationController
   include CardScoped
-
-  before_action :set_comment
 
   with_options only: :destroy do
     before_action :set_reaction
@@ -15,7 +13,7 @@ class Cards::Comments::ReactionsController < ApplicationController
   end
 
   def create
-    @reaction = @comment.reactions.create!(params.expect(reaction: :content))
+    @reaction = @card.reactions.create!(params.expect(reaction: :content))
 
     respond_to do |format|
       format.turbo_stream
@@ -33,12 +31,8 @@ class Cards::Comments::ReactionsController < ApplicationController
   end
 
   private
-    def set_comment
-      @comment = @card.comments.find(params[:comment_id])
-    end
-
     def set_reaction
-      @reaction = @comment.reactions.find(params[:id])
+      @reaction = @card.reactions.find(params[:id])
     end
 
     def ensure_permission_to_administer_reaction
