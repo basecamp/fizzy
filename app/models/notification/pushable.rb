@@ -31,4 +31,13 @@ module Notification::Pushable
   def pushable?
     !creator.system? && user.active? && account.active?
   end
+
+  def payload
+    "Notification::#{payload_type}Payload".constantize.new(self)
+  end
+
+  private
+    def payload_type
+      source_type.presence_in(%w[ Event Mention ]) || "Default"
+    end
 end

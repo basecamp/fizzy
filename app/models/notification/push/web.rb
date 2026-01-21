@@ -9,7 +9,7 @@ class Notification::Push::Web < Notification::Push
     end
 
     def perform_push
-      Rails.configuration.x.web_push_pool.queue(build_payload, subscriptions)
+      Rails.configuration.x.web_push_pool.queue(notification.payload.to_h, subscriptions)
     end
 
     def subscriptions

@@ -9,14 +9,18 @@ class Notification::Push::Native < Notification::Push
     end
 
     def perform_push
-      native_notification(build_payload).deliver_later_to(devices)
+      native_notification.deliver_later_to(devices)
     end
 
     def devices
       @devices ||= notification.identity.devices
     end
 
-    def native_notification(payload)
+    def payload
+      @payload ||= notification.payload
+    end
+
+    def native_notification
       ApplicationPushNotification
         .with_apple(
           aps: {
@@ -29,9 +33,9 @@ class Notification::Push::Native < Notification::Push
           android: { notification: nil }
         )
         .with_data(
-          title: payload[:title],
-          body: payload[:body],
-          url: payload[:url],
+          title: payload.title,
+          body: payload.body,
+          url: payload.url,
           account_id: notification.account.external_account_id,
           avatar_url: creator_avatar_url,
           card_id: card&.id,
@@ -40,8 +44,8 @@ class Notification::Push::Native < Notification::Push
           category: notification_category
         )
         .new(
-          title: payload[:title],
-          body: payload[:body],
+          title: payload.title,
+          body: payload.body,
           badge: notification.user.notifications.unread.count,
           sound: "default",
           thread_id: card&.id,
