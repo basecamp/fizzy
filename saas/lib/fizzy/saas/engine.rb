@@ -154,11 +154,13 @@ module Fizzy
       config.to_prepare do
         ::Account.include Account::Billing, Account::Limited
         ::User.include User::NotifiesAccountOfEmailChange
-        ::Identity.include Identity::Devices
-        ::NotificationPusher.prepend NotificationPusher::Native
-        ::Signup.prepend Fizzy::Saas::Signup
+        ::Identity.include Authorization::Identity, Identity::Devices
+        ::Signup.prepend Signup
+        ApplicationController.include Authorization::Controller
         CardsController.include(Card::LimitedCreation)
         Cards::PublishesController.include(Card::LimitedPublishing)
+
+        Notification.register_push_target(:native)
 
         Queenbee::Subscription.short_names = Subscription::SHORT_NAMES
 
@@ -170,9 +172,6 @@ module Fizzy
           ::Object.send(:remove_const, const_name) if ::Object.const_defined?(const_name)
           ::Object.const_set const_name, Subscription.const_get(short_name, false)
         end
-
-        ::ApplicationController.include Fizzy::Saas::Authorization::Controller
-        ::Identity.include Fizzy::Saas::Authorization::Identity
       end
     end
   end

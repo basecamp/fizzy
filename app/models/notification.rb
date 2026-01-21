@@ -1,5 +1,5 @@
 class Notification < ApplicationRecord
-  include PushNotifiable
+  include Notification::Pushable
 
   belongs_to :account, default: -> { user.account }
   belongs_to :user
@@ -27,6 +27,7 @@ class Notification < ApplicationRecord
   after_destroy_commit -> { broadcast_remove_to user, :notifications }
 
   delegate :notifiable_target, to: :source
+  delegate :identity, to: :user
 
   class << self
     def read_all
