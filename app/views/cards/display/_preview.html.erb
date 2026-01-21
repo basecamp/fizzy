@@ -46,7 +46,10 @@
 
   <footer class="card__footer flex gap-half">
     <%= render "cards/display/preview/meta", card: card, preview: true %>
-    <%= render "cards/display/preview/comments", card: card %>
+    <div class="card__counts">
+      <%= render "cards/display/preview/boosts", card: card %>
+      <%= render "cards/display/preview/comments", card: card %>
+    </div>
     <%= render "cards/display/common/background", card: card %>
   </footer>
 

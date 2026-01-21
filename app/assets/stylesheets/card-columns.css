@@ -536,12 +536,39 @@
     /* Set lower limit for font size */
     font-size: clamp(0.6rem, 0.85cqi, 100px);
 
+    .card__counts {
+      display: flex;
+      flex-shrink: 0;
+      gap: 2ch;
+      margin-block-end: calc(var(--block-space) * -1.7);
+      margin-inline-start: auto;
+      margin-inline-end: calc(var(--card-padding-inline) * -0.5);
+
+      @media (max-width: 639px) {
+        margin: 0;
+        position: absolute;
+        inset-block-end: var(--card-padding-block);
+        inset-inline-end: var(--card-padding-inline);
+      }
+    }
+
+    .card__boosts {
+      --column-gap: 0.8ch;
+
+      display: flex;
+      align-items: center;
+
+      img {
+        block-size: 1.6em;
+        inline-size: 1.6em;
+      }
+    }
+
     .card__comments {
       --column-gap: 0.8ch;
 
       display: flex;
-      margin-block-end: calc(var(--block-space) * -1.7);
-      margin-inline-end: calc(var(--card-padding-inline) * -0.5);
+      align-items: center;
 
       .icon {
         --icon-size: 1.6em;
@@ -583,6 +610,10 @@
       strong,
       .local-time-value {
         font-weight: inherit;
+      }
+
+      @media (max-width: 639px) {
+        inline-size: auto;
       }
     }
 

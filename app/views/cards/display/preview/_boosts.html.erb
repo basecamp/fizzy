@@ -1,0 +1,7 @@
+<% boosts = card.reactions %>
+<% if boosts.any? %>
+  <div class="card__boosts align-center gap-half flex-item-justify-end flex-item-no-shrink">
+    <%= image_tag "boost-color.svg", aria: { hidden: true } %>
+    <strong><%= boosts.count %></strong>
+  </div>
+<% end %>
