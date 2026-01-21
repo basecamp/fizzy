@@ -1,28 +1,26 @@
-module NotificationPusher::Native
-  extend ActiveSupport::Concern
-
-  def push
-    return unless should_push?
-
-    build_payload.tap do |payload|
-      push_to_web(payload) if notification.user.push_subscriptions.any?
-      push_to_native(payload)
-    end
+class Notification::PushTarget::Native < Notification::PushTarget
+  def self.push_later(notification)
+    Notification::NativePushJob.perform_later(notification)
   end
 
   private
-    def push_destination?
-      notification.user.push_subscriptions.any? || notification.user.devices.any?
+    def should_push?
+      super && devices.any?
     end
 
-    def push_to_native(payload)
-      devices = notification.user.devices
-      return if devices.empty?
-
-      native_notification(payload).deliver_later_to(devices)
+    def perform_push
+      native_notification.deliver_later_to(devices)
     end
 
-    def native_notification(payload)
+    def devices
+      @devices ||= notification.identity.devices
+    end
+
+    def payload
+      @payload ||= notification.payload
+    end
+
+    def native_notification
       ApplicationPushNotification
         .with_apple(
           aps: {
@@ -35,9 +33,9 @@ module NotificationPusher::Native
           android: { notification: nil }
         )
         .with_data(
-          title: payload[:title],
-          body: payload[:body],
-          url: payload[:url],
+          title: payload.title,
+          body: payload.body,
+          url: payload.url,
           account_id: notification.account.external_account_id,
           avatar_url: creator_avatar_url,
           card_id: card&.id,
@@ -46,8 +44,8 @@ module NotificationPusher::Native
           category: notification_category
         )
         .new(
-          title: payload[:title],
-          body: payload[:body],
+          title: payload.title,
+          body: payload.body,
           badge: notification.user.notifications.unread.count,
           sound: "default",
           thread_id: card&.id,
@@ -81,9 +79,5 @@ module NotificationPusher::Native
     def creator_avatar_url
       return unless notification.creator.respond_to?(:avatar) && notification.creator.avatar.attached?
       Rails.application.routes.url_helpers.url_for(notification.creator.avatar)
-    end
-
-    def card
-      @card ||= notification.card
     end
 end
