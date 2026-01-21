@@ -21,15 +21,4 @@ class Notification::Push
     def perform_push
       raise NotImplementedError
     end
-
-    def build_payload
-      case notification.source_type
-      when "Event"
-        Notification::EventPayload.new(notification).to_h
-      when "Mention"
-        Notification::MentionPayload.new(notification).to_h
-      else
-        Notification::DefaultPayload.new(notification).to_h
-      end
-    end
 end

@@ -104,8 +104,7 @@ class Notification::Push::NativeTest < ActiveSupport::TestCase
     @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
 
     push = Notification::Push::Native.new(@notification)
-    payload = push.send(:build_payload)
-    native = push.send(:native_notification, payload)
+    native = push.send(:native_notification)
 
     assert_not_nil native.title
     assert_not_nil native.body
@@ -116,8 +115,7 @@ class Notification::Push::NativeTest < ActiveSupport::TestCase
     @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
 
     push = Notification::Push::Native.new(@notification)
-    payload = push.send(:build_payload)
-    native = push.send(:native_notification, payload)
+    native = push.send(:native_notification)
 
     assert_equal @notification.card.id, native.thread_id
   end
@@ -127,8 +125,7 @@ class Notification::Push::NativeTest < ActiveSupport::TestCase
     notification.user.identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
 
     push = Notification::Push::Native.new(notification)
-    payload = push.send(:build_payload)
-    native = push.send(:native_notification, payload)
+    native = push.send(:native_notification)
 
     assert native.high_priority
   end
@@ -137,8 +134,7 @@ class Notification::Push::NativeTest < ActiveSupport::TestCase
     @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
 
     push = Notification::Push::Native.new(@notification)
-    payload = push.send(:build_payload)
-    native = push.send(:native_notification, payload)
+    native = push.send(:native_notification)
 
     assert_not native.high_priority
   end
@@ -147,8 +143,7 @@ class Notification::Push::NativeTest < ActiveSupport::TestCase
     @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
 
     push = Notification::Push::Native.new(@notification)
-    payload = push.send(:build_payload)
-    native = push.send(:native_notification, payload)
+    native = push.send(:native_notification)
 
     assert_equal 1, native.apple_data.dig(:aps, :"mutable-content")
     assert_includes %w[active time-sensitive], native.apple_data.dig(:aps, :"interruption-level")
@@ -159,8 +154,7 @@ class Notification::Push::NativeTest < ActiveSupport::TestCase
     @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
 
     push = Notification::Push::Native.new(@notification)
-    payload = push.send(:build_payload)
-    native = push.send(:native_notification, payload)
+    native = push.send(:native_notification)
 
     assert_nil native.google_data.dig(:android, :notification)
   end
@@ -169,8 +163,7 @@ class Notification::Push::NativeTest < ActiveSupport::TestCase
     @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
 
     push = Notification::Push::Native.new(@notification)
-    payload = push.send(:build_payload)
-    native = push.send(:native_notification, payload)
+    native = push.send(:native_notification)
 
     assert_not_nil native.data[:url]
     assert_equal @notification.account.external_account_id, native.data[:account_id]

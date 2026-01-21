@@ -11,19 +11,19 @@ class Notification::DefaultPayload
     { title: title, body: body, url: url }
   end
 
+  def title
+    "New notification"
+  end
+
+  def body
+    "You have a new notification"
+  end
+
+  def url
+    notifications_url
+  end
+
   private
-    def title
-      "New notification"
-    end
-
-    def body
-      "You have a new notification"
-    end
-
-    def url
-      notifications_url
-    end
-
     def card_url(card)
       Rails.application.routes.url_helpers.card_url(card, **url_options)
     end
