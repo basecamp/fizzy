@@ -199,4 +199,18 @@ class CardTest < ActiveSupport::TestCase
     assert card.watched_by?(kevin), "Kevin's watch should remain (has board access)"
     assert_not card.watched_by?(david), "David's watch should be deleted (no board access)"
   end
+
+  test "card has reactions association" do
+    card = cards(:logo)
+    user = users(:david)
+
+    assert_difference "card.reactions.count", +1 do
+      card.reactions.create!(content: "👍", reacter: user)
+    end
+
+    reaction = card.reactions.last
+    assert_equal "👍", reaction.content
+    assert_equal user, reaction.reacter
+    assert_equal card, reaction.reactable
+  end
 end

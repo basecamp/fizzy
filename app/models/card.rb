@@ -7,6 +7,7 @@ class Card < ApplicationRecord
   belongs_to :board
   belongs_to :creator, class_name: "User", default: -> { Current.user }
 
+  has_many :reactions, -> { order(:created_at) }, as: :reactable, dependent: :delete_all
   has_one_attached :image, dependent: :purge_later
 
   has_rich_text :description
