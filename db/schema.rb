@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_01_21_184815) do
+ActiveRecord::Schema[8.2].define(version: 2026_01_21_194404) do
   create_table "accesses", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -78,7 +78,6 @@ ActiveRecord::Schema[8.2].define(version: 2026_01_21_184815) do
     t.string "token", null: false
     t.datetime "updated_at", null: false
     t.index ["owner_type", "owner_id", "token"], name: "idx_on_owner_type_owner_id_token_95a4008c64", unique: true
-    t.index ["owner_type", "owner_id"], name: "index_action_push_native_devices_on_owner"
     t.index ["session_id"], name: "index_action_push_native_devices_on_session_id"
   end
 
