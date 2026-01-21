@@ -12,11 +12,11 @@ module NotificationPusher::Native
 
   private
     def push_destination?
-      notification.user.push_subscriptions.any? || notification.user.devices.any?
+      notification.user.push_subscriptions.any? || notification.user.identity.devices.any?
     end
 
     def push_to_native(payload)
-      devices = notification.user.devices
+      devices = notification.user.identity.devices
       return if devices.empty?
 
       native_notification(payload).deliver_later_to(devices)
