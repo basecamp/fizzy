@@ -2,11 +2,11 @@ class DevicesController < ApplicationController
   before_action :set_device, only: :destroy
 
   def index
-    @devices = Current.user.devices.order(created_at: :desc)
+    @devices = Current.identity.devices.order(created_at: :desc)
   end
 
   def create
-    ApplicationPushDevice.register(owner: Current.user, **device_params)
+    ApplicationPushDevice.register(owner: Current.identity, **device_params)
     head :created
   end
 
@@ -20,7 +20,7 @@ class DevicesController < ApplicationController
 
   private
     def set_device
-      @device = Current.user.devices.find_by(token: params[:id]) || Current.user.devices.find(params[:id])
+      @device = Current.identity.devices.find_by(token: params[:id]) || Current.identity.devices.find(params[:id])
     end
 
     def device_params

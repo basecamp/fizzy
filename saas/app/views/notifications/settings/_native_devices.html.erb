@@ -1,9 +1,9 @@
 <div class="native-devices margin-block-start">
   <h3 class="txt-small txt-uppercase divider">Mobile Devices</h3>
 
-  <% if Current.user.devices.any? %>
+  <% if Current.identity.devices.any? %>
     <p class="txt-small">
-      You have <%= pluralize(Current.user.devices.count, "mobile device") %> registered for push notifications.
+      You have <%= pluralize(Current.identity.devices.count, "mobile device") %> registered for push notifications.
     </p>
     <%= link_to "Manage devices", devices_path, class: "btn txt-small" %>
   <% else %>

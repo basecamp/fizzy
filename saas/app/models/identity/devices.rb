@@ -1,4 +1,4 @@
-module User::Devices
+module Identity::Devices
   extend ActiveSupport::Concern
 
   included do

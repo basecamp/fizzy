@@ -2,12 +2,12 @@ require "test_helper"
 
 class DevicesControllerTest < ActionDispatch::IntegrationTest
   setup do
-    @user = users(:david)
-    sign_in_as @user
+    @identity = identities(:david)
+    sign_in_as :david
   end
 
-  test "index shows user devices" do
-    @user.devices.create!(token: "test_token_123", platform: "apple", name: "iPhone 15 Pro")
+  test "index shows identity's devices" do
+    @identity.devices.create!(token: "test_token_123", platform: "apple", name: "iPhone 15 Pro")
 
     get devices_path
 
@@ -17,7 +17,7 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "index shows empty state when no devices" do
-    @user.devices.delete_all
+    @identity.devices.delete_all
 
     get devices_path
 
@@ -36,7 +36,7 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
   test "creates a new device via api" do
     token = SecureRandom.hex(32)
 
-    assert_difference "ActionPushNative::Device.count", 1 do
+    assert_difference -> { ApplicationPushDevice.count }, 1 do
       post devices_path, params: {
         token: token,
         platform: "apple",
@@ -46,11 +46,11 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :created
 
-    device = ActionPushNative::Device.last
+    device = ApplicationPushDevice.last
     assert_equal token, device.token
     assert_equal "apple", device.platform
     assert_equal "iPhone 15 Pro", device.name
-    assert_equal @user, device.owner
+    assert_equal @identity, device.owner
   end
 
   test "creates android device" do
@@ -62,23 +62,23 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :created
 
-    device = ActionPushNative::Device.last
+    device = ApplicationPushDevice.last
     assert_equal "google", device.platform
   end
 
-  test "same token can be registered by multiple users" do
+  test "same token can be registered by multiple identities" do
     shared_token = "shared_push_token_123"
-    other_user = users(:kevin)
+    other_identity = identities(:kevin)
 
-    # Other user registers the token first
-    other_device = other_user.devices.create!(
+    # Other identity registers the token first
+    other_device = other_identity.devices.create!(
       token: shared_token,
       platform: "apple",
       name: "Kevin's iPhone"
     )
 
-    # Current user registers the same token with their own device
-    assert_difference "ActionPushNative::Device.count", 1 do
+    # Current identity registers the same token with their own device
+    assert_difference -> { ApplicationPushDevice.count }, 1 do
       post devices_path, params: {
         token: shared_token,
         platform: "apple",
@@ -88,13 +88,13 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :created
 
-    # Both users have their own device records
+    # Both identities have their own device records
     assert_equal shared_token, other_device.reload.token
-    assert_equal other_user, other_device.owner
+    assert_equal other_identity, other_device.owner
 
-    davids_device = @user.devices.last
+    davids_device = @identity.devices.last
     assert_equal shared_token, davids_device.token
-    assert_equal @user, davids_device.owner
+    assert_equal @identity, davids_device.owner
   end
 
   test "rejects invalid platform" do
@@ -128,46 +128,46 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "destroys device by id" do
-    device = @user.devices.create!(
+    device = @identity.devices.create!(
       token: "token_to_delete",
       platform: "apple",
       name: "iPhone"
     )
 
-    assert_difference "ActionPushNative::Device.count", -1 do
+    assert_difference -> { ApplicationPushDevice.count }, -1 do
       delete device_path(device)
     end
 
     assert_redirected_to devices_path
-    assert_not ActionPushNative::Device.exists?(device.id)
+    assert_not ApplicationPushDevice.exists?(device.id)
   end
 
   test "returns not found when device not found by id" do
-    assert_no_difference "ActionPushNative::Device.count" do
+    assert_no_difference "ApplicationPushDevice.count" do
       delete device_path(id: "nonexistent")
     end
 
     assert_response :not_found
   end
 
-  test "returns not found for another user's device by id" do
-    other_user = users(:kevin)
-    device = other_user.devices.create!(
-      token: "other_users_token",
+  test "returns not found for another identity's device by id" do
+    other_identity = identities(:kevin)
+    device = other_identity.devices.create!(
+      token: "other_identity_token",
       platform: "apple",
       name: "Other iPhone"
     )
 
-    assert_no_difference "ActionPushNative::Device.count" do
+    assert_no_difference "ApplicationPushDevice.count" do
       delete device_path(device)
     end
 
     assert_response :not_found
-    assert ActionPushNative::Device.exists?(device.id)
+    assert ApplicationPushDevice.exists?(device.id)
   end
 
   test "destroy by id requires authentication" do
-    device = @user.devices.create!(
+    device = @identity.devices.create!(
       token: "my_token",
       platform: "apple",
       name: "iPhone"
@@ -178,50 +178,50 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
     delete device_path(device)
 
     assert_response :redirect
-    assert ActionPushNative::Device.exists?(device.id)
+    assert ApplicationPushDevice.exists?(device.id)
   end
 
   test "destroys device by token" do
-    device = @user.devices.create!(
+    device = @identity.devices.create!(
       token: "token_to_unregister",
       platform: "apple",
       name: "iPhone"
     )
 
-    assert_difference "ActionPushNative::Device.count", -1 do
+    assert_difference -> { ApplicationPushDevice.count }, -1 do
       delete device_path("token_to_unregister"), as: :json
     end
 
     assert_response :no_content
-    assert_not ActionPushNative::Device.exists?(device.id)
+    assert_not ApplicationPushDevice.exists?(device.id)
   end
 
   test "returns not found when device not found by token" do
-    assert_no_difference "ActionPushNative::Device.count" do
+    assert_no_difference "ApplicationPushDevice.count" do
       delete device_path("nonexistent_token"), as: :json
     end
 
     assert_response :not_found
   end
 
-  test "returns not found for another user's device by token" do
-    other_user = users(:kevin)
-    device = other_user.devices.create!(
-      token: "other_users_token",
+  test "returns not found for another identity's device by token" do
+    other_identity = identities(:kevin)
+    device = other_identity.devices.create!(
+      token: "other_identity_token",
       platform: "apple",
       name: "Other iPhone"
     )
 
-    assert_no_difference "ActionPushNative::Device.count" do
-      delete device_path("other_users_token"), as: :json
+    assert_no_difference "ApplicationPushDevice.count" do
+      delete device_path("other_identity_token"), as: :json
     end
 
     assert_response :not_found
-    assert ActionPushNative::Device.exists?(device.id)
+    assert ApplicationPushDevice.exists?(device.id)
   end
 
   test "destroy by token requires authentication" do
-    device = @user.devices.create!(
+    device = @identity.devices.create!(
       token: "my_token",
       platform: "apple",
       name: "iPhone"
@@ -232,6 +232,6 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
     delete device_path("my_token"), as: :json
 
     assert_response :redirect
-    assert ActionPushNative::Device.exists?(device.id)
+    assert ApplicationPushDevice.exists?(device.id)
   end
 end
