@@ -36,6 +36,8 @@ class Search::Record < ApplicationRecord
     query = Search::Query.wrap(query)
 
     for_query(query, user: user)
+      .joins(:card)
+      .where(cards: { status: "published" })
       .includes(:searchable, card: [ :board, :creator ])
       .order(created_at: :desc)
       .select(:id, :account_id, :searchable_type, :searchable_id, :card_id, :board_id, :title, :content, :created_at, *search_fields(query))

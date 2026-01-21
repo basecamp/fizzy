@@ -4,19 +4,21 @@ class Card::SearchableTest < ActiveSupport::TestCase
   include SearchTestHelper
 
   test "card search" do
+    Current.user = @user
+
     # Searching by title
-    card = @board.cards.create!(title: "layout is broken", creator: @user)
+    card = @board.cards.create!(title: "layout is broken", creator: @user, status: "published")
     results = Card.mentioning("layout", user: @user)
     assert_includes results, card
 
     # Searching by comment
-    card_with_comment = @board.cards.create!(title: "Some card", creator: @user)
+    card_with_comment = @board.cards.create!(title: "Some card", creator: @user, status: "published")
     card_with_comment.comments.create!(body: "overflowing text", creator: @user)
     results = Card.mentioning("overflowing", user: @user)
     assert_includes results, card_with_comment
 
     # Sanitizing search query
-    card_broken = @board.cards.create!(title: "broken layout", creator: @user)
+    card_broken = @board.cards.create!(title: "broken layout", creator: @user, status: "published")
     results = Card.mentioning("broken \"", user: @user)
     assert_includes results, card_broken
 
@@ -25,11 +27,16 @@ class Card::SearchableTest < ActiveSupport::TestCase
 
     # Filtering by board_ids
     other_board = Board.create!(name: "Other Board", account: @account, creator: @user)
-    card_in_board = @board.cards.create!(title: "searchable content", creator: @user)
-    card_in_other_board = other_board.cards.create!(title: "searchable content", creator: @user)
+    card_in_board = @board.cards.create!(title: "searchable content", creator: @user, status: "published")
+    card_in_other_board = other_board.cards.create!(title: "searchable content", creator: @user, status: "published")
     results = Card.mentioning("searchable", user: @user)
     assert_includes results, card_in_board
     assert_not_includes results, card_in_other_board
+
+    # Drafted cards are excluded from search results
+    drafted_card = @board.cards.create!(title: "drafted searchable content", creator: @user, status: "drafted")
+    results = Card.mentioning("drafted", user: @user)
+    assert_not_includes results, drafted_card
   end
 
   test "search content is truncated to a reasonable limit" do

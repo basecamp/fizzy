@@ -4,9 +4,11 @@ class SearchTest < ActiveSupport::TestCase
   include SearchTestHelper
 
   test "search" do
+    Current.user = @user
+
     # Search cards and comments
-    card = @board.cards.create!(title: "layout design", creator: @user)
-    comment_card = @board.cards.create!(title: "Some card", creator: @user)
+    card = @board.cards.create!(title: "layout design", creator: @user, status: "published")
+    comment_card = @board.cards.create!(title: "Some card", creator: @user, status: "published")
     comment_card.comments.create!(body: "overflowing text", creator: @user)
 
     results = Search::Record.for(@user.account_id).search("layout", user: @user)
@@ -18,8 +20,9 @@ class SearchTest < ActiveSupport::TestCase
     # Don't include inaccessible boards
     other_user = User.create!(name: "Other User", account: @account)
     inaccessible_board = Board.create!(name: "Inaccessible Board", account: @account, creator: other_user)
-    accessible_card = @board.cards.create!(title: "searchable content", creator: @user)
-    inaccessible_card = inaccessible_board.cards.create!(title: "searchable content", creator: other_user)
+    accessible_card = @board.cards.create!(title: "searchable content", creator: @user, status: "published")
+    Current.user = other_user
+    inaccessible_card = inaccessible_board.cards.create!(title: "searchable content", creator: other_user, status: "published")
 
     results = Search::Record.for(@user.account_id).search("searchable", user: @user)
     assert results.find { |it| it.card_id == accessible_card.id }

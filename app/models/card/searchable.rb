@@ -6,7 +6,9 @@ module Card::Searchable
 
     scope :mentioning, ->(query, user:) do
       search_record_class = Search::Record.for(user.account_id)
-      joins(search_record_class.card_join).merge(search_record_class.for_query(query, user: user))
+      joins(search_record_class.card_join)
+        .merge(search_record_class.for_query(query, user: user))
+        .where(status: "published")
     end
   end
 

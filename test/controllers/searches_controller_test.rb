@@ -4,11 +4,12 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
   include SearchTestHelper
 
   setup do
+    Current.user = @user
     @board.update!(all_access: true)
-    @card = @board.cards.create!(title: "Layout is broken", description: "Look at this mess.", creator: @user)
-    @comment_card = @board.cards.create!(title: "Some card", creator: @user)
+    @card = @board.cards.create!(title: "Layout is broken", description: "Look at this mess.", creator: @user, status: "published")
+    @comment_card = @board.cards.create!(title: "Some card", creator: @user, status: "published")
     @comment_card.comments.create!(body: "overflowing text issue", creator: @user)
-    @comment2_card = @board.cards.create!(title: "Just haggis", description: "More haggis", creator: @user)
+    @comment2_card = @board.cards.create!(title: "Just haggis", description: "More haggis", creator: @user, status: "published")
     @comment2_card.comments.create!(body: "I love haggis", creator: @user)
 
     untenanted { sign_in_as @user }
@@ -43,7 +44,7 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "search highlights matched terms with proper HTML marks" do
-    @board.cards.create!(title: "Testing search highlighting", creator: @user)
+    @board.cards.create!(title: "Testing search highlighting", creator: @user, status: "published")
 
     get search_path(q: "highlighting", script_name: "/#{@account.external_account_id}")
     assert_response :success
@@ -52,7 +53,8 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
   test "search preserves highlight marks but escapes surrounding HTML" do
     @board.cards.create!(
       title: "<b>Bold</b> testing content",
-      creator: @user
+      creator: @user,
+      status: "published"
     )
 
     get search_path(q: "testing", script_name: "/#{@account.external_account_id}")
