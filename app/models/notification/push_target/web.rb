@@ -1,4 +1,4 @@
-class Notification::Push::Web < Notification::Push
+class Notification::PushTarget::Web < Notification::PushTarget
   def self.push_later(notification)
     Notification::WebPushJob.perform_later(notification)
   end

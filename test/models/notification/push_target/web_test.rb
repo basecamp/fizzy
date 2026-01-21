@@ -1,6 +1,6 @@
 require "test_helper"
 
-class Notification::Push::WebTest < ActiveSupport::TestCase
+class Notification::PushTarget::WebTest < ActiveSupport::TestCase
   setup do
     @user = users(:david)
     @notification = @user.notifications.create!(
@@ -27,28 +27,28 @@ class Notification::Push::WebTest < ActiveSupport::TestCase
         subscriptions.count == 1
     end
 
-    Notification::Push::Web.new(@notification).push
+    Notification::PushTarget::Web.new(@notification).push
   end
 
   test "does not push when user has no subscriptions" do
     @user.push_subscriptions.delete_all
     @web_push_pool.expects(:queue).never
 
-    Notification::Push::Web.new(@notification).push
+    Notification::PushTarget::Web.new(@notification).push
   end
 
   test "does not push for cancelled accounts" do
     @user.account.cancel(initiated_by: @user)
     @web_push_pool.expects(:queue).never
 
-    Notification::Push::Web.new(@notification).push
+    Notification::PushTarget::Web.new(@notification).push
   end
 
   test "does not push when creator is system user" do
     @notification.update!(creator: users(:system))
     @web_push_pool.expects(:queue).never
 
-    Notification::Push::Web.new(@notification).push
+    Notification::PushTarget::Web.new(@notification).push
   end
 
   test "payload includes card title for card events" do
@@ -56,7 +56,7 @@ class Notification::Push::WebTest < ActiveSupport::TestCase
       payload[:title] == @notification.card.title
     end
 
-    Notification::Push::Web.new(@notification).push
+    Notification::PushTarget::Web.new(@notification).push
   end
 
   test "payload for comment includes RE prefix" do
@@ -67,7 +67,7 @@ class Notification::Push::WebTest < ActiveSupport::TestCase
       payload[:title].start_with?("RE:")
     end
 
-    Notification::Push::Web.new(notification).push
+    Notification::PushTarget::Web.new(notification).push
   end
 
   test "payload for assignment includes assigned message" do
@@ -78,7 +78,7 @@ class Notification::Push::WebTest < ActiveSupport::TestCase
       payload[:body].include?("Assigned to you")
     end
 
-    Notification::Push::Web.new(notification).push
+    Notification::PushTarget::Web.new(notification).push
   end
 
   test "payload for mention includes mentioner name" do
@@ -89,12 +89,12 @@ class Notification::Push::WebTest < ActiveSupport::TestCase
       payload[:title].include?("mentioned you")
     end
 
-    Notification::Push::Web.new(notification).push
+    Notification::PushTarget::Web.new(notification).push
   end
 
   test "push_later enqueues Notification::WebPushJob" do
     assert_enqueued_with(job: Notification::WebPushJob, args: [ @notification ]) do
-      Notification::Push::Web.push_later(@notification)
+      Notification::PushTarget::Web.push_later(@notification)
     end
   end
 end
