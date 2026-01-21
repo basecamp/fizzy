@@ -1,7 +1,6 @@
 class CreateActionPushNativeDevices < ActiveRecord::Migration[8.0]
   def change
     create_table :action_push_native_devices do |t|
-      t.string :uuid, null: false
       t.string :name
       t.string :platform, null: false
       t.string :token, null: false
@@ -10,6 +9,6 @@ class CreateActionPushNativeDevices < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :action_push_native_devices, [ :owner_type, :owner_id, :uuid ], unique: true
+    add_index :action_push_native_devices, [ :owner_type, :owner_id, :token ], unique: true
   end
 end
