@@ -4,7 +4,8 @@ class CreateActionPushNativeDevices < ActiveRecord::Migration[8.0]
       t.string :name
       t.string :platform, null: false
       t.string :token, null: false
-      t.belongs_to :owner, polymorphic: true, type: :uuid
+      t.belongs_to :owner, polymorphic: true, type: :uuid, index: false
+      t.belongs_to :session, type: :uuid, foreign_key: true
 
       t.timestamps
     end
