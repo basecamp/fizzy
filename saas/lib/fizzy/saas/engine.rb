@@ -155,6 +155,7 @@ module Fizzy
         ::Account.include Account::Billing, Account::Limited
         ::User.include User::NotifiesAccountOfEmailChange
         ::Identity.include Authorization::Identity, Identity::Devices
+        ::Session.include Session::Devices
         ::Signup.prepend Signup
         ApplicationController.include Authorization::Controller
         CardsController.include(Card::LimitedCreation)

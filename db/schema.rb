@@ -75,10 +75,12 @@ ActiveRecord::Schema[8.2].define(version: 2026_02_18_120000) do
     t.uuid "owner_id"
     t.string "owner_type"
     t.string "platform", null: false
+    t.uuid "session_id"
     t.string "token", null: false
     t.datetime "updated_at", null: false
     t.index ["owner_type", "owner_id", "token"], name: "idx_on_owner_type_owner_id_token_95a4008c64", unique: true
     t.index ["owner_type", "owner_id"], name: "index_action_push_native_devices_on_owner"
+    t.index ["session_id"], name: "index_action_push_native_devices_on_session_id"
   end
 
   create_table "action_text_rich_texts", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -852,4 +854,6 @@ ActiveRecord::Schema[8.2].define(version: 2026_02_18_120000) do
     t.index ["account_id"], name: "index_webhooks_on_account_id"
     t.index ["board_id", "subscribed_actions"], name: "index_webhooks_on_board_id_and_subscribed_actions", length: { subscribed_actions: 255 }
   end
+
+  add_foreign_key "action_push_native_devices", "sessions"
 end
