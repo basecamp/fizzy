@@ -1,20 +1,24 @@
 class Users::DevicesController < ApplicationController
   before_action :set_devices
 
+  rescue_from ActiveRecord::NotNullViolation, ArgumentError, with: :bad_request
+
   def index
   end
 
   def create
-    device = @devices.find_or_initialize_by(uuid: params.require(:uuid))
-    device.update!(device_params)
+    @devices.create!(device_params)
     head :created
-  rescue ArgumentError
-    head :bad_request
   end
 
   def destroy
-    @devices.destroy_by(id: params[:id])
-    redirect_to users_devices_path, notice: "Device removed"
+    if params[:token].present?
+      @devices.destroy_by(token: params[:token])
+      head :no_content
+    else
+      @devices.destroy_by(id: params[:id])
+      redirect_to users_devices_path, notice: "Device removed"
+    end
   end
 
   private
@@ -26,5 +30,9 @@ class Users::DevicesController < ApplicationController
       params.permit(:token, :platform, :name).tap do |permitted|
         permitted[:platform] = permitted[:platform].to_s.downcase if permitted[:platform].present?
       end
+    end
+
+    def bad_request
+      head :bad_request
     end
 end

@@ -45,7 +45,9 @@ module Fizzy
           end
 
           namespace :users do
-            resources :devices, only: [ :index, :create, :destroy ]
+            resources :devices, only: [ :index, :create, :destroy ] do
+              delete :destroy, on: :collection, as: :unregister
+            end
           end
         end
       end
