@@ -1,8 +1,9 @@
-class NotificationPusher
-  include Rails.application.routes.url_helpers
+class Notification::Push
   include ExcerptHelper
 
   attr_reader :notification
+
+  delegate :card, to: :notification
 
   def initialize(notification)
     @notification = notification
@@ -11,21 +12,16 @@ class NotificationPusher
   def push
     return unless should_push?
 
-    build_payload.tap do |payload|
-      push_to_web(payload)
-    end
+    perform_push
   end
 
   private
     def should_push?
-      push_destination? &&
-        !notification.creator.system? &&
-        notification.user.active? &&
-        notification.account.active?
+      notification.pushable?
     end
 
-    def push_destination?
-      notification.user.push_subscriptions.any?
+    def perform_push
+      raise NotImplementedError
     end
 
     def build_payload
@@ -41,7 +37,6 @@ class NotificationPusher
 
     def build_event_payload
       event = notification.source
-      card = event.card
 
       base_payload = {
         title: card_notification_title(card),
@@ -80,7 +75,6 @@ class NotificationPusher
 
     def build_mention_payload
       mention = notification.source
-      card = mention.card
 
       {
         title: "#{mention.mentioner.first_name} mentioned you",
@@ -93,17 +87,8 @@ class NotificationPusher
       {
         title: "New notification",
         body: "You have a new notification",
-        url: notifications_url(**url_options)
+        url: notifications_url
       }
-    end
-
-    def push_to_web(payload)
-      subscriptions = notification.user.push_subscriptions
-      enqueue_payload_for_delivery(payload, subscriptions)
-    end
-
-    def enqueue_payload_for_delivery(payload, subscriptions)
-      Rails.configuration.x.web_push_pool.queue(payload, subscriptions)
     end
 
     def card_notification_title(card)
@@ -116,6 +101,10 @@ class NotificationPusher
 
     def card_url(card)
       Rails.application.routes.url_helpers.card_url(card, **url_options)
+    end
+
+    def notifications_url
+      Rails.application.routes.url_helpers.notifications_url(**url_options)
     end
 
     def card_url_with_comment_anchor(comment)

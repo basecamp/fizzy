@@ -1,25 +1,19 @@
-module NotificationPusher::Native
-  extend ActiveSupport::Concern
-
-  def push
-    return unless should_push?
-
-    build_payload.tap do |payload|
-      push_to_web(payload) if notification.user.push_subscriptions.any?
-      push_to_native(payload)
-    end
+class Notification::Push::Native < Notification::Push
+  def self.push_later(notification)
+    Notification::NativePushJob.perform_later(notification)
   end
 
   private
-    def push_destination?
-      notification.user.push_subscriptions.any? || notification.user.identity.devices.any?
+    def should_push?
+      super && devices.any?
     end
 
-    def push_to_native(payload)
-      devices = notification.user.identity.devices
-      return if devices.empty?
+    def perform_push
+      native_notification(build_payload).deliver_later_to(devices)
+    end
 
-      native_notification(payload).deliver_later_to(devices)
+    def devices
+      @devices ||= notification.identity.devices
     end
 
     def native_notification(payload)
@@ -81,9 +75,5 @@ module NotificationPusher::Native
     def creator_avatar_url
       return unless notification.creator.respond_to?(:avatar) && notification.creator.avatar.attached?
       Rails.application.routes.url_helpers.url_for(notification.creator.avatar)
-    end
-
-    def card
-      @card ||= notification.card
     end
 end
