@@ -6,7 +6,7 @@ class DevicesController < ApplicationController
   end
 
   def create
-    ApplicationPushDevice.register(owner: Current.identity, **device_params)
+    ApplicationPushDevice.register(session: Current.session, **device_params)
     head :created
   end
 

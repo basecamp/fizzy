@@ -140,6 +140,7 @@ module Fizzy
       config.to_prepare do
         ::Account.include Account::Billing, Account::Limited
         ::Identity.include Identity::Devices
+        ::Session.include Session::Devices
         ::Notification.register_push_target(:native)
         ::Signup.prepend Fizzy::Saas::Signup
         CardsController.include(Card::LimitedCreation)
