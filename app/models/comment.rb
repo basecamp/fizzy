@@ -4,7 +4,7 @@ class Comment < ApplicationRecord
   belongs_to :account, default: -> { card.account }
   belongs_to :card, touch: true
   belongs_to :creator, class_name: "User", default: -> { Current.user }
-  has_many :reactions, -> { order(:created_at) }, dependent: :delete_all
+  has_many :reactions, -> { order(:created_at) }, as: :reactable, dependent: :delete_all
 
   has_rich_text :body
 
