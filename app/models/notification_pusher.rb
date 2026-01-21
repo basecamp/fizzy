@@ -45,7 +45,7 @@ class NotificationPusher
 
       base_payload = {
         title: card_notification_title(card),
-        path: card_path(card)
+        url: card_url(card)
       }
 
       case event.action
@@ -53,7 +53,7 @@ class NotificationPusher
         base_payload.merge(
           title: "RE: #{base_payload[:title]}",
           body: comment_notification_body(event),
-          path: card_path_with_comment_anchor(event.eventable)
+          url: card_url_with_comment_anchor(event.eventable)
         )
       when "card_assigned"
         base_payload.merge(
@@ -85,7 +85,7 @@ class NotificationPusher
       {
         title: "#{mention.mentioner.first_name} mentioned you",
         body: format_excerpt(mention.source.mentionable_content, length: 200),
-        path: card_path(card)
+        url: card_url(card)
       }
     end
 
@@ -93,7 +93,7 @@ class NotificationPusher
       {
         title: "New notification",
         body: "You have a new notification",
-        path: notifications_path(script_name: notification.account.slug)
+        url: notifications_url(**url_options)
       }
     end
 
@@ -114,15 +114,22 @@ class NotificationPusher
       format_excerpt(event.eventable.body, length: 200)
     end
 
-    def card_path(card)
-      Rails.application.routes.url_helpers.card_path(card, script_name: notification.account.slug)
+    def card_url(card)
+      Rails.application.routes.url_helpers.card_url(card, **url_options)
     end
 
-    def card_path_with_comment_anchor(comment)
-      Rails.application.routes.url_helpers.card_path(
+    def card_url_with_comment_anchor(comment)
+      Rails.application.routes.url_helpers.card_url(
         comment.card,
         anchor: ActionView::RecordIdentifier.dom_id(comment),
-        script_name: notification.account.slug
+        **url_options
       )
+    end
+
+    def url_options
+      base_options = Rails.application.routes.default_url_options.presence ||
+        Rails.application.config.action_mailer.default_url_options ||
+        {}
+      base_options.merge(script_name: notification.account.slug)
     end
 end

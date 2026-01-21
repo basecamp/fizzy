@@ -37,7 +37,7 @@ module NotificationPusher::Native
         .with_data(
           title: payload[:title],
           body: payload[:body],
-          path: payload[:path],
+          url: payload[:url],
           account_id: notification.account.external_account_id,
           avatar_url: creator_avatar_url,
           card_id: card&.id,
