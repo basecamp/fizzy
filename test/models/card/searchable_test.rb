@@ -32,6 +32,24 @@ class Card::SearchableTest < ActiveSupport::TestCase
     assert_not_includes results, card_in_other_board
   end
 
+  test "search content is truncated to a reasonable limit" do
+    search_record_class = Search::Record.for(@user.account_id)
+
+    # Create a card with unreasonably long content
+    long_content = "asdf " * Searchable::SEARCH_CONTENT_LIMIT
+    card = @board.cards.create!(title: "Card with long description", creator: @user)
+    card.description = ActionText::Content.new(long_content)
+    card.save!
+
+    # Check if was indexed
+    results = Card.mentioning("asdf", user: @user)
+    assert_includes results, card
+
+    # Check the content length was within the limit
+    search_record = search_record_class.find_by(searchable_type: "Card", searchable_id: card.id)
+    assert search_record.content.bytesize <= Searchable::SEARCH_CONTENT_LIMIT
+  end
+
   test "deleting card removes search record and FTS entry" do
     search_record_class = Search::Record.for(@user.account_id)
     card = @board.cards.create!(title: "Card to delete", creator: @user)

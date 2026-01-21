@@ -1,6 +1,8 @@
 module Searchable
   extend ActiveSupport::Concern
 
+  SEARCH_CONTENT_LIMIT = 32.kilobytes
+
   included do
     after_create_commit :create_in_search_index
     after_update_commit :update_in_search_index
@@ -32,9 +34,13 @@ module Searchable
         card_id: search_card_id,
         board_id: search_board_id,
         title: search_title,
-        content: search_content,
+        content: search_record_content,
         created_at: created_at
       }
+    end
+
+    def search_record_content
+      search_content&.truncate_bytes(SEARCH_CONTENT_LIMIT, omission: "")
     end
 
     def search_record_class
