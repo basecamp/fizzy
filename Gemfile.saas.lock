@@ -60,7 +60,8 @@ GIT
 
 GIT
   remote: https://github.com/rails/action_push_native.git
-  revision: 9fb4a2bfe54270b1a3508028f00aaa586e257655
+  revision: 8ef7023a335e1f09ad1fe22a4b7b007b040528bd
+  branch: add-abstract-record
   specs:
     action_push_native (0.3.0)
       activejob (>= 8.0)
