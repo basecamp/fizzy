@@ -18,10 +18,6 @@ class Mention < ApplicationRecord
     source
   end
 
-  def high_priority_push?
-    true
-  end
-
   private
     def watch_source_by_mentionee
       source.watch_by(mentionee)
