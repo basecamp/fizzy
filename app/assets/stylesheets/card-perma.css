@@ -64,6 +64,8 @@
     }
 
     .card__body {
+      position: relative;
+
       @media (max-width: 639px) {
         flex-direction: column;
         padding-block-end: calc(var(--card-padding-block) * 1.5);

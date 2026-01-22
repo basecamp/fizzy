@@ -21,6 +21,8 @@
           <% if card.published? %>
             <%= render "cards/triage/columns", card: card %>
           <% end %>
+
+          <%= render "cards/display/common/stamp", card: card %>
         </div>
 
         <footer class="card__footer">

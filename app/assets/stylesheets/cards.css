@@ -377,11 +377,12 @@
     display: flex;
     flex-direction: column;
     font-weight: bold;
-    inset: auto 1ch 1ch auto;
+    inset: auto 0 -1lh auto;
     justify-content: center;
     max-inline-size: 25ch;
     min-inline-size: 16ch;
     padding: 1ch;
+    pointer-events: none;
     position: absolute;
     rotate: 5deg;
     transform-origin: top right;
