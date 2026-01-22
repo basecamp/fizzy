@@ -537,42 +537,30 @@
     font-size: clamp(0.6rem, 0.85cqi, 100px);
 
     .card__counts {
+      align-items: flex-end;
       display: flex;
       flex-shrink: 0;
-      gap: 2ch;
-      margin-block-end: calc(var(--block-space) * -1.7);
-      margin-inline-start: auto;
-      margin-inline-end: calc(var(--card-padding-inline) * -0.5);
-
-      @media (max-width: 639px) {
-        margin: 0;
-        position: absolute;
-        inset-block-end: var(--card-padding-block);
-        inset-inline-end: var(--card-padding-inline);
-      }
+      gap: 1ch;
+      margin-inline: auto calc(var(--card-padding-inline) * -0.5);
     }
 
-    .card__boosts {
-      --column-gap: 0.8ch;
+    .card__boosts,
+    .card__comments {
+      --icon-size: 1.6em;
 
-      display: flex;
       align-items: center;
+      display: flex;
+      flex-shrink: 0;
+      font-weight: 600;
+      gap: 0.5ch;
+      min-width: 2ch;
 
       img {
-        block-size: 1.6em;
-        inline-size: 1.6em;
+        block-size: var(--icon-size);
+        inline-size: var(--icon-size);
       }
-    }
 
-    .card__comments {
-      --column-gap: 0.8ch;
-
-      display: flex;
-      align-items: center;
-
-      .icon {
-        --icon-size: 1.6em;
-
+      .icon--comment {
         color: var(--card-color);
       }
     }
