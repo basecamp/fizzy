@@ -34,6 +34,23 @@
       }
     }
 
+    @media (max-width: 799px) {
+      --half-btn-height: 1.25rem;
+      --padding-inline: 1.5ch;
+
+      column-gap: 0;
+      grid-template-areas:
+        "notch-top notch-top notch-top"
+        "card card card"
+        "actions-left notch-bottom actions-right"
+        "closure-message closure-message closure-message";
+      grid-template-columns: 1fr auto 1fr;
+      inline-size: calc(100% + 2 * var(--padding-inline));
+      margin-inline: calc(-1 * var(--padding-inline));
+      max-inline-size: none;
+      position: relative;
+    }
+
     .card {
       --card-aspect-ratio: 2 / 0.95;
       --lexxy-bg-color: var(--card-bg-color);
@@ -86,6 +103,11 @@
       }
     }
 
+    .card__meta {
+      grid-area: meta;
+      margin-inline-end: auto;
+    }
+
     .card__stages {
       max-inline-size: 32ch;
 
@@ -120,33 +142,59 @@
     }
 
     .card__footer {
-      flex-wrap: wrap;
+      --btn-size: 2.5rem;
+
+      display: flex;
+      gap: 0.5ch;
+      inline-size: 100%;
+      text-align: start;
+
+      /* Switch to grid layout so that the bg zoom button can stay next to the
+       * meta element, and the reactions can sit below */
+      &:has(.reaction) {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-template-areas:
+          "meta bg-zoom"
+          "reactions reactions";
+      }
+
+      @media (max-width: 639px) {
+        font-size: var(--text-x-small);
+      }
     }
 
     .reactions {
-      --reaction-size: 1.6875rem;
+      --reaction-size: var(--btn-size);
+
+      align-self: flex-end;
+      display: flex;
+      gap: 0.5ch;
+      grid-area: reactions;
+      margin-inline-start: auto;
 
       &:has(.reaction) {
-        margin-block-end: calc(var(--card-padding-block) / -2);
-        padding-block-start: calc(var(--card-padding-block) / 2);
+        --padding: calc(var(--card-padding-block) / 2);
+        --reaction-size: 1.6875rem;
+
+        margin-block: var(--padding) calc(-1 * var(--padding));
+        padding-block-start: var(--padding);
         position: relative;
 
         &:before {
-          border-block-start: 1px dashed var(--card-color);
+          border-block-start: 1px dashed color-mix(in srgb, transparent, var(--card-color) 33%);
           content: "";
-          inset-block-start: 0;
-          inset-inline: calc(-1 * var(--card-padding-inline));
-          opacity: 0.25;
+          inset: 0 calc(-1 * var(--card-padding-inline)) auto;
           position: absolute;
         }
       }
 
       &:not(:has(.reaction)) {
-        align-self: flex-end;
-        inset-block-end: var(--card-padding-block);
-        inset-inline-end: var(--card-padding-inline);
-        margin-inline-start: auto;
         position: static;
+
+        .reactions__trigger {
+          --btn-border-color: var(--color-ink-light);
+        }
       }
     }
 
@@ -154,33 +202,8 @@
       inline-size: max-content;
     }
 
-    @media (max-width: 639px) {
-      display: flex;
-      flex-basis: 100%;
-      justify-content: flex-end;
-      order: 1;
-
-      .reactions:not(:has(.reaction)) {
-        position: static;
-      }
-    }
-
-    /* Make the reactions flow naturally in the footer flex layout instead of
-       using absolute positioning. Use order to place reactions last. */
-    .card__footer {
-      /* When bg image zoom button exists, it has auto margin from utility class.
-         Remove auto margin from reactions so they cluster together. */
-      &:has(> .card__zoom-bg-btn) .card__reactions {
-        margin-inline-start: 0;
-      }
-
-      > .card__zoom-bg-btn {
-        margin-block-start: -0.25rem;
-      }
-    }
-
     .card__zoom-bg-btn {
-      margin-inline-start: auto;
+      grid-area: bg-zoom;
     }
 
     .bubble {
@@ -195,23 +218,6 @@
 
         inset: calc(var(--bubble-size) / 1.5) 0 auto auto;
       }
-    }
-
-    @media (max-width: 799px) {
-      --half-btn-height: 1.5rem;
-      --padding-inline: 1.5ch;
-
-      column-gap: 0;
-      grid-template-areas:
-        "notch-top notch-top notch-top"
-        "card card card"
-        "actions-left notch-bottom actions-right"
-        "closure-message closure-message closure-message";
-      grid-template-columns: 1fr auto 1fr;
-      inline-size: calc(100% + 2 * var(--padding-inline));
-      margin-inline: calc(-1 * var(--padding-inline));
-      max-inline-size: none;
-      position: relative;
     }
   }
 

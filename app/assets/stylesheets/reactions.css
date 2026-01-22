@@ -32,11 +32,8 @@
 
       .reactions__trigger {
         --btn-border-color: var(--color-ink-lightest);
-        background-color: var(--color-ink-lightest);
 
-        &:not(:hover) {
-          opacity: 0.66;
-        }
+        background-color: var(--color-ink-lightest);
       }
     }
   }
