@@ -13,6 +13,14 @@ class Notification::MentionPayload < Notification::DefaultPayload
     card_url(card)
   end
 
+  def category
+    "mention"
+  end
+
+  def high_priority?
+    true
+  end
+
   private
     def mention
       notification.source

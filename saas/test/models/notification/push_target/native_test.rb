@@ -10,39 +10,26 @@ class Notification::PushTarget::NativeTest < ActiveSupport::TestCase
     @user.push_subscriptions.delete_all
   end
 
-  test "notification_category returns assignment for card_assigned" do
+  test "payload category returns assignment for card_assigned" do
     notification = notifications(:logo_assignment_kevin)
-    @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
 
-    push = Notification::PushTarget::Native.new(notification)
-
-    assert_equal "assignment", push.send(:notification_category)
+    assert_equal "assignment", notification.payload.category
   end
 
-  test "notification_category returns comment for comment_created" do
+  test "payload category returns comment for comment_created" do
     notification = notifications(:layout_commented_kevin)
-    @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
 
-    push = Notification::PushTarget::Native.new(notification)
-
-    assert_equal "comment", push.send(:notification_category)
+    assert_equal "comment", notification.payload.category
   end
 
-  test "notification_category returns mention for mentions" do
+  test "payload category returns mention for mentions" do
     notification = notifications(:logo_card_david_mention_by_jz)
-    notification.user.identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
 
-    push = Notification::PushTarget::Native.new(notification)
-
-    assert_equal "mention", push.send(:notification_category)
+    assert_equal "mention", notification.payload.category
   end
 
-  test "notification_category returns card for other card events" do
-    @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
-
-    push = Notification::PushTarget::Native.new(@notification)
-
-    assert_equal "card", push.send(:notification_category)
+  test "payload category returns card for other card events" do
+    assert_equal "card", @notification.payload.category
   end
 
 

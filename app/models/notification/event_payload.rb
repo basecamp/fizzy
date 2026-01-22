@@ -36,6 +36,18 @@ class Notification::EventPayload < Notification::DefaultPayload
     end
   end
 
+  def category
+    case event.action
+    when "card_assigned" then "assignment"
+    when "comment_created" then "comment"
+    else "card"
+    end
+  end
+
+  def high_priority?
+    event.action.card_assigned?
+  end
+
   private
     def event
       notification.source
