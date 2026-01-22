@@ -12,17 +12,6 @@ class Notification::PushTarget
   end
 
   def process
-    return unless should_push?
-
-    perform_push
+    raise NotImplementedError
   end
-
-  private
-    def should_push?
-      notification.pushable?
-    end
-
-    def perform_push
-      raise NotImplementedError
-    end
 end

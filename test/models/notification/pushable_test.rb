@@ -46,19 +46,43 @@ class Notification::PushableTest < ActiveSupport::TestCase
     Notification.push_targets = original_targets
   end
 
-  test "pushable? returns true for normal notifications" do
-    assert @notification.pushable?
+  test "push processes targets for normal notifications" do
+    target_class = mock("push_target_class")
+    target_class.expects(:process).with(@notification)
+
+    original_targets = Notification.push_targets
+    Notification.push_targets = [ target_class ]
+
+    @notification.push
+  ensure
+    Notification.push_targets = original_targets
   end
 
-  test "pushable? returns false when creator is system user" do
+  test "push skips targets when creator is system user" do
     @notification.update!(creator: users(:system))
 
-    assert_not @notification.pushable?
+    target_class = mock("push_target_class")
+    target_class.expects(:process).never
+
+    original_targets = Notification.push_targets
+    Notification.push_targets = [ target_class ]
+
+    @notification.push
+  ensure
+    Notification.push_targets = original_targets
   end
 
-  test "pushable? returns false for cancelled accounts" do
+  test "push skips targets for cancelled accounts" do
     @user.account.cancel(initiated_by: @user)
 
-    assert_not @notification.pushable?
+    target_class = mock("push_target_class")
+    target_class.expects(:process).never
+
+    original_targets = Notification.push_targets
+    Notification.push_targets = [ target_class ]
+
+    @notification.push
+  ensure
+    Notification.push_targets = original_targets
   end
 end

@@ -1,13 +1,11 @@
 class Notification::PushTarget::Native < Notification::PushTarget
-  private
-    def should_push?
-      super && devices.any?
-    end
-
-    def perform_push
+  def process
+    if devices.any?
       native_notification.deliver_later_to(devices)
     end
+  end
 
+  private
     def devices
       @devices ||= notification.identity.devices
     end

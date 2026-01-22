@@ -50,16 +50,6 @@ class Notification::PushTarget::NativeTest < ActiveSupport::TestCase
     end
   end
 
-  test "does not push when creator is system user" do
-    stub_push_services
-    @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
-    @notification.update!(creator: users(:system))
-
-    assert_no_native_push_delivery do
-      Notification::PushTarget::Native.new(@notification).process
-    end
-  end
-
   test "pushes to multiple devices" do
     stub_push_services
     @identity.devices.delete_all
