@@ -137,6 +137,32 @@ Key recurring tasks (via `config/recurring.yml`):
 - Search records denormalized for performance
 - Models in `app/models/search/`
 
+## Docker Deployment
+
+### Multi-Architecture Support
+
+Fizzy supports both AMD64 and ARM64 architectures:
+- Docker images are built for `linux/amd64` and `linux/arm64`
+- Multi-arch manifests are created automatically via GitHub Actions
+- Published to GitHub Container Registry (GHCR): `ghcr.io/basecamp/fizzy`
+
+The `@.github/workflows/publish-image.yml` workflow builds both architectures on every push to `main` and on version tags.
+
+### Testing ARM64 Locally
+
+Use the provided test script:
+```bash
+./test-arm64-build.sh
+```
+
+Or manually:
+```bash
+docker buildx build --platform linux/arm64 --tag fizzy:arm64-test --load .
+docker run --rm --platform linux/arm64 -e SECRET_KEY_BASE=test123 -p 80:80 fizzy:arm64-test
+```
+
+See `@TESTING_ARM64.md` for detailed testing instructions.
+
 ## Tools
 
 ### Chrome MCP (Local Dev)
