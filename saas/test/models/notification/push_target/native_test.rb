@@ -45,40 +45,6 @@ class Notification::PushTarget::NativeTest < ActiveSupport::TestCase
     assert_equal "card", push.send(:notification_category)
   end
 
-  test "interruption_level is time-sensitive for assignments" do
-    notification = notifications(:logo_assignment_kevin)
-    @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
-
-    push = Notification::PushTarget::Native.new(notification)
-
-    assert_equal "time-sensitive", push.send(:interruption_level)
-  end
-
-  test "interruption_level is time-sensitive for mentions" do
-    notification = notifications(:logo_card_david_mention_by_jz)
-    notification.user.identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
-
-    push = Notification::PushTarget::Native.new(notification)
-
-    assert_equal "time-sensitive", push.send(:interruption_level)
-  end
-
-  test "interruption_level is active for comments" do
-    notification = notifications(:layout_commented_kevin)
-    @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
-
-    push = Notification::PushTarget::Native.new(notification)
-
-    assert_equal "active", push.send(:interruption_level)
-  end
-
-  test "interruption_level is active for other card events" do
-    @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
-
-    push = Notification::PushTarget::Native.new(@notification)
-
-    assert_equal "active", push.send(:interruption_level)
-  end
 
   test "pushes to native devices when user has devices" do
     stub_push_services
@@ -184,8 +150,46 @@ class Notification::PushTarget::NativeTest < ActiveSupport::TestCase
     native = push.send(:native_notification)
 
     assert_equal 1, native.apple_data.dig(:aps, :"mutable-content")
-    assert_includes %w[active time-sensitive], native.apple_data.dig(:aps, :"interruption-level")
     assert_not_nil native.apple_data.dig(:aps, :category)
+  end
+
+  test "native notification sets time-sensitive interruption level for assignments" do
+    notification = notifications(:logo_assignment_kevin)
+    notification.user.identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
+
+    push = Notification::PushTarget::Native.new(notification)
+    native = push.send(:native_notification)
+
+    assert_equal "time-sensitive", native.apple_data.dig(:aps, :"interruption-level")
+  end
+
+  test "native notification sets time-sensitive interruption level for mentions" do
+    notification = notifications(:logo_card_david_mention_by_jz)
+    notification.user.identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
+
+    push = Notification::PushTarget::Native.new(notification)
+    native = push.send(:native_notification)
+
+    assert_equal "time-sensitive", native.apple_data.dig(:aps, :"interruption-level")
+  end
+
+  test "native notification sets active interruption level for comments" do
+    notification = notifications(:layout_commented_kevin)
+    @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
+
+    push = Notification::PushTarget::Native.new(notification)
+    native = push.send(:native_notification)
+
+    assert_equal "active", native.apple_data.dig(:aps, :"interruption-level")
+  end
+
+  test "native notification sets active interruption level for other card events" do
+    @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
+
+    push = Notification::PushTarget::Native.new(@notification)
+    native = push.send(:native_notification)
+
+    assert_equal "active", native.apple_data.dig(:aps, :"interruption-level")
   end
 
   test "native notification sets android notification to nil for data-only" do
