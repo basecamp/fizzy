@@ -9,7 +9,7 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
   test "index shows identity's devices" do
     @identity.devices.create!(token: "test_token_123", platform: "apple", name: "iPhone 15 Pro")
 
-    get devices_path
+    untenanted { get saas.devices_path }
 
     assert_response :success
     assert_select "strong", "iPhone 15 Pro"
@@ -19,7 +19,7 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
   test "index shows empty state when no devices" do
     @identity.devices.delete_all
 
-    get devices_path
+    untenanted { get saas.devices_path }
 
     assert_response :success
     assert_select "p", /No devices registered/
@@ -28,7 +28,7 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
   test "index requires authentication" do
     sign_out
 
-    get devices_path
+    untenanted { get saas.devices_path }
 
     assert_response :redirect
   end
@@ -37,11 +37,13 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
     token = SecureRandom.hex(32)
 
     assert_difference -> { ApplicationPushDevice.count }, 1 do
-      post devices_path, params: {
-        token: token,
-        platform: "apple",
-        name: "iPhone 15 Pro"
-      }, as: :json
+      untenanted do
+        post saas.devices_path, params: {
+          token: token,
+          platform: "apple",
+          name: "iPhone 15 Pro"
+        }, as: :json
+      end
     end
 
     assert_response :created
@@ -54,11 +56,13 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "creates android device" do
-    post devices_path, params: {
-      token: SecureRandom.hex(32),
-      platform: "google",
-      name: "Pixel 8"
-    }, as: :json
+    untenanted do
+      post saas.devices_path, params: {
+        token: SecureRandom.hex(32),
+        platform: "google",
+        name: "Pixel 8"
+      }, as: :json
+    end
 
     assert_response :created
 
@@ -79,11 +83,13 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
 
     # Current identity registers the same token with their own device
     assert_difference -> { ApplicationPushDevice.count }, 1 do
-      post devices_path, params: {
-        token: shared_token,
-        platform: "apple",
-        name: "David's iPhone"
-      }, as: :json
+      untenanted do
+        post saas.devices_path, params: {
+          token: shared_token,
+          platform: "apple",
+          name: "David's iPhone"
+        }, as: :json
+      end
     end
 
     assert_response :created
@@ -98,20 +104,24 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "rejects invalid platform" do
-    post devices_path, params: {
-      token: SecureRandom.hex(32),
-      platform: "windows",
-      name: "Surface"
-    }, as: :json
+    untenanted do
+      post saas.devices_path, params: {
+        token: SecureRandom.hex(32),
+        platform: "windows",
+        name: "Surface"
+      }, as: :json
+    end
 
     assert_response :unprocessable_entity
   end
 
   test "rejects missing token" do
-    post devices_path, params: {
-      platform: "apple",
-      name: "iPhone"
-    }, as: :json
+    untenanted do
+      post saas.devices_path, params: {
+        platform: "apple",
+        name: "iPhone"
+      }, as: :json
+    end
 
     assert_response :bad_request
   end
@@ -119,10 +129,12 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
   test "create requires authentication" do
     sign_out
 
-    post devices_path, params: {
-      token: SecureRandom.hex(32),
-      platform: "apple"
-    }, as: :json
+    untenanted do
+      post saas.devices_path, params: {
+        token: SecureRandom.hex(32),
+        platform: "apple"
+      }, as: :json
+    end
 
     assert_response :redirect
   end
@@ -135,16 +147,16 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
     )
 
     assert_difference -> { ApplicationPushDevice.count }, -1 do
-      delete device_path(device)
+      untenanted { delete saas.device_path(device) }
     end
 
-    assert_redirected_to devices_path
+    assert_redirected_to saas.devices_path(script_name: nil)
     assert_not ApplicationPushDevice.exists?(device.id)
   end
 
   test "returns not found when device not found by id" do
     assert_no_difference "ApplicationPushDevice.count" do
-      delete device_path(id: "nonexistent")
+      untenanted { delete saas.device_path(id: "nonexistent") }
     end
 
     assert_response :not_found
@@ -159,7 +171,7 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
     )
 
     assert_no_difference "ApplicationPushDevice.count" do
-      delete device_path(device)
+      untenanted { delete saas.device_path(device) }
     end
 
     assert_response :not_found
@@ -175,7 +187,7 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
 
     sign_out
 
-    delete device_path(device)
+    untenanted { delete saas.device_path(device) }
 
     assert_response :redirect
     assert ApplicationPushDevice.exists?(device.id)
@@ -189,7 +201,7 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
     )
 
     assert_difference -> { ApplicationPushDevice.count }, -1 do
-      delete device_path("token_to_unregister"), as: :json
+      untenanted { delete saas.device_path("token_to_unregister"), as: :json }
     end
 
     assert_response :no_content
@@ -198,7 +210,7 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
 
   test "returns not found when device not found by token" do
     assert_no_difference "ApplicationPushDevice.count" do
-      delete device_path("nonexistent_token"), as: :json
+      untenanted { delete saas.device_path("nonexistent_token"), as: :json }
     end
 
     assert_response :not_found
@@ -213,7 +225,7 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
     )
 
     assert_no_difference "ApplicationPushDevice.count" do
-      delete device_path("other_identity_token"), as: :json
+      untenanted { delete saas.device_path("other_identity_token"), as: :json }
     end
 
     assert_response :not_found
@@ -229,7 +241,7 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
 
     sign_out
 
-    delete device_path("my_token"), as: :json
+    untenanted { delete saas.device_path("my_token"), as: :json }
 
     assert_response :redirect
     assert ApplicationPushDevice.exists?(device.id)
