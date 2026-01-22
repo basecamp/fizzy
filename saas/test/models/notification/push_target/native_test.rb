@@ -199,9 +199,4 @@ class Notification::PushTarget::NativeTest < ActiveSupport::TestCase
     assert_equal @notification.creator.name, native.data[:creator_name]
   end
 
-  test "push_later enqueues Notification::NativePushJob" do
-    assert_enqueued_with(job: Notification::NativePushJob, args: [ @notification ]) do
-      Notification::PushTarget::Native.push_later(@notification)
-    end
-  end
 end

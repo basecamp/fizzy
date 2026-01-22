@@ -92,9 +92,4 @@ class Notification::PushTarget::WebTest < ActiveSupport::TestCase
     Notification::PushTarget::Web.new(notification).push
   end
 
-  test "push_later enqueues Notification::WebPushJob" do
-    assert_enqueued_with(job: Notification::WebPushJob, args: [ @notification ]) do
-      Notification::PushTarget::Web.push_later(@notification)
-    end
-  end
 end

@@ -9,14 +9,23 @@ class Notification::PushableTest < ActiveSupport::TestCase
     )
   end
 
-  test "push_later calls push_later on all registered targets" do
-    target = mock("push_target")
-    target.expects(:push_later).with(@notification)
+  test "push_later enqueues Notification::PushJob" do
+    assert_enqueued_with(job: Notification::PushJob, args: [ @notification ]) do
+      @notification.push_later
+    end
+  end
+
+  test "push calls push on all registered targets" do
+    target_class = mock("push_target_class")
+    target_instance = mock("push_target_instance")
+
+    target_class.expects(:new).with(@notification).returns(target_instance)
+    target_instance.expects(:push)
 
     original_targets = Notification.push_targets
-    Notification.push_targets = [ target ]
+    Notification.push_targets = [ target_class ]
 
-    @notification.push_later
+    @notification.push
   ensure
     Notification.push_targets = original_targets
   end
