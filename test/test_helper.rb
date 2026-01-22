@@ -3,6 +3,7 @@ require_relative "../config/environment"
 
 require "rails/test_help"
 require "webmock/minitest"
+require_relative "webmock_ipaddr_extension"
 require "vcr"
 require "mocha/minitest"
 require "turbo/broadcastable/test_helper"
