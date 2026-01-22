@@ -3,11 +3,15 @@ class Notification::PushTarget
 
   delegate :card, to: :notification
 
+  def self.process(notification)
+    new(notification).process
+  end
+
   def initialize(notification)
     @notification = notification
   end
 
-  def push
+  def process
     return unless should_push?
 
     perform_push

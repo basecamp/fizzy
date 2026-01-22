@@ -38,7 +38,7 @@ class Notification::PushTarget::NativeTest < ActiveSupport::TestCase
     @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
 
     assert_native_push_delivery(count: 1) do
-      Notification::PushTarget::Native.new(@notification).push
+      Notification::PushTarget::Native.new(@notification).process
     end
   end
 
@@ -46,7 +46,7 @@ class Notification::PushTarget::NativeTest < ActiveSupport::TestCase
     @identity.devices.delete_all
 
     assert_no_native_push_delivery do
-      Notification::PushTarget::Native.new(@notification).push
+      Notification::PushTarget::Native.new(@notification).process
     end
   end
 
@@ -56,7 +56,7 @@ class Notification::PushTarget::NativeTest < ActiveSupport::TestCase
     @notification.update!(creator: users(:system))
 
     assert_no_native_push_delivery do
-      Notification::PushTarget::Native.new(@notification).push
+      Notification::PushTarget::Native.new(@notification).process
     end
   end
 
@@ -67,7 +67,7 @@ class Notification::PushTarget::NativeTest < ActiveSupport::TestCase
     @identity.devices.create!(token: "token2", platform: "google", name: "Pixel")
 
     assert_native_push_delivery(count: 2) do
-      Notification::PushTarget::Native.new(@notification).push
+      Notification::PushTarget::Native.new(@notification).process
     end
   end
 
