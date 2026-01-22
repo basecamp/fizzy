@@ -1,8 +1,4 @@
 class Notification::PushTarget::Native < Notification::PushTarget
-  def self.push_later(notification)
-    Notification::NativePushJob.perform_later(notification)
-  end
-
   private
     def should_push?
       super && devices.any?

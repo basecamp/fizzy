@@ -1,8 +1,4 @@
 class Notification::PushTarget::Web < Notification::PushTarget
-  def self.push_later(notification)
-    Notification::WebPushJob.perform_later(notification)
-  end
-
   private
     def should_push?
       super && subscriptions.any?
