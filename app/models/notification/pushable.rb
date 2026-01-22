@@ -27,9 +27,7 @@ module Notification::Pushable
   end
 
   def push
-    self.class.push_targets.each do |target|
-      target.new(self).push
-    end
+    self.class.push_targets.each { |target| push_to(target) }
   end
 
   def pushable?
@@ -41,6 +39,10 @@ module Notification::Pushable
   end
 
   private
+    def push_to(target)
+      target.process(self)
+    end
+
     def payload_type
       source_type.presence_in(%w[ Event Mention ]) || "Default"
     end

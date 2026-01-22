@@ -15,12 +15,9 @@ class Notification::PushableTest < ActiveSupport::TestCase
     end
   end
 
-  test "push calls push on all registered targets" do
+  test "push calls process on all registered targets" do
     target_class = mock("push_target_class")
-    target_instance = mock("push_target_instance")
-
-    target_class.expects(:new).with(@notification).returns(target_instance)
-    target_instance.expects(:push)
+    target_class.expects(:process).with(@notification)
 
     original_targets = Notification.push_targets
     Notification.push_targets = [ target_class ]

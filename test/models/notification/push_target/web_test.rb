@@ -27,28 +27,28 @@ class Notification::PushTarget::WebTest < ActiveSupport::TestCase
         subscriptions.count == 1
     end
 
-    Notification::PushTarget::Web.new(@notification).push
+    Notification::PushTarget::Web.new(@notification).process
   end
 
   test "does not push when user has no subscriptions" do
     @user.push_subscriptions.delete_all
     @web_push_pool.expects(:queue).never
 
-    Notification::PushTarget::Web.new(@notification).push
+    Notification::PushTarget::Web.new(@notification).process
   end
 
   test "does not push for cancelled accounts" do
     @user.account.cancel(initiated_by: @user)
     @web_push_pool.expects(:queue).never
 
-    Notification::PushTarget::Web.new(@notification).push
+    Notification::PushTarget::Web.new(@notification).process
   end
 
   test "does not push when creator is system user" do
     @notification.update!(creator: users(:system))
     @web_push_pool.expects(:queue).never
 
-    Notification::PushTarget::Web.new(@notification).push
+    Notification::PushTarget::Web.new(@notification).process
   end
 
   test "payload includes card title for card events" do
@@ -56,7 +56,7 @@ class Notification::PushTarget::WebTest < ActiveSupport::TestCase
       payload[:title] == @notification.card.title
     end
 
-    Notification::PushTarget::Web.new(@notification).push
+    Notification::PushTarget::Web.new(@notification).process
   end
 
   test "payload for comment includes RE prefix" do
@@ -67,7 +67,7 @@ class Notification::PushTarget::WebTest < ActiveSupport::TestCase
       payload[:title].start_with?("RE:")
     end
 
-    Notification::PushTarget::Web.new(notification).push
+    Notification::PushTarget::Web.new(notification).process
   end
 
   test "payload for assignment includes assigned message" do
@@ -78,7 +78,7 @@ class Notification::PushTarget::WebTest < ActiveSupport::TestCase
       payload[:body].include?("Assigned to you")
     end
 
-    Notification::PushTarget::Web.new(notification).push
+    Notification::PushTarget::Web.new(notification).process
   end
 
   test "payload for mention includes mentioner name" do
@@ -89,7 +89,7 @@ class Notification::PushTarget::WebTest < ActiveSupport::TestCase
       payload[:title].include?("mentioned you")
     end
 
-    Notification::PushTarget::Web.new(notification).push
+    Notification::PushTarget::Web.new(notification).process
   end
 
 end
