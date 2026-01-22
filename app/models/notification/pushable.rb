@@ -29,11 +29,9 @@ module Notification::Pushable
   end
 
   def push
-    self.class.push_targets.each { |target| push_to(target) }
-  end
+    return unless pushable?
 
-  def pushable?
-    !creator.system? && user.active? && account.active?
+    self.class.push_targets.each { |target| push_to(target) }
   end
 
   def payload
@@ -41,6 +39,10 @@ module Notification::Pushable
   end
 
   private
+    def pushable?
+      !creator.system? && user.active? && account.active?
+    end
+
     def push_to(target)
       target.process(self)
     end

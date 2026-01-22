@@ -37,20 +37,6 @@ class Notification::PushTarget::WebTest < ActiveSupport::TestCase
     Notification::PushTarget::Web.new(@notification).process
   end
 
-  test "does not push for cancelled accounts" do
-    @user.account.cancel(initiated_by: @user)
-    @web_push_pool.expects(:queue).never
-
-    Notification::PushTarget::Web.new(@notification).process
-  end
-
-  test "does not push when creator is system user" do
-    @notification.update!(creator: users(:system))
-    @web_push_pool.expects(:queue).never
-
-    Notification::PushTarget::Web.new(@notification).process
-  end
-
   test "payload includes card title for card events" do
     @web_push_pool.expects(:queue).once.with do |payload, _|
       payload[:title] == @notification.card.title
