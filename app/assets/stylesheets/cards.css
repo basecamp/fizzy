@@ -379,6 +379,10 @@
       }
     }
 
+    .reaction__popup {
+      inline-size: max-content;
+    }
+
     &:has(.reaction) {
       flex-basis: 100%;
       order: 1;
