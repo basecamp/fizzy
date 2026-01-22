@@ -37,6 +37,10 @@ class Event < ApplicationRecord
     Event::Description.new(self, user)
   end
 
+  def high_priority_push?
+    action.card_assigned?
+  end
+
   private
     def dispatch_webhooks
       Event::WebhookDispatchJob.perform_later(self)

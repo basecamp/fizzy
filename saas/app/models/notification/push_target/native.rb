@@ -49,7 +49,7 @@ class Notification::PushTarget::Native < Notification::PushTarget
           badge: notification.user.notifications.unread.count,
           sound: "default",
           thread_id: card&.id,
-          high_priority: assignment_notification?
+          high_priority: high_priority_notification?
         )
     end
 
@@ -69,11 +69,11 @@ class Notification::PushTarget::Native < Notification::PushTarget
     end
 
     def interruption_level
-      assignment_notification? ? "time-sensitive" : "active"
+      high_priority_notification? ? "time-sensitive" : "active"
     end
 
-    def assignment_notification?
-      notification.source.is_a?(Event) && notification.source.action == "card_assigned"
+    def high_priority_notification?
+      notification.source.high_priority_push?
     end
 
     def creator_avatar_url
