@@ -54,7 +54,25 @@ class Notification::PushTarget::NativeTest < ActiveSupport::TestCase
     assert_equal "time-sensitive", push.send(:interruption_level)
   end
 
-  test "interruption_level is active for non-assignments" do
+  test "interruption_level is time-sensitive for mentions" do
+    notification = notifications(:logo_card_david_mention_by_jz)
+    notification.user.identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
+
+    push = Notification::PushTarget::Native.new(notification)
+
+    assert_equal "time-sensitive", push.send(:interruption_level)
+  end
+
+  test "interruption_level is active for comments" do
+    notification = notifications(:layout_commented_kevin)
+    @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
+
+    push = Notification::PushTarget::Native.new(notification)
+
+    assert_equal "active", push.send(:interruption_level)
+  end
+
+  test "interruption_level is active for other card events" do
     @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
 
     push = Notification::PushTarget::Native.new(@notification)
@@ -130,7 +148,27 @@ class Notification::PushTarget::NativeTest < ActiveSupport::TestCase
     assert native.high_priority
   end
 
-  test "native notification sets normal priority for non-assignments" do
+  test "native notification sets high_priority for mentions" do
+    notification = notifications(:logo_card_david_mention_by_jz)
+    notification.user.identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
+
+    push = Notification::PushTarget::Native.new(notification)
+    native = push.send(:native_notification)
+
+    assert native.high_priority
+  end
+
+  test "native notification sets normal priority for comments" do
+    notification = notifications(:layout_commented_kevin)
+    @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
+
+    push = Notification::PushTarget::Native.new(notification)
+    native = push.send(:native_notification)
+
+    assert_not native.high_priority
+  end
+
+  test "native notification sets normal priority for other card events" do
     @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
 
     push = Notification::PushTarget::Native.new(@notification)
