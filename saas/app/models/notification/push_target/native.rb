@@ -24,7 +24,7 @@ class Notification::PushTarget::Native < Notification::PushTarget
       ApplicationPushNotification
         .with_apple(
           aps: {
-            category: notification_category,
+            category: payload.category,
             "mutable-content": 1,
             "interruption-level": interruption_level
           }
@@ -41,7 +41,7 @@ class Notification::PushTarget::Native < Notification::PushTarget
           card_id: card&.id,
           card_title: card&.title,
           creator_name: notification.creator.name,
-          category: notification_category
+          category: payload.category
         )
         .new(
           title: payload.title,
@@ -49,39 +49,17 @@ class Notification::PushTarget::Native < Notification::PushTarget
           badge: notification.user.notifications.unread.count,
           sound: "default",
           thread_id: card&.id,
-          high_priority: high_priority_notification?
+          high_priority: payload.high_priority?
         )
     end
 
-    def notification_category
-      case notification.source
-      when Event
-        case notification.source.action
-        when "card_assigned" then "assignment"
-        when "comment_created" then "comment"
-        else "card"
-        end
-      when Mention
-        "mention"
-      else
-        "default"
-      end
-    end
-
     def interruption_level
-      high_priority_notification? ? "time-sensitive" : "active"
-    end
-
-    def high_priority_notification?
-      case notification.source
-      when Event then notification.source.action.card_assigned?
-      when Mention then true
-      else false
-      end
+      payload.high_priority? ? "time-sensitive" : "active"
     end
 
     def creator_avatar_url
-      return unless notification.creator.respond_to?(:avatar) && notification.creator.avatar.attached?
-      Rails.application.routes.url_helpers.url_for(notification.creator.avatar)
+      if notification.creator.respond_to?(:avatar) && notification.creator.avatar.attached?
+        Rails.application.routes.url_helpers.url_for(notification.creator.avatar)
+      end
     end
 end

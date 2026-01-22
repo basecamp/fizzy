@@ -23,6 +23,14 @@ class Notification::DefaultPayload
     notifications_url
   end
 
+  def category
+    "default"
+  end
+
+  def high_priority?
+    false
+  end
+
   private
     def card_url(card)
       Rails.application.routes.url_helpers.card_url(card, **url_options)
