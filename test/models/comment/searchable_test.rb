@@ -7,6 +7,17 @@ class Comment::SearchableTest < ActiveSupport::TestCase
     @card = @board.cards.create!(title: "Test Card", status: "published", creator: @user)
   end
 
+  test "searchable? returns true for comments on published cards" do
+    comment = @card.comments.create!(body: "test comment", creator: @user)
+    assert comment.searchable?
+  end
+
+  test "searchable? returns false for comments on draft cards" do
+    draft_card = @board.cards.create!(title: "Draft Card", status: "drafted", creator: @user)
+    comment = draft_card.comments.build(body: "test comment", creator: @user)
+    assert_not comment.searchable?
+  end
+
   test "comment search" do
     search_record_class = Search::Record.for(@user.account_id)
     # Comment is indexed on create

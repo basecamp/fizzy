@@ -15,11 +15,17 @@ module Searchable
 
   private
     def create_in_search_index
-      search_record_class.create!(search_record_attributes)
+      if searchable?
+        search_record_class.create!(search_record_attributes)
+      end
     end
 
     def update_in_search_index
-      search_record_class.upsert!(search_record_attributes)
+      if searchable?
+        search_record_class.upsert!(search_record_attributes)
+      else
+        remove_from_search_index
+      end
     end
 
     def remove_from_search_index
@@ -53,4 +59,5 @@ module Searchable
   # - search_content: returns content string
   # - search_card_id: returns the card id (self.id for cards, card_id for comments)
   # - search_board_id: returns the board id
+  # - searchable?: returns whether this record should be indexed
 end

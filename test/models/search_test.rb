@@ -15,6 +15,11 @@ class SearchTest < ActiveSupport::TestCase
     results = Search::Record.for(@user.account_id).search("overflowing", user: @user)
     assert results.find { |it| it.card_id == comment_card.id && it.searchable_type == "Comment" }
 
+    # Drafted cards are excluded from search results
+    drafted_card = @board.cards.create!(title: "drafted searchable content", creator: @user, status: "drafted")
+    results = Search::Record.for(@user.account_id).search("drafted", user: @user)
+    assert_not results.find { |it| it.card_id == drafted_card.id }
+
     # Don't include inaccessible boards
     other_user = User.create!(name: "Other User", account: @account)
     inaccessible_board = Board.create!(name: "Inaccessible Board", account: @account, creator: other_user)

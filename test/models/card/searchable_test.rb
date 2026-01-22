@@ -3,6 +3,16 @@ require "test_helper"
 class Card::SearchableTest < ActiveSupport::TestCase
   include SearchTestHelper
 
+  test "searchable? returns true for published cards" do
+    card = @board.cards.create!(title: "Published Card", status: "published", creator: @user)
+    assert card.searchable?
+  end
+
+  test "searchable? returns false for draft cards" do
+    card = @board.cards.create!(title: "Draft Card", status: "drafted", creator: @user)
+    assert_not card.searchable?
+  end
+
   test "card search" do
     # Searching by title
     card = @board.cards.create!(title: "layout is broken", status: "published", creator: @user)
@@ -77,5 +87,47 @@ class Card::SearchableTest < ActiveSupport::TestCase
       fts_count = Search::Record::SQLite::Fts.where(rowid: card.id).count
       assert_equal 0, fts_count, "FTS entry should be deleted"
     end
+  end
+
+  test "updating a draft card does not index it" do
+    search_record_class = Search::Record.for(@user.account_id)
+
+    card = @board.cards.create!(title: "Draft card", creator: @user, status: "drafted")
+    assert_nil search_record_class.find_by(searchable_type: "Card", searchable_id: card.id)
+
+    card.update!(title: "Updated draft card")
+    assert_nil search_record_class.find_by(searchable_type: "Card", searchable_id: card.id),
+      "Draft card should not be indexed after update"
+
+    results = Card.mentioning("Updated", user: @user)
+    assert_not_includes results, card
+  end
+
+  test "publishing a draft card indexes it" do
+    search_record_class = Search::Record.for(@user.account_id)
+
+    card = @board.cards.create!(title: "Draft to publish", creator: @user, status: "drafted")
+    assert_nil search_record_class.find_by(searchable_type: "Card", searchable_id: card.id)
+
+    card.publish
+    search_record = search_record_class.find_by(searchable_type: "Card", searchable_id: card.id)
+    assert_not_nil search_record, "Published card should be indexed"
+    assert_equal card.id, search_record.card_id
+
+    results = Card.mentioning("publish", user: @user)
+    assert_includes results, card
+  end
+
+  test "unpublishing a draft card removes it from the search index" do
+    search_record_class = Search::Record.for(@user.account_id)
+
+    card = @board.cards.create!(title: "Draft to publish", creator: @user, status: "published")
+    assert_not_nil search_record_class.find_by(searchable_type: "Card", searchable_id: card.id)
+
+    card.update!(status: "drafted")
+
+    assert_nil search_record_class.find_by(searchable_type: "Card", searchable_id: card.id)
+    results = Card.mentioning("publish", user: @user)
+    assert_not_includes results, card
   end
 end
