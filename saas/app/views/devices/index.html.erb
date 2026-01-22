@@ -7,7 +7,7 @@
         <strong><%= device.name || "Unnamed device" %></strong>
         (<%= device.platform == "apple" ? "iOS" : "Android" %>)
         <span>Added <%= time_ago_in_words(device.created_at) %> ago</span>
-        <%= button_to "Remove", device_path(device), method: :delete, data: { confirm: "Remove this device?" } %>
+        <%= button_to "Remove", saas.device_path(device), method: :delete, data: { confirm: "Remove this device?" } %>
       </li>
     <% end %>
   </ul>

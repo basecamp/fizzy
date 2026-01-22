@@ -43,8 +43,6 @@ module Fizzy
           namespace :stripe do
             resource :webhooks, only: :create
           end
-
-          resources :devices, only: [ :index, :create, :destroy ]
         end
       end
 
