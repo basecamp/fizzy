@@ -620,6 +620,7 @@
     &:has(.card__background img:not([src=""])) {
       .card__content,
       .card__meta,
+      .card__boosts,
       .card__comments,
       .card__column-name:not(.card__column-name--current) {
         opacity: 0;
@@ -630,6 +631,7 @@
         &:hover {
           .card__content,
           .card__footer,
+          .card__boosts,
           .card__comments,
           .card__column-name:not(.card__column-name--current) {
             opacity: 1;
