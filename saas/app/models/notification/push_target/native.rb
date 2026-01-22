@@ -73,7 +73,11 @@ class Notification::PushTarget::Native < Notification::PushTarget
     end
 
     def high_priority_notification?
-      notification.source.high_priority_push?
+      case notification.source
+      when Event then notification.source.action.card_assigned?
+      when Mention then true
+      else false
+      end
     end
 
     def creator_avatar_url
