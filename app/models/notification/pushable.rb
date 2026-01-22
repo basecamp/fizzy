@@ -23,8 +23,12 @@ module Notification::Pushable
   end
 
   def push_later
+    Notification::PushJob.perform_later(self)
+  end
+
+  def push
     self.class.push_targets.each do |target|
-      target.push_later(self)
+      target.new(self).push
     end
   end
 
