@@ -80,6 +80,11 @@
         display: none !important;
       }
     }
+
+    .reactions {
+      margin-block-start: var(--block-space-half);
+      margin-inline: calc(var(--column-gap) / -1);
+    }
   }
 
   .comment__author {

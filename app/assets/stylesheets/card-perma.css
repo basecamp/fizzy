@@ -119,27 +119,68 @@
       }
     }
 
-    /* Make the reactions flow naturally in the footer flex layout instead of
-       using absolute positioning. Use order to place reactions last. */
     .card__footer {
-      .card__reactions {
-        margin-inline-start: auto;
-        order: 1;
+      flex-wrap: wrap;
+    }
+
+    .reactions {
+      --reaction-size: 1.6875rem;
+
+      &:has(.reaction) {
+        margin-block-end: calc(var(--card-padding-block) / -2);
+        padding-block-start: calc(var(--card-padding-block) / 2);
+        position: relative;
+
+        &:before {
+          border-block-start: 1px dashed var(--card-color);
+          content: "";
+          inset-block-start: 0;
+          inset-inline: calc(-1 * var(--card-padding-inline));
+          opacity: 0.25;
+          position: absolute;
+        }
       }
+
+      &:not(:has(.reaction)) {
+        align-self: flex-end;
+        inset-block-end: var(--card-padding-block);
+        inset-inline-end: var(--card-padding-inline);
+        margin-inline-start: auto;
+        position: static;
+      }
+    }
+
+    .reaction__popup {
+      inline-size: max-content;
+    }
+
+    @media (max-width: 639px) {
+      display: flex;
+      flex-basis: 100%;
+      justify-content: flex-end;
+      order: 1;
 
       .reactions:not(:has(.reaction)) {
         position: static;
       }
+    }
 
-      /* When zoom button exists, it has auto margin from utility class.
+    /* Make the reactions flow naturally in the footer flex layout instead of
+       using absolute positioning. Use order to place reactions last. */
+    .card__footer {
+      /* When bg image zoom button exists, it has auto margin from utility class.
          Remove auto margin from reactions so they cluster together. */
-      &:has(> .flex-item-justify-end) .card__reactions {
+      &:has(> .card__zoom-bg-btn) .card__reactions {
         margin-inline-start: 0;
       }
 
-      > .flex-item-justify-end {
+      > .card__zoom-bg-btn {
         margin-block-start: -0.25rem;
       }
+    }
+
+    .card__zoom-bg-btn {
+      margin-inline-start: auto;
     }
 
     .bubble {

@@ -25,9 +25,7 @@
 
         <footer class="card__footer full-width flex align-start gap">
           <%= render "cards/display/perma/meta", card: card %>
-          <div class="card__reactions">
-            <%= render "reactions/reactions", reactable: card %>
-          </div>
+          <%= render "reactions/reactions", reactable: card %>
           <%= render "cards/display/perma/background", card: card %>
         </footer>
       <% end %>

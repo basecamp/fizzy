@@ -537,11 +537,14 @@
     font-size: clamp(0.6rem, 0.85cqi, 100px);
 
     .card__counts {
+      --gap: 0.5ch;
+
       align-items: flex-end;
       display: flex;
       flex-shrink: 0;
-      gap: 1ch;
+      gap: calc(2 * var(--gap));
       margin-inline: auto calc(var(--card-padding-inline) * -0.5);
+      padding-inline-start: var(--gap);
     }
 
     .card__boosts,
@@ -552,8 +555,7 @@
       display: flex;
       flex-shrink: 0;
       font-weight: 600;
-      gap: 0.5ch;
-      min-width: 2ch;
+      gap: var(--gap);
 
       img {
         block-size: var(--icon-size);
