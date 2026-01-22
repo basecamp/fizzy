@@ -1,4 +1,5 @@
 class DevicesController < ApplicationController
+  disallow_account_scope
   before_action :set_device, only: :destroy
 
   def index
@@ -13,7 +14,7 @@ class DevicesController < ApplicationController
   def destroy
     @device.destroy
     respond_to do |format|
-      format.html { redirect_to devices_path, notice: "Device removed" }
+      format.html { redirect_to saas.devices_path, notice: "Device removed" }
       format.json { head :no_content }
     end
   end
