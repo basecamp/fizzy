@@ -119,6 +119,29 @@
       }
     }
 
+    /* Make the reactions flow naturally in the footer flex layout instead of
+       using absolute positioning. Use order to place reactions last. */
+    .card__footer {
+      .card__reactions {
+        margin-inline-start: auto;
+        order: 1;
+      }
+
+      .reactions:not(:has(.reaction)) {
+        position: static;
+      }
+
+      /* When zoom button exists, it has auto margin from utility class.
+         Remove auto margin from reactions so they cluster together. */
+      &:has(> .flex-item-justify-end) .card__reactions {
+        margin-inline-start: 0;
+      }
+
+      > .flex-item-justify-end {
+        margin-block-start: -0.25rem;
+      }
+    }
+
     .bubble {
       --bubble-number-max: 42px;
       --bubble-size: 6rem;
