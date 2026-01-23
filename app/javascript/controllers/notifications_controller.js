@@ -55,8 +55,9 @@ export default class extends Controller {
     return navigator.serviceWorker.getRegistration("/service-worker.js", { scope: "/" })
   }
 
-  #registerServiceWorker() {
-    return navigator.serviceWorker.register("/service-worker.js", { scope: "/" })
+  async #registerServiceWorker() {
+    await navigator.serviceWorker.register("/service-worker.js", { scope: "/" })
+    return navigator.serviceWorker.ready
   }
 
   async #subscribe(registration) {
