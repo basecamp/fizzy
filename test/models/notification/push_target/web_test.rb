@@ -77,5 +77,4 @@ class Notification::PushTarget::WebTest < ActiveSupport::TestCase
 
     Notification::PushTarget::Web.new(notification).process
   end
-
 end
