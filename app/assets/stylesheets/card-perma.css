@@ -200,7 +200,7 @@
       }
     }
 
-    .reaction__popup {
+    .reaction__popup.popup {
       inline-size: max-content;
     }
 
