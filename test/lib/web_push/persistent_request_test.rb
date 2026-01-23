@@ -12,7 +12,7 @@ class WebPush::PersistentRequestTest < ActiveSupport::TestCase
     notification = WebPush::Notification.new(
       title: "Test",
       body: "Test notification",
-      path: "/test",
+      url: "/test",
       badge: 0,
       endpoint: ENDPOINT,
       endpoint_ip: PUBLIC_TEST_IP,
