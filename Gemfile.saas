@@ -11,7 +11,7 @@ gem "console1984", bc: "console1984"
 gem "audits1984", bc: "audits1984"
 
 # Native push notifications (iOS/Android)
-gem "action_push_native", github: "rails/action_push_native", branch: "add-abstract-record"
+gem "action_push_native"
 
 # Telemetry
 gem "rails_structured_logging", bc: "rails-structured-logging"
