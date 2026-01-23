@@ -3,22 +3,15 @@ class Notification::PushTarget
 
   delegate :card, to: :notification
 
+  def self.process(notification)
+    new(notification).process
+  end
+
   def initialize(notification)
     @notification = notification
   end
 
-  def push
-    return unless should_push?
-
-    perform_push
+  def process
+    raise NotImplementedError
   end
-
-  private
-    def should_push?
-      notification.pushable?
-    end
-
-    def perform_push
-      raise NotImplementedError
-    end
 end

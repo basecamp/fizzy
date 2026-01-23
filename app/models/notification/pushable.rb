@@ -23,13 +23,13 @@ module Notification::Pushable
   end
 
   def push_later
-    self.class.push_targets.each do |target|
-      target.push_later(self)
-    end
+    Notification::PushJob.perform_later(self)
   end
 
-  def pushable?
-    !creator.system? && user.active? && account.active?
+  def push
+    return unless pushable?
+
+    self.class.push_targets.each { |target| push_to(target) }
   end
 
   def payload
@@ -37,6 +37,14 @@ module Notification::Pushable
   end
 
   private
+    def pushable?
+      !creator.system? && user.active? && account.active?
+    end
+
+    def push_to(target)
+      target.process(self)
+    end
+
     def payload_type
       source_type.presence_in(%w[ Event Mention ]) || "Default"
     end

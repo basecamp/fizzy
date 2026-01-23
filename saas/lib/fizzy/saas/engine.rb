@@ -9,6 +9,11 @@ module Fizzy
       # moved from config/initializers/queenbee.rb
       Queenbee.host_app = Fizzy
 
+      # Configure ActionPushNative to use the saas database
+      ActiveSupport.on_load(:action_push_native_record) do
+        connects_to database: { writing: :saas, reading: :saas }
+      end
+
       initializer "fizzy_saas.content_security_policy", before: :load_config_initializers do |app|
         app.config.x.content_security_policy.form_action = "https://checkout.stripe.com https://billing.stripe.com"
       end
@@ -37,8 +42,6 @@ module Fizzy
           namespace :stripe do
             resource :webhooks, only: :create
           end
-
-          resources :devices, only: [ :index, :create, :destroy ]
         end
       end
 

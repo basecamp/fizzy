@@ -10,39 +10,26 @@ class Notification::PushTarget::NativeTest < ActiveSupport::TestCase
     @user.push_subscriptions.delete_all
   end
 
-  test "notification_category returns assignment for card_assigned" do
+  test "payload category returns assignment for card_assigned" do
     notification = notifications(:logo_assignment_kevin)
-    @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
 
-    push = Notification::PushTarget::Native.new(notification)
-
-    assert_equal "assignment", push.send(:notification_category)
+    assert_equal "assignment", notification.payload.category
   end
 
-  test "notification_category returns comment for comment_created" do
+  test "payload category returns comment for comment_created" do
     notification = notifications(:layout_commented_kevin)
-    @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
 
-    push = Notification::PushTarget::Native.new(notification)
-
-    assert_equal "comment", push.send(:notification_category)
+    assert_equal "comment", notification.payload.category
   end
 
-  test "notification_category returns mention for mentions" do
+  test "payload category returns mention for mentions" do
     notification = notifications(:logo_card_david_mention_by_jz)
-    notification.user.identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
 
-    push = Notification::PushTarget::Native.new(notification)
-
-    assert_equal "mention", push.send(:notification_category)
+    assert_equal "mention", notification.payload.category
   end
 
-  test "notification_category returns card for other card events" do
-    @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
-
-    push = Notification::PushTarget::Native.new(@notification)
-
-    assert_equal "card", push.send(:notification_category)
+  test "payload category returns card for other card events" do
+    assert_equal "card", @notification.payload.category
   end
 
 
@@ -51,7 +38,7 @@ class Notification::PushTarget::NativeTest < ActiveSupport::TestCase
     @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
 
     assert_native_push_delivery(count: 1) do
-      Notification::PushTarget::Native.new(@notification).push
+      Notification::PushTarget::Native.new(@notification).process
     end
   end
 
@@ -59,17 +46,7 @@ class Notification::PushTarget::NativeTest < ActiveSupport::TestCase
     @identity.devices.delete_all
 
     assert_no_native_push_delivery do
-      Notification::PushTarget::Native.new(@notification).push
-    end
-  end
-
-  test "does not push when creator is system user" do
-    stub_push_services
-    @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
-    @notification.update!(creator: users(:system))
-
-    assert_no_native_push_delivery do
-      Notification::PushTarget::Native.new(@notification).push
+      Notification::PushTarget::Native.new(@notification).process
     end
   end
 
@@ -80,7 +57,7 @@ class Notification::PushTarget::NativeTest < ActiveSupport::TestCase
     @identity.devices.create!(token: "token2", platform: "google", name: "Pixel")
 
     assert_native_push_delivery(count: 2) do
-      Notification::PushTarget::Native.new(@notification).push
+      Notification::PushTarget::Native.new(@notification).process
     end
   end
 
@@ -212,9 +189,4 @@ class Notification::PushTarget::NativeTest < ActiveSupport::TestCase
     assert_equal @notification.creator.name, native.data[:creator_name]
   end
 
-  test "push_later enqueues Notification::NativePushJob" do
-    assert_enqueued_with(job: Notification::NativePushJob, args: [ @notification ]) do
-      Notification::PushTarget::Native.push_later(@notification)
-    end
-  end
 end
