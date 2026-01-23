@@ -161,6 +161,8 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_equal card.title, @response.parsed_body["title"]
     assert_equal card.closed?, @response.parsed_body["closed"]
     assert_equal 2, @response.parsed_body["steps"].size
+    assert_equal card_comments_url(card), @response.parsed_body["comments_url"]
+    assert_equal card_reactions_url(card), @response.parsed_body["reactions_url"]
   end
 
   test "create as JSON" do

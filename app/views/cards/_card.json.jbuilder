@@ -20,4 +20,5 @@ json.cache! card do
   json.has_more_assignees card.assignees.size > 5
 
   json.comments_url card_comments_url(card)
+  json.reactions_url card_reactions_url(card)
 end
