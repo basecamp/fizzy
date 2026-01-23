@@ -20,6 +20,9 @@ export default class extends Controller {
 
         if (registration && subscription) {
           this.element.classList.add(this.enabledClass)
+        } else {
+          this.subscribeButtonTarget.hidden = false
+          this.explainerTarget.hidden = true
         }
         break
     }
@@ -54,8 +57,9 @@ export default class extends Controller {
     return navigator.serviceWorker.getRegistration("/service-worker.js", { scope: "/" })
   }
 
-  #registerServiceWorker() {
-    return navigator.serviceWorker.register("/service-worker.js", { scope: "/" })
+  async #registerServiceWorker() {
+    await navigator.serviceWorker.register("/service-worker.js", { scope: "/" })
+    return navigator.serviceWorker.ready
   }
 
   async #subscribe(registration) {

@@ -1,6 +1,8 @@
 Fizzy::Saas::Engine.routes.draw do
   Queenbee.routes(self)
 
+  resources :devices, only: [ :index, :create, :destroy ]
+
   namespace :admin do
     mount Audits1984::Engine, at: "/console"
     get "stats", to: "stats#show"
