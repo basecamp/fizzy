@@ -9,6 +9,8 @@ export default class extends Controller {
   async connect() {
     if (!this.#allowed) return
 
+    this.#listenForSubscriptionChanges()
+
     switch(Notification.permission) {
       case "default":
         this.subscribeButtonTarget.hidden = false
@@ -20,8 +22,17 @@ export default class extends Controller {
 
         if (registration && subscription) {
           this.element.classList.add(this.enabledClass)
+        } else if (registration) {
+          this.subscribeButtonTarget.hidden = false
+          this.element.classList.remove(this.enabledClass)
         }
         break
+    }
+  }
+
+  disconnect() {
+    if (this.messageHandler) {
+      navigator.serviceWorker?.removeEventListener("message", this.messageHandler)
     }
   }
 
@@ -48,6 +59,24 @@ export default class extends Controller {
 
   get #allowed() {
     return navigator.serviceWorker && window.Notification
+  }
+
+  #listenForSubscriptionChanges() {
+    this.messageHandler = (event) => {
+      if (event.data?.type === "pushsubscriptionchange") {
+        this.#syncRenewedSubscription(event.data.subscription)
+      }
+    }
+    navigator.serviceWorker.addEventListener("message", this.messageHandler)
+  }
+
+  async #syncRenewedSubscription({ endpoint, p256dh_key, auth_key }) {
+    const body = JSON.stringify({ push_subscription: { endpoint, p256dh_key, auth_key } })
+    const response = await post(this.subscriptionsUrlValue, { body, responseKind: "turbo-stream" })
+    if (response.ok) {
+      this.element.classList.add(this.enabledClass)
+      this.subscribeButtonTarget.hidden = true
+    }
   }
 
   async #getServiceWorkerRegistration() {

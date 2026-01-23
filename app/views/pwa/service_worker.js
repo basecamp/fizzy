@@ -39,3 +39,34 @@ async function openURL(url) {
     await self.clients.openWindow(url)
   }
 }
+
+self.addEventListener("pushsubscriptionchange", (event) => {
+  event.waitUntil(resubscribe(event))
+})
+
+async function resubscribe(event) {
+  const oldSubscription = event.oldSubscription
+  const applicationServerKey = oldSubscription?.options?.applicationServerKey
+
+  if (!applicationServerKey) return
+
+  const newSubscription = await self.registration.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: applicationServerKey
+  })
+
+  await syncSubscriptionWithServer(newSubscription)
+}
+
+async function syncSubscriptionWithServer(subscription) {
+  const { endpoint, keys: { p256dh, auth } } = subscription.toJSON()
+  const clients = await self.clients.matchAll({ type: "window" })
+  const client = clients[0]
+
+  if (client) {
+    client.postMessage({
+      type: "pushsubscriptionchange",
+      subscription: { endpoint, p256dh_key: p256dh, auth_key: auth }
+    })
+  }
+}
