@@ -189,4 +189,20 @@ class Notification::PushTarget::NativeTest < ActiveSupport::TestCase
     assert_equal @notification.creator.name, native.data[:creator_name]
   end
 
+  private
+    def assert_native_push_delivery(count: 1, &block)
+      assert_enqueued_jobs count, only: ApplicationPushNotificationJob do
+        perform_enqueued_jobs only: Notification::PushJob, &block
+      end
+    end
+
+    def assert_no_native_push_delivery(&block)
+      assert_enqueued_jobs 0, only: ApplicationPushNotificationJob do
+        perform_enqueued_jobs only: Notification::PushJob, &block
+      end
+    end
+
+    def stub_push_services
+      ActionPushNative.stubs(:service_for).returns(stub(push: true))
+    end
 end
