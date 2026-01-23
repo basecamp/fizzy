@@ -20,6 +20,9 @@ export default class extends Controller {
 
         if (registration && subscription) {
           this.element.classList.add(this.enabledClass)
+        } else {
+          this.subscribeButtonTarget.hidden = false
+          this.explainerTarget.hidden = true
         }
         break
     }
