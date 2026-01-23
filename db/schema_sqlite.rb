@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2025_12_24_092315) do
+ActiveRecord::Schema[8.2].define(version: 2026_01_21_155752) do
   create_table "accesses", id: :uuid, force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -412,13 +412,14 @@ ActiveRecord::Schema[8.2].define(version: 2025_12_24_092315) do
 
   create_table "reactions", id: :uuid, force: :cascade do |t|
     t.uuid "account_id", null: false
-    t.uuid "comment_id", null: false
     t.string "content", limit: 16, null: false
     t.datetime "created_at", null: false
+    t.uuid "reactable_id", null: false
+    t.string "reactable_type", limit: 255, null: false
     t.uuid "reacter_id", null: false
     t.datetime "updated_at", null: false
     t.index ["account_id"], name: "index_reactions_on_account_id"
-    t.index ["comment_id"], name: "index_reactions_on_comment_id"
+    t.index ["reactable_type", "reactable_id"], name: "index_reactions_on_reactable_type_and_reactable_id"
     t.index ["reacter_id"], name: "index_reactions_on_reacter_id"
   end
 

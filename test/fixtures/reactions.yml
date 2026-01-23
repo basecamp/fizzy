@@ -2,12 +2,12 @@ kevin:
   id: <%= ActiveRecord::FixtureSet.identify("kevin_reaction", :uuid) %>
   account: 37s_uuid
   content: "👍"
-  comment: logo_agreement_jz_uuid
+  reactable: logo_agreement_jz_uuid (Comment)
   reacter: kevin_uuid
 
 david:
   id: <%= ActiveRecord::FixtureSet.identify("david_reaction", :uuid) %>
   account: 37s_uuid
   content: "👍"
-  comment: logo_agreement_jz_uuid
+  reactable: logo_agreement_jz_uuid (Comment)
   reacter: david_uuid

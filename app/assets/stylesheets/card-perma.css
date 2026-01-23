@@ -25,7 +25,7 @@
     position: relative;
 
     &:has(dialog[open]) {
-      z-index: 2;
+      z-index: 3;
     }
 
     &:has(.card-perma__star-input:checked) {
