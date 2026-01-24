@@ -14,7 +14,6 @@ def op_read(field)
 end
 
 apns_key_id = op_read("APNS_KEY_ID")
-apns_team_id = op_read("APNS_TEAM_ID")
 apns_encryption_key_b64 = op_read("APNS_ENCRYPTION_KEY_B64")
 fcm_encryption_key_b64 = op_read("FCM_ENCRYPTION_KEY_B64")
 
@@ -38,7 +37,6 @@ puts %Q(export ENABLE_NATIVE_PUSH="true")
 warn ""
 warn "Push notification credentials loaded for development"
 warn "  APNs Key ID: #{apns_key_id}"
-warn "  APNs Team ID: #{apns_team_id}"
 warn "  APNs: #{apns_encryption_key_b64.empty? ? "not configured" : "configured"}"
 warn "  FCM: #{fcm_encryption_key_b64.empty? ? "not configured" : "configured"}"
 warn "  Native push: enabled"
