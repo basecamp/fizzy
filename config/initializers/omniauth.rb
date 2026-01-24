@@ -15,3 +15,7 @@ end
 
 OmniAuth.config.allowed_request_methods = [ :get, :post ]
 OmniAuth.config.silence_get_warning = true
+OmniAuth.config.on_failure = Proc.new { |env|
+  Rails.logger.error "[OIDC] OmniAuth failure: #{env['omniauth.error']&.message || 'unknown'} (#{env['omniauth.error.type']})"
+  Rack::Response.new([ "302 Moved" ], 302, "Location" => "/auth/failure?message=#{env['omniauth.error.type']}").finish
+}

@@ -4,8 +4,7 @@
   <h1 class="txt-x-large font-weight-black margin-block-end">Get into Fizzy</h1>
 
   <% if oidc_enabled? %>
-    <%= button_to "Sign in with OIDC", "/auth/oidc",
-        method: :post,
+    <%= link_to "Sign in with OIDC", "/auth/oidc",
         data: { turbo: false },
         class: "btn btn--primary center txt-medium margin-block-end" %>
 
