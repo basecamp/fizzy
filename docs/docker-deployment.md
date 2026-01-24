@@ -148,7 +148,10 @@ OIDC with a single provider is supported when the following variables are set.
 - `OIDC_CLIENT_ID`
 - `OIDC_CLIENT_SECRET`
 
-If you'd like to hide the magic-link login flow, you can set `OIDC_REQUIRED=true`.
+Optional variables
+
+- `OIDC_RATE_LIMIT` (defaults to 10; set to configure allowed OIDC login attempts within 15 minutes)
+- `OIDC_REQUIRED` (defaults to `false`; set to `true` to hide magic link login)
 
 #### Multi-tenant mode
 
