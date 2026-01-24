@@ -46,6 +46,16 @@ This will ask for your 1password authorization to read and set the environment v
 * [Staging](https://dashboard.stripe.com/acct_1SdTbuRvb8txnPBR/test/dashboard)
 * [Production](https://dashboard.stripe.com/acct_1SNy97RwChFE4it8/dashboard)
 
+## Working with Push Notifications
+
+To test native push notifications (APNs and FCM) locally, start the dev server with the `--push` flag:
+
+```sh
+bin/dev --push
+```
+
+This will ask for your 1Password authorization to fetch the push credentials. Note that this loads the **production** APNs and FCM credentials into your environment.
+
 ## Environments
 
 Fizzy is deployed with [Kamal](https://kamal-deploy.org/). You'll need to have the 1Password CLI set up in order to access the secrets that are used when deploying. Provided you have that, it should be as simple as `bin/kamal deploy` to the correct environment.
