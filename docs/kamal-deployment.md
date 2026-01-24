@@ -121,4 +121,5 @@ To enable OAuth2 login, set:
 
 Optional:
 
+- `OIDC_RATE_LIMIT` (defaults to 10; set to configure allowed OIDC login attempts within 15 minutes)
 - `OIDC_REQUIRED` (defaults to `false`; set to `true` to hide magic link login)
