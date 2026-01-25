@@ -52,6 +52,9 @@ class Account::Subscription < SaasRecord
     if stripe_customer_id && (email = owner_email)
       Stripe::Customer.update(stripe_customer_id, email: email)
     end
+  rescue Stripe::InvalidRequestError => e
+    # Customer already deleted in Stripe - treat as success
+    Rails.logger.warn "Stripe customer #{stripe_customer_id} not found during email sync: #{e.message}"
   end
 
   private
