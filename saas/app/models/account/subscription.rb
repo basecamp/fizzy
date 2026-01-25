@@ -47,4 +47,18 @@ class Account::Subscription < SaasRecord
     # Subscription already deleted/canceled in Stripe - treat as success
     Rails.logger.warn "Stripe subscription #{stripe_subscription_id} not found during cancel: #{e.message}"
   end
+
+  def sync_customer_email_to_stripe
+    if stripe_customer_id && (email = owner_email)
+      Stripe::Customer.update(stripe_customer_id, email: email)
+    end
+  end
+
+  private
+    # Account owner email for Stripe customer record. Returns nil when:
+    # - No owner exists (ownership being transferred, account in limbo)
+    # - Owner has no identity (deactivated user)
+    def owner_email
+      account.users.owner.first&.identity&.email_address
+    end
 end

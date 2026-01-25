@@ -31,6 +31,10 @@ module Account::Billing
     reload_billing_waiver
   end
 
+  def owner_email_changed
+    Account::SyncStripeCustomerEmailJob.perform_later(subscription) if subscription
+  end
+
   private
     def active_subscription
       if comped?

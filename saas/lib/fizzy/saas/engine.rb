@@ -133,6 +133,7 @@ module Fizzy
 
       config.to_prepare do
         ::Account.include Account::Billing, Account::Limited
+        ::User.include User::NotifiesAccountOfEmailChange
         ::Signup.prepend Fizzy::Saas::Signup
         CardsController.include(Card::LimitedCreation)
         Cards::PublishesController.include(Card::LimitedPublishing)
