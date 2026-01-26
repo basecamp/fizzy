@@ -31,6 +31,10 @@ class Notification::DefaultPayload
     false
   end
 
+  def avatar_url
+    Rails.application.routes.url_helpers.user_avatar_url(notification.creator, **url_options)
+  end
+
   private
     def card_url(card)
       Rails.application.routes.url_helpers.card_url(card, **url_options)
