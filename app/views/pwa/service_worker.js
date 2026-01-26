@@ -1,14 +1,3 @@
-self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET') return
-
-  if (event.request.destination === 'document') {
-    event.respondWith(
-      fetch(event.request, { cache: 'no-cache' })
-        .catch(() => caches.match(event.request))
-    )
-  }
-})
-
 self.addEventListener("push", (event) => {
   const data = event.data.json()
   event.waitUntil(Promise.all([ showNotification(data), updateBadgeCount(data.options) ]))
