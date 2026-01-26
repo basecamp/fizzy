@@ -31,7 +31,7 @@ class Notification::PushTarget::Native < Notification::PushTarget
           body: payload.body,
           url: payload.url,
           account_id: notification.account.external_account_id,
-          avatar_url: creator_avatar_url,
+          avatar_url: payload.avatar_url,
           card_id: card&.id,
           card_title: card&.title,
           creator_name: notification.creator.name,
@@ -49,11 +49,5 @@ class Notification::PushTarget::Native < Notification::PushTarget
 
     def interruption_level
       payload.high_priority? ? "time-sensitive" : "active"
-    end
-
-    def creator_avatar_url
-      if notification.creator.respond_to?(:avatar) && notification.creator.avatar.attached?
-        Rails.application.routes.url_helpers.url_for(notification.creator.avatar)
-      end
     end
 end
