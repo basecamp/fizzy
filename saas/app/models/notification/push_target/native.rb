@@ -36,6 +36,7 @@ class Notification::PushTarget::Native < Notification::PushTarget
           card_title: card&.title,
           creator_id: notification.creator.id,
           creator_name: notification.creator.name,
+          creator_familiar_name: notification.creator.familiar_name,
           creator_initials: notification.creator.initials,
           creator_avatar_color: notification.creator.avatar_background_color,
           category: payload.category
