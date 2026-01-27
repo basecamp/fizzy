@@ -41,7 +41,7 @@
       <% if Current.user == @user %>
         <hr class="separator--horizontal full-width flex-item-grow margin-block-start-double" style="--border-color: var(--color-ink-light);" aria-hidden="true">
 
-        <%= button_to session_path(script_name: nil), method: :delete, class: "btn txt-x-small center", data: { turbo: false } do %>
+        <%= button_to session_path(script_name: nil), method: :delete, class: "btn txt-x-small center", form: { data: { turbo: false, controller: "logout", action: "submit->logout#clearCache" } } do %>
           <span>Sign out of Fizzy on this device</span>
         <% end %>
       <% end %>
