@@ -118,6 +118,22 @@ __Error responses:__
 | `401 Unauthorized` | Invalid `pending_authentication_token` or `code` |
 | `429 Too Many Requests` | Rate limit exceeded |
 
+
+#### Delete server-side session (_log out_)
+
+To log out and destroy the server-side session:
+
+```bash
+curl -X DELETE \
+  -H "Accept: application/json" \
+  -H "Cookie: session_token=eyJfcmFpbHMi..." \
+  https://app.fizzy.do/session
+```
+
+__Response:__
+
+Returns `204 No Content` on success.
+
 ## Caching
 
 Most endpoints return [ETag](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/ETag) and [Cache-Control](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cache-Control) headers. You can use these to avoid re-downloading unchanged data.

@@ -22,6 +22,26 @@ class ApiTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "logout with user credentials" do
+    identity = identities(:david)
+
+    untenanted do
+      post session_path(format: :json), params: { email_address: identity.email_address }
+      magic_link = MagicLink.last
+
+      assert_difference -> { identity.sessions.count }, +1 do
+        post session_magic_link_path(format: :json), params: { code: magic_link.code, pending_authentication_token: @response.parsed_body["pending_authentication_token"] }
+      end
+      assert cookies[:session_token].present?
+
+      assert_difference -> { identity.sessions.count }, -1 do
+        delete session_path(format: :json)
+      end
+      assert_response :no_content
+      assert_not cookies[:session_token].present?
+    end
+  end
+
   test "authenticate with valid access token" do
     get boards_path(format: :json), env: @davids_bearer_token
     assert_response :success
