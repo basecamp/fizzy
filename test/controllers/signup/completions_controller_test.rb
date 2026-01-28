@@ -55,4 +55,30 @@ class Signup::CompletionsControllerTest < ActionDispatch::IntegrationTest
       assert_select "li", text: "Full name can't be blank"
     end
   end
+
+  test "create via JSON" do
+    untenanted do
+      post signup_completion_path(format: :json), params: {
+        signup: {
+          full_name: @signup.full_name
+        }
+      }
+    end
+
+    assert_response :created
+    assert @response.parsed_body["account_id"].present?
+  end
+
+  test "create via JSON with blank name" do
+    untenanted do
+      post signup_completion_path(format: :json), params: {
+        signup: {
+          full_name: ""
+        }
+      }
+    end
+
+    assert_response :unprocessable_entity
+    assert_includes @response.parsed_body["errors"], "Full name can't be blank"
+  end
 end

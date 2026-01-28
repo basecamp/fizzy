@@ -80,7 +80,7 @@ class Sessions::MagicLinksControllerTest < ActionDispatch::IntegrationTest
     assert MagicLink.exists?(expired_link.id), "Expired magic link should not be consumed"
   end
 
-  test "create via JSON" do
+  test "create via JSON for sign in" do
     identity = identities(:david)
     magic_link = identity.send_magic_link
 
@@ -89,6 +89,20 @@ class Sessions::MagicLinksControllerTest < ActionDispatch::IntegrationTest
       post session_magic_link_path(format: :json), params: { code: magic_link.code }
       assert_response :success
       assert @response.parsed_body["session_token"].present?
+      assert_equal false, @response.parsed_body["requires_signup_completion"]
+    end
+  end
+
+  test "create via JSON for sign up" do
+    identity = identities(:david)
+    magic_link = identity.send_magic_link(for: :sign_up)
+
+    untenanted do
+      post session_path(format: :json), params: { email_address: identity.email_address }
+      post session_magic_link_path(format: :json), params: { code: magic_link.code }
+      assert_response :success
+      assert @response.parsed_body["session_token"].present?
+      assert_equal true, @response.parsed_body["requires_signup_completion"]
     end
   end
 
