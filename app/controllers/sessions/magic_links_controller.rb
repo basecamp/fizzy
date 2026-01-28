@@ -46,7 +46,7 @@ class Sessions::MagicLinksController < ApplicationController
 
       respond_to do |format|
         format.html { redirect_to after_sign_in_url(magic_link) }
-        format.json { render json: { session_token: session_token } }
+        format.json { render json: { session_token: session_token, requires_signup_completion: requires_signup_completion?(magic_link) } }
       end
     end
 
@@ -68,7 +68,7 @@ class Sessions::MagicLinksController < ApplicationController
     end
 
     def after_sign_in_url(magic_link)
-      if magic_link.for_sign_up?
+      if requires_signup_completion?(magic_link)
         new_signup_completion_path
       else
         after_authentication_url
@@ -81,5 +81,9 @@ class Sessions::MagicLinksController < ApplicationController
         format.html { redirect_to session_magic_link_path, alert: rate_limit_exceeded_message }
         format.json { render json: { message: rate_limit_exceeded_message }, status: :too_many_requests }
       end
+    end
+
+    def requires_signup_completion?(magic_link)
+      magic_link.for_sign_up?
     end
 end
