@@ -144,4 +144,50 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :no_content
   end
+
+  test "index as JSON avoids N+1 queries on identity" do
+    sign_in_as :kevin
+
+    # Warm up the cache and establish baseline
+    get users_path, as: :json
+    assert_response :success
+
+    # Count queries for the actual test
+    queries = track_sql_queries do
+      get users_path, as: :json
+    end
+
+    # Filter relevant queries (SELECT on users and identities for the index action)
+    # Exclude the current user lookup query (happens during authentication)
+    index_user_queries = queries.select { |q|
+      q =~ /SELECT.*FROM [`"]users[`"]/ &&
+      q =~ /ORDER BY lower\(name\)/ &&  # The index query has ORDER BY lower(name)
+      q !~ /COUNT/
+    }
+    # The includes(:identity) generates a query with IN clause for multiple identities
+    index_identity_queries = queries.select { |q|
+      q =~ /SELECT.*FROM [`"]identities[`"]/ &&
+      q =~ /WHERE.*IN \(/  # The includes query uses IN clause
+    }
+
+    # Should have exactly 1 query for users and 1 query for identities (via includes)
+    assert_equal 1, index_user_queries.size, "Expected 1 user index query, got #{index_user_queries.size}: #{index_user_queries.inspect}"
+    assert_equal 1, index_identity_queries.size, "Expected 1 identity query via includes, got #{index_identity_queries.size}: #{index_identity_queries.inspect}"
+
+    # Verify response contains email addresses (which require identity association)
+    json = @response.parsed_body
+    assert json.first["email_address"].present?, "Email address should be present in response"
+  end
+
+  private
+    def track_sql_queries(&block)
+      queries = []
+      subscriber = ActiveSupport::Notifications.subscribe("sql.active_record") do |_, _, _, _, payload|
+        queries << payload[:sql] unless payload[:name] == "SCHEMA"
+      end
+      yield
+      queries
+    ensure
+      ActiveSupport::Notifications.unsubscribe(subscriber) if subscriber
+    end
 end
