@@ -1,59 +1,60 @@
 importScripts("<%= javascript_url("turbo-offline-umd.min") %>")
 
-<% if hotwire_native_app? %>
-  TurboOffline.addRule({
-    match: /\/assets\/.+[-\.][0-9a-f]+\.(js|css|svg|png|jpg|webp|woff2?|ico)$/,
-    handler: TurboOffline.handlers.cacheFirst({
-      cacheName: "assets",
-      maxAge: 60 * 60 * 24 * 7
-    })
+// Documents - top-level navigation requests only
+// We need `cache: "no-cache"` here to work around
+// an annoying Safari PWA bug that predates offline mode
+TurboOffline.addRule({
+  match: (request) => request.destination === "document",
+  handler: TurboOffline.handlers.networkFirst({
+    cacheName: "main",
+    maxAge: 60 * 60 * 24 * 3,
+    networkTimeout: 3,
+    fetchOptions: { cache: "no-cache" }
   })
+})
 
-  TurboOffline.addRule({
-    match: /\/(boards|cards|users)\//,
-    except: /\/(edit|pin|watch|new)$/,
-    handler: TurboOffline.handlers.networkFirst({
-      cacheName: "cards",
-      maxAge: 60 * 60 * 24 * 3,
-      networkTimeout: 2
-    })
+TurboOffline.addRule({
+  match: /\/assets\/.+[-\.][0-9a-f]+\.(js|css|svg|png|jpg|webp|woff2?|ico)$/,
+  handler: TurboOffline.handlers.cacheFirst({
+    cacheName: "assets",
+    maxAge: 60 * 60 * 24 * 7
   })
+})
 
-  TurboOffline.addRule({
-    match: /\/rails\/active_storage\//,
-    handler: TurboOffline.handlers.networkFirst({
-      cacheName: "storage",
-      maxAge: 60 * 60 * 24 * 7,
-      networkTimeout: 2
-    })
+TurboOffline.addRule({
+  match: /\/(boards|cards|users)\//,
+  except: /\/(edit|pin|watch|new)$/,
+  handler: TurboOffline.handlers.networkFirst({
+    cacheName: "main",
+    maxAge: 60 * 60 * 24 * 3,
+    networkTimeout: 2
   })
+})
 
-  // Everything else
-  TurboOffline.addRule({
-    handler: TurboOffline.handlers.networkFirst({
-      cacheName: "misc",
-      maxAge: 60 * 60 * 24,
-      networkTimeout: 3
-    })
+TurboOffline.addRule({
+  match: /\/rails\/active_storage\//,
+  handler: TurboOffline.handlers.networkFirst({
+    cacheName: "storage",
+    maxAge: 60 * 60 * 24 * 7,
+    networkTimeout: 2
   })
+})
 
-  TurboOffline.start()
-<% else %>
-  self.addEventListener("fetch", (event) => {
-    if (event.request.method !== "GET") return
-
-    if (event.request.destination === "document") {
-      event.respondWith(
-        fetch(event.request, { cache: "no-cache" })
-          .catch(() => caches.match(event.request))
-      )
-    }
+// Everything else
+TurboOffline.addRule({
+  handler: TurboOffline.handlers.networkFirst({
+    cacheName: "main",
+    maxAge: 60 * 60 * 24,
+    networkTimeout: 3
   })
-<% end %>
+})
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(self.clients.claim())
 })
+
+TurboOffline.start()
+
 
 self.addEventListener("push", (event) => {
   const data = event.data.json()
