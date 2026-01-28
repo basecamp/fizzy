@@ -15,3 +15,5 @@ kevin:
 
 mike:
   email_address: mike@37signals.com
+  oidc_subject: "google-oauth2|mike123"
+  oidc_provider: "oidc"
