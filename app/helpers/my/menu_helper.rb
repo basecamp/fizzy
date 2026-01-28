@@ -19,7 +19,10 @@ module My::MenuHelper
 
   def my_menu_board_item(board)
     my_menu_item("board", board) do
-      link_to(tag.span(board.name, class: "overflow-ellipsis"), board, class: "popup__btn btn")
+      link_to(board, class: "popup__btn btn") do
+        tag.span(board.name, class: "overflow-ellipsis") +
+        board_column_counts_tag(board)
+      end
     end
   end
 
@@ -53,4 +56,28 @@ module My::MenuHelper
       icon_tag(item, class: "popup__icon") + yield
     end
   end
+
+  private
+    def board_column_counts_tag(board)
+      columns = board.columns.sorted
+      maybe_count = board.cards.awaiting_triage.size
+
+      return tag.span if columns.empty? && maybe_count.zero?
+
+      tag.span(class: "board-menu-counts") do
+        counts = []
+        counts << board_count_tag(maybe_count, title: "Maybe?") if maybe_count > 0
+        counts += columns.filter_map do |column|
+          count = column.cards.active.size
+          board_count_tag(count, color: column.color, title: column.name) if count > 0
+        end
+        safe_join(counts)
+      end
+    end
+
+    def board_count_tag(count, color: nil, title: nil)
+      formatted_count = count > 99 ? "99+" : count.to_s
+      style = "--card-color: #{color};" if color
+      tag.span(formatted_count, class: "board-menu-count", style: style, title: title)
+    end
 end
