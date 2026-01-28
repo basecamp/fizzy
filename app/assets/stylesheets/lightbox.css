@@ -3,23 +3,16 @@
     --dialog-duration: 350ms;
     --lightbox-padding: 3vmin;
 
-    align-items: center;
     background-color: transparent;
     block-size: 100dvh;
     border: 0;
-    display: flex;
     inline-size: 100dvw;
     inset: 0;
-    justify-content: center;
     margin: auto;
     max-height: unset;
     max-width: unset;
     overflow: hidden;
-    padding:
-      calc(var(--lightbox-padding) + var(--custom-safe-inset-top))
-      calc(var(--lightbox-padding) + var(--custom-safe-inset-right))
-      calc(var(--lightbox-padding) + var(--custom-safe-inset-bottom))
-      calc(var(--lightbox-padding) + var(--custom-safe-inset-left));
+    padding: var(--lightbox-padding);
     text-align: center;
 
     &::backdrop {
@@ -54,15 +47,12 @@
   .lightbox__actions {
     display: flex;
     gap: 1ch;
-    inset:
-      calc(var(--lightbox-padding) + var(--custom-safe-inset-top))
-      calc(var(--lightbox-padding) + var(--custom-safe-inset-right))
-      auto
-      auto;
+    inset: var(--lightbox-padding) var(--lightbox-padding) auto auto;
     position: absolute;
   }
 
   .lightbox__figure {
+    align-self: stretch;
     animation-fill-mode: forwards;
     animation: slide-down var(--dialog-duration);
     display: flex;
@@ -81,10 +71,6 @@
 
     &:empty {
       display: none;
-    }
-
-    &[tabindex="-1"]:focus-visible {
-      outline: unset;
     }
   }
 
