@@ -200,7 +200,7 @@
   .popup--animated {
     opacity: 0;
     transform: scale(0.2);
-    transform-origin: top left;
+    transform-origin: top left; /* Works as `top center` because popups have `translate: -50%` */
     transition: var(--dialog-duration) allow-discrete;
     transition-property: display, opacity, overlay, transform;
 
