@@ -34,7 +34,7 @@
 
   :is(a, button, input, textarea, .switch, .btn) {
     transition: 100ms ease-out;
-    transition-property: background-color, border-color, box-shadow, filter, outline;
+    transition-property: background-color, border-color, box-shadow, outline;
     touch-action: manipulation;
 
     /* Keyboard navigation */
