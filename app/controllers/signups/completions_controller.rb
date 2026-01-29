@@ -29,7 +29,7 @@ class Signups::CompletionsController < ApplicationController
           redirect_to landing_url(script_name: @signup.account.slug)
         end
 
-        format.json { render json: { account_id: @signup.account.external_account_id }, status: :created }
+        format.json { render json: { account_id: @signup.account.id }, status: :created }
       end
     end
 

@@ -58,24 +58,28 @@ class Signup::CompletionsControllerTest < ActionDispatch::IntegrationTest
 
   test "create via JSON" do
     untenanted do
-      post signup_completion_path(format: :json), params: {
-        signup: {
-          full_name: @signup.full_name
+      assert_difference -> { Account.count }, +1 do
+        post signup_completion_path(format: :json), params: {
+          signup: {
+            full_name: @signup.full_name
+          }
         }
-      }
+      end
     end
 
     assert_response :created
-    assert @response.parsed_body["account_id"].present?
+    assert_equal Account.last.id, @response.parsed_body["account_id"]
   end
 
   test "create via JSON with blank name" do
     untenanted do
-      post signup_completion_path(format: :json), params: {
-        signup: {
-          full_name: ""
+      assert_no_difference -> { Account.count } do
+        post signup_completion_path(format: :json), params: {
+          signup: {
+            full_name: ""
+          }
         }
-      }
+      end
     end
 
     assert_response :unprocessable_entity
