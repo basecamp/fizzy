@@ -14,7 +14,7 @@
     min-inline-size: min(25ch, calc(100vw - (var(--panel-padding))));
     overflow: auto;
     position: absolute;
-    transform: translateX(-50%);
+    translate: -50%;
     z-index: var(--z-popup);
 
     &[open] {
@@ -27,13 +27,13 @@
     &:where(.popup--align-left),
     &.orient-left {
       inset-inline: auto 0;
-      transform: translateX(var(--orient-offset, 0px));
+      translate: var(--orient-offset, 0px);
     }
 
     &:where(.popup--align-right),
     &.orient-right {
       inset-inline: 0 auto;
-      transform: translateX(var(--orient-offset, 0px));
+      translate: var(--orient-offset, 0px);
     }
 
     form {
@@ -199,7 +199,7 @@
 
   .popup--animated {
     opacity: 0;
-    transform: scale(0.2) translateX(-50%);
+    transform: scale(0.2);
     transform-origin: top left;
     transition: var(--dialog-duration) allow-discrete;
     transition-property: display, opacity, overlay, transform;
@@ -214,7 +214,7 @@
 
     &[open] {
       opacity: 1;
-      transform: scale(1) translateX(-50%);
+      transform: scale(1);
 
       &::backdrop {
         opacity: 0.5;
@@ -224,7 +224,7 @@
     @starting-style {
       &[open] {
         opacity: 0;
-        transform: scale(0.2) translateX(-50%);
+        transform: scale(0.2);
       }
 
       &[open]::backdrop {
