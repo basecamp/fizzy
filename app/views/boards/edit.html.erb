@@ -14,7 +14,7 @@
 <% end %>
 
 <section class="settings">
-  <div class="settings__panel settings__panel--users panel shadow center">
+  <div class="settings__panel settings__panel--users panel shadow">
     <%= form_with model: @board, class: "display-contents", data: {
           controller: "form boards-form",
           boards_form_self_removal_prompt_message_value: "Are you sure you want to remove yourself from this board? You won’t be able to get back in unless someone invites you.",
@@ -30,7 +30,7 @@
     <% end %>
   </div>
 
-  <div class="settings__panel panel shadow center">
+  <div class="settings__panel panel shadow">
     <%= render "boards/edit/auto_close", board: @board %>
     <%= render "boards/edit/publication", board: @board %>
     <%= render "boards/edit/delete", board: @board if Current.user.can_administer_board?(@board) %>

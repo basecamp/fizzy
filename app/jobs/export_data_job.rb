@@ -1,4 +1,4 @@
-class ExportAccountDataJob < ApplicationJob
+class ExportDataJob < ApplicationJob
   queue_as :backend
 
   discard_on ActiveJob::DeserializationError

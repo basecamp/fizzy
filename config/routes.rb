@@ -9,6 +9,8 @@ Rails.application.routes.draw do
     resources :exports, only: [ :create, :show ]
   end
 
+  resources :imports, only: %i[ new create show ]
+
   resources :users do
     scope module: :users do
       resource :avatar
@@ -20,6 +22,8 @@ Rails.application.routes.draw do
       resources :email_addresses, param: :token do
         resource :confirmation, module: :email_addresses
       end
+
+      resources :data_exports, only: [ :create, :show ]
     end
   end
 
@@ -167,6 +171,7 @@ Rails.application.routes.draw do
   end
 
   resource :landing
+
 
   namespace :my do
     resource :identity, only: :show

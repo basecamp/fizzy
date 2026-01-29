@@ -9,6 +9,7 @@ class Account < ApplicationRecord
   has_many :tags, dependent: :destroy
   has_many :columns, dependent: :destroy
   has_many :exports, class_name: "Account::Export", dependent: :destroy
+  has_many :imports, class_name: "Account::Import", dependent: :destroy
 
   before_create :assign_external_account_id
   after_create :create_join_code
