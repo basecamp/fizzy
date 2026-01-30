@@ -1,7 +1,34 @@
-@layer components {
-  /* Editor
-  /* ------------------------------------------------------------------------ */
+@import url("lexxy-variables.css") layer(base);
+@import url("lexxy-content.css") layer(base);
+@import url("lexxy-editor.css") layer(base);
 
+@layer components {
   lexxy-editor {
+    --lexxy-border-color: oklch(var(--lch-ink-darkest) / 20%);
+    --lexxy-editor-padding: 0;
+    --lexxy-toolbar-button-size: 2rem;
+    --lexxy-toolbar-gap: 0;
+
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+  }
+
+  lexxy-toolbar {
+    border-color: var(--lexxy-border-color);
+  }
+
+  .lexxy-editor__toolbar-button {
+    background: transparent;
+
+    @media(any-hover: hover) {
+      &:hover {
+        background-color: color-mix(in srgb, transparent, var(--color-ink) 10%);
+      }
+    }
+  }
+
+  .lexxy-editor__content {
+    margin-block-start: 0.5lh;
   }
 }

@@ -229,7 +229,7 @@
     }
 
     lexxy-toolbar {
-      border-block-start: 1px solid var(--color-ink-light);
+      border-block-start: 1px solid var(--lexxy-border-color);
     }
 
     & ~ .btn.btn--reversed {
