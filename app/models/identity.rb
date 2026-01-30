@@ -1,5 +1,5 @@
 class Identity < ApplicationRecord
-  include Joinable, Transferable
+  include Joinable, OidcCompatible, Transferable
 
   has_many :access_tokens, dependent: :destroy
   has_many :magic_links, dependent: :destroy
@@ -12,6 +12,7 @@ class Identity < ApplicationRecord
   before_destroy :deactivate_users, prepend: true
 
   validates :email_address, format: { with: URI::MailTo::EMAIL_REGEXP }
+  validates :oidc_subject, uniqueness: { scope: :oidc_provider }, allow_nil: true
   normalizes :email_address, with: ->(value) { value.strip.downcase.presence }
 
   def self.find_by_permissable_access_token(token, method:)
