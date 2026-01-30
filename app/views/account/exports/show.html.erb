@@ -10,20 +10,18 @@
   </div>
 <% end %>
 
-<div class="panel panel--wide shadow center flex flex-column gap">
-  <h2 class="txt-large margin-none font-weight-black"><%= @page_title %></h2>
+<div class="panel panel--wide shadow center flex flex-column align-center gap">
+  <h2 class="txt-large font-weight-black margin-none"><%= @page_title %></h2>
 
   <% if @export.present? %>
-    <p class="margin-none-block-start">Your export is ready. The download should start automatically.</p>
+    <div>Your export is ready. The download should start automatically.</div>
 
-    <%= link_to rails_blob_path(@export.file, disposition: "attachment"),
+    <%= link_to "Download your data", rails_blob_path(@export.file, disposition: "attachment"),
           id: "download-link",
           class: "btn btn--link",
-          data: { turbo: false, controller: "auto-click" } do %>
-      Download your data
-    <% end %>
+          data: { turbo: false, controller: "auto-click" } %>
   <% else %>
-    <p class="margin-none-block-start">That download link has expired. You’ll need to <%= link_to "request a new export", account_settings_path, class: "txt-lnk" %>.</p>
+    <div>That download link has expired. You’ll need to <%= link_to "request a new export", account_settings_path, class: "txt-link" %>.</div>
   <% end %>
 
 </div>

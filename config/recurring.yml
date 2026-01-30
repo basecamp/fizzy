@@ -25,7 +25,7 @@ production: &production
     command: "MagicLink.cleanup"
     schedule: every 4 hours
   cleanup_exports:
-    command: "Account::Export.cleanup"
+    command: "Export.cleanup"
     schedule: every hour at minute 20
   incineration:
     class: "Account::IncinerateDueJob"

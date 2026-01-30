@@ -34,7 +34,7 @@ gem "platform_agent"
 gem "aws-sdk-s3", require: false
 gem "web-push"
 gem "net-http-persistent"
-gem "rubyzip", require: "zip"
+gem "zip_kit"
 gem "mittens"
 gem "useragent", bc: "useragent"
 

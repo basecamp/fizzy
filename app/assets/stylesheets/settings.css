@@ -13,18 +13,21 @@
     }
   }
 
+  /* Sections & Panels
+  /* -------------------------------------------------------------------------- */
+
   .settings__panel {
     --panel-size: 100%;
     --panel-padding: calc(var(--settings-spacer) / 1);
 
     display: flex;
     flex-direction: column;
-    gap: calc(var(--settings-spacer) / 2);
+    gap: var(--panel-padding);
     min-block-size: 100%;
     min-inline-size: 0;
 
-    @media (min-width: 960px) {
-      --panel-padding: calc(var(--settings-spacer) * 1.5) calc(var(--settings-spacer) * 2);
+    @media (min-width: 640px) {
+      --panel-padding: calc(var(--settings-spacer) * 2);
     }
   }
 
@@ -35,6 +38,20 @@
 
     @media (min-width: 960px) {
       max-height: calc(100dvh - 12rem);
+    }
+  }
+
+  .settings__section {
+    h2 {
+      font-size: var(--text-large);
+    }
+
+    > * + * {
+      margin-block-start: calc(var(--panel-padding) / 2);
+    }
+
+    &:is(:first-child):has(h2) {
+      margin-top: -0.33lh; /* Align h2 letters caps with panel padding */
     }
   }
 

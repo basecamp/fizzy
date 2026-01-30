@@ -7,7 +7,7 @@ class Assignment < ApplicationRecord
   belongs_to :assignee, class_name: "User"
   belongs_to :assigner, class_name: "User"
 
-  validate :within_limit, on: :create
+  validate :within_limit, on: :create, if: -> { card.present? }
 
   private
     def within_limit

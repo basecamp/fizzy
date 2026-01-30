@@ -1,19 +1,21 @@
-<header class="margin-block-start-double">
-  <h2 class="divider txt-large">Export your data</h2>
-  <p class="margin-none-block">Download an archive of your Fizzy data.</p>
-</header>
+<section class="settings__section">
+  <header>
+    <h2 class="divider">Export account data</h2>
+    <div>Download a complete archive of all account data.</div>
+  </header>
 
-<div data-controller="dialog" data-dialog-modal-value="true">
-  <button type="button" class="btn" data-action="dialog#open">Begin export...</button>
+  <div data-controller="dialog" data-dialog-modal-value="true" data-action="keydown.esc->dialog#close">
+    <button type="button" class="btn" data-action="dialog#open">Begin export...</button>
 
-  <dialog class="dialog panel panel--wide shadow" data-dialog-target="dialog">
-    <h2 class="margin-none txt-large">Export your account data</h2>
-    <p class="margin-none-block-start">This will kick off a request to generate a ZIP archive of all the data in boards you have access to.</p>
-    <p>When the file is ready, we’ll email you a link to download it. The link will expire after 24 hours.</p>
+    <dialog class="dialog panel panel--wide shadow" data-dialog-target="dialog" style="--panel-size: 48ch;">
+      <h2 class="txt-large">Export all account data</h2>
+      <p>This will generate a ZIP archive of all data in this account including all boards, cards, users, and settings.</p>
+      <p>We‘ll email you a link to download the file when it‘s ready. The link will expire after 24 hours.</p>
 
-    <div class="flex gap justify-center">
-      <%= button_to "Start export", account_exports_path, method: :post, class: "btn btn--link", form: { data: { action: "submit->dialog#close" } } %>
-      <button type="button" class="btn" data-action="dialog#close">Cancel</button>
-    </div>
-  </dialog>
-</div>
+      <div class="flex gap justify-center">
+        <%= button_to "Start export", account_exports_path, method: :post, class: "btn btn--link", form: { data: { action: "submit->dialog#close" } } %>
+        <button type="button" class="btn" data-action="dialog#close">Cancel</button>
+      </div>
+    </dialog>
+  </div>
+</section>
