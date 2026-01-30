@@ -225,27 +225,29 @@
   
       th,
       td {
+        background-color: var(--color-canvas);
         border: 1px solid var(--color-ink-light);
-        padding: 0.5ch 1ch;
+        font-size: var(--text-small);
+        min-width: 5ch;
+        max-width: 50ch;
+        padding: 0.75ch;
         text-align: start;
         word-break: normal;
-      
+        
         *:last-child {
           margin-block-end: 0;
         }
-
-        *:not(pre, code) {
-          word-break: normal;
+  
+        &.lexxy-content__table-cell--header {
+          background-color: var(--color-ink-lightest);
+          font-weight: bold;
         }
-      }
   
-      th,
-      .lexxy-content__table-cell--header {
-        background: var(--color-ink-lightest);
-      }
-  
-      td {
-        background: var(--color-canvas);
+        *:is(code, pre) {
+          hyphens: auto;
+          text-wrap: wrap;
+          white-space: pre-wrap;
+        }
       }
     }
   }
