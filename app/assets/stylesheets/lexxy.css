@@ -3,11 +3,13 @@
 @import url("lexxy-editor.css") layer(base);
 
 @layer components {
+  /* Editor
+  /* ------------------------------------------------------------------------ */
+
   lexxy-editor {
     --lexxy-border-color: oklch(var(--lch-ink-darkest) / 20%);
     --lexxy-editor-padding: 0;
     --lexxy-toolbar-button-size: 2rem;
-    --lexxy-toolbar-gap: 0;
 
     background-color: transparent;
     border: none;
@@ -21,14 +23,87 @@
   .lexxy-editor__toolbar-button {
     background: transparent;
 
+    &[aria-pressed="true"] {
+      background-color: oklch(var(--lch-blue-medium) / 20%);
+    }
+
     @media(any-hover: hover) {
-      &:hover {
-        background-color: color-mix(in srgb, transparent, var(--color-ink) 10%);
+      &:hover:not([aria-pressed="true"]) {
+        background-color: oklch(var(--lch-ink-dark) / 20%);
+      }
+    }
+  }
+
+  lexxy-link-dropdown {
+    --lexxy-toolbar-spacing: 1.5ch;
+
+    max-inline-size: 20rem;
+
+    form {
+      flex-direction: column;
+    }
+
+    .lexxy-editor__toolbar-button {
+      border-radius: 99rem;
+
+      &[type="submit"] {
+        background-color: var(--color-link);
+      }
+
+      &[type="button"] {
+        border: 1px solid var(--color-ink-light);
       }
     }
   }
 
   .lexxy-editor__content {
     margin-block-start: 0.5lh;
+  }
+
+  .lexxy-code-language-picker {
+    border-radius: 99rem;
+  }
+
+  [data-lexical-cursor] {
+    animation: blink 1s step-end infinite;
+    block-size: 1lh;
+    border-inline-start: 1px solid currentColor;
+    line-height: inherit;
+    margin-block: 1em;
+  }
+
+  /* Content
+  /* ------------------------------------------------------------------------ */
+
+  .lexxy-content {
+    --lexxy-content-margin: 0.5lh;
+
+    color: currentColor;
+
+    h1, h2, h3, h4, h5, h6 {
+      font-weight: 800;
+      letter-spacing: -0.02ch;
+      line-height: 1.1;
+      overflow-wrap: break-word;
+      text-wrap: balance;
+    }
+
+    p {
+      margin: 0;
+    }
+
+    blockquote {
+      border-inline-start: 0.25em solid var(--color-ink-lighter);
+      padding-block: 0;
+    }
+
+    code {
+      background: var(--color-canvas);
+      border: 1px solid var(--color-ink-lighter);
+    }
+
+    hr {
+      border-block-end-width: 2px;
+    }
   }
 }
