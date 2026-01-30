@@ -3,6 +3,7 @@ json.cache! card do
   json.description card.description.to_plain_text
   json.description_html card.description.to_s
   json.image_url card.image.presence && url_for(card.image)
+  json.has_attachments card.has_attachments?
 
   json.tags card.tags.pluck(:title).sort
 
