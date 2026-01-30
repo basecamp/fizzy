@@ -39,8 +39,10 @@
         <span>Get QR code</span>
       <% end %>
 
-      <dialog class="dialog panel shadow" data-dialog-target="dialog">
-        <p class="margin-none-block-start"><strong>Scan this code with the camera on your mobile device</strong></p>
+      <dialog class="dialog panel shadow" data-dialog-target="dialog" style="--panel-size: 50ch;">
+        <p class="margin-none-block-start txt-balance">
+          <strong>Scan this code to join <%= Current.account.name %>:</strong>
+        </p>
 
         <%= qr_code_image(url) %>
 
