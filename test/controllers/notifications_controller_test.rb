@@ -23,5 +23,9 @@ class NotificationsControllerTest < ActionDispatch::IntegrationTest
     assert_not_nil notification["created_at"]
     assert_not_nil notification["card"]
     assert_not_nil notification["creator"]
+    assert_not_nil notification.dig("creator", "avatar_url")
+    assert_not_nil notification.dig("card", "number")
+    assert_not_nil notification.dig("card", "board_name")
+    assert_not_nil notification.dig("card", "column")
   end
 end
