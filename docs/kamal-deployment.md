@@ -103,6 +103,7 @@ To use the included `s3` service, set:
 - `S3_BUCKET` (defaults to `fizzy-#{Rails.env}-activestorage`)
 - `S3_REGION` (defaults to `us-east-1`)
 - `S3_SECRET_ACCESS_KEY`
+- `CSP_CONNECT_SRC`
 
 Optional for S3-compatible endpoints:
 

@@ -132,6 +132,7 @@ Then set the following as appropriate for your S3 bucket:
 - `S3_REGION`
 - `S3_ACCESS_KEY_ID`
 - `S3_SECRET_ACCESS_KEY`
+- `CSP_CONNECT_SRC`
 
 If you're using a provider other than AWS, you will also need some of the following:
 
