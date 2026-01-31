@@ -21,11 +21,11 @@ module Account::Limited
   end
 
   def nearing_plan_cards_limit?
-    plan.limit_cards? && remaining_cards_count < NEAR_CARD_LIMIT_THRESHOLD
+    plan.limit_cards? && remaining_cards_count <= NEAR_CARD_LIMIT_THRESHOLD
   end
 
   def exceeding_card_limit?
-    plan.limit_cards? && billed_cards_count > plan.card_limit
+    plan.limit_cards? && billed_cards_count >= plan.card_limit
   end
 
   def nearing_plan_storage_limit?
