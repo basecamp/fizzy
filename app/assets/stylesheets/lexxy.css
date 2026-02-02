@@ -64,6 +64,10 @@
     border-radius: 99rem;
   }
 
+  lexxy-table-tools {
+    font-size: var(--text-x-small);
+  }
+
   [data-lexical-cursor] {
     animation: blink 1s step-end infinite;
     block-size: 1lh;
@@ -104,6 +108,15 @@
 
     hr {
       border-block-end-width: 2px;
+    }
+
+    table {
+      th, td {
+        font-size: var(--text-small);
+        padding-block: 0.75ch;
+      }
+      th:not([class*="selected"], [data-action="delete"], [data-action="toggle"]) { background-color: var(--color-ink-lightest); }
+      td:not([class*="selected"], [data-action="delete"], [data-action="toggle"]) { background-color: var(--color-canvas); }
     }
   }
 }
