@@ -14,6 +14,7 @@ export default class extends Controller {
 
   connect() {
     this.refresh()
+    this.#reorderItems()
   }
 
   change(event) {
@@ -69,6 +70,7 @@ export default class extends Controller {
       this.#renameHiddenFields(item.dataset.multiSelectionFieldName)
     }
     this.labelTarget.textContent = this.#selectedLabel
+    this.#reorderItems()
   }
 
   isAnExclusiveSelectionItemInvolved(item) {
@@ -129,5 +131,35 @@ export default class extends Controller {
   #updateFilterShow() {
     const hasSelection = this.#selectedValues().length > 0
     this.element.setAttribute("data-filter-show", hasSelection)
+  }
+
+  #reorderItems() {
+    const list = this.element.querySelector("[role='listbox']")
+    if (!list) return
+
+    const items = Array.from(this.itemTargets)
+    const exclusiveItems = items.filter(item => this.#isExclusiveSelection(item))
+    const regularItems = items.filter(item => !this.#isExclusiveSelection(item))
+
+    const selectedItems = regularItems.filter(item =>
+      item.getAttribute(this.selectPropertyNameValue) === "true"
+    )
+    const unselectedItems = regularItems.filter(item =>
+      item.getAttribute(this.selectPropertyNameValue) !== "true"
+    )
+
+    const sortByLabel = (a, b) => {
+      const labelA = (a.dataset.multiSelectionComboboxLabel || "").toLowerCase()
+      const labelB = (b.dataset.multiSelectionComboboxLabel || "").toLowerCase()
+      return labelA.localeCompare(labelB)
+    }
+
+    selectedItems.sort(sortByLabel)
+    unselectedItems.sort(sortByLabel)
+
+    // Reorder: exclusive items first, then selected, then unselected
+    ;[...exclusiveItems, ...selectedItems, ...unselectedItems].forEach(item => {
+      list.appendChild(item)
+    })
   }
 }
