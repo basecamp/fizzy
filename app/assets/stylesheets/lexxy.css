@@ -38,12 +38,6 @@
   lexxy-link-dropdown {
     --lexxy-toolbar-spacing: 1.5ch;
 
-    max-inline-size: 20rem;
-
-    form {
-      flex-direction: column;
-    }
-
     .lexxy-editor__toolbar-button {
       border-radius: 99rem;
 
