@@ -71,7 +71,9 @@ class Account::DataTransfer::RecordSet
     def import_batch(files)
       batch_data = files.map do |file|
         data = load(file)
-        data.slice(*attributes).merge("account_id" => account.id)
+        data.slice(*attributes).merge("account_id" => account.id).tap do |record_data|
+          record_data["updated_at"] = Time.current if record_data.key?("updated_at")
+        end
       end
 
       model.insert_all!(batch_data)
