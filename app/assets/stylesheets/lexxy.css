@@ -41,7 +41,15 @@
     .lexxy-editor__toolbar-button {
       border-radius: 99rem;
 
-      &[type="submit"] {
+      @media(any-hover: hover) {
+        &:hover {
+          filter: brightness(0.9);
+          opacity: 1;
+        }
+      }
+
+      &[type="submit"],
+      &[type="submit"]:hover {
         background-color: var(--color-link);
       }
 
