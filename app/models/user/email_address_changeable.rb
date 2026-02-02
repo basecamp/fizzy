@@ -39,7 +39,7 @@ module User::EmailAddressChangeable
 
   private
     def generate_email_address_change_token(from: identity.email_address, to:, **options)
-      options = options.reverse_merge(
+      options = options.with_defaults(
         for: EMAIL_CHANGE_TOKEN_PURPOSE,
         old_email_address: from,
         new_email_address: to,

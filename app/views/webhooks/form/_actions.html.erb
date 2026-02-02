@@ -1,16 +1,24 @@
-<ul class="flex flex-column align-start gap-half margin-none unpad">
-  <%= form.collection_check_boxes \
-        :subscribed_actions,
-        webhook_action_options,
-        :first,
-        :last do |item| %>
-    <li class="list-style-none margin-none flex align-center gap">
-      <label class="switch toggler__visible-when-off flex-item-no-shrink txt-x-small">
-        <%= item.check_box(class: "switch__input") %>
-        <span class="switch__btn round"></span>
-        <span class="for-screen-reader"><%= item.text %></span>
-      </label>
-      <span><%= item.text %></span>
-    </li>
-  <% end %>
-</ul>
+<div data-controller="toggle-class">
+  <div class="flex align-center gap-half margin-block-end-half">
+    <%= button_tag "Enable all", type: "button", class: "btn btn--plain txt-x-small txt-link font-weight-normal", data: { action: "click->toggle-class#checkAll" } %>
+    <span class="txt-subtle">&middot;</span>
+    <%= button_tag "Disable all", type: "button", class: "btn btn--plain txt-x-small txt-link font-weight-normal", data: { action: "click->toggle-class#checkNone" } %>
+  </div>
+  <ul class="flex flex-column align-start gap-half margin-none unpad">
+    <%= form.collection_check_boxes \
+          :subscribed_actions,
+          webhook_action_options,
+          :first,
+          :last do |item| %>
+      <li class="list-style-none margin-none">
+        <label class="toggler__visible-when-off flex align-center gap cursor-pointer">
+          <span class="switch txt-x-small flex-item-no-shrink">
+            <%= item.check_box(class: "switch__input", data: { toggle_class_target: "checkbox" }) %>
+            <span class="switch__btn round"></span>
+          </span>
+          <span class="min-width"><%= item.text %></span>
+        </label>
+      </li>
+    <% end %>
+  </ul>
+</div>

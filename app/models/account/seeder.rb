@@ -69,6 +69,7 @@ class Account::Seeder
           <li>Make another called "Working on"</li>
         </ol>
         <p>Go back to the Board view, click the little “+” to the right of the DONE column, name the column, pick a color, then do it again.</p>
+        <p><br></p>
         <p>After that, drag this card to “DONE” or select “DONE” in the sidebar.</p>
         <action-text-attachment url="https://videos.37signals.com/fizzy/assets/images/make-columns.gif" alt="Demo of adding columns" caption="Make two more columns" content-type="image/*" filename="make-columns.gif" presentation="gallery"></action-text-attachment>
       HTML

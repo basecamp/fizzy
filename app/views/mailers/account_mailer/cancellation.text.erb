@@ -1,0 +1,13 @@
+Your Fizzy account "<%= @account.name %>" was cancelled.
+
+WHAT HAPPENS NOW?
+
+- No one can access the account anymore
+<% if @account.try(:subscription) %>
+- We won't charge you anymore
+<% end %>
+- Everything in the account will be deleted in <%= distance_of_time_in_words_to_now(Account::Incineratable::INCINERATION_GRACE_PERIOD.from_now) %>
+
+CHANGED YOUR MIND?
+
+If you want to cancel this deletion and restore your account, send us an email to support@fizzy.do as soon as possible.

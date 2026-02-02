@@ -20,12 +20,12 @@
 
       &.orient-right {
         inset-inline: 0 auto;
-        translate: 0 -100%;
+        translate: var(--orient-offset, 0px) -100%;
       }
 
       &.orient-left {
         inset-inline: auto 0;
-        translate: 0 -100%;
+        translate: var(--orient-offset, 0px) -100%;
       }
     }
 

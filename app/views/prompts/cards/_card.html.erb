@@ -3,6 +3,6 @@
     #<%= card.number %> <%= card.title %>
   </template>
   <template type="editor">
-    <%= link_to "##{card.number} #{card.title}", card_url(card) %>
+    <%= link_to "##{card.number} #{card.title}", card_path(card) %>
   </template>
 </lexxy-prompt-item>

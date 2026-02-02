@@ -1,3 +1,15 @@
-<%= turbo_frame_tag "pins" do %>
-  <%= render partial: "my/pins/pin", collection: @pins %>
+<% @page_title = "Pinned" %>
+
+<% content_for :header do %>
+  <div class="header__actions header__actions--start">
+    <%= back_link_to "Home", root_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+  </div>
+
+  <h1 class="header__title" data-bridge--title-target="header"><%= @page_title %></h1>
 <% end %>
+
+<div class="pins-list panel panel--wide flex center borderless unpad flex-column gap-half margin-block-start">
+  <%= turbo_frame_tag "pins" do %>
+    <%= render partial: "my/pins/pin", collection: @pins %>
+  <% end %>
+</div>

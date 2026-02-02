@@ -1,13 +1,13 @@
 class Card < ApplicationRecord
-  include Assignable, Attachments, Broadcastable, Closeable, Colored, Entropic, Eventable,
-    Exportable, Golden, Mentions, Multistep, Pinnable, Postponable, Promptable,
-    Readable, Searchable, Stallable, Statuses, Taggable, Triageable, Watchable
+  include Accessible, Assignable, Attachments, Broadcastable, Closeable, Colored, Commentable,
+    Entropic, Eventable, Exportable, Golden, Mentions, Multistep, Pinnable, Postponable, Promptable,
+    Readable, Searchable, Stallable, Statuses, Storage::Tracked, Taggable, Triageable, Watchable
 
   belongs_to :account, default: -> { board.account }
   belongs_to :board
   belongs_to :creator, class_name: "User", default: -> { Current.user }
 
-  has_many :comments, dependent: :destroy
+  has_many :reactions, -> { order(:created_at) }, as: :reactable, dependent: :delete_all
   has_one_attached :image, dependent: :purge_later
 
   has_rich_text :description
@@ -23,7 +23,7 @@ class Card < ApplicationRecord
   scope :chronologically,         -> { order created_at:     :asc,  id: :asc  }
   scope :latest,                  -> { order last_active_at: :desc, id: :desc }
   scope :with_users,              -> { preload(creator: [ :avatar_attachment, :account ], assignees: [ :avatar_attachment, :account ]) }
-  scope :preloaded,               -> { with_users.preload(:column, :tags, :steps, :closure, :goldness, :activity_spike, :image_attachment, board: [ :entropy, :columns ], not_now: [ :user ]).with_rich_text_description_and_embeds }
+  scope :preloaded,               -> { with_users.preload(:column, :tags, :steps, :closure, :goldness, :activity_spike, :image_attachment, reactions: :reacter, board: [ :entropy, :columns ], not_now: [ :user ]).with_rich_text_description_and_embeds }
 
   scope :indexed_by, ->(index) do
     case index
@@ -45,8 +45,6 @@ class Card < ApplicationRecord
     else latest
     end
   end
-
-  delegate :accessible_to?, to: :board
 
   def card
     self
@@ -82,14 +80,11 @@ class Card < ApplicationRecord
       end
 
       remove_inaccessible_notifications_later
+      clean_inaccessible_data_later
     end
 
     def track_board_change_event(old_board_name)
       track_event "board_changed", particulars: { old_board: old_board_name, new_board: board.name }
-    end
-
-    def grant_access_to_assignees
-      board.accesses.grant_to(assignees)
     end
 
     def assign_number

@@ -1,7 +1,5 @@
 module LoginHelper
   def login_url
-    # Use main_app because this helper may be invoked from an engine controller
-    # that inherits from AdminController.
     main_app.new_session_path(script_name: nil)
   end
 

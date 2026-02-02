@@ -1,5 +1,6 @@
 class JoinCodesController < ApplicationController
   allow_unauthenticated_access
+  rate_limit to: 10, within: 3.minutes, only: :create, with: -> { head :too_many_requests }
 
   before_action :set_join_code
   before_action :ensure_join_code_is_valid

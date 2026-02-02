@@ -5,6 +5,11 @@ class Cards::StepsController < ApplicationController
 
   def create
     @step = @card.steps.create!(step_params)
+
+    respond_to do |format|
+      format.turbo_stream
+      format.json { head :created, location: card_step_path(@card, @step, format: :json) }
+    end
   end
 
   def show
@@ -15,10 +20,20 @@ class Cards::StepsController < ApplicationController
 
   def update
     @step.update!(step_params)
+
+    respond_to do |format|
+      format.turbo_stream
+      format.json { render :show }
+    end
   end
 
   def destroy
     @step.destroy!
+
+    respond_to do |format|
+      format.turbo_stream
+      format.json { head :no_content }
+    end
   end
 
   private

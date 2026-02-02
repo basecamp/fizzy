@@ -296,17 +296,46 @@ class Webhook::DeliveryTest < ActiveSupport::TestCase
     stub_dns_resolution(PUBLIC_TEST_IP)
 
     # Verify Net::HTTP.new is called with the pinned IP
+    response_mock = stub(code: "200")
+    response_mock.stubs(:read_body)
+
     http_mock = mock("http")
     http_mock.stubs(:use_ssl=)
     http_mock.stubs(:ipaddr=)
     http_mock.stubs(:open_timeout=)
     http_mock.stubs(:read_timeout=)
-    http_mock.stubs(:request).returns(stub(code: "200"))
+    http_mock.stubs(:request).yields(response_mock).returns(response_mock)
 
     Net::HTTP.expects(:new).with("example.com", 443).returns(http_mock)
 
     delivery.deliver
 
+    assert delivery.succeeded?
+  end
+
+  test "handles response too large error" do
+    delivery = webhook_deliveries(:pending)
+
+    large_body = "x" * 200.kilobytes
+    stub_request(:post, delivery.webhook.url).to_return(status: 200, body: large_body)
+
+    delivery.deliver
+
+    assert_equal "completed", delivery.state
+    assert_equal "response_too_large", delivery.response[:error]
+    assert_not delivery.succeeded?
+  end
+
+  test "allows responses within size limit" do
+    delivery = webhook_deliveries(:pending)
+
+    small_body = "x" * 50.kilobytes
+    stub_request(:post, delivery.webhook.url).to_return(status: 200, body: small_body)
+
+    delivery.deliver
+
+    assert_equal "completed", delivery.state
+    assert_equal 200, delivery.response[:code]
     assert delivery.succeeded?
   end
 

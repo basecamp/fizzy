@@ -29,7 +29,7 @@ class Filter < ApplicationRecord
       result = result.where(creator_id: creators.ids) if creators.present?
       result = result.where(board: boards.ids) if boards.present?
       result = result.tagged_with(tags.ids) if tags.present?
-      result = result.where("cards.created_at": creation_window) if creation_window
+      result = result.where(cards: { created_at: creation_window }) if creation_window
       result = result.closed_at_window(closure_window) if closure_window
       result = result.closed_by(closers) if closers.present?
       result = terms.reduce(result) do |result, term|

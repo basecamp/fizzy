@@ -70,7 +70,7 @@
             <li>Click <em aria-label="the Apple menu"></em> in the top left.</li>
             <li>Click <em>System Settings…</em>.</li>
             <li>Click <em>Notifications</em>.</li>
-            <li>Click <em><%= platform.browser.capitalize %></em>.</li>
+            <li>Click <em><%= platform.browser == "Chrome" ? "Google Chrome" : platform.browser.capitalize %></em>.</li>
             <li>Click <em><%= icon_tag "switch", alt: "the switch" %></em> to <em>Allow notifications</em>.</li>
           <% end %>
         </ol>

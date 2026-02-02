@@ -1,4 +1,0 @@
-logo:
-  id: <%= ActiveRecord::FixtureSet.identify("logo_engagement", :uuid) %>
-  account: 37s_uuid
-  card: logo_uuid

@@ -13,8 +13,10 @@
       "menu menu menu"
       "actions-start title actions-end";
     max-inline-size: 100dvw;
-    padding-block: calc(var(--block-space-half) + env(safe-area-inset-top)) var(--block-space-half);
+    padding-block: calc(var(--block-space-half) + var(--custom-safe-inset-top)) var(--block-space-half);
     padding-inline: var(--main-padding);
+    position: relative;
+    z-index: var(--z-nav);
 
     /* Change the grid size depending on how many buttons are present */
     &:has(.header__actions > *:nth-child(1)) { --header-button-count: 1; }
@@ -23,6 +25,10 @@
 
     &:has(nav) {
       row-gap: 0;
+    }
+
+    &:has(dialog[open]) {
+      z-index: var(--z-nav-open);
     }
 
     &:has(~ #main .card-columns) {
@@ -116,17 +122,15 @@
   /* Optional class to stack header actions on small screens
   /* ------------------------------------------------------------------------ */
 
-  /* .header--mobile-actions-stack {
+  .header--mobile-actions-stack {
     @media (max-width: 639px) {
-      grid-template-columns: 1fr 1fr;
       grid-template-areas:
-        "menu menu"
-        "actions-start actions-end"
-        "title title";
+        "actions-start menu actions-end"
+        "title title title";
 
       .header__title {
         margin-block-start: 0.25rem;
       }
     }
-  } */
+  }
 }

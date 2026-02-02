@@ -1,4 +1,5 @@
 <% @page_title = @board.name %>
+<% @body_class = "contained-scrolling" %>
 
 <% content_for :head do %>
   <%= tag.meta property: "og:title", content: "#{@board.name} | #{Current.account.name}" %>
@@ -13,7 +14,7 @@
 <% end %>
 
 <% content_for :header do %>
-  <h1 class="header__title divider divider--fade full-width">
+  <h1 class="header__title divider divider--fade full-width" data-bridge--title-target="header">
     <span class="overflow-ellipsis"><%= @page_title %></span>
   </h1>
 <% end %>

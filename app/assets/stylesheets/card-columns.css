@@ -1,4 +1,33 @@
 @layer components {
+  /* Layout adjustments for contained scrolling
+  /* ------------------------------------------------------------------------ */
+
+  /* Scroll columns individually on mobile */
+  @media (max-width: 639px) {
+    body.contained-scrolling {
+      block-size: 100dvh;
+      grid-template-rows: 1fr var(--footer-height);
+
+      #global-container {
+        display: grid;
+        grid-template-rows: auto 1fr;
+        overflow: hidden;
+      }
+
+      #main {
+        display: grid;
+        grid-template-rows: auto auto 1fr;
+        overflow: auto;
+        padding: 0;
+      }
+
+      /* Adapt the grid to public views (no filters or watchers sections) */
+      &.public #main {
+        grid-template-rows: 1fr;
+      }
+    }
+  }
+
   /* Column container
   /* ------------------------------------------------------------------------ */
 
@@ -10,38 +39,52 @@
     --bubble-size: 3.5rem;
     --cards-gap: min(1.2cqi, 1.7rem);
     --column-gap: 8px;
-    --column-padding-expanded: calc(var(--column-gap) * 2);
+    --column-padding: calc(var(--column-gap) * 2);
     --column-transition-duration: 300ms;
     --column-width-collapsed: 40px;
     --column-width-expanded: 450px;
     --progress-increment: var(--progress-max-height) / var(--progress-max-cards);
-    --progress-max-cards: 20;
+    --progress-max-cards: 15; /* should match first geared pagination page size */
     --progress-max-height: 50dvh;
 
     container-type: inline-size;
     display: grid;
     gap: var(--column-gap);
-    grid-template-columns: 1fr var(--column-width-expanded) 1fr;
+    grid-template-columns: 1fr auto 1fr;
+    inline-size: 100%;
     margin-inline: auto;
     max-inline-size: var(--main-width);
+    outline: none;
     overflow-x: auto;
     overflow-y: hidden;
-    padding-block-end: var(--column-width-collapsed);
     position: relative;
 
     /* When it has something expanded */
-    &:has(.card-columns__left .cards:not(.is-collapsed), .card-columns__right .cards:not(.is-collapsed)) {
-      grid-template-columns: auto var(--column-width-expanded) auto;
+    &:has(.card-columns__left .is-expanded, .card-columns__right .is-expanded) {
+      grid-template-columns: auto auto auto;
+
+      @media (min-width: 640px) {
+        grid-template-columns: auto var(--column-width-expanded) auto;
+      }
     }
 
     &:has(.cards) {
+      block-size: 100%;
       min-block-size: 20lh;
     }
 
-    body:not(.public) & {
-      @media (max-width: 519px) {
-        display: none;
+    @media (max-width: 639px) {
+      --column-width-expanded: calc(100vw - var(--column-gap) * 4);
+
+      scroll-snap-type: inline mandatory;
+
+      &:not(:has(.is-expanded)) {
+        grid-template-columns: auto var(--column-width-collapsed) auto;
       }
+    }
+
+    @media (min-width: 640px) {
+      padding-block-end: var(--column-width-collapsed);
     }
   }
 
@@ -50,16 +93,27 @@
     align-items: stretch;
     display: flex;
     gap: var(--column-gap);
+    position: relative;
+
+    @media (max-width: 639px) {
+      min-block-size: 0;
+    }
   }
 
   .card-columns__left {
     justify-content: end;
+    margin-inline-start: auto;
     padding-inline-start: var(--column-gap);
+
+    @media (max-width: 639px) {
+      padding-inline-start: calc(var(--column-gap) * 2);
+    }
   }
 
   .card-columns__right {
     justify-content: start;
     padding-inline-end: var(--column-gap);
+    margin-inline-end: auto;
   }
 
   /* Column
@@ -71,7 +125,13 @@
     inline-size: var(--column-width-expanded);
     outline: none;
     position: relative;
-    scroll-snap-align: start;
+    scroll-snap-align: center;
+
+    &.is-expanded {
+      @media (max-width: 639px) {
+        overflow: hidden;
+      }
+    }
 
     &.is-collapsed {
       inline-size: var(--column-width-collapsed);
@@ -125,15 +185,17 @@
   .cards__transition-container {
     block-size: 100%;
     border-radius: calc(var(--column-width-collapsed) / 2);
-    translate: 0;
+    translate: 0 0.5ch; /* Allow a little room for the mini bubble */
     transition: translate var(--column-transition-duration) var(--ease-out-overshoot-subtle);
 
-    .is-collapsed:not(.cards--considering) & {
-      translate: 0 var(--column-width-collapsed);
-    }
+    @media (min-width: 640px) {
+      .is-expanded & {
+        translate: 0 0.5ch; /* Allow a little room for the mini bubble */
+      }
 
-    .cards:not(.is-collapsed) & {
-      padding-inline: var(--column-padding-expanded);
+      .is-collapsed & {
+        translate: 0 var(--column-width-collapsed);
+      }
     }
 
     .drag-and-drop__hover-container & {
@@ -150,43 +212,84 @@
     .no-transitions & {
       transition: none;
     }
+
+    /* Use flex so the __list container can take up the remaining space for scrolling */
+    @media (max-width: 639px) {
+      .is-expanded & {
+        display: flex;
+        flex-direction: column;
+      }
+    }
   }
 
   /* The wrapper around the cards used to clip overflow while transitioning.
    * Also, don't resize cards while transitioning to avoid reflow. */
   .cards__list {
-    align-items: flex-end; /* use flex-start to wipe from left */
     display: flex;
     flex-direction: column;
     gap: var(--cards-gap);
-    margin-block-start: -1ch;
-    margin-inline: -1ch;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
 
-    .cards:not(.is-collapsed) & {
-      padding: 1ch;
-    }
+    .is-expanded & {
+      padding: var(--column-padding) var(--column-padding) calc(var(--column-padding) + var(--custom-safe-inset-bottom));
 
-    .card {
-      inline-size: calc(var(--column-width-expanded) - var(--column-padding-expanded) * 2);
-    }
-
-    .cards--grid & {
-      display: contents;
+      /* Use the rest of the column height for scrolling */
+      @media (max-width: 639px) {
+        flex: 1;
+        padding-inline: calc(var(--column-padding) / 4);
+      }
     }
 
     [aria-selected] & .card[aria-selected] {
       outline: var(--focus-ring-size) solid var(--color-selected-dark);
       outline-offset: var(--focus-ring-offset);
 
-      @media (prefers-color-scheme: dark) {
+      html[data-theme="dark"] & {
         outline-color: oklch(var(--lch-blue-medium));
+      }
+
+      @media (prefers-color-scheme: dark) {
+        html:not([data-theme]) & {
+          outline-color: oklch(var(--lch-blue-medium));
+        }
+      }
+    }
+
+    &:has(.card) {
+      .blank-slate {
+        display: none;
+      }
+    }
+
+    /* Use the default blank-slate on small viewports since drag-and-drop isn't available */
+    [data-controller~="drag-and-drop"] & {
+      @media (max-width: 639px) {
+        .blank-slate--drag {
+          display: none;
+        }
+      }
+
+      @media (min-width: 640px) {
+        .blank-slate--default {
+          display: none;
+        }
       }
     }
   }
 
   .cards__new-column {
-    margin-block-start: var(--column-width-collapsed);
+    position: relative;
+
+    @media (max-width: 639px) {
+      inset-inline-end: 0;
+      position: absolute;
+      translate: 100%;
+    }
+
+    @media (min-width: 640px) {
+      margin-block-start: var(--column-width-collapsed);
+    }
   }
 
   /* Cards grid; used when filtering
@@ -197,11 +300,7 @@
     --card-grid-columns: 1;
 
     container-type: inline-size;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: var(--cards-gap);
-    justify-content: center;
+    inline-size: 100%;
     margin-inline: auto;
     max-inline-size: var(--main-width);
 
@@ -211,6 +310,15 @@
 
     @media (min-width: 960px) {
       --card-grid-columns: 3;
+    }
+
+    .cards__list {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: var(--cards-gap);
+      justify-content: center;
+      padding: 1ch;
     }
 
     .card {
@@ -228,6 +336,10 @@
       inline-size: fit-content;
       margin: 0 0 0 auto;
     }
+
+    .blank-slate--drag {
+      display: none;
+    }
   }
 
   /* Column Elements
@@ -238,11 +350,11 @@
       block-size: 100%;
     }
 
-    .cards:not(.is-collapsed) & {
+    .cards.is-expanded & {
       display: grid;
       grid-template-areas: "menu expander maximize";
       grid-template-columns: var(--column-width-collapsed) 1fr var(--column-width-collapsed);
-      margin-block-end: calc(0.5 * var(--cards-gap));
+      padding-inline: var(--column-padding);
     }
   }
 
@@ -266,6 +378,7 @@
   }
 
   .cards__menu {
+    position: relative;
     z-index: var(--z-popup);
   }
 
@@ -285,12 +398,18 @@
     font-weight: 600;
     gap: 0.5ch;
     grid-area: expander;
+    justify-content: center;
+    outline: none;
     outline-offset: -2px;
     position: relative;
     text-transform: uppercase;
 
+    &[disabled] {
+      opacity: 1;
+    }
+
     @media (any-hover: hover) {
-      &:hover {
+      .is-collapsed:hover {
         filter: brightness(0.9);
       }
     }
@@ -331,26 +450,22 @@
         block-size: 100%;
         content: "";
         inline-size: 1px;
-        inset: 0 auto;
+        inset-block: calc(var(--column-width-collapsed) + var(--card-count) * var(--progress-increment)) 0;
         position: absolute;
         z-index: -2;
       }
 
       &:after {
         block-size: calc(var(--column-width-collapsed) + var(--card-count) * var(--progress-increment));
+        max-block-size: none;
         opacity: 1;
         inline-size: var(--column-width-collapsed);
       }
     }
 
-    .cards:not(.is-collapsed) & {
+    .cards.is-expanded & {
       inline-size: 100%;
       justify-content: center;
-    }
-
-    .cards:is(.cards--considering) &:hover {
-      cursor: unset;
-      filter: none;
     }
   }
 
@@ -358,7 +473,7 @@
     line-height: var(--column-width-collapsed);
     inline-size: var(--column-width-collapsed);
 
-    .cards:not(.is-collapsed) & {
+    .cards.is-expanded & {
       display: none;
     }
   }
@@ -376,7 +491,7 @@
       writing-mode: vertical-rl;
     }
 
-    .cards:not(.is-collapsed, .cards--considering) & {
+    .cards.is-expanded & {
       align-items: center;
       display: flex;
       gap: 0.25ch;
@@ -386,76 +501,75 @@
     .icon--collapse {
     --icon-size: 1.15em;
 
-      opacity: 0;
-      scale: 1.5;
+      opacity: 0.66;
       transition: 150ms ease-out;
       transition-property: opacity, scale;
+
+      @media (min-width: 640px) {
+        opacity: 0;
+        scale: 1.5;
+      }
 
       .cards.is-collapsed & {
         display: none;
       }
 
-      .cards:not(.is-collapsed) .cards__expander:hover & {
+      .cards.is-expanded .cards__expander:hover & {
         opacity: 0.66;
         scale: 1;
       }
     }
   }
 
-  /* TODO: I think this is legacy now? */
-  .cards__heading {
-    display: flex;
-    font-size: var(--text-medium);
-    inset-block-start: 0;
-    justify-content: center;
-    margin-block-start: 1px;
-    margin-inline: -8px; /* enough to cover card shadows, but avoid overlapping bubbles */
-    padding-block: var(--cards-gap) 0;
-    position: sticky;
-    z-index: 3;
-
-    /* Cover bubbles and cards on small viewports */
-    @media (max-width: 639px) {
-      margin-inline: calc(-1 * var(--cards-gap) - var(--main-padding));
-    }
-
-    &, .cards__filter {
-      font-weight: bold;
-      text-transform: uppercase;
-    }
-
-    .cards__filter {
-      --filter-block-padding: 0.5rem;
-
-      background-color: var(--color-canvas);
-      border-radius: 99rem;
-      inline-size: auto;
-      margin-block: calc(-1 * var(--filter-block-padding));
-      padding-block: var(--filter-block-padding);
-    }
-
-    dialog {
-      font-weight: normal;
-      text-transform: none;
-    }
-  }
-
   /* Override card styles within columns
+  /* Adding .board-tools here since it sits outside the cards container on mobile */
   /* ------------------------------------------------------------------------ */
 
-  .cards {
-    .card {
-      --block-space: 1em;
-      --block-space-half: 0.5em;
-      --card-padding-inline: 1em;
-      --text-xx-large: 1.6em;
-      --text-x-small: 1em;
+  .cards .card,
+  .board-tools {
+    --block-space: 1em;
+    --block-space-half: 0.5em;
+    --card-padding-inline: 1em;
+    --text-xx-large: 1.6em;
+    --text-x-small: 1em;
 
-      /* Set lower limit for font size */
-      font-size: clamp(0.6rem, 0.85cqi, 100px);
+    /* Set lower limit for font size */
+    font-size: clamp(0.6rem, 0.85cqi, 100px);
+
+    .card__counts {
+      --gap: 0.5ch;
+
+      align-items: flex-end;
+      display: flex;
+      flex-shrink: 0;
+      gap: calc(2 * var(--gap));
+      margin-inline: auto calc(var(--card-padding-inline) * -0.5);
+      padding-inline-start: var(--gap);
+    }
+
+    .card__boosts,
+    .card__comments {
+      --icon-size: 1.6em;
+
+      align-items: center;
+      display: flex;
+      flex-shrink: 0;
+      font-weight: 600;
+      gap: var(--gap);
+
+      img {
+        block-size: var(--icon-size);
+        inline-size: var(--icon-size);
+      }
+
+      .icon--comment {
+        color: var(--card-color);
+      }
     }
 
     .card__steps {
+      --column-gap: 0.8ch;
+
       display: flex;
     }
 
@@ -487,18 +601,35 @@
       .local-time-value {
         font-weight: inherit;
       }
+
+      @media (max-width: 639px) {
+        inline-size: auto;
+      }
     }
 
-    .card:has(.card__background img:not([src=""])) {
+    &:has(.card__background img:not([src=""])) {
       .card__content,
       .card__meta,
+      .card__boosts,
+      .card__comments,
       .card__column-name:not(.card__column-name--current) {
         opacity: 0;
         transition: opacity 0.2s ease-in-out;
+      }
 
-        @media (any-hover: hover) {
-          .card:hover & {
+      @media (any-hover: hover) {
+        &:hover {
+          .card__content,
+          .card__footer,
+          .card__boosts,
+          .card__comments,
+          .card__column-name:not(.card__column-name--current) {
             opacity: 1;
+          }
+
+          .card__background img {
+            filter: blur(3px) brightness(1.2);
+            opacity: 0.2;
           }
         }
       }
@@ -508,19 +639,12 @@
       inset-inline-start: 100%;
       translate: -90% -40%;
     }
-
-    @media (any-hover: hover) {
-      .card:has(.card__background img:not([src=""])):hover .card__background img:not([src=""]) {
-        filter: blur(3px) brightness(1.2);
-        opacity: 0.2;
-      }
-    }
   }
 
   /* Considering
   /* ------------------------------------------------------------------------ */
 
-  .cards--considering {
+  .cards--maybe {
     --card-color: oklch(var(--lch-blue-medium));
 
     position: relative;
@@ -574,15 +698,37 @@
     --card-padding-block: var(--block-space);
 
     border: 1px solid var(--border-color);
-    margin-block-end: var(--cards-gap);
+    inline-size: auto;
     text-align: center;
+
+    @media (max-width: 639px) {
+      /* On mobile, hide the tool card inside the Maybe column */
+      .cards & {
+        display: none;
+      }
+
+      #cards_container > & {
+        margin: 0 3ch 1ch;
+      }
+    }
+
+    @media (min-width: 640px) {
+      /* On desktop, hide the tool card above the columns */
+      #cards_container > & {
+        display: none;
+      }
+    }
+
+    @media (min-width: 800px) {
+      margin: var(--column-padding) var(--column-padding) 0;
+    }
 
     &:has(dialog[open]) {
       z-index: 5;
     }
 
-    .separator--horizontal {
-      margin-block: var(--block-space);
+    .divider {
+      --divider-color: oklch(var(--lch-blue-light));
     }
 
     .btn--link {
@@ -596,7 +742,7 @@
 
     footer {
       font-size: var(--text-x-small);
-      margin-block-end: calc(var(--block-space-half) * -1);
+      margin-block: 1ch calc(var(--block-space-half) * -1);
     }
 
     .overflow-count {
@@ -638,7 +784,8 @@
   .cards--on-deck {
     --card-color: var(--color-ink-light) !important;
 
-    .card {
+    .card,
+    .blank-slate {
       --card-color: var(--color-card-complete) !important;
     }
 
@@ -647,47 +794,60 @@
     }
   }
 
-  /* Closed (Done)
-  /* ------------------------------------------------------------------------ */
-
-  .cards--closed {
-
-  }
-
   /* Doing
   /* -------------------------------------------------------------------------- */
 
   /* Surface a mini bubble if there are cards with bubbles inside */
-  .cards--considering:has(.bubble:not([hidden])),
-  .cards--doing.is-collapsed:has(.bubble:not([hidden])) {
-    .cards__transition-container {
-      --bubble-color: var(--card-color, oklch(var(--lch-blue-medium)));
-      --bubble-shape: 54% 46% 61% 39% / 57% 49% 51% 43%;
+  .cards--maybe:has(.bubble:not([hidden])) .cards__expander-title,
+  .cards--maybe.is-collapsed:has(.bubble:not([hidden])) .cards__transition-container,
+  .cards--doing.is-collapsed:has(.bubble:not([hidden])) .cards__transition-container {
+    --bubble-color: var(--card-color, oklch(var(--lch-blue-medium)));
+    --bubble-opacity: 75%;
+    --bubble-shape: 54% 46% 61% 39% / 57% 49% 51% 43%;
+
+    &:before {
+      background: radial-gradient(
+        color-mix(in srgb, var(--bubble-color) calc(var(--bubble-opacity) / 5), var(--color-canvas)) 50%,
+        color-mix(in srgb, var(--bubble-color) var(--bubble-opacity), var(--color-canvas)) 100%
+      );
+      block-size: 1em;
+      border-radius: var(--bubble-shape);
+      content: "";
+      inline-size: 1em;
+      inset: 0 0 auto auto;
+      position: absolute;
+      translate: 20% -20%;
+      z-index: 1;
+    }
+
+    /* Maybe column: position bubble relative to the title, not the container */
+    .cards--maybe.is-expanded & {
+      overflow: visible;
+      position: relative;
 
       &:before {
-        background: radial-gradient(
-          color-mix(in srgb, var(--bubble-color) 8%, var(--color-canvas)) 50%,
-          color-mix(in srgb, var(--bubble-color) 48%, var(--color-canvas)) 100%
-        );
-        block-size: 1em;
-        border-radius: var(--bubble-shape);
-        content: "";
-        inline-size: 1em;
-        inset: 0 0 auto auto;
-        position: absolute;
-        translate: 20% -20%;
-        z-index: 1;
-      }
-
-      .cards--considering &:before {
-        inset: 0 auto auto 0;
-        translate: 100% 75%;
+        inset-block-start: 50%;
+        inset-inline-start: 0;
+        translate: -125% -75%;
+        z-index: -1;
       }
     }
-  }
 
-  .cards--considering:has(.bubble:not([hidden])) .cards__expander-title:before {
-    translate: 120% 50%;
+    @media (max-width: 639px) {
+      &.cards__expander-title:before {
+        display: none;
+      }
+    }
+
+    html[data-theme="dark"] & {
+      --bubble-opacity: 100%;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      html:not([data-theme]) & {
+        --bubble-opacity: 100%;
+      }
+    }
   }
 
   /* Card column indicators
@@ -717,60 +877,11 @@
     --btn-background: var(--card-color);
 
     color: var(--color-ink-inverted);
+    opacity: 1 !important;
 
     @media (hover: hover) {
       &:hover {
         --btn-background: var(--card-color);
-      }
-    }
-  }
-
-  /* Mobile columns
-  /* -------------------------------------------------------------------------- */
-
-  .mobile-card-columns {
-    --column-gap: 8px;
-    --column-padding-expanded: calc(var(--column-gap) * 2);
-    --column-width-collapsed: 40px;
-    --progress-increment: var(--progress-max-width) / var(--progress-max-cards);
-    --progress-max-cards: 20;
-    --progress-max-width: 100%;
-
-    padding-inline: 3vw;
-
-    /* Hide on larger devices with cursors */
-    @media (min-width: 520px) {
-      display: none;
-    }
-
-    .cards.is-collapsed {
-      inline-size: auto;
-      display: block;
-      padding-block: 0.5ch;
-
-      .cards__expander {
-        --gradient-direction: to right;
-
-        flex-direction: row;
-        inline-size: auto;
-
-        &:before {
-          block-size: 1px;
-          inline-size: 100%;
-          inset: 50% 0 auto;
-          translaate: 0 -50%;
-        }
-
-        &:after {
-          block-size: var(--column-width-collapsed);
-          inline-size: calc(var(--column-width-collapsed) + var(--card-count) * var(--progress-increment));
-          margin-inline-start: 0;
-          max-inline-size: var(--progress-max-width);
-        }
-      }
-
-      .cards__expander-title {
-        writing-mode: revert;
       }
     }
   }

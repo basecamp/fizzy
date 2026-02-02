@@ -15,6 +15,16 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "invalidates page title cache when account updates" do
+    get board_path(boards(:writebook))
+    etag = response.headers["ETag"]
+
+    accounts("37s").update!(name: "Renamed Account")
+
+    get board_path(boards(:writebook)), headers: { "If-None-Match" => etag }
+    assert_response :success
+  end
+
   test "create" do
     assert_difference -> { Board.count }, +1 do
       post boards_path, params: { board: { name: "Remodel Punch List" } }
@@ -189,5 +199,45 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
       assert_response :success
       assert_select "input.switch__input[name='user_ids[]'][value='#{david.id}'][disabled]"
     end
+  end
+
+  test "index as JSON" do
+    get boards_path, as: :json
+    assert_response :success
+    assert_equal users(:kevin).boards.count, @response.parsed_body.count
+  end
+
+  test "show as JSON" do
+    get board_path(boards(:writebook)), as: :json
+    assert_response :success
+    assert_equal boards(:writebook).name, @response.parsed_body["name"]
+  end
+
+  test "create as JSON" do
+    assert_difference -> { Board.count }, +1 do
+      post boards_path, params: { board: { name: "My new board" } }, as: :json
+    end
+
+    assert_response :created
+    assert_equal board_path(Board.last, format: :json), @response.headers["Location"]
+  end
+
+  test "update as JSON" do
+    board = boards(:writebook)
+
+    put board_path(board), params: { board: { name: "Updated Name" } }, as: :json
+
+    assert_response :no_content
+    assert_equal "Updated Name", board.reload.name
+  end
+
+  test "destroy as JSON" do
+    board = boards(:writebook)
+
+    assert_difference -> { Board.count }, -1 do
+      delete board_path(board), as: :json
+    end
+
+    assert_response :no_content
   end
 end

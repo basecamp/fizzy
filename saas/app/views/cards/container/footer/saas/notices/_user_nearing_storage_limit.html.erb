@@ -1,0 +1,1 @@
+This account has used <%= storage_to_human_size(Current.account.billed_bytes_used) %> out of <%= storage_to_human_size(Current.account.plan.storage_limit) %> <%= Current.account.plan.free? ? "free storage" : "storage" %>. Upgrade soon.

@@ -1,11 +1,12 @@
 <% @page_title = "Create a new board" %>
+<% @body_class = "compact-on-touch" %>
 
 <div class="panel panel--centered">
-  <%= form_with model: @board, class: "flex flex-column gap", data: { controller: "form", action: "submit->form#preventEmptySubmit" } do |form| %>
+  <%= bridged_form_with model: @board, class: "flex flex-column gap", data: { controller: "form", action: "submit->form#preventEmptySubmit" } do |form| %>
     <h1 class="txt-x-large margin-none font-weight-black"><%= @page_title %></h1>
     <%= form.text_field :name, required: true, class: "input full-width", autofocus: true, autocomplete: "off", placeholder: "Name it…", data: { form_target: "input", action: "keydown.esc@document->form#cancel", validation_message: "Board names can‘t be blank" } %>
 
-    <button type="submit" class="btn btn--link center">
+    <button type="submit" class="btn btn--link center" data-bridge--form-target="submit">
       <span>Create board</span>
       <%= icon_tag "arrow-right" %>
     </button>

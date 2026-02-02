@@ -6,17 +6,17 @@
 
   <% if board.published? %>
     <div class="border-radius pad fill-selected">
-      <div class="flex-inline center justify-between gap">
-        <span class="txt-large"><%= icon_tag "lock" %></span>
-        <label class="switch flex align-center justify-between">
-          <%= form_with url: board_publication_path(board), method: :delete, data: { controller: "form" } do |form| %>
+      <%= form_with url: board_publication_path(board), method: :delete, class: "flex-inline center justify-between gap", data: { controller: "form" } do |form| %>
+        <label class="flex gap cursor-pointer">
+          <span class="txt-large"><%= icon_tag "lock" %></span>
+          <span class="switch flex align-center justify-between">
             <%= form.check_box :published, class: "switch__input", checked: true, data: { action: "change->form#submit" }, disabled: !Current.user.can_administer_board?(@board) %>
             <span class="switch__btn round"></span>
-            <span class="for-screen-reader">Turn off the public link</span>
-          <% end %>
+          </span>
+          <span class="for-screen-reader">Turn off the public link</span>
         </label>
-        <span class="txt-large"><%= icon_tag "world" %></span>
-      </div>
+        <span class="txt-large" aria-hidden="true"><%= icon_tag "world" %></span>
+      <% end %>
 
       <div class="flex align-center gap-half margin-block">
         <%= text_field_tag :publication_url, published_board_url(board), readonly: true, class: "full-width input fill-white" %>
@@ -40,17 +40,17 @@
     </div>
   <% else %>
     <div class="border-radius pad fill-shade">
-      <div class="flex-inline center justify-between gap">
-        <span class="txt-large"><%= icon_tag "lock" %></span>
-        <label class="switch flex align-center justify-between">
-          <%= form_with url: board_publication_path(board), method: :post, data: { controller: "form" } do |form| %>
+      <%= form_with url: board_publication_path(board), method: :post, class: "flex-inline center justify-between gap", data: { controller: "form" } do |form| %>
+        <span class="txt-large" aria-hidden="true"><%= icon_tag "lock" %></span>
+        <label class="flex gap cursor-pointer">
+          <span class="switch flex align-center justify-between">
             <%= form.check_box :published, class: "switch__input", checked: false, data: { action: "change->form#submit" }, disabled: !Current.user.can_administer_board?(@board) %>
             <span class="switch__btn round"></span>
-            <span class="for-screen-reader">Turn on the public link</span>
-          <% end %>
+          </span>
+          <span class="txt-large"><%= icon_tag "world" %></span>
+          <span class="for-screen-reader">Turn on the public link</span>
         </label>
-        <span class="txt-large"><%= icon_tag "world" %></span>
-      </div>
+      <% end %>
     </div>
   <% end %>
 <% end %>

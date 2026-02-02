@@ -24,8 +24,8 @@ module WebhooksHelper
 
   def link_to_webhooks(board, &)
     link_to board_webhooks_path(board_id: board),
-        class: [ "btn", { "btn--reversed": board.webhooks.any? } ],
-        data: { controller: "tooltip" } do
+        class: [ "btn btn--circle-mobile", { "btn--reversed": board.webhooks.any? } ],
+        data: { controller: "tooltip", bridge__overflow_menu_target: "item", bridge_title: "Webhooks" } do
       icon_tag("world") + tag.span("Webhooks", class: "for-screen-reader")
     end
   end

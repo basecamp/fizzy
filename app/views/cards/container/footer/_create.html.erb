@@ -1,0 +1,19 @@
+<div class="card-perma__notch card-perma__notch--bottom flex-column">
+  <div class="card-perma__notch-new-card-buttons">
+    <%= button_to card_publish_path(card), name: "creation_type", value: "add", class: "btn",
+          title: "Create card (#{ hotkey_label(["ctrl", "enter"]) })",
+          form: { data: { controller: "form bridge--form" } },
+          data: { form_target: "submit", bridge__form_target: "submit", controller: "clicker", action: "keydown.ctrl+enter@document->clicker#click keydown.meta+enter@document->clicker#click" } do %>
+      <span>Create card</span>
+    <% end %>
+
+    <%= button_to card_publish_path(card), method: :post, class: "btn btn--reversed", name: "creation_type", value: "add_another",
+          title: "Create and add another (#{ hotkey_label(["ctrl", "shift", "enter"]) })", form: { data: { controller: "form" } },
+          data: { form_target: "submit", controller: "clicker", action: "keydown.ctrl+shift+enter@document->clicker#click keydown.meta+shift+enter@document->clicker#click" } do %>
+      <span>Create and add another</span>
+    <% end %>
+  </div>
+
+  <%= render "cards/container/footer/saas/near_notice" if Fizzy.saas? %>
+</div>
+

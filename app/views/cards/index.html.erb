@@ -4,7 +4,7 @@
 <%= render "cards/broadcasts", filter: @filter %>
 
 <% content_for :header do %>
-  <h1 class="header__title divider divider--fade full-width">
+  <h1 class="header__title divider divider--fade full-width" data-bridge--title-target="header">
     <span class="overflow-ellipsis txt-capitalize-first-letter"><%= @user_filtering.selected_boards_label %></span>
   </h1>
 
@@ -19,9 +19,11 @@
 
 <%= turbo_frame_tag :cards_container do %>
   <section class="cards cards--grid">
-    <%= with_automatic_pagination :cards_paginated_container, @page do %>
-      <%= render "cards/display/previews", cards: @page.records, draggable: true %>
-    <% end %>
-    <div class="blank-slate blank-slate--empty blank-slate--filters">No cards match this filter</div>
+    <div class="cards__list hide-scrollbar">
+      <%= with_automatic_pagination :cards_paginated_container, @page do %>
+        <%= render "cards/display/previews", cards: @page.records, draggable: true %>
+      <% end %>
+      <div class="blank-slate">No cards match this filter</div>
+    </div>
   </section>
 <% end %>

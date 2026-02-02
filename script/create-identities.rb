@@ -11,7 +11,7 @@ ApplicationRecord.with_each_tenant do |tenant|
 
     # Use IdentityProvider to link the user's email to this tenant
     # This will find_or_create the identity and link it to the tenant
-    identity = IdentityProvider.link(email_address: user.email_address, to: tenant)
+    IdentityProvider.link(email_address: user.email_address, to: tenant)
 
     puts "  ✅ Linked identity for user #{user.id} (#{user.email_address}) to tenant '#{tenant}'"
   end

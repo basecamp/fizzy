@@ -59,9 +59,8 @@
   .icon--fizzy { --svg: url("fizzy.svg"); }
   .icon--globe { --svg: url("globe.svg "); }
   .icon--golden-ticket { --svg: url("golden-ticket.svg "); }
+  .icon--history { --svg: url("history.svg "); }
   .icon--home { --svg: url("home.svg "); }
-  .icon--install { --svg: url("install.svg "); }
-  .icon--install { --svg: url("install.svg "); }
   .icon--install-edge { --svg: url("install-edge.svg "); }
   .icon--lifebuoy { --svg: url("lifebuoy.svg "); }
   .icon--lock { --svg: url("lock.svg "); }
@@ -72,6 +71,8 @@
   .icon--menu-dots-horizontal { --svg: url("menu-dots-horizontal.svg "); }
   .icon--menu-dots-vertical { --svg: url("menu-dots-vertical.svg "); }
   .icon--minus { --svg: url("minus.svg "); }
+  .icon--monitor { --svg: url("monitor.svg "); }
+  .icon--moon { --svg: url("moon.svg "); }
   .icon--move { --svg: url("move.svg "); }
   .icon--notification-bell-access-only { --svg: url("bell.svg "); }
   .icon--notification-bell-watching { --svg: url("bell-off.svg "); }
@@ -96,6 +97,7 @@
   .icon--settings { --svg: url("settings.svg "); }
   .icon--share { --svg: url("share.svg "); }
   .icon--sliders { --svg: url("sliders.svg "); }
+  .icon--sun { --svg: url("sun.svg "); }
   .icon--switch { --svg: url("switch.svg "); }
   .icon--tag { --svg: url("tag.svg "); }
   .icon--tag-outline { --svg: url("tag-outline.svg "); }

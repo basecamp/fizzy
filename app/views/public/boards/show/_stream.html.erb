@@ -1,10 +1,16 @@
-<section id="the-stream" class="cards cards--considering" data-column-name="Maybe?"
+<section id="maybe"
+  class="cards cards--maybe is-expanded"
+  data-column-name="Maybe?"
+  data-collapsible-columns-target="column maybeColumn"
   data-action="turbo:before-morph-attribute->collapsible-columns#preventToggle">
   <div class="cards__transition-container">
     <header class="cards__header">
-      <div class="cards__expander">
+      <div hidden class="cards__expander">
         <h2 class="cards__expander-title" data-collapsible-columns-target="title">Maybe?</h2>
       </div>
+
+      <%# render "boards/show/expander", title: "Maybe?", count: column.cards.active.count, column_id: dom_id(column) %>
+      <%= render "boards/show/expander", title: "Maybe?", count: 2, column_id: "maybe" %>
 
       <%= link_to public_board_columns_stream_url(board.publication.key), class: "cards__maximize-button btn btn--circle txt-x-small borderless", data: { turbo_frame: "_top" } do %>
         <%= icon_tag "grid", class: "translucent" %>

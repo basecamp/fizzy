@@ -72,4 +72,17 @@ class SignupTest < ActiveSupport::TestCase
       assert_nil signup.user
     end
   end
+
+  test "#complete with name that is too long" do
+    Current.without_account do
+      signup = Signup.new(full_name: "A" * 241, identity: identities(:kevin))
+      signup.expects(:create_tenant).never
+
+      assert_not signup.complete
+
+      assert signup.errors[:full_name].any?
+      assert_nil signup.account
+      assert_nil signup.user
+    end
+  end
 end

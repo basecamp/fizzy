@@ -5,7 +5,7 @@ export default class extends Controller {
   static targets = [ "item", "counter" ]
   static values = {
     propertyName: String,
-    maxValue: { type: Number, default: 20 }
+    maxValue: { type: Number, default: 15 } // should match first geared pagination page size
   }
 
   initialize() {
@@ -13,7 +13,9 @@ export default class extends Controller {
   }
 
   connect() {
-    this.#updateCounter()
+    if (this.itemTargets.length > 0) {
+      this.#updateCounter()
+    }
   }
 
   itemTargetConnected() {

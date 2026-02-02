@@ -1,0 +1,63 @@
+<% @page_title = "Account admin" %>
+
+<% content_for :header do %>
+  <div class="header__actions header__actions--start">
+    <%= back_link_to "Accounts", saas.admin_accounts_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+  </div>
+<% end %>
+
+
+<div class="panel panel--wide shadow center">
+  <div class="flex flex-column gap txt-medium">
+    <h1 class="txt-x-large font-weight-black margin-none">Edit Account <%= @account.external_account_id %></h1>
+
+    <%= form_with model: @account, url: saas.admin_account_path(@account.external_account_id), class: "flex flex-column gap" do |form| %>
+      <table class="txt-align-start">
+        <tr>
+          <td class="txt-subtle">Account Name:</td>
+          <td class="margin-inline-start-none"><%= @account.name %></td>
+        </tr>
+        <tr>
+          <td class="txt-subtle">Subscription plan:</td>
+          <td class="margin-inline-start-none"><%= @account.plan.name %></td>
+        </tr>
+        <tr>
+          <td class="txt-subtle">Actual card count:</td>
+          <td class="margin-inline-start-none"><%= @account.cards_count %> cards </td>
+        </tr>
+        <tr>
+          <td class="txt-subtle">Actual bytes used:</td>
+          <td class="margin-inline-start-none"><%= storage_to_human_size(@account.bytes_used) %></td>
+        </tr>
+        <tr>
+          <td>
+            <%= form.label :card_count, class: "txt-subtle" do %>
+              <span>Override card count</span><br><%= "(Exceeds plan limit)" if @account.exceeding_card_limit? %>
+            <% end %>
+          </td>
+          <td><%= form.number_field :card_count, value: @account.overridden_limits&.card_count, class: "input" %></td>
+        </tr>
+        <tr>
+          <td>
+            <%= form.label :bytes_used, class: "txt-subtle" do %>
+              <span>Override bytes used</span><br><%= "(Exceeds plan limit)" if @account.exceeding_storage_limit? %>
+            <% end %>
+          </td>
+          <td><%= form.number_field :bytes_used, value: @account.overridden_limits&.bytes_used, class: "input" %></td>
+        </tr>
+      </table>
+
+      <button type="submit" class="btn btn--link full-width">Save changes</button>
+    <% end %>
+
+    <% if @account.overridden_limits %>
+      <%= button_to "Reset limits", saas.admin_account_overridden_limits_path(@account.external_account_id), method: :delete, class: "btn btn--negative full-width" %>
+    <% end %>
+
+    <% if @account.comped? %>
+      <%= button_to "Uncomp account", saas.admin_account_billing_waiver_path(@account.external_account_id), method: :delete, class: "btn btn--plain txt-negative txt-underline" %>
+    <% else %>
+      <%= button_to "Comp account", saas.admin_account_billing_waiver_path(@account.external_account_id), method: :post, class: "btn btn--plain txt-positive txt-underline" %>
+    <% end %>
+  </div>
+</div>

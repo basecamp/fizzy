@@ -7,8 +7,8 @@
         related_element_target: "related",
         related_element_group_value: card.id,
         action: "mouseover->related-element#highlight mouseout->related-element#unhighlight" } do %>
-  <div class="card__header flex align-start gap full-width">
-    <h4 class="card__board flex-inline align-start">
+  <div class="card__header">
+    <h4 class="card__board">
       <span class="card__id">
         <span class="for-screen-reader">Card number</span>
         <%= card.number %>
@@ -19,9 +19,7 @@
     </h4>
 
     <% unless event.action.in?(%w[ card_closed card_published card_reopened ]) %>
-      <span class="event__icon flex-item-justify-end txt-reversed">
-        <%= icon_tag event_action_icon(event) %>
-      </span>
+      <%= icon_tag event_action_icon(event), class: "event__icon" %>
     <% end %>
   </div>
   <div class="event__content">

@@ -1,0 +1,41 @@
+@layer base {
+  /*
+    Segoe UI Variable Fizzy font face configuration.
+
+    1. Segoe UI Variable (Weights 100-700):
+       Leverages variable font features to:
+       - Automatically adjust Weight (wght) dynamically within the 100-700 range.
+       - Automatically manage Optical Size (opsz) based on font-size.
+
+    2. Segoe UI Black (Weights 800-900):
+       Used as a fallback because Segoe UI Variable does not natively support 900 weight.
+       This ensures a consistent bold experience across all weights.
+  */
+  @font-face {
+    font-family: "Segoe UI Variable Fizzy";
+    src: local("Segoe UI Variable");
+    font-weight: 100 700;
+    font-style: normal;
+  }
+
+  @font-face {
+    font-family: "Segoe UI Variable Fizzy";
+    src: local("Segoe UI Variable");
+    font-weight: 100 700;
+    font-style: italic;
+  }
+
+  @font-face {
+    font-family: "Segoe UI Variable Fizzy";
+    src: local("Segoe UI Black");
+    font-weight: 800 900;
+    font-style: normal;
+  }
+
+  @font-face {
+    font-family: "Segoe UI Variable Fizzy";
+    src: local("Segoe UI Black Italic");
+    font-weight: 800 900;
+    font-style: italic;
+  }
+}

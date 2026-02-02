@@ -47,4 +47,24 @@ class Sessions::MenusControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
   end
+
+  test "show excludes cancelled accounts" do
+    sign_in_as @identity
+    @identity.users.delete_all
+    account1 = Account.create!(external_account_id: 9999994, name: "Active Account")
+    account2 = Account.create!(external_account_id: 9999995, name: "Cancelled Account")
+    user1 = @identity.users.create!(account: account1, name: "Kevin", role: "owner")
+    user2 = @identity.users.create!(account: account2, name: "Kevin", role: "owner")
+
+    # Cancel one account
+    account2.cancel(initiated_by: user2)
+
+    untenanted do
+      get session_menu_url
+    end
+
+    # Should redirect to the only active account
+    assert_response :redirect
+    assert_redirected_to root_url(script_name: account1.slug)
+  end
 end

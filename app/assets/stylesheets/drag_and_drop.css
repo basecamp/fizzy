@@ -15,9 +15,5 @@
     outline-offset: -2px;
     transition: background-color 200ms;
     z-index: 1;
-
-    .cards__heading {
-      background-color: transparent;
-    }
   }
 }

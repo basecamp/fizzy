@@ -1,6 +1,6 @@
 <div class="panel margin-block-double center shadow">
   <h1 class="font-black txt-x-large margin-none-block-end">You’re unsubscribed</h1>
-  <p class="margin-block-start-half">Thanks, <%= @user.first_name %>! Fizzy won’t send you any more email notifications. If you change your mind you can turn them back on in <%= link_to "Notifications Settings", notifications_settings_path %>.</p>
+  <p class="margin-block-start-half">Thanks, <%= @user.first_name %>! Fizzy won’t send you any more email notifications. If you change your mind, you can turn them back on in <%= link_to "Notification Settings", notifications_settings_path %>.</p>
 
   <%= link_to root_path, class: "btn btn--link margin-block-start" do %>
     <%= icon_tag "arrow-left" %>

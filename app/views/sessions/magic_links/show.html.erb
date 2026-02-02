@@ -3,17 +3,19 @@
 <div class="panel panel--centered flex flex-column gap-half <%= "shake" if flash[:alert] || flash[:shake] %>">
   <header>
     <h1 class="txt-x-large font-weight-black margin-none"><%= @page_title %></h1>
-    <p class="margin-none-block-start txt-medium">Then enter the verification code included in the email below:</p>
+    <p class="margin-none-block-start txt-medium txt-balance">
+      Then enter the verification code included in the email below:
+    </p>
   </header>
 
   <%= form_with url: session_magic_link_path, method: :post, html: { data: { controller: "magic-link" } } do |form| %>
-    <%= form.text_field :code, required: true, class: "input center txt-align-enter txt-large",
+    <%= form.text_field :code, required: true, class: "input center txt-align-enter txt-large txt-uppercase",
         autofocus: true, autocorrect: "off", autocapitalize: "off", spellcheck: "false", "data-1p-ignore": true,
         autocomplete: "one-time-code", maxlength: "6", placeholder: "••••••", value: params[:code],
         data: { magic_link_target: "input", action: "keydown.enter->magic-link#submitOnEnter paste->magic-link#submitOnPaste" } %>
   <% end %>
 
-  <p class="txt-small">The code you receive will work for <%= distance_of_time_in_words(MagicLink::EXPIRATION_TIME) %>.</p>
+  <p class="txt-small txt-balance">The code sent to <strong><%= email_address_pending_authentication %></strong> will work for <%= distance_of_time_in_words(MagicLink::EXPIRATION_TIME) %>.</p>
 </div>
 
 <% if Rails.env.development? && flash[:magic_link_code].present? %>

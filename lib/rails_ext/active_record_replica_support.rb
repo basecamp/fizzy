@@ -34,6 +34,18 @@ module ActiveRecordReplicaSupport
     def replica_configured?
       configurations.find_db_config("replica").present?
     end
+
+    # Execute block using read replica if available, otherwise use primary.
+    #
+    # Example:
+    #   ApplicationRecord.with_reading_role { User.count }
+    def with_reading_role(&block)
+      if replica_configured?
+        connected_to(role: :reading, &block)
+      else
+        yield
+      end
+    end
   end
 end
 

@@ -1,0 +1,2 @@
+<% ENV["BETA_NUMBER"] = "4" %>
+<%= ERB.new(File.read(File.join(Gem::Specification.find_by_name("fizzy-saas").gem_dir, "config", "deploy.beta.yml")), trim_mode: 2).result %>

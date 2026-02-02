@@ -7,7 +7,7 @@ on:
         type: boolean
         required: true
     secrets:
-      GH_TOKEN:
+      FIZZY_GH_TOKEN:
         required: false
 
 permissions:
@@ -50,13 +50,13 @@ jobs:
       MYSQL_USER: root
       FIZZY_DB_HOST: 127.0.0.1
       FIZZY_DB_PORT: 3306
-      BUNDLE_GITHUB__COM: ${{ inputs.saas && format('x-access-token:{0}', secrets.GH_TOKEN) || '' }}
+      BUNDLE_GITHUB__COM: ${{ inputs.saas && format('x-access-token:{0}', secrets.FIZZY_GH_TOKEN) || '' }}
 
     steps:
       - name: Install system packages
         run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libsqlite3-0 libvips curl ffmpeg
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: ruby/setup-ruby@v1
         with:

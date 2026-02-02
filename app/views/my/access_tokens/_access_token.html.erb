@@ -1,0 +1,13 @@
+<tr style="view-transition-name: <%= dom_id(access_token) %>">
+  <td><strong><%= access_token.description %></strong></td>
+  <td><%= access_token.permission.humanize %></td>
+  <td><%= local_datetime_tag access_token.created_at, style: :datetime %></td>
+  <td>
+    <%= button_to my_access_token_path(access_token), method: :delete,
+          class: "btn txt-negative btn--circle txt-x-small borderless fill-transparent",
+          data: { turbo_confirm: "Are you sure you want to permanently revoke this access token?" } do %>
+      <%= icon_tag "trash" %>
+      <span class="for-screen-reader">Edit this token</span>
+    <% end %>
+  </td>
+</tr>

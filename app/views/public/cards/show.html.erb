@@ -14,7 +14,7 @@
 
 <% content_for :header do %>
   <div class="header__actions header__actions--start">
-    <%= back_link_to @card.board.name, published_board_url(@card.board), "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click", style: "view-transistion-name: card-board-title;" %>
+    <%= back_link_to @card.board.name, published_board_url(@card.board), "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
   </div>
 <% end %>
 
@@ -30,11 +30,12 @@
       <div class="card__body justify-space-between">
         <%= render "public/cards/show/content", card: @card %>
         <%= render "cards/display/public_preview/columns", card: @card if @card.open? %>
+        <%= render "cards/display/common/stamp", card: @card %>
       </div>
 
       <%= render "public/cards/show/steps", card: @card %>
 
-      <footer class="card__footer full-width flex align-start gap">
+      <footer class="card__footer">
         <%= render "cards/display/public_preview/meta", card: @card %>
         <%= render "cards/display/perma/background", card: @card %>
       </footer>

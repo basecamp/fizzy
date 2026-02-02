@@ -6,7 +6,7 @@
 
   <%= tag.li class: "popup__item", data: { filter_target: "item", navigable_list_target: "item" } do %>
     <%= icon_tag "logout", class: "popup__icon" %>
-    <%= button_to session_url(script_name: nil), method: :delete, class: "popup__btn btn", data: { turbo: false } do %>
+    <%= button_to session_path(script_name: nil), method: :delete, class: "popup__btn btn", data: { turbo: false } do %>
       <span>Sign out</span>
     <% end %>
   <% end %>

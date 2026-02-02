@@ -17,6 +17,7 @@ module SearchTestHelper
     Current.account = @account
     @identity = Identity.create!(email_address: "test@example.com")
     @user = User.create!(name: "Test User", account: @account, identity: @identity)
+    Current.user = @user
     @board = Board.create!(name: "Test Board", account: @account, creator: @user)
   end
 

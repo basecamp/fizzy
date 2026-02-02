@@ -3,12 +3,12 @@
 
   <figure class="lightbox__figure">
     <img src="" class="lightbox__image" data-lightbox-target="zoomedImage" />
-    <figcaption class="lightbox__caption" data-lightbox-target="caption"></figcaption>
+    <figcaption class="lightbox__caption" data-lightbox-target="caption" tabindex="-1" data-dialog-target="focusTouch">&nbsp</figcaption>
   </figure>
 
   <div class="lightbox__actions">
     <%= yield %>
-    <button class="btn fill-white" data-action="dialog#close" data-controller="hotkey tooltip">
+    <button class="btn fill-white" data-action="dialog#close" data-controller="hotkey tooltip" data-dialog-target="focusMouse">
       <%= icon_tag "remove" %>
       <span class="for-screen-reader">Close (esc)</span>
     </button>

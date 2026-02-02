@@ -16,13 +16,19 @@ module SsrfProtection
 
   def resolve_public_ip(hostname)
     ip_addresses = resolve_dns(hostname)
-    public_ips = ip_addresses.reject { |ip| private_address?(ip) }
+    public_ips = ip_addresses.reject { |ip| blocked_address?(ip) }
     public_ips.sort_by { |ipaddr| ipaddr.ipv4? ? 0 : 1 }.first&.to_s
   end
 
-  def private_address?(ip)
+  def blocked_address?(ip)
     ip = IPAddr.new(ip.to_s) unless ip.is_a?(IPAddr)
-    ip.private? || ip.loopback? || ip.link_local? || ip.ipv4_mapped? || in_disallowed_range?(ip)
+
+    ip.private? ||
+      ip.loopback? ||
+      ip.link_local? ||
+      ip.ipv4_mapped? ||
+      ip.ipv4_compat? ||
+      in_disallowed_range?(ip)
   end
 
   private

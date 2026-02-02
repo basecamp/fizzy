@@ -1,0 +1,21 @@
+<h3 class="margin-block-start txt-x-large font-weight-black txt-tight-lines">
+  <% if Current.account.exceeding_storage_limit? %>
+    You’ve run out of storage
+  <% elsif Current.account.nearing_plan_storage_limit? %>
+    You’ve used <strong><%= storage_to_human_size(Current.account.billed_bytes_used) %></strong> of storage
+  <% else %>
+    Thank you for buying Fizzy
+  <% end %>
+</h3>
+
+<% if Current.account.nearing_plan_storage_limit? || Current.account.exceeding_storage_limit? %>
+  <p class="margin-block-start-half">
+    The <strong><%= Current.account.plan.name %></strong> plan includes <strong><%= storage_to_human_size(Plan.paid.storage_limit) %></strong>. Upgrade to get <strong><%= storage_to_human_size(Plan.paid_with_extra_storage.storage_limit) %></strong> extra storage for <%= format_currency(Plan.paid_with_extra_storage.price - Plan.paid.price) %>/month more.
+  </p>
+
+  <%= button_to "Upgrade to #{Plan.paid_with_extra_storage.name} for #{ number_to_currency(Plan.paid_with_extra_storage.price, strip_insignificant_zeros: true) }/month", account_subscription_upgrade_path, class: "btn settings-subscription__button txt-medium", form: { data: { turbo: false } } %>
+<% end %>
+
+<% if Current.account.subscription %>
+  <%= render "account/settings/subscription", subscription: Current.account.subscription %>
+<% end %>

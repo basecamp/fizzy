@@ -12,14 +12,14 @@
         height: height %>
 <% elsif blob.audio? %>
   <audio controls="true" width="100%" preload="metadata">
-    <source src="<%= rails_blob_url(blob) %>" type="<%= blob.content_type %>">
+    <source src="<%= rails_blob_path(blob) %>" type="<%= blob.content_type %>">
   </audio>
 <% elsif blob.variable? %>
-  <%= link_to url_for(blob.variant(variant)), data: { action: "lightbox#open:prevent", lightbox_target: "image" } do %>
-    <%= image_tag url_for(blob.variant(variant)), width: width, height: height %>
+  <%= link_to rails_representation_path(blob.variant(variant)), data: { lightbox_target: "image", lightbox_caption_value: blob.filename.to_s } do %>
+    <%= image_tag rails_representation_path(blob.variant(variant)), width: width, height: height %>
   <% end %>
 <% elsif blob.previewable? %>
-  <%= image_tag url_for(blob.preview(variant)), width: width, height: height %>
+  <%= image_tag rails_representation_path(blob.preview(variant)), width: width, height: height %>
 <% else %>
   <span class="attachment__icon"><%= blob.filename.extension&.downcase.presence || "unknown" %></span>
 <% end %>

@@ -1,0 +1,14 @@
+@layer platform {
+  [data-platform~=android] {
+    .hide-on-android {
+      display: none;
+    }
+
+    /* Filters
+    /* ------------------------------------------------------------------------ */
+
+    .filters {
+      --text-x-small: 1rem;
+    }
+  }
+}

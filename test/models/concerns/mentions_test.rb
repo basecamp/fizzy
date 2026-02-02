@@ -70,16 +70,6 @@ class MentionsTest < ActiveSupport::TestCase
     end
   end
 
-  test "don't create mentions from comments when belonging to unpublished cards" do
-    perform_enqueued_jobs only: Mention::CreateJob do
-      card = boards(:writebook).cards.create title: "Cleanup", description: "Some initial content"
-
-      assert_no_difference -> { Mention.count } do
-        card.comments.create!(body: "Great work on this #{mention_html_for(users(:david))}!")
-      end
-    end
-  end
-
   test "can't mention users that don't have access to the board" do
     boards(:writebook).update! all_access: false
     boards(:writebook).accesses.revoke_from(users(:david))

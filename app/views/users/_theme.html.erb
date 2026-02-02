@@ -1,0 +1,25 @@
+<section class="settings__section">
+  <header>
+    <h2 class="divider">Appearance</h2>
+  </header>
+
+  <div class="theme-switcher flex gap max-width justify-center txt-small margin-block-start-half">
+    <label class="btn theme-switcher__btn">
+      <%= icon_tag "sun" %>
+      <span class="overflow-ellipsis">Always light</span>
+      <input type="radio" name="theme" data-action="click->theme#setLight" data-theme-target="lightButton">
+    </label>
+
+    <label class="btn theme-switcher__btn" >
+      <%= icon_tag "moon" %>
+      <span class="overflow-ellipsis">Always dark</span>
+      <input type="radio" name="theme" data-action="click->theme#setDark" data-theme-target="darkButton">
+    </label>
+
+    <label class="btn theme-switcher__btn">
+      <%= icon_tag "monitor" %>
+      <span class="overflow-ellipsis">Same as OS</span>
+      <input type="radio" name="theme" data-action="click->theme#setAuto" data-theme-target="autoButton">
+    </label>
+  </div>
+</section>

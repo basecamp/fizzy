@@ -4,7 +4,7 @@
   <h1 class="txt-x-large font-weight-black margin-block-end"><%= @page_title %></h1>
 
   <%= form_with model: @signup, url: signup_completion_path, scope: "signup", class: "flex flex-column gap", data: { controller: "form" } do |form| %>
-    <%= form.text_field :full_name, class: "input txt-large", autocomplete: "name", placeholder: "Enter your full name…", autofocus: true, required: true %>
+    <%= form.text_field :full_name, class: "input txt-large", autocomplete: "name", placeholder: "Enter your full name…", autofocus: true, required: true, maxlength: 240 %>
 
     <p>You're one step away. Just enter your name to get your own Fizzy account.</p>
 

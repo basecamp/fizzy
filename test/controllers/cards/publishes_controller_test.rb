@@ -28,6 +28,6 @@ class Cards::PublishesControllerTest < ActionDispatch::IntegrationTest
 
     new_card = Card.last
     assert new_card.drafted?
-    assert_redirected_to new_card
+    assert_redirected_to card_draft_path(new_card)
   end
 end

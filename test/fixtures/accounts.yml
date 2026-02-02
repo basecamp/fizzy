@@ -9,3 +9,9 @@ initech:
   name: Initech LLC
   external_account_id: <%= ActiveRecord::FixtureSet.identify("initech") %>
   cards_count: 0
+
+acme:
+  id: <%= ActiveRecord::FixtureSet.identify("acme", :uuid) %>
+  name: ACME
+  external_account_id: <%= ActiveRecord::FixtureSet.identify("acme") %>
+  cards_count: 0

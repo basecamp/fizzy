@@ -39,6 +39,27 @@ class UserTest < ActiveSupport::TestCase
     assert_equal "ÉLH", User.new(name: "Éva-Louise Hernández").initials
   end
 
+  test "name methods handle blank names gracefully" do
+    user = User.new(name: "")
+    assert_equal "", user.familiar_name
+    assert_nil user.first_name
+    assert_nil user.last_name
+    assert_equal "", user.initials
+  end
+
+  test "validates name presence" do
+    user = User.new(account: accounts("37s"), role: "member", name: "")
+    assert_not user.valid?
+    assert_includes user.errors[:name], "can't be blank"
+
+    user.name = "   "
+    assert_not user.valid?
+    assert_includes user.errors[:name], "can't be blank"
+
+    user.name = "Victor Cooper"
+    assert user.valid?
+  end
+
   test "setup?" do
     user = users(:kevin)
 

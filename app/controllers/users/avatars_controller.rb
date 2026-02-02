@@ -1,6 +1,4 @@
 class Users::AvatarsController < ApplicationController
-  include ActiveStorage::Streaming
-
   allow_unauthenticated_access only: :show
 
   before_action :set_user
@@ -10,7 +8,7 @@ class Users::AvatarsController < ApplicationController
     if @user.system?
       redirect_to view_context.image_path("system_user.png")
     elsif @user.avatar.attached?
-      redirect_to rails_blob_url(@user.avatar_thumbnail, disposition: "inline")
+      redirect_to rails_blob_path(@user.avatar_thumbnail, disposition: "inline")
     elsif stale? @user, cache_control: cache_control
       render_initials
     end

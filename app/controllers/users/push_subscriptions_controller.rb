@@ -5,13 +5,7 @@ class Users::PushSubscriptionsController < ApplicationController
   end
 
   def create
-    if subscription = @push_subscriptions.find_by(push_subscription_params)
-      subscription.touch
-    else
-      @push_subscriptions.create! push_subscription_params.merge(user_agent: request.user_agent)
-    end
-
-    head :ok
+    @push_subscriptions.create_with(user_agent: request.user_agent).create_or_find_by!(push_subscription_params)
   end
 
   def destroy

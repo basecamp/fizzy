@@ -54,6 +54,14 @@ class SmokeTest < ApplicationSystemTestCase
       assert_selector "a img[src*='/rails/active_storage']"
       assert_selector "figcaption span.attachment__name", text: "moon.jpg"
     end
+
+    # Click the image to open the lightbox
+    find("action-text-attachment figure.attachment a:has(img)").click
+
+    assert_selector "dialog.lightbox[open]"
+    within("dialog.lightbox") do
+      assert_selector "img.lightbox__image[src*='/rails/active_storage']"
+    end
   end
 
   test "dismissing notifications" do

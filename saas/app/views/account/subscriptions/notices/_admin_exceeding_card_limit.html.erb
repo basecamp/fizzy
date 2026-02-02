@@ -1,0 +1,4 @@
+<strong>You’ve used your <u><%= Plan.free.card_limit %></u> free cards.</strong>
+<%= link_to account_settings_path(anchor: "subscription"), class: "btn settings-subscription__button" do %>
+  <span>Upgrade to Unlimited</span>
+<% end %>

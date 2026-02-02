@@ -30,7 +30,7 @@
     }
 
     &:has(.card--notification) {
-      .notifications-list__empty-message {
+      .notifications-list__blank-slate {
         display: none;
       }
     }
@@ -95,12 +95,12 @@
     display: none;
 
     .notifications--on & {
-      display: block;
+      display: inline;
     }
   }
 
   .notifications__off-message {
-    display: block;
+    display: inline;
 
     .notifications--on & {
       display: none;
@@ -108,7 +108,7 @@
   }
 
   .notifications__status {
+    --panel-border-radius: 0.5em;
     --panel-padding: var(--block-space);
   }
 }
-

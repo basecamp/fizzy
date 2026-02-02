@@ -34,6 +34,7 @@ export default class extends Controller {
   showModalAndSubmit(event) {
     this.showModal()
     this.formTarget.requestSubmit()
+    this.#restoreFocusAfterTurboFrameLoads()
   }
 
   showModal() {
@@ -49,6 +50,12 @@ export default class extends Controller {
     } else {
       this.#loadTurboFrame()
     }
+  }
+
+  #restoreFocusAfterTurboFrameLoads() {
+    this.turboFrameTarget.addEventListener("turbo:frame-load", () => {
+      this.searchInputTarget.focus()
+    }, { once: true })
   }
 
   #loadTurboFrame() {

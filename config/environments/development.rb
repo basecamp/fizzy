@@ -26,7 +26,7 @@ Rails.application.configure do
     config.cache_store = :memory_store
     config.public_file_server.headers = { "Cache-Control" => "public, max-age=#{2.days.to_i}" }
   else
-    config.action_controller.perform_caching = true
+    config.action_controller.perform_caching = false
 
     config.cache_store = :null_store
   end
@@ -34,6 +34,8 @@ Rails.application.configure do
   # Store uploaded files on the local file system (see config/storage.yml for options).
   if Rails.root.join("tmp/minio-dev.txt").exist?
     config.active_storage.service = :devminio
+    config.x.content_security_policy.connect_src = "http://minio.localhost:39000"
+    config.x.content_security_policy.img_src = "http://minio.localhost:39000"
   else
     config.active_storage.service = :local
   end
@@ -83,9 +85,15 @@ Rails.application.configure do
     config.action_mailer.raise_delivery_errors = false
   end
 
-  config.hosts = %w[ fizzy.localhost localhost 127.0.0.1 ] + [ /^fizzy-\d+(:\d+)$/ ]
+  config.hosts = [
+    "fizzy.localhost",
+    "localhost",
+    "127.0.0.1",
+    /fizzy-\d+/,   # review apps: fizzy-123, fizzy-456:3000
+    /.*\.ts\.net/, # tailscale serve: hostname.tail1234.ts.net
+    /.*\.nip\.io/  # nip.io for mobile apps
+  ]
 
-  # Set host to be used by links generated in mailer and notification view templates.
-  config.action_controller.default_url_options = { host: config.hosts.first, port: 3006 }
-  config.action_mailer.default_url_options     = { host: config.hosts.first, port: 3006 }
+  # Canonical host for mailer URLs (emails always link here, not personal Tailscale URLs)
+  config.action_mailer.default_url_options = { host: "#{config.hosts.first}:3006" }
 end

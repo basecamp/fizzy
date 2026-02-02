@@ -22,6 +22,7 @@
       <%= general_prompts(@card.board) %>
     <% end %>
 
-    <%= link_to "Close editor and discard changes", @card, data: { form_target: "cancel" }, hidden: true %>
+    <%= link_to "Close editor and discard changes", @card,
+          data: { form_target: "cancel", bridge__form_target: "cancel", bridge_title: "Cancel" }, hidden: true %>
   <% end %>
 <% end %>
