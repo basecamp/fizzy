@@ -50,6 +50,8 @@ class Account::DataTransfer::ActionTextRichTextRecordSet < Account::DataTransfer
       if missing.any?
         raise IntegrityError, "#{file_path} is missing required fields: #{missing.join(', ')}"
       end
+
+      check_associations_dont_exist(data)
     end
 
     def convert_sgids_to_gids(content)
