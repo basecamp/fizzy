@@ -181,6 +181,7 @@ export default class extends Controller {
       this.#collapseAllExcept(expandedColumn)
     } else {
       this.#collapseAllExcept(this.maybeColumnTarget)
+      this.#expand(this.maybeColumnTarget, false)
     }
   }
 
