@@ -1,0 +1,15 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["2WNYUYRS7G.do.fizzy.app.ios"],
+        "components": [
+          {
+            "/": "/*",
+            "comment": "Matches all paths."
+          }
+        ]
+      }
+    ]
+  }
+}
