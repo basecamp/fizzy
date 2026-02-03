@@ -24,6 +24,12 @@
       <%= icon_tag "arrow-right" %>
     </button>
   <% end %>
+
+  <p>
+    <%= link_to new_account_import_path, class: "btn btn--plain txt-link center txt-small", data: { turbo_prefetch: false } do %>
+      <span>Or import an exported account</span>
+    <% end %>
+  </p>
 </div>
 
 <% content_for :footer do %>
