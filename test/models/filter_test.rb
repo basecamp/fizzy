@@ -45,6 +45,16 @@ class FilterTest < ActiveSupport::TestCase
     assert_empty users(:david).filters.new(board_ids: [ boards(:writebook).id ]).boards
   end
 
+  test "filter by column" do
+    filter = users(:david).filters.new column_ids: [ columns(:writebook_in_progress).id ]
+    assert_equal [ cards(:text) ], filter.cards
+
+    filter = users(:david).filters.new column_ids: [ columns(:writebook_triage).id ]
+    assert_includes filter.cards, cards(:logo)
+    assert_includes filter.cards, cards(:layout)
+    assert_not_includes filter.cards, cards(:text)
+  end
+
   test "remembering equivalent filters" do
     assert_difference "Filter.count", +1 do
       filter = users(:david).filters.remember(sorted_by: "latest", assignment_status: "unassigned", tag_ids: [ tags(:mobile).id ])
@@ -63,8 +73,8 @@ class FilterTest < ActiveSupport::TestCase
   end
 
   test "turning into params" do
-    filter = users(:david).filters.new sorted_by: "latest", tag_ids: "", assignee_ids: [ users(:jz).id ], board_ids: [ boards(:writebook).id ]
-    expected = { assignee_ids: [ users(:jz).id ], board_ids: [ boards(:writebook).id ] }
+    filter = users(:david).filters.new sorted_by: "latest", tag_ids: "", assignee_ids: [ users(:jz).id ], board_ids: [ boards(:writebook).id ], column_ids: [ columns(:writebook_in_progress).id ]
+    expected = { assignee_ids: [ users(:jz).id ], board_ids: [ boards(:writebook).id ], column_ids: [ columns(:writebook_in_progress).id ] }
     assert_equal expected, filter.as_params
   end
 
