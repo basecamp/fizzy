@@ -37,8 +37,13 @@ class ActionPack::WebAuthn::CoseKey
   class UnsupportedKeyTypeError < StandardError; end
 
   # COSE key labels
-  KTY_LABEL = 1
-  ALG_LABEL = 3
+  KEY_TYPE_LABEL = 1
+  ALGORITHM_LABEL = 3
+  EC2_CURVE_LABEL = -1
+  EC2_X_LABEL = -2
+  EC2_Y_LABEL = -3
+  RSA_N_LABEL = -1
+  RSA_E_LABEL = -2
 
   # COSE key types
   EC2 = 2
@@ -51,6 +56,9 @@ class ActionPack::WebAuthn::CoseKey
   # COSE EC2 curves
   P256 = 1
 
+  # OpenSSL types
+  UNCOMPRESSED_POINT_MARKER = 0x04
+
   attr_reader :key_type, :algorithm, :parameters
 
   class << self
@@ -61,8 +69,8 @@ class ActionPack::WebAuthn::CoseKey
     def decode(bytes)
       data = ActionPack::WebAuthn::CborDecoder.decode(bytes)
       new(
-        key_type: data[KTY_LABEL],
-        algorithm: data[ALG_LABEL],
+        key_type: data[KEY_TYPE_LABEL],
+        algorithm: data[ALGORITHM_LABEL],
         parameters: data
       )
     end
@@ -91,14 +99,14 @@ class ActionPack::WebAuthn::CoseKey
 
   private
     def build_ec2_es256_key
-      curve = parameters[-1]
+      curve = parameters[EC2_CURVE_LABEL]
       raise UnsupportedKeyTypeError, "Unsupported EC curve: #{curve}" unless curve == P256
 
-      x = parameters[-2]
-      y = parameters[-3]
+      x = parameters[EC2_X_LABEL]
+      y = parameters[EC2_Y_LABEL]
 
       # Uncompressed point format: 0x04 || x || y
-      public_key_bytes = [ 0x04, *x.bytes, *y.bytes ].pack("C*")
+      public_key_bytes = [ UNCOMPRESSED_POINT_MARKER, *x.bytes, *y.bytes ].pack("C*")
 
       asn1 = OpenSSL::ASN1::Sequence([
         OpenSSL::ASN1::Sequence([
@@ -112,8 +120,8 @@ class ActionPack::WebAuthn::CoseKey
     end
 
     def build_rsa_rs256_key
-      n = OpenSSL::BN.new(parameters[-1], 2)
-      e = OpenSSL::BN.new(parameters[-2], 2)
+      n = OpenSSL::BN.new(parameters[RSA_N_LABEL], 2)
+      e = OpenSSL::BN.new(parameters[RSA_E_LABEL], 2)
 
       asn1 = OpenSSL::ASN1::Sequence([
         OpenSSL::ASN1::Sequence([
