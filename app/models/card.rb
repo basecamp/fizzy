@@ -58,6 +58,7 @@ class Card < ApplicationRecord
     transaction do
       card.update!(board: new_board)
       card.events.update_all(board_id: new_board.id)
+      Event.where(eventable: card.comments).update_all(board_id: new_board.id)
     end
   end
 

@@ -128,25 +128,29 @@ class CardTest < ActiveSupport::TestCase
 
   test "move cards to a different board" do
     card = cards(:logo)
-    old_board = boards(:writebook)
+    old_board = card.board
     new_board = boards(:private)
 
-    assert_equal old_board, card.board
+    card.comments.create!(body: "Sensitive information", creator: users(:david))
 
-    assert card.events.where(board: old_board).exists?
+    card_events_on_old_board = card.events.where(board: old_board)
+    comment_events_on_old_board = Event.where(board: old_board, eventable: card.comments)
+
+    assert card_events_on_old_board.exists?
+    assert comment_events_on_old_board.exists?
 
     card.move_to(new_board)
 
     assert_equal new_board, card.reload.board
 
-    events_in_old_board = card.events.where(board: old_board)
-    events_in_new_board = card.events.where(board: new_board)
+    card_events_on_new_board = card.events.where(board: new_board)
+    comment_events_on_new_board = Event.where(board: new_board, eventable: card.comments)
 
-    assert_empty events_in_old_board
-    assert events_in_new_board.exists?
-
-    board_changed_event = events_in_new_board.find { |event| event.action == "card_board_changed" }
-    assert board_changed_event
+    assert_empty card_events_on_old_board
+    assert_empty comment_events_on_old_board
+    assert card_events_on_new_board.exists?
+    assert comment_events_on_new_board.exists?
+    assert card_events_on_new_board.find_by(action: "card_board_changed")
   end
 
   test "a card is filled if it has either the title or the description set" do
