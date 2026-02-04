@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import { nextFrame, debounce } from "helpers/timing_helpers";
+import { isNative } from "helpers/platform_helpers";
 
 export default class extends Controller {
   static classes = [ "collapsed", "expanded", "noTransitions", "titleNotVisible" ]
@@ -114,7 +115,7 @@ export default class extends Controller {
     }
 
     if (window.matchMedia('(max-width: 639px)').matches) {
-      column.scrollIntoView({ behavior: "smooth", inline: "center" })
+      column.scrollIntoView({ behavior: isNative() ? "instant" : "smooth", inline: "center" })
     }
   }
 
