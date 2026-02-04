@@ -1,0 +1,27 @@
+<% if card.estimated? || card.business_value.present? || card.difficulty.present? %>
+  <div class="card__estimates-display margin-top-1 txt-small txt-subtle">
+    <div class="flex gap-1">
+      <% if card.business_value.present? %>
+        <span>
+          BV: <%= card.business_value %>/10
+        </span>
+        <span class="txt-subtle">--</span>
+      <% end %>
+
+      <% if card.difficulty.present? %>
+        <span>
+          DI: <%= card.difficulty %>/10
+        </span>
+        <% if card.estimate_hours.present? %>
+          <span class="txt-subtle">--</span>
+        <% end %>
+      <% end %>
+
+      <% if card.estimate_hours.present? %>
+        <span>
+          Est: <%= number_with_precision(card.estimate_hours, precision: 1, strip_insignificant_zeros: true) %>h
+        </span>
+      <% end %>
+    </div>
+  </div>
+<% end %>

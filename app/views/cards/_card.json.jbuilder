@@ -11,6 +11,11 @@ json.cache! card do
   json.last_active_at card.last_active_at.utc
   json.created_at card.created_at.utc
 
+  # Estimates
+  json.business_value card.business_value
+  json.difficulty card.difficulty
+  json.estimate_hours card.estimate_hours
+
   json.url card_url(card)
 
   json.board card.board, partial: "boards/board", as: :board

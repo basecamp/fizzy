@@ -1,0 +1,13 @@
+<% if card.business_value.present? || card.difficulty.present? || card.estimate_hours.present? %>
+  <span class="card__estimate-badge txt-x-small txt-subtle">
+    <% if card.business_value.present? %>
+      <%= card.business_value %>
+    <% end %>
+    <% if card.difficulty.present? %>
+      <% if card.business_value.present? %> <% end %>--<%= card.difficulty %>
+    <% end %>
+    <% if card.estimate_hours.present? %>
+      <% if card.business_value.present? || card.difficulty.present? %> <% end %>--<%= number_with_precision(card.estimate_hours, precision: 1, strip_insignificant_zeros: true) %>h
+    <% end %>
+  </span>
+<% end %>

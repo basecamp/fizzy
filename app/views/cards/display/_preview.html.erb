@@ -24,6 +24,7 @@
       <%= render "cards/display/preview/board", card: card %>
       <%= render "cards/display/preview/tags", card: card %>
       <%= render "cards/display/preview/steps", card: card %>
+      <%= render "cards/display/preview/estimate_badge", card: card %>
       <%= icon_tag "attachment", class: "card__attachments-indicator translucent" if card.has_attachments? %>
 
       <% if card.triaged? %>

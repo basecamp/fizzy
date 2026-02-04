@@ -22,6 +22,46 @@
       <%= general_prompts(@card.board) %>
     <% end %>
 
+    <div class="card__estimates margin-top-1 padding-1" style="background: var(--color-subtle); border-radius: var(--border-radius);">
+      <div class="txt-small txt-subtle margin-bottom-half">
+        <strong>Estimates</strong>
+      </div>
+      <div class="flex gap-1">
+        <div class="flex flex-column" style="flex: 1;">
+          <%= form.label :business_value, class: "txt-x-small txt-subtle" do %>
+            BV (1-10)
+          <% end %>
+          <%= form.number_field :business_value, min: 1, max: 10, 
+                class: "input input--sm", 
+                style: "width: 100%; padding: 0.25rem 0.5rem; font-size: 0.875rem;",
+                placeholder: "—",
+                data: { action: "change->local-save#save" } %>
+        </div>
+
+        <div class="flex flex-column" style="flex: 1;">
+          <%= form.label :difficulty, class: "txt-x-small txt-subtle" do %>
+            Diff (1-10)
+          <% end %>
+          <%= form.number_field :difficulty, min: 1, max: 10, 
+                class: "input input--sm", 
+                style: "width: 100%; padding: 0.25rem 0.5rem; font-size: 0.875rem;",
+                placeholder: "—",
+                data: { action: "change->local-save#save" } %>
+        </div>
+
+        <div class="flex flex-column" style="flex: 1;">
+          <%= form.label :estimate_hours, class: "txt-x-small txt-subtle" do %>
+            Est (hours)
+          <% end %>
+          <%= form.number_field :estimate_hours, step: 0.5, min: 0, 
+                class: "input input--sm", 
+                style: "width: 100%; padding: 0.25rem 0.5rem; font-size: 0.875rem;",
+                placeholder: "—",
+                data: { action: "change->local-save#save" } %>
+        </div>
+      </div>
+    </div>
+
     <%= link_to "Close editor and discard changes", @card,
           data: { form_target: "cancel", bridge__form_target: "cancel", bridge_title: "Cancel" }, hidden: true %>
   <% end %>
