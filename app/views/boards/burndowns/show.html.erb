@@ -1,0 +1,145 @@
+<% @page_title = "#{@board.name} - Burndown Chart" %>
+
+<% content_for :header do %>
+  <div class="header__actions header__actions--start">
+    <%= link_back_to_board(@board) %>
+  </div>
+
+  <h1 class="header__title" data-bridge--title-target="header">
+    <div>
+      <span class="overflow-ellipsis">Burndown Chart</span>
+      <div class="txt-small txt-subtle margin-top-half">
+        Sprint: <%= @burndown[:start_date].strftime('%b %d') %> - <%= @burndown[:end_date].strftime('%b %d, %Y') %>
+      </div>
+    </div>
+  </h1>
+
+  <div class="header__actions header__actions--end">
+    <%= link_to "Settings", edit_board_path(@board), class: "btn btn--secondary" %>
+  </div>
+<% end %>
+
+<div class="margin-2">
+  <!-- Summary Stats -->
+  <div class="flex gap-2 margin-bottom-2" style="background: var(--color-subtle); padding: 1.5rem; border-radius: var(--border-radius);">
+    <div class="flex-item-grow">
+      <div class="txt-x-small txt-subtle">COMMITTED STORIES</div>
+      <div class="txt-xx-large"><strong><%= number_with_precision(@burndown[:total_estimate], precision: 1, strip_insignificant_zeros: true) %>h</strong></div>
+    </div>
+
+    <div class="flex-item-grow">
+      <div class="txt-x-small txt-subtle">AVAILABLE TIME</div>
+      <div class="txt-xx-large"><strong><%= number_with_precision(@burndown[:available_hours], precision: 1, strip_insignificant_zeros: true) %>h</strong></div>
+    </div>
+
+    <div class="flex-item-grow">
+      <div class="txt-x-small txt-subtle">COMPLETED</div>
+      <div class="txt-xx-large"><strong><%= number_with_precision(@burndown[:completed_estimate], precision: 1, strip_insignificant_zeros: true) %>h</strong></div>
+    </div>
+
+    <div class="flex-item-grow">
+      <div class="txt-x-small txt-subtle">REMAINING</div>
+      <div class="txt-xx-large"><strong><%= number_with_precision(@burndown[:remaining_estimate], precision: 1, strip_insignificant_zeros: true) %>h</strong></div>
+    </div>
+
+    <div class="flex-item-grow">
+      <div class="txt-x-small txt-subtle">EFFICIENCY</div>
+      <div class="txt-xx-large"><strong><%= @burndown[:efficiency] %>%</strong></div>
+    </div>
+  </div>
+
+  <!-- Burndown Chart -->
+  <div class="panel shadow margin-bottom-2">
+    <h2 class="divider txt-large">Burndown Chart</h2>
+    <div class="margin-top-1" 
+         data-controller="burndown-chart"
+         data-burndown-chart-data-value="<%= @burndown[:daily].to_json %>"
+         style="height: 400px;">
+      <canvas id="burndown-canvas"></canvas>
+    </div>
+  </div>
+
+  <!-- Sprint Backlog Table -->
+  <div class="panel shadow">
+    <h2 class="divider txt-large">Sprint Backlog</h2>
+    
+    <table class="table margin-top-1">
+      <thead>
+        <tr>
+          <th class="txt-left">#</th>
+          <th class="txt-left">Card</th>
+          <th class="txt-center">⭐ BV</th>
+          <th class="txt-center">⚡ Diff</th>
+          <th class="txt-center">⏱ Est (h)</th>
+          <th class="txt-center">⏳ Remain (h)</th>
+          <th class="txt-center">% Done</th>
+          <th class="txt-center">Status</th>
+          <th class="txt-left">Assignees</th>
+          <th class="txt-left">Closed</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @burndown[:cards].each do |card_data| %>
+          <% card = card_data[:card] %>
+          <tr style="<%= 'opacity: 0.6;' if card_data[:closed] %>">
+            <td class="txt-left txt-subtle">#<%= card.number %></td>
+            <td class="txt-left">
+              <%= link_to card.title, card_path(card), class: "txt-bold" %>
+            </td>
+            <td class="txt-center">
+              <%= card_data[:business_value] || "—" %>
+            </td>
+            <td class="txt-center">
+              <%= card_data[:difficulty] || "—" %>
+            </td>
+            <td class="txt-center">
+              <%= card_data[:estimate_hours] ? number_with_precision(card_data[:estimate_hours], precision: 1, strip_insignificant_zeros: true) : "—" %>
+            </td>
+            <td class="txt-center">
+              <%= card_data[:actual_remaining] ? number_with_precision(card_data[:actual_remaining], precision: 1, strip_insignificant_zeros: true) : "—" %>
+            </td>
+            <td class="txt-center">
+              <% if card_data[:completion_percentage] && card_data[:completion_percentage] > 0 %>
+                <span class="<%= 'txt-success' if card_data[:completion_percentage] == 100 %>">
+                  <%= card_data[:completion_percentage] %>%
+                </span>
+              <% else %>
+                0%
+              <% end %>
+            </td>
+            <td class="txt-center">
+              <% if card_data[:closed] %>
+                <span class="badge badge--success">✓ Done</span>
+              <% else %>
+                <span class="badge badge--warning">Open</span>
+              <% end %>
+            </td>
+            <td class="txt-left">
+              <% if card.assignees.any? %>
+                <%= card.assignees.map(&:familiar_name).join(", ") %>
+              <% else %>
+                <span class="txt-subtle">Unassigned</span>
+              <% end %>
+            </td>
+            <td class="txt-left txt-small txt-subtle">
+              <% if card_data[:closed_at] %>
+                <%= card_data[:closed_at].strftime('%b %d, %Y') %>
+              <% else %>
+                —
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+      <tfoot>
+        <tr style="background: var(--color-subtle); font-weight: bold;">
+          <td colspan="4" class="txt-right">TOTAL:</td>
+          <td class="txt-center">
+            <%= number_with_precision(@burndown[:total_estimate], precision: 1, strip_insignificant_zeros: true) %>h
+          </td>
+          <td colspan="3"></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>

@@ -25,6 +25,7 @@ Rails.application.routes.draw do
 
   resources :boards do
     scope module: :boards do
+      resource :burndown, only: [:show]
       resource :subscriptions
       resource :involvement
       resource :publication

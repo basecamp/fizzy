@@ -59,6 +59,20 @@
                 placeholder: "—",
                 data: { action: "change->local-save#save" } %>
         </div>
+
+        <div class="flex flex-column" style="flex: 1;">
+          <%= form.label :remaining_hours, class: "txt-x-small txt-subtle" do %>
+            ⏳ Remaining (h)
+          <% end %>
+          <%= form.number_field :remaining_hours, step: 0.5, min: 0, 
+                class: "input input--sm", 
+                style: "width: 100%; padding: 0.25rem 0.5rem; font-size: 0.875rem;",
+                placeholder: "—",
+                data: { action: "change->local-save#save" } %>
+          <div class="txt-xx-small txt-subtle margin-top-quarter">
+            Leave empty = use estimate
+          </div>
+        </div>
       </div>
     </div>
 

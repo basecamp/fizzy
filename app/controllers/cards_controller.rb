@@ -67,6 +67,6 @@ class CardsController < ApplicationController
 
     def card_params
       params.expect(card: [ :title, :description, :image, :created_at, :last_active_at,
-                             :business_value, :difficulty, :estimate_hours ])
+                             :business_value, :difficulty, :estimate_hours, :remaining_hours ])
     end
 end

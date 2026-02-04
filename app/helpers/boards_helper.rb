@@ -9,4 +9,13 @@ module BoardsHelper
       icon_tag("settings") + tag.span("Settings for #{board.name}", class: "for-screen-reader")
     end
   end
+
+  def link_to_burndown(board)
+    return unless board.sprint_configured?
+    
+    link_to board_burndown_path(board), class: "btn btn--secondary",
+      data: { controller: "tooltip", bridge_title: "Burndown Chart" } do
+      icon_tag("bar-chart") + tag.span("Burndown", class: "hide-on-touch")
+    end
+  end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_01_21_155752) do
+ActiveRecord::Schema[8.2].define(version: 2026_02_04_000003) do
   create_table "accesses", id: :uuid, force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -153,9 +153,12 @@ ActiveRecord::Schema[8.2].define(version: 2026_01_21_155752) do
   create_table "boards", id: :uuid, force: :cascade do |t|
     t.uuid "account_id", null: false
     t.boolean "all_access", default: false, null: false
+    t.decimal "available_hours", precision: 8, scale: 2
     t.datetime "created_at", null: false
     t.uuid "creator_id", null: false
+    t.date "end_date"
     t.string "name", limit: 255, null: false
+    t.date "start_date"
     t.datetime "updated_at", null: false
     t.index ["account_id"], name: "index_boards_on_account_id"
     t.index ["creator_id"], name: "index_boards_on_creator_id"
@@ -200,12 +203,16 @@ ActiveRecord::Schema[8.2].define(version: 2026_01_21_155752) do
   create_table "cards", id: :uuid, force: :cascade do |t|
     t.uuid "account_id", null: false
     t.uuid "board_id", null: false
+    t.integer "business_value"
     t.uuid "column_id"
     t.datetime "created_at", null: false
     t.uuid "creator_id", null: false
+    t.integer "difficulty"
     t.date "due_on"
+    t.decimal "estimate_hours", precision: 8, scale: 2
     t.datetime "last_active_at", null: false
     t.bigint "number", null: false
+    t.decimal "remaining_hours", precision: 8, scale: 2
     t.string "status", limit: 255, default: "drafted", null: false
     t.string "title", limit: 255
     t.datetime "updated_at", null: false

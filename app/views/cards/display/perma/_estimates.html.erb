@@ -3,23 +3,28 @@
     <div class="flex gap-1">
       <% if card.business_value.present? %>
         <span>
-          BV: <%= card.business_value %>/10
+          ⭐ BV: <%= card.business_value %>/10
         </span>
-        <span class="txt-subtle">--</span>
+        <span class="txt-subtle">•</span>
       <% end %>
 
       <% if card.difficulty.present? %>
         <span>
-          DI: <%= card.difficulty %>/10
+          ⚡ Diff: <%= card.difficulty %>/10
         </span>
-        <% if card.estimate_hours.present? %>
-          <span class="txt-subtle">--</span>
-        <% end %>
+        <span class="txt-subtle">•</span>
       <% end %>
 
       <% if card.estimate_hours.present? %>
         <span>
-          Est: <%= number_with_precision(card.estimate_hours, precision: 1, strip_insignificant_zeros: true) %>h
+          ⏱ Est: <%= number_with_precision(card.estimate_hours, precision: 1, strip_insignificant_zeros: true) %>h
+        </span>
+      <% end %>
+
+      <% if card.remaining_hours.present? && !card.closed? %>
+        <span class="txt-subtle">•</span>
+        <span class="txt-warning">
+          ⏳ Remaining: <%= number_with_precision(card.remaining_hours, precision: 1, strip_insignificant_zeros: true) %>h (<%= card.completion_percentage %>%)
         </span>
       <% end %>
     </div>

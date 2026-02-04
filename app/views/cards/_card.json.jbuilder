@@ -15,6 +15,8 @@ json.cache! card do
   json.business_value card.business_value
   json.difficulty card.difficulty
   json.estimate_hours card.estimate_hours
+  json.remaining_hours card.remaining_hours
+  json.completion_percentage card.completion_percentage
 
   json.url card_url(card)
 
