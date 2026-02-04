@@ -1,0 +1,19 @@
+<% if board.sprint_configured? %>
+  <div class="txt-x-small txt-subtle margin-top-half">
+    <div class="flex gap-half align-center">
+      <span>
+        📅 Sprint: <%= board.start_date.strftime('%b %d') %> - <%= board.end_date.strftime('%b %d, %Y') %>
+      </span>
+      <span>•</span>
+      <span>
+        <%= board.sprint_days_remaining %> days left
+      </span>
+      <% if board.available_hours.present? %>
+        <span>•</span>
+        <span>
+          ⏱ <%= number_with_precision(board.available_hours, precision: 1, strip_insignificant_zeros: true) %>h available
+        </span>
+      <% end %>
+    </div>
+  </div>
+<% end %>

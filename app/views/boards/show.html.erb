@@ -10,7 +10,10 @@
   </div>
 
   <h1 class="header__title divider divider--fade full-width" data-bridge--title-target="header">
-    <span class="overflow-ellipsis"><%= @board.name %></span>
+    <div>
+      <span class="overflow-ellipsis"><%= @board.name %></span>
+      <%= render "boards/show/sprint_info", board: @board %>
+    </div>
   </h1>
 
   <div class="header__actions header__actions--end hide-on-native">

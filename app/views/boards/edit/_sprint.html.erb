@@ -1,0 +1,59 @@
+<%= form_with model: board, class: "margin-block-end", data: { controller: "form" } do |form| %>
+  <h2 class="divider txt-large">Sprint configuration</h2>
+  <p class="margin-none-block-start txt-subtle">Configure sprint dates and available hours for burndown chart tracking.</p>
+  
+  <div class="margin-top-1" style="background: var(--color-subtle); padding: 1rem; border-radius: var(--border-radius);">
+    <div class="flex gap-1 align-end">
+      <div class="flex flex-column" style="flex: 1;">
+        <%= form.label :start_date, class: "txt-small txt-subtle margin-bottom-half" do %>
+          Sprint start date
+        <% end %>
+        <%= form.date_field :start_date, 
+              class: "input full-width", 
+              style: "padding: 0.5rem; height: 2.5rem;",
+              disabled: !Current.user.can_administer_board?(board) %>
+      </div>
+
+      <div class="flex flex-column" style="flex: 1;">
+        <%= form.label :end_date, class: "txt-small txt-subtle margin-bottom-half" do %>
+          Sprint end date
+        <% end %>
+        <%= form.date_field :end_date, 
+              class: "input full-width", 
+              style: "padding: 0.5rem; height: 2.5rem;",
+              disabled: !Current.user.can_administer_board?(board) %>
+      </div>
+
+      <div class="flex flex-column" style="flex: 1;">
+        <%= form.label :available_hours, class: "txt-small txt-subtle margin-bottom-half" do %>
+          Avai.. hours
+        <% end %>
+        <%= form.number_field :available_hours, 
+              step: 0.5, 
+              min: 0,
+              class: "input full-width", 
+              style: "padding: 0.5rem; height: 2.5rem;",
+              placeholder: "e.g., 80",
+              disabled: !Current.user.can_administer_board?(board) %>
+      </div>
+    </div>
+
+    <% if board.sprint_configured? %>
+      <div class="margin-top-1 txt-small txt-subtle" style="display: flex; gap: 0.75rem; align-items: center;">
+        <span><strong>Duration:</strong> <%= board.sprint_days %> days</span>
+        <span>•</span>
+        <span><strong>Remaining:</strong> <%= board.sprint_days_remaining %> days</span>
+        <span>•</span>
+        <span><strong>Progress:</strong> <%= board.sprint_progress_percentage %>%</span>
+      </div>
+    <% end %>
+
+    <% if Current.user.can_administer_board?(board) %>
+      <div class="margin-top-1 txt-center">
+        <button type="submit" class="btn btn--link center txt-normal">
+          <span>Save sprint configuration</span>
+        </button>
+      </div>
+    <% end %>
+  </div>
+<% end %>
