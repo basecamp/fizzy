@@ -18,6 +18,7 @@
 
   lexxy-toolbar {
     border-color: var(--lexxy-border-color);
+    gap: 0;
   }
 
   .lexxy-editor__toolbar-button {
@@ -95,8 +96,12 @@
       text-wrap: balance;
     }
 
-    p {
+    p:has(+ p) {
       margin: 0;
+    }
+
+    ol, ul {
+      padding-inline-start: 1ch;
     }
 
     blockquote {
@@ -121,5 +126,13 @@
       th:not([class*="selected"], [data-action="delete"], [data-action="toggle"]) { background-color: var(--color-ink-lightest); }
       td:not([class*="selected"], [data-action="delete"], [data-action="toggle"]) { background-color: var(--color-canvas); }
     }
+
+    .attachment {
+      margin-inline: auto;
+    }
+  }
+
+  .attachment {
+    margin-inline: 0;
   }
 }
