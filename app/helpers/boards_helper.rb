@@ -1,13 +1,6 @@
 module BoardsHelper
-  def link_back_to_board(board, bridged = false)
-    back_link_to board.name,
-      board,
-      "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click click->turbo-navigation#backIfSamePath",
-      data: ({
-        bridge__buttons_target: "button",
-        bridge_icon_url: bridge_icon("board"),
-        bridge_title: "Go to #{board.name}"
-      } if bridged)
+  def link_back_to_board(board)
+    back_link_to board.name, board, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click click->turbo-navigation#backIfSamePath"
   end
 
   def link_to_edit_board(board)
