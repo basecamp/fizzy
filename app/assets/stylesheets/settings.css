@@ -58,6 +58,14 @@
   /* Users
   /* ------------------------------------------------------------------------ */
 
+  .settings__section--users {
+    @media (min-width: 640px) {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      min-height: 0;
+    }
+  }
   .settings__user-filter {
     --btn-size: 3.5ch;
     --avatar-size: var(--btn-size);
