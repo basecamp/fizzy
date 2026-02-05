@@ -33,6 +33,15 @@
 #   Returns true if the user was verified through biometrics, PIN, or other
 #   method. This is stronger than mere presence.
 #
+# [+backup_eligible?+]
+#   Returns true if the credential can be backed up (e.g., synced passkeys
+#   from Apple, Google, or Microsoft). Indicates multi-device credential support.
+#
+# [+backed_up?+]
+#   Returns true if the credential is currently backed up to cloud storage.
+#   Useful for risk assessment—backed-up credentials may be accessible from
+#   multiple devices.
+#
 class ActionPack::WebAuthn::Authenticator::Data
   # Segment lengths
   RELYING_PARTY_ID_HASH_LENGTH = 32
@@ -44,6 +53,8 @@ class ActionPack::WebAuthn::Authenticator::Data
   # Flags
   USER_PRESENT_FLAG = 0x01
   USER_VERIFIED_FLAG = 0x04
+  BACKUP_ELIGIBLE_FLAG = 0x08
+  BACKUP_STATE_FLAG = 0x10
   ATTESTED_CREDENTIAL_DATA_FLAG = 0x40
 
   attr_reader :bytes, :relying_party_id_hash, :flags, :sign_count, :credential_id, :public_key_bytes
@@ -111,6 +122,18 @@ class ActionPack::WebAuthn::Authenticator::Data
 
   def user_verified?
     flags & USER_VERIFIED_FLAG != 0
+  end
+
+  # Returns true if the credential is eligible for backup (e.g., synced passkey).
+  # This indicates the authenticator supports multi-device credentials.
+  def backup_eligible?
+    flags & BACKUP_ELIGIBLE_FLAG != 0
+  end
+
+  # Returns true if the credential is currently backed up to cloud storage.
+  # Only meaningful when +backup_eligible?+ is true.
+  def backed_up?
+    flags & BACKUP_STATE_FLAG != 0
   end
 
   def public_key

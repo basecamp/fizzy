@@ -1,7 +1,7 @@
 module ActionPack::WebAuthn
   class << self
     def relying_party
-      # TODO
+      RelyingParty.new
     end
   end
 end

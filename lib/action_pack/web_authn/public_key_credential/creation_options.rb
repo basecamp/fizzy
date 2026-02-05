@@ -43,7 +43,7 @@ class ActionPack::WebAuthn::PublicKeyCredential::CreationOptions < ActionPack::W
   ES256 = { type: "public-key", alg: -7 }.freeze
   RS256 = { type: "public-key", alg: -257 }.freeze
 
-  attr_reader :id, :name, :display_name, :relying_party
+  attr_reader :id, :name, :display_name
 
   # Creates a new set of credential creation options.
   #
@@ -66,7 +66,6 @@ class ActionPack::WebAuthn::PublicKeyCredential::CreationOptions < ActionPack::W
     @id = id
     @name = name
     @display_name = display_name
-    @relying_party = relying_party
   end
 
   # Returns a Hash suitable for JSON serialization and passing to the

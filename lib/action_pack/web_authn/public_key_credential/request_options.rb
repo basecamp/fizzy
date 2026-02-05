@@ -23,7 +23,7 @@
 #   The relying party (your application) configuration. Defaults to
 #   +ActionPack::WebAuthn.relying_party+.
 class ActionPack::WebAuthn::PublicKeyCredential::RequestOptions < ActionPack::WebAuthn::PublicKeyCredential::Options
-  attr_reader :relying_party, :credentials
+  attr_reader :credentials
 
   # Creates a new set of credential request options.
   #
@@ -38,7 +38,6 @@ class ActionPack::WebAuthn::PublicKeyCredential::RequestOptions < ActionPack::We
     super(**attrs)
 
     @credentials = credentials
-    @relying_party = relying_party
   end
 
   # Returns a Hash suitable for JSON serialization and passing to the

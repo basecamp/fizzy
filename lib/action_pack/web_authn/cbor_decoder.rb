@@ -82,25 +82,38 @@ class ActionPack::WebAuthn::CborDecoder
   # Flow control
   BREAK_CODE = 0xFF
 
+  # Limits
+  MAX_DEPTH = 16
+  MAX_SIZE = 10.megabytes
+
   class << self
     # Decodes a CBOR-encoded byte sequence into a Ruby object.
     #
     #   ActionPack::WebAuthn::CborDecoder.decode("\xa2\x61a\x01\x61b\x02")
     #   # => {"a" => 1, "b" => 2}
-    def decode(bytes)
+    def decode(bytes, **args)
       bytes = bytes.bytes if bytes.respond_to?(:bytes)
-      new(bytes).decode
+      new(bytes, **args).decode
     end
   end
 
-  def initialize(bytes) # :nodoc:
+  def initialize(bytes, max_depth: MAX_DEPTH, max_size: MAX_SIZE) # :nodoc:
+    raise DecodeError, "Input exceeds maximum size" if bytes.length > max_size
+
     @bytes = bytes
+    @max_depth = max_depth
     @position = 0
+    @depth = 0
   end
 
   # Decodes the next CBOR data item from the byte sequence.
   def decode
-    case major_type
+    raise DecodeError, "Unexpected end of input" if @position >= @bytes.length
+    raise DecodeError, "Maximum nesting depth exceeded" if @depth > @max_depth
+
+    @depth += 1
+
+    result = case major_type
     when UNSIGNED_INTEGER_TYPE then decode_unsigned_integer
     when NEGATIVE_INTEGER_TYPE then decode_negative_integer
     when BYTE_STRING_TYPE then decode_byte_string
@@ -110,6 +123,9 @@ class ActionPack::WebAuthn::CborDecoder
     when TAG_TYPE then decode_tag
     when FLOAT_OR_SIMPLE_TYPE then decode_float_or_simple
     end
+
+    @depth -= 1
+    result
   end
 
   private
@@ -229,12 +245,16 @@ class ActionPack::WebAuthn::CborDecoder
     end
 
     def read_bytes(length)
+      raise DecodeError, "Unexpected end of input" if @position + length > @bytes.length
+
       bytes = @bytes[@position, length]
       @position += length
       bytes
     end
 
     def read_byte
+      raise DecodeError, "Unexpected end of input" if @position >= @bytes.length
+
       byte = @bytes[@position]
       @position += 1
       byte

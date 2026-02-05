@@ -242,6 +242,53 @@ class ActionPack::WebAuthn::CborDecoderTest < ActiveSupport::TestCase
     assert_equal 1, ActionPack::WebAuthn::CborDecoder.decode([ 0x01 ])
   end
 
+  test "raises error for empty input" do
+    assert_raises(ActionPack::WebAuthn::CborDecoder::DecodeError) do
+      ActionPack::WebAuthn::CborDecoder.decode([])
+    end
+  end
+
+  test "raises error for truncated byte string" do
+    # 0x44 = byte string of length 4, but only 2 bytes follow
+    assert_raises(ActionPack::WebAuthn::CborDecoder::DecodeError) do
+      decode("440102")
+    end
+  end
+
+  test "raises error for truncated integer" do
+    # 0x19 = 2-byte integer follows, but only 1 byte provided
+    assert_raises(ActionPack::WebAuthn::CborDecoder::DecodeError) do
+      decode("19ff")
+    end
+  end
+
+  test "raises error for truncated array" do
+    # 0x82 = array of 2 items, but only 1 provided
+    assert_raises(ActionPack::WebAuthn::CborDecoder::DecodeError) do
+      decode("8201")
+    end
+  end
+
+  test "raises error for deeply nested structure" do
+    # Build array nested 20 levels deep: [[[[...]]]]
+    # 0x81 = array of 1 item
+    deeply_nested = "81" * 20 + "01"
+
+    error = assert_raises(ActionPack::WebAuthn::CborDecoder::DecodeError) do
+      decode(deeply_nested)
+    end
+
+    assert_equal "Maximum nesting depth exceeded", error.message
+  end
+
+  test "raises error for input exceeding max size" do
+    error = assert_raises(ActionPack::WebAuthn::CborDecoder::DecodeError) do
+      ActionPack::WebAuthn::CborDecoder.decode([ 0x01 ], max_size: 0)
+    end
+
+    assert_equal "Input exceeds maximum size", error.message
+  end
+
   private
     def decode(hex)
       bytes = [ hex ].pack("H*").bytes

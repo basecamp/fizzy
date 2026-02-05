@@ -24,7 +24,7 @@ class ActionPack::WebAuthn::Authenticator::AttestationTest < ActiveSupport::Test
 
     assert_equal "none", attestation.format
     assert_equal({}, attestation.attestation_statement)
-    assert_instance_of ActionPack::WebAuthn::Authenticator::AuthenticatorData, attestation.authenticator_data
+    assert_instance_of ActionPack::WebAuthn::Authenticator::Data, attestation.authenticator_data
   end
 
   test "delegates credential_id to authenticator_data" do
