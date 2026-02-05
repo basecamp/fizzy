@@ -1,16 +1,16 @@
 <% @hide_footer_frames = true %>
-<% @page_title = "Signing in..." %>
+<% @page_title = t("sessions.starts.new.signing_in") %>
 
 <div class="panel panel--centered flex flex-column gap-half">
   <header>
     <h1 class="txt-x-large font-weight-black margin-none">
       <%= @page_title %>
     </h1>
-    <p class="margin-none">Just a sec while we sign you in with <%= Current.account.name %>.</p>
+    <p class="margin-none"><%= t("sessions.starts.new.just_a_sec", account_name: Current.account.name) %></p>
   </header>
 
   <%= form_with url: session_start_path, method: :post, data: { controller: "form auto-submit" } do |form| %>
-    <%= form.button "Sign in", type: "submit", class: "btn btn-primary", data: { form_target: "submit", turbo_submits_with: "Signing in..." } %>
+    <%= form.button t("sessions.starts.new.sign_in"), type: "submit", class: "btn btn-primary", data: { form_target: "submit", turbo_submits_with: t("sessions.starts.new.signing_in") } %>
   <% end %>
 </div>
 

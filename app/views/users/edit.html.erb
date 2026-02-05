@@ -1,8 +1,8 @@
-<% @page_title = "Edit your profile" %>
+<% @page_title = t("users.edit.page_title") %>
 
 <% content_for :header do %>
   <div class="header__actions header__actions--start">
-    <%= back_link_to "profile", user_path(@user), "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+    <%= back_link_to t("users.edit.back_to"), user_path(@user), "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
   </div>
 <% end %>
 
@@ -16,32 +16,41 @@
           <%= image_tag user_avatar_path(@user), aria: { hidden: "true" }, class: "avatar", size: 128, data: { upload_preview_target: "image" } %>
           <%= form.file_field :avatar, id: "file", class: "input", accept: User::Avatar::ALLOWED_AVATAR_CONTENT_TYPES.join(","),
                 data: { upload_preview_target: "input", action: "upload-preview#previewImage" } %>
-          <span class="for-screen-reader">Profile avatar for <%= @user.name %></span>
+          <span class="for-screen-reader"><%= t("users.edit.profile_avatar_for", name: @user.name) %></span>
         </label>
 
         <% if @user.avatar.attached? %>
-          <%= tag.button type: :submit, form: "avatar-delete-form", class: "btn btn--negative txt-small", data: { turbo_confirm: "Are you sure you want to remove your avatar? This can't be undone." } do %>
+          <%= tag.button type: :submit, form: "avatar-delete-form", class: "btn btn--negative txt-small", data: { turbo_confirm: t("users.edit.remove_avatar_confirm") } do %>
             <%= icon_tag "minus" %>
-            <span class="for-screen-reader">Delete avatar</span>
+            <span class="for-screen-reader"><%= t("users.edit.delete_avatar") %></span>
           <% end %>
         <% end %>
       </div>
 
       <div class="flex align-center gap">
         <label class="flex align-center gap input input--actor">
-          <%= form.text_field :name, class: "input full-width", autocomplete: "name", placeholder: "Name", autofocus: true, required: true, data: { "1p-ignore": true, action: "keydown.esc@document->form#cancel" } %>
+          <%= form.text_field :name, class: "input full-width", autocomplete: "name", placeholder: t("users.edit.name_placeholder"), autofocus: true, required: true, data: { "1p-ignore": true, action: "keydown.esc@document->form#cancel" } %>
         </label>
       </div>
       <div class="flex align-center gap">
         <div class="flex align-center gap input input--actor">
-          <%= form.email_field :email_address, class: "input full-width", autocomplete: "username", placeholder: "Email address", required: true, readonly: true, value: @user.identity.email_address %>
-          <%= link_to "Change email", new_user_email_address_path(user_id: Current.user.id), class: "btn btn--plain txt-link txt-small txt-nowrap" %>
+          <%= form.email_field :email_address, class: "input full-width", autocomplete: "username", placeholder: t("users.edit.email_address"), required: true, readonly: true, value: @user.identity.email_address %>
+          <%= link_to t("users.edit.change_email"), new_user_email_address_path(user_id: Current.user.id), class: "btn btn--plain txt-link txt-small txt-nowrap" %>
         </div>
+      </div>
+
+      <div class="flex align-center gap">
+        <%= form_with url: my_locale_path, method: :patch, class: "flex align-center gap input input--actor", data: { controller: "form" } do |locale_form| %>
+          <label class="flex align-center gap" style="flex: 1;">
+            <span class="txt-small" style="min-width: 6ch;"><%= t("locales.language") %></span>
+            <%= locale_form.select :locale, options_for_select(available_locales_for_select, Current.identity.locale.presence || I18n.default_locale.to_s), {}, class: "input full-width", data: { action: "change->form#submit" } %>
+          </label>
+        <% end %>
       </div>
 
       <% if @user.errors.any? %>
         <div class="margin-block-half txt-negative txt-small" style="text-align: left;">
-          <p class="margin-block-none font-weight-bold">Your changes couldn't be saved:</p>
+          <p class="margin-block-none font-weight-bold"><%= t("users.edit.validation_errors") %></p>
           <ul class="margin-block-none">
             <% @user.errors.full_messages.each do |message| %>
               <li><%= message %></li>
@@ -51,10 +60,10 @@
       <% end %>
 
       <button type="submit" id="log_in" class="btn btn--reversed center" data-form-target="submit">
-        <span>Save changes</span>
+        <span><%= t("users.edit.save_changes") %></span>
       </button>
 
-      <%= link_to "Cancel and go back", user_path(@user), data: { form_target: "cancel", turbo_frame: "_top" }, hidden: true %>
+      <%= link_to t("shared.cancel_and_go_back"), user_path(@user), data: { form_target: "cancel", turbo_frame: "_top" }, hidden: true %>
     <% end %>
 
     <%= form_with url: user_avatar_url(@user), method: :delete, id: "avatar-delete-form" %>

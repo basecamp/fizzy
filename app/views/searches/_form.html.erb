@@ -11,6 +11,6 @@
           action: "keydown.enter->bar#showModalAndSubmit:prevent keydown.esc->bar#reset" } %>
   <button class="search__reset btn btn--circle borderless" data-action="bar#clearInput">
     <%= icon_tag "close" %>
-    <span class="for-screen-reader">Close search</span>
+    <span class="for-screen-reader"><%= t("searches.close_search") %></span>
   </button>
 <% end %>

@@ -13,6 +13,7 @@ class Identity < ApplicationRecord
 
   validates :email_address, format: { with: URI::MailTo::EMAIL_REGEXP }
   normalizes :email_address, with: ->(value) { value.strip.downcase.presence }
+  normalizes :locale, with: ->(value) { value.presence&.strip }
 
   def self.find_by_permissable_access_token(token, method:)
     if (access_token = AccessToken.find_by(token: token)) && access_token.allows?(method)

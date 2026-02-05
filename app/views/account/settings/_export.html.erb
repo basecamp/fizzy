@@ -1,20 +1,20 @@
 <section class="settings__section">
   <header>
-    <h2 class="divider">Export account data</h2>
-    <div>Download a complete archive of all account data.</div>
+    <h2 class="divider"><%= t("account.settings.export.section_title") %></h2>
+    <div><%= t("account.settings.export.section_intro") %></div>
   </header>
 
   <div data-controller="dialog" data-dialog-modal-value="true" data-action="keydown.esc->dialog#close">
-    <button type="button" class="btn" data-action="dialog#open">Begin export...</button>
+    <button type="button" class="btn" data-action="dialog#open"><%= t("account.settings.export.begin_export") %></button>
 
     <dialog class="dialog panel panel--wide shadow" data-dialog-target="dialog" style="--panel-size: 48ch;">
-      <h2 class="txt-large">Export all account data</h2>
-      <p>This will generate a ZIP archive of all data in this account including all boards, cards, users, and settings.</p>
-      <p>We‘ll email you a link to download the file when it‘s ready. The link will expire after 24 hours.</p>
+      <h2 class="txt-large"><%= t("account.settings.export.dialog_title") %></h2>
+      <p><%= t("account.settings.export.dialog_body") %></p>
+      <p><%= t("account.settings.export.dialog_footnote") %></p>
 
       <div class="flex gap justify-center">
-        <%= button_to "Start export", account_exports_path, method: :post, class: "btn btn--link", form: { data: { action: "submit->dialog#close" } } %>
-        <button type="button" class="btn" data-action="dialog#close">Cancel</button>
+        <%= button_to t("account.settings.export.start_export"), account_exports_path, method: :post, class: "btn btn--link", form: { data: { action: "submit->dialog#close" } } %>
+        <button type="button" class="btn" data-action="dialog#close"><%= t("shared.cancel") %></button>
       </div>
     </dialog>
   </div>

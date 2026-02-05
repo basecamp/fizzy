@@ -4,16 +4,16 @@
   <% if earliest == latest %>
     <div class="events__none">
       <h2 class="txt-medium margin-none"><%= local_datetime_tag earliest, style: :agoorweekday, class: "txt-ink txt-capitalize" %></h2>
-      <p class="margin-none">No activity</p>
+      <p class="margin-none"><%= t("events.empty_days.no_activity") %></p>
     </div>
   <% elsif earliest < latest %>
     <div class="events__none">
       <h2 class="txt-medium margin-none"><%= local_datetime_tag earliest, style: :agoorweekday, class: "txt-ink txt-capitalize" %> – <%= local_datetime_tag latest, style: :agoorweekday, class: "txt-ink txt-capitalize" %></h2>
-      <p class="margin-none">No activity for <%= (latest - earliest).seconds.in_days.round + 1 %> days</p>
+      <p class="margin-none"><%= t("events.empty_days.no_activity_for_days", count: (latest - earliest).seconds.in_days.round + 1) %></p>
     </div>
   <% end %>
 <% else %>
   <div class="events__none">
-    <p class="margin-none"> <%= day_timeline.has_activity? ? "No more activity" : "No activity" %></p>
+    <p class="margin-none"> <%= day_timeline.has_activity? ? t("events.empty_days.no_more_activity") : t("events.empty_days.no_activity") %></p>
   </div>
 <% end %>

@@ -1,15 +1,15 @@
-<% @page_title = "Confirm your new email address" %>
+<% @page_title = t("users.email_addresses.confirm_page_title") %>
 
 <% content_for :header do %>
   <div class="header__actions header__actions--start">
-    <%= back_link_to "My profile", edit_user_path(@user, script_name: @user.account.slug), "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+    <%= back_link_to t("users.my_profile"), edit_user_path(@user, script_name: @user.account.slug), "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
   </div>
 <% end %>
 
 <div class="panel panel--centered flex flex-column gap-half" style="--panel-size: 50ch;">
-  <h1 class="txt-x-large font-weight-black margin-none">Check your email</h1>
-  <p class="margin-none">We just sent an email to <strong><%= params[:email_address] %></strong></p>
-  <p class="margin-none-block-start margin-block-end-half">Hit the link in the email to confirm this is the email address you want to use with Fizzy going forward.</p>
+  <h1 class="txt-x-large font-weight-black margin-none"><%= t("users.email_addresses.check_email") %></h1>
+  <p class="margin-none"><%= t("users.email_addresses.sent_to", email: content_tag(:strong, params[:email_address])).html_safe %></p>
+  <p class="margin-none-block-start margin-block-end-half"><%= t("users.email_addresses.hit_link") %></p>
 
-  <%= link_to "Done", edit_user_path(@user, script_name: @user.account.slug), class: "btn btn--link center" %>
+  <%= link_to t("shared.done"), edit_user_path(@user, script_name: @user.account.slug), class: "btn btn--link center" %>
 </div>

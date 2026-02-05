@@ -16,36 +16,36 @@
       <div data-navigable-list-target="item" class="full-width">
         <%= link_to notifications_settings_path,
               class: "btn borderless tray__notification-settings",
-              title: "Notification Settings",
+              title: t("notifications.tray.notification_settings"),
               data: { action: "dialog#close" } do %>
           <%= icon_tag "settings" %>
-          <span>Settings</span>
+          <span><%= t("notifications.tray.settings") %></span>
         <% end %>
       </div>
 
       <div data-navigable-list-target="item" class="full-width">
         <%= link_to notifications_path, class: "btn borderless flex-item-grow position-relative overflow-ellipsis", data: { action: "click->dialog#close" } do %>
           <%= icon_tag "bell" %>
-          <span class="tray__new-notifications">See more new items</span>
-          <span class="tray__old-notifications">See older items</span>
+          <span class="tray__new-notifications"><%= t("notifications.tray.see_more_new") %></span>
+          <span class="tray__old-notifications"><%= t("notifications.tray.see_older") %></span>
         <% end %>
       </div>
 
       <%= button_to bulk_reading_path(from_tray: true),
             class: "btn borderless tray__clear-notifications",
-            title: "Mark all notifications as read",
+            title: t("notifications.mark_as_read"),
             data: { action: "dialog#close badge#clear", turbo_frame: "notifications" },
             form: { class: "full-width", data: { navigable_list_target: "item" } } do %>
         <%= icon_tag "check" %>
-        <span>Clear all</span>
+        <span><%= t("notifications.tray.clear_all") %></span>
       <% end %>
     </div>
   </dialog>
 
-  <button class="tray__toggle" data-action="dialog#toggle keydown.n@document->hotkey#click" data-controller="hotkey" aria-label="Toggle notifications stack" aria-haspopup="true">
+  <button class="tray__toggle" data-action="dialog#toggle keydown.n@document->hotkey#click" data-controller="hotkey" aria-label="<%= t("notifications.tray.toggle_aria_label") %>" aria-haspopup="true">
     <div class="tray__toggle-btn txt-uppercase btn btn--reversed txt-x-small center full-width">
       <%= icon_tag "bell" %>
-      <span class="tray__toggle-text">Notifications <kbd class="hide-on-touch">N</kbd></span>
+      <span class="tray__toggle-text"><%= t("notifications.tray.toggle_text") %> <kbd class="hide-on-touch">N</kbd></span>
     </div>
   </button>
 </section>

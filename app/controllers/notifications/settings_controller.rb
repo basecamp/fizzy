@@ -7,7 +7,7 @@ class Notifications::SettingsController < ApplicationController
 
   def update
     @settings.update!(settings_params)
-    redirect_to notifications_settings_path, notice: "Settings updated"
+    redirect_to notifications_settings_path, notice: I18n.t("notifications.settings_updated")
   end
 
   private

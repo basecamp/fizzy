@@ -1,0 +1,5 @@
+en:
+  tags:
+    index:
+      title: "All tags"
+      delete: "Delete"

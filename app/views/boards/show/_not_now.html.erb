@@ -1,4 +1,4 @@
-<%= column_tag id: "not-now", name: "Not Now", drop_url: columns_card_drops_not_now_path("__id__"), class: "cards--on-deck", style: "--card-color: var(--color-card-complete);",
+<%= column_tag id: "not-now", name: t("columns.not_now"), drop_url: columns_card_drops_not_now_path("__id__"), class: "cards--on-deck", style: "--card-color: var(--color-card-complete);",
   data: {
     card_hotkeys_disabled: true,
     collapsible_columns_target: "column",
@@ -6,7 +6,7 @@
     action: "focus->collapsible-columns#focusOnColumn"
   } do %>
   <header class="cards__header">
-    <%= render "boards/show/expander", title: "Not Now", count: board.cards.postponed.count, column_id: "not-now" %>
+    <%= render "boards/show/expander", title: t("columns.not_now"), count: board.cards.postponed.count, column_id: "not-now" %>
     <%= render "boards/show/menu/maximize", column_path: board_columns_not_now_path(board) %>
   </header>
   <%= column_frame_tag :not_now_column, src: board_columns_not_now_path(board) %>

@@ -31,7 +31,7 @@ class Signup
         destroy_account
         handle_account_creation_error(error)
 
-        errors.add(:base, "Something went wrong, and we couldn't create your account. Please give it another try.")
+        errors.add(:base, I18n.t("activerecord.errors.models.signup.attributes.base.creation_failed"))
         Rails.error.report(error, severity: :error)
         Rails.logger.error error
         Rails.logger.error error.backtrace.join("\n")

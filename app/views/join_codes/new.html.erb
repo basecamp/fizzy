@@ -1,4 +1,4 @@
-<% @page_title = "Join #{@join_code.account.name} in Fizzy" %>
+<% @page_title = t("account.join_codes.join.page_title", name: @join_code.account.name) %>
 
 <div class="panel panel--centered flex flex-column gap-half">
   <h1 class="txt-x-large font-weight-black margin-none"><%= @page_title %></h1>
@@ -6,12 +6,12 @@
   <%= form_with url: join_path(code: params[:code], tenant: params[:tenant]), class: "flex flex-column gap txt-medium", data: { controller: "form" } do |form| %>
     <div class="flex align-center gap">
       <label class="flex align-center gap input input--actor">
-        <%= form.email_field :email_address, required: true, class: "input full-width", autofocus: true, autocomplete: "username", placeholder: "Email address" %>
+        <%= form.email_field :email_address, required: true, class: "input full-width", autofocus: true, autocomplete: "username", placeholder: t("account.join_codes.join.email_placeholder") %>
       </label>
     </div>
 
     <button type="submit" id="log_in" class="btn btn--link center" data-form-target="submit">
-      <span>Continue</span>
+      <span><%= t("account.join_codes.join.continue") %></span>
       <%= icon_tag "arrow-right" %>
     </button>
   <% end %>

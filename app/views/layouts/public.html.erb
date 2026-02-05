@@ -5,7 +5,7 @@
   <body class="public <%= @body_class %>" data-controller="local-time timezone-cookie" data-action="turbo:morph@window->local-time#refreshAll">
     <div id="global-container">
       <header class="header" id="header">
-        <a href="#main" class="header__skip-navigation btn" data-turbo="false">Skip to main content</a>
+        <a href="#main" class="header__skip-navigation btn" data-turbo="false"><%= t("shared.skip_to_main_content") %></a>
         <nav>
           <%= link_to "https://fizzy.do", class: "header__logo center flex-inline align-center" do %>
             <span><%= image_tag "logo.png", alt: "" %></span>

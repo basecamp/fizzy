@@ -42,9 +42,9 @@ class BoardsController < ApplicationController
     respond_to do |format|
       format.html do
         if @board.accessible_to?(Current.user)
-          redirect_to edit_board_path(@board), notice: "Saved"
+          redirect_to edit_board_path(@board), notice: I18n.t("account.saved")
         else
-          redirect_to root_path, notice: "Saved (you were removed from the board)"
+          redirect_to root_path, notice: I18n.t("account.saved_removed_from_board")
         end
       end
       format.json { head :no_content }

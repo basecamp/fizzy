@@ -1,8 +1,8 @@
 <%= turbo_frame_tag @card, :columns do %>
   <div class="card__stages" role="radiogroup" data-controller="scroll-to">
-    <legend class="for-screen-reader">Choose a column for this card</legend>
+    <legend class="for-screen-reader"><%= t("columns.choose") %></legend>
 
-    <%= button_to "Not now", card_not_now_path(@card),
+    <%= button_to t("columns.not_now"), card_not_now_path(@card),
         class: [ "card__column-name btn", { "card__column-name--current": @card.postponed? } ],
         style: "--column-color: var(--color-card-complete)",
         disabled: @card.postponed?,
@@ -11,7 +11,7 @@
         data: { scroll_to_target: @card.postponed? ? "target" : nil },
         form_class: "flex gap-half" %>
 
-    <%= button_to "Maybe?", card_triage_path(@card), method: :delete,
+    <%= button_to t("columns.maybe"), card_triage_path(@card), method: :delete,
         class: [ "card__column-name card__column-name--stream btn", { "card__column-name--current": @card.awaiting_triage? } ],
         style: "--column-color: var(--color-card-default)",
         disabled: @card.awaiting_triage?,
@@ -24,7 +24,7 @@
       <%= button_to_set_column @card, column %>
     <% end %>
 
-    <%= button_to "Done", card_closure_path(@card),
+    <%= button_to t("columns.done"), card_closure_path(@card),
         class: [ "card__column-name btn", { "card__column-name--current": @card.closed? } ],
         style: "--column-color: var(--color-card-complete)",
         disabled: @card.closed?,

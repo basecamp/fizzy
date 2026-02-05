@@ -1,15 +1,15 @@
-<% @page_title = "Change usage limit" %>
+<% @page_title = t("account.join_codes.edit.page_title") %>
 
 <% content_for :header do %>
   <div class="header__actions header__actions--start">
-    <%= back_link_to "Invite link", account_join_code_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+    <%= back_link_to t("account.join_codes.edit.invite_link"), account_join_code_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
   </div>
 <% end %>
 
 <article class="panel panel--wide center shadow flex flex-column gap-half" style="view-transition-name: <%= dom_id(@join_code) %>">
   <header class="margin-block-end-half">
     <h2 class="txt-large margin-none font-weight-black"><%= @page_title %></h2>
-    <p class="txt-medium margin-none">How many times can this link be used to join the account?</p>
+    <p class="txt-medium margin-none"><%= t("account.join_codes.edit.how_many_times") %></p>
   </header>
 
   <%= form_with model: @join_code, url: account_join_code_path, method: :patch, data: { controller: "form" }, html: { class: "flex flex-column gap" } do |form| %>
@@ -32,9 +32,9 @@
     </p>
 
     <%= form.button type: :submit, class: "btn btn--link center txt-medium", data: { form_target: "submit" } do %>
-      <span>Save changes</span>
+      <span><%= t("account.join_codes.edit.save_changes") %></span>
     <% end %>
 
-    <%= link_to "Go back", account_join_code_path, data: { form_target: "cancel" }, hidden: true %>
+    <%= link_to t("account.join_codes.edit.go_back"), account_join_code_path, data: { form_target: "cancel" }, hidden: true %>
   <% end %>
 </article>

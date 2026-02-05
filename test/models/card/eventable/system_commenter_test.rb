@@ -22,13 +22,15 @@ class Card::Eventable::SystemCommenterTest < ActiveSupport::TestCase
   end
 
   test "card_closed" do
-    assert_system_comment "Moved to “Done” by David" do
+    expected = strip_tags(I18n.t("events.system_comment.card_closed_html", creator_name: "David", column: I18n.t("columns.done")).html_safe)
+    assert_system_comment expected do
       @card.close
     end
   end
 
   test "card_title_changed" do
-    assert_system_comment "David changed the title from “The text is too small” to “Make text larger”" do
+    expected = strip_tags(I18n.t("events.system_comment.card_title_changed_html", creator_name: "David", old_title: "The text is too small", new_title: "Make text larger").html_safe)
+    assert_system_comment expected do
       @card.update! title: "Make text larger"
     end
   end

@@ -7,22 +7,22 @@
       <% if Current.user == @user %>
         <%= link_to edit_user_path(@user), class: "user-edit-link btn", data: { controller: "tooltip" } do %>
           <%= icon_tag "pencil" %>
-          <span class="for-screen-reader">Edit profile</span>
+          <span class="for-screen-reader"><%= t("users.show.edit_profile") %></span>
         <% end %>
       <% end %>
 
       <div class="avatar txt-xx-large center fill-white btn--circle hide-focus-ring">
-        <%= image_tag user_avatar_path(@user), alt: "Profile avatar for #{@user.name}" %>
+        <%= image_tag user_avatar_path(@user), alt: t("users.show.profile_avatar_alt", name: @user.name) %>
       </div>
 
       <div class="flex flex-column gap-half margin-block-end">
         <h1 class="txt-x-large margin-none"><%= @user.name %></h1>
         <div class="txt-medium">
           <% if !@user.active? %>
-            <%= @user.name %> is no longer on this account
+            <%= t("users.show.no_longer_on_account", name: @user.name) %>
           <% elsif !@user.verified? %>
-            Unverified
-            <div class="txt-small txt-tinted">A sign-in code has been sent to this email address, but the user has not yet logged in to confirm their identity.</div>
+            <%= t("users.show.unverified") %>
+            <div class="txt-small txt-tinted"><%= t("users.show.sign_in_code_sent") %></div>
           <% else %>
             <%= mail_to @user.identity.email_address %>
           <% end %>
@@ -31,9 +31,9 @@
 
       <% if @user.verified? %>
         <div class="flex-inline center justify-center flex-wrap gap">
-          <%= link_to "Which cards are assigned to #{me_or_you}?",
+          <%= link_to t("users.show.cards_assigned_to", name: me_or_you),
                 cards_path(assignee_ids: [ @user.id ], sorted_by: "newest"), class: "btn btn--link", data: { turbo_frame: "_top" } %>
-          <%= link_to "Which cards were added by #{me_or_you}?",
+          <%= link_to t("users.show.cards_added_by", name: me_or_you),
                 cards_path(creator_ids: [ @user.id ], sorted_by: "newest"), class: "btn btn--link", data: { turbo_frame: "_top" } %>
         </div>
       <% end %>
@@ -42,7 +42,7 @@
         <hr class="separator--horizontal full-width flex-item-grow margin-block-start-double" style="--border-color: var(--color-ink-light);" aria-hidden="true">
 
         <%= button_to session_path(script_name: nil), method: :delete, class: "btn txt-x-small center", data: { turbo: false } do %>
-          <span>Sign out of Fizzy on this device</span>
+          <span><%= t("users.show.sign_out") %></span>
         <% end %>
       <% end %>
     </div>

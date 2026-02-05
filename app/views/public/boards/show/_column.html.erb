@@ -10,7 +10,7 @@
 
       <%= link_to public_board_column_url(column.board.publication.key, column), class: "cards__maximize-button btn btn--circle txt-x-small borderless", data: { turbo_frame: "_top" } do %>
         <%= icon_tag "grid", class: "translucent" %>
-        <span class="for-screen-reader">Maximize column</span>
+        <span class="for-screen-reader"><%= t("columns.maximize_column") %></span>
       <% end %>
     </header>
 

@@ -1,0 +1,23 @@
+en:
+  shared:
+    skip_to_main_content: "Skip to main content"
+    close_dialog: "Close dialog"
+    cancel: "Cancel"
+    save: "Save"
+    save_changes: "Save changes"
+    done: "Done"
+    cancel_and_go_back: "Cancel and go back"
+    colophon_fizzy: "Fizzy™"
+    colophon_designed_by: "is designed, built, and backed by"
+    colophon_37signals: "37signals™"
+    welcome_letter_title: "Welcome, and thanks for signing up for Fizzy."
+    welcome_letter_intro_html: "To get you started, we set you up with a Fizzy board called <em>Playground</em>. It's got a few cards designed to help you learn Fizzy itself. Open each card, go through the simple steps, and you'll be an expert in Fizzy in no time. You'll see the <em>Playground</em> when you close this message."
+    welcome_letter_help: "If you ever need a hand, please contact me directly at jason@37signals.com. I'm here for you, we're all here for you."
+    welcome_letter_signoff: "Thanks again and all the best,"
+    welcome_letter_signature_html: "<strong>Jason Fried</strong>, jason@37signals.com"
+    welcome_letter_byline_html: "CEO & co-founder of 37signals, makers of Fizzy, Basecamp, and HEY"
+  columns:
+    done: "Done"
+    not_now: "Not Now"
+    maybe: "Maybe?"
+    triage: "Triage"

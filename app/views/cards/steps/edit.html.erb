@@ -2,17 +2,17 @@
   <div class="flex align-center gap-half">
     <%= form_with model: [@card, @step], class: "step", data: { controller: "form" } do |form| %>
       <%= form.check_box :completed, { class: "step__checkbox", checked: @step.completed?, disabled: true } %>
-      <%= form.text_field :content, class: "input step__content step__content--edit hide-focus-ring", placeholder: "Name this step…", required: true, autofocus: true, autocomplete: "off",
+      <%= form.text_field :content, class: "input step__content step__content--edit hide-focus-ring", placeholder: t("cards.steps.edit.name_placeholder"), required: true, autofocus: true, autocomplete: "off",
           data: { action: "keydown.esc->form#cancel focus->form#select", "1p-ignore": "true" } %>
       <%= form.button type: "submit", class: "btn btn--positive txt-xx-small" do %>
         <%= icon_tag "check" %>
-        <span class="for-screen-reader">Save changes</span>
+        <span class="for-screen-reader"><%= t("cards.steps.edit.save_changes") %></span>
       <% end %>
-      <%= link_to "Cancel changes", card_step_path(@card, @step), data: { form_target: "cancel" }, hidden: true %>
+      <%= link_to t("cards.steps.edit.cancel_changes"), card_step_path(@card, @step), data: { form_target: "cancel" }, hidden: true %>
     <% end %>
     <%= button_to card_step_path(@card, @step), method: :delete, class: "btn btn--negative txt-xx-small" do %>
       <%= icon_tag "trash" %>
-      <span class="for-screen-reader">Delete this step</span>
+      <span class="for-screen-reader"><%= t("cards.steps.edit.delete_this_step") %></span>
     <% end %>
   </div>
 <% end %>

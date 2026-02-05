@@ -1,7 +1,7 @@
 <section class="settings__section">
   <header>
-    <h2 class="divider">Auto close</h2>
-    <div>Fizzy doesn’t let stale cards stick around forever. Cards automatically move to “Not Now” if there is no activity for a specific period of time. <em>This is the default, global setting — you can override it on each board.</em></div>
+    <h2 class="divider"><%= t("account.entropy_section_title") %></h2>
+    <div><%= t("account.entropy_intro_html").html_safe %></div>
   </header>
 
   <%= render "entropy/auto_close", model: account.entropy, url: account_entropy_path, disabled: !Current.user.admin? %>

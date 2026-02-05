@@ -1,16 +1,16 @@
-<% @page_title = "Create a new board" %>
+<% @page_title = t("boards.new.page_title") %>
 <% @body_class = "compact-on-touch" %>
 
 <div class="panel panel--centered">
   <%= bridged_form_with model: @board, class: "flex flex-column gap", data: { controller: "form", action: "submit->form#preventEmptySubmit" } do |form| %>
     <h1 class="txt-x-large margin-none font-weight-black"><%= @page_title %></h1>
-    <%= form.text_field :name, required: true, class: "input full-width", autofocus: true, autocomplete: "off", placeholder: "Name it…", data: { form_target: "input", action: "keydown.esc@document->form#cancel", validation_message: "Board names can‘t be blank" } %>
+    <%= form.text_field :name, required: true, class: "input full-width", autofocus: true, autocomplete: "off", placeholder: t("boards.new.placeholder"), data: { form_target: "input", action: "keydown.esc@document->form#cancel", validation_message: "Board names can‘t be blank" } %>
 
     <button type="submit" class="btn btn--link center" data-bridge--form-target="submit">
-      <span>Create board</span>
+      <span><%= t("boards.new.create_button") %></span>
       <%= icon_tag "arrow-right" %>
     </button>
 
-    <%= link_to "Cancel and go back", root_path, data: { form_target: "cancel", turbo_frame: "_top" }, hidden: true %>
+    <%= link_to t("shared.cancel_and_go_back"), root_path, data: { form_target: "cancel", turbo_frame: "_top" }, hidden: true %>
   <% end %>
 </div>

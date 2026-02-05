@@ -1,0 +1,39 @@
+en:
+  sessions:
+    new:
+      page_title: "Enter your email"
+      title: "Get into Fizzy"
+      email_placeholder: "Enter your email address…"
+      new_here: "New here?"
+      sign_up: "Sign up"
+      to_create_account: "to create an account."
+      already_have_account: "Already have an account?"
+      enter_email: "Enter your email and we'll get you signed in."
+      submit: "Let's go"
+    starts:
+      new:
+        just_a_sec: "Just a sec while we sign you in with %{account_name}."
+        sign_in: "Sign in"
+        signing_in: "Signing in..."
+    magic_links:
+      show:
+        page_title: "Check your email"
+        enter_code: "Then enter the verification code included in the email below:"
+        code_expires: "The code sent to %{email} will work for %{duration}."
+        code_expires_html: "The code sent to <strong>%{email}</strong> will work for %{duration}."
+        psst_code: "Psst, here's your code:"
+        dev_badge: "DEV"
+    menus:
+      show:
+        hmm: "Hmm..."
+        no_accounts: "You don't have any Fizzy accounts."
+        sign_up_new: "Sign up for a new Fizzy account"
+        import_exported: "Import an exported account"
+    rate_limit: "Try again later."
+    something_went_wrong: "Something went wrong"
+    enter_email_to_sign_in: "Enter your email address to sign in."
+    try_another_code: "Try another code."
+    try_again_15_minutes: "Try again in 15 minutes."
+    something_went_wrong_try_again: "Something went wrong. Please try again."
+  signups:
+    try_again_later: "Try again later."

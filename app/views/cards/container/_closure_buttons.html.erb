@@ -1,16 +1,16 @@
 <div class="flex gap-half">
   <%= link_to edit_card_path(card), class: "btn btn--circle-mobile borderless",
-        data: { controller: "hotkey", action: "keydown.e@document->hotkey#click", bridge__buttons_target: "button", bridge_title: "Edit", bridge_icon_url: bridge_icon("pencil"), turbo_frame: dom_id(card, :edit) } do %>
+        data: { controller: "hotkey", action: "keydown.e@document->hotkey#click", bridge__buttons_target: "button", bridge_title: t("cards.container.edit"), bridge_icon_url: bridge_icon("pencil"), turbo_frame: dom_id(card, :edit) } do %>
     <%= icon_tag "pencil", class: "icon--mobile-only" %>
-    <span>Edit</span>
+    <span><%= t("cards.container.edit") %></span>
     <kbd class="txt-x-small hide-on-touch">e</kbd>
   <% end %>
 
   <%= button_to card_closure_path(card), class: "btn btn--circle-mobile borderless",
-        data: { controller: "hotkey", form_target: "submit", bridge__buttons_target: "button", bridge_title: "Mark as Done", bridge_icon_url: bridge_icon("check"), action: "keydown.d@document->hotkey#click" },
+        data: { controller: "hotkey", form_target: "submit", bridge__buttons_target: "button", bridge_title: t("cards.container.mark_as_done"), bridge_icon_url: bridge_icon("check"), action: "keydown.d@document->hotkey#click" },
         form: { data: { controller: "form" } } do %>
     <%= icon_tag "check", class: "icon--mobile-only" %>
-    <span class="overflow-ellipsis">Mark as Done</span>
+    <span class="overflow-ellipsis"><%= t("cards.container.mark_as_done") %></span>
     <kbd class="txt-x-small hide-on-touch">d</kbd>
   <% end %>
 </div>

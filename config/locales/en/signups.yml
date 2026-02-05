@@ -1,0 +1,11 @@
+en:
+  signups:
+    new:
+      title: "Sign up"
+      enter_email: "Enter your email to create an account."
+      submit: "Let's go"
+    completions:
+      new:
+        one_step_away: "You're one step away. Just enter your name to get your own Fizzy account."
+        validation_errors: "Your changes couldn't be saved:"
+        continue: "Continue"

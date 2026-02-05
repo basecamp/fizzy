@@ -1,7 +1,7 @@
 module NotificationsHelper
   def event_notification_title(event)
     case event_notification_action(event)
-    when "comment_created" then "RE: #{card_notification_title(event.eventable.card)}"
+    when "comment_created" then I18n.t("notifications.re_prefix", title: card_notification_title(event.eventable.card))
     else card_notification_title(event.eventable)
     end
   end
@@ -10,17 +10,17 @@ module NotificationsHelper
     creator = event.creator.name
 
     case event_notification_action(event)
-    when "card_assigned" then "Assigned to #{event.assignees.none? ? "self" : event.assignees.pluck(:name).to_sentence}"
-    when "card_unassigned" then "Unassigned by #{creator}"
-    when "card_published" then "Added by #{creator}"
-    when "card_closed" then "Moved to Done by #{creator}"
-    when "card_reopened" then "Reopened by #{creator}"
-    when "card_postponed" then "Moved to Not Now by #{creator}"
-    when "card_auto_postponed" then "Moved to Not Now due to inactivity"
-    when "card_title_changed" then "Renamed by #{creator}"
-    when "card_board_changed" then "Moved by #{creator}"
-    when "card_triaged" then "Moved to #{event.particulars.dig("particulars", "column")} by #{creator}"
-    when "card_sent_back_to_triage" then "Moved back to Maybe? by #{creator}"
+    when "card_assigned" then event.assignees.none? ? I18n.t("notifications.assigned_to_self") : I18n.t("notifications.assigned_to", assignees: event.assignees.pluck(:name).to_sentence)
+    when "card_unassigned" then I18n.t("notifications.unassigned_by", creator: creator)
+    when "card_published" then I18n.t("notifications.added_by", creator: creator)
+    when "card_closed" then I18n.t("notifications.moved_to_done_by", creator: creator)
+    when "card_reopened" then I18n.t("notifications.reopened_by", creator: creator)
+    when "card_postponed" then I18n.t("notifications.moved_to_not_now_by", creator: creator)
+    when "card_auto_postponed" then I18n.t("notifications.moved_to_not_now_inactivity")
+    when "card_title_changed" then I18n.t("notifications.renamed_by", creator: creator)
+    when "card_board_changed" then I18n.t("notifications.moved_by", creator: creator)
+    when "card_triaged" then I18n.t("notifications.moved_to_column_by", column: event.particulars.dig("particulars", "column"), creator: creator)
+    when "card_sent_back_to_triage" then I18n.t("notifications.moved_back_to_maybe_by", creator: creator)
     when "comment_created" then comment_notification_body(event)
     else creator
     end
@@ -46,7 +46,7 @@ module NotificationsHelper
       button_to url,
           method: :delete,
           class: "card__notification-unread-indicator btn btn--circle borderless",
-          title: "Mark as unread",
+          title: t("notifications.mark_as_unread"),
           data: { action: "form#submit:stop badge#update:stop", form_target: "submit" },
           form: { data: { controller: "form" } } do
         concat(icon_tag("unseen"))
@@ -54,7 +54,7 @@ module NotificationsHelper
     else
       button_to url,
           class: "card__notification-unread-indicator btn btn--circle borderless",
-          title: "Mark as read",
+          title: t("notifications.mark_as_read"),
           data: { action: "form#submit:stop badge#update:stop", form_target: "submit" },
           form: { data: { controller: "form" } } do
         concat(icon_tag("remove"))
@@ -71,10 +71,10 @@ module NotificationsHelper
 
   def bundle_email_frequency_options_for(settings)
     options_for_select([
-      [ "Never", "never" ],
-      [ "Every few hours", "every_few_hours" ],
-      [ "Every day", "daily" ],
-      [ "Every week", "weekly" ]
+      [ t("notifications.bundle_frequency.never"), "never" ],
+      [ t("notifications.bundle_frequency.every_few_hours"), "every_few_hours" ],
+      [ t("notifications.bundle_frequency.daily"), "daily" ],
+      [ t("notifications.bundle_frequency.weekly"), "weekly" ]
     ], settings.bundle_email_frequency)
   end
 
@@ -93,6 +93,6 @@ module NotificationsHelper
     end
 
     def card_notification_title(card)
-      card.title.presence || "Card #{card.number}"
+      card.title.presence || I18n.t("notifications.card_title", number: card.number)
     end
 end

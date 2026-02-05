@@ -1,14 +1,14 @@
 <div id="<%= dom_id(column, :menu) %>" class="cards__menu" data-controller="dialog" data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside">
   <button class="btn btn--circle txt-x-small borderless" data-action="click->dialog#open">
     <%= icon_tag "menu-dots-horizontal", class: "translucent" %>
-    <span class="for-screen-reader">Column options</span>
+    <span class="for-screen-reader"><%= t("boards.columns.column_options") %></span>
   </button>
   <dialog class="popup popup--align-right panel flex-column gap fill-white shadow txt-small margin-block-double" data-dialog-target="dialog">
     <ul class="popup__list">
       <li class="popup__item">
         <button class="popup__btn btn" data-action="click->clicker#click">
           <%= icon_tag "pencil" %>
-          <span>Edit column</span>
+          <span><%= t("boards.columns.edit_column") %></span>
         </button>
       </li>
 
@@ -18,7 +18,7 @@
               form_class: "display-contents",
               disabled: column.leftmost? do %>
           <%= icon_tag "column-left" %>
-          <span>Move to the left</span>
+          <span><%= t("boards.columns.move_left") %></span>
         <% end %>
       </li>
 
@@ -28,7 +28,7 @@
               form_class: "display-contents",
               disabled: column.rightmost? do %>
           <%= icon_tag "column-right" %>
-          <span>Move to the right</span>
+          <span><%= t("boards.columns.move_right") %></span>
         <% end %>
       </li>
 
@@ -37,18 +37,18 @@
               method: :delete,
               class: "popup__btn btn txt-negative",
                 form_class: "display-contents",
-              form: { data: { turbo_confirm: "Are you sure you want to delete this column? This will move the cards back to Maybe." } } do %>
+              form: { data: { turbo_confirm: t("boards.columns.delete_confirm") } } do %>
           <%= icon_tag "trash" %>
-          <span>Delete column</span>
+          <span><%= t("boards.columns.delete_column") %></span>
         <% end %>
       </li>
     </ul>
   </dialog>
 
   <div data-controller="dialog" data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside">
-    <button id="<%= dom_id(column, :manage_menu) %>" class="popup__btn btn" data-action="click->dialog#open:stop" data-clicker-target="clickable" hidden aria-hidden>Save changes</button>
+    <button id="<%= dom_id(column, :manage_menu) %>" class="popup__btn btn" data-action="click->dialog#open:stop" data-clicker-target="clickable" hidden aria-hidden><%= t("shared.save_changes") %></button>
     <dialog class="popup panel flex-column gap-half fill-white shadow txt-small margin-block-double" data-dialog-target="dialog" data-action="turbo:before-morph-attribute->dialog#preventCloseOnMorphing">
-      <%= render "boards/show/menu/column_form", board: column.board, column: column, label: "Save changes" %>
+      <%= render "boards/show/menu/column_form", board: column.board, column: column, label: t("shared.save_changes") %>
     </dialog>
   </div>
 </div>

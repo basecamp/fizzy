@@ -1,0 +1,30 @@
+en:
+  cards:
+    container:
+      edit: "Edit"
+      mark_as_done: "Mark as Done"
+      undo: "Undo"
+      completed_by: "Completed by %{name} on "
+    moves_to_not_now_prefix: "Moves to \"Not Now\" "
+    moves_to_not_now_suffix: " if there's no activity."
+  card_deleted: "Card deleted"
+  card_added: "Card added"
+    display:
+      stamp:
+        by: "by"
+      meta:
+        by: "By"
+        updated: "Updated"
+        assigned_to: "Assigned to"
+        not_assigned: "Not assigned"
+        last_updated: "Last updated"
+    steps:
+      edit:
+        name_placeholder: "Name this step…"
+        save_changes: "Save changes"
+        cancel_changes: "Cancel changes"
+        delete_this_step: "Delete this step"
+    watches:
+      watch_this: "Watch this"
+      stop_watching: "Stop watching"
+    add_a_card: "Add a card"

@@ -2,7 +2,7 @@
       data: {
         controller: "expandable-on-native",
         expandable_on_native_auto_expand_selector_value: "[data-filter-show=true]" } do %>
-    <%= tag.summary "Toggle filters", class: "btn btn--plain margin-block-end", data: { bridge__buttons_target: "button", bridge_title: "Toggle filters", bridge_icon_url: bridge_icon("funnel") } %>
+    <%= tag.summary t("filters.toggle_filters"), class: "btn btn--plain margin-block-end", data: { bridge__buttons_target: "button", bridge_title: t("filters.toggle_filters"), bridge_icon_url: bridge_icon("funnel") } %>
     <%= tag.aside \
           class: class_names("filters margin-block-end", { "filters--expanded": user_filtering.expanded? }),
           data: {

@@ -1,16 +1,16 @@
-<% @page_title = "Notifications" %>
+<% @page_title = t("notifications.index.page_title") %>
 <% @hide_footer_frames = true %>
 
 <% content_for :header do %>
   <div class="header__actions header__actions--start">
-    <%= back_link_to "Home", root_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+    <%= back_link_to t("notifications.index.home"), root_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
   </div>
 
   <h1 class="header__title" data-bridge--title-target="header"><%= @page_title %></h1>
 
   <div class="header__actions header__actions--end">
-    <%= link_to notifications_settings_path, class: "btn btn--circle-mobile", data: { bridge__overflow_menu_target: "item", bridge_title: "Notification settings" } do %>
-      <%= icon_tag "settings" %> <span class="for-screen-reader">Notification settings</span>
+    <%= link_to notifications_settings_path, class: "btn btn--circle-mobile", data: { bridge__overflow_menu_target: "item", bridge_title: t("notifications.index.notification_settings") } do %>
+      <%= icon_tag "settings" %> <span class="for-screen-reader"><%= t("notifications.index.notification_settings") %></span>
     <% end %>
   </div>
 <% end %>

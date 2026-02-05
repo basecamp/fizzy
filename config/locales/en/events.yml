@@ -1,0 +1,6 @@
+en:
+  events:
+    empty_days:
+      no_more_activity: "No more activity"
+      no_activity: "No activity"
+      no_activity_for_days: "No activity for %{count} days"

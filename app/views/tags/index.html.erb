@@ -1,5 +1,5 @@
 <section class="panel borderless center margin pad">
-  <h1>All tags</h1>
+  <h1><%= t("tags.index.title") %></h1>
   <ul class="txt-align-start">
     <% @tags.each do |tag| %>
       <li class="flex align-start justify-space-between gap pad" style="border-block-end: 1px solid var(--color-ink-lighter)">
@@ -13,7 +13,7 @@
 
         <%= button_to tag_path(tag), class: "btn txt-small", method: :delete, data: { turbo_confirm: "Are you sure?" } do %>
           <%= icon_tag "remove" %>
-          <span class="for-screen-reader">Delete</span>
+          <span class="for-screen-reader"><%= t("tags.index.delete") %></span>
         <% end %>
       </li>
     <% end %>

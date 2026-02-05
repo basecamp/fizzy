@@ -1,16 +1,16 @@
-<% @page_title = "Link expired" %>
+<% @page_title = t("users.email_addresses.confirmations.invalid_token.page_title") %>
 
 <div class="panel panel--centered center flex flex-column gap-half" style="--panel-size: 50ch;">
   <h1 class="txt-x-large font-weight-black margin-none">
     <%= @page_title %>
   </h1>
   <p class="margin-none-block-start margin-block-end-half">
-    That email confirmation link is no longer valid—they expire after 30 minutes. You’ll have to try again.
+    <%= t("users.email_addresses.confirmations.invalid_token.body") %>
   </p>
 
-  <%= link_to "Change my email address", new_user_email_address_path(user_id: @user, script_name: @user.account.slug), class: "btn btn--link center" %>
+  <%= link_to t("users.email_addresses.confirmations.invalid_token.change_my_email"), new_user_email_address_path(user_id: @user, script_name: @user.account.slug), class: "btn btn--link center" %>
 
   <p class="txt-small txt-subtle">
-    If you get stuck, <%= mail_to "support@fizzy.do", "send us an email" %> and we’ll get you back on track.
+    If you get stuck, <%= mail_to "support@fizzy.do", t("users.email_addresses.confirmations.invalid_token.send_us_email") %> and we’ll get you back on track.
   </p>
 </div>

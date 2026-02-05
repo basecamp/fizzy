@@ -3,12 +3,12 @@
 <% if user_filtering.expanded? %>
   <button type="button" class="btn txt-x-small btn--reversed" aria-selected="true" data-action="toggle-class#toggle toggle-enable#toggle" data-controller="tooltip">
     <%= icon_tag "filter" %>
-    <span class="for-screen-reader">Close filter options</span>
+    <span class="for-screen-reader"><%= t("filters.close_filter_options") %></span>
   </button>
 <% else %>
   <button type="button" class="btn txt-x-small filter-toggle" data-action="toggle-class#toggle toggle-enable#toggle" data-controller="tooltip">
     <%= icon_tag "filter" %>
-    <span class="filters__show-when-expanded for-screen-reader">Collapse filter options</span>
-    <span class="filters__show-when-collapsed for-screen-reader">Expand filter options</span>
+    <span class="filters__show-when-expanded for-screen-reader"><%= t("filters.collapse_filter_options") %></span>
+    <span class="filters__show-when-collapsed for-screen-reader"><%= t("filters.expand_filter_options") %></span>
   </button>
 <% end %>

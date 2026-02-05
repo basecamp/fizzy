@@ -1,8 +1,8 @@
-<% @page_title = "Change your email" %>
+<% @page_title = t("users.email_addresses.new.page_title") %>
 
 <% content_for :header do %>
   <div class="header__actions header__actions--start">
-    <%= back_link_to "My profile", edit_user_path(@user, script_name: @user.account.slug), "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+    <%= back_link_to t("users.my_profile"), edit_user_path(@user, script_name: @user.account.slug), "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
   </div>
 <% end %>
 
@@ -14,14 +14,14 @@
   <%= form_with url: user_email_addresses_path(user_id: @user.id), method: :post, class: "flex flex-column gap-half", data: { controller: "form", turbo: false } do |form| %>
     <div class="flex align-center gap-half">
       <label class="flex align-center gap input input--actor">
-        <%= form.email_field :email_address, class: "input full-width", autocomplete: "email", placeholder: "New email address", autofocus: true, required: true %>
+        <%= form.email_field :email_address, class: "input full-width", autocomplete: "email", placeholder: t("users.email_addresses.new.new_email_placeholder"), autofocus: true, required: true %>
       </label>
     </div>
 
-    <p class="margin-none-block-start margin-block-end-half">Enter your new email address, then check your email to confirm the change.</p>
+    <p class="margin-none-block-start margin-block-end-half"><%= t("users.email_addresses.new.intro") %></p>
 
     <button type="submit" class="btn btn--link center" data-form-target="submit">
-      <span>Continue</span>
+      <span><%= t("users.email_addresses.new.continue") %></span>
       <%= icon_tag "arrow-right" %>
     </button>
   <% end %>

@@ -1,0 +1,34 @@
+en:
+  boards:
+    edit:
+      page_title: "Board Settings"
+      only_admins_notice: "Only admins can change these settings"
+      self_removal_confirm: "Are you sure you want to remove yourself from this board? You won't be able to get back in unless someone invites you."
+      select_all: "Select all"
+      select_none: "Select none"
+      save_changes: "Save changes"
+      save_changes_hotkey: "Save changes (%{hotkey})"
+    publication:
+      public_link: "Public link"
+      turn_on_public_link_desc: "Turn on the Public link to share this board with anyone in the world. They won't need to log in and they won't be able to see anything else in Fizzy."
+      turn_off_public_link: "Turn off the public link"
+      turn_on_public_link: "Turn on the public link"
+      copy_public_link: "Copy public link"
+      add_optional_description: "Add an optional description to the public page"
+      add_public_note_placeholder: "Add a public note about this board…"
+      save_changes: "Save changes"
+    new:
+      page_title: "Create a new board"
+      placeholder: "Name it…"
+      create_button: "Create board"
+      validation_message: "Board names can't be blank"
+    columns:
+      page_title: "Column: %{name}"
+      add_column: "Add column"
+      add_a_column: "Add a column"
+      column_options: "Column options"
+      edit_column: "Edit column"
+      move_left: "Move to the left"
+      move_right: "Move to the right"
+      delete_column: "Delete column"
+      delete_confirm: "Are you sure you want to delete this column? This will move the cards back to Maybe."

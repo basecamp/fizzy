@@ -1,8 +1,8 @@
-<% @page_title = "Generate a personal access token" %>
+<% @page_title = t("my.access_tokens.new.page_title") %>
 
 <% content_for :header do %>
   <div class="header__actions header__actions--start">
-    <%= back_link_to "tokens", my_access_tokens_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+    <%= back_link_to t("my.access_tokens.new.back_to"), my_access_tokens_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
   </div>
 
   <h1 class="header__title" data-bridge--title-target="header"><%= @page_title %></h1>
@@ -11,19 +11,19 @@
 <article class="panel panel--wide shadow center txt-align-start" style="view-transition-name: <%= dom_id(@access_token) %>">
   <%= form_with model: @access_token, url: my_access_tokens_path, scope: :access_token, data: { controller: "form" }, html: { class: "flex flex-column gap" } do |form| %>
     <div class="flex flex-column gap-half">
-      <strong><%= form.label :description, "Access token description" %></strong>
+      <strong><%= form.label :description, t("my.access_tokens.new.description_label") %></strong>
       <%= form.text_field :description, required: true, autofocus: true, class: "input", placeholder: "e.g. Github", data: { action: "keydown.esc@document->form#cancel" } %>
     </div>
 
     <div class="flex flex-column gap-half">
       <strong><%= form.label :permission %></strong>
-      <%= form.select :permission, options_for_select({ "Read" => "read", "Read + Write" => "write"}), {}, class: "input input--select" %>
+      <%= form.select :permission, options_for_select({ t("my.access_tokens.new.read") => "read", t("my.access_tokens.new.read_write") => "write"}), {}, class: "input input--select" %>
     </div>
 
     <%= form.button type: :submit, class: "btn btn--link center txt-medium" do %>
-      <span>Generate access token</span>
+      <span><%= t("my.access_tokens.new.generate") %></span>
     <% end %>
 
-     <%= link_to "Cancel and go back", my_access_tokens_path, data: { form_target: "cancel" }, hidden: true %>
+     <%= link_to t("my.access_tokens.new.cancel_and_go_back"), my_access_tokens_path, data: { form_target: "cancel" }, hidden: true %>
   <% end %>
 </article>

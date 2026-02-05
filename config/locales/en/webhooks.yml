@@ -1,0 +1,32 @@
+en:
+  webhooks:
+    index:
+      intro: "Webhooks can notify another application when something happens in this Fizzy board. You'll choose which events to subscribe to and provide a URL to receive the data."
+      example: "For example, you could create a webhook that posts to a Campfire chat in Basecamp when new cards are added to Fizzy."
+      set_up_new: "Set up a new webhook"
+    new:
+      payload_url: "Payload URL"
+      payload_url_hint: "This is the URL for the app that will receive payloads from Fizzy."
+      events: "Events"
+      events_hint: "Trigger a call to the Payload URL when:"
+      create: "Create Webhook"
+      go_back: "Go back"
+    edit:
+      events: "Events"
+      events_hint: "Trigger a call to the Payload URL when:"
+      save_changes: "Save Changes"
+      go_back: "Go back"
+    show:
+      edit: "Edit"
+      secret: "Secret"
+      secret_description: "We'll send a %{header} header with each request. You can generate a %{hmac} using %{sha256} of the request body with this secret to verify that the request came from us."
+      reactivate: "Reactivate"
+      subscribed_to: "Subscribed to"
+      no_events: "This Webhook isn't subscribed to any events. It will never trigger."
+      deliveries: "Deliveries"
+      no_deliveries: "This Webhook hasn't been triggered yet"
+    form:
+      enable_all: "Enable all"
+      disable_all: "Disable all"
+    webhook:
+      remove: "Remove %{name}"

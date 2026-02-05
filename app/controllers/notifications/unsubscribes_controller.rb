@@ -18,7 +18,7 @@ class Notifications::UnsubscribesController < ApplicationController
   private
     def set_user
       unless @user = User.find_by_token_for(:unsubscribe, params[:access_token])
-        redirect_to root_path, alert: "Invalid unsubscribe link"
+        redirect_to root_path, alert: I18n.t("notifications.invalid_unsubscribe_link")
       end
     end
 end

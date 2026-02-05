@@ -1,0 +1,16 @@
+en:
+  mailers:
+    magic_link:
+      sign_in_instructions_subject: "Your Fizzy code is %{code}"
+    export:
+      completed_subject: "Your Fizzy data export is ready for download"
+    import:
+      completed_subject: "Your Fizzy account import is done"
+      failed_subject: "Your Fizzy account import failed"
+    account:
+      cancellation_subject: "Your Fizzy account was cancelled"
+    notification:
+      bundle_subject: "Fizzy: New notifications"
+      bundle_subject_with_account: "Fizzy (%{account_name}): New notifications"
+    user_mailer:
+      email_change_confirmation_subject: "Confirm your new email address"

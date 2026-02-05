@@ -8,7 +8,7 @@
     data-platform="<%= platform.type %>" data-bridge--title-title-value="<%= @page_title %>">
     <div id="global-container" data-controller="bridge--buttons bridge--overflow-menu">
       <header class="header header--mobile-actions-stack <%= @header_class %>" id="header">
-        <a href="#main" class="header__skip-navigation btn" data-turbo="false">Skip to main content</a>
+        <a href="#main" class="header__skip-navigation btn" data-turbo="false"><%= t("shared.skip_to_main_content") %></a>
         <%= render "my/menu" if Current.user %>
         <%= yield :header %>
       </header>

@@ -1,4 +1,8 @@
 module ApplicationHelper
+  def available_locales_for_select
+    Rails.application.config.i18n.available_locales.map { |locale| [ t("locales.name.#{locale}", default: locale.to_s), locale.to_s ] }
+  end
+
   def page_title_tag
     account_name = if Current.account && Current.session&.identity&.users&.many?
       Current.account&.name

@@ -1,7 +1,7 @@
 <% @page_title = "Signup for Fizzy" %>
 
 <div class="panel panel--centered flex flex-column gap-half">
-  <h1 class="txt-x-large font-weight-black margin-block-end">Sign up</h1>
+  <h1 class="txt-x-large font-weight-black margin-block-end"><%= t("signups.new.title") %></h1>
 
   <%= form_with model: @signup, url: signup_path, scope: "signup", class: "flex flex-column gap", data: { turbo: false, controller: "form" } do |form| %>
     <div class="flex align-center gap">
@@ -10,10 +10,10 @@
       </label>
     </div>
 
-    <p>Enter your email to create an account.</p>
+    <p><%= t("signups.new.enter_email") %></p>
 
     <button type="submit" id="log_in" class="btn btn--link center txt-medium">
-      <span>Let’s go</span>
+      <span><%= t("signups.new.submit") %></span>
       <%= icon_tag "arrow-right" %>
     </button>
   <% end %>

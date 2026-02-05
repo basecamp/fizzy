@@ -12,12 +12,12 @@
   </span>
 
   <span class="card__meta-text card__meta-text--updated overflow-ellipsis">
-    <%= icon_tag "refresh--meta", aria: { label: "Last updated" } %>
+    <%= icon_tag "refresh--meta", aria: { label: t("cards.display.meta.last_updated") } %>
     <%= local_datetime_tag(card.last_active_at, style: :daysago) %>
   </span>
 
   <span class="card__meta-text card__meta-text--assignees overflow-ellipsis">
-    <%= icon_tag("arrow-right", aria: { label: "Assigned to" }) if card.assignees.any? %>
+    <%= icon_tag("arrow-right", aria: { label: t("cards.display.meta.assigned_to") }) if card.assignees.any? %>
     <%= card.assignees.map { |assignee| h assignee.familiar_name }.to_sentence(two_words_connector: " / ", last_word_connector: " / ").html_safe %>
   </span>
 

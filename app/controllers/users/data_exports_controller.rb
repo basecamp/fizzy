@@ -11,7 +11,7 @@ class Users::DataExportsController < ApplicationController
 
   def create
     @user.data_exports.create!(account: Current.account).build_later
-    redirect_to @user, notice: "Export started. You'll receive an email when it's ready."
+    redirect_to @user, notice: I18n.t("users.data_exports.export_started")
   end
 
   private

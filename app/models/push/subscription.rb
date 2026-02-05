@@ -38,13 +38,13 @@ class Push::Subscription < ApplicationRecord
 
     def validate_endpoint_url
       if endpoint_uri.nil?
-        errors.add(:endpoint, "is not a valid URL")
+        errors.add(:endpoint, I18n.t("activerecord.errors.models.push/subscription.attributes.endpoint.invalid_url"))
       elsif endpoint_uri.scheme != "https"
-        errors.add(:endpoint, "must use HTTPS")
+        errors.add(:endpoint, I18n.t("activerecord.errors.models.push/subscription.attributes.endpoint.invalid_scheme"))
       elsif !permitted_endpoint_host?
-        errors.add(:endpoint, "is not a permitted push service")
+        errors.add(:endpoint, I18n.t("activerecord.errors.models.push/subscription.attributes.endpoint.not_permitted"))
       elsif resolved_endpoint_ip.nil?
-        errors.add(:endpoint, "resolves to a private or invalid IP address")
+        errors.add(:endpoint, I18n.t("activerecord.errors.models.push/subscription.attributes.endpoint.private_ip"))
       end
     end
 

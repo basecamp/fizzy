@@ -18,7 +18,7 @@
           <%= render "cards/display/public_previews", cards: @page.records %>
         <% end %>
       <% else %>
-        <div class="blank-slate">No cards here</div>
+        <div class="blank-slate"><%= t("columns.no_cards_here") %></div>
       <% end %>
     </div>
   <% end %>

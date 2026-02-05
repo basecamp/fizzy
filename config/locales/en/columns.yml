@@ -1,0 +1,7 @@
+en:
+  columns:
+    choose: "Choose a column for this card"
+    add_card: "Add card"
+    no_cards_here: "No cards here"
+    maximize_column: "Maximize column"
+    expand_column: "Expand column"

@@ -1,0 +1,9 @@
+en:
+  user_mailer:
+    email_change_confirmation:
+      subject: "Confirm your email address change"
+      subtitle: "Confirm your email address change"
+      button: "Yes use this email address"
+      ignore: "If you didn't request this change, you can ignore this email. Your email address WILL NOT be changed unless you hit the button."
+      need_help: "Need help?"
+      send_email: "Send us an email"

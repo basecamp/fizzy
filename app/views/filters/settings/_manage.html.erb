@@ -4,6 +4,6 @@
 <div class="filters__manage gap-half">
   <%= link_to clear_url, class: "btn btn--remove txt-x-small", data: { controller: "hotkey tooltip", action: "keydown.esc@document->hotkey#click"} do %>
     <%= icon_tag "close" %>
-    <span class="for-screen-reader">Clear all</span>
+    <span class="for-screen-reader"><%= t("filters.clear_all") %></span>
   <% end %>
 </div>

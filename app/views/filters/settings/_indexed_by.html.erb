@@ -5,7 +5,7 @@
             action: "keydown.esc->dialog#close click@document->dialog#closeOnClickOutside dialog:close@document->filter#clearInput",
             filter_show: user_filtering.show_indexed_by?,
             combobox_default_value_value: "all",
-            combobox_default_label_value: "Status…",
+            combobox_default_label_value: t("filters.status"),
             combobox_with_default_class: "quick-filter--with-default" } do %>
     <button type="button" class="btn input input--select flex-inline txt-x-small" data-action="click->dialog#toggle:stop">
       <span class="overflow-ellipsis" data-combobox-target="label">
@@ -16,8 +16,8 @@
       <%= hidden_field_tag :indexed_by, nil, data: { filter_settings_target: "field" } %>
     </template>
 
-    <%= filter_dialog "Filter by…" do %>
-      <strong class="popup__title">Filter by status…</strong>
+    <%= filter_dialog t("filters.filter_by") do %>
+      <strong class="popup__title"><%= t("filters.filter_by_status") %></strong>
 
       <ul class="popup__list" data-filter-target="list" role="listbox">
         <% Filter::INDEXES.each do |index| %>

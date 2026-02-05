@@ -47,3 +47,20 @@ something to work on if you'd like to do so.
 Hopefully this process makes it easier for everyone to be involved. Thanks for
 helping! ❤️
 
+## Internationalization (i18n)
+
+User-facing strings should use Rails I18n so the app can be localized.
+
+- **Where to add keys**: Put translations under `config/locales/en/` in YAML files
+  by feature (e.g. `boards.yml`, `cards.yml`, `shared.yml`, `users.yml`).
+- **Naming**: Use namespaced keys that match the view path, e.g. `cards.container.edit`,
+  `boards.new.page_title`, `shared.save_changes`.
+- **In views**: Use the `t()` helper, e.g. `<%= t("cards.container.edit") %>`.
+- **Interpolation**: For dynamic values use `t("key", name: value)` in Ruby and
+  `%{name}` in the YAML value.
+- **HTML**: For strings that contain HTML, use a key ending in `_html` and mark
+  the value as html_safe only when the translation is trusted (e.g. in shared
+  welcome letter content).
+- **New strings**: When adding UI copy, add the key to the appropriate locale
+  file and use `t("...")` instead of hardcoding English.
+

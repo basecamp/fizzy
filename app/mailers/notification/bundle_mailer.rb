@@ -11,6 +11,6 @@ class Notification::BundleMailer < ApplicationMailer
 
     mail \
       to: bundle.user.identity.email_address,
-      subject: "Fizzy#{ " (#{ Current.account.name })" if @user.identity.accounts.many? }: New notifications"
+      subject: @user.identity.accounts.many? ? I18n.t("mailers.notification.bundle_subject_with_account", account_name: Current.account.name) : I18n.t("mailers.notification.bundle_subject")
   end
 end

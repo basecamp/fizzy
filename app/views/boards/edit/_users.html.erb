@@ -27,9 +27,9 @@
 
   <div class="toggler__visible-when-off">
     <div class="flex align-center justify-end gap-half">
-      <%= button_tag "Select all", type: "button", class: "btn btn--plain txt-x-small txt-link font-weight-normal", data: { action: "click->toggle-class#checkAll" }, disabled: %>
+      <%= button_tag t("boards.edit.select_all"), type: "button", class: "btn btn--plain txt-x-small txt-link font-weight-normal", data: { action: "click->toggle-class#checkAll" }, disabled: %>
       <span class="txt-subtle">&middot;</span>
-      <%= button_tag "Select none", type: "button", class: "btn btn--plain txt-x-small txt-link font-weight-normal", data: { action: "click->toggle-class#checkNone" }, disabled: %>
+      <%= button_tag t("boards.edit.select_none"), type: "button", class: "btn btn--plain txt-x-small txt-link font-weight-normal", data: { action: "click->toggle-class#checkNone" }, disabled: %>
     </div>
   </div>
 

@@ -1,8 +1,8 @@
-<% @page_title = "New personal access token" %>
+<% @page_title = t("my.access_tokens.show.page_title") %>
 
 <% content_for :header do %>
   <div class="header__actions header__actions--start">
-    <%= back_link_to "Tokens", my_access_tokens_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+    <%= back_link_to t("my.access_tokens.show.back_to"), my_access_tokens_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
   </div>
 
   <h1 class="header__title" data-bridge--title-target="header"><%= @page_title %></h1>
@@ -11,16 +11,16 @@
 <article class="panel panel--wide shadow center txt-align-start" style="view-transition-name: <%= dom_id(@access_token) %>">
   <div class="flex flex-column gap">
     <label class="flex flex-column gap-half txt-align-start">
-      <strong><%= @access_token.description %> (<%= @access_token.permission == "write" ? "Read + Write" : "Read" %>)</strong>
+      <strong><%= @access_token.description %> (<%= @access_token.permission == "write" ? t("my.access_tokens.new.read_write") : t("my.access_tokens.new.read") %>)</strong>
       <input type="text" value="<%= @access_token.token %>" class="input" readonly>
     </label>
-    <p class="margin-none txt-small">Be sure to save this access token now because you won’t be able to see it again.</p>
+    <p class="margin-none txt-small"><%= t("my.access_tokens.show.save_warning") %></p>
 
     <%= tag.button class: "btn btn--link center", data: {
       controller: "copy-to-clipboard", action: "copy-to-clipboard#copy",
           copy_to_clipboard_success_class: "btn--success", copy_to_clipboard_content_value: @access_token.token } do %>
       <%= icon_tag "copy-paste" %>
-      <span>Copy access token</span>
+      <span><%= t("my.access_tokens.show.copy_token") %></span>
     <% end %>
   </div>
 </article>

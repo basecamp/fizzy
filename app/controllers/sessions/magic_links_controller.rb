@@ -20,7 +20,7 @@ class Sessions::MagicLinksController < ApplicationController
   private
     def ensure_that_email_address_pending_authentication_exists
       unless email_address_pending_authentication.present?
-        alert_message = "Enter your email address to sign in."
+        alert_message = I18n.t("sessions.enter_email_to_sign_in")
         respond_to do |format|
           format.html { redirect_to new_session_path, alert: alert_message }
           format.json { render json: { message: alert_message }, status: :unauthorized }
@@ -52,7 +52,7 @@ class Sessions::MagicLinksController < ApplicationController
 
     def email_address_mismatch
       clear_pending_authentication_token
-      alert_message = "Something went wrong. Please try again."
+      alert_message = I18n.t("sessions.something_went_wrong_try_again")
 
       respond_to do |format|
         format.html { redirect_to new_session_path, alert: alert_message }
@@ -63,7 +63,7 @@ class Sessions::MagicLinksController < ApplicationController
     def invalid_code
       respond_to do |format|
         format.html { redirect_to session_magic_link_path, flash: { shake: true } }
-        format.json { render json: { message: "Try another code." }, status: :unauthorized }
+        format.json { render json: { message: I18n.t("sessions.try_another_code") }, status: :unauthorized }
       end
     end
 
@@ -76,7 +76,7 @@ class Sessions::MagicLinksController < ApplicationController
     end
 
     def rate_limit_exceeded
-      rate_limit_exceeded_message = "Try again in 15 minutes."
+      rate_limit_exceeded_message = I18n.t("sessions.try_again_15_minutes")
       respond_to do |format|
         format.html { redirect_to session_magic_link_path, alert: rate_limit_exceeded_message }
         format.json { render json: { message: rate_limit_exceeded_message }, status: :too_many_requests }

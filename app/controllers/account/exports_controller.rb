@@ -10,7 +10,7 @@ class Account::ExportsController < ApplicationController
 
   def create
     Current.account.exports.create!(user: Current.user).build_later
-    redirect_to account_settings_path, notice: "Export started. You'll receive an email when it's ready."
+    redirect_to account_settings_path, notice: I18n.t("account.export_started")
   end
 
   private

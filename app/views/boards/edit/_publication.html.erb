@@ -1,7 +1,7 @@
 <%= turbo_frame_tag @board, :publication do %>
   <header>
-    <h2 class="divider txt-large">Public link</h2>
-    <div>Turn on the Public link to share this board with anyone in the world. They won’t need to log in and they won’t be able to see anything else in Fizzy.</div>
+    <h2 class="divider txt-large"><%= t("boards.publication.public_link") %></h2>
+    <div><%= t("boards.publication.turn_on_public_link_desc") %></div>
   </header>
 
   <% if board.published? %>
@@ -13,7 +13,7 @@
             <%= form.check_box :published, class: "switch__input", checked: true, data: { action: "change->form#submit" }, disabled: !Current.user.can_administer_board?(@board) %>
             <span class="switch__btn round"></span>
           </span>
-          <span class="for-screen-reader">Turn off the public link</span>
+          <span class="for-screen-reader"><%= t("boards.publication.turn_off_public_link") %></span>
         </label>
         <span class="txt-large" aria-hidden="true"><%= icon_tag "world" %></span>
       <% end %>
@@ -23,18 +23,18 @@
         <div class="flex align-center justify-center gap-half">
           <%= button_to_copy_to_clipboard(published_board_url(board)) do %>
             <%= icon_tag "copy-paste" %>
-            <span class="for-screen-reader">Copy public link</span>
+            <span class="for-screen-reader"><%= t("boards.publication.copy_public_link") %></span>
           <% end %>
         </div>
       </div>
-      <strong class="margin-block-end-half flex justify-center txt-small">Add an optional description to the public page</strong>
+      <strong class="margin-block-end-half flex justify-center txt-small"><%= t("boards.publication.add_optional_description") %></strong>
       <div class="border-radius input fill-white">
         <%= form_with model: board, class: "txt-align-start", data: { controller: "form", turbo_frame: "_top" } do |form| %>
           <%= form.rich_textarea :public_description, class: "rich-text-content txt-small",
-            placeholder: "Add a public note about this board…",
+            placeholder: t("boards.publication.add_public_note_placeholder"),
             data: { action: "keydown.ctrl+enter->form#submit:prevent keydown.meta+enter->form#submit:prevent keydown.esc->form#cancel:stop" },
             readonly: !Current.user.can_administer_board?(@board) %>
-          <%= form.button "Save changes", type: :submit, class: "btn txt-small", title: "Save changes (#{ hotkey_label(["ctrl", "enter"]) })" %>
+          <%= form.button t("boards.publication.save_changes"), type: :submit, class: "btn txt-small", title: t("boards.edit.save_changes_hotkey", hotkey: hotkey_label(["ctrl", "enter"])) %>
         <% end %>
       </div>
     </div>
@@ -48,7 +48,7 @@
             <span class="switch__btn round"></span>
           </span>
           <span class="txt-large"><%= icon_tag "world" %></span>
-          <span class="for-screen-reader">Turn on the public link</span>
+          <span class="for-screen-reader"><%= t("boards.publication.turn_on_public_link") %></span>
         </label>
       <% end %>
     </div>

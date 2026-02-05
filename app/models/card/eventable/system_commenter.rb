@@ -17,25 +17,25 @@ class Card::Eventable::SystemCommenter
     def comment_body
       case event.action
       when "card_assigned"
-        "#{creator_name} <strong>assigned</strong> this to #{assignee_names}."
+        I18n.t("events.system_comment.card_assigned_html", creator_name: creator_name, assignee_names: assignee_names).html_safe
       when "card_unassigned"
-        "#{creator_name} <strong>unassigned</strong> from #{assignee_names}."
+        I18n.t("events.system_comment.card_unassigned_html", creator_name: creator_name, assignee_names: assignee_names).html_safe
       when "card_closed"
-        "<strong>Moved</strong> to “Done” by #{creator_name}"
+        I18n.t("events.system_comment.card_closed_html", creator_name: creator_name, column: I18n.t("columns.done")).html_safe
       when "card_reopened"
-        "<strong>Reopened</strong> by #{creator_name}"
+        I18n.t("events.system_comment.card_reopened_html", creator_name: creator_name).html_safe
       when "card_postponed"
-        "#{creator_name} <strong>moved</strong> this to “Not Now”"
+        I18n.t("events.system_comment.card_postponed_html", creator_name: creator_name, column: I18n.t("columns.not_now")).html_safe
       when "card_auto_postponed"
-        "<strong>Moved</strong> to “Not Now” due to inactivity"
+        I18n.t("events.system_comment.card_auto_postponed_html", column: I18n.t("columns.not_now")).html_safe
       when "card_title_changed"
-        "#{creator_name} <strong>changed the title</strong> from “#{old_title}” to “#{new_title}”."
+        I18n.t("events.system_comment.card_title_changed_html", creator_name: creator_name, old_title: old_title, new_title: new_title).html_safe
       when "card_board_changed"
-        "#{creator_name} <strong>moved</strong> this from “#{old_board}” to “#{new_board}”."
+        I18n.t("events.system_comment.card_board_changed_html", creator_name: creator_name, old_board: old_board, new_board: new_board).html_safe
       when "card_triaged"
-        "#{creator_name} <strong>moved</strong> this to “#{column}”"
+        I18n.t("events.system_comment.card_triaged_html", creator_name: creator_name, column: column).html_safe
       when "card_sent_back_to_triage"
-        "#{creator_name} <strong>moved</strong> this back to “Maybe?”"
+        I18n.t("events.system_comment.card_sent_back_to_triage_html", creator_name: creator_name, column: I18n.t("columns.maybe")).html_safe
       end
     end
 

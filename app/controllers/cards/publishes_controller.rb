@@ -6,7 +6,7 @@ class Cards::PublishesController < ApplicationController
 
     if add_another_param?
       card = @board.cards.create!(status: :drafted)
-      redirect_to card_draft_path(card), notice: "Card added"
+      redirect_to card_draft_path(card), notice: I18n.t("cards.card_added")
     else
       redirect_to @card.board
     end

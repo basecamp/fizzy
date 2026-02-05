@@ -16,8 +16,8 @@
 
     <div class="flex flex-column gap-half">
       <%= form.label :url do %>
-        <strong>Payload URL</strong><br>
-        <p class="margin-none txt-x-small txt-subtle">This is the URL for the app that will receive payloads from Fizzy.</p>
+        <strong><%= t("webhooks.new.payload_url") %></strong><br>
+        <p class="margin-none txt-x-small txt-subtle"><%= t("webhooks.new.payload_url_hint") %></p>
       <% end %>
       <%= form.url_field :url,
             required: true,
@@ -30,16 +30,16 @@
 
     <div class="flex flex-column gap-half">
       <%= form.label :actions do %>
-        <strong>Events</strong><br>
-        <p class="margin-none txt-x-small txt-subtle">Trigger a call to the Payload URL when:</p>
+        <strong><%= t("webhooks.new.events") %></strong><br>
+        <p class="margin-none txt-x-small txt-subtle"><%= t("webhooks.new.events_hint") %></p>
       <% end %>
       <%= render "webhooks/form/actions", form: form %>
     </div>
 
     <%= form.button type: :submit, class: "btn btn--link center txt-medium" do %>
-      <span>Create Webhook</span>
+      <span><%= t("webhooks.new.create") %></span>
     <% end %>
 
-    <%= link_to "Go back", board_webhooks_path, data: { form_target: "cancel" }, hidden: true %>
+    <%= link_to t("webhooks.new.go_back"), board_webhooks_path, data: { form_target: "cancel" }, hidden: true %>
   <% end %>
 </article>

@@ -47,25 +47,25 @@ class NotificationPusher
       case event.action
       when "comment_created"
         base_payload.merge(
-          title: "RE: #{base_payload[:title]}",
+          title: I18n.t("notifications.re_prefix", title: base_payload[:title]),
           body: comment_notification_body(event),
           path: card_path_with_comment_anchor(event.eventable)
         )
       when "card_assigned"
         base_payload.merge(
-          body: "Assigned to you by #{event.creator.name}"
+          body: I18n.t("notifications.assigned_to_you_by", creator: event.creator.name)
         )
       when "card_published"
         base_payload.merge(
-          body: "Added by #{event.creator.name}"
+          body: I18n.t("notifications.added_by", creator: event.creator.name)
         )
       when "card_closed"
         base_payload.merge(
-          body: card.closure ? "Moved to Done by #{event.creator.name}" : "Closed by #{event.creator.name}"
+          body: card.closure ? I18n.t("notifications.moved_to_done_by", creator: event.creator.name) : I18n.t("notifications.closed_by", creator: event.creator.name)
         )
       when "card_reopened"
         base_payload.merge(
-          body: "Reopened by #{event.creator.name}"
+          body: I18n.t("notifications.reopened_by", creator: event.creator.name)
         )
       else
         base_payload.merge(
@@ -87,8 +87,8 @@ class NotificationPusher
 
     def build_default_payload
       {
-        title: "New notification",
-        body: "You have a new notification",
+        title: I18n.t("notifications.new_notification_title"),
+        body: I18n.t("notifications.new_notification_body"),
         path: notifications_path(script_name: notification.account.slug)
       }
     end
@@ -103,7 +103,7 @@ class NotificationPusher
     end
 
     def card_notification_title(card)
-      card.title.presence || "Card #{card.number}"
+      card.title.presence || I18n.t("notifications.card_title", number: card.number)
     end
 
     def comment_notification_body(event)

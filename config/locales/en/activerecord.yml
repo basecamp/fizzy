@@ -1,0 +1,42 @@
+en:
+  activerecord:
+    errors:
+      models:
+        webhook:
+          attributes:
+            url:
+              invalid_scheme: "must use %{schemes}"
+              invalid: "not a URL"
+        user/avatar:
+          attributes:
+            avatar:
+              invalid_content_type: "must be a JPEG, PNG, GIF, or WebP image"
+              width_too_large: "width must be less than %{max}px"
+              height_too_large: "height must be less than %{max}px"
+        signup:
+          attributes:
+            base:
+              creation_failed: "Something went wrong, and we couldn't create your account. Please give it another try."
+        push/subscription:
+          attributes:
+            endpoint:
+              invalid_url: "is not a valid URL"
+              invalid_scheme: "must use HTTPS"
+              not_permitted: "is not a permitted push service"
+              private_ip: "resolves to a private or invalid IP address"
+        notification/bundle:
+          attributes:
+            base:
+              overlapping: "Bundle window overlaps with an existing pending bundle with id %{id}"
+        comment:
+          attributes:
+            card:
+              not_commentable: "does not allow comments"
+        assignment:
+          attributes:
+            base:
+              limit_reached: "Card already has the maximum of %{count} assignees"
+        account/join_code:
+          attributes:
+            usage_limit:
+              less_than_or_equal_to: "cannot be larger than the population of the planet"

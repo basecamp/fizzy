@@ -1,109 +1,111 @@
+<% b = "notifications.settings.browser" %>
+<% s = "notifications.settings.system" %>
 <% unless (platform.safari? || platform.chrome?) && platform.ios? %>
   <div class="notifications-help" data-notifications-target="details">
     <% case
       when platform.firefox? && platform.android? %>
-        <h2>Turn on notifications for <%= platform.browser.capitalize %>.</h2>
+        <h2><%= t("#{b}.turn_on_for_browser", browser: platform.browser.capitalize) %></h2>
         <ol>
-          <li>Tap <em><%= icon_tag "lock", alt: "the View site information button" %></em> in the address bar.</li>
-          <li>Tap <em>Notification</em> to change to <em>Allowed</em>.</li>
+          <li><%= t("#{s}.tap") %> <em><%= icon_tag "lock", alt: t("#{b}.alt_view_site_info") %></em> <%= t("#{b}.in_address_bar") %></li>
+          <li><%= t("#{b}.tap_notification_to_allowed_html").html_safe %></li>
         </ol>
       <% when platform.edge? && platform.desktop? %>
-        <h2>Turn on notifications for this website.</h2>
+        <h2><%= t("#{b}.turn_on_for_website") %></h2>
         <ol>
-          <li>Click <em><%= icon_tag "lock", alt: "the View site information button" %></em> left of the address bar.</li>
-          <li>Under <em>Permissions for this site &gt; Notifications</em>, choose <em>Allow</em>.</li>
+          <li><%= t("#{s}.click") %> <em><%= icon_tag "lock", alt: t("#{b}.alt_view_site_info") %></em> <%= t("#{b}.left_of_address_bar") %></li>
+          <li><%= t("#{b}.permissions_site_notifications_html").html_safe %></li>
         </ol>
-        <h2>Turn on notifications for <%= platform.browser.capitalize %>.</h2>
+        <h2><%= t("#{b}.turn_on_for_browser", browser: platform.browser.capitalize) %></h2>
         <ol>
           <% if platform.windows? %>
-            <li>Click <em>Start</em>, then <em>Settings</em>.</li>
-            <li>Go to <em>System &gt; Notification</em>.</li>
-            <li>Click <em><%= icon_tag "switch", alt: "the switch" %></em> <em>ON</em> for <%= platform.browser.capitalize %>.</li>
+            <li><%= t("#{b}.start_then_settings_html").html_safe %></li>
+            <li><%= t("#{b}.go_to_system_notification_html").html_safe %></li>
+            <li><%= t("#{s}.click") %> <em><%= icon_tag "switch", alt: t("#{s}.alt_switch") %></em> <em><%= t("#{s}.on") %></em> <%= t("#{b}.for_browser", browser: platform.browser.capitalize) %></li>
           <% else %>
-            <li>Click <em aria-label="the Apple menu"></em> in the top left.</li>
-            <li>Click <em>System Settings…</em>.</li>
-            <li>Click <em>Notifications</em>.</li>
-            <li>Click <em><%= platform.browser.capitalize %></em>.</li>
-            <li>Click <em><%= icon_tag "switch", alt: "the switch" %></em> to <em>Allow notifications</em>.</li>
+            <li><%= t("#{b}.click_prefix").html_safe %><em aria-label="<%= t("#{b}.aria_apple_menu") %>"></em><%= t("#{b}.in_top_left_suffix") %></li>
+            <li><%= t("#{s}.click") %> <em><%= t("#{b}.system_settings") %></em>.</li>
+            <li><%= t("#{s}.click") %> <em><%= t("#{b}.notifications") %></em>.</li>
+            <li><%= t("#{s}.click") %> <em><%= platform.browser.capitalize %></em>.</li>
+            <li><%= t("#{b}.click_switch_allow") %></li>
           <% end %>
         </ol>
       <% when platform.firefox? && platform.desktop? %>
-        <h2>Turn on notifications for this website.</h2>
+        <h2><%= t("#{b}.turn_on_for_website") %></h2>
         <ol>
-          <li>Click <em><%= platform.browser.capitalize %></em> in the top left.</li>
-          <li>Click <em>Settings…</em>.</li>
-          <li>Click <em>Privacy & Security</em> in the sidebar.</li>
-          <li>Scroll down to <em>Permissions</em>.</li>
-          <li>Click <em>Settings</em> next to <em>Notifications</em>.</li>
-          <li>Select <em>Allow</em> next to <em><%= root_url %></em>.</li>
+          <li><%= t("#{s}.click") %> <em><%= platform.browser.capitalize %></em> <%= t("#{b}.in_top_left_suffix") %></li>
+          <li><%= t("#{s}.click") %> <em><%= t("#{b}.settings") %></em>.</li>
+          <li><%= t("#{s}.click") %> <em><%= t("#{b}.privacy_security") %></em> <%= t("#{b}.in_sidebar") %></li>
+          <li><%= t("#{b}.scroll_to_permissions") %></li>
+          <li><%= t("#{b}.settings_next_to_notifications") %></li>
+          <li><%= t("#{b}.select_allow_next_to_url", url: root_url) %></li>
         </ol>
 
-        <h2>Turn on notifications for <%= platform.browser.capitalize %>.</h2>
+        <h2><%= t("#{b}.turn_on_for_browser", browser: platform.browser.capitalize) %></h2>
         <ol>
           <% if platform.windows? %>
-            <li>Click <em>Start</em>, then <em>Settings</em>.</li>
-            <li>Go to <em>System &gt; Notification</em>.</li>
-            <li>Click <em><%= icon_tag "switch", alt: "the toggle button" %></em> <em>ON</em> for <%= platform.browser.capitalize %>.</li>
+            <li><%= t("#{b}.start_then_settings_html").html_safe %></li>
+            <li><%= t("#{b}.go_to_system_notification_html").html_safe %></li>
+            <li><%= t("#{s}.click") %> <em><%= icon_tag "switch", alt: t("#{s}.alt_toggle_button") %></em> <em><%= t("#{s}.on") %></em> <%= t("#{b}.for_browser", browser: platform.browser.capitalize) %></li>
           <% else %>
-            <li>Click <em aria-label="the Apple menu"></em> in the top left.</li>
-            <li>Click <em>System Settings…</em>.</li>
-            <li>Click <em>Notifications</em>.</li>
-            <li>Click <em><%= platform.browser.capitalize %></em>.</li>
-            <li>Click <em><%= icon_tag "switch", alt: "the switch" %></em> to <em>Allow notifications</em>.</li>
+            <li><%= t("#{b}.click_prefix").html_safe %><em aria-label="<%= t("#{b}.aria_apple_menu") %>"></em><%= t("#{b}.in_top_left_suffix") %></li>
+            <li><%= t("#{s}.click") %> <em><%= t("#{b}.system_settings") %></em>.</li>
+            <li><%= t("#{s}.click") %> <em><%= t("#{b}.notifications") %></em>.</li>
+            <li><%= t("#{s}.click") %> <em><%= platform.browser.capitalize %></em>.</li>
+            <li><%= t("#{b}.click_switch_allow") %></li>
           <% end %>
         </ol>
       <% when platform.chrome? && platform.desktop? %>
-        <h2>Turn on notifications for this website.</h2>
+        <h2><%= t("#{b}.turn_on_for_website") %></h2>
         <ol>
-          <li>Click the <em><%= icon_tag "sliders", alt: "View site information" %></em> icon in the address bar.</li>
-          <li>Click <em>Site Settings</em>.</li>
-          <li>Ensure notifications are <em>Allowed</em>.</li>
+          <li><%= t("#{b}.click_the") %> <em><%= icon_tag "sliders", alt: t("#{b}.alt_view_site_info_sliders") %></em> <%= t("#{b}.icon_in_address_bar") %></li>
+          <li><%= t("#{s}.click") %> <em><%= t("#{b}.site_settings") %></em>.</li>
+          <li><%= t("#{b}.ensure_allowed") %></li>
         </ol>
 
-        <h2>Turn on notifications for <%= platform.browser.capitalize %>.</h2>
+        <h2><%= t("#{b}.turn_on_for_browser", browser: platform.browser.capitalize) %></h2>
         <ol>
           <% if platform.windows? %>
-            <li>Click <em>Start</em>, then <em>Settings</em>.</li>
-            <li>Go to <em>System &gt; Notification</em>.</li>
-            <li>Click <em><%= icon_tag "switch", alt: "the switch" %></em> <em>ON</em> for <%= platform.browser.capitalize %>.</li>
+            <li><%= t("#{b}.start_then_settings_html").html_safe %></li>
+            <li><%= t("#{b}.go_to_system_notification_html").html_safe %></li>
+            <li><%= t("#{s}.click") %> <em><%= icon_tag "switch", alt: t("#{s}.alt_switch") %></em> <em><%= t("#{s}.on") %></em> <%= t("#{b}.for_browser", browser: platform.browser.capitalize) %></li>
           <% else %>
-            <li>Click <em aria-label="the Apple menu"></em> in the top left.</li>
-            <li>Click <em>System Settings…</em>.</li>
-            <li>Click <em>Notifications</em>.</li>
-            <li>Click <em><%= platform.browser == "Chrome" ? "Google Chrome" : platform.browser.capitalize %></em>.</li>
-            <li>Click <em><%= icon_tag "switch", alt: "the switch" %></em> to <em>Allow notifications</em>.</li>
+            <li><%= t("#{b}.click_prefix").html_safe %><em aria-label="<%= t("#{b}.aria_apple_menu") %>"></em><%= t("#{b}.in_top_left_suffix") %></li>
+            <li><%= t("#{s}.click") %> <em><%= t("#{b}.system_settings") %></em>.</li>
+            <li><%= t("#{s}.click") %> <em><%= t("#{b}.notifications") %></em>.</li>
+            <li><%= t("#{s}.click") %> <em><%= platform.browser == "Chrome" ? t("#{b}.google_chrome") : platform.browser.capitalize %></em>.</li>
+            <li><%= t("#{b}.click_switch_allow") %></li>
           <% end %>
         </ol>
       <% when platform.chrome? && platform.android? %>
-        <h2>Turn on notifications for <%= platform.browser.capitalize %>.</h2>
+        <h2><%= t("#{b}.turn_on_for_browser", browser: platform.browser.capitalize) %></h2>
         <ol>
-          <li>Tap the <em><%= icon_tag "menu-dots-vertical", alt: "More options" %></em> menu button.</li>
-          <li>Tap <em>Settings</em>.</li>
-          <li>Tap <em>Notifications</em>.</li>
-          <li>Tap <em><%= icon_tag "switch", alt: "the switch" %></em> to <em>Allow <%= platform.browser.capitalize %> notifications</em>.</li>
-          <li>Tap <em><%= icon_tag "switch", alt: "the switch" %></em> next to <em>Web apps</em>.</li>
-          <li>Tap <em><%= icon_tag "bell-alert", alt: "the notification bell" %></em> and select <em>Allow</em>.</li>
+          <li><%= t("#{s}.tap_the") %> <em><%= icon_tag "menu-dots-vertical", alt: t("#{s}.alt_more_options") %></em> <%= t("#{s}.menu_button") %></li>
+          <li><%= t("#{b}.tap_settings") %></li>
+          <li><%= t("#{b}.tap_notifications") %></li>
+          <li><%= t("#{s}.tap") %> <em><%= icon_tag "switch", alt: t("#{s}.alt_switch") %></em> <%= t("#{s}.to") %> <em><%= t("#{b}.allow_browser_notifications", browser: platform.browser.capitalize) %></em>.</li>
+          <li><%= t("#{s}.tap") %> <em><%= icon_tag "switch", alt: t("#{s}.alt_switch") %></em> <%= t("#{b}.next_to_web_apps") %></li>
+                    <li><%= t("#{s}.tap") %> <em><%= icon_tag "bell-alert", alt: t("#{b}.alt_notification_bell") %></em> <%= t("#{b}.and_select_allow") %></li>
         </ol>
       <% when platform.safari? && platform.desktop? %>
-        <h2>Turn on notifications for this website.</h2>
+        <h2><%= t("#{b}.turn_on_for_website") %></h2>
         <ol>
-          <li>Click <em aria-label="the Apple menu"></em> in the top left.</li>
-          <li>Click <em>System Settings…</em>.</li>
-          <li>Click <em>Notifications</em>.</li>
-          <li>Click <em><%= request.base_url %></em> in the list.</li>
-          <li>Click <em><%= icon_tag "switch", alt: "the switch" %></em> to <em>Allow notifications</em>.</li>
+          <li><%= t("#{b}.click_prefix").html_safe %><em aria-label="<%= t("#{b}.aria_apple_menu") %>"></em><%= t("#{b}.in_top_left_suffix") %></li>
+          <li><%= t("#{s}.click") %> <em><%= t("#{b}.system_settings") %></em>.</li>
+          <li><%= t("#{s}.click") %> <em><%= t("#{b}.notifications") %></em>.</li>
+                    <li><%= t("#{b}.click_url_in_list_html", url: request.base_url).html_safe %></li>
+          <li><%= t("#{b}.click_switch_allow") %></li>
         </ol>
-        <h2>Turn on notifications for <%= platform.browser.capitalize %>.</h2>
+        <h2><%= t("#{b}.turn_on_for_browser", browser: platform.browser.capitalize) %></h2>
         <ol>
-          <li>Click <em><%= platform.browser.capitalize %></em> in the top left.</li>
-          <li>Click <em>Settings…</em>.</li>
-          <li>Click the <em>Websites</em> tab.</li>
-          <li>Click <em>Notifications</em> in the sidebar.</li>
-          <li>Click <em><%= request.base_url %></em> in the list.</li>
-          <li>Select <em>Allow</em>.</li>
+          <li><%= t("#{s}.click") %> <em><%= platform.browser.capitalize %></em> <%= t("#{b}.in_top_left_suffix") %></li>
+          <li><%= t("#{s}.click") %> <em><%= t("#{b}.settings") %></em>.</li>
+          <li><%= t("#{b}.websites_tab") %></li>
+          <li><%= t("#{b}.notifications_in_sidebar") %></li>
+                    <li><%= t("#{b}.click_url_in_list_html", url: request.base_url).html_safe %></li>
+          <li><%= t("#{b}.select_allow") %></li>
         </ol>
       <% else %>
-        <p>Ensure notifications are enabled for <em><%= root_url %></em> in your web browser settings.</p>
+        <p><%= t("#{b}.ensure_enabled_for_url_html", url: root_url).html_safe %></p>
     <% end %>
   </div>
 <% end %>

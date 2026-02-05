@@ -1,23 +1,23 @@
-<% @page_title = "Enter your email" %>
+<% @page_title = t("sessions.new.page_title") %>
 
 <div class="panel panel--centered flex flex-column gap-half">
-  <h1 class="txt-x-large font-weight-black margin-block-end">Get into Fizzy</h1>
+  <h1 class="txt-x-large font-weight-black margin-block-end"><%= t("sessions.new.title") %></h1>
 
   <%= form_with url: session_path, class: "flex flex-column gap-half txt-medium" do |form| %>
     <div class="flex align-center gap">
       <label class="flex align-center gap input input--actor">
-        <%= form.email_field :email_address, required: true, class: "input txt-large full-width", autofocus: true, autocomplete: "username", placeholder: "Enter your email address…" %>
+        <%= form.email_field :email_address, required: true, class: "input txt-large full-width", autofocus: true, autocomplete: "username", placeholder: t("sessions.new.email_placeholder") %>
       </label>
     </div>
 
     <% if Account.accepting_signups? %>
-      <p><strong>New here?</strong> <%= link_to "Sign up", new_signup_path %> to create an account. <strong>Already have an account?</strong> Enter your email and we’ll get you signed in.</p>
+      <p><strong><%= t("sessions.new.new_here") %></strong> <%= link_to t("sessions.new.sign_up"), new_signup_path %> <%= t("sessions.new.to_create_account") %> <strong><%= t("sessions.new.already_have_account") %></strong> <%= t("sessions.new.enter_email") %></p>
     <% else %>
-      <p>Enter your email and we’ll get you signed in.</p>
+      <p><%= t("sessions.new.enter_email") %></p>
     <% end %>
 
     <button type="submit" id="log_in" class="btn btn--link center txt-medium">
-      <span>Let’s go</span>
+      <span><%= t("sessions.new.submit") %></span>
       <%= icon_tag "arrow-right" %>
     </button>
   <% end %>

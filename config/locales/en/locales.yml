@@ -1,0 +1,7 @@
+# Language/locale names and labels for the locale selector.
+# When adding a new locale (Phase 4), add its display name here and to config.i18n.available_locales.
+en:
+  locales:
+    language: "Language"
+    name:
+      en: "English"

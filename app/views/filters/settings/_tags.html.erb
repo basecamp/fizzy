@@ -5,7 +5,7 @@
         controller: "dialog filter multi-selection-combobox",
         action: "keydown.esc->dialog#close click@document->dialog#closeOnClickOutside dialog:close@document->filter#clearInput",
         filter_show: user_filtering.show_tags?,
-        multi_selection_combobox_no_selection_label_value: "Tagged…" } do %>
+        multi_selection_combobox_no_selection_label_value: t("filters.tagged") } do %>
   <button type="button" class="btn input input--select flex-inline txt-x-small" data-action="click->dialog#toggle:stop">
     <span class="overflow-ellipsis" data-multi-selection-combobox-target="label"></span>
   </button>
@@ -14,10 +14,10 @@
     <%= hidden_field_tag "tag_ids[]", nil, data: { filter_settings_target: "field" } %>
   </template>
 
-  <%= filter_dialog "Tagged…" do %>
-    <%= filter_title "Tagged…" %>
+  <%= filter_dialog t("filters.tagged") do %>
+    <%= filter_title t("filters.tagged") %>
     <% if user_filtering.tags.many? %>
-      <%= text_field_tag nil, nil, id: nil, placeholder: "Filter…", class: "input input--transparent txt-small", autofocus: true,
+      <%= text_field_tag nil, nil, id: nil, placeholder: t("filters.filter_placeholder"), class: "input input--transparent txt-small", autofocus: true,
             type: "search", autocorrect: "off", autocomplete: "off", data: { "1p-ignore": "true", filter_target: "input", dialog_target: "focusMouse", action: "input->filter#filter" } %>
     <% end %>
 

@@ -1,7 +1,7 @@
-<p>Unsubscribing from all email notifications as <%= @user.name %>…</p>
+<p><%= t("notifications.unsubscribes.new.unsubscribing", name: @user.name) %></p>
 
 <div class="push_double--top centered delayed-fade-in">
   <%= auto_submit_form_with model: @user, url: notifications_unsubscribe_path(access_token: params[:access_token]), method: :post do |form| %>
-    <%= form.submit "Unsubscribe now", class: "btn" %>
+    <%= form.submit t("notifications.unsubscribes.new.unsubscribe_now"), class: "btn" %>
   <% end %>
 </div>

@@ -1,0 +1,52 @@
+en:
+  account:
+    entropy_section_title: "Auto close"
+    entropy_intro_html: "Fizzy doesn't let stale cards stick around forever. Cards automatically move to \"Not Now\" if there is no activity for a specific period of time. <em>This is the default, global setting — you can override it on each board.</em>"
+    saved: "Saved"
+    saved_removed_from_board: "Saved (you were removed from the board)"
+    export_started: "Export started. You'll receive an email when it's ready."
+    updated: "Account updated"
+    deleted: "Account deleted"
+    account_settings: "Account Settings"
+    join_codes:
+      join:
+        page_title: "Join %{name} in Fizzy"
+        email_placeholder: "Email address"
+        continue: "Continue"
+      show:
+        page_title: "Add people"
+        share_link_intro: "Share the link below to invite people to this account"
+        generate_new_code_confirm: "Are you sure you want to generate a new link? The previous code will stop working."
+        generate_new_code: "Generate a new code"
+        copy_invite_link: "Copy invite link"
+        get_qr_code: "Get QR code"
+        scan_qr_code: "Scan this code with the camera on your mobile device"
+        change_limit: "Change limit"
+        used_count: "This code has been used %{used}/%{limit} times"
+        remaining: "%{count} remaining"
+        none_remaining: "none"
+      edit:
+        page_title: "Change usage limit"
+        invite_link: "Invite link"
+        how_many_times: "How many times can this link be used to join the account?"
+        save_changes: "Save changes"
+        go_back: "Go back"
+    imports:
+      show:
+        page_title: "Import status"
+        heading: "Import status"
+        in_progress: "Your import is in progress. This may take a while for large accounts."
+        completed_success: "Your import has completed successfully!"
+        go_to_account: "Go to your account"
+        failed: "Your import failed."
+        failed_hint: "This may be due to corrupted export data or a conflict with existing data. Please try again with a fresh export."
+        try_again: "Try again"
+    settings:
+      export:
+        section_title: "Export account data"
+        section_intro: "Download a complete archive of all account data."
+        begin_export: "Begin export..."
+        dialog_title: "Export all account data"
+        dialog_body: "This will generate a ZIP archive of all data in this account including all boards, cards, users, and settings."
+        dialog_footnote: "We'll email you a link to download the file when it's ready. The link will expire after 24 hours."
+        start_export: "Start export"

@@ -25,7 +25,7 @@ class Comment < ApplicationRecord
 
   private
     def card_is_commentable
-      errors.add(:card, "does not allow comments") unless card.commentable?
+      errors.add(:card, I18n.t("activerecord.errors.models.comment.attributes.card.not_commentable")) unless card.commentable?
     end
 
     def watch_card_by_creator

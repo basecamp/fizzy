@@ -30,7 +30,7 @@ module User::Avatar
   private
     def avatar_content_type_allowed
       if !ALLOWED_AVATAR_CONTENT_TYPES.include?(avatar.content_type)
-        errors.add(:avatar, "must be a JPEG, PNG, GIF, or WebP image")
+        errors.add(:avatar, I18n.t("activerecord.errors.models.user/avatar.attributes.avatar.invalid_content_type"))
       end
     end
 
@@ -41,11 +41,11 @@ module User::Avatar
       height = avatar.blob.metadata[:height]
 
       if width && width > MAX_AVATAR_DIMENSIONS[:width]
-        errors.add(:avatar, "width must be less than #{MAX_AVATAR_DIMENSIONS[:width]}px")
+        errors.add(:avatar, I18n.t("activerecord.errors.models.user/avatar.attributes.avatar.width_too_large", max: MAX_AVATAR_DIMENSIONS[:width]))
       end
 
       if height && height > MAX_AVATAR_DIMENSIONS[:height]
-        errors.add(:avatar, "height must be less than #{MAX_AVATAR_DIMENSIONS[:height]}px")
+        errors.add(:avatar, I18n.t("activerecord.errors.models.user/avatar.attributes.avatar.height_too_large", max: MAX_AVATAR_DIMENSIONS[:height]))
       end
     end
 end

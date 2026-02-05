@@ -2,23 +2,23 @@
   <heading>
     <h2 class="txt-medium">
       Push notifications are
-      <span class="notifications__on-message">ON</span>
-      <span class="notifications__off-message">OFF</span>
+      <span class="notifications__on-message"><%= t("notifications.settings.push_notifications.on") %></span>
+      <span class="notifications__off-message"><%= t("notifications.settings.push_notifications.off") %></span>
     </h2>
   </heading>
 
   <div class="margin-block-start-half" data-notifications-target="subscribeButton" hidden>
     <button class="btn txt-small" data-action="notifications#attemptToSubscribe">
       <%= icon_tag "bell" %>
-      <span>Turn ON push notifications on this device</span>
+      <span><%= t("notifications.settings.push_notifications.turn_on") %></span>
     </button>
   </div>
 
   <details class="margin-block-start-half" data-notifications-target="explainer">
     <summary class="btn txt-x-small">
       <%= icon_tag "lifebuoy" %>
-      <span class="notifications__off-message">Help me fix this</span>
-      <span class="notifications__on-message">Not receiving notifications?</span>
+      <span class="notifications__off-message"><%= t("notifications.settings.push_notifications.help_me_fix") %></span>
+      <span class="notifications__on-message"><%= t("notifications.settings.push_notifications.not_receiving") %></span>
     </summary>
 
     <div class="notifications-help__explainer fill-white margin-block-start border-radius border txt-align-start">

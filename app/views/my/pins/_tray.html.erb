@@ -11,10 +11,10 @@
     <%= turbo_frame_tag "pins", src: my_pins_path, data: { controller: "frame", action: "turbo:morph@document->frame#reload" } %>
   <% end %>
 
-  <button class="tray__toggle" data-action="dialog#toggle keydown.p@document->hotkey#click" data-controller="hotkey" aria-label="Toggle pins stack" aria-haspopup="true">
+  <button class="tray__toggle" data-action="dialog#toggle keydown.p@document->hotkey#click" data-controller="hotkey" aria-label="<%= t("my.pins.toggle_aria_label") %>" aria-haspopup="true">
     <div class="tray__toggle-btn txt-uppercase btn btn--reversed txt-x-small center full-width">
       <%= icon_tag "pinned" %>
-      <span class="tray__toggle-text">Pinned <kbd class="hide-on-touch">P</kbd></span>
+      <span class="tray__toggle-text"><%= t("my.pins.pinned") %> <kbd class="hide-on-touch">P</kbd></span>
     </div>
   </button>
 </section>

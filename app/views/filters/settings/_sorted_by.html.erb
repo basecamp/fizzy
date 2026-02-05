@@ -16,8 +16,8 @@
       <%= hidden_field_tag :sorted_by, nil, data: { filter_settings_target: "field" } %>
     </template>
 
-    <%= filter_dialog "Sort by…" do %>
-      <strong class="popup__title">Sort by…</strong>
+    <%= filter_dialog t("filters.sort_by") do %>
+      <strong class="popup__title"><%= t("filters.sort_by") %></strong>
 
       <ul class="popup__list" data-filter-target="list" role="listbox">
         <% Filter::SORTED_BY.each do |sort| %>
