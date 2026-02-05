@@ -9,7 +9,8 @@ TurboOffline.addRule({
     cacheName: "main",
     maxAge: 60 * 60 * 24 * 3,
     networkTimeout: 3,
-    fetchOptions: { cache: "no-cache" }
+    fetchOptions: { cache: "no-cache" },
+    maxEntrySize: 1024 * 1024
   })
 })
 
@@ -17,7 +18,8 @@ TurboOffline.addRule({
   match: /\/assets\/.+[-\.][0-9a-f]+\.(js|css|svg|png|jpg|webp|woff2?|ico)$/,
   handler: TurboOffline.handlers.cacheFirst({
     cacheName: "assets",
-    maxAge: 60 * 60 * 24 * 7
+    maxAge: 60 * 60 * 24 * 7,
+    maxEntrySize: 1024 * 1024
   })
 })
 
@@ -27,7 +29,8 @@ TurboOffline.addRule({
   handler: TurboOffline.handlers.networkFirst({
     cacheName: "main",
     maxAge: 60 * 60 * 24 * 3,
-    networkTimeout: 2
+    networkTimeout: 2,
+    maxEntrySize: 1024 * 1024
   })
 })
 
@@ -36,7 +39,9 @@ TurboOffline.addRule({
   handler: TurboOffline.handlers.networkFirst({
     cacheName: "storage",
     maxAge: 60 * 60 * 24 * 7,
-    networkTimeout: 2
+    networkTimeout: 2,
+    maxEntrySize: 2 * 1024 * 1024, // 2MB covers about 95% of all Fizzy blobs
+    maxEntries: 500
   })
 })
 
@@ -45,7 +50,8 @@ TurboOffline.addRule({
   handler: TurboOffline.handlers.networkFirst({
     cacheName: "main",
     maxAge: 60 * 60 * 24,
-    networkTimeout: 3
+    networkTimeout: 3,
+    maxEntrySize: 1024 * 1024
   })
 })
 
