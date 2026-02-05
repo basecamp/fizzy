@@ -114,8 +114,17 @@
       border: 1px solid var(--color-ink-lighter);
     }
 
+    .horizontal-divider {
+      padding-block: var(--lexxy-content-margin);
+      hr { margin: 0; }
+    }
+
     hr {
-      border-block-end-width: 2px;
+      border: 0;
+      border-block-end: 2px solid currentColor;
+      color: currentColor;
+      inline-size: 20%;
+      margin: calc(var(--lexxy-content-margin) * 2) 0;
     }
 
     table {
