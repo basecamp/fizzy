@@ -3,7 +3,7 @@ class Signup
   include ActiveModel::Attributes
   include ActiveModel::Validations
 
-  attr_accessor :full_name, :email_address, :identity
+  attr_accessor :full_name, :email_address, :identity, :skip_account_seeding
   attr_reader :account, :user
 
   validates :email_address, format: { with: URI::MailTo::EMAIL_REGEXP }, on: :identity_creation
@@ -65,7 +65,7 @@ class Signup
         }
       )
       @user = @account.users.find_by!(role: :owner)
-      @account.setup_customer_template
+      @account.setup_customer_template unless skip_account_seeding
     end
 
     def generate_account_name

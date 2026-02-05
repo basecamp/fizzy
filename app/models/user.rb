@@ -14,7 +14,7 @@ class User < ApplicationRecord
   has_many :closures, dependent: :nullify
   has_many :pins, dependent: :destroy
   has_many :pinned_cards, through: :pins, source: :card
-  has_many :exports, class_name: "Account::Export", dependent: :destroy
+  has_many :data_exports, class_name: "User::DataExport", dependent: :destroy
 
   def deactivate
     transaction do

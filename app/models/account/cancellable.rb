@@ -4,8 +4,6 @@ module Account::Cancellable
   included do
     has_one :cancellation, dependent: :destroy
 
-    scope :active, -> { where.missing(:cancellation) }
-
     define_callbacks :cancel
     define_callbacks :reactivate
   end
@@ -30,10 +28,6 @@ module Account::Cancellable
         end
       end
     end
-  end
-
-  def active?
-    !cancelled?
   end
 
   def cancelled?

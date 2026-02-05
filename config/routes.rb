@@ -7,6 +7,7 @@ Rails.application.routes.draw do
     resource :join_code
     resource :settings
     resources :exports, only: [ :create, :show ]
+    resources :imports, only: [ :new, :create, :show ]
   end
 
   resources :users do
@@ -20,6 +21,8 @@ Rails.application.routes.draw do
       resources :email_addresses, param: :token do
         resource :confirmation, module: :email_addresses
       end
+
+      resources :data_exports, only: [ :create, :show ]
     end
   end
 

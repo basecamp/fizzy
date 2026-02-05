@@ -76,6 +76,17 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Something more in-depth", card.description.to_plain_text.strip
   end
 
+  test "update draft card does not render reactions" do
+    draft = boards(:writebook).cards.create!(creator: users(:kevin), status: :drafted)
+
+    patch card_path(draft), as: :turbo_stream, params: {
+      card: { image: fixture_file_upload("moon.jpg", "image/jpeg") }
+    }
+    assert_response :success
+
+    assert_no_match "reactions", response.body, "Draft card should not show reactions/boost button"
+  end
+
   test "users can only see cards in boards they have access to" do
     get card_path(cards(:logo))
     assert_response :success

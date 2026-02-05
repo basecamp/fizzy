@@ -479,6 +479,7 @@ GEM
     xpath (3.2.0)
       nokogiri (~> 1.8)
     zeitwerk (2.7.4)
+    zip_kit (6.3.4)
 
 PLATFORMS
   aarch64-linux
@@ -523,7 +524,6 @@ DEPENDENCIES
   rouge
   rqrcode
   rubocop-rails-omakase
-  rubyzip
   selenium-webdriver
   solid_cable (>= 3.0)
   solid_cache (~> 1.0)
@@ -538,6 +538,7 @@ DEPENDENCIES
   web-console
   web-push
   webmock
+  zip_kit
 
 BUNDLED WITH
    2.7.2

@@ -1,44 +1,17 @@
 require "test_helper"
 
 class Account::ExportTest < ActiveSupport::TestCase
-  test "build_later enqueues ExportAccountDataJob" do
+  test "build_later enqueues DataExportJob" do
     export = Account::Export.create!(account: Current.account, user: users(:david))
 
-    assert_enqueued_with(job: ExportAccountDataJob, args: [ export ]) do
+    assert_enqueued_with(job: DataExportJob, args: [ export ]) do
       export.build_later
-    end
-  end
-
-  test "build generates zip with card JSON files" do
-    export = Account::Export.create!(account: Current.account, user: users(:david))
-
-    export.build
-
-    assert export.completed?
-    assert export.file.attached?
-    assert_equal "application/zip", export.file.content_type
-  end
-
-  test "build sets status to processing then completed" do
-    export = Account::Export.create!(account: Current.account, user: users(:david))
-
-    export.build
-
-    assert export.completed?
-    assert_not_nil export.completed_at
-  end
-
-  test "build sends email when completed" do
-    export = Account::Export.create!(account: Current.account, user: users(:david))
-
-    assert_enqueued_jobs 1, only: ActionMailer::MailDeliveryJob do
-      export.build
     end
   end
 
   test "build sets status to failed on error" do
     export = Account::Export.create!(account: Current.account, user: users(:david))
-    export.stubs(:generate_zip).raises(StandardError.new("Test error"))
+    ZipFile.stubs(:create_for).raises(StandardError.new("Test error"))
 
     assert_raises(StandardError) do
       export.build
@@ -52,44 +25,55 @@ class Account::ExportTest < ActiveSupport::TestCase
     recent_export = Account::Export.create!(account: Current.account, user: users(:david), status: :completed, completed_at: 23.hours.ago)
     pending_export = Account::Export.create!(account: Current.account, user: users(:david), status: :pending)
 
-    Account::Export.cleanup
+    Export.cleanup
 
-    assert_not Account::Export.exists?(old_export.id)
-    assert Account::Export.exists?(recent_export.id)
-    assert Account::Export.exists?(pending_export.id)
+    assert_not Export.exists?(old_export.id)
+    assert Export.exists?(recent_export.id)
+    assert Export.exists?(pending_export.id)
   end
 
-  test "build includes only accessible cards for user" do
-    user = users(:david)
-    export = Account::Export.create!(account: Current.account, user: user)
+  test "build generates zip with account data" do
+    export = Account::Export.create!(account: Current.account, user: users(:david))
 
     export.build
 
     assert export.completed?
     assert export.file.attached?
+    assert_equal "application/zip", export.file.content_type
+  end
 
-    # Verify zip contents
-    Tempfile.create([ "test", ".zip" ]) do |temp|
-      temp.binmode
-      export.file.download { |chunk| temp.write(chunk) }
-      temp.rewind
+  test "build includes blob files in zip" do
+    blob = ActiveStorage::Blob.create_and_upload!(
+      io: file_fixture("moon.jpg").open,
+      filename: "moon.jpg",
+      content_type: "image/jpeg"
+    )
+    export = Account::Export.create!(account: Current.account, user: users(:david))
 
-      Zip::File.open(temp.path) do |zip|
-        json_files = zip.glob("*.json")
-        assert json_files.any?, "Zip should contain at least one JSON file"
+    export.build
 
-        # Verify structure of a JSON file
-        json_content = JSON.parse(zip.read(json_files.first.name))
-        assert json_content.key?("number")
-        assert json_content.key?("title")
-        assert json_content.key?("board")
-        assert json_content.key?("creator")
-        assert json_content["creator"].key?("id")
-        assert json_content["creator"].key?("name")
-        assert json_content["creator"].key?("email")
-        assert json_content.key?("description")
-        assert json_content.key?("comments")
-      end
+    assert export.completed?
+    export.file.open do |file|
+      reader = ZipKit::FileReader.read_zip_structure(io: file)
+      entry = reader.find { |e| e.filename == "storage/#{blob.key}" }
+      assert entry, "Expected blob file in zip"
     end
+  end
+
+  test "build succeeds when rich text references missing blob" do
+    blob = ActiveStorage::Blob.create_and_upload!(
+      io: file_fixture("moon.jpg").open,
+      filename: "moon.jpg",
+      content_type: "image/jpeg"
+    )
+    card = cards(:logo)
+    card.update!(description: "<action-text-attachment sgid=\"#{blob.attachable_sgid}\"></action-text-attachment>")
+    ActiveStorage::Blob.where(id: blob.id).delete_all
+
+    export = Account::Export.create!(account: Current.account, user: users(:david))
+
+    export.build
+
+    assert export.completed?
   end
 end

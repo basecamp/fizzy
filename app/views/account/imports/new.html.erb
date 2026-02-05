@@ -1,0 +1,24 @@
+<% @page_title = "Import an account" %>
+
+<div class="panel panel--centered flex flex-column gap">
+  <header>
+    <h1 class="txt-x-large font-weight-black txt-tight-lines margin-block-end-half">Import a Fizzy account</h1>
+    <div>Create an account using data from a Fizzy export. Upload the exported .zip file below.</div>
+  </header>
+
+  <%= form_with url: account_imports_path, class: "flex flex-column gap", data: { controller: "form upload-preview" }, multipart: true do |form| %>
+    <label class="btn input--upload">
+      <div data-upload-preview-target="placeholder">Choose a file…</div>
+      <div data-upload-preview-target="fileName" hidden></div>
+      <%= form.file_field :file, accept: ".zip", required: true, data: { action: "upload-preview#previewFileName", upload_preview_target: "input" } %>
+    </label>
+
+    <button type="submit" class="btn btn--link center" data-form-target="submit">
+      <span>Start Import →</span>
+    </button>
+  <% end %>
+</div>
+
+<% content_for :footer do %>
+  <%= render "sessions/footer" %>
+<% end %>

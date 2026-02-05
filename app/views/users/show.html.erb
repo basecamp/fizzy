@@ -1,8 +1,8 @@
 <% @page_title = @user.name %>
 <% me_or_you = Current.user == @user ? "me" : @user.first_name %>
 
-<div class="profile-layout">
-  <section class="panel shadow txt-align-center" style="--panel-size: 45ch;">
+<div class="settings settings--profile">
+  <div class="settings__panel panel shadow txt-align-center">
     <div class="flex flex-column gap position-relative">
       <% if Current.user == @user %>
         <%= link_to edit_user_path(@user), class: "user-edit-link btn", data: { controller: "tooltip" } do %>
@@ -46,14 +46,15 @@
         <% end %>
       <% end %>
     </div>
-  </section>
+  </div>
 
   <% if Current.user == @user %>
-    <section class="panel shadow" style="--panel-size: 45ch;">
+    <div class="settings__panel panel shadow hide-on-native">
       <%= render "users/theme" %>
       <%= render "users/transfer", user: @user %>
       <%= render "users/access_tokens" %>
-    </section>
+      <%= render "users/data_export" %>
+    </div>
   <% end %>
 </div>
 

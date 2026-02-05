@@ -15,8 +15,8 @@ export default class extends Controller {
 
   async connect() {
     this.mediaQuery = window.matchMedia(this.desktopBreakpointValue)
-    this.handleDesktop = this.#handleDesktop.bind(this)
-    this.mediaQuery.addEventListener("change", this.handleDesktop)
+    this.handlePlatform = this.#handlePlatform.bind(this)
+    this.mediaQuery.addEventListener("change", this.handlePlatform)
 
     await this.#restoreColumnsDisablingTransitions()
     this.#setupIntersectionObserver()
@@ -27,7 +27,7 @@ export default class extends Controller {
       this._intersectionObserver.disconnect()
       this._intersectionObserver = null
     }
-    this.mediaQuery.removeEventListener("change", this.handleDesktop)
+    this.mediaQuery.removeEventListener("change", this.handlePlatform)
   }
 
   toggle({ target }) {
@@ -56,7 +56,7 @@ export default class extends Controller {
   async #restoreColumnsDisablingTransitions() {
     this.#disableTransitions()
     this.#restoreColumns()
-    this.#handleDesktop()
+    this.#handlePlatform()
 
     await nextFrame()
     this.#enableTransitions()
@@ -163,7 +163,7 @@ export default class extends Controller {
     return this.mediaQuery?.matches
   }
 
-  #handleDesktop() {
+  #handlePlatform() {
     this.#isDesktop ? this.#handleDesktopMode() : this.#handleMobileMode()
   }
 
@@ -181,6 +181,7 @@ export default class extends Controller {
       this.#collapseAllExcept(expandedColumn)
     } else {
       this.#collapseAllExcept(this.maybeColumnTarget)
+      this.#expand(this.maybeColumnTarget, false)
     }
   }
 

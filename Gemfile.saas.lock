@@ -628,6 +628,7 @@ GEM
       railties
       yabeda (~> 0.8)
     zeitwerk (2.7.4)
+    zip_kit (6.3.4)
 
 PLATFORMS
   aarch64-linux
@@ -678,7 +679,6 @@ DEPENDENCIES
   rouge
   rqrcode
   rubocop-rails-omakase
-  rubyzip
   selenium-webdriver
   sentry-rails
   sentry-ruby
@@ -705,6 +705,7 @@ DEPENDENCIES
   yabeda-prometheus-mmap
   yabeda-puma-plugin
   yabeda-rails
+  zip_kit
 
 BUNDLED WITH
    2.7.2

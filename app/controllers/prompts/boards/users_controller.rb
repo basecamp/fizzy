@@ -2,7 +2,7 @@ class Prompts::Boards::UsersController < ApplicationController
   include BoardScoped
 
   def index
-    @users = @board.users.alphabetically
+    @users = @board.users.active.alphabetically
 
     if stale? etag: @users
       render layout: false

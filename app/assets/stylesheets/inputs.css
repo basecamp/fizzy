@@ -57,18 +57,12 @@
     }
   }
 
-  .input--file {
+  .input--file,
+  .input--upload {
     cursor: pointer;
-    display: grid;
-    inline-size: auto;
-    place-items: center;
 
-    > * {
-      grid-area: 1 / 1;
-    }
-
-    img {
-      border-radius: 0.4em;
+    &:has(input[type="file"]:focus-visible) {
+      outline: 0.15rem solid var(--color-selected-dark);
     }
 
     input[type="file"] {
@@ -88,16 +82,44 @@
         opacity: 0;
       }
     }
+  }
 
-    &:has(input[type="file"]:focus),
-    &:has(input[type="file"]:focus-visible) {
-      outline: 0.15rem solid var(--color-selected-dark);
+  .input--file {
+    display: grid;
+    inline-size: auto;
+    place-items: center;
+
+    > * {
+      grid-area: 1 / 1;
+    }
+
+    img {
+      border-radius: 0.4em;
     }
 
     &:is(.avatar) {
       input[type="file"] {
         border-radius: 50%;
       }
+    }
+  }
+
+  .input--upload {
+    --btn-border-color: var(--color-ink);
+    --btn-border-radius: 1ch;
+
+    border-style: dashed;
+    position: relative;
+
+    input[type="file"] {
+      inset: 0;
+      outline: none;
+      position: absolute;
+    }
+
+    &:has([data-upload-preview-target="fileName"]:not([hidden])) {
+      --btn-border-color: var(--color-positive);
+      --btn-color: var(--color-positive);
     }
   }
 

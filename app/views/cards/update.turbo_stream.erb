@@ -1,4 +1,5 @@
-<%= turbo_stream.replace dom_id(@card, :card_container), partial: "cards/container", method: :morph, locals: { card: @card.reload } %>
+<% container_partial = @card.drafted? ? "cards/drafts/container" : "cards/container" %>
+<%= turbo_stream.replace dom_id(@card, :card_container), partial: container_partial, method: :morph, locals: { card: @card.reload } %>
 
 <%= turbo_stream.update dom_id(@card, :edit) do %>
   <%= render "cards/container/content_display", card: @card %>
