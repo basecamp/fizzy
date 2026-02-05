@@ -39,8 +39,7 @@
 # By default, supports ES256 (ECDSA with P-256 and SHA-256) and RS256
 # (RSASSA-PKCS1-v1_5 with SHA-256), which cover the vast majority of
 # authenticators.
-class ActionPack::WebAuthn::PublicKeyCredential::CreationOptions
-  CHALLENGE_LENGTH = 32
+class ActionPack::WebAuthn::PublicKeyCredential::CreationOptions < ActionPack::WebAuthn::PublicKeyCredential::Options
   ES256 = { type: "public-key", alg: -7 }.freeze
   RS256 = { type: "public-key", alg: -257 }.freeze
 
@@ -61,23 +60,13 @@ class ActionPack::WebAuthn::PublicKeyCredential::CreationOptions
   #
   # [+:relying_party+]
   #   Optional. The relying party configuration.
-  def initialize(id:, name:, display_name:, relying_party: ActionPack::WebAuthn.relying_party)
+  def initialize(id:, name:, display_name:, **attrs)
+    super(**attrs)
+
     @id = id
     @name = name
     @display_name = display_name
     @relying_party = relying_party
-  end
-
-  # Returns a Base64URL-encoded random challenge. The challenge is generated
-  # once and memoized for the lifetime of this object.
-  #
-  # The challenge must be stored server-side and verified when the client
-  # responds, to prevent replay attacks.
-  def challenge
-    @challenge ||= Base64.urlsafe_encode64(
-      SecureRandom.random_bytes(CHALLENGE_LENGTH),
-      padding: false
-    )
   end
 
   # Returns a Hash suitable for JSON serialization and passing to the
@@ -96,7 +85,7 @@ class ActionPack::WebAuthn::PublicKeyCredential::CreationOptions
         RS256
       ],
       authenticatorSelection: {
-        userVerification: "preferred"
+        userVerification: user_verification.to_s
       }
     }
   end

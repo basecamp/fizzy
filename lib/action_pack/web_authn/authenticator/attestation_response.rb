@@ -46,7 +46,7 @@ class ActionPack::WebAuthn::Authenticator::AttestationResponse < ActionPack::Web
     @attestation ||= ActionPack::WebAuthn::Authenticator::Attestation.decode(attestation_object)
   end
 
-  def user_verified?
-    attestation.authenticator_data.user_verified?
+  def authenticator_data
+    attestation.authenticator_data
   end
 end

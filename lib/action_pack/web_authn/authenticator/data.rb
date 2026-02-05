@@ -15,7 +15,7 @@
 #
 # == Usage
 #
-#   data = ActionPack::WebAuthn::Authenticator::AuthenticatorData.decode(bytes)
+#   data = ActionPack::WebAuthn::Authenticator::Data.decode(bytes)
 #
 #   data.user_present?   # => true
 #   data.user_verified?  # => true
@@ -33,7 +33,7 @@
 #   Returns true if the user was verified through biometrics, PIN, or other
 #   method. This is stronger than mere presence.
 #
-class ActionPack::WebAuthn::Authenticator::AuthenticatorData
+class ActionPack::WebAuthn::Authenticator::Data
   # Segment lengths
   RELYING_PARTY_ID_HASH_LENGTH = 32
   FLAGS_LENGTH = 1
@@ -46,9 +46,17 @@ class ActionPack::WebAuthn::Authenticator::AuthenticatorData
   USER_VERIFIED_FLAG = 0x04
   ATTESTED_CREDENTIAL_DATA_FLAG = 0x40
 
-  attr_reader :relying_party_id_hash, :flags, :sign_count, :credential_id, :public_key_bytes
+  attr_reader :bytes, :relying_party_id_hash, :flags, :sign_count, :credential_id, :public_key_bytes
 
   class << self
+    def wrap(data)
+      if data.is_a?(self)
+        data
+      else
+        decode(data)
+      end
+    end
+
     def decode(bytes)
       bytes = bytes.bytes if bytes.is_a?(String)
       position = 0
@@ -78,6 +86,7 @@ class ActionPack::WebAuthn::Authenticator::AuthenticatorData
       end
 
       new(
+        bytes: bytes,
         relying_party_id_hash: relying_party_id_hash,
         flags: flags,
         sign_count: sign_count,
@@ -87,7 +96,8 @@ class ActionPack::WebAuthn::Authenticator::AuthenticatorData
     end
   end
 
-  def initialize(relying_party_id_hash:, flags:, sign_count:, credential_id:, public_key_bytes:)
+  def initialize(bytes:, relying_party_id_hash:, flags:, sign_count:, credential_id:, public_key_bytes:)
+    @bytes = bytes
     @relying_party_id_hash = relying_party_id_hash
     @flags = flags
     @sign_count = sign_count
