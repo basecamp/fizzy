@@ -62,7 +62,7 @@ GIT
 
 GIT
   remote: https://github.com/hotwired/turbo-rails.git
-  revision: cdf9d18a99906c349e01fbe05c6c7cdaa71ce550
+  revision: 0becdbbcdbf607eab6632463bc63f94d64249b7b
   branch: offline-cache
   specs:
     turbo-rails (2.0.23)
