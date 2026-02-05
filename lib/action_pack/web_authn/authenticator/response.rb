@@ -50,17 +50,25 @@ class ActionPack::WebAuthn::Authenticator::Response
       raise InvalidResponseError, "Origin does not match"
     end
 
+    unless relying_party_id_matches?(origin)
+      raise InvalidResponseError, "Relying party ID does not match origin"
+    end
+
+    unless user_present?
+      raise InvalidResponseError, "User presence is required"
+    end
+
     if user_verification == :required && !user_verified?
       raise InvalidResponseError, "User verification is required"
     end
   end
 
-  def user_verified?
-    raise NotImplementedError
-  end
-
   def client_data
     @client_data ||= JSON.parse(client_data_json)
+  end
+
+  def authenticator_data
+    nil
   end
 
   private
@@ -70,5 +78,20 @@ class ActionPack::WebAuthn::Authenticator::Response
 
     def origin_matches?(expected_origin)
       ActiveSupport::SecurityUtils.secure_compare(expected_origin, client_data["origin"])
+    end
+
+    def relying_party_id_matches?(origin)
+      ActiveSupport::SecurityUtils.secure_compare(
+        Digest::SHA256.digest(URI.parse(origin).host),
+        authenticator_data&.relying_party_id_hash || ""
+      )
+    end
+
+    def user_present?
+      authenticator_data&.user_present?
+    end
+
+    def user_verified?
+      authenticator_data&.user_verified?
     end
 end

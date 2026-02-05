@@ -17,7 +17,7 @@
 # == Attributes
 #
 # [+authenticator_data+]
-#   The parsed AuthenticatorData containing credential information.
+#   The parsed Data containing credential information.
 #
 # [+format+]
 #   The attestation statement format (e.g., "none", "packed", "fido-u2f").
@@ -44,7 +44,7 @@ class ActionPack::WebAuthn::Authenticator::Attestation
     cbor = ActionPack::WebAuthn::CborDecoder.decode(bytes)
 
     new(
-      authenticator_data: ActionPack::WebAuthn::Authenticator::AuthenticatorData.decode(cbor["authData"]),
+      authenticator_data: ActionPack::WebAuthn::Authenticator::Data.decode(cbor["authData"]),
       format: cbor["fmt"],
       attestation_statement: cbor["attStmt"]
     )

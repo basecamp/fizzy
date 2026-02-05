@@ -22,9 +22,7 @@
 # [+relying_party+]
 #   The relying party (your application) configuration. Defaults to
 #   +ActionPack::WebAuthn.relying_party+.
-class ActionPack::WebAuthn::PublicKeyCredential::RequestOptions
-  CHALLENGE_LENGTH = 32
-
+class ActionPack::WebAuthn::PublicKeyCredential::RequestOptions < ActionPack::WebAuthn::PublicKeyCredential::Options
   attr_reader :relying_party, :credentials
 
   # Creates a new set of credential request options.
@@ -36,21 +34,11 @@ class ActionPack::WebAuthn::PublicKeyCredential::RequestOptions
   #
   # [+:relying_party+]
   #   Optional. The relying party configuration.
-  def initialize(credentials:, relying_party: ActionPack::WebAuthn.relying_party)
+  def initialize(credentials:, **attrs)
+    super(**attrs)
+
     @credentials = credentials
     @relying_party = relying_party
-  end
-
-  # Returns a Base64URL-encoded random challenge. The challenge is generated
-  # once and memoized for the lifetime of this object.
-  #
-  # The challenge must be stored server-side and verified when the client
-  # responds, to prevent replay attacks.
-  def challenge
-    @challenge ||= Base64.urlsafe_encode64(
-      SecureRandom.random_bytes(CHALLENGE_LENGTH),
-      padding: false
-    )
   end
 
   # Returns a Hash suitable for JSON serialization and passing to the
@@ -65,7 +53,7 @@ class ActionPack::WebAuthn::PublicKeyCredential::RequestOptions
           id: credential.credential_id
         }
       end,
-      userVerification: "preferred"
+      userVerification: user_verification.to_s
     }
   end
 end
