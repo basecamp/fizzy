@@ -39,6 +39,15 @@
         </div>
       </div>
 
+      <div class="flex align-center gap">
+        <%= form_with url: my_locale_path, method: :patch, class: "flex align-center gap input input--actor", data: { controller: "form" } do |locale_form| %>
+          <label class="flex align-center gap" style="flex: 1;">
+            <span class="txt-small" style="min-width: 6ch;"><%= t("locales.language") %></span>
+            <%= locale_form.select :locale, options_for_select(available_locales_for_select, Current.identity.locale.presence || I18n.default_locale.to_s), {}, class: "input full-width", data: { action: "change->form#submit" } %>
+          </label>
+        <% end %>
+      </div>
+
       <% if @user.errors.any? %>
         <div class="margin-block-half txt-negative txt-small" style="text-align: left;">
           <p class="margin-block-none font-weight-bold"><%= t("users.edit.validation_errors") %></p>

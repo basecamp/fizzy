@@ -38,7 +38,7 @@ Fizzy currently uses Rails’ built-in I18n API with English as the default loca
 
 ### Not Yet Done
 
-- **Locale selection**: No UI or persistence for user/account locale; app uses `I18n.default_locale` only. (Phase 3)
+- **Locale selection**: Implemented in Phase 3 — locale is persisted on `Identity`, set from params/session/identity in `SetLocale`, and a language selector is available on the profile (user edit) page.
 - **Coverage**: Phase 2 follow-up completed; remaining hardcoded strings in users/joins, email_addresses/confirmations, join_codes, account (join_codes, imports, settings/export), boards publication, cards steps/display meta, reactions have been moved to locale files.
 - **Additional locales**: Only `en` locale files exist; no other languages (e.g. `es`, `ja`) have been added. (Phase 4)
 - **Validation/error messages**: Model and validation messages may still be default Rails/English.
@@ -62,9 +62,9 @@ Fizzy currently uses Rails’ built-in I18n API with English as the default loca
 
 ### Phase 3 – Locale selection (optional)
 
-- [ ] Add a way to set locale (e.g. user preference, account setting, or request/session)
-- [ ] Persist locale (e.g. on `User` or `Identity`) and set `I18n.locale` in a controller/middleware
-- [ ] Document how to add a new locale (copy `en/` to `xx/`, translate, add to `available_locales` if desired)
+- [x] Add a way to set locale (e.g. user preference, account setting, or request/session)
+- [x] Persist locale (e.g. on `User` or `Identity`) and set `I18n.locale` in a controller/middleware
+- [x] Document how to add a new locale (copy `en/` to `xx/`, translate, add to `available_locales` if desired)
 
 ### Phase 4 – Additional languages (optional)
 
@@ -144,6 +144,14 @@ These views/partials had hardcoded English strings; completed items are checked.
 - **HTML**: For HTML content use a key ending in `_html` and pass `_html: true` or use `.html_safe` only when the translation is trusted (e.g. `welcome_letter_intro_html` in `shared.yml`).
 - **Testing**: Consider enabling `config.i18n.raise_on_missing_translations = true` in test to catch missing keys.
 - **Production**: `config.i18n.fallbacks = true` is set so missing translations fall back to the default locale.
+
+### How to add a new locale (Phase 3)
+
+1. **Create locale files**: Copy the entire `config/locales/en/` directory to `config/locales/<locale>/` (e.g. `config/locales/es/` for Spanish). Translate all values; you can keep the same key structure and only change the string values.
+2. **Register the locale**: In `config/application.rb`, add the new locale to `config.i18n.available_locales`, e.g. `config.i18n.available_locales = [:en, :es]`.
+3. **Display name**: Add the language name for the locale selector in each locale file. In `config/locales/en/locales.yml` add under `locales.name` e.g. `es: "Spanish"`. In `config/locales/es/locales.yml` (when you create it) add `es: "Español"` and `en: "Inglés"` so the selector shows correct names in both languages.
+4. **Run migration**: The locale column on `identities` is already in place; no extra migration is needed for new locales.
+5. **Optional**: Set `config.i18n.default_locale` to the new locale for a locale-specific deployment, or leave as `:en` and rely on user/URL/session selection.
 
 ## Acceptance Criteria
 

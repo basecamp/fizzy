@@ -173,6 +173,7 @@ Rails.application.routes.draw do
 
   namespace :my do
     resource :identity, only: :show
+    resource :locale, only: :update
     resources :access_tokens
     resources :pins
     resource :timezone

@@ -29,5 +29,6 @@ module Fizzy
 
     config.i18n.default_locale = :en
     config.i18n.fallback_locales = [:en]
+    config.i18n.available_locales = [:en]
   end
 end
