@@ -63,6 +63,26 @@ class ActionPack::WebAuthn::Authenticator::DataTest < ActiveSupport::TestCase
     assert_not data.user_verified?
   end
 
+  test "backup_eligible? returns true when flag is set" do
+    data = build_data_with_flags(0x08)
+    assert data.backup_eligible?
+  end
+
+  test "backup_eligible? returns false when flag is not set" do
+    data = build_data_with_flags(0x00)
+    assert_not data.backup_eligible?
+  end
+
+  test "backed_up? returns true when flag is set" do
+    data = build_data_with_flags(0x10)
+    assert data.backed_up?
+  end
+
+  test "backed_up? returns false when flag is not set" do
+    data = build_data_with_flags(0x00)
+    assert_not data.backed_up?
+  end
+
   test "public_key returns OpenSSL key when public_key_bytes present" do
     flags = 0x41
     bytes = build_authenticator_data(flags: flags, include_credential: true)
@@ -98,6 +118,7 @@ class ActionPack::WebAuthn::Authenticator::DataTest < ActiveSupport::TestCase
 
     def build_data_with_flags(flags)
       ActionPack::WebAuthn::Authenticator::Data.new(
+        bytes: [],
         relying_party_id_hash: @rp_id_hash,
         flags: flags,
         sign_count: 0,

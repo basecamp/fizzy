@@ -13,7 +13,7 @@ class ActionPack::WebAuthn::Authenticator::AssertionResponseTest < ActiveSupport
     # Generate a real key pair for signature verification
     @private_key = OpenSSL::PKey::EC.generate("prime256v1")
     @public_key = @private_key
-    @credential = Struct.new(:public_key).new(@public_key)
+    @credential = Struct.new(:public_key, :sign_count).new(@public_key, 0)
 
     @authenticator_data = build_authenticator_data(user_verified: true)
     @signature = sign(@authenticator_data, @client_data_json)
@@ -28,7 +28,7 @@ class ActionPack::WebAuthn::Authenticator::AssertionResponseTest < ActiveSupport
 
   test "initializes with credential, authenticator data, and signature" do
     assert_equal @credential, @response.credential
-    assert_equal @authenticator_data, @response.authenticator_data
+    assert_instance_of ActionPack::WebAuthn::Authenticator::Data, @response.authenticator_data
     assert_equal @signature, @response.signature
   end
 

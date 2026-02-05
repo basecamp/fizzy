@@ -96,10 +96,23 @@ class ActionPack::WebAuthn::Authenticator::AttestationResponseTest < ActiveSuppo
     assert_equal "Origin does not match", error.message
   end
 
+  test "validate! raises when attestation format is not supported" do
+    response = ActionPack::WebAuthn::Authenticator::AttestationResponse.new(
+      client_data_json: @client_data_json,
+      attestation_object: build_attestation_object(user_verified: true, format: "packed")
+    )
+
+    error = assert_raises(ActionPack::WebAuthn::Authenticator::Response::InvalidResponseError) do
+      response.validate!(challenge: @challenge, origin: @origin)
+    end
+
+    assert_equal "Unsupported attestation format: packed", error.message
+  end
+
   private
-    def build_attestation_object(user_verified:)
+    def build_attestation_object(user_verified:, format: "none")
       auth_data = build_authenticator_data(user_verified: user_verified)
-      encode_cbor_attestation_object(auth_data)
+      encode_cbor_attestation_object(auth_data, format: format)
     end
 
     def build_authenticator_data(user_verified:)
@@ -133,10 +146,10 @@ class ActionPack::WebAuthn::Authenticator::AttestationResponseTest < ActiveSuppo
       encode_cbor_map(params)
     end
 
-    def encode_cbor_attestation_object(auth_data)
+    def encode_cbor_attestation_object(auth_data, format:)
       bytes = [0xa3]
       bytes.concat([0x63, *"fmt".bytes])
-      bytes.concat([0x64, *"none".bytes])
+      bytes.concat([0x40 + format.bytesize, *format.bytes])
       bytes.concat([0x67, *"attStmt".bytes])
       bytes << 0xa0
       bytes.concat([0x68, *"authData".bytes])

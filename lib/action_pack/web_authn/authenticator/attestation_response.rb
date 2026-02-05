@@ -25,8 +25,10 @@
 # In addition to the base Response validations, this class verifies:
 #
 # * The client data type is "webauthn.create"
+# * The attestation format is "none" (other formats require certificate verification)
 #
 class ActionPack::WebAuthn::Authenticator::AttestationResponse < ActionPack::WebAuthn::Authenticator::Response
+  SUPPORTED_ATTESTATION_FORMATS = %w[ none ].freeze
   attr_reader :attestation_object
 
   def initialize(attestation_object:, **attributes)
@@ -39,6 +41,10 @@ class ActionPack::WebAuthn::Authenticator::AttestationResponse < ActionPack::Web
 
     unless client_data["type"] == "webauthn.create"
       raise InvalidResponseError, "Client data type is not webauthn.create"
+    end
+
+    unless SUPPORTED_ATTESTATION_FORMATS.include?(attestation.format)
+      raise InvalidResponseError, "Unsupported attestation format: #{attestation.format}"
     end
   end
 

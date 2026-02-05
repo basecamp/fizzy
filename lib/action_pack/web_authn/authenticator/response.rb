@@ -50,8 +50,16 @@ class ActionPack::WebAuthn::Authenticator::Response
       raise InvalidResponseError, "Origin does not match"
     end
 
-    unless relying_party_id_matches?(origin)
-      raise InvalidResponseError, "Relying party ID does not match origin"
+    if cross_origin?
+      raise InvalidResponseError, "Cross-origin requests are not supported"
+    end
+
+    if token_binding_present?
+      raise InvalidResponseError, "Token binding is not supported"
+    end
+
+    unless relying_party_id_valid_for?(origin)
+      raise InvalidResponseError, "Relying party ID is not valid for origin"
     end
 
     unless user_present?
@@ -61,6 +69,10 @@ class ActionPack::WebAuthn::Authenticator::Response
     if user_verification == :required && !user_verified?
       raise InvalidResponseError, "User verification is required"
     end
+  end
+
+  def relying_party
+    ActionPack::WebAuthn.relying_party
   end
 
   def client_data
@@ -85,6 +97,14 @@ class ActionPack::WebAuthn::Authenticator::Response
         Digest::SHA256.digest(URI.parse(origin).host),
         authenticator_data&.relying_party_id_hash || ""
       )
+    end
+
+    def cross_origin?
+      client_data["crossOrigin"] == true
+    end
+
+    def token_binding_present?
+      client_data.dig("tokenBinding", "status") == "present"
     end
 
     def user_present?
