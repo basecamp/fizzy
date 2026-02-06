@@ -79,3 +79,14 @@ paycheck:
   status: published
   last_active_at: <%= 1.week.ago %>
   account: initech_uuid
+
+unfinished_thoughts:
+  id: <%= ActiveRecord::FixtureSet.identify("unfinished_thoughts", :uuid) %>
+  number: 3
+  board: miltons_wish_list_uuid
+  creator: mike_uuid
+  title: Some unfinished thoughts
+  created_at: <%= 1.week.ago %>
+  status: drafted
+  last_active_at: <%= 1.week.ago %>
+  account: initech_uuid

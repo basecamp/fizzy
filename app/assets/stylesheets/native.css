@@ -1,0 +1,98 @@
+@layer native {
+  [data-platform~=native] {
+    --footer-height: 0;
+
+    -webkit-tap-highlight-color: transparent;
+
+    .hide-on-native {
+      display: none;
+    }
+
+    /* Layout
+    /* ------------------------------------------------------------------------ */
+
+    &:not(.contained-scrolling) {
+      #main {
+        padding-block-end: var(--custom-safe-inset-bottom);
+      }
+    }
+
+    /* Header
+    /* ------------------------------------------------------------------------ */
+
+    .header:is(
+      :not(:has(.header__title, .header__actions)),
+      :not(:has(.header__title, .header__actions--end)):has(.header__actions--start .btn--back:only-child)
+    ) {
+      block-size: var(--custom-safe-inset-top);
+      padding: unset;
+
+      * {
+        display: none;
+      }
+    }
+
+    .header__actions {
+      .btn--back {
+        display: none;
+      }
+    }
+
+    /* Card columns
+    /* ------------------------------------------------------------------------ */
+
+    .board-tools.card {
+      padding-block-start: 0;
+    }
+
+    /* Card perma
+    /* ------------------------------------------------------------------------ */
+
+    .card-perma {
+      margin-block-start: 0;
+
+      &:not(:has(.card-perma__notch-new-card-buttons)) .card-perma__bg {
+        padding-block: clamp(0.25rem, 2vw, var(--padding-block));
+      }
+    }
+
+    .card-perma__bg {
+      border-start-start-radius: calc(0.2em + clamp(0.25rem, 2vw, var(--padding-block)));
+      border-start-end-radius: calc(0.2em + clamp(0.25rem, 2vw, var(--padding-block)));
+    }
+
+    .card-perma__closure-message {
+      margin-block: var(--block-space);
+      translate: unset;
+    }
+
+    /* Search
+    /* ------------------------------------------------------------------------ */
+
+    .search__title {
+      text-decoration: none;
+    }
+  }
+}
+
+[data-bridge-components~=form] {
+  [data-controller~=bridge--form] {
+    [data-bridge--form-target~=submit] {
+      display: none;
+    }
+  }
+}
+
+[data-bridge-components~=overflow-menu] {
+  [data-controller~=bridge--overflow-menu] {
+    [data-bridge--overflow-menu-target~=item] {
+      display: none;
+    }
+  }
+}
+
+[data-bridge-components~=buttons] {
+  [data-bridge--buttons-target~=button] {
+    display: none;
+  }
+}

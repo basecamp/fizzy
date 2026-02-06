@@ -1,18 +1,20 @@
-<% @page_title = "Notifications settings" %>
+<% @page_title = "Notification Settings" %>
 
 <% content_for :header do %>
-  <h1 class="header__title"><%= @page_title %></h1>
+  <h1 class="header__title" data-bridge--title-target="header"><%= @page_title %></h1>
 <% end %>
 
-<section class="settings">
-  <div class="settings__panel settings__panel--users panel shadow center">
-    <h2 class="txt-medium txt-uppercase divider">Boards</h2>
-    <div class="settings__user-list flex flex-column gap-half">
-      <%= render partial: "notifications/settings/board", collection: @boards, locals: { user: Current.user } %>
-    </div>
+<section class="settings margin-block-start-half">
+  <div class="settings__panel settings__panel--users panel shadow">
+    <section class="settings__section">
+      <h2 class="divider">Boards</h2>
+      <div class="settings__user-list flex flex-column gap-half">
+        <%= render partial: "notifications/settings/board", collection: @boards, locals: { user: Current.user } %>
+      </div>
+    </section>
   </div>
 
-  <div class="settings__panel panel shadow center">
+  <div class="settings__panel panel shadow">
     <%= render "notifications/settings/push_notifications" %>
     <%= render "notifications/settings/email", settings: @settings %>
   </div>

@@ -1,43 +1,28 @@
 require "test_helper"
 
 class Users::PushSubscriptionsControllerTest < ActionDispatch::IntegrationTest
+  PUBLIC_TEST_IP = "142.250.185.206"
+
   setup do
     sign_in_as :david
+    stub_dns_resolution(PUBLIC_TEST_IP)
   end
 
   test "create new push subscription" do
-    subscription_params = { "endpoint" => "https://apple", "p256dh_key" => "123", "auth_key" => "456" }
+    subscription_params = { "endpoint" => "https://fcm.googleapis.com/fcm/send/abc123", "p256dh_key" => "123", "auth_key" => "456" }
 
     post user_push_subscriptions_path(users(:david)),
       params: { push_subscription: subscription_params }, headers: { "HTTP_USER_AGENT" => "Mozilla/5.0" }
 
-    assert_response :ok
+    assert_response :no_content
 
     assert_equal subscription_params, users(:david).push_subscriptions.last.attributes.slice("endpoint", "p256dh_key", "auth_key")
     assert_equal "Mozilla/5.0", users(:david).push_subscriptions.last.user_agent
   end
 
-  test "touch existing subscription" do
-    existing_subscription = users(:david).push_subscriptions.create!(
-      endpoint: "https://apple",
-      p256dh_key: "123",
-      auth_key: "456"
-    )
-
-    assert_no_difference -> { users(:david).push_subscriptions.count } do
-      assert_changes -> { existing_subscription.reload.updated_at } do
-        post user_push_subscriptions_path(users(:david)), params: {
-          push_subscription: existing_subscription.attributes.slice("endpoint", "p256dh_key", "auth_key")
-        }
-      end
-    end
-
-    assert_response :ok
-  end
-
   test "destroy a push subscription" do
     subscription = users(:david).push_subscriptions.create!(
-      endpoint: "https://apple",
+      endpoint: "https://fcm.googleapis.com/fcm/send/abc123",
       p256dh_key: "123",
       auth_key: "456"
     )
@@ -47,4 +32,35 @@ class Users::PushSubscriptionsControllerTest < ActionDispatch::IntegrationTest
       assert_redirected_to user_push_subscriptions_path(users(:david))
     end
   end
+
+  test "rejects subscription with non-permitted endpoint" do
+    subscription_params = { "endpoint" => "https://attacker.example.com/steal", "p256dh_key" => "123", "auth_key" => "456" }
+
+    assert_no_difference -> { Push::Subscription.count } do
+      post user_push_subscriptions_path(users(:david)),
+        params: { push_subscription: subscription_params }
+    end
+
+    assert_response :unprocessable_entity
+  end
+
+  test "rejects subscription with endpoint resolving to private IP" do
+    stub_dns_resolution("192.168.1.1")
+
+    subscription_params = { "endpoint" => "https://fcm.googleapis.com/fcm/send/abc123", "p256dh_key" => "123", "auth_key" => "456" }
+
+    assert_no_difference -> { Push::Subscription.count } do
+      post user_push_subscriptions_path(users(:david)),
+        params: { push_subscription: subscription_params }
+    end
+
+    assert_response :unprocessable_entity
+  end
+
+  private
+    def stub_dns_resolution(*ips)
+      dns_mock = mock("dns")
+      dns_mock.stubs(:each_address).multiple_yields(*ips)
+      Resolv::DNS.stubs(:open).yields(dns_mock)
+    end
 end

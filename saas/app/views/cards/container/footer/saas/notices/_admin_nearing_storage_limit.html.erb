@@ -1,0 +1,1 @@
+You’ve used <%= storage_to_human_size(Current.account.billed_bytes_used) %> out of <%= storage_to_human_size(Current.account.plan.storage_limit) %> <%= Current.account.plan.free? ? "free storage" : "storage" %>. <strong><%= link_to "Upgrade to get more", account_settings_path(anchor: "subscription") %></strong>.

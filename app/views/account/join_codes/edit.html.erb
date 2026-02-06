@@ -14,12 +14,21 @@
 
   <%= form_with model: @join_code, url: account_join_code_path, method: :patch, data: { controller: "form" }, html: { class: "flex flex-column gap" } do |form| %>
     <%= form.number_field :usage_limit,
-          required: true, autofocus: true, min: @join_code.usage_count,
+          required: true, autofocus: true,
+          in: 0..Account::JoinCode::USAGE_LIMIT_MAX,
           class: "input center txt-large fit-content font-weight-black txt-align-center", style: "max-inline-size: 8ch",
           data: { action: "keydown.esc@document->form#cancel focus->form#select" } %>
 
+    <% if @join_code.errors.any? %>
+      <div class="txt-negative txt-small">
+        <% @join_code.errors.full_messages.each do |message| %>
+          <p class="margin-block-none"><%= message %></p>
+        <% end %>
+      </div>
+    <% end %>
+
     <p class="margin-none txt-subtle">
-      This code has been used <%= @join_code.usage_count %>/<%= @join_code.usage_limit %> times.
+      This code has been used <%= @join_code.usage_count %>/<%= @join_code.usage_limit_in_database %> times.
     </p>
 
     <%= form.button type: :submit, class: "btn btn--link center txt-medium", data: { form_target: "submit" } do %>

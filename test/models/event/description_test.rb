@@ -32,4 +32,14 @@ class Event::DescriptionTest < ActiveSupport::TestCase
 
     assert_includes description.to_plain_text, "David added"
   end
+
+  test "escapes html in card titles in plain text description" do
+    card = cards(:logo)
+    card.update_column(:title, "<script>alert('xss')</script>")
+
+    description = events(:logo_published).description_for(users(:david))
+
+    assert_includes description.to_plain_text, "&lt;script&gt;alert(&#39;xss&#39;)&lt;/script&gt;"
+    assert_not_includes description.to_plain_text, "<script>"
+  end
 end

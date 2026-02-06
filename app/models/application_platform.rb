@@ -35,8 +35,24 @@ class ApplicationPlatform < PlatformAgent
     !mobile?
   end
 
+  def native?
+    match? /Hotwire Native/
+  end
+
   def windows?
     operating_system == "Windows"
+  end
+
+  def type
+    if native? && android?
+      "native android"
+    elsif native? && ios?
+      "native ios"
+    elsif mobile?
+      "mobile web"
+    else
+      "desktop web"
+    end
   end
 
   def operating_system

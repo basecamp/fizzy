@@ -1,0 +1,29 @@
+pending_account_export:
+  id: <%= ActiveRecord::FixtureSet.identify("pending_account_export", :uuid) %>
+  account: 37s_uuid
+  user: david_uuid
+  type: Account::Export
+  status: pending
+
+completed_account_export:
+  id: <%= ActiveRecord::FixtureSet.identify("completed_account_export", :uuid) %>
+  account: 37s_uuid
+  user: david_uuid
+  type: Account::Export
+  status: completed
+  completed_at: <%= 1.hour.ago.to_fs(:db) %>
+
+pending_user_data_export:
+  id: <%= ActiveRecord::FixtureSet.identify("pending_user_data_export", :uuid) %>
+  account: 37s_uuid
+  user: david_uuid
+  type: User::DataExport
+  status: pending
+
+completed_user_data_export:
+  id: <%= ActiveRecord::FixtureSet.identify("completed_user_data_export", :uuid) %>
+  account: 37s_uuid
+  user: david_uuid
+  type: User::DataExport
+  status: completed
+  completed_at: <%= 1.hour.ago.to_fs(:db) %>

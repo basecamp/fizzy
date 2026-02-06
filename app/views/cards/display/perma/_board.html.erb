@@ -1,14 +1,9 @@
-<%= render "cards/display/common/board", card: card do %>
-  <div class="align-self-center position-relative txt-small"
-      data-controller="dialog"
-      data-action="keydown.esc->dialog#close:stop click@document->dialog#closeOnClickOutside mouseenter->dialog#loadLazyFrames" <%= "hidden" if card.closed? %>>
-    <button class="board-picker__button btn btn--reversed card__hide-on-index fill-transparent" data-action="click->dialog#open:stop">
-      <%= icon_tag "caret-down" %>
-      <span class="for-screen-reader">Choose a board for this card</span>
-    </button>
-
-    <dialog class="popup panel flex-column align-start gap-half fill-white shadow margin-block-double" data-dialog-target="dialog" data-action="turbo:before-morph-attribute->dialog#preventCloseOnMorphing turbo:submit-end->dialog#close">
-      <%= turbo_frame_tag "board_picker", src: edit_card_board_path(card), target: "_top", loading: :lazy, refresh: "morph" %>
-    </dialog>
-  </div>
-<% end %>
+<div class="card__board" data-controller="dialog" data-action="keydown.esc->dialog#close:stop click@document->dialog#closeOnClickOutside mouseenter->dialog#loadLazyFrames">
+  <%= render "cards/display/common/board", card: card do %>
+    <%= icon_tag "caret-down", class: "txt-xx-small", hidden: card.closed? %>
+  <% end %>
+  <button class="card__board-picker-button btn btn--plain" data-action="click->dialog#open:stop" aria-label="Choose a board for this card" <%= "hidden" if card.closed? %>></button>
+  <dialog class="popup popup--align-right panel flex-column align-start gap-half fill-white shadow" data-dialog-target="dialog" data-action="turbo:before-morph-attribute->dialog#preventCloseOnMorphing turbo:submit-end->dialog#close">
+    <%= turbo_frame_tag "board_picker", src: edit_card_board_path(card), target: "_top", loading: :lazy, refresh: "morph" %>
+  </dialog>
+</div>

@@ -37,4 +37,14 @@ class Account::JoinCodesControllerTest < ActionDispatch::IntegrationTest
     delete account_join_code_path
     assert_response :forbidden
   end
+
+  test "update with extremely large usage_limit" do
+    # A number larger than bigint max (2^63 - 1 = 9223372036854775807)
+    huge_number = "99999999999999999999999999999999999"
+
+    put account_join_code_path, params: { account_join_code: { usage_limit: huge_number } }
+
+    assert_response :unprocessable_entity
+    assert_select ".txt-negative", text: /cannot be larger than the population of the planet/
+  end
 end

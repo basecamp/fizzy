@@ -1,0 +1,9 @@
+<% @page_title = "Thank you" %>
+
+<% if @stripe_session&.payment_status == "paid" %>
+  <section class="panel panel--wide panel--centered center borderless">
+    <h1 class="txt-x-large font-weight-black margin-none">Thanks for buying Fizzy!</h1>
+    <p class="txt-medium margin-none-block-start">Your payment was successful. You’re now on the <strong><%= Current.account.plan.name %></strong> plan.</p>
+    <%= link_to "Done", account_settings_path, class: "btn settings-subscription__button txt-medium" %>
+  </section>
+<% end %>

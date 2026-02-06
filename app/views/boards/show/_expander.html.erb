@@ -1,5 +1,5 @@
 <button class="cards__expander btn btn--plain" data-collapsible-columns-target="button" data-css-variable-counter-target="counter" data-action="click->collapsible-columns#toggle click->navigable-list#selectCurrentOrReset"
-  style="--card-count: <%= [ count, 20 ].min %>" aria-controls="<%= column_id %>" aria-expanded="false">
+  style="--card-count: <%= [ count, 15 ].min %>" aria-controls="<%= column_id %>" aria-expanded="false">
   <span class="cards__expander-count" data-drag-and-drop-counter="true"><%= count > 99 ? "99+" : count %></span>
   <h2 class="cards__expander-title" data-collapsible-columns-target="title">
     <%= title %>

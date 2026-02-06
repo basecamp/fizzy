@@ -6,4 +6,14 @@ paths = [
   '''log''',
   '''tmp''',
   '''.*\.yml\.enc''',
+  '''docs/''',
+  '''test/''',
 ]
+
+[[rules]]
+id = "basecamp-integration-url"
+description = "Basecamp Integration URL"
+regex = '''https://[^\s]*?([0-9a-fA-F]{16,})'''
+[rules.allowlist]
+regexTarget = "match"
+regexes = ['''github\.com''']

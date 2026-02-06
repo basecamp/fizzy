@@ -1,4 +1,9 @@
 @layer components {
+  /* Prevent page scrolling when modal dialog is open */
+  html:has(dialog:modal) {
+    overflow: hidden;
+  }
+
   :is(.dialog) {
     border: 0;
     opacity: 0;
@@ -34,5 +39,10 @@
         opacity: 0;
       }
     }
+  }
+
+  /* Ensure padding from viewport edges */
+  .dialog.panel {
+    max-inline-size: calc(100vw - var(--inline-space-double) * 2);
   }
 }

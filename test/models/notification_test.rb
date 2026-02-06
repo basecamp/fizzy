@@ -15,7 +15,9 @@ class NotificationTest < ActiveSupport::TestCase
     notification.read # Mark as read first
 
     assert_turbo_stream_broadcasts([ notification.user, :notifications ], count: 1) do
-      notification.unread
+      perform_enqueued_jobs do
+        notification.unread
+      end
     end
   end
 

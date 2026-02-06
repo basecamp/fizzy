@@ -1,4 +1,4 @@
-<%= form_with url: search_path, method: :get, class: "search__form flex align-center justify-center gap-half", data: { bar_target: "form", turbo_frame: "bar_content" } do |form| %>
+<%= form_with url: search_path, method: :get, class: "search__form flex align-center justify-center gap-half", data: { bar_target: "form", turbo_frame: defined?(target_turbo_frame) ? target_turbo_frame : nil } do |form| %>
   <%= form.label :q, "Search Fizzy", class: "font-weight-black txt-nowrap" %>
   <%= text_field_tag :q, query_terms,
         class: "search__input input",

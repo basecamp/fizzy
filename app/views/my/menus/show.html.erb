@@ -5,10 +5,10 @@
     <%= render "my/menus/people", users: @users %>
     <%= render "my/menus/settings" %>
     <%= render "my/menus/shortcuts" %>
-    <%= render "my/menus/accounts", accounts: Current.identity.accounts %>
+    <%= render "my/menus/accounts", accounts: @accounts %>
   <% end %>
 
   <footer class="nav__footer">
-    <strong class="txt-nowrap"><a href="https://www.fizzy.do" target="_blank" class="txt-ink"><%= icon_tag "fizzy", class: "v-align-middle" %> Fizzy™</a></strong> is designed, built, and backed by <strong class="txt-nowrap"><a href="https://37signals.com" target="_blank" class="txt-ink"><%= icon_tag "37signals", class: "v-align-middle" %> 37signals™</a></strong>
+    <%= render "layouts/shared/colophon" %>
   </footer>
 <% end %>

@@ -220,11 +220,16 @@
   .events__column-header {
     background-color: var(--color-canvas);
     grid-row-start: 1;
-    inset-block-start: calc(var(--block-space) * -1);
-    margin-block-end: var(--events-gap);
-    padding-block: calc(var(--events-gap) * 3) var(--events-gap);
+    inset-block-start: var(--custom-safe-inset-top);
+    margin-block: calc(var(--events-gap) * 2) var(--events-gap);
+    padding-block: var(--events-gap);
     position: sticky;
     z-index: var(--z-events-column-header);
+
+    @media (max-width: 639px) {
+      margin-inline: calc(var(--main-padding) * -0.5);
+      padding-inline: var(--main-padding);
+    }
   }
 
   .events__column-footer {
@@ -234,11 +239,15 @@
   }
 
   .events__maximize-button {
-    inset: calc(var(--events-gap) * 3) 0 auto auto;
+    inset: 50% var(--events-gap) auto auto;
     outline-offset: -2px;
     position: absolute;
-    transform: translateY(-10%);
+    transform: translateY(-50%);
     z-index: 1;
+
+    @media (max-width: 639px) {
+      inset-inline-end: 0;
+    }
 
     @media (any-hover: hover ) {
       opacity: 0;
@@ -282,6 +291,7 @@
 
   .event {
     --column-gap: 0.7ch;
+    --event-padding: 0.6em;
 
     background-color: color-mix(in srgb, var(--card-color) 10%, var(--color-canvas));
     border-radius: 0.2em;
@@ -291,7 +301,7 @@
     max-inline-size: 100%;
     min-inline-size: 0;
     overflow: clip;
-    padding: 0.6em;
+    padding: var(--event-padding);
     position: relative;
     z-index: 0;
 
@@ -316,12 +326,15 @@
       z-index: 0;
     }
 
+    .card__header {
+      inline-size: 100%;
+      margin-block-start: calc(-1 * var(--event-padding));
+    }
+
     .card__board {
       background-color: transparent;
       color: color-mix(in srgb, var(--card-color) 40%, var(--color-ink));
       font-size: 0.7em;
-      padding: 0;
-      translate: 0 -0.3em;
     }
 
     .card__board-name {
@@ -368,16 +381,11 @@
   }
 
   .event__icon {
+    color: var(--card-color);
     display: grid;
-    margin: -0.3em -0.3em auto auto;
+    margin-inline-start: auto;
     place-content: center;
-
-    .icon {
-      background-color: var(--card-color);
-      block-size: 1em;
-      inline-size: 1em;
-      grid-area: 1 / 1;
-    }
+    translate: calc(var(--event-padding) / 2);
   }
 
   .event__timestamp {

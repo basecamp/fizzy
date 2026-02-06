@@ -1,15 +1,48 @@
 #!/usr/bin/env sh
 
-bin/rails runner - <<EOF
-  puts "Login with david@example.com to: http://fizzy.localhost:3006/"
-EOF
+PORT=3006
+USE_TAILSCALE=0
 
-if [ -f tmp/solid-queue.txt ]; then
-  export SOLID_QUEUE_IN_PUMA=1
+for arg in "$@"; do
+  case $arg in
+    --tailscale) USE_TAILSCALE=1 ;;
+  esac
+done
+
+if [ ! -f tmp/solid-queue.txt ]; then
+  export SOLID_QUEUE_IN_PUMA=false
 fi
 
 if [ -f tmp/oss-config.txt ]; then
   export OSS_CONFIG=1
 fi
 
-exec ./bin/rails server -p 3006
+if [ "$USE_TAILSCALE" = "1" ]; then
+  if ! command -v tailscale >/dev/null 2>&1; then
+    echo "Error: tailscale not found" >&2
+    exit 1
+  fi
+
+  TS_STATUS=$(tailscale status --self --json 2>&1)
+  if [ $? -ne 0 ]; then
+    echo "Error: tailscale not logged in" >&2
+    exit 1
+  fi
+
+  TS_HOSTNAME=$(echo "$TS_STATUS" | jq -r '.Self.DNSName | rtrimstr(".")')
+  TS_PORT="4$PORT"
+
+  stop_tailscale() { tailscale serve --https=$TS_PORT off >/dev/null 2>&1; }
+  trap stop_tailscale EXIT INT TERM
+
+  tailscale serve --bg --https=$TS_PORT localhost:$PORT >/dev/null 2>&1
+  if ! tailscale serve status --json 2>/dev/null | jq -e ".TCP.\"$TS_PORT\"" >/dev/null 2>&1; then
+    echo "Error: tailscale serve failed. On Linux, run once: sudo tailscale set --operator=\$USER" >&2
+    exit 1
+  fi
+  echo "Login with david@example.com to: https://$TS_HOSTNAME:$TS_PORT/"
+else
+  echo "Login with david@example.com to: http://fizzy.localhost:$PORT/"
+fi
+
+./bin/rails server -b 0.0.0.0 -p $PORT

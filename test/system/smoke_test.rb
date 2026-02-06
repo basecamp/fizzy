@@ -1,6 +1,27 @@
 require "application_system_test_case"
 
 class SmokeTest < ApplicationSystemTestCase
+  test "joining an account" do
+    account = accounts("37s")
+
+    visit join_url(code: account.join_code.code, script_name: account.slug)
+    fill_in "Email address", with: "newbie@example.com"
+    click_on "Continue"
+
+    assert_selector "h1", text: "Check your email"
+    identity = Identity.find_by!(email_address: "newbie@example.com")
+    code = identity.magic_links.active.first.code
+    fill_in "code", with: code
+    send_keys :enter
+
+    assert_selector "input[id=user_name]"
+    assert account.users.find_by!(identity:).verified?, "User was not properly verified"
+    fill_in "Full name", with: "New Bee"
+    click_on "Continue"
+
+    assert_selector "h1", text: "Writebook"
+  end
+
   test "create a card" do
     sign_in_as(users(:david))
 
@@ -24,7 +45,7 @@ class SmokeTest < ApplicationSystemTestCase
 
     within("form lexxy-editor figure.attachment[data-content-type='image/jpeg']") do
       assert_selector "img[src*='/rails/active_storage']"
-      assert_selector "figcaption input[placeholder='moon.jpg']"
+      assert_selector "figcaption textarea[placeholder='moon.jpg']"
     end
 
     click_on "Post"
@@ -32,6 +53,14 @@ class SmokeTest < ApplicationSystemTestCase
     within("action-text-attachment") do
       assert_selector "a img[src*='/rails/active_storage']"
       assert_selector "figcaption span.attachment__name", text: "moon.jpg"
+    end
+
+    # Click the image to open the lightbox
+    find("action-text-attachment figure.attachment a:has(img)").click
+
+    assert_selector "dialog.lightbox[open]"
+    within("dialog.lightbox") do
+      assert_selector "img.lightbox__image[src*='/rails/active_storage']"
     end
   end
 

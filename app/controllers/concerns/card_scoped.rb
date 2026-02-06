@@ -17,4 +17,15 @@ module CardScoped
     def render_card_replacement
       render turbo_stream: turbo_stream.replace([ @card, :card_container ], partial: "cards/container", method: :morph, locals: { card: @card.reload })
     end
+
+    def capture_card_location
+      @source_column = @card.column
+      @was_in_stream = @card.awaiting_triage?
+    end
+
+    def refresh_stream_if_needed
+      if @was_in_stream
+        set_page_and_extract_portion_from @board.cards.awaiting_triage.latest.with_golden_first.preloaded
+      end
+    end
 end

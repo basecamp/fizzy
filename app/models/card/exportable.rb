@@ -67,7 +67,7 @@ module Card::Exportable
     end
 
     def collect_attachments
-      attachments.to_a + comments.flat_map { |c| c.attachments.to_a }
+      (attachments.to_a + comments.flat_map { |c| c.attachments.to_a }).uniq(&:blob_id)
     end
 
     def export_status

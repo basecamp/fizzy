@@ -15,11 +15,11 @@ export default class extends Controller {
   }
 
   mouseEnter(event) {
-    orient(this.#tooltipElement)
+    orient({ target: this.#tooltipElement, anchor: this.element })
   }
 
   mouseOut(event) {
-    orient(this.#tooltipElement, false)
+    orient({ target: this.#tooltipElement, reset: true })
   }
 
   get #tooltipElement() {

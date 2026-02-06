@@ -4,7 +4,7 @@ class Users::RolesController < ApplicationController
 
   def update
     @user.update!(role_params)
-    redirect_to users_path
+    redirect_to account_settings_path
   end
 
   private

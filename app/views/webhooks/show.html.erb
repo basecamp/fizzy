@@ -22,7 +22,7 @@
   </header>
   <% unless @webhook.active? %>
     <div>
-      <%= button_to "Reactivate", board_webhook_activation_path(@webhook), method: :post %>
+      <%= button_to "Reactivate", board_webhook_activation_path(@webhook.board_id, @webhook), method: :post %>
     </div>
   <% end %>
 

@@ -3,6 +3,8 @@ class Notification::Bundle::DeliverJob < ApplicationJob
 
   queue_as :backend
 
+  discard_on ActiveJob::DeserializationError
+
   def perform(bundle)
     bundle.deliver
   end

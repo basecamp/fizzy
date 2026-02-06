@@ -1,0 +1,11 @@
+<% if Current.user.admin? && !Current.account.comped? %>
+  <section class="panel panel--wide settings-subscription__panel shadow center margin-block-double">
+    <h2 id="subscription" class="divider settings-subscription__divider txt-small txt-uppercase margin-none">Subscription</h2>
+
+    <% if Current.account.plan.free? %>
+      <%= render "account/settings/free_plan" %>
+    <% else %>
+      <%= render "account/settings/paid_plan" %>
+    <% end %>
+  </section>
+<% end %>

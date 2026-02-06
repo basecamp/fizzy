@@ -1,11 +1,13 @@
 import { Controller } from "@hotwired/stimulus"
 import { nextFrame, debounce } from "helpers/timing_helpers";
+import { isNative } from "helpers/platform_helpers";
 
 export default class extends Controller {
-  static classes = [ "collapsed", "noTransitions", "titleNotVisible" ]
-  static targets = [ "column", "button", "title" ]
+  static classes = [ "collapsed", "expanded", "noTransitions", "titleNotVisible" ]
+  static targets = [ "column", "button", "title", "maybeColumn" ]
   static values = {
-    board: String
+    board: String,
+    desktopBreakpoint: { type: String, default: "(min-width: 640px)" }
   }
 
   initialize() {
@@ -13,6 +15,10 @@ export default class extends Controller {
   }
 
   async connect() {
+    this.mediaQuery = window.matchMedia(this.desktopBreakpointValue)
+    this.handlePlatform = this.#handlePlatform.bind(this)
+    this.mediaQuery.addEventListener("change", this.handlePlatform)
+
     await this.#restoreColumnsDisablingTransitions()
     this.#setupIntersectionObserver()
   }
@@ -22,10 +28,11 @@ export default class extends Controller {
       this._intersectionObserver.disconnect()
       this._intersectionObserver = null
     }
+    this.mediaQuery.removeEventListener("change", this.handlePlatform)
   }
 
   toggle({ target }) {
-    const column = target.closest('[data-collapsible-columns-target="column"]')
+    const column = target.closest('[data-collapsible-columns-target~="column"]')
     this.#toggleColumn(column);
   }
 
@@ -41,15 +48,16 @@ export default class extends Controller {
   }
 
   focusOnColumn({ target }) {
-    if (this.#isCollapsed(target)) {
+    if (this.#isDesktop && this.#isCollapsed(target)) {
       this.#collapseAllExcept(target)
-      this.#expand(target)
+      this.#expand({ column: target })
     }
   }
 
   async #restoreColumnsDisablingTransitions() {
     this.#disableTransitions()
     this.#restoreColumns()
+    this.#handlePlatform()
 
     await nextFrame()
     this.#enableTransitions()
@@ -67,14 +75,16 @@ export default class extends Controller {
     this.#collapseAllExcept(column)
 
     if (this.#isCollapsed(column)) {
-      this.#expand(column)
+      this.#expand({ column })
     } else {
       this.#collapse(column)
     }
   }
 
   #collapseAllExcept(clickedColumn) {
-    this.columnTargets.forEach(column => {
+    const columns = this.#isDesktop ? this.columnTargets.filter(c => c !== this.maybeColumnTarget) : this.columnTargets
+
+    columns.forEach(column => {
       if (column !== clickedColumn) {
         this.#collapse(column)
       }
@@ -88,17 +98,25 @@ export default class extends Controller {
   #collapse(column) {
     const key = this.#localStorageKeyFor(column)
 
-    this.#buttonFor(column).setAttribute("aria-expanded", "false")
+    this.#buttonFor(column)?.setAttribute("aria-expanded", "false")
+    column.classList.remove(this.expandedClass)
     column.classList.add(this.collapsedClass)
     localStorage.removeItem(key)
   }
 
-  #expand(column) {
-    const key = this.#localStorageKeyFor(column)
-
-    this.#buttonFor(column).setAttribute("aria-expanded", "true")
+  #expand({ column, saveState = true, scrollBehavior = "smooth" }) {
+    this.#buttonFor(column)?.setAttribute("aria-expanded", "true")
     column.classList.remove(this.collapsedClass)
-    localStorage.setItem(key, true)
+    column.classList.add(this.expandedClass)
+
+    if (saveState) {
+      const key = this.#localStorageKeyFor(column)
+      localStorage.setItem(key, true)
+    }
+
+    if (window.matchMedia('(max-width: 639px)').matches) {
+      column.scrollIntoView({ behavior: scrollBehavior, inline: "center" })
+    }
   }
 
   #buttonFor(column) {
@@ -114,7 +132,8 @@ export default class extends Controller {
   #restoreColumn(column) {
     const key = this.#localStorageKeyFor(column)
     if (localStorage.getItem(key)) {
-      this.#expand(column)
+      this.#collapseAllExcept(column)
+      this.#expand({ column, scrollBehavior: isNative() ? "instant" : "smooth" })
     }
   }
 
@@ -139,5 +158,35 @@ export default class extends Controller {
     }, { threshold: [0] })
 
     this.titleTargets.forEach(title => this._intersectionObserver.observe(title))
+  }
+
+  get #isDesktop() {
+    return this.mediaQuery?.matches
+  }
+
+  #handlePlatform() {
+    this.#isDesktop ? this.#handleDesktopMode() : this.#handleMobileMode()
+  }
+
+  async #handleDesktopMode() {
+    this.#expand({ column: this.maybeColumnTarget, saveState: false })
+    this.#maybeButton.setAttribute("disabled", true)
+  }
+
+  #handleMobileMode() {
+    this.#maybeButton.removeAttribute("disabled")
+
+    const expandedColumn = this.columnTargets.find(column => column !== this.maybeColumnTarget && !this.#isCollapsed(column))
+
+    if (expandedColumn) {
+      this.#collapseAllExcept(expandedColumn)
+    } else {
+      this.#collapseAllExcept(this.maybeColumnTarget)
+      this.#expand({ column: this.maybeColumnTarget, saveState: false })
+    }
+  }
+
+  get #maybeButton() {
+    return this.maybeColumnTarget.querySelector('[data-collapsible-columns-target="button"]')
   }
 }

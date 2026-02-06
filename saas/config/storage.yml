@@ -1,0 +1,33 @@
+test:
+  service: Disk
+  root: <%= Rails.root.join("tmp/storage/files") %>
+
+local:
+  service: Disk
+  root: <%= Rails.root.join("storage", Rails.env, "files") %>
+
+devminio:
+  service: S3
+  bucket: fizzy-dev-activestorage
+  endpoint: "http://minio.localhost:39000"
+  force_path_style: true
+  request_checksum_calculation: when_required # default is when_supported with CRC64NVME checksum which FlashBlade doesn't support
+  response_checksum_validation: when_required # default is when_supported with CRC64NVME checksum which FlashBlade doesn't support
+  region: us-east-1 # default region required for signer
+  access_key_id: minioadmin
+  secret_access_key: minioadmin
+
+# We have "development", "staging", and "production" buckets configured. Note that we don't have a
+# "beta" bucket. (As of 2025-06-01.)
+<% pure_env = Rails.env.beta? ? "production" : Rails.env %>
+purestorage:
+  service: S3
+  bucket: fizzy-<%= pure_env %>-activestorage
+  endpoint: "https://storage.basecamp.com"
+  ssl_verify_peer: false # FIXME: using self-signed cert internally
+  force_path_style: true
+  request_checksum_calculation: when_required # default is when_supported with CRC64NVME checksum which FlashBlade doesn't support
+  response_checksum_validation: when_required # default is when_supported with CRC64NVME checksum which FlashBlade doesn't support
+  region: us-east-1 # default region required for signer
+  access_key_id: <%= ENV["ACTIVE_STORAGE_ACCESS_KEY_ID"] %>
+  secret_access_key: <%= ENV["ACTIVE_STORAGE_SECRET_ACCESS_KEY"] %>

@@ -36,7 +36,7 @@ else
     if user = identity.users.find_by(account: Current.account)
       user
     else
-      User.create!(name: full_name, identity: identity, account: Current.account)
+      User.create!(name: full_name, identity: identity, account: Current.account, verified_at: Time.current)
     end
   end
 

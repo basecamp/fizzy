@@ -1,5 +1,6 @@
 <%= column_tag id: "not-now", name: "Not Now", drop_url: columns_card_drops_not_now_path("__id__"), class: "cards--on-deck", style: "--card-color: var(--color-card-complete);",
   data: {
+    card_hotkeys_disabled: true,
     collapsible_columns_target: "column",
     drag_and_strum_target: "container",
     action: "focus->collapsible-columns#focusOnColumn"

@@ -1,0 +1,20 @@
+<% if subscription.current_period_end %>
+  <p class="margin-block-start-half"><%= subscription_period_end_action(subscription) %> <strong><%= subscription.current_period_end.to_date.to_fs(:long) %></strong></p>
+<% end %>
+
+<p>
+  <%= link_to "Manage your subscription", account_billing_portal_path, class: "btn btn--plain settings-subscription__link txt-link", data: { turbo_prefetch: false } %>
+</p>
+
+<div class="settings-subscription__footer txt-small margin-block">
+  Right now you’re on the <strong><%= Current.account.plan.name %></strong> plan which includes unlimited cards, unlimited users, and <%= storage_to_human_size(Current.account.plan.storage_limit) %> of storage.
+
+  <% if subscription.plan == Plan.paid && !(Current.account.nearing_plan_storage_limit? || Current.account.exceeding_storage_limit?) %>
+    <%= button_to "Upgrade", account_subscription_upgrade_path, class: "btn btn--plain settings-subscription__link txt-link", form: { class: "flex-inline flex-wrap", data: { turbo: false } } %>
+    to <%= storage_to_human_size(Plan.paid_with_extra_storage.storage_limit) %> storage for <%= format_currency(Plan.paid_with_extra_storage.price - Plan.paid.price) %>/month more.
+  <% elsif subscription.plan == Plan.paid_with_extra_storage && !Current.account.exceeding_storage_limit? %>
+    <%= button_to "Downgrade", account_subscription_downgrade_path, class: "btn btn--plain settings-subscription__link txt-link", form: { class: "flex-inline flex-wrap", data: { turbo: false } } %>
+    to <%= storage_to_human_size(Plan.paid.storage_limit) %> storage.
+  <% end %>
+</div>
+

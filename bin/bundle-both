@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo
+gum style --foreground 135 --bold "▸ OSS: Gemfile"
+gum style --foreground 240 "bundle $*"
+BUNDLE_GEMFILE=Gemfile bundle "$@"
+
+echo
+gum style --foreground 135 --bold "▸ SaaS: Gemfile.saas"
+gum style --foreground 240 "bundle $*"
+BUNDLE_GEMFILE=Gemfile.saas bundle "$@"

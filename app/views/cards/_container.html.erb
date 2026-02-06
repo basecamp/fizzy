@@ -1,5 +1,5 @@
-<% cache card do %>
-  <section id="<%= dom_id(card, :card_container) %>" class="card-perma" style="--card-color: <%= card.color %>;">
+<section id="<%= dom_id(card, :card_container) %>" class="card-perma" style="--card-color: <%= card.color %>;" data-controller="dialog-manager bridge--form">
+  <% cache card do %>
     <div class="card-perma__actions card-perma__actions--left">
       <%= render "cards/container/gild", card: card if card.published? && !card.closed? %>
       <%= render "cards/container/image", card: card %>
@@ -21,11 +21,14 @@
           <% if card.published? %>
             <%= render "cards/triage/columns", card: card %>
           <% end %>
+
+          <%= render "cards/display/common/stamp", card: card %>
         </div>
 
-        <footer class="card__footer full-width flex align-start gap">
+        <footer class="card__footer">
           <%= render "cards/display/perma/meta", card: card %>
           <%= render "cards/display/perma/background", card: card %>
+          <%= render "reactions/reactions", reactable: card %>
         </footer>
       <% end %>
 
@@ -33,11 +36,9 @@
         <%= render "cards/display/preview/bubble", card: card %>
       <% end %>
     </div>
+  <% end %>
 
-    <% if card.published? %>
-      <%= render "cards/container/footer/published", card: card %>
-    <% elsif card.drafted? %>
-      <%= render "cards/container/footer/draft", card: card %>
-    <% end %>
-  </section>
-<% end %>
+  <% if card.published? %>
+    <%= render "cards/container/footer/published", card: card %>
+  <% end %>
+</section>

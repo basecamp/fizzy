@@ -1,6 +1,6 @@
 <h1 class="title">Download your Fizzy data</h1>
 <p class="subtitle">Your Fizzy data export has finished processing and is ready to download.</p>
 
-<p><%= link_to "Download your data", account_export_url(@export) %></p>
+<p><%= link_to "Download your data", export_download_url(@export) %></p>
 
 <p class="footer">Need help? <%= mail_to "support@fizzy.do", "Send us an email" %>.</p>

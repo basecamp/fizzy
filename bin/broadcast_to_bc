@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-
-curl -s -d content="[Fizzy] ${1}" https://3.basecamp.com/2914079/integrations/5c3a7bd149c975b95312253c/buckets/4896644/chats/676031034/lines

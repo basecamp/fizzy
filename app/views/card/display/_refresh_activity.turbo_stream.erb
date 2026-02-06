@@ -1,4 +1,0 @@
-<%= turbo_stream.remove dom_id(card, "bubble") %>
-<%= turbo_stream.replace dom_id(card, :card_closure_toggle) do %>
-  <%= render "cards/container/closure", card: card %>
-<% end %>

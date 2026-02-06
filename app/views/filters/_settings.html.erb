@@ -1,29 +1,36 @@
-<%= tag.aside \
-      class: class_names("filters margin-block-end", { "filters--expanded": user_filtering.expanded? }),
+<%= tag.details class: "expandable-on-native",
+      open: true,
       data: {
-        controller: "toggle-enable toggle-class filter-settings dialog-manager",
-        toggle_class_toggle_class: "filters--expanded",
-        filter_settings_filters_set_class: "filters--has-filters-set",
-        filter_settings_no_filtering_url_value: no_filtering_url,
-        filter_settings_refresh_url_value: settings_refresh_path,
-        filter_settings_cards_url_value: cards_path,
-        turbo_permanent: true } do %>
-  <%= form_with url: filter_url, method: :get, class: "display-contents", data: {
-        controller: "form",
-        turbo_frame: "cards_container",
-        filter_settings_target: "form",
-        action: "turbo:submit-end->filter-settings#resetIfNoFiltering",
-        turbo_action: "advance" } do |form| %>
-    <%= hidden_field_tag :expand_all, true, disabled: !user_filtering.expanded?, data: { toggle_enable_target: "element" } %>
+        controller: "expandable-on-native",
+        expandable_on_native_auto_expand_selector_value: "[data-filter-show=true]" } do %>
+    <%= tag.summary "Toggle filters", class: "btn btn--plain margin-block-end", data: { bridge__buttons_target: "button", bridge_title: "Toggle filters", bridge_icon_url: bridge_icon("funnel") } %>
+    <%= tag.aside \
+          class: class_names("filters margin-block-end", { "filters--expanded": user_filtering.expanded? }),
+          data: {
+            controller: "toggle-enable toggle-class filter-settings dialog-manager",
+            toggle_class_toggle_class: "filters--expanded",
+            filter_settings_filters_set_class: "filters--has-filters-set",
+            filter_settings_no_filtering_url_value: no_filtering_url,
+            filter_settings_refresh_url_value: settings_refresh_path,
+            filter_settings_cards_url_value: cards_path,
+            turbo_permanent: true } do %>
+      <%= form_with url: filter_url, method: :get, class: "display-contents", data: {
+            controller: "form",
+            turbo_frame: "cards_container",
+            filter_settings_target: "form",
+            action: "turbo:submit-end->filter-settings#resetIfNoFiltering",
+            turbo_action: "advance" } do |form| %>
+        <%= hidden_field_tag :expand_all, true, disabled: !user_filtering.expanded?, data: { toggle_enable_target: "element" } %>
 
-    <%= yield form if block_given? %>
-
-      <%= render "filters/settings/terms", filter: user_filtering.filter, form: form do %>
         <%= yield form if block_given? %>
-      <% end %>
-      <%= render "filters/settings/controls", user_filtering: user_filtering, form: form %>
 
-      <%= render "filters/settings/toggle", user_filtering: user_filtering %>
-  <% end %>
-  <%= render "filters/settings/manage", user_filtering: user_filtering, no_filtering_url: no_filtering_url %>
+          <%= render "filters/settings/terms", filter: user_filtering.filter, form: form do %>
+            <%= yield form if block_given? %>
+          <% end %>
+          <%= render "filters/settings/controls", user_filtering: user_filtering, form: form %>
+
+          <%= render "filters/settings/toggle", user_filtering: user_filtering %>
+      <% end %>
+      <%= render "filters/settings/manage", user_filtering: user_filtering, no_filtering_url: no_filtering_url %>
+    <% end %>
 <% end %>

@@ -14,5 +14,9 @@
       0 0 0 1px color-mix(in oklch, var(--color-golden) 100%, transparent),
       0 0 0.2em 0.2em color-mix(in oklch, var(--color-golden) 25%, transparent),
       0 0 1em 0.5em color-mix(in oklch, var(--color-golden) 25%, transparent);
+
+    lexxy-toolbar {
+      --lexxy-bg-color: transparent;
+    }
   }
 }

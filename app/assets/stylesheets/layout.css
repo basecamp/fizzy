@@ -6,6 +6,23 @@
     &.public {
       grid-template-rows: auto 1fr auto;
     }
+
+    &.compact-on-touch {
+      @media (any-hover: none) {
+        grid-template-rows: auto 1fr auto;
+        min-height: unset;
+      }
+    }
+  }
+
+  /* Required for the card column page on mobile, but not needed otherwise */
+  :where(#global-container) {
+    display: contents;
+  }
+
+  :where(#header) {
+    position: relative;
+    z-index: var(--z-nav);
   }
 
   :where(#main) {
@@ -13,18 +30,13 @@
     margin-inline: auto;
     max-inline-size: 100dvw;
     padding-inline:
-      calc(var(--main-padding) + env(safe-area-inset-left))
-      calc(var(--main-padding) + env(safe-area-inset-right));
+      calc(var(--main-padding) + var(--custom-safe-inset-left))
+      calc(var(--main-padding) + var(--custom-safe-inset-right));
     text-align: center;
   }
 
   :where(#footer) {
     max-inline-size: 100dvw;
-  }
-
-  :where(#header) {
-    position: relative;
-    z-index: var(--z-nav);
   }
 
   :is(#header, #footer) {

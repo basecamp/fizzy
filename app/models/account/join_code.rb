@@ -1,15 +1,18 @@
 class Account::JoinCode < ApplicationRecord
   CODE_LENGTH = 12
+  USAGE_LIMIT_MAX = 10_000_000_000
 
   belongs_to :account
+
+  validates :usage_limit, numericality: { less_than_or_equal_to: USAGE_LIMIT_MAX, message: "cannot be larger than the population of the planet" }
 
   scope :active, -> { where("usage_count < usage_limit") }
 
   before_create :generate_code, if: -> { code.blank? }
 
   def redeem_if(&block)
-    transaction do
-      increment!(:usage_count) if block.call(account)
+    with_lock do
+      increment!(:usage_count) if active? && block.call(account)
     end
   end
 

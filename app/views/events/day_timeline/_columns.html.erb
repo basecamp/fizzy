@@ -1,4 +1,5 @@
 <% cache [ day_timeline.events ] do %>
+  <%# Template Dependency Updated: _layout.html.erb 2026-01-26 %>
   <% if day_timeline.has_activity? %>
     <div class="events__columns">
       <%= render "events/day_timeline/column", column: day_timeline.added_column %>

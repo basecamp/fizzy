@@ -1,7 +1,16 @@
-<%= form_with model: board, class: "txt-align-center margin-block-start-auto", method: :delete do |form| %>
-  <%= form.button class: "btn txt-negative borderless txt-small", data: { turbo_confirm: "Are you sure you want to permanently delete this board and all the cards on it? This can't be undone." } do %>
+<div class="txt-align-center margin-block-start-auto" data-controller="dialog" data-dialog-modal-value="true" data-action="keydown.esc->dialog#close:stop">
+  <button type="button" class="btn txt-negative borderless txt-small" data-action="dialog#open">
     <%= icon_tag "trash" %>
     <span>Delete this board</span>
-  <% end %>
-<% end %>
-
+  </button>
+  <dialog class="dialog panel fill-white shadow gap flex-column" style="--panel-size: 40ch" data-dialog-target="dialog">
+    <h3 class="txt-large txt-bold">Delete this board?</h3>
+    <p class="txt-medium margin-block-half">Are you sure you want to permanently delete this board and all the cards on it? This can't be undone.</p>
+    <div class="flex gap-half justify-center margin-block-start">
+      <button type="button" class="btn" data-action="dialog#close">Cancel</button>
+      <%= button_to board_path(board), method: :delete, class: "btn txt-negative", data: { turbo_frame: "_top" } do %>
+        <span>Delete board</span>
+      <% end %>
+    </div>
+  </dialog>
+</div>

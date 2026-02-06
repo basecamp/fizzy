@@ -1,0 +1,83 @@
+#!/usr/bin/env ruby
+#
+# Fetches Stripe development environment variables from 1Password and starts
+# the Stripe CLI webhook listener.
+#
+# Usage: eval "$(bundle exec stripe-dev)"
+
+require "json"
+require "fileutils"
+
+LOG_FILE = "log/stripe.development.log"
+PID_FILE = "tmp/stripe.tunnel.pid"
+
+# Ensure directories exist
+FileUtils.mkdir_p("log")
+FileUtils.mkdir_p("tmp")
+
+# Kill any existing stripe tunnel process
+if File.exist?(PID_FILE)
+  old_pid = File.read(PID_FILE).strip.to_i
+  if old_pid > 0
+    Process.kill("TERM", old_pid) rescue nil
+  end
+  File.delete(PID_FILE)
+end
+
+# Fetch secrets from 1Password
+secrets_escaped = `kamal secrets fetch \
+  --adapter 1password \
+  --account 23QPQDKZC5BKBIIG7UGT5GR5RM \
+  --from "Deploy/Fizzy" \
+  "Development/STRIPE_SECRET_KEY" \
+  "Development/STRIPE_MONTHLY_V1_PRICE_ID" \
+  "Development/STRIPE_MONTHLY_EXTRA_STORAGE_V1_PRICE_ID" 2>/dev/null`
+
+secrets_json = secrets_escaped.gsub(/\\(.)/, '\1')
+secrets = JSON.parse(secrets_json)
+
+stripe_secret_key = secrets["Deploy/Fizzy/Development/STRIPE_SECRET_KEY"]
+stripe_price_id = secrets["Deploy/Fizzy/Development/STRIPE_MONTHLY_V1_PRICE_ID"]
+stripe_extra_storage_price_id = secrets["Deploy/Fizzy/Development/STRIPE_MONTHLY_EXTRA_STORAGE_V1_PRICE_ID"]
+
+# Clear previous log file
+File.write(LOG_FILE, "")
+
+# Start stripe listen in background
+pid = spawn(
+  "stripe", "listen", "--forward-to", "localhost:3006/stripe/webhooks",
+  out: [ LOG_FILE, "a" ],
+  err: [ LOG_FILE, "a" ]
+)
+Process.detach(pid)
+
+# Save PID for cleanup
+File.write(PID_FILE, pid.to_s)
+
+# Wait for the webhook secret to appear in logs
+webhook_secret = nil
+20.times do
+  sleep 0.5
+  if File.exist?(LOG_FILE)
+    content = File.read(LOG_FILE)
+    if match = content.match(/webhook signing secret is (whsec_\w+)/)
+      webhook_secret = match[1]
+      break
+    end
+  end
+end
+
+if webhook_secret.nil?
+  warn "Warning: Could not capture webhook secret from stripe listen"
+end
+
+# Output export statements
+puts %Q(export STRIPE_SECRET_KEY="#{stripe_secret_key}")
+puts %Q(export STRIPE_MONTHLY_V1_PRICE_ID="#{stripe_price_id}")
+puts %Q(export STRIPE_MONTHLY_EXTRA_STORAGE_V1_PRICE_ID="#{stripe_extra_storage_price_id}")
+puts %Q(export STRIPE_WEBHOOK_SECRET="#{webhook_secret}") if webhook_secret
+
+# Informational message to stderr (won't be eval'd)
+warn ""
+warn "Stripe CLI listening (PID: #{pid})"
+warn "Logs: #{LOG_FILE}"

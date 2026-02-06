@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+MESSAGE="$KAMAL_PERFORMER deployed $KAMAL_SERVICE_VERSION to $KAMAL_DESTINATION in $KAMAL_RUNTIME seconds"
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+bin/notify_dash_of_deployment "$MESSAGE" $KAMAL_VERSION $KAMAL_PERFORMER $CURRENT_BRANCH $KAMAL_DESTINATION $KAMAL_RUNTIME
+
+if [[ $CURRENT_BRANCH == "main" && $KAMAL_DESTINATION == "production" ]]; then
+  gh release create $KAMAL_SERVICE_VERSION --target $KAMAL_VERSION --generate-notes 2> /dev/null || true
+
+  RELEASE_URL=$(gh release view $KAMAL_SERVICE_VERSION --json url,body --jq .url)
+  RELEASE_BODY=$(gh release view $KAMAL_SERVICE_VERSION --json url,body --jq .body)
+
+  saas/bin/broadcast_to_bc "$MESSAGE "$'\n'"$RELEASE_URL "$'\n'"$RELEASE_BODY"
+else
+  saas/bin/broadcast_to_bc "$MESSAGE"
+fi

@@ -24,8 +24,15 @@
       }
     }
 
-    @media (prefers-color-scheme: dark) {
+    html[data-theme="dark"] & {
       filter: invert(1);
     }
+
+    @media (prefers-color-scheme: dark) {
+      html:not([data-theme]) & {
+        filter: invert(1);
+      }
+    }
+
   }
 }

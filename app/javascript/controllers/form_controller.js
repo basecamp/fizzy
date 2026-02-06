@@ -8,8 +8,19 @@ export default class extends Controller {
     debounceTimeout: { type: Number, default: 300 }
   }
 
+  #isComposing = false
+
   initialize() {
     this.debouncedSubmit = debounce(this.debouncedSubmit.bind(this), this.debounceTimeoutValue)
+  }
+
+  // IME Composition tracking
+  compositionStart() {
+    this.#isComposing = true
+  }
+
+  compositionEnd() {
+    this.#isComposing = false
   }
 
   submit() {
@@ -32,11 +43,21 @@ export default class extends Controller {
     }
   }
 
+  preventComposingSubmit(event) {
+    if (this.#isComposing) {
+      event.preventDefault()
+    }
+  }
+
   debouncedSubmit(event) {
     this.submit(event)
   }
 
   submitToTopTarget(event) {
+    const value = event.target.value?.trim()
+
+    if (!value) return false
+
     this.element.setAttribute("data-turbo-frame", "_top")
     this.submit()
   }

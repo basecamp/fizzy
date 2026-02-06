@@ -15,6 +15,16 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "invalidates page title cache when account updates" do
+    get board_path(boards(:writebook))
+    etag = response.headers["ETag"]
+
+    accounts("37s").update!(name: "Renamed Account")
+
+    get board_path(boards(:writebook)), headers: { "If-None-Match" => etag }
+    assert_response :success
+  end
+
   test "create" do
     assert_difference -> { Board.count }, +1 do
       post boards_path, params: { board: { name: "Remodel Punch List" } }
@@ -144,5 +154,90 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
     delete board_path(board)
 
     assert_response :forbidden
+  end
+
+  test "disables select all/none buttons for non-privileged user" do
+    logout_and_sign_in_as :jz
+    assert_not users(:jz).can_administer_board?(boards(:writebook))
+
+    get edit_board_path(boards(:writebook))
+
+    assert_response :success
+    assert_select "button[disabled]", text: "Select all"
+    assert_select "button[disabled]", text: "Select none"
+  end
+
+  test "enables select all/none buttons for privileged user" do
+    assert users(:kevin).can_administer_board?(boards(:writebook))
+
+    get edit_board_path(boards(:writebook))
+
+    assert_response :success
+    assert_select "button:not([disabled])", text: "Select all"
+    assert_select "button:not([disabled])", text: "Select none"
+  end
+
+  test "access toggle disabled state is cached correctly" do
+    board = boards(:writebook)
+    david = users(:david)
+
+    with_actionview_partial_caching do
+      # privileged user
+      assert users(:kevin).can_administer_board?(board)
+
+      get edit_board_path(board)
+
+      assert_response :success
+      assert_select "input.switch__input[name='user_ids[]'][value='#{david.id}']:not([disabled])"
+
+      # unprivileged user
+      logout_and_sign_in_as :jz
+      assert_not users(:jz).can_administer_board?(board)
+
+      get edit_board_path(board)
+
+      assert_response :success
+      assert_select "input.switch__input[name='user_ids[]'][value='#{david.id}'][disabled]"
+    end
+  end
+
+  test "index as JSON" do
+    get boards_path, as: :json
+    assert_response :success
+    assert_equal users(:kevin).boards.count, @response.parsed_body.count
+  end
+
+  test "show as JSON" do
+    get board_path(boards(:writebook)), as: :json
+    assert_response :success
+    assert_equal boards(:writebook).name, @response.parsed_body["name"]
+  end
+
+  test "create as JSON" do
+    assert_difference -> { Board.count }, +1 do
+      post boards_path, params: { board: { name: "My new board" } }, as: :json
+    end
+
+    assert_response :created
+    assert_equal board_path(Board.last, format: :json), @response.headers["Location"]
+  end
+
+  test "update as JSON" do
+    board = boards(:writebook)
+
+    put board_path(board), params: { board: { name: "Updated Name" } }, as: :json
+
+    assert_response :no_content
+    assert_equal "Updated Name", board.reload.name
+  end
+
+  test "destroy as JSON" do
+    board = boards(:writebook)
+
+    assert_difference -> { Board.count }, -1 do
+      delete board_path(board), as: :json
+    end
+
+    assert_response :no_content
   end
 end

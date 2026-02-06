@@ -1,0 +1,16 @@
+<%= turbo_frame_tag reactable, :reacting do %>
+  <div class="reactions">
+    <div id="<%= dom_id(reactable, :reactions) %>" class="reactions__list">
+      <%= render partial: "reactions/reaction", collection: reactable.reactions %>
+    </div>
+
+    <%= turbo_frame_tag reactable, :new_reaction do %>
+      <%= link_to new_polymorphic_path([ *reaction_path_prefix_for(reactable), :reaction ]), role: "button",
+            class: "reactions__trigger btn btn--circle", action: "soft-keyboard#open",
+            data: { turbo_frame: dom_id(reactable, :new_reaction), action: "dialog#close" } do %>
+        <%= image_tag "boost-color.svg", aria: { hidden: true } %>
+        <span class="for-screen-reader">Add your own reaction</span>
+      <% end %>
+    <% end %>
+  </div>
+<% end %>

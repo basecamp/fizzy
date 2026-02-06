@@ -2,21 +2,26 @@
 <html lang="en">
   <%= render "layouts/shared/head" %>
 
-  <body data-controller="local-time timezone-cookie turbo-navigation" data-action="turbo:morph@window->local-time#refreshAll turbo:before-visit@document->turbo-navigation#rememberLocation">
-    <header class="header <%= @header_class %>" id="header">
-      <a href="#main" class="header__skip-navigation btn" data-turbo="false">Skip to main content</a>
-      <%= render "my/menu" if Current.user %>
-      <%= yield :header %>
-    </header>
+  <body class="<%= @body_class %>"
+    data-controller="local-time timezone-cookie turbo-navigation theme bridge--title bridge--text-size bridge--insets"
+    data-action="turbo:morph@window->local-time#refreshAll turbo:before-visit@document->turbo-navigation#rememberLocation"
+    data-platform="<%= platform.type %>" data-bridge--title-title-value="<%= @page_title %>">
+    <div id="global-container" data-controller="bridge--buttons bridge--overflow-menu">
+      <header class="header header--mobile-actions-stack <%= @header_class %>" id="header">
+        <a href="#main" class="header__skip-navigation btn" data-turbo="false">Skip to main content</a>
+        <%= render "my/menu" if Current.user %>
+        <%= yield :header %>
+      </header>
 
-    <%= render "layouts/shared/flash" %>
-    <%= render "layouts/shared/time_zone" if Current.user %>
+      <%= render "layouts/shared/flash" %>
+      <%= render "layouts/shared/time_zone" if Current.user %>
 
-    <main id="main">
-      <%= yield %>
-    </main>
+      <main id="main">
+        <%= yield %>
+      </main>
+    </div>
 
-    <footer id="footer">
+    <footer id="footer" class="hide-on-native">
       <%= yield :footer %>
 
       <% if Current.user && !@hide_footer_frames %>
@@ -26,6 +31,8 @@
           <%= render "notifications/tray" %>
         </div>
       <% end %>
+
+      <%= render "layouts/shared/welcome_letter" if flash[:welcome_letter] %>
     </footer>
   </body>
 </html>

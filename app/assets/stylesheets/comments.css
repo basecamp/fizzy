@@ -4,7 +4,7 @@
     --comment-padding-block: var(--block-space-half);
     --comment-padding-inline: var(--inline-space-double);
     --comment-max: 70ch;
-    --reaction-size: 1.6875rem;
+    --reaction-size: 2.25rem;
 
     display: flex;
     flex-direction: column;
@@ -15,6 +15,10 @@
     @media (min-width: 160ch) {
       padding-inline: var(--tray-size);
     }
+
+    @media (min-width: 640px) {
+      --reaction-size: 1.6875rem;
+    }
   }
 
   .comments__subscribers {
@@ -23,16 +27,63 @@
   }
 
   .comment {
-    margin-inline: auto;
-    max-inline-size: var(--comment-max);
-    position: relative;
-
-    house-md-toolbar {
-      margin-block-start: calc(var(--comment-padding-block) * -0.5);
+    /* Distinguish from the .comment class used for code formatting without extra specificity */
+    &:where(.comments &) {
+      display: flex;
+      margin-inline: auto;
+      max-inline-size: var(--comment-max);
+      position: relative;
     }
 
-    .house-md-content {
-      padding: var(--comment-padding-block) 0 0;
+    .comment-by-system & {
+      --comment-padding-block: var(--block-space-half);
+
+      text-align: center;
+
+      &::before {
+        /* Make up space for lack of avatar */
+        content: "";
+        display: flex;
+        inline-size: calc(var(--comment-padding-inline) * 0.9);
+      }
+
+      .comment__avatar {
+        display: none;
+      }
+
+      .comment__author {
+        a { margin: 0 auto; }
+        h3 { margin-inline: auto; }
+        strong { display: none; }
+      }
+
+      .comment__body {
+        padding: 0;
+        text-align: center;
+      }
+
+      .comment__content {
+        --stripe-color: var(--color-ink-lightest);
+
+        background-image: repeating-linear-gradient(
+          45deg in srgb,
+          var(--color-canvas) 0 1px,
+          var(--stripe-color) 1px 10px);
+        padding-inline: var(--comment-padding-inline);
+
+        .comments--system-expanded .comment-by-system & {
+          --stripe-color: color-mix(in srgb, var(--card-color) 10%, var(--color-canvas));
+        }
+      }
+
+      .reactions {
+        display: none !important;
+      }
+    }
+
+    .reactions {
+      margin-block-start: var(--block-space-half);
+      margin-inline: calc(var(--column-gap) / -1);
     }
   }
 
@@ -48,7 +99,6 @@
   }
 
   .comment__body {
-    padding-inline-end: var(--reaction-size);
     text-align: start;
 
     .action-text-content {
@@ -60,6 +110,17 @@
         margin-block-end: 0;
       }
     }
+
+    &:not:has(lexxy-editor) {
+      padding-inline-end: var(--reaction-size);
+    }
+
+    /* Add an empty space so the last line of text doesn't overlap with the reaction button */
+    .action-text-content > p:last-child::after {
+      content: "";
+      display: inline-block;
+      inline-size: var(--reaction-size);
+    }
   }
 
   .comment__content {
@@ -70,6 +131,7 @@
 
     background-color: var(--comment-bg-color);
     border-radius: 0.2em;
+    max-inline-size: calc(100% - calc(var(--comment-padding-inline) * 0.75));
     padding:
       var(--comment-padding-block)
       calc(var(--comment-padding-inline) / 2)
@@ -80,55 +142,60 @@
 
   .comment__edit {
     background-color: var(--color-ink-lightest);
+
+    &:hover {
+      z-index: 1;
+    }
   }
 
-  .comment--system {
-    --comment-padding-block: var(--block-space-half);
+  .comment__permalink-title {
+    color: currentColor;
+    opacity: 0.66;
+    text-decoration: none;
+    text-transform: capitalize;
 
-    max-inline-size: var(--comment-max);
-    text-align: center;
-
-    &::before {
-      /* Make up space for lack of avatar */
-      content: "";
-      display: flex;
-      inline-size: calc(var(--comment-padding-inline) * 0.75);
+    @media (max-width: 639px) {
+      line-height: 1.5lh;
     }
+  }
 
-    .comment__avatar {
+  .comment__history {
+    background-color: transparent;
+    display: none;
+    inset: var(--comment-padding-block) var(--comment-padding-block) auto auto;
+    translate: 2px -2px; /* Align baseline with time stamp */
+    position: absolute;
+
+    @media (any-hover: hover) {
+      &:hover {
+        background-color: var(--stripe-color);
+      }
+    }
+  }
+
+  .comment-by-system {
+    display: none;
+    transition: var(--dialog-duration) allow-discrete;
+    transition-property: display;
+
+    .comments--system-expanded & {
+      display: contents;
+    }
+  }
+
+  /* Show the last system comment */
+  :nth-last-child(1 of .comment-by-system) {
+    display: contents;
+
+    .comment__history {
+      display: inline-flex;
+    }
+  }
+
+  /* Hide the "Show history" button if there's only one system comment */
+  :nth-child(1 of .comment-by-system) {
+    .comment__history {
       display: none;
-    }
-
-    .comment__author {
-      a {
-        margin: 0 auto;
-      }
-
-      h3 {
-        margin-inline: auto;
-      }
-
-      strong {
-        display: none;
-      }
-    }
-
-    .comment__body {
-      padding: 0;
-      text-align: center;
-    }
-
-    .comment__content {
-      background-image: repeating-linear-gradient(
-        45deg in srgb,
-        var(--color-canvas) 0 1px,
-        var(--color-ink-lightest) 1px 10px
-      );
-      padding-inline: var(--comment-padding-inline);
-    }
-
-    .reactions {
-      display: none !important;
     }
   }
 }

@@ -3,6 +3,7 @@ require_relative "../config/environment"
 
 require "rails/test_help"
 require "webmock/minitest"
+require_relative "webmock_ipaddr_extension"
 require "vcr"
 require "mocha/minitest"
 require "turbo/broadcastable/test_helper"
@@ -38,13 +39,13 @@ end
 
 module ActiveSupport
   class TestCase
-    parallelize(workers: :number_of_processors)
+    parallelize workers: :number_of_processors, work_stealing: ENV["WORK_STEALING"] != "false"
 
     # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
     fixtures :all
 
     include ActiveJob::TestHelper
-    include ActionTextTestHelper, CardTestHelper, ChangeTestHelper, SessionTestHelper
+    include ActionTextTestHelper, CachingTestHelper, CardTestHelper, ChangeTestHelper, SessionTestHelper
     include Turbo::Broadcastable::TestHelper
 
     setup do
@@ -61,6 +62,17 @@ class ActionDispatch::IntegrationTest
   setup do
     integration_session.default_url_options[:script_name] = "/#{ActiveRecord::FixtureSet.identify("37signals")}"
   end
+
+  private
+    def without_action_dispatch_exception_handling
+      original = Rails.application.config.action_dispatch.show_exceptions
+      Rails.application.config.action_dispatch.show_exceptions = :none
+      Rails.application.instance_variable_set(:@app_env_config, nil) # Clear memoized env_config
+      yield
+    ensure
+      Rails.application.config.action_dispatch.show_exceptions = original
+      Rails.application.instance_variable_set(:@app_env_config, nil) # Reset env_config
+    end
 end
 
 class ActionDispatch::SystemTestCase
@@ -143,8 +155,7 @@ module FixturesTestHelper
 
       # Format as UUID string and convert to base36 (25 chars)
       uuid = "%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x" % bytes
-      hex = uuid.delete("-")
-      hex.to_i(16).to_s(36).rjust(25, "0")
+      ActiveRecord::Type::Uuid.hex_to_base36(uuid.delete("-"))
     end
   end
 end

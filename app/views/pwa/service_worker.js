@@ -9,8 +9,8 @@ self.addEventListener('fetch', (event) => {
   }
 })
 
-self.addEventListener("push", async (event) => {
-  const data = await event.data.json()
+self.addEventListener("push", (event) => {
+  const data = event.data.json()
   event.waitUntil(Promise.all([ showNotification(data), updateBadgeCount(data.options) ]))
 })
 

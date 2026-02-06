@@ -10,8 +10,6 @@
     flex-wrap: wrap;
     gap: var(--inline-space-half);
     inline-size: 100%;
-    margin-block-start: calc(var(--block-space-half) / 2);
-    margin-inline: calc(var(--column-gap) / -1);
 
     &:has([open]) {
       z-index: var(--z-popup);
@@ -24,22 +22,24 @@
       margin: 0;
       position: absolute;
 
+      @media (max-width: 640px) {
+        inset-inline-end: calc(var(--comment-padding-inline) / 3);
+      }
+
       .reactions__list {
         display: none;
       }
 
       .reactions__trigger {
         --btn-border-color: var(--color-ink-lightest);
-        background-color: var(--color-ink-lightest);
 
-        &:not(:hover) {
-          opacity: 0.66;
-        }
+        background-color: var(--color-ink-lightest);
       }
     }
   }
 
   .reactions__trigger {
+    --btn-size: var(--reaction-size);
     --btn-border-color: var(--reaction-border-color);
 
     img {
@@ -95,19 +95,28 @@
       &:not(.expanded):hover {
         filter: brightness(var(--reaction-hover-brightness));
 
-        @media (prefers-color-scheme: dark) {
+        html[data-theme="dark"] & {
           --reaction-hover-brightness: 1.25;
         }
+
+        @media (prefers-color-scheme: dark) {
+          html:not([data-theme]) & {
+            --reaction-hover-brightness: 1.25;
+          }
+        }
+
       }
     }
   }
 
   /* Make the avatar and delete buttons fit nicely within the reaction */
   .reaction__avatar,
+  .reaction__avatar .avatar,
   .reaction__form-label,
   .reaction form {
-    block-size: var(--btn-size);
+    block-size: 100%;
   }
+
 
   .reaction__delete {
     display: none;

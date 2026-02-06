@@ -7,6 +7,7 @@
     --color-canvas: white;
     --border-dark: 1px solid var(--color-ink);
     --border-light: 1px solid color-mix(in oklch, var(--color-ink), transparent 75%);
+    --font-sans: "Adwaita Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Hiragino Sans GB", "Hiragino Sans", "Apple SD Gothic Neo", "Microsoft YaHei", "Meiryo", "Malgun Gothic";
   }
 
   @page {
@@ -125,7 +126,7 @@
   .card--new,
   .cards__decoration,
   .card-columns:before,
-  .cards--considering:before {
+  .cards--maybe:before {
     display: none;
   }
 
@@ -140,7 +141,7 @@
     padding-inline: 0;
   }
 
-  .cards--considering {
+  .cards--maybe {
     background: none;
     margin: 0;
     padding-inline: 1ch;
@@ -163,8 +164,8 @@
   .comments__subscribers,
   .card__meta-avatars--assignees > div > div:last-child,
   .steps > .step:last-child,
-  div:has(> .tag-picker__button),
-  div:has(> .board-picker__button),
+  .card__board-name .icon,
+  div:has(> .card__tag-picker-button),
   .delete-card,
   .header--card .header__title {
     display: none;

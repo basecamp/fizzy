@@ -1,4 +1,11 @@
 GIT
+  remote: https://github.com/basecamp/lexxy
+  revision: 4f0fc4d5773bc6892de70f175440c259974c12a7
+  specs:
+    lexxy (0.7.0.beta)
+      rails (>= 8.0.2)
+
+GIT
   remote: https://github.com/basecamp/useragent
   revision: 433ca320a42db1266c4b89df74d0abdb9a880c5e
   specs:
@@ -6,7 +13,7 @@ GIT
 
 GIT
   remote: https://github.com/rails/rails.git
-  revision: 3c3f6c8a253c8a0f346695374f927c9ab32fbefb
+  revision: 60d92e4e7dfe923528ccdccc18820ccfe841b7b8
   branch: main
   specs:
     actioncable (8.2.0.alpha)
@@ -78,6 +85,7 @@ GIT
       json
       logger (>= 1.4.2)
       minitest (>= 5.1)
+      psych (>= 4)
       securerandom (>= 0.3)
       tzinfo (~> 2.0, >= 2.0.5)
       uri (>= 0.13.1)
@@ -108,15 +116,15 @@ GIT
 GEM
   remote: https://rubygems.org/
   specs:
-    action_text-trix (2.1.15)
+    action_text-trix (2.1.16)
       railties
-    addressable (2.8.8)
-      public_suffix (>= 2.0.2, < 8.0)
+    addressable (2.8.7)
+      public_suffix (>= 2.0.2, < 7.0)
     ast (2.4.3)
     autotuner (1.1.0)
     aws-eventstream (1.4.0)
-    aws-partitions (1.1187.0)
-    aws-sdk-core (3.239.1)
+    aws-partitions (1.1203.0)
+    aws-sdk-core (3.241.3)
       aws-eventstream (~> 1, >= 1.3.0)
       aws-partitions (~> 1, >= 1.992.0)
       aws-sigv4 (~> 1.9)
@@ -124,24 +132,24 @@ GEM
       bigdecimal
       jmespath (~> 1, >= 1.6.1)
       logger
-    aws-sdk-kms (1.118.0)
-      aws-sdk-core (~> 3, >= 3.239.1)
+    aws-sdk-kms (1.120.0)
+      aws-sdk-core (~> 3, >= 3.241.3)
       aws-sigv4 (~> 1.5)
-    aws-sdk-s3 (1.205.0)
-      aws-sdk-core (~> 3, >= 3.234.0)
+    aws-sdk-s3 (1.211.0)
+      aws-sdk-core (~> 3, >= 3.241.3)
       aws-sdk-kms (~> 1)
       aws-sigv4 (~> 1.5)
     aws-sigv4 (1.12.1)
       aws-eventstream (~> 1, >= 1.0.2)
     base64 (0.3.0)
-    bcrypt (3.1.20)
-    bcrypt_pbkdf (1.1.1)
+    bcrypt (3.1.21)
+    bcrypt_pbkdf (1.1.2)
     benchmark (0.5.0)
-    bigdecimal (3.3.1)
+    bigdecimal (4.0.1)
     bindex (0.8.1)
-    bootsnap (1.19.0)
+    bootsnap (1.21.1)
       msgpack (~> 1.2)
-    brakeman (7.1.1)
+    brakeman (7.1.2)
       racc
     builder (3.3.0)
     bundler-audit (0.9.3)
@@ -159,33 +167,30 @@ GEM
     childprocess (5.1.0)
       logger (~> 1.5)
     chunky_png (1.4.0)
-    concurrent-ruby (1.3.5)
-    connection_pool (2.5.5)
+    concurrent-ruby (1.3.6)
+    connection_pool (3.0.2)
     crack (1.0.1)
       bigdecimal
       rexml
     crass (1.0.6)
-    date (3.5.0)
-    debug (1.11.0)
+    date (3.5.1)
+    debug (1.11.1)
       irb (~> 1.10)
       reline (>= 0.3.8)
-    dotenv (3.1.8)
+    dotenv (3.2.0)
     drb (2.2.3)
     ed25519 (1.4.0)
-    erb (6.0.0)
+    erb (6.0.1)
     erubi (1.13.1)
     et-orbi (1.4.0)
       tzinfo
-    faker (3.5.2)
+    faker (3.5.3)
       i18n (>= 1.8.11, < 2)
-    ffi (1.17.2)
     ffi (1.17.2-aarch64-linux-gnu)
     ffi (1.17.2-aarch64-linux-musl)
     ffi (1.17.2-arm-linux-gnu)
     ffi (1.17.2-arm-linux-musl)
     ffi (1.17.2-arm64-darwin)
-    ffi (1.17.2-x86-linux-gnu)
-    ffi (1.17.2-x86-linux-musl)
     ffi (1.17.2-x86_64-darwin)
     ffi (1.17.2-x86_64-linux-gnu)
     ffi (1.17.2-x86_64-linux-musl)
@@ -198,7 +203,7 @@ GEM
     globalid (1.3.0)
       activesupport (>= 6.1)
     hashdiff (1.2.1)
-    i18n (1.14.7)
+    i18n (1.14.8)
       concurrent-ruby (~> 1.0)
     image_processing (1.14.0)
       mini_magick (>= 4.9.5, < 6)
@@ -207,8 +212,8 @@ GEM
       actionpack (>= 6.0.0)
       activesupport (>= 6.0.0)
       railties (>= 6.0.0)
-    io-console (0.8.1)
-    irb (1.15.3)
+    io-console (0.8.2)
+    irb (1.16.0)
       pp (>= 0.6.0)
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
@@ -216,10 +221,10 @@ GEM
       actionview (>= 7.0.0)
       activesupport (>= 7.0.0)
     jmespath (1.6.2)
-    json (2.17.1)
+    json (2.18.0)
     jwt (3.1.2)
       base64
-    kamal (2.9.0)
+    kamal (2.10.1)
       activesupport (>= 7.0)
       base64 (~> 0.2)
       bcrypt_pbkdf (~> 1.0)
@@ -237,11 +242,9 @@ GEM
       logger (~> 1.6)
     letter_opener (1.10.0)
       launchy (>= 2.2, < 4)
-    lexxy (0.1.20.beta)
-      rails (>= 8.0.2)
     lint_roller (1.1.0)
     logger (1.7.0)
-    loofah (2.24.1)
+    loofah (2.25.0)
       crass (~> 1.0.2)
       nokogiri (>= 1.12.0)
     mail (2.9.0)
@@ -255,8 +258,8 @@ GEM
     mini_magick (5.3.1)
       logger
     mini_mime (1.1.5)
-    mini_portile2 (2.8.9)
-    minitest (5.26.2)
+    minitest (6.0.1)
+      prism (~> 1.5)
     mission_control-jobs (1.1.0)
       actioncable (>= 7.1)
       actionpack (>= 7.1)
@@ -267,13 +270,13 @@ GEM
       railties (>= 7.1)
       stimulus-rails
       turbo-rails
-    mittens (0.3.0)
-    mocha (2.8.2)
+    mittens (0.3.1)
+    mocha (3.0.1)
       ruby2_keywords (>= 0.0.5)
     msgpack (1.8.0)
-    net-http-persistent (4.0.6)
-      connection_pool (~> 2.2, >= 2.2.4)
-    net-imap (0.5.12)
+    net-http-persistent (4.0.8)
+      connection_pool (>= 2.2.4, < 4)
+    net-imap (0.6.2)
       date
       net-protocol
     net-pop (0.1.2)
@@ -288,26 +291,23 @@ GEM
       net-protocol
     net-ssh (7.3.0)
     nio4r (2.7.5)
-    nokogiri (1.18.10)
-      mini_portile2 (~> 2.8.2)
+    nokogiri (1.19.0-aarch64-linux-gnu)
       racc (~> 1.4)
-    nokogiri (1.18.10-aarch64-linux-gnu)
+    nokogiri (1.19.0-aarch64-linux-musl)
       racc (~> 1.4)
-    nokogiri (1.18.10-aarch64-linux-musl)
+    nokogiri (1.19.0-arm-linux-gnu)
       racc (~> 1.4)
-    nokogiri (1.18.10-arm-linux-gnu)
+    nokogiri (1.19.0-arm-linux-musl)
       racc (~> 1.4)
-    nokogiri (1.18.10-arm-linux-musl)
+    nokogiri (1.19.0-arm64-darwin)
       racc (~> 1.4)
-    nokogiri (1.18.10-arm64-darwin)
+    nokogiri (1.19.0-x86_64-darwin)
       racc (~> 1.4)
-    nokogiri (1.18.10-x86_64-darwin)
+    nokogiri (1.19.0-x86_64-linux-gnu)
       racc (~> 1.4)
-    nokogiri (1.18.10-x86_64-linux-gnu)
+    nokogiri (1.19.0-x86_64-linux-musl)
       racc (~> 1.4)
-    nokogiri (1.18.10-x86_64-linux-musl)
-      racc (~> 1.4)
-    openssl (3.3.2)
+    openssl (4.0.0)
     ostruct (0.6.3)
     parallel (1.27.0)
     parser (3.3.10.0)
@@ -319,15 +319,15 @@ GEM
     pp (0.6.3)
       prettyprint
     prettyprint (0.2.0)
-    prism (1.6.0)
+    prism (1.8.0)
     propshaft (1.3.1)
       actionpack (>= 7.0.0)
       activesupport (>= 7.0.0)
       rack
-    psych (5.2.6)
+    psych (5.3.1)
       date
       stringio
-    public_suffix (7.0.0)
+    public_suffix (6.0.2)
     puma (7.1.0)
       nio4r (~> 2.0)
     raabro (1.4.0)
@@ -340,7 +340,7 @@ GEM
       rack (>= 3.0.0)
     rack-test (2.2.0)
       rack (>= 1.3)
-    rackup (2.2.1)
+    rackup (2.3.1)
       rack (>= 3)
     rails-dom-testing (2.3.0)
       activesupport (>= 5.0.0)
@@ -351,7 +351,7 @@ GEM
       nokogiri (>= 1.15.7, != 1.16.7, != 1.16.6, != 1.16.5, != 1.16.4, != 1.16.3, != 1.16.2, != 1.16.1, != 1.16.0.rc1, != 1.16.0)
     rainbow (3.1.1)
     rake (13.3.1)
-    rdoc (6.16.1)
+    rdoc (7.0.3)
       erb
       psych (>= 4.0.0)
       tsort
@@ -360,11 +360,11 @@ GEM
     reline (0.6.3)
       io-console (~> 0.5)
     rexml (3.4.4)
-    rouge (4.6.1)
-    rqrcode (3.1.1)
+    rouge (4.7.0)
+    rqrcode (3.2.0)
       chunky_png (~> 1.0)
       rqrcode_core (~> 2.0)
-    rqrcode_core (2.0.1)
+    rqrcode_core (2.1.0)
     rubocop (1.81.7)
       json (~> 2.3)
       language_server-protocol (~> 3.17.0.2)
@@ -383,7 +383,7 @@ GEM
       lint_roller (~> 1.1)
       rubocop (>= 1.75.0, < 2.0)
       rubocop-ast (>= 1.47.1, < 2.0)
-    rubocop-rails (2.34.1)
+    rubocop-rails (2.34.0)
       activesupport (>= 4.2.0)
       lint_roller (~> 1.1)
       rack (>= 1.1)
@@ -400,7 +400,7 @@ GEM
     ruby2_keywords (0.0.5)
     rubyzip (3.2.2)
     securerandom (0.4.1)
-    selenium-webdriver (4.38.0)
+    selenium-webdriver (4.39.0)
       base64 (~> 0.2)
       logger (~> 1.4)
       rexml (~> 3.2, >= 3.2.5)
@@ -422,19 +422,15 @@ GEM
       fugit (~> 1.11)
       railties (>= 7.1)
       thor (>= 1.3.1)
-    sqlite3 (2.8.1)
-      mini_portile2 (~> 2.8.0)
-    sqlite3 (2.8.1-aarch64-linux-gnu)
-    sqlite3 (2.8.1-aarch64-linux-musl)
-    sqlite3 (2.8.1-arm-linux-gnu)
-    sqlite3 (2.8.1-arm-linux-musl)
-    sqlite3 (2.8.1-arm64-darwin)
-    sqlite3 (2.8.1-x86-linux-gnu)
-    sqlite3 (2.8.1-x86-linux-musl)
-    sqlite3 (2.8.1-x86_64-darwin)
-    sqlite3 (2.8.1-x86_64-linux-gnu)
-    sqlite3 (2.8.1-x86_64-linux-musl)
-    sshkit (1.24.0)
+    sqlite3 (2.8.0-aarch64-linux-gnu)
+    sqlite3 (2.8.0-aarch64-linux-musl)
+    sqlite3 (2.8.0-arm-linux-gnu)
+    sqlite3 (2.8.0-arm-linux-musl)
+    sqlite3 (2.8.0-arm64-darwin)
+    sqlite3 (2.8.0-x86_64-darwin)
+    sqlite3 (2.8.0-x86_64-linux-gnu)
+    sqlite3 (2.8.0-x86_64-linux-musl)
+    sshkit (1.25.0)
       base64
       logger
       net-scp (>= 1.1.2)
@@ -443,17 +439,17 @@ GEM
       ostruct
     stimulus-rails (1.3.4)
       railties (>= 6.0.0)
-    stringio (3.1.9)
-    thor (1.4.0)
-    thruster (0.1.16)
-    thruster (0.1.16-aarch64-linux)
-    thruster (0.1.16-arm64-darwin)
-    thruster (0.1.16-x86_64-darwin)
-    thruster (0.1.16-x86_64-linux)
-    timeout (0.4.4)
+    stringio (3.2.0)
+    thor (1.5.0)
+    thruster (0.1.17)
+    thruster (0.1.17-aarch64-linux)
+    thruster (0.1.17-arm64-darwin)
+    thruster (0.1.17-x86_64-darwin)
+    thruster (0.1.17-x86_64-linux)
+    timeout (0.6.0)
     trilogy (2.9.0)
     tsort (0.2.0)
-    turbo-rails (2.0.20)
+    turbo-rails (2.0.21)
       actionpack (>= 7.1.0)
       railties (>= 7.1.0)
     tzinfo (2.0.6)
@@ -462,16 +458,15 @@ GEM
       unicode-emoji (~> 4.1)
     unicode-emoji (4.1.0)
     uri (1.1.1)
-    vcr (6.3.1)
-      base64
+    vcr (6.4.0)
     web-console (4.2.1)
       actionview (>= 6.0.0)
       activemodel (>= 6.0.0)
       bindex (>= 0.4.0)
       railties (>= 6.0.0)
-    web-push (3.0.2)
+    web-push (3.1.0)
       jwt (~> 3.0)
-      openssl (~> 3.0)
+      openssl (>= 3.0)
     webmock (3.26.1)
       addressable (>= 2.8.0)
       crack (>= 0.3.2)
@@ -483,7 +478,8 @@ GEM
     websocket-extensions (0.1.5)
     xpath (3.2.0)
       nokogiri (~> 1.8)
-    zeitwerk (2.7.3)
+    zeitwerk (2.7.4)
+    zip_kit (6.3.4)
 
 PLATFORMS
   aarch64-linux
@@ -492,11 +488,7 @@ PLATFORMS
   arm-linux-gnu
   arm-linux-musl
   arm64-darwin
-  arm64-linux
-  ruby
-  x86-linux-gnu
-  x86-linux-musl
-  x86_64-darwin
+  x86_64-darwin-25
   x86_64-linux
   x86_64-linux-gnu
   x86_64-linux-musl
@@ -518,7 +510,7 @@ DEPENDENCIES
   jbuilder
   kamal
   letter_opener
-  lexxy
+  lexxy!
   mission_control-jobs
   mittens
   mocha
@@ -532,7 +524,6 @@ DEPENDENCIES
   rouge
   rqrcode
   rubocop-rails-omakase
-  rubyzip
   selenium-webdriver
   solid_cable (>= 3.0)
   solid_cache (~> 1.0)
@@ -547,6 +538,7 @@ DEPENDENCIES
   web-console
   web-push
   webmock
+  zip_kit
 
 BUNDLED WITH
    2.7.2

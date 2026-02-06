@@ -1,0 +1,7 @@
+<% comments = card.comments.by_user %>
+<% if comments.any? %>
+  <div class="card__comments">
+    <%= icon_tag "comment" %>
+    <span><%= comments.count %></span>
+  </div>
+<% end %>

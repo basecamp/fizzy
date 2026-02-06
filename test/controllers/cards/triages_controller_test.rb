@@ -24,4 +24,25 @@ class Cards::TriagesControllerTest < ActionDispatch::IntegrationTest
       assert_redirected_to card
     end
   end
+
+  test "create as JSON" do
+    card = cards(:logo)
+    column = columns(:writebook_in_progress)
+
+    post card_triage_path(card, column_id: column.id), as: :json
+
+    assert_response :no_content
+    assert_equal column, card.reload.column
+  end
+
+  test "destroy as JSON" do
+    card = cards(:shipping)
+
+    assert card.column.present?
+
+    delete card_triage_path(card), as: :json
+
+    assert_response :no_content
+    assert_nil card.reload.column
+  end
 end

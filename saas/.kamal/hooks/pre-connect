@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+
+# Validate hostnames are FQDNs ending in -int.37signals.com
+if command -v yq >/dev/null 2>&1; then
+  declare -A SUGGESTIONS
+  while IFS= read -r host; do
+    if [[ ! $host =~ -int\.37signals\.com$ ]]; then
+      if [[ $host =~ -4[0-9]{2}$ ]]; then
+        SUGGESTIONS["$host"]="$host.df-ams-int.37signals.com"
+      elif [[ $host =~ -1[0-9]{2}$ ]]; then
+        SUGGESTIONS["$host"]="$host.df-iad-int.37signals.com"
+      else
+        SUGGESTIONS["$host"]="$host.sc-chi-int.37signals.com"
+      fi
+    fi
+  done < <(bin/kamal config -d "${KAMAL_DESTINATION:-production}" 2>/dev/null | yq -r '.":hosts"[]')
+
+  if [ ${#SUGGESTIONS[@]} -gt 0 ]; then
+    echo "Unqualified hostnames found in config/deploy.${KAMAL_DESTINATION:-production}.yml:" >&2
+    echo "" >&2
+    echo "Update to use fully-qualified hostnames:" >&2
+    for host in "${!SUGGESTIONS[@]}"; do
+      echo "  $host → ${SUGGESTIONS[$host]}" >&2
+    done
+    exit 1
+  fi
+fi
+
+# Verify Tailscale connection and SSH authentication before deploying.
+tailscale_cmd() {
+  if command -v tailscale >/dev/null 2>&1; then
+    tailscale "$@"
+  elif [ -f "/Applications/Tailscale.app/Contents/MacOS/Tailscale" ]; then
+    env TAILSCALE_BE_CLI=1 /Applications/Tailscale.app/Contents/MacOS/Tailscale "$@"
+  else
+    return 1
+  fi
+}
+
+on_tailscale() {
+  tailscale_cmd status --json 2>/dev/null | jq -e '.Self.Online' >/dev/null 2>&1
+}
+
+# Check Tailscale connection
+if ! on_tailscale; then
+  echo "" >&2
+  echo "You must be connected to Tailscale to deploy." >&2
+  echo "" >&2
+  echo "→ Connect to Tailscale and try again" >&2
+  echo "" >&2
+  exit 1
+fi
+
+# Verify SSH access
+echo "Deploying via Tailscale. Verifying SSH access…" >&2
+
+TEST_HOST="fizzy-app-101.df-iad-int.37signals.com"
+
+SSH_OUTPUT=$(ssh -o ConnectTimeout=5 "app@$TEST_HOST" true 2>&1)
+SSH_EXIT=$?
+
+echo "$SSH_OUTPUT" >&2
+
+if echo "$SSH_OUTPUT" | grep -q "Permission denied"; then
+  GITHUB_USER=$(gh api user 2>/dev/null | jq -r '.login // "unknown"')
+  GITHUB_KEYS_URL="https://github.com/${GITHUB_USER}.keys"
+
+  echo "" >&2
+  echo "ERROR: SSH authentication failed" >&2
+  echo "" >&2
+  echo "You must deploy with an SSH key that's on your GitHub account." >&2
+  echo "" >&2
+  echo "→ Verify your public key is at $GITHUB_KEYS_URL" >&2
+  echo "  Add it at https://github.com/settings/keys if not" >&2
+  echo "" >&2
+  echo "Note that SSH keys are pulled from GitHub every 5 minutes, so if you've" >&2
+  echo "just added a new key to GitHub, try again in five." >&2
+  echo "" >&2
+  exit 1
+fi
+
+exit $SSH_EXIT

@@ -1,8 +1,8 @@
 <% @page_title = @user.name %>
 <% me_or_you = Current.user == @user ? "me" : @user.first_name %>
 
-<div class="profile-layout">
-  <section class="panel shadow txt-align-center" style="--panel-size: 45ch;">
+<div class="settings settings--profile">
+  <div class="settings__panel panel shadow txt-align-center">
     <div class="flex flex-column gap position-relative">
       <% if Current.user == @user %>
         <%= link_to edit_user_path(@user), class: "user-edit-link btn", data: { controller: "tooltip" } do %>
@@ -18,34 +18,46 @@
       <div class="flex flex-column gap-half margin-block-end">
         <h1 class="txt-x-large margin-none"><%= @user.name %></h1>
         <div class="txt-medium">
-          <% if @user.active? %>
-            <%= mail_to @user.identity.email_address %>
-          <% else %>
+          <% if !@user.active? %>
             <%= @user.name %> is no longer on this account
+          <% elsif !@user.verified? %>
+            Unverified
+            <div class="txt-small txt-tinted">A sign-in code has been sent to this email address, but the user has not yet logged in to confirm their identity.</div>
+          <% else %>
+            <%= mail_to @user.identity.email_address %>
           <% end %>
         </div>
       </div>
 
-      <div class="flex-inline center justify-center flex-wrap gap">
-        <%= link_to "Which cards are assigned to #{me_or_you}?",
-              cards_path(assignee_ids: [ @user.id ], sorted_by: "newest"), class: "btn", data: { turbo_frame: "_top" } %>
-        <%= link_to "Which cards were added by #{me_or_you}?",
-              cards_path(creator_ids: [ @user.id ], sorted_by: "newest"), class: "btn", data: { turbo_frame: "_top" } %>
-      </div>
+      <% if @user.verified? %>
+        <div class="flex-inline center justify-center flex-wrap gap">
+          <%= link_to "Which cards are assigned to #{me_or_you}?",
+                cards_path(assignee_ids: [ @user.id ], sorted_by: "newest"), class: "btn btn--link", data: { turbo_frame: "_top" } %>
+          <%= link_to "Which cards were added by #{me_or_you}?",
+                cards_path(creator_ids: [ @user.id ], sorted_by: "newest"), class: "btn btn--link", data: { turbo_frame: "_top" } %>
+        </div>
+      <% end %>
+
+      <% if Current.user == @user %>
+        <hr class="separator--horizontal full-width flex-item-grow margin-block-start-double" style="--border-color: var(--color-ink-light);" aria-hidden="true">
+
+        <%= button_to session_path(script_name: nil), method: :delete, class: "btn txt-x-small center", data: { turbo: false } do %>
+          <span>Sign out of Fizzy on this device</span>
+        <% end %>
+      <% end %>
     </div>
-  </section>
+  </div>
 
   <% if Current.user == @user %>
-    <section class="panel shadow" style="--panel-size: 45ch;">
+    <div class="settings__panel panel shadow hide-on-native">
+      <%= render "users/theme" %>
       <%= render "users/transfer", user: @user %>
-
-      <div class="center margin-block-start-double">
-        <%= button_to session_url(script_name: nil), method: :delete, class: "btn btn--plain txt-link txt-small", data: { turbo: false } do %>
-        <span>Sign out</span>
-      <% end %>
-      </div>
-    </section>
+      <%= render "users/access_tokens" %>
+      <%= render "users/data_export" %>
+    </div>
   <% end %>
 </div>
 
-<%= turbo_frame_tag "user_events", src: user_events_path(@user) %>
+<% if @user.verified? %>
+  <%= turbo_frame_tag "user_events", src: user_events_path(@user) %>
+<% end %>

@@ -80,4 +80,27 @@ class AccessTest < ActiveSupport::TestCase
 
     assert_not card.watched_by?(kevin)
   end
+
+  test "pins are destroyed when access is lost" do
+    kevin = users(:kevin)
+    board = boards(:writebook)
+    card = cards(:logo) # Kevin has pinned this card
+
+    other_board = boards(:miltons_wish_list)
+    other_card = cards(:radio)
+    other_board.accesses.grant_to(kevin)
+    other_card.pin_by(kevin)
+
+    assert card.pinned_by?(kevin)
+    assert other_card.pinned_by?(kevin)
+
+    kevin_access = accesses(:writebook_kevin)
+
+    perform_enqueued_jobs only: Board::CleanInaccessibleDataJob do
+      kevin_access.destroy
+    end
+
+    assert_not card.pinned_by?(kevin)
+    assert other_card.pinned_by?(kevin), "Pin on other board should not be destroyed"
+  end
 end

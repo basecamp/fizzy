@@ -5,20 +5,22 @@
     <%= back_link_to @column.board.name, published_board_url(@column.board), "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
   </div>
 
-  <h1 class="header__title divider divider--fade full-width">
+  <h1 class="header__title divider divider--fade full-width" data-bridge--title-target="header">
     <span class="overflow-ellipsis"><%= @page_title %></span>
   </h1>
 <% end %>
 
 <section class="cards cards--grid">
   <%= turbo_frame_tag @column, :cards do %>
-    <% if @page.used? %>
-      <%= with_automatic_pagination dom_id(@column, :cards), @page do %>
-        <%= render "public/boards/columns/list", cards: @page.records %>
+    <div class="cards__list hide-scrollbar">
+      <% if @page.used? %>
+        <%= with_automatic_pagination dom_id(@column, :cards), @page do %>
+          <%= render "cards/display/public_previews", cards: @page.records %>
+        <% end %>
+      <% else %>
+        <div class="blank-slate">No cards here</div>
       <% end %>
-    <% else %>
-      <div class="blank-slate blank-slate--empty">No cards here</div>
-    <% end %>
+    </div>
   <% end %>
 </section>
 

@@ -14,6 +14,10 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
     webhook = webhooks(:active)
     get board_webhook_path(webhook.board, webhook)
     assert_response :success
+
+    webhook = webhooks(:inactive)
+    get board_webhook_path(webhook.board, webhook)
+    assert_response :success
   end
 
   test "new" do
@@ -60,6 +64,11 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
 
   test "edit" do
     webhook = webhooks(:active)
+    get edit_board_webhook_path(webhook.board, webhook)
+    assert_response :success
+    assert_select "form"
+
+    webhook = webhooks(:inactive)
     get edit_board_webhook_path(webhook.board, webhook)
     assert_response :success
     assert_select "form"
@@ -111,5 +120,14 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_redirected_to board_webhooks_path(webhook.board)
+  end
+
+  test "cannot access webhooks on board without access" do
+    logout_and_sign_in_as :jason
+
+    webhook = webhooks(:inactive)  # on private board, jason has no access
+
+    get board_webhooks_path(webhook.board)
+    assert_response :not_found
   end
 end

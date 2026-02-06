@@ -1,10 +1,12 @@
 <%= turbo_frame_tag @card, :assignment do %>
   <%= tag.div class: "max-width full-width", data: {
 				action: "turbo:before-cache@document->dialog#close dialog:show@document->navigable-list#reset keydown->navigable-list#navigate filter:changed->navigable-list#reset",
-				controller: "filter navigable-list",
+				controller: "filter navigable-list assignment-limit",
 				dialog_target: "dialog",
 				navigable_list_focus_on_selection_value: false,
-				navigable_list_actionable_items_value: true } do %>
+				navigable_list_actionable_items_value: true,
+				assignment_limit_limit_value: Assignment::LIMIT,
+				assignment_limit_count_value: @card.assignments.count } do %>
 
     <div class="flex align-start justify-space-between">
       <strong class="popup__title">Assign this to…</strong>
@@ -17,9 +19,16 @@
     <ul class="popup__list" data-filter-target="list">
       <%= render "user", card: @card, user: Current.user, user_label: "Me" do %>
         <span class="visually-hidden"><%= Current.user.name %></span>
+        <kbd class="txt-xx-small hide-on-touch">m</kbd>
       <% end %>
       <%= render collection: @assigned_to, partial: "user", locals: { card: @card } %>
-      <%= render collection: @users, partial: "user", locals: { card: @card } %>
+      <% @users.each do |user| %>
+        <%= render "user", card: @card, user: user, data: { assignment_limit_target: "unassigned" } %>
+      <% end %>
     </ul>
+
+    <div class="popup__footer" hidden data-assignment-limit-target="limitMessage">
+      Maximum <%= Assignment::LIMIT %> assignees
+    </div>
   <% end %>
 <% end %>

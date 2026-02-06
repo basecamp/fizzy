@@ -31,7 +31,7 @@ export default class extends Controller {
 
     if (container !== this.sourceContainer) {
       container.classList.add(this.hoverContainerClass)
-      this.#applyContainerCssVariable(container)
+      this.#applyContainerCssVariableToDraggedItem(container)
     } else {
       this.#restoreOriginalDraggedItemCssVariable()
     }
@@ -78,7 +78,7 @@ export default class extends Controller {
     this.containerTargets.forEach(container => container.classList.remove(this.hoverContainerClass))
   }
 
-  #applyContainerCssVariable(container) {
+  #applyContainerCssVariableToDraggedItem(container) {
     const cssVariable = this.#containerCssVariableFor(container)
     if (cssVariable) {
       this.dragItem.style.setProperty(cssVariable.name, cssVariable.value)

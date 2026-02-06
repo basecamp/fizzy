@@ -11,8 +11,7 @@ export default class extends Controller {
 
     switch(Notification.permission) {
       case "default":
-        this.subscribeButtonTarget.hidden = false
-        this.explainerTarget.hidden = true
+        this.#showButtonToSubscribe()
         break
       case "granted":
         const registration = await this.#getServiceWorkerRegistration()
@@ -20,6 +19,8 @@ export default class extends Controller {
 
         if (registration && subscription) {
           this.element.classList.add(this.enabledClass)
+        } else {
+          this.#showButtonToSubscribe()
         }
         break
     }
@@ -54,8 +55,9 @@ export default class extends Controller {
     return navigator.serviceWorker.getRegistration("/service-worker.js", { scope: "/" })
   }
 
-  #registerServiceWorker() {
-    return navigator.serviceWorker.register("/service-worker.js", { scope: "/" })
+  async #registerServiceWorker() {
+    await navigator.serviceWorker.register("/service-worker.js", { scope: "/" })
+    return navigator.serviceWorker.ready
   }
 
   async #subscribe(registration) {
@@ -74,6 +76,11 @@ export default class extends Controller {
     } else {
       subscription.unsubscribe()
     }
+  }
+
+  #showButtonToSubscribe() {
+    this.subscribeButtonTarget.hidden = false
+    this.explainerTarget.hidden = true
   }
 
   async #requestPermissionAndSubscribe(registration) {

@@ -1,0 +1,14 @@
+<p>Your Fizzy account <strong><%= @account.name %></strong> was cancelled.</p>
+
+<h2>What happens now?</h2>
+
+<ul>
+  <li>No one can access the account anymore</li>
+  <% if @account.try(:subscription) %>
+  <li>We won't charge you anymore</li>
+  <% end %>
+  <li>Everything in the account will be deleted in <%= distance_of_time_in_words_to_now(Account::Incineratable::INCINERATION_GRACE_PERIOD.from_now) %></li>
+</ul>
+
+<i>Changed your mind?</i>
+<p>If you want to cancel this deletion and restore your account, send us an email to <a href="mailto:support@fizzy.do">support@fizzy.do</a> as soon as possible.</p>

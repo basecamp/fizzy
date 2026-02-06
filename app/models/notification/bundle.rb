@@ -74,7 +74,7 @@ class Notification::Bundle < ApplicationRecord
     end
 
     def deliverable?
-      user.settings.bundling_emails? && notifications.any?
+      user.settings.bundling_emails? && notifications.any? && account.active?
     end
 
     def overlapping_bundles

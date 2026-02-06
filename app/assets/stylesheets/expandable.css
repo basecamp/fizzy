@@ -1,0 +1,13 @@
+@layer components {
+  .expandable-on-native {
+    body:not([data-platform~=native]) & {
+      &::details-content {
+        display: contents;
+      }
+
+      summary {
+        display: none;
+      }
+    }
+  }
+}

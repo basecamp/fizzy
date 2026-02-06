@@ -1,0 +1,18 @@
+<h3 class="margin-block-start txt-large font-weight-black txt-tight-lines">
+  <% if Current.account.exceeding_card_limit? && Current.account.exceeding_storage_limit? %>
+    You’ve used up your <u><%= number_with_delimiter(Plan.free.card_limit) %></u> free cards and all <u><%= storage_to_human_size(Plan.free.storage_limit) %></u> of free storage
+  <% elsif Current.account.exceeding_card_limit? %>
+    You’ve used up your <u><%= number_with_delimiter(Plan.free.card_limit) %></u> free cards
+  <% elsif Current.account.exceeding_storage_limit? %>
+    You’ve used up all <u><%= storage_to_human_size(Plan.free.storage_limit) %></u> of free storage
+  <% else %>
+    You’ve used <u><%= Current.account.billed_cards_count %></u> free cards out of <%= number_with_delimiter(Plan.free.card_limit) %>
+  <% end %>
+</h3>
+
+<p class="margin-block-start-half">To keep using Fizzy <%= "past #{ number_with_delimiter(Plan.free.card_limit) } cards," unless Current.account.exceeding_storage_limit? %> it’s only <strong><%= format_currency(Plan.paid.price) %>/month</strong> for <strong class="txt-nowrap">unlimited cards</strong>, <strong class="txt-nowrap">unlimited users</strong>, and <strong><%= storage_to_human_size(Plan.paid.storage_limit) %></strong> of storage.</p>
+
+<%= button_to "Upgrade to #{Plan.paid.name} for #{ format_currency(Plan.paid.price) }/month", account_subscription_path, class: "btn settings-subscription__button txt-medium", form: { data: { turbo: false } } %>
+
+<p>Cancel anytime, no contracts, take your data with you whenever.</p>
+<p class="settings-subscription__footer txt-small margin-none-block-end">Right now you’re on the <strong><%= Current.account.plan.name %></strong> plan which includes <%= number_with_delimiter(Plan.free.card_limit) %> cards, unlimited users, and <%= storage_to_human_size(Plan.free.storage_limit) %> of storage.</p>

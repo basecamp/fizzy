@@ -18,6 +18,7 @@ module SessionTestHelper
     magic_link = identity.magic_links.order(id: :desc).first
 
     untenanted do
+      post session_path, params: { email_address: identity.email_address }
       post session_magic_link_url, params: { code: magic_link.code }
     end
 
@@ -56,5 +57,13 @@ module SessionTestHelper
     yield
   ensure
     integration_session.default_url_options[:script_name] = original_script_name
+  end
+
+  def with_multi_tenant_mode(enabled)
+    previous = Account.multi_tenant
+    Account.multi_tenant = enabled
+    yield
+  ensure
+    Account.multi_tenant = previous
   end
 end

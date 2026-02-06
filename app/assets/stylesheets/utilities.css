@@ -13,23 +13,27 @@
   .txt-align-start { text-align: start; }
   .txt-align-end { text-align: end; }
 
+  .txt-current { color: currentColor; }
   .txt-ink { color: var(--color-ink); }
   .txt-reversed { color: var(--color-ink-inverted); }
   .txt-negative { color: var(--color-negative); }
+  .txt-positive { color: var(--color-positive); }
   .txt-subtle { color: var(--color-ink-dark); }
   .txt-alert { color: var(--color-marker); }
   .txt-undecorated { text-decoration: none; }
   .txt-underline { text-decoration: underline; }
   .txt-tight-lines { line-height: 1.2; }
   .txt-nowrap { white-space: nowrap; }
+  .txt-balance { text-wrap: balance; }
   .txt-break { word-break: break-word; }
   .txt-uppercase { text-transform: uppercase; }
   .txt-capitalize { text-transform: capitalize; }
   .txt-capitalize-first-letter::first-letter { text-transform: capitalize; }
   .txt-link { color: var(--color-link); text-decoration: underline; }
 
-  .font-weight-black { font-weight: 900; }
   .font-weight-normal { font-weight: normal; }
+  .font-weight-bold { font-weight: bold; }
+  .font-weight-black { font-weight: 900; }
 
   /* Flexbox and Grid */
   .justify-end { justify-content: end; }
@@ -95,12 +99,6 @@
   .overflow-clip { text-overflow: clip; white-space: nowrap; overflow: hidden; }
   .overflow-ellipsis { text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
 
-  .overflow-hide-scrollbar::-webkit-scrollbar {
-    @media (pointer: course) {
-      display: none;
-    }
-  }
-
   .overflow-line-clamp {
     -webkit-line-clamp: var(--lines, 2);
     -webkit-box-orient: vertical;
@@ -115,6 +113,8 @@
     cursor: default;
     pointer-events: none;
   }
+
+  .cursor-pointer { cursor: pointer; }
 
   /* Padding */
   .pad { padding: var(--block-space) var(--inline-space); }
@@ -182,6 +182,23 @@
   .fill-highlight { background-color: var(--color-highlight); }
   .fill-transparent { background-color: transparent; }
 
+  .fill-highlighter {
+    display: inline-block;
+    position: relative;
+    z-index: 1;
+
+    &::before {
+      background-color: var(--color-highlight);
+      border-radius: 0.2em;
+      content: "";
+      inset-block: 0;
+      inset-inline: -0.1em;
+      position: absolute;
+      transform: skewX(-10deg) rotate(1deg);
+      z-index: -1;
+    }
+  }
+
   .translucent { opacity: var(--opacity, 0.66); }
 
   /* Borders */
@@ -247,6 +264,12 @@
 
     @media (any-hover: none) {
       display: unset;
+    }
+  }
+
+  .show-on-native {
+    body:not([data-platform~=native]) & {
+      display: none;
     }
   }
 

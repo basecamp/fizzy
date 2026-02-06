@@ -1,0 +1,34 @@
+<section id="<%= dom_id(card, :card_container) %>" class="card-perma" style="--card-color: <%= card.color %>;">
+  <% cache card do %>
+    <div class="card-perma__actions card-perma__actions--left">
+      <%= render "cards/container/image", card: card %>
+    </div>
+
+    <div class="card-perma__bg">
+      <%= card_article_tag card, class: "card" do %>
+        <header class="card__header">
+          <%= render "cards/display/perma/board", card: card %>
+          <%= render "cards/display/perma/tags", card: card %>
+        </header>
+
+        <div class="card__body justify-space-between">
+          <div class="card__content">
+            <%= render "cards/container/content", card: card %>
+            <%= render "cards/display/perma/steps", card: card %>
+          </div>
+        </div>
+
+        <footer class="card__footer">
+          <%= render "cards/display/perma/meta", card: card %>
+          <%= render "cards/display/perma/background", card: card %>
+        </footer>
+      <% end %>
+    </div>
+  <% end %>
+
+  <% if Fizzy.saas? %>
+    <%= render "cards/container/footer/saas/create", card: card %>
+  <% else %>
+    <%= render "cards/container/footer/create", card: card %>
+  <% end %>
+</section>

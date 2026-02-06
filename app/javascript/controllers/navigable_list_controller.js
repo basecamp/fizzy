@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import { nextFrame } from "helpers/timing_helpers"
+import { isMobile } from "helpers/platform_helpers"
 
 export default class extends Controller {
   static targets = [ "item", "input" ]
@@ -16,6 +17,11 @@ export default class extends Controller {
     autoSelect: { type: Boolean, default: true },
     autoScroll: { type: Boolean, default: true },
     onlyActOnFocusedItems: { type: Boolean, default: false }
+  }
+
+  // Don't load for mobile devices
+  static get shouldLoad() {
+    return !isMobile()
   }
 
   connect() {
@@ -43,6 +49,10 @@ export default class extends Controller {
 
   select({ target }) {
     this.selectItem(target, true)
+  }
+
+  hoverSelect({ currentTarget }) {
+    this.selectItem(currentTarget)
   }
 
   selectCurrentOrReset(event) {
@@ -221,6 +231,20 @@ export default class extends Controller {
     })
   }
 
+  // Public accessors for card_hotkeys_controller outlet
+  get visibleItems() {
+    return this.#visibleItems
+  }
+
+  clearSelection() {
+    this.#clearSelection()
+    this.currentItem = null
+  }
+
+  get hasFocus() {
+    return this.element.contains(document.activeElement)
+  }
+
   #keyHandlers = {
     ArrowDown(event) {
       if (this.supportsVerticalNavigationValue) {
@@ -245,11 +269,14 @@ export default class extends Controller {
       }
     },
     Enter(event) {
+      // Skip handling during IME composition (e.g., Japanese input)
+      if (event.isComposing) { return }
+
       if (event.shiftKey) {
         this.#toggleCurrentItem(event)
       } else {
         this.#clickCurrentItem(event)
       }
-    },
+    }
   }
 }

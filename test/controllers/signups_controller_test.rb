@@ -34,15 +34,17 @@ class SignupsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "create with email address containing blanks" do
-    untenanted do
-      assert_no_difference -> { Identity.count } do
-        assert_no_difference -> { MagicLink.count } do
-          post signup_path, params: { signup: { email_address: "sam smith@example.com" } }
+  test "create with invalid email address" do
+    without_action_dispatch_exception_handling do
+      untenanted do
+        assert_no_difference -> { Identity.count } do
+          assert_no_difference -> { MagicLink.count } do
+            post signup_path, params: { signup: { email_address: "not-a-valid-email" } }
+          end
         end
-      end
 
-      assert_response :unprocessable_entity
+        assert_response :unprocessable_entity
+      end
     end
   end
 
@@ -59,6 +61,18 @@ class SignupsControllerTest < ActionDispatch::IntegrationTest
       end
 
       assert_redirected_to new_signup_completion_path
+    end
+  end
+
+  test "redirects to session#new when single_tenant and user exists" do
+    users(:david)
+
+    with_multi_tenant_mode(false) do
+      untenanted do
+        get new_signup_path
+
+        assert_redirected_to new_session_url
+      end
     end
   end
 end

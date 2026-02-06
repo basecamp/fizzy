@@ -1,0 +1,9 @@
+<div class="settings_subscription__warning full-width pad-inline center margin-block-half">
+  <% if Current.user.admin? %>
+    <%= render "cards/container/footer/saas/notices/admin_nearing_card_limit" if Current.account.nearing_plan_cards_limit? %>
+    <%= render "cards/container/footer/saas/notices/admin_nearing_storage_limit" if Current.account.nearing_plan_storage_limit? %>
+  <% else %>
+    <%= render "cards/container/footer/saas/notices/user_nearing_card_limit" if Current.account.nearing_plan_cards_limit? %>
+    <%= render "cards/container/footer/saas/notices/user_nearing_storage_limit" if Current.account.nearing_plan_storage_limit? %>
+  <% end %>
+</div>

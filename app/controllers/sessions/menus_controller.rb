@@ -4,7 +4,7 @@ class Sessions::MenusController < ApplicationController
   layout "public"
 
   def show
-    @accounts = Current.identity.accounts
+    @accounts = Current.identity.accounts.active
 
     if @accounts.one?
       redirect_to root_url(script_name: @accounts.first.slug)

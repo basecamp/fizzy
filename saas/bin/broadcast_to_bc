@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+url=$(op read "op://Deploy/Deploy Chatbot/url" --account 23QPQDKZC5BKBIIG7UGT5GR5RM)
+curl -s -d content="[Fizzy] ${1}" "${url}"

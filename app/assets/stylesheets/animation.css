@@ -44,6 +44,11 @@
     to   { transform: translateY(0); }
   }
 
+  @keyframes slide-up-fade-in {
+    from { transform: translateY(2rem); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+  }
+
   @keyframes slide-down {
     from { transform: translateY(0); }
     to   { transform: translateY(2rem); }
@@ -64,6 +69,15 @@
   @keyframes success {
     0%  { background-color: var(--color-border-darker); scale: 0.8; }
     33% { background-color: var(--color-border-darker); scale: 1; }
+  }
+
+  @keyframes wiggle {
+    0% { transform: rotate(0deg); }
+    20% { transform: rotate(3deg); }
+    40% { transform: rotate(-3deg); }
+    60% { transform: rotate(3deg); }
+    80% { transform: rotate(-3deg); }
+    100% { transform: rotate(0deg); }
   }
 
   @keyframes wobble {

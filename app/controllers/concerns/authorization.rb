@@ -2,8 +2,7 @@ module Authorization
   extend ActiveSupport::Concern
 
   included do
-    before_action :ensure_can_access_account, if: -> { Current.account.present? && authenticated? }
-    before_action :ensure_only_staff_can_access_non_production_remote_environments, if: :authenticated?
+    before_action :ensure_can_access_account, if: :authenticated_account_access?
   end
 
   class_methods do
@@ -26,12 +25,17 @@ module Authorization
       head :forbidden unless Current.identity.staff?
     end
 
-    def ensure_can_access_account
-      redirect_to session_menu_url(script_name: nil) if Current.user.blank? || !Current.user.active?
+    def authenticated_account_access?
+      Current.account.present? && authenticated?
     end
 
-    def ensure_only_staff_can_access_non_production_remote_environments
-      head :forbidden unless Rails.env.local? || Rails.env.production? || Current.identity.staff?
+    def ensure_can_access_account
+      unless Current.account.active? && Current.user&.active?
+        respond_to do |format|
+          format.html { redirect_to session_menu_path(script_name: nil) }
+          format.json { head :forbidden }
+        end
+      end
     end
 
     def redirect_existing_user

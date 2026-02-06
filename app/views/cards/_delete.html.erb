@@ -1,0 +1,16 @@
+<div data-controller="dialog" data-dialog-modal-value="true" data-action="keydown.esc->dialog#close:stop">
+  <button type="button" class="btn txt-negative borderless txt-small" data-action="dialog#open">
+    <%= icon_tag "trash" %>
+    <span>Delete this card</span>
+  </button>
+  <dialog class="dialog panel fill-white shadow gap flex-column" style="--panel-size: 40ch" data-dialog-target="dialog">
+    <h3 class="txt-large txt-bold">Delete this card?</h3>
+    <p class="txt-medium margin-block-half">Are you sure you want to permanently delete this card?</p>
+    <div class="flex gap-half justify-center margin-block-start">
+      <button type="button" class="btn" data-action="dialog#close">Cancel</button>
+      <%= button_to card_path(card), method: :delete, class: "btn txt-negative", data: { turbo_frame: "_top" } do %>
+        <span>Delete card</span>
+      <% end %>
+    </div>
+  </dialog>
+</div>

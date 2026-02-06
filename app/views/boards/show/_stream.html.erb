@@ -1,20 +1,20 @@
-<%= column_tag id: "the-stream", name: "Maybe?", drop_url: columns_card_drops_stream_path("__id__"), collapsed: false, selected: "true", class: "cards--considering" do %>
+<%= column_tag id: "maybe", name: "Maybe?", drop_url: columns_card_drops_stream_path("__id__"), collapsed: false, selected: "true", class: "cards--maybe", data: {
+  drag_and_strum_target: "container",
+  collapsible_columns_target: "column maybeColumn",
+  action: "focus->collapsible-columns#focusOnColumn"
+} do %>
   <header class="cards__header">
-    <div class="cards__expander">
-      <h2 class="cards__expander-title" data-collapsible-columns-target="title">Maybe?</h2>
-    </div>
-    <%= link_to board_columns_stream_path(board), class: "cards__maximize-button btn btn--circle txt-x-small borderless", data: { turbo_frame: "_top" } do %>
-      <%= icon_tag "grid", class: "translucent" %>
-      <span class="for-screen-reader">Expand column</span>
-    <% end %>
+    <%= render "boards/show/expander", title: "Maybe?", count: board.cards.awaiting_triage.count, column_id: "maybe" %>
+    <%= render "boards/show/menu/maximize", column_path: board_columns_stream_path(board) %>
   </header>
-  <%= render "columns/show/add_card_button", board: board %>
-  <% if page.used? %>
-    <%= with_automatic_pagination "the-stream", @page do %>
-      <%= render "boards/columns/list", cards: page.records, draggable: true %>
+  <div data-bridge-disabled="true">
+    <%= render "columns/show/add_card_button", board: board %>
+  </div>
+  <div class="cards__list hide-scrollbar" data-drag-drop-item-container>
+    <% if page.used? %>
+      <%= with_automatic_pagination "maybe", @page do %>
+        <%= render "cards/display/previews", cards: page.records, draggable: true %>
+      <% end %>
     <% end %>
-  <% else %>
-    <div class="cards__list" data-drag-drop-item-container>
-    </div>
-  <% end %>
+  </div>
 <% end %>

@@ -8,6 +8,7 @@
 <% content_for :header do %>
   <div class="header__actions header__actions--start">
     <%= link_back_to_board(@card.board) %>
+    <%= bridged_button_to_board(@card.board) %>
   </div>
 <% end %>
 
@@ -16,7 +17,7 @@
 
 <div data-controller="beacon lightbox" data-beacon-url-value="<%= card_reading_path(@card) %>">
   <%= render "cards/container", card: @card %>
-  <%= render "cards/messages",  card: @card unless @card.drafted? %>
+  <%= render "cards/messages",  card: @card %>
 
   <%= render "layouts/lightbox" do %>
     <%= button_to_remove_card_image(@card) if @card.image.attached? %>

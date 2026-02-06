@@ -15,7 +15,7 @@
       <% end %>
     </div>
     <div class="overflow-ellipsis translucent txt-ink">
-      <%= result.card.board.name %>
+      <%= result.card.board.name %> · <%= local_datetime_tag(result.created_at, style: :timeordate) %>
     </div>
   <% end %>
 </li>

@@ -15,6 +15,7 @@ module Board::Publishable
   def published?
     publication.present?
   end
+  alias_method :publicly_accessible?, :published?
 
   def publish
     create_publication! unless published?

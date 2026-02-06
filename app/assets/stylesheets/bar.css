@@ -19,8 +19,14 @@
     view-transition-name: bar;
     z-index: var(--z-bar);
 
-    @media (prefers-color-scheme: dark) {
+    html[data-theme="dark"] & {
       border-block: 1px solid var(--color-ink-lighter);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      html:not([data-theme]) & {
+        border-block: 1px solid var(--color-ink-lighter);
+      }
     }
 
     &:has(.bar__placeholder[hidden]) {

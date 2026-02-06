@@ -1,0 +1,35 @@
+<% @page_title = "Personal access tokens" %>
+
+<% content_for :header do %>
+  <div class="header__actions header__actions--start">
+    <%= back_link_to "My profile", user_path(Current.user), "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+  </div>
+
+  <h1 class="header__title" data-bridge--title-target="header"><%= @page_title %></h1>
+<% end %>
+
+<section class="panel panel--wide shadow center webhooks">
+  <% if @access_tokens.any? %>
+    <p class="margin-none-block-start">Tokens you have generated that can be used to access the Fizzy API.</p>
+    <table class="access_tokens_table margin-block-end-double max-width txt-small">
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th>Permission</th>
+          <th>Created</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <%= render partial: "my/access_tokens/access_token", collection: @access_tokens %>
+      </tbody>
+    </table>
+  <% else %>
+    <p class="margin-none-block-start">Personal access tokens can be used like a password to access the Fizzy developer API. You can have as many tokens as you need and revoke access to each one at any time.</p>
+  <% end %>
+
+  <%= link_to new_my_access_token_path, class: "btn btn--link" do %>
+    <%= icon_tag "add" %>
+    <span>Generate a new access token</span>
+  <% end %>
+</section>

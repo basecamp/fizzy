@@ -1,0 +1,9 @@
+<%= turbo_stream.replace("closed-cards", partial: "boards/show/closed", method: :morph, locals: { board: @card.board }) %>
+
+<% if @card.column %>
+  <%= turbo_stream.replace(dom_id(@card.column), partial: "boards/show/column", method: :morph, locals: { column: @card.column }) %>
+<% elsif @card.awaiting_triage? %>
+  <%= turbo_stream.replace("the-stream", partial: "boards/show/stream", method: :morph, locals: { board: @card.board, page: @page }) %>
+<% end %>
+
+<%= turbo_stream.replace([ @card, :card_container ], partial: "cards/container", method: :morph, locals: { card: @card.reload }) %>

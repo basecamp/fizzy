@@ -22,6 +22,20 @@ class Cards::AssignmentsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "create as JSON" do
+    card = cards(:logo)
+
+    assert_not card.assigned_to?(users(:david))
+
+    post card_assignments_path(card), params: { assignee_id: users(:david).id }, as: :json
+    assert_response :no_content
+    assert card.reload.assigned_to?(users(:david))
+
+    post card_assignments_path(card), params: { assignee_id: users(:david).id }, as: :json
+    assert_response :no_content
+    assert_not card.reload.assigned_to?(users(:david))
+  end
+
   private
     def assert_meta_replaced(card)
       assert_turbo_stream action: :replace, target: dom_id(card, :meta)

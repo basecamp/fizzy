@@ -5,7 +5,7 @@
     <%= back_link_to "Webhooks", board_webhooks_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
   </div>
 
-  <h1 class="header__title"><%= @page_title %></h1>
+  <h1 class="header__title" data-bridge--title-target="header"><%= @page_title %></h1>
 <% end %>
 
 <article class="panel panel--wide center txt-align-start" style="view-transition-name: <%= dom_id(@webhook) %>">
@@ -31,7 +31,7 @@
     <div class="flex flex-column gap-half">
       <%= form.label :actions do %>
         <strong>Events</strong><br>
-        <p class="margin-none txt-x-small txt-subtle">Trigger a call to the Payload URL when these things occur:</p>
+        <p class="margin-none txt-x-small txt-subtle">Trigger a call to the Payload URL when:</p>
       <% end %>
       <%= render "webhooks/form/actions", form: form %>
     </div>

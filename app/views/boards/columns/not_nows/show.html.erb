@@ -5,19 +5,21 @@
     <%= link_back_to_board(@board) %>
   </div>
 
-  <h1 class="header__title divider divider--fade full-width">
+  <h1 class="header__title divider divider--fade full-width" data-bridge--title-target="header">
     <span class="overflow-ellipsis"><%= @page_title %></span>
   </h1>
 <% end %>
 
 <section class="cards cards--grid">
   <%= turbo_frame_tag :not_now_column do %>
-    <% if @page.used? %>
-      <%= with_automatic_pagination :not_now_column, @page do %>
-        <%= render "boards/columns/list", cards: @page.records, draggable: true %>
+    <div class="cards__list hide-scrollbar" data-drag-drop-item-container>
+      <% if @page.used? %>
+        <%= with_automatic_pagination :not_now_column, @page do %>
+          <%= render "cards/display/previews", cards: @page.records, draggable: true %>
+        <% end %>
+      <% else %>
+        <%= render "boards/columns/empty_placeholder" %>
       <% end %>
-    <% else %>
-      <%= render "boards/columns/empty_placeholder" %>
-    <% end %>
+    </div>
   <% end %>
 </section>

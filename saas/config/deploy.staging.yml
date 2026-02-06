@@ -1,0 +1,87 @@
+retain_containers: 1
+
+servers:
+  web:
+    hosts:
+      - fizzy-staging-app-101.df-iad-int.37signals.com: df_iad
+      - fizzy-staging-app-102.df-iad-int.37signals.com: df_iad
+      - fizzy-staging-app-01.sc-chi-int.37signals.com: sc_chi
+      - fizzy-staging-app-02.sc-chi-int.37signals.com: sc_chi
+      - fizzy-staging-app-401.df-ams-int.37signals.com: df_ams
+      - fizzy-staging-app-402.df-ams-int.37signals.com: df_ams
+    labels:
+      otel_scrape_enabled: true
+  jobs:
+    hosts:
+      - fizzy-staging-jobs-101.df-iad-int.37signals.com: df_iad
+      - fizzy-staging-jobs-102.df-iad-int.37signals.com: df_iad
+    labels:
+      otel_scrape_enabled: true
+
+proxy:
+  ssl: false
+
+ssh:
+  user: app
+
+env:
+  clear:
+    RAILS_ENV: staging
+    RAILS_LOG_LEVEL: fatal # suppress unstructured log lines
+    MYSQL_DATABASE_HOST: fizzy-staging-mysql-primary
+    MYSQL_DATABASE_REPLICA_HOST: fizzy-staging-mysql-replica
+    MYSQL_SOLID_CABLE_HOST: fizzy-staging-mysql-primary
+    MYSQL_SOLID_QUEUE_HOST: fizzy-staging-mysql-primary
+  secret:
+    - RAILS_MASTER_KEY
+    - MYSQL_ALTER_PASSWORD
+    - MYSQL_ALTER_USER
+    - MYSQL_APP_PASSWORD
+    - MYSQL_APP_USER
+    - MYSQL_READONLY_PASSWORD
+    - MYSQL_READONLY_USER
+    - SECRET_KEY_BASE
+    - VAPID_PUBLIC_KEY
+    - VAPID_PRIVATE_KEY
+    - ACTIVE_STORAGE_ACCESS_KEY_ID
+    - ACTIVE_STORAGE_SECRET_ACCESS_KEY
+    - QUEENBEE_API_TOKEN
+    - SIGNAL_ID_SECRET
+    - SENTRY_DSN
+    - ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY
+    - ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY
+    - ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT
+    - STRIPE_MONTHLY_V1_PRICE_ID
+    - STRIPE_MONTHLY_EXTRA_STORAGE_V1_PRICE_ID
+    - STRIPE_SECRET_KEY
+    - STRIPE_WEBHOOK_SECRET
+  tags:
+    sc_chi:
+      MYSQL_SOLID_CACHE_HOST: fizzy-staging-solidcache-db-01.sc-chi-int.37signals.com
+    df_iad:
+      MYSQL_SOLID_CACHE_HOST: fizzy-staging-solidcache-db-101.df-iad-int.37signals.com
+      PRIMARY_DATACENTER: true
+    df_ams:
+      MYSQL_SOLID_CACHE_HOST: fizzy-staging-solidcache-db-401.df-ams-int.37signals.com
+
+
+accessories:
+  load-balancer:
+    image: basecamp/kamal-proxy:lb
+    hosts:
+      - fizzy-staging-lb-01.sc-chi-int.37signals.com
+      - fizzy-staging-lb-101.df-iad-int.37signals.com
+      - fizzy-staging-lb-401.df-ams-int.37signals.com
+    labels:
+      otel_role: load-balancer
+      otel_service: fizzy-load-balancer
+      otel_scrape_enabled: true
+    options:
+      publish:
+        - 80:80
+        - 443:443
+      # NFS mount for certificates
+      # See https://3.basecamp.com/2914079/buckets/37331921/todos/9180260061
+      mount: type=volume,src=certificates,dst=/certificates,volume-driver=local,volume-opt=type=nfs,volume-opt=device=:/fizzy-staging-certificates,"volume-opt=o=addr=purestorage.sc-chi-int.37signals.com,nfsvers=3,rw,noatime,nconnect=8,soft,timeo=30,retrans=2"
+    volumes:
+      - load-balancer:/home/kamal-proxy/.config/kamal-proxy
