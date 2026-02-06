@@ -13,7 +13,7 @@ GIT
 
 GIT
   remote: https://github.com/basecamp/console1984
-  revision: 02b1b9ee7fd7050174b6a98c2b43057553621dc4
+  revision: 23419ec8861e73f12ced75a3fc559d03f7be5854
   specs:
     console1984 (0.2.2)
       irb (~> 1.13)
