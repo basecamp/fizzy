@@ -12,3 +12,15 @@
     display: block;
   }
 }
+
+.pwa-install {
+  padding: 1rem;
+  background: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  justify-content: center;
+}
+
+.pwa-install.hidden {
+  display: none;
+}

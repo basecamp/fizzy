@@ -16,6 +16,12 @@
       <%= render "layouts/shared/flash" %>
       <%= render "layouts/shared/time_zone" if Current.user %>
 
+      <div class="pwa-install hidden" data-controller="pwa-install">
+        <button class="btn btn--primary btn--large" data-action="pwa-install#install" data-pwa-install-target="button">
+          Install Fizzy App
+        </button>
+      </div>
+
       <main id="main">
         <%= yield %>
       </main>
