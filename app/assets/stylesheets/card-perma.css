@@ -127,12 +127,12 @@
 
       @media (max-width: 639px) {
         border: 1px solid var(--card-color);
-        border-radius: 0.25em;
+        border-radius: 0.4em;
         flex-direction: row;
         gap: 0;
         overflow: auto;
         max-inline-size: 100%;
-        padding: 0;
+        padding: 0.2em;
         position: relative;
         white-space: nowrap;
 
@@ -150,7 +150,6 @@
 
     .card__column-name {
       @media (max-width: 639px) {
-        --btn-border-radius: 0;
         justify-content: center;
       }
     }
