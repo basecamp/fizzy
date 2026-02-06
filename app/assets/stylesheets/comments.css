@@ -91,6 +91,17 @@
     .btn {
       font-weight: inherit;
     }
+
+    @media (max-width: 639px) {
+      margin-block-end: calc(var(--block-space-half) / 2);
+
+      h3 {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        column-gap: 0.4em;
+      }
+    }
   }
 
   .comment__avatar {
@@ -155,7 +166,7 @@
     text-transform: capitalize;
 
     @media (max-width: 639px) {
-      line-height: 1.5lh;
+      font-size: var(--text-small);
     }
   }
 
