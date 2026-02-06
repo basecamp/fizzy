@@ -9,7 +9,7 @@ export default class extends Controller {
     window.addEventListener("pwa-install:available", this.checkAvailability)
 
     if (window.matchMedia('(display-mode: standalone)').matches) {
-      this.element.hidden = true
+      this.element.classList.add("hidden")
     }
   }
 
@@ -19,10 +19,7 @@ export default class extends Controller {
 
   checkAvailability = () => {
     if (window.deferredPrompt) {
-      const ua = navigator.userAgent
-      if (/Android/i.test(ua) && /Chrome/i.test(ua)) {
-        this.element.hidden = false
-      }
+      this.element.classList.remove("hidden")
     }
   }
 
@@ -35,7 +32,7 @@ export default class extends Controller {
 
     if (outcome === "accepted") {
       window.deferredPrompt = null
-      this.element.hidden = true
+      this.element.classList.add("hidden")
     }
   }
 }
