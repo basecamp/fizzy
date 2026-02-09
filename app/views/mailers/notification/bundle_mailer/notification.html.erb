@@ -5,10 +5,13 @@
       You have <%= link_to pluralize(@notifications.count, "new notification"), notifications_url %><%= " in #{ Current.account.name }" if @user.identity.accounts.many? %>.
     </p>
 
-    <% @notifications.group_by(&:card).each do |card, notifications| %>
-      <h2 class="notification__board"><%= card.board.name %></h2>
-      <%= link_to "##{ card.number } #{ card.title }", card, class: "card__title" %>
-      <%= render partial: "notification/bundle_mailer/notification", collection: notifications, as: :notification %>
+    <% @notifications.group_by { |n| n.card.board }.sort_by { |board, _| board.name.downcase }.each do |board, board_notifications| %>
+      <hr class="notification__board-separator">
+      <h2 class="notification__board"><%= link_to board.name, board %></h2>
+      <% board_notifications.group_by(&:card).each do |card, notifications| %>
+        <%= link_to "##{ card.number } #{ card.title }", card, class: "card__title" %>
+        <%= render partial: "notification/bundle_mailer/notification", collection: notifications, as: :notification %>
+      <% end %>
     <% end %>
 
     <p class="footer">Fizzy emails you about new notifications every few hours. <br>
