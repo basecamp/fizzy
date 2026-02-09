@@ -1,7 +1,7 @@
 Notifications since <%= @bundle.starts_at.strftime("%-l%P on %A, %B %-d") %>
 You have <%= pluralize @notifications.count, "new notification" %><%= " in #{ Current.account.name }" if @user.identity.accounts.many? %>.
 
-<% @notifications.group_by { |n| n.card.board }.each do |board, board_notifications| %>
+<% @notifications.group_by { |n| n.card.board }.sort_by { |board, _| board.name.downcase }.each do |board, board_notifications| %>
 <%= board.name %>
 <%= "-" * board.name.length %>
 

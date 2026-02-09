@@ -14,11 +14,12 @@ class Notification::BundleMailerTest < ActionMailer::TestCase
   test "renders avatar with initials in span when avatar is not attached" do
     create_notification(@user)
 
-    email = Notification::BundleMailer.notification(@bundle)
+    html = Nokogiri::HTML5(Notification::BundleMailer.notification(@bundle).html_part.body.to_s)
 
-    assert_match /<span[^>]*class="avatar"[^>]*>/, email.html_part.body.to_s
-    assert_match /#{@user.initials}/, email.html_part.body.to_s
-    assert_match /style="background-color: #[A-F0-9]{6};?"/, email.html_part.body.to_s
+    avatar = html.at_css("span.avatar")
+    assert avatar, "Expected a span.avatar element"
+    assert_equal @user.initials, avatar.text.strip
+    assert_match /background-color: #[A-F0-9]{6}/, avatar["style"]
   end
 
   test "renders avatar with external image URL when avatar is attached" do
@@ -30,14 +31,15 @@ class Notification::BundleMailerTest < ActionMailer::TestCase
 
     create_notification(@user)
 
-    email = Notification::BundleMailer.notification(@bundle)
+    html = Nokogiri::HTML5(Notification::BundleMailer.notification(@bundle).html_part.body.to_s)
 
-    assert_match /<img[^>]*class="avatar"[^>]*>/, email.html_part.body.to_s
-    assert_match /<img[^>]*class="avatar"[^>]*src="[^"]*"/, email.html_part.body.to_s
-    assert_match /alt="#{@user.name}"/, email.html_part.body.to_s
+    avatar = html.at_css("img.avatar")
+    assert avatar, "Expected an img.avatar element"
+    assert avatar["src"].present?
+    assert_equal @user.name, avatar["alt"]
   end
 
-  test "groups notifications by board" do
+  test "groups notifications by board, sorted alphabetically" do
     private_board = boards(:private)
     private_card = Current.with(user: @user) do
       private_board.cards.create!(
@@ -53,35 +55,35 @@ class Notification::BundleMailerTest < ActionMailer::TestCase
     create_notification(@user, source: private_event)
     create_notification(@user, source: events(:layout_published))
 
-    html = Notification::BundleMailer.notification(@bundle).html_part.body.to_s
+    html = Nokogiri::HTML5(Notification::BundleMailer.notification(@bundle).html_part.body.to_s)
 
-    board_headers = html.scan(/class="notification__board"/)
+    board_headers = html.css(".notification__board")
     assert_equal 2, board_headers.size, "Should have exactly two board headers"
-
-    assert_match(/Writebook/, html)
-    assert_match(/Private board/, html)
+    assert_equal [ "Private board", "Writebook" ], board_headers.map(&:text)
   end
 
   test "board header links to the board" do
     create_notification(@user, source: events(:logo_published))
 
-    html = Notification::BundleMailer.notification(@bundle).html_part.body.to_s
+    html = Nokogiri::HTML5(Notification::BundleMailer.notification(@bundle).html_part.body.to_s)
     board = boards(:writebook)
 
-    assert_match %r{<a[^>]*href="[^"]*boards/#{board.id}"[^>]*>Writebook</a>}, html
+    link = html.at_css(".notification__board a")
+    assert_equal "Writebook", link.text
+    assert_match %r{boards/#{board.id}}, link["href"]
   end
 
   test "shows multiple cards under same board header" do
     create_notification(@user, source: events(:logo_published))
     create_notification(@user, source: events(:layout_published))
 
-    html = Notification::BundleMailer.notification(@bundle).html_part.body.to_s
+    html = Nokogiri::HTML5(Notification::BundleMailer.notification(@bundle).html_part.body.to_s)
 
-    board_header_count = html.scan(/class="notification__board"/).size
-    assert_equal 1, board_header_count, "Same board should only have one header"
+    assert_equal 1, html.css(".notification__board").size, "Same board should only have one header"
 
-    assert_match(/The logo isn/, html)
-    assert_match(/Layout is broken/, html)
+    card_titles = html.css(".card__title").map(&:text)
+    assert_includes card_titles, "#1 The logo isn't big enough"
+    assert_includes card_titles, "#2 Layout is broken"
   end
 
   private
