@@ -127,12 +127,12 @@
 
       @media (max-width: 639px) {
         border: 1px solid var(--card-color);
-        border-radius: 0.4em;
+        border-radius: calc(0.2em + 3px);
         flex-direction: row;
         gap: 0;
         overflow: auto;
         max-inline-size: 100%;
-        padding: 0.2em;
+        padding: 3px;
         position: relative;
         white-space: nowrap;
 
