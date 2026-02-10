@@ -220,6 +220,15 @@
     .card__title-link {
       color: inherit;
     }
+
+    code {
+      background-color: var(--color-canvas);
+      border: 1px solid var(--color-ink-lighter);
+      border-radius: 0.25ch;
+      font-family: var(--font-mono);
+      font-size: smaller;
+      padding: 0.1ch 0.25ch;
+    }
   }
 
   .card__description {

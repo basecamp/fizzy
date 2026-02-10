@@ -1,5 +1,5 @@
 <h1 class="card__title flex align-start gap-half">
-  <%= link_to card.title, edit_card_path(card), class: "card__title-link" %>
+  <%= link_to card_html_title(card), edit_card_path(card), class: "card__title-link" %>
 </h1>
 
 <% unless card.description.blank? %>

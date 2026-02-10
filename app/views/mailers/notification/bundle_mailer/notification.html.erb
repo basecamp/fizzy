@@ -9,7 +9,7 @@
       <hr class="notification__board-separator">
       <h2 class="notification__board"><%= link_to board.name, board %></h2>
       <% board_notifications.group_by(&:card).each do |card, notifications| %>
-        <%= link_to "##{ card.number } #{ card.title }", card, class: "card__title" %>
+        <%= link_to card, class: "card__title" do %>#<%= card.number %> <%= card_html_title(card) %><% end %>
         <%= render partial: "notification/bundle_mailer/notification", collection: notifications, as: :notification %>
       <% end %>
     <% end %>
