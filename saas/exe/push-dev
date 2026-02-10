@@ -1,0 +1,42 @@
+#!/usr/bin/env ruby
+#
+# Fetches push notification credentials from 1Password for development.
+# Uses the same 1Password items as production (Deploy/Fizzy Production).
+#
+# Usage: eval "$(bundle exec push-dev)"
+
+OP_ACCOUNT = "23QPQDKZC5BKBIIG7UGT5GR5RM"
+OP_VAULT = "Deploy"
+OP_ITEM = "Fizzy"
+
+def op_read(field)
+  `op read "op://#{OP_VAULT}/#{OP_ITEM}/Production/#{field}" --account #{OP_ACCOUNT} 2>/dev/null`.strip
+end
+
+apns_key_id = op_read("APNS_KEY_ID")
+apns_encryption_key_b64 = op_read("APNS_ENCRYPTION_KEY_B64")
+fcm_encryption_key_b64 = op_read("FCM_ENCRYPTION_KEY_B64")
+
+if apns_key_id.empty? || apns_encryption_key_b64.empty?
+  warn "Error: Could not fetch APNs credentials from 1Password"
+  warn "Make sure you're signed in: op signin --account #{OP_ACCOUNT}"
+  exit 1
+end
+
+if fcm_encryption_key_b64.empty?
+  warn "Warning: Could not fetch FCM credentials from 1Password"
+  warn "Android push notifications will not work"
+end
+
+puts %Q(export APNS_KEY_ID="#{apns_key_id}")
+puts %Q(export APNS_TEAM_ID="#{apns_team_id}")
+puts %Q(export APNS_ENCRYPTION_KEY_B64="#{apns_encryption_key_b64}")
+puts %Q(export FCM_ENCRYPTION_KEY_B64="#{fcm_encryption_key_b64}")
+puts %Q(export ENABLE_NATIVE_PUSH="true")
+
+warn ""
+warn "Push notification credentials loaded for development"
+warn "  APNs Key ID: #{apns_key_id}"
+warn "  APNs: #{apns_encryption_key_b64.empty? ? "not configured" : "configured"}"
+warn "  FCM: #{fcm_encryption_key_b64.empty? ? "not configured" : "configured"}"
+warn "  Native push: enabled"

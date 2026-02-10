@@ -1,5 +1,5 @@
 class Notification < ApplicationRecord
-  include PushNotifiable
+  include Notification::Pushable
 
   belongs_to :account, default: -> { user.account }
   belongs_to :user
@@ -18,6 +18,7 @@ class Notification < ApplicationRecord
 
   delegate :notifiable_target, to: :source
   delegate :card, to: :source
+  delegate :identity, to: :user
 
   def self.read_all
     all.each { |notification| notification.read }
