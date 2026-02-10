@@ -66,6 +66,12 @@
       translate: unset;
     }
 
+    .card-perma--draft {
+      .card-perma__bg {
+        box-shadow: 0 calc(100vh + 100px) 0 100vh var(--color-container);
+      }
+    }
+
     /* Search
     /* ------------------------------------------------------------------------ */
 
