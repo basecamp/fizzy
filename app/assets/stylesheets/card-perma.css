@@ -68,7 +68,7 @@
 
       @media (max-width: 639px) {
         flex-direction: column;
-        padding-block-end: calc(var(--card-padding-block) * 1.5);
+        padding-block: var(--card-padding-block) calc(var(--card-padding-block) * 1.5);
       }
     }
 
@@ -90,11 +90,23 @@
       }
 
       &:has(textarea) {
-        margin-block-end: 0;
+        @media (min-width: 640px) {
+          margin-block-end: 0;
+        }
 
         @supports not (field-sizing: content) {
           text-wrap: unset; /* Safari is annoying if you have text-wrap: balance in textareas */
         }
+      }
+
+      @media (max-width: 639px) {
+        margin-block-end: 0.75ch;
+      }
+    }
+
+    .card__description {
+      @media (max-width: 639px) {
+        margin-block-end: 1ch;
       }
     }
 
