@@ -5,6 +5,8 @@ module User::EmailAddressChangeable
   extend ActiveSupport::Concern
 
   def change_email_address_using_token(token)
+    return false if identity&.email_locked?
+
     parsed_token = SignedGlobalID.parse(token, for: EMAIL_CHANGE_TOKEN_PURPOSE)
 
     old_email_address = parsed_token&.params&.fetch("old_email_address")
@@ -18,6 +20,8 @@ module User::EmailAddressChangeable
   end
 
   def send_email_address_change_confirmation(new_email_address)
+    return false if identity&.email_locked?
+
     token = generate_email_address_change_token(
       to: new_email_address,
       expires_in: EMAIL_CHANGE_TOKEN_EXPIRATION
@@ -31,6 +35,8 @@ module User::EmailAddressChangeable
   end
 
   def change_email_address(new_email_address)
+    return false if identity&.email_locked?
+
     transaction do
       new_identity = Identity.find_or_create_by!(email_address: new_email_address)
       update!(identity: new_identity)
