@@ -13,7 +13,13 @@
     <%= link_to "Go to your account", landing_url(script_name: @import.account.slug), class: "btn btn--link center txt-medium" %>
   <% when "failed" %>
     <p class="txt-medium txt-negative">Your import failed.</p>
-    <p class="txt-small">This may be due to corrupted export data or a conflict with existing data. Please try again with a fresh export.</p>
+    <% if @import.failed_due_to_conflict? %>
+      <p class="txt-small">It looks like the account you are trying to import already exists.</p>
+    <% elsif @import.failed_due_to_invalid_export? %>
+      <p class="txt-small">The ZIP file isn't a Fizzy account export.</p>
+    <% else %>
+      <p class="txt-small">This may be due to corrupted export data or a conflict with existing data. Please try again with a fresh export.</p>
+    <% end %>
     <%= link_to "Try again", new_account_import_path, class: "btn btn--plain center txt-medium" %>
   <% end %>
 </div>

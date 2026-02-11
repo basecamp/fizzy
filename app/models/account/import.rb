@@ -7,6 +7,7 @@ class Account::Import < ApplicationRecord
   has_one_attached :file
 
   enum :status, %w[ pending processing completed failed ].index_by(&:itself), default: :pending
+  enum :failure_reason, %w[ conflict invalid_export ].index_by(&:itself), prefix: :failed_due_to, scopes: false
 
   scope :expired, -> { where(completed_at: ...24.hours.ago).or(where(status: :failed, created_at: ...7.days.ago)) }
 
@@ -26,6 +27,12 @@ class Account::Import < ApplicationRecord
         record_set.check(from: zip, start: last_id, callback: callback)
       end
     end
+  rescue Account::DataTransfer::RecordSet::ConflictError => e
+    mark_as_failed(:conflict)
+    raise e
+  rescue Account::DataTransfer::RecordSet::IntegrityError, ZipFile::InvalidFileError => e
+    mark_as_failed(:invalid_export)
+    raise e
   rescue => e
     mark_as_failed
     raise e
@@ -44,6 +51,12 @@ class Account::Import < ApplicationRecord
     reconcile_account_storage
 
     mark_completed
+  rescue Account::DataTransfer::RecordSet::ConflictError => e
+    mark_as_failed(:conflict)
+    raise e
+  rescue Account::DataTransfer::RecordSet::IntegrityError, ZipFile::InvalidFileError => e
+    mark_as_failed(:invalid_export)
+    raise e
   rescue => e
     mark_as_failed
     raise e
@@ -60,9 +73,9 @@ class Account::Import < ApplicationRecord
       ImportMailer.completed(identity, account).deliver_later
     end
 
-    def mark_as_failed
-      failed!
-      ImportMailer.failed(identity).deliver_later
+    def mark_as_failed(failure_reason = nil)
+      update!(status: :failed, failure_reason: failure_reason)
+      ImportMailer.failed(self).deliver_later
     end
 
     def add_importer_to_all_access_boards
