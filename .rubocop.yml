@@ -8,6 +8,8 @@ inherit_gem: { rubocop-rails-omakase: rubocop.yml }
 #   Enabled: false
 
 AllCops:
+  TargetRubyVersion: 4.0
+  ParserEngine: parser_prism
   Exclude:
     - 'db/migrate/**/*'
     - 'db/schema*.rb'

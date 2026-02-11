@@ -61,6 +61,13 @@ GIT
       yabeda (~> 0.6)
 
 GIT
+  remote: https://github.com/maxprokopiev/rinku.git
+  revision: 8583fe1c0531d2fdea6e5c120fb1b0b800b452b7
+  branch: fix-ruby-export
+  specs:
+    rinku (2.0.6)
+
+GIT
   remote: https://github.com/rails/rails.git
   revision: 60d92e4e7dfe923528ccdccc18820ccfe841b7b8
   branch: main
@@ -244,6 +251,7 @@ GEM
       rack-test (>= 0.6.3)
       regexp_parser (>= 1.5, < 3.0)
       xpath (~> 3.2)
+    cgi (0.5.1)
     childprocess (5.1.0)
       logger (~> 1.5)
     chunky_png (1.4.0)
@@ -267,6 +275,7 @@ GEM
       tzinfo
     faker (3.5.3)
       i18n (>= 1.8.11, < 2)
+    ffi (1.17.2)
     ffi (1.17.2-aarch64-linux-gnu)
     ffi (1.17.2-aarch64-linux-musl)
     ffi (1.17.2-arm-linux-gnu)
@@ -338,6 +347,7 @@ GEM
     mini_magick (5.3.1)
       logger
     mini_mime (1.1.5)
+    mini_portile2 (2.8.9)
     minitest (6.0.1)
       prism (~> 1.5)
     mission_control-jobs (1.1.0)
@@ -371,6 +381,9 @@ GEM
       net-protocol
     net-ssh (7.3.0)
     nio4r (2.7.5)
+    nokogiri (1.19.0)
+      mini_portile2 (~> 2.8.2)
+      racc (~> 1.4)
     nokogiri (1.19.0-aarch64-linux-gnu)
       racc (~> 1.4)
     nokogiri (1.19.0-aarch64-linux-musl)
@@ -471,13 +484,12 @@ GEM
     reline (0.6.3)
       io-console (~> 0.5)
     rexml (3.4.4)
-    rinku (2.0.6)
     rouge (4.7.0)
     rqrcode (3.2.0)
       chunky_png (~> 1.0)
       rqrcode_core (~> 2.0)
     rqrcode_core (2.1.0)
-    rubocop (1.81.7)
+    rubocop (1.84.1)
       json (~> 2.3)
       language_server-protocol (~> 3.17.0.2)
       lint_roller (~> 1.1.0)
@@ -485,12 +497,12 @@ GEM
       parser (>= 3.3.0.2)
       rainbow (>= 2.2.2, < 4.0)
       regexp_parser (>= 2.9.3, < 3.0)
-      rubocop-ast (>= 1.47.1, < 2.0)
+      rubocop-ast (>= 1.49.0, < 2.0)
       ruby-progressbar (~> 1.7)
       unicode-display_width (>= 2.4.0, < 4.0)
-    rubocop-ast (1.48.0)
+    rubocop-ast (1.49.0)
       parser (>= 3.3.7.2)
-      prism (~> 1.4)
+      prism (~> 1.7)
     rubocop-performance (1.26.1)
       lint_roller (~> 1.1)
       rubocop (>= 1.75.0, < 2.0)
@@ -544,6 +556,8 @@ GEM
       fugit (~> 1.11)
       railties (>= 7.1)
       thor (>= 1.3.1)
+    sqlite3 (2.8.0)
+      mini_portile2 (~> 2.8.0)
     sqlite3 (2.8.0-aarch64-linux-gnu)
     sqlite3 (2.8.0-aarch64-linux-musl)
     sqlite3 (2.8.0-arm-linux-gnu)
@@ -577,7 +591,7 @@ GEM
       concurrent-ruby (~> 1.0)
     unicode-display_width (3.2.0)
       unicode-emoji (~> 4.1)
-    unicode-emoji (4.1.0)
+    unicode-emoji (4.2.0)
     uri (1.1.1)
     vcr (6.4.0)
     web-console (4.2.1)
@@ -637,6 +651,7 @@ PLATFORMS
   arm-linux-gnu
   arm-linux-musl
   arm64-darwin
+  ruby
   x86_64-linux
   x86_64-linux-gnu
   x86_64-linux-musl
@@ -652,6 +667,7 @@ DEPENDENCIES
   brakeman
   bundler-audit
   capybara
+  cgi
   console1984!
   debug
   faker
@@ -676,8 +692,10 @@ DEPENDENCIES
   rails!
   rails_structured_logging!
   redcarpet
+  rinku!
   rouge
   rqrcode
+  rubocop (>= 1.82.0)
   rubocop-rails-omakase
   selenium-webdriver
   sentry-rails
@@ -694,7 +712,7 @@ DEPENDENCIES
   useragent!
   vcr
   web-console
-  web-push
+  web-push (>= 3.1.0)
   webmock
   webrick
   yabeda
@@ -707,5 +725,8 @@ DEPENDENCIES
   yabeda-rails
   zip_kit
 
+RUBY VERSION
+  ruby 4.0.0
+
 BUNDLED WITH
-   2.7.2
+  4.0.3
