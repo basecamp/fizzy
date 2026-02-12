@@ -2,15 +2,11 @@ module Card::Readable
   extend ActiveSupport::Concern
 
   def read_by(user)
-    notifications_for(user).tap do |notifications|
-      notifications.each(&:read)
-    end
+    user.notifications.find_by(card: self)&.read
   end
 
   def unread_by(user)
-    all_notifications_for(user).tap do |notifications|
-      notifications.each(&:unread)
-    end
+    user.notifications.find_by(card: self)&.unread
   end
 
   def remove_inaccessible_notifications
@@ -23,18 +19,6 @@ module Card::Readable
   private
     def remove_inaccessible_notifications_later
       Card::RemoveInaccessibleNotificationsJob.perform_later(self)
-    end
-
-    def notifications_for(user)
-      scope = user.notifications.unread
-      scope.where(source: event_notification_sources)
-        .or(scope.where(source: mention_notification_sources))
-    end
-
-    def all_notifications_for(user)
-      scope = user.notifications
-      scope.where(source: event_notification_sources)
-        .or(scope.where(source: mention_notification_sources))
     end
 
     def event_notification_sources

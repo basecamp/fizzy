@@ -25,12 +25,12 @@ module User::Notifiable
 
     def expand_pending_bundle_for(notification)
       pending = notification_bundles.pending.last
-      if pending.present? && notification.created_at < pending.starts_at
-        pending.update!(starts_at: notification.created_at) # expand the window to include this notification
+      if pending.present? && notification.updated_at < pending.starts_at
+        pending.update!(starts_at: notification.updated_at) # expand the window to include this notification
       end
     end
 
     def create_bundle_for(notification)
-      notification_bundles.create!(starts_at: notification.created_at)
+      notification_bundles.create!(starts_at: notification.updated_at)
     end
 end

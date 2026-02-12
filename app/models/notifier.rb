@@ -16,7 +16,13 @@ class Notifier
     if should_notify?
       # Processing recipients in order avoids deadlocks if notifications overlap.
       recipients.sort_by(&:id).map do |recipient|
-        Notification.create! user: recipient, source: source, creator: creator
+        notification = Notification.find_or_initialize_by(user: recipient, card: source.card)
+        notification.source = source
+        notification.creator = creator
+        notification.read_at = nil
+        notification.unread_count = (notification.unread_count || 0) + 1
+        notification.save!
+        notification
       end
     end
   end

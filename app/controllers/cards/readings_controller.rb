@@ -2,12 +2,12 @@ class Cards::ReadingsController < ApplicationController
   include CardScoped
 
   def create
-    @notifications = @card.read_by(Current.user)
+    @card.read_by(Current.user)
     record_board_access
   end
 
   def destroy
-    @notifications = @card.unread_by(Current.user)
+    @card.unread_by(Current.user)
     record_board_access
   end
 

@@ -1,5 +1,5 @@
 json.cache! notification do
-  json.(notification, :id)
+  json.(notification, :id, :unread_count)
   json.read notification.read?
   json.read_at notification.read_at&.utc
   json.created_at notification.created_at.utc

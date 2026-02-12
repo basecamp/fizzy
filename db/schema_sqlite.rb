@@ -385,7 +385,7 @@ ActiveRecord::Schema[8.2].define(version: 2026_02_11_122517) do
 
   create_table "notifications", id: :uuid, force: :cascade do |t|
     t.uuid "account_id", null: false
-    t.uuid "card_id"
+    t.uuid "card_id", null: false
     t.datetime "created_at", null: false
     t.uuid "creator_id"
     t.datetime "read_at"
@@ -397,6 +397,7 @@ ActiveRecord::Schema[8.2].define(version: 2026_02_11_122517) do
     t.index ["account_id"], name: "index_notifications_on_account_id"
     t.index ["creator_id"], name: "index_notifications_on_creator_id"
     t.index ["source_type", "source_id"], name: "index_notifications_on_source"
+    t.index ["user_id", "card_id"], name: "index_notifications_on_user_id_and_card_id", unique: true
     t.index ["user_id", "read_at", "created_at"], name: "index_notifications_on_user_id_and_read_at_and_created_at", order: { read_at: :desc, created_at: :desc }
     t.index ["user_id"], name: "index_notifications_on_user_id"
   end

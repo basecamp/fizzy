@@ -3,6 +3,7 @@ require "test_helper"
 class Notification::BundleMailerTest < ActionMailer::TestCase
   setup do
     @user = users(:david)
+    @user.notifications.destroy_all
 
     @bundle = Notification::Bundle.create!(
       user: @user,
