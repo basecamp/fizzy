@@ -87,6 +87,16 @@ class Notification::BundleMailerTest < ActionMailer::TestCase
     assert_includes card_titles, "#2 Layout is broken"
   end
 
+  test "renders inline code in card title" do
+    cards(:logo).update_column :title, "Fix the `bug` in production"
+    create_notification(@user, source: events(:logo_published))
+
+    html = Nokogiri::HTML5(Notification::BundleMailer.notification(@bundle).html_part.body.to_s)
+
+    title_link = html.at_css(".card__title")
+    assert_equal "#1 Fix the <code>bug</code> in production", title_link.inner_html
+  end
+
   private
     def create_notification(user, source: events(:logo_published))
       Notification.create!(user: user, creator: user, source: source, created_at: 30.minutes.ago)
