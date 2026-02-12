@@ -1,8 +1,8 @@
 GIT
   remote: https://github.com/basecamp/lexxy
-  revision: 4f0fc4d5773bc6892de70f175440c259974c12a7
+  revision: 4bcf8d0213971560e90734493f8bd835addc3642
   specs:
-    lexxy (0.7.0.beta)
+    lexxy (0.7.4.beta)
       rails (>= 8.0.2)
 
 GIT
