@@ -5,9 +5,9 @@
 :root {
   --lexxy-color-ink: var(--color-ink);
   --lexxy-color-ink-medium: var(--color-ink-dark);
-  --lexxy-color-ink-light: var(--color-ink-light);
-  --lexxy-color-ink-lighter: var(--color-ink-lighter);
-  --lexxy-color-ink-lightest: var(--color-ink-lightest);
+  --lexxy-color-ink-light: var(--color-ink-medium);
+  --lexxy-color-ink-lighter: var(--color-ink-light);
+  --lexxy-color-ink-lightest: var(--color-ink-lighter);
   --lexxy-color-ink-inverted: var(--color-ink-inverted);
 
   --lexxy-color-canvas: var(--color-canvas);
@@ -34,8 +34,10 @@
   --lexxy-color-selected: oklch(var(--lch-blue-light));
   --lexxy-color-selected-dark: oklch(var(--lch-blue-medium));
 
-  --lexxy-color-table-cell-border: var(--color-ink-light);
+  --lexxy-color-table-cell-border: var(--color-ink-ligher);
   --lexxy-color-table-cell-selected-bg: var(--lexxy-color-selected);
+  --lexxy-color-table-cell-toggle: var(--lexxy-color-selected);
+  --lexxy-color-table-cell-remove: oklch(var(--lch-red-medium) / 20%);
 }
 
 @layer components {
