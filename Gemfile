@@ -16,7 +16,7 @@ gem "kamal", require: false
 gem "puma", ">= 5.0"
 gem "solid_cable", ">= 3.0"
 gem "solid_cache", "~> 1.0"
-gem "solid_queue", "~> 1.2"
+gem "solid_queue", "~> 1.3"
 gem "sqlite3", ">= 2.0"
 gem "thruster", require: false
 gem "trilogy", "~> 2.9"
