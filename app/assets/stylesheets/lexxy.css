@@ -2,6 +2,42 @@
 @import url("lexxy-content.css") layer(base);
 @import url("lexxy-editor.css") layer(base);
 
+:root {
+  --lexxy-color-ink: var(--color-ink);
+  --lexxy-color-ink-medium: var(--color-ink-dark);
+  --lexxy-color-ink-light: var(--color-ink-light);
+  --lexxy-color-ink-lighter: var(--color-ink-lighter);
+  --lexxy-color-ink-lightest: var(--color-ink-lightest);
+  --lexxy-color-ink-inverted: var(--color-ink-inverted);
+
+  --lexxy-color-canvas: var(--color-canvas);
+
+  --lexxy-color-accent-dark: var(--color-accent-dark);
+  --lexxy-color-accent-medium: var(--color-accent-medium);
+  --lexxy-color-accent-light: var(--color-accent-light);
+  --lexxy-color-accent-lightest: var(--color-accent-lightest);
+
+  --lexxy-color-red: oklch(var(--lch-red-medium));
+  --lexxy-color-green: oklch(var(--lch-green-medium));
+  --lexxy-color-blue: oklch(var(--lch-blue-medium));
+  --lexxy-color-purple: oklch(var(--lch-purple-medium));
+
+  --lexxy-color-code-token-att: var(--color-code-token__att);
+  --lexxy-color-code-token-comment: var(--color-code-token__comment);
+  --lexxy-color-code-token-function: var(--color-code-token__function);
+  --lexxy-color-code-token-operator: var(--color-code-token__operator);
+  --lexxy-color-code-token-property: var(--color-code-token__property);
+  --lexxy-color-code-token-punctuation: var(--color-code-token__punctuation);
+  --lexxy-color-code-token-selector: var(--color-code-token__selector);
+  --lexxy-color-code-token-variable: var(--color-code-token__variable);
+
+  --lexxy-color-selected: oklch(var(--lch-blue-light));
+  --lexxy-color-selected-dark: oklch(var(--lch-blue-medium));
+
+  --lexxy-color-table-cell-border: var(--color-ink-light);
+  --lexxy-color-table-cell-selected-bg: var(--lexxy-color-selected);
+}
+
 @layer components {
   /* Editor
   /* ------------------------------------------------------------------------ */
@@ -132,8 +168,10 @@
         font-size: var(--text-small);
         padding-block: 0.75ch;
       }
-      th:not([class*="selected"], [data-action="delete"], [data-action="toggle"]) { background-color: var(--color-ink-lightest); }
-      td:not([class*="selected"], [data-action="delete"], [data-action="toggle"]) { background-color: var(--color-canvas); }
+      tr:not([data-action="delete"]) {
+        th:not([class*="selected"], [data-action="delete"], [data-action="toggle"]) { background-color: var(--color-ink-lightest); }
+        td:not([class*="selected"], [data-action="delete"], [data-action="toggle"]) { background-color: var(--color-canvas); }
+      }
     }
 
     .attachment {
