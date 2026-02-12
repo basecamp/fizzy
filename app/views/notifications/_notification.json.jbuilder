@@ -10,6 +10,8 @@ json.cache! notification do
 
   json.card do
     json.(notification.card, :id, :title, :status)
+    json.closed notification.card.closed?
+    json.postponed notification.card.postponed?
     json.url card_url(notification.card)
   end
 

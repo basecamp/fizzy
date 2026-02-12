@@ -22,5 +22,9 @@ class NotificationsControllerTest < ActionDispatch::IntegrationTest
     assert_not_nil notification["card"]
     assert_not_nil notification["creator"]
     assert_not_nil notification["unread_count"]
+
+    card = notifications(:logo_assignment_kevin).card
+    assert_equal card.closed?, notification.dig("card", "closed")
+    assert_equal card.postponed?, notification.dig("card", "postponed")
   end
 end
