@@ -2,6 +2,9 @@
 <% @header_class = "header--events" %>
 
 <%= render "cards/broadcasts", filter: @filter %>
+<div class="performance-notice">
+  Fizzy is a bit sluggish at the moment, but we're working hard to get things humming smoothly again. Apologies for the disruption!
+</div>
 
 <% content_for :header do %>
   <%= render "events/index/add_card_button", user_filtering: @user_filtering %>
