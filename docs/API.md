@@ -747,7 +747,7 @@ Returns `204 No Content` on success.
 
 ### `POST /:account_slug/cards/:card_number/triage`
 
-Moves a card from triage into a column.
+Moves a card into a column. Works for cards in any state - use this to move cards between columns, not just from triage.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
