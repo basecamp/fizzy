@@ -202,9 +202,12 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "index as JSON" do
+    boards = users(:kevin).boards.ordered_by_recently_accessed
+
     get boards_path, as: :json
     assert_response :success
-    assert_equal users(:kevin).boards.count, @response.parsed_body.count
+    assert_equal boards.count, @response.parsed_body.count
+    assert_equal boards.pluck(:id), @response.parsed_body.pluck("id")
   end
 
   test "show as JSON" do
