@@ -385,11 +385,13 @@ ActiveRecord::Schema[8.2].define(version: 2026_02_11_122517) do
 
   create_table "notifications", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.uuid "account_id", null: false
+    t.uuid "card_id"
     t.datetime "created_at", null: false
     t.uuid "creator_id"
     t.datetime "read_at"
     t.uuid "source_id", null: false
     t.string "source_type", null: false
+    t.integer "unread_count", default: 0, null: false
     t.datetime "updated_at", null: false
     t.uuid "user_id", null: false
     t.index ["account_id"], name: "index_notifications_on_account_id"
