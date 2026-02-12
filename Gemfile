@@ -41,6 +41,7 @@ gem "useragent", bc: "useragent"
 # Operations
 gem "autotuner"
 gem "mission_control-jobs"
+gem "stackprof"
 gem "benchmark" # indirect dependency, being removed from Ruby 3.5 stdlib so here to quash warnings
 
 group :development, :test do
