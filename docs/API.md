@@ -43,6 +43,10 @@ To authenticate a request using your access token, include it in the `Authorizat
 curl -H "Authorization: Bearer put-your-access-token-here" -H "Accept: application/json" https://app.fizzy.do/my/identity
 ```
 
+> [!NOTE]
+> When using the hosted version at app.fizzy.do, API requests must include a descriptive `User-Agent` header (e.g., `User-Agent: MyApp/1.0`).
+> Requests using default scripting user agents like `Python-urllib` may be blocked before reaching the API. Self-hosted instances may not have this requirement.
+
 ### Magic Link Authentication
 
 For native apps, you can authenticate users via magic links. This is a two-step process:
