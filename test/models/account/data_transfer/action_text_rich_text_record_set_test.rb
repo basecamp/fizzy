@@ -41,4 +41,44 @@ class Account::DataTransfer::ActionTextRichTextRecordSetTest < ActiveSupport::Te
     tempfile&.unlink
     importing_account&.destroy
   end
+
+  test "convert_gids_to_sgids skips GIDs belonging to another account" do
+    victim_tag = tags(:web)
+    attacker_account = accounts(:initech)
+    assert_not_equal attacker_account.id, victim_tag.account_id
+
+    cross_tenant_gid = victim_tag.to_global_id.to_s
+    html = %(<action-text-attachment gid="#{cross_tenant_gid}"></action-text-attachment>)
+
+    record_set = Account::DataTransfer::ActionTextRichTextRecordSet.new(attacker_account)
+    result = record_set.send(:convert_gids_to_sgids, html)
+
+    assert_no_match(/sgid=/, result, "Cross-tenant GID must not be converted to SGID")
+    assert_match(/gid=/, result, "Original GID should remain unconverted")
+  end
+
+  test "convert_gids_to_sgids converts GIDs belonging to the same account" do
+    own_tag = tags(:web)
+    own_account = accounts(:"37s")
+    assert_equal own_account.id, own_tag.account_id
+
+    same_account_gid = own_tag.to_global_id.to_s
+    html = %(<action-text-attachment gid="#{same_account_gid}"></action-text-attachment>)
+
+    record_set = Account::DataTransfer::ActionTextRichTextRecordSet.new(own_account)
+    result = record_set.send(:convert_gids_to_sgids, html)
+
+    assert_match(/sgid=/, result, "Same-account GID should be converted to SGID")
+    assert_no_match(/ gid=/, result, "GID should be removed after SGID conversion")
+  end
+
+  test "convert_gids_to_sgids handles non-existent record GIDs gracefully" do
+    nonexistent_gid = "gid://fizzy/Tag/00000000000000000000000000"
+    html = %(<action-text-attachment gid="#{nonexistent_gid}"></action-text-attachment>)
+
+    record_set = Account::DataTransfer::ActionTextRichTextRecordSet.new(accounts(:"37s"))
+    result = record_set.send(:convert_gids_to_sgids, html)
+
+    assert_no_match(/sgid=/, result, "Non-existent record should not produce SGID")
+  end
 end

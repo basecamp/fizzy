@@ -84,9 +84,16 @@ class Account::DataTransfer::ActionTextRichTextRecordSet < Account::DataTransfer
         gid = GlobalID.parse(node["gid"])
 
         if gid
-          record = gid.find
-          node["sgid"] = record.attachable_sgid
-          node.remove_attribute("gid")
+          record = begin
+            gid.find
+          rescue ActiveRecord::RecordNotFound
+            nil
+          end
+
+          if record&.account_id == account.id
+            node["sgid"] = record.attachable_sgid
+            node.remove_attribute("gid")
+          end
         end
       end
 
