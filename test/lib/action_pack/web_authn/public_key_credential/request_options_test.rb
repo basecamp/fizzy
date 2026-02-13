@@ -3,10 +3,9 @@ require "test_helper"
 class ActionPack::WebAuthn::PublicKeyCredential::RequestOptionsTest < ActiveSupport::TestCase
   setup do
     @relying_party = ActionPack::WebAuthn::RelyingParty.new(id: "example.com", name: "Example App")
-    credential = Struct.new(:id, :transports)
     @credentials = [
-      credential.new("credential-1", []),
-      credential.new("credential-2", [])
+      build_credential(id: "credential-1"),
+      build_credential(id: "credential-2")
     ]
     @options = ActionPack::WebAuthn::PublicKeyCredential::RequestOptions.new(
       credentials: @credentials,
@@ -39,10 +38,9 @@ class ActionPack::WebAuthn::PublicKeyCredential::RequestOptionsTest < ActiveSupp
   end
 
   test "as_json includes transports when present" do
-    credential = Struct.new(:id, :transports)
     credentials = [
-      credential.new("cred-1", [ "usb", "nfc" ]),
-      credential.new("cred-2", [ "internal" ])
+      build_credential(id: "cred-1", transports: [ "usb", "nfc" ]),
+      build_credential(id: "cred-2", transports: [ "internal" ])
     ]
 
     options = ActionPack::WebAuthn::PublicKeyCredential::RequestOptions.new(
@@ -57,8 +55,7 @@ class ActionPack::WebAuthn::PublicKeyCredential::RequestOptionsTest < ActiveSupp
   end
 
   test "as_json omits transports when empty" do
-    credential = Struct.new(:id, :transports)
-    credentials = [ credential.new("cred-1", []) ]
+    credentials = [ build_credential(id: "cred-1") ]
 
     options = ActionPack::WebAuthn::PublicKeyCredential::RequestOptions.new(
       credentials: credentials,
@@ -69,4 +66,14 @@ class ActionPack::WebAuthn::PublicKeyCredential::RequestOptionsTest < ActiveSupp
       { type: "public-key", id: "cred-1" }
     ], options.as_json[:allowCredentials]
   end
+
+  private
+    def build_credential(id:, transports: [])
+      ActionPack::WebAuthn::PublicKeyCredential.new(
+        id: id,
+        public_key: OpenSSL::PKey::EC.generate("prime256v1"),
+        sign_count: 0,
+        transports: transports
+      )
+    end
 end

@@ -1,8 +1,8 @@
 class ActionPack::WebAuthn::PublicKeyCredential
-  attr_reader :id, :public_key, :sign_count, :owner
+  attr_reader :id, :public_key, :sign_count, :transports, :owner
 
   class << self
-    def create(client_data_json:, attestation_object:, challenge:, origin:, owner: nil)
+    def create(client_data_json:, attestation_object:, challenge:, origin:, transports: [], owner: nil)
       response = ActionPack::WebAuthn::Authenticator::AttestationResponse.new(
         client_data_json: client_data_json,
         attestation_object: attestation_object
@@ -14,15 +14,17 @@ class ActionPack::WebAuthn::PublicKeyCredential
         id: response.attestation.credential_id,
         public_key: response.attestation.public_key,
         sign_count: response.attestation.sign_count,
+        transports: transports,
         owner: owner
       )
     end
   end
 
-  def initialize(id:, public_key:, sign_count:, owner: nil)
+  def initialize(id:, public_key:, sign_count:, transports: [], owner: nil)
     @id = id
     @public_key = public_key
     @sign_count = sign_count
+    @transports = transports
     @owner = owner
   end
 

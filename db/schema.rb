@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_02_12_102026) do
+ActiveRecord::Schema[8.2].define(version: 2026_02_13_154740) do
   create_table "accesses", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -341,6 +341,18 @@ ActiveRecord::Schema[8.2].define(version: 2026_02_12_102026) do
     t.string "token"
     t.datetime "updated_at", null: false
     t.index ["identity_id"], name: "index_access_token_on_identity_id"
+  end
+
+  create_table "identity_credentials", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "credential_id", null: false
+    t.uuid "identity_id", null: false
+    t.binary "public_key", null: false
+    t.integer "sign_count", default: 0, null: false
+    t.text "transports"
+    t.datetime "updated_at", null: false
+    t.index ["credential_id"], name: "index_identity_credentials_on_credential_id", unique: true
+    t.index ["identity_id"], name: "index_identity_credentials_on_identity_id"
   end
 
   create_table "magic_links", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|

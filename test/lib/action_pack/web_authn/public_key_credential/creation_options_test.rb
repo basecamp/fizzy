@@ -63,10 +63,9 @@ class ActionPack::WebAuthn::PublicKeyCredential::CreationOptionsTest < ActiveSup
   end
 
   test "as_json includes excludeCredentials" do
-    credential = Struct.new(:id, :transports)
     credentials = [
-      credential.new("cred-1", [ "usb", "nfc" ]),
-      credential.new("cred-2", [ "internal" ])
+      build_credential(id: "cred-1", transports: [ "usb", "nfc" ]),
+      build_credential(id: "cred-2", transports: [ "internal" ])
     ]
 
     options = ActionPack::WebAuthn::PublicKeyCredential::CreationOptions.new(
@@ -84,13 +83,11 @@ class ActionPack::WebAuthn::PublicKeyCredential::CreationOptionsTest < ActiveSup
   end
 
   test "as_json excludeCredentials omits transports when empty" do
-    credential = Struct.new(:id, :transports).new("cred-1", [])
-
     options = ActionPack::WebAuthn::PublicKeyCredential::CreationOptions.new(
       id: "user-123",
       name: "user@example.com",
       display_name: "Test User",
-      exclude_credentials: [ credential ],
+      exclude_credentials: [ build_credential(id: "cred-1") ],
       relying_party: @relying_party
     )
 
@@ -98,4 +95,14 @@ class ActionPack::WebAuthn::PublicKeyCredential::CreationOptionsTest < ActiveSup
       { type: "public-key", id: "cred-1" }
     ], options.as_json[:excludeCredentials]
   end
+
+  private
+    def build_credential(id:, transports: [])
+      ActionPack::WebAuthn::PublicKeyCredential.new(
+        id: id,
+        public_key: OpenSSL::PKey::EC.generate("prime256v1"),
+        sign_count: 0,
+        transports: transports
+      )
+    end
 end
