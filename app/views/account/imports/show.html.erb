@@ -12,7 +12,7 @@
     </div>
   <% when "completed" %>
     <div class="import-status import-status--success">
-      <div><strong>Your import was successfull!</strong></div>
+      <div><strong>Your import was successful!</strong></div>
       <%= link_to "Go to your account →", landing_url(script_name: @import.account.slug), class: "btn btn--link" %>
     </div>
   <% when "failed" %>
