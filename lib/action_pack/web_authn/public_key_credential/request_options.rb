@@ -17,7 +17,8 @@
 #
 # [+credentials+]
 #   A collection of credential records for the user. Each credential must
-#   respond to +credential_id+ returning the Base64URL-encoded credential ID.
+#   respond to +id+ returning the Base64URL-encoded credential ID, and
+#   +transports+ returning an array of transport strings.
 #
 # [+relying_party+]
 #   The relying party (your application) configuration. Defaults to
@@ -46,13 +47,15 @@ class ActionPack::WebAuthn::PublicKeyCredential::RequestOptions < ActionPack::We
     {
       challenge: challenge,
       rpId: relying_party.id,
-      allowCredentials: credentials.map do |credential|
-        {
-          type: "public-key",
-          id: credential.credential_id
-        }
-      end,
+      allowCredentials: credentials.map { |credential| allow_credential_json(credential) },
       userVerification: user_verification.to_s
     }
   end
+
+  private
+    def allow_credential_json(credential)
+      hash = { type: "public-key", id: credential.id }
+      hash[:transports] = credential.transports if credential.transports.any?
+      hash
+    end
 end

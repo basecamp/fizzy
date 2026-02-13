@@ -58,8 +58,8 @@ class ActionPack::WebAuthn::Authenticator::Response
       raise InvalidResponseError, "Token binding is not supported"
     end
 
-    unless relying_party_id_valid_for?(origin)
-      raise InvalidResponseError, "Relying party ID is not valid for origin"
+    unless relying_party_id_matches?
+      raise InvalidResponseError, "Relying party ID does not match"
     end
 
     unless user_present?
@@ -92,9 +92,9 @@ class ActionPack::WebAuthn::Authenticator::Response
       ActiveSupport::SecurityUtils.secure_compare(expected_origin, client_data["origin"])
     end
 
-    def relying_party_id_matches?(origin)
+    def relying_party_id_matches?
       ActiveSupport::SecurityUtils.secure_compare(
-        Digest::SHA256.digest(URI.parse(origin).host),
+        Digest::SHA256.digest(relying_party.id),
         authenticator_data&.relying_party_id_hash || ""
       )
     end

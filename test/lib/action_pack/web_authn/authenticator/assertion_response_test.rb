@@ -2,6 +2,8 @@ require "test_helper"
 
 class ActionPack::WebAuthn::Authenticator::AssertionResponseTest < ActiveSupport::TestCase
   setup do
+    ActionPack::WebAuthn::Current.host = "example.com"
+
     @challenge = "test-challenge-123"
     @origin = "https://example.com"
     @client_data_json = {

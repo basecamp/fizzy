@@ -60,18 +60,28 @@ class ActionPack::WebAuthn::PublicKeyCredential::CreationOptions < ActionPack::W
   #
   # [+:relying_party+]
   #   Optional. The relying party configuration.
-  def initialize(id:, name:, display_name:, **attrs)
+  #
+  # [+:resident_key+]
+  #   Optional. Resident key requirement. One of +:preferred+, +:required+,
+  #   or +:discouraged+. Defaults to +:preferred+.
+  #
+  # [+:exclude_credentials+]
+  #   Optional. Existing credentials to exclude from registration. Each must
+  #   respond to +id+ and +transports+.
+  def initialize(id:, name:, display_name:, resident_key: :preferred, exclude_credentials: [], **attrs)
     super(**attrs)
 
     @id = id
     @name = name
     @display_name = display_name
+    @resident_key = resident_key
+    @exclude_credentials = exclude_credentials
   end
 
   # Returns a Hash suitable for JSON serialization and passing to the
   # WebAuthn JavaScript API.
   def as_json(*)
-    {
+    json = {
       challenge: challenge,
       rp: relying_party.as_json,
       user: {
@@ -84,8 +94,22 @@ class ActionPack::WebAuthn::PublicKeyCredential::CreationOptions < ActionPack::W
         RS256
       ],
       authenticatorSelection: {
+        residentKey: @resident_key.to_s,
         userVerification: user_verification.to_s
       }
     }
+
+    if @exclude_credentials.any?
+      json[:excludeCredentials] = @exclude_credentials.map { |credential| exclude_credential_json(credential) }
+    end
+
+    json
   end
+
+  private
+    def exclude_credential_json(credential)
+      hash = { type: "public-key", id: credential.id }
+      hash[:transports] = credential.transports if credential.transports.any?
+      hash
+    end
 end

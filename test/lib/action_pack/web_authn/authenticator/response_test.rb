@@ -2,6 +2,8 @@ require "test_helper"
 
 class ActionPack::WebAuthn::Authenticator::ResponseTest < ActiveSupport::TestCase
   setup do
+    ActionPack::WebAuthn::Current.host = "example.com"
+
     @challenge = "test-challenge-123"
     @origin = "https://example.com"
     @client_data_json = {
@@ -77,6 +79,30 @@ class ActionPack::WebAuthn::Authenticator::ResponseTest < ActiveSupport::TestCas
     end
 
     assert_equal "Cross-origin requests are not supported", error.message
+  end
+
+  test "validate! raises when relying party ID does not match" do
+    rp_id_hash = Digest::SHA256.digest("evil.com")
+    flags = 0x05
+    sign_count = 0
+
+    bytes = []
+    bytes.concat(rp_id_hash.bytes)
+    bytes << flags
+    bytes.concat([sign_count].pack("N").bytes)
+
+    wrong_rp_data = ActionPack::WebAuthn::Authenticator::Data.decode(bytes.pack("C*"))
+
+    response = TestableResponse.new(
+      client_data_json: @client_data_json,
+      authenticator_data: wrong_rp_data
+    )
+
+    error = assert_raises(ActionPack::WebAuthn::Authenticator::Response::InvalidResponseError) do
+      response.validate!(challenge: @challenge, origin: @origin)
+    end
+
+    assert_equal "Relying party ID does not match", error.message
   end
 
   test "validate! raises when tokenBinding status is present" do
