@@ -14,7 +14,7 @@ module Yabeda
           gauge :global_timer_total_seconds,
             comment: "Total time all threads spent waiting on the GVL (seconds)"
 
-          histogram :request_wait_seconds,
+          histogram :request_wait,
             unit: :seconds,
             comment: "GVL wait time experienced during a single request (seconds)",
             buckets: WAIT_HISTOGRAM_BUCKETS
