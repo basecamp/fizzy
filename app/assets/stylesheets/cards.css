@@ -381,6 +381,7 @@
     --stamp-color: oklch(var(--lch-green-medium) / 0.65);
 
     align-items: center;
+    backdrop-filter: blur(2px);
     background-color: color-mix(in srgb, var(--card-bg-color) 90%, transparent);
     border-radius: 0.2em;
     border: 0.5ch solid var(--stamp-color);
@@ -407,6 +408,12 @@
           display: flex;
         }
       }
+    }
+
+    @media (max-width: 639px) {
+      inset: auto calc(var(--card-padding-inline) * -0.5) 100% auto;
+      translate: 0 40%;
+      scale: 75%;
     }
   }
 
