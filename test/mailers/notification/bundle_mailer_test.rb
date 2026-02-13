@@ -97,6 +97,15 @@ class Notification::BundleMailerTest < ActionMailer::TestCase
     assert_equal "#1 Fix the <code>bug</code> in production", title_link.inner_html
   end
 
+  test "skips notifications whose source event was deleted" do
+    notification = create_notification(@user)
+    notification.source.destroy
+
+    email = Notification::BundleMailer.notification(@bundle)
+    assert_not email.respond_to?(:deliver) && email.message.is_a?(Mail::Message),
+      "Should not generate a real email when all notifications are stale"
+  end
+
   private
     def create_notification(user, source: events(:logo_published))
       Notification.create!(user: user, creator: user, source: source, created_at: 30.minutes.ago)
