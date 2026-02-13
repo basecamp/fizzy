@@ -78,9 +78,10 @@ class Cards::CommentsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_equal comment.id, @response.parsed_body["id"]
     assert_equal comment.card.id, @response.parsed_body.dig("card", "id")
-    assert_equal card_url(comment.card.id), @response.parsed_body.dig("card", "url")
-    assert_equal card_comment_reactions_url(comment.card_id, comment.id), @response.parsed_body["reactions_url"]
-    assert_equal card_comment_url(comment.card_id, comment.id), @response.parsed_body["url"]
+    assert_equal comment.card.number, @response.parsed_body.dig("card", "number")
+    assert_equal card_url(comment.card), @response.parsed_body.dig("card", "url")
+    assert_equal card_comment_reactions_url(comment.card, comment), @response.parsed_body["reactions_url"]
+    assert_equal card_comment_url(comment.card, comment), @response.parsed_body["url"]
   end
 
   test "update as JSON" do
