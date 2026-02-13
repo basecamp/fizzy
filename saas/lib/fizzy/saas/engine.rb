@@ -1,6 +1,7 @@
 require_relative "transaction_pinning"
 require_relative "signup"
 require_relative "authorization"
+require_relative "gvl_instrumentation"
 require_relative "../../rails_ext/active_record_tasks_database_tasks.rb"
 
 module Fizzy
@@ -49,6 +50,10 @@ module Fizzy
 
       initializer "fizzy_saas.transaction_pinning" do |app|
         app.config.middleware.insert_after(ActiveRecord::Middleware::DatabaseSelector, TransactionPinning::Middleware)
+      end
+
+      initializer "fizzy_saas.gvl_instrumentation" do |app|
+        app.config.middleware.insert_before(Rack::Runtime, GvlInstrumentation)
       end
 
       initializer "fizzy_saas.solid_queue" do
@@ -116,6 +121,9 @@ module Fizzy
         Yabeda::ActionCable.configure do |config|
           config.channel_class_name = "ActionCable::Channel::Base"
         end
+
+        require "yabeda/gvl"
+        Yabeda::GVL.install!
 
         require_relative "metrics"
       end
