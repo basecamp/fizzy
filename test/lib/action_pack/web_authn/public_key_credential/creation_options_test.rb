@@ -42,6 +42,60 @@ class ActionPack::WebAuthn::PublicKeyCredential::CreationOptionsTest < ActiveSup
       { type: "public-key", alg: -257 }
     ], @options.as_json[:pubKeyCredParams]
 
-    assert_equal({ userVerification: "preferred" }, @options.as_json[:authenticatorSelection])
+    assert_equal "preferred", @options.as_json[:authenticatorSelection][:residentKey]
+    assert_equal "preferred", @options.as_json[:authenticatorSelection][:userVerification]
+  end
+
+  test "as_json includes residentKey in authenticatorSelection" do
+    options = ActionPack::WebAuthn::PublicKeyCredential::CreationOptions.new(
+      id: "user-123",
+      name: "user@example.com",
+      display_name: "Test User",
+      resident_key: :required,
+      relying_party: @relying_party
+    )
+
+    assert_equal "required", options.as_json[:authenticatorSelection][:residentKey]
+  end
+
+  test "as_json excludes excludeCredentials when empty" do
+    assert_nil @options.as_json[:excludeCredentials]
+  end
+
+  test "as_json includes excludeCredentials" do
+    credential = Struct.new(:id, :transports)
+    credentials = [
+      credential.new("cred-1", [ "usb", "nfc" ]),
+      credential.new("cred-2", [ "internal" ])
+    ]
+
+    options = ActionPack::WebAuthn::PublicKeyCredential::CreationOptions.new(
+      id: "user-123",
+      name: "user@example.com",
+      display_name: "Test User",
+      exclude_credentials: credentials,
+      relying_party: @relying_party
+    )
+
+    assert_equal [
+      { type: "public-key", id: "cred-1", transports: [ "usb", "nfc" ] },
+      { type: "public-key", id: "cred-2", transports: [ "internal" ] }
+    ], options.as_json[:excludeCredentials]
+  end
+
+  test "as_json excludeCredentials omits transports when empty" do
+    credential = Struct.new(:id, :transports).new("cred-1", [])
+
+    options = ActionPack::WebAuthn::PublicKeyCredential::CreationOptions.new(
+      id: "user-123",
+      name: "user@example.com",
+      display_name: "Test User",
+      exclude_credentials: [ credential ],
+      relying_party: @relying_party
+    )
+
+    assert_equal [
+      { type: "public-key", id: "cred-1" }
+    ], options.as_json[:excludeCredentials]
   end
 end

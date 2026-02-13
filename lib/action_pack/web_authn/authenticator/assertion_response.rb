@@ -9,14 +9,14 @@
 #
 #   # Look up the credential by ID
 #   credential = user.credentials.find_by!(
-#     external_id: params[:id]
+#     credentail_id: params[:id]
 #   )
 #
 #   response = ActionPack::WebAuthn::Authenticator::AssertionResponse.new(
 #     client_data_json: params[:response][:clientDataJSON],
 #     authenticator_data: params[:response][:authenticatorData],
 #     signature: params[:response][:signature],
-#     credential: credential
+#     credential: credential.to_public_key_credential
 #   )
 #
 #   response.validate!(
@@ -68,9 +68,7 @@ class ActionPack::WebAuthn::Authenticator::AssertionResponse < ActionPack::WebAu
     end
 
     def sign_count_increased?
-      if credential.sign_count.nil?
-        true
-      elsif authenticator_data.sign_count.zero? && credential.sign_count.zero?
+      if authenticator_data.sign_count.zero? && credential.sign_count.zero?
         # Some authenticators always return 0 for the sign count, even after multiple authentications.
         # In that case, we have to check that both the stored and returned sign counts are 0,
         # which indicates that the authenticator is likely not updating the sign count.

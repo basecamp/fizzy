@@ -3,10 +3,10 @@ require "test_helper"
 class ActionPack::WebAuthn::PublicKeyCredential::RequestOptionsTest < ActiveSupport::TestCase
   setup do
     @relying_party = ActionPack::WebAuthn::RelyingParty.new(id: "example.com", name: "Example App")
-    credential = Struct.new(:credential_id)
+    credential = Struct.new(:id, :transports)
     @credentials = [
-      credential.new("credential-1"),
-      credential.new("credential-2")
+      credential.new("credential-1", []),
+      credential.new("credential-2", [])
     ]
     @options = ActionPack::WebAuthn::PublicKeyCredential::RequestOptions.new(
       credentials: @credentials,
@@ -36,5 +36,37 @@ class ActionPack::WebAuthn::PublicKeyCredential::RequestOptionsTest < ActiveSupp
       { type: "public-key", id: "credential-2" }
     ], @options.as_json[:allowCredentials]
     assert_equal "preferred", @options.as_json[:userVerification]
+  end
+
+  test "as_json includes transports when present" do
+    credential = Struct.new(:id, :transports)
+    credentials = [
+      credential.new("cred-1", [ "usb", "nfc" ]),
+      credential.new("cred-2", [ "internal" ])
+    ]
+
+    options = ActionPack::WebAuthn::PublicKeyCredential::RequestOptions.new(
+      credentials: credentials,
+      relying_party: @relying_party
+    )
+
+    assert_equal [
+      { type: "public-key", id: "cred-1", transports: [ "usb", "nfc" ] },
+      { type: "public-key", id: "cred-2", transports: [ "internal" ] }
+    ], options.as_json[:allowCredentials]
+  end
+
+  test "as_json omits transports when empty" do
+    credential = Struct.new(:id, :transports)
+    credentials = [ credential.new("cred-1", []) ]
+
+    options = ActionPack::WebAuthn::PublicKeyCredential::RequestOptions.new(
+      credentials: credentials,
+      relying_party: @relying_party
+    )
+
+    assert_equal [
+      { type: "public-key", id: "cred-1" }
+    ], options.as_json[:allowCredentials]
   end
 end
