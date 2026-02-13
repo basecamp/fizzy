@@ -10,7 +10,7 @@ module Fizzy
         before = GVLTools::LocalTimer.monotonic_time
         result = @app.call(env)
         gvl_wait_ns = GVLTools::LocalTimer.monotonic_time - before
-        Yabeda.gvl.request_wait_seconds.measure({}, gvl_wait_ns / 1_000_000_000.0)
+        Yabeda.gvl.request_wait.measure({}, gvl_wait_ns / 1_000_000_000.0)
         result
       ensure
         GVLTools::LocalTimer.disable
