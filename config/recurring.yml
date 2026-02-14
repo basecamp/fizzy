@@ -20,7 +20,7 @@ production: &production
     schedule: every hour at minute 12
   cleanup_webhook_deliveries:
     command: "Webhook::Delivery.cleanup"
-    schedule: every 4 hours at minute 51
+    schedule: every 15 minutes
   cleanup_magic_links:
     command: "MagicLink.cleanup"
     schedule: every 4 hours
