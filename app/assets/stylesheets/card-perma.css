@@ -63,6 +63,27 @@
       opacity: 0.2;
     }
 
+    .card__header {
+      @media (max-width: 639px) {
+        flex-wrap: wrap;
+        gap: var(--card-header-space) unset;
+      }
+    }
+
+    .card__tags {
+      @media (max-width: 639px) {
+        padding: 0.25lh;
+      }
+    }
+
+    .card__tags-list {
+      @media (min-width: 640px) {
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+    }
+
     .card__body {
       position: relative;
 
