@@ -10,8 +10,13 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "filtered index" do
-    get cards_path(filters(:jz_assignments).as_params.merge(term: "haggis"))
+  test "filtered index with single term" do
+    get cards_path(filters(:jz_assignments).as_params.merge(terms: ["haggis"]))
+    assert_response :success
+  end
+
+  test "filtered index with several terms" do
+    get cards_path(filters(:jz_assignments).as_params.merge(terms: ["haggis", "other"]))
     assert_response :success
   end
 
