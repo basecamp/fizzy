@@ -23,6 +23,8 @@ gem "trilogy", "~> 2.9"
 
 # Features
 gem "bcrypt", "~> 3.1.7"
+gem "omniauth_openid_connect", "~> 0.8.0"
+gem "omniauth-rails_csrf_protection", "~> 1.0"
 gem "geared_pagination", "~> 1.2"
 gem "rqrcode"
 gem "rouge"
