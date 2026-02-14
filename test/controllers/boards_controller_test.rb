@@ -207,6 +207,35 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
     assert_equal users(:kevin).boards.count, @response.parsed_body.count
   end
 
+  test "index as JSON includes all boards ordered by recently accessed" do
+    account = accounts("37s")
+    kevin = users(:kevin)
+    baseline_accessed_at = 3.days.ago.change(usec: 0)
+
+    kevin.accesses.order(:id).each_with_index do |access, index|
+      access.update!(accessed_at: baseline_accessed_at + index.seconds)
+    end
+
+    35.times do |index|
+      board = Board.create!(
+        name: "Recent board #{index}",
+        creator: kevin,
+        account: account,
+        all_access: false
+      )
+      board.access_for(kevin).update!(accessed_at: baseline_accessed_at + (index + 1).minutes)
+    end
+
+    get boards_path, as: :json
+
+    assert_response :success
+
+    expected_ids = kevin.boards.ordered_by_recently_accessed.pluck(:id)
+    actual_ids = @response.parsed_body.map { |board| board["id"] }
+
+    assert_equal expected_ids, actual_ids
+  end
+
   test "show as JSON" do
     get board_path(boards(:writebook)), as: :json
     assert_response :success
