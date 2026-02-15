@@ -19,7 +19,7 @@
     pointer-events: auto;
     position: relative;
     transition: 100ms ease-out;
-    transition-property: background-color, border, box-shadow, color, filter, opacity, scale;
+    transition-property: background-color, border, box-shadow, color, opacity, scale;
 
     @media (any-hover: hover) {
       &:hover {
