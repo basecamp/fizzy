@@ -1,0 +1,7 @@
+# Generated from app/models/user/configurable.rb with RBS::Inline
+
+module User::Configurable
+  extend ActiveSupport::Concern
+
+  def in_time_zone: () ?{ (?) -> untyped } -> untyped
+end

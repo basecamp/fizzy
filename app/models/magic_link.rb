@@ -1,3 +1,5 @@
+# rbs_inline: enabled
+
 class MagicLink < ApplicationRecord
   CODE_LENGTH = 6
   EXPIRATION_TIME = 15.minutes
@@ -15,21 +17,26 @@ class MagicLink < ApplicationRecord
   validates :code, uniqueness: true, presence: true
 
   class << self
+    #: (String) -> MagicLink?
     def consume(code)
       active.find_by(code: Code.sanitize(code))&.consume
     end
 
+    #: -> void
     def cleanup
       stale.delete_all
     end
   end
 
+  #: -> self
   def consume
     destroy
     self
   end
 
   private
+
+    #: -> void
     def generate_code
       self.code ||= loop do
         candidate = Code.generate(CODE_LENGTH)
@@ -37,6 +44,7 @@ class MagicLink < ApplicationRecord
       end
     end
 
+    #: -> void
     def set_expiration
       self.expires_at ||= EXPIRATION_TIME.from_now
     end

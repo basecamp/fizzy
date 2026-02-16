@@ -1,5 +1,10 @@
+# rbs_inline: enabled
+
 module User::Configurable
   extend ActiveSupport::Concern
+
+  # @type self: singleton(User) & singleton(User::Configurable)
+  # @type instance: User & User::Configurable
 
   included do
     has_one :settings, class_name: "User::Settings", dependent: :destroy

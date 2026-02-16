@@ -1,0 +1,24 @@
+# Generated from app/models/magic_link.rb with RBS::Inline
+
+class MagicLink < ApplicationRecord
+  CODE_LENGTH: ::Integer
+
+  EXPIRATION_TIME: untyped
+
+  # : (String) -> MagicLink?
+  def self.consume: (String) -> MagicLink?
+
+  # : -> void
+  def self.cleanup: () -> void
+
+  # : -> self
+  def consume: () -> self
+
+  private
+
+  # : -> void
+  def generate_code: () -> void
+
+  # : -> void
+  def set_expiration: () -> void
+end

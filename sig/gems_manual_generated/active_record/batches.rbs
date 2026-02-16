@@ -1,0 +1,22 @@
+# module ActiveRecord
+#   class Relation
+#     module Methods[Model, PrimaryKey]
+#       def in_batches: (?of: Integer, ?start: Integer, ?finish: Integer, ?load: bool, ?error_on_ignore: bool, ?order: untyped) { (self) -> void } -> nil
+#                     | (?of: Integer, ?start: Integer, ?finish: Integer, ?load: bool, ?error_on_ignore: bool, ?order: untyped) -> ActiveRecord::Batches::BatchEnumerator
+#     end
+
+#     module ClassMethods[Model, Relation, PrimaryKey]
+#       def in_batches: (?of: Integer, ?start: Integer, ?finish: Integer, ?load: bool, ?error_on_ignore: bool, ?order: untyped) { (Relation) -> void } -> nil
+#                     | (?of: Integer, ?start: Integer, ?finish: Integer, ?load: bool, ?error_on_ignore: bool, ?order: untyped) -> ActiveRecord::Batches::BatchEnumerator
+#     end
+#   end
+
+#   module Batches
+#     class BatchEnumerator
+#       def destroy_all: () -> untyped
+#       def delete_all: () -> untyped
+#       def update_all: (untyped) -> untyped
+#       def touch_all: (*untyped, ?time: untyped) -> untyped
+#     end
+#   end
+# end
