@@ -3,13 +3,13 @@
 class Card::Entropy
   attr_reader card: Card
 
-  attr_reader auto_clean_period: ActiveSupport::Duration
+  attr_reader auto_clean_period: Integer
 
   # : (Card) -> Card::Entropy?
   def self.for: (Card) -> Card::Entropy?
 
-  # : (Card, ActiveSupport::Duration) -> void
-  def initialize: (Card, ActiveSupport::Duration) -> void
+  # : (Card, Integer) -> void
+  def initialize: (Card, Integer) -> void
 
   def auto_clean_at: () -> untyped
 

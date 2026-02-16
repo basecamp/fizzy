@@ -27,6 +27,9 @@ module Card::Entropic
     delegate :auto_postpone_period, to: :board
   end
 
+  # @rbs!
+  #   def auto_postpone_period: () -> Integer
+
   class_methods do
     def auto_postpone_all_due
       # @type self: singleton(Card) & singleton(Card::Entropic)
@@ -36,10 +39,12 @@ module Card::Entropic
     end
   end
 
+  #: -> Card::Entropy?
   def entropy
     Card::Entropy.for(self)
   end
 
+  #: -> void
   def entropic?
     entropy.present?
   end

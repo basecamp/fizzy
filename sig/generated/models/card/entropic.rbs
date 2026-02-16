@@ -3,9 +3,13 @@
 module Card::Entropic
   extend ActiveSupport::Concern
 
+  def auto_postpone_period: () -> Integer
+
   def auto_postpone_all_due: () -> untyped
 
-  def entropy: () -> untyped
+  # : -> Card::Entropy?
+  def entropy: () -> Card::Entropy?
 
-  def entropic?: () -> untyped
+  # : -> void
+  def entropic?: () -> void
 end

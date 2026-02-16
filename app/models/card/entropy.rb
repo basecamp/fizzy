@@ -2,7 +2,7 @@
 
 class Card::Entropy
   attr_reader :card #: Card
-  attr_reader :auto_clean_period #: ActiveSupport::Duration
+  attr_reader :auto_clean_period #: Integer
 
   class << self
     #: (Card) -> Card::Entropy?
@@ -13,7 +13,7 @@ class Card::Entropy
     end
   end
 
-  #: (Card, ActiveSupport::Duration) -> void
+  #: (Card, Integer) -> void
   def initialize(card, auto_clean_period)
     @card = card
     @auto_clean_period = auto_clean_period

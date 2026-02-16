@@ -1,0 +1,11 @@
+module ActiveRecord
+  class AssociationRelation
+    def prepend_order: (String) -> self
+  end
+end
+
+module ActiveRecord
+  class Relation
+    def prepend_order: (String) -> self
+  end
+end
