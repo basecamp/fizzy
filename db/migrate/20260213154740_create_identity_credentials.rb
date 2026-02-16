@@ -5,6 +5,7 @@ class CreateIdentityCredentials < ActiveRecord::Migration[8.2]
       t.string :credential_id, null: false
       t.binary :public_key, null: false
       t.integer :sign_count, null: false, default: 0
+      t.string :name
       t.text :transports
 
       t.timestamps

@@ -347,6 +347,7 @@ ActiveRecord::Schema[8.2].define(version: 2026_02_13_154740) do
     t.datetime "created_at", null: false
     t.string "credential_id", null: false
     t.uuid "identity_id", null: false
+    t.string "name"
     t.binary "public_key", null: false
     t.integer "sign_count", default: 0, null: false
     t.text "transports"
