@@ -22,8 +22,8 @@ class Webhook::Delivery < ApplicationRecord
 
   after_create_commit :deliver_later
 
-  def self.cleanup
-    stale.delete_all
+  def self.cleanup(batch_size: 500, pause: 0.1)
+    sleep pause until stale.limit(batch_size).delete_all.zero?
   end
 
   def deliver_later
