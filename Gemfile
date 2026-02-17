@@ -25,7 +25,6 @@ gem "trilogy", "~> 2.9"
 gem "bcrypt", "~> 3.1.7"
 gem "geared_pagination", "~> 1.2"
 gem "rqrcode"
-gem "redcarpet"
 gem "rouge"
 gem "jbuilder"
 gem "lexxy", bc: "lexxy"
@@ -41,6 +40,7 @@ gem "useragent", bc: "useragent"
 # Operations
 gem "autotuner"
 gem "mission_control-jobs"
+gem "stackprof"
 gem "benchmark" # indirect dependency, being removed from Ruby 3.5 stdlib so here to quash warnings
 
 group :development, :test do

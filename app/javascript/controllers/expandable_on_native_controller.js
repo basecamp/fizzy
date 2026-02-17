@@ -9,8 +9,6 @@ export default class extends Controller {
   static values = { autoExpandSelector: String }
 
   connect() {
-    if (this.hasAutoExpandSelectorValue && this.element.querySelector(this.autoExpandSelectorValue)) {
-      this.element.open = true
-    }
+    this.element.open = this.hasAutoExpandSelectorValue && this.element.querySelector(this.autoExpandSelectorValue)
   }
 }

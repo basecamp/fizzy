@@ -15,7 +15,7 @@
   </div>
 
   <% if card.tags.any? %>
-    <div class="min-width overflow-ellipsis">
+    <div class="card__tags-list min-width">
       <% card.tags.each_with_index do |tag, index| %>
         <%= link_to cards_path(board_ids: [ card.board ], tag_ids: [ tag.id ]),
               class: "card__tag btn btn--plain min-width txt-uppercase fill-transparent" do %>

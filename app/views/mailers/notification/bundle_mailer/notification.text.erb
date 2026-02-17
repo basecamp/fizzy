@@ -1,15 +1,14 @@
 Notifications since <%= @bundle.starts_at.strftime("%-l%P on %A, %B %-d") %>
 You have <%= pluralize @notifications.count, "new notification" %><%= " in #{ Current.account.name }" if @user.identity.accounts.many? %>.
 
-<% @notifications.group_by(&:card).each do |card, notifications| %>
---------------------------------------------------------------------------------
+<% @notifications.group_by { |n| n.card.board }.sort_by { |board, _| board.name.downcase }.each do |board, board_notifications| %>
+<%= board.name %>
+<%= "-" * board.name.length %>
 
-<%= card.board.name %>
+<% board_notifications.group_by(&:card).each do |card, notifications| %>
 <%= "##{ card.number } #{ card.title }" %>
-
---------------------------------------------------------------------------------
-
 <%= render partial: "notification/bundle_mailer/notification", collection: notifications, as: :notification %>
+<% end %>
 <% end %>
 
 --------------------------------------------------------------------------------

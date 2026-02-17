@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_01_21_155752) do
+ActiveRecord::Schema[8.2].define(version: 2026_02_13_170100) do
   create_table "accesses", id: :uuid, force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -42,6 +42,7 @@ ActiveRecord::Schema[8.2].define(version: 2026_01_21_155752) do
     t.uuid "account_id"
     t.datetime "completed_at"
     t.datetime "created_at", null: false
+    t.string "failure_reason"
     t.uuid "identity_id", null: false
     t.string "status", limit: 255, default: "pending", null: false
     t.datetime "updated_at", null: false
@@ -384,17 +385,20 @@ ActiveRecord::Schema[8.2].define(version: 2026_01_21_155752) do
 
   create_table "notifications", id: :uuid, force: :cascade do |t|
     t.uuid "account_id", null: false
+    t.uuid "card_id", null: false
     t.datetime "created_at", null: false
     t.uuid "creator_id"
     t.datetime "read_at"
     t.uuid "source_id", null: false
     t.string "source_type", limit: 255, null: false
+    t.integer "unread_count", default: 0, null: false
     t.datetime "updated_at", null: false
     t.uuid "user_id", null: false
     t.index ["account_id"], name: "index_notifications_on_account_id"
     t.index ["creator_id"], name: "index_notifications_on_creator_id"
     t.index ["source_type", "source_id"], name: "index_notifications_on_source"
-    t.index ["user_id", "read_at", "created_at"], name: "index_notifications_on_user_id_and_read_at_and_created_at", order: { read_at: :desc, created_at: :desc }
+    t.index ["user_id", "card_id"], name: "index_notifications_on_user_id_and_card_id", unique: true
+    t.index ["user_id", "read_at", "updated_at"], name: "index_notifications_on_user_id_and_read_at_and_updated_at", order: { read_at: :desc, updated_at: :desc }
     t.index ["user_id"], name: "index_notifications_on_user_id"
   end
 
@@ -590,6 +594,7 @@ ActiveRecord::Schema[8.2].define(version: 2026_01_21_155752) do
     t.datetime "updated_at", null: false
     t.uuid "webhook_id", null: false
     t.index ["account_id"], name: "index_webhook_deliveries_on_account_id"
+    t.index ["created_at"], name: "index_webhook_deliveries_on_created_at"
     t.index ["event_id"], name: "index_webhook_deliveries_on_event_id"
     t.index ["webhook_id"], name: "index_webhook_deliveries_on_webhook_id"
   end

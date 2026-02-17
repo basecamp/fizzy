@@ -34,6 +34,26 @@
       }
     }
 
+    @media (max-width: 639px) {
+      &:has(.card__closed) {
+        padding-block-start: 2rem;
+      }
+
+      &:has(.reactions .reaction) {
+        .card__meta-avatars--assignees {
+          margin-inline-end: unset;
+        }
+      }
+
+      &:not(:has(.reactions .reaction)) {
+        &:has(.card__closed) {
+          .card__meta-text--assignees {
+            margin-inline-end: calc(var(--btn-size) + var(--meta-spacer-block));
+          }
+        }
+      }
+    }
+
     @media (max-width: 799px) {
       --half-btn-height: 1.25rem;
       --padding-inline: 1.5ch;
@@ -63,12 +83,33 @@
       opacity: 0.2;
     }
 
+    .card__header {
+      @media (max-width: 639px) {
+        flex-wrap: wrap;
+        gap: var(--card-header-space) unset;
+      }
+    }
+
+    .card__tags {
+      @media (max-width: 639px) {
+        padding: 0.25lh;
+      }
+    }
+
+    .card__tags-list {
+      @media (min-width: 640px) {
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+    }
+
     .card__body {
       position: relative;
 
       @media (max-width: 639px) {
         flex-direction: column;
-        padding-block-end: calc(var(--card-padding-block) * 1.5);
+        padding-block: var(--card-padding-block) calc(var(--card-padding-block) * 1.5);
       }
     }
 
@@ -90,11 +131,23 @@
       }
 
       &:has(textarea) {
-        margin-block-end: 0;
+        @media (min-width: 640px) {
+          margin-block-end: 0;
+        }
 
         @supports not (field-sizing: content) {
           text-wrap: unset; /* Safari is annoying if you have text-wrap: balance in textareas */
         }
+      }
+
+      @media (max-width: 639px) {
+        margin-block-end: 0.75ch;
+      }
+    }
+
+    .card__description {
+      @media (max-width: 639px) {
+        margin-block-end: 1ch;
       }
     }
 
@@ -108,6 +161,43 @@
     .card__meta {
       grid-area: meta;
       margin-inline-end: auto;
+
+      @media (max-width: 639px) {
+        --meta-spacer-block: 0.75ch;
+
+        inline-size: 100%;
+        grid-template-areas:
+          "avatars-author text-added"
+          "avatars-author text-author"
+          "text-updated text-updated"
+          "text-assignees text-assignees"
+          "avatars-assignees avatars-assignees";
+        grid-template-columns: auto 1fr;
+
+        .card__meta-text {
+          border: 0;
+          padding: 0;
+        }
+
+        .card__meta-text + .card__meta-text {
+          border-block-start: var(--card-border);
+          margin-block-start: var(--meta-spacer-block);
+          padding-block-start: var(--meta-spacer-block);
+        }
+
+        .card__meta-avatars--assignees {
+          margin-inline: 0 calc(var(--btn-size) + var(--meta-spacer-block));
+          margin-block-start: var(--meta-spacer-block);
+        }
+
+        .card__meta-avatars--author {
+          display: initial;
+        }
+
+        .card__meta-avatars--assignees .avatar {
+          display: grid;
+        }
+      }
     }
 
     .card__stages {
@@ -115,12 +205,12 @@
 
       @media (max-width: 639px) {
         border: 1px solid var(--card-color);
-        border-radius: 0.25em;
+        border-radius: calc(0.2em + 3px);
         flex-direction: row;
         gap: 0;
         overflow: auto;
         max-inline-size: 100%;
-        padding: 0;
+        padding: 3px;
         position: relative;
         white-space: nowrap;
 
@@ -130,7 +220,7 @@
           min-block-size: 2.5em;
         }
 
-        & > form + form:not(:has(.card__column-name--current)) {
+        & > form:not(:has(.card__column-name--current)) + form:not(:has(.card__column-name--current)) {
           box-shadow: -1px 0 0 0 var(--color-container);
         }
       }
@@ -138,7 +228,6 @@
 
     .card__column-name {
       @media (max-width: 639px) {
-        --btn-border-radius: 0;
         justify-content: center;
       }
     }
@@ -163,6 +252,7 @@
 
       @media (max-width: 639px) {
         font-size: var(--text-x-small);
+        position: relative;
       }
     }
 
@@ -189,13 +279,23 @@
           inset: 0 calc(-1 * var(--card-padding-inline)) auto;
           position: absolute;
         }
+
+        @media (any-hover: none) {
+          --reaction-size: 2.25rem;
+        }
       }
 
       &:not(:has(.reaction)) {
-        position: static;
-
         .reactions__trigger {
           --btn-border-color: var(--color-ink-light);
+        }
+
+        @media (max-width: 639px) {
+          inset-inline-end: 0;
+        }
+
+        @media (min-width: 640px) {
+          position: static;
         }
       }
     }

@@ -5,7 +5,7 @@ module ColumnsHelper
       card_triage_path(card, column_id: column),
       method: :post,
       class: [ "card__column-name btn", { "card__column-name--current": column == card.column && card.open? } ],
-      disabled: column == card.column,
+      disabled: column == card.column && card.open?,
       style: "--column-color: #{column.color}",
       form_class: "flex gap-half",
       data: { turbo_frame: "_top", scroll_to_target: column == card.column && card.open? ? "target" : nil }

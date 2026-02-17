@@ -42,9 +42,14 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to card_draft_path(card)
   end
 
-  test "show" do
-    get card_path(cards(:logo))
-    assert_response :success
+  test "show renders inline code in title" do
+    card = cards(:logo)
+    card.update_column :title, "Fix the `bug` in production"
+
+    get card_path(card)
+    assert_select ".card__title-link" do |element|
+      assert_equal "Fix the <code>bug</code> in production", element.inner_html
+    end
   end
 
   test "edit" do

@@ -1,11 +1,23 @@
 require "test_helper"
 
 class Event::DescriptionTest < ActiveSupport::TestCase
+  test "html description is html safe" do
+    description = events(:logo_published).description_for(users(:david))
+
+    assert_predicate description.to_html, :html_safe?
+  end
+
   test "generates html description for card published event" do
     description = events(:logo_published).description_for(users(:david))
 
     assert_includes description.to_html, "added"
     assert_includes description.to_html, "logo"
+  end
+
+  test "plain text description is html safe" do
+    description = events(:logo_published).description_for(users(:david))
+
+    assert_predicate description.to_plain_text, :html_safe?
   end
 
   test "generates plain text description for card published event" do
@@ -31,6 +43,96 @@ class Event::DescriptionTest < ActiveSupport::TestCase
     description = events(:logo_published).description_for(users(:jz))
 
     assert_includes description.to_plain_text, "David added"
+  end
+
+  test "to_html escapes assignee names" do
+    users(:jz).update_column(:name, "Tom & Jerry")
+    description = events(:logo_assignment_jz).description_for(users(:david))
+
+    assert_includes description.to_html, "Tom &amp; Jerry"
+    assert_not_includes description.to_html, "Tom & Jerry"
+  end
+
+  test "to_plain_text escapes assignee names" do
+    users(:jz).update_column(:name, "Tom & Jerry")
+    description = events(:logo_assignment_jz).description_for(users(:david))
+
+    assert_includes description.to_plain_text, "Tom &amp; Jerry"
+    assert_not_includes description.to_plain_text, "Tom &amp;amp; Jerry"
+  end
+
+  test "to_html escapes unassigned names" do
+    users(:jz).update_column(:name, "Tom & Jerry")
+    event = events(:logo_assignment_jz)
+    event.update_column(:action, "card_unassigned")
+    description = event.description_for(users(:david))
+
+    assert_includes description.to_html, "Tom &amp; Jerry"
+    assert_not_includes description.to_html, "Tom & Jerry"
+  end
+
+  test "to_plain_text escapes unassigned names" do
+    users(:jz).update_column(:name, "Tom & Jerry")
+    event = events(:logo_assignment_jz)
+    event.update_column(:action, "card_unassigned")
+    description = event.description_for(users(:david))
+
+    assert_includes description.to_plain_text, "Tom &amp; Jerry"
+    assert_not_includes description.to_plain_text, "Tom &amp;amp; Jerry"
+  end
+
+  test "to_html escapes old title in renamed description" do
+    event = events(:logo_published)
+    event.update_columns(action: "card_title_changed", particulars: { "particulars" => { "old_title" => "Tom & Jerry" } })
+    description = event.description_for(users(:david))
+
+    assert_includes description.to_html, "Tom &amp; Jerry"
+    assert_not_includes description.to_html, "Tom & Jerry"
+  end
+
+  test "to_plain_text escapes old title in renamed description" do
+    event = events(:logo_published)
+    event.update_columns(action: "card_title_changed", particulars: { "particulars" => { "old_title" => "Tom & Jerry" } })
+    description = event.description_for(users(:david))
+
+    assert_includes description.to_plain_text, "Tom &amp; Jerry"
+    assert_not_includes description.to_plain_text, "Tom &amp;amp; Jerry"
+  end
+
+  test "to_html escapes board name in moved description" do
+    event = events(:logo_published)
+    event.update_columns(action: "card_board_changed", particulars: { "particulars" => { "new_board" => "Tom & Jerry" } })
+    description = event.description_for(users(:david))
+
+    assert_includes description.to_html, "Tom &amp; Jerry"
+    assert_not_includes description.to_html, "Tom & Jerry"
+  end
+
+  test "to_plain_text escapes board name in moved description" do
+    event = events(:logo_published)
+    event.update_columns(action: "card_board_changed", particulars: { "particulars" => { "new_board" => "Tom & Jerry" } })
+    description = event.description_for(users(:david))
+
+    assert_includes description.to_plain_text, "Tom &amp; Jerry"
+    assert_not_includes description.to_plain_text, "Tom &amp;amp; Jerry"
+  end
+
+  test "to_html escapes column name in triaged description" do
+    event = events(:logo_published)
+    event.update_columns(action: "card_triaged", particulars: { "particulars" => { "column" => "Tom & Jerry" } })
+    description = event.description_for(users(:david))
+
+    assert_includes description.to_html, "Tom &amp; Jerry"
+    assert_not_includes description.to_html, "Tom & Jerry"
+  end
+
+  test "to_plain_text escapes column name in triaged description" do
+    event = events(:logo_published)
+    event.update_columns(action: "card_triaged", particulars: { "particulars" => { "column" => "Tom & Jerry" } })
+    description = event.description_for(users(:david))
+
+    assert_includes description.to_plain_text, "Tom &amp; Jerry"
+    assert_not_includes description.to_plain_text, "Tom &amp;amp; Jerry"
   end
 
   test "escapes html in card titles in plain text description" do

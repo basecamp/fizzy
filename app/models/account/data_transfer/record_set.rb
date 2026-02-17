@@ -1,5 +1,6 @@
 class Account::DataTransfer::RecordSet
   class IntegrityError < StandardError; end
+  class ConflictError < IntegrityError; end
 
   IMPORT_BATCH_SIZE = 100
 
@@ -93,7 +94,7 @@ class Account::DataTransfer::RecordSet
       end
 
       if model.exists?(id: data["id"])
-        raise IntegrityError, "#{model} record with ID #{data['id']} already exists"
+        raise ConflictError, "#{model} record with ID #{data['id']} already exists"
       end
 
       check_associations_dont_exist(data)
@@ -118,7 +119,7 @@ class Account::DataTransfer::RecordSet
       end
 
       if associated_class.exists?(id: associated_id)
-        raise IntegrityError, "#{model} record references existing #{association.name} (#{associated_class}) with ID #{associated_id}"
+        raise ConflictError, "#{model} record references existing #{association.name} (#{associated_class}) with ID #{associated_id}"
       end
     end
 

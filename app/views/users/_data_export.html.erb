@@ -10,7 +10,7 @@
     <dialog class="dialog panel panel--wide shadow" data-dialog-target="dialog" style="--panel-size: 48ch;">
       <h2 class="txt-large">Export your data</h2>
       <p>This will generate a ZIP archive of all cards you have access to.</p>
-      <p>We‘ll email you a link to download the file when it‘s ready. The link will expire after 24 hours.</p>
+      <p>We’ll email you a link to download the file when it’s ready. The link will expire after 24 hours.</p>
 
       <div class="flex gap justify-center">
         <%= button_to "Start export", user_data_exports_path(@user), method: :post, class: "btn btn--link", form: { data: { action: "submit->dialog#close" } } %>

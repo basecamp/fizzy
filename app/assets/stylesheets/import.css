@@ -1,0 +1,33 @@
+@layer components {
+  .import-status {
+    --import-status-border-color: var(--color-ink-light);
+    --import-status-color: var(--color-ink);
+
+    border: 1px dashed var(--import-status-border-color);
+    border-radius: 1ch;
+    color: var(--import-status-color);
+    font-size: var(--text-medium);
+    padding: 1.5ch;
+
+    .btn {
+      font-size: var(--text-small);
+      margin-block-start: 1.5ch;
+    }
+  }
+
+  .import-status--success {
+    --import-status-border-color: var(--color-positive);
+    --import-status-color: var(--color-positive);
+  }
+
+  .import-status--error {
+    --import-status-border-color: var(--color-negative);
+    --import-status-color: var(--color-negative);
+  }
+
+  @keyframes dash {
+    to {
+      background-position: 100% 0%, 0% 100%, 0% 0%, 100% 100%;
+    }
+  }
+}

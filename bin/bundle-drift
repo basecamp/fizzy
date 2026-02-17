@@ -5,6 +5,7 @@
 # Usage:
 #   bin/bundle-drift [check]   # check for drift (default subcommand)
 #   bin/bundle-drift correct   # restore alignment (Gemfile.saas.lock is authoritative)
+#   bin/bundle-drift forward   # push Gemfile.lock changes into Gemfile.saas.lock
 require "bundler"
 require "fileutils"
 
@@ -118,11 +119,63 @@ class GemfileDriftCorrector
     end
 end
 
+class GemfileDriftForwarder
+  def forward
+    drift = GemfileDriftChecker.new.check
+    return puts "\nNothing to forward." if drift.empty?
+
+    puts "\nForwarding Gemfile.lock versions into Gemfile.saas.lock...\n\n"
+
+    original_content = File.read(GEMFILE_SAAS_LOCK)
+    patched_content = original_content.dup
+
+    drift.each do |d|
+      old_entry = "#{d[:name]} (#{d[:saas]})"
+      new_entry = "#{d[:name]} (#{d[:oss]})"
+      puts "  #{old_entry} → #{new_entry}"
+      patched_content.gsub!(old_entry, new_entry)
+    end
+
+    File.write(GEMFILE_SAAS_LOCK, patched_content)
+
+    puts "\n▸ Verifying alignment"
+    new_drift = GemfileDriftChecker.new.check
+
+    if new_drift.empty?
+      puts "\n✓ Lock files are now in sync"
+      show_diff(original_content, patched_content)
+    else
+      puts "\n✗ Lock files still have drift after forwarding."
+      puts "  Restoring original Gemfile.saas.lock."
+      File.write(GEMFILE_SAAS_LOCK, original_content)
+      exit 1
+    end
+  end
+
+  private
+    def show_diff(original, patched)
+      require "tempfile"
+
+      Tempfile.create("gemfile-saas-lock-original") do |f|
+        f.write(original)
+        f.flush
+
+        diff = `diff -u #{f.path} #{GEMFILE_SAAS_LOCK} 2>/dev/null`
+        unless diff.empty?
+          puts "\nChanges made to Gemfile.saas.lock:"
+          puts diff
+        end
+      end
+    end
+end
+
 case command = ARGV[0] || "check"
 when "check"
   exit 1 unless GemfileDriftChecker.new.check.empty?
 when "correct"
   GemfileDriftCorrector.new.correct
+when "forward"
+  GemfileDriftForwarder.new.forward
 else
-  abort "Usage: bin/bundle-drift [check|correct]"
+  abort "Usage: bin/bundle-drift [check|correct|forward]"
 end

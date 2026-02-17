@@ -15,13 +15,16 @@
         <span class="for-screen-reader">Display auto-login QR code</span>
       <% end %>
 
-      <dialog class="dialog panel shadow" data-dialog-target="dialog">
+      <dialog class="dialog panel shadow" data-dialog-target="dialog" style="--panel-size: 50ch;">
+        <p class="margin-none-block-start txt-balance">
+          <strong>Scan this code to instantly log in on another device:</strong>
+        </p>
+
         <%= qr_code_image(url) %>
 
         <form method="dialog" class="margin-block-start flex justify-center">
-          <button class="btn" data-controller="tooltip">
-            <%= icon_tag "remove" %>
-            <span class="for-screen-reader">Close dialog</span>
+          <button class="btn">
+            <span>Done</span>
           </button>
         </form>
       </dialog>

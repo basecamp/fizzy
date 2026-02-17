@@ -14,7 +14,7 @@
           <li class="popup__item txt-medium">
             <%= icon_tag "marker", class: "popup__icon" %>
             <%= link_to landing_path(script_name: account.slug), class: "btn overflow-ellipsis fill-transparent popup__btn" do %>
-              <strong><%= account.name %></strong>
+              <strong class="overflow-ellipsis"><%= account.name %></strong>
             <% end %>
           </li>
         <% end %>

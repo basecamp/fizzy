@@ -95,7 +95,7 @@
     {
       "warning_type": "Remote Code Execution",
       "warning_code": 24,
-      "fingerprint": "b00571393e95a8c7d77b1ed963cfc5cc89333bc82f447cf8783549d817990305",
+      "fingerprint": "f13f9f972c3f026ab4509a66ac284b8b7c1ba6191a3c4c89d2e9fb4584478f6d",
       "check_name": "UnsafeReflection",
       "message": "Unsafe reflection method `safe_constantize` called on model attribute",
       "file": "app/models/notifier.rb",
@@ -139,5 +139,5 @@
       "note": "No user input allowed"
     }
   ],
-  "brakeman_version": "7.1.2"
+  "brakeman_version": "8.0.1"
 }

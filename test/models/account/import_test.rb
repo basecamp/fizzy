@@ -62,6 +62,67 @@ class Account::ImportTest < ActiveSupport::TestCase
     export_tempfile&.unlink
   end
 
+  test "check sets no failure_reason for unexpected errors" do
+    import = Account::Import.create!(identity: identities(:david), account: Account.create!(name: "Import Test"))
+
+    assert_raises(NoMethodError) { import.check }
+
+    assert import.failed?
+    assert_nil import.failure_reason
+  end
+
+  test "check sets failure_reason to invalid_export for non-Fizzy ZIP" do
+    target_account = Account.create!(name: "Import Test")
+    import = Account::Import.create!(identity: identities(:david), account: target_account)
+
+    # Create a ZIP with no account.json
+    tempfile = Tempfile.new([ "bad_export", ".zip" ])
+    tempfile.binmode
+    writer = ZipFile::Writer.new(tempfile)
+    writer.add_file("data/dummy.json", '{"hello": "world"}')
+    writer.close
+    tempfile.rewind
+
+    Current.set(account: target_account) do
+      import.file.attach(io: tempfile, filename: "export.zip", content_type: "application/zip")
+    end
+
+    assert_raises(Account::DataTransfer::RecordSet::IntegrityError) { import.check }
+
+    assert import.failed?
+    assert_equal "invalid_export", import.failure_reason
+  ensure
+    tempfile&.close
+    tempfile&.unlink
+  end
+
+  test "check sets failure_reason to conflict when records already exist" do
+    source_account = accounts("37s")
+    exporter = users(:david)
+    identity = exporter.identity
+
+    export = Account::Export.create!(account: source_account, user: exporter)
+    export.build
+
+    export_tempfile = Tempfile.new([ "export", ".zip" ])
+    export.file.open { |f| FileUtils.cp(f.path, export_tempfile.path) }
+
+    # Import without destroying the source, so records still exist
+    target_account = Account.create_with_owner(account: { name: "Import Test" }, owner: { identity: identity, name: exporter.name })
+    import = Account::Import.create!(identity: identity, account: target_account)
+    Current.set(account: target_account) do
+      import.file.attach(io: File.open(export_tempfile.path), filename: "export.zip", content_type: "application/zip")
+    end
+
+    assert_raises(Account::DataTransfer::RecordSet::ConflictError) { import.check }
+
+    assert import.failed?
+    assert_equal "conflict", import.failure_reason
+  ensure
+    export_tempfile&.close
+    export_tempfile&.unlink
+  end
+
   private
     def account_digest(account)
       {

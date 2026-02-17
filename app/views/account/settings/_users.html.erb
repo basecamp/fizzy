@@ -1,9 +1,9 @@
-<section class="settings__section">
+<section class="settings__section settings__section--users">
   <header>
     <h2 class="divider">People on this account</h2>
   </header>
 
-  <%= tag.div class: "flex flex-column gap settings__user-filter", data: {
+  <%= tag.div class: "settings__user-filter flex flex-column gap", data: {
     controller: "filter navigable-list",
     action: "keydown->navigable-list#navigate filter:changed->navigable-list#reset",
     navigable_list_focus_on_selection_value: true,

@@ -1,4 +1,4 @@
-<section id="<%= dom_id(card, :card_container) %>" class="card-perma" style="--card-color: <%= card.color %>;">
+<section id="<%= dom_id(card, :card_container) %>" class="card-perma card-perma--draft" style="--card-color: <%= card.color %>;">
   <% cache card do %>
     <div class="card-perma__actions card-perma__actions--left">
       <%= render "cards/container/image", card: card %>

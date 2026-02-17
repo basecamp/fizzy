@@ -1,0 +1,207 @@
+@layer components {
+  .attachment {
+    block-size: auto;
+    display: block;
+    inline-size: fit-content;
+    position: relative;
+    max-inline-size: 100%;
+
+    progress {
+      inline-size: 100%;
+      margin: auto;
+    }
+  }
+
+  .attachment__caption {
+    color: color-mix(in oklch, var(--color-ink) 66%, transparent);
+    font-size: var(--text-small);
+
+    textarea {
+      --input-border-radius: 0.3em;
+      --input-border-size: 0;
+      --input-padding: 0;
+
+      background-color: var(--input-background, transparent);
+      border: none;
+      color: inherit;
+      inline-size: 100%;
+      max-inline-size: 100%;
+      resize: none;
+      text-align: center;
+
+      &:focus {
+        --focus-ring-size: 0;
+      }
+
+      @supports (field-sizing: content) {
+        field-sizing: content;
+        inline-size: auto;
+        min-inline-size: 20ch;
+      }
+    }
+  }
+
+  .attachment__icon {
+    aspect-ratio: 4/5;
+    background-color: color-mix(var(--attachment-icon-color), transparent 90%);
+    block-size: 2.5lh;
+    border: 2px solid var(--attachment-icon-color);
+    border-block-start-width: 1ch;
+    border-radius: 0.5ch;
+    box-sizing: border-box;
+    color: var(--attachment-icon-color);
+    display: grid;
+    font-size: var(--text-small);
+    font-weight: bold;
+    inline-size: auto;
+    padding-inline: 0.5ch;
+    place-content: center;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .attachment--preview {
+    margin-inline: auto;
+    text-align: center;
+
+    img, video {
+      block-size: auto;
+      display: block;
+      margin-inline: auto;
+      max-inline-size: 100%;
+      user-select: none;
+    }
+
+    > a {
+      display: block;
+    }
+
+    .attachment__caption {
+      column-gap: 0.5ch;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-block-start: 0.5ch;
+    }
+  }
+
+  .attachment--file {
+    --attachment-icon-color: var(--color-ink-medium);
+
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1ch;
+    inline-size: 100%;
+    margin-inline: 0;
+
+    .attachment__caption {
+      display: grid;
+      flex: 1;
+      text-align: start;
+    }
+
+    .attachment__name {
+      color: var(--color-ink);
+      font-weight: bold;
+    }
+
+    /* Video attachments don't have an identifiable class, but we need to
+     * make sure the caption is always below the video */
+    &:has(video) {
+      .attachment__caption {
+        flex: none;
+        inline-size: 100%;
+      }
+    }
+  }
+
+  .attachment--psd,
+  .attachment--key,
+  .attachment--sketch,
+  .attachment--ai,
+  .attachment--eps,
+  .attachment--indd,
+  .attachment--svg,
+  .attachment--ppt,
+  .attachment--pptx {
+    --attachment-icon-color: oklch(var(--lch-red-medium));
+  }
+
+  .attachment--css,
+  .attachment--crash,
+  .attachment--php,
+  .attachment--json,
+  .attachment--htm,
+  .attachment--html,
+  .attachment--rb,
+  .attachment--erb,
+  .attachment--ts,
+  .attachment--js {
+    --attachment-icon-color: oklch(var(--lch-purple-medium));
+  }
+
+  .attachment--txt,
+  .attachment--pages,
+  .attachment--rtf,
+  .attachment--md,
+  .attachment--doc,
+  .attachment--docx {
+    --attachment-icon-color: oklch(var(--lch-blue-medium));
+  }
+
+  .attachment--csv &,
+  .attachment--numbers &,
+  .attachment--xls &,
+  .attachment--xlsx & {
+    --attachment-icon-color: oklch(var(--lch-green-medium));
+  }
+
+  .attachment__link {
+    color: var(--color-link);
+    text-decoration: underline;
+  }
+
+  /* Custom attachments such as mentions, etc. */
+  action-text-attachment[content-type^='application/vnd.actiontext'] {
+    --attachment-bg-color: transparent;
+    --attachment-image-size: 1em;
+    --attachment-text-color: currentColor;
+
+    align-items: center;
+    background: var(--attachment-bg-color);
+    border-radius: 99rem;
+    box-shadow:
+      -0.25ch 0 0 var(--attachment-bg-color),
+       0.5ch 0 0 var(--attachment-bg-color);
+    color: var(--attachment-text-color);
+    display: inline-flex;
+    gap: 0.25ch;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    vertical-align: bottom;
+    white-space: normal;
+
+    lexxy-editor & {
+      cursor: pointer;
+    }
+
+    img {
+      block-size: var(--attachment-image-size);
+      border-radius: 50%;
+      inline-size: var(--attachment-image-size);
+    }
+
+    &.node--selected {
+      --attachment-bg-color: oklch(var(--lch-blue-dark));
+      --attachment-text-color: var(--color-ink-inverted);
+    }
+  }
+
+  action-text-attachment[content-type^='application/vnd.actiontext.mention'] {
+    img {
+      object-fit: cover;
+    }
+  }
+}

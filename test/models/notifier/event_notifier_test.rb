@@ -71,18 +71,18 @@ class Notifier::EventNotifierTest < ActiveSupport::TestCase
   test "create notifications on publish for mentionees" do
     users(:kevin).mentioned_by(users(:david), at: cards(:logo))
 
-    assert_difference -> { users(:kevin).notifications.count }, +1 do
-      Notifier.for(events(:logo_published)).notify
-    end
+    notifications = Notifier.for(events(:logo_published)).notify
+
+    assert_includes notifications.map(&:user), users(:kevin)
   end
 
-  test "don'create notifications on publish for mentionees that are not watching" do
+  test "create notifications on publish for mentionees that are not watching" do
     users(:kevin).mentioned_by(users(:david), at: cards(:logo))
     cards(:logo).unwatch_by(users(:kevin))
 
-    assert_difference -> { users(:kevin).notifications.count }, +1 do
-      Notifier.for(events(:logo_published)).notify
-    end
+    notifications = Notifier.for(events(:logo_published)).notify
+
+    assert_includes notifications.map(&:user), users(:kevin)
   end
 
   test "don't create notifications on comment for mentionees" do

@@ -1,6 +1,8 @@
 @layer components {
   .qr-code {
     aspect-ratio: 1;
-    block-size: 50dvh;
+    border-radius: 1ch;
+    inline-size: clamp(20ch, 50dvh, 70ch);
+    margin-block: var(--block-space);
   }
 }

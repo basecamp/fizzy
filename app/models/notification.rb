@@ -5,32 +5,39 @@ class Notification < ApplicationRecord
   belongs_to :user
   belongs_to :creator, class_name: "User"
   belongs_to :source, polymorphic: true
+  belongs_to :card
 
   scope :unread, -> { where(read_at: nil) }
   scope :read, -> { where.not(read_at: nil) }
-  scope :ordered, -> { order(read_at: :desc, created_at: :desc) }
+  scope :ordered, -> { order(read_at: :desc, updated_at: :desc) }
+  scope :preloaded, -> { preload(:card, :creator, :account, source: [ :board, :creator, { eventable: [ :closure, :board, :assignments ] } ]) }
 
-  after_create_commit :broadcast_unread
-  after_destroy_commit :broadcast_read
+  before_validation :set_card
   after_create :bundle
+  after_update :bundle, if: :source_id_previously_changed?
 
-  scope :preloaded, -> { preload(:creator, :account, source: [ :board, :creator, { eventable: [ :closure, :board, :assignments ] } ]) }
+  after_create_commit  -> { broadcast_prepend_later_to user, :notifications, target: "notifications" }
+  after_update_commit  -> { broadcast_update }
+  after_destroy_commit -> { broadcast_remove_to user, :notifications }
 
   delegate :notifiable_target, to: :source
-  delegate :card, to: :source
 
-  def self.read_all
-    all.each { |notification| notification.read }
+  class << self
+    def read_all
+      all.each(&:read)
+    end
+
+    def unread_all
+      all.each(&:unread)
+    end
   end
 
   def read
-    update!(read_at: Time.current)
-    broadcast_read
+    update!(read_at: Time.current, unread_count: 0)
   end
 
   def unread
-    update!(read_at: nil)
-    broadcast_unread
+    update!(read_at: nil, unread_count: 1)
   end
 
   def read?
@@ -38,15 +45,19 @@ class Notification < ApplicationRecord
   end
 
   private
-    def broadcast_unread
-      broadcast_prepend_later_to user, :notifications, target: "notifications"
-    end
-
-    def broadcast_read
-      broadcast_remove_to user, :notifications
+    def set_card
+      self.card = source.card
     end
 
     def bundle
       user.bundle(self) if user.settings.bundling_emails?
+    end
+
+    def broadcast_update
+      if read?
+        broadcast_remove_to(user, :notifications)
+      else
+        broadcast_prepend_later_to(user, :notifications, target: "notifications")
+      end
     end
 end
