@@ -240,4 +240,52 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :no_content
   end
+
+  test "index as JSON avoids N+1 queries on creator and identity" do
+    # Warm up the cache and establish baseline
+    get boards_path, as: :json
+    assert_response :success
+
+    # Count queries for the actual test
+    queries = track_sql_queries do
+      get boards_path, as: :json
+    end
+
+    # Filter relevant queries for the index action
+    # Exclude current user lookup (happens during authentication)
+    board_queries = queries.select { |q| q =~ /SELECT.*FROM [`"]boards[`"]/ && q !~ /COUNT/ }
+    # The includes(creator: :identity) generates a query with IN clause for users
+    creator_queries = queries.select { |q|
+      q =~ /SELECT.*FROM [`"]users[`"]/ &&
+      q =~ /WHERE.*IN \(/  # The includes query uses IN clause
+    }
+    # The includes query for identities should also use IN clause
+    identity_queries = queries.select { |q|
+      q =~ /SELECT.*FROM [`"]identities[`"]/ &&
+      q =~ /WHERE.*IN \(/
+    }
+
+    # Should have exactly 1 query for boards, 1 for users (creators), and 1 for identities
+    assert_equal 1, board_queries.size, "Expected 1 board query, got #{board_queries.size}: #{board_queries.inspect}"
+    assert_equal 1, creator_queries.size, "Expected 1 creator query via includes, got #{creator_queries.size}: #{creator_queries.inspect}"
+    assert_equal 1, identity_queries.size, "Expected 1 identity query via includes, got #{identity_queries.size}: #{identity_queries.inspect}"
+
+    # Verify response contains creator with email address
+    json = @response.parsed_body
+    first_board = json.first
+    assert first_board["creator"].present?, "Creator should be present in response"
+    assert first_board["creator"]["email_address"].present?, "Creator email address should be present in response"
+  end
+
+  private
+    def track_sql_queries(&block)
+      queries = []
+      subscriber = ActiveSupport::Notifications.subscribe("sql.active_record") do |_, _, _, _, payload|
+        queries << payload[:sql] unless payload[:name] == "SCHEMA"
+      end
+      yield
+      queries
+    ensure
+      ActiveSupport::Notifications.unsubscribe(subscriber) if subscriber
+    end
 end
