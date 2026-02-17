@@ -7,7 +7,7 @@ image: fizzy
 # Where to deploy fizzy
 servers:
   web:
-    - 192.168.1.216
+    - 192.168.1.101
 
 # How you connect to your server
 ssh:
@@ -77,7 +77,7 @@ asset_path: /rails/public/assets
 # Configure the image builder.
 builder:
   arch: amd64
-  remote: ssh://root@192.168.1.128
+  remote: ssh://root@192.168.1.102
   local: false
   context: "."
   args:
