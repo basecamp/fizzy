@@ -1,19 +1,33 @@
-.access_tokens_table {
+.access-tokens {
   border-collapse: collapse;
+  font-size: var(--text-small);
   inline-size: 100%;
+  margin-block-end: 2lh;
 
   td, th {
-    border-block-end: 1px solid var(--color-ink-light);
-    padding-inline: var(--inline-space);
+    border-block-end: 1px solid var(--color-ink-lighter);
     text-align: start;
+
+    &:first-child {
+      inline-size: 100%;
+    }
+
+    &:not(:first-child) {
+      padding-inline-start: var(--inline-space);
+    }
+
+    &:not(:last-child) {
+      padding-inline-end: var(--inline-space);
+    }
   }
 
   th {
+    color: var(--color-ink-dark);
     font-size: var(--text-x-small);
     text-transform: uppercase;
   }
 
-  tr:nth-of-type(even) {
-    background-color: var(--color-ink-lightest);
+  td {
+    padding-block: 8px;
   }
 }
