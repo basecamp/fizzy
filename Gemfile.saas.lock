@@ -39,9 +39,9 @@ GIT
 
 GIT
   remote: https://github.com/basecamp/rails-structured-logging
-  revision: 76960cb5c15fc2b6b5f7542e05d7dcc031cef9e6
+  revision: f6633fd8fee5906d8affa2329c61de7a3450eb7e
   specs:
-    rails_structured_logging (0.2.1)
+    rails_structured_logging (0.3.0)
       json
       rails (>= 6.0.0)
 
@@ -62,7 +62,7 @@ GIT
 
 GIT
   remote: https://github.com/rails/rails.git
-  revision: 60d92e4e7dfe923528ccdccc18820ccfe841b7b8
+  revision: fef11d43f3ee2f2c185059a97fc27c7f253f1111
   branch: main
   specs:
     actioncable (8.2.0.alpha)
@@ -96,7 +96,7 @@ GIT
       rails-html-sanitizer (~> 1.6)
       useragent (~> 0.16)
     actiontext (8.2.0.alpha)
-      action_text-trix (~> 2.1.15)
+      action_text-trix (~> 2.1.16)
       actionpack (= 8.2.0.alpha)
       activerecord (= 8.2.0.alpha)
       activestorage (= 8.2.0.alpha)
@@ -294,15 +294,16 @@ GEM
       activesupport (>= 6.0.0)
       railties (>= 6.0.0)
     io-console (0.8.2)
-    irb (1.16.0)
+    irb (1.17.0)
       pp (>= 0.6.0)
+      prism (>= 1.3.0)
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
     jbuilder (2.14.1)
       actionview (>= 7.0.0)
       activesupport (>= 7.0.0)
     jmespath (1.6.2)
-    json (2.18.0)
+    json (2.18.1)
     jwt (3.1.2)
       base64
     kamal (2.10.1)
@@ -357,7 +358,7 @@ GEM
     msgpack (1.8.0)
     net-http-persistent (4.0.8)
       connection_pool (>= 2.2.4, < 4)
-    net-imap (0.6.2)
+    net-imap (0.6.3)
       date
       net-protocol
     net-pop (0.1.2)
@@ -372,19 +373,19 @@ GEM
       net-protocol
     net-ssh (7.3.0)
     nio4r (2.7.5)
-    nokogiri (1.19.0-aarch64-linux-gnu)
+    nokogiri (1.19.1-aarch64-linux-gnu)
       racc (~> 1.4)
-    nokogiri (1.19.0-aarch64-linux-musl)
+    nokogiri (1.19.1-aarch64-linux-musl)
       racc (~> 1.4)
-    nokogiri (1.19.0-arm-linux-gnu)
+    nokogiri (1.19.1-arm-linux-gnu)
       racc (~> 1.4)
-    nokogiri (1.19.0-arm-linux-musl)
+    nokogiri (1.19.1-arm-linux-musl)
       racc (~> 1.4)
-    nokogiri (1.19.0-arm64-darwin)
+    nokogiri (1.19.1-arm64-darwin)
       racc (~> 1.4)
-    nokogiri (1.19.0-x86_64-linux-gnu)
+    nokogiri (1.19.1-x86_64-linux-gnu)
       racc (~> 1.4)
-    nokogiri (1.19.0-x86_64-linux-musl)
+    nokogiri (1.19.1-x86_64-linux-musl)
       racc (~> 1.4)
     openssl (4.0.0)
     ostruct (0.6.3)
@@ -398,7 +399,7 @@ GEM
     pp (0.6.3)
       prettyprint
     prettyprint (0.2.0)
-    prism (1.8.0)
+    prism (1.9.0)
     prometheus-client-mmap (1.4.0)
       base64
       bigdecimal
@@ -441,7 +442,7 @@ GEM
       nio4r (~> 2.0)
     raabro (1.4.0)
     racc (1.8.1)
-    rack (3.2.4)
+    rack (3.2.5)
     rack-mini-profiler (4.0.1)
       rack (>= 1.2.0)
     rack-session (2.1.1)
@@ -463,7 +464,7 @@ GEM
     rake-compiler-dock (1.9.1)
     rb_sys (0.9.117)
       rake-compiler-dock (= 1.9.1)
-    rdoc (7.0.3)
+    rdoc (7.2.0)
       erb
       psych (>= 4.0.0)
       tsort

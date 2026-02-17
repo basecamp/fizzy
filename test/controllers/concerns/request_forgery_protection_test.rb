@@ -8,11 +8,13 @@ class RequestForgeryProtectionTest < ActionDispatch::IntegrationTest
     ActionController::Base.allow_forgery_protection = true
 
     @original_force_ssl = Rails.configuration.force_ssl
+    @original_secure_protocol = ActionDispatch::Http::URL.secure_protocol
   end
 
   teardown do
     ActionController::Base.allow_forgery_protection = @original_allow_forgery_protection
     Rails.configuration.force_ssl = @original_force_ssl
+    ActionDispatch::Http::URL.secure_protocol = @original_secure_protocol
   end
 
   test "JSON request succeeds with missing Sec-Fetch-Site header" do
@@ -38,6 +40,7 @@ class RequestForgeryProtectionTest < ActionDispatch::IntegrationTest
 
   test "HTTP request fails with missing Sec-Fetch-Site header when force_ssl is enabled" do
     Rails.configuration.force_ssl = true
+    ActionDispatch::Http::URL.secure_protocol = true
 
     assert_no_difference -> { Board.count } do
       post boards_path,

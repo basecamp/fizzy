@@ -7,14 +7,10 @@ module RequestForgeryProtection
 
   private
     def verified_via_header_only?
-      super || allowed_api_request? || allowed_insecure_context_request?
+      super || allowed_api_request?
     end
 
     def allowed_api_request?
       sec_fetch_site_value.nil? && request.format.json?
-    end
-
-    def allowed_insecure_context_request?
-      sec_fetch_site_value.nil? && !request.ssl? && !Rails.configuration.force_ssl
     end
 end
