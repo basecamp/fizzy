@@ -8,6 +8,8 @@ module CurrentRequest
       Current.user_agent  = request.user_agent
       Current.ip_address  = request.ip
       Current.referrer    = request.referrer
+
+      ActionPack::WebAuthn::Current.host = request.host
     end
   end
 end
