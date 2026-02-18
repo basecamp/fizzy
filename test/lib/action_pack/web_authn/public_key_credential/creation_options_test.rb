@@ -43,6 +43,7 @@ class ActionPack::WebAuthn::PublicKeyCredential::CreationOptionsTest < ActiveSup
     ], @options.as_json[:pubKeyCredParams]
 
     assert_equal "preferred", @options.as_json[:authenticatorSelection][:residentKey]
+    assert_equal false, @options.as_json[:authenticatorSelection][:requireResidentKey]
     assert_equal "preferred", @options.as_json[:authenticatorSelection][:userVerification]
   end
 
@@ -56,6 +57,7 @@ class ActionPack::WebAuthn::PublicKeyCredential::CreationOptionsTest < ActiveSup
     )
 
     assert_equal "required", options.as_json[:authenticatorSelection][:residentKey]
+    assert_equal true, options.as_json[:authenticatorSelection][:requireResidentKey]
   end
 
   test "as_json excludes excludeCredentials when empty" do

@@ -6,6 +6,8 @@ class SessionsController < ApplicationController
   layout "public"
 
   def new
+    set_webauthn_host
+    @request_options = passkey_request_options
   end
 
   def create
@@ -65,6 +67,16 @@ class SessionsController < ApplicationController
           format.html { redirect_to new_session_path, alert: "Something went wrong" }
           format.json { render json: { message: "Something went wrong" }, status: :unprocessable_entity }
         end
+      end
+    end
+
+    def set_webauthn_host
+      ActionPack::WebAuthn::Current.host = request.host
+    end
+
+    def passkey_request_options
+      ActionPack::WebAuthn::PublicKeyCredential::RequestOptions.new(credentials: []).tap do |options|
+        session[:webauthn_challenge] = options.challenge
       end
     end
 end

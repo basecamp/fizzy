@@ -157,6 +157,7 @@ Rails.application.routes.draw do
       resources :transfers
       resource :magic_link
       resource :menu
+      resource :passkey, only: :create
     end
   end
 
