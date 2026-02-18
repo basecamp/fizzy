@@ -14,11 +14,11 @@ class Users::CredentialsController < ApplicationController
     Identity::Credential.register(
       identity: Current.identity,
       name: credential_params[:name],
-      client_data_json: credential_params.dig(:response, :client_data_json),
-      attestation_object: credential_params.dig(:response, :attestation_object),
+      client_data_json: credential_params[:client_data_json],
+      attestation_object: credential_params[:attestation_object],
       challenge: session.delete(:webauthn_challenge),
       origin: request.base_url,
-      transports: Array(credential_params.dig(:response, :transports))
+      transports: Array(credential_params[:transports])
     )
 
     redirect_to user_credentials_path(Current.user)
@@ -35,6 +35,6 @@ class Users::CredentialsController < ApplicationController
     end
 
     def credential_params
-      params.expect(credential: [ :name, response: [ :client_data_json, :attestation_object, transports: [] ] ])
+      params.expect(credential: [ :name, :client_data_json, :attestation_object, transports: [] ])
     end
 end
