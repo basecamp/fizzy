@@ -6,8 +6,8 @@ class SessionsController < ApplicationController
   layout "public"
 
   def new
-    set_webauthn_host
-    @request_options = passkey_request_options
+    @request_options = Identity::Credential.request_options
+    session[:webauthn_challenge] = @request_options.challenge
   end
 
   def create
@@ -70,13 +70,4 @@ class SessionsController < ApplicationController
       end
     end
 
-    def set_webauthn_host
-      ActionPack::WebAuthn::Current.host = request.host
-    end
-
-    def passkey_request_options
-      ActionPack::WebAuthn::PublicKeyCredential::RequestOptions.new(credentials: []).tap do |options|
-        session[:webauthn_challenge] = options.challenge
-      end
-    end
 end
