@@ -25,7 +25,7 @@ export default class extends Controller {
     for (const transport of credential.response.getTransports?.() || []) {
       const input = document.createElement("input")
       input.type = "hidden"
-      input.name = "credential[response][transports][]"
+      input.name = "credential[transports][]"
       input.value = transport
       this.element.appendChild(input)
     }
