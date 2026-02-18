@@ -13,6 +13,15 @@
     }
   }
 
+  .settings--profile {
+    @media (min-width: 960px) {
+      &:has(> .settings__panel:only-child) {
+        grid-template-columns: minmax(0, 50ch);
+        justify-content: center;
+      }
+    }
+  }
+
   /* Sections & Panels
   /* -------------------------------------------------------------------------- */
 
