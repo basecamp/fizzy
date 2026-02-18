@@ -96,6 +96,27 @@ class Account::ImportTest < ActiveSupport::TestCase
     tempfile&.unlink
   end
 
+  test "check sets failure_reason to invalid_export for non-ZIP file" do
+    target_account = Account.create!(name: "Import Test")
+    import = Account::Import.create!(identity: identities(:david), account: target_account)
+
+    tempfile = Tempfile.new([ "not_a_zip", ".zip" ])
+    tempfile.write("this is not a zip file at all")
+    tempfile.rewind
+
+    Current.set(account: target_account) do
+      import.file.attach(io: tempfile, filename: "export.zip", content_type: "application/zip")
+    end
+
+    assert_raises(ZipFile::InvalidFileError) { import.check }
+
+    assert import.failed?
+    assert_equal "invalid_export", import.failure_reason
+  ensure
+    tempfile&.close
+    tempfile&.unlink
+  end
+
   test "check sets failure_reason to conflict when records already exist" do
     source_account = accounts("37s")
     exporter = users(:david)

@@ -119,6 +119,17 @@ class ZipFileTest < ActiveSupport::TestCase
     end
   end
 
+  test "reader raises InvalidFileError for non-zip file" do
+    tempfile = Tempfile.new([ "not_a_zip", ".zip" ])
+    tempfile.write("this is not a zip file at all")
+    tempfile.rewind
+
+    assert_raises(ZipFile::InvalidFileError) { ZipFile::Reader.new(tempfile) }
+  ensure
+    tempfile&.close
+    tempfile&.unlink
+  end
+
   private
     def create_test_zip(files)
       tempfile = Tempfile.new([ "test", ".zip" ])

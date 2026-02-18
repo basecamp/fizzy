@@ -2,7 +2,7 @@ class ZipFile::Reader
   def initialize(io)
     @io = io
     @reader = ZipKit::FileReader.read_zip_structure(io: io)
-  rescue ZipKit::FileReader::InvalidStructure => e
+  rescue ZipKit::FileReader::ReadError, ZipKit::FileReader::MissingEOCD, ZipKit::FileReader::UnsupportedFeature => e
     raise ZipFile::InvalidFileError, e.message
   end
 
