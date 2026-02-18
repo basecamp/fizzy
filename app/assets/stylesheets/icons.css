@@ -62,6 +62,7 @@
   .icon--history { --svg: url("history.svg "); }
   .icon--home { --svg: url("home.svg "); }
   .icon--install-edge { --svg: url("install-edge.svg "); }
+  .icon--key { --svg: url("key.svg "); }
   .icon--lifebuoy { --svg: url("lifebuoy.svg "); }
   .icon--lock { --svg: url("lock.svg "); }
   .icon--logout { --svg: url("logout.svg "); }

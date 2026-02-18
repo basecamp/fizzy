@@ -6,7 +6,7 @@
     <div class="flex flex-column gap position-relative">
       <% if Current.user == @user %>
         <%= link_to user_credentials_path(@user), class: "user-edit-link btn", style: "inset: 0 auto auto 0", data: { controller: "tooltip" } do %>
-          🔑
+          <%= icon_tag "key" %>
           <span class="for-screen-reader">Manage passkeys</span>
         <% end %>
 
