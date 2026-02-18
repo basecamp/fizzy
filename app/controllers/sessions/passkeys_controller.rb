@@ -14,11 +14,7 @@ class Sessions::PasskeysController < ApplicationController
     )
 
     if credential
-      start_new_session_for credential.identity
-      respond_to do |format|
-        format.html { redirect_to after_authentication_url }
-        format.json { render json: { session_token: session_token } }
-      end
+      authentication_succeeded(credential.identity)
     else
       authentication_failed
     end
@@ -27,6 +23,15 @@ class Sessions::PasskeysController < ApplicationController
   private
     def response_params
       params.expect(response: [ :client_data_json, :authenticator_data, :signature ])
+    end
+
+    def authentication_succeeded(identity)
+      start_new_session_for identity
+
+      respond_to do |format|
+        format.html { redirect_to after_authentication_url }
+        format.json { render json: { session_token: session_token } }
+      end
     end
 
     def authentication_failed
