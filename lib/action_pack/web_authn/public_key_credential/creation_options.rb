@@ -95,6 +95,7 @@ class ActionPack::WebAuthn::PublicKeyCredential::CreationOptions < ActionPack::W
       ],
       authenticatorSelection: {
         residentKey: @resident_key.to_s,
+        requireResidentKey: @resident_key == :required,
         userVerification: user_verification.to_s
       }
     }

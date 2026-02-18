@@ -1,6 +1,9 @@
 <% @page_title = "Enter your email" %>
 
-<div class="panel panel--centered flex flex-column gap-half" data-controller="passkey">
+<div class="panel panel--centered flex flex-column gap-half" data-controller="passkey"
+  data-passkey-public-key-value="<%= @request_options.as_json.to_json %>"
+  data-passkey-url-value="<%= session_passkey_path %>"
+  data-passkey-csrf-token-value="<%= form_authenticity_token %>">
   <h1 class="txt-x-large font-weight-black margin-block-end">Get into Fizzy</h1>
 
   <%= form_with url: session_path, class: "flex flex-column gap-half txt-medium" do |form| %>
@@ -11,16 +14,17 @@
     </div>
 
     <% if Account.accepting_signups? %>
-      <p><strong>New here?</strong> <%= link_to "Sign up", new_signup_path %> to create an account. <strong>Already have an account?</strong> Enter your email and we’ll get you signed in.</p>
+      <p><strong>New here?</strong> <%= link_to "Sign up", new_signup_path %> to create an account. <strong>Already have an account?</strong> Enter your email and we'll get you signed in.</p>
     <% else %>
-      <p>Enter your email and we’ll get you signed in.</p>
+      <p>Enter your email and we'll get you signed in.</p>
     <% end %>
 
     <button type="submit" id="log_in" class="btn btn--link center txt-medium">
-      <span>Let’s go</span>
+      <span>Let's go</span>
       <%= icon_tag "arrow-right" %>
     </button>
   <% end %>
+
 </div>
 
 <% content_for :footer do %>
