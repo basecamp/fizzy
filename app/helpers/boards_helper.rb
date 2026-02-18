@@ -1,6 +1,25 @@
 module BoardsHelper
   def link_back_to_board(board)
-    back_link_to board.name, board, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click click->turbo-navigation#backIfSamePath"
+    path = safe_return_to || board
+    label = params[:return_label].presence || board.name
+    back_link_to(
+      label,
+      path,
+      "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click click->turbo-navigation#backIfSamePath"
+    )
+  end
+
+  private
+
+  def safe_return_to
+    return unless params[:return_to].present?
+
+    uri = URI.parse(params[:return_to])
+    return unless uri.host.nil? # prevents open redirect
+
+    params[:return_to]
+  rescue URI::InvalidURIError
+    nil
   end
 
   def link_to_edit_board(board)
