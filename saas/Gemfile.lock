@@ -51,6 +51,9 @@ GEM
       rails-dom-testing (~> 2.2)
       rails-html-sanitizer (~> 1.6)
       useragent (~> 0.16)
+    actionpack-xml_parser (2.0.1)
+      actionpack (>= 5.0)
+      railties (>= 5.0)
     actiontext (8.1.1)
       action_text-trix (~> 2.1.15)
       actionpack (= 8.1.1)
@@ -282,6 +285,7 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
+  actionpack-xml_parser
   activeresource
   queenbee!
   rails_structured_logging!
