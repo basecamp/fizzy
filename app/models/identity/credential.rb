@@ -36,6 +36,8 @@ class Identity::Credential < ApplicationRecord
         credential_id: public_key_credential.id,
         public_key: public_key_credential.public_key.to_der,
         sign_count: public_key_credential.sign_count,
+        aaguid: public_key_credential.aaguid,
+        backed_up: public_key_credential.backed_up,
         transports: public_key_credential.transports
       )
     end
@@ -50,7 +52,7 @@ class Identity::Credential < ApplicationRecord
       challenge: challenge,
       origin: origin
     )
-    update!(sign_count: pkc.sign_count)
+    update!(sign_count: pkc.sign_count, backed_up: pkc.backed_up)
     self
   rescue ActionPack::WebAuthn::Authenticator::Response::InvalidResponseError
     nil
