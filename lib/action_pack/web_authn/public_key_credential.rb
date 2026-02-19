@@ -1,5 +1,5 @@
 class ActionPack::WebAuthn::PublicKeyCredential
-  attr_reader :id, :public_key, :sign_count, :transports, :owner
+  attr_reader :id, :public_key, :sign_count, :aaguid, :backed_up, :transports, :owner
 
   class << self
     def create(client_data_json:, attestation_object:, challenge:, origin:, transports: [], owner: nil)
@@ -14,16 +14,20 @@ class ActionPack::WebAuthn::PublicKeyCredential
         id: response.attestation.credential_id,
         public_key: response.attestation.public_key,
         sign_count: response.attestation.sign_count,
+        aaguid: response.attestation.aaguid,
+        backed_up: response.attestation.backed_up?,
         transports: transports,
         owner: owner
       )
     end
   end
 
-  def initialize(id:, public_key:, sign_count:, transports: [], owner: nil)
+  def initialize(id:, public_key:, sign_count:, aaguid: nil, backed_up: nil, transports: [], owner: nil)
     @id = id
     @public_key = public_key
     @sign_count = sign_count
+    @aaguid = aaguid
+    @backed_up = backed_up
     @transports = transports
     @owner = owner
   end
@@ -39,5 +43,6 @@ class ActionPack::WebAuthn::PublicKeyCredential
     response.validate!(challenge: challenge, origin: origin)
 
     @sign_count = response.authenticator_data.sign_count
+    @backed_up = response.authenticator_data.backed_up?
   end
 end
