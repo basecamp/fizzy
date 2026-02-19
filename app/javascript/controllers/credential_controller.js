@@ -19,7 +19,7 @@ export default class extends Controller {
   }
 
   submitCredential(credential) {
-    this.clientDataJSONTarget.value = this.bufferToBase64url(credential.response.clientDataJSON)
+    this.clientDataJSONTarget.value = new TextDecoder().decode(credential.response.clientDataJSON)
     this.attestationObjectTarget.value = this.bufferToBase64url(credential.response.attestationObject)
 
     for (const transport of credential.response.getTransports?.() || []) {

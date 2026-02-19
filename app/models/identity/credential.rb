@@ -24,7 +24,7 @@ class Identity::Credential < ApplicationRecord
 
     def register(identity:, name:, client_data_json:, attestation_object:, challenge:, origin:, transports: [])
       public_key_credential = ActionPack::WebAuthn::PublicKeyCredential.create(
-        client_data_json: Base64.urlsafe_decode64(client_data_json),
+        client_data_json: client_data_json,
         attestation_object: Base64.urlsafe_decode64(attestation_object),
         challenge: challenge,
         origin: origin,
