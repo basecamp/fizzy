@@ -10,6 +10,7 @@ module CurrentRequest
       Current.referrer    = request.referrer
 
       ActionPack::WebAuthn::Current.host = request.host
+      ActionPack::WebAuthn::Current.origin = request.base_url
     end
   end
 end

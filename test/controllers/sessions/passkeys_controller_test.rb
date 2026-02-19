@@ -44,7 +44,7 @@ class Sessions::PasskeysControllerTest < ActionDispatch::IntegrationTest
       challenge = session[:webauthn_challenge]
 
       params = assertion_params(challenge: challenge)
-      params[:response][:signature] = Base64.urlsafe_encode64("invalid", padding: false)
+      params[:passkey][:signature] = Base64.urlsafe_encode64("invalid", padding: false)
 
       post session_passkey_url, params: params
 
@@ -59,8 +59,8 @@ class Sessions::PasskeysControllerTest < ActionDispatch::IntegrationTest
       get new_session_url
 
       post session_passkey_url, params: {
-        credential_id: "nonexistent",
-        response: {
+        passkey: {
+          id: "nonexistent",
           client_data_json: Base64.urlsafe_encode64("{}", padding: false),
           authenticator_data: Base64.urlsafe_encode64("x", padding: false),
           signature: Base64.urlsafe_encode64("x", padding: false)
@@ -89,8 +89,8 @@ class Sessions::PasskeysControllerTest < ActionDispatch::IntegrationTest
       get new_session_url
 
       post session_passkey_url(format: :json), params: {
-        credential_id: "nonexistent",
-        response: {
+        passkey: {
+          id: "nonexistent",
           client_data_json: Base64.urlsafe_encode64("{}", padding: false),
           authenticator_data: Base64.urlsafe_encode64("x", padding: false),
           signature: Base64.urlsafe_encode64("x", padding: false)
@@ -116,8 +116,8 @@ class Sessions::PasskeysControllerTest < ActionDispatch::IntegrationTest
       signature = sign(authenticator_data, client_data_json)
 
       {
-        credential_id: @credential.credential_id,
-        response: {
+        passkey: {
+          id: @credential.credential_id,
           client_data_json: client_data_json,
           authenticator_data: Base64.urlsafe_encode64(authenticator_data, padding: false),
           signature: Base64.urlsafe_encode64(signature, padding: false)

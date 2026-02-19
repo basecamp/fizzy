@@ -41,10 +41,10 @@ export default class extends Controller {
 
     const fields = {
       authenticity_token: this.csrfTokenValue,
-      credential_id: credential.id,
-      "response[client_data_json]": new TextDecoder().decode(credential.response.clientDataJSON),
-      "response[authenticator_data]": this.#bufferToBase64url(credential.response.authenticatorData),
-      "response[signature]": this.#bufferToBase64url(credential.response.signature)
+      "passkey[id]": credential.id,
+      "passkey[client_data_json]": new TextDecoder().decode(credential.response.clientDataJSON),
+      "passkey[authenticator_data]": this.#bufferToBase64url(credential.response.authenticatorData),
+      "passkey[signature]": this.#bufferToBase64url(credential.response.signature)
     }
 
     for (const [name, value] of Object.entries(fields)) {
