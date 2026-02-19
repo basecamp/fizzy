@@ -4,7 +4,10 @@ class Users::RolesController < ApplicationController
 
   def update
     @user.update!(role_params)
-    redirect_to account_settings_path
+    respond_to do |format|
+      format.html { redirect_to account_settings_path }
+      format.json { head :no_content }
+    end
   end
 
   private

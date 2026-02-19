@@ -1,0 +1,149 @@
+#compdef fizzy
+# fizzy zsh completion
+# Place in a directory in your $fpath (e.g., ~/.zsh/completions/)
+
+_fizzy() {
+  local -a commands
+  commands=(
+    'auth:Authentication (login, logout, status)'
+    'config:Configuration management'
+    'help:Show help'
+    'version:Show version'
+    'boards:List boards in the account'
+    'cards:List or filter cards'
+    'columns:List columns on a board'
+    'comments:List comments on a card'
+    'reactions:List reactions on a comment'
+    'notifications:List notifications'
+    'people:List users in account'
+    'search:Search cards'
+    'show:Show card or board details'
+    'tags:List tags'
+    'card:Manage cards (create, update, delete, image)'
+    'board:Manage boards (create, update, delete, show)'
+    'column:Manage columns on a board'
+    'close:Close a card'
+    'reopen:Reopen a closed card'
+    'triage:Move card to a column'
+    'untriage:Move card back to triage'
+    'postpone:Move card to "not now"'
+    'comment:Add, edit, or delete comments'
+    'assign:Assign a card to someone'
+    'tag:Add a tag to a card'
+    'watch:Subscribe to card notifications'
+    'unwatch:Unsubscribe from card'
+    'gild:Mark card as golden'
+    'ungild:Remove golden status'
+    'step:Manage steps (checklist items) on a card'
+    'react:Manage reactions on comments'
+  )
+
+  local -a auth_commands
+  auth_commands=(
+    'login:Authenticate via OAuth'
+    'logout:Clear credentials'
+    'status:Show auth status'
+    'refresh:Check token status'
+  )
+
+  local -a config_commands
+  config_commands=(
+    'list:List all configuration'
+    'get:Get a configuration value'
+    'set:Set a configuration value'
+    'unset:Remove a configuration value'
+    'path:Show configuration paths'
+  )
+
+  _arguments -C \
+    '(-j --json)'{-j,--json}'[Force JSON output]' \
+    '(-m --md)'{-m,--md}'[Force Markdown output]' \
+    '(-q --quiet --data)'{-q,--quiet,--data}'[Minimal output]' \
+    '(-v --verbose)'{-v,--verbose}'[Debug output]' \
+    '(-b --board --in)'{-b,--board,--in}'[Board ID or name]:board:' \
+    '(-a --account)'{-a,--account}'[Account slug]:account:' \
+    '(-h --help)'{-h,--help}'[Show help]' \
+    '1: :->command' \
+    '*::arg:->args'
+
+  case "$state" in
+    command)
+      _describe -t commands 'fizzy command' commands
+      ;;
+    args)
+      # In args state, $words is shifted so $words[1] is the subcommand
+      case "$words[1]" in
+        auth)
+          _describe -t auth_commands 'auth subcommand' auth_commands
+          ;;
+        config)
+          _describe -t config_commands 'config subcommand' config_commands
+          ;;
+        card)
+          # Handle nested card subcommands
+          if [[ ${#words[@]} -ge 3 && "$words[2]" == "image" ]]; then
+            local card_image_commands=(
+              'delete:Remove header image from card'
+            )
+            _describe -t card_image_commands 'card image subcommand' card_image_commands
+          else
+            local card_commands=(
+              'update:Update a card'
+              'delete:Permanently delete a card'
+              'image:Manage card header image'
+            )
+            _describe -t card_commands 'card subcommand' card_commands
+          fi
+          ;;
+        board)
+          local board_commands=(
+            'create:Create a new board'
+            'update:Update a board'
+            'delete:Delete a board'
+            'show:Show board details'
+          )
+          _describe -t board_commands 'board subcommand' board_commands
+          ;;
+        column)
+          local column_commands=(
+            'create:Create a column'
+            'update:Update a column'
+            'delete:Delete a column'
+            'show:Show column details'
+          )
+          _describe -t column_commands 'column subcommand' column_commands
+          ;;
+        notifications)
+          local notification_commands=(
+            'read:Mark notification as read'
+            'unread:Mark notification as unread'
+          )
+          _describe -t notification_commands 'notifications subcommand' notification_commands
+          ;;
+        comment)
+          local comment_commands=(
+            'edit:Update a comment'
+            'delete:Delete a comment'
+          )
+          _describe -t comment_commands 'comment subcommand' comment_commands
+          ;;
+        step)
+          local step_commands=(
+            'show:Show step details'
+            'update:Update a step'
+            'delete:Delete a step'
+          )
+          _describe -t step_commands 'step subcommand' step_commands
+          ;;
+        react)
+          local react_commands=(
+            'delete:Delete a reaction'
+          )
+          _describe -t react_commands 'react subcommand' react_commands
+          ;;
+      esac
+      ;;
+  esac
+}
+
+_fizzy "$@"
