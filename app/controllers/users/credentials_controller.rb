@@ -1,22 +1,32 @@
 class Users::CredentialsController < ApplicationController
-  before_action :set_credential, only: :destroy
+  before_action :set_credential, only: %i[ edit update destroy ]
 
   def index
     @credentials = Current.identity.credentials.order(name: :asc, created_at: :desc)
   end
 
   def new
+    @disable_view_transition = true
     @creation_options = Identity::Credential.creation_options(identity: Current.identity, display_name: Current.user.name)
     session[:webauthn_challenge] = @creation_options.challenge
   end
 
   def create
-    Current.identity.credentials.register(
+    credential = Current.identity.credentials.register(
       passkey: passkey_params,
-      challenge: session.delete(:webauthn_challenge),
-      name: credential_params[:name]
+      challenge: session.delete(:webauthn_challenge)
     )
 
+    render json: { location: edit_user_credential_path(Current.user, credential, created: true) }
+  rescue ActionPack::WebAuthn::Authenticator::Response::InvalidResponseError => error
+    render json: { error: error.message }, status: :unprocessable_entity
+  end
+
+  def edit
+  end
+
+  def update
+    @credential.update!(credential_params)
     redirect_to user_credentials_path(Current.user)
   end
 
