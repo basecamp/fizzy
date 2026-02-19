@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { base64urlToBuffer, bufferToBase64url } from "helpers/base64url_helpers"
 
 export default class extends Controller {
   static values = { publicKey: Object, url: String, csrfToken: String }
@@ -43,8 +44,8 @@ export default class extends Controller {
       authenticity_token: this.csrfTokenValue,
       "passkey[id]": credential.id,
       "passkey[client_data_json]": new TextDecoder().decode(credential.response.clientDataJSON),
-      "passkey[authenticator_data]": this.#bufferToBase64url(credential.response.authenticatorData),
-      "passkey[signature]": this.#bufferToBase64url(credential.response.signature)
+      "passkey[authenticator_data]": bufferToBase64url(credential.response.authenticatorData),
+      "passkey[signature]": bufferToBase64url(credential.response.signature)
     }
 
     for (const [name, value] of Object.entries(fields)) {
@@ -62,31 +63,18 @@ export default class extends Controller {
   #prepareOptions(options) {
     const prepared = {
       ...options,
-      challenge: this.#base64urlToBuffer(options.challenge)
+      challenge: base64urlToBuffer(options.challenge)
     }
 
     if (options.allowCredentials?.length) {
       prepared.allowCredentials = options.allowCredentials.map(cred => ({
         ...cred,
-        id: this.#base64urlToBuffer(cred.id)
+        id: base64urlToBuffer(cred.id)
       }))
     } else {
       delete prepared.allowCredentials
     }
 
     return prepared
-  }
-
-  #base64urlToBuffer(base64url) {
-    const base64 = base64url.replace(/-/g, "+").replace(/_/g, "/")
-    const padding = "=".repeat((4 - base64.length % 4) % 4)
-    const binary = atob(base64 + padding)
-    return Uint8Array.from(binary, c => c.charCodeAt(0)).buffer
-  }
-
-  #bufferToBase64url(buffer) {
-    const bytes = new Uint8Array(buffer)
-    const binary = String.fromCharCode(...bytes)
-    return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "")
   }
 }
