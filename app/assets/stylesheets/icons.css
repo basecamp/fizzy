@@ -27,6 +27,7 @@
   .icon--art { --svg: url("art.svg "); }
   .icon--assigned { --svg: url("assigned.svg "); }
   .icon--attachment { --svg: url("attachment.svg "); }
+  .icon--authentication { --svg: url("authentication.svg "); }
   .icon--bell-alert { --svg: url("bell-alert.svg "); }
   .icon--bell-off { --svg: url("bell-off.svg "); }
   .icon--bell { --svg: url("bell.svg "); }
@@ -62,7 +63,6 @@
   .icon--history { --svg: url("history.svg "); }
   .icon--home { --svg: url("home.svg "); }
   .icon--install-edge { --svg: url("install-edge.svg "); }
-  .icon--key { --svg: url("key.svg "); }
   .icon--lifebuoy { --svg: url("lifebuoy.svg "); }
   .icon--lock { --svg: url("lock.svg "); }
   .icon--logout { --svg: url("logout.svg "); }
