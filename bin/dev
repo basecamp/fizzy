@@ -23,7 +23,7 @@ if [ "$USE_TAILSCALE" = "1" ]; then
     exit 1
   fi
 
-  TS_STATUS=$(tailscale status --self --json 2>&1)
+  TS_STATUS=$(tailscale status --self --json 2>/dev/null)
   if [ $? -ne 0 ]; then
     echo "Error: tailscale not logged in" >&2
     exit 1
