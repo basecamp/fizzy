@@ -1,3 +1,3 @@
 class ActionPack::WebAuthn::Current < ActiveSupport::CurrentAttributes
-  attribute :host
+  attribute :host, :origin
 end

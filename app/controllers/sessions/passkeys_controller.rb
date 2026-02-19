@@ -5,12 +5,8 @@ class Sessions::PasskeysController < ApplicationController
 
   def create
     credential = Identity::Credential.authenticate(
-      id: params.expect(:credential_id),
-      client_data_json: response_params[:client_data_json],
-      authenticator_data: response_params[:authenticator_data],
-      signature: response_params[:signature],
-      challenge: session.delete(:webauthn_challenge),
-      origin: request.base_url
+      passkey: passkey_params,
+      challenge: session.delete(:webauthn_challenge)
     )
 
     if credential
@@ -21,8 +17,8 @@ class Sessions::PasskeysController < ApplicationController
   end
 
   private
-    def response_params
-      params.expect(response: [ :client_data_json, :authenticator_data, :signature ])
+    def passkey_params
+      params.expect(passkey: [ :id, :client_data_json, :authenticator_data, :signature ])
     end
 
     def authentication_succeeded(identity)

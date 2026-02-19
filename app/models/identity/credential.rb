@@ -18,21 +18,17 @@ class Identity::Credential < ApplicationRecord
       ActionPack::WebAuthn::PublicKeyCredential::RequestOptions.new(credentials: credentials.map(&:to_public_key_credential))
     end
 
-    def authenticate(id:, **params)
-      find_by(credential_id: id)&.authenticate(**params)
-    end
-
-    def register(identity:, name:, client_data_json:, attestation_object:, challenge:, origin:, transports: [])
+    def register(passkey:, challenge:, origin: ActionPack::WebAuthn::Current.origin, **attributes)
       public_key_credential = ActionPack::WebAuthn::PublicKeyCredential.create(
-        client_data_json: client_data_json,
-        attestation_object: Base64.urlsafe_decode64(attestation_object),
+        client_data_json: passkey[:client_data_json],
+        attestation_object: Base64.urlsafe_decode64(passkey[:attestation_object]),
         challenge: challenge,
         origin: origin,
-        transports: transports
+        transports: Array(passkey[:transports])
       )
 
-      identity.credentials.create!(
-        name: name,
+      create!(
+        **attributes,
         credential_id: public_key_credential.id,
         public_key: public_key_credential.public_key.to_der,
         sign_count: public_key_credential.sign_count,
@@ -41,14 +37,18 @@ class Identity::Credential < ApplicationRecord
         transports: public_key_credential.transports
       )
     end
+
+    def authenticate(passkey:, challenge:, origin: ActionPack::WebAuthn::Current.origin)
+      find_by(credential_id: passkey[:id])&.authenticate(passkey: passkey, challenge: challenge, origin: origin)
+    end
   end
 
-  def authenticate(client_data_json:, authenticator_data:, signature:, challenge:, origin:)
+  def authenticate(passkey:, challenge:, origin: ActionPack::WebAuthn::Current.origin)
     pkc = to_public_key_credential
     pkc.authenticate(
-      client_data_json: client_data_json,
-      authenticator_data: Base64.urlsafe_decode64(authenticator_data),
-      signature: Base64.urlsafe_decode64(signature),
+      client_data_json: passkey[:client_data_json],
+      authenticator_data: Base64.urlsafe_decode64(passkey[:authenticator_data]),
+      signature: Base64.urlsafe_decode64(passkey[:signature]),
       challenge: challenge,
       origin: origin
     )
