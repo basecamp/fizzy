@@ -57,7 +57,7 @@ class ActionPack::WebAuthn::Authenticator::Data
   BACKUP_STATE_FLAG = 0x10
   ATTESTED_CREDENTIAL_DATA_FLAG = 0x40
 
-  attr_reader :bytes, :relying_party_id_hash, :flags, :sign_count, :credential_id, :public_key_bytes
+  attr_reader :bytes, :relying_party_id_hash, :flags, :sign_count, :aaguid, :credential_id, :public_key_bytes
 
   class << self
     def wrap(data)
@@ -81,10 +81,13 @@ class ActionPack::WebAuthn::Authenticator::Data
       sign_count = bytes[position, SIGN_COUNT_LENGTH].pack("C*").unpack1("N")
       position += SIGN_COUNT_LENGTH
 
+      aaguid = nil
       credential_id = nil
       public_key_bytes = nil
 
       if flags & ATTESTED_CREDENTIAL_DATA_FLAG != 0
+        aaguid_bytes = bytes[position, AAGUID_LENGTH].pack("C*")
+        aaguid = aaguid_bytes.unpack("H8H4H4H4H12").join("-")
         position += AAGUID_LENGTH
 
         credential_id_length = bytes[position, CREDENTIAL_ID_LENGTH_BYTES].pack("C*").unpack1("n")
@@ -101,17 +104,19 @@ class ActionPack::WebAuthn::Authenticator::Data
         relying_party_id_hash: relying_party_id_hash,
         flags: flags,
         sign_count: sign_count,
+        aaguid: aaguid,
         credential_id: credential_id,
         public_key_bytes: public_key_bytes
       )
     end
   end
 
-  def initialize(bytes:, relying_party_id_hash:, flags:, sign_count:, credential_id:, public_key_bytes:)
+  def initialize(bytes:, relying_party_id_hash:, flags:, sign_count:, aaguid: nil, credential_id:, public_key_bytes:)
     @bytes = bytes
     @relying_party_id_hash = relying_party_id_hash
     @flags = flags
     @sign_count = sign_count
+    @aaguid = aaguid
     @credential_id = credential_id
     @public_key_bytes = public_key_bytes
   end

@@ -38,7 +38,7 @@
 class ActionPack::WebAuthn::Authenticator::Attestation
   attr_reader :authenticator_data, :format, :attestation_statement
 
-  delegate :credential_id, :public_key, :public_key_bytes, :sign_count, to: :authenticator_data
+  delegate :credential_id, :public_key, :public_key_bytes, :sign_count, :aaguid, :backed_up?, to: :authenticator_data
 
   def self.decode(bytes)
     cbor = ActionPack::WebAuthn::CborDecoder.decode(bytes)
