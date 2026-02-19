@@ -9,7 +9,7 @@
   <%= form_with url: session_path, class: "flex flex-column gap-half txt-medium" do |form| %>
     <div class="flex align-center gap">
       <label class="flex align-center gap input input--actor">
-        <%= form.email_field :email_address, required: true, class: "input txt-large full-width", autofocus: true, autocomplete: "username webauthn", placeholder: "Enter your email address…" %>
+        <%= form.email_field :email_address, required: true, class: "input txt-large full-width", autofocus: true, autocomplete: "email webauthn", placeholder: "Enter your email address…" %>
       </label>
     </div>
 
