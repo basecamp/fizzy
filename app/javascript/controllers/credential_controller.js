@@ -1,35 +1,49 @@
 import { Controller } from "@hotwired/stimulus"
+import { post } from "@rails/request.js"
 import { base64urlToBuffer, bufferToBase64url } from "helpers/base64url_helpers"
 
 export default class extends Controller {
-  static values = { publicKey: Object }
-  static targets = ["clientDataJSON", "attestationObject"]
+  static values = { publicKey: Object, registerUrl: String }
+  static targets = ["button", "error", "cancelled"]
 
-  async create(event) {
+  async create() {
+    this.buttonTarget.disabled = true
+    this.errorTarget.hidden = true
+    this.cancelledTarget.hidden = true
+
     try {
       const publicKey = this.#prepareOptions(this.publicKeyValue)
       const credential = await navigator.credentials.create({ publicKey })
-      this.#submitCredential(credential)
+      await this.#registerCredential(credential)
     } catch (error) {
-      if (error.name !== "AbortError" && error.name !== "NotAllowedError") {
-        console.error("Registration failed:", error)
+      if (error.name === "AbortError" || error.name === "NotAllowedError") {
+        this.cancelledTarget.hidden = false
+      } else {
+        this.errorTarget.hidden = false
       }
+      this.buttonTarget.disabled = false
     }
   }
 
-  #submitCredential(credential) {
-    this.clientDataJSONTarget.value = new TextDecoder().decode(credential.response.clientDataJSON)
-    this.attestationObjectTarget.value = bufferToBase64url(credential.response.attestationObject)
+  async #registerCredential(credential) {
+    const response = await post(this.registerUrlValue, {
+      body: JSON.stringify({
+        passkey: {
+          client_data_json: new TextDecoder().decode(credential.response.clientDataJSON),
+          attestation_object: bufferToBase64url(credential.response.attestationObject),
+          transports: credential.response.getTransports?.() || []
+        }
+      }),
+      contentType: "application/json",
+      responseKind: "json"
+    })
 
-    for (const transport of credential.response.getTransports?.() || []) {
-      const input = document.createElement("input")
-      input.type = "hidden"
-      input.name = "passkey[transports][]"
-      input.value = transport
-      this.element.appendChild(input)
+    if (response.ok) {
+      const { location } = await response.json
+      Turbo.visit(location)
+    } else {
+      throw new Error("Registration failed")
     }
-
-    this.element.requestSubmit()
   }
 
   #prepareOptions(options) {
