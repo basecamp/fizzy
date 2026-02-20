@@ -15,7 +15,7 @@ Rails.application.routes.draw do
       resource :avatar
       resource :role
       resource :events
-      resources :credentials, except: :show
+      resources :credentials, except: %i[ show new ]
 
       resources :push_subscriptions
 
