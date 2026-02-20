@@ -29,6 +29,7 @@ class Identity::Credential < ApplicationRecord
 
       create!(
         **attributes,
+        name: attributes.fetch(:name, Authenticator.find_by_aaguid(public_key_credential.aaguid)&.name),
         credential_id: public_key_credential.id,
         public_key: public_key_credential.public_key.to_der,
         sign_count: public_key_credential.sign_count,
@@ -56,6 +57,10 @@ class Identity::Credential < ApplicationRecord
     self
   rescue ActionPack::WebAuthn::Authenticator::Response::InvalidResponseError
     nil
+  end
+
+  def authenticator
+    Authenticator.find_by_aaguid(aaguid)
   end
 
   def to_public_key_credential

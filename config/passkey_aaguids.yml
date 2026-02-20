@@ -1,0 +1,124 @@
+shared:
+  apple_passwords:
+    name: Apple Passwords
+    icon:
+      light: passkeys/apple_passwords_light.svg
+      dark: passkeys/apple_passwords_dark.svg
+    aaguids:
+      - dd4ec289-e01d-41c9-bb89-70fa845d4bf2
+      - fbfc3007-154e-4ecc-8c0b-6e020557d7bd
+
+  google_password_manager:
+    name: Google Password Manager
+    icon:
+      light: passkeys/google_password_manager_light.svg
+      dark: passkeys/google_password_manager_dark.svg
+    aaguids:
+      - ea9b8d66-4d01-1d21-3ce4-b6b48cb575d4
+
+  windows_hello:
+    name: Windows Hello
+    icon:
+      light: passkeys/windows_hello_light.svg
+      dark: passkeys/windows_hello_dark.svg
+    aaguids:
+      - 08987058-cadc-4b81-b6e1-30de50dcbe96
+      - 6028b017-b1d4-4c02-b4b3-afcdafc96bb2
+      - 9ddd1817-af5a-4672-a2b9-3e3dd95000a9
+
+  1password:
+    name: 1Password
+    icon:
+      light: passkeys/1password_light.svg
+      dark: passkeys/1password_dark.svg
+    aaguids:
+      - bada5566-a7aa-401f-bd96-45619a55120d
+
+  bitwarden:
+    name: Bitwarden
+    icon:
+      light: passkeys/bitwarden_light.svg
+      dark: passkeys/bitwarden_dark.svg
+    aaguids:
+      - d548826e-79b4-db40-a3d8-11116f7e8349
+
+  samsung_pass:
+    name: Samsung Pass
+    icon:
+      light: passkeys/samsung_pass_light.svg
+      dark: passkeys/samsung_pass_dark.svg
+    aaguids:
+      - 53414d53-554e-4700-0000-000000000000
+
+  lastpass:
+    name: LastPass
+    icon:
+      light: passkeys/lastpass_light.svg
+      dark: passkeys/lastpass_dark.svg
+    aaguids:
+      - b78a0a55-6ef8-d246-a042-ba0f6d55050c
+
+  dashlane:
+    name: Dashlane
+    icon:
+      light: passkeys/dashlane_light.svg
+      dark: passkeys/dashlane_dark.svg
+    aaguids:
+      - 531126d6-e717-415c-9320-3d9aa6981239
+
+  yubikey:
+    name: YubiKey
+    icon:
+      light: passkeys/yubikey_light.svg
+      dark: passkeys/yubikey_dark.svg
+    aaguids:
+      - 19083c3d-8383-4b18-bc03-8f1c9ab2fd1b
+      - 1ac71f64-468d-4fe0-bef1-0e5f2f551f18
+      - 20ac7a17-c814-4833-93fe-539f0d5e3389
+      - 24673149-6c86-42e7-98d9-433fb5b73296
+      - 2fc0579f-8113-47ea-b116-bb5a8db9202a
+      - 3124e301-f14e-4e38-876d-fbeeb090e7bf
+      - 34744913-4f57-4e6e-a527-e9ec3c4b94e6
+      - 34f5766d-1536-4a24-9033-0e294e510fb0
+      - 3a662962-c6d4-4023-bebb-98ae92e78e20
+      - 3aa78eb1-ddd8-46a8-a821-8f8ec57a7bd5
+      - 3b24bf49-1d45-4484-a917-13175df0867b
+      - 4599062e-6926-4fe7-9566-9e8fb1aedaa0
+      - 4fc84f16-2545-4e53-b8fc-7bf4d7282a10
+      - 57f7de54-c807-4eab-b1c6-1c9be7984e92
+      - 58276709-bb4b-4bb3-baf1-60eea99282a7
+      - 5b0e46ba-db02-44ac-b979-ca9b84f5e335
+      - 62e54e98-c209-4df3-b692-de71bb6a8528
+      - 662ef48a-95e2-4aaa-a6c1-5b9c40375824
+      - 6ab56fad-881f-4a43-acb2-0be065924522
+      - 6ec5cff2-a0f9-4169-945b-f33b563f7b99
+      - 73bb0cd4-e502-49b8-9c6f-b59445bf720b
+      - 7409272d-1ff9-4e10-9fc9-ac0019c124fd
+      - 79f3c8ba-9e35-484b-8f47-53a5a0f5c630
+      - 7b96457d-e3cd-432b-9ceb-c9fdd7ef7432
+      - 7d1351a6-e097-4852-b8bf-c9ac5c9ce4a3
+      - 83c47309-aabb-4108-8470-8be838b573cb
+      - 85203421-48f9-4355-9bc8-8a53846e5083
+      - 8c39ee86-7f9a-4a95-9ba3-f6b097e5c2ee
+      - 905b4cb4-ed6f-4da9-92fc-45e0d4e9b5c7
+      - 90636e1f-ef82-43bf-bdcf-5255f139d12f
+      - 97e6a830-c952-4740-95fc-7c78dc97ce47
+      - 9e66c661-e428-452a-a8fb-51f7ed088acf
+      - 9eb7eabc-9db5-49a1-b6c3-555a802093f4
+      - a02167b9-ae71-4ac7-9a07-06432ebb6f1c
+      - a25342c0-3cdc-4414-8e46-f4807fca511c
+      - ad08c78a-4e41-49b9-86a2-ac15b06899e2
+      - b2c1a50b-dad8-4dc7-ba4d-0ce9597904bc
+      - b90e7dc1-316e-4fee-a25a-56a666a670fe
+      - c1f9a0bc-1dd2-404a-b27f-8e29047a43fd
+      - c5ef55ff-ad9a-4b9f-b580-adebafe026d0
+      - cb69481e-8ff7-4039-93ec-0a2729a154a8
+      - ce6bf97f-9f69-4ba7-9032-97adc6ca5cf1
+      - d2fbd093-ee62-488d-9dad-1e36389f8826
+      - d7781e5d-e353-46aa-afe2-3ca49f13332a
+      - d8522d9f-575b-4866-88a9-ba99fa02f35b
+      - dd86a2da-86a0-4cbe-b462-4bd31f57bc6f
+      - ee882879-721c-4913-9775-3dfcce97072a
+      - fa2b99dc-9e39-4257-8f92-4a30d23c4118
+      - fcc0118f-cd45-435b-8da1-9782b2da0715
+      - ff4dac45-ede8-4ec2-aced-cf66103f4335
