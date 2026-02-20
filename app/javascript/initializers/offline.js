@@ -1,7 +1,9 @@
 import { Turbo } from "@hotwired/turbo-rails"
 
-Turbo.offline.start("/service-worker.js", {
-  scope: "/",
-  native: true,
-  preload: /\/assets\//
-})
+if (Current.user) {
+  Turbo.offline.start("/service-worker.js", {
+    scope: "/",
+    native: true,
+    preload: /\/assets\//
+  })
+}
