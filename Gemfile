@@ -19,7 +19,7 @@ gem "solid_cache", "~> 1.0"
 gem "solid_queue", "~> 1.2"
 gem "sqlite3", ">= 2.0"
 gem "thruster", require: false
-gem "trilogy", "~> 2.9"
+gem "trilogy", "~> 2.10"
 
 # Features
 gem "bcrypt", "~> 3.1.7"
