@@ -10,6 +10,7 @@
 # Ignore all environment files (except templates).
 /.env*
 !/.env*.erb
+!.env.example
 
 # Ignore all logfiles and tempfiles.
 /log/*
@@ -41,3 +42,7 @@
 
 /config/credentials/*.key
 .DS_Store
+
+# Ignore storage and database data for docker.
+fizzy_storage
+fizzy_mysql_data

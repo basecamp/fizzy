@@ -72,6 +72,8 @@ Fizzy uses **URL path-based multi-tenancy**:
 - Sessions managed via signed cookies
 - Board-level access control via `Access` records
 
+**Forward Auth (optional)**: When a reverse proxy (e.g. [Stargate](https://github.com/soulteary/stargate)) has already authenticated the user, Fizzy can trust `X-Auth-Email` and related headers from trusted IPs or with a secret header. See [docs/forward_auth.md](docs/forward_auth.md) for configuration and security requirements.
+
 ### Core Domain Models
 
 **Account** → The tenant/organization
