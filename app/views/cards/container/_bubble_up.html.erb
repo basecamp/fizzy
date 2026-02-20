@@ -1,0 +1,43 @@
+<div data-controller="dialog"
+    data-action="keydown.esc->dialog#close:stop click@document->dialog#closeOnClickOutside">
+      <button class="<%= class_names("btn", "btn--reversed" => card.bubbling?) %>"
+          data-controller="tooltip hotkey" data-action="click->dialog#toggle:stop keydown.shift+b@document->hotkey#click">
+    <%= icon_tag "bubbles" %>
+    <span class="for-screen-reader">Bubble Up Later (shift+b)</span>
+  </button>
+
+  <dialog class="popup panel flex-column align-start justify-start fill-white shadow txt-small"
+      data-dialog-target="dialog"
+      data-action="turbo:before-morph-attribute->dialog#preventCloseOnMorphing turbo:submit-end->dialog#close">
+      <strong class="popup__title">BUBBLE UP...</strong>
+
+      <div class="full-width"
+        data-controller="navigable-list"
+        data-navigable-list-actionable-items-value="true"
+        data-navigable-list-prevent-handled-keys-value="true"
+        data-navigable-list-focus-on-selection-value="false"
+        data-action="keydown->navigable-list#navigate dialog:show@document->navigable-list#reset">
+        <ul class="popup__list">
+          <% if @card.bubbling? %>
+            <li class="popup__item" data-navigable-list-target="item">
+              <%= button_to [@card, :bubble_up], method: :delete,
+                  class: "popup__btn btn" do %>
+                <span class="overflow-ellipsis flex-item-grow">Pop!</span>
+              <% end %>
+            </li>
+          <% end %>
+
+          <% TimeSlot::HUMAN_NAMES_BY_VALUE.each do |slot, name| %>
+            <% unless slot_too_soon(slot) %>
+              <li class="popup__item" data-navigable-list-target="item">
+                <%= button_to [@card, :bubble_up, { slot: slot }], method: :post,
+                    class: "popup__btn btn" do %>
+                    <span class="overflow-ellipsis flex-item-grow"><%= name %></span>
+                <% end %>
+              </li>
+            <% end %>
+          <% end %>
+        </ul>
+      </div>
+  </dialog>
+</div>

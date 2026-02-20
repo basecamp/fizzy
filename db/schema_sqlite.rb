@@ -179,6 +179,16 @@ ActiveRecord::Schema[8.2].define(version: 2026_02_18_120000) do
     t.index ["card_id"], name: "index_card_activity_spikes_on_card_id", unique: true
   end
 
+  create_table "card_bubble_ups", id: :uuid, force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.uuid "card_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "resurface_at"
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_card_bubble_ups_on_account_id"
+    t.index ["card_id"], name: "index_card_bubble_ups_on_card_id"
+  end
+
   create_table "card_goldnesses", id: :uuid, force: :cascade do |t|
     t.uuid "account_id", null: false
     t.uuid "card_id", null: false

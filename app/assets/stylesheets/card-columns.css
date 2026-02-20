@@ -790,7 +790,7 @@
       --card-color: var(--color-card-complete) !important;
     }
 
-    .bubble {
+    .bubble:not(.bubble--golden) {
       display: none !important;
     }
   }
@@ -800,17 +800,13 @@
 
   /* Surface a mini bubble if there are cards with bubbles inside */
   .cards--maybe:has(.bubble:not([hidden])) .cards__expander-title,
-  .cards--maybe.is-collapsed:has(.bubble:not([hidden])) .cards__transition-container,
+  .cards--on-deck:has(.bubble--golden:not([hidden])) .cards__expander-title,
   .cards--doing.is-collapsed:has(.bubble:not([hidden])) .cards__transition-container {
-    --bubble-color: var(--card-color, oklch(var(--lch-blue-medium)));
     --bubble-opacity: 75%;
     --bubble-shape: 54% 46% 61% 39% / 57% 49% 51% 43%;
 
-    &:before {
-      background: radial-gradient(
-        color-mix(in srgb, var(--bubble-color) calc(var(--bubble-opacity) / 5), var(--color-canvas)) 50%,
-        color-mix(in srgb, var(--bubble-color) var(--bubble-opacity), var(--color-canvas)) 100%
-      );
+    &:before,
+    &:after {
       block-size: 1em;
       border-radius: var(--bubble-shape);
       content: "";
@@ -821,21 +817,53 @@
       z-index: 1;
     }
 
+    /* Regular mini bubble */
+    .cards:has(.bubble:not(.bubble--golden):not([hidden])) &::before {
+      --bubble-color: var(--card-color, oklch(var(--lch-blue-medium)));
+      background: radial-gradient(
+        color-mix(in srgb, var(--bubble-color) calc(var(--bubble-opacity) / 5), var(--color-canvas)) 50%,
+        color-mix(in srgb, var(--bubble-color) var(--bubble-opacity), var(--color-canvas)) 100%
+      );
+    }
+
+    /* Golden mini bubble */
+    .cards:has(.bubble--golden:not([hidden])) &::after {
+      --bubble-color: var(--color-golden);
+      background: radial-gradient(
+        color-mix(in srgb, var(--bubble-color) calc(var(--bubble-opacity) / 5), var(--color-canvas)) 50%,
+        color-mix(in srgb, var(--bubble-color) var(--bubble-opacity), var(--color-canvas)) 100%
+      );
+    }
+
+    /* Offset if both bubbles present */
+    .cards:has(.bubble:not(.bubble--golden):not([hidden])):has(.bubble--golden:not([hidden])) & {
+      &::before { translate: -15% -25%; }
+      &::after { translate: 35% -15%; }
+    }
+
     /* Maybe column: position bubble relative to the title, not the container */
-    .cards--maybe.is-expanded & {
+    .cards--maybe.is-expanded &,
+    .cards--on-deck.is-expanded & {
       overflow: visible;
       position: relative;
 
-      &:before {
+      &:before,
+      &:after {
         inset-block-start: 50%;
         inset-inline-start: 0;
-        translate: -125% -75%;
+        translate: -135% -50%;
         z-index: -1;
+      }
+
+      .cards:has(.bubble:not(.bubble--golden):not([hidden])):has(.bubble--golden:not([hidden])) & {
+        &::before { translate: -160% -50%; }
+        &::after { translate: -110% -50%; }
       }
     }
 
     @media (max-width: 639px) {
-      &.cards__expander-title:before {
+      &.cards__expander-title:before,
+      &.cards__expander-title:after {
         display: none;
       }
     }

@@ -32,6 +32,17 @@ class Card::TriageableTest < ActiveSupport::TestCase
     assert card.triaged?
   end
 
+  test "triaging a bubbled card pops it" do
+    card = cards(:buy_domain)
+    column = columns(:writebook_in_progress)
+
+    card.bubble_up_at(1.hour.ago)
+    card.triage_into(column)
+
+    assert card.reload.triaged?
+    assert_not card.bubble_up?
+  end
+
   test "cannot triage into a column from a different board" do
     card = cards(:buy_domain)
     other_board_column = Column.create!(
