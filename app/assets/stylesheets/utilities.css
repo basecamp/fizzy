@@ -31,8 +31,9 @@
   .txt-capitalize-first-letter::first-letter { text-transform: capitalize; }
   .txt-link { color: var(--color-link); text-decoration: underline; }
 
-  .font-weight-normal { font-weight: normal; }
-  .font-weight-bold { font-weight: bold; }
+  .font-weight-normal { font-weight: 400; }
+  .font-weight-medium { font-weight: 500; }
+  .font-weight-bold { font-weight: 700; }
   .font-weight-black { font-weight: 900; }
 
   /* Flexbox and Grid */
@@ -280,6 +281,30 @@
     /* Chrome/Safari/Opera */
     &::-webkit-scrollbar {
       display: none;
+    }
+  }
+
+  .hide-on-dark-mode {
+    html[data-theme="dark"] & {
+      display: none;
+    }
+
+    html:not([data-theme]) & {
+      @media (prefers-color-scheme: dark) {
+        display: none;
+      }
+    }
+  }
+
+  .hide-on-light-mode {
+    html[data-theme="light"] & {
+      display: none;
+    }
+
+    html:not([data-theme]) & {
+      @media (prefers-color-scheme: light) {
+        display: none;
+      }
     }
   }
 }
