@@ -68,7 +68,11 @@ class ActionPack::WebAuthn::PublicKeyCredential::CreationOptions < ActionPack::W
   # [+:exclude_credentials+]
   #   Optional. Existing credentials to exclude from registration. Each must
   #   respond to +id+ and +transports+.
-  def initialize(id:, name:, display_name:, resident_key: :preferred, exclude_credentials: [], **attrs)
+  #
+  # [+:attestation+]
+  #   Optional. The attestation conveyance preference. One of +:none+,
+  #   +:indirect+, +:direct+, or +:enterprise+. Defaults to +:none+.
+  def initialize(id:, name:, display_name:, resident_key: :preferred, exclude_credentials: [], attestation: :none, **attrs)
     super(**attrs)
 
     @id = id
@@ -76,6 +80,7 @@ class ActionPack::WebAuthn::PublicKeyCredential::CreationOptions < ActionPack::W
     @display_name = display_name
     @resident_key = resident_key
     @exclude_credentials = exclude_credentials
+    @attestation = validate_attestation(attestation)
   end
 
   # Returns a Hash suitable for JSON serialization and passing to the
@@ -104,10 +109,24 @@ class ActionPack::WebAuthn::PublicKeyCredential::CreationOptions < ActionPack::W
       json[:excludeCredentials] = @exclude_credentials.map { |credential| exclude_credential_json(credential) }
     end
 
+    if @attestation != :none
+      json[:attestation] = @attestation.to_s
+    end
+
     json
   end
 
   private
+    ATTESTATION_PREFERENCES = %i[ none indirect direct enterprise ].freeze
+
+    def validate_attestation(value)
+      if ATTESTATION_PREFERENCES.include?(value)
+        value
+      else
+        raise ArgumentError, "Invalid attestation preference: #{value.inspect}. Must be one of: #{ATTESTATION_PREFERENCES.map(&:inspect).join(", ")}"
+      end
+    end
+
     def exclude_credential_json(credential)
       hash = { type: "public-key", id: credential.id }
       hash[:transports] = credential.transports if credential.transports.any?
