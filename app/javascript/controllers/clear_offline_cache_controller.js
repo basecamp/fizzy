@@ -1,8 +1,8 @@
 import { Controller } from "@hotwired/stimulus"
+import { Turbo } from "@hotwired/turbo-rails"
 
 export default class extends Controller {
-  async clearCache() {
-    const registration = await navigator.serviceWorker?.ready
-    registration?.active?.postMessage({ action: "clearCache" })
+  clearCache() {
+    Turbo.offline.clearCache()
   }
 }
