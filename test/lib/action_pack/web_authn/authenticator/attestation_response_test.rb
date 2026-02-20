@@ -98,7 +98,7 @@ class ActionPack::WebAuthn::Authenticator::AttestationResponseTest < ActiveSuppo
     assert_equal "Origin does not match", error.message
   end
 
-  test "validate! raises when attestation format is not supported" do
+  test "validate! raises when attestation format is not registered" do
     response = ActionPack::WebAuthn::Authenticator::AttestationResponse.new(
       client_data_json: @client_data_json,
       attestation_object: build_attestation_object(user_verified: true, format: "packed")
@@ -109,6 +109,24 @@ class ActionPack::WebAuthn::Authenticator::AttestationResponseTest < ActiveSuppo
     end
 
     assert_equal "Unsupported attestation format: packed", error.message
+  end
+
+  test "validate! calls registered verifier for custom format" do
+    verified = false
+    custom_verifier = Object.new
+    custom_verifier.define_singleton_method(:verify!) { |_attestation, client_data_json:| verified = true }
+
+    ActionPack::WebAuthn.register_attestation_verifier("packed", custom_verifier)
+
+    response = ActionPack::WebAuthn::Authenticator::AttestationResponse.new(
+      client_data_json: @client_data_json,
+      attestation_object: build_attestation_object(user_verified: true, format: "packed")
+    )
+
+    response.validate!(challenge: @challenge, origin: @origin)
+    assert verified
+  ensure
+    ActionPack::WebAuthn.attestation_verifiers.delete("packed")
   end
 
   private

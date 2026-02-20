@@ -84,6 +84,34 @@ class ActionPack::WebAuthn::PublicKeyCredential::CreationOptionsTest < ActiveSup
     ], options.as_json[:excludeCredentials]
   end
 
+  test "as_json excludes attestation when none" do
+    assert_nil @options.as_json[:attestation]
+  end
+
+  test "as_json includes attestation when not none" do
+    options = ActionPack::WebAuthn::PublicKeyCredential::CreationOptions.new(
+      id: "user-123",
+      name: "user@example.com",
+      display_name: "Test User",
+      attestation: :direct,
+      relying_party: @relying_party
+    )
+
+    assert_equal "direct", options.as_json[:attestation]
+  end
+
+  test "raises with invalid attestation preference" do
+    assert_raises(ArgumentError) do
+      ActionPack::WebAuthn::PublicKeyCredential::CreationOptions.new(
+        id: "user-123",
+        name: "user@example.com",
+        display_name: "Test User",
+        attestation: :invalid,
+        relying_party: @relying_party
+      )
+    end
+  end
+
   test "as_json excludeCredentials omits transports when empty" do
     options = ActionPack::WebAuthn::PublicKeyCredential::CreationOptions.new(
       id: "user-123",
