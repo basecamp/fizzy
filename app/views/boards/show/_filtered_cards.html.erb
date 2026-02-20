@@ -1,7 +1,11 @@
 <section class="cards cards--grid">
   <div class="cards__list hide-scrollbar">
     <%= with_automatic_pagination :filtered_cards_paginated_container, page do %>
-      <%= render "cards/display/previews", cards: page.records, draggable: true %>
+      <%= render "cards/display/previews",
+            cards: @page.records,
+            draggable: true,
+            return_to: request.fullpath,
+            return_label: @board.name %>
     <% end %>
     <div class="blank-slate">No cards match this filter</div>
   </div>

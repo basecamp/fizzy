@@ -1,3 +1,4 @@
+<%# expects: card:, return_to:, return_label: %>
 <% draggable = local_assigns.fetch(:draggable, false) && card.published? %>
 
 <% card_data = {
@@ -16,7 +17,7 @@
 
 <%= card_article_tag card, class: "card", draggable: draggable, data: card_data, tabindex: 0 do %>
   <div class="flex flex-column flex-item-grow max-inline-size">
-    <%= link_to card_path(card), draggable: false, class: "card__link", title: card_title_tag(card), data: { action: "dialog#close", turbo_frame: "_top" } do %>
+    <%= link_to card_path(card, return_to: return_to, return_label: return_label), draggable: false, class: "card__link", title: card_title_tag(card), data: { action: "dialog#close", turbo_frame: "_top" } do %>
       <span class="for-screen-reader"><%= card.title %></span>
     <% end %>
 

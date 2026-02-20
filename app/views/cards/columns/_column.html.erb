@@ -1,1 +1,5 @@
-<%= render "cards/display/previews", cards: column.cards, draggable: draggable %>
+<%= render "cards/display/previews",
+      cards: @page.records,
+      draggable: true,
+      return_to: request.fullpath,
+      return_label: @board.name %>
