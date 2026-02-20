@@ -5,11 +5,6 @@
   <div class="settings__panel panel shadow txt-align-center">
     <div class="flex flex-column gap position-relative">
       <% if Current.user == @user %>
-        <%= link_to user_credentials_path(@user), class: "user-edit-link btn", style: "inset: 0 auto auto 0", data: { controller: "tooltip" } do %>
-          <%= icon_tag "authentication" %>
-          <span class="for-screen-reader">Manage passkeys</span>
-        <% end %>
-
         <%= link_to edit_user_path(@user), class: "user-edit-link btn", data: { controller: "tooltip" } do %>
           <%= icon_tag "pencil" %>
           <span class="for-screen-reader">Edit profile</span>
@@ -45,6 +40,11 @@
 
       <% if Current.user == @user %>
         <hr class="separator--horizontal full-width flex-item-grow margin-block-start-double" style="--border-color: var(--color-ink-light);" aria-hidden="true">
+
+        <%= link_to user_credentials_path(@user), class: "btn txt-x-small center" do %>
+          <%= icon_tag "authentication" %>
+          <span>Manage passkeys</span>
+        <% end %>
 
         <%= button_to session_path(script_name: nil), method: :delete, class: "btn txt-x-small center", data: { turbo: false } do %>
           <span>Sign out of Fizzy on this device</span>
