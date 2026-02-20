@@ -15,7 +15,11 @@
     <div class="cards__list hide-scrollbar" data-drag-drop-item-container>
       <% if @page.used? %>
         <%= with_automatic_pagination :stream_column, @page do %>
-          <%= render "cards/display/previews", cards: @page.records, draggable: true %>
+          <%= render "cards/display/previews",
+                cards: @page.records,
+                draggable: true,
+                return_to: request.fullpath,
+                return_label: @board.name %>
         <% end %>
       <% else %>
         <%= render "boards/columns/empty_placeholder" %>

@@ -1,7 +1,13 @@
 module BoardsHelper
   def link_back_to_board(board)
-    path = safe_return_to || board
-    label = params[:return_label].presence || board.name
+    safe_path = safe_return_to
+    if safe_path
+      path = safe_path
+      label = params[:return_label].presence || board.name
+    else
+      path = board
+      label = board.name
+    end
     back_link_to(
       label,
       path,
@@ -14,10 +20,17 @@ module BoardsHelper
   def safe_return_to
     return unless params[:return_to].present?
 
-    uri = URI.parse(params[:return_to])
-    return unless uri.host.nil? # prevents open redirect
+    raw = params[:return_to].to_s
 
-    params[:return_to]
+    # Only allow relative paths starting with a single "/"
+    return unless raw.start_with?("/") && !raw.start_with?("//")
+
+    uri = URI.parse(raw)
+
+    # Prevent open redirect and non-HTTP schemes
+    return unless uri.scheme.nil? && uri.host.nil?
+
+    raw
   rescue URI::InvalidURIError
     nil
   end
