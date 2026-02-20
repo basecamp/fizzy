@@ -7,6 +7,7 @@ class NotificationDeliveryTest < ActiveSupport::TestCase
     @card = cards(:logo)
 
     @card.assignments.destroy_all
+    @assignee.notifications.destroy_all
 
     stub_web_push_pool
 
@@ -55,7 +56,7 @@ class NotificationDeliveryTest < ActiveSupport::TestCase
       end
     end
 
-    notification = @assignee.notifications.last
+    notification = @assignee.notifications.reload.last
     assert_not_nil notification, "Notification should be created for assignee"
 
     bundle = @assignee.notification_bundles.pending.last

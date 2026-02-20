@@ -3,10 +3,7 @@ require "test_helper"
 class Notification::PushableTest < ActiveSupport::TestCase
   setup do
     @user = users(:david)
-    @notification = @user.notifications.create!(
-      source: events(:logo_published),
-      creator: users(:jason)
-    )
+    @notification = notifications(:logo_mentioned_david)
   end
 
   test "push_later enqueues Notification::PushJob" do
@@ -28,12 +25,24 @@ class Notification::PushableTest < ActiveSupport::TestCase
   end
 
   test "push_later is called after notification is created" do
-    Notification.any_instance.expects(:push_later)
+    assert_enqueued_with(job: Notification::PushJob) do
+      @user.notifications.create!(
+        source: events(:layout_published),
+        creator: users(:jason)
+      )
+    end
+  end
 
-    @user.notifications.create!(
-      source: events(:logo_published),
-      creator: users(:jason)
-    )
+  test "push_later is called when notification source changes" do
+    assert_enqueued_with(job: Notification::PushJob) do
+      @notification.update!(source: events(:logo_published))
+    end
+  end
+
+  test "push_later is not called for other updates" do
+    assert_no_enqueued_jobs only: Notification::PushJob do
+      @notification.update!(unread_count: 5)
+    end
   end
 
   test "register_push_target accepts symbols" do

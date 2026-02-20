@@ -4,8 +4,7 @@ module Notification::Pushable
   included do
     class_attribute :push_targets, default: []
 
-    after_create_commit :push_later
-    after_update_commit :push_later, if: :source_id_previously_changed?
+    after_save_commit :push_later, if: :source_id_previously_changed?
   end
 
   class_methods do

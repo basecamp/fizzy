@@ -4,7 +4,7 @@ class Notification::PushTarget::NativeTest < ActiveSupport::TestCase
   setup do
     @user = users(:kevin)
     @identity = @user.identity
-    @notification = notifications(:logo_published_kevin)
+    @notification = notifications(:logo_assignment_kevin)
 
     # Ensure user has no web push subscriptions (we want to test native push independently)
     @user.push_subscriptions.delete_all
@@ -23,12 +23,14 @@ class Notification::PushTarget::NativeTest < ActiveSupport::TestCase
   end
 
   test "payload category returns mention for mentions" do
-    notification = notifications(:logo_card_david_mention_by_jz)
+    notification = notifications(:logo_mentioned_david)
 
     assert_equal "mention", notification.payload.category
   end
 
   test "payload category returns card for other card events" do
+    @notification.update!(source: events(:logo_published))
+
     assert_equal "card", @notification.payload.category
   end
 
@@ -92,7 +94,7 @@ class Notification::PushTarget::NativeTest < ActiveSupport::TestCase
   end
 
   test "native notification sets high_priority for mentions" do
-    notification = notifications(:logo_card_david_mention_by_jz)
+    notification = notifications(:logo_mentioned_david)
     notification.user.identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
 
     push = Notification::PushTarget::Native.new(notification)
@@ -112,6 +114,7 @@ class Notification::PushTarget::NativeTest < ActiveSupport::TestCase
   end
 
   test "native notification sets normal priority for other card events" do
+    @notification.update!(source: events(:logo_published))
     @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
 
     push = Notification::PushTarget::Native.new(@notification)
@@ -141,7 +144,7 @@ class Notification::PushTarget::NativeTest < ActiveSupport::TestCase
   end
 
   test "native notification sets time-sensitive interruption level for mentions" do
-    notification = notifications(:logo_card_david_mention_by_jz)
+    notification = notifications(:logo_mentioned_david)
     notification.user.identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
 
     push = Notification::PushTarget::Native.new(notification)
@@ -161,6 +164,7 @@ class Notification::PushTarget::NativeTest < ActiveSupport::TestCase
   end
 
   test "native notification sets active interruption level for other card events" do
+    @notification.update!(source: events(:logo_published))
     @identity.devices.create!(token: "test123", platform: "apple", name: "Test iPhone")
 
     push = Notification::PushTarget::Native.new(@notification)

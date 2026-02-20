@@ -3,10 +3,7 @@ require "test_helper"
 class Notification::PushTarget::WebTest < ActiveSupport::TestCase
   setup do
     @user = users(:david)
-    @notification = @user.notifications.create!(
-      source: events(:logo_published),
-      creator: users(:jason)
-    )
+    @notification = notifications(:logo_mentioned_david)
 
     @user.push_subscriptions.create!(
       endpoint: "https://fcm.googleapis.com/fcm/send/test123",
@@ -38,6 +35,8 @@ class Notification::PushTarget::WebTest < ActiveSupport::TestCase
   end
 
   test "payload includes card title for card events" do
+    @notification.update!(source: events(:logo_published))
+
     @web_push_pool.expects(:queue).once.with do |payload, _|
       payload[:title] == @notification.card.title
     end
@@ -57,24 +56,20 @@ class Notification::PushTarget::WebTest < ActiveSupport::TestCase
   end
 
   test "payload for assignment includes assigned message" do
-    event = events(:logo_assignment_david)
-    notification = @user.notifications.create!(source: event, creator: event.creator)
+    @notification.update!(source: events(:logo_assignment_david))
 
     @web_push_pool.expects(:queue).once.with do |payload, _|
       payload[:body].include?("Assigned to you")
     end
 
-    Notification::PushTarget::Web.new(notification).process
+    Notification::PushTarget::Web.new(@notification).process
   end
 
   test "payload for mention includes mentioner name" do
-    mention = mentions(:logo_card_david_mention_by_jz)
-    notification = @user.notifications.create!(source: mention, creator: users(:jz))
-
     @web_push_pool.expects(:queue).once.with do |payload, _|
       payload[:title].include?("mentioned you")
     end
 
-    Notification::PushTarget::Web.new(notification).process
+    Notification::PushTarget::Web.new(@notification).process
   end
 end
