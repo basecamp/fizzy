@@ -1,0 +1,40 @@
+<% @page_title = "Authorize #{@client.name}" %>
+
+<% content_for :header do %>
+  <h1 class="header__title"><%= @page_title %></h1>
+<% end %>
+
+<article class="panel panel--wide shadow center txt-align-start">
+  <%= form_with url: oauth_authorization_path, method: :post, data: { turbo: false }, html: { class: "flex flex-column gap" } do |f| %>
+    <%= f.hidden_field :client_id, value: @client.client_id %>
+    <%= f.hidden_field :redirect_uri, value: @redirect_uri %>
+    <%= f.hidden_field :state, value: @state %>
+    <%= f.hidden_field :code_challenge, value: @code_challenge %>
+    <%= f.hidden_field :code_challenge_method, value: "S256" %>
+    <%= f.hidden_field :response_type, value: "code" %>
+
+    <div class="flex flex-column gap-half">
+      <strong>Application</strong>
+      <p class="margin-none"><%= @client.name %></p>
+      <% if @client.dynamically_registered? %>
+        <p class="txt-small txt-muted margin-none">Registered by a local tool. Only authorize if you trust it.</p>
+      <% end %>
+    </div>
+
+    <div class="flex flex-column gap-half">
+      <strong><%= f.label :scope, "Permission" %></strong>
+      <% scope_options = @client.scopes.include?("write") ? { "Read" => "read", "Read + Write" => "write" } : { "Read" => "read" } %>
+      <%= f.select :scope, options_for_select(scope_options, @scope), {}, class: "input input--select" %>
+    </div>
+
+    <div class="flex gap">
+      <%= f.button type: :submit, class: "btn btn--link txt-medium" do %>
+        <span>Authorize</span>
+      <% end %>
+
+      <%= f.button type: :submit, name: :error, value: "access_denied", class: "btn btn--outline txt-medium" do %>
+        <span>Deny</span>
+      <% end %>
+    </div>
+  <% end %>
+</article>
