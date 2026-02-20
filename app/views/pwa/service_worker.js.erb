@@ -5,6 +5,7 @@ importScripts("<%= javascript_url("turbo-offline-umd.min") %>")
 // an annoying Safari PWA bug that predates offline mode
 TurboOffline.addRule({
   match: (request) => request.destination === "document",
+  except: /\/(edit|pin|watch|new)$/,
   handler: TurboOffline.handlers.networkFirst({
     cacheName: "main",
     maxAge: 60 * 60 * 24 * 3,
@@ -47,6 +48,7 @@ TurboOffline.addRule({
 
 // Everything else
 TurboOffline.addRule({
+  except: /\/(service-worker|edit|pin|watch|new)$/,
   handler: TurboOffline.handlers.networkFirst({
     cacheName: "main",
     maxAge: 60 * 60 * 24,
