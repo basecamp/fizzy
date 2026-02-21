@@ -1,0 +1,16 @@
+<h1>Registered Devices</h1>
+
+<% if @devices.any? %>
+  <ul>
+    <% @devices.each do |device| %>
+      <li>
+        <strong><%= device.name || "Unnamed device" %></strong>
+        (<%= device.platform == "apple" ? "iOS" : "Android" %>)
+        <span>Added <%= time_ago_in_words(device.created_at) %> ago</span>
+        <%= button_to "Remove", saas.device_path(device), method: :delete, data: { confirm: "Remove this device?" } %>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <p>No devices registered. Install the mobile app to receive push notifications.</p>
+<% end %>

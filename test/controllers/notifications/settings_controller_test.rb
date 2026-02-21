@@ -13,6 +13,14 @@ class Notifications::SettingsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "show with registered devices" do
+    @user.identity.devices.create!(token: "test_token", platform: "apple", name: "iPhone 15 Pro")
+
+    get notifications_settings_path
+
+    assert_response :success
+  end
+
   test "update email frequency" do
     assert_changes -> { @user.reload.settings.bundle_email_frequency }, from: "never", to: "every_few_hours" do
       put notifications_settings_path, params: { user_settings: { bundle_email_frequency: "every_few_hours" } }

@@ -11,6 +11,9 @@ gem "fizzy-saas", path: "saas"
 gem "console1984", bc: "console1984"
 gem "audits1984", bc: "audits1984", branch: "flavorjones/coworker-api"
 
+# Native push notifications (iOS/Android)
+gem "action_push_native"
+
 # Telemetry
 gem "rails_structured_logging", bc: "rails-structured-logging"
 gem "sentry-ruby"

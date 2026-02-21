@@ -1,0 +1,14 @@
+<div class="native-devices margin-block-start">
+  <h3 class="txt-small txt-uppercase divider">Mobile Devices</h3>
+
+  <% if Current.identity.devices.any? %>
+    <p class="txt-small">
+      You have <%= pluralize(Current.identity.devices.count, "mobile device") %> registered for push notifications.
+    </p>
+    <%= link_to "Manage devices", saas.devices_path, class: "btn txt-small" %>
+  <% else %>
+    <p class="txt-small color-secondary">
+      No mobile devices registered. Install the iOS or Android app to receive push notifications on your phone.
+    </p>
+  <% end %>
+</div>

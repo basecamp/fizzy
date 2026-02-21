@@ -22,7 +22,7 @@ Gem::Specification.new do |spec|
   end
 
   spec.bindir = "exe"
-  spec.executables = [ "stripe-dev" ]
+  spec.executables = [ "push-dev", "stripe-dev" ]
 
   spec.add_dependency "rails", ">= 8.1.0.beta1"
   spec.add_dependency "queenbee"
