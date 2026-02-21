@@ -584,7 +584,7 @@ GEM
     timeout (0.6.0)
     trilogy (2.9.0)
     tsort (0.2.0)
-    turbo-rails (2.0.21)
+    turbo-rails (2.0.23)
       actionpack (>= 7.1.0)
       railties (>= 7.1.0)
     tzinfo (2.0.6)
