@@ -35,6 +35,10 @@ class WebhookTest < ActiveSupport::TestCase
 
     webhook = Webhook.new name: "HTTPS", board: boards(:writebook), url: "https://example.com/webhook"
     assert webhook.valid?
+
+    webhook = Webhook.new name: "TRAILING SPACE", board: boards(:writebook), url: "https://example.com/webhook "
+    assert webhook.valid?
+    assert_equal "https://example.com/webhook", webhook.url
   end
 
   test "deactivate" do

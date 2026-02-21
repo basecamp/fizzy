@@ -36,6 +36,7 @@ class Webhook < ApplicationRecord
   after_create :create_delinquency_tracker!
 
   normalizes :subscribed_actions, with: ->(value) { Array.wrap(value).map(&:to_s).uniq & PERMITTED_ACTIONS }
+  normalizes :url, with: -> { it.strip }
 
   validates :name, presence: true
   validate :validate_url
