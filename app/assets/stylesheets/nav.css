@@ -71,10 +71,14 @@
                 0 0.8em 0.8em oklch(var(--lch-blue-medium) / 5%);
     grid-template-rows: auto 1fr auto;
     gap: var(--nav-section-gap);
+    inset: 0 0 auto 0;
+    margin-inline: auto;
     max-block-size: calc(100vh - var(--block-space) - var(--footer-height));
     overflow: hidden;
     padding-block-end: 0;
     scrollbar-gutter: stable both-edges;
+    transform-origin: top center;
+    translate: 0;
     z-index: var(--z-nav);
 
     @media (max-height: 668px) {
