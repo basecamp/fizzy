@@ -51,6 +51,14 @@
       overflow: visible;
       width: auto;
     }
+
+    .nav__brand {
+      font-size: 1.2rem;
+      font-weight: 900;
+      font-stretch: 90%;
+      margin-block-start: -0.03em;
+      margin-inline-start: 0.3em;
+    }
   }
 
   /* Dialog
