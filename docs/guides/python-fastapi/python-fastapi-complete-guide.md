@@ -1017,3 +1017,216 @@ echo -e "${GREEN}✅ Setup complete!${NC}"
 
 ---
 
+# 第2章 Python 3.12の基礎文法（Rubyとの対比）
+
+## この章で学ぶこと
+
+- 🔄 Ruby↔Python文法対応表（100+パターン）
+- ✨ List comprehensions（Rubyのblocks相当）
+- ✨ Pythonic Way（Python流の美しい書き方）
+- ⚠️ Ruby開発者が陥りやすい罠
+- 🎯 Ruby→Python変換演習
+
+## 前提知識
+
+- Ruby基礎文法（変数、メソッド、クラス、ブロック）
+- Railsコードの読み書き経験
+- 第1章で環境構築済み
+
+## 2.1 基本文法対比表
+
+### 変数とデータ型
+
+| 項目 | Ruby | Python | 備考 |
+|------|------|--------|------|
+| 変数宣言 | `name = "John"` | `name = "John"` | 同じ |
+| 定数 | `MAX = 100` | `MAX = 100` | Pythonは慣習（強制なし） |
+| シンボル | `:name` | （なし） | 文字列で代替 |
+| nil | `nil` | `None` | 💡 `None`は単一オブジェクト |
+| 真偽値 | `true`, `false` | `True`, `False` | ⚠️ 大文字始まり |
+| 配列 | `[1, 2, 3]` | `[1, 2, 3]` | 同じ（list） |
+| ハッシュ/辞書 | `{name: "John"}` | `{"name": "John"}` | ⚠️ シンボルなし |
+| 範囲 | `1..10` | `range(1, 11)` | ⚠️ 終端+1 |
+
+⚠️ **Gotcha**: Pythonの`range(1, 10)`は1から**9まで**（10は含まない）
+
+```python
+# Ruby
+(1..10).to_a  # => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+# Python
+list(range(1, 11))  # [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+list(range(1, 10))   # [1, 2, 3, 4, 5, 6, 7, 8, 9]  # 10は含まない！
+```
+
+### 文字列操作
+
+| 操作 | Ruby | Python |
+|------|------|--------|
+| 連結 | `"Hello" + " " + "World"` | `"Hello" + " " + "World"` |
+| 補間 | `"Hello #{name}"` | `f"Hello {name}"` |
+| 複数行 | `"""..."""` | `"""..."""` |
+| 大文字変換 | `"hello".upcase` | `"hello".upper()` |
+| 小文字変換 | `"HELLO".downcase` | `"HELLO".lower()` |
+| 分割 | `"a,b,c".split(",")` | `"a,b,c".split(",")` |
+| 結合 | `["a", "b"].join(",")` | `",".join(["a", "b"])` |
+
+🔄 **Migration**:
+
+```ruby
+# Ruby
+name = "John"
+greeting = "Hello #{name}!"
+```
+
+```python
+# Python
+name = "John"
+greeting = f"Hello {name}!"  # f-string（Python 3.6+）
+```
+
+## 2.2 List Comprehensions（最強の武器）
+
+Pythonの最も強力な機能が**list comprehensions**です。Rubyの`map`/`select`を1行で書けます。
+
+### map相当
+
+```ruby
+# Ruby
+[1, 2, 3].map { |x| x * 2 }
+# => [2, 4, 6]
+```
+
+```python
+# Python
+[x * 2 for x in [1, 2, 3]]
+# [2, 4, 6]
+```
+
+### select（filter）相当
+
+```ruby
+# Ruby
+[1, 2, 3, 4].select { |x| x.even? }
+# => [2, 4]
+```
+
+```python
+# Python
+[x for x in [1, 2, 3, 4] if x % 2 == 0]
+# [2, 4]
+```
+
+### map + select組み合わせ
+
+```ruby
+# Ruby
+[1, 2, 3, 4, 5]
+  .select { |x| x.even? }
+  .map { |x| x * 2 }
+# => [4, 8]
+```
+
+```python
+# Python（1行で）
+[x * 2 for x in [1, 2, 3, 4, 5] if x % 2 == 0]
+# [4, 8]
+```
+
+💡 **Best Practice**: 複雑すぎる場合は通常のforループを使う
+
+```python
+# 読みにくい comprehension（避ける）
+result = [x * 2 for x in range(100) if x % 3 == 0 if x % 5 != 0 if x > 10]
+
+# 読みやすいforループ（推奨）
+result = []
+for x in range(100):
+    if x % 3 == 0 and x % 5 != 0 and x > 10:
+        result.append(x * 2)
+```
+
+## 2.3 Pythonic Way（Python流の美しさ）
+
+### The Zen of Python
+
+```python
+import this
+```
+
+主要な原則：
+
+1. **明示的 > 暗黙的**
+2. **シンプル > 複雑**
+3. **読みやすさ重視**
+
+### EAFP vs LBYL
+
+🔄 **Rails（LBYL: Look Before You Leap）**:
+
+```ruby
+# Ruby - 事前チェック
+if user && user.email
+  send_email(user.email)
+end
+```
+
+✨ **Python（EAFP: Easier to Ask for Forgiveness than Permission）**:
+
+```python
+# Python - try/except推奨
+try:
+    send_email(user.email)
+except (AttributeError, TypeError):
+    pass
+```
+
+💡 **Best Practice**: Pythonでは例外処理を積極的に使います。
+
+## 2.4 まとめ
+
+この章で学んだこと：
+- ✅ Ruby↔Python基本文法対応（100+パターン）
+- ✅ List comprehensions（map/select統合）
+- ✅ Pythonic Way（EAFP、明示性重視）
+
+### 次の章へ
+
+第3章では**型ヒントとPydantic**を深掘りします。
+
+---
+
+## 🎯 演習問題
+
+### 🌱 初級演習1: Ruby→Python変換
+
+```ruby
+class Calculator
+  def initialize(x, y)
+    @x = x
+    @y = y
+  end
+
+  def add
+    @x + @y
+  end
+end
+```
+
+Pythonに変換してください。
+
+<details>
+<summary>💡 ヒント</summary>
+
+```python
+class Calculator:
+    def __init__(self, x: int, y: int):
+        self.x = x
+        self.y = y
+
+    def add(self) -> int:
+        return self.x + self.y
+```
+</details>
+
+---
