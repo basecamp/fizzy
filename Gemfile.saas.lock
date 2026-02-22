@@ -61,6 +61,15 @@ GIT
       yabeda (~> 0.6)
 
 GIT
+  remote: https://github.com/hotwired/turbo-rails.git
+  revision: 43bc205155b0eb57e5e016ed0e87a12c29ba2ab2
+  branch: offline-cache
+  specs:
+    turbo-rails (2.0.23)
+      actionpack (>= 7.1.0)
+      railties (>= 7.1.0)
+
+GIT
   remote: https://github.com/rails/rails.git
   revision: 12e24eaf2f0a9613e015653f013dd131317d9bf5
   branch: main
@@ -584,9 +593,6 @@ GEM
     timeout (0.6.0)
     trilogy (2.9.0)
     tsort (0.2.0)
-    turbo-rails (2.0.21)
-      actionpack (>= 7.1.0)
-      railties (>= 7.1.0)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     unicode-display_width (3.2.0)
@@ -701,7 +707,7 @@ DEPENDENCIES
   stripe (~> 18.0)
   thruster
   trilogy (~> 2.9)
-  turbo-rails
+  turbo-rails!
   useragent!
   vcr
   web-console!
