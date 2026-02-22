@@ -1230,3 +1230,285 @@ class Calculator:
 </details>
 
 ---
+
+# 第3章 型ヒントとPydantic
+
+## この章で学ぶこと
+
+- ✨ Python型ヒントの基礎と実践
+- 🔄 Rails Strong Parameters → Pydantic Model
+- ✨ Pydanticバリデーション（実行時型チェック）
+- 💡 FastAPIとの統合パターン
+
+## 3.1 型ヒント基礎
+
+### 基本的な型
+
+```python
+# 型ヒント付き関数
+def greet(name: str, age: int) -> str:
+    return f"Hello, {name} ({age})"
+
+# 変数の型ヒント
+user_name: str = "John"
+user_age: int = 30
+is_active: bool = True
+```
+
+### コレクション型
+
+```python
+from typing import List, Dict, Optional
+
+# List
+names: List[str] = ["Alice", "Bob"]
+
+# Dict
+user: Dict[str, int] = {"age": 30}
+
+# Optional（Noneを許容）
+email: Optional[str] = None  # str | None
+```
+
+## 3.2 Pydantic Model
+
+🔄 **Rails Strong Parameters相当**:
+
+```ruby
+# Rails
+def user_params
+  params.require(:user).permit(:name, :email, :age)
+end
+```
+
+```python
+# Python (Pydantic)
+from pydantic import BaseModel, EmailStr, Field
+
+class UserCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=100)
+    email: EmailStr
+    age: int = Field(ge=0, le=150)  # 0 <= age <= 150
+
+# バリデーション自動実行
+user = UserCreate(name="John", email="john@example.com", age=30)
+# ValidationError if invalid
+```
+
+### バリデーション例
+
+```python
+from pydantic import BaseModel, validator
+
+class User(BaseModel):
+    name: str
+    email: str
+
+    @validator('email')
+    def email_must_contain_at(cls, v):
+        if '@' not in v:
+            raise ValueError('must contain @')
+        return v.lower()  # 自動で小文字化
+
+# OK
+user = User(name="John", email="JOHN@EXAMPLE.COM")
+print(user.email)  # "john@example.com"
+
+# ValidationError
+try:
+    User(name="John", email="invalid")
+except ValidationError as e:
+    print(e.errors())
+```
+
+## 3.3 FastAPI統合
+
+```python
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+app = FastAPI()
+
+class UserCreate(BaseModel):
+    name: str
+    email: str
+
+@app.post("/users")
+def create_user(user: UserCreate):
+    # バリデーション済みuser
+    return {"name": user.name, "email": user.email}
+```
+
+🔄 **Rails vs FastAPI**:
+
+```ruby
+# Rails
+class UsersController < ApplicationController
+  def create
+    @user = User.new(user_params)
+    if @user.save
+      render json: @user
+    else
+      render json: @user.errors, status: :unprocessable_entity
+    end
+  end
+
+  private
+  def user_params
+    params.require(:user).permit(:name, :email)
+  end
+end
+```
+
+```python
+# FastAPI (自動バリデーション)
+@app.post("/users")
+def create_user(user: UserCreate):
+    # Pydanticが自動バリデーション
+    # エラー時は422 Unprocessable Entityを自動返却
+    db_user = User(**user.dict())
+    session.add(db_user)
+    session.commit()
+    return db_user
+```
+
+💡 **Best Practice**: FastAPIはPydanticと完全統合。バリデーションエラーは自動でHTTP 422返却。
+
+## 3.4 まとめ
+
+- ✅ 型ヒントで静的型チェック（mypy）
+- ✅ Pydanticで実行時バリデーション
+- ✅ Rails Strong Parameters → Pydantic Model
+- ✅ FastAPI自動統合
+
+次章では、パッケージ管理を深掘りします。
+
+---
+
+## 🎯 演習問題
+
+### 🌱 初級演習: Pydanticモデル作成
+
+Rails Strong Parametersを Pydanticに変換してください：
+
+```ruby
+def board_params
+  params.require(:board).permit(:name, :description, :is_public)
+end
+```
+
+<details>
+<summary>💡 ヒント</summary>
+
+```python
+from pydantic import BaseModel, Field
+
+class BoardCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=100)
+    description: str = ""
+    is_public: bool = False
+```
+</details>
+
+---
+
+# 第4章 仮想環境とパッケージ管理
+
+## この章で学ぶこと
+
+- 🔄 Bundler → uv/pipの違い
+- ✨ requirements.txt / pyproject.tomlの書き方
+- ✨ uvロックファイル（Gemfile.lock相当）
+- 💡 依存管理のベストプラクティス
+
+## 4.1 Bundler vs uv
+
+| 機能 | Rails (Bundler) | Python (uv推奨) |
+|------|----------------|----------------|
+| 依存ファイル | Gemfile | pyproject.toml |
+| ロックファイル | Gemfile.lock | uv.lock |
+| インストール | `bundle install` | `uv sync` |
+| 追加 | `bundle add gem_name` | `uv add package_name` |
+| 更新 | `bundle update` | `uv lock --upgrade` |
+
+## 4.2 pyproject.toml
+
+```toml
+[project]
+name = "fizzy-fastapi"
+version = "0.1.0"
+requires-python = ">=3.12"
+
+dependencies = [
+    "fastapi>=0.110.0",
+    "sqlmodel>=0.0.16",
+    "pydantic>=2.6.0",
+]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=8.0.0",
+    "ruff>=0.2.0",
+]
+```
+
+🔄 **Gemfileとの対応**:
+
+```ruby
+# Gemfile
+source "https://rubygems.org"
+
+gem "rails", "~> 8.1.0"
+gem "pg", ">= 1.1"
+
+group :development, :test do
+  gem "debug"
+end
+```
+
+## 4.3 uvコマンド一覧
+
+```bash
+# プロジェクト初期化
+uv init
+
+# 依存追加
+uv add fastapi sqlmodel
+
+# 開発依存追加
+uv add --dev pytest ruff
+
+# インストール
+uv sync
+
+# ロックファイル更新
+uv lock
+
+# パッケージ実行
+uv run uvicorn app.main:app
+```
+
+## 4.4 まとめ
+
+- ✅ Gemfile → pyproject.toml
+- ✅ bundle install → uv sync
+- ✅ uv.lockで再現可能ビルド
+
+---
+
+## Part I まとめ
+
+### 学んだこと
+
+Part Iでは、Rails開発者がPython開発環境を構築し、基本文法を習得しました：
+
+1. **第1章**: uv/pyenv/miseで環境構築
+2. **第2章**: Ruby↔Python文法対応
+3. **第3章**: 型ヒントとPydantic
+4. **第4章**: パッケージ管理
+
+### 次のPart IIへ
+
+Part IIでは、**FastAPI Web開発**に入ります。Fizzyの BoardsController/Boardモデルを FastAPIで完全再現します！
+
+---
