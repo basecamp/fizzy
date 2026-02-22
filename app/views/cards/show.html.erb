@@ -23,3 +23,5 @@
     <%= button_to_remove_card_image(@card) if @card.image.attached? %>
   <% end %>
 </div>
+
+<%= bridged_share_button(bridge_share_card_description(@card)) %>

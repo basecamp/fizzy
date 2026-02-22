@@ -9,12 +9,4 @@ module BoardsHelper
       icon_tag("settings") + tag.span("Settings for #{board.name}", class: "for-screen-reader")
     end
   end
-
-  def bridged_button_to_board(board)
-    link_to "Go to #{board.name}", board, hidden: true, data: {
-      bridge__buttons_target: "button",
-      bridge_icon_url: bridge_icon("board"),
-      bridge_title: "Go to #{board.name}"
-    }
-  end
 end
