@@ -56,6 +56,7 @@ Default branch: `main`
 Pre-deploy: `bin/rails saas:enable`
 Deploy: `bin/kamal deploy -d <destination>`
 Destinations: production, staging, beta, beta1, beta2, beta3, beta4
+Note: `beta` is a template requiring `BETA_NUMBER` env var; typical targets are `beta1`-`beta4`.
 
 ## Architecture Overview
 
