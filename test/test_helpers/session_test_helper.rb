@@ -28,6 +28,27 @@ module SessionTestHelper
     assert_not_nil cookie, "Expected session_token cookie to be set after sign in"
   end
 
+  def sign_in_via_oidc(uid: "test-oidc-uid", email: "oidc@example.com", email_verified: true)
+    auth_hash = OmniAuth::AuthHash.new(
+      provider: "oidc",
+      uid: uid,
+      info: { email: email, name: "OIDC User" },
+      extra: { raw_info: { email_verified: email_verified } }
+    )
+
+    OmniAuth.config.mock_auth[:oidc] = auth_hash
+
+    untenanted do
+      get new_session_path
+      assert_response :success, "Can access new session page"
+
+      post "/auth/oidc/callback", env: { "omniauth.auth" => auth_hash }
+    end
+
+    assert_response :redirect, "OIDC callback should grant access"
+    assert cookies[:session_token].present?, "Expected session_token cookie to be set after OIDC sign in"
+  end
+
   def logout_and_sign_in_as(identity)
     Session.delete_all
     sign_in_as identity

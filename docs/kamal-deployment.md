@@ -111,3 +111,15 @@ Optional for S3-compatible endpoints:
 - `S3_REQUEST_CHECKSUM_CALCULATION` (defaults to `when_supported`)
 - `S3_RESPONSE_CHECKSUM_VALIDATION` (defaults to `when_supported`)
 
+### Configuring OIDC / OAuth2 authentication
+
+To enable OAuth2 login, set:
+
+- `OIDC_ISSUER`
+- `OIDC_CLIENT_ID`
+- `OIDC_CLIENT_SECRET`
+
+Optional:
+
+- `OIDC_RATE_LIMIT` (defaults to 10; set to configure allowed OIDC login attempts within 15 minutes)
+- `OIDC_REQUIRED` (defaults to `false`; set to `true` to hide magic link login)

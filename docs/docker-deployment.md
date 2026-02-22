@@ -140,6 +140,19 @@ If you're using a provider other than AWS, you will also need some of the follow
 - `S3_REQUEST_CHECKSUM_CALCULATION`
 - `S3_RESPONSE_CHECKSUM_VALIDATION`
 
+#### OIDC / OAuth2 Authentication
+
+OIDC with a single provider is supported when the following variables are set.
+
+- `OIDC_ISSUER`
+- `OIDC_CLIENT_ID`
+- `OIDC_CLIENT_SECRET`
+
+Optional variables
+
+- `OIDC_RATE_LIMIT` (defaults to 10; set to configure allowed OIDC login attempts within 15 minutes)
+- `OIDC_REQUIRED` (defaults to `false`; set to `true` to hide magic link login)
+
 #### Multi-tenant mode
 
 By default, when you run the Fizzy Docker image you'll be limited to creating a single account (although that account can have as many users as you like).

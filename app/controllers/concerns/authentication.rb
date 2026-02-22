@@ -9,7 +9,7 @@ module Authentication
 
     etag { Current.identity.id if authenticated? }
 
-    include Authentication::ViaMagicLink, LoginHelper
+    include Authentication::ViaMagicLink, Authentication::ViaOidc, LoginHelper
   end
 
   class_methods do
@@ -103,5 +103,19 @@ module Authentication
 
     def session_token
       cookies[:session_token]
+    end
+
+    def authentication_failed(message: "Something went wrong. Please try again.", redirect_path: new_session_path)
+      respond_to do |format|
+        format.html { redirect_to redirect_path, alert: message }
+        format.json { render json: { message: message }, status: :unauthorized }
+      end
+    end
+
+    def rate_limit_exceeded(message: "Try again later.", redirect_path: new_session_path)
+      respond_to do |format|
+        format.html { redirect_to redirect_path, alert: message }
+        format.json { render json: { message: message }, status: :too_many_requests }
+      end
     end
 end
