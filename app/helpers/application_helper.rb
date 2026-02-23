@@ -1,7 +1,4 @@
 module ApplicationHelper
-  def page_title_for_return
-    @page_title.presence
-  end
   def page_title_tag
     account_name = if Current.account && Current.session&.identity&.users&.many?
       Current.account&.name

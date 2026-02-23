@@ -1,5 +1,7 @@
-<%# expects: card:, return_to:, return_label: %>
+<%# expects: card:. Optional: return_to:, return_label: %>
 <% draggable = local_assigns.fetch(:draggable, false) && card.published? %>
+<% return_to = local_assigns.fetch(:return_to, request.fullpath) %>
+<% return_label = local_assigns.fetch(:return_label, card.board&.name) %>
 
 <% card_data = {
   id: card.number,

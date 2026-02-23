@@ -6,9 +6,7 @@ class BoardsHelperTest < ActionView::TestCase
   fixtures :boards
 
   setup do
-    @board = Board.find(
-    ActiveRecord::FixtureSet.identify("writebook", :uuid)
-    )
+    @board = Board.find(ActiveRecord::FixtureSet.identify("writebook", :uuid))
   end
 
   test "uses safe relative return_to path" do

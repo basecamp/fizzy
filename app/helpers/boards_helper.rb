@@ -3,37 +3,32 @@ module BoardsHelper
     safe_path = safe_return_to
     if safe_path
       path = safe_path
-      label = params[:return_label].presence || board.name
+      label = @user_filtering&.selected_boards_label || board.name
     else
       path = board
       label = board.name
     end
-    back_link_to(
-      label,
-      path,
-      "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click click->turbo-navigation#backIfSamePath"
-    )
+    back_link_to(label, path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click click->turbo-navigation#backIfSamePath")
   end
 
   private
 
-  def safe_return_to
-    return unless params[:return_to].present?
+    def safe_return_to
+      if params[:return_to].present?
+        raw = params[:return_to].to_s
+        
+        if raw.start_with?("/") && !raw.start_with?("//")
+          uri = URI.parse(raw)
 
-    raw = params[:return_to].to_s
-
-    # Only allow relative paths starting with a single "/"
-    return unless raw.start_with?("/") && !raw.start_with?("//")
-
-    uri = URI.parse(raw)
-
-    # Prevent open redirect and non-HTTP schemes
-    return unless uri.scheme.nil? && uri.host.nil?
-
-    raw
-  rescue URI::InvalidURIError
-    nil
-  end
+          # Prevent open redirect and non-HTTP schemes
+          if uri.scheme.nil? && uri.host.nil?
+            raw
+          end
+        end
+      end
+    rescue URI::InvalidURIError
+      nil
+    end
 
   def link_to_edit_board(board)
     link_to edit_board_path(board), class: "btn btn--circle-mobile",
