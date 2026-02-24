@@ -93,6 +93,22 @@ class Notifier::EventNotifierTest < ActiveSupport::TestCase
     end
   end
 
+  test "don't create notifications on comment for mentionees even before mention records exist" do
+    comment = cards(:layout).comments.create!(
+      body: "Hey #{mention_html_for(users(:kevin))}, what do you think?",
+      creator: users(:david)
+    )
+    event = boards(:writebook).events.create!(
+      action: "comment_created", creator: users(:david), eventable: comment
+    )
+
+    assert_empty comment.mentionees, "Mention records should not exist yet"
+
+    notifications = Notifier.for(event).notify
+
+    assert_not_includes notifications.map(&:user), users(:kevin)
+  end
+
   test "assignment events notify assignees regardless of involvement level" do
     boards(:writebook).access_for(users(:jz)).access_only!
 
@@ -100,4 +116,9 @@ class Notifier::EventNotifierTest < ActiveSupport::TestCase
 
     assert_equal [ users(:jz) ], notifications.map(&:user)
   end
+
+  private
+    def mention_html_for(user)
+      ActionText::Attachment.from_attachable(user).to_html
+    end
 end
