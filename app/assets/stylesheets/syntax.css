@@ -44,7 +44,11 @@
 
     .gd {
       color: var(--markup-deleted);
-      background-color: light-dark(lch(39.64 68.17 31.45 / 0.15), lch(39.64 68.17 31.45 / 0.2));
+      background-color: lch(39.64 68.17 31.45 / 0.15);
+
+      html[data-theme="dark"] & {
+        background-color: lch(39.64 68.17 31.45 / 0.2);
+      }
     }
 
     .nb, .nc, .no, .nn {
@@ -57,7 +61,11 @@
 
     .gi {
       color: var(--markup-inserted);
-      background-color: light-dark(lch(49.14 52.75 142.85 / 0.15), lch(83.65 59.31 141.61 / 0.15));
+      background-color: lch(49.14 52.75 142.85 / 0.15);
+
+      html[data-theme="dark"] & {
+        background-color: lch(83.65 59.31 141.61 / 0.15);
+      }
     }
 
     .kc, .l, .ld, .m, .mb, .mf, .mh, .mi, .il, .mo, .mx, .sb, .bp, .ne, .nl, .py, .nv, .vc, .vg, .vi, .vm, .o, .ow {
