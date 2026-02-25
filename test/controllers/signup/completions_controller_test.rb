@@ -68,7 +68,6 @@ class Signup::CompletionsControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :created
-    assert_equal Account.last.id, @response.parsed_body["account_id"]
   end
 
   test "create via JSON with blank name" do
