@@ -30,7 +30,7 @@
       <strong class="margin-block-end-half flex justify-center txt-small">Add an optional description to the public page</strong>
       <div class="border-radius input fill-white">
         <%= form_with model: board, class: "txt-align-start", data: { controller: "form", turbo_frame: "_top" } do |form| %>
-          <%= form.rich_textarea :public_description, class: "rich-text-content txt-small",
+          <%= form.rich_textarea :public_description, class: "lexxy-content txt-small",
             placeholder: "Add a public note about this board…",
             data: { action: "keydown.ctrl+enter->form#submit:prevent keydown.meta+enter->form#submit:prevent keydown.esc->form#cancel:stop" },
             readonly: !Current.user.can_administer_board?(@board) %>

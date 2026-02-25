@@ -1,24 +1,40 @@
 const EDGE_THRESHOLD = 16
 
-export function orient(el, orient = true) {
-  el.classList.remove("orient-left", "orient-right")
+export function orient({ target, anchor = null, reset = false }) {
+  target.classList.remove("orient-left", "orient-right")
+  target.style.removeProperty("--orient-offset")
 
-  if (!orient) return
+  if (reset) return
 
-  const rightSpace = spaceOnRight(el)
-  const leftSpace = spaceOnLeft(el)
+  const targetGeometry = geometry(target)
+  const anchorGeometry = geometry(anchor)
+  const shouldOrientLeft = targetGeometry.spaceOnRight < EDGE_THRESHOLD && targetGeometry.spaceOnRight < targetGeometry.spaceOnLeft
+  const shouldOrientRight = targetGeometry.spaceOnLeft < EDGE_THRESHOLD && targetGeometry.spaceOnLeft < targetGeometry.spaceOnRight
 
-  if (rightSpace < EDGE_THRESHOLD && rightSpace < leftSpace) {
-    el.classList.add("orient-left")
-  } else if (leftSpace < EDGE_THRESHOLD && leftSpace < rightSpace) {
-    el.classList.add("orient-right")
+  if (shouldOrientLeft) {
+    orientLeft({ el: target, targetGeometry, anchorGeometry })
+  } else if (shouldOrientRight) {
+    orientRight({ el: target, targetGeometry, anchorGeometry })
   }
 }
 
-function spaceOnLeft(el) {
-  return el.getBoundingClientRect().left
+function orientLeft({ el, targetGeometry, anchorGeometry }) {
+  const offset = Math.min(0, anchorGeometry.spaceOnLeft + anchorGeometry.width - targetGeometry.width) * -1
+  el.classList.add("orient-left")
+  el.style.setProperty("--orient-offset", `${offset}px`)
 }
 
-function spaceOnRight(el) {
-  return window.innerWidth - el.getBoundingClientRect().right
+function orientRight({ el, targetGeometry, anchorGeometry }) {
+  const offset = Math.max(0, anchorGeometry.spaceOnLeft + targetGeometry.width - window.innerWidth) * -1
+  el.classList.add("orient-right")
+  el.style.setProperty("--orient-offset", `${offset}px`)
+}
+
+function geometry(el) {
+  const rect = el.getBoundingClientRect()
+  return {
+    spaceOnLeft: rect.left,
+    spaceOnRight: window.innerWidth - rect.right,
+    width: rect.width
+  }
 }

@@ -52,8 +52,11 @@ export default class extends Controller {
     this.#show()
   }
 
+  // Keep in sync with Card::Stallable#stalled? in app/models/card/stallable.rb
   get #isStalled() {
-    return this.stalledValue.lastActivitySpikeAt && signedDifferenceInDays(new Date(this.stalledValue.lastActivitySpikeAt), new Date()) > this.stalledValue.stalledAfterDays
+    return this.stalledValue.lastActivitySpikeAt &&
+      signedDifferenceInDays(new Date(this.stalledValue.lastActivitySpikeAt), new Date()) > this.stalledValue.stalledAfterDays &&
+      signedDifferenceInDays(new Date(this.stalledValue.updatedAt), new Date()) > this.stalledValue.stalledAfterDays
   }
 
   #showStalled() {

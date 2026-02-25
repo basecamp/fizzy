@@ -1,11 +1,13 @@
 <div id="<%= dom_id(card, :watch_button) %>">
   <% if card.watched_by? Current.user %>
-    <%= button_to card_watch_path(card), method: :delete, class: "btn btn--reversed", data: { controller: "tooltip hotkey", action: "keydown.shift+n@document->hotkey#click" } do %>
+    <%= button_to card_watch_path(card), method: :delete, class: "btn btn--reversed btn--circle-mobile",
+          data: { controller: "tooltip hotkey", action: "keydown.shift+n@document->hotkey#click", bridge__overflow_menu_target: "item", bridge_title: "Stop watching" } do %>
       <%= icon_tag "bell" %>
       <span class="for-screen-reader">Stop watching (shift+n)</span>
     <% end %>
   <% else %>
-    <%= button_to card_watch_path(card), class: "btn", data: { controller: "tooltip hotkey", action: "keydown.shift+n@document->hotkey#click" } do %>
+    <%= button_to card_watch_path(card), class: "btn btn--circle-mobile",
+          data: { controller: "tooltip hotkey", action: "keydown.shift+n@document->hotkey#click", bridge__overflow_menu_target: "item", bridge_title: "Watch this" } do %>
       <%= icon_tag "bell-off" %>
       <span class="for-screen-reader">Watch this (shift+n)</span>
     <% end %>

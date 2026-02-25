@@ -1,6 +1,5 @@
 module AccountSlug
-  PATTERN = /(\d{7,})/
-  FORMAT = "%07d"
+  PATTERN = /(\d+)/
   PATH_INFO_MATCH = /\A(\/#{AccountSlug::PATTERN})/
 
   class Extractor
@@ -40,7 +39,7 @@ module AccountSlug
   end
 
   def self.decode(slug) slug.to_i end
-  def self.encode(id) FORMAT % id end
+  def self.encode(id) id.to_s end
 end
 
 Rails.application.config.middleware.insert_after Rack::TempfileReaper, AccountSlug::Extractor

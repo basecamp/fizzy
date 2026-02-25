@@ -32,6 +32,7 @@
   .txt-link { color: var(--color-link); text-decoration: underline; }
 
   .font-weight-normal { font-weight: normal; }
+  .font-weight-semibold { font-weight: 600; }
   .font-weight-bold { font-weight: bold; }
   .font-weight-black { font-weight: 900; }
 

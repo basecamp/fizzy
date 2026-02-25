@@ -2,7 +2,7 @@
   <%# Helper Dependency Updated: avatar_image_tag 2025-12-15 %>
   <%= notification_tag notification do %>
     <%= render "notifications/notification/header", notification: notification do %>
-      <%= notification_toggle_read_button(notification, url: card_reading_path(notification.card)) %>
+      <%= notification_toggle_read_button(notification, url: notification_reading_path(notification)) %>
     <% end %>
     <%= render "notifications/notification/body", notification: notification %>
   <% end %>

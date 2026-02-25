@@ -10,8 +10,6 @@
     flex-wrap: wrap;
     gap: var(--inline-space-half);
     inline-size: 100%;
-    margin-block-start: var(--block-space-half);
-    margin-inline: calc(var(--column-gap) / -1);
 
     &:has([open]) {
       z-index: var(--z-popup);
@@ -34,11 +32,8 @@
 
       .reactions__trigger {
         --btn-border-color: var(--color-ink-lightest);
-        background-color: var(--color-ink-lightest);
 
-        &:not(:hover) {
-          opacity: 0.66;
-        }
+        background-color: var(--color-ink-lightest);
       }
     }
   }
@@ -90,6 +85,10 @@
     .btn {
       font-size: 0.6em;
       inline-size: auto;
+    }
+
+    @media (any-hover: none) {
+      padding-inline-end: 0.12em;
     }
   }
 
@@ -171,6 +170,11 @@
   .reaction__cancel-btn {
     --btn-size: 1.25rem;
     --icon-size: var(--btn-size);
+
+    @media (any-hover: none) {
+      --btn-size: 2rem;
+      --icon-size: 90%;
+    }
   }
 
   .reaction__submit-btn {
@@ -223,6 +227,12 @@
 
       &:hover {
         scale: 1.3;
+      }
+
+      @media (any-hover: none) {
+        --btn-size: calc(1.6rem * 1.3);
+
+        font-size: 1.6rem;
       }
     }
   }

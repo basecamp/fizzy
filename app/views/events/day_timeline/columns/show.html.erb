@@ -5,7 +5,7 @@
     <%= back_link_to "Activity", root_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
   </div>
 
-  <h1 class="header__title">
+  <h1 class="header__title" data-bridge--title-target="header">
     <%= @column.title %>
   </h1>
 <% end %>

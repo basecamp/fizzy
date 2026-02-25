@@ -1,0 +1,35 @@
+name: Sync Gemfile.saas.lock
+
+on:
+  push:
+    branches:
+      - "dependabot/bundler/**"
+    paths:
+      - Gemfile.lock
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+
+      - name: Forward Gemfile.lock changes to Gemfile.saas.lock
+        run: bin/bundle-drift forward
+
+      - name: Commit updated lockfile
+        run: |
+          git add Gemfile.saas.lock
+          if ! git diff --cached --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git commit -m "Sync Gemfile.saas.lock"
+            git push
+          fi

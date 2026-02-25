@@ -440,6 +440,7 @@
     .card__meta-text:not(.card__meta-text--updated),
     .card__stages,
     .card__steps,
+    .card__boosts,
     .card__comments,
     .card__closed {
       display: none;

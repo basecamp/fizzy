@@ -14,7 +14,7 @@ class Event::Description
   end
 
   def to_plain_text
-    to_sentence(creator_name, quoted(card.title))
+    to_sentence(creator_name, quoted(card.title)).html_safe
   end
 
   private
@@ -38,11 +38,11 @@ class Event::Description
     end
 
     def creator_name
-      h(event.creator.name)
+      h event.creator.name
     end
 
     def quoted(text)
-      %("#{h text}")
+      h %("#{text}")
     end
 
     def card
@@ -86,27 +86,43 @@ class Event::Description
       if event.assignees.include?(user)
         "#{creator} will handle #{card_title}"
       else
-        "#{creator} assigned #{h event.assignees.pluck(:name).to_sentence} to #{card_title}"
+        "#{creator} assigned #{assignee_names} to #{card_title}"
       end
     end
 
     def unassigned_sentence(creator, card_title)
-      assignees_text = event.assignees.include?(user) ? "yourself" : event.assignees.pluck(:name).to_sentence
-      "#{creator} unassigned #{h(assignees_text)} from #{card_title}"
+      "#{creator} unassigned #{unassigned_names} from #{card_title}"
     end
 
     def renamed_sentence(creator, card_title)
-      old_title = event.particulars.dig("particulars", "old_title")
-      %(#{creator} renamed #{card_title} (was: "#{h old_title}"))
+      %(#{creator} renamed #{card_title} (was: "#{old_title}"))
     end
 
     def moved_sentence(creator, card_title)
-      new_location = event.particulars.dig("particulars", "new_board") || event.particulars.dig("particulars", "new_collection")
-      %(#{creator} moved #{card_title} to "#{h new_location}")
+      %(#{creator} moved #{card_title} to "#{new_location}")
     end
 
     def triaged_sentence(creator, card_title)
-      column = event.particulars.dig("particulars", "column")
-      %(#{creator} moved #{card_title} to "#{h column}")
+      %(#{creator} moved #{card_title} to "#{column}")
+    end
+
+    def assignee_names
+      h event.assignees.pluck(:name).to_sentence
+    end
+
+    def unassigned_names
+      h(event.assignees.include?(user) ? "yourself" : assignee_names)
+    end
+
+    def old_title
+      h event.particulars.dig("particulars", "old_title")
+    end
+
+    def new_location
+      h(event.particulars.dig("particulars", "new_board") || event.particulars.dig("particulars", "new_collection"))
+    end
+
+    def column
+      h event.particulars.dig("particulars", "column")
     end
 end

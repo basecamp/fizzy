@@ -70,16 +70,6 @@ class MentionsTest < ActiveSupport::TestCase
     end
   end
 
-  test "don't create mentions from comments when belonging to unpublished cards" do
-    perform_enqueued_jobs only: Mention::CreateJob do
-      card = boards(:writebook).cards.create title: "Cleanup", description: "Some initial content"
-
-      assert_no_difference -> { Mention.count } do
-        card.comments.create!(body: "Great work on this #{mention_html_for(users(:david))}!")
-      end
-    end
-  end
-
   test "can't mention users that don't have access to the board" do
     boards(:writebook).update! all_access: false
     boards(:writebook).accesses.revoke_from(users(:david))
@@ -87,6 +77,18 @@ class MentionsTest < ActiveSupport::TestCase
     assert_no_difference -> { Mention.count }, +1 do
       perform_enqueued_jobs only: Mention::CreateJob do
         boards(:writebook).cards.create title: "Cleanup", description: "Did you finish up with the cleanup, #{mention_html_for(users(:david))}?"
+      end
+    end
+  end
+
+  test "notify new mentionees when editing a comment to add a mention" do
+    card = boards(:writebook).cards.create title: "Fresh card", description: "Some content", status: :published
+
+    perform_enqueued_jobs do
+      comment = card.comments.create!(body: "Initial thought")
+
+      assert_difference -> { users(:kevin).notifications.count }, +1 do
+        comment.update!(body: "Actually, #{mention_html_for(users(:kevin))}, what do you think?")
       end
     end
   end

@@ -185,15 +185,16 @@
   .cards__transition-container {
     block-size: 100%;
     border-radius: calc(var(--column-width-collapsed) / 2);
-    translate: 0 0.5ch; /* Allow a little room for the mini bubble */
+    margin-block-start: 0.5ch; /* Allow a little room for the mini bubble */
     transition: translate var(--column-transition-duration) var(--ease-out-overshoot-subtle);
 
     @media (min-width: 640px) {
       .is-expanded & {
-        translate: 0 0.5ch; /* Allow a little room for the mini bubble */
+        translate: 0; /* Animate back from collapsed state */
       }
 
       .is-collapsed & {
+        margin-block-start: 0;
         translate: 0 var(--column-width-collapsed);
       }
     }
@@ -232,7 +233,7 @@
     overflow-y: auto;
 
     .is-expanded & {
-      padding: var(--column-padding);
+      padding: var(--column-padding) var(--column-padding) calc(var(--column-padding) + var(--custom-safe-inset-bottom));
 
       /* Use the rest of the column height for scrolling */
       @media (max-width: 639px) {
@@ -378,6 +379,7 @@
   }
 
   .cards__menu {
+    position: relative;
     z-index: var(--z-popup);
   }
 
@@ -535,16 +537,33 @@
     /* Set lower limit for font size */
     font-size: clamp(0.6rem, 0.85cqi, 100px);
 
-    .card__comments {
-      --column-gap: 0.8ch;
+    .card__counts {
+      --gap: 0.5ch;
 
+      align-items: flex-end;
       display: flex;
-      margin-block-end: calc(var(--block-space) * -1.7);
-      margin-inline-end: calc(var(--card-padding-inline) * -0.5);
+      flex-shrink: 0;
+      gap: calc(2 * var(--gap));
+      margin-inline: auto calc(var(--card-padding-inline) * -0.5);
+      padding-inline-start: var(--gap);
+    }
 
-      .icon {
-        --icon-size: 1.6em;
+    .card__boosts,
+    .card__comments {
+      --icon-size: 1.6em;
 
+      align-items: center;
+      display: flex;
+      flex-shrink: 0;
+      font-weight: 600;
+      gap: var(--gap);
+
+      img {
+        block-size: var(--icon-size);
+        inline-size: var(--icon-size);
+      }
+
+      .icon--comment {
         color: var(--card-color);
       }
     }
@@ -583,18 +602,35 @@
       .local-time-value {
         font-weight: inherit;
       }
+
+      @media (max-width: 639px) {
+        inline-size: auto;
+      }
     }
 
-    .card:has(.card__background img:not([src=""])) {
+    &:has(.card__background img:not([src=""])) {
       .card__content,
       .card__meta,
+      .card__boosts,
+      .card__comments,
       .card__column-name:not(.card__column-name--current) {
         opacity: 0;
         transition: opacity 0.2s ease-in-out;
+      }
 
-        @media (any-hover: hover) {
-          .card:hover & {
+      @media (any-hover: hover) {
+        &:hover {
+          .card__content,
+          .card__footer,
+          .card__boosts,
+          .card__comments,
+          .card__column-name:not(.card__column-name--current) {
             opacity: 1;
+          }
+
+          .card__background img {
+            filter: blur(3px) brightness(1.2);
+            opacity: 0.2;
           }
         }
       }
@@ -603,13 +639,6 @@
     .bubble {
       inset-inline-start: 100%;
       translate: -90% -40%;
-    }
-
-    @media (any-hover: hover) {
-      .card:has(.card__background img:not([src=""])):hover .card__background img:not([src=""]) {
-        filter: blur(3px) brightness(1.2);
-        opacity: 0.2;
-      }
     }
   }
 
@@ -740,13 +769,16 @@
     --panel-padding: 2ch;
     --panel-size: 100%;
 
-    display: flex;
     flex-wrap: wrap;
     gap: var(--gap);
     inset-block-start: 0;
     justify-content: center;
     position: absolute;
     z-index: 1;
+
+    &[open] {
+      display: flex;
+    }
   }
 
   /* On Deck (Not Now)

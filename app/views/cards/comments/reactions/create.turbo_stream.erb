@@ -1,3 +1,0 @@
-<%= turbo_stream.replace([ @comment, :reacting ]) do %>
-  <%= render "cards/comments/reactions/reactions", comment: @comment.reload %>
-<% end %>

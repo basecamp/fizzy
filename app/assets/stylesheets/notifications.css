@@ -67,7 +67,7 @@
  /* Help
  /* ------------------------------------------------------------------------ */
   .notifications-help {
-    h2 {
+    h3 {
       font-size: var(--text-medium);
       margin: 0;
     }
@@ -95,12 +95,12 @@
     display: none;
 
     .notifications--on & {
-      display: block;
+      display: revert;
     }
   }
 
   .notifications__off-message {
-    display: block;
+    display: revert;
 
     .notifications--on & {
       display: none;

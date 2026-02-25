@@ -11,9 +11,7 @@
   <% card_data[:card_not_now_url] = card_not_now_path(card) %>
   <% card_data[:card_closure_url] = card_closure_path(card) %>
   <% card_data[:action] = "mouseenter->navigable-list#hoverSelect" %>
-  <% if Current.user %>
-    <% card_data[:card_assign_to_me_url] = card_assignments_path(card, params: { assignee_id: Current.user.id }) %>
-  <% end %>
+  <% card_data[:card_assign_to_self_url] = card_self_assignment_path(card) %>
 <% end %>
 
 <%= card_article_tag card, class: "card", draggable: draggable, data: card_data, tabindex: 0 do %>
@@ -38,17 +36,21 @@
     <div class="card__body justify-space-between">
       <div class="card__content">
         <h3 class="card__title overflow-line-clamp">
-          <%= card.title %>
+          <%= card_html_title(card) %>
         </h3>
       </div>
 
       <%= render "cards/display/preview/columns", card: card %>
+      <%= render "cards/display/common/stamp", card: card %>
     </div>
   </div>
 
   <footer class="card__footer flex gap-half">
     <%= render "cards/display/preview/meta", card: card, preview: true %>
-    <%= render "cards/display/preview/comments", card: card %>
+    <div class="card__counts">
+      <%= render "cards/display/preview/boosts", card: card %>
+      <%= render "cards/display/preview/comments", card: card %>
+    </div>
     <%= render "cards/display/common/background", card: card %>
   </footer>
 

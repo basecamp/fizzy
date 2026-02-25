@@ -16,12 +16,13 @@
       <% end %>
     </h1>
 
-    <%= form.rich_textarea :description, class: "card__description rich-text-content",
+    <%= form.rich_textarea :description, class: "card__description lexxy-content",
           placeholder: "Add some notes, context, pictures, or video about this…",
           data: { local_save_target: "input", action: "lexxy:change->local-save#save turbo:morph-element->local-save#restoreContent keydown.ctrl+enter->form#submit:prevent keydown.meta+enter->form#submit:prevent keydown.esc->form#cancel:stop" } do %>
       <%= general_prompts(@card.board) %>
     <% end %>
 
-    <%= link_to "Close editor and discard changes", @card, data: { form_target: "cancel" }, hidden: true %>
+    <%= link_to "Close editor and discard changes", @card,
+          data: { form_target: "cancel", bridge__form_target: "cancel", bridge_title: "Cancel" }, hidden: true %>
   <% end %>
 <% end %>

@@ -1,7 +1,27 @@
 @layer platform {
+  :root:has([data-platform~=ios]) {
+    &[data-text-size=xsmall] { font-size: 14px; }
+    &[data-text-size=small] { font-size: 15px; }
+    &[data-text-size=medium] { font-size: 16px; }
+    &[data-text-size=large] { font-size: 17px; }
+    &[data-text-size=xlarge] { font-size: 19px; }
+    &[data-text-size=xxlarge] { font-size: 21px; }
+    &[data-text-size=xxxlarge] { font-size: 23px; }
+  }
+
   [data-platform~=ios] {
     .hide-on-ios {
       display: none;
+    }
+
+    /* Events
+    /* ------------------------------------------------------------------------ */
+
+    .events__column-header {
+      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px);
+      background-color: oklch(from var(--color-canvas) l c h / 0.5);
+      border-radius: 10em;
     }
   }
 }

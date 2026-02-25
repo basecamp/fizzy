@@ -30,11 +30,12 @@
       <div class="card__body justify-space-between">
         <%= render "public/cards/show/content", card: @card %>
         <%= render "cards/display/public_preview/columns", card: @card if @card.open? %>
+        <%= render "cards/display/common/stamp", card: @card %>
       </div>
 
       <%= render "public/cards/show/steps", card: @card %>
 
-      <footer class="card__footer full-width flex align-start gap">
+      <footer class="card__footer">
         <%= render "cards/display/public_preview/meta", card: @card %>
         <%= render "cards/display/perma/background", card: @card %>
       </footer>

@@ -44,6 +44,15 @@ class AccountSlugExtractorTest < ActiveSupport::TestCase
     assert_nil captured.fetch(:current_account)
   end
 
+  test "encodes account IDs without zero-padding" do
+    assert_equal "1", AccountSlug.encode(1)
+  end
+
+  test "decodes both padded and non-padded slugs" do
+    assert_equal 123, AccountSlug.decode("123")
+    assert_equal 123, AccountSlug.decode("0000123")
+  end
+
   private
     def call_with_env(path, extra_env = {})
       captured = {}

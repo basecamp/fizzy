@@ -51,7 +51,7 @@ Rails.application.configure do
 
   config.public_file_server.enabled = true
   config.public_file_server.headers = {
-    "Cache-Control" => "public, max-age=#{1.year.to_i}"
+    "Cache-Control" => "public, max-age=#{5.minutes.to_i}"
   }
 
   # Select Active Storage service via env var; default to local disk.

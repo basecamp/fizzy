@@ -47,6 +47,29 @@
       "note": ""
     },
     {
+      "warning_type": "SSL Verification Bypass",
+      "warning_code": 71,
+      "fingerprint": "8e566e1a52e48940c840541ea4e33f41a39dc0f2a97eb83c52e76f9582667a3c",
+      "check_name": "SSLVerify",
+      "message": "SSL certificate verification was bypassed",
+      "file": "app/models/zip_file/remote_io.rb",
+      "line": 41,
+      "link": "https://brakemanscanner.org/docs/warning_types/ssl_verification_bypass/",
+      "code": "Net::HTTP.new(@uri.hostname, @uri.port).verify_mode = OpenSSL::SSL::VERIFY_NONE",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "ZipFile::RemoteIO",
+        "method": "with_http"
+      },
+      "user_input": null,
+      "confidence": "High",
+      "cwe_id": [
+        295
+      ],
+      "note": "Required for internal PureStorage self-signed certificates. Only used for trusted internal storage URLs."
+    },
+    {
       "warning_type": "Mass Assignment",
       "warning_code": 70,
       "fingerprint": "ac0fa1970dea215e2f47a5676ffd63d8728951e361da12a53dd424bf6dc46f2a",
@@ -72,7 +95,7 @@
     {
       "warning_type": "Remote Code Execution",
       "warning_code": 24,
-      "fingerprint": "b00571393e95a8c7d77b1ed963cfc5cc89333bc82f447cf8783549d817990305",
+      "fingerprint": "f13f9f972c3f026ab4509a66ac284b8b7c1ba6191a3c4c89d2e9fb4584478f6d",
       "check_name": "UnsafeReflection",
       "message": "Unsafe reflection method `safe_constantize` called on model attribute",
       "file": "app/models/notifier.rb",
@@ -116,5 +139,5 @@
       "note": "No user input allowed"
     }
   ],
-  "brakeman_version": "7.1.0"
+  "brakeman_version": "8.0.1"
 }

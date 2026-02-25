@@ -1,6 +1,6 @@
 class Reaction < ApplicationRecord
-  belongs_to :account, default: -> { comment.account }
-  belongs_to :comment, touch: true
+  belongs_to :account, default: -> { reactable.account }
+  belongs_to :reactable, polymorphic: true, touch: true
   belongs_to :reacter, class_name: "User", default: -> { Current.user }
 
   scope :ordered, -> { order(:created_at) }
@@ -11,6 +11,6 @@ class Reaction < ApplicationRecord
 
   private
     def register_card_activity
-      comment.card.touch_last_active_at
+      reactable.card.touch_last_active_at
     end
 end

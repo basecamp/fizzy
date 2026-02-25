@@ -1,20 +1,20 @@
 <% @page_title = "Choose an account" %>
 
 <% cache [ Current.identity, @accounts ] do %>
-  <div
-    class="panel panel--centered flex flex-column gap-half"
+  <section
+    class="panel panel--centered flex flex-column gap"
     style="--popup-icon-size: 24px; --popup-item-padding-inline: 0.5rem;"
   >
     <% if @accounts.any? %>
-      <h1 class="txt-x-large font-weight-black margin-none">
+      <h1 class="txt-x-large font-weight-black txt-tight-lines margin-none">
         Your Fizzy accounts
       </h1>
-      <menu class="popup__list pad border-radius border">
+      <menu class="popup__list pad border-radius border" style="--block-space: var(--inline-space);">
         <% @accounts.each do |account| %>
           <li class="popup__item txt-medium">
             <%= icon_tag "marker", class: "popup__icon" %>
             <%= link_to landing_path(script_name: account.slug), class: "btn overflow-ellipsis fill-transparent popup__btn" do %>
-              <strong><%= account.name %></strong>
+              <strong class="overflow-ellipsis"><%= account.name %></strong>
             <% end %>
           </li>
         <% end %>
@@ -24,12 +24,10 @@
       <p class="margin-none-block-start">You don’t have any Fizzy accounts.</p>
     <% end %>
 
-    <div class="margin-block-start">
-      <%= link_to new_signup_path, class: "btn btn--plain txt-link center txt-small", data: { turbo_prefetch: false } do %>
-        <span>Sign up for a new Fizzy account</span>
-      <% end %>
-    </div>
-  </div>
+    <%= link_to new_signup_path, class: "btn center txt-small margin-block-start", data: { turbo_prefetch: false } do %>
+      <span>Sign up for a new Fizzy account</span>
+    <% end %>
+  </section>
 <% end %>
 
 <% content_for :footer do %>

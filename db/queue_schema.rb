@@ -132,7 +132,6 @@ ActiveRecord::Schema[8.2].define(version: 1) do
     t.index ["key"], name: "index_solid_queue_semaphores_on_key", unique: true
   end
 
-  # If these FKs are removed, make sure to periodically run `RecurringExecution.clear_in_batches`
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_failed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade

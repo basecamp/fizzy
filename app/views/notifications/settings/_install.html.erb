@@ -1,6 +1,6 @@
 <% unless (platform.chrome? && !platform.ios?) || (platform.firefox? && !platform.android?) %>
   <div class="notifications-help pwa__instructions hide-in-pwa">
-    <h2><%= platform.safari? && platform.desktop? ? "…or install" : "Install " -%> Fizzy as a web app.</h2>
+    <h3><%= platform.safari? && platform.desktop? ? "…or install" : "Install " -%> Fizzy as a web app.</h3>
     <% case
       when platform.edge? %>
         <ol>
@@ -20,7 +20,7 @@
       <% when platform.safari? && platform.desktop? %>
         <ol>
           <li>Click <em>File</em> in the top left.</li>
-          <li>Click <em>Add to Dock…</em>.</li>
+          <li>Click <em>Add to Dock…</em></li>
         </ol>
       <% when (platform.safari? || platform.chrome?) && platform.ios? %>
         <p>To receive push notifications in <%= platform.browser.capitalize %> for <%= platform.operating_system %>, you must first install Fizzy as a web app.</p>

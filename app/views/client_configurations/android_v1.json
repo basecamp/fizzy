@@ -1,0 +1,90 @@
+{
+  "settings": {},
+  "rules": [
+    {
+      "patterns": [
+        ".*"
+      ],
+      "properties": {
+        "context": "default",
+        "presentation": "default",
+        "query_string_presentation": "replace",
+        "uri": "hotwire://fragment/web",
+        "fallback_uri": "hotwire://fragment/web",
+        "pull_to_refresh_enabled": true
+      }
+    },
+    {
+      "patterns": [
+        "/new$",
+        "/new\\?.+$",
+        "/edit$",
+        "/edit\\?.+$",
+        "/cards/[0-9]+/draft",
+        "/notifications/settings",
+        "/account/settings",
+        "/account/join_code"
+      ],
+      "properties": {
+        "context": "modal",
+        "pull_to_refresh_enabled": false
+      }
+    },
+    {
+      "patterns": [
+        "/native/login/blank"
+      ],
+      "properties": {
+        "uri": "hotwire://fragment/login/blank"
+      }
+    },
+    {
+      "patterns": [
+        "/native/login/email"
+      ],
+      "properties": {
+        "uri": "hotwire://fragment/login/email"
+      }
+    },
+    {
+      "patterns": [
+        "/native/login/magic_code"
+      ],
+      "properties": {
+        "uri": "hotwire://fragment/login/magic_code"
+      }
+    },
+    {
+      "patterns": [
+        "/native/login/signup_completion"
+      ],
+      "properties": {
+        "uri": "hotwire://fragment/login/signup_completion"
+      }
+    },
+    {
+      "patterns": [
+        "/native/settings"
+      ],
+      "properties": {
+        "uri": "hotwire://fragment/settings"
+      }
+    },
+    {
+      "patterns": [
+        "/my/pins"
+      ],
+      "properties": {
+        "uri": "hotwire://fragment/pins"
+      }
+    },
+    {
+      "patterns": [
+        "/notifications$"
+      ],
+      "properties": {
+        "uri": "hotwire://fragment/notifications"
+      }
+    }
+  ]
+}

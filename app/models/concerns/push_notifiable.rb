@@ -2,7 +2,7 @@ module PushNotifiable
   extend ActiveSupport::Concern
 
   included do
-    after_create_commit :push_notification_later
+    after_save_commit :push_notification_later, if: :source_id_previously_changed?
   end
 
   private

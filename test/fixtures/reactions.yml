@@ -2,12 +2,26 @@ kevin:
   id: <%= ActiveRecord::FixtureSet.identify("kevin_reaction", :uuid) %>
   account: 37s_uuid
   content: "👍"
-  comment: logo_agreement_jz_uuid
+  reactable: logo_agreement_jz_uuid (Comment)
   reacter: kevin_uuid
 
 david:
   id: <%= ActiveRecord::FixtureSet.identify("david_reaction", :uuid) %>
   account: 37s_uuid
   content: "👍"
-  comment: logo_agreement_jz_uuid
+  reactable: logo_agreement_jz_uuid (Comment)
+  reacter: david_uuid
+
+logo_card_kevin:
+  id: <%= ActiveRecord::FixtureSet.identify("logo_card_kevin_reaction", :uuid) %>
+  account: 37s_uuid
+  content: "🎯"
+  reactable: logo_uuid (Card)
+  reacter: kevin_uuid
+
+logo_card_david:
+  id: <%= ActiveRecord::FixtureSet.identify("logo_card_david_reaction", :uuid) %>
+  account: 37s_uuid
+  content: "👍"
+  reactable: logo_uuid (Card)
   reacter: david_uuid

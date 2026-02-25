@@ -9,6 +9,7 @@
   <div class="header__actions header__actions--start">
     <%= link_back_to_board(@card.board) %>
   </div>
+  <%= bridged_button_to_board(@card.board) %>
 <% end %>
 
 <%= turbo_stream_from @card %>
@@ -22,3 +23,5 @@
     <%= button_to_remove_card_image(@card) if @card.image.attached? %>
   <% end %>
 </div>
+
+<%= bridged_share_url_button(bridge_share_card_description(@card)) %>

@@ -17,11 +17,12 @@
     <div class="card__body justify-space-between">
       <div class="card__content">
         <h1 class="card__title overflow-line-clamp">
-          <%= card.title %>
+          <%= card_html_title(card) %>
         </h1>
       </div>
 
       <%= render "cards/display/public_preview/columns", card: card if card.triaged? %>
+      <%= render "cards/display/common/stamp", card: card %>
     </div>
   </div>
 

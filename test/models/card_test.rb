@@ -18,14 +18,6 @@ class CardTest < ActiveSupport::TestCase
     assert_equal account.reload.cards_count, card.number
   end
 
-  test "capturing messages" do
-    assert_difference -> { cards(:logo).comments.count }, +1 do
-      cards(:logo).comments.create!(body: "Agreed.")
-    end
-
-    assert_equal "Agreed.", cards(:logo).comments.last.body.to_plain_text.chomp
-  end
-
   test "assignment states" do
     assert cards(:logo).assigned_to?(users(:kevin))
     assert_not cards(:logo).assigned_to?(users(:david))
@@ -136,25 +128,29 @@ class CardTest < ActiveSupport::TestCase
 
   test "move cards to a different board" do
     card = cards(:logo)
-    old_board = boards(:writebook)
+    old_board = card.board
     new_board = boards(:private)
 
-    assert_equal old_board, card.board
+    card.comments.create!(body: "Sensitive information", creator: users(:david))
 
-    assert card.events.where(board: old_board).exists?
+    card_events_on_old_board = card.events.where(board: old_board)
+    comment_events_on_old_board = Event.where(board: old_board, eventable: card.comments)
+
+    assert card_events_on_old_board.exists?
+    assert comment_events_on_old_board.exists?
 
     card.move_to(new_board)
 
     assert_equal new_board, card.reload.board
 
-    events_in_old_board = card.events.where(board: old_board)
-    events_in_new_board = card.events.where(board: new_board)
+    card_events_on_new_board = card.events.where(board: new_board)
+    comment_events_on_new_board = Event.where(board: new_board, eventable: card.comments)
 
-    assert_empty events_in_old_board
-    assert events_in_new_board.exists?
-
-    board_changed_event = events_in_new_board.find { |event| event.action == "card_board_changed" }
-    assert board_changed_event
+    assert_empty card_events_on_old_board
+    assert_empty comment_events_on_old_board
+    assert card_events_on_new_board.exists?
+    assert comment_events_on_new_board.exists?
+    assert card_events_on_new_board.find_by(action: "card_board_changed")
   end
 
   test "a card is filled if it has either the title or the description set" do
@@ -206,5 +202,19 @@ class CardTest < ActiveSupport::TestCase
 
     assert card.watched_by?(kevin), "Kevin's watch should remain (has board access)"
     assert_not card.watched_by?(david), "David's watch should be deleted (no board access)"
+  end
+
+  test "card has reactions association" do
+    card = cards(:logo)
+    user = users(:david)
+
+    assert_difference "card.reactions.count", +1 do
+      card.reactions.create!(content: "👍", reacter: user)
+    end
+
+    reaction = card.reactions.last
+    assert_equal "👍", reaction.content
+    assert_equal user, reaction.reacter
+    assert_equal card, reaction.reactable
   end
 end

@@ -25,6 +25,7 @@ class Admin::StatsController < AdminController
   private
     def paid_subscriptions
       Account::Subscription
+        .where(status: %w[active trialing past_due])
         .where(plan_key: %w[monthly_v1 monthly_extra_storage_v1])
         .where.not(account_id: Account::BillingWaiver.select(:account_id))
     end

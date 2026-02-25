@@ -2,12 +2,12 @@ require "test_helper"
 
 class Account::ExportsControllerTest < ActionDispatch::IntegrationTest
   setup do
-    sign_in_as :david
+    sign_in_as :jason
   end
 
   test "create creates an export record and enqueues job" do
     assert_difference -> { Account::Export.count }, 1 do
-      assert_enqueued_with(job: ExportAccountDataJob) do
+      assert_enqueued_with(job: DataExportJob) do
         post account_exports_path
       end
     end
@@ -20,14 +20,14 @@ class Account::ExportsControllerTest < ActionDispatch::IntegrationTest
     post account_exports_path
 
     export = Account::Export.last
-    assert_equal users(:david), export.user
+    assert_equal users(:jason), export.user
     assert_equal Current.account, export.account
     assert export.pending?
   end
 
   test "create rejects request when current export limit is reached" do
     Account::ExportsController::CURRENT_EXPORT_LIMIT.times do
-      Account::Export.create!(account: Current.account, user: users(:david))
+      Account::Export.create!(account: Current.account, user: users(:jason))
     end
 
     assert_no_difference -> { Account::Export.count } do
@@ -39,7 +39,7 @@ class Account::ExportsControllerTest < ActionDispatch::IntegrationTest
 
   test "create allows request when exports are older than one day" do
     Account::ExportsController::CURRENT_EXPORT_LIMIT.times do
-      Account::Export.create!(account: Current.account, user: users(:david), created_at: 2.days.ago)
+      Account::Export.create!(account: Current.account, user: users(:jason), created_at: 2.days.ago)
     end
 
     assert_difference -> { Account::Export.count }, 1 do
@@ -50,7 +50,7 @@ class Account::ExportsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "show displays completed export with download link" do
-    export = Account::Export.create!(account: Current.account, user: users(:david))
+    export = Account::Export.create!(account: Current.account, user: users(:jason))
     export.build
 
     get account_export_path(export)
@@ -74,5 +74,23 @@ class Account::ExportsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "h2", "Download Expired"
+  end
+
+  test "create is forbidden for non-admin members" do
+    logout_and_sign_in_as :david
+
+    post account_exports_path
+
+    assert_response :forbidden
+  end
+
+  test "show is forbidden for non-admin members" do
+    logout_and_sign_in_as :david
+    export = Account::Export.create!(account: Current.account, user: users(:jason))
+    export.build
+
+    get account_export_path(export)
+
+    assert_response :forbidden
   end
 end

@@ -1,12 +1,12 @@
-<section class="panel unpad borderless center flex flex-column gap-half margin-block-start">
-  <h2 class="txt-medium txt-uppercase divider margin-none-block-end">Email Notifications</h2>
-  <p class="margin-none">Get a single email with all your notifications every few hours, daily, or weekly.</p>
-  <%= form_with model: settings, url: notifications_settings_path, 
-      class: "flex flex-column gap-half",
+<section class="settings__section">
+  <heading>
+    <h2 class="divider">Email Notifications</h2>
+    <div>Get a single email with all your notifications every few hours, daily, or weekly.</div>
+  </heading>
+
+  <%= form_with model: settings, url: notifications_settings_path,
       method: :patch, local: true, data: { controller: "form" } do |form| %>
-    <div class="flex flex-column gap-half pad">
-      <strong><%= form.label :bundle_email_frequency, "Email me about new notifications..." %></strong>
-      <%= form.select :bundle_email_frequency, bundle_email_frequency_options_for(settings), {}, class: "input input--select txt-align-center", data: { action: "change->form#submit" } %>
-    </div>
+    <div class="margin-block-end-half"><strong><%= form.label :bundle_email_frequency, "Email me about new notifications..." %></strong></div>
+    <%= form.select :bundle_email_frequency, bundle_email_frequency_options_for(settings), {}, class: "input input--select txt-align-center", data: { action: "change->form#submit" } %>
   <% end %>
 </section>

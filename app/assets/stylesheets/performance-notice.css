@@ -1,0 +1,11 @@
+.performance-notice {
+  background: oklch(var(--lch-yellow-lightest));
+  border-radius: 1ch;
+  border: 1px solid oklch(var(--lch-yellow-light));
+  font-size: var(--text-small);
+  margin-block-end: 2ch;
+  margin-inline: auto;
+  max-inline-size: 60ch;
+  padding-inline: 2ch;
+  padding: 1ch;
+}

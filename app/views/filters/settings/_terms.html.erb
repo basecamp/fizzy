@@ -1,8 +1,9 @@
 <%= form.search_field "terms[]", placeholder: "Filter these cards… [F]", class: "filter__terms input txt-x-small",
       autofocus: false, autocomplete: :off, autocorrect: "off", data: {
             "1p-ignore": "true",
-            controller: "hotkey",
+            controller: "hotkey touch-placeholder",
             filter_settings_target: "field",
+            touch_placeholder_placeholder_value: "Filter these cards…",
             action: "keydown.f@document->hotkey#focus input->filter-settings#resetIfNoFiltering input->form#debouncedSubmit keydown.enter->form#submitToTopTarget blur->form#submitToTopTarget" } %>
 
 <% if filter.terms.present? %>

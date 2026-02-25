@@ -1,38 +1,53 @@
 @layer components {
+  /* Prevent page scrolling when modal dialog is open */
+  html:has(dialog:modal) {
+    overflow: hidden;
+  }
+
   :is(.dialog) {
     border: 0;
     opacity: 0;
-    transform: scale(0.2);
-    transform-origin: top center;
-    transition: var(--dialog-duration) allow-discrete;
+    transform: scale(0.85);
+    transform-origin: center;
+    transition-behavior: allow-discrete;
+    transition-duration: calc(var(--dialog-duration) / 2); /* Faster closing */
     transition-property: display, opacity, overlay, transform;
+    transition-timing-function: ease-out;
 
     &::backdrop {
       background-color: var(--color-black);
       opacity: 0;
-      transform: scale(1);
-      transition: var(--dialog-duration) allow-discrete;
+      transition-behavior: allow-discrete;
+      transition-duration: calc(var(--dialog-duration) / 2);
       transition-property: display, opacity, overlay;
+      transition-timing-function: ease-out;
     }
 
     &[open] {
       opacity: 1;
       transform: scale(1);
+      transition-duration: var(--dialog-duration); /* Normal opening speed */
 
       &::backdrop {
         opacity: 0.5;
+        transition-duration: var(--dialog-duration);
       }
     }
 
     @starting-style {
       &[open] {
         opacity: 0;
-        transform: scale(0.2);
+        transform: scale(0.85);
       }
 
       &[open]::backdrop {
         opacity: 0;
       }
     }
+  }
+
+  /* Ensure padding from viewport edges */
+  .dialog.panel {
+    max-inline-size: calc(100vw - var(--inline-space-double) * 2);
   }
 }

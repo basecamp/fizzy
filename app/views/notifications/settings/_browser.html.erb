@@ -2,18 +2,18 @@
   <div class="notifications-help" data-notifications-target="details">
     <% case
       when platform.firefox? && platform.android? %>
-        <h2>Turn on notifications for <%= platform.browser.capitalize %>.</h2>
+        <h3>Turn on notifications for <%= platform.browser.capitalize %>.</h3>
         <ol>
           <li>Tap <em><%= icon_tag "lock", alt: "the View site information button" %></em> in the address bar.</li>
           <li>Tap <em>Notification</em> to change to <em>Allowed</em>.</li>
         </ol>
       <% when platform.edge? && platform.desktop? %>
-        <h2>Turn on notifications for this website.</h2>
+        <h3>Turn on notifications for this website.</h3>
         <ol>
           <li>Click <em><%= icon_tag "lock", alt: "the View site information button" %></em> left of the address bar.</li>
           <li>Under <em>Permissions for this site &gt; Notifications</em>, choose <em>Allow</em>.</li>
         </ol>
-        <h2>Turn on notifications for <%= platform.browser.capitalize %>.</h2>
+        <h3>Turn on notifications for <%= platform.browser.capitalize %>.</h3>
         <ol>
           <% if platform.windows? %>
             <li>Click <em>Start</em>, then <em>Settings</em>.</li>
@@ -21,24 +21,24 @@
             <li>Click <em><%= icon_tag "switch", alt: "the switch" %></em> <em>ON</em> for <%= platform.browser.capitalize %>.</li>
           <% else %>
             <li>Click <em aria-label="the Apple menu"></em> in the top left.</li>
-            <li>Click <em>System Settings…</em>.</li>
+            <li>Click <em>System Settings…</em></li>
             <li>Click <em>Notifications</em>.</li>
             <li>Click <em><%= platform.browser.capitalize %></em>.</li>
             <li>Click <em><%= icon_tag "switch", alt: "the switch" %></em> to <em>Allow notifications</em>.</li>
           <% end %>
         </ol>
       <% when platform.firefox? && platform.desktop? %>
-        <h2>Turn on notifications for this website.</h2>
+        <h3>Turn on notifications for this website.</h3>
         <ol>
           <li>Click <em><%= platform.browser.capitalize %></em> in the top left.</li>
-          <li>Click <em>Settings…</em>.</li>
+          <li>Click <em>Settings…</em></li>
           <li>Click <em>Privacy & Security</em> in the sidebar.</li>
           <li>Scroll down to <em>Permissions</em>.</li>
           <li>Click <em>Settings</em> next to <em>Notifications</em>.</li>
           <li>Select <em>Allow</em> next to <em><%= root_url %></em>.</li>
         </ol>
 
-        <h2>Turn on notifications for <%= platform.browser.capitalize %>.</h2>
+        <h3>Turn on notifications for <%= platform.browser.capitalize %>.</h3>
         <ol>
           <% if platform.windows? %>
             <li>Click <em>Start</em>, then <em>Settings</em>.</li>
@@ -46,21 +46,21 @@
             <li>Click <em><%= icon_tag "switch", alt: "the toggle button" %></em> <em>ON</em> for <%= platform.browser.capitalize %>.</li>
           <% else %>
             <li>Click <em aria-label="the Apple menu"></em> in the top left.</li>
-            <li>Click <em>System Settings…</em>.</li>
+            <li>Click <em>System Settings…</em></li>
             <li>Click <em>Notifications</em>.</li>
             <li>Click <em><%= platform.browser.capitalize %></em>.</li>
             <li>Click <em><%= icon_tag "switch", alt: "the switch" %></em> to <em>Allow notifications</em>.</li>
           <% end %>
         </ol>
       <% when platform.chrome? && platform.desktop? %>
-        <h2>Turn on notifications for this website.</h2>
+        <h3>Turn on notifications for this website.</h3>
         <ol>
           <li>Click the <em><%= icon_tag "sliders", alt: "View site information" %></em> icon in the address bar.</li>
           <li>Click <em>Site Settings</em>.</li>
           <li>Ensure notifications are <em>Allowed</em>.</li>
         </ol>
 
-        <h2>Turn on notifications for <%= platform.browser.capitalize %>.</h2>
+        <h3>Turn on notifications for <%= platform.browser.capitalize %>.</h3>
         <ol>
           <% if platform.windows? %>
             <li>Click <em>Start</em>, then <em>Settings</em>.</li>
@@ -68,14 +68,14 @@
             <li>Click <em><%= icon_tag "switch", alt: "the switch" %></em> <em>ON</em> for <%= platform.browser.capitalize %>.</li>
           <% else %>
             <li>Click <em aria-label="the Apple menu"></em> in the top left.</li>
-            <li>Click <em>System Settings…</em>.</li>
+            <li>Click <em>System Settings…</em></li>
             <li>Click <em>Notifications</em>.</li>
             <li>Click <em><%= platform.browser == "Chrome" ? "Google Chrome" : platform.browser.capitalize %></em>.</li>
             <li>Click <em><%= icon_tag "switch", alt: "the switch" %></em> to <em>Allow notifications</em>.</li>
           <% end %>
         </ol>
       <% when platform.chrome? && platform.android? %>
-        <h2>Turn on notifications for <%= platform.browser.capitalize %>.</h2>
+        <h3>Turn on notifications for <%= platform.browser.capitalize %>.</h3>
         <ol>
           <li>Tap the <em><%= icon_tag "menu-dots-vertical", alt: "More options" %></em> menu button.</li>
           <li>Tap <em>Settings</em>.</li>
@@ -85,18 +85,18 @@
           <li>Tap <em><%= icon_tag "bell-alert", alt: "the notification bell" %></em> and select <em>Allow</em>.</li>
         </ol>
       <% when platform.safari? && platform.desktop? %>
-        <h2>Turn on notifications for this website.</h2>
+        <h3>Turn on notifications for this website.</h3>
         <ol>
           <li>Click <em aria-label="the Apple menu"></em> in the top left.</li>
-          <li>Click <em>System Settings…</em>.</li>
+          <li>Click <em>System Settings…</em></li>
           <li>Click <em>Notifications</em>.</li>
           <li>Click <em><%= request.base_url %></em> in the list.</li>
           <li>Click <em><%= icon_tag "switch", alt: "the switch" %></em> to <em>Allow notifications</em>.</li>
         </ol>
-        <h2>Turn on notifications for <%= platform.browser.capitalize %>.</h2>
+        <h3>Turn on notifications for <%= platform.browser.capitalize %>.</h3>
         <ol>
           <li>Click <em><%= platform.browser.capitalize %></em> in the top left.</li>
-          <li>Click <em>Settings…</em>.</li>
+          <li>Click <em>Settings…</em></li>
           <li>Click the <em>Websites</em> tab.</li>
           <li>Click <em>Notifications</em> in the sidebar.</li>
           <li>Click <em><%= request.base_url %></em> in the list.</li>

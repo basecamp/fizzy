@@ -3,10 +3,12 @@ json.cache! card do
   json.description card.description.to_plain_text
   json.description_html card.description.to_s
   json.image_url card.image.presence && url_for(card.image)
+  json.has_attachments card.has_attachments?
 
   json.tags card.tags.pluck(:title).sort
 
   json.closed card.closed?
+  json.postponed card.postponed?
   json.golden card.golden?
   json.last_active_at card.last_active_at.utc
   json.created_at card.created_at.utc
@@ -20,4 +22,5 @@ json.cache! card do
   json.has_more_assignees card.assignees.size > 5
 
   json.comments_url card_comments_url(card)
+  json.reactions_url card_reactions_url(card)
 end

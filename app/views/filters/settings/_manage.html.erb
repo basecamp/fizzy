@@ -1,7 +1,8 @@
 <% filter = user_filtering.filter %>
+<% clear_url = filter.single_board ? board_path(filter.single_board) : no_filtering_url %>
 
 <div class="filters__manage gap-half">
-  <%= link_to no_filtering_url, class: "btn btn--remove txt-x-small", data: { controller: "hotkey tooltip", action: "keydown.esc@document->hotkey#click"} do %>
+  <%= link_to clear_url, class: "btn btn--remove txt-x-small", data: { controller: "hotkey tooltip", action: "keydown.esc@document->hotkey#click"} do %>
     <%= icon_tag "close" %>
     <span class="for-screen-reader">Clear all</span>
   <% end %>

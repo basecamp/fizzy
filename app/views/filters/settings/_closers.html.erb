@@ -17,11 +17,10 @@
     </template>
 
     <%= filter_dialog "Closed by…" do %>
-      <strong class="popup__title">Closed by…</strong>
-
+      <%= filter_title "Closed by…" %>
       <% if user_filtering.users.many? %>
         <%= text_field_tag nil, nil, id: nil, placeholder: "Filter…", class: "input input--transparent txt-small", autofocus: true,
-              type: "search", autocorrect: "off", autocomplete: "off", data: { "1p-ignore": "true", filter_target: "input", action: "input->filter#filter" } %>
+              type: "search", autocorrect: "off", autocomplete: "off", data: { "1p-ignore": "true", filter_target: "input", dialog_target: "focusMouse", action: "input->filter#filter" } %>
       <% end %>
 
       <ul class="popup__list" data-filter-target="list" role="listbox">

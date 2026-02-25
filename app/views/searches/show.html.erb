@@ -1,20 +1,20 @@
-<% @page_title = params.has_key?(:q) ? "Search results for \"#{params[:q]}\"" : "Search" %>
+<% @page_title = @query ? "Search results for \"#{@query}\"" : "Search" %>
 
 <% content_for :header do %>
   <div class="header__actions header__actions--start">
     <%= back_link_to "Home", root_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
   </div>
 
-  <h1 class="header__title"><%= @page_title %></h1>
+  <h1 class="header__title" data-bridge--title-target="header"><%= @page_title %></h1>
 <% end %>
 
 <div class="search-perma margin-block-start">
-  <%= render "form", query_terms: params[:q] %>
+  <%= render "form", query_terms: @query %>
   <%= turbo_frame_tag "bar_content" do %>
     <% if @card %>
       <%= auto_submit_form_with url: card_path(@card), method: :get, data: { turbo_action: "advance", turbo_frame: "_top", search_redirect: true } %>
     <% else %>
-      <%= render "results", page: @page %>
+      <%= render "results", page: @page, query: @query %>
     <% end %>
   <% end %>
 </div>

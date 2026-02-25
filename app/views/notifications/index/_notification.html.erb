@@ -1,6 +1,0 @@
-<%= notification_tag notification do %>
-  <%= render "notifications/notification/header", notification: notification do %>
-    <%= notification_toggle_read_button(notification, url: notification_reading_path(notification)) %>
-  <% end %>
-  <%= render "notifications/notification/body", notification: notification %>
-<% end %>

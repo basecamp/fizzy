@@ -1,0 +1,32 @@
+<% @page_title = "Import an account" %>
+<div class="panel panel--centered flex flex-column gap" style="--panel-size: 54ch;">
+  <header>
+    <h1 class="txt-x-large font-weight-black txt-tight-lines margin-block-end-none">Import a Fizzy account</h1>
+
+    <% if Fizzy.saas? %>
+      <div class="font-weight-semibold margin-block-end">Running Fizzy on your own server and want us to host on <a class="txt-ink txt-underline" href="https://fizzy.do" target="_blank" rel="noopener noreferrer">fizzy.do</a> instead?</div>
+      <div>Export your self-hosted account, then upload the .zip file below.</div>
+    <% else %>
+      <div class="font-weight-semibold margin-block-end">Ready to host Fizzy on your own server?</div>
+      <div>Export your <a class="txt-ink txt-underline" href="https://fizzy.do" target="_blank" rel="noopener noreferrer">fizzy.do</a> account, then upload the .zip file below.</div>
+    <% end %>
+  </header>
+
+  <%= form_with url: account_imports_path, class: "flex flex-column gap", data: { controller: "form upload-preview" }, multipart: true do |form| %>
+    <label class="btn input--upload">
+      <div data-upload-preview-target="placeholder">Choose a file…</div>
+      <div data-upload-preview-target="fileName" hidden></div>
+      <%= form.file_field :file, accept: ".zip", required: true, data: { action: "upload-preview#previewFileName", upload_preview_target: "input" } %>
+    </label>
+
+    <button type="submit" class="btn btn--link center" data-form-target="submit">
+      <span>Start Import →</span>
+    </button>
+  <% end %>
+
+  <p class="txt-small">If you run into issues or would like assistance, just <a href="mailto:support@fizzy.do" class="txt-ink txt-underline">send us an email</a>.</p>
+</div>
+
+<% content_for :footer do %>
+  <%= render "sessions/footer" %>
+<% end %>

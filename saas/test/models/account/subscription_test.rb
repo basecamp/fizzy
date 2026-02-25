@@ -117,4 +117,78 @@ class Account::SubscriptionTest < ActiveSupport::TestCase
       subscription.cancel
     end
   end
+
+  test "sync_customer_email_to_stripe updates Stripe customer with owner email" do
+    account = accounts(:"37s")
+    owner = account.users.find_by(role: :owner) || account.users.first.tap { |u| u.update!(role: :owner) }
+    subscription = account.create_subscription!(
+      stripe_customer_id: "cus_test",
+      plan_key: "monthly_v1",
+      status: "active"
+    )
+
+    Stripe::Customer.expects(:update).with("cus_test", email: owner.identity.email_address).once
+
+    subscription.sync_customer_email_to_stripe
+  end
+
+  test "sync_customer_email_to_stripe does nothing without stripe_customer_id" do
+    account = accounts(:"37s")
+    subscription = account.build_subscription(
+      stripe_customer_id: nil,
+      plan_key: "free_v1",
+      status: "active"
+    )
+
+    Stripe::Customer.expects(:update).never
+
+    subscription.sync_customer_email_to_stripe
+  end
+
+  test "sync_customer_email_to_stripe does nothing without owner" do
+    account = accounts(:"37s")
+    account.users.update_all(role: :member)
+    subscription = account.create_subscription!(
+      stripe_customer_id: "cus_test",
+      plan_key: "monthly_v1",
+      status: "active"
+    )
+
+    Stripe::Customer.expects(:update).never
+
+    subscription.sync_customer_email_to_stripe
+  end
+
+  test "sync_customer_email_to_stripe does nothing when owner has no identity" do
+    account = accounts(:"37s")
+    owner = account.users.find_by(role: :owner) || account.users.first.tap { |u| u.update!(role: :owner) }
+    owner.update_column(:identity_id, nil)
+    subscription = account.create_subscription!(
+      stripe_customer_id: "cus_test",
+      plan_key: "monthly_v1",
+      status: "active"
+    )
+
+    Stripe::Customer.expects(:update).never
+
+    subscription.sync_customer_email_to_stripe
+  end
+
+  test "sync_customer_email_to_stripe treats deleted customer as success" do
+    account = accounts(:"37s")
+    account.users.find_by(role: :owner) || account.users.first.tap { |u| u.update!(role: :owner) }
+    subscription = account.create_subscription!(
+      stripe_customer_id: "cus_deleted",
+      plan_key: "monthly_v1",
+      status: "active"
+    )
+
+    Stripe::Customer.stubs(:update).raises(
+      Stripe::InvalidRequestError.new("No such customer", {})
+    )
+
+    assert_nothing_raised do
+      subscription.sync_customer_email_to_stripe
+    end
+  end
 end

@@ -13,9 +13,9 @@ json.cache! comment do
 
   json.card do
     json.id comment.card_id
-    json.url card_url(comment.card_id)
+    json.url card_url(comment.card)
   end
 
-  json.reactions_url card_comment_reactions_url(comment.card_id, comment.id)
-  json.url card_comment_url(comment.card_id, comment.id)
+  json.reactions_url card_comment_reactions_url(comment.card, comment)
+  json.url card_comment_url(comment.card, comment)
 end

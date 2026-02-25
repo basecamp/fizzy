@@ -1,16 +1,11 @@
-logo_published_kevin:
-  id: <%= ActiveRecord::FixtureSet.identify("logo_published_kevin", :uuid) %>
-  user: kevin_uuid
-  source: logo_published_uuid (Event)
-  created_at: <%= 1.week.ago %>
-  creator: david_uuid
-  account: 37s_uuid
-
 logo_assignment_kevin:
   id: <%= ActiveRecord::FixtureSet.identify("logo_assignment_kevin", :uuid) %>
   user: kevin_uuid
   source: logo_assignment_km_uuid (Event)
+  card: logo_uuid
+  unread_count: 2
   created_at: <%= 1.week.ago %>
+  updated_at: <%= 1.week.ago + 1.second %>
   creator: david_uuid
   account: 37s_uuid
 
@@ -18,22 +13,20 @@ layout_commented_kevin:
   id: <%= ActiveRecord::FixtureSet.identify("layout_commented_kevin", :uuid) %>
   user: kevin_uuid
   source: layout_commented_uuid (Event)
+  card: layout_uuid
+  unread_count: 1
   created_at: <%= 1.week.ago %>
+  updated_at: <%= 1.week.ago + 2.seconds %>
   creator: david_uuid
   account: 37s_uuid
 
-logo_card_david_mention_by_jz:
-  id: <%= ActiveRecord::FixtureSet.identify("logo_card_david_mention_by_jz_notif", :uuid) %>
-  user: david_uuid
-  source: logo_card_david_mention_by_jz_uuid (Mention)
-  created_at: <%= 1.week.ago %>
-  creator: david_uuid
-  account: 37s_uuid
-
-logo_comment_david_mention_by_jz:
-  id: <%= ActiveRecord::FixtureSet.identify("logo_comment_david_mention_by_jz_notif", :uuid) %>
+logo_mentioned_david:
+  id: <%= ActiveRecord::FixtureSet.identify("logo_mentioned_david", :uuid) %>
   user: david_uuid
   source: logo_comment_david_mention_by_jz_uuid (Mention)
+  card: logo_uuid
+  unread_count: 2
   created_at: <%= 1.week.ago %>
+  updated_at: <%= 1.week.ago + 3.seconds %>
   creator: david_uuid
   account: 37s_uuid

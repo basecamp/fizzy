@@ -1,6 +1,7 @@
 require_relative "transaction_pinning"
 require_relative "signup"
 require_relative "authorization"
+require_relative "gvl_instrumentation"
 require_relative "../../rails_ext/active_record_tasks_database_tasks.rb"
 
 module Fizzy
@@ -15,6 +16,11 @@ module Fizzy
 
       initializer "fizzy_saas.assets" do |app|
         app.config.assets.paths << root.join("app/assets/stylesheets")
+      end
+
+      initializer "fizzy_saas.public_files" do |app|
+        app.middleware.insert_after ActionDispatch::Static, ActionDispatch::Static, root.join("public").to_s,
+          headers: app.config.public_file_server.headers
       end
 
       initializer "fizzy.saas.routes", after: :add_routing_paths do |app|
@@ -44,6 +50,10 @@ module Fizzy
 
       initializer "fizzy_saas.transaction_pinning" do |app|
         app.config.middleware.insert_after(ActiveRecord::Middleware::DatabaseSelector, TransactionPinning::Middleware)
+      end
+
+      initializer "fizzy_saas.gvl_instrumentation" do |app|
+        app.config.middleware.insert_before(Rack::Runtime, GvlInstrumentation)
       end
 
       initializer "fizzy_saas.solid_queue" do
@@ -112,6 +122,9 @@ module Fizzy
           config.channel_class_name = "ActionCable::Channel::Base"
         end
 
+        require "yabeda/gvl"
+        Yabeda::GVL.install!
+
         require_relative "metrics"
       end
 
@@ -119,8 +132,9 @@ module Fizzy
         config.console1984.protected_environments = %i[ production beta staging ]
         config.console1984.ask_for_username_if_empty = true
         config.console1984.base_record_class = "::SaasRecord"
+        config.console1984.incinerate_after = 60.days
 
-        config.audits1984.base_controller_class = "::SaasAdminController"
+        config.audits1984.base_controller_class = "::Admin::AuditsController"
         config.audits1984.auditor_class = "::Identity"
         config.audits1984.auditor_name_attribute = :email_address
 
@@ -133,6 +147,7 @@ module Fizzy
 
       config.to_prepare do
         ::Account.include Account::Billing, Account::Limited
+        ::User.include User::NotifiesAccountOfEmailChange
         ::Signup.prepend Fizzy::Saas::Signup
         CardsController.include(Card::LimitedCreation)
         Cards::PublishesController.include(Card::LimitedPublishing)

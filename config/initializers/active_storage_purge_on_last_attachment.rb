@@ -22,7 +22,7 @@ module ActiveStorage
 
     private
       def purge_dependent_blob_later
-        if dependent == :purge_later && !@purge_mode
+        if (record.nil? || dependent == :purge_later) && !@purge_mode
           purge_blob_if_last(:purge_later)
         end
       end

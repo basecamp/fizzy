@@ -207,6 +207,43 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
     assert_equal users(:kevin).boards.count, @response.parsed_body.count
   end
 
+  test "index as JSON paginates and preserves recently-accessed order" do
+    account = accounts("37s")
+    kevin = users(:kevin)
+    baseline_accessed_at = 3.days.ago.change(usec: 0)
+
+    kevin.accesses.order(:id).each_with_index do |access, index|
+      access.update!(accessed_at: baseline_accessed_at + index.seconds)
+    end
+
+    200.times do |index|
+      board = Board.create!(
+        name: "Recent board #{index}",
+        creator: kevin,
+        account: account,
+        all_access: false
+      )
+      board.access_for(kevin).update!(accessed_at: baseline_accessed_at + (index + 1).minutes)
+    end
+
+    expected_ids = kevin.boards.ordered_by_recently_accessed.pluck(:id)
+    actual_ids = []
+    next_page = boards_path(format: :json)
+    page_count = 0
+
+    while next_page
+      get next_page, as: :json
+      assert_response :success
+
+      page_count += 1
+      actual_ids.concat(@response.parsed_body.map { |board| board["id"] })
+      next_page = next_page_from_link_header(@response.headers["Link"])
+    end
+
+    assert_equal expected_ids, actual_ids
+    assert_operator page_count, :>, 1
+  end
+
   test "show as JSON" do
     get board_path(boards(:writebook)), as: :json
     assert_response :success
@@ -240,4 +277,10 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :no_content
   end
+
+  private
+    def next_page_from_link_header(link_header)
+      url = link_header&.match(/<([^>]+)>;\s*rel="next"/)&.captures&.first
+      URI.parse(url).request_uri if url
+    end
 end

@@ -30,7 +30,7 @@ export default class extends Controller {
 
   reset() {
     this.zoomedImageTarget.src = ""
-    this.captionTarget.innerText = ""
+    this.captionTarget.innerHTML = "&nbsp;"
     this.dispatch('closed')
   }
 

@@ -1,8 +1,9 @@
 import { Controller } from "@hotwired/stimulus"
 import { orient } from "helpers/orientation_helpers"
+import { isTouchDevice } from "helpers/platform_helpers"
 
 export default class extends Controller {
-  static targets = [ "dialog" ]
+  static targets = [ "dialog", "focusMouse", "focusTouch" ]
   static values = {
     modal: { type: Boolean, default: false },
     sizing: { type: Boolean, default: true },
@@ -14,6 +15,10 @@ export default class extends Controller {
     if (this.autoOpenValue) this.open()
   }
 
+  focusTouchTargetConnected() {
+    this.#setupFocus()
+  }
+
   open() {
     const modal = this.modalValue
 
@@ -21,7 +26,7 @@ export default class extends Controller {
       this.dialogTarget.showModal()
     } else {
       this.dialogTarget.show()
-      orient(this.dialogTarget)
+      orient({ target: this.dialogTarget, anchor: this.element })
     }
 
     this.loadLazyFrames()
@@ -41,7 +46,7 @@ export default class extends Controller {
     this.dialogTarget.close()
     this.dialogTarget.setAttribute("aria-hidden", "true")
     this.dialogTarget.blur()
-    orient(this.dialogTarget, false)
+    orient({ target: this.dialogTarget, reset: true })
     this.dispatch("close")
   }
 
@@ -62,5 +67,11 @@ export default class extends Controller {
 
   captureKey(event) {
     if (event.key !== "Escape") { event.stopPropagation() }
+  }
+
+  #setupFocus() {
+    const touch = isTouchDevice()
+    if (this.hasFocusMouseTarget) this.focusMouseTarget.autofocus = !touch
+    if (this.hasFocusTouchTarget) this.focusTouchTarget.autofocus = touch
   }
 }

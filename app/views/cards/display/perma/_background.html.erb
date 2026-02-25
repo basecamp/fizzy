@@ -1,5 +1,5 @@
 <%= render "cards/display/common/background", card: card do %>
-  <%= link_to card.image.presence, class: "btn fill-transparent flex-item-justify-end", data: { controller: "tooltip", lightbox_target: "image" } do %>
+  <%= link_to card.image.presence, class: "card__zoom-bg-btn btn", data: { controller: "tooltip", lightbox_target: "image" } do %>
     <%= icon_tag "picture-zoom" %>
     <span class="for-screen-reader">Zoom background image</span>
   <% end %>

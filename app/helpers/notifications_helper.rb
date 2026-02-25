@@ -29,9 +29,7 @@ module NotificationsHelper
   def notification_tag(notification, &)
     tag.div id: dom_id(notification), class: "tray__item tray__item--notification", data: {
       navigable_list_target: "item",
-      notifications_tray_target: "notification",
-      card_id: notification.card.id,
-      timestamp: notification.created_at.to_i
+      card_id: notification.card.id
     } do
       link_to(notification,
         class: [ "card card--notification", { "card--closed": notification.card.closed? }, { "unread": !notification.read? } ],
@@ -58,7 +56,7 @@ module NotificationsHelper
           data: { action: "form#submit:stop badge#update:stop", form_target: "submit" },
           form: { data: { controller: "form" } } do
         concat(icon_tag("remove"))
-        concat(tag.span("1", class: "badge-count", data: { group_count: "" }))
+        concat(tag.span(notification.unread_count, class: "badge-count")) if notification.unread_count > 1
       end
     end
   end

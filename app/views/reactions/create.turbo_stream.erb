@@ -1,0 +1,3 @@
+<%= turbo_stream.replace([ @reactable, :reacting ]) do %>
+  <%= render "reactions/reactions", reactable: @reactable.reload %>
+<% end %>

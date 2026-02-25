@@ -68,4 +68,26 @@ class Account::BillingTest < ActiveSupport::TestCase
 
     account.incinerate
   end
+
+  test "owner_email_changed enqueues sync job when subscription exists" do
+    account = accounts(:"37s")
+    account.create_subscription!(
+      stripe_customer_id: "cus_test",
+      plan_key: "monthly_v1",
+      status: "active"
+    )
+
+    assert_enqueued_with(job: Account::SyncStripeCustomerEmailJob, args: [ account.subscription ]) do
+      account.owner_email_changed
+    end
+  end
+
+  test "owner_email_changed does nothing without subscription" do
+    account = accounts(:initech)
+    account.subscription&.destroy
+
+    assert_no_enqueued_jobs do
+      account.owner_email_changed
+    end
+  end
 end

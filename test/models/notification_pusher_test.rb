@@ -3,10 +3,7 @@ require "test_helper"
 class NotificationPusherTest < ActiveSupport::TestCase
   setup do
     @user = users(:david)
-    @notification = @user.notifications.create!(
-      source: events(:logo_published),
-      creator: users(:jason)
-    )
+    @notification = notifications(:logo_mentioned_david)
     @pusher = NotificationPusher.new(@notification)
 
     @user.push_subscriptions.create!(

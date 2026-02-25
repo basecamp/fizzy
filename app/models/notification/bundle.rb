@@ -5,7 +5,7 @@ class Notification::Bundle < ApplicationRecord
   enum :status, %i[ pending processing delivered ]
 
   scope :due, -> { pending.where("ends_at <= ?", Time.current) }
-  scope :containing, ->(notification) { where("starts_at <= ? AND ends_at > ?", notification.created_at, notification.created_at) }
+  scope :containing, ->(notification) { where("starts_at <= ? AND ends_at > ?", notification.updated_at, notification.updated_at) }
   scope :overlapping_with, ->(other_bundle) do
     where(
       "(starts_at <= ? AND ends_at >= ?) OR (starts_at <= ? AND ends_at >= ?) OR (starts_at >= ? AND ends_at <= ?)",
@@ -33,7 +33,7 @@ class Notification::Bundle < ApplicationRecord
   end
 
   def notifications
-    user.notifications.where(created_at: window).unread
+    user.notifications.where(updated_at: window).unread
   end
 
   def deliver

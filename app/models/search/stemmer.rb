@@ -5,7 +5,7 @@ module Search::Stemmer
 
   def stem(value)
     if value.present?
-      value.gsub(/[^\w\s]/, "").split(/\s+/).map { |word| STEMMER.stem(word.downcase) }.join(" ")
+      value.gsub(/[^\w\s]/, " ").split(/\s+/).map { |word| STEMMER.stem(word.downcase) }.join(" ")
     else
       value
     end

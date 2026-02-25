@@ -1,0 +1,26 @@
+<%= turbo_frame_tag @reactable, :new_reaction do %>
+  <%= form_with model: [ *reaction_path_prefix_for(@reactable), Reaction.new ],
+        class: "reaction reaction__form expanded",
+        html: { aria: { label: "New reaction" } },
+        data: { controller: "form reaction-emoji", turbo_frame: dom_id(@reactable, :reacting), action: "keydown.esc->form#cancel submit->form#preventEmptySubmit submit->form#preventComposingSubmit" } do |form| %>
+    <label class="reaction__form-label flex gap" style="--column-gap: 0.4ch;">
+      <figure class="reaction__avatar margin-none flex-item-no-shrink">
+        <%= avatar_tag Current.user %>
+      </figure>
+
+      <%= form.text_field :content, autofocus: true, autocomplete: "off", autocorrect: "off", maxlength: 16,
+            pattern: /\S+.*/, class: "input reaction__input txt-small", data: { form_target: "input", reaction_emoji_target: "input", action: "compositionstart->form#compositionStart compositionend->form#compositionEnd" }, aria: { label: "Add a reaction" } %>
+    </label>
+
+    <%= render "reactions/menu" %>
+
+    <%= form.button class: "reaction__submit-btn btn btn--circle borderless", type: "submit", data: { form_target: "submit" } do %>
+      <%= icon_tag "check-circle" %> <span class="for-screen-reader">Submit</span>
+    <% end %>
+
+    <%= link_to polymorphic_path([ *reaction_path_prefix_for(@reactable), :reactions ]), role: "button",
+          data: { turbo_frame: dom_id(@reactable, :reacting), form_target: "cancel" }, class: "reaction__cancel-btn btn btn--circle borderless" do %>
+      <%= icon_tag "close-circle" %> <span class="for-screen-reader">Cancel</span>
+    <% end %>
+  <% end %>
+<% end %>

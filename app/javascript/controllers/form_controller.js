@@ -54,6 +54,10 @@ export default class extends Controller {
   }
 
   submitToTopTarget(event) {
+    const value = event.target.value?.trim()
+
+    if (!value) return false
+
     this.element.setAttribute("data-turbo-frame", "_top")
     this.submit()
   }

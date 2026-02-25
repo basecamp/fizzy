@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2025_12_24_092315) do
+ActiveRecord::Schema[8.2].define(version: 2026_02_18_120000) do
   create_table "accesses", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -33,20 +33,21 @@ ActiveRecord::Schema[8.2].define(version: 2025_12_24_092315) do
     t.index ["account_id"], name: "index_account_cancellations_on_account_id", unique: true
   end
 
-  create_table "account_exports", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.uuid "account_id", null: false
-    t.datetime "completed_at"
-    t.datetime "created_at", null: false
-    t.string "status", default: "pending", null: false
-    t.datetime "updated_at", null: false
-    t.uuid "user_id", null: false
-    t.index ["account_id"], name: "index_account_exports_on_account_id"
-    t.index ["user_id"], name: "index_account_exports_on_user_id"
-  end
-
   create_table "account_external_id_sequences", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "value", default: 0, null: false
     t.index ["value"], name: "index_account_external_id_sequences_on_value", unique: true
+  end
+
+  create_table "account_imports", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "account_id"
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.string "failure_reason"
+    t.uuid "identity_id", null: false
+    t.string "status", default: "pending", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_account_imports_on_account_id"
+    t.index ["identity_id"], name: "index_account_imports_on_identity_id"
   end
 
   create_table "account_join_codes", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -146,8 +147,9 @@ ActiveRecord::Schema[8.2].define(version: 2025_12_24_092315) do
     t.datetime "created_at", null: false
     t.string "key"
     t.datetime "updated_at", null: false
-    t.index ["account_id", "key"], name: "index_board_publications_on_account_id_and_key"
+    t.index ["account_id"], name: "index_board_publications_on_account_id"
     t.index ["board_id"], name: "index_board_publications_on_board_id"
+    t.index ["key"], name: "index_board_publications_on_key", unique: true
   end
 
   create_table "boards", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -293,6 +295,19 @@ ActiveRecord::Schema[8.2].define(version: 2025_12_24_092315) do
     t.index ["eventable_type", "eventable_id"], name: "index_events_on_eventable"
   end
 
+  create_table "exports", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.string "status", default: "pending", null: false
+    t.string "type"
+    t.datetime "updated_at", null: false
+    t.uuid "user_id", null: false
+    t.index ["account_id"], name: "index_exports_on_account_id"
+    t.index ["type"], name: "index_exports_on_type"
+    t.index ["user_id"], name: "index_exports_on_user_id"
+  end
+
   create_table "filters", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.uuid "account_id", null: false
     t.datetime "created_at", null: false
@@ -371,17 +386,20 @@ ActiveRecord::Schema[8.2].define(version: 2025_12_24_092315) do
 
   create_table "notifications", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.uuid "account_id", null: false
+    t.uuid "card_id", null: false
     t.datetime "created_at", null: false
     t.uuid "creator_id"
     t.datetime "read_at"
     t.uuid "source_id", null: false
     t.string "source_type", null: false
+    t.integer "unread_count", default: 0, null: false
     t.datetime "updated_at", null: false
     t.uuid "user_id", null: false
     t.index ["account_id"], name: "index_notifications_on_account_id"
     t.index ["creator_id"], name: "index_notifications_on_creator_id"
     t.index ["source_type", "source_id"], name: "index_notifications_on_source"
-    t.index ["user_id", "read_at", "created_at"], name: "index_notifications_on_user_id_and_read_at_and_created_at", order: { read_at: :desc, created_at: :desc }
+    t.index ["user_id", "card_id"], name: "index_notifications_on_user_id_and_card_id", unique: true
+    t.index ["user_id", "read_at", "updated_at"], name: "index_notifications_on_user_id_and_read_at_and_updated_at", order: { read_at: :desc, updated_at: :desc }
     t.index ["user_id"], name: "index_notifications_on_user_id"
   end
 
@@ -412,13 +430,14 @@ ActiveRecord::Schema[8.2].define(version: 2025_12_24_092315) do
 
   create_table "reactions", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.uuid "account_id", null: false
-    t.uuid "comment_id", null: false
     t.string "content", limit: 16, null: false
     t.datetime "created_at", null: false
+    t.uuid "reactable_id", null: false
+    t.string "reactable_type", null: false
     t.uuid "reacter_id", null: false
     t.datetime "updated_at", null: false
     t.index ["account_id"], name: "index_reactions_on_account_id"
-    t.index ["comment_id"], name: "index_reactions_on_comment_id"
+    t.index ["reactable_type", "reactable_id"], name: "index_reactions_on_reactable_type_and_reactable_id"
     t.index ["reacter_id"], name: "index_reactions_on_reacter_id"
   end
 
@@ -803,6 +822,7 @@ ActiveRecord::Schema[8.2].define(version: 2025_12_24_092315) do
     t.datetime "updated_at", null: false
     t.uuid "webhook_id", null: false
     t.index ["account_id"], name: "index_webhook_deliveries_on_account_id"
+    t.index ["created_at"], name: "index_webhook_deliveries_on_created_at"
     t.index ["event_id"], name: "index_webhook_deliveries_on_event_id"
     t.index ["webhook_id"], name: "index_webhook_deliveries_on_webhook_id"
   end

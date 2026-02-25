@@ -1,6 +1,6 @@
 <section class="search">
   <div class="search__results">
-    <% unless page.used? %>
+    <% if !page.used? && query %>
       <div class="search__blank-slate blank-slate">
         No matches
       </div>

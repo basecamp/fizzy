@@ -3,7 +3,7 @@ class Notifier::CommentEventNotifier < Notifier
 
   private
     def recipients
-      card.watchers.without(creator, *source.eventable.mentionees)
+      card.watchers.without(creator, *source.eventable.scan_mentionees)
     end
 
     def card

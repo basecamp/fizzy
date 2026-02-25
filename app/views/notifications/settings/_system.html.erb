@@ -1,5 +1,5 @@
 <div class="notifications-help hide-in-browser" data-notifications-target="details">
-  <h2>Check your <%= platform.operating_system %> settings</h2>
+  <h3>Check your <%= platform.operating_system %> settings</h3>
   <% case
     when platform.firefox? && platform.android? %>
       <ol>
@@ -22,7 +22,7 @@
           <li>Click <em><%= icon_tag "switch", alt: "the toggle button" %></em> <em>ON</em> for Fizzy.</li>
         <% else %>
           <li>Click <em aria-label="the Apple menu"></em> in the top left.</li>
-          <li>Click <em>System Settings…</em>.</li>
+          <li>Click <em>System Settings…</em></li>
           <li>Click <em>Notifications</em>.</li>
           <li>Click <em>Fizzy</em>.</li>
           <li>Click <em><%= icon_tag "switch", alt: "the allow notifications switch" %></em> to <em>Allow notifications</em>.</li>
@@ -31,7 +31,7 @@
     <% when platform.safari? && platform.desktop? %>
       <ol>
         <li>Click <em aria-label="the Apple menu"></em> in the top left.</li>
-        <li>Click <em>System Settings…</em>.</li>
+        <li>Click <em>System Settings…</em></li>
         <li>Click <em>Notifications</em>.</li>
         <li>Click <em>Fizzy</em>.</li>
         <li>Click <em><%= icon_tag "switch", alt: "the allow notifications switch" %></em> to <em>Allow notifications</em>.</li>

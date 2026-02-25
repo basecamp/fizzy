@@ -19,7 +19,7 @@
     pointer-events: auto;
     position: relative;
     transition: 100ms ease-out;
-    transition-property: background-color, border, box-shadow, color, filter, opacity, scale;
+    transition-property: background-color, border, box-shadow, color, opacity, scale;
 
     @media (any-hover: hover) {
       &:hover {
@@ -107,11 +107,6 @@
     > * {
       grid-area: 1/1;
     }
-
-    @media (max-width: 639px) {
-      --btn-size: 3em;
-      --icon-size: 75%;
-    }
   }
 
   /* Make a normal button circular on mobile */
@@ -125,7 +120,7 @@
       inline-size: var(--btn-size);
 
       kbd,
-      span:last-of-type {
+      span:last-of-type:not(.icon) {
         display: none;
       }
     }
@@ -224,17 +219,15 @@
   .btn--back {
     --btn-border-size: 0;
 
-    font-size: var(--text-medium);
-
     @media (max-width: 639px) {
-      padding: 0.5em;
-
       strong, kbd {
         display: none;
       }
     }
 
     @media (min-width: 640px) {
+      font-size: var(--text-medium);
+
       .icon--arrow-left {
         display: none;
       }

@@ -5,6 +5,19 @@ class CommentTest < ActiveSupport::TestCase
     Current.session = sessions(:david)
   end
 
+  test "cannot create comment on a draft card" do
+    draft_card = cards(:unfinished_thoughts)
+
+    comment = draft_card.comments.build(body: "This should fail")
+
+    assert_not comment.valid?
+    assert_includes comment.errors[:card], "does not allow comments"
+
+    assert_raises(ActiveRecord::RecordInvalid) do
+      draft_card.comments.create!(body: "This should raise")
+    end
+  end
+
   test "rich text embed variants are processed immediately on attachment" do
     comment = cards(:logo).comments.create!(body: "Check this out")
     comment.body.body.attachables # force load

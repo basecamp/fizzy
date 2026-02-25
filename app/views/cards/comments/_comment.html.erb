@@ -32,11 +32,11 @@
           <% end %>
         </div>
 
-        <div class="comment__body rich-text-content" data-controller="syntax-highlight retarget-links" data-turbo-permanent>
+        <div class="comment__body lexxy-content" data-controller="syntax-highlight retarget-links" data-turbo-permanent>
           <%= comment.body %>
         </div>
 
-        <%= render "cards/comments/reactions/reactions", comment: comment %>
+        <%= render "reactions/reactions", reactable: comment %>
       </div>
     </div>
   <% end %>

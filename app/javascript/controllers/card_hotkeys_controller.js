@@ -79,7 +79,7 @@ export default class extends Controller {
     const selection = this.#selectedCard
     if (!selection) return
 
-    const url = selection.card.dataset.cardAssignToMeUrl
+    const url = selection.card.dataset.cardAssignToSelfUrl
     if (url) {
       event.preventDefault()
       await post(url, { responseKind: "turbo-stream" })

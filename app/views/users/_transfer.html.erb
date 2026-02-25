@@ -1,30 +1,30 @@
-<div class="flex flex-column gap align-center margin-block-double">
+<section class="settings__section">
   <% url = session_transfer_url(user.identity.transfer_id, script_name: nil) %>
 
-  <label class="flex flex-column gap full-width">
-    <header>
-      <strong class="divider txt-large">Devices</strong>
-      <p class="margin-none" id="session_transfer_label">Link to automatically log in on another device.</p>
-    </header>
-    <span class="flex align-center gap margin-inline">
-      <input type="text" class="input fill-white" id="session_transfer_url" value="<%= url %>" aria-labelledby="session_transfer_label" readonly>
-    </span>
-  </label>
+  <header>
+    <h2 class="divider">Devices</h2>
+    <p class="margin-none" id="session_transfer_label">Link to automatically log in on another device.</p>
+  </header>
 
-  <div class="flex align-center gap">
+  <input type="text" class="input fill-white" id="session_transfer_url" value="<%= url %>" aria-labelledby="session_transfer_label" readonly>
+
+  <div class="flex justify-center gap">
     <div data-controller="dialog" data-dialog-modal-value="true" class="flex-inline">
       <%= tag.button class: "btn", data: { action: "dialog#open", controller: "tooltip" } do %>
         <%= icon_tag "qr-code" %>
         <span class="for-screen-reader">Display auto-login QR code</span>
       <% end %>
 
-      <dialog class="dialog panel shadow" data-dialog-target="dialog">
+      <dialog class="dialog panel shadow" data-dialog-target="dialog" style="--panel-size: 50ch;">
+        <p class="margin-none-block-start txt-balance">
+          <strong>Scan this code to instantly log in on another device:</strong>
+        </p>
+
         <%= qr_code_image(url) %>
 
         <form method="dialog" class="margin-block-start flex justify-center">
-          <button class="btn" data-controller="tooltip">
-            <%= icon_tag "remove" %>
-            <span class="for-screen-reader">Close dialog</span>
+          <button class="btn">
+            <span>Done</span>
           </button>
         </form>
       </dialog>
@@ -35,4 +35,4 @@
       <span class="for-screen-reader">Copy auto-login link</span>
     <% end %>
   </div>
-</div>
+</section>

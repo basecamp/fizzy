@@ -14,13 +14,13 @@
 <% end %>
 
 <% content_for :header do %>
-  <h1 class="header__title divider divider--fade full-width">
+  <h1 class="header__title divider divider--fade full-width" data-bridge--title-target="header">
     <span class="overflow-ellipsis"><%= @page_title %></span>
   </h1>
 <% end %>
 
 <% if @board.public_description.present? %>
-  <div class="card__board-public-description rich-text-content txt-align-center center margin-block-end" data-controller="syntax-highlight">
+  <div class="card__board-public-description lexxy-content txt-align-center center margin-block-end" data-controller="syntax-highlight">
     <%= @board.public_description %>
   </div>
 <% end %>

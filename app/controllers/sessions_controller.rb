@@ -20,7 +20,11 @@ class SessionsController < ApplicationController
 
   def destroy
     terminate_session
-    redirect_to_logout_url
+
+    respond_to do |format|
+      format.html { redirect_to_logout_url }
+      format.json { head :no_content }
+    end
   end
 
   private
