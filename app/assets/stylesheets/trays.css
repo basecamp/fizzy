@@ -303,7 +303,6 @@
       html[data-theme="dark"] & {
         box-shadow: 0 0 0 1px var(--color-ink-lighter);
       }
-
     }
 
     .card__background {
