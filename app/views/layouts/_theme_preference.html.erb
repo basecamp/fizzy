@@ -1,6 +1,9 @@
 <%= javascript_tag nonce: true do %>
   const theme = localStorage.getItem("theme")
-  if (theme && theme !== "auto") {
+  if (theme === "light" || theme === "dark") {
     document.documentElement.dataset.theme = theme
+  } else {
+    document.documentElement.dataset.theme =
+      window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
   }
 <% end %>
