@@ -31,12 +31,6 @@
       --btn-hover-brightness: 1.25;
     }
 
-    @media (prefers-color-scheme: dark) {
-      html:not([data-theme]) & {
-        --btn-hover-brightness: 1.25;
-      }
-    }
-
     &[disabled],
     &:has([disabled]),
     [disabled] &[type=submit],

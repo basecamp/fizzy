@@ -103,12 +103,6 @@
           --reaction-hover-brightness: 1.25;
         }
 
-        @media (prefers-color-scheme: dark) {
-          html:not([data-theme]) & {
-            --reaction-hover-brightness: 1.25;
-          }
-        }
-
       }
     }
   }

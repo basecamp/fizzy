@@ -249,12 +249,6 @@
       html[data-theme="dark"] & {
         outline-color: oklch(var(--lch-blue-medium));
       }
-
-      @media (prefers-color-scheme: dark) {
-        html:not([data-theme]) & {
-          outline-color: oklch(var(--lch-blue-medium));
-        }
-      }
     }
 
     &:has(.card) {
@@ -845,12 +839,6 @@
 
     html[data-theme="dark"] & {
       --bubble-opacity: 100%;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      html:not([data-theme]) & {
-        --bubble-opacity: 100%;
-      }
     }
   }
 
