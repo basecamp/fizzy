@@ -2,7 +2,7 @@
 <html lang="en">
   <%= render "layouts/shared/head" %>
 
-  <body class="public <%= @body_class %>" data-controller="local-time timezone-cookie" data-action="turbo:morph@window->local-time#refreshAll">
+  <body class="public <%= @body_class %>" data-controller="local-time timezone-cookie theme" data-action="turbo:morph@window->local-time#refreshAll">
     <div id="global-container">
       <header class="header" id="header">
         <a href="#main" class="header__skip-navigation btn" data-turbo="false">Skip to main content</a>
