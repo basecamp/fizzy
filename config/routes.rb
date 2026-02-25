@@ -159,6 +159,10 @@ Rails.application.routes.draw do
     end
   end
 
+  get "/auth/oidc/callback", to: "sessions/oidc#create"
+  post "/auth/oidc/callback", to: "sessions/oidc#create"
+  get "/auth/failure", to: "sessions/oidc#failure"
+
   get "/signup", to: redirect("/signup/new")
 
   resource :signup, only: %i[ new create ] do
