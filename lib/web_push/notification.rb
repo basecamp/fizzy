@@ -20,7 +20,7 @@ class WebPush::Notification
     end
 
     def encoded_message
-      JSON.generate title: @title, options: { body: @body, icon: icon_path, data: { url: @url, badge: @badge } }
+      JSON.generate title: @title, options: { body: @body, icon: icon_path, data: { url: @url, path: @url, badge: @badge } }
     end
 
     def icon_path
