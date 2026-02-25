@@ -14,7 +14,7 @@
     --markup-deleted: lch(39.64 68.17 31.45);
 
     /* Redefine named color values for dark mode */
-    html[data-theme="dark"] {
+    html[data-theme="dark"] & {
       --keyword: lch(67.63 58.99 30.64);
       --entity: lch(75.13 46.73 306.74);
       --constant: lch(74.9 39.71 255.53);
