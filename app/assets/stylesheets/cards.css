@@ -403,12 +403,6 @@
         }
       }
     }
-
-    @media (max-width: 639px) {
-      inset: auto calc(var(--card-padding-inline) * -0.5) 100% auto;
-      translate: 0 40%;
-      scale: 75%;
-    }
   }
 
   .card:has(.card__closed),

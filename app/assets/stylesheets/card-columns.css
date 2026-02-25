@@ -816,6 +816,10 @@
       position: absolute;
       translate: 20% -20%;
       z-index: 1;
+
+      @media (max-width: 639px) {
+        translate: 20% 0%;
+      }
     }
 
     /* Maybe column: position bubble relative to the title, not the container */

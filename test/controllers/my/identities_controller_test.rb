@@ -11,6 +11,7 @@ class My::IdentitiesControllerTest < ActionDispatch::IntegrationTest
     untenanted do
       get my_identity_path, as: :json
       assert_response :success
+      assert_equal identity.id, @response.parsed_body["id"]
       assert_equal identity.accounts.count, @response.parsed_body["accounts"].count
     end
   end

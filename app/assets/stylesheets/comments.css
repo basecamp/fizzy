@@ -84,6 +84,17 @@
     .reactions {
       margin-block-start: var(--block-space-half);
       margin-inline: calc(var(--column-gap) / -1);
+
+      &:not(:has(.reaction)) {
+        inset-block-end: var(--comment-padding-block);
+        inset-inline-end: calc(var(--comment-padding-inline) / 2);
+        margin: 0;
+        position: absolute;
+
+        @media (max-width: 640px) {
+          inset-inline-end: calc(var(--comment-padding-inline) / 3);
+        }
+      }
     }
   }
 

@@ -1,7 +1,7 @@
 @layer components {
   .flash {
     display: flex;
-    inset-block-start: var(--block-space);
+    inset-block-start: calc(var(--block-space) + var(--custom-safe-inset-top));
     inset-inline-start: 50%;
     justify-content: center;
     position: fixed;
