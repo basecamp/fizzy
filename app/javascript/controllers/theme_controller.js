@@ -67,19 +67,8 @@ export default class extends Controller {
   }
 
   #updateThemeColor() {
-    const lightMeta = document.getElementById("theme-color-light")
-    const darkMeta = document.getElementById("theme-color-dark")
-    if (!lightMeta || !darkMeta) return
-
-    const stored = this.#storedTheme
-
-    if (stored === "light" || stored === "dark") {
-      lightMeta.media = stored === "light" ? "all" : "not all"
-      darkMeta.media = stored === "dark" ? "all" : "not all"
-    } else {
-      lightMeta.media = "(prefers-color-scheme: light)"
-      darkMeta.media = "(prefers-color-scheme: dark)"
-    }
+    const meta = document.getElementById("theme-color")
+    if (meta) meta.content = meta.dataset[this.#resolvedTheme]
   }
 
   #updateButtons() {
