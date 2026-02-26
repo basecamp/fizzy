@@ -60,7 +60,7 @@ env:
     - FCM_ENCRYPTION_KEY_B64
   tags:
     sc_chi:
-      MYSQL_SOLID_CACHE_HOST: fizzy-solidcache-db-01.sc-chi-int.37signals.com
+      MYSQL_SOLID_CACHE_HOST: fizzy-solidcache-db-101.df-iad-int.37signals.com
     df_iad:
       MYSQL_SOLID_CACHE_HOST: fizzy-solidcache-db-101.df-iad-int.37signals.com
       PRIMARY_DATACENTER: true
