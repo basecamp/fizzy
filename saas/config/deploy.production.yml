@@ -60,6 +60,8 @@ env:
     - FCM_ENCRYPTION_KEY_B64
   tags:
     sc_chi:
+      # sc_chi temporarily using the df_iad cache for maintenance
+      # point this back to sc_chi cache when it's back
       MYSQL_SOLID_CACHE_HOST: fizzy-solidcache-db-101.df-iad-int.37signals.com
     df_iad:
       MYSQL_SOLID_CACHE_HOST: fizzy-solidcache-db-101.df-iad-int.37signals.com
