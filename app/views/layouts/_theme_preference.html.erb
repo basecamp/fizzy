@@ -1,9 +1,16 @@
 <%= javascript_tag nonce: true do %>
   const theme = localStorage.getItem("theme")
+  const lightMeta = document.getElementById("theme-color-light")
+  const darkMeta = document.getElementById("theme-color-dark")
   const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
 
   if (theme === "light" || theme === "dark") {
     document.documentElement.dataset.theme = theme
+
+    if (lightMeta && darkMeta) {
+      lightMeta.media = theme === "light" ? "all" : "not all"
+      darkMeta.media = theme === "dark" ? "all" : "not all"
+    }
   } else {
     document.documentElement.dataset.theme = prefersDark ? "dark" : "light"
   }
