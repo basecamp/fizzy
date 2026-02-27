@@ -51,7 +51,6 @@ export default class extends Controller {
 
     const applyTheme = () => {
       document.documentElement.dataset.theme = resolved
-      this.#updateThemeColor()
       this.#updateButtons()
     }
 
@@ -64,11 +63,6 @@ export default class extends Controller {
 
   #applyStoredTheme() {
     this.#theme = this.#storedTheme
-  }
-
-  #updateThemeColor() {
-    const meta = document.getElementById("theme-color")
-    if (meta) meta.content = meta.dataset[this.#resolvedTheme]
   }
 
   #updateButtons() {
