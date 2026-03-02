@@ -81,17 +81,20 @@ class Notification::EventPayload < Notification::DefaultPayload
       card.title.presence || "Card #{card.number}"
     end
 
+    def event_particulars
+      event.particulars.dig("particulars") || {}
+    end
+
     def column_name
-      event.particulars.dig("particulars", "column")
+      event_particulars["column"]
     end
 
     def new_location_name
-      event.particulars.dig("particulars", "new_board") ||
-        event.particulars.dig("particulars", "new_collection")
+      event_particulars["new_board"] || event_particulars["new_collection"]
     end
 
     def new_title
-      event.particulars.dig("particulars", "new_title")
+      event_particulars["new_title"]
     end
 
     def card_url_with_comment_anchor(comment)
