@@ -18,7 +18,7 @@ permissions:
   packages: read
 
 env:
-  AWS_REGION: me-central-1
+  AWS_REGION: eu-central-1
   ECR_REPOSITORY: fizzy
 
 jobs:

@@ -25,7 +25,7 @@ permissions:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  AWS_REGION: me-central-1
+  AWS_REGION: eu-central-1
   ENVIRONMENT: production
 
 defaults:

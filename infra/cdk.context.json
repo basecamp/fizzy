@@ -1,5 +1,5 @@
 {
-  "vpc-provider:account=000000000000:filter.tag:Name=ZarVpc:region=me-central-1:returnAsymmetricSubnets=true": {
+  "vpc-provider:account=000000000000:filter.tag:Name=ZarVpc:region=eu-central-1:returnAsymmetricSubnets=true": {
     "vpcId": "vpc-dummy",
     "vpcCidrBlock": "10.0.0.0/16",
     "ownerAccountId": "000000000000",
@@ -12,13 +12,13 @@
           {
             "subnetId": "subnet-11111111111111111",
             "cidr": "10.0.4.0/22",
-            "availabilityZone": "me-central-1a",
+            "availabilityZone": "eu-central-1a",
             "routeTableId": "rtb-11111111111111111"
           },
           {
             "subnetId": "subnet-22222222222222222",
             "cidr": "10.0.8.0/22",
-            "availabilityZone": "me-central-1b",
+            "availabilityZone": "eu-central-1b",
             "routeTableId": "rtb-22222222222222222"
           }
         ]
@@ -30,13 +30,13 @@
           {
             "subnetId": "subnet-33333333333333333",
             "cidr": "10.0.0.0/24",
-            "availabilityZone": "me-central-1a",
+            "availabilityZone": "eu-central-1a",
             "routeTableId": "rtb-33333333333333333"
           },
           {
             "subnetId": "subnet-44444444444444444",
             "cidr": "10.0.1.0/24",
-            "availabilityZone": "me-central-1b",
+            "availabilityZone": "eu-central-1b",
             "routeTableId": "rtb-44444444444444444"
           }
         ]
@@ -48,13 +48,13 @@
           {
             "subnetId": "subnet-55555555555555555",
             "cidr": "10.0.12.0/22",
-            "availabilityZone": "me-central-1a",
+            "availabilityZone": "eu-central-1a",
             "routeTableId": "rtb-55555555555555555"
           },
           {
             "subnetId": "subnet-66666666666666666",
             "cidr": "10.0.16.0/22",
-            "availabilityZone": "me-central-1b",
+            "availabilityZone": "eu-central-1b",
             "routeTableId": "rtb-66666666666666666"
           }
         ]
