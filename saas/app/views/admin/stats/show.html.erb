@@ -94,7 +94,7 @@
       </h2>
     </header>
 
-    <ul class="margin-block-half">
+    <ul class="list-style-none margin-block-half">
       <% @recent_accounts.each do |account| %>
         <% admin_user = account.users.owner.first %>
         <li class="flex align-start gap-half margin-block-start-half">
@@ -125,7 +125,7 @@
       </h2>
     </header>
 
-    <ul class="margin-block-half">
+    <ul class="list-style-none margin-block-half">
       <% @top_accounts.each do |account| %>
         <% admin_user = account.users.owner.first %>
         <li class="flex align-start gap-half margin-block-start-half">
