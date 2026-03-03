@@ -49,4 +49,6 @@ module ActiveRecordReplicaSupport
   end
 end
 
-ActiveRecord::Base.include ActiveRecordReplicaSupport
+ActiveSupport.on_load(:active_record) do
+  include ActiveRecordReplicaSupport
+end
