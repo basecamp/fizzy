@@ -1,7 +1,14 @@
 Fizzy::Saas::Engine.routes.draw do
   Queenbee.routes(self)
 
-  resources :devices, only: [ :index, :create, :destroy ]
+  namespace :my do
+    resources :devices, only: [ :index, :create, :destroy ]
+  end
+
+  # Legacy /devices routes for mobile apps not yet updated to /my/devices
+  get "/devices", to: redirect("/my/devices")
+  post "/devices", to: "my/devices#create"
+  delete "/devices/:id", to: "my/devices#destroy"
 
   namespace :admin do
     mount Audits1984::Engine, at: "/console"

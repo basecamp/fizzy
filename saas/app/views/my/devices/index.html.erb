@@ -17,7 +17,7 @@
               Added <%= local_datetime_tag(device.created_at, style: :daysago) %>
             </span>
           </div>
-          <%= button_to saas.device_path(device), method: :delete, class: "btn btn--circle-mobile txt-small", data: { confirm: "Remove this device?" }, form: { class: "flex-item-no-shrink" } do %>
+          <%= button_to saas.my_device_path(device), method: :delete, class: "btn btn--circle-mobile txt-small", data: { confirm: "Remove this device?" }, form: { class: "flex-item-no-shrink" } do %>
             <%= icon_tag "trash", class: "icon--mobile-only" %>
             <span class="overflow-ellipsis">Remove</span>
           <% end %>
