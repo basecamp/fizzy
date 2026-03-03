@@ -278,6 +278,20 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
     assert_response :no_content
   end
 
+  test "index avoids N+1 queries on creator and identity" do
+    assert_queries_match(/FROM [`"]users[`"].* IN \(/, count: 1) do
+      assert_queries_match(/FROM [`"]identities[`"].* IN \(/, count: 1) do
+        get boards_path, as: :json
+        assert_response :success
+      end
+    end
+
+    json = @response.parsed_body
+    first_board = json.first
+    assert first_board["creator"].present?
+    assert first_board["creator"]["email_address"].present?
+  end
+
   private
     def next_page_from_link_header(link_header)
       url = link_header&.match(/<([^>]+)>;\s*rel="next"/)&.captures&.first

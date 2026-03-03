@@ -43,6 +43,19 @@ ActiveRecord::Schema[8.2].define(version: 2026_01_26_230838) do
     t.index ["stripe_subscription_id"], name: "index_account_subscriptions_on_stripe_subscription_id", unique: true
   end
 
+  create_table "action_push_native_devices", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name"
+    t.uuid "owner_id"
+    t.string "owner_type"
+    t.string "platform", null: false
+    t.uuid "session_id"
+    t.string "token", null: false
+    t.datetime "updated_at", null: false
+    t.index ["owner_type", "owner_id", "token"], name: "idx_on_owner_type_owner_id_token_95a4008c64", unique: true
+    t.index ["session_id"], name: "index_action_push_native_devices_on_session_id"
+  end
+
   create_table "audits1984_auditor_tokens", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.uuid "auditor_id", null: false
     t.datetime "created_at", null: false

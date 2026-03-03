@@ -3,7 +3,9 @@ import { BridgeElement } from "@hotwired/hotwire-native-bridge"
 BridgeElement.prototype.getButton = function() {
   return {
     title: this.title,
-    icon: this.getIcon()
+    icon: this.getIcon(),
+    displayTitle: this.getDisplayTitle(),
+    displayAsPrimaryAction: this.getDisplayAsPrimaryAction()
   }
 }
 
@@ -15,4 +17,12 @@ BridgeElement.prototype.getIcon = function() {
   }
 
   return null
+}
+
+BridgeElement.prototype.getDisplayTitle = function() {
+  return !!this.bridgeAttribute(`display-title`)
+}
+
+BridgeElement.prototype.getDisplayAsPrimaryAction = function() {
+  return !!this.bridgeAttribute(`display-as-primary-action`)
 }

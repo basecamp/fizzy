@@ -16,7 +16,9 @@
     color: var(--flash-color, var(--color-ink-inverted));
     display: inline-flex;
     font-size: var(--font-size-medium);
+    inline-size: max-content;
     margin: 0 auto;
+    max-inline-size: 90vw;
     padding: 0.7em 1.4em;
   }
 }

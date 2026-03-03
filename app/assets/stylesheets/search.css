@@ -117,7 +117,7 @@ summary {
 
   .search-perma {
     .search__form > label,
-    .search__reset {
+    .search__form:has(.search__input:placeholder-shown) .search__reset {
       display: none;
     }
 

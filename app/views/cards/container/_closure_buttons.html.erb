@@ -7,10 +7,12 @@
   <% end %>
 
   <%= button_to card_closure_path(card), class: "btn btn--circle-mobile borderless",
-        data: { controller: "hotkey", form_target: "submit", bridge__buttons_target: "button", bridge_title: "Mark as Done", bridge_icon_url: bridge_icon("check"), action: "keydown.d@document->hotkey#click" },
+        data: { controller: "hotkey", form_target: "submit", bridge__buttons_target: "button", bridge_title: "Mark done", bridge_display_as_primary_action: true, bridge_display_title: true, bridge_icon_url: bridge_icon("check"), action: "keydown.d@document->hotkey#click" },
         form: { data: { controller: "form" } } do %>
     <%= icon_tag "check", class: "icon--mobile-only" %>
     <span class="overflow-ellipsis">Mark as Done</span>
     <kbd class="txt-x-small hide-on-touch">d</kbd>
   <% end %>
+
+  <%= bridged_button_to_board(card.board) %>
 </div>

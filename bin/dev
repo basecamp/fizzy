@@ -2,12 +2,30 @@
 
 PORT=3006
 USE_TAILSCALE=0
+USE_PUSH=0
 
 for arg in "$@"; do
   case $arg in
     --tailscale) USE_TAILSCALE=1 ;;
+    --push) USE_PUSH=1 ;;
   esac
 done
+
+if [ "$USE_PUSH" = "1" ]; then
+  if [ ! -f tmp/saas.txt ]; then
+    echo "Enabling SaaS mode for push notifications..."
+    ./bin/rails saas:enable
+  fi
+  echo "Loading push credentials from 1Password..."
+  if ! eval "$(BUNDLE_GEMFILE=Gemfile.saas bundle exec push-dev)"; then
+    echo "Error: failed to load push credentials. Are you signed into 1Password?" >&2
+    exit 1
+  fi
+  if [ -z "$APNS_ENCRYPTION_KEY_B64" ] || [ -z "$APNS_KEY_ID" ]; then
+    echo "Error: Push credentials not set. Missing APNS_ENCRYPTION_KEY_B64 or APNS_KEY_ID." >&2
+    exit 1
+  fi
+fi
 
 if [ ! -f tmp/solid-queue.txt ]; then
   export SOLID_QUEUE_IN_PUMA=false

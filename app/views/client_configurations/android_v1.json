@@ -32,6 +32,16 @@
     },
     {
       "patterns": [
+        "/devices$"
+      ],
+      "properties": {
+        "context": "modal",
+        "pull_to_refresh_enabled": false,
+        "allow_untenanted_navigation": true
+      }
+    },
+    {
+      "patterns": [
         "/native/login/blank"
       ],
       "properties": {

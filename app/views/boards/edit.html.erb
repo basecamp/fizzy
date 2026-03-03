@@ -16,13 +16,13 @@
 <section class="settings">
   <div class="settings__panel settings__panel--users panel shadow">
     <%= form_with model: @board, class: "display-contents", data: {
-          controller: "form boards-form",
+          controller: "form boards-form bridge--form",
           boards_form_self_removal_prompt_message_value: "Are you sure you want to remove yourself from this board? You won’t be able to get back in unless someone invites you.",
           action: "turbo:submit-start->boards-form#submitWithWarning" } do |form| %>
       <%= render "boards/edit/name", form: form, board: @board %>
       <%= render "boards/edit/users", board: @board, selected_users: @selected_users, unselected_users: @unselected_users, form: form %>
 
-      <button type="submit" id="log_in" class="btn btn--link center txt-normal" <%= "disabled" unless Current.user.can_administer_board?(@board) %>>
+      <button type="submit" id="log_in" class="btn btn--link center txt-normal" data-bridge--form-target="submit" <%= "disabled" unless Current.user.can_administer_board?(@board) %>>
         <span>Save changes</span>
       </button>
 

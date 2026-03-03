@@ -9,7 +9,6 @@
   <div class="header__actions header__actions--start">
     <%= link_back_to_board(@card.board) %>
   </div>
-  <%= bridged_button_to_board(@card.board) %>
 <% end %>
 
 <%= turbo_stream_from @card %>

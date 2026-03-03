@@ -27,7 +27,7 @@ module Account::Billing
   end
 
   def uncomp
-    billing_waiver&.destroy
+    billing_waiver&.destroy!
     reload_billing_waiver
   end
 

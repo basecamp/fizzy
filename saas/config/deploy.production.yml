@@ -55,6 +55,9 @@ env:
     - STRIPE_MONTHLY_EXTRA_STORAGE_V1_PRICE_ID
     - STRIPE_SECRET_KEY
     - STRIPE_WEBHOOK_SECRET
+    - APNS_KEY_ID
+    - APNS_ENCRYPTION_KEY_B64
+    - FCM_ENCRYPTION_KEY_B64
   tags:
     sc_chi:
       MYSQL_SOLID_CACHE_HOST: fizzy-solidcache-db-01.sc-chi-int.37signals.com

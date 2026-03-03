@@ -10,6 +10,7 @@
     flex-wrap: wrap;
     gap: var(--inline-space-half);
     inline-size: 100%;
+    z-index: 3;
 
     &:has([open]) {
       z-index: var(--z-popup);

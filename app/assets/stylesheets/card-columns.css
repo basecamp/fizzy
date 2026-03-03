@@ -280,6 +280,7 @@
       inset-inline-end: 0;
       position: absolute;
       translate: 100%;
+      z-index: 2;
     }
 
     @media (min-width: 640px) {

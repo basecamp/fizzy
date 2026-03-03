@@ -1,7 +1,7 @@
 <div class="header__actions header__actions--end">
   <div>
     <%= link_to new_board_path, class: "btn btn--link btn--circle-mobile",
-          data: { controller: "hotkey", action: "keydown.b@document->hotkey#click", bridge__buttons_target: "button", bridge_title: "Add a board", bridge_icon_url: bridge_icon("board") } do %>
+          data: { controller: "hotkey", action: "keydown.b@document->hotkey#click", bridge__buttons_target: "button", bridge_title: "Add board", bridge_display_title: true, bridge_icon_url: bridge_icon("board") } do %>
       <%= icon_tag "board" %>
       <span class="overflow-ellipsis">Add a board</span>
       <kbd class="hide-on-touch">B</kbd>

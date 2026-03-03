@@ -1,5 +1,5 @@
 <% if Current.user.admin? && !Current.account.comped? %>
-  <section class="panel panel--wide settings-subscription__panel shadow center margin-block-double">
+  <section class="panel panel--wide settings-subscription__panel shadow center margin-block-double hide-on-native">
     <h2 id="subscription" class="divider settings-subscription__divider txt-small txt-uppercase margin-none">Subscription</h2>
 
     <% if Current.account.plan.free? %>

@@ -5,12 +5,8 @@ class BoardsController < ApplicationController
   before_action :ensure_permission_to_admin_board, only: %i[ update destroy ]
 
   def index
-    if request.format.json?
-      set_page_and_extract_portion_from Current.user.boards.ordered_by_recently_accessed
-      fresh_when etag: @page.records
-    else
-      set_page_and_extract_portion_from Current.user.boards
-    end
+    set_page_and_extract_portion_from Current.user.boards.ordered_by_recently_accessed.includes(creator: :identity)
+    fresh_when etag: @page.records
   end
 
   def show

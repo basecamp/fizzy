@@ -24,13 +24,16 @@
       <%= button_to_set_column @card, column %>
     <% end %>
 
-    <%= button_to "Done", card_closure_path(@card),
+    <%= button_to card_closure_path(@card),
         class: [ "card__column-name btn", { "card__column-name--current": @card.closed? } ],
         style: "--column-color: var(--color-card-complete)",
         disabled: @card.closed?,
         role: "radio",
         aria: { checked: @card.closed? },
         data: { scroll_to_target: @card.closed? ? "target" : nil },
-        form_class: "flex gap-half" %>
+        form_class: "flex gap-half" do %>
+          <%= icon_tag "check", class: "icon--mobile-only" %>
+          Done
+    <% end %>
   </div>
 <% end %>

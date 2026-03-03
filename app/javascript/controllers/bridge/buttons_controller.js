@@ -5,6 +5,26 @@ export default class extends BridgeComponent {
   static component = "buttons"
   static targets = [ "button" ]
 
+  connect() {
+    super.connect()
+
+    if (!this.beforeUnloadHandler) {
+      this.beforeUnloadHandler = this.handleBeforeUnload.bind(this)
+    }
+
+    window.addEventListener("beforeunload", this.beforeUnloadHandler)
+  }
+
+  disconnect() {
+    super.disconnect()
+
+    if (this.beforeUnloadHandler) {
+      window.removeEventListener("beforeunload", this.beforeUnloadHandler)
+    }
+
+    this.notifyBridgeOfDisconnect()
+  }
+
   buttonTargetConnected() {
     this.notifyBridgeOfConnect()
   }
@@ -25,6 +45,14 @@ export default class extends BridgeComponent {
     this.send("connect", { buttons }, message => {
       this.#clickButton(message)
     })
+  }
+
+  notifyBridgeOfDisconnect() {
+    this.send("disconnect")
+  }
+
+  handleBeforeUnload() {
+    this.notifyBridgeOfDisconnect()
   }
 
   #clickButton(message) {

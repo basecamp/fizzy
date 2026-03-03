@@ -28,6 +28,10 @@ class Identity < ApplicationRecord
     end
   end
 
+  def users_with_active_accounts
+    users.joins(:account).merge(Account.active).includes(:account)
+  end
+
   private
     def deactivate_users
       users.find_each(&:deactivate)

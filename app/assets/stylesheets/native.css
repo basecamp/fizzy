@@ -91,10 +91,18 @@
       .card__board {
         border-radius: 0 var(--border-radius) var(--border-radius) 0;
       }
+
+      .card-perma__notch--bottom {
+        z-index: 1;
+      }
     }
 
     /* Search
     /* ------------------------------------------------------------------------ */
+
+    .search {
+      overscroll-behavior: auto;
+    }
 
     .search__title {
       text-decoration: none;

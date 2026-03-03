@@ -14,7 +14,7 @@ To go back to open source mode:
 bin/rails saas:disable
 ```
 
-Then you can work do [Fizzy development as usual](https://github.com/basecamp/fizzy).
+Then you can do [Fizzy development as usual](https://github.com/basecamp/fizzy).
 
 ## How to update Fizzy
 
@@ -45,6 +45,16 @@ This will ask for your 1password authorization to read and set the environment v
 * [Development](https://dashboard.stripe.com/acct_1SdTFtRus34tgjsJ/test/dashboard)
 * [Staging](https://dashboard.stripe.com/acct_1SdTbuRvb8txnPBR/test/dashboard)
 * [Production](https://dashboard.stripe.com/acct_1SNy97RwChFE4it8/dashboard)
+
+## Working with Push Notifications
+
+To test native push notifications (APNs and FCM) locally, start the dev server with the `--push` flag:
+
+```sh
+bin/dev --push
+```
+
+This will ask for your 1Password authorization to fetch the push credentials. Note that this loads the **production** APNs and FCM credentials into your environment.
 
 ## Environments
 
