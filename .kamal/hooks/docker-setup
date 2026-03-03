@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+resolve_ssh_user() {
+  ruby <<'RUBY'
+require "yaml"
+
+destination = ENV["KAMAL_DESTINATION"].to_s
+config_path = destination.empty? ? "config/deploy.yml" : "config/deploy.#{destination}.yml"
+
+if File.exist?(config_path)
+  config = YAML.load_file(config_path) || {}
+  user = config.dig("ssh", "user").to_s
+  puts user unless user.empty?
+end
+RUBY
+}
+
+SSH_USER="${KAMAL_SSH_USER:-$(resolve_ssh_user)}"
+SSH_USER="${SSH_USER:-$USER}"
+HOSTS="${KAMAL_HOSTS:-}"
+
+if [[ -z "$HOSTS" ]]; then
+  echo "docker-setup: no hosts provided"
+  exit 0
+fi
+
+IFS=',' read -r -a HOST_ARRAY <<< "$HOSTS"
+
+for host in "${HOST_ARRAY[@]}"; do
+  host="$(echo "$host" | xargs)"
+  [[ -z "$host" ]] && continue
+
+  echo "docker-setup: ensuring ${SSH_USER} is in the docker group on ${host}"
+  ssh -F /dev/null -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new "${SSH_USER}@${host}" \
+    "sudo usermod -aG docker ${SSH_USER}"
+
+  echo "docker-setup: installing certbot tooling and server dirs on ${SSH_USER}@${host}"
+  ssh -F /dev/null -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new "${SSH_USER}@${host}" \
+    "sudo apt-get update && sudo apt-get install -y certbot python3-certbot-dns-cloudflare && mkdir -p ~/.secrets/certbot ~/.config/letsencrypt ~/.local/share/letsencrypt/work ~/.local/share/letsencrypt/logs ~/fizzy-data/storage && chmod 700 ~/.secrets/certbot"
+done

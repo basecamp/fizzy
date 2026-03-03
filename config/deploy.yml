@@ -8,16 +8,22 @@ image: fizzy
 # Where to deploy fizzy
 servers:
   web:
-    - fizzy.example.com  # Set your server name here
+    - 10.10.10.106
 
 # How you connect to your server
 ssh:
-  user: root  # If you use a different username to SSH to your server, specify it here
+  user: kdlocpanda
 
-# Automatic SSL
+# Cloudflare Tunnel handles public TLS; Kamal proxy serves local origin HTTP
 proxy:
-  ssl: true                # Set this to false if you *don't* want SSL
-  host: fizzy.example.com  # Set your server name here to use automatic SSL
+  host: fizzy.joshyorko.com
+  app_port: 80
+  ssl_redirect: true
+  forward_headers: true
+  ssl: false
+  run:
+    bind_ips:
+      - 127.0.0.1
 
 # Your application configuration (secrets come from .kamal/secrets).
 env:
@@ -28,11 +34,23 @@ env:
     - SMTP_USERNAME
     - SMTP_PASSWORD
   clear:
-    BASE_URL: https://fizzy.example.com # The public URL of your Fizzy instance
-    MAILER_FROM_ADDRESS: support@example.com # The email "from" address that Fizzy sends email from
-    SMTP_ADDRESS: mail.example.com # The SMTP server you'll use to send email
+    BASE_URL: https://fizzy.joshyorko.com
+    ASSUME_SSL: true
+    FORCE_SSL: true
+    MAILER_FROM_ADDRESS: joshua.yorko@gmail.com
+    SMTP_ADDRESS: smtp.gmail.com
     MULTI_TENANT: false # Set to true to allow multiple accounts to sign up
     SOLID_QUEUE_IN_PUMA: true # Run background jobs in the app container
+
+
+accessories:
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    host: 10.10.10.106
+    cmd: tunnel --no-autoupdate run
+    env:
+      secret:
+        - TUNNEL_TOKEN:CLOUDFLARED_TOKEN
 
 
 #-- General configuration --#
@@ -49,10 +67,9 @@ aliases:
   logs: app logs -f
   dbc: app exec --interactive --reuse "bin/rails dbconsole --include-password"
 
-# Use a persistent storage volume for sqlite database files and local Active Storage files.
-# Recommended to change this to a mounted volume path that is backed up off server.
+# Use a persistent host path for sqlite database files and local Active Storage files.
 volumes:
-  - "fizzy_storage:/rails/storage"
+  - "/home/kdlocpanda/fizzy-data/storage:/rails/storage"
 
 # Bridge fingerprinted assets, like JS and CSS, between versions to avoid
 # hitting 404 on in-flight requests. Combines all files from new and old
