@@ -21,22 +21,29 @@ module Search::Record::SQLite
   end
 
   def card_title
-    highlight(card.title, show: :full) if card_id
+    highlight_full(card.title) if card_id
   end
 
   def card_description
-    highlight(card.description.to_plain_text, show: :snippet) if card_id
+    highlight_snippet(card.description.to_plain_text) if card_id
   end
 
   def comment_body
-    highlight(comment.body.to_plain_text, show: :snippet) if comment
+    highlight_snippet(comment.body.to_plain_text) if comment
   end
 
   private
-    def highlight(text, show:)
+    def highlight_snippet(text)
       if text.present? && attribute?(:query)
-        highlighter = Search::Highlighter.new(query)
-        show == :snippet ? highlighter.snippet(text) : highlighter.highlight(text)
+        Search::Highlighter.new(query).snippet(text)
+      else
+        text
+      end
+    end
+
+    def highlight_full(text)
+      if text.present? && attribute?(:query)
+        Search::Highlighter.new(query).highlight(text)
       else
         text
       end
