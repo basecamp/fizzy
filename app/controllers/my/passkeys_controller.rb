@@ -1,4 +1,6 @@
 class My::PasskeysController < ApplicationController
+  include CurrentWebAuthnRequest
+
   before_action :set_passkey, only: %i[ edit update destroy ]
 
   def index
