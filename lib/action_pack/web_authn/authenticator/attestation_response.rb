@@ -40,13 +40,13 @@ class ActionPack::WebAuthn::Authenticator::AttestationResponse < ActionPack::Web
     super(**args)
 
     unless client_data["type"] == "webauthn.create"
-      raise InvalidResponseError, "Client data type is not webauthn.create"
+      raise ActionPack::WebAuthn::InvalidAuthenticationResponseError, "Client data type is not webauthn.create"
     end
 
     verifier = ActionPack::WebAuthn.attestation_verifiers[attestation.format]
 
     unless verifier
-      raise InvalidResponseError, "Unsupported attestation format: #{attestation.format}"
+      raise ActionPack::WebAuthn::InvalidAuthenticationResponseError, "Unsupported attestation format: #{attestation.format}"
     end
 
     verifier.verify!(attestation, client_data_json: client_data_json)

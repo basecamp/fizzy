@@ -55,7 +55,7 @@ class Passkey < ApplicationRecord
     )
     update!(sign_count: pkc.sign_count, backed_up: pkc.backed_up)
     self
-  rescue ActionPack::WebAuthn::Authenticator::Response::InvalidResponseError
+  rescue ActionPack::WebAuthn::InvalidAuthenticationResponseError
     nil
   end
 

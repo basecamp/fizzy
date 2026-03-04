@@ -14,7 +14,7 @@ class My::PasskeysController < ApplicationController
     )
 
     render json: { location: edit_my_passkey_path(passkey, created: true) }
-  rescue ActionPack::WebAuthn::Authenticator::Response::InvalidResponseError => error
+  rescue ActionPack::WebAuthn::InvalidAuthenticationResponseError => error
     render json: { error: error.message }, status: :unprocessable_entity
   end
 

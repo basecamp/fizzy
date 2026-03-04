@@ -1,4 +1,8 @@
 module ActionPack::WebAuthn
+  class InvalidAuthenticationResponseError < StandardError; end
+  class InvalidCborError < StandardError; end
+  class UnsupportedKeyTypeError < StandardError; end
+
   class << self
     def relying_party
       RelyingParty.new

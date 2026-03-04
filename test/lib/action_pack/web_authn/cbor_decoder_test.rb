@@ -152,7 +152,7 @@ class ActionPack::WebAuthn::CborDecoderTest < ActiveSupport::TestCase
   end
 
   test "raises error for reserved additional info values" do
-    assert_raises(ActionPack::WebAuthn::CborDecoder::DecodeError) do
+    assert_raises(ActionPack::WebAuthn::InvalidCborError) do
       decode("1c")
     end
   end
@@ -228,7 +228,7 @@ class ActionPack::WebAuthn::CborDecoderTest < ActiveSupport::TestCase
   end
 
   test "raises error for unsupported simple value" do
-    assert_raises(ActionPack::WebAuthn::CborDecoder::DecodeError) do
+    assert_raises(ActionPack::WebAuthn::InvalidCborError) do
       decode("e0")
     end
   end
@@ -243,28 +243,28 @@ class ActionPack::WebAuthn::CborDecoderTest < ActiveSupport::TestCase
   end
 
   test "raises error for empty input" do
-    assert_raises(ActionPack::WebAuthn::CborDecoder::DecodeError) do
+    assert_raises(ActionPack::WebAuthn::InvalidCborError) do
       ActionPack::WebAuthn::CborDecoder.decode([])
     end
   end
 
   test "raises error for truncated byte string" do
     # 0x44 = byte string of length 4, but only 2 bytes follow
-    assert_raises(ActionPack::WebAuthn::CborDecoder::DecodeError) do
+    assert_raises(ActionPack::WebAuthn::InvalidCborError) do
       decode("440102")
     end
   end
 
   test "raises error for truncated integer" do
     # 0x19 = 2-byte integer follows, but only 1 byte provided
-    assert_raises(ActionPack::WebAuthn::CborDecoder::DecodeError) do
+    assert_raises(ActionPack::WebAuthn::InvalidCborError) do
       decode("19ff")
     end
   end
 
   test "raises error for truncated array" do
     # 0x82 = array of 2 items, but only 1 provided
-    assert_raises(ActionPack::WebAuthn::CborDecoder::DecodeError) do
+    assert_raises(ActionPack::WebAuthn::InvalidCborError) do
       decode("8201")
     end
   end
@@ -274,7 +274,7 @@ class ActionPack::WebAuthn::CborDecoderTest < ActiveSupport::TestCase
     # 0x81 = array of 1 item
     deeply_nested = "81" * 20 + "01"
 
-    error = assert_raises(ActionPack::WebAuthn::CborDecoder::DecodeError) do
+    error = assert_raises(ActionPack::WebAuthn::InvalidCborError) do
       decode(deeply_nested)
     end
 
@@ -282,7 +282,7 @@ class ActionPack::WebAuthn::CborDecoderTest < ActiveSupport::TestCase
   end
 
   test "raises error for input exceeding max size" do
-    error = assert_raises(ActionPack::WebAuthn::CborDecoder::DecodeError) do
+    error = assert_raises(ActionPack::WebAuthn::InvalidCborError) do
       ActionPack::WebAuthn::CborDecoder.decode([ 0x01 ], max_size: 0)
     end
 

@@ -12,12 +12,12 @@
 #   ActionPack::WebAuthn.register_attestation_verifier("packed", MyPackedVerifier.new)
 #
 # The +verify!+ method receives the decoded +Attestation+ object and the raw
-# +client_data_json+ bytes. Raise +InvalidResponseError+ if verification fails.
+# +client_data_json+ bytes. Raise +InvalidAuthenticationResponseError+ if verification fails.
 #
 class ActionPack::WebAuthn::Authenticator::AttestationVerifiers::None
   def verify!(attestation, client_data_json:)
     if attestation.attestation_statement.present?
-      raise ActionPack::WebAuthn::Authenticator::Response::InvalidResponseError,
+      raise ActionPack::WebAuthn::InvalidAuthenticationResponseError,
         "Attestation statement must be empty for 'none' format"
     end
   end

@@ -56,7 +56,7 @@ class ActionPack::WebAuthn::Authenticator::AttestationResponseTest < ActiveSuppo
       attestation_object: build_attestation_object(user_verified: false)
     )
 
-    error = assert_raises(ActionPack::WebAuthn::Authenticator::Response::InvalidResponseError) do
+    error = assert_raises(ActionPack::WebAuthn::InvalidAuthenticationResponseError) do
       response.validate!(challenge: @challenge, origin: @origin, user_verification: :required)
     end
 
@@ -75,7 +75,7 @@ class ActionPack::WebAuthn::Authenticator::AttestationResponseTest < ActiveSuppo
       attestation_object: build_attestation_object(user_verified: true)
     )
 
-    error = assert_raises(ActionPack::WebAuthn::Authenticator::Response::InvalidResponseError) do
+    error = assert_raises(ActionPack::WebAuthn::InvalidAuthenticationResponseError) do
       response.validate!(challenge: @challenge, origin: @origin)
     end
 
@@ -83,7 +83,7 @@ class ActionPack::WebAuthn::Authenticator::AttestationResponseTest < ActiveSuppo
   end
 
   test "validate! raises when challenge does not match" do
-    error = assert_raises(ActionPack::WebAuthn::Authenticator::Response::InvalidResponseError) do
+    error = assert_raises(ActionPack::WebAuthn::InvalidAuthenticationResponseError) do
       @response.validate!(challenge: "wrong-challenge", origin: @origin)
     end
 
@@ -91,7 +91,7 @@ class ActionPack::WebAuthn::Authenticator::AttestationResponseTest < ActiveSuppo
   end
 
   test "validate! raises when origin does not match" do
-    error = assert_raises(ActionPack::WebAuthn::Authenticator::Response::InvalidResponseError) do
+    error = assert_raises(ActionPack::WebAuthn::InvalidAuthenticationResponseError) do
       @response.validate!(challenge: @challenge, origin: "https://evil.com")
     end
 
@@ -104,7 +104,7 @@ class ActionPack::WebAuthn::Authenticator::AttestationResponseTest < ActiveSuppo
       attestation_object: build_attestation_object(user_verified: true, format: "packed")
     )
 
-    error = assert_raises(ActionPack::WebAuthn::Authenticator::Response::InvalidResponseError) do
+    error = assert_raises(ActionPack::WebAuthn::InvalidAuthenticationResponseError) do
       response.validate!(challenge: @challenge, origin: @origin)
     end
 

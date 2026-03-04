@@ -54,7 +54,7 @@ class ActionPack::WebAuthn::Authenticator::AssertionResponseTest < ActiveSupport
       credential: @credential
     )
 
-    error = assert_raises(ActionPack::WebAuthn::Authenticator::Response::InvalidResponseError) do
+    error = assert_raises(ActionPack::WebAuthn::InvalidAuthenticationResponseError) do
       response.validate!(challenge: @challenge, origin: @origin)
     end
 
@@ -69,7 +69,7 @@ class ActionPack::WebAuthn::Authenticator::AssertionResponseTest < ActiveSupport
       credential: @credential
     )
 
-    error = assert_raises(ActionPack::WebAuthn::Authenticator::Response::InvalidResponseError) do
+    error = assert_raises(ActionPack::WebAuthn::InvalidAuthenticationResponseError) do
       response.validate!(challenge: @challenge, origin: @origin)
     end
 
@@ -77,7 +77,7 @@ class ActionPack::WebAuthn::Authenticator::AssertionResponseTest < ActiveSupport
   end
 
   test "validate! raises when challenge does not match" do
-    error = assert_raises(ActionPack::WebAuthn::Authenticator::Response::InvalidResponseError) do
+    error = assert_raises(ActionPack::WebAuthn::InvalidAuthenticationResponseError) do
       @response.validate!(challenge: "wrong-challenge", origin: @origin)
     end
 
@@ -85,7 +85,7 @@ class ActionPack::WebAuthn::Authenticator::AssertionResponseTest < ActiveSupport
   end
 
   test "validate! raises when origin does not match" do
-    error = assert_raises(ActionPack::WebAuthn::Authenticator::Response::InvalidResponseError) do
+    error = assert_raises(ActionPack::WebAuthn::InvalidAuthenticationResponseError) do
       @response.validate!(challenge: @challenge, origin: "https://evil.com")
     end
 
@@ -129,7 +129,7 @@ class ActionPack::WebAuthn::Authenticator::AssertionResponseTest < ActiveSupport
       credential: @credential
     )
 
-    error = assert_raises(ActionPack::WebAuthn::Authenticator::Response::InvalidResponseError) do
+    error = assert_raises(ActionPack::WebAuthn::InvalidAuthenticationResponseError) do
       response.validate!(challenge: @challenge, origin: @origin, user_verification: :required)
     end
 

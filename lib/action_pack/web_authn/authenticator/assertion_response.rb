@@ -51,19 +51,19 @@ class ActionPack::WebAuthn::Authenticator::AssertionResponse < ActionPack::WebAu
   private
     def validate_client_data_type
       unless client_data["type"] == "webauthn.get"
-        raise InvalidResponseError, "Client data type is not webauthn.get"
+        raise ActionPack::WebAuthn::InvalidAuthenticationResponseError, "Client data type is not webauthn.get"
       end
     end
 
     def validate_signature
       unless valid_signature?
-        raise InvalidResponseError, "Invalid signature"
+        raise ActionPack::WebAuthn::InvalidAuthenticationResponseError, "Invalid signature"
       end
     end
 
     def validate_sign_count_increase
       unless sign_count_increased?
-        raise InvalidResponseError, "Sign count did not increase"
+        raise ActionPack::WebAuthn::InvalidAuthenticationResponseError, "Sign count did not increase"
       end
     end
 

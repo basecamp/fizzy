@@ -25,8 +25,6 @@
 #   )
 #
 class ActionPack::WebAuthn::Authenticator::Response
-  # Raised when response validation fails.
-  class InvalidResponseError < StandardError; end
 
   attr_reader :client_data_json
 
@@ -37,37 +35,37 @@ class ActionPack::WebAuthn::Authenticator::Response
   def valid?(**args)
     validate!(**args)
     true
-  rescue InvalidResponseError
+  rescue ActionPack::WebAuthn::InvalidAuthenticationResponseError
     false
   end
 
   def validate!(challenge:, origin:, user_verification: :preferred)
     unless challenge_matches?(challenge)
-      raise InvalidResponseError, "Challenge does not match"
+      raise ActionPack::WebAuthn::InvalidAuthenticationResponseError, "Challenge does not match"
     end
 
     unless origin_matches?(origin)
-      raise InvalidResponseError, "Origin does not match"
+      raise ActionPack::WebAuthn::InvalidAuthenticationResponseError, "Origin does not match"
     end
 
     if cross_origin?
-      raise InvalidResponseError, "Cross-origin requests are not supported"
+      raise ActionPack::WebAuthn::InvalidAuthenticationResponseError, "Cross-origin requests are not supported"
     end
 
     if token_binding_present?
-      raise InvalidResponseError, "Token binding is not supported"
+      raise ActionPack::WebAuthn::InvalidAuthenticationResponseError, "Token binding is not supported"
     end
 
     unless relying_party_id_matches?
-      raise InvalidResponseError, "Relying party ID does not match"
+      raise ActionPack::WebAuthn::InvalidAuthenticationResponseError, "Relying party ID does not match"
     end
 
     unless user_present?
-      raise InvalidResponseError, "User presence is required"
+      raise ActionPack::WebAuthn::InvalidAuthenticationResponseError, "User presence is required"
     end
 
     if user_verification == :required && !user_verified?
-      raise InvalidResponseError, "User verification is required"
+      raise ActionPack::WebAuthn::InvalidAuthenticationResponseError, "User verification is required"
     end
   end
 

@@ -46,7 +46,7 @@ class ActionPack::WebAuthn::Authenticator::ResponseTest < ActiveSupport::TestCas
   end
 
   test "validate! raises when challenge does not match" do
-    error = assert_raises(ActionPack::WebAuthn::Authenticator::Response::InvalidResponseError) do
+    error = assert_raises(ActionPack::WebAuthn::InvalidAuthenticationResponseError) do
       @response.validate!(challenge: "wrong-challenge", origin: @origin)
     end
 
@@ -54,7 +54,7 @@ class ActionPack::WebAuthn::Authenticator::ResponseTest < ActiveSupport::TestCas
   end
 
   test "validate! raises when origin does not match" do
-    error = assert_raises(ActionPack::WebAuthn::Authenticator::Response::InvalidResponseError) do
+    error = assert_raises(ActionPack::WebAuthn::InvalidAuthenticationResponseError) do
       @response.validate!(challenge: @challenge, origin: "https://evil.com")
     end
 
@@ -74,7 +74,7 @@ class ActionPack::WebAuthn::Authenticator::ResponseTest < ActiveSupport::TestCas
       authenticator_data: @authenticator_data
     )
 
-    error = assert_raises(ActionPack::WebAuthn::Authenticator::Response::InvalidResponseError) do
+    error = assert_raises(ActionPack::WebAuthn::InvalidAuthenticationResponseError) do
       response.validate!(challenge: @challenge, origin: @origin)
     end
 
@@ -98,7 +98,7 @@ class ActionPack::WebAuthn::Authenticator::ResponseTest < ActiveSupport::TestCas
       authenticator_data: wrong_rp_data
     )
 
-    error = assert_raises(ActionPack::WebAuthn::Authenticator::Response::InvalidResponseError) do
+    error = assert_raises(ActionPack::WebAuthn::InvalidAuthenticationResponseError) do
       response.validate!(challenge: @challenge, origin: @origin)
     end
 
@@ -118,7 +118,7 @@ class ActionPack::WebAuthn::Authenticator::ResponseTest < ActiveSupport::TestCas
       authenticator_data: @authenticator_data
     )
 
-    error = assert_raises(ActionPack::WebAuthn::Authenticator::Response::InvalidResponseError) do
+    error = assert_raises(ActionPack::WebAuthn::InvalidAuthenticationResponseError) do
       response.validate!(challenge: @challenge, origin: @origin)
     end
 

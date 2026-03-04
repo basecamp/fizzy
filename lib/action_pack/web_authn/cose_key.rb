@@ -33,8 +33,6 @@
 # [+parameters+]
 #   The full COSE key parameters map, including curve and coordinate data.
 class ActionPack::WebAuthn::CoseKey
-  # Raised when the key type, algorithm, or curve is not supported.
-  class UnsupportedKeyTypeError < StandardError; end
 
   # COSE key labels
   KEY_TYPE_LABEL = 1
@@ -93,14 +91,14 @@ class ActionPack::WebAuthn::CoseKey
     case [ key_type, algorithm ]
     when [ EC2, ES256 ] then build_ec2_es256_key
     when [ RSA, RS256 ] then build_rsa_rs256_key
-    else raise UnsupportedKeyTypeError, "Unsupported COSE key type/algorithm: #{key_type}/#{algorithm}"
+    else raise ActionPack::WebAuthn::UnsupportedKeyTypeError, "Unsupported COSE key type/algorithm: #{key_type}/#{algorithm}"
     end
   end
 
   private
     def build_ec2_es256_key
       curve = parameters[EC2_CURVE_LABEL]
-      raise UnsupportedKeyTypeError, "Unsupported EC curve: #{curve}" unless curve == P256
+      raise ActionPack::WebAuthn::UnsupportedKeyTypeError, "Unsupported EC curve: #{curve}" unless curve == P256
 
       x = parameters[EC2_X_LABEL]
       y = parameters[EC2_Y_LABEL]

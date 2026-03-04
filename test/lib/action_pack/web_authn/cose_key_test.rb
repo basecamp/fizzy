@@ -92,7 +92,7 @@ class ActionPack::WebAuthn::CoseKeyTest < ActiveSupport::TestCase
       parameters: {}
     )
 
-    error = assert_raises(ActionPack::WebAuthn::CoseKey::UnsupportedKeyTypeError) do
+    error = assert_raises(ActionPack::WebAuthn::UnsupportedKeyTypeError) do
       key.to_openssl_key
     end
 
@@ -107,7 +107,7 @@ class ActionPack::WebAuthn::CoseKeyTest < ActiveSupport::TestCase
       parameters: parameters
     )
 
-    error = assert_raises(ActionPack::WebAuthn::CoseKey::UnsupportedKeyTypeError) do
+    error = assert_raises(ActionPack::WebAuthn::UnsupportedKeyTypeError) do
       key.to_openssl_key
     end
 

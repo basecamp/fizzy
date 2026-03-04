@@ -24,7 +24,7 @@ class ActionPack::WebAuthn::Authenticator::AttestationVerifiers::NoneTest < Acti
   test "verify! raises with non-empty attestation statement" do
     attestation = stub(attestation_statement: { "sig" => "abc" })
 
-    error = assert_raises(ActionPack::WebAuthn::Authenticator::Response::InvalidResponseError) do
+    error = assert_raises(ActionPack::WebAuthn::InvalidAuthenticationResponseError) do
       @verifier.verify!(attestation, client_data_json: "")
     end
 
