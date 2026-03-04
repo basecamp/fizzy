@@ -144,10 +144,10 @@ curl -X POST \
   -H "Accept: application/json" \
   -H "Cookie: session_token=eyJfcmFpbHMi..." \
   -d '{"access_token": {"description": "Fizzy CLI", "permission": "write"}}' \
-  https://app.fizzy.do/my/access_tokens
+  https://app.fizzy.do/1234567/my/access_tokens
 ```
 
-Or with a Bearer token:
+Or with a Bearer token (must have `write` permission):
 
 ```bash
 curl -X POST \
@@ -168,7 +168,7 @@ HTTP/1.1 201 Created
 
 ```json
 {
-  "token": "fizzy_aBcDeFgHiJkLmNoPqRsTuVwXyZ",
+  "token": "4f9Q6d2wXr8Kp1Ls0Vz3BnTa",
   "description": "Fizzy CLI",
   "permission": "write"
 }
