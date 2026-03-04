@@ -469,9 +469,12 @@ __Response:__
     "email_address": "david@example.com",
     "created_at": "2025-12-05T19:36:35.401Z",
     "url": "http://fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
-  }
+  },
+  "public_url": "http://fizzy.localhost:3006/897362094/public/boards/aB3dEfGhIjKlMnOp"
 }
 ```
+
+The `public_url` field is only present when the board is published.
 
 ### `POST /:account_slug/boards`
 
@@ -539,6 +542,50 @@ Returns `204 No Content` on success.
 ### `DELETE /:account_slug/boards/:board_id`
 
 Deletes a Board. Only board administrators can delete a board.
+
+__Response:__
+
+Returns `204 No Content` on success.
+
+## Board Publications
+
+Publishing a board makes it publicly accessible via a shareable link, without requiring authentication. Only board administrators can publish or unpublish a board.
+
+### `POST /:account_slug/boards/:board_id/publication`
+
+Publishes a board, generating a shareable public link.
+
+__Response:__
+
+```
+HTTP/1.1 201 Created
+```
+
+```json
+{
+  "id": "03f5v9zkft4hj9qq0lsn9ohcm",
+  "name": "Fizzy",
+  "all_access": true,
+  "created_at": "2025-12-05T19:36:35.534Z",
+  "url": "http://fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
+  "creator": {
+    "id": "03f5v9zjw7pz8717a4no1h8a7",
+    "name": "David Heinemeier Hansson",
+    "role": "owner",
+    "active": true,
+    "email_address": "david@example.com",
+    "created_at": "2025-12-05T19:36:35.401Z",
+    "url": "http://fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
+  },
+  "public_url": "http://fizzy.localhost:3006/897362094/public/boards/aB3dEfGhIjKlMnOp"
+}
+```
+
+If the board is already published, the existing publication is returned.
+
+### `DELETE /:account_slug/boards/:board_id/publication`
+
+Unpublishes a board, removing public access.
 
 __Response:__
 

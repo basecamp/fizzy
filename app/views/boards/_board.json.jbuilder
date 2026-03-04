@@ -4,4 +4,6 @@ json.cache! board do
   json.url board_url(board)
 
   json.creator board.creator, partial: "users/user", as: :user
+
+  json.public_url published_board_url(board) if board.published?
 end

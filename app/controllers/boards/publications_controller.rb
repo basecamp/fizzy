@@ -5,10 +5,20 @@ class Boards::PublicationsController < ApplicationController
 
   def create
     @board.publish
+
+    respond_to do |format|
+      format.turbo_stream
+      format.json { render partial: "boards/board", locals: { board: @board }, status: :created }
+    end
   end
 
   def destroy
     @board.unpublish
     @board.reload
+
+    respond_to do |format|
+      format.turbo_stream
+      format.json { head :no_content }
+    end
   end
 end
