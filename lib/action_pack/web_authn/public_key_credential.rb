@@ -5,10 +5,12 @@ class ActionPack::WebAuthn::PublicKeyCredential
     def create(client_data_json:, attestation_object:, challenge:, origin:, transports: [], owner: nil)
       response = ActionPack::WebAuthn::Authenticator::AttestationResponse.new(
         client_data_json: client_data_json,
-        attestation_object: attestation_object
+        attestation_object: attestation_object,
+        challenge: challenge,
+        origin: origin
       )
 
-      response.validate!(challenge: challenge, origin: origin)
+      response.validate!
 
       new(
         id: response.attestation.credential_id,
@@ -37,10 +39,12 @@ class ActionPack::WebAuthn::PublicKeyCredential
       client_data_json: client_data_json,
       authenticator_data: authenticator_data,
       signature: signature,
-      credential: self
+      credential: self,
+      challenge: challenge,
+      origin: origin
     )
 
-    response.validate!(challenge: challenge, origin: origin)
+    response.validate!
 
     @sign_count = response.authenticator_data.sign_count
     @backed_up = response.authenticator_data.backed_up?

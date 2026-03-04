@@ -31,25 +31,12 @@
 class ActionPack::WebAuthn::Authenticator::AttestationResponse < ActionPack::WebAuthn::Authenticator::Response
   attr_reader :attestation_object
 
+  validate :client_data_type_must_be_create
+  validate :attestation_must_be_valid
+
   def initialize(attestation_object:, **attributes)
     super(**attributes)
     @attestation_object = attestation_object
-  end
-
-  def validate!(**args)
-    super(**args)
-
-    unless client_data["type"] == "webauthn.create"
-      raise ActionPack::WebAuthn::InvalidAuthenticationResponseError, "Client data type is not webauthn.create"
-    end
-
-    verifier = ActionPack::WebAuthn.attestation_verifiers[attestation.format]
-
-    unless verifier
-      raise ActionPack::WebAuthn::InvalidAuthenticationResponseError, "Unsupported attestation format: #{attestation.format}"
-    end
-
-    verifier.verify!(attestation, client_data_json: client_data_json)
   end
 
   def attestation
@@ -59,4 +46,21 @@ class ActionPack::WebAuthn::Authenticator::AttestationResponse < ActionPack::Web
   def authenticator_data
     attestation.authenticator_data
   end
+
+  private
+    def client_data_type_must_be_create
+      unless client_data["type"] == "webauthn.create"
+        errors.add(:base, "Client data type is not webauthn.create")
+      end
+    end
+
+    def attestation_must_be_valid
+      verifier = ActionPack::WebAuthn.attestation_verifiers[attestation.format]
+
+      if verifier
+        verifier.verify!(attestation, client_data_json: client_data_json)
+      else
+        errors.add(:base, "Unsupported attestation format: #{attestation.format}")
+      end
+    end
 end
