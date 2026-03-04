@@ -12,33 +12,23 @@ class Sessions::PasskeysController < ApplicationController
     )
 
     if credential
-      authentication_succeeded(credential.holder)
+      start_new_session_for credential.holder
+
+      respond_to do |format|
+        format.html { redirect_to after_authentication_url }
+        format.json { render json: { session_token: session_token } }
+      end
     else
-      authentication_failed
+      respond_to do |format|
+        format.html { redirect_to new_session_path, alert: "That passkey didn't work. Try again." }
+        format.json { render json: { message: "That passkey didn't work. Try again." }, status: :unauthorized }
+      end
     end
   end
 
   private
     def passkey_params
       params.expect(passkey: [ :id, :client_data_json, :authenticator_data, :signature ])
-    end
-
-    def authentication_succeeded(identity)
-      start_new_session_for identity
-
-      respond_to do |format|
-        format.html { redirect_to after_authentication_url }
-        format.json { render json: { session_token: session_token } }
-      end
-    end
-
-    def authentication_failed
-      alert_message = "That passkey didn't work. Try again."
-
-      respond_to do |format|
-        format.html { redirect_to new_session_path, alert: alert_message }
-        format.json { render json: { message: alert_message }, status: :unauthorized }
-      end
     end
 
     def rate_limit_exceeded
