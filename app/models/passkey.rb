@@ -1,5 +1,5 @@
-class Identity::Credential < ApplicationRecord
-  belongs_to :identity
+class Passkey < ApplicationRecord
+  belongs_to :holder, polymorphic: true
 
   serialize :transports, coder: JSON, type: Array, default: []
 
@@ -10,7 +10,7 @@ class Identity::Credential < ApplicationRecord
         name: identity.email_address,
         display_name: display_name,
         resident_key: :required,
-        exclude_credentials: identity.credentials.map(&:to_public_key_credential)
+        exclude_credentials: identity.passkeys.map(&:to_public_key_credential)
       )
     end
 

@@ -4,13 +4,13 @@ class Sessions::PasskeysController < ApplicationController
   rate_limit to: 10, within: 3.minutes, only: :create, with: :rate_limit_exceeded
 
   def create
-    credential = Identity::Credential.authenticate(
+    credential = Passkey.authenticate(
       passkey: passkey_params,
       challenge: session.delete(:webauthn_challenge)
     )
 
     if credential
-      authentication_succeeded(credential.identity)
+      authentication_succeeded(credential.holder)
     else
       authentication_failed
     end

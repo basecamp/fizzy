@@ -41,7 +41,7 @@
       <% if Current.user == @user %>
         <hr class="separator--horizontal full-width flex-item-grow margin-block-start-double" style="--border-color: var(--color-ink-light);" aria-hidden="true">
 
-        <%= link_to user_credentials_path(@user), class: "btn txt-x-small center" do %>
+        <%= link_to my_passkeys_path, class: "btn txt-x-small center" do %>
           <%= icon_tag "authentication" %>
           <span>Manage passkeys</span>
         <% end %>

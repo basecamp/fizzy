@@ -5,7 +5,7 @@ class Sessions::PasskeysControllerTest < ActionDispatch::IntegrationTest
     @identity = identities(:kevin)
     @private_key = OpenSSL::PKey::EC.generate("prime256v1")
 
-    @credential = @identity.credentials.create!(
+    @credential = @identity.passkeys.create!(
       name: "Test Passkey",
       credential_id: Base64.urlsafe_encode64(SecureRandom.random_bytes(32), padding: false),
       public_key: @private_key.public_to_der,

@@ -11,12 +11,12 @@
 <section class="panel panel--wide shadow center"
     data-controller="credential"
     data-credential-public-key-value="<%= @creation_options.as_json.to_json %>"
-    data-credential-register-url-value="<%= user_credentials_path(Current.user) %>">
+    data-credential-register-url-value="<%= my_passkeys_path %>">
   <p class="font-weight-medium margin-none-block-start">Passkeys let you sign in securely without a password or email code.</p>
 
-  <% if @credentials.any? %>
+  <% if @passkeys.any? %>
     <ul class="margin-none-block-start margin-block-end-double unpad">
-      <%= render partial: "users/credentials/credential", collection: @credentials %>
+      <%= render partial: "my/passkeys/passkey", collection: @passkeys %>
     </ul>
   <% end %>
 

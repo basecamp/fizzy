@@ -6,7 +6,7 @@ class SessionsController < ApplicationController
   layout "public"
 
   def new
-    @request_options = Identity::Credential.request_options
+    @request_options = Passkey.request_options
     session[:webauthn_challenge] = @request_options.challenge
   end
 
