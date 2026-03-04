@@ -25,48 +25,30 @@
 #   )
 #
 class ActionPack::WebAuthn::Authenticator::Response
+  include ActiveModel::Validations
 
   attr_reader :client_data_json
+  attr_accessor :challenge, :origin, :user_verification
 
-  def initialize(client_data_json:)
+  validate :challenge_must_match
+  validate :origin_must_match
+  validate :must_not_be_cross_origin
+  validate :must_not_have_token_binding
+  validate :relying_party_id_must_match
+  validate :user_must_be_present
+  validate :user_must_be_verified_when_required
+
+  def initialize(client_data_json:, challenge: nil, origin: nil, user_verification: :preferred)
     @client_data_json = client_data_json
+    @challenge = challenge
+    @origin = origin
+    @user_verification = user_verification
   end
 
-  def valid?(**args)
-    validate!(**args)
-    true
-  rescue ActionPack::WebAuthn::InvalidAuthenticationResponseError
-    false
-  end
-
-  def validate!(challenge:, origin:, user_verification: :preferred)
-    unless challenge_matches?(challenge)
-      raise ActionPack::WebAuthn::InvalidAuthenticationResponseError, "Challenge does not match"
-    end
-
-    unless origin_matches?(origin)
-      raise ActionPack::WebAuthn::InvalidAuthenticationResponseError, "Origin does not match"
-    end
-
-    if cross_origin?
-      raise ActionPack::WebAuthn::InvalidAuthenticationResponseError, "Cross-origin requests are not supported"
-    end
-
-    if token_binding_present?
-      raise ActionPack::WebAuthn::InvalidAuthenticationResponseError, "Token binding is not supported"
-    end
-
-    unless relying_party_id_matches?
-      raise ActionPack::WebAuthn::InvalidAuthenticationResponseError, "Relying party ID does not match"
-    end
-
-    unless user_present?
-      raise ActionPack::WebAuthn::InvalidAuthenticationResponseError, "User presence is required"
-    end
-
-    if user_verification == :required && !user_verified?
-      raise ActionPack::WebAuthn::InvalidAuthenticationResponseError, "User verification is required"
-    end
+  def validate!
+    super
+  rescue ActiveModel::ValidationError
+    raise ActionPack::WebAuthn::InvalidAuthenticationResponseError, errors.full_messages.join(", ")
   end
 
   def relying_party
@@ -82,34 +64,48 @@ class ActionPack::WebAuthn::Authenticator::Response
   end
 
   private
-    def challenge_matches?(expected_challenge)
-      ActiveSupport::SecurityUtils.secure_compare(expected_challenge, client_data["challenge"])
+    def challenge_must_match
+      unless ActiveSupport::SecurityUtils.secure_compare(challenge, client_data["challenge"])
+        errors.add(:base, "Challenge does not match")
+      end
     end
 
-    def origin_matches?(expected_origin)
-      ActiveSupport::SecurityUtils.secure_compare(expected_origin, client_data["origin"])
+    def origin_must_match
+      unless ActiveSupport::SecurityUtils.secure_compare(origin, client_data["origin"])
+        errors.add(:base, "Origin does not match")
+      end
     end
 
-    def relying_party_id_matches?
-      ActiveSupport::SecurityUtils.secure_compare(
+    def must_not_be_cross_origin
+      if client_data["crossOrigin"] == true
+        errors.add(:base, "Cross-origin requests are not supported")
+      end
+    end
+
+    def must_not_have_token_binding
+      if client_data.dig("tokenBinding", "status") == "present"
+        errors.add(:base, "Token binding is not supported")
+      end
+    end
+
+    def relying_party_id_must_match
+      unless ActiveSupport::SecurityUtils.secure_compare(
         Digest::SHA256.digest(relying_party.id),
         authenticator_data&.relying_party_id_hash || ""
       )
+        errors.add(:base, "Relying party ID does not match")
+      end
     end
 
-    def cross_origin?
-      client_data["crossOrigin"] == true
+    def user_must_be_present
+      unless authenticator_data&.user_present?
+        errors.add(:base, "User presence is required")
+      end
     end
 
-    def token_binding_present?
-      client_data.dig("tokenBinding", "status") == "present"
-    end
-
-    def user_present?
-      authenticator_data&.user_present?
-    end
-
-    def user_verified?
-      authenticator_data&.user_verified?
+    def user_must_be_verified_when_required
+      if user_verification == :required && !authenticator_data&.user_verified?
+        errors.add(:base, "User verification is required")
+      end
     end
 end

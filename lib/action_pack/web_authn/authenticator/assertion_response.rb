@@ -34,6 +34,10 @@
 class ActionPack::WebAuthn::Authenticator::AssertionResponse < ActionPack::WebAuthn::Authenticator::Response
   attr_reader :credential, :authenticator_data, :signature
 
+  validate :client_data_type_must_be_get
+  validate :signature_must_be_valid
+  validate :sign_count_must_increase
+
   def initialize(credential:, authenticator_data:, signature:, **attributes)
     super(**attributes)
     @credential = credential
@@ -41,39 +45,28 @@ class ActionPack::WebAuthn::Authenticator::AssertionResponse < ActionPack::WebAu
     @authenticator_data = ActionPack::WebAuthn::Authenticator::Data.wrap(authenticator_data)
   end
 
-  def validate!(**args)
-    super(**args)
-    validate_client_data_type
-    validate_signature
-    validate_sign_count_increase
-  end
-
   private
-    def validate_client_data_type
+    def client_data_type_must_be_get
       unless client_data["type"] == "webauthn.get"
-        raise ActionPack::WebAuthn::InvalidAuthenticationResponseError, "Client data type is not webauthn.get"
+        errors.add(:base, "Client data type is not webauthn.get")
       end
     end
 
-    def validate_signature
-      unless valid_signature?
-        raise ActionPack::WebAuthn::InvalidAuthenticationResponseError, "Invalid signature"
-      end
-    end
-
-    def validate_sign_count_increase
-      unless sign_count_increased?
-        raise ActionPack::WebAuthn::InvalidAuthenticationResponseError, "Sign count did not increase"
-      end
-    end
-
-    def valid_signature?
+    def signature_must_be_valid
       client_data_hash = Digest::SHA256.digest(client_data_json)
       signed_data = authenticator_data.bytes.pack("C*") + client_data_hash
 
-      credential.public_key.verify("SHA256", signature, signed_data)
+      unless credential.public_key.verify("SHA256", signature, signed_data)
+        errors.add(:base, "Invalid signature")
+      end
     rescue OpenSSL::PKey::PKeyError
-      false
+      errors.add(:base, "Invalid signature")
+    end
+
+    def sign_count_must_increase
+      unless sign_count_increased?
+        errors.add(:base, "Sign count did not increase")
+      end
     end
 
     def sign_count_increased?

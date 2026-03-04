@@ -24,7 +24,9 @@ class ActionPack::WebAuthn::Authenticator::AssertionResponseTest < ActiveSupport
       client_data_json: @client_data_json,
       authenticator_data: @authenticator_data,
       signature: @signature,
-      credential: @credential
+      credential: @credential,
+      challenge: @challenge,
+      origin: @origin
     )
   end
 
@@ -36,7 +38,7 @@ class ActionPack::WebAuthn::Authenticator::AssertionResponseTest < ActiveSupport
 
   test "validate! succeeds with valid challenge, origin, type, and signature" do
     assert_nothing_raised do
-      @response.validate!(challenge: @challenge, origin: @origin)
+      @response.validate!
     end
   end
 
@@ -51,11 +53,13 @@ class ActionPack::WebAuthn::Authenticator::AssertionResponseTest < ActiveSupport
       client_data_json: client_data_json,
       authenticator_data: @authenticator_data,
       signature: sign(@authenticator_data, client_data_json),
-      credential: @credential
+      credential: @credential,
+      challenge: @challenge,
+      origin: @origin
     )
 
     error = assert_raises(ActionPack::WebAuthn::InvalidAuthenticationResponseError) do
-      response.validate!(challenge: @challenge, origin: @origin)
+      response.validate!
     end
 
     assert_equal "Client data type is not webauthn.get", error.message
@@ -66,27 +70,33 @@ class ActionPack::WebAuthn::Authenticator::AssertionResponseTest < ActiveSupport
       client_data_json: @client_data_json,
       authenticator_data: @authenticator_data,
       signature: "invalid-signature",
-      credential: @credential
+      credential: @credential,
+      challenge: @challenge,
+      origin: @origin
     )
 
     error = assert_raises(ActionPack::WebAuthn::InvalidAuthenticationResponseError) do
-      response.validate!(challenge: @challenge, origin: @origin)
+      response.validate!
     end
 
     assert_equal "Invalid signature", error.message
   end
 
   test "validate! raises when challenge does not match" do
+    @response.challenge = "wrong-challenge"
+
     error = assert_raises(ActionPack::WebAuthn::InvalidAuthenticationResponseError) do
-      @response.validate!(challenge: "wrong-challenge", origin: @origin)
+      @response.validate!
     end
 
     assert_equal "Challenge does not match", error.message
   end
 
   test "validate! raises when origin does not match" do
+    @response.origin = "https://evil.com"
+
     error = assert_raises(ActionPack::WebAuthn::InvalidAuthenticationResponseError) do
-      @response.validate!(challenge: @challenge, origin: "https://evil.com")
+      @response.validate!
     end
 
     assert_equal "Origin does not match", error.message
@@ -98,11 +108,14 @@ class ActionPack::WebAuthn::Authenticator::AssertionResponseTest < ActiveSupport
       client_data_json: @client_data_json,
       authenticator_data: authenticator_data,
       signature: sign(authenticator_data, @client_data_json),
-      credential: @credential
+      credential: @credential,
+      challenge: @challenge,
+      origin: @origin,
+      user_verification: :preferred
     )
 
     assert_nothing_raised do
-      response.validate!(challenge: @challenge, origin: @origin, user_verification: :preferred)
+      response.validate!
     end
   end
 
@@ -112,11 +125,14 @@ class ActionPack::WebAuthn::Authenticator::AssertionResponseTest < ActiveSupport
       client_data_json: @client_data_json,
       authenticator_data: authenticator_data,
       signature: sign(authenticator_data, @client_data_json),
-      credential: @credential
+      credential: @credential,
+      challenge: @challenge,
+      origin: @origin,
+      user_verification: :required
     )
 
     assert_nothing_raised do
-      response.validate!(challenge: @challenge, origin: @origin, user_verification: :required)
+      response.validate!
     end
   end
 
@@ -126,11 +142,14 @@ class ActionPack::WebAuthn::Authenticator::AssertionResponseTest < ActiveSupport
       client_data_json: @client_data_json,
       authenticator_data: authenticator_data,
       signature: sign(authenticator_data, @client_data_json),
-      credential: @credential
+      credential: @credential,
+      challenge: @challenge,
+      origin: @origin,
+      user_verification: :required
     )
 
     error = assert_raises(ActionPack::WebAuthn::InvalidAuthenticationResponseError) do
-      response.validate!(challenge: @challenge, origin: @origin, user_verification: :required)
+      response.validate!
     end
 
     assert_equal "User verification is required", error.message
