@@ -1,7 +1,7 @@
 <% @page_title = "Enter your email" %>
 
 <div class="panel panel--centered flex flex-column gap-half" data-controller="passkey"
-    data-passkey-public-key-value="<%= @request_options.as_json.to_json %>"
+    data-passkey-public-key-value="<%= @request_options.to_json %>"
     data-passkey-url-value="<%= session_passkey_path %>"
     data-passkey-csrf-token-value="<%= form_authenticity_token %>">
   <h1 class="txt-x-large font-weight-black margin-block-end">Get into Fizzy</h1>
