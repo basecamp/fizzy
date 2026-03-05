@@ -16,7 +16,7 @@ class SearchesController < ApplicationController
     def find_card(query)
       return if query.blank?
 
-      if query.to_s.match?(/\A#?\d+\z/)
+      if query.to_s.match?(/\A#\d+\z/)
         number = query.to_s.delete_prefix("#").to_i
         Current.user.accessible_cards.find_by(number: number)
       else
