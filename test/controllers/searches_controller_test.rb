@@ -40,9 +40,9 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
     get search_path(q: @card.id, script_name: "/#{@account.external_account_id}")
     assert_select "form[data-controller='auto-submit']"
 
-    # Searching by card number
+    # Searching by card number without prefix uses full search (no direct redirect)
     get search_path(q: @card.number, script_name: "/#{@account.external_account_id}")
-    assert_select "form[data-controller='auto-submit']"
+    assert_select "form[data-controller='auto-submit']", count: 0
 
     # Searching by card number with hash prefix
     get search_path(q: "##{@card.number}", script_name: "/#{@account.external_account_id}")
