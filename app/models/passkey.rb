@@ -4,13 +4,13 @@ class Passkey < ApplicationRecord
   serialize :transports, coder: JSON, type: Array, default: []
 
   class << self
-    def creation_options(identity:, display_name:)
+    def creation_options(holder:, display_name:)
       ActionPack::WebAuthn::PublicKeyCredential::CreationOptions.new(
-        id: identity.id,
-        name: identity.email_address,
+        id: holder.id,
+        name: holder.email_address,
         display_name: display_name,
         resident_key: :required,
-        exclude_credentials: identity.passkeys.map(&:to_public_key_credential)
+        exclude_credentials: holder.passkeys.map(&:to_public_key_credential)
       )
     end
 

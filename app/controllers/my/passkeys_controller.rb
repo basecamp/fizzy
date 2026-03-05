@@ -5,7 +5,7 @@ class My::PasskeysController < ApplicationController
 
   def index
     @passkeys = Current.identity.passkeys.order(name: :asc, created_at: :desc)
-    @creation_options = Passkey.creation_options(identity: Current.identity, display_name: Current.user.name)
+    @creation_options = Passkey.creation_options(holder: Current.identity, display_name: Current.user.name)
     session[:webauthn_challenge] = @creation_options.challenge
   end
 
