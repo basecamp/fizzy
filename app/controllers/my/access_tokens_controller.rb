@@ -21,12 +21,10 @@ class My::AccessTokensController < ApplicationController
         expiring_id = verifier.generate access_token.id, expires_in: 10.seconds
         redirect_to my_access_token_path(expiring_id)
       end
+
       format.json do
-        render json: {
-          token: access_token.token,
-          description: access_token.description,
-          permission: access_token.permission
-        }, status: :created
+        render status: :created, json: \
+          { token: access_token.token, description: access_token.description, permission: access_token.permission }
       end
     end
   end
