@@ -1,8 +1,63 @@
 #!/bin/bash -e
 
-# If running the rails server then create or migrate existing database
-if [ "${1}" == "./bin/thrust" ] && [ "${2}" == "./bin/rails" ] && [ "${3}" == "server" ]; then
+LITESTREAM_PID=""
+APP_PID=""
+LITESTREAM_ENABLED=false
+
+if [ -n "${S3_BUCKET:-}" ] && [ -n "${S3_ENDPOINT:-}" ]; then
+  LITESTREAM_ENABLED=true
+
+  echo "[entrypoint] Ensuring S3 bucket exists ..."
+  ./bin/ensure-s3-bucket
+
+  mkdir -p /rails/storage
+
+  echo "[entrypoint] Restoring SQLite databases from Litestream ..."
+  for db in production production_queue production_cache production_cable; do
+    DB_PATH="/rails/storage/${db}.sqlite3"
+    rm -f "${DB_PATH}" "${DB_PATH}-shm" "${DB_PATH}-wal"
+
+    litestream restore -if-replica-exists -config /rails/config/litestream.yml "${DB_PATH}" \
+      2>&1 || echo "[entrypoint] No replica found for ${db} (first deploy is OK)"
+  done
+fi
+
+if [ "${1:-}" = "./bin/thrust" ] && [ "${2:-}" = "./bin/rails" ] && [ "${3:-}" = "server" ]; then
   MIGRATE=1 ./bin/rails db:prepare
 fi
 
-exec "${@}"
+if [ "${LITESTREAM_ENABLED}" = true ]; then
+  litestream replicate -config /rails/config/litestream.yml &
+  LITESTREAM_PID=$!
+  echo "[entrypoint] Litestream replicate started (pid=${LITESTREAM_PID})"
+fi
+
+shutdown() {
+  echo "[entrypoint] Shutdown signal received"
+
+  if [ -n "${APP_PID}" ]; then
+    kill -TERM "${APP_PID}" 2>/dev/null || true
+    wait "${APP_PID}" 2>/dev/null || true
+  fi
+
+  if [ -n "${LITESTREAM_PID}" ]; then
+    kill -TERM "${LITESTREAM_PID}" 2>/dev/null || true
+    wait "${LITESTREAM_PID}" 2>/dev/null || true
+  fi
+
+  exit 0
+}
+
+trap shutdown SIGTERM SIGINT
+
+"${@}" &
+APP_PID=$!
+wait "${APP_PID}"
+EXIT_CODE=$?
+
+if [ -n "${LITESTREAM_PID}" ]; then
+  kill -TERM "${LITESTREAM_PID}" 2>/dev/null || true
+  wait "${LITESTREAM_PID}" 2>/dev/null || true
+fi
+
+exit "${EXIT_CODE}"

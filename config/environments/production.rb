@@ -59,6 +59,7 @@ Rails.application.configure do
   if config.active_storage.service.blank?
     config.active_storage.service = ENV.fetch("ACTIVE_STORAGE_SERVICE", "local").to_sym
   end
+  config.active_storage.resolve_model_to_route = :rails_storage_proxy
 
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
   # config.asset_host = "http://assets.example.com"

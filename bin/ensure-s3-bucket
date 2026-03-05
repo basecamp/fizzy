@@ -1,0 +1,41 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "aws-sdk-s3"
+
+bucket = ENV["S3_BUCKET"].to_s
+endpoint = ENV["S3_ENDPOINT"].to_s
+access_key_id = ENV["S3_ACCESS_KEY_ID"].to_s
+secret_access_key = ENV["S3_SECRET_ACCESS_KEY"].to_s
+region = ENV.fetch("S3_REGION", "us-east-1")
+force_path_style = ENV.fetch("S3_FORCE_PATH_STYLE", "true") == "true"
+
+if bucket.empty? || endpoint.empty? || access_key_id.empty? || secret_access_key.empty?
+  warn "[ensure-s3-bucket] Missing S3 env vars; skipping bucket check"
+  exit 0
+end
+
+client = Aws::S3::Client.new(
+  endpoint: endpoint,
+  access_key_id: access_key_id,
+  secret_access_key: secret_access_key,
+  region: region,
+  force_path_style: force_path_style
+)
+
+begin
+  client.head_bucket(bucket: bucket)
+  puts "[ensure-s3-bucket] Bucket exists: #{bucket}"
+rescue Aws::S3::Errors::NotFound, Aws::S3::Errors::NoSuchBucket
+  puts "[ensure-s3-bucket] Creating bucket: #{bucket}"
+
+  create_opts = { bucket: bucket }
+  unless region == "us-east-1"
+    create_opts[:create_bucket_configuration] = { location_constraint: region }
+  end
+
+  client.create_bucket(**create_opts)
+  puts "[ensure-s3-bucket] Created bucket: #{bucket}"
+rescue Aws::S3::Errors::BucketAlreadyOwnedByYou, Aws::S3::Errors::BucketAlreadyExists
+  puts "[ensure-s3-bucket] Bucket already present: #{bucket}"
+end

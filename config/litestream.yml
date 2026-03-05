@@ -1,0 +1,40 @@
+dbs:
+  - path: /rails/storage/production.sqlite3
+    replicas:
+      - type: s3
+        bucket: ${S3_BUCKET}
+        path: litestream/production.sqlite3
+        region: ${AWS_REGION}
+        endpoint: ${S3_ENDPOINT}
+        force-path-style: true
+        sync-interval: 1s
+
+  - path: /rails/storage/production_queue.sqlite3
+    replicas:
+      - type: s3
+        bucket: ${S3_BUCKET}
+        path: litestream/production_queue.sqlite3
+        region: ${AWS_REGION}
+        endpoint: ${S3_ENDPOINT}
+        force-path-style: true
+        sync-interval: 1s
+
+  - path: /rails/storage/production_cache.sqlite3
+    replicas:
+      - type: s3
+        bucket: ${S3_BUCKET}
+        path: litestream/production_cache.sqlite3
+        region: ${AWS_REGION}
+        endpoint: ${S3_ENDPOINT}
+        force-path-style: true
+        sync-interval: 1s
+
+  - path: /rails/storage/production_cable.sqlite3
+    replicas:
+      - type: s3
+        bucket: ${S3_BUCKET}
+        path: litestream/production_cable.sqlite3
+        region: ${AWS_REGION}
+        endpoint: ${S3_ENDPOINT}
+        force-path-style: true
+        sync-interval: 1s

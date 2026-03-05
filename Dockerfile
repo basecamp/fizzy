@@ -17,6 +17,10 @@ WORKDIR /rails
 # Install base packages
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y curl libjemalloc2 libvips sqlite3 libssl-dev && \
+    ARCH=$(dpkg --print-architecture) && \
+    curl -sSL "https://github.com/benbjohnson/litestream/releases/download/v0.3.13/litestream-v0.3.13-linux-${ARCH}.deb" -o /tmp/litestream.deb && \
+    dpkg -i /tmp/litestream.deb && \
+    rm -f /tmp/litestream.deb && \
     ln -s /usr/lib/$(uname -m)-linux-gnu/libjemalloc.so.2 /usr/local/lib/libjemalloc.so && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
