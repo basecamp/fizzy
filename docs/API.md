@@ -539,6 +539,7 @@ __Response:__
     "description": "Hello, World!",
     "description_html": "<div class=\"action-text-content\"><p>Hello, World!</p></div>",
     "image_url": null,
+    "has_attachments": false,
     "tags": ["programming"],
     "golden": false,
     "last_active_at": "2025-12-05T19:38:48.553Z",
@@ -590,6 +591,7 @@ __Response:__
   "description": "Hello, World!",
   "description_html": "<div class=\"action-text-content\"><p>Hello, World!</p></div>",
   "image_url": null,
+  "has_attachments": false,
   "tags": ["programming"],
   "closed": false,
   "golden": false,
@@ -747,7 +749,7 @@ Returns `204 No Content` on success.
 
 ### `POST /:account_slug/cards/:card_number/triage`
 
-Moves a card from triage into a column.
+Moves a card into a column.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -857,6 +859,7 @@ __Response:__
     "description": "Hello, World!",
     "description_html": "<div class=\"action-text-content\"><p>Hello, World!</p></div>",
     "image_url": null,
+    "has_attachments": false,
     "tags": ["programming"],
     "golden": false,
     "last_active_at": "2025-12-05T19:38:48.553Z",

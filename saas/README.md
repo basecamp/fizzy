@@ -14,7 +14,7 @@ To go back to open source mode:
 bin/rails saas:disable
 ```
 
-Then you can work do [Fizzy development as usual](https://github.com/basecamp/fizzy).
+Then you can do [Fizzy development as usual](https://github.com/basecamp/fizzy).
 
 ## How to update Fizzy
 

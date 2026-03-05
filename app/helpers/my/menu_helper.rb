@@ -11,6 +11,7 @@ module My::MenuHelper
       aria: { activedescendant: "" },
       data: {
         "1p-ignore": "true",
+        dialog_target: "focusMouse",
         filter_target: "input",
         nav_section_expander_target: "input",
         navigable_list_target: "input",

@@ -10,10 +10,11 @@ class Account::LimitedTest < ActiveSupport::TestCase
     accounts(:initech).update_column(:cards_count, 899)
     assert_not accounts(:initech).nearing_plan_cards_limit?
 
-    # Free plan near limit
+    # Free plan at exactly the threshold (remaining = 100)
     accounts(:initech).update_column(:cards_count, 900)
-    assert_not accounts(:initech).nearing_plan_cards_limit?
+    assert accounts(:initech).nearing_plan_cards_limit?
 
+    # Free plan over the threshold
     accounts(:initech).update_column(:cards_count, 901)
     assert accounts(:initech).nearing_plan_cards_limit?
   end
@@ -26,6 +27,10 @@ class Account::LimitedTest < ActiveSupport::TestCase
     # Free plan under limit
     accounts(:initech).update_column(:cards_count, 999)
     assert_not accounts(:initech).exceeding_card_limit?
+
+    # Free plan at exactly the limit
+    accounts(:initech).update_column(:cards_count, 1000)
+    assert accounts(:initech).exceeding_card_limit?
 
     # Free plan over limit
     accounts(:initech).update_column(:cards_count, 1001)

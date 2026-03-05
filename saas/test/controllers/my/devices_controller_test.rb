@@ -1,6 +1,6 @@
 require "test_helper"
 
-class DevicesControllerTest < ActionDispatch::IntegrationTest
+class My::DevicesControllerTest < ActionDispatch::IntegrationTest
   setup do
     @identity = identities(:david)
     sign_in_as :david
@@ -9,7 +9,7 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
   test "index shows identity's devices" do
     @identity.devices.create!(token: "test_token_123", platform: "apple", name: "iPhone 15 Pro")
 
-    untenanted { get saas.devices_path }
+    untenanted { get saas.my_devices_path }
 
     assert_response :success
     assert_select "strong", "iPhone 15 Pro"
@@ -19,10 +19,10 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
   test "index shows empty state when no devices" do
     @identity.devices.delete_all
 
-    untenanted { get saas.devices_path }
+    untenanted { get saas.my_devices_path }
 
     assert_response :success
-    assert_select "p", /No devices registered/
+    assert_select "h1", /No devices registered/
   end
 
   test "show notification settings with registered devices" do
@@ -36,7 +36,7 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
   test "index requires authentication" do
     sign_out
 
-    untenanted { get saas.devices_path }
+    untenanted { get saas.my_devices_path }
 
     assert_response :redirect
   end
@@ -46,7 +46,7 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
 
     assert_difference -> { ApplicationPushDevice.count }, 1 do
       untenanted do
-        post saas.devices_path, params: {
+        post saas.my_devices_path, params: {
           token: token,
           platform: "apple",
           name: "iPhone 15 Pro"
@@ -65,7 +65,7 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
 
   test "creates android device" do
     untenanted do
-      post saas.devices_path, params: {
+      post saas.my_devices_path, params: {
         token: SecureRandom.hex(32),
         platform: "google",
         name: "Pixel 8"
@@ -92,7 +92,7 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
     # Current identity registers the same token with their own device
     assert_difference -> { ApplicationPushDevice.count }, 1 do
       untenanted do
-        post saas.devices_path, params: {
+        post saas.my_devices_path, params: {
           token: shared_token,
           platform: "apple",
           name: "David's iPhone"
@@ -113,7 +113,7 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
 
   test "rejects invalid platform" do
     untenanted do
-      post saas.devices_path, params: {
+      post saas.my_devices_path, params: {
         token: SecureRandom.hex(32),
         platform: "windows",
         name: "Surface"
@@ -125,7 +125,7 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
 
   test "rejects missing token" do
     untenanted do
-      post saas.devices_path, params: {
+      post saas.my_devices_path, params: {
         platform: "apple",
         name: "iPhone"
       }, as: :json
@@ -138,7 +138,7 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
     sign_out
 
     untenanted do
-      post saas.devices_path, params: {
+      post saas.my_devices_path, params: {
         token: SecureRandom.hex(32),
         platform: "apple"
       }, as: :json
@@ -155,16 +155,16 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
     )
 
     assert_difference -> { ApplicationPushDevice.count }, -1 do
-      untenanted { delete saas.device_path(device) }
+      untenanted { delete saas.my_device_path(device) }
     end
 
-    assert_redirected_to saas.devices_path(script_name: nil)
+    assert_redirected_to saas.my_devices_path(script_name: nil)
     assert_not ApplicationPushDevice.exists?(device.id)
   end
 
   test "returns not found when device not found by id" do
     assert_no_difference "ApplicationPushDevice.count" do
-      untenanted { delete saas.device_path(id: "nonexistent") }
+      untenanted { delete saas.my_device_path(id: "nonexistent") }
     end
 
     assert_response :not_found
@@ -179,7 +179,7 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
     )
 
     assert_no_difference "ApplicationPushDevice.count" do
-      untenanted { delete saas.device_path(device) }
+      untenanted { delete saas.my_device_path(device) }
     end
 
     assert_response :not_found
@@ -195,7 +195,7 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
 
     sign_out
 
-    untenanted { delete saas.device_path(device) }
+    untenanted { delete saas.my_device_path(device) }
 
     assert_response :redirect
     assert ApplicationPushDevice.exists?(device.id)
@@ -209,7 +209,7 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
     )
 
     assert_difference -> { ApplicationPushDevice.count }, -1 do
-      untenanted { delete saas.device_path("token_to_unregister"), as: :json }
+      untenanted { delete saas.my_device_path("token_to_unregister"), as: :json }
     end
 
     assert_response :no_content
@@ -218,7 +218,7 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
 
   test "returns not found when device not found by token" do
     assert_no_difference "ApplicationPushDevice.count" do
-      untenanted { delete saas.device_path("nonexistent_token"), as: :json }
+      untenanted { delete saas.my_device_path("nonexistent_token"), as: :json }
     end
 
     assert_response :not_found
@@ -233,7 +233,7 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
     )
 
     assert_no_difference "ApplicationPushDevice.count" do
-      untenanted { delete saas.device_path("other_identity_token"), as: :json }
+      untenanted { delete saas.my_device_path("other_identity_token"), as: :json }
     end
 
     assert_response :not_found
@@ -249,7 +249,7 @@ class DevicesControllerTest < ActionDispatch::IntegrationTest
 
     sign_out
 
-    untenanted { delete saas.device_path("my_token"), as: :json }
+    untenanted { delete saas.my_device_path("my_token"), as: :json }
 
     assert_response :redirect
     assert ApplicationPushDevice.exists?(device.id)

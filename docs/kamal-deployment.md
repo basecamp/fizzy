@@ -11,7 +11,7 @@ The steps to configure your very own Fizzy are:
 
 1. Fork the repo
 2. Initialize Kamal by running `kamal init`. This command generates the `.kamal` directory along with the required configuration files, including `.kamal/secrets`.
-3. Edit few things in config/deploy.yml and .kamal/secrets
+3. Edit a few things in config/deploy.yml and .kamal/secrets
 4. Run `kamal setup` to do your first deploy.
 
 We'll go through each of these in turn.
@@ -103,6 +103,7 @@ To use the included `s3` service, set:
 - `S3_BUCKET` (defaults to `fizzy-#{Rails.env}-activestorage`)
 - `S3_REGION` (defaults to `us-east-1`)
 - `S3_SECRET_ACCESS_KEY`
+- `CSP_CONNECT_SRC`
 
 Optional for S3-compatible endpoints:
 

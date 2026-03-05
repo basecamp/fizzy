@@ -128,7 +128,7 @@
   }
 
   @media (min-width: 640px) {
-    .btn--circle-mobile .icon--mobile-only {
+    .btn .icon--mobile-only {
       display: none !important;
     }
   }
@@ -270,6 +270,28 @@
 
     span {
       inline-size: 100%;
+    }
+  }
+
+  /* Button utilities
+  /* ------------------------------------------------------------------------ */
+
+  :is([data-platform~=mobile], [data-platform~=native]) {
+    .btn--ensure-tap-target-size {
+      --tap-target-z-index: 1;
+      --tap-target-min-size: 44px;
+
+      z-index: var(--tap-target-z-index);
+
+      &::before {
+        content: "";
+        display: block;
+        block-size: var(--tap-target-min-size);
+        inline-size: var(--tap-target-min-size);
+        inset: calc(50% - var(--tap-target-min-size) / 2) auto auto calc(50% - var(--tap-target-min-size) / 2);
+        opacity: 0;
+        position: absolute;
+      }
     }
   }
 }

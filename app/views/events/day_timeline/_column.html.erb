@@ -1,6 +1,6 @@
 <div class="events__column">
   <h3 class="events__column-header">
-    <%= column.title %>
+    <span><%= column.title %></span>
 
     <% if column.events_by_hour.any? %>
       <%= link_to events_day_timeline_column_path(column, day: column.day_timeline.day.to_date), class: "events__maximize-button btn btn--circle txt-x-small borderless", data: { turbo_frame: "_top" } do %>
