@@ -1,5 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
-import { base64urlToBuffer, bufferToBase64url } from "helpers/base64url_helpers"
+import { authenticate } from "lib/action_pack/webauthn"
 
 export default class extends Controller {
   static values = { publicKey: Object, url: String, csrfToken: String }
@@ -20,13 +20,12 @@ export default class extends Controller {
     this.#abortController = new AbortController()
 
     try {
-      const credential = await navigator.credentials.get({
-        publicKey: this.#prepareOptions(this.publicKeyValue),
-        mediation: "conditional",
-        signal: this.#abortController.signal
+      const passkey = await authenticate(this.publicKeyValue, {
+        signal: this.#abortController.signal,
+        mediation: "conditional"
       })
 
-      this.#submitAssertion(credential)
+      this.#submitPasskey(passkey)
     } catch (error) {
       if (error.name !== "AbortError") {
         console.error("Passkey error:", error)
@@ -34,7 +33,7 @@ export default class extends Controller {
     }
   }
 
-  #submitAssertion(credential) {
+  #submitPasskey(passkey) {
     const form = document.createElement("form")
     form.method = "POST"
     form.action = this.urlValue
@@ -42,10 +41,10 @@ export default class extends Controller {
 
     const fields = {
       authenticity_token: this.csrfTokenValue,
-      "passkey[id]": credential.id,
-      "passkey[client_data_json]": new TextDecoder().decode(credential.response.clientDataJSON),
-      "passkey[authenticator_data]": bufferToBase64url(credential.response.authenticatorData),
-      "passkey[signature]": bufferToBase64url(credential.response.signature)
+      "passkey[id]": passkey.id,
+      "passkey[client_data_json]": passkey.client_data_json,
+      "passkey[authenticator_data]": passkey.authenticator_data,
+      "passkey[signature]": passkey.signature
     }
 
     for (const [name, value] of Object.entries(fields)) {
@@ -58,23 +57,5 @@ export default class extends Controller {
 
     document.body.appendChild(form)
     form.submit()
-  }
-
-  #prepareOptions(options) {
-    const prepared = {
-      ...options,
-      challenge: base64urlToBuffer(options.challenge)
-    }
-
-    if (options.allowCredentials?.length) {
-      prepared.allowCredentials = options.allowCredentials.map(cred => ({
-        ...cred,
-        id: base64urlToBuffer(cred.id)
-      }))
-    } else {
-      delete prepared.allowCredentials
-    }
-
-    return prepared
   }
 }
