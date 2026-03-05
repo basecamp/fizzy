@@ -40,6 +40,14 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
     get search_path(q: @card.id, script_name: "/#{@account.external_account_id}")
     assert_select "form[data-controller='auto-submit']"
 
+    # Searching by card number
+    get search_path(q: @card.number, script_name: "/#{@account.external_account_id}")
+    assert_select "form[data-controller='auto-submit']"
+
+    # Searching by card number with hash prefix
+    get search_path(q: "##{@card.number}", script_name: "/#{@account.external_account_id}")
+    assert_select "form[data-controller='auto-submit']"
+
     # Searching with non-existent card id
     get search_path(q: "999999", script_name: "/#{@account.external_account_id}")
     assert_select "form[data-controller='auto-submit']", count: 0
