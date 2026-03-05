@@ -5,55 +5,38 @@ class Passkey < ApplicationRecord
 
   class << self
     def creation_options(holder:, display_name:)
-      ActionPack::WebAuthn::PublicKeyCredential::CreationOptions.new(
+      ActionPack::WebAuthn::PublicKeyCredential.creation_options(
         id: holder.id,
         name: holder.email_address,
         display_name: display_name,
         resident_key: :required,
-        exclude_credentials: holder.passkeys.map(&:to_public_key_credential)
+        exclude_credentials: holder.passkeys
       )
     end
 
     def request_options(credentials: [])
-      ActionPack::WebAuthn::PublicKeyCredential::RequestOptions.new(credentials: credentials.map(&:to_public_key_credential))
+      ActionPack::WebAuthn::PublicKeyCredential.request_options(credentials: credentials)
     end
 
-    def register(passkey:, challenge:, origin: ActionPack::WebAuthn::Current.origin, **attributes)
-      public_key_credential = ActionPack::WebAuthn::PublicKeyCredential.create(
-        client_data_json: passkey[:client_data_json],
-        attestation_object: Base64.urlsafe_decode64(passkey[:attestation_object]),
-        challenge: challenge,
-        origin: origin,
-        transports: Array(passkey[:transports])
-      )
+    def register(passkey:, challenge:, **attributes)
+      credential = ActionPack::WebAuthn::PublicKeyCredential.register(passkey, challenge: challenge)
 
       create!(
+        **credential.to_h,
         **attributes,
-        name: attributes.fetch(:name, Authenticator.find_by_aaguid(public_key_credential.aaguid)&.name),
-        credential_id: public_key_credential.id,
-        public_key: public_key_credential.public_key.to_der,
-        sign_count: public_key_credential.sign_count,
-        aaguid: public_key_credential.aaguid,
-        backed_up: public_key_credential.backed_up,
-        transports: public_key_credential.transports
+        name: attributes.fetch(:name, Authenticator.find_by_aaguid(credential.aaguid)&.name)
       )
     end
 
-    def authenticate(passkey:, challenge:, origin: ActionPack::WebAuthn::Current.origin)
-      find_by(credential_id: passkey[:id])&.authenticate(passkey: passkey, challenge: challenge, origin: origin)
+    def authenticate(passkey:, challenge:)
+      find_by(credential_id: passkey[:id])&.authenticate(passkey: passkey, challenge: challenge)
     end
   end
 
-  def authenticate(passkey:, challenge:, origin: ActionPack::WebAuthn::Current.origin)
-    pkc = to_public_key_credential
-    pkc.authenticate(
-      client_data_json: passkey[:client_data_json],
-      authenticator_data: Base64.urlsafe_decode64(passkey[:authenticator_data]),
-      signature: Base64.urlsafe_decode64(passkey[:signature]),
-      challenge: challenge,
-      origin: origin
-    )
-    update!(sign_count: pkc.sign_count, backed_up: pkc.backed_up)
+  def authenticate(passkey:, challenge:)
+    credential = to_public_key_credential
+    credential.authenticate(passkey, challenge: challenge)
+    update!(sign_count: credential.sign_count, backed_up: credential.backed_up)
     self
   rescue ActionPack::WebAuthn::InvalidAuthenticationResponseError
     nil
@@ -66,7 +49,7 @@ class Passkey < ApplicationRecord
   def to_public_key_credential
     ActionPack::WebAuthn::PublicKeyCredential.new(
       id: credential_id,
-      public_key: OpenSSL::PKey.read(public_key),
+      public_key: public_key,
       sign_count: sign_count,
       transports: transports
     )
