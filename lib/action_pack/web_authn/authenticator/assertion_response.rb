@@ -9,7 +9,7 @@
 #
 #   # Look up the credential by ID
 #   credential = user.credentials.find_by!(
-#     credentail_id: params[:id]
+#     credential_id: params[:id]
 #   )
 #
 #   response = ActionPack::WebAuthn::Authenticator::AssertionResponse.new(
