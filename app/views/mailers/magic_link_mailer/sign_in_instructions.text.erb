@@ -1,7 +1,7 @@
 <% if @magic_link.for_sign_in? %>
 Please enter this 6-character verification code on the Fizzy sign-in page:
 <% else %>
-Please enter this 6-character verification code on the Fizzy sign-up page to create your new account:
+Please enter this 6-character verification code to finish creating your account:
 <% end %>
 
 <%= @magic_link.code %>
