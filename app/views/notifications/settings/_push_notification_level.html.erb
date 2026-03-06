@@ -1,0 +1,12 @@
+<section class="settings__section">
+  <heading>
+    <h2 class="divider">Push Notifications</h2>
+    <div>Notifications are sent to your registered devices.</div>
+  </heading>
+
+  <%= form_with model: settings, url: notifications_settings_path,
+      method: :patch, local: true, data: { controller: "form" } do |form| %>
+    <div class="margin-block-end-half"><strong><%= form.label :push_notification_level, "Send push notifications for..." %></strong></div>
+    <%= form.select :push_notification_level, push_notification_level_options_for(settings), {}, class: "input input--select txt-align-center", data: { action: "change->form#submit" } %>
+  <% end %>
+</section>

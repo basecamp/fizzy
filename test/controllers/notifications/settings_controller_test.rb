@@ -21,4 +21,13 @@ class Notifications::SettingsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to notifications_settings_path
     assert_equal "Settings updated", flash[:notice]
   end
+
+  test "update push notification level" do
+    assert_changes -> { @user.reload.settings.push_notification_level }, from: "all_activity", to: "only_mentions" do
+      put notifications_settings_path, params: { user_settings: { push_notification_level: "only_mentions" } }
+    end
+
+    assert_redirected_to notifications_settings_path
+    assert_equal "Settings updated", flash[:notice]
+  end
 end
