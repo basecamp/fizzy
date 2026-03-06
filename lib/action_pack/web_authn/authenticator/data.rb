@@ -64,8 +64,11 @@ class ActionPack::WebAuthn::Authenticator::Data
       if data.is_a?(self)
         data
       else
+        data = Base64.urlsafe_decode64(data) unless data.encoding == Encoding::BINARY
         decode(data)
       end
+    rescue ArgumentError
+      raise ActionPack::WebAuthn::InvalidAuthenticationResponseError, "Invalid base64 encoding in authenticator data"
     end
 
     def decode(bytes)

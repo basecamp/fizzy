@@ -40,6 +40,17 @@ class ActionPack::WebAuthn::Authenticator::Attestation
 
   delegate :credential_id, :public_key, :public_key_bytes, :sign_count, :aaguid, :backed_up?, to: :authenticator_data
 
+  def self.wrap(data)
+    if data.is_a?(self)
+      data
+    else
+      data = Base64.urlsafe_decode64(data) unless data.encoding == Encoding::BINARY
+      decode(data)
+    end
+  rescue ArgumentError
+    raise ActionPack::WebAuthn::InvalidAuthenticationResponseError, "Invalid base64 encoding in attestation object"
+  end
+
   def self.decode(bytes)
     cbor = ActionPack::WebAuthn::CborDecoder.decode(bytes)
 
