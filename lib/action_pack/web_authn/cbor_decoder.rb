@@ -21,7 +21,7 @@
 # The decoder supports the following CBOR types:
 #
 # [Integers]
-#   Unsigned (major type 0) and negative (major type 1) integers up to 64 bits.
+#   Unsigned (major type 0) and negative (major type 1) integers of any size.
 #
 # [Byte strings]
 #   Binary data (major type 2), returned as ASCII-8BIT encoded strings.
@@ -191,9 +191,18 @@ class ActionPack::WebAuthn::CborDecoder
       end
     end
 
+    POSITIVE_BIGNUM_TAG = 2
+    NEGATIVE_BIGNUM_TAG = 3
+
     def decode_tag
-      read_argument
-      decode
+      tag = read_argument
+      value = decode
+
+      case tag
+      when POSITIVE_BIGNUM_TAG then value.bytes.inject(0) { |n, b| (n << 8) | b }
+      when NEGATIVE_BIGNUM_TAG then -1 - value.bytes.inject(0) { |n, b| (n << 8) | b }
+      else value
+      end
     end
 
     def decode_half_float
