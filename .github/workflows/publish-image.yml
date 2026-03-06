@@ -42,13 +42,15 @@ jobs:
       IMAGE_NAME: ${{ github.repository }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3.12.0
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
 
       - name: Log in to GHCR
-        uses: docker/login-action@v3.7.0
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -65,7 +67,7 @@ jobs:
 
       - name: Extract Docker metadata (tags, labels) with arch suffix
         id: meta
-        uses: docker/metadata-action@v5.10.0
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
         with:
           images: ${{ steps.vars.outputs.canonical }}
           tags: |
@@ -83,7 +85,7 @@ jobs:
 
       - name: Build and push (${{ matrix.platform }})
         id: build
-        uses: docker/build-push-action@v6.19.2
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
         with:
           context: .
           file: Dockerfile
@@ -101,7 +103,7 @@ jobs:
 
       - name: Attest image provenance (per-arch)
         if: github.event_name != 'pull_request'
-        uses: actions/attest-build-provenance@v3.2.0
+        uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f # v3.2.0
         with:
           subject-name: ${{ steps.vars.outputs.canonical }}
           subject-digest: ${{ steps.build.outputs.digest }}
@@ -118,10 +120,10 @@ jobs:
       IMAGE_NAME: ${{ github.repository }}
     steps:
       - name: Set up Docker Buildx (for imagetools)
-        uses: docker/setup-buildx-action@v3.12.0
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
 
       - name: Log in to GHCR
-        uses: docker/login-action@v3.7.0
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -138,7 +140,7 @@ jobs:
 
       - name: Compute base tags (no suffix)
         id: meta
-        uses: docker/metadata-action@v5.10.0
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
         with:
           images: ${{ steps.vars.outputs.canonical }}
           tags: |
@@ -158,7 +160,7 @@ jobs:
         shell: bash
         run: |
           set -eu
-          tags="${{ steps.meta.outputs.tags }}"
+          tags="${STEPS_META_OUTPUTS_TAGS}"
           echo "Creating manifests for tags:"
           printf '%s\n' "$tags"
           while IFS= read -r tag; do
@@ -182,20 +184,24 @@ jobs:
                 "${src_tag}-arm64"
             fi
           done <<< "$tags"
+        env:
+          STEPS_META_OUTPUTS_TAGS: ${{ steps.meta.outputs.tags }}
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@v4.0.0
+        uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
 
       - name: Cosign sign all tags (keyless OIDC)
         shell: bash
         run: |
           set -eu
-          tags="${{ steps.meta.outputs.tags }}"
+          tags="${STEPS_META_OUTPUTS_TAGS}"
           printf '%s\n' "$tags"
           while IFS= read -r tag; do
             [ -z "$tag" ] && continue
             echo "Signing $tag"
             cosign sign --yes "$tag"
           done <<< "$tags"
+        env:
+          STEPS_META_OUTPUTS_TAGS: ${{ steps.meta.outputs.tags }}
 
 
