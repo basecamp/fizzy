@@ -1,49 +1,46 @@
-module ActionPack::WebAuthn::Passkey
-  extend ActiveSupport::Concern
+class ActionPack::WebAuthn::Passkey < ApplicationRecord
+  self.table_name = "passkeys"
 
-  class_methods do
-    def request_options(credentials: [])
-      ActionPack::WebAuthn::PublicKeyCredential.request_options(credentials: credentials)
+  belongs_to :holder, polymorphic: true
+  serialize :transports, coder: JSON, type: Array, default: []
+
+  class << self
+    def request_options(holder: nil, **options)
+      ActionPack::WebAuthn::PublicKeyCredential.request_options(
+        **Rails.configuration.action_pack.web_authn.default_request_options.to_h,
+        **holder&.passkey_request_options.to_h,
+        **options
+      )
     end
 
     def authenticate(passkey:, challenge:)
       find_by(credential_id: passkey[:id])&.authenticate(passkey: passkey, challenge: challenge)
     end
 
-    def registration_attributes(&block)
-      define_singleton_method(:_registration_attributes, &block)
-    end
-
-    def creation_options(**params)
-      ActionPack::WebAuthn::PublicKeyCredential.creation_options(**_registration_attributes(**params))
+    def creation_options(holder:, **options)
+      ActionPack::WebAuthn::PublicKeyCredential.creation_options(
+        **Rails.configuration.action_pack.web_authn.default_creation_options.to_h,
+        **holder.passkey_creation_options.to_h,
+        **options
+      )
     end
 
     def register(passkey:, challenge:, **attributes)
       credential = ActionPack::WebAuthn::PublicKeyCredential.register(passkey, challenge: challenge)
 
-      create!(
-        **credential.to_h,
-        **attributes
-      )
-    end
-
-    def after_authenticate(method_name = nil, &block)
-      block ||= ->(credential) { send(method_name, credential) }
-
-      define_method(:after_authenticate_callback) do |credential|
-        instance_exec(credential, &block)
-      end
+      create!(**credential.to_h, **attributes)
     end
   end
 
   def authenticate(passkey:, challenge:)
     credential = to_public_key_credential
     credential.authenticate(passkey, challenge: challenge)
-    after_authenticate_callback(credential) if respond_to?(:after_authenticate_callback)
+    update!(sign_count: credential.sign_count, backed_up: credential.backed_up)
     self
   rescue ActionPack::WebAuthn::InvalidAuthenticationResponseError
     nil
   end
+
 
   def to_public_key_credential
     ActionPack::WebAuthn::PublicKeyCredential.new(

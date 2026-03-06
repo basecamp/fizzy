@@ -35,7 +35,7 @@ class ActionPack::WebAuthn::PublicKeyCredential::RequestOptions < ActionPack::We
   #
   # [+:relying_party+]
   #   Optional. The relying party configuration.
-  def initialize(credentials:, **attrs)
+  def initialize(credentials: [], **attrs)
     super(**attrs)
 
     @credentials = credentials

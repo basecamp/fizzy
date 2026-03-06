@@ -8,7 +8,7 @@ class SessionsController < ApplicationController
   layout "public"
 
   def new
-    @request_options = Passkey.request_options
+    @request_options = ActionPack::WebAuthn::Passkey.request_options
     session[:webauthn_challenge] = @request_options.challenge
   end
 

@@ -1,6 +1,7 @@
 require_relative "boot"
 require "rails/all"
 require_relative "../lib/fizzy"
+require_relative "../lib/action_pack/web_authn/railtie"
 
 Bundler.require(*Rails.groups)
 
