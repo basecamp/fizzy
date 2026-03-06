@@ -1,10 +1,10 @@
-module ActionPackWebAuthnInferePasskeyName
+module ActionPackWebAuthnInferPasskeyName
   extend ActiveSupport::Concern
 
   class_methods do
     def register(...)
       super(...).tap do |credential|
-        credential.update!(name: authenticator.name) if authenticator && name.blank?
+        credential.update!(name: credential.authenticator.name) if credential.authenticator && credential.name.blank?
       end
     end
   end

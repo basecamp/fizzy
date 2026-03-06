@@ -3,7 +3,7 @@ class Identity < ApplicationRecord
   include Joinable, Transferable
 
   has_passkeys do |config|
-    config.request_options do
+    config.creation_options do
       {
         name: email_address,
         display_name: Current.user&.name || email_address

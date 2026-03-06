@@ -21,7 +21,7 @@
 # The decoder supports the following CBOR types:
 #
 # [Integers]
-#   Unsigned (major type 0) and negative (major type 1) integers of any size.
+#   Unsigned (major type 0) and negative (major type 1) integers up to 64 bits.
 #
 # [Byte strings]
 #   Binary data (major type 2), returned as ASCII-8BIT encoded strings.
