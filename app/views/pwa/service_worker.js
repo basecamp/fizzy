@@ -1,3 +1,16 @@
+// Clear all offline mode caches and restore normal service worker behavior.
+// skipWaiting() ensures this activates immediately without requiring users
+// to close all tabs.
+self.addEventListener("install", (event) => {
+  self.skipWaiting()
+})
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys().then((names) => Promise.all(names.map((name) => caches.delete(name))))
+  )
+})
+
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return
 
