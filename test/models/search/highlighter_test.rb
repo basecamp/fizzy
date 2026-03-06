@@ -29,9 +29,9 @@ class Search::HighlighterTest < ActiveSupport::TestCase
     assert_equal "Say #{mark('hello world')} to everyone", result
   end
 
-  test "snippet returns full text with highlights when under max words" do
+  test "snippet returns full text with highlights when under limit" do
     highlighter = Search::Highlighter.new("ruby")
-    result = highlighter.snippet("Ruby is great", max_words: 20)
+    result = highlighter.snippet("Ruby is great", max_chars: 100)
 
     assert_equal "#{mark('Ruby')} is great", result
   end
@@ -39,7 +39,7 @@ class Search::HighlighterTest < ActiveSupport::TestCase
   test "snippet creates excerpt around match" do
     highlighter = Search::Highlighter.new("match")
     text = "word " * 10 + "match " + "word " * 10
-    result = highlighter.snippet(text, max_words: 10)
+    result = highlighter.snippet(text, max_chars: 50)
 
     assert result.start_with?("...")
     assert result.end_with?("...")
@@ -49,7 +49,7 @@ class Search::HighlighterTest < ActiveSupport::TestCase
   test "snippet adds leading ellipsis when match is not at start" do
     highlighter = Search::Highlighter.new("middle")
     text = "word " * 20 + "middle"
-    result = highlighter.snippet(text, max_words: 10)
+    result = highlighter.snippet(text, max_chars: 50)
 
     assert result.start_with?("...")
     assert_not result.end_with?("...")
@@ -59,7 +59,7 @@ class Search::HighlighterTest < ActiveSupport::TestCase
   test "snippet adds trailing ellipsis when text continues after excerpt" do
     highlighter = Search::Highlighter.new("start")
     text = "start " + "word " * 30
-    result = highlighter.snippet(text, max_words: 10)
+    result = highlighter.snippet(text, max_chars: 50)
 
     assert result.end_with?("...")
     assert_not result.start_with?("...")
@@ -69,7 +69,7 @@ class Search::HighlighterTest < ActiveSupport::TestCase
   test "snippet falls back to truncation when no match found" do
     highlighter = Search::Highlighter.new("nomatch")
     text = "This text does not contain the search term " + "word " * 50
-    result = highlighter.snippet(text, max_words: 10)
+    result = highlighter.snippet(text, max_chars: 50)
 
     assert_includes result, "..."
     assert_not_includes result, Search::Highlighter::OPENING_MARK
@@ -80,6 +80,81 @@ class Search::HighlighterTest < ActiveSupport::TestCase
     result = highlighter.highlight("<script>test</script>")
 
     assert_equal "&lt;script&gt;#{mark('test')}&lt;/script&gt;", result
+  end
+
+  test "highlight CJK text" do
+    highlighter = Search::Highlighter.new("中文")
+    result = highlighter.highlight("这是中文测试")
+
+    assert_equal "这是#{mark('中文')}测试", result
+  end
+
+  test "highlight Japanese text" do
+    highlighter = Search::Highlighter.new("日本")
+    result = highlighter.highlight("これは日本語です")
+
+    assert_equal "これは#{mark('日本')}語です", result
+  end
+
+  test "highlight Korean text" do
+    highlighter = Search::Highlighter.new("한국")
+    result = highlighter.highlight("이것은 한국어입니다")
+
+    assert_equal "이것은 #{mark('한국')}어입니다", result
+  end
+
+  test "highlight mixed CJK and English" do
+    highlighter = Search::Highlighter.new("test 中文")
+    result = highlighter.highlight("This is a test about 中文内容")
+
+    assert_equal "This is a #{mark('test')} about #{mark('中文')}内容", result
+  end
+
+  test "snippet handles CJK text without spaces" do
+    highlighter = Search::Highlighter.new("中文")
+    text = "这是一段很长的中文文本用于测试摘要功能是否正常工作"
+    result = highlighter.snippet(text, max_chars: 100)
+
+    assert_includes result, mark("中文")
+  end
+
+  test "snippet truncates long CJK text around match" do
+    highlighter = Search::Highlighter.new("目标")
+    text = "前面有很多很多很多很多很多的文字内容" + "目标词汇" + "后面也有很多很多很多很多很多的文字内容"
+    result = highlighter.snippet(text, max_chars: 30)
+
+    assert_includes result, mark("目标")
+    assert result.start_with?("...")
+    assert result.end_with?("...")
+  end
+
+  test "highlight stems terms for better matching" do
+    highlighter = Search::Highlighter.new("running")
+    result = highlighter.highlight("I like to run every day")
+
+    assert_equal "I like to #{mark('run')} every day", result
+  end
+
+  test "snippet finds match case-insensitively" do
+    highlighter = Search::Highlighter.new("test")
+    text = "これは非常に長い日本語のテキストでTESTという単語を含む" * 3
+    result = highlighter.snippet(text, max_chars: 30)
+
+    assert_includes result, mark("TEST")
+  end
+
+  test "highlight Latin terms adjacent to CJK characters" do
+    highlighter = Search::Highlighter.new("test")
+    result = highlighter.highlight("日本語TESTテスト")
+
+    assert_equal "日本語#{mark('TEST')}テスト", result
+  end
+
+  test "highlight mixed CJK and Latin term case-insensitively" do
+    highlighter = Search::Highlighter.new("日本語test")
+    result = highlighter.highlight("これは日本語TESTです")
+
+    assert_equal "これは#{mark('日本語TEST')}です", result
   end
 
   private
