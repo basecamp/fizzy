@@ -18,11 +18,17 @@
 #
 # == Example
 #
-#   response.validate!(
+#   response = ActionPack::WebAuthn::Authenticator::AssertionResponse.new(
+#     client_data_json: client_data_json,
+#     authenticator_data: authenticator_data,
+#     signature: signature,
+#     credential: credential,
 #     challenge: session[:webauthn_challenge],
 #     origin: "https://example.com",
 #     user_verification: :required
 #   )
+#
+#   response.validate!
 #
 class ActionPack::WebAuthn::Authenticator::Response
   include ActiveModel::Validations
@@ -57,6 +63,8 @@ class ActionPack::WebAuthn::Authenticator::Response
 
   def client_data
     @client_data ||= JSON.parse(client_data_json)
+  rescue JSON::ParserError
+    raise ActionPack::WebAuthn::InvalidAuthenticationResponseError, "Client data is not valid JSON"
   end
 
   def authenticator_data
@@ -65,13 +73,21 @@ class ActionPack::WebAuthn::Authenticator::Response
 
   private
     def challenge_must_match
-      unless ActiveSupport::SecurityUtils.secure_compare(challenge, client_data["challenge"])
+      if challenge.blank?
+        errors.add(:base, "Challenge missing")
+      elsif client_data["challenge"].blank?
+        errors.add(:base, "Challenge missing in client data")
+      elsif !ActiveSupport::SecurityUtils.secure_compare(challenge.to_s, client_data["challenge"].to_s)
         errors.add(:base, "Challenge does not match")
       end
     end
 
     def origin_must_match
-      unless ActiveSupport::SecurityUtils.secure_compare(origin, client_data["origin"])
+      if origin.blank?
+        errors.add(:base, "Origin missing")
+      elsif client_data["origin"].blank?
+        errors.add(:base, "Origin missing in client data")
+      elsif !ActiveSupport::SecurityUtils.secure_compare(origin.to_s, client_data["origin"].to_s)
         errors.add(:base, "Origin does not match")
       end
     end

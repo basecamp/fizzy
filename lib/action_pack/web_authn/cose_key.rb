@@ -33,7 +33,6 @@
 # [+parameters+]
 #   The full COSE key parameters map, including curve and coordinate data.
 class ActionPack::WebAuthn::CoseKey
-
   # COSE key labels
   KEY_TYPE_LABEL = 1
   ALGORITHM_LABEL = 3

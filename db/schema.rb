@@ -416,7 +416,7 @@ ActiveRecord::Schema[8.2].define(version: 2026_03_04_131850) do
     t.text "transports"
     t.datetime "updated_at", null: false
     t.index ["credential_id"], name: "index_passkeys_on_credential_id", unique: true
-    t.index ["holder_id"], name: "index_passkeys_on_holder_id"
+    t.index ["holder_type", "holder_id"], name: "index_passkeys_on_holder_type_and_holder_id"
   end
 
   create_table "pins", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|

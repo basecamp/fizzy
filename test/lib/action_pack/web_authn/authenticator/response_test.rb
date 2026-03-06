@@ -99,7 +99,7 @@ class ActionPack::WebAuthn::Authenticator::ResponseTest < ActiveSupport::TestCas
     bytes = []
     bytes.concat(rp_id_hash.bytes)
     bytes << flags
-    bytes.concat([sign_count].pack("N").bytes)
+    bytes.concat([ sign_count ].pack("N").bytes)
 
     wrong_rp_data = ActionPack::WebAuthn::Authenticator::Data.decode(bytes.pack("C*"))
 
@@ -148,7 +148,7 @@ class ActionPack::WebAuthn::Authenticator::ResponseTest < ActiveSupport::TestCas
       bytes = []
       bytes.concat(rp_id_hash.bytes)
       bytes << flags
-      bytes.concat([sign_count].pack("N").bytes)
+      bytes.concat([ sign_count ].pack("N").bytes)
 
       ActionPack::WebAuthn::Authenticator::Data.decode(bytes.pack("C*"))
     end

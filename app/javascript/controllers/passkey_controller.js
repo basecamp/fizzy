@@ -15,7 +15,7 @@ export default class extends Controller {
   }
 
   async #attemptConditionalMediation() {
-    if (!await PublicKeyCredential?.isConditionalMediationAvailable?.()) return
+    if (!await window.PublicKeyCredential?.isConditionalMediationAvailable?.()) return
 
     this.#abortController = new AbortController()
 

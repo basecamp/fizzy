@@ -51,7 +51,6 @@
 #
 # Raises +InvalidCborError+ when encountering malformed or unsupported CBOR data.
 class ActionPack::WebAuthn::CborDecoder
-
   # Major types
   UNSIGNED_INTEGER_TYPE = 0
   NEGATIVE_INTEGER_TYPE = 1

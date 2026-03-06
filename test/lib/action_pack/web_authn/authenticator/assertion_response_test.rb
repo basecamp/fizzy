@@ -165,7 +165,7 @@ class ActionPack::WebAuthn::Authenticator::AssertionResponseTest < ActiveSupport
       bytes = []
       bytes.concat(rp_id_hash.bytes)
       bytes << flags
-      bytes.concat([sign_count].pack("N").bytes)
+      bytes.concat([ sign_count ].pack("N").bytes)
       bytes.pack("C*")
     end
 

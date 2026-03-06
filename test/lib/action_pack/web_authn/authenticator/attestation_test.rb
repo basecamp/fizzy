@@ -50,9 +50,9 @@ class ActionPack::WebAuthn::Authenticator::AttestationTest < ActiveSupport::Test
       bytes = []
       bytes.concat(@rp_id_hash.bytes)
       bytes << 0x41 # flags: user present + attested credential
-      bytes.concat([@sign_count].pack("N").bytes)
+      bytes.concat([ @sign_count ].pack("N").bytes)
       bytes.concat(@aaguid.bytes)
-      bytes.concat([@credential_id.bytesize].pack("n").bytes)
+      bytes.concat([ @credential_id.bytesize ].pack("n").bytes)
       bytes.concat(@credential_id.bytes)
       bytes.concat(@cose_key.bytes)
       bytes.pack("C*")
@@ -64,25 +64,25 @@ class ActionPack::WebAuthn::Authenticator::AttestationTest < ActiveSupport::Test
     end
 
     def encode_cbor_attestation_object
-      bytes = [0xa3] # map with 3 items
+      bytes = [ 0xa3 ] # map with 3 items
 
       # "fmt" => "none"
-      bytes.concat([0x63, *"fmt".bytes]) # text string "fmt"
-      bytes.concat([0x64, *"none".bytes]) # text string "none"
+      bytes.concat([ 0x63, *"fmt".bytes ]) # text string "fmt"
+      bytes.concat([ 0x64, *"none".bytes ]) # text string "none"
 
       # "attStmt" => {}
-      bytes.concat([0x67, *"attStmt".bytes]) # text string "attStmt"
+      bytes.concat([ 0x67, *"attStmt".bytes ]) # text string "attStmt"
       bytes << 0xa0 # empty map
 
       # "authData" => <bytes>
-      bytes.concat([0x68, *"authData".bytes]) # text string "authData"
+      bytes.concat([ 0x68, *"authData".bytes ]) # text string "authData"
       auth_data_length = @auth_data.bytesize
       if auth_data_length <= 23
         bytes << (0x40 + auth_data_length)
       elsif auth_data_length <= 255
-        bytes.concat([0x58, auth_data_length])
+        bytes.concat([ 0x58, auth_data_length ])
       else
-        bytes.concat([0x59, (auth_data_length >> 8) & 0xff, auth_data_length & 0xff])
+        bytes.concat([ 0x59, (auth_data_length >> 8) & 0xff, auth_data_length & 0xff ])
       end
       bytes.concat(@auth_data.bytes)
 
@@ -101,7 +101,7 @@ class ActionPack::WebAuthn::Authenticator::AttestationTest < ActiveSupport::Test
     end
 
     def encode_cbor_map(hash)
-      bytes = [0xa0 + hash.size]
+      bytes = [ 0xa0 + hash.size ]
       hash.each do |key, value|
         bytes.concat(encode_cbor_integer(key))
         bytes.concat(encode_cbor_value(value))
@@ -111,9 +111,9 @@ class ActionPack::WebAuthn::Authenticator::AttestationTest < ActiveSupport::Test
 
     def encode_cbor_integer(int)
       if int >= 0 && int <= 23
-        [int]
+        [ int ]
       elsif int >= -24 && int < 0
-        [0x20 - int - 1]
+        [ 0x20 - int - 1 ]
       else
         raise "Integer encoding not implemented for #{int}"
       end
@@ -126,9 +126,9 @@ class ActionPack::WebAuthn::Authenticator::AttestationTest < ActiveSupport::Test
       when String
         length = value.bytesize
         if length <= 23
-          [0x40 + length, *value.bytes]
+          [ 0x40 + length, *value.bytes ]
         else
-          [0x58, length, *value.bytes]
+          [ 0x58, length, *value.bytes ]
         end
       end
     end

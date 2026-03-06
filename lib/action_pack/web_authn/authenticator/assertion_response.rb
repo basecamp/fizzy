@@ -16,13 +16,12 @@
 #     client_data_json: params[:response][:clientDataJSON],
 #     authenticator_data: params[:response][:authenticatorData],
 #     signature: params[:response][:signature],
-#     credential: credential.to_public_key_credential
-#   )
-#
-#   response.validate!(
+#     credential: credential.to_public_key_credential,
 #     challenge: session[:authentication_challenge],
 #     origin: "https://example.com"
 #   )
+#
+#   response.validate!
 #
 # == Validation
 #

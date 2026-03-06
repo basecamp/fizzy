@@ -8,7 +8,7 @@ class ActionPack::WebAuthn::PublicKeyCredential::Options
     @user_verification = user_verification.to_sym
     @relying_party = relying_party
 
-    unless USER_VERIFICATION_OPTIONS.include?(user_verification)
+    unless USER_VERIFICATION_OPTIONS.include?(@user_verification)
       raise ArgumentError, "Invalid user verification option: #{user_verification.inspect}"
     end
   end

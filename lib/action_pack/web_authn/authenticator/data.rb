@@ -70,6 +70,12 @@ class ActionPack::WebAuthn::Authenticator::Data
 
     def decode(bytes)
       bytes = bytes.bytes if bytes.is_a?(String)
+
+      minimum_length = RELYING_PARTY_ID_HASH_LENGTH + FLAGS_LENGTH + SIGN_COUNT_LENGTH
+      if bytes.length < minimum_length
+        raise ActionPack::WebAuthn::InvalidAuthenticationResponseError, "Authenticator data is too short"
+      end
+
       position = 0
 
       relying_party_id_hash = bytes[position, RELYING_PARTY_ID_HASH_LENGTH].pack("C*")
