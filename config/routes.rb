@@ -1,6 +1,16 @@
 Rails.application.routes.draw do
   root "events#index"
 
+  get "/.well-known/oauth-authorization-server", to: "oauth/metadata#show"
+  get "/.well-known/oauth-protected-resource", to: "oauth/protected_resource_metadata#show"
+
+  namespace :oauth do
+    resource :authorization, only: %i[ new create ]
+    resource :token, only: :create
+    resource :revocation, only: :create
+    resources :clients, only: :create
+  end
+
   namespace :account do
     resource :cancellation, only: [ :create ]
     resource :entropy
@@ -174,6 +184,7 @@ Rails.application.routes.draw do
   namespace :my do
     resource :identity, only: :show
     resources :access_tokens
+    resources :connected_apps, only: %i[ index destroy ]
     resources :pins
     resource :timezone
     resource :menu
