@@ -83,6 +83,10 @@ class ActionPack::WebAuthn::CborDecoder
   MAX_DEPTH = 16
   MAX_SIZE = 10.megabytes
 
+  # Tags
+  POSITIVE_BIGNUM_TAG = 2
+  NEGATIVE_BIGNUM_TAG = 3
+
   class << self
     # Decodes a CBOR-encoded byte sequence into a Ruby object.
     #
@@ -190,9 +194,6 @@ class ActionPack::WebAuthn::CborDecoder
         raise ActionPack::WebAuthn::InvalidCborError, "Invalid simple value: #{info}"
       end
     end
-
-    POSITIVE_BIGNUM_TAG = 2
-    NEGATIVE_BIGNUM_TAG = 3
 
     def decode_tag
       tag = read_argument
