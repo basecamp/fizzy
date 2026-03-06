@@ -106,7 +106,7 @@ class ActionPack::WebAuthn::CborDecoder
   # Decodes the next CBOR data item from the byte sequence.
   def decode
     raise ActionPack::WebAuthn::InvalidCborError, "Unexpected end of input" if @position >= @bytes.length
-    raise ActionPack::WebAuthn::InvalidCborError, "Maximum nesting depth exceeded" if @depth > @max_depth
+    raise ActionPack::WebAuthn::InvalidCborError, "Maximum nesting depth exceeded" if @depth >= @max_depth
 
     @depth += 1
 

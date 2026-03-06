@@ -19,9 +19,10 @@ class Passkey < ApplicationRecord
   end
 
   class << self
-    def register(**attributes)
-      attributes[:name] ||= Authenticator.find_by_aaguid(attributes[:aaguid])&.name
-      super(**attributes)
+    def register(passkey:, challenge:, **attributes)
+      super(passkey: passkey, challenge: challenge, **attributes).tap do |record|
+        record.update!(name: record.authenticator&.name) if record.name.blank?
+      end
     end
   end
 
