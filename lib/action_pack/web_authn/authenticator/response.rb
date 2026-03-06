@@ -48,7 +48,7 @@ class ActionPack::WebAuthn::Authenticator::Response
     @client_data_json = client_data_json
     @challenge = challenge
     @origin = origin
-    @user_verification = user_verification
+    @user_verification = user_verification.to_sym
   end
 
   def validate!

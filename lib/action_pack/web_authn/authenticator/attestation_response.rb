@@ -40,7 +40,7 @@ class ActionPack::WebAuthn::Authenticator::AttestationResponse < ActionPack::Web
   end
 
   def attestation
-    @attestation ||= ActionPack::WebAuthn::Authenticator::Attestation.decode(attestation_object)
+    @attestation ||= ActionPack::WebAuthn::Authenticator::Attestation.wrap(attestation_object)
   end
 
   def authenticator_data

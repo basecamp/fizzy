@@ -69,7 +69,7 @@ class ActionPack::WebAuthn::Authenticator::AssertionResponseTest < ActiveSupport
     response = ActionPack::WebAuthn::Authenticator::AssertionResponse.new(
       client_data_json: @client_data_json,
       authenticator_data: @authenticator_data,
-      signature: "invalid-signature",
+      signature: Base64.urlsafe_encode64("invalid-signature", padding: false),
       credential: @credential,
       challenge: @challenge,
       origin: @origin

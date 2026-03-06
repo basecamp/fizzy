@@ -17,7 +17,7 @@ class ActionPack::WebAuthn::PublicKeyCredential
     def register(params, challenge:, origin: ActionPack::WebAuthn::Current.origin)
       response = ActionPack::WebAuthn::Authenticator::AttestationResponse.new(
         client_data_json: params[:client_data_json],
-        attestation_object: Base64.urlsafe_decode64(params[:attestation_object]),
+        attestation_object: params[:attestation_object],
         challenge: challenge,
         origin: origin
       )
@@ -59,8 +59,8 @@ class ActionPack::WebAuthn::PublicKeyCredential
   def authenticate(params, challenge:, origin: ActionPack::WebAuthn::Current.origin)
     response = ActionPack::WebAuthn::Authenticator::AssertionResponse.new(
       client_data_json: params[:client_data_json],
-      authenticator_data: Base64.urlsafe_decode64(params[:authenticator_data]),
-      signature: Base64.urlsafe_decode64(params[:signature]),
+      authenticator_data: params[:authenticator_data],
+      signature: params[:signature],
       credential: self,
       challenge: challenge,
       origin: origin
