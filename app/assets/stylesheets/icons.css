@@ -27,6 +27,7 @@
   .icon--art { --svg: url("art.svg "); }
   .icon--assigned { --svg: url("assigned.svg "); }
   .icon--attachment { --svg: url("attachment.svg "); }
+  .icon--authentication { --svg: url("authentication.svg "); }
   .icon--bell-alert { --svg: url("bell-alert.svg "); }
   .icon--bell-off { --svg: url("bell-off.svg "); }
   .icon--bell { --svg: url("bell.svg "); }

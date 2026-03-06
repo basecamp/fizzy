@@ -1,4 +1,6 @@
 class SessionsController < ApplicationController
+  include CurrentWebAuthnRequest
+
   disallow_account_scope
   require_unauthenticated_access except: :destroy
   rate_limit to: 10, within: 3.minutes, only: :create, with: :rate_limit_exceeded
@@ -6,6 +8,8 @@ class SessionsController < ApplicationController
   layout "public"
 
   def new
+    @request_options = ActionPack::WebAuthn::Passkey.request_options
+    session[:webauthn_challenge] = @request_options.challenge
   end
 
   def create

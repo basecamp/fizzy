@@ -1,5 +1,15 @@
 class Identity < ApplicationRecord
+  include ActionPack::WebAuthn::Holder
   include Joinable, Transferable
+
+  has_passkeys do |config|
+    config.creation_options do
+      {
+        name: email_address,
+        display_name: Current.user&.name || email_address
+      }
+    end
+  end
 
   has_many :access_tokens, dependent: :destroy
   has_many :magic_links, dependent: :destroy
