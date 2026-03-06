@@ -3,13 +3,13 @@ class ActionPack::WebAuthn::PublicKeyCredential
 
   class << self
     def request_options(**attributes)
-      attributes[:exclude_credentials] = transform_credentials(attributes[:exclude_credentials]) if attributes[:exclude_credentials]
+      attributes[:credentials] = transform_credentials(attributes[:credentials]) if attributes[:credentials]
 
       ActionPack::WebAuthn::PublicKeyCredential::RequestOptions.new(**attributes)
     end
 
     def creation_options(**attributes)
-      attributes[:credentials] = transform_credentials(attributes[:credentials]) if attributes[:credentials]
+      attributes[:exclude_credentials] = transform_credentials(attributes[:exclude_credentials]) if attributes[:exclude_credentials]
 
       ActionPack::WebAuthn::PublicKeyCredential::CreationOptions.new(**attributes)
     end

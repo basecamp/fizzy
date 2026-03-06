@@ -23,8 +23,7 @@ module ActionPack::WebAuthn::Passkey
 
       create!(
         **credential.to_h,
-        **attributes,
-        name: attributes.fetch(:name, Authenticator.find_by_aaguid(credential.aaguid)&.name)
+        **attributes
       )
     end
 
