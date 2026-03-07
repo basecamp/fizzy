@@ -5,6 +5,11 @@ class Boards::EntropiesController < ApplicationController
 
   def update
     @board.update!(entropy_params)
+
+    respond_to do |format|
+      format.turbo_stream
+      format.json { render "boards/show", status: :ok }
+    end
   end
 
   private

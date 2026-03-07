@@ -248,6 +248,7 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
     get board_path(boards(:writebook)), as: :json
     assert_response :success
     assert_equal boards(:writebook).name, @response.parsed_body["name"]
+    assert_equal boards(:writebook).auto_postpone_period, @response.parsed_body["auto_postpone_period"]
   end
 
   test "show as JSON includes public_url when published" do

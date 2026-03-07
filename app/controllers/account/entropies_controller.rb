@@ -2,8 +2,13 @@ class Account::EntropiesController < ApplicationController
   before_action :ensure_admin
 
   def update
-    Current.account.entropy.update!(entropy_params)
-    redirect_to account_settings_path, notice: "Account updated"
+    @account = Current.account
+    @account.entropy.update!(entropy_params)
+
+    respond_to do |format|
+      format.html { redirect_to account_settings_path, notice: "Account updated" }
+      format.json { render "account/settings/show", status: :ok }
+    end
   end
 
   private
