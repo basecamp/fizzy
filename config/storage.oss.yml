@@ -6,6 +6,11 @@ local:
   service: Disk
   root: <%= Rails.root.join("storage", Rails.env, "files") %>
 
+mirror_s3:
+  service: Mirror
+  primary: local
+  mirrors: [ s3 ]
+
 devminio:
   service: S3
   bucket: fizzy-dev-activestorage
