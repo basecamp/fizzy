@@ -9,17 +9,17 @@ class Card::EntropicTest < ActiveSupport::TestCase
     freeze_time
 
     entropies(:writebook_board).destroy
-    entropies("37s_account").reload.update! auto_postpone_period: 456.days
+    entropies("37s_account").reload.update! auto_postpone_period: 365.days
     cards(:layout).update! last_active_at: 2.day.ago
-    assert_equal (456 - 2).days.from_now, cards(:layout).entropy.auto_clean_at
+    assert_equal (365 - 2).days.from_now, cards(:layout).entropy.auto_clean_at
   end
 
   test "auto_postpone_at infers the period from the board when present" do
     freeze_time
 
-    entropies(:writebook_board).update! auto_postpone_period: 123.days
+    entropies(:writebook_board).update! auto_postpone_period: 90.days
     cards(:layout).update! last_active_at: 2.day.ago
-    assert_equal (123 - 2).days.from_now, cards(:layout).entropy.auto_clean_at
+    assert_equal (90 - 2).days.from_now, cards(:layout).entropy.auto_clean_at
   end
 
   test "setting auto_postpone_period in the board without entropy will create it, without affecting the account entropy" do
@@ -27,7 +27,7 @@ class Card::EntropicTest < ActiveSupport::TestCase
     original_period = account_entropy.auto_postpone_period
 
     entropies(:writebook_board).destroy
-    boards(:writebook).update! auto_postpone_period: 999.days
+    boards(:writebook).update! auto_postpone_period: 365.days
 
     assert_equal original_period, account_entropy.reload.auto_postpone_period
   end

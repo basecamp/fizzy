@@ -88,7 +88,7 @@ class BoardsController < ApplicationController
     end
 
     def board_params
-      params.expect(board: [ :name, :all_access, :auto_postpone_period, :public_description ])
+      params.expect(board: [ :name, :all_access, :auto_postpone_period_in_days, :public_description ])
     end
 
     def grantees
