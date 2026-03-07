@@ -250,6 +250,24 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
     assert_equal boards(:writebook).name, @response.parsed_body["name"]
   end
 
+  test "show as JSON includes public_url when published" do
+    board = boards(:writebook)
+    board.publish
+
+    get board_path(board), as: :json
+    assert_response :success
+    assert_equal published_board_url(board), @response.parsed_body["public_url"]
+  end
+
+  test "show as JSON excludes public_url when not published" do
+    board = boards(:writebook)
+    assert_not board.published?
+
+    get board_path(board), as: :json
+    assert_response :success
+    assert_nil @response.parsed_body["public_url"]
+  end
+
   test "create as JSON" do
     assert_difference -> { Board.count }, +1 do
       post boards_path, params: { board: { name: "My new board" } }, as: :json
