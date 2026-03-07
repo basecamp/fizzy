@@ -32,4 +32,36 @@ class Webhooks::ActivationsControllerTest < ActionDispatch::IntegrationTest
     post board_webhook_activation_path(webhook.board, webhook)
     assert_response :forbidden
   end
+
+  test "create as JSON" do
+    webhook = webhooks(:inactive)
+
+    assert_not webhook.active?
+
+    assert_changes -> { webhook.reload.active? }, from: false, to: true do
+      post board_webhook_activation_path(webhook.board, webhook), as: :json
+    end
+
+    assert_response :created
+    assert_equal webhook.id, @response.parsed_body["id"]
+    assert_equal true, @response.parsed_body["active"]
+  end
+
+  test "cannot activate webhook on board without access as JSON" do
+    logout_and_sign_in_as :jason
+    webhook = webhooks(:inactive)
+
+    post board_webhook_activation_path(webhook.board, webhook), as: :json
+
+    assert_response :not_found
+  end
+
+  test "non-admin cannot activate webhook as JSON" do
+    logout_and_sign_in_as :jz
+    webhook = webhooks(:active)
+
+    post board_webhook_activation_path(webhook.board, webhook), as: :json
+
+    assert_response :forbidden
+  end
 end
