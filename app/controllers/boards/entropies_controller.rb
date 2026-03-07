@@ -9,6 +9,6 @@ class Boards::EntropiesController < ApplicationController
 
   private
     def entropy_params
-      params.expect(board: [ :auto_postpone_period ])
+      params.expect(board: [ :auto_postpone_period_in_days ])
     end
 end
