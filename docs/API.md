@@ -461,6 +461,7 @@ __Response:__
   "name": "Fizzy",
   "all_access": true,
   "created_at": "2025-12-05T19:36:35.534Z",
+  "auto_postpone_period": 2592000,
   "url": "http://fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
   "creator": {
     "id": "03f5v9zjw7pz8717a4no1h8a7",
@@ -568,6 +569,7 @@ HTTP/1.1 201 Created
   "name": "Fizzy",
   "all_access": true,
   "created_at": "2025-12-05T19:36:35.534Z",
+  "auto_postpone_period": 2592000,
   "url": "http://fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
   "creator": {
     "id": "03f5v9zjw7pz8717a4no1h8a7",
@@ -706,6 +708,7 @@ __Response:__
       "name": "Fizzy",
       "all_access": true,
       "created_at": "2025-12-05T19:36:35.534Z",
+      "auto_postpone_period": 2592000,
       "url": "http://fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
       "creator": {
         "id": "03f5v9zjw7pz8717a4no1h8a7",
@@ -1027,6 +1030,7 @@ __Response:__
       "name": "Fizzy",
       "all_access": true,
       "created_at": "2025-12-05T19:36:35.534Z",
+      "auto_postpone_period": 2592000,
       "url": "http://fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
       "creator": {
         "id": "03f5v9zjw7pz8717a4no1h8a7",
