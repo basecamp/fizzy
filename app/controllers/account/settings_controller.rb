@@ -3,7 +3,10 @@ class Account::SettingsController < ApplicationController
   before_action :set_account
 
   def show
-    @users = @account.users.active.alphabetically.includes(:identity)
+    respond_to do |format|
+      format.html { @users = @account.users.active.alphabetically.includes(:identity) }
+      format.json
+    end
   end
 
   def update

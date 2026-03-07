@@ -1,6 +1,7 @@
 json.cache! board do
   json.(board, :id, :name, :all_access)
   json.created_at board.created_at.utc
+  json.auto_postpone_period board.auto_postpone_period
   json.url board_url(board)
 
   json.creator board.creator, partial: "users/user", as: :user

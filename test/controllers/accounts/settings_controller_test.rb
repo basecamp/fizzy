@@ -22,4 +22,13 @@ class Account::SettingsControllerTest < ActionDispatch::IntegrationTest
     put account_settings_path, params: { account: { name: "New Account Name" } }
     assert_response :forbidden
   end
+
+  test "show as JSON" do
+    get account_settings_path, as: :json
+
+    assert_response :success
+    assert_equal Current.account.name, @response.parsed_body["name"]
+    assert_equal Current.account.cards_count, @response.parsed_body["cards_count"]
+    assert_equal Current.account.entropy.auto_postpone_period, @response.parsed_body["auto_postpone_period"]
+  end
 end
