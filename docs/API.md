@@ -611,13 +611,13 @@ __Response:__
     "signing_secret": "p94Bx2HjempCdYB4DTyZkY1b",
     "subscribed_actions": ["card_published", "card_assigned", "card_closed"],
     "created_at": "2025-12-05T19:36:35.534Z",
-    "url": "http://fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm/webhooks/03f5v9zkft4hj9qq0lsn9ohcm",
+    "url": "http://fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcy/webhooks/03f5v9zkft4hj9qq0lsn9ohcm",
     "board": {
-      "id": "03f5v9zkft4hj9qq0lsn9ohcm",
+      "id": "03f5v9zkft4hj9qq0lsn9ohcy",
       "name": "Fizzy",
       "all_access": true,
       "created_at": "2025-12-05T19:36:35.534Z",
-      "url": "http://fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
+      "url": "http://fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcy",
       "creator": {
         "id": "03f5v9zjw7pz8717a4no1h8a7",
         "name": "David Heinemeier Hansson",
