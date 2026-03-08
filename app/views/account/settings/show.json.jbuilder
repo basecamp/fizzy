@@ -1,0 +1,1 @@
+json.(Current.account, :name)
