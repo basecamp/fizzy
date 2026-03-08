@@ -24,14 +24,19 @@ class My::AccessTokensController < ApplicationController
 
       format.json do
         render status: :created, json: \
-          { token: access_token.token, description: access_token.description, permission: access_token.permission }
+          { id: access_token.id, token: access_token.token, description: access_token.description,
+            permission: access_token.permission, created_at: access_token.created_at }
       end
     end
   end
 
   def destroy
     my_access_tokens.find(params[:id]).destroy!
-    redirect_to my_access_tokens_path
+
+    respond_to do |format|
+      format.html { redirect_to my_access_tokens_path }
+      format.json { head :no_content }
+    end
   end
 
   private
