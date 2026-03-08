@@ -25,7 +25,7 @@ class My::AccessTokensController < ApplicationController
       format.json do
         render status: :created, json: \
           { id: access_token.id, token: access_token.token, description: access_token.description,
-            permission: access_token.permission, created_at: access_token.created_at }
+            permission: access_token.permission, created_at: access_token.created_at.utc }
       end
     end
   end

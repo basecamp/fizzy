@@ -17,7 +17,7 @@ class SearchesController < ApplicationController
         end
         format.json do
           set_page_and_extract_portion_from \
-            Current.user.accessible_cards.mentioning(@query, user: Current.user).distinct.preloaded
+            Current.user.accessible_cards.mentioning(@query, user: Current.user).distinct.latest.preloaded
         end
       end
     end

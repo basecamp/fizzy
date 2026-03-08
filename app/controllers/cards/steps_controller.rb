@@ -5,6 +5,11 @@ class Cards::StepsController < ApplicationController
 
   def index
     fresh_when etag: @card.steps
+
+    respond_to do |format|
+      format.json
+      format.html { redirect_to card_path(@card) }
+    end
   end
 
   def create
