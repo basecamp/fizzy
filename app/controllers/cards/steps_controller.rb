@@ -8,7 +8,6 @@ class Cards::StepsController < ApplicationController
 
     respond_to do |format|
       format.json
-      format.html { redirect_to card_path(@card) }
     end
   end
 
