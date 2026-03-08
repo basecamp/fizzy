@@ -3,6 +3,10 @@ class Cards::StepsController < ApplicationController
 
   before_action :set_step, only: %i[ show edit update destroy ]
 
+  def index
+    fresh_when etag: @card.steps
+  end
+
   def create
     @step = @card.steps.create!(step_params)
 
