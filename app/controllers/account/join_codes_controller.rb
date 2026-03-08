@@ -1,4 +1,6 @@
 class Account::JoinCodesController < ApplicationController
+  wrap_parameters :account_join_code
+
   before_action :set_join_code
   before_action :ensure_admin, only: %i[ update destroy ]
 

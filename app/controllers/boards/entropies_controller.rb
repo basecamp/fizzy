@@ -1,4 +1,6 @@
 class Boards::EntropiesController < ApplicationController
+  wrap_parameters :board
+
   include BoardScoped
 
   before_action :ensure_permission_to_admin_board

@@ -1,4 +1,6 @@
 class Notifications::SettingsController < ApplicationController
+  wrap_parameters :user_settings
+
   before_action :set_settings
 
   def show

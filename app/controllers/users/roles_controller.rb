@@ -1,4 +1,6 @@
 class Users::RolesController < ApplicationController
+  wrap_parameters :user
+
   before_action :set_user
   before_action :ensure_permission_to_administer_user
 
