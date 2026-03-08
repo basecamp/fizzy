@@ -1,0 +1,27 @@
+app/views/searches/show.json.jbuilder
+  0c67fd36e0e6e917 1
+test/controllers/searches_controller_test.rb
+  0c67fd36e0e6e917 49-78
+app/controllers/searches_controller.rb
+  0c67fd36e0e6e917 7-11,13-14,16-22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.8",
+  "base_commit_sha": "f7cbd36a8b6a35177e61793e4066b16a584b6f1f",
+  "prompts": {
+    "0c67fd36e0e6e917": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a45a1723-028c-4830-80dd-e5cdd8334412",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 144,
+      "overriden_lines": 0
+    }
+  }
+}
