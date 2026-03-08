@@ -6,11 +6,27 @@ class Account::ExportsController < ApplicationController
   CURRENT_EXPORT_LIMIT = 10
 
   def show
+    if @export
+      respond_to do |format|
+        format.html
+        format.json
+      end
+    else
+      respond_to do |format|
+        format.html
+        format.json { head :not_found }
+      end
+    end
   end
 
   def create
-    Current.account.exports.create!(user: Current.user).build_later
-    redirect_to account_settings_path, notice: "Export started. You'll receive an email when it's ready."
+    @export = Current.account.exports.create!(user: Current.user)
+    @export.build_later
+
+    respond_to do |format|
+      format.html { redirect_to account_settings_path, notice: "Export started. You'll receive an email when it's ready." }
+      format.json { render :show, status: :created }
+    end
   end
 
   private
@@ -23,6 +39,7 @@ class Account::ExportsController < ApplicationController
     end
 
     def set_export
-      @export = Current.account.exports.completed.find_by(id: params[:id], user: Current.user)
+      scope = request.format.json? ? Current.account.exports : Current.account.exports.completed
+      @export = scope.find_by(id: params[:id], user: Current.user)
     end
 end

@@ -76,6 +76,49 @@ class Account::ExportsControllerTest < ActionDispatch::IntegrationTest
     assert_select "h2", "Download Expired"
   end
 
+  test "create as JSON" do
+    assert_difference -> { Account::Export.count }, 1 do
+      assert_enqueued_with(job: DataExportJob) do
+        post account_exports_path, as: :json
+      end
+    end
+
+    assert_response :created
+    body = @response.parsed_body
+    assert body["id"].present?
+    assert_equal "pending", body["status"]
+    assert_nil body["download_url"]
+  end
+
+  test "show as JSON with completed export" do
+    export = Account::Export.create!(account: Current.account, user: users(:jason))
+    export.build
+
+    get account_export_path(export), as: :json
+    assert_response :success
+
+    body = @response.parsed_body
+    assert_equal export.id, body["id"]
+    assert_equal "completed", body["status"]
+    assert body["download_url"].present?
+  end
+
+  test "show as JSON with pending export" do
+    export = Account::Export.create!(account: Current.account, user: users(:jason))
+
+    get account_export_path(export), as: :json
+    assert_response :success
+
+    body = @response.parsed_body
+    assert_equal "pending", body["status"]
+    assert_nil body["download_url"]
+  end
+
+  test "show as JSON with missing export" do
+    get account_export_path("nonexistent"), as: :json
+    assert_response :not_found
+  end
+
   test "create is forbidden for non-admin members" do
     logout_and_sign_in_as :david
 
