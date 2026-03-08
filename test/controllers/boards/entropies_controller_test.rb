@@ -16,6 +16,13 @@ class Boards::EntropiesControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "update as JSON" do
+    put board_entropy_path(@board), params: { board: { auto_postpone_period: 99.days } }, as: :json
+
+    assert_response :no_content
+    assert_equal 99.days, @board.entropy.reload.auto_postpone_period
+  end
+
   test "update requires board admin permission" do
     logout_and_sign_in_as :jz
 

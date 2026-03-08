@@ -16,7 +16,11 @@ class Users::AvatarsController < ApplicationController
 
   def destroy
     @user.avatar.destroy
-    redirect_to @user
+
+    respond_to do |format|
+      format.html { redirect_to @user }
+      format.json { head :no_content }
+    end
   end
 
   private
