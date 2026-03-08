@@ -15,5 +15,6 @@ class Boards::Columns::StreamsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     assert_kind_of Array, @response.parsed_body
+    assert response.headers["X-Total-Count"].present?, "Expected X-Total-Count header"
   end
 end
