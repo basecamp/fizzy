@@ -1,0 +1,73 @@
+test/controllers/cards/readings_controller_test.rb
+  0c67fd36e0e6e917 42-53
+test/controllers/users/push_subscriptions_controller_test.rb
+  0c67fd36e0e6e917 23-58
+app/controllers/account/entropies_controller.rb
+  0c67fd36e0e6e917 6-10
+test/controllers/accounts/entropies_controller_test.rb
+  0c67fd36e0e6e917 16-22
+test/controllers/columns/left_positions_controller_test.rb
+  0c67fd36e0e6e917 24-39
+test/controllers/boards/involvements_controller_test.rb
+  0c67fd36e0e6e917 18-28
+app/controllers/account/join_codes_controller.rb
+  0c67fd36e0e6e917 13-16,18-21,27-31
+test/controllers/users/avatars_controller_test.rb
+  0c67fd36e0e6e917 52-56
+test/controllers/notifications/settings_controller_test.rb
+  0c67fd36e0e6e917 16-30
+app/controllers/users/roles_controller.rb
+  0c67fd36e0e6e917 7-11
+app/controllers/boards/involvements_controller.rb
+  0c67fd36e0e6e917 6-11
+test/controllers/users/roles_controller_test.rb
+  0c67fd36e0e6e917 17-23
+test/controllers/accounts/settings_controller_test.rb
+  0c67fd36e0e6e917 19-32
+app/controllers/account/settings_controller.rb
+  0c67fd36e0e6e917 11-15
+app/controllers/users/avatars_controller.rb
+  0c67fd36e0e6e917 19-23
+app/controllers/cards/publishes_controller.rb
+  0c67fd36e0e6e917 7-8,14-16
+app/controllers/boards/entropies_controller.rb
+  0c67fd36e0e6e917 8-12
+app/controllers/users/push_subscriptions_controller.rb
+  0c67fd36e0e6e917 8-13,18-22
+test/controllers/columns/right_positions_controller_test.rb
+  0c67fd36e0e6e917 24-39
+app/controllers/columns/left_positions_controller.rb
+  0c67fd36e0e6e917 7-11
+app/controllers/cards/readings_controller.rb
+  0c67fd36e0e6e917 7-11,17-21
+app/controllers/notifications/settings_controller.rb
+  0c67fd36e0e6e917 10-14
+app/controllers/columns/right_positions_controller.rb
+  0c67fd36e0e6e917 7-11
+test/controllers/boards/entropies_controller_test.rb
+  0c67fd36e0e6e917 19-25
+test/controllers/cards/publishes_controller_test.rb
+  0c67fd36e0e6e917 19-29
+test/controllers/accounts/join_codes_controller_test.rb
+  0c67fd36e0e6e917 27-61
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.8",
+  "base_commit_sha": "a79f5de01bf6f10a4daf7366b1e5280fd72379f2",
+  "prompts": {
+    "0c67fd36e0e6e917": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a45a1723-028c-4830-80dd-e5cdd8334412",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>",
+      "messages": [],
+      "total_additions": 472,
+      "total_deletions": 27,
+      "accepted_lines": 463,
+      "overriden_lines": 0
+    }
+  }
+}
