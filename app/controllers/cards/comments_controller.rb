@@ -1,4 +1,5 @@
 class Cards::CommentsController < ApplicationController
+  wrap_parameters :comment, include: %i[ body created_at ]
   include CardScoped
 
   before_action :set_comment, only: %i[ show edit update destroy ]
