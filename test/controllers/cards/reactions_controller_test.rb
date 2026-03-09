@@ -53,6 +53,7 @@ class Cards::ReactionsControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :created
+    assert_equal "👍", @response.parsed_body["content"]
   end
 
   test "destroy as JSON" do

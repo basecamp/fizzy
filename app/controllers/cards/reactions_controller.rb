@@ -21,7 +21,7 @@ class Cards::ReactionsController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render "reactions/create" }
-      format.json { head :created }
+      format.json { render "reactions/show", status: :created }
     end
   end
 
