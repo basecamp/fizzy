@@ -173,7 +173,7 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
     webhook = Webhook.last
 
     assert_response :created
-    assert_equal board_webhook_path(board, webhook, format: :json), @response.headers["Location"]
+    assert_equal board_webhook_url(board, webhook, format: :json), @response.headers["Location"]
     assert_equal webhook.id, @response.parsed_body["id"]
     assert_equal "https://example.com/webhook", @response.parsed_body["payload_url"]
     assert_equal webhook.signing_secret, @response.parsed_body["signing_secret"]
