@@ -1,0 +1,27 @@
+test/controllers/my/access_tokens_controller_test.rb
+  0c67fd36e0e6e917 67-78
+app/controllers/my/access_tokens_controller.rb
+  0c67fd36e0e6e917 2-3
+test/controllers/boards/involvements_controller_test.rb
+  0c67fd36e0e6e917 24
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.9",
+  "base_commit_sha": "53a4b9b23af34a3fa1aeb7736ef77da359ce41ad",
+  "prompts": {
+    "0c67fd36e0e6e917": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a45a1723-028c-4830-80dd-e5cdd8334412",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>",
+      "messages": [],
+      "total_additions": 16,
+      "total_deletions": 2,
+      "accepted_lines": 15,
+      "overriden_lines": 0
+    }
+  }
+}
