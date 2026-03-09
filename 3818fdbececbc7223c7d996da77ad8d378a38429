@@ -1,0 +1,23 @@
+test/controllers/cards/comments_controller_test.rb
+  8b0c57e906d356c9 87-106
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.9",
+  "base_commit_sha": "3818fdbececbc7223c7d996da77ad8d378a38429",
+  "prompts": {
+    "8b0c57e906d356c9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8cf7eda5-1bc8-4ebe-84cb-5b97963585d0",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 20,
+      "overriden_lines": 0
+    }
+  }
+}
