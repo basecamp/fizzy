@@ -20,5 +20,3 @@ class TrackTrueClientIp
     @app.call(env)
   end
 end
-
-Rails.application.config.middleware.insert_before ActionDispatch::RemoteIp, TrackTrueClientIp

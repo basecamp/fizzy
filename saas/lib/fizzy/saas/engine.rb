@@ -1,4 +1,5 @@
 require_relative "transaction_pinning"
+require_relative "true_client_ip"
 require_relative "signup"
 require_relative "authorization"
 require_relative "gvl_instrumentation"
@@ -59,6 +60,10 @@ module Fizzy
 
       initializer "fizzy_saas.transaction_pinning" do |app|
         app.config.middleware.insert_after(ActiveRecord::Middleware::DatabaseSelector, TransactionPinning::Middleware)
+      end
+
+      initializer "fizzy_saas.true_client_ip" do |app|
+        app.config.middleware.insert_before ActionDispatch::RemoteIp, TrackTrueClientIp
       end
 
       initializer "fizzy_saas.gvl_instrumentation" do |app|
