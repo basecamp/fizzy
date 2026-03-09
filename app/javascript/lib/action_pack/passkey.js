@@ -10,7 +10,7 @@ document.addEventListener("click", async (event) => {
   button.disabled = true
 
   try {
-    const meta = document.querySelector('meta[name="passkey-public-key"]')
+    const meta = document.querySelector('meta[name="passkey-creation-options"]')
     const publicKey = JSON.parse(meta.content)
     const passkey = await register(publicKey)
 

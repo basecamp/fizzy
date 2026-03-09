@@ -1,6 +1,6 @@
 module ActionPack::Passkey::FormHelper
-  def passkey_public_key_meta_tag(creation_options)
-    tag.meta(name: "passkey-public-key", content: creation_options.to_json)
+  def passkey_creation_options_meta_tag(creation_options)
+    tag.meta(name: "passkey-creation-options", content: creation_options.to_json)
   end
 
   def create_passkey_button(label = nil, url, param: :passkey, form: {}, **options, &block)
