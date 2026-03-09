@@ -29,7 +29,7 @@ class Users::PushSubscriptionsControllerTest < ActionDispatch::IntegrationTest
     assert_response :created
   end
 
-  test "create as JSON returns 200 for duplicate subscription" do
+  test "create as JSON for duplicate subscription" do
     subscription_params = { "endpoint" => "https://fcm.googleapis.com/fcm/send/abc123", "p256dh_key" => "123", "auth_key" => "456" }
 
     users(:david).push_subscriptions.create!(subscription_params)
@@ -39,7 +39,7 @@ class Users::PushSubscriptionsControllerTest < ActionDispatch::IntegrationTest
         params: { push_subscription: subscription_params }, as: :json
     end
 
-    assert_response :ok
+    assert_response :created
   end
 
   test "destroy as JSON" do

@@ -31,7 +31,7 @@ class Columns::LeftPositionsControllerTest < ActionDispatch::IntegrationTest
     original_position_b = column_b.position
 
     post column_left_position_path(column_b), as: :json
-    assert_response :no_content
+    assert_response :created
 
     assert_equal original_position_b, column_a.reload.position
     assert_equal original_position_a, column_b.reload.position

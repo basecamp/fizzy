@@ -7,7 +7,7 @@ class Columns::RightPositionsController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream
-      format.json { head :no_content }
+      format.json { head :created }
     end
   end
 end

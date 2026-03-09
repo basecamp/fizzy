@@ -9,7 +9,7 @@ class Users::PushSubscriptionsController < ApplicationController
 
     respond_to do |format|
       format.html { head :no_content }
-      format.json { head subscription.previously_new_record? ? :created : :ok }
+      format.json { head :created }
     end
   end
 

@@ -13,7 +13,8 @@ class Cards::PublishesController < ApplicationController
           redirect_to @card.board
         end
       end
-      format.json { head :no_content }
+
+      format.json { head :created }
     end
   end
 

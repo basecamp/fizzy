@@ -41,7 +41,7 @@ class Cards::ReadingsControllerTest < ActionDispatch::IntegrationTest
 
   test "create as JSON" do
     post card_reading_url(cards(:logo)), as: :json
-    assert_response :no_content
+    assert_response :created
   end
 
   test "destroy as JSON" do

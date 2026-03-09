@@ -24,7 +24,7 @@ class Cards::PublishesControllerTest < ActionDispatch::IntegrationTest
       post card_publish_path(card), as: :json
     end
 
-    assert_response :no_content
+    assert_response :created
   end
 
   test "create and add another" do

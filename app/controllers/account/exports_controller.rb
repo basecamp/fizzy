@@ -6,16 +6,9 @@ class Account::ExportsController < ApplicationController
   CURRENT_EXPORT_LIMIT = 10
 
   def show
-    if @export
-      respond_to do |format|
-        format.html
-        format.json
-      end
-    else
-      respond_to do |format|
-        format.html
-        format.json { head :not_found }
-      end
+    respond_to do |format|
+      format.html
+      format.json { @export ? render(:show) : head(:not_found) }
     end
   end
 
