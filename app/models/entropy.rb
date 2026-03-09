@@ -11,7 +11,7 @@ class Entropy < ApplicationRecord
   after_commit -> { container.cards.touch_all if container }
 
   def auto_postpone_period_in_days
-    days = auto_postpone_period / 1.day
+    days = auto_postpone_period / 1.day.to_i
 
     if days.in?(AUTO_POSTPONE_PERIODS_IN_DAYS)
       days

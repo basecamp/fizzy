@@ -1,5 +1,5 @@
 <%
-  current_index = knob_options.index(current_value)
+  current_index = knob_options.index(current_value) || 0
 %>
 
 <fieldset class="knob" data-controller="knob" data-knob-target="field" style="--knob-options: <%= knob_options.length %>; --knob-index: <%= current_index %>">
