@@ -18,7 +18,7 @@ class Boards::ColumnsController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream
-      format.json { head :created, location: board_column_path(@board, @column, format: :json) }
+      format.json { render :show, status: :created, location: board_column_path(@board, @column, format: :json) }
     end
   end
 

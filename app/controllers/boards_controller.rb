@@ -26,7 +26,7 @@ class BoardsController < ApplicationController
 
     respond_to do |format|
       format.html { redirect_to board_path(@board) }
-      format.json { head :created, location: board_path(@board, format: :json) }
+      format.json { render :show, status: :created, location: board_path(@board, format: :json) }
     end
   end
 

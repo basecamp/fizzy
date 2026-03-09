@@ -56,6 +56,7 @@ class Cards::CommentsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :created
     assert_equal card_comment_path(card, Comment.last, format: :json), @response.headers["Location"]
+    assert_equal Comment.last.id, @response.parsed_body["id"]
   end
 
   test "create as JSON with custom created_at" do

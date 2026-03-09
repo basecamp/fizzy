@@ -275,6 +275,7 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :created
     assert_equal board_path(Board.last, format: :json), @response.headers["Location"]
+    assert_equal "My new board", @response.parsed_body["name"]
   end
 
   test "update as JSON" do

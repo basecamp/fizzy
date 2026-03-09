@@ -14,7 +14,7 @@ class Cards::CommentsController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream
-      format.json { head :created, location: card_comment_path(@card, @comment, format: :json) }
+      format.json { render :show, status: :created, location: card_comment_path(@card, @comment, format: :json) }
     end
   end
 

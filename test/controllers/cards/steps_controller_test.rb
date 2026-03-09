@@ -75,6 +75,7 @@ class Cards::StepsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :created
     assert_equal card_step_path(card, Step.last, format: :json), @response.headers["Location"]
+    assert_equal "New step", @response.parsed_body["content"]
   end
 
   test "show as JSON" do
