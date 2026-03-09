@@ -1,0 +1,31 @@
+app/controllers/my/access_tokens_controller.rb
+  0c67fd36e0e6e917 28
+app/views/my/access_tokens/_access_token.json.jbuilder
+  0c67fd36e0e6e917 1-2
+app/views/account/exports/show.json.jbuilder
+  0c67fd36e0e6e917 1-2
+app/controllers/cards/steps_controller.rb
+  0c67fd36e0e6e917 8-12
+app/controllers/searches_controller.rb
+  0c67fd36e0e6e917 20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.8",
+  "base_commit_sha": "f170313ff478299ed8fd7a815a6ddb0e01a83f2a",
+  "prompts": {
+    "0c67fd36e0e6e917": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a45a1723-028c-4830-80dd-e5cdd8334412",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>",
+      "messages": [],
+      "total_additions": 11,
+      "total_deletions": 4,
+      "accepted_lines": 11,
+      "overriden_lines": 0
+    }
+  }
+}

@@ -1,0 +1,33 @@
+app/controllers/boards/entropies_controller.rb
+  0c67fd36e0e6e917 2-3
+app/controllers/notifications/settings_controller.rb
+  0c67fd36e0e6e917 2-3
+test/controllers/api/flat_json_params_test.rb
+  0c67fd36e0e6e917 1-71
+app/controllers/users/roles_controller.rb
+  0c67fd36e0e6e917 2-3
+app/controllers/account/join_codes_controller.rb
+  0c67fd36e0e6e917 2-3
+app/controllers/account/settings_controller.rb
+  0c67fd36e0e6e917 2-3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.8",
+  "base_commit_sha": "a7e741930d71679618c53e976a1a9929535e333d",
+  "prompts": {
+    "0c67fd36e0e6e917": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a45a1723-028c-4830-80dd-e5cdd8334412",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>",
+      "messages": [],
+      "total_additions": 82,
+      "total_deletions": 1,
+      "accepted_lines": 81,
+      "overriden_lines": 0
+    }
+  }
+}

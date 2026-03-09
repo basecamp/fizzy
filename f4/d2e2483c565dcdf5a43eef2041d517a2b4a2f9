@@ -1,0 +1,49 @@
+app/controllers/account/exports_controller.rb
+  0c67fd36e0e6e917 11
+app/controllers/columns/left_positions_controller.rb
+  0c67fd36e0e6e917 10
+app/controllers/users/push_subscriptions_controller.rb
+  0c67fd36e0e6e917 12
+app/views/account/join_codes/show.json.jbuilder
+  0c67fd36e0e6e917 3
+test/controllers/cards/readings_controller_test.rb
+  0c67fd36e0e6e917 44
+app/controllers/cards/publishes_controller.rb
+  0c67fd36e0e6e917 16-17
+test/controllers/columns/right_positions_controller_test.rb
+  0c67fd36e0e6e917 34
+app/controllers/cards/readings_controller.rb
+  0c67fd36e0e6e917 10
+app/controllers/searches_controller.rb
+  0c67fd36e0e6e917 18
+app/controllers/columns/right_positions_controller.rb
+  0c67fd36e0e6e917 10
+app/views/account/exports/show.json.jbuilder
+  0c67fd36e0e6e917 3-6
+test/controllers/cards/publishes_controller_test.rb
+  0c67fd36e0e6e917 27
+test/controllers/columns/left_positions_controller_test.rb
+  0c67fd36e0e6e917 34
+test/controllers/users/push_subscriptions_controller_test.rb
+  0c67fd36e0e6e917 32,42
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.8",
+  "base_commit_sha": "f4d2e2483c565dcdf5a43eef2041d517a2b4a2f9",
+  "prompts": {
+    "0c67fd36e0e6e917": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a45a1723-028c-4830-80dd-e5cdd8334412",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>",
+      "messages": [],
+      "total_additions": 22,
+      "total_deletions": 28,
+      "accepted_lines": 19,
+      "overriden_lines": 0
+    }
+  }
+}

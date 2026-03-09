@@ -1,0 +1,33 @@
+test/controllers/boards/columns/closeds_controller_test.rb
+  0c67fd36e0e6e917 12-18
+app/views/boards/columns/not_nows/show.json.jbuilder
+  0c67fd36e0e6e917 1
+test/controllers/boards/columns/streams_controller_test.rb
+  0c67fd36e0e6e917 12-18
+test/controllers/boards/columns/not_nows_controller_test.rb
+  0c67fd36e0e6e917 12-18
+app/views/boards/columns/streams/show.json.jbuilder
+  0c67fd36e0e6e917 1
+app/views/boards/columns/closeds/show.json.jbuilder
+  0c67fd36e0e6e917 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.8",
+  "base_commit_sha": "2c3275b3662e1c123ad91f72dbecfed608e318a8",
+  "prompts": {
+    "0c67fd36e0e6e917": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a45a1723-028c-4830-80dd-e5cdd8334412",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 168,
+      "overriden_lines": 0
+    }
+  }
+}
