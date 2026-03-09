@@ -663,7 +663,7 @@ __Response:__
 
 ```
 HTTP/1.1 201 Created
-Location: http://fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm/webhooks/03f5v9zkft4hj9qq0lsn9ohcm.json
+Location: http://fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcy/webhooks/03f5v9zkft4hj9qq0lsn9ohcm.json
 ```
 
 Returns the created webhook in the response body.
