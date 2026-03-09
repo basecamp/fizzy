@@ -64,6 +64,18 @@ class My::AccessTokensControllerTest < ActionDispatch::IntegrationTest
     assert_kind_of Array, body
   end
 
+  test "index as JSON with bearer token and no account scope" do
+    sign_out
+    bearer_token = { "HTTP_AUTHORIZATION" => "Bearer #{identity_access_tokens(:davids_api_token).token}" }
+
+    untenanted do
+      get my_access_tokens_path, as: :json, env: bearer_token
+    end
+
+    assert_response :success
+    assert_kind_of Array, @response.parsed_body
+  end
+
   test "destroy as JSON" do
     token = identities(:kevin).access_tokens.create!(description: "To delete", permission: "read")
 
