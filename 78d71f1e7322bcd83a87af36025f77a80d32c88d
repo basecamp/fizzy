@@ -1,0 +1,31 @@
+app/views/reactions/show.json.jbuilder
+  0c67fd36e0e6e917 1
+app/controllers/cards/reactions_controller.rb
+  0c67fd36e0e6e917 24
+test/controllers/cards/reactions_controller_test.rb
+  0c67fd36e0e6e917 56
+app/controllers/cards/comments/reactions_controller.rb
+  0c67fd36e0e6e917 25
+test/controllers/cards/comments/reactions_controller_test.rb
+  0c67fd36e0e6e917 52
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.9",
+  "base_commit_sha": "78d71f1e7322bcd83a87af36025f77a80d32c88d",
+  "prompts": {
+    "0c67fd36e0e6e917": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a45a1723-028c-4830-80dd-e5cdd8334412",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>",
+      "messages": [],
+      "total_additions": 5,
+      "total_deletions": 2,
+      "accepted_lines": 5,
+      "overriden_lines": 0
+    }
+  }
+}
