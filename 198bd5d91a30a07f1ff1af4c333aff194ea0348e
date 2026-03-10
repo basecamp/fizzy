@@ -1,0 +1,47 @@
+app/controllers/boards_controller.rb
+  bdbd7d946a91cc8b 2-3
+app/controllers/boards/columns_controller.rb
+  bdbd7d946a91cc8b 2-3
+app/controllers/signups_controller.rb
+  bdbd7d946a91cc8b 2-3
+app/controllers/cards_controller.rb
+  bdbd7d946a91cc8b 2-3
+app/controllers/cards/steps_controller.rb
+  bdbd7d946a91cc8b 2-3
+app/controllers/webhooks_controller.rb
+  bdbd7d946a91cc8b 2-3
+app/controllers/signups/completions_controller.rb
+  bdbd7d946a91cc8b 2-3
+app/controllers/users/joins_controller.rb
+  bdbd7d946a91cc8b 2-3
+app/controllers/my/access_tokens_controller.rb
+  bdbd7d946a91cc8b 2-3
+app/controllers/cards/reactions_controller.rb
+  bdbd7d946a91cc8b 2-3
+app/controllers/cards/comments/reactions_controller.rb
+  bdbd7d946a91cc8b 2-3
+app/controllers/users_controller.rb
+  bdbd7d946a91cc8b 2-3
+app/controllers/users/push_subscriptions_controller.rb
+  bdbd7d946a91cc8b 2-3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.9",
+  "base_commit_sha": "198bd5d91a30a07f1ff1af4c333aff194ea0348e",
+  "prompts": {
+    "bdbd7d946a91cc8b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fe441a9e-d318-40f8-b625-76cdba41de85",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>",
+      "messages": [],
+      "total_additions": 219,
+      "total_deletions": 10,
+      "accepted_lines": 213,
+      "overriden_lines": 0
+    }
+  }
+}
