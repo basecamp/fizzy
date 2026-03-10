@@ -49,7 +49,7 @@ class Account::EntropiesControllerTest < ActionDispatch::IntegrationTest
   test "update as JSON requires admin" do
     logout_and_sign_in_as :david
 
-    put account_entropy_path, params: { entropy: { auto_postpone_period_in_days: 1 } }, as: :json
+    put account_entropy_path, params: { entropy: { auto_postpone_period_in_days: 7 } }, as: :json
     assert_response :forbidden
   end
 end

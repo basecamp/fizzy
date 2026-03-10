@@ -60,7 +60,7 @@ class Boards::EntropiesControllerTest < ActionDispatch::IntegrationTest
 
     original_period = @board.entropy.auto_postpone_period
 
-    put board_entropy_path(@board), params: { board: { auto_postpone_period_in_days: 1 } }, as: :json
+    put board_entropy_path(@board), params: { board: { auto_postpone_period_in_days: 7 } }, as: :json
 
     assert_response :forbidden
     assert_equal original_period, @board.entropy.reload.auto_postpone_period
