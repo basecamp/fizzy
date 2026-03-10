@@ -434,7 +434,7 @@ __Response:__
     "name": "Fizzy",
     "all_access": true,
     "created_at": "2025-12-05T19:36:35.534Z",
-    "auto_postpone_period": 2592000,
+    "auto_postpone_period_in_days": 30,
     "url": "http://fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
     "creator": {
       "id": "03f5v9zjw7pz8717a4no1h8a7",
@@ -461,7 +461,7 @@ __Response:__
   "name": "Fizzy",
   "all_access": true,
   "created_at": "2025-12-05T19:36:35.534Z",
-  "auto_postpone_period": 2592000,
+  "auto_postpone_period_in_days": 30,
   "url": "http://fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
   "creator": {
     "id": "03f5v9zjw7pz8717a4no1h8a7",
@@ -486,7 +486,7 @@ Creates a new Board in the account.
 |-----------|------|----------|-------------|
 | `name` | string | Yes | The name of the board |
 | `all_access` | boolean | No | Whether any user in the account can access this board. Defaults to `true` |
-| `auto_postpone_period` | integer | No | Number of seconds of inactivity before cards are automatically postponed (e.g. `2592000` = 30 days) |
+| `auto_postpone_period_in_days` | integer | No | Number of days of inactivity before cards are automatically postponed (e.g. `30`) |
 | `public_description` | string | No | Rich text description shown on the public board page |
 
 __Request:__
@@ -516,7 +516,7 @@ Updates a Board. Only board administrators can update a board.
 |-----------|------|----------|-------------|
 | `name` | string | No | The name of the board |
 | `all_access` | boolean | No | Whether any user in the account can access this board |
-| `auto_postpone_period` | integer | No | Number of seconds of inactivity before cards are automatically postponed (e.g. `2592000` = 30 days) |
+| `auto_postpone_period_in_days` | integer | No | Number of days of inactivity before cards are automatically postponed (e.g. `30`) |
 | `public_description` | string | No | Rich text description shown on the public board page |
 | `user_ids` | array | No | Array of *all* user IDs who should have access to this board (only applicable when `all_access` is `false`) |
 
@@ -526,7 +526,7 @@ __Request:__
 {
   "board": {
     "name": "Updated board name",
-    "auto_postpone_period": 2592000,
+    "auto_postpone_period_in_days": 30,
     "public_description": "This is a **public** description of the board.",
     "all_access": false,
     "user_ids": [
@@ -569,7 +569,7 @@ HTTP/1.1 201 Created
   "name": "Fizzy",
   "all_access": true,
   "created_at": "2025-12-05T19:36:35.534Z",
-  "auto_postpone_period": 2592000,
+  "auto_postpone_period_in_days": 30,
   "url": "http://fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
   "creator": {
     "id": "03f5v9zjw7pz8717a4no1h8a7",
@@ -608,11 +608,11 @@ __Response:__
   "name": "37signals",
   "cards_count": 5,
   "created_at": "2025-12-05T19:36:35.401Z",
-  "auto_postpone_period": 2592000
+  "auto_postpone_period_in_days": 30
 }
 ```
 
-The `auto_postpone_period` is the account-level default in seconds (e.g. `2592000` = 30 days). Cards are automatically moved to "Not Now" after this period of inactivity. Each board can override this with its own value.
+The `auto_postpone_period_in_days` is the account-level default in days (e.g. `30`). Cards are automatically moved to "Not Now" after this period of inactivity. Each board can override this with its own value.
 
 ### `PUT /account/entropy`
 
@@ -623,7 +623,7 @@ __Request:__
 ```json
 {
   "entropy": {
-    "auto_postpone_period": 2592000
+    "auto_postpone_period_in_days": 30
   }
 }
 ```
@@ -638,7 +638,7 @@ Returns the account object:
   "name": "37signals",
   "cards_count": 5,
   "created_at": "2025-12-05T19:36:35.401Z",
-  "auto_postpone_period": 2592000
+  "auto_postpone_period_in_days": 30
 }
 ```
 
@@ -651,7 +651,7 @@ __Request:__
 ```json
 {
   "board": {
-    "auto_postpone_period": 7776000
+    "auto_postpone_period_in_days": 90
   }
 }
 ```
@@ -826,7 +826,7 @@ __Response:__
       "name": "Fizzy",
       "all_access": true,
       "created_at": "2025-12-05T19:36:35.534Z",
-      "auto_postpone_period": 2592000,
+      "auto_postpone_period_in_days": 30,
       "url": "http://fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
       "creator": {
         "id": "03f5v9zjw7pz8717a4no1h8a7",
@@ -880,7 +880,7 @@ __Response:__
     "name": "Fizzy",
     "all_access": true,
     "created_at": "2025-12-05T19:36:35.534Z",
-    "auto_postpone_period": 2592000,
+    "auto_postpone_period_in_days": 30,
     "url": "http://fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
     "creator": {
       "id": "03f5v9zjw7pz8717a4no1h8a7",
@@ -1148,7 +1148,7 @@ __Response:__
       "name": "Fizzy",
       "all_access": true,
       "created_at": "2025-12-05T19:36:35.534Z",
-      "auto_postpone_period": 2592000,
+      "auto_postpone_period_in_days": 30,
       "url": "http://fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
       "creator": {
         "id": "03f5v9zjw7pz8717a4no1h8a7",

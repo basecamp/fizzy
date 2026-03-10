@@ -22,7 +22,7 @@ class Boards::EntropiesControllerTest < ActionDispatch::IntegrationTest
 
       assert_response :success
       assert_equal 90.days, @board.entropy.reload.auto_postpone_period
-      assert_equal 90.days, @response.parsed_body["auto_postpone_period"]
+      assert_equal 90, @response.parsed_body["auto_postpone_period_in_days"]
     end
   end
 
@@ -41,6 +41,15 @@ class Boards::EntropiesControllerTest < ActionDispatch::IntegrationTest
     original_period = @board.entropy.auto_postpone_period
 
     put board_entropy_path(@board, format: :turbo_stream), params: { board: { auto_postpone_period_in_days: 1 } }
+
+    assert_response :unprocessable_entity
+    assert_equal original_period, @board.entropy.reload.auto_postpone_period
+  end
+
+  test "update as JSON rejects invalid auto_postpone_period" do
+    original_period = @board.entropy.auto_postpone_period
+
+    put board_entropy_path(@board), params: { board: { auto_postpone_period_in_days: 1 } }, as: :json
 
     assert_response :unprocessable_entity
     assert_equal original_period, @board.entropy.reload.auto_postpone_period
