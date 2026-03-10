@@ -244,6 +244,7 @@ class FlatJsonParamsTest < ActionDispatch::IntegrationTest
 
     post users_joins_path, params: { name: "Flat Join" }, as: :json
 
+    assert_response :no_content
     assert_equal "Flat Join", users(:david).reload.name
   end
 
