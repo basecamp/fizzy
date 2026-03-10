@@ -1,5 +1,5 @@
 class Notifications::SettingsController < ApplicationController
-  wrap_parameters :user_settings
+  wrap_parameters :user_settings, include: %i[ bundle_email_frequency ]
 
   before_action :set_settings
 

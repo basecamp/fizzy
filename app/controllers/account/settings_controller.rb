@@ -1,5 +1,5 @@
 class Account::SettingsController < ApplicationController
-  wrap_parameters :account
+  wrap_parameters :account, include: %i[ name ]
 
   before_action :ensure_admin, only: :update
   before_action :set_account
