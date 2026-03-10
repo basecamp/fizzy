@@ -221,6 +221,8 @@ class FlatJsonParamsTest < ActionDispatch::IntegrationTest
         post signup_path, params: { email_address: email }, as: :json
       end
     end
+
+    assert_response :created
   end
 
   test "complete signup with flat JSON" do
