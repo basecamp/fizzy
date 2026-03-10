@@ -1,0 +1,23 @@
+test/controllers/api/flat_json_params_test.rb
+  04d84b6f4cbbb80f 224-225
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.9",
+  "base_commit_sha": "0dfe4a31885a47b467955e5293f0a7b7f10e2c29",
+  "prompts": {
+    "04d84b6f4cbbb80f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cb08f0c1-2bc8-423e-bf6c-1a64499bfedb",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>",
+      "messages": [],
+      "total_additions": 8,
+      "total_deletions": 1,
+      "accepted_lines": 8,
+      "overriden_lines": 0
+    }
+  }
+}
