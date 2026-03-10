@@ -1,4 +1,6 @@
 class Cards::StepsController < ApplicationController
+  wrap_parameters :step, include: %i[ content completed ]
+
   include CardScoped
 
   before_action :set_step, only: %i[ show edit update destroy ]

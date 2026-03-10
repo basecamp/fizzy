@@ -1,4 +1,6 @@
 class Boards::ColumnsController < ApplicationController
+  wrap_parameters :column, include: %i[ name color ]
+
   include BoardScoped
 
   before_action :set_column, only: %i[ show update destroy ]

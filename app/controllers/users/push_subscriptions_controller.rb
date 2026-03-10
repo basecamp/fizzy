@@ -1,4 +1,6 @@
 class Users::PushSubscriptionsController < ApplicationController
+  wrap_parameters :push_subscription, include: %i[ endpoint p256dh_key auth_key ]
+
   before_action :set_push_subscriptions
 
   def index

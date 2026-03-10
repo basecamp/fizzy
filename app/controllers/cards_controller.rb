@@ -1,4 +1,6 @@
 class CardsController < ApplicationController
+  wrap_parameters :card, include: %i[ title description image created_at last_active_at ]
+
   include FilterScoped
 
   before_action :set_board, only: %i[ create ]

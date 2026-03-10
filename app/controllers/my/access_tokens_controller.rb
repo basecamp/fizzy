@@ -1,4 +1,6 @@
 class My::AccessTokensController < ApplicationController
+  wrap_parameters :access_token, include: %i[ description permission ]
+
   skip_before_action :require_account
 
   def index

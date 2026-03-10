@@ -1,4 +1,6 @@
 class Users::JoinsController < ApplicationController
+  wrap_parameters :user, include: %i[ name avatar ]
+
   layout "public"
 
   def new
