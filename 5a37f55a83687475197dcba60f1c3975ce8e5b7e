@@ -1,0 +1,25 @@
+test/controllers/api/flat_json_params_test.rb
+  04d84b6f4cbbb80f 247
+app/controllers/users/joins_controller.rb
+  04d84b6f4cbbb80f 11-15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.9",
+  "base_commit_sha": "5a37f55a83687475197dcba60f1c3975ce8e5b7e",
+  "prompts": {
+    "04d84b6f4cbbb80f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cb08f0c1-2bc8-423e-bf6c-1a64499bfedb",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 6,
+      "overriden_lines": 0
+    }
+  }
+}
