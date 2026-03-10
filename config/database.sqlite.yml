@@ -2,6 +2,18 @@ default: &default
   adapter: sqlite3
   pool: 5
   timeout: 5000
+  pragmas:
+    # WAL mode allows concurrent reads + writes without blocking each other.
+    # Critical for multi-process Puma + Solid Queue deployments.
+    journal_mode: wal
+    # NORMAL is safe with WAL mode and significantly faster than FULL.
+    synchronous: normal
+    # 128MB memory-mapped I/O for read-heavy workloads.
+    mmap_size: 134217728
+    # Cap WAL file at 64MB to prevent unbounded growth.
+    journal_size_limit: 67108864
+    # 2MB page cache (negative = KB).
+    cache_size: -2000
 
 development:
   primary:

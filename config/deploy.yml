@@ -1,5 +1,8 @@
 # Name of this app
 service: fizzy
+
+# How long to wait for the new container to become healthy before giving up.
+deploy_timeout: 120
 image: fizzy
 
 
@@ -18,6 +21,9 @@ ssh:
 proxy:
   ssl: true
   host: fizzy.evansparkman.dev
+  healthcheck:
+    interval: 2
+    path: /up
 
 # Your application configuration (secrets come from .kamal/secrets).
 env:
@@ -36,6 +42,9 @@ env:
     SMTP_AUTHENTICATION: plain
     MULTI_TENANT: "false"
     SOLID_QUEUE_IN_PUMA: "true"
+    # Cap at 2 Puma workers. SQLite handles concurrent writes better with fewer
+    # processes; more workers = more lock contention on a single-server SQLite setup.
+    WEB_CONCURRENCY: "2"
 
 
 #-- General configuration --#
