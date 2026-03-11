@@ -9,7 +9,7 @@ namespace :saas do
       csv << [ "Queenbee ID", "Account Name", "Sign Up Date", "Paid Date", "Comped", "Card Count", "Storage Used (Bytes)", "Last Active" ]
 
       Account.active.includes(:storage_total).in_batches do |batch|
-        batch_ids = batch.select(:id)
+        batch_ids = batch.pluck(:id)
         paid_dates = Account::Subscription.paid.where(account_id: batch_ids)
           .group(:account_id).minimum(:created_at)
         comped_account_ids = Account::BillingWaiver.where(account_id: batch_ids)
