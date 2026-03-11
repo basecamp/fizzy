@@ -5,14 +5,16 @@ namespace :saas do
   task usage_report: :environment do
     output_path = Rails.root.join("tmp/usage_report.csv")
 
-    paid_dates = Account::Subscription.paid.group(:account_id).minimum(:created_at)
-    comped_account_ids = Account::BillingWaiver.pluck(:account_id).to_set
-
     CSV.open(output_path, "w") do |csv|
       csv << [ "Queenbee ID", "Account Name", "Sign Up Date", "Paid Date", "Comped", "Card Count", "Storage Used (Bytes)", "Last Active" ]
 
       Account.active.includes(:storage_total).in_batches do |batch|
-        last_active_dates = Card.where(account_id: batch.select(:id))
+        batch_ids = batch.select(:id)
+        paid_dates = Account::Subscription.paid.where(account_id: batch_ids)
+          .group(:account_id).minimum(:created_at)
+        comped_account_ids = Account::BillingWaiver.where(account_id: batch_ids)
+          .pluck(:account_id).to_set
+        last_active_dates = Card.where(account_id: batch_ids)
           .group(:account_id).maximum(:last_active_at)
 
         batch.each do |account|
