@@ -4,9 +4,8 @@ class Account::Subscription < SaasRecord
   enum :status, %w[ active past_due unpaid canceled incomplete incomplete_expired trialing paused ].index_by(&:itself)
 
   scope :paid, -> {
-    paid_plan_keys = Plan::PLANS.values.select(&:paid?).map(&:key)
     where(status: %w[active trialing past_due])
-      .where(plan_key: paid_plan_keys)
+      .where(plan_key: Plan.all.select(&:paid?).map(&:key))
       .where.not(account_id: Account::BillingWaiver.select(:account_id))
   }
 
