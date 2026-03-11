@@ -27,7 +27,7 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   AWS_REGION: eu-central-1
   ENVIRONMENT: production
-  MATTERMOST_CHANNEL: engineering
+  MATTERMOST_CHANNEL: team-platform
 
 defaults:
   run:
