@@ -5,7 +5,9 @@ namespace :saas do
   task usage_report: :environment do
     output_path = Rails.root.join("tmp/usage_report.csv")
 
-    paid_subscriptions = Account::Subscription.paid.index_by(&:account_id)
+    paid_subscriptions = Account::Subscription.paid
+      .group_by(&:account_id)
+      .transform_values { |subs| subs.min_by { |s| [ s.created_at, s.id ] } }
     comped_account_ids = Account::BillingWaiver.pluck(:account_id).to_set
 
     CSV.open(output_path, "w") do |csv|
