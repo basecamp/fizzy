@@ -29,6 +29,17 @@ class ActionPack::WebAuthn::CoseKeyTest < ActiveSupport::TestCase
       -1 => @rsa_n,
       -2 => @rsa_e
     }
+
+    # Generate a real Ed25519 key for valid test data
+    ed25519_key = OpenSSL::PKey.generate_key("ED25519")
+    @ed25519_x = ed25519_key.raw_public_key
+
+    @okp_parameters = {
+      1 => 1,    # kty: OKP
+      3 => -8,   # alg: EdDSA
+      -1 => 6,   # crv: Ed25519
+      -2 => @ed25519_x
+    }
   end
 
   test "initializes with key type, algorithm, and parameters" do
@@ -51,6 +62,14 @@ class ActionPack::WebAuthn::CoseKeyTest < ActiveSupport::TestCase
     assert_equal(-7, key.algorithm)
   end
 
+  test "decodes OKP/EdDSA key from CBOR" do
+    cbor = encode_cbor(@okp_parameters)
+    key = ActionPack::WebAuthn::CoseKey.decode(cbor)
+
+    assert_equal 1, key.key_type
+    assert_equal(-8, key.algorithm)
+  end
+
   test "decodes RSA/RS256 key from CBOR" do
     cbor = encode_cbor(@rsa_parameters)
     key = ActionPack::WebAuthn::CoseKey.decode(cbor)
@@ -70,6 +89,18 @@ class ActionPack::WebAuthn::CoseKeyTest < ActiveSupport::TestCase
 
     assert_instance_of OpenSSL::PKey::EC, openssl_key
     assert_equal "prime256v1", openssl_key.group.curve_name
+  end
+
+  test "converts OKP/EdDSA key to OpenSSL Ed25519 key" do
+    key = ActionPack::WebAuthn::CoseKey.new(
+      key_type: 1,
+      algorithm: -8,
+      parameters: @okp_parameters
+    )
+
+    openssl_key = key.to_openssl_key
+
+    assert_equal "ED25519", openssl_key.oid
   end
 
   test "converts RSA/RS256 key to OpenSSL RSA key" do
@@ -97,6 +128,21 @@ class ActionPack::WebAuthn::CoseKeyTest < ActiveSupport::TestCase
     end
 
     assert_match(/99\/-7/, error.message)
+  end
+
+  test "raises error for unsupported OKP curve" do
+    parameters = @okp_parameters.merge(-1 => 5) # Ed448 instead of Ed25519
+    key = ActionPack::WebAuthn::CoseKey.new(
+      key_type: 1,
+      algorithm: -8,
+      parameters: parameters
+    )
+
+    error = assert_raises(ActionPack::WebAuthn::UnsupportedKeyTypeError) do
+      key.to_openssl_key
+    end
+
+    assert_match(/curve/, error.message.downcase)
   end
 
   test "raises error for unsupported EC curve" do

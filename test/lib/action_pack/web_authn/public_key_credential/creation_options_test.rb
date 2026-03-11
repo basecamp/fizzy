@@ -39,6 +39,7 @@ class ActionPack::WebAuthn::PublicKeyCredential::CreationOptionsTest < ActiveSup
 
     assert_equal [
       { type: "public-key", alg: -7 },
+      { type: "public-key", alg: -8 },
       { type: "public-key", alg: -257 }
     ], @options.as_json[:pubKeyCredParams]
 

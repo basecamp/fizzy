@@ -19,16 +19,19 @@
 # [ES256]
 #   ECDSA with P-256 curve and SHA-256. The most common algorithm for WebAuthn.
 #
+# [EdDSA]
+#   EdDSA with Ed25519 curve. Increasingly supported by modern authenticators.
+#
 # [RS256]
 #   RSASSA-PKCS1-v1_5 with SHA-256. Used by some security keys and platforms.
 #
 # == Attributes
 #
 # [+key_type+]
-#   The COSE key type (2 for EC2, 3 for RSA).
+#   The COSE key type (1 for OKP, 2 for EC2, 3 for RSA).
 #
 # [+algorithm+]
-#   The COSE algorithm identifier (-7 for ES256, -257 for RS256).
+#   The COSE algorithm identifier (-7 for ES256, -8 for EdDSA, -257 for RS256).
 #
 # [+parameters+]
 #   The full COSE key parameters map, including curve and coordinate data.
@@ -41,17 +44,24 @@ class ActionPack::WebAuthn::CoseKey
   EC2_Y_LABEL = -3
   RSA_N_LABEL = -1
   RSA_E_LABEL = -2
+  OKP_CURVE_LABEL = -1
+  OKP_X_LABEL = -2
 
   # COSE key types
+  OKP = 1
   EC2 = 2
   RSA = 3
 
   # COSE algorithms
   ES256 = -7
+  EDDSA = -8
   RS256 = -257
 
   # COSE EC2 curves
   P256 = 1
+
+  # COSE OKP curves
+  ED25519 = 6
 
   # OpenSSL types
   UNCOMPRESSED_POINT_MARKER = 0x04
@@ -81,14 +91,16 @@ class ActionPack::WebAuthn::CoseKey
 
   # Converts the COSE key to an OpenSSL public key object.
   #
-  # Returns an +OpenSSL::PKey::EC+ for EC2 keys or +OpenSSL::PKey::RSA+ for
-  # RSA keys, suitable for use with +OpenSSL::PKey#verify+.
+  # Returns an +OpenSSL::PKey::EC+ for EC2 keys, +OpenSSL::PKey::RSA+ for
+  # RSA keys, or an Ed25519 key for OKP keys, suitable for use with
+  # +OpenSSL::PKey#verify+.
   #
   # Raises +UnsupportedKeyTypeError+ if the key type, algorithm, or curve
   # is not supported.
   def to_openssl_key
     case [ key_type, algorithm ]
     when [ EC2, ES256 ] then build_ec2_es256_key
+    when [ OKP, EDDSA ] then build_okp_eddsa_key
     when [ RSA, RS256 ] then build_rsa_rs256_key
     else raise ActionPack::WebAuthn::UnsupportedKeyTypeError, "Unsupported COSE key type/algorithm: #{key_type}/#{algorithm}"
     end
@@ -114,6 +126,22 @@ class ActionPack::WebAuthn::CoseKey
       ])
 
       OpenSSL::PKey::EC.new(asn1.to_der)
+    end
+
+    def build_okp_eddsa_key
+      curve = parameters[OKP_CURVE_LABEL]
+      raise ActionPack::WebAuthn::UnsupportedKeyTypeError, "Unsupported OKP curve: #{curve}" unless curve == ED25519
+
+      x = parameters[OKP_X_LABEL]
+
+      asn1 = OpenSSL::ASN1::Sequence([
+        OpenSSL::ASN1::Sequence([
+          OpenSSL::ASN1::ObjectId("ED25519")
+        ]),
+        OpenSSL::ASN1::BitString(x)
+      ])
+
+      OpenSSL::PKey.read(asn1.to_der)
     end
 
     def build_rsa_rs256_key

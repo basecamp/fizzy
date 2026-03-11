@@ -57,8 +57,9 @@ class ActionPack::WebAuthn::Authenticator::AssertionResponse < ActionPack::WebAu
     def signature_must_be_valid
       client_data_hash = Digest::SHA256.digest(client_data_json)
       signed_data = authenticator_data.bytes.pack("C*") + client_data_hash
+      digest = credential.public_key.oid == "ED25519" ? nil : "SHA256"
 
-      unless credential.public_key.verify("SHA256", signature, signed_data)
+      unless credential.public_key.verify(digest, signature, signed_data)
         errors.add(:base, "Invalid signature")
       end
     rescue OpenSSL::PKey::PKeyError
