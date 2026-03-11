@@ -16,6 +16,57 @@ class Account::SubscriptionTest < ActiveSupport::TestCase
     assert_not Account::Subscription.new(plan_key: "free_v1", status: "active").paid?
   end
 
+  test "paid scope includes active paid subscriptions" do
+    subscription = Account::Subscription.create!(
+      account: accounts(:initech), plan_key: "monthly_v1", status: "active",
+      stripe_customer_id: "cus_paid"
+    )
+
+    assert_includes Account::Subscription.paid, subscription
+  end
+
+  test "paid scope includes trialing and past_due subscriptions" do
+    trialing = Account::Subscription.create!(
+      account: accounts(:initech), plan_key: "monthly_v1", status: "trialing",
+      stripe_customer_id: "cus_trialing"
+    )
+    past_due = Account::Subscription.create!(
+      account: accounts(:acme), plan_key: "monthly_extra_storage_v1", status: "past_due",
+      stripe_customer_id: "cus_past_due"
+    )
+
+    assert_includes Account::Subscription.paid, trialing
+    assert_includes Account::Subscription.paid, past_due
+  end
+
+  test "paid scope excludes free plan subscriptions" do
+    subscription = Account::Subscription.create!(
+      account: accounts(:initech), plan_key: "free_v1", status: "active",
+      stripe_customer_id: "cus_free"
+    )
+
+    assert_not_includes Account::Subscription.paid, subscription
+  end
+
+  test "paid scope excludes canceled subscriptions" do
+    subscription = Account::Subscription.create!(
+      account: accounts(:initech), plan_key: "monthly_v1", status: "canceled",
+      stripe_customer_id: "cus_canceled"
+    )
+
+    assert_not_includes Account::Subscription.paid, subscription
+  end
+
+  test "paid scope excludes comped accounts" do
+    subscription = Account::Subscription.create!(
+      account: accounts(:initech), plan_key: "monthly_v1", status: "active",
+      stripe_customer_id: "cus_comped"
+    )
+    Account::BillingWaiver.create!(account: accounts(:initech))
+
+    assert_not_includes Account::Subscription.paid, subscription
+  end
+
   test "pause pauses Stripe subscription with void behavior" do
     subscription = Account::Subscription.new(stripe_subscription_id: "sub_123")
 
