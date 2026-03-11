@@ -41,7 +41,6 @@ class ActionPack::Passkey < ApplicationRecord
     nil
   end
 
-
   def to_public_key_credential
     ActionPack::WebAuthn::PublicKeyCredential.new(
       id: credential_id,
