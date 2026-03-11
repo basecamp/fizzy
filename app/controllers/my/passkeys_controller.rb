@@ -1,5 +1,5 @@
 class My::PasskeysController < ApplicationController
-  include CurrentWebAuthnRequest
+  include ActionPack::Passkey::Request
 
   before_action :set_passkey, only: %i[ edit update destroy ]
 

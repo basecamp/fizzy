@@ -13,4 +13,10 @@ class ActionPack::Railtie < Rails::Railtie
       include ActionPack::Passkey::FormHelper
     end
   end
+
+  initializer "action_pack.passkey.request" do
+    ActiveSupport.on_load(:action_controller) do
+      require_relative "passkey/request"
+    end
+  end
 end

@@ -1,4 +1,4 @@
-module CurrentWebAuthnRequest
+module ActionPack::Passkey::Request
   extend ActiveSupport::Concern
 
   included do
