@@ -9,12 +9,14 @@ document.addEventListener("click", async (event) => {
   if (!form) return
 
   button.disabled = true
+  button.dispatchEvent(new CustomEvent("passkey:start", { bubbles: true }))
 
   try {
     const meta = document.querySelector('meta[name="passkey-creation-options"]')
     const creationOptions = JSON.parse(meta.content)
     const passkey = await register(creationOptions)
 
+    button.dispatchEvent(new CustomEvent("passkey:success", { bubbles: true }))
     fillCreateForm(form, passkey)
     form.submit()
   } catch (error) {
@@ -34,12 +36,14 @@ document.addEventListener("click", async (event) => {
   if (!form) return
 
   button.disabled = true
+  button.dispatchEvent(new CustomEvent("passkey:start", { bubbles: true }))
 
   try {
     const meta = document.querySelector('meta[name="passkey-request-options"]')
     const requestOptions = JSON.parse(meta.content)
     const passkey = await authenticate(requestOptions)
 
+    button.dispatchEvent(new CustomEvent("passkey:success", { bubbles: true }))
     fillSignInForm(form, passkey)
     form.submit()
   } catch (error) {
