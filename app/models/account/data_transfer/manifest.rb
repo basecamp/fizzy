@@ -26,25 +26,53 @@ class Account::DataTransfer::Manifest
       [
         Account::DataTransfer::AccountRecordSet.new(account),
         Account::DataTransfer::UserRecordSet.new(account),
-        *build_record_sets(::User::Settings, ::Tag, ::Board, ::Column),
+        *build_record_sets(
+          ::User::Settings,
+          ::Tag,
+          ::Board,
+          ::Column
+        ),
         Account::DataTransfer::EntropyRecordSet.new(account),
         *build_record_sets(
-          ::Board::Publication, ::Webhook, ::Access, ::Card, ::Comment, ::Step,
-          ::Assignment, ::Tagging, ::Closure, ::Card::Goldness, ::Card::NotNow,
-          ::Card::ActivitySpike, ::Watch, ::Pin, ::Reaction, ::Mention,
-          ::Filter, ::Webhook::DelinquencyTracker, ::Event,
-          ::Notification, ::Notification::Bundle, ::Webhook::Delivery
+          ::Board::Publication,
+          ::Webhook,
+          ::Access,
+          ::Card,
+          ::Comment,
+          ::Step,
+          ::Assignment,
+          ::Tagging,
+          ::Closure,
+          ::Card::Goldness,
+          ::Card::NotNow,
+          ::Card::ActivitySpike,
+          ::Watch,
+          ::Pin,
+          ::Reaction,
+          ::Mention,
+          ::Filter,
+          ::Webhook::DelinquencyTracker,
+          ::Event,
+          ::Notification,
+          ::Notification::Bundle,
+          ::Webhook::Delivery
         ),
         Account::DataTransfer::ActiveStorage::BlobRecordSet.new(account),
         *build_record_sets(::ActiveStorage::Attachment),
         Account::DataTransfer::ActionText::RichTextRecordSet.new(account),
         Account::DataTransfer::ActiveStorage::FileRecordSet.new(account)
-      ]
+      ].then { set_importable_model_names(it) }
     end
 
     def build_record_sets(*models)
       models.map do |model|
         Account::DataTransfer::RecordSet.new(account: account, model: model)
       end
+    end
+
+    def set_importable_model_names(record_sets)
+      model_names = record_sets.filter_map { |record_set| record_set.model&.name }
+      record_sets.each { |record_set| record_set.importable_model_names = model_names }
+      record_sets
     end
 end

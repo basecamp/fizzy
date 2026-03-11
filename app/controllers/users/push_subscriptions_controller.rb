@@ -1,16 +1,27 @@
 class Users::PushSubscriptionsController < ApplicationController
+  wrap_parameters :push_subscription, include: %i[ endpoint p256dh_key auth_key ]
+
   before_action :set_push_subscriptions
 
   def index
   end
 
   def create
-    @push_subscriptions.create_with(user_agent: request.user_agent).create_or_find_by!(push_subscription_params)
+    subscription = @push_subscriptions.create_with(user_agent: request.user_agent).create_or_find_by!(push_subscription_params)
+
+    respond_to do |format|
+      format.html { head :no_content }
+      format.json { head :created }
+    end
   end
 
   def destroy
     @push_subscriptions.destroy_by(id: params[:id])
-    redirect_to user_push_subscriptions_url
+
+    respond_to do |format|
+      format.html { redirect_to user_push_subscriptions_url }
+      format.json { head :no_content }
+    end
   end
 
   private

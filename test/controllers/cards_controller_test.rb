@@ -192,6 +192,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
 
     card = Card.last
     assert_equal card_path(card, format: :json), @response.headers["Location"]
+    assert_equal "My new card", @response.parsed_body["title"]
 
     assert_equal "My new card", card.title
     assert_equal "Big if true", card.description.to_plain_text

@@ -4,11 +4,21 @@ class Cards::ReadingsController < ApplicationController
   def create
     @notification = @card.read_by(Current.user)
     record_board_access
+
+    respond_to do |format|
+      format.turbo_stream
+      format.json { head :created }
+    end
   end
 
   def destroy
     @notification = @card.unread_by(Current.user)
     record_board_access
+
+    respond_to do |format|
+      format.turbo_stream
+      format.json { head :no_content }
+    end
   end
 
   private

@@ -20,6 +20,42 @@ class Users::PushSubscriptionsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Mozilla/5.0", users(:david).push_subscriptions.last.user_agent
   end
 
+  test "create as JSON" do
+    subscription_params = { "endpoint" => "https://fcm.googleapis.com/fcm/send/abc123", "p256dh_key" => "123", "auth_key" => "456" }
+
+    post user_push_subscriptions_path(users(:david)),
+      params: { push_subscription: subscription_params }, headers: { "HTTP_USER_AGENT" => "Mozilla/5.0" }, as: :json
+
+    assert_response :created
+  end
+
+  test "create as JSON for duplicate subscription" do
+    subscription_params = { "endpoint" => "https://fcm.googleapis.com/fcm/send/abc123", "p256dh_key" => "123", "auth_key" => "456" }
+
+    users(:david).push_subscriptions.create!(subscription_params)
+
+    assert_no_difference -> { Push::Subscription.count } do
+      post user_push_subscriptions_path(users(:david)),
+        params: { push_subscription: subscription_params }, as: :json
+    end
+
+    assert_response :created
+  end
+
+  test "destroy as JSON" do
+    subscription = users(:david).push_subscriptions.create!(
+      endpoint: "https://fcm.googleapis.com/fcm/send/abc123",
+      p256dh_key: "123",
+      auth_key: "456"
+    )
+
+    assert_difference -> { Push::Subscription.count }, -1 do
+      delete user_push_subscription_path(users(:david), subscription), as: :json
+    end
+
+    assert_response :no_content
+  end
+
   test "destroy a push subscription" do
     subscription = users(:david).push_subscriptions.create!(
       endpoint: "https://fcm.googleapis.com/fcm/send/abc123",

@@ -4,11 +4,17 @@ class Cards::PublishesController < ApplicationController
   def create
     @card.publish
 
-    if add_another_param?
-      card = @board.cards.create!(status: :drafted)
-      redirect_to card_draft_path(card), notice: "Card added"
-    else
-      redirect_to @card.board
+    respond_to do |format|
+      format.html do
+        if add_another_param?
+          card = @board.cards.create!(status: :drafted)
+          redirect_to card_draft_path(card), notice: "Card added"
+        else
+          redirect_to @card.board
+        end
+      end
+
+      format.json { head :created }
     end
   end
 

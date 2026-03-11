@@ -15,7 +15,7 @@ export default class extends Controller {
 
   submit() {
     if (this.inputTarget.disabled) return
-    this.element.submit()
+    this.element.requestSubmit()
     this.inputTarget.disabled = true
   }
 }

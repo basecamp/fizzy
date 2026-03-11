@@ -13,6 +13,7 @@ class Account::DataTransfer::ActiveStorage::BlobRecordSet < Account::DataTransfe
         data = load(file)
         data.slice(*attributes).merge(
           "account_id" => account.id,
+          "key" => ::ActiveStorage::Blob.generate_unique_secure_token(length: ::ActiveStorage::Blob::MINIMUM_TOKEN_LENGTH),
           "service_name" => ::ActiveStorage::Blob.service.name
         )
       end

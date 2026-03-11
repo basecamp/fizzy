@@ -42,6 +42,20 @@ class Board::PublishableTest < ActiveSupport::TestCase
     end
   end
 
+  test "touch board when publication is created" do
+    assert_changes -> { boards(:writebook).reload.updated_at } do
+      boards(:writebook).publish
+    end
+  end
+
+  test "touch board when publication is destroyed" do
+    boards(:writebook).publish
+
+    assert_changes -> { boards(:writebook).reload.updated_at } do
+      boards(:writebook).unpublish
+    end
+  end
+
   test "publish doesn't create duplicate publications" do
     boards(:writebook).publish
     original_publication = boards(:writebook).publication

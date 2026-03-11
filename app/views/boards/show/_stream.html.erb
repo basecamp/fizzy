@@ -12,7 +12,7 @@
   </div>
   <div class="cards__list hide-scrollbar" data-drag-drop-item-container>
     <% if page.used? %>
-      <%= with_automatic_pagination "maybe", @page do %>
+      <%= with_automatic_pagination "maybe", page do %>
         <%= render "cards/display/previews", cards: page.records, draggable: true %>
       <% end %>
     <% end %>

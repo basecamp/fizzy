@@ -25,9 +25,11 @@ class My::AccessTokensControllerTest < ActionDispatch::IntegrationTest
     end
     assert_response :created
     body = @response.parsed_body
+    assert body["id"].present?
     assert body["token"].present?
     assert_equal "Fizzy CLI", body["description"]
     assert_equal "write", body["permission"]
+    assert body["created_at"].present?
   end
 
   test "create new token via JSON with bearer token" do
@@ -52,6 +54,36 @@ class My::AccessTokensControllerTest < ActionDispatch::IntegrationTest
       post my_access_tokens_path, params: { access_token: { description: "Fizzy CLI", permission: "read" } }, env: bearer_token, as: :json
     end
     assert_response :unauthorized
+  end
+
+  test "index as JSON" do
+    get my_access_tokens_path, as: :json
+    assert_response :success
+
+    body = @response.parsed_body
+    assert_kind_of Array, body
+  end
+
+  test "index as JSON with bearer token and no account scope" do
+    sign_out
+    bearer_token = { "HTTP_AUTHORIZATION" => "Bearer #{identity_access_tokens(:davids_api_token).token}" }
+
+    untenanted do
+      get my_access_tokens_path, as: :json, env: bearer_token
+    end
+
+    assert_response :success
+    assert_kind_of Array, @response.parsed_body
+  end
+
+  test "destroy as JSON" do
+    token = identities(:kevin).access_tokens.create!(description: "To delete", permission: "read")
+
+    assert_difference -> { identities(:kevin).access_tokens.count }, -1 do
+      delete my_access_token_path(token), as: :json
+    end
+
+    assert_response :no_content
   end
 
   test "accessing new token after reveal window redirects to index" do

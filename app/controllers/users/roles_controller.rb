@@ -1,10 +1,16 @@
 class Users::RolesController < ApplicationController
+  wrap_parameters :user, include: %i[ role ]
+
   before_action :set_user
   before_action :ensure_permission_to_administer_user
 
   def update
     @user.update!(role_params)
-    redirect_to account_settings_path
+
+    respond_to do |format|
+      format.html { redirect_to account_settings_path }
+      format.json { head :no_content }
+    end
   end
 
   private

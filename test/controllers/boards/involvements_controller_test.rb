@@ -15,4 +15,15 @@ class Boards::InvolvementsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
   end
+
+  test "update as JSON" do
+    board = boards(:writebook)
+    board.access_for(users(:kevin)).access_only!
+
+    assert_changes -> { board.access_for(users(:kevin)).involvement }, from: "access_only", to: "watching" do
+      put board_involvement_path(board), params: { involvement: "watching" }, as: :json
+    end
+
+    assert_response :no_content
+  end
 end

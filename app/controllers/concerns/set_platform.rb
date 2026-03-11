@@ -7,6 +7,6 @@ module SetPlatform
 
   private
     def platform
-      @platform ||= ApplicationPlatform.new(request.user_agent)
+      @platform ||= ApplicationPlatform.new(cookies[:x_user_agent].presence || request.user_agent)
     end
 end
