@@ -1,44 +1,66 @@
 require "test_helper"
 
 class ActionPack::WebAuthn::CoseKeyTest < ActiveSupport::TestCase
-  setup do
-    # Generate a real EC key for valid test data
-    ec_key = OpenSSL::PKey::EC.generate("prime256v1")
-    public_key_bn = ec_key.public_key.to_bn
-    public_key_bytes = public_key_bn.to_s(2)
-    # Skip the 0x04 uncompressed point prefix
-    @ec2_x = public_key_bytes[1, 32]
-    @ec2_y = public_key_bytes[33, 32]
+  # All CBOR data generated with Python cbor2 v5.8.0
 
+  # EC2/ES256 P-256 public key (32-byte x and y coordinates)
+  EC2_X = ["2ba472104c686f39d4b623cc9324953e7053b47cae818e8cf774203a4f51af71"].pack("H*")
+  EC2_Y = ["69cb8ac519bdd929e2bdbe79e9f9b8d14c2d89a7cbd324647a1ccd68b8de3ca0"].pack("H*")
+
+  # CBOR: {1: 2, 3: -7, -1: 1, -2: <x 32 bytes>, -3: <y 32 bytes>}
+  EC2_CBOR = ["a50102032620012158202ba472104c686f39d4b623cc9324953e7053b47cae81" \
+    "8e8cf774203a4f51af7122582069cb8ac519bdd929e2bdbe79e9f9b8d14c2d89a7cbd324" \
+    "647a1ccd68b8de3ca0"].pack("H*")
+
+  # Ed25519 public key (32 bytes)
+  ED25519_X = ["a95ee02872a2c5224b394832767bea746620e50776e845872228716065f16005"].pack("H*")
+
+  # CBOR: {1: 1, 3: -8, -1: 6, -2: <x 32 bytes>}
+  OKP_CBOR = ["a4010103272006215820a95ee02872a2c5224b394832767bea746620e50776e8" \
+    "45872228716065f16005"].pack("H*")
+
+  # RSA 2048-bit public key (256-byte modulus, 3-byte exponent 65537)
+  RSA_N = ["d388adb3aa7812402281c57ce870821b17558f0a247a771834892d85399ecd4f" \
+    "830dd35f65e7afe5030d9ee10f4873567039976486202cce8ac499114194d32fe615026e" \
+    "7eeee5b2ff564041d68b9b33c35a2ac17210c69c9e85fa74249b06e4ffa6b38ff5ef54e" \
+    "1860aa59a6fb043e2b65ecf0ce8d0ff90d25683ca2da016618308f3fa7f74efc178ec46" \
+    "e0224f10cf0eed7d46cc6167210f088cc6b77fc08a7fcd14536aa9c726519806a96ea00" \
+    "517ce1ed1336ae6962338a6c4cc4754d953ebbffb5d6b1bc76368b552b628adb788b0bc" \
+    "9f895dff6b1c74d79ce210b5941995beb1f498a1e9123666bdc92bc6b0f2a04fdb40cf1" \
+    "d253ba1582673ec293113"].pack("H*")
+  RSA_E = ["010001"].pack("H*")
+
+  # CBOR: {1: 3, 3: -257, -1: <n 256 bytes>, -2: <e 3 bytes>}
+  RSA_CBOR = ["a401030339010020590100d388adb3aa7812402281c57ce870821b17558f0a24" \
+    "7a771834892d85399ecd4f830dd35f65e7afe5030d9ee10f4873567039976486202cce8a" \
+    "c499114194d32fe615026e7eeee5b2ff564041d68b9b33c35a2ac17210c69c9e85fa742" \
+    "49b06e4ffa6b38ff5ef54e1860aa59a6fb043e2b65ecf0ce8d0ff90d25683ca2da01661" \
+    "8308f3fa7f74efc178ec46e0224f10cf0eed7d46cc6167210f088cc6b77fc08a7fcd145" \
+    "36aa9c726519806a96ea00517ce1ed1336ae6962338a6c4cc4754d953ebbffb5d6b1bc7" \
+    "6368b552b628adb788b0bc9f895dff6b1c74d79ce210b5941995beb1f498a1e9123666b" \
+    "dc92bc6b0f2a04fdb40cf1d253ba1582673ec2931132143010001"].pack("H*")
+
+  setup do
     @ec2_parameters = {
       1 => 2,    # kty: EC2
       3 => -7,   # alg: ES256
       -1 => 1,   # crv: P-256
-      -2 => @ec2_x,
-      -3 => @ec2_y
+      -2 => EC2_X,
+      -3 => EC2_Y
     }
-
-    # Generate a real RSA key for valid test data
-    rsa_key = OpenSSL::PKey::RSA.new(2048)
-    @rsa_n = rsa_key.n.to_s(2)
-    @rsa_e = rsa_key.e.to_s(2)
 
     @rsa_parameters = {
       1 => 3,     # kty: RSA
       3 => -257,  # alg: RS256
-      -1 => @rsa_n,
-      -2 => @rsa_e
+      -1 => RSA_N,
+      -2 => RSA_E
     }
-
-    # Generate a real Ed25519 key for valid test data
-    ed25519_key = OpenSSL::PKey.generate_key("ED25519")
-    @ed25519_x = ed25519_key.raw_public_key
 
     @okp_parameters = {
       1 => 1,    # kty: OKP
       3 => -8,   # alg: EdDSA
       -1 => 6,   # crv: Ed25519
-      -2 => @ed25519_x
+      -2 => ED25519_X
     }
   end
 
@@ -55,24 +77,21 @@ class ActionPack::WebAuthn::CoseKeyTest < ActiveSupport::TestCase
   end
 
   test "decodes EC2/ES256 key from CBOR" do
-    cbor = encode_cbor(@ec2_parameters)
-    key = ActionPack::WebAuthn::CoseKey.decode(cbor)
+    key = ActionPack::WebAuthn::CoseKey.decode(EC2_CBOR)
 
     assert_equal 2, key.key_type
     assert_equal(-7, key.algorithm)
   end
 
   test "decodes OKP/EdDSA key from CBOR" do
-    cbor = encode_cbor(@okp_parameters)
-    key = ActionPack::WebAuthn::CoseKey.decode(cbor)
+    key = ActionPack::WebAuthn::CoseKey.decode(OKP_CBOR)
 
     assert_equal 1, key.key_type
     assert_equal(-8, key.algorithm)
   end
 
   test "decodes RSA/RS256 key from CBOR" do
-    cbor = encode_cbor(@rsa_parameters)
-    key = ActionPack::WebAuthn::CoseKey.decode(cbor)
+    key = ActionPack::WebAuthn::CoseKey.decode(RSA_CBOR)
 
     assert_equal 3, key.key_type
     assert_equal(-257, key.algorithm)
@@ -236,48 +255,4 @@ class ActionPack::WebAuthn::CoseKeyTest < ActiveSupport::TestCase
     assert_match(/at least 2048 bits/i, error.message)
   end
 
-  private
-    def encode_cbor(hash)
-      # CBOR map encoding
-      bytes = [ 0xa0 + hash.size ] # map with n items
-
-      hash.each do |key, value|
-        bytes.concat(encode_cbor_integer(key))
-        bytes.concat(encode_cbor_value(value))
-      end
-
-      bytes.pack("C*")
-    end
-
-    def encode_cbor_integer(int)
-      if int >= 0 && int <= 23
-        [ int ]
-      elsif int >= 0 && int <= 255
-        [ 0x18, int ]
-      elsif int >= -24 && int < 0
-        [ 0x20 - int - 1 ]
-      elsif int >= -256 && int < -24
-        [ 0x38, -int - 1 ]
-      else
-        # 16-bit negative integer
-        val = -int - 1
-        [ 0x39, (val >> 8) & 0xff, val & 0xff ]
-      end
-    end
-
-    def encode_cbor_value(value)
-      case value
-      when Integer
-        encode_cbor_integer(value)
-      when String
-        length = value.bytesize
-        if length <= 23
-          [ 0x40 + length, *value.bytes ]
-        elsif length <= 255
-          [ 0x58, length, *value.bytes ]
-        else
-          [ 0x59, (length >> 8) & 0xff, length & 0xff, *value.bytes ]
-        end
-      end
-    end
 end
