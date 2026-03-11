@@ -13,7 +13,7 @@ namespace :saas do
     CSV.open(output_path, "w") do |csv|
       csv << [ "Queenbee ID", "Account Name", "Sign Up Date", "Paid Date", "Comped", "Card Count", "Storage Used (Bytes)", "Last Active" ]
 
-      Account.active.find_each do |account|
+      Account.active.includes(:storage_total).find_each do |account|
         subscription = paid_subscriptions[account.id]
 
         csv << [
