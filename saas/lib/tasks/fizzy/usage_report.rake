@@ -5,9 +5,7 @@ namespace :saas do
   task usage_report: :environment do
     output_path = Rails.root.join("tmp/usage_report.csv")
 
-    paid_subscriptions = Account::Subscription.paid
-      .group_by(&:account_id)
-      .transform_values { |subs| subs.min_by { |s| [ s.created_at, s.id ] } }
+    paid_dates = Account::Subscription.paid.group(:account_id).minimum(:created_at)
     comped_account_ids = Account::BillingWaiver.pluck(:account_id).to_set
 
     CSV.open(output_path, "w") do |csv|
@@ -18,13 +16,11 @@ namespace :saas do
           .group(:account_id).maximum(:last_active_at)
 
         batch.each do |account|
-          subscription = paid_subscriptions[account.id]
-
           csv << [
             account.external_account_id,
             account.name,
             account.created_at.to_date,
-            subscription&.created_at&.to_date,
+            paid_dates[account.id]&.to_date,
             comped_account_ids.include?(account.id),
             account.cards_count,
             account.bytes_used,
