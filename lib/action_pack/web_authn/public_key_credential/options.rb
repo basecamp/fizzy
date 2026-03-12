@@ -7,6 +7,7 @@ class ActionPack::WebAuthn::PublicKeyCredential::Options
 
   attribute :user_verification, default: :preferred
   attribute :relying_party, default: -> { ActionPack::WebAuthn.relying_party }
+  attribute :challenge_expiration
 
   validates :user_verification, inclusion: { in: USER_VERIFICATION_OPTIONS }
 
@@ -26,14 +27,21 @@ class ActionPack::WebAuthn::PublicKeyCredential::Options
     "#<#{self.class.name} #{attributes_string}>"
   end
 
-  # Returns a Base64URL-encoded random challenge. The challenge is generated
-  # once and memoized for the lifetime of this object.
+  # Returns a Base64URL-encoded signed challenge containing a random nonce and
+  # an embedded timestamp. The challenge is generated once and memoized for the
+  # lifetime of this object.
   #
-  # The challenge must be stored server-side and verified when the client
-  # responds, to prevent replay attacks.
+  # The timestamp allows the server to reject stale challenges. The expiration
+  # window is configurable per-ceremony via
+  # +config.action_pack.web_authn.creation_challenge_expiration+ and
+  # +config.action_pack.web_authn.request_challenge_expiration+, or per-instance
+  # via the +challenge_expiration+ attribute.
   def challenge
     @challenge ||= Base64.urlsafe_encode64(
-      SecureRandom.random_bytes(CHALLENGE_LENGTH),
+      ActionPack::WebAuthn.challenge_verifier.generate(
+        Base64.strict_encode64(SecureRandom.random_bytes(CHALLENGE_LENGTH)),
+        expires_in: challenge_expiration
+      ),
       padding: false
     )
   end

@@ -12,18 +12,24 @@
 # meta tag options, calls the browser WebAuthn API, and fills in the hidden fields before
 # submitting the form.
 module ActionPack::Passkey::FormHelper
-  # Renders a +<meta>+ tag containing JSON-serialized creation options for the WebAuthn
-  # registration ceremony. The companion Stimulus controller reads this tag to call
+  # Renders +<meta>+ tags containing JSON-serialized creation options and the challenge endpoint
+  # URL for the WebAuthn registration ceremony. The companion JavaScript reads these tags to call
   # +navigator.credentials.create()+.
-  def passkey_creation_options_meta_tag(creation_options)
-    tag.meta(name: "passkey-creation-options", content: creation_options.to_json)
+  def passkey_creation_options_meta_tag(creation_options, **challenge_url_options)
+    safe_join([
+      passkey_challenge_url_meta_tag(**challenge_url_options),
+      tag.meta(name: "passkey-creation-options", content: creation_options.to_json)
+    ])
   end
 
-  # Renders a +<meta>+ tag containing JSON-serialized request options for the WebAuthn
-  # authentication ceremony. The companion Stimulus controller reads this tag to call
-  # +navigator.credentials.get()+.
-  def passkey_request_options_meta_tag(request_options)
-    tag.meta(name: "passkey-request-options", content: request_options.to_json)
+  # Renders +<meta>+ tags containing JSON-serialized request options and the challenge endpoint
+  # URL for the WebAuthn authentication ceremony. The companion JavaScript reads these tags to
+  # call +navigator.credentials.get()+.
+  def passkey_request_options_meta_tag(request_options, **challenge_url_options)
+    safe_join([
+      passkey_challenge_url_meta_tag(**challenge_url_options),
+      tag.meta(name: "passkey-request-options", content: request_options.to_json)
+    ])
   end
 
   # Renders a form with hidden fields for the passkey registration ceremony. The form POSTs to
@@ -77,4 +83,9 @@ module ActionPack::Passkey::FormHelper
       ])
     end
   end
+
+  private
+    def passkey_challenge_url_meta_tag(**url_options)
+      tag.meta(name: "passkey-challenge-url", content: passkey_challenge_path(**url_options))
+    end
 end

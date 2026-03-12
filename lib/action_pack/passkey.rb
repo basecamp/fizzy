@@ -9,11 +9,10 @@
 # response:
 #
 #   options = ActionPack::Passkey.creation_options(holder: current_user)
-#   # Store options.challenge in the session, pass options to the browser
+#   # Pass options to the browser
 #
 #   passkey = ActionPack::Passkey.register(
 #     passkey: params[:passkey],
-#     challenge: session[:challenge],
 #     holder: current_user
 #   )
 #
@@ -23,12 +22,9 @@
 # response:
 #
 #   options = ActionPack::Passkey.request_options
-#   # Store options.challenge in the session, pass options to the browser
+#   # Pass options to the browser
 #
-#   passkey = ActionPack::Passkey.authenticate(
-#     passkey: params[:passkey],
-#     challenge: session[:challenge]
-#   )
+#   passkey = ActionPack::Passkey.authenticate(passkey: params[:passkey])
 #
 # == Holder integration
 #
@@ -55,12 +51,13 @@ class ActionPack::Passkey < ApplicationRecord
 
     # Verifies the attestation response from the browser and persists a new passkey record.
     # The +passkey+ hash should contain +client_data_json+, +attestation_object+, and +transports+
-    # as submitted by the registration form. The +challenge+ must match the one from the
-    # CreationOptions stored in the session. Any additional +attributes+ (e.g. +holder+) are
-    # passed through to +create!+.
+    # as submitted by the registration form. The +challenge+ defaults to
+    # +ActionPack::WebAuthn::Current.challenge+, which is automatically populated from the session
+    # by ActionPack::Passkey::Request. Any additional +attributes+ (e.g. +holder+) are passed
+    # through to +create!+.
     #
     # Raises ActionPack::WebAuthn::InvalidResponseError if the attestation is invalid.
-    def register(passkey:, challenge:, **attributes)
+    def register(passkey:, challenge: ActionPack::WebAuthn::Current.challenge, **attributes)
       credential = ActionPack::WebAuthn::PublicKeyCredential.register(passkey, challenge: challenge)
 
       create!(**credential.to_h, **attributes)
@@ -81,7 +78,7 @@ class ActionPack::Passkey < ApplicationRecord
     # Looks up a passkey by credential ID and verifies the assertion response from the browser.
     # Returns the authenticated Passkey record, or +nil+ if the credential is not found or
     # verification fails.
-    def authenticate(passkey:, challenge:)
+    def authenticate(passkey:, challenge: ActionPack::WebAuthn::Current.challenge)
       find_by(credential_id: passkey[:id])&.authenticate(passkey: passkey, challenge: challenge)
     end
   end
@@ -89,7 +86,7 @@ class ActionPack::Passkey < ApplicationRecord
   # Verifies the assertion response against this passkey's stored credential and updates the
   # +sign_count+ and +backed_up+ attributes. Returns +self+ on success, or +nil+ if the
   # response is invalid.
-  def authenticate(passkey:, challenge:)
+  def authenticate(passkey:, challenge: ActionPack::WebAuthn::Current.challenge)
     credential = to_public_key_credential
     credential.authenticate(passkey, challenge: challenge)
     update!(sign_count: credential.sign_count, backed_up: credential.backed_up)

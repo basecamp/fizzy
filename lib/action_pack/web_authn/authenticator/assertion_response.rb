@@ -17,7 +17,7 @@
 #     authenticator_data: params[:response][:authenticatorData],
 #     signature: params[:response][:signature],
 #     credential: credential.to_public_key_credential,
-#     challenge: session[:authentication_challenge],
+#     challenge: ActionPack::WebAuthn::Current.challenge,
 #     origin: "https://example.com"
 #   )
 #

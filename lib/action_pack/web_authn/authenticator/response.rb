@@ -23,7 +23,7 @@
 #     authenticator_data: authenticator_data,
 #     signature: signature,
 #     credential: credential,
-#     challenge: session[:webauthn_challenge],
+#     challenge: ActionPack::WebAuthn::Current.challenge,
 #     origin: "https://example.com",
 #     user_verification: :required
 #   )
@@ -37,6 +37,7 @@ class ActionPack::WebAuthn::Authenticator::Response
   attr_accessor :challenge, :origin, :user_verification
 
   validate :challenge_must_match
+  validate :challenge_must_not_be_expired
   validate :origin_must_match
   validate :must_not_be_cross_origin
   validate :must_not_have_token_binding
@@ -80,6 +81,18 @@ class ActionPack::WebAuthn::Authenticator::Response
       elsif !ActiveSupport::SecurityUtils.secure_compare(challenge.to_s, client_data["challenge"].to_s)
         errors.add(:base, "Challenge does not match")
       end
+    end
+
+    def challenge_must_not_be_expired
+      return if errors.any? || challenge.blank?
+
+      signed_message = Base64.urlsafe_decode64(challenge)
+
+      unless ActionPack::WebAuthn.challenge_verifier.verified(signed_message)
+        errors.add(:base, "Challenge has expired")
+      end
+    rescue ArgumentError
+      errors.add(:base, "Challenge is invalid")
     end
 
     def origin_must_match

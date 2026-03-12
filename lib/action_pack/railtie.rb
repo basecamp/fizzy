@@ -6,6 +6,24 @@ class ActionPack::Railtie < Rails::Railtie
   config.action_pack.web_authn = ActiveSupport::OrderedOptions.new
   config.action_pack.web_authn.default_request_options = {}
   config.action_pack.web_authn.default_creation_options = {}
+  config.action_pack.web_authn.creation_challenge_expiration = 10.minutes
+  config.action_pack.web_authn.request_challenge_expiration = 5.minutes
+
+  config.action_pack.passkey = ActiveSupport::OrderedOptions.new
+  config.action_pack.passkey.routes_prefix = "/rails/action_pack/passkey"
+  config.action_pack.passkey.draw_routes = true
+
+  initializer "action_pack.passkey.routes" do |app|
+    passkey_config = config.action_pack.passkey
+
+    app.routes.prepend do
+      if passkey_config.draw_routes
+        scope passkey_config.routes_prefix, as: :passkey do
+          post "/challenge" => "action_pack/passkey/challenges#create", as: :challenge
+        end
+      end
+    end
+  end
 
   initializer "action_pack.passkey.form_helper" do
     ActiveSupport.on_load(:action_view) do

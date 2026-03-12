@@ -10,6 +10,10 @@ module ActionPack::WebAuthn
       RelyingParty.new
     end
 
+    def challenge_verifier
+      Rails.application.message_verifier("action_pack.webauthn.challenge")
+    end
+
     def attestation_verifiers
       @attestation_verifiers ||= {
         "none" => Authenticator::AttestationVerifiers::None.new

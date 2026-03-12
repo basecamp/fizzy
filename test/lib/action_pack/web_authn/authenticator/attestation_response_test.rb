@@ -32,10 +32,12 @@ class ActionPack::WebAuthn::Authenticator::AttestationResponseTest < ActiveSuppo
     "c686f39d4b623cc9324953e7053b47cae818e8cf774203a4f51af7122582069cb8ac519b" \
     "dd929e2bdbe79e9f9b8d14c2d89a7cbd324647a1ccd68b8de3ca0" ].pack("H*")
 
+  include WebauthnTestHelper
+
   setup do
     ActionPack::WebAuthn::Current.host = "example.com"
 
-    @challenge = "test-challenge-123"
+    @challenge = webauthn_challenge
     @origin = "https://example.com"
     @client_data_json = {
       challenge: @challenge,

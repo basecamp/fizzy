@@ -1,6 +1,8 @@
 require "test_helper"
 
 class My::PasskeysControllerTest < ActionDispatch::IntegrationTest
+  include WebauthnTestHelper
+
   setup do
     sign_in_as :kevin
   end
@@ -11,8 +13,7 @@ class My::PasskeysControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "register a passkey" do
-    get my_passkeys_path
-    challenge = session[:webauthn_challenge]
+    challenge = request_webauthn_challenge
 
     assert_difference -> { identities(:kevin).passkeys.count }, 1 do
       post my_passkeys_path, params: build_attestation_params(challenge: challenge)

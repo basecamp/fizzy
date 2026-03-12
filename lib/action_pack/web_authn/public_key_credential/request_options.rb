@@ -25,6 +25,7 @@
 #   +ActionPack::WebAuthn.relying_party+.
 class ActionPack::WebAuthn::PublicKeyCredential::RequestOptions < ActionPack::WebAuthn::PublicKeyCredential::Options
   attribute :credentials, default: -> { [] }
+  attribute :challenge_expiration, default: -> { Rails.configuration.action_pack.web_authn.request_challenge_expiration }
 
   def initialize(attributes = {})
     super

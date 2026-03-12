@@ -9,7 +9,7 @@
 #   response = ActionPack::WebAuthn::Authenticator::AttestationResponse.new(
 #     client_data_json: params[:response][:clientDataJSON],
 #     attestation_object: params[:response][:attestationObject],
-#     challenge: session[:registration_challenge],
+#     challenge: ActionPack::WebAuthn::Current.challenge,
 #     origin: "https://example.com"
 #   )
 #

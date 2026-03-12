@@ -1,4 +1,4 @@
-class CreateIdentityCredentials < ActiveRecord::Migration[8.2]
+class CreateActionPackPasskeys < ActiveRecord::Migration[8.2]
   def change
     create_table :action_pack_passkeys, id: :uuid do |t|
       t.uuid :holder_id, null: false

@@ -1,6 +1,8 @@
 require "test_helper"
 
 class Sessions::PasskeysControllerTest < ActionDispatch::IntegrationTest
+  include WebauthnTestHelper
+
   setup do
     @identity = identities(:kevin)
 
@@ -15,8 +17,7 @@ class Sessions::PasskeysControllerTest < ActionDispatch::IntegrationTest
 
   test "successful authentication" do
     untenanted do
-      get new_session_url
-      challenge = session[:webauthn_challenge]
+      challenge = request_webauthn_challenge
 
       post session_passkey_url, params: build_assertion_params(challenge: challenge, credential: @credential)
 
@@ -28,8 +29,7 @@ class Sessions::PasskeysControllerTest < ActionDispatch::IntegrationTest
 
   test "updates sign count" do
     untenanted do
-      get new_session_url
-      challenge = session[:webauthn_challenge]
+      challenge = request_webauthn_challenge
 
       post session_passkey_url, params: build_assertion_params(challenge: challenge, credential: @credential, sign_count: 1)
 
@@ -39,8 +39,7 @@ class Sessions::PasskeysControllerTest < ActionDispatch::IntegrationTest
 
   test "rejects invalid signature" do
     untenanted do
-      get new_session_url
-      challenge = session[:webauthn_challenge]
+      challenge = request_webauthn_challenge
 
       params = build_assertion_params(challenge: challenge, credential: @credential)
       params[:passkey][:signature] = Base64.urlsafe_encode64("invalid", padding: false)
@@ -55,7 +54,7 @@ class Sessions::PasskeysControllerTest < ActionDispatch::IntegrationTest
 
   test "rejects unknown credential" do
     untenanted do
-      get new_session_url
+      request_webauthn_challenge
 
       post session_passkey_url, params: {
         passkey: {
@@ -73,8 +72,7 @@ class Sessions::PasskeysControllerTest < ActionDispatch::IntegrationTest
 
   test "successful authentication via JSON" do
     untenanted do
-      get new_session_url
-      challenge = session[:webauthn_challenge]
+      challenge = request_webauthn_challenge
 
       post session_passkey_url(format: :json), params: build_assertion_params(challenge: challenge, credential: @credential)
 
@@ -85,7 +83,7 @@ class Sessions::PasskeysControllerTest < ActionDispatch::IntegrationTest
 
   test "failed authentication via JSON" do
     untenanted do
-      get new_session_url
+      request_webauthn_challenge
 
       post session_passkey_url(format: :json), params: {
         passkey: {

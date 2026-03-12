@@ -18,6 +18,7 @@ document.addEventListener("click", async (event) => {
     if (!meta) throw new Error("Missing passkey creation options")
 
     const creationOptions = JSON.parse(meta.content)
+    await refreshChallenge(creationOptions)
     const passkey = await register(creationOptions)
 
     button.dispatchEvent(new CustomEvent("passkey:success", { bubbles: true }))
@@ -49,6 +50,7 @@ document.addEventListener("click", async (event) => {
     if (!meta) throw new Error("Missing passkey request options")
 
     const requestOptions = JSON.parse(meta.content)
+    await refreshChallenge(requestOptions)
     const passkey = await authenticate(requestOptions)
 
     button.dispatchEvent(new CustomEvent("passkey:success", { bubbles: true }))
@@ -72,6 +74,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!meta) return
 
   const publicKey = JSON.parse(meta.content)
+  await refreshChallenge(publicKey)
 
   try {
     const passkey = await authenticate(publicKey, { mediation: "conditional" })
@@ -84,6 +87,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 })
+
+async function refreshChallenge(options) {
+  const url = document.querySelector('meta[name="passkey-challenge-url"]')?.content
+  if (!url) throw new Error("Missing passkey challenge URL")
+  const token = document.querySelector('meta[name="csrf-token"]')?.content
+
+  const response = await fetch(url, {
+    method: "POST",
+    credentials: "same-origin",
+    headers: {
+      "X-CSRF-Token": token,
+      "Accept": "application/json"
+    }
+  })
+
+  if (!response.ok) throw new Error("Failed to refresh challenge")
+
+  const { challenge } = await response.json()
+  options.challenge = challenge
+}
 
 function fillCreateForm(form, passkey) {
   form.querySelector('[data-passkey-field="client_data_json"]').value = passkey.client_data_json

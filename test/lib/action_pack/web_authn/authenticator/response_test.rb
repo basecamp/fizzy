@@ -1,10 +1,12 @@
 require "test_helper"
 
 class ActionPack::WebAuthn::Authenticator::ResponseTest < ActiveSupport::TestCase
+  include WebauthnTestHelper
+
   setup do
     ActionPack::WebAuthn::Current.host = "example.com"
 
-    @challenge = "test-challenge-123"
+    @challenge = webauthn_challenge
     @origin = "https://example.com"
     @client_data_json = {
       challenge: @challenge,

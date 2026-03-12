@@ -6,14 +6,10 @@ class My::PasskeysController < ApplicationController
   def index
     @passkeys = Current.identity.passkeys.order(name: :asc, created_at: :desc)
     @creation_options = ActionPack::Passkey.creation_options(holder: Current.identity)
-    session[:webauthn_challenge] = @creation_options.challenge
   end
 
   def create
-    passkey = Current.identity.passkeys.register(
-      passkey: passkey_params,
-      challenge: session.delete(:webauthn_challenge)
-    )
+    passkey = Current.identity.passkeys.register(passkey: passkey_params)
 
     redirect_to edit_my_passkey_path(passkey, created: true)
   end

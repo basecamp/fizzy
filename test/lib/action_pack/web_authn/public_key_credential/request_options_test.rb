@@ -22,9 +22,12 @@ class ActionPack::WebAuthn::PublicKeyCredential::RequestOptionsTest < ActiveSupp
     assert_match(/\A[A-Za-z0-9_-]+\z/, @options.challenge)
   end
 
-  test "generates challenge of correct length" do
-    decoded = Base64.urlsafe_decode64(@options.challenge)
-    assert_equal 32, decoded.bytesize
+  test "generates signed challenge containing nonce" do
+    signed_message = Base64.urlsafe_decode64(@options.challenge)
+    nonce = ActionPack::WebAuthn.challenge_verifier.verified(signed_message)
+
+    assert_not_nil nonce
+    assert_equal 32, Base64.strict_decode64(nonce).bytesize
   end
 
   test "as_json" do
