@@ -7,29 +7,21 @@
 # - +create_passkey_button+ — render a form with hidden fields for the registration ceremony.
 # - +sign_in_with_passkey_button+ — render a form with hidden fields for the authentication
 #   ceremony.
-#
-# These helpers are designed to pair with a Stimulus controller (or similar) that reads the
-# meta tag options, calls the browser WebAuthn API, and fills in the hidden fields before
-# submitting the form.
 module ActionPack::Passkey::FormHelper
   # Renders +<meta>+ tags containing JSON-serialized creation options and the challenge endpoint
   # URL for the WebAuthn registration ceremony. The companion JavaScript reads these tags to call
   # +navigator.credentials.create()+.
   def passkey_creation_options_meta_tag(creation_options, **challenge_url_options)
-    safe_join([
-      passkey_challenge_url_meta_tag(**challenge_url_options),
+    passkey_challenge_url_meta_tag(**challenge_url_options) +
       tag.meta(name: "passkey-creation-options", content: creation_options.to_json)
-    ])
   end
 
   # Renders +<meta>+ tags containing JSON-serialized request options and the challenge endpoint
   # URL for the WebAuthn authentication ceremony. The companion JavaScript reads these tags to
   # call +navigator.credentials.get()+.
   def passkey_request_options_meta_tag(request_options, **challenge_url_options)
-    safe_join([
-      passkey_challenge_url_meta_tag(**challenge_url_options),
+    passkey_challenge_url_meta_tag(**challenge_url_options) +
       tag.meta(name: "passkey-request-options", content: request_options.to_json)
-    ])
   end
 
   # Renders a form with hidden fields for the passkey registration ceremony. The form POSTs to
@@ -46,19 +38,17 @@ module ActionPack::Passkey::FormHelper
     form_options = form.reverse_merge(method: :post, action: url, class: "button_to")
 
     tag.form(**form_options) do
-      safe_join([
-        hidden_field_tag(:authenticity_token, form_authenticity_token),
-        hidden_field_tag("#{param}[client_data_json]", nil, id: nil, data: { passkey_field: "client_data_json" }),
-        hidden_field_tag("#{param}[attestation_object]", nil, id: nil, data: { passkey_field: "attestation_object" }),
-        hidden_field_tag("#{param}[transports][]", nil, id: nil, data: { passkey_field: "transports" }),
+      hidden_field_tag(:authenticity_token, form_authenticity_token) +
+        hidden_field_tag("#{param}[client_data_json]", nil, id: nil, data: { passkey_field: "client_data_json" }) +
+        hidden_field_tag("#{param}[attestation_object]", nil, id: nil, data: { passkey_field: "attestation_object" }) +
+        hidden_field_tag("#{param}[transports][]", nil, id: nil, data: { passkey_field: "transports" }) +
         tag.button(name, type: :button, data: { passkey: "create" }, **options)
-      ])
     end
   end
 
   # Renders a form with hidden fields for the passkey authentication ceremony. The form POSTs to
   # +url+ and includes hidden fields for +id+, +client_data_json+, +authenticator_data+, and
-  # +signature+ — populated by the Stimulus controller after the browser credential API resolves.
+  # +signature+
   # Accepts a +label+ string or a block for button content.
   #
   # Options:
@@ -73,14 +63,12 @@ module ActionPack::Passkey::FormHelper
     form_options = form.reverse_merge(method: :post, action: url, class: "button_to", data: form_data)
 
     tag.form(**form_options) do
-      safe_join([
-        hidden_field_tag(:authenticity_token, form_authenticity_token),
-        hidden_field_tag("#{param}[id]", nil, id: nil, data: { passkey_field: "id" }),
-        hidden_field_tag("#{param}[client_data_json]", nil, id: nil, data: { passkey_field: "client_data_json" }),
-        hidden_field_tag("#{param}[authenticator_data]", nil, id: nil, data: { passkey_field: "authenticator_data" }),
-        hidden_field_tag("#{param}[signature]", nil, id: nil, data: { passkey_field: "signature" }),
+      hidden_field_tag(:authenticity_token, form_authenticity_token) +
+        hidden_field_tag("#{param}[id]", nil, id: nil, data: { passkey_field: "id" }) +
+        hidden_field_tag("#{param}[client_data_json]", nil, id: nil, data: { passkey_field: "client_data_json" }) +
+        hidden_field_tag("#{param}[authenticator_data]", nil, id: nil, data: { passkey_field: "authenticator_data" }) +
+        hidden_field_tag("#{param}[signature]", nil, id: nil, data: { passkey_field: "signature" }) +
         tag.button(name, type: :button, data: { passkey: "sign_in" }, **options)
-      ])
     end
   end
 
