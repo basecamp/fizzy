@@ -6,7 +6,7 @@ class Sessions::PasskeysController < ApplicationController
   rate_limit to: 10, within: 3.minutes, only: :create, with: :rate_limit_exceeded
 
   def create
-    credential = ActionPack::Passkey.authenticate(passkey: passkey_params)
+    credential = ActionPack::Passkey.authenticate(passkey: passkey_authentication_params)
 
     if credential
       start_new_session_for credential.holder
@@ -24,10 +24,6 @@ class Sessions::PasskeysController < ApplicationController
   end
 
   private
-    def passkey_params
-      params.expect(passkey: [ :id, :client_data_json, :authenticator_data, :signature ])
-    end
-
     def rate_limit_exceeded
       rate_limit_exceeded_message = "Try again later."
 

@@ -9,7 +9,7 @@ class My::PasskeysController < ApplicationController
   end
 
   def create
-    passkey = Current.identity.passkeys.register(passkey: passkey_params)
+    passkey = Current.identity.passkeys.register(passkey: passkey_registration_params)
 
     redirect_to edit_my_passkey_path(passkey, created: true)
   end
@@ -18,7 +18,7 @@ class My::PasskeysController < ApplicationController
   end
 
   def update
-    @passkey.update!(passkey_params_for_update)
+    @passkey.update!(params.expect(passkey: [ :name ]))
     redirect_to my_passkeys_path
   end
 
@@ -30,13 +30,5 @@ class My::PasskeysController < ApplicationController
   private
     def set_passkey
       @passkey = Current.identity.passkeys.find(params[:id])
-    end
-
-    def passkey_params_for_update
-      params.expect(passkey: [ :name ])
-    end
-
-    def passkey_params
-      params.expect(passkey: [ :client_data_json, :attestation_object, transports: [] ])
     end
 end
