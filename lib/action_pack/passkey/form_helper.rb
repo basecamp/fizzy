@@ -4,8 +4,8 @@
 #
 # - +passkey_creation_options_meta_tag+ / +passkey_request_options_meta_tag+ — render a <meta>
 #   tag containing the JSON-serialized WebAuthn options for the browser credential API.
-# - +create_passkey_button+ — render a form with hidden fields for the registration ceremony.
-# - +sign_in_with_passkey_button+ — render a form with hidden fields for the authentication
+# - +passkey_creation_button+ — render a form with hidden fields for the registration ceremony.
+# - +passkey_sign_in_button+ — render a form with hidden fields for the authentication
 #   ceremony.
 module ActionPack::Passkey::FormHelper
   # Renders +<meta>+ tags containing JSON-serialized creation options and the challenge endpoint
@@ -33,7 +33,7 @@ module ActionPack::Passkey::FormHelper
   # - +param+: the form parameter namespace (default: +:passkey+)
   # - +form+: additional HTML attributes for the +<form>+ tag
   # - All other options are passed to the +<button>+ tag
-  def create_passkey_button(name = nil, url = nil, param: :passkey, form: {}, **options, &block)
+  def passkey_creation_button(name = nil, url = nil, param: :passkey, form: {}, **options, &block)
     url, name = name, block ? capture(&block) : nil if block_given?
     form_options = form.reverse_merge(method: :post, action: url, class: "button_to")
 
@@ -56,7 +56,7 @@ module ActionPack::Passkey::FormHelper
   # - +mediation+: WebAuthn mediation hint (e.g. +"conditional"+ for autofill-assisted sign in)
   # - +form+: additional HTML attributes for the +<form>+ tag
   # - All other options are passed to the +<button>+ tag
-  def sign_in_with_passkey_button(name = nil, url = nil, param: :passkey, mediation: nil, form: {}, **options, &block)
+  def passkey_sign_in_button(name = nil, url = nil, param: :passkey, mediation: nil, form: {}, **options, &block)
     url, name = name, block ? capture(&block) : nil if block_given?
     form_data = {}
     form_data[:passkey_mediation] = mediation if mediation
