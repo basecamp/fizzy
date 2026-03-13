@@ -3,8 +3,6 @@
 # == Usage
 #
 #   class User < ApplicationRecord
-#     include ActionPack::Passkey::Holder
-#
 #     has_passkeys name: :email_address, display_name: :name
 #   end
 #

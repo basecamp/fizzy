@@ -1,5 +1,4 @@
 class Identity < ApplicationRecord
-  include ActionPack::Passkey::Holder
   include Joinable, Transferable
 
   has_passkeys name: :email_address, display_name: -> { Current.user&.name || email_address }

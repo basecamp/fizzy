@@ -25,9 +25,8 @@
 #
 # == Holder integration
 #
-# Include ActionPack::Passkey::Holder in your model and call +has_passkeys+ to set up the
-# association and configure ceremony options per-holder. See ActionPack::Passkey::Holder for
-# details.
+# Call +has_passkeys+ in your model to set up the association and configure ceremony options
+# per-holder. See ActionPack::Passkey::Holder for details.
 class ActionPack::Passkey < ApplicationRecord
   self.table_name = "action_pack_passkeys"
   belongs_to :holder, polymorphic: true

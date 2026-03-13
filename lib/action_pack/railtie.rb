@@ -42,6 +42,17 @@ class ActionPack::Railtie < Rails::Railtie
     end
   end
 
+  initializer "action_pack.passkey.holder" do
+    ActiveSupport.on_load(:active_record) do
+      # We need this shim because Holder is namespaced under Passkey, which is an ActiveRecort
+      # and can't be required before ActiveRecord is loaded.
+      def self.has_passkeys(**options, &block)
+        include ActionPack::Passkey::Holder
+        has_passkeys(**options, &block)
+      end
+    end
+  end
+
   initializer "action_pack.passkey.form_helper" do
     ActiveSupport.on_load(:action_view) do
       require_relative "passkey/form_helper"
