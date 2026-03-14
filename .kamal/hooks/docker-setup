@@ -35,7 +35,7 @@ for host in "${HOST_ARRAY[@]}"; do
   ssh -F /dev/null -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new "${SSH_USER}@${host}" \
     "sudo usermod -aG docker ${SSH_USER}"
 
-  echo "docker-setup: installing certbot tooling and server dirs on ${SSH_USER}@${host}"
+  echo "docker-setup: creating server dirs on ${SSH_USER}@${host}"
   ssh -F /dev/null -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new "${SSH_USER}@${host}" \
-    "sudo apt-get update && sudo apt-get install -y certbot python3-certbot-dns-cloudflare && mkdir -p ~/.secrets/certbot ~/.config/letsencrypt ~/.local/share/letsencrypt/work ~/.local/share/letsencrypt/logs ~/fizzy-data/storage && chmod 700 ~/.secrets/certbot"
+    "mkdir -p ~/fizzy-data/storage"
 done
