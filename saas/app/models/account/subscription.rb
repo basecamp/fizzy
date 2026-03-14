@@ -3,6 +3,12 @@ class Account::Subscription < SaasRecord
 
   enum :status, %w[ active past_due unpaid canceled incomplete incomplete_expired trialing paused ].index_by(&:itself)
 
+  scope :paid, -> {
+    where(status: %w[active trialing past_due])
+      .where(plan_key: Plan.all.select(&:paid?).map(&:key))
+      .where.not(account_id: Account::BillingWaiver.select(:account_id))
+  }
+
   validates :plan_key, presence: true, inclusion: { in: Plan::PLANS.keys.map(&:to_s) }
 
   delegate :paid?, to: :plan
