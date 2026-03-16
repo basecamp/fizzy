@@ -60,6 +60,37 @@ class Account::ExportTest < ActiveSupport::TestCase
     end
   end
 
+  test "export excludes blobs and attachments from previous exports" do
+    first_export = Account::Export.create!(account: Current.account, user: users(:david))
+    first_export.build
+    assert first_export.completed?
+
+    first_export_blob = first_export.file.blob
+    first_export_attachment = first_export.file.attachment
+
+    second_export = Account::Export.create!(account: Current.account, user: users(:david))
+    second_export.build
+    assert second_export.completed?
+
+    second_export.file.open do |file|
+      reader = ZipKit::FileReader.read_zip_structure(io: file)
+      filenames = reader.map(&:filename)
+
+      blob_entries = filenames.select { |f| f.start_with?("data/active_storage_blobs/") }
+      blob_ids = blob_entries.map { |f| File.basename(f, ".json") }
+      assert_not_includes blob_ids, first_export_blob.id, "Export should not include blob metadata from previous exports"
+
+      storage_entries = filenames.select { |f| f.start_with?("storage/") }
+      assert_not storage_entries.any? { |f| f == "storage/#{first_export_blob.key}" },
+        "Export should not include blob file from previous exports"
+
+      attachment_entries = filenames.select { |f| f.start_with?("data/active_storage_attachments/") }
+      attachment_ids = attachment_entries.map { |f| File.basename(f, ".json") }
+      assert_not_includes attachment_ids, first_export_attachment.id,
+        "Export should not include attachment records from previous exports"
+    end
+  end
+
   test "build succeeds when rich text references missing blob" do
     blob = ActiveStorage::Blob.create_and_upload!(
       io: file_fixture("moon.jpg").open,

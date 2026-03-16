@@ -58,7 +58,7 @@ class Account::DataTransfer::Manifest
           ::Webhook::Delivery
         ),
         Account::DataTransfer::ActiveStorage::BlobRecordSet.new(account),
-        *build_record_sets(::ActiveStorage::Attachment),
+        Account::DataTransfer::ActiveStorage::AttachmentRecordSet.new(account),
         Account::DataTransfer::ActionText::RichTextRecordSet.new(account),
         Account::DataTransfer::ActiveStorage::FileRecordSet.new(account)
       ].then { set_importable_model_names(it) }

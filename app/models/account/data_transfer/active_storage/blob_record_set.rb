@@ -8,6 +8,12 @@ class Account::DataTransfer::ActiveStorage::BlobRecordSet < Account::DataTransfe
   end
 
   private
+    def records
+      ::ActiveStorage::Blob.where(account: account).where.not(
+        id: ::ActiveStorage::Attachment.where(record_type: INTERNAL_RECORD_TYPES).select(:blob_id)
+      )
+    end
+
     def import_batch(files)
       batch_data = files.map do |file|
         data = load(file)
