@@ -34,6 +34,27 @@ class ActiveStorage::DirectUploadsControllerTest < ActionDispatch::IntegrationTe
     assert_includes response.parsed_body.keys, "direct_upload"
   end
 
+  test "create with session token" do
+    sign_in_as :david
+
+    post rails_direct_uploads_path,
+      params: @blob_params,
+      as: :json
+
+    assert_response :success
+    assert_includes response.parsed_body.keys, "direct_upload"
+  end
+
+  test "create with session token in another account is forbidden" do
+    sign_in_as :david
+
+    post rails_direct_uploads_path(script_name: "/#{ActiveRecord::FixtureSet.identify("initech")}"),
+      params: @blob_params,
+      as: :json
+
+    assert_response :forbidden
+  end
+
   test "create with read-only access token" do
     post rails_direct_uploads_path,
       params: @blob_params,
