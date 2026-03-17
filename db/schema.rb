@@ -338,10 +338,12 @@ ActiveRecord::Schema[8.2].define(version: 2026_02_18_120000) do
     t.datetime "created_at", null: false
     t.text "description"
     t.uuid "identity_id", null: false
+    t.uuid "oauth_client_id"
     t.string "permission"
     t.string "token"
     t.datetime "updated_at", null: false
     t.index ["identity_id"], name: "index_access_token_on_identity_id"
+    t.index ["oauth_client_id"], name: "index_identity_access_tokens_on_oauth_client_id"
   end
 
   create_table "magic_links", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -401,6 +403,18 @@ ActiveRecord::Schema[8.2].define(version: 2026_02_18_120000) do
     t.index ["user_id", "card_id"], name: "index_notifications_on_user_id_and_card_id", unique: true
     t.index ["user_id", "read_at", "updated_at"], name: "index_notifications_on_user_id_and_read_at_and_updated_at", order: { read_at: :desc, updated_at: :desc }
     t.index ["user_id"], name: "index_notifications_on_user_id"
+  end
+
+  create_table "oauth_clients", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "client_id", null: false
+    t.datetime "created_at", null: false
+    t.boolean "dynamically_registered", default: false
+    t.string "name", null: false
+    t.json "redirect_uris"
+    t.json "scopes"
+    t.boolean "trusted", default: false
+    t.datetime "updated_at", null: false
+    t.index ["client_id"], name: "index_oauth_clients_on_client_id", unique: true
   end
 
   create_table "pins", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -840,4 +854,6 @@ ActiveRecord::Schema[8.2].define(version: 2026_02_18_120000) do
     t.index ["account_id"], name: "index_webhooks_on_account_id"
     t.index ["board_id", "subscribed_actions"], name: "index_webhooks_on_board_id_and_subscribed_actions", length: { subscribed_actions: 255 }
   end
+
+  add_foreign_key "identity_access_tokens", "oauth_clients"
 end
