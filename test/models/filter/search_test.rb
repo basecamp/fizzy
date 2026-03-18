@@ -15,7 +15,8 @@ class Filter::SearchTest < ActiveSupport::TestCase
 
   test "multiple terms all match" do
     matching_card = @board.cards.create!(title: "haggis neeps tatties", creator: @user, status: "published")
-    _partial_card = @board.cards.create!(title: "haggis only", creator: @user, status: "published")
+    @board.cards.create!(title: "haggis only", creator: @user, status: "published")
+    @board.cards.create!(title: "neeps only", creator: @user, status: "published")
 
     filter = @user.filters.new(terms: [ "haggis", "neeps" ], indexed_by: "all", sorted_by: "latest")
 
