@@ -121,6 +121,18 @@ class SmokeTest < ApplicationSystemTestCase
     assert_current_path filter_url, ignore_query: false
   end
 
+  test "card back link returns to global filter view when navigating from it" do
+    sign_in_as(users(:kevin))
+
+    filter_url = cards_url(creator_ids: [ users(:kevin).id ])
+    visit filter_url
+    click_on cards(:text).title
+
+    assert_selector "a.btn--back strong", text: "Back to all boards"
+    find("a.btn--back").click
+    assert_current_path filter_url, ignore_query: false
+  end
+
   test "dragging card to a new column" do
     sign_in_as(users(:david))
 
