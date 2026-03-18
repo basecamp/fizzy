@@ -1,5 +1,5 @@
 module BoardsHelper
-  def link_back_to_board(board, prefer_referrer: false)
+  def link_back_to_board(board, prefer_referrer: [])
     back_link_to board.name, board, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click click->turbo-navigation#backIfSamePath", prefer_referrer:
   end
 

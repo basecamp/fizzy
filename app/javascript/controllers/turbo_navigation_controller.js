@@ -24,6 +24,10 @@ export default class extends Controller {
   referrerBackLinkTargetConnected(link) {
     if (!this.#referrerUrl || !this.#referrerLabel) { return }
 
+    const allowedPaths = (link.dataset.turboNavigationAllowedReferrerPaths || "").split(",")
+    const referrerPath = new URL(this.#referrerUrl).pathname
+    if (!allowedPaths.includes(referrerPath)) { return }
+
     link.href = this.#referrerUrl
     const strong = link.querySelector("strong")
     if (strong) { strong.textContent = `Back to ${this.#referrerLabel}` }

@@ -133,6 +133,16 @@ class SmokeTest < ApplicationSystemTestCase
     assert_current_path filter_url, ignore_query: false
   end
 
+  test "card back link is not rewritten when navigating from a non-filter page" do
+    sign_in_as(users(:david))
+
+    visit account_settings_url
+    click_on "Invite people"
+    visit card_url(cards(:logo))
+
+    assert_selector "a.btn--back strong", text: "Back to Writebook"
+  end
+
   test "dragging card to a new column" do
     sign_in_as(users(:david))
 
