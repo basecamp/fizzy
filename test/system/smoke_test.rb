@@ -108,6 +108,19 @@ class SmokeTest < ApplicationSystemTestCase
     end
   end
 
+  test "card back link returns to board filter view when navigating from it" do
+    sign_in_as(users(:david))
+
+    filter_url = board_url(boards(:writebook), creator_ids: [ users(:david).id ])
+    visit filter_url
+    click_on cards(:logo).title
+
+    back_link = find("a.btn--back")
+    assert_selector "a.btn--back strong", text: "Back to Writebook"
+    back_link.click
+    assert_current_path filter_url, ignore_query: false
+  end
+
   test "dragging card to a new column" do
     sign_in_as(users(:david))
 
