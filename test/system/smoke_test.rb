@@ -129,7 +129,7 @@ class SmokeTest < ApplicationSystemTestCase
   private
     def sign_in_as(user)
       visit session_transfer_url(user.identity.transfer_id, script_name: nil)
-      assert_selector "h1", text: "Latest Activity"
+      assert_current_path root_path
     end
 
     def fill_in_lexxy(selector = "lexxy-editor", with:)
