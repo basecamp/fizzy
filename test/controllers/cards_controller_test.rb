@@ -42,6 +42,15 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to card_draft_path(card)
   end
 
+  test "show renders assign-to-me hotkey using self assignment path" do
+    card = cards(:logo)
+
+    get card_path(card)
+    assert_response :success
+
+    assert_select "form[action=?] button[hidden]", card_self_assignment_path(card), text: "Assign to me"
+  end
+
   test "show renders inline code in title" do
     card = cards(:logo)
     card.update_column :title, "Fix the `bug` in production"

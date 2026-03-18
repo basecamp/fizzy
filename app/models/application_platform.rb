@@ -43,6 +43,17 @@ class ApplicationPlatform < PlatformAgent
     operating_system == "Windows"
   end
 
+  def bridge_name
+    case
+    when native? && android? then :android
+    when native? && ios?     then :ios
+    end
+  end
+
+  def bridge_components
+    extract_list_from_native_user_agent("bridge-components")
+  end
+
   def type
     if native? && android?
       "native android"
@@ -67,4 +78,13 @@ class ApplicationPlatform < PlatformAgent
       os =~ /Linux/ ? "Linux" : os
     end
   end
+
+  private
+    def extract_list_from_native_user_agent(prefix)
+      if native?
+        user_agent.to_s.match(/#{Regexp.escape(prefix)}: \[(.*?)\]/) { |matches| matches[1] }.to_s
+      else
+        ""
+      end
+    end
 end

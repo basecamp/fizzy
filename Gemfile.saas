@@ -5,12 +5,10 @@ git_source(:bc) { |repo| "https://github.com/basecamp/#{repo}" }
 
 gem "activeresource", require: "active_resource"
 gem "actionpack-xml_parser" # needed by queenbee for XML request body parsing
-gem "stripe", "~> 18.0"
 gem "queenbee", bc: "queenbee-plugin"
 gem "fizzy-saas", path: "saas"
 gem "console1984", bc: "console1984"
 gem "audits1984", bc: "audits1984", branch: "flavorjones/coworker-api"
-gem "csv"
 
 # Native push notifications (iOS/Android)
 gem "action_push_native"

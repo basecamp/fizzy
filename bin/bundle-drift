@@ -130,10 +130,10 @@ class GemfileDriftForwarder
     patched_content = original_content.dup
 
     drift.each do |d|
-      old_entry = "#{d[:name]} (#{d[:saas]})"
-      new_entry = "#{d[:name]} (#{d[:oss]})"
-      puts "  #{old_entry} → #{new_entry}"
-      patched_content.gsub!(old_entry, new_entry)
+      puts "  #{d[:name]} (#{d[:saas]}) → #{d[:name]} (#{d[:oss]})"
+      patched_content.gsub!(/#{Regexp.escape(d[:name])} \(#{Regexp.escape(d[:saas])}([^)]*)\)/) do
+        "#{d[:name]} (#{d[:oss]}#{$1})"
+      end
     end
 
     File.write(GEMFILE_SAAS_LOCK, patched_content)

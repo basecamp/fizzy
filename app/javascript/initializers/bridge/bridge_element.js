@@ -5,12 +5,13 @@ BridgeElement.prototype.getButton = function() {
     title: this.title,
     icon: this.getIcon(),
     displayTitle: this.getDisplayTitle(),
-    displayAsPrimaryAction: this.getDisplayAsPrimaryAction()
+    displayAsPrimaryAction: this.getDisplayAsPrimaryAction(),
+    slot: this.getSlot()
   }
 }
 
 BridgeElement.prototype.getIcon = function() {
-  const url = this.bridgeAttribute(`icon-url`)
+  const url = this.bridgeAttribute("icon-url")
 
   if (url) {
     return { url }
@@ -20,9 +21,13 @@ BridgeElement.prototype.getIcon = function() {
 }
 
 BridgeElement.prototype.getDisplayTitle = function() {
-  return !!this.bridgeAttribute(`display-title`)
+  return !!this.bridgeAttribute("display-title")
 }
 
 BridgeElement.prototype.getDisplayAsPrimaryAction = function() {
-  return !!this.bridgeAttribute(`display-as-primary-action`)
+  return !!this.bridgeAttribute("display-as-primary-action")
+}
+
+BridgeElement.prototype.getSlot = function () {
+  return this.bridgeAttribute("slot") ?? "right"
 }

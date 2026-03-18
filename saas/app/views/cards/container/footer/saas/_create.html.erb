@@ -1,5 +1,0 @@
-<% if Current.account.exceeding_limits? %>
-  <%= render "account/subscriptions/upgrade" %>
-<% else %>
-  <%= render "cards/container/footer/create", card: card %>
-<% end %>

@@ -16,10 +16,6 @@ module Fizzy
         connects_to database: { writing: :saas, reading: :saas }
       end
 
-      initializer "fizzy_saas.content_security_policy", before: :load_config_initializers do |app|
-        app.config.x.content_security_policy.form_action = "https://checkout.stripe.com https://billing.stripe.com"
-      end
-
       initializer "fizzy_saas.assets" do |app|
         app.config.assets.paths << root.join("app/assets/stylesheets")
       end
@@ -31,25 +27,6 @@ module Fizzy
 
       initializer "fizzy_saas.push_config", after: "action_push_native.config" do |app|
         app.paths["config/push"].unshift(root.join("config/push.yml").to_s)
-      end
-
-      initializer "fizzy.saas.routes", after: :add_routing_paths do |app|
-        # Routes that rely on the implicit account tenant should go here instead of in +routes.rb+.
-        app.routes.prepend do
-          namespace :account do
-            resource :billing_portal, only: :show
-            resource :subscription do
-              scope module: :subscriptions do
-                resource :upgrade, only: :create
-                resource :downgrade, only: :create
-              end
-            end
-          end
-
-          namespace :stripe do
-            resource :webhooks, only: :create
-          end
-        end
       end
 
       initializer "fizzy.saas.mount" do |app|
@@ -96,10 +73,6 @@ module Fizzy
         if Rails.env.test?
           require_relative "testing"
         end
-      end
-
-      initializer "fizzy_saas.stripe" do
-        Stripe.api_key = ENV["STRIPE_SECRET_KEY"]
       end
 
       initializer "fizzy_saas.sentry" do
@@ -160,14 +133,10 @@ module Fizzy
       end
 
       config.to_prepare do
-        ::Account.include Account::Billing, Account::Limited
-        ::User.include User::NotifiesAccountOfEmailChange
         ::Identity.include Authorization::Identity, Identity::Devices
         ::Session.include Session::Devices
         ::Signup.prepend Signup
         ApplicationController.include Authorization::Controller
-        CardsController.include(Card::LimitedCreation)
-        Cards::PublishesController.include(Card::LimitedPublishing)
 
         Notification.register_push_target(:native)
 
