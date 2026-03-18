@@ -91,42 +91,6 @@ class Account::ExportTest < ActiveSupport::TestCase
     end
   end
 
-  test "export keeps blobs shared with account records even when also attached to exports" do
-    shared_blob = ActiveStorage::Blob.create_and_upload!(
-      io: StringIO.new("shared blob content"),
-      filename: "shared.txt",
-      content_type: "text/plain"
-    )
-    card = cards(:logo)
-    card.image.attach(shared_blob)
-    non_internal_attachment = card.image.attachment
-
-    prior_export = Account::Export.create!(account: Current.account, user: users(:david))
-    prior_export.file.attach(shared_blob)
-    internal_attachment = prior_export.file.attachment
-
-    export = Account::Export.create!(account: Current.account, user: users(:david))
-    export.build
-    assert export.completed?
-
-    export.file.open do |file|
-      reader = ZipKit::FileReader.read_zip_structure(io: file)
-      filenames = reader.map(&:filename)
-
-      blob_entries = filenames.select { |f| f.start_with?("data/active_storage_blobs/") }
-      blob_ids = blob_entries.map { |f| File.basename(f, ".json") }
-      assert_includes blob_ids, shared_blob.id
-
-      storage_entries = filenames.select { |f| f.start_with?("storage/") }
-      assert_includes storage_entries, "storage/#{shared_blob.key}"
-
-      attachment_entries = filenames.select { |f| f.start_with?("data/active_storage_attachments/") }
-      attachment_ids = attachment_entries.map { |f| File.basename(f, ".json") }
-      assert_includes attachment_ids, non_internal_attachment.id
-      assert_not_includes attachment_ids, internal_attachment.id
-    end
-  end
-
   test "build succeeds when rich text references missing blob" do
     blob = ActiveStorage::Blob.create_and_upload!(
       io: file_fixture("moon.jpg").open,

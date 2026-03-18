@@ -5,19 +5,11 @@ class Account::DataTransfer::ActiveStorage::FileRecordSet < Account::DataTransfe
 
   private
     def records
-      ::ActiveStorage::Blob.where(account: account).where.not(id: internal_only_blob_ids)
+      ::ActiveStorage::Blob.where(account: account).where.not(id: excluded_blob_ids)
     end
 
-    def internal_only_blob_ids
-      internal_blob_ids.where.not(blob_id: external_blob_ids)
-    end
-
-    def internal_blob_ids
+    def excluded_blob_ids
       ::ActiveStorage::Attachment.where(account: account, record_type: INTERNAL_RECORD_TYPES).select(:blob_id)
-    end
-
-    def external_blob_ids
-      ::ActiveStorage::Attachment.where(account: account).where.not(record_type: INTERNAL_RECORD_TYPES).select(:blob_id)
     end
 
     def export_record(blob)
