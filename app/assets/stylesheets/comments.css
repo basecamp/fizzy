@@ -220,4 +220,12 @@
       display: none;
     }
   }
+
+  .comment-by-system--account-limit {
+    --stripe-color: oklch(var(--lch-blue-lightest));
+
+    .comment__content {
+      padding: 3ch;
+    }
+  }
 }

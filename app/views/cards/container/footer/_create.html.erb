@@ -13,5 +13,7 @@
       <span>Create and add another</span>
     <% end %>
   </div>
+
+  <%= render "cards/container/footer/saas/storage_limit_notice" if Fizzy.saas? %>
 </div>
 
