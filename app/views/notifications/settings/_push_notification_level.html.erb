@@ -7,12 +7,10 @@
   <%= form_with model: settings, url: notifications_settings_path,
       method: :patch, local: true, data: { controller: "form" } do |form| %>
     <div class="margin-block-end-half"><strong><%= form.label :push_notification_level, "Send push notifications for..." %></strong></div>
-    <%= form.select :push_notification_level, push_notification_level_options_for(settings), {}, class: "input input--select txt-align-center", data: {
-      controller: "set-text",
-      set_text_target_value: "#notifications-settings-description",
-      action: "change->form#submit change->set-text#forSelectedOption turbo:render@window->set-text#forSelectedOption load@window->set-text#forSelectedOption"
-    } %>
-    <div id="notifications-settings-description" class="margin-block-start-half txt-small txt-subtle"></div>
+    <%= form.select :push_notification_level, push_notification_level_options_for(settings), {}, class: "input input--select txt-align-center", data: { action: "change->form#submit" } %>
+    <div class="margin-block-start-half txt-small txt-subtle">
+      <%= push_notification_level_description_for(settings) %>
+    </div>
   <% end %>
 
   <%= render "notifications/settings/native_devices" if Fizzy.saas? %>

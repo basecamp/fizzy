@@ -78,10 +78,18 @@ module NotificationsHelper
 
   def push_notification_level_options_for(settings)
     options_for_select([
-      [ "All activity", "all_activity", { data: { text: "Loop me in on everything happening in boards I'm following." } } ],
-      [ "Comments and @mentions", "comments_and_mentions", { data: { text: "Only send a push notification when someone comments on a card I'm part of, or when someone @mentions me in any card." } } ],
-      [ "Only @mentions", "only_mentions", { data: { text: "Only send a push when someone @mentions me in any card." } } ]
+      [ "All activity", "all_activity" ],
+      [ "Comments and @mentions", "comments_and_mentions" ],
+      [ "Only @mentions", "only_mentions" ]
     ], settings.push_notification_level)
+  end
+
+  def push_notification_level_description_for(settings)
+    {
+      "all_activity" => "Loop me in on everything happening in boards I'm following.",
+      "comments_and_mentions" => "Only send a push notification when someone comments on a card I'm part of, or when someone @mentions me in any card.",
+      "only_mentions" => "Only send a push when someone @mentions me in any card."
+    }[settings.push_notification_level]
   end
 
   private
