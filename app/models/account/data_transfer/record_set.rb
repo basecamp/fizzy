@@ -3,7 +3,7 @@ class Account::DataTransfer::RecordSet
   class ConflictError < IntegrityError; end
 
   IMPORT_BATCH_SIZE = 100
-  INTERNAL_RECORD_TYPES = %w[Export Account::Import].freeze
+  INTERNAL_RECORD_TYPES = %w[Export Account::Import ActiveStorage::VariantRecord].freeze
 
   attr_accessor :importable_model_names
   attr_reader :account, :model, :attributes

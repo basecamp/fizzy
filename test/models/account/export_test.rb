@@ -91,6 +91,45 @@ class Account::ExportTest < ActiveSupport::TestCase
     end
   end
 
+  test "export excludes variant record attachments and blobs" do
+    blob = ActiveStorage::Blob.create_and_upload!(
+      io: file_fixture("moon.jpg").open,
+      filename: "moon.jpg",
+      content_type: "image/jpeg"
+    )
+    variant_record = ActiveStorage::VariantRecord.create!(blob: blob, variation_digest: "test_digest")
+    variant_blob = ActiveStorage::Blob.create_and_upload!(
+      io: file_fixture("moon.jpg").open,
+      filename: "moon_variant.jpg",
+      content_type: "image/jpeg"
+    )
+    variant_record.image.attach(variant_blob)
+
+    export = Account::Export.create!(account: Current.account, user: users(:david))
+    export.build
+    assert export.completed?
+
+    export.file.open do |file|
+      reader = ZipKit::FileReader.read_zip_structure(io: file)
+      filenames = reader.map(&:filename)
+
+      attachment_entries = filenames.select { |f| f.start_with?("data/active_storage_attachments/") }
+      attachment_ids = attachment_entries.map { |f| File.basename(f, ".json") }
+      variant_attachment = variant_record.image.attachment
+      assert_not_includes attachment_ids, variant_attachment.id,
+        "Export should not include variant record attachment"
+
+      blob_entries = filenames.select { |f| f.start_with?("data/active_storage_blobs/") }
+      blob_ids = blob_entries.map { |f| File.basename(f, ".json") }
+      assert_not_includes blob_ids, variant_blob.id,
+        "Export should not include variant record blob"
+
+      storage_entries = filenames.select { |f| f.start_with?("storage/") }
+      assert_not storage_entries.any? { |f| f == "storage/#{variant_blob.key}" },
+        "Export should not include variant record blob file"
+    end
+  end
+
   test "build succeeds when rich text references missing blob" do
     blob = ActiveStorage::Blob.create_and_upload!(
       io: file_fixture("moon.jpg").open,

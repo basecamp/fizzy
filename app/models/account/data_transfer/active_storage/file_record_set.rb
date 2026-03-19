@@ -29,6 +29,7 @@ class Account::DataTransfer::ActiveStorage::FileRecordSet < Account::DataTransfe
         old_key = file.delete_prefix("storage/")
         blob_id = old_key_to_blob_id[old_key]
         raise IntegrityError, "Storage file #{old_key} has no matching blob metadata in export" unless blob_id
+        next if internal_blob_ids.include?(blob_id)
 
         blob = ::ActiveStorage::Blob.find_by(id: blob_id, account: account)
         raise IntegrityError, "Blob #{blob_id} not found for storage key #{old_key}" unless blob
@@ -54,16 +55,29 @@ class Account::DataTransfer::ActiveStorage::FileRecordSet < Account::DataTransfe
       end
     end
 
-    def with_zip(zip)
-      @old_key_to_blob_id = nil
-      super
-    end
-
     def check_record(file_path)
       old_key = file_path.delete_prefix("storage/")
+      blob_id = old_key_to_blob_id[old_key]
 
-      unless old_key_to_blob_id.key?(old_key)
+      unless blob_id
         raise IntegrityError, "Storage file #{old_key} has no matching blob metadata in export"
       end
+    end
+
+    def internal_blob_ids
+      @internal_blob_ids ||= build_internal_blob_ids
+    end
+
+    def build_internal_blob_ids
+      zip.glob("data/active_storage_attachments/*.json").each_with_object(Set.new) do |file, ids|
+        data = load(file)
+        ids << data["blob_id"] if data["record_type"].in?(INTERNAL_RECORD_TYPES)
+      end
+    end
+
+    def with_zip(zip)
+      @internal_blob_ids = nil
+      @old_key_to_blob_id = nil
+      super
     end
 end
