@@ -1,4 +1,7 @@
 @layer components {
+  /* List
+  /* ------------------------------------------------------------------------ */
+
   .comments {
     --avatar-size: 2.33em;
     --comment-padding-block: var(--block-space-half);
@@ -21,10 +24,8 @@
     }
   }
 
-  .comments__subscribers {
-    max-inline-size: var(--comment-max);
-    padding-inline: calc(var(--comment-padding-block) + var(--inline-space-double));
-  }
+  /* Comment
+  /* ------------------------------------------------------------------------ */
 
   .comment {
     /* Distinguish from the .comment class used for code formatting without extra specificity */
@@ -33,52 +34,6 @@
       margin-inline: auto;
       max-inline-size: var(--comment-max);
       position: relative;
-    }
-
-    .comment-by-system & {
-      --comment-padding-block: var(--block-space-half);
-
-      text-align: center;
-
-      &::before {
-        /* Make up space for lack of avatar */
-        content: "";
-        display: flex;
-        inline-size: calc(var(--comment-padding-inline) * 0.9);
-      }
-
-      .comment__avatar {
-        display: none;
-      }
-
-      .comment__author {
-        a { margin: 0 auto; }
-        h3 { margin-inline: auto; }
-        strong { display: none; }
-      }
-
-      .comment__body {
-        padding: 0;
-        text-align: center;
-      }
-
-      .comment__content {
-        --stripe-color: var(--color-ink-lightest);
-
-        background-image: repeating-linear-gradient(
-          45deg in srgb,
-          var(--color-canvas) 0 1px,
-          var(--stripe-color) 1px 10px);
-        padding-inline: var(--comment-padding-inline);
-
-        .comments--system-expanded .comment-by-system & {
-          --stripe-color: color-mix(in srgb, var(--card-color) 10%, var(--color-canvas));
-        }
-      }
-
-      .reactions {
-        display: none !important;
-      }
     }
 
     .reactions {
@@ -195,13 +150,62 @@
     }
   }
 
+  /* System comment
+  /* ------------------------------------------------------------------------ */
+
   .comment-by-system {
+    --stripe-color: var(--color-ink-lightest);
+
     display: none;
     transition: var(--dialog-duration) allow-discrete;
     transition-property: display;
 
     .comments--system-expanded & {
       display: contents;
+    }
+
+    .comment {
+      --comment-padding-block: var(--block-space-half);
+
+      text-align: center;
+
+      &::before {
+        /* Make up space for lack of avatar */
+        content: "";
+        display: flex;
+        inline-size: calc(var(--comment-padding-inline) * 0.9);
+      }
+    }
+
+    .comment__avatar {
+      display: none;
+    }
+
+    .comment__author {
+      a { margin: 0 auto; }
+      h3 { margin-inline: auto; }
+      strong { display: none; }
+    }
+
+    .comment__body {
+      padding: 0;
+      text-align: center;
+    }
+
+    .comment__content {
+      background-image: repeating-linear-gradient(
+        45deg in srgb,
+        var(--color-canvas) 0 1px,
+        var(--stripe-color) 1px 10px);
+      padding-inline: var(--comment-padding-inline);
+
+      .comments--system-expanded .comment-by-system & {
+        --stripe-color: color-mix(in srgb, var(--card-color) 10%, var(--color-canvas));
+      }
+    }
+
+    .reactions {
+      display: none !important;
     }
   }
 
@@ -219,5 +223,21 @@
     .comment__history {
       display: none;
     }
+  }
+
+  .comment-by-system--account-limit {
+    --stripe-color: oklch(var(--lch-blue-lightest));
+
+    .comment__content {
+      padding: 3ch;
+    }
+  }
+
+  /* Subscribers
+  /* ------------------------------------------------------------------------ */
+
+  .comments__subscribers {
+    max-inline-size: var(--comment-max);
+    padding-inline: calc(var(--comment-padding-block) + var(--inline-space-double));
   }
 }

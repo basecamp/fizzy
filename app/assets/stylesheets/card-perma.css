@@ -543,4 +543,12 @@
       }
     }
   }
+
+  .card-perma__account-limit-message {
+    background-color: var(--color-canvas);
+    border: 2px solid var(--color-container);
+    border-radius: 4px;
+    margin-block-start: calc(var(--padding-block) / -2);
+    padding: 1ch 2ch;
+  }
 }

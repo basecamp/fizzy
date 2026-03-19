@@ -1,0 +1,12 @@
+<div class="comment-by-system comment-by-system--account-limit">
+  <div class="comment align-start full-width">
+    <div class="comment__content flex flex-column flex-item-grow full-width">
+      <div class="comment__body lexxy-content">
+        <div class="action-text-content">
+          <strong>This account has used all the included free storage (<%= number_to_human_size(Account::StorageLimited::STORAGE_LIMIT) %>).</strong>
+          <div><%= link_to "Self-host Fizzy", "https://github.com/basecamp/fizzy", target: "_blank" %> for unlimited storage.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

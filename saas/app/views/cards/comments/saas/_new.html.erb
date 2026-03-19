@@ -1,0 +1,5 @@
+<% if Current.account.exceeding_storage_limit? %>
+  <%= render "cards/comments/saas/storage_limit_exceeded" %>
+<% else %>
+  <%= render "cards/comments/new", card: card %>
+<% end %>
