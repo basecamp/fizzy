@@ -27,7 +27,7 @@ gem "geared_pagination", "~> 1.2"
 gem "rqrcode"
 gem "rouge"
 gem "jbuilder"
-gem "lexxy", github: "basecamp/lexxy", branch: "main"
+gem "lexxy", bc: "lexxy", branch: "main"
 gem "image_processing", "~> 1.14"
 gem "platform_agent"
 gem "aws-sdk-s3", require: false
