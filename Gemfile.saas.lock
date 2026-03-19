@@ -22,6 +22,14 @@ GIT
       rainbow
 
 GIT
+  remote: https://github.com/basecamp/lexxy.git
+  revision: 4b718b01cbd786a65f51f9c9ff59141161b4b972
+  branch: main
+  specs:
+    lexxy (0.8.5.beta)
+      rails (>= 8.0.2)
+
+GIT
   remote: https://github.com/basecamp/queenbee-plugin
   revision: 14312a940471e20617b38cdec7c092a01567d18b
   specs:
@@ -367,8 +375,6 @@ GEM
       logger (~> 1.6)
     letter_opener (1.10.0)
       launchy (>= 2.2, < 4)
-    lexxy (0.8.5.beta)
-      rails (>= 8.0.2)
     lint_roller (1.1.0)
     logger (1.7.0)
     loofah (2.25.0)
@@ -724,7 +730,7 @@ DEPENDENCIES
   jbuilder
   kamal
   letter_opener
-  lexxy (= 0.8.5.beta)
+  lexxy!
   mission_control-jobs
   mittens
   mocha
