@@ -26,5 +26,9 @@
     </div>
   <% end %>
 
-  <%= render "cards/container/footer/create", card: card %>
+  <% if Fizzy.saas? %>
+    <%= render "cards/container/footer/saas/create", card: card %>
+  <% else %>
+    <%= render "cards/container/footer/create", card: card %>
+  <% end %>
 </section>

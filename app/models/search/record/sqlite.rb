@@ -10,7 +10,10 @@ module Search::Record::SQLite
 
     after_save :upsert_to_fts5_table
 
-    scope :matching, ->(query, account_id) { joins(:search_records_fts).where("search_records_fts MATCH ?", query) }
+    scope :matching, ->(query, account_id) {
+      joins("INNER JOIN search_records_fts ON search_records_fts.rowid = #{table_name}.id")
+        .where("search_records_fts MATCH ?", query)
+    }
   end
 
   class_methods do

@@ -5,6 +5,7 @@
   <body class="<%= @body_class %>"
     data-controller="local-time timezone-cookie turbo-navigation theme bridge--title bridge--text-size bridge--insets"
     data-action="turbo:morph@window->local-time#refreshAll turbo:before-visit@document->turbo-navigation#rememberLocation"
+    data-turbo-navigation-label-value="<%= @page_title %>"
     data-platform="<%= platform.type %>"
     data-bridge-platform="<%= platform.bridge_name %>"
     data-bridge-components="<%= platform.bridge_components %>"

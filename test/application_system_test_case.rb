@@ -28,4 +28,10 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   else
     driven_by :chrome_headless, screen_size: [ 1200, 1000 ]
   end
+
+  private
+    def sign_in_as(user)
+      visit session_transfer_url(user.identity.transfer_id, script_name: nil)
+      assert_current_path root_path
+    end
 end

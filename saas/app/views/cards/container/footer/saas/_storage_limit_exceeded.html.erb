@@ -1,0 +1,8 @@
+<div class="card-perma__notch card-perma__notch--bottom">
+  <div class="card-perma__account-limit-message">
+    <strong>This account has used all the included free storage (<%= number_to_human_size(Current.account.storage_limit) %>).</strong>
+    <div>
+      <%= link_to "Self-host Fizzy", "https://github.com/basecamp/fizzy", target: "_blank" %> for unlimited storage.
+    </div>
+  </div>
+</div>

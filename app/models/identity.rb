@@ -1,6 +1,8 @@
 class Identity < ApplicationRecord
   include Joinable, Transferable
 
+  has_passkeys name: :email_address, display_name: -> { Current.user&.name || email_address }
+
   has_many :access_tokens, dependent: :destroy
   has_many :magic_links, dependent: :destroy
   has_many :sessions, dependent: :destroy

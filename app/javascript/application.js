@@ -6,3 +6,4 @@ import "controllers"
 
 import "lexxy"
 import "@rails/actiontext"
+import "lib/action_pack/passkey"

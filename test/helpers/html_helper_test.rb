@@ -104,6 +104,38 @@ class HtmlHelperTest < ActionView::TestCase
       format_html(%(<p>Contact us at <a href="mailto:support@example.com">support@example.com</a></p>))
   end
 
+  test "gracefully handle regexp timeout by skipping auto-linking" do
+    input = "<p>Check this: https://example.com</p>"
+
+    String.class_eval do
+      alias_method :original_scan, :scan
+      define_method(:scan) do |*args, &block|
+        if args.first == AutoLinkScrubber::AUTOLINK_REGEXP
+          raise Regexp::TimeoutError
+        end
+        original_scan(*args, &block)
+      end
+    end
+
+    assert_equal_html %(<p>Check this: https://example.com</p>), format_html(input)
+  ensure
+    String.class_eval do
+      alias_method :scan, :original_scan
+      remove_method :original_scan
+    end
+  end
+
+  test "skip auto-linking in very large text nodes" do
+    url = "https://example.com"
+    large_text = "x" * 5_000 + " #{url} " + "y" * 5_000
+    input = "<p>#{large_text}</p>"
+
+    result = format_html(input)
+
+    assert_no_match(/<a/, result)
+    assert_includes result, url
+  end
+
   test "don't autolink content in excluded elements" do
     %w[ figcaption pre code ].each do |element|
       assert_equal_html \

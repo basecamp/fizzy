@@ -11,6 +11,10 @@
 
 <p>This code will work for <%= distance_of_time_in_words(MagicLink::EXPIRATION_TIME) %>.</p>
 
+<% if account = @magic_link.identity.accounts.last %>
+  <p>P.S. You can make your account more secure and sign-in faster with a <%= link_to "Passkey", my_passkeys_url(script_name: account.slug) %></p>
+<% end %>
+
 <p class="footer">Need help? <%= mail_to "support@fizzy.do", "Send us an email"%>.
 </p>
 

@@ -1,0 +1,82 @@
+require "test_helper"
+
+class ActionPack::WebAuthn::PublicKeyCredential::RequestOptionsTest < ActiveSupport::TestCase
+  setup do
+    @relying_party = ActionPack::WebAuthn::RelyingParty.new(id: "example.com", name: "Example App")
+    @credentials = [
+      build_credential(id: "credential-1"),
+      build_credential(id: "credential-2")
+    ]
+    @options = ActionPack::WebAuthn::PublicKeyCredential::RequestOptions.new(
+      credentials: @credentials,
+      relying_party: @relying_party
+    )
+  end
+
+  test "initializes with required parameters" do
+    assert_equal @credentials, @options.credentials
+    assert_equal @relying_party, @options.relying_party
+  end
+
+  test "generates base64url encoded challenge" do
+    assert_match(/\A[A-Za-z0-9_-]+\z/, @options.challenge)
+  end
+
+  test "generates signed challenge containing nonce" do
+    signed_message = Base64.urlsafe_decode64(@options.challenge)
+    nonce = ActionPack::WebAuthn.challenge_verifier.verified(signed_message)
+
+    assert_not_nil nonce
+    assert_equal 32, Base64.strict_decode64(nonce).bytesize
+  end
+
+  test "as_json" do
+    assert_equal @options.challenge, @options.as_json[:challenge]
+    assert_equal "example.com", @options.as_json[:rpId]
+    assert_equal [
+      { type: "public-key", id: "credential-1" },
+      { type: "public-key", id: "credential-2" }
+    ], @options.as_json[:allowCredentials]
+    assert_equal "preferred", @options.as_json[:userVerification]
+  end
+
+  test "as_json includes transports when present" do
+    credentials = [
+      build_credential(id: "cred-1", transports: [ "usb", "nfc" ]),
+      build_credential(id: "cred-2", transports: [ "internal" ])
+    ]
+
+    options = ActionPack::WebAuthn::PublicKeyCredential::RequestOptions.new(
+      credentials: credentials,
+      relying_party: @relying_party
+    )
+
+    assert_equal [
+      { type: "public-key", id: "cred-1", transports: [ "usb", "nfc" ] },
+      { type: "public-key", id: "cred-2", transports: [ "internal" ] }
+    ], options.as_json[:allowCredentials]
+  end
+
+  test "as_json omits transports when empty" do
+    credentials = [ build_credential(id: "cred-1") ]
+
+    options = ActionPack::WebAuthn::PublicKeyCredential::RequestOptions.new(
+      credentials: credentials,
+      relying_party: @relying_party
+    )
+
+    assert_equal [
+      { type: "public-key", id: "cred-1" }
+    ], options.as_json[:allowCredentials]
+  end
+
+  private
+    def build_credential(id:, transports: [])
+      ActionPack::WebAuthn::PublicKeyCredential.new(
+        id: id,
+        public_key: OpenSSL::PKey::EC.generate("prime256v1"),
+        sign_count: 0,
+        transports: transports
+      )
+    end
+end
