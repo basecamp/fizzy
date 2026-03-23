@@ -314,4 +314,41 @@
       margin: 0;
     }
   }
+
+  /* Checkboxes */
+  .checkbox {
+    appearance: none;
+    background-color: var(--color-canvas);
+    block-size: 1.1em;
+    border: 1px solid currentColor;
+    border-radius: 0.15em;
+    color: currentColor;
+    display: grid;
+    font: inherit;
+    inline-size: 1.1em;
+    margin: 0;
+    place-content: center;
+    transform: translateY(0.1em);
+
+    &::before {
+      background-color: CanvasText;
+      block-size: 0.65em;
+      box-shadow: inset 1em 1em currentColor;
+      clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+      content: "";
+      inline-size: 0.65em;
+      transform: scale(0);
+      transform-origin: center;
+      transition: 150ms transform ease-in-out;
+    }
+
+    &:checked::before {
+      transform: scale(1) rotate(10deg);
+    }
+
+    &:where([disabled]):not(:hover):not(:active) {
+      filter: none;
+      opacity: 0.5;
+    }
+  }
 }

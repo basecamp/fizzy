@@ -91,6 +91,46 @@ class Account::ExportTest < ActiveSupport::TestCase
     end
   end
 
+  test "build includes variant records and their attachments in zip" do
+    blob = ActiveStorage::Blob.create_and_upload!(
+      io: file_fixture("moon.jpg").open,
+      filename: "moon.jpg",
+      content_type: "image/jpeg"
+    )
+    variant_record = ActiveStorage::VariantRecord.create!(
+      blob: blob,
+      variation_digest: "test_digest"
+    )
+    variant_blob = ActiveStorage::Blob.create_and_upload!(
+      io: file_fixture("moon.jpg").open,
+      filename: "moon_variant.jpg",
+      content_type: "image/jpeg"
+    )
+    ActiveStorage::Attachment.create!(
+      name: "image",
+      record: variant_record,
+      blob: variant_blob
+    )
+
+    export = Account::Export.create!(account: Current.account, user: users(:david))
+    export.build
+
+    assert export.completed?
+    export.file.open do |file|
+      reader = ZipKit::FileReader.read_zip_structure(io: file)
+      filenames = reader.map(&:filename)
+
+      variant_entries = filenames.select { |f| f.start_with?("data/active_storage_variant_records/") }
+      variant_ids = variant_entries.map { |f| File.basename(f, ".json") }
+      assert_includes variant_ids, variant_record.id, "Export should include variant record"
+
+      attachment_entries = filenames.select { |f| f.start_with?("data/active_storage_attachments/") }
+      attachment_ids = attachment_entries.map { |f| File.basename(f, ".json") }
+      variant_attachment = variant_record.reload.image_attachment
+      assert_includes attachment_ids, variant_attachment.id, "Export should include variant attachment"
+    end
+  end
+
   test "build succeeds when rich text references missing blob" do
     blob = ActiveStorage::Blob.create_and_upload!(
       io: file_fixture("moon.jpg").open,

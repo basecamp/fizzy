@@ -223,6 +223,10 @@
     padding: 0;
   }
 
+  :where(.list-unindented) {
+    padding-inline-start: 1.25em;
+  }
+
   /* Accessibility */
   .visually-hidden,
   .for-screen-reader {

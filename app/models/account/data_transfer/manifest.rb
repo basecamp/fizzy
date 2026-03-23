@@ -26,14 +26,14 @@ class Account::DataTransfer::Manifest
       [
         Account::DataTransfer::AccountRecordSet.new(account),
         Account::DataTransfer::UserRecordSet.new(account),
-        *build_record_sets(
+        *record_sets_for(
           ::User::Settings,
           ::Tag,
           ::Board,
           ::Column
         ),
         Account::DataTransfer::EntropyRecordSet.new(account),
-        *build_record_sets(
+        *record_sets_for(
           ::Board::Publication,
           ::Webhook,
           ::Access,
@@ -58,16 +58,21 @@ class Account::DataTransfer::Manifest
           ::Webhook::Delivery
         ),
         Account::DataTransfer::ActiveStorage::BlobRecordSet.new(account),
+        record_set_for(::ActiveStorage::VariantRecord),
         Account::DataTransfer::ActiveStorage::AttachmentRecordSet.new(account),
         Account::DataTransfer::ActionText::RichTextRecordSet.new(account),
         Account::DataTransfer::ActiveStorage::FileRecordSet.new(account)
       ].then { set_importable_model_names(it) }
     end
 
-    def build_record_sets(*models)
+    def record_sets_for(*models)
       models.map do |model|
-        Account::DataTransfer::RecordSet.new(account: account, model: model)
+        record_set_for(model)
       end
+    end
+
+    def record_set_for(model)
+      Account::DataTransfer::RecordSet.new(account: account, model: model)
     end
 
     def set_importable_model_names(record_sets)
