@@ -45,7 +45,7 @@ export class Service extends Construct {
       deployEnvironment: environment,
       vpc: props.vpc,
       image,
-      albName: ECS_DEFAULTS.INTERNAL_ALB_NAME,
+      albName: ECS_DEFAULTS.ALB_NAME,
       validateProductionImageVersion: false,
       autoScaling: {
         minCapacity: config.service.minCapacity,
