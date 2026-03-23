@@ -70,7 +70,8 @@ class User::FilteringTest < ActiveSupport::TestCase
     result = filtering.users
     
     # Should just be alphabetical, no selection sorting
-    names = result.map(&:name)
-    assert_equal names.sort, names, "Users should be alphabetically sorted"
+    # User.alphabetically sorts case-insensitively, so we verify the order matches
+    assert result.count > 0, "Should have users"
+    assert_equal result, result.sort_by { |u| u.name.downcase }, "Users should be alphabetically sorted"
   end
 end
