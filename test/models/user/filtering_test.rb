@@ -7,10 +7,15 @@ class User::FilteringTest < ActiveSupport::TestCase
   end
 
   test "users_for_assignee_filter sorts selected assignees first" do
-    # Create some test users
-    alice = @user.account.users.create!(name: "Alice", email_address: "alice@test.com")
-    bob = @user.account.users.create!(name: "Bob", email_address: "bob@test.com")
-    charlie = @user.account.users.create!(name: "Charlie", email_address: "charlie@test.com")
+    # Create some test users with identities
+    alice_identity = Identity.find_or_create_by!(email_address: "alice@test.com")
+    alice = @user.account.users.create!(name: "Alice", identity: alice_identity)
+    
+    bob_identity = Identity.find_or_create_by!(email_address: "bob@test.com")
+    bob = @user.account.users.create!(name: "Bob", identity: bob_identity)
+    
+    charlie_identity = Identity.find_or_create_by!(email_address: "charlie@test.com")
+    charlie = @user.account.users.create!(name: "Charlie", identity: charlie_identity)
     
     # Select Bob and Charlie as assignees
     @filter.assignees = [charlie, bob]
@@ -29,8 +34,11 @@ class User::FilteringTest < ActiveSupport::TestCase
   end
 
   test "users_for_creator_filter sorts selected creators first" do
-    alice = @user.account.users.create!(name: "Alice", email_address: "alice@test.com")
-    bob = @user.account.users.create!(name: "Bob", email_address: "bob@test.com")
+    alice_identity = Identity.find_or_create_by!(email_address: "alice@test.com")
+    alice = @user.account.users.create!(name: "Alice", identity: alice_identity)
+    
+    bob_identity = Identity.find_or_create_by!(email_address: "bob@test.com")
+    bob = @user.account.users.create!(name: "Bob", identity: bob_identity)
     
     @filter.creators = [bob]
     @filter.save!
@@ -42,8 +50,11 @@ class User::FilteringTest < ActiveSupport::TestCase
   end
 
   test "users_for_closer_filter sorts selected closers first" do
-    alice = @user.account.users.create!(name: "Alice", email_address: "alice@test.com")
-    bob = @user.account.users.create!(name: "Bob", email_address: "bob@test.com")
+    alice_identity = Identity.find_or_create_by!(email_address: "alice@test.com")
+    alice = @user.account.users.create!(name: "Alice", identity: alice_identity)
+    
+    bob_identity = Identity.find_or_create_by!(email_address: "bob@test.com")
+    bob = @user.account.users.create!(name: "Bob", identity: bob_identity)
     
     @filter.closers = [alice]
     @filter.save!
