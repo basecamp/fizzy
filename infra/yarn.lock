@@ -77,10 +77,10 @@
   dependencies:
     undici-types "~7.16.0"
 
-"@zarpay/zar-cdk-lib@^0.29.0":
-  version "0.29.0"
-  resolved "https://npm.pkg.github.com/download/@zarpay/zar-cdk-lib/0.29.0/96f7489b6598c104253cb4f3d2d8ca08721feb29#96f7489b6598c104253cb4f3d2d8ca08721feb29"
-  integrity sha512-k4lI7ge5+HGERVQD9/V0pwxapF6FE7o6LlMXGB5H2DYgiW+xEJm91v/f8UORxXNMp8ao2z+ka+6X++xhGckuiA==
+"@zarpay/zar-cdk-lib@^0.40.0":
+  version "0.40.0"
+  resolved "https://npm.pkg.github.com/download/@zarpay/zar-cdk-lib/0.40.0/ec1ad4073b75fa8c9737bfa6574f01ca9a7368b0#ec1ad4073b75fa8c9737bfa6574f01ca9a7368b0"
+  integrity sha512-n75kK8D6qsfEVuULifBEjCl+FEEwcKIKPuRzVfJ3fJm53ycWyFdp84IJeTGiK/R5PtxnLV3y5l6f62y9sbW7rw==
 
 acorn-walk@^8.1.1:
   version "8.3.4"
