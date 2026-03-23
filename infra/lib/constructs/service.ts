@@ -3,7 +3,7 @@ import * as ecs from 'aws-cdk-lib/aws-ecs';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
-import { EcrContainerImage, SharedAlbEcsFargateService } from '@zarpay/zar-cdk-lib';
+import { EcrContainerImage, ECS_DEFAULTS, SharedAlbEcsFargateService } from '@zarpay/zar-cdk-lib';
 import { config } from '../../environments/config-loader';
 import { appName, environment, isProduction, smtp } from '../shared/global-variables';
 import { Database } from './database';
@@ -45,6 +45,7 @@ export class Service extends Construct {
       deployEnvironment: environment,
       vpc: props.vpc,
       image,
+      albName: ECS_DEFAULTS.INTERNAL_ALB_NAME,
       validateProductionImageVersion: false,
       autoScaling: {
         minCapacity: config.service.minCapacity,
