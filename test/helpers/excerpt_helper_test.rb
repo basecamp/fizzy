@@ -11,7 +11,8 @@ class ExcerptHelperTest < ActionView::TestCase
   end
 
   test "ol" do
-    assert_excerpt("99. Hello world", "99. Hello world")
+    assert_excerpt("99. Hello world", "99.    Hello world")
+    assert_excerpt("99. Hello world", "  99.    Hello world")
   end
 
   test "large spaces" do

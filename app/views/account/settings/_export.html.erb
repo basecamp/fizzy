@@ -4,7 +4,7 @@
     <div>Download a complete archive of all account data.</div>
   </header>
 
-  <div data-controller="dialog" data-dialog-modal-value="true" data-action="keydown.esc->dialog#close">
+  <div data-controller="dialog" data-dialog-modal-value="true" data-action="keydown.esc->dialog#close open-export@document->dialog#open">
     <button type="button" class="btn" data-action="dialog#open">Begin export...</button>
 
     <dialog class="dialog panel panel--wide shadow" data-dialog-target="dialog" style="--panel-size: 48ch;">

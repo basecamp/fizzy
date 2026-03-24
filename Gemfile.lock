@@ -233,7 +233,7 @@ GEM
       actionview (>= 7.0.0)
       activesupport (>= 7.0.0)
     jmespath (1.6.2)
-    json (2.19.1)
+    json (2.19.2)
     jwt (3.1.2)
       base64
     kamal (2.10.1)
@@ -254,7 +254,7 @@ GEM
       logger (~> 1.6)
     letter_opener (1.10.0)
       launchy (>= 2.2, < 4)
-    lexxy (0.8.5.beta)
+    lexxy (0.9.0.beta)
       rails (>= 8.0.2)
     lint_roller (1.1.0)
     logger (1.7.0)
@@ -518,7 +518,7 @@ DEPENDENCIES
   jbuilder
   kamal
   letter_opener
-  lexxy (= 0.8.5.beta)
+  lexxy (= 0.9.0.beta)
   mission_control-jobs
   mittens
   mocha
