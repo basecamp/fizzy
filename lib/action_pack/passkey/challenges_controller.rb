@@ -24,7 +24,7 @@ class ActionPack::Passkey::ChallengesController < ActionController::Base
   def create
     challenge = create_passkey_challenge
 
-    cookies.encrypted[COOKIE_NAME] = { value: challenge, httponly: true, same_site: :strict, secure: !request.local? && request.ssl? }
+    cookies.encrypted[COOKIE_NAME] = { value: challenge, httponly: true, same_site: :lax, secure: !request.local? && request.ssl? }
     render json: { challenge: challenge }
   end
 

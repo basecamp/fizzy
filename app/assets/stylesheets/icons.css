@@ -11,6 +11,7 @@
     mask-repeat: no-repeat;
     mask-size: var(--icon-size, 1em);
     pointer-events: none;
+    position: relative;
     user-select: none;
   }
 
@@ -18,7 +19,11 @@
     background: none;
   }
 
-  .icon--37signals { --svg: url("37signals.svg"); }
+  .icon--37signals {
+    --svg: url("37signals.svg");
+    top: -0.1em;
+    margin-right: 0.1375em;
+  }
   .icon--add { --svg: url("add.svg "); }
   .icon--add--meta { --svg: url("add--meta.svg "); }
   .icon--arrow-left { --svg: url("arrow-left.svg "); }
@@ -28,6 +33,13 @@
   .icon--assigned { --svg: url("assigned.svg "); }
   .icon--attachment { --svg: url("attachment.svg "); }
   .icon--authentication { --svg: url("authentication.svg "); }
+  .icon--basecamp {
+    --svg: url("basecamp.svg");
+    inline-size: 1.14em;
+    mask-size: 1.14em var(--icon-size, 1em);
+    top: -0.1em;
+    margin-right: 0.1375em;
+  }
   .icon--bell-alert { --svg: url("bell-alert.svg "); }
   .icon--bell-off { --svg: url("bell-off.svg "); }
   .icon--bell { --svg: url("bell.svg "); }
@@ -57,9 +69,20 @@
   .icon--gear { --svg: url("gear.svg "); }
   .icon--grid { --svg: url("grid.svg "); }
   .icon--filter { --svg: url("filter.svg "); }
-  .icon--fizzy { --svg: url("fizzy.svg"); }
+  .icon--fizzy {
+    --svg: url("fizzy.svg");
+    top: -0.1em;
+    margin-right: 0.1375em;
+  }
   .icon--globe { --svg: url("globe.svg "); }
   .icon--golden-ticket { --svg: url("golden-ticket.svg "); }
+  .icon--hey {
+    --svg: url("hey.svg");
+    block-size: 1.06em;
+    mask-size: var(--icon-size, 1em) 1.06em;
+    top: -0.1em;
+    margin-right: 0.1375em;
+  }
   .icon--history { --svg: url("history.svg "); }
   .icon--home { --svg: url("home.svg "); }
   .icon--install-edge { --svg: url("install-edge.svg "); }

@@ -23,12 +23,19 @@
 
 import { register, authenticate } from "lib/action_pack/webauthn"
 
-let listeners
-let currentDocument
+const mediated = new WeakSet()
+const mediationSelector = 'form[data-passkey-mediation="conditional"]'
 
-document.addEventListener("DOMContentLoaded", setup)
-document.addEventListener("turbo:load", setup)
-document.addEventListener("turbo:before-cache", teardown)
+// Delegate click events for passkey buttons. Walks up from the click target
+// to find the nearest [data-passkey] element, like Rails UJS does.
+document.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-passkey]")
+
+  if (button) {
+    if (button.dataset.passkey === "create") createPasskey(button)
+    else if (button.dataset.passkey === "sign_in") signInWithPasskey(button)
+  }
+})
 
 // Set error state on the nearest [data-passkey-errors] container.
 // The app's CSS is responsible for showing/hiding children based on
@@ -41,38 +48,36 @@ document.addEventListener("passkey:error", ({ target, detail: { cancelled } }) =
   }
 })
 
-// Bind click handlers to passkey buttons and attempt conditional mediation.
-// Guards against duplicate setup.
-function setup() {
-  if (currentDocument !== document.documentElement) {
-    currentDocument = document.documentElement
-
-    listeners?.abort()
-    listeners = new AbortController()
-
-    for (const button of document.querySelectorAll('[data-passkey="create"]')) {
-      button.addEventListener("click", () => createPasskey(button), { signal: listeners.signal })
-    }
-
-    for (const button of document.querySelectorAll('[data-passkey="sign_in"]')) {
-      button.addEventListener("click", () => signInWithPasskey(button), { signal: listeners.signal })
-    }
-
-    attemptConditionalMediation()
-  }
-}
-
-// Reset transient DOM state and unbind event handlers to prevent leaks and duplicate handlers.
-function teardown() {
-  currentDocument = null
-  listeners?.abort()
-
-  for (const button of document.querySelectorAll('[data-passkey][disabled]')) {
+// Clean up transient DOM state before Turbo caches the page snapshot.
+document.addEventListener("turbo:before-cache", () => {
+  for (const button of document.querySelectorAll("[data-passkey][disabled]")) {
     button.disabled = false
   }
 
   for (const container of document.querySelectorAll("[data-passkey-errors]")) {
     delete container.dataset.passkeyErrorState
+  }
+})
+
+// Attempt conditional mediation when a form with [data-passkey-mediation="conditional"]
+// appears in the DOM. Uses a MutationObserver so it works regardless of how the form
+// is inserted (initial page load, Turbo Drive, Turbo Streams, or plain JS).
+new MutationObserver((mutations) => {
+  for (const { addedNodes } of mutations) {
+    for (const node of addedNodes) {
+      if (node.nodeType === Node.ELEMENT_NODE) mediateIn(node)
+    }
+  }
+}).observe(document.documentElement, { childList: true, subtree: true })
+
+mediateIn(document)
+
+function mediateIn(root) {
+  const form = root.matches?.(mediationSelector) ? root : root.querySelector?.(mediationSelector)
+
+  if (form && !mediated.has(form)) {
+    mediated.add(form)
+    attemptConditionalMediation()
   }
 }
 
