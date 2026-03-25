@@ -1,0 +1,123 @@
+name: Sync upstream main into fork main
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 */6 * * *"
+
+concurrency:
+  group: sync-upstream-main
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Configure git author
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch origin and upstream
+        shell: bash
+        run: |
+          set -euo pipefail
+          git remote remove upstream 2>/dev/null || true
+          git remote add upstream https://github.com/basecamp/fizzy.git
+          git fetch origin main self-hosted
+          git fetch upstream main
+
+      - name: Fast-forward fork main from upstream
+        id: sync
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout -B main origin/main
+
+          before_sha="$(git rev-parse HEAD)"
+          upstream_sha="$(git rev-parse upstream/main)"
+
+          git merge --ff-only upstream/main
+
+          after_sha="$(git rev-parse HEAD)"
+
+          if [ "$before_sha" != "$after_sha" ]; then
+            git push origin main
+            echo "main_updated=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "main_updated=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          echo "before_sha=$before_sha" >> "$GITHUB_OUTPUT"
+          echo "after_sha=$after_sha" >> "$GITHUB_OUTPUT"
+          echo "upstream_sha=$upstream_sha" >> "$GITHUB_OUTPUT"
+
+      - name: Create or refresh upstream PR into self-hosted
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git fetch origin main self-hosted
+
+          existing_pr="$(gh pr list \
+            --repo "$GITHUB_REPOSITORY" \
+            --base self-hosted \
+            --head main \
+            --state open \
+            --json number \
+            --jq '.[0].number')"
+
+          if git diff --quiet origin/self-hosted...origin/main; then
+            if [ -n "$existing_pr" ]; then
+              gh pr close "$existing_pr" \
+                --repo "$GITHUB_REPOSITORY" \
+                --comment "Closing because \`main\` and \`self-hosted\` no longer differ."
+            fi
+            exit 0
+          fi
+
+          cat > /tmp/upstream-sync-pr.md <<EOF
+          This automated PR carries the latest upstream \`basecamp/fizzy\` \`main\` changes into this fork's \`self-hosted\` branch.
+
+          The workflow keeps the fork's \`main\` branch as a clean mirror of upstream, then opens this review step so self-hosted deployment changes stay isolated on \`self-hosted\` instead of being mixed into the upstream-tracking branch.
+
+          Sync details:
+          - Upstream repository: \`basecamp/fizzy\`
+          - Upstream branch: \`main\`
+          - Fork branch updated: \`main\`
+          - Previous fork main SHA: \`${{ steps.sync.outputs.before_sha }}\`
+          - Current fork main SHA: \`${{ steps.sync.outputs.after_sha }}\`
+          - Upstream main SHA: \`${{ steps.sync.outputs.upstream_sha }}\`
+
+          Review focus:
+          - upstream app changes that conflict with the self-hosted Kamal path
+          - migrations, dependencies, or env changes that alter deployment assumptions
+          - workflow changes worth porting separately into \`self-hosted\`
+          EOF
+
+          if [ -n "$existing_pr" ]; then
+            gh pr edit "$existing_pr" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "[codex] sync upstream main into self-hosted" \
+              --body-file /tmp/upstream-sync-pr.md
+          else
+            gh pr create \
+              --repo "$GITHUB_REPOSITORY" \
+              --base self-hosted \
+              --head main \
+              --title "[codex] sync upstream main into self-hosted" \
+              --body-file /tmp/upstream-sync-pr.md \
+              --draft
+          fi
