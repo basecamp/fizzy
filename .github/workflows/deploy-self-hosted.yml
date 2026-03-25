@@ -1,9 +1,6 @@
 name: Deploy self-hosted Fizzy
 
 on:
-  push:
-    branches:
-      - self-hosted
   workflow_dispatch:
     inputs:
       action:

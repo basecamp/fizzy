@@ -1,11 +1,7 @@
 name: Sync Gemfile.saas.lock
 
 on:
-  push:
-    branches:
-      - "dependabot/bundler/**"
-    paths:
-      - Gemfile.lock
+  workflow_dispatch:
 
 permissions:
   contents: write

@@ -1,12 +1,6 @@
 name: Build and publish container image to GHCR
 
 on:
-  push:
-    branches:
-      - main
-      - self-hosted
-    tags:
-      - 'v*'
   workflow_dispatch:
 
 concurrency:
@@ -206,4 +200,3 @@ jobs:
             echo "Signing $tag"
             cosign sign --yes "$tag"
           done <<< "$tags"
-

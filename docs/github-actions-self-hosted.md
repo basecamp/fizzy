@@ -6,7 +6,7 @@ This branch deploys Fizzy from a self-hosted GitHub Actions runner on `pi5-01`.
 
 - Keep self-hosted deployment work on the `self-hosted` branch.
 - Set the fork default branch to `self-hosted` once the repo-side workflow is in place.
-- `.github/workflows/publish-image.yml` is configured to publish from both `main` and `self-hosted`.
+- Both Actions workflows are `workflow_dispatch` only. Nothing auto-builds or auto-deploys on push.
 
 ## Repo secrets
 
@@ -51,12 +51,14 @@ The workflow expects `pi5-01` to be able to SSH to `homelab-rcc` without prompti
 
 ## Deploy workflow
 
-`.github/workflows/deploy-self-hosted.yml` runs on:
+`.github/workflows/deploy-self-hosted.yml` runs only by manual dispatch.
 
-- pushes to `self-hosted`
-- manual dispatch
+Recommended order:
 
-Manual dispatch supports:
+1. Run `publish-image.yml`.
+2. After the image exists in GHCR, run `deploy-self-hosted.yml`.
+
+Manual deploy dispatch supports:
 
 - `deploy`: normal `bin/kamal deploy`
 - `setup`: first-time `bin/kamal setup`
