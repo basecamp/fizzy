@@ -26,6 +26,14 @@ class Boards::AgentBootstrapsControllerTest < ActionDispatch::IntegrationTest
     assert_equal board.id, body.dig("board", "id")
   end
 
+  test "new requires account admin" do
+    logout_and_sign_in_as :jz
+
+    get new_board_agent_bootstrap_path(boards(:writebook))
+
+    assert_response :forbidden
+  end
+
   test "show" do
     bootstrap = boards(:writebook).agent_bootstraps.create!(
       account: accounts("37s"),
@@ -36,6 +44,19 @@ class Boards::AgentBootstrapsControllerTest < ActionDispatch::IntegrationTest
     get board_agent_bootstrap_path(bootstrap.board, bootstrap)
     assert_response :success
     assert_in_body bootstrap.token
+  end
+
+  test "show requires account admin" do
+    bootstrap = boards(:writebook).agent_bootstraps.create!(
+      account: accounts("37s"),
+      creator: users(:kevin),
+      expires_at: 30.minutes.from_now
+    )
+
+    logout_and_sign_in_as :jz
+    get board_agent_bootstrap_path(bootstrap.board, bootstrap)
+
+    assert_response :forbidden
   end
 
   test "board page includes agent setup link for account admins" do
