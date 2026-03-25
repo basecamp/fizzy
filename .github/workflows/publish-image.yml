@@ -75,6 +75,7 @@ jobs:
           labels: |
             org.opencontainers.image.source=${{ env.SOURCE_URL }}
             org.opencontainers.image.revision=${{ github.sha }}
+            service=fizzy
           sbom: false
           provenance: false
 
