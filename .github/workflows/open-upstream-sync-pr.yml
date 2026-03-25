@@ -1,0 +1,104 @@
+name: Open PR from upstream into self-hosted
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 * * * *"
+
+concurrency:
+  group: open-upstream-sync-pr
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  open_pr:
+    runs-on: ubuntu-latest
+    env:
+      SYNC_BRANCH: codex/upstream-main-sync
+      UPSTREAM_REMOTE: upstream
+      UPSTREAM_REPO_URL: https://github.com/basecamp/fizzy.git
+      UPSTREAM_BRANCH: main
+      TARGET_BRANCH: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Fetch target and upstream branches
+        shell: bash
+        run: |
+          set -euo pipefail
+          git remote add "$UPSTREAM_REMOTE" "$UPSTREAM_REPO_URL" 2>/dev/null || git remote set-url "$UPSTREAM_REMOTE" "$UPSTREAM_REPO_URL"
+          git fetch origin "$TARGET_BRANCH"
+          git fetch "$UPSTREAM_REMOTE" "$UPSTREAM_BRANCH"
+
+      - name: Create or refresh PR from upstream into self-hosted
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          existing_pr="$(gh pr list \
+            --repo "$GITHUB_REPOSITORY" \
+            --base "$TARGET_BRANCH" \
+            --head "$SYNC_BRANCH" \
+            --state open \
+            --json number \
+            --jq '.[0].number')"
+
+          if git diff --quiet "origin/$TARGET_BRANCH...$UPSTREAM_REMOTE/$UPSTREAM_BRANCH"; then
+            if [ -n "$existing_pr" ]; then
+              gh pr close "$existing_pr" \
+                --repo "$GITHUB_REPOSITORY" \
+                --comment "Closing because \`$UPSTREAM_REMOTE/$UPSTREAM_BRANCH\` and \`$TARGET_BRANCH\` no longer differ."
+            fi
+
+            if gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/$SYNC_BRANCH" >/dev/null 2>&1; then
+              gh api \
+                --method DELETE \
+                "repos/$GITHUB_REPOSITORY/git/refs/heads/$SYNC_BRANCH"
+            fi
+            exit 0
+          fi
+
+          git checkout --force -B "$SYNC_BRANCH" "$UPSTREAM_REMOTE/$UPSTREAM_BRANCH"
+          git push --force-with-lease origin "$SYNC_BRANCH"
+
+          cat > /tmp/upstream-sync-pr.md <<EOF
+          This automated PR alerts you that \`$UPSTREAM_REMOTE/$UPSTREAM_BRANCH\` has changed and now differs from \`$TARGET_BRANCH\`.
+
+          The PR head branch is disposable and is recreated from \`$UPSTREAM_REMOTE/$UPSTREAM_BRANCH\` on each run, so closing the PR will not remove your long-lived deployment branch.
+
+          Change context:
+          - Upstream source: \`$UPSTREAM_REPO_URL\`
+          - Upstream branch: \`$UPSTREAM_BRANCH\`
+          - PR head branch: \`$SYNC_BRANCH\`
+          - Target branch: \`$TARGET_BRANCH\`
+          - Triggering SHA: \`${GITHUB_SHA}\`
+          - Triggering ref: \`${GITHUB_REF}\`
+
+          Review focus:
+          - upstream app changes that conflict with the self-hosted Kamal path
+          - migrations, dependencies, or env changes that alter deployment assumptions
+          - workflow changes worth porting separately into \`$TARGET_BRANCH\`
+          EOF
+
+          if [ -n "$existing_pr" ]; then
+            gh pr edit "$existing_pr" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "[codex] sync upstream main into self-hosted" \
+              --body-file /tmp/upstream-sync-pr.md
+          else
+            gh pr create \
+              --repo "$GITHUB_REPOSITORY" \
+              --base "$TARGET_BRANCH" \
+              --head "$SYNC_BRANCH" \
+              --title "[codex] sync upstream main into self-hosted" \
+              --body-file /tmp/upstream-sync-pr.md \
+              --draft
+          fi
