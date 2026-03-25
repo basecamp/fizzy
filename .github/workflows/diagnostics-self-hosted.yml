@@ -93,14 +93,14 @@ jobs:
       - name: Write deploy secrets to local files
         shell: bash
         env:
-          KAMAL_SERVER_ALIAS: ${{ vars.KAMAL_SERVER_ALIAS }}
-          KAMAL_PUBLIC_HOST: ${{ vars.KAMAL_PUBLIC_HOST }}
-          KAMAL_SSH_USER: ${{ vars.KAMAL_SSH_USER }}
-          KAMAL_STORAGE_PATH: ${{ vars.KAMAL_STORAGE_PATH }}
-          KAMAL_MAILER_FROM_ADDRESS: ${{ vars.KAMAL_MAILER_FROM_ADDRESS }}
-          KAMAL_KNOWN_HOST: ${{ vars.KAMAL_KNOWN_HOST }}
-          S3_ENDPOINT: ${{ vars.S3_ENDPOINT }}
-          S3_BUCKET: ${{ vars.S3_BUCKET }}
+          KAMAL_SERVER_ALIAS: ${{ secrets.KAMAL_SERVER_ALIAS || vars.KAMAL_SERVER_ALIAS }}
+          KAMAL_PUBLIC_HOST: ${{ secrets.KAMAL_PUBLIC_HOST || vars.KAMAL_PUBLIC_HOST }}
+          KAMAL_SSH_USER: ${{ secrets.KAMAL_SSH_USER || vars.KAMAL_SSH_USER }}
+          KAMAL_STORAGE_PATH: ${{ secrets.KAMAL_STORAGE_PATH || vars.KAMAL_STORAGE_PATH }}
+          KAMAL_MAILER_FROM_ADDRESS: ${{ secrets.KAMAL_MAILER_FROM_ADDRESS || vars.KAMAL_MAILER_FROM_ADDRESS }}
+          KAMAL_KNOWN_HOST: ${{ secrets.KAMAL_KNOWN_HOST || vars.KAMAL_KNOWN_HOST }}
+          S3_ENDPOINT: ${{ secrets.S3_ENDPOINT || vars.S3_ENDPOINT }}
+          S3_BUCKET: ${{ secrets.S3_BUCKET || vars.S3_BUCKET }}
           SECRET_KEY_BASE: ${{ secrets.SECRET_KEY_BASE }}
           VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
           VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
@@ -114,6 +114,32 @@ jobs:
           set -euo pipefail
 
           mkdir -p config
+
+          missing=0
+          for key in \
+            KAMAL_SERVER_ALIAS \
+            KAMAL_PUBLIC_HOST \
+            KAMAL_SSH_USER \
+            KAMAL_STORAGE_PATH \
+            KAMAL_MAILER_FROM_ADDRESS \
+            KAMAL_KNOWN_HOST \
+            S3_ENDPOINT \
+            S3_BUCKET \
+            SECRET_KEY_BASE \
+            VAPID_PUBLIC_KEY \
+            VAPID_PRIVATE_KEY \
+            SMTP_USERNAME \
+            SMTP_PASSWORD \
+            S3_ACCESS_KEY_ID \
+            S3_SECRET_ACCESS_KEY \
+            CLOUDFLARED_TOKEN
+          do
+            if [ -z "${!key:-}" ]; then
+              echo "Missing required Actions setting: $key" >&2
+              missing=1
+            fi
+          done
+          [ "$missing" -eq 0 ]
 
           {
             printf 'KAMAL_SERVER_ALIAS=%s\n' "$KAMAL_SERVER_ALIAS"
@@ -146,7 +172,7 @@ jobs:
       - name: Verify runner can SSH to homelab-rcc
         shell: bash
         env:
-          KAMAL_SERVER_ALIAS: ${{ vars.KAMAL_SERVER_ALIAS }}
+          KAMAL_SERVER_ALIAS: ${{ secrets.KAMAL_SERVER_ALIAS || vars.KAMAL_SERVER_ALIAS }}
         run: |
           set -euo pipefail
           ssh -o BatchMode=yes "$KAMAL_SERVER_ALIAS" "echo runner-ssh-ok >/dev/null"
@@ -154,7 +180,7 @@ jobs:
       - name: Prepare runner SSH state
         shell: bash
         env:
-          KAMAL_KNOWN_HOST: ${{ vars.KAMAL_KNOWN_HOST }}
+          KAMAL_KNOWN_HOST: ${{ secrets.KAMAL_KNOWN_HOST || vars.KAMAL_KNOWN_HOST }}
         run: |
           set -euo pipefail
           mkdir -p "$HOME/.ssh"
