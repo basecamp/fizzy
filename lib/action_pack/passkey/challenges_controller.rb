@@ -17,8 +17,6 @@
 class ActionPack::Passkey::ChallengesController < ActionController::Base
   COOKIE_NAME = :action_pack_passkey_challenge
 
-  include ActionPack::Passkey::Request
-
   # Generates a fresh challenge, stores it in an encrypted cookie, and returns
   # it as JSON. The cookie is consumed on the next passkey form submission.
   def create
