@@ -214,7 +214,7 @@ jobs:
       - name: Log in to GHCR
         shell: bash
         env:
-          KAMAL_REGISTRY_PASSWORD: ${{ secrets.KAMAL_REGISTRY_PASSWORD }}
+          KAMAL_REGISTRY_PASSWORD: ${{ github.token }}
         run: |
           set -euo pipefail
           export DOCKER_CONFIG="$RUNNER_TEMP/docker-ghcr"
@@ -262,7 +262,7 @@ jobs:
         env:
           ACTION: ${{ needs.prepare.outputs.action }}
           VERSION_INPUT: ${{ needs.prepare.outputs.version }}
-          KAMAL_REGISTRY_PASSWORD: ${{ secrets.KAMAL_REGISTRY_PASSWORD }}
+          KAMAL_REGISTRY_PASSWORD: ${{ github.token }}
         run: |
           set -euo pipefail
           runner_home="$(getent passwd "$(id -un)" | cut -d: -f6)"
