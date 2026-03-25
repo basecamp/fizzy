@@ -68,7 +68,7 @@ jobs:
 
   deploy:
     needs: prepare
-    runs-on: ${{ fromJSON(vars.SELF_HOSTED_RUNNER_LABELS_JSON) }}
+    runs-on: ${{ fromJSON(vars.SELF_HOSTED_RUNNER_LABELS_JSON || '["self-hosted"]') }}
     timeout-minutes: 90
     permissions:
       contents: read
