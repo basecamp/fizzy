@@ -1,35 +1,51 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/sh
+set -eu
 
 resolve_ssh_user() {
   ruby <<'RUBY'
+require "erb"
 require "yaml"
+require "dotenv"
 
 destination = ENV["KAMAL_DESTINATION"].to_s
 config_path = destination.empty? ? "config/deploy.yml" : "config/deploy.#{destination}.yml"
 
 if File.exist?(config_path)
-  config = YAML.load_file(config_path) || {}
+  Dotenv.load(".env.kamal.local") if File.exist?(".env.kamal.local")
+  rendered = ERB.new(File.read(config_path)).result
+  config = YAML.safe_load(rendered, aliases: true) || {}
   user = config.dig("ssh", "user").to_s
   puts user unless user.empty?
 end
 RUBY
 }
 
+run_ssh() {
+  ssh_config_file="${KAMAL_SSH_CONFIG_FILE:-${HOME:-}/.ssh/config}"
+  if [ -n "$ssh_config_file" ] && [ -f "$ssh_config_file" ]; then
+    ssh -F "$ssh_config_file" "$@"
+  else
+    ssh "$@"
+  fi
+}
+
 SSH_USER="${KAMAL_SSH_USER:-$(resolve_ssh_user)}"
-SSH_USER="${SSH_USER:-$USER}"
+SSH_USER="${SSH_USER:-${USER:-}}"
 HOSTS="${KAMAL_HOSTS:-}"
 
-if [[ -z "$HOSTS" ]]; then
+if [ -z "$HOSTS" ]; then
   exit 0
 fi
 
-IFS=',' read -r -a HOST_ARRAY <<< "$HOSTS"
+OLD_IFS=$IFS
+IFS=','
+set -- $HOSTS
+IFS=$OLD_IFS
 
-for host in "${HOST_ARRAY[@]}"; do
-  host="$(echo "$host" | xargs)"
-  [[ -z "$host" ]] && continue
+for host in "$@"; do
+  host="$(printf '%s' "$host" | xargs)"
+  [ -z "$host" ] && continue
 
   echo "pre-connect: checking SSH for ${SSH_USER}@${host}"
-  ssh -o BatchMode=yes -o ConnectTimeout=5 -o StrictHostKeyChecking=accept-new "${SSH_USER}@${host}" "echo ok >/dev/null"
+  run_ssh -o BatchMode=yes -o ConnectTimeout=5 -o StrictHostKeyChecking=accept-new "${SSH_USER}@${host}" "echo ok >/dev/null"
 done

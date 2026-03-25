@@ -1,3 +1,16 @@
+<%
+require "dotenv"
+
+Dotenv.load(".env.kamal.local") if File.exist?(".env.kamal.local")
+
+kamal_server_alias = ENV.fetch("KAMAL_SERVER_ALIAS")
+kamal_public_host = ENV.fetch("KAMAL_PUBLIC_HOST")
+kamal_ssh_user = ENV.fetch("KAMAL_SSH_USER")
+kamal_storage_path = ENV.fetch("KAMAL_STORAGE_PATH")
+kamal_mailer_from_address = ENV.fetch("KAMAL_MAILER_FROM_ADDRESS")
+s3_endpoint = ENV.fetch("S3_ENDPOINT")
+s3_bucket = ENV.fetch("S3_BUCKET")
+%>
 # Name of this app
 service: fizzy
 image: joshyorko/fizzy
@@ -8,15 +21,15 @@ image: joshyorko/fizzy
 # Where to deploy fizzy
 servers:
   web:
-    - homelab-rcc
+    - <%= kamal_server_alias %>
 
 # How you connect to your server
 ssh:
-  user: kdlocpanda
+  user: <%= kamal_ssh_user %>
 
 # Cloudflare Tunnel handles public TLS; Kamal proxy serves local origin HTTP
 proxy:
-  host: fizzy.joshyorko.com
+  host: <%= kamal_public_host %>
   app_port: 80
   ssl_redirect: true
   forward_headers: true
@@ -38,25 +51,25 @@ env:
     - AWS_ACCESS_KEY_ID:S3_ACCESS_KEY_ID
     - AWS_SECRET_ACCESS_KEY:S3_SECRET_ACCESS_KEY
   clear:
-    BASE_URL: https://fizzy.joshyorko.com
+    BASE_URL: https://<%= kamal_public_host %>
     ASSUME_SSL: true
     FORCE_SSL: true
-    MAILER_FROM_ADDRESS: joshua.yorko@gmail.com
+    MAILER_FROM_ADDRESS: <%= kamal_mailer_from_address %>
     SMTP_ADDRESS: smtp.gmail.com
     MULTI_TENANT: false # Set to true to allow multiple accounts to sign up
     SOLID_QUEUE_IN_PUMA: true # Run background jobs in the app container
     ACTIVE_STORAGE_SERVICE: mirror_s3
-    S3_ENDPOINT: http://10.10.40.56:9000
+    S3_ENDPOINT: <%= s3_endpoint %>
     S3_REGION: us-east-1
     S3_FORCE_PATH_STYLE: true
-    S3_BUCKET: fizzy-production
+    S3_BUCKET: <%= s3_bucket %>
     AWS_REGION: us-east-1
 
 
 accessories:
   cloudflared:
     image: cloudflare/cloudflared:latest
-    host: homelab-rcc
+    host: <%= kamal_server_alias %>
     cmd: tunnel --no-autoupdate run
     env:
       secret:
@@ -82,7 +95,7 @@ aliases:
 
 # Use a persistent host path for sqlite database files and local Active Storage files.
 volumes:
-  - "/home/kdlocpanda/fizzy-data/storage:/rails/storage"
+  - "<%= kamal_storage_path %>:/rails/storage"
 
 # Bridge fingerprinted assets, like JS and CSS, between versions to avoid
 # hitting 404 on in-flight requests. Combines all files from new and old

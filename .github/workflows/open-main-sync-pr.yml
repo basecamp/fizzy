@@ -1,0 +1,86 @@
+name: Open PR from main into self-hosted
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: open-main-sync-pr
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  open_pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Fetch target branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main self-hosted
+
+      - name: Create or refresh PR from main into self-hosted
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          existing_pr="$(gh pr list \
+            --repo "$GITHUB_REPOSITORY" \
+            --base self-hosted \
+            --head main \
+            --state open \
+            --json number \
+            --jq '.[0].number')"
+
+          if git diff --quiet origin/self-hosted...origin/main; then
+            if [ -n "$existing_pr" ]; then
+              gh pr close "$existing_pr" \
+                --repo "$GITHUB_REPOSITORY" \
+                --comment "Closing because \`main\` and \`self-hosted\` no longer differ."
+            fi
+            exit 0
+          fi
+
+          cat > /tmp/main-sync-pr.md <<EOF
+          This automated PR alerts you that \`main\` has changed and now differs from \`self-hosted\`.
+
+          The intent is to keep \`main\` as the upstream-tracking branch and use this PR as the review surface for deciding what should be merged into the self-hosted deployment branch.
+
+          Change context:
+          - Source branch: \`main\`
+          - Target branch: \`self-hosted\`
+          - Triggering SHA: \`${GITHUB_SHA}\`
+          - Triggering ref: \`${GITHUB_REF}\`
+
+          Review focus:
+          - upstream app changes that conflict with the self-hosted Kamal path
+          - migrations, dependencies, or env changes that alter deployment assumptions
+          - workflow changes worth porting separately into \`self-hosted\`
+          EOF
+
+          if [ -n "$existing_pr" ]; then
+            gh pr edit "$existing_pr" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "[codex] sync main into self-hosted" \
+              --body-file /tmp/main-sync-pr.md
+          else
+            gh pr create \
+              --repo "$GITHUB_REPOSITORY" \
+              --base self-hosted \
+              --head main \
+              --title "[codex] sync main into self-hosted" \
+              --body-file /tmp/main-sync-pr.md \
+              --draft
+          fi

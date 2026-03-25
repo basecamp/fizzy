@@ -11,33 +11,121 @@ on:
         options:
           - deploy
           - setup
+      version:
+        description: Existing image tag to deploy; defaults to sha-<current commit>
+        required: false
+        type: string
+  workflow_call:
+    inputs:
+      action:
+        description: Kamal action to run
+        required: false
+        default: deploy
+        type: string
+      version:
+        description: Existing image tag to deploy; defaults to sha-<current commit>
+        required: false
+        default: ""
+        type: string
 
 concurrency:
   group: deploy-self-hosted-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      action: ${{ steps.vars.outputs.action }}
+      version: ${{ steps.vars.outputs.version }}
+    steps:
+      - name: Resolve deploy inputs
+        id: vars
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          MANUAL_ACTION: ${{ github.event.inputs.action || '' }}
+          MANUAL_VERSION: ${{ github.event.inputs.version || '' }}
+          CALLED_ACTION: ${{ inputs.action || '' }}
+          CALLED_VERSION: ${{ inputs.version || '' }}
+        run: |
+          set -euo pipefail
+
+          if [ "$EVENT_NAME" = "workflow_call" ]; then
+            action="${CALLED_ACTION:-deploy}"
+            version="${CALLED_VERSION:-}"
+          else
+            action="${MANUAL_ACTION:-deploy}"
+            version="${MANUAL_VERSION:-}"
+          fi
+
+          if [ -z "$version" ]; then
+            version="sha-${GITHUB_SHA::7}"
+          fi
+
+          printf 'action=%s\n' "$action" >> "$GITHUB_OUTPUT"
+          printf 'version=%s\n' "$version" >> "$GITHUB_OUTPUT"
+
   deploy:
-    runs-on:
-      - self-hosted
-      - linux
-      - arm64
-      - pi5-01
-      - kamal
+    needs: prepare
+    runs-on: ${{ fromJSON(vars.SELF_HOSTED_RUNNER_LABELS_JSON) }}
     timeout-minutes: 90
     permissions:
       contents: read
       packages: read
-    env:
-      KAMAL_IMAGE: ghcr.io/basecamp/kamal:v2.10.1
 
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
+      - name: Set up Ruby on runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          runner_home="$(getent passwd "$(id -un)" | cut -d: -f6)"
+          export RBENV_ROOT="${RBENV_ROOT:-$runner_home/.rbenv}"
+          export PATH="$RBENV_ROOT/bin:$RBENV_ROOT/shims:$PATH"
+          eval "$(rbenv init - bash)"
+          ruby -v
+          if ! bundle _2.6.9_ -v >/dev/null 2>&1; then
+            gem install bundler -v 2.6.9 --no-document
+          fi
+          bundle -v
+
+      - name: Configure persistent Bundler path
+        shell: bash
+        run: |
+          set -euo pipefail
+          runner_home="$(getent passwd "$(id -un)" | cut -d: -f6)"
+          bundle_path="$runner_home/.local/share/bundle/fizzy"
+          bundle_app_config="$runner_home/.config/bundle/fizzy"
+          mkdir -p "$bundle_path" "$bundle_app_config"
+          {
+            printf 'BUNDLE_PATH=%s\n' "$bundle_path"
+            printf 'BUNDLE_APP_CONFIG=%s\n' "$bundle_app_config"
+          } >> "$GITHUB_ENV"
+
+      - name: Install bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          runner_home="$(getent passwd "$(id -un)" | cut -d: -f6)"
+          export RBENV_ROOT="${RBENV_ROOT:-$runner_home/.rbenv}"
+          export PATH="$RBENV_ROOT/bin:$RBENV_ROOT/shims:$PATH"
+          eval "$(rbenv init - bash)"
+          bundle check || bundle install --jobs 4 --retry 3
+
       - name: Write deploy secrets to local files
         shell: bash
         env:
+          KAMAL_SERVER_ALIAS: ${{ vars.KAMAL_SERVER_ALIAS }}
+          KAMAL_PUBLIC_HOST: ${{ vars.KAMAL_PUBLIC_HOST }}
+          KAMAL_SSH_USER: ${{ vars.KAMAL_SSH_USER }}
+          KAMAL_STORAGE_PATH: ${{ vars.KAMAL_STORAGE_PATH }}
+          KAMAL_MAILER_FROM_ADDRESS: ${{ vars.KAMAL_MAILER_FROM_ADDRESS }}
+          KAMAL_KNOWN_HOST: ${{ vars.KAMAL_KNOWN_HOST }}
+          S3_ENDPOINT: ${{ vars.S3_ENDPOINT }}
+          S3_BUCKET: ${{ vars.S3_BUCKET }}
           SECRET_KEY_BASE: ${{ secrets.SECRET_KEY_BASE }}
           VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
           VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
@@ -53,6 +141,14 @@ jobs:
           mkdir -p config
 
           {
+            printf 'KAMAL_SERVER_ALIAS=%s\n' "$KAMAL_SERVER_ALIAS"
+            printf 'KAMAL_PUBLIC_HOST=%s\n' "$KAMAL_PUBLIC_HOST"
+            printf 'KAMAL_SSH_USER=%s\n' "$KAMAL_SSH_USER"
+            printf 'KAMAL_STORAGE_PATH=%s\n' "$KAMAL_STORAGE_PATH"
+            printf 'KAMAL_MAILER_FROM_ADDRESS=%s\n' "$KAMAL_MAILER_FROM_ADDRESS"
+            printf 'KAMAL_KNOWN_HOST=%s\n' "$KAMAL_KNOWN_HOST"
+            printf 'S3_ENDPOINT=%s\n' "$S3_ENDPOINT"
+            printf 'S3_BUCKET=%s\n' "$S3_BUCKET"
             printf 'SECRET_KEY_BASE=%s\n' "$SECRET_KEY_BASE"
             printf 'VAPID_PUBLIC_KEY=%s\n' "$VAPID_PUBLIC_KEY"
             printf 'VAPID_PRIVATE_KEY=%s\n' "$VAPID_PRIVATE_KEY"
@@ -74,9 +170,11 @@ jobs:
 
       - name: Verify runner can SSH to homelab-rcc
         shell: bash
+        env:
+          KAMAL_SERVER_ALIAS: ${{ vars.KAMAL_SERVER_ALIAS }}
         run: |
           set -euo pipefail
-          ssh -o BatchMode=yes homelab-rcc "echo runner-ssh-ok >/dev/null"
+          ssh -o BatchMode=yes "$KAMAL_SERVER_ALIAS" "echo runner-ssh-ok >/dev/null"
 
       - name: Log in to GHCR
         shell: bash
@@ -84,14 +182,18 @@ jobs:
           KAMAL_REGISTRY_PASSWORD: ${{ secrets.KAMAL_REGISTRY_PASSWORD }}
         run: |
           set -euo pipefail
+          export DOCKER_CONFIG="$RUNNER_TEMP/docker-ghcr"
+          mkdir -p "$DOCKER_CONFIG"
           printf '%s' "$KAMAL_REGISTRY_PASSWORD" | docker login ghcr.io -u joshyorko --password-stdin
 
       - name: Wait for published image tag
         shell: bash
+        env:
+          VERSION_INPUT: ${{ needs.prepare.outputs.version }}
         run: |
           set -euo pipefail
 
-          image_ref="ghcr.io/joshyorko/fizzy:sha-${GITHUB_SHA::7}"
+          image_ref="ghcr.io/joshyorko/fizzy:${VERSION_INPUT}"
 
           for attempt in $(seq 1 60); do
             if docker manifest inspect "$image_ref" >/dev/null 2>&1; then
@@ -106,38 +208,41 @@ jobs:
           echo "Timed out waiting for $image_ref" >&2
           exit 1
 
-      - name: Pull official Kamal image
-        shell: bash
-        run: |
-          set -euo pipefail
-          docker pull "$KAMAL_IMAGE"
-
-      - name: Run Kamal from official container
+      - name: Prepare runner SSH state
         shell: bash
         env:
+          KAMAL_KNOWN_HOST: ${{ vars.KAMAL_KNOWN_HOST }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.ssh"
+          chmod 700 "$HOME/.ssh"
+          touch "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/known_hosts"
+          ssh-keygen -R "$KAMAL_KNOWN_HOST" -f "$HOME/.ssh/known_hosts" >/dev/null 2>&1 || true
+          ssh-keyscan "$KAMAL_KNOWN_HOST" >> "$HOME/.ssh/known_hosts" 2>/dev/null
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Run Kamal on runner
+        shell: bash
+        env:
+          ACTION: ${{ needs.prepare.outputs.action }}
+          VERSION_INPUT: ${{ needs.prepare.outputs.version }}
           KAMAL_REGISTRY_PASSWORD: ${{ secrets.KAMAL_REGISTRY_PASSWORD }}
         run: |
           set -euo pipefail
+          runner_home="$(getent passwd "$(id -un)" | cut -d: -f6)"
+          export RBENV_ROOT="${RBENV_ROOT:-$runner_home/.rbenv}"
+          export PATH="$RBENV_ROOT/bin:$RBENV_ROOT/shims:$PATH"
+          eval "$(rbenv init - bash)"
 
-          action="${{ github.event.inputs.action || 'deploy' }}"
-          version="sha-${GITHUB_SHA::7}"
-          docker run --rm \
-            --pull never \
-            --entrypoint /bin/sh \
-            -v "$PWD:/workspace" \
-            -v "$HOME/.ssh:/root/.ssh:ro" \
-            -v "$HOME/.docker:/root/.docker:ro" \
-            -v /var/run/docker.sock:/var/run/docker.sock \
-            -w /workspace \
-            -e KAMAL_REGISTRY_PASSWORD \
-            -e ACTION="$action" \
-            -e VERSION="$version" \
-            "$KAMAL_IMAGE" -lc '
-              set -euo pipefail
+          kamal_cmd() {
+            bundle exec kamal "$@"
+          }
 
-              if [ "$ACTION" = "setup" ]; then
-                /kamal/bin/kamal setup --skip-push --version "$VERSION"
-              else
-                /kamal/bin/kamal deploy --skip-push --version "$VERSION"
-              fi
-            '
+          if [ "$ACTION" = "setup" ]; then
+            kamal_cmd setup --skip-push --version "$VERSION_INPUT"
+          else
+            kamal_cmd deploy --skip-push --version "$VERSION_INPUT"
+          fi
+
+          kamal_cmd accessory reboot cloudflared

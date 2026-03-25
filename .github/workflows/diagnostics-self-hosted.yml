@@ -27,25 +27,63 @@ concurrency:
 
 jobs:
   diagnose:
-    runs-on:
-      - self-hosted
-      - linux
-      - arm64
-      - pi5-01
-      - kamal
+    runs-on: ${{ fromJSON(vars.SELF_HOSTED_RUNNER_LABELS_JSON) }}
     timeout-minutes: 30
     permissions:
       contents: read
-    env:
-      KAMAL_IMAGE: ghcr.io/basecamp/kamal:v2.10.1
 
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
+      - name: Set up Ruby on runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          runner_home="$(getent passwd "$(id -un)" | cut -d: -f6)"
+          export RBENV_ROOT="${RBENV_ROOT:-$runner_home/.rbenv}"
+          export PATH="$RBENV_ROOT/bin:$RBENV_ROOT/shims:$PATH"
+          eval "$(rbenv init - bash)"
+          ruby -v
+          if ! bundle _2.6.9_ -v >/dev/null 2>&1; then
+            gem install bundler -v 2.6.9 --no-document
+          fi
+          bundle -v
+
+      - name: Configure persistent Bundler path
+        shell: bash
+        run: |
+          set -euo pipefail
+          runner_home="$(getent passwd "$(id -un)" | cut -d: -f6)"
+          bundle_path="$runner_home/.local/share/bundle/fizzy"
+          bundle_app_config="$runner_home/.config/bundle/fizzy"
+          mkdir -p "$bundle_path" "$bundle_app_config"
+          {
+            printf 'BUNDLE_PATH=%s\n' "$bundle_path"
+            printf 'BUNDLE_APP_CONFIG=%s\n' "$bundle_app_config"
+          } >> "$GITHUB_ENV"
+
+      - name: Install bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          runner_home="$(getent passwd "$(id -un)" | cut -d: -f6)"
+          export RBENV_ROOT="${RBENV_ROOT:-$runner_home/.rbenv}"
+          export PATH="$RBENV_ROOT/bin:$RBENV_ROOT/shims:$PATH"
+          eval "$(rbenv init - bash)"
+          bundle check || bundle install --jobs 4 --retry 3
+
       - name: Write deploy secrets to local files
         shell: bash
         env:
+          KAMAL_SERVER_ALIAS: ${{ vars.KAMAL_SERVER_ALIAS }}
+          KAMAL_PUBLIC_HOST: ${{ vars.KAMAL_PUBLIC_HOST }}
+          KAMAL_SSH_USER: ${{ vars.KAMAL_SSH_USER }}
+          KAMAL_STORAGE_PATH: ${{ vars.KAMAL_STORAGE_PATH }}
+          KAMAL_MAILER_FROM_ADDRESS: ${{ vars.KAMAL_MAILER_FROM_ADDRESS }}
+          KAMAL_KNOWN_HOST: ${{ vars.KAMAL_KNOWN_HOST }}
+          S3_ENDPOINT: ${{ vars.S3_ENDPOINT }}
+          S3_BUCKET: ${{ vars.S3_BUCKET }}
           SECRET_KEY_BASE: ${{ secrets.SECRET_KEY_BASE }}
           VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
           VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
@@ -61,6 +99,14 @@ jobs:
           mkdir -p config
 
           {
+            printf 'KAMAL_SERVER_ALIAS=%s\n' "$KAMAL_SERVER_ALIAS"
+            printf 'KAMAL_PUBLIC_HOST=%s\n' "$KAMAL_PUBLIC_HOST"
+            printf 'KAMAL_SSH_USER=%s\n' "$KAMAL_SSH_USER"
+            printf 'KAMAL_STORAGE_PATH=%s\n' "$KAMAL_STORAGE_PATH"
+            printf 'KAMAL_MAILER_FROM_ADDRESS=%s\n' "$KAMAL_MAILER_FROM_ADDRESS"
+            printf 'KAMAL_KNOWN_HOST=%s\n' "$KAMAL_KNOWN_HOST"
+            printf 'S3_ENDPOINT=%s\n' "$S3_ENDPOINT"
+            printf 'S3_BUCKET=%s\n' "$S3_BUCKET"
             printf 'SECRET_KEY_BASE=%s\n' "$SECRET_KEY_BASE"
             printf 'VAPID_PUBLIC_KEY=%s\n' "$VAPID_PUBLIC_KEY"
             printf 'VAPID_PRIVATE_KEY=%s\n' "$VAPID_PRIVATE_KEY"
@@ -82,73 +128,78 @@ jobs:
 
       - name: Verify runner can SSH to homelab-rcc
         shell: bash
+        env:
+          KAMAL_SERVER_ALIAS: ${{ vars.KAMAL_SERVER_ALIAS }}
         run: |
           set -euo pipefail
-          ssh -o BatchMode=yes homelab-rcc "echo runner-ssh-ok >/dev/null"
+          ssh -o BatchMode=yes "$KAMAL_SERVER_ALIAS" "echo runner-ssh-ok >/dev/null"
 
-      - name: Pull official Kamal image
+      - name: Prepare runner SSH state
         shell: bash
+        env:
+          KAMAL_KNOWN_HOST: ${{ vars.KAMAL_KNOWN_HOST }}
         run: |
           set -euo pipefail
-          docker pull "$KAMAL_IMAGE"
+          mkdir -p "$HOME/.ssh"
+          chmod 700 "$HOME/.ssh"
+          touch "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/known_hosts"
+          ssh-keygen -R "$KAMAL_KNOWN_HOST" -f "$HOME/.ssh/known_hosts" >/dev/null 2>&1 || true
+          ssh-keyscan "$KAMAL_KNOWN_HOST" >> "$HOME/.ssh/known_hosts" 2>/dev/null
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
-      - name: Run Kamal diagnostics
+      - name: Run Kamal diagnostics on runner
         shell: bash
         env:
           COMMAND: ${{ github.event.inputs.command || 'summary' }}
           LINES: ${{ github.event.inputs.lines || '200' }}
         run: |
           set -euo pipefail
+          runner_home="$(getent passwd "$(id -un)" | cut -d: -f6)"
+          export RBENV_ROOT="${RBENV_ROOT:-$runner_home/.rbenv}"
+          export PATH="$RBENV_ROOT/bin:$RBENV_ROOT/shims:$PATH"
+          eval "$(rbenv init - bash)"
 
-          docker run --rm \
-            --pull never \
-            --entrypoint /bin/sh \
-            -v "$PWD:/workspace" \
-            -v "$HOME/.ssh:/root/.ssh:ro" \
-            -v /var/run/docker.sock:/var/run/docker.sock \
-            -w /workspace \
-            -e COMMAND \
-            -e LINES \
-            "$KAMAL_IMAGE" -lc '
-              set -euo pipefail
+          kamal_cmd() {
+            bundle exec kamal "$@"
+          }
 
-              fail=0
-              run_check() {
-                echo
-                echo "==> $*"
-                if ! "$@"; then
-                  fail=1
-                fi
-              }
+          fail=0
+          run_check() {
+            echo
+            echo "==> $*"
+            if ! "$@"; then
+              fail=1
+            fi
+          }
 
-              case "$COMMAND" in
-                summary)
-                  run_check /kamal/bin/kamal version
-                  run_check /kamal/bin/kamal details
-                  run_check /kamal/bin/kamal app version
-                  run_check /kamal/bin/kamal app containers
-                  run_check /kamal/bin/kamal proxy details
-                  ;;
-                app_logs)
-                  run_check /kamal/bin/kamal app logs --primary --lines "$LINES"
-                  ;;
-                proxy_logs)
-                  run_check /kamal/bin/kamal proxy logs --primary --lines "$LINES"
-                  ;;
-                app_details)
-                  run_check /kamal/bin/kamal app details
-                  ;;
-                proxy_details)
-                  run_check /kamal/bin/kamal proxy details
-                  ;;
-                audit)
-                  run_check /kamal/bin/kamal audit
-                  ;;
-                *)
-                  echo "Unsupported diagnostics command: $COMMAND" >&2
-                  exit 64
-                  ;;
-              esac
+          case "$COMMAND" in
+            summary)
+              run_check bundle exec kamal version
+              run_check kamal_cmd details
+              run_check kamal_cmd app version
+              run_check kamal_cmd app containers
+              run_check kamal_cmd proxy details
+              ;;
+            app_logs)
+              run_check kamal_cmd app logs --primary --lines "$LINES"
+              ;;
+            proxy_logs)
+              run_check kamal_cmd proxy logs --primary --lines "$LINES"
+              ;;
+            app_details)
+              run_check kamal_cmd app details
+              ;;
+            proxy_details)
+              run_check kamal_cmd proxy details
+              ;;
+            audit)
+              run_check kamal_cmd audit
+              ;;
+            *)
+              echo "Unsupported diagnostics command: $COMMAND" >&2
+              exit 64
+              ;;
+          esac
 
-              exit "$fail"
-            '
+          exit "$fail"
