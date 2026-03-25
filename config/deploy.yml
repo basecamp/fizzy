@@ -1,6 +1,6 @@
 # Name of this app
 service: fizzy
-image: fizzy
+image: joshyorko/fizzy
 
 
 #-- About your deployment --#
@@ -65,9 +65,12 @@ accessories:
 
 #-- General configuration --#
 
-# Use a local registry to deploy
 registry:
-  server: localhost:5555
+  server: ghcr.io
+  username:
+    - joshyorko
+  password:
+    - KAMAL_REGISTRY_PASSWORD
 
 # Handy aliases for interacting with your deployment. For eaxmple: `bin/kamal console` will connect to a
 # Rails console in production.
@@ -86,6 +89,6 @@ volumes:
 # version inside the asset_path.
 asset_path: /rails/public/assets
 
-# Configure the image builder.
+# Keep builder config available for manual fallback deploys.
 builder:
   arch: amd64

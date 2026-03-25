@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - self-hosted
     tags:
       - 'v*'
   workflow_dispatch:
@@ -205,5 +206,4 @@ jobs:
             echo "Signing $tag"
             cosign sign --yes "$tag"
           done <<< "$tags"
-
 
