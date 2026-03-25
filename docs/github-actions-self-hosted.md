@@ -14,7 +14,7 @@ Kamal itself runs inside the official `ghcr.io/basecamp/kamal:v2.10.1` container
 
 - Keep self-hosted deployment work on the `self-hosted` branch.
 - Set the fork default branch to `self-hosted` once the repo-side workflow is in place.
-- Both Actions workflows are `workflow_dispatch` only. Nothing auto-builds or auto-deploys on push.
+- The deploy-related workflows are `workflow_dispatch` only. Nothing auto-builds or auto-deploys on push.
 
 ## Repo secrets
 
@@ -61,10 +61,37 @@ The workflow expects `pi5-01` to be able to SSH to `homelab-rcc` without prompti
 
 `.github/workflows/deploy-self-hosted.yml` runs only by manual dispatch.
 
+## Diagnostics workflow
+
+`.github/workflows/diagnostics-self-hosted.yml` runs only by manual dispatch and does not deploy anything.
+
+Recommended first run:
+
+1. Run `diagnostics-self-hosted.yml` with `command=summary`.
+2. Run `diagnostics-self-hosted.yml` with `command=app_logs` if you want to prove Kamal can reach the current Fizzy app and stream logs.
+
 Recommended order:
 
-1. Run `publish-image.yml`.
-2. After the image exists in GHCR, run `deploy-self-hosted.yml`.
+1. Run `diagnostics-self-hosted.yml` with `command=summary`.
+2. Run `publish-image.yml`.
+3. After the image exists in GHCR, run `deploy-self-hosted.yml`.
+
+Diagnostics dispatch supports:
+
+- `summary`: `kamal version`, `kamal details`, `kamal app version`, `kamal app containers`, and `kamal proxy details`
+- `app_logs`: `kamal app logs --primary --lines N`
+- `proxy_logs`: `kamal proxy logs --primary --lines N`
+- `app_details`: `kamal app details`
+- `proxy_details`: `kamal proxy details`
+- `audit`: `kamal audit`
+
+The diagnostics workflow:
+
+- writes `.env.kamal.local` and `config/master.key` from GitHub secrets
+- verifies `pi5-01` can SSH to `homelab-rcc`
+- pulls `ghcr.io/basecamp/kamal:v2.10.1`
+- runs the selected Kamal read-only diagnostic command set inside that official container
+- fails the workflow if any selected Kamal check fails
 
 Manual deploy dispatch supports:
 
