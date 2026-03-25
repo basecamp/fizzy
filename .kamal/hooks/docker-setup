@@ -1,5 +1,5 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/sh
+set -eu
 
 resolve_ssh_user() {
   ruby <<'RUBY'
@@ -16,26 +16,38 @@ end
 RUBY
 }
 
+run_ssh() {
+  ssh_config_file="${KAMAL_SSH_CONFIG_FILE:-${HOME:-}/.ssh/config}"
+  if [ -n "$ssh_config_file" ] && [ -f "$ssh_config_file" ]; then
+    ssh -F "$ssh_config_file" "$@"
+  else
+    ssh "$@"
+  fi
+}
+
 SSH_USER="${KAMAL_SSH_USER:-$(resolve_ssh_user)}"
-SSH_USER="${SSH_USER:-$USER}"
+SSH_USER="${SSH_USER:-${USER:-}}"
 HOSTS="${KAMAL_HOSTS:-}"
 
-if [[ -z "$HOSTS" ]]; then
+if [ -z "$HOSTS" ]; then
   echo "docker-setup: no hosts provided"
   exit 0
 fi
 
-IFS=',' read -r -a HOST_ARRAY <<< "$HOSTS"
+OLD_IFS=$IFS
+IFS=','
+set -- $HOSTS
+IFS=$OLD_IFS
 
-for host in "${HOST_ARRAY[@]}"; do
-  host="$(echo "$host" | xargs)"
-  [[ -z "$host" ]] && continue
+for host in "$@"; do
+  host="$(printf '%s' "$host" | xargs)"
+  [ -z "$host" ] && continue
 
   echo "docker-setup: ensuring ${SSH_USER} is in the docker group on ${host}"
-  ssh -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new "${SSH_USER}@${host}" \
+  run_ssh -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new "${SSH_USER}@${host}" \
     "sudo usermod -aG docker ${SSH_USER}"
 
   echo "docker-setup: creating server dirs on ${SSH_USER}@${host}"
-  ssh -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new "${SSH_USER}@${host}" \
+  run_ssh -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new "${SSH_USER}@${host}" \
     "mkdir -p ~/fizzy-data/storage"
 done

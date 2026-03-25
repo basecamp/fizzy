@@ -5,35 +5,43 @@ on:
 
 concurrency:
   group: publish-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 env:
   IMAGE_DESCRIPTION: Fizzy is Kanban as it should be. Not as it has been.
   SOURCE_URL: https://github.com/${{ github.repository }}
 
 jobs:
+  prepare:
+    name: Resolve release tag
+    runs-on: ubuntu-latest
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: ${{ github.repository }}
+    outputs:
+      canonical: ${{ steps.vars.outputs.canonical }}
+      short_sha: ${{ steps.vars.outputs.short_sha }}
+    steps:
+      - name: Compute canonical image name and release tag
+        id: vars
+        shell: bash
+        run: |
+          set -euo pipefail
+          image_ref="${IMAGE_NAME:-$GITHUB_REPOSITORY}"
+          canonical_image="${REGISTRY}/${image_ref,,}"
+          echo "canonical=${canonical_image}" >> "$GITHUB_OUTPUT"
+          echo "short_sha=sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
   build:
-    name: Build and push image (${{ matrix.arch }})
-    runs-on: ${{ matrix.runner }}
+    name: Build and push image (amd64)
+    needs: prepare
+    runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
       contents: read
       packages: write
       id-token: write
       attestations: write
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - runner: ubuntu-latest
-            platform: linux/amd64
-            arch: amd64
-          - runner: ubuntu-24.04-arm
-            platform: linux/arm64
-            arch: arm64
-    env:
-      REGISTRY: ghcr.io
-      IMAGE_NAME: ${{ github.repository }}
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -46,38 +54,11 @@ jobs:
       - name: Log in to GHCR
         uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4.0.0
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Compute canonical image name (lowercase)
-        id: vars
-        shell: bash
-        run: |
-          set -eu
-          IMAGE_REF="${IMAGE_NAME:-$GITHUB_REPOSITORY}"
-          CANONICAL_IMAGE="${REGISTRY}/${IMAGE_REF,,}"
-          echo "canonical=${CANONICAL_IMAGE}" >> "$GITHUB_OUTPUT"
-
-      - name: Extract Docker metadata (tags, labels) with arch suffix
-        id: meta
-        uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf # v6.0.0
-        with:
-          images: ${{ steps.vars.outputs.canonical }}
-          tags: |
-            type=ref,event=branch
-            type=ref,event=tag
-            type=sha,format=short,prefix=sha-
-            type=semver,pattern={{version}},enable=${{ startsWith(github.ref, 'refs/tags/v') }}
-            type=semver,pattern={{major}}.{{minor}},enable=${{ startsWith(github.ref, 'refs/tags/v') }}
-            type=semver,pattern={{major}},enable=${{ startsWith(github.ref, 'refs/tags/v') }}
-          flavor: |
-            latest=false
-            suffix=-${{ matrix.arch }}
-          labels: |
-            org.opencontainers.image.source=${{ env.SOURCE_URL }}
-
-      - name: Build and push (${{ matrix.platform }})
+      - name: Build and push linux/amd64
         id: build
         uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294 # v7.0.0
         with:
@@ -86,117 +67,60 @@ jobs:
           build-args: |
             OCI_SOURCE=${{ env.SOURCE_URL }}
             OCI_DESCRIPTION=${{ env.IMAGE_DESCRIPTION }}
-          platforms: ${{ matrix.platform }}
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha,scope=${{ matrix.platform }}
-          cache-to: type=gha,scope=${{ matrix.platform }},mode=max
+          platforms: linux/amd64
+          push: true
+          tags: ${{ needs.prepare.outputs.canonical }}:${{ needs.prepare.outputs.short_sha }}-amd64
+          labels: |
+            org.opencontainers.image.source=${{ env.SOURCE_URL }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          cache-from: type=gha,scope=linux-amd64
+          cache-to: type=gha,scope=linux-amd64,mode=max,ignore-error=true
           sbom: false
           provenance: false
 
-      - name: Attest image provenance (per-arch)
-        if: github.event_name != 'pull_request'
+      - name: Attest image provenance (amd64)
         uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
         with:
-          subject-name: ${{ steps.vars.outputs.canonical }}
+          subject-name: ${{ needs.prepare.outputs.canonical }}
           subject-digest: ${{ steps.build.outputs.digest }}
           push-to-registry: false
 
   manifest:
-    name: Create multi-arch manifest and sign
-    needs: build
-    if: github.event_name != 'pull_request'
+    name: Create release tag
+    needs:
+      - prepare
+      - build
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
       packages: write
       id-token: write
-    env:
-      REGISTRY: ghcr.io
-      IMAGE_NAME: ${{ github.repository }}
     steps:
-      - name: Set up Docker Buildx (for imagetools)
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
 
       - name: Log in to GHCR
         uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4.0.0
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Compute canonical image name (lowercase)
-        id: vars
+      - name: Create release tag
         shell: bash
         run: |
-          set -eu
-          IMAGE_REF="${IMAGE_NAME:-$GITHUB_REPOSITORY}"
-          CANONICAL_IMAGE="${REGISTRY}/${IMAGE_REF,,}"
-          echo "canonical=${CANONICAL_IMAGE}" >> "$GITHUB_OUTPUT"
+          set -euo pipefail
+          docker buildx imagetools create \
+            --tag "${{ needs.prepare.outputs.canonical }}:${{ needs.prepare.outputs.short_sha }}" \
+            "${{ needs.prepare.outputs.canonical }}:${{ needs.prepare.outputs.short_sha }}-amd64"
 
-      - name: Compute base tags (no suffix)
-        id: meta
-        uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf # v6.0.0
-        with:
-          images: ${{ steps.vars.outputs.canonical }}
-          tags: |
-            type=ref,event=branch
-            type=ref,event=tag
-            type=sha,format=short,prefix=sha-
-            type=semver,pattern={{version}},enable=${{ startsWith(github.ref, 'refs/tags/v') }}
-            type=semver,pattern={{major}}.{{minor}},enable=${{ startsWith(github.ref, 'refs/tags/v') }}
-            type=semver,pattern={{major}},enable=${{ startsWith(github.ref, 'refs/tags/v') }}
-            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') }}
-          flavor: |
-            latest=false
-          labels: |
-            org.opencontainers.image.source=${{ env.SOURCE_URL }}
-
-      - name: Create multi-arch manifests
-        shell: bash
-        env:
-          TAGS: ${{ steps.meta.outputs.tags }}
-        run: |
-          set -eu
-          tags="$TAGS"
-          echo "Creating manifests for tags:"
-          printf '%s\n' "$tags"
-          while IFS= read -r tag; do
-            [ -z "$tag" ] && continue
-            echo "Creating manifest for $tag"
-            src_tag="$tag"
-            if [[ "$tag" == *:latest && "${GITHUB_REF}" == refs/tags/* ]]; then
-              ref="${GITHUB_REF#refs/tags/}"
-              src_tag="${tag%:latest}:$ref"
-            fi
-            if [ -n "${IMAGE_DESCRIPTION:-}" ]; then
-              docker buildx imagetools create \
-                --tag "$tag" \
-                --annotation "index:org.opencontainers.image.description=${IMAGE_DESCRIPTION}" \
-                "${src_tag}-amd64" \
-                "${src_tag}-arm64"
-            else
-              docker buildx imagetools create \
-                --tag "$tag" \
-                "${src_tag}-amd64" \
-                "${src_tag}-arm64"
-            fi
-          done <<< "$tags"
-
-      - name: Install Cosign
-        uses: sigstore/cosign-installer@ba7bc0a3fef59531c69a25acd34668d6d3fe6f22 # v4.1.0
-
-      - name: Cosign sign all tags (keyless OIDC)
-        shell: bash
-        env:
-          TAGS: ${{ steps.meta.outputs.tags }}
-        run: |
-          set -eu
-          tags="$TAGS"
-          printf '%s\n' "$tags"
-          while IFS= read -r tag; do
-            [ -z "$tag" ] && continue
-            echo "Signing $tag"
-            cosign sign --yes "$tag"
-          done <<< "$tags"
+  deploy:
+    name: Handoff to Kamal deploy
+    needs:
+      - prepare
+      - manifest
+    uses: ./.github/workflows/deploy-self-hosted.yml
+    with:
+      action: deploy
+      version: ${{ needs.prepare.outputs.short_sha }}
+    secrets: inherit
