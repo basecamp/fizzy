@@ -40,23 +40,39 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          ruby_version="$(tr -d '\n' < .ruby-version)"
           runner_home="$(getent passwd "$(id -un)" | cut -d: -f6)"
           export RBENV_ROOT="${RBENV_ROOT:-$runner_home/.rbenv}"
           export PATH="$RBENV_ROOT/bin:$RBENV_ROOT/shims:$PATH"
+          if ! command -v rbenv >/dev/null 2>&1; then
+            echo "rbenv is required on the self-hosted runner." >&2
+            exit 1
+          fi
           eval "$(rbenv init - bash)"
+          if ! rbenv versions --bare | grep -Fxq "$ruby_version"; then
+            if ! rbenv commands | grep -Fxq install; then
+              echo "rbenv install support is required to add Ruby $ruby_version on the self-hosted runner." >&2
+              exit 1
+            fi
+            rbenv install -s "$ruby_version"
+          fi
+          rbenv shell "$ruby_version"
+          rbenv rehash
           ruby -v
           if ! bundle _2.6.9_ -v >/dev/null 2>&1; then
             gem install bundler -v 2.6.9 --no-document
+            rbenv rehash
           fi
           bundle -v
+          printf 'RBENV_VERSION=%s\n' "$ruby_version" >> "$GITHUB_ENV"
 
       - name: Configure persistent Bundler path
         shell: bash
         run: |
           set -euo pipefail
           runner_home="$(getent passwd "$(id -un)" | cut -d: -f6)"
-          bundle_path="$runner_home/.local/share/bundle/fizzy"
-          bundle_app_config="$runner_home/.config/bundle/fizzy"
+          bundle_path="$runner_home/.local/share/bundle/fizzy/$RBENV_VERSION"
+          bundle_app_config="$runner_home/.config/bundle/fizzy/$RBENV_VERSION"
           mkdir -p "$bundle_path" "$bundle_app_config"
           {
             printf 'BUNDLE_PATH=%s\n' "$bundle_path"
@@ -71,6 +87,7 @@ jobs:
           export RBENV_ROOT="${RBENV_ROOT:-$runner_home/.rbenv}"
           export PATH="$RBENV_ROOT/bin:$RBENV_ROOT/shims:$PATH"
           eval "$(rbenv init - bash)"
+          rbenv shell "$RBENV_VERSION"
           bundle check || bundle install --jobs 4 --retry 3
 
       - name: Write deploy secrets to local files
@@ -159,6 +176,7 @@ jobs:
           export RBENV_ROOT="${RBENV_ROOT:-$runner_home/.rbenv}"
           export PATH="$RBENV_ROOT/bin:$RBENV_ROOT/shims:$PATH"
           eval "$(rbenv init - bash)"
+          rbenv shell "$RBENV_VERSION"
 
           kamal_cmd() {
             bundle exec kamal "$@"

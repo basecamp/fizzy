@@ -1,4 +1,4 @@
-name: CI (SaaS)
+name: CI (Auto)
 
 on:
   workflow_dispatch:
@@ -7,13 +7,56 @@ permissions:
   contents: read
 
 jobs:
+  detect_edition:
+    name: Detect edition
+    runs-on: ubuntu-latest
+    outputs:
+      edition: ${{ steps.detect.outputs.edition }}
+      saas_enabled: ${{ steps.detect.outputs.saas_enabled }}
+    steps:
+      - name: Resolve branch CI mode
+        id: detect
+        shell: bash
+        env:
+          FIZZY_EDITION: ${{ vars.FIZZY_EDITION || '' }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          edition="$(printf '%s' "${FIZZY_EDITION:-}" | tr '[:upper:]' '[:lower:]')"
+          if [ -z "$edition" ]; then
+            if [ "$REF_NAME" = "self-hosted" ]; then
+              edition="oss"
+            else
+              edition="saas"
+            fi
+          fi
+
+          case "$edition" in
+            oss|self-hosted)
+              printf 'edition=oss\n' >> "$GITHUB_OUTPUT"
+              printf 'saas_enabled=false\n' >> "$GITHUB_OUTPUT"
+              ;;
+            saas)
+              printf 'edition=saas\n' >> "$GITHUB_OUTPUT"
+              printf 'saas_enabled=true\n' >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "Unsupported FIZZY_EDITION '$edition'. Use 'oss' or 'saas'." >&2
+              exit 64
+              ;;
+          esac
+
   test_oss:
     name: Test (OSS)
+    needs: detect_edition
     uses: ./.github/workflows/test.yml
     with:
       saas: false
   test_saas:
     name: Test (SaaS)
+    needs: detect_edition
+    if: needs.detect_edition.outputs.saas_enabled == 'true'
     uses: ./.github/workflows/test.yml
     with:
       saas: true
