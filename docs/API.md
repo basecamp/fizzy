@@ -176,6 +176,77 @@ HTTP/1.1 201 Created
 
 Store the `token` value securely — it won't be retrievable again. Use it as a Bearer token for subsequent API requests.
 
+#### Create an agent bootstrap link via the API
+
+If you want an external agent to join a specific board, get its own write token, and start watching that board immediately, create a board-scoped bootstrap:
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer put-your-access-token-here" \
+  https://app.fizzy.do/1234567/boards/abc123/agent_bootstraps
+```
+
+__Response:__
+
+```json
+{
+  "id": "9l7v2wbw5s6r7ryz6q4m2m7ps",
+  "token": "6dFq9yY9fA5vP4a9QqG4gC8R",
+  "expires_at": "2026-03-25T11:30:00Z",
+  "bootstrap_url": "https://app.fizzy.do/agent_bootstrap/6dFq9yY9fA5vP4a9QqG4gC8R/claim",
+  "setup_command": "fizzy auth bootstrap \"https://app.fizzy.do/agent_bootstrap/6dFq9yY9fA5vP4a9QqG4gC8R/claim\" --email \"agent+abc123@example.com\" --name \"Writebook Agent\"",
+  "permission": "write",
+  "involvement": "watching"
+}
+```
+
+This endpoint requires account admin or owner privileges. The token is single-use and expires automatically.
+
+#### Claim an agent bootstrap link
+
+Agents should claim the bootstrap URL directly. This creates or reuses the identity, ensures account membership, grants access to the target board when needed, creates a personal access token, and sets the agent to watch the board.
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{"email_address":"agent@example.com","name":"Writebook Agent","profile_name":"openclaw"}' \
+  https://app.fizzy.do/agent_bootstrap/6dFq9yY9fA5vP4a9QqG4gC8R/claim
+```
+
+__Response:__
+
+```json
+{
+  "token": "4f9Q6d2wXr8Kp1Ls0Vz3BnTa",
+  "permission": "write",
+  "account": {
+    "slug": "1234567"
+  },
+  "board": {
+    "id": "abc123",
+    "name": "Writebook"
+  },
+  "user": {
+    "email_address": "agent@example.com",
+    "name": "Writebook Agent"
+  },
+  "profile": {
+    "base_url": "https://app.fizzy.do",
+    "account_slug": "1234567",
+    "default_board_id": "abc123"
+  }
+}
+```
+
+Error responses:
+
+| Status Code | Description |
+|--------|-------------|
+| `410 Gone` | The bootstrap token is invalid, expired, or already used |
+
 ## Caching
 
 Most endpoints return [ETag](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/ETag) and [Cache-Control](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cache-Control) headers. You can use these to avoid re-downloading unchanged data.
@@ -542,6 +613,21 @@ __Response:__
 Returns `204 No Content` on success.
 
 ### `DELETE /:account_slug/boards/:board_id`
+
+### `PUT /:account_slug/boards/:board_id/involvement`
+
+Set your board involvement. Use `watching` to subscribe the current user to new cards on the board and `access_only` to unsubscribe.
+
+```bash
+curl -X PUT \
+  -H "Authorization: Bearer put-your-access-token-here" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{"involvement":"watching"}' \
+  https://app.fizzy.do/1234567/boards/abc123/involvement
+```
+
+Returns `204 No Content` on success.
 
 Deletes a Board. Only board administrators can delete a board.
 
