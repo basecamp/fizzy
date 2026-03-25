@@ -11,3 +11,4 @@ jobs:
     uses: ./.github/workflows/test.yml
     with:
       saas: false
+      include_mysql: ${{ github.ref_name != 'self-hosted' }}

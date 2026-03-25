@@ -6,6 +6,10 @@ on:
       saas:
         type: boolean
         required: true
+      include_mysql:
+        type: boolean
+        required: false
+        default: true
     secrets:
       FIZZY_GH_TOKEN:
         required: false
@@ -19,16 +23,11 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
-      matrix:
-        include:
-          - mode: SQLite
-            db_adapter: sqlite
-          - mode: MySQL
-            db_adapter: mysql
+      matrix: ${{ fromJSON(inputs.include_mysql && '{"include":[{"mode":"SQLite","db_adapter":"sqlite"},{"mode":"MySQL","db_adapter":"mysql"}]}' || '{"include":[{"mode":"SQLite","db_adapter":"sqlite"}]}') }}
 
     services:
       mysql:
-        image: mysql:8.0
+        image: ${{ matrix.db_adapter == 'mysql' && 'mysql:8.0' || '' }}
         env:
           MYSQL_ALLOW_EMPTY_PASSWORD: yes
           MYSQL_DATABASE: fizzy_test
@@ -45,11 +44,11 @@ jobs:
       DATABASE_ADAPTER: ${{ matrix.db_adapter }}
       ${{ inputs.saas && 'SAAS' || 'SAAS_DISABLED' }}: ${{ inputs.saas && '1' || '' }}
       BUNDLE_GEMFILE: ${{ inputs.saas && 'Gemfile.saas' || 'Gemfile' }}
-      MYSQL_HOST: 127.0.0.1
-      MYSQL_PORT: 3306
-      MYSQL_USER: root
-      FIZZY_DB_HOST: 127.0.0.1
-      FIZZY_DB_PORT: 3306
+      MYSQL_HOST: ${{ matrix.db_adapter == 'mysql' && '127.0.0.1' || '' }}
+      MYSQL_PORT: ${{ matrix.db_adapter == 'mysql' && '3306' || '' }}
+      MYSQL_USER: ${{ matrix.db_adapter == 'mysql' && 'root' || '' }}
+      FIZZY_DB_HOST: ${{ matrix.db_adapter == 'mysql' && '127.0.0.1' || '' }}
+      FIZZY_DB_PORT: ${{ matrix.db_adapter == 'mysql' && '3306' || '' }}
       BUNDLE_GITHUB__COM: ${{ inputs.saas && format('x-access-token:{0}', secrets.FIZZY_GH_TOKEN) || '' }} # zizmor: ignore[secrets-outside-env]
 
     steps:

@@ -53,6 +53,7 @@ jobs:
     uses: ./.github/workflows/test.yml
     with:
       saas: false
+      include_mysql: ${{ needs.detect_edition.outputs.edition == 'saas' }}
   test_saas:
     name: Test (SaaS)
     needs: detect_edition
@@ -60,5 +61,6 @@ jobs:
     uses: ./.github/workflows/test.yml
     with:
       saas: true
+      include_mysql: true
     secrets:
       FIZZY_GH_TOKEN: ${{ secrets.FIZZY_GH_TOKEN }}
