@@ -32,10 +32,10 @@ for host in "${HOST_ARRAY[@]}"; do
   [[ -z "$host" ]] && continue
 
   echo "docker-setup: ensuring ${SSH_USER} is in the docker group on ${host}"
-  ssh -F /dev/null -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new "${SSH_USER}@${host}" \
+  ssh -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new "${SSH_USER}@${host}" \
     "sudo usermod -aG docker ${SSH_USER}"
 
   echo "docker-setup: creating server dirs on ${SSH_USER}@${host}"
-  ssh -F /dev/null -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new "${SSH_USER}@${host}" \
+  ssh -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new "${SSH_USER}@${host}" \
     "mkdir -p ~/fizzy-data/storage"
 done

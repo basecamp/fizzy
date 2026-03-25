@@ -2,6 +2,14 @@
 
 This branch deploys Fizzy from a self-hosted GitHub Actions runner on `pi5-01`.
 
+The runner host only needs:
+
+- Docker
+- SSH access to `homelab-rcc`
+- the GitHub Actions runner service
+
+Kamal itself runs inside the official `ghcr.io/basecamp/kamal:v2.10.1` container during the workflow.
+
 ## Branch model
 
 - Keep self-hosted deployment work on the `self-hosted` branch.
@@ -60,16 +68,19 @@ Recommended order:
 
 Manual deploy dispatch supports:
 
-- `deploy`: normal `bin/kamal deploy`
-- `setup`: first-time `bin/kamal setup`
+- `deploy`: normal `kamal deploy`
+- `setup`: first-time `kamal setup`
 
 The workflow:
 
 - writes `.env.kamal.local` and `config/master.key` from GitHub secrets
 - waits for `ghcr.io/joshyorko/fizzy:sha-<short_sha>` to exist
-- runs `bin/kamal setup --skip-push --version …` or `bin/kamal deploy --skip-push --version …`
+- pulls `ghcr.io/basecamp/kamal:v2.10.1`
+- runs Kamal inside that official container with the repo, SSH config, Docker config, and Docker socket mounted in
+- runs `kamal setup --skip-push --version …` or `kamal deploy --skip-push --version …`
 
 This matches the current Kamal docs:
 
 - `registry/server` selects a non-local registry
+- Kamal supports running the CLI from Docker when the runner does not have a local Ruby toolchain
 - `kamal deploy --skip-push --version VERSION` deploys an already-published image

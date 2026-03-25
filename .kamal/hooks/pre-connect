@@ -31,5 +31,5 @@ for host in "${HOST_ARRAY[@]}"; do
   [[ -z "$host" ]] && continue
 
   echo "pre-connect: checking SSH for ${SSH_USER}@${host}"
-  ssh -F /dev/null -o BatchMode=yes -o ConnectTimeout=5 -o StrictHostKeyChecking=accept-new "${SSH_USER}@${host}" "echo ok >/dev/null"
+  ssh -o BatchMode=yes -o ConnectTimeout=5 -o StrictHostKeyChecking=accept-new "${SSH_USER}@${host}" "echo ok >/dev/null"
 done

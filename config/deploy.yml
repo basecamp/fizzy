@@ -8,7 +8,7 @@ image: joshyorko/fizzy
 # Where to deploy fizzy
 servers:
   web:
-    - 10.10.10.106
+    - homelab-rcc
 
 # How you connect to your server
 ssh:
@@ -56,7 +56,7 @@ env:
 accessories:
   cloudflared:
     image: cloudflare/cloudflared:latest
-    host: 10.10.10.106
+    host: homelab-rcc
     cmd: tunnel --no-autoupdate run
     env:
       secret:
