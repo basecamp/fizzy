@@ -36,6 +36,7 @@ class ActionPack::WebAuthn::PublicKeyCredential::Options
   attribute :user_verification, default: :preferred
   attribute :relying_party, default: -> { ActionPack::WebAuthn.relying_party }
   attribute :challenge_expiration
+  attribute :challenge_purpose
 
   validates :user_verification, inclusion: { in: USER_VERIFICATION_OPTIONS }
 
@@ -70,7 +71,8 @@ class ActionPack::WebAuthn::PublicKeyCredential::Options
     @challenge ||= Base64.urlsafe_encode64(
       ActionPack::WebAuthn.challenge_verifier.generate(
         Base64.strict_encode64(SecureRandom.random_bytes(CHALLENGE_LENGTH)),
-        expires_in: challenge_expiration
+        expires_in: challenge_expiration,
+        purpose: challenge_purpose
       ),
       padding: false
     )

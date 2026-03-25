@@ -8,7 +8,7 @@ class SessionsController < ApplicationController
   layout "public"
 
   def new
-    @request_options = passkey_request_options
+    @authentication_options = passkey_authentication_options
   end
 
   def create

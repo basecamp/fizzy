@@ -24,31 +24,33 @@ class ActionPack::WebAuthn::PublicKeyCredential::CreationOptionsTest < ActiveSup
 
   test "generates signed challenge containing nonce" do
     signed_message = Base64.urlsafe_decode64(@options.challenge)
-    nonce = ActionPack::WebAuthn.challenge_verifier.verified(signed_message)
+    nonce = ActionPack::WebAuthn.challenge_verifier.verified(signed_message, purpose: "registration")
 
     assert_not_nil nonce
     assert_equal 32, Base64.strict_decode64(nonce).bytesize
   end
 
   test "as_json" do
-    assert_equal @options.challenge, @options.as_json[:challenge]
+    json = @options.as_json
 
-    assert_equal({ id: "example.com", name: "Example App" }, @options.as_json[:rp])
+    assert_equal @options.challenge, json["challenge"]
 
-    user = @options.as_json[:user]
-    assert_equal Base64.urlsafe_encode64("user-123", padding: false), user[:id]
-    assert_equal "user@example.com", user[:name]
-    assert_equal "Test User", user[:displayName]
+    assert_equal({ "id" => "example.com", "name" => "Example App" }, json["rp"])
+
+    user = json["user"]
+    assert_equal Base64.urlsafe_encode64("user-123", padding: false), user["id"]
+    assert_equal "user@example.com", user["name"]
+    assert_equal "Test User", user["displayName"]
 
     assert_equal [
-      { type: "public-key", alg: -7 },
-      { type: "public-key", alg: -8 },
-      { type: "public-key", alg: -257 }
-    ], @options.as_json[:pubKeyCredParams]
+      { "type" => "public-key", "alg" => -7 },
+      { "type" => "public-key", "alg" => -8 },
+      { "type" => "public-key", "alg" => -257 }
+    ], json["pubKeyCredParams"]
 
-    assert_equal "required", @options.as_json[:authenticatorSelection][:residentKey]
-    assert_equal true, @options.as_json[:authenticatorSelection][:requireResidentKey]
-    assert_equal "preferred", @options.as_json[:authenticatorSelection][:userVerification]
+    assert_equal "required", json["authenticatorSelection"]["residentKey"]
+    assert_equal true, json["authenticatorSelection"]["requireResidentKey"]
+    assert_equal "preferred", json["authenticatorSelection"]["userVerification"]
   end
 
   test "as_json includes residentKey in authenticatorSelection" do
@@ -60,12 +62,12 @@ class ActionPack::WebAuthn::PublicKeyCredential::CreationOptionsTest < ActiveSup
       relying_party: @relying_party
     )
 
-    assert_equal "required", options.as_json[:authenticatorSelection][:residentKey]
-    assert_equal true, options.as_json[:authenticatorSelection][:requireResidentKey]
+    assert_equal "required", options.as_json["authenticatorSelection"]["residentKey"]
+    assert_equal true, options.as_json["authenticatorSelection"]["requireResidentKey"]
   end
 
   test "as_json excludes excludeCredentials when empty" do
-    assert_nil @options.as_json[:excludeCredentials]
+    assert_nil @options.as_json["excludeCredentials"]
   end
 
   test "as_json includes excludeCredentials" do
@@ -83,13 +85,13 @@ class ActionPack::WebAuthn::PublicKeyCredential::CreationOptionsTest < ActiveSup
     )
 
     assert_equal [
-      { type: "public-key", id: "cred-1", transports: [ "usb", "nfc" ] },
-      { type: "public-key", id: "cred-2", transports: [ "internal" ] }
-    ], options.as_json[:excludeCredentials]
+      { "type" => "public-key", "id" => "cred-1", "transports" => [ "usb", "nfc" ] },
+      { "type" => "public-key", "id" => "cred-2", "transports" => [ "internal" ] }
+    ], options.as_json["excludeCredentials"]
   end
 
   test "as_json excludes attestation when none" do
-    assert_nil @options.as_json[:attestation]
+    assert_nil @options.as_json["attestation"]
   end
 
   test "as_json includes attestation when not none" do
@@ -101,7 +103,7 @@ class ActionPack::WebAuthn::PublicKeyCredential::CreationOptionsTest < ActiveSup
       relying_party: @relying_party
     )
 
-    assert_equal "direct", options.as_json[:attestation]
+    assert_equal "direct", options.as_json["attestation"]
   end
 
   test "raises with invalid attestation preference" do
@@ -126,8 +128,8 @@ class ActionPack::WebAuthn::PublicKeyCredential::CreationOptionsTest < ActiveSup
     )
 
     assert_equal [
-      { type: "public-key", id: "cred-1" }
-    ], options.as_json[:excludeCredentials]
+      { "type" => "public-key", "id" => "cred-1" }
+    ], options.as_json["excludeCredentials"]
   end
 
   private

@@ -18,7 +18,6 @@ class ActionPack::WebAuthn::Authenticator::ResponseTest < ActiveSupport::TestCas
     @response = TestableResponse.new(
       client_data_json: @client_data_json,
       authenticator_data: @authenticator_data,
-      challenge: @challenge,
       origin: @origin
     )
   end
@@ -41,9 +40,20 @@ class ActionPack::WebAuthn::Authenticator::ResponseTest < ActiveSupport::TestCas
     assert @response.valid?
   end
 
-  test "valid? returns false when challenge does not match" do
-    @response.challenge = "wrong-challenge"
-    assert_not @response.valid?
+  test "valid? returns false when challenge in client data is invalid" do
+    client_data_json = {
+      challenge: "not-a-valid-signed-challenge",
+      origin: @origin,
+      type: "webauthn.create"
+    }.to_json
+
+    response = TestableResponse.new(
+      client_data_json: client_data_json,
+      authenticator_data: @authenticator_data,
+      origin: @origin
+    )
+
+    assert_not response.valid?
   end
 
   test "valid? returns false when origin does not match" do
@@ -51,14 +61,24 @@ class ActionPack::WebAuthn::Authenticator::ResponseTest < ActiveSupport::TestCas
     assert_not @response.valid?
   end
 
-  test "validate! raises when challenge does not match" do
-    @response.challenge = "wrong-challenge"
+  test "validate! raises when challenge in client data is invalid" do
+    client_data_json = {
+      challenge: "not-a-valid-signed-challenge",
+      origin: @origin,
+      type: "webauthn.create"
+    }.to_json
+
+    response = TestableResponse.new(
+      client_data_json: client_data_json,
+      authenticator_data: @authenticator_data,
+      origin: @origin
+    )
 
     error = assert_raises(ActionPack::WebAuthn::InvalidResponseError) do
-      @response.validate!
+      response.validate!
     end
 
-    assert_equal "Challenge does not match", error.message
+    assert_match /Challenge (is invalid|has expired)/, error.message
   end
 
   test "validate! raises when origin does not match" do
@@ -82,7 +102,6 @@ class ActionPack::WebAuthn::Authenticator::ResponseTest < ActiveSupport::TestCas
     response = TestableResponse.new(
       client_data_json: client_data_json,
       authenticator_data: @authenticator_data,
-      challenge: @challenge,
       origin: @origin
     )
 
@@ -108,7 +127,6 @@ class ActionPack::WebAuthn::Authenticator::ResponseTest < ActiveSupport::TestCas
     response = TestableResponse.new(
       client_data_json: @client_data_json,
       authenticator_data: wrong_rp_data,
-      challenge: @challenge,
       origin: @origin
     )
 
@@ -130,7 +148,6 @@ class ActionPack::WebAuthn::Authenticator::ResponseTest < ActiveSupport::TestCas
     response = TestableResponse.new(
       client_data_json: client_data_json,
       authenticator_data: @authenticator_data,
-      challenge: @challenge,
       origin: @origin
     )
 

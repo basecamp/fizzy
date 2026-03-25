@@ -37,7 +37,7 @@ class ActionPack::WebAuthn::Authenticator::AttestationResponseTest < ActiveSuppo
   setup do
     ActionPack::WebAuthn::Current.host = "example.com"
 
-    @challenge = webauthn_challenge
+    @challenge = webauthn_challenge(purpose: "registration")
     @origin = "https://example.com"
     @client_data_json = {
       challenge: @challenge,
@@ -48,7 +48,6 @@ class ActionPack::WebAuthn::Authenticator::AttestationResponseTest < ActiveSuppo
     @response = ActionPack::WebAuthn::Authenticator::AttestationResponse.new(
       client_data_json: @client_data_json,
       attestation_object: ATTESTATION_NONE_VERIFIED,
-      challenge: @challenge,
       origin: @origin
     )
   end
@@ -67,7 +66,6 @@ class ActionPack::WebAuthn::Authenticator::AttestationResponseTest < ActiveSuppo
     response = ActionPack::WebAuthn::Authenticator::AttestationResponse.new(
       client_data_json: @client_data_json,
       attestation_object: ATTESTATION_NONE_NOT_VERIFIED,
-      challenge: @challenge,
       origin: @origin,
       user_verification: :preferred
     )
@@ -81,7 +79,6 @@ class ActionPack::WebAuthn::Authenticator::AttestationResponseTest < ActiveSuppo
     response = ActionPack::WebAuthn::Authenticator::AttestationResponse.new(
       client_data_json: @client_data_json,
       attestation_object: ATTESTATION_NONE_VERIFIED,
-      challenge: @challenge,
       origin: @origin,
       user_verification: :required
     )
@@ -95,7 +92,6 @@ class ActionPack::WebAuthn::Authenticator::AttestationResponseTest < ActiveSuppo
     response = ActionPack::WebAuthn::Authenticator::AttestationResponse.new(
       client_data_json: @client_data_json,
       attestation_object: ATTESTATION_NONE_NOT_VERIFIED,
-      challenge: @challenge,
       origin: @origin,
       user_verification: :required
     )
@@ -117,7 +113,6 @@ class ActionPack::WebAuthn::Authenticator::AttestationResponseTest < ActiveSuppo
     response = ActionPack::WebAuthn::Authenticator::AttestationResponse.new(
       client_data_json: client_data_json,
       attestation_object: ATTESTATION_NONE_VERIFIED,
-      challenge: @challenge,
       origin: @origin
     )
 
@@ -128,14 +123,24 @@ class ActionPack::WebAuthn::Authenticator::AttestationResponseTest < ActiveSuppo
     assert_equal "Client data type is not webauthn.create", error.message
   end
 
-  test "validate! raises when challenge does not match" do
-    @response.challenge = "wrong-challenge"
+  test "validate! raises when challenge in client data is invalid" do
+    client_data_json = {
+      challenge: "not-a-valid-signed-challenge",
+      origin: @origin,
+      type: "webauthn.create"
+    }.to_json
+
+    response = ActionPack::WebAuthn::Authenticator::AttestationResponse.new(
+      client_data_json: client_data_json,
+      attestation_object: ATTESTATION_NONE_VERIFIED,
+      origin: @origin
+    )
 
     error = assert_raises(ActionPack::WebAuthn::InvalidResponseError) do
-      @response.validate!
+      response.validate!
     end
 
-    assert_equal "Challenge does not match", error.message
+    assert_match /Challenge (is invalid|has expired)/, error.message
   end
 
   test "validate! raises when origin does not match" do
@@ -152,7 +157,6 @@ class ActionPack::WebAuthn::Authenticator::AttestationResponseTest < ActiveSuppo
     response = ActionPack::WebAuthn::Authenticator::AttestationResponse.new(
       client_data_json: @client_data_json,
       attestation_object: ATTESTATION_PACKED_VERIFIED,
-      challenge: @challenge,
       origin: @origin
     )
 
@@ -173,7 +177,6 @@ class ActionPack::WebAuthn::Authenticator::AttestationResponseTest < ActiveSuppo
     response = ActionPack::WebAuthn::Authenticator::AttestationResponse.new(
       client_data_json: @client_data_json,
       attestation_object: ATTESTATION_PACKED_VERIFIED,
-      challenge: @challenge,
       origin: @origin
     )
 

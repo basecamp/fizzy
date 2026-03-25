@@ -1,9 +1,5 @@
 <% @page_title = "Enter your email" %>
 
-<% content_for :head do %>
-  <%= passkey_request_options_meta_tag(@request_options) %>
-<% end %>
-
 <div class="panel panel--centered flex flex-column gap-half">
   <h1 class="txt-x-large font-weight-black margin-block-end">Get into Fizzy</h1>
 
@@ -26,7 +22,7 @@
     </button>
   <% end %>
 
-  <%= passkey_sign_in_button "Sign in with a passkey", session_passkey_path, mediation: "conditional", class: "btn btn--link center txt-medium", hidden: true %>
+  <%= passkey_sign_in_button "Sign in with a passkey", session_passkey_path, options: @authentication_options, mediation: "conditional", class: "btn btn--link center txt-medium", hidden: true %>
 
 </div>
 

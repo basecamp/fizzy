@@ -26,6 +26,7 @@
 class ActionPack::WebAuthn::PublicKeyCredential::RequestOptions < ActionPack::WebAuthn::PublicKeyCredential::Options
   attribute :credentials, default: -> { [] }
   attribute :challenge_expiration, default: -> { Rails.configuration.action_pack.web_authn.request_challenge_expiration }
+  attribute :challenge_purpose, default: "authentication"
 
   def initialize(attributes = {})
     super
@@ -34,13 +35,15 @@ class ActionPack::WebAuthn::PublicKeyCredential::RequestOptions < ActionPack::We
 
   # Returns a Hash suitable for JSON serialization and passing to the
   # WebAuthn JavaScript API.
-  def as_json(*)
-    {
+  def as_json(options = {})
+    json = {
       challenge: challenge,
       rpId: relying_party.id,
       allowCredentials: credentials.map { |credential| allow_credential_json(credential) },
       userVerification: user_verification.to_s
     }
+
+    json.as_json(options)
   end
 
   private

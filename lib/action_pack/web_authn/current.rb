@@ -14,10 +14,6 @@
 #   The expected origin (typically +request.base_url+). Validated against the
 #   +origin+ field in the authenticator's client data.
 #
-# [+challenge+]
-#   The Base64URL-encoded challenge read from the encrypted cookie. Validated
-#   against the +challenge+ field in the authenticator's client data.
-#
 class ActionPack::WebAuthn::Current < ActiveSupport::CurrentAttributes
-  attribute :host, :origin, :challenge
+  attribute :host, :origin
 end

@@ -17,7 +17,6 @@
 #     authenticator_data: params[:response][:authenticatorData],
 #     signature: params[:response][:signature],
 #     credential: credential.to_public_key_credential,
-#     challenge: ActionPack::WebAuthn::Current.challenge,
 #     origin: "https://example.com"
 #   )
 #
@@ -48,6 +47,10 @@ class ActionPack::WebAuthn::Authenticator::AssertionResponse < ActionPack::WebAu
   end
 
   private
+    def challenge_purpose
+      "authentication"
+    end
+
     def client_data_type_must_be_get
       unless client_data["type"] == "webauthn.get"
         errors.add(:base, "Client data type is not webauthn.get")

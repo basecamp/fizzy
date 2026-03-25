@@ -13,7 +13,7 @@ class My::PasskeysControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "register a passkey" do
-    challenge = request_webauthn_challenge
+    challenge = request_webauthn_challenge(purpose: "registration")
 
     assert_difference -> { identities(:kevin).passkeys.count }, 1 do
       post my_passkeys_path, params: build_attestation_params(challenge: challenge)

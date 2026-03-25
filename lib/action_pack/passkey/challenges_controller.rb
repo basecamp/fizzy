@@ -5,9 +5,10 @@
 # authentication ceremony so that the challenge is issued just-in-time rather
 # than embedded in the initial page load.
 #
-# The generated challenge is stored in an encrypted, HTTP-only, same-site
-# cookie and simultaneously returned in the JSON response body. The cookie is
-# consumed by ActionPack::Passkey::Request on the subsequent form submission.
+# The generated challenge is returned in the JSON response body. The challenge
+# is a signed, expiring token that the server can verify on the subsequent
+# form submission without needing server-side state — the challenge is
+# extracted from the authenticator's +clientDataJSON+ response.
 #
 # == Route
 #
@@ -15,23 +16,34 @@
 # via +config.action_pack.passkey.routes_prefix+).
 #
 class ActionPack::Passkey::ChallengesController < ActionController::Base
-  COOKIE_NAME = :action_pack_passkey_challenge
-
   include ActionPack::Passkey::Request
 
-  # Generates a fresh challenge, stores it in an encrypted cookie, and returns
-  # it as JSON. The cookie is consumed on the next passkey form submission.
+  # Generates a fresh challenge and returns it as JSON. Accepts an optional
+  # +purpose+ parameter ("registration" or "authentication") to select the
+  # appropriate challenge expiration. Defaults to "authentication".
   def create
-    challenge = create_passkey_challenge
-
-    cookies.encrypted[COOKIE_NAME] = { value: challenge, httponly: true, same_site: :lax, secure: !request.local? && request.ssl? }
-    render json: { challenge: challenge }
+    render json: { challenge: create_passkey_challenge }
   end
 
   private
     def create_passkey_challenge
       ActionPack::WebAuthn::PublicKeyCredential::Options.new(
-        challenge_expiration: Rails.configuration.action_pack.web_authn.request_challenge_expiration
+        challenge_expiration: challenge_expiration,
+        challenge_purpose: challenge_purpose
       ).challenge
+    end
+
+    def challenge_purpose
+      params[:purpose] == "registration" ? "registration" : "authentication"
+    end
+
+    def challenge_expiration
+      config = Rails.configuration.action_pack.web_authn
+
+      if challenge_purpose == "registration"
+        config.creation_challenge_expiration
+      else
+        config.request_challenge_expiration
+      end
     end
 end

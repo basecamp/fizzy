@@ -23,7 +23,6 @@
 #     authenticator_data: authenticator_data,
 #     signature: signature,
 #     credential: credential,
-#     challenge: ActionPack::WebAuthn::Current.challenge,
 #     origin: "https://example.com",
 #     user_verification: :required
 #   )
@@ -34,9 +33,9 @@ class ActionPack::WebAuthn::Authenticator::Response
   include ActiveModel::Validations
 
   attr_reader :client_data_json
-  attr_accessor :challenge, :origin, :user_verification
+  attr_accessor :origin, :user_verification
 
-  validate :challenge_must_match
+  validate :challenge_must_be_present
   validate :challenge_must_not_be_expired
   validate :origin_must_match
   validate :must_not_be_cross_origin
@@ -45,9 +44,8 @@ class ActionPack::WebAuthn::Authenticator::Response
   validate :user_must_be_present
   validate :user_must_be_verified_when_required
 
-  def initialize(client_data_json:, challenge: nil, origin: nil, user_verification: :preferred)
+  def initialize(client_data_json:, origin: nil, user_verification: :preferred)
     @client_data_json = client_data_json
-    @challenge = challenge
     @origin = origin
     @user_verification = user_verification.to_sym
   end
@@ -76,26 +74,26 @@ class ActionPack::WebAuthn::Authenticator::Response
   end
 
   private
-    def challenge_must_match
-      if challenge.blank?
+    def challenge_must_be_present
+      if client_data["challenge"].blank?
         errors.add(:base, "Challenge missing")
-      elsif client_data["challenge"].blank?
-        errors.add(:base, "Challenge missing in client data")
-      elsif !ActiveSupport::SecurityUtils.secure_compare(challenge.to_s, client_data["challenge"].to_s)
-        errors.add(:base, "Challenge does not match")
       end
     end
 
     def challenge_must_not_be_expired
-      return if errors.any? || challenge.blank?
+      return if errors.any?
 
-      signed_message = Base64.urlsafe_decode64(challenge)
+      signed_message = Base64.urlsafe_decode64(client_data["challenge"])
 
-      unless ActionPack::WebAuthn.challenge_verifier.verified(signed_message)
+      unless ActionPack::WebAuthn.challenge_verifier.verified(signed_message, purpose: challenge_purpose)
         errors.add(:base, "Challenge has expired")
       end
     rescue ArgumentError
       errors.add(:base, "Challenge is invalid")
+    end
+
+    def challenge_purpose
+      nil
     end
 
     def origin_must_match

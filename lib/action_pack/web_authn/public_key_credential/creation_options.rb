@@ -53,6 +53,7 @@ class ActionPack::WebAuthn::PublicKeyCredential::CreationOptions < ActionPack::W
   attribute :exclude_credentials, default: -> { [] }
   attribute :attestation, default: :none
   attribute :challenge_expiration, default: -> { Rails.configuration.action_pack.web_authn.creation_challenge_expiration }
+  attribute :challenge_purpose, default: "registration"
 
   validates :id, :name, :display_name, presence: true
   validates :resident_key, inclusion: { in: RESIDENT_KEY_OPTIONS }
@@ -67,7 +68,7 @@ class ActionPack::WebAuthn::PublicKeyCredential::CreationOptions < ActionPack::W
 
   # Returns a Hash suitable for JSON serialization and passing to the
   # WebAuthn JavaScript API.
-  def as_json(*)
+  def as_json(options = {})
     json = {
       challenge: challenge,
       rp: relying_party.as_json,
@@ -96,7 +97,7 @@ class ActionPack::WebAuthn::PublicKeyCredential::CreationOptions < ActionPack::W
       json[:attestation] = attestation.to_s
     end
 
-    json
+    json.as_json(options)
   end
 
   private
