@@ -1,0 +1,37 @@
+# Fizzy Infrastructure - Developer Commands
+
+# Show all commands
+default:
+    @just --list --unsorted
+
+# ─────────────────────────────────────────────────────────────
+# INFRA
+# ─────────────────────────────────────────────────────────────
+
+# [infra] Setup environment (check node, install deps)
+infra-setup:
+    scripts/setup.sh
+
+# [infra] Run tests
+infra-test:
+    yarn test
+
+# [infra] CDK synth: just infra-synth --environment=development --profile=DevOpsPlayGround
+infra-synth *args:
+    scripts/cdk.sh synth {{args}}
+
+# [infra] CDK diff: just infra-diff --environment=development --profile=DevOpsPlayGround
+infra-diff *args:
+    scripts/cdk.sh diff {{args}}
+
+# [infra] CDK deploy: just infra-deploy --environment=development --profile=DevOpsPlayGround
+infra-deploy *args:
+    scripts/cdk.sh deploy {{args}}
+
+# [infra] CDK destroy: just infra-destroy --environment=development --profile=DevOpsPlayGround
+infra-destroy *args:
+    scripts/cdk.sh destroy {{args}}
+
+# [infra] CDK import: just infra-import --environment=production --stack=ZarFizzyStack
+infra-import *args:
+    scripts/cdk.sh import {{args}}

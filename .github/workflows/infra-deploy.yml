@@ -25,8 +25,9 @@ permissions:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  AWS_REGION: me-central-1
+  AWS_REGION: eu-central-1
   ENVIRONMENT: production
+  MATTERMOST_CHANNEL: team-platform
 
 defaults:
   run:
@@ -84,7 +85,7 @@ jobs:
         uses: adriantaut/action-mattermost-notify@feature/add-color-input
         with:
           MATTERMOST_WEBHOOK_URL: ${{ secrets.MATTERMOST_WEBHOOK }}
-          MATTERMOST_CHANNEL: platform-alerts
+          MATTERMOST_CHANNEL: ${{ env.MATTERMOST_CHANNEL }}
           MATTERMOST_USERNAME: ${{ github.event.repository.name }}-deployer
           COLOR: ${{ job.status }}
           TEXT: |

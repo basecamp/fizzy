@@ -16,7 +16,7 @@ export const environment = (process.env.ENVIRONMENT as ENVIRONMENT) || ENVIRONME
 /**
  * AWS primary region (UAE)
  */
-export const region = 'me-central-1';
+export const region = 'eu-central-1';
 
 /**
  * Application name

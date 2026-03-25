@@ -62,6 +62,11 @@ export class Database extends Construct {
       writer: rds.ClusterInstance.serverlessV2('writer', {
         instanceIdentifier: `fizzy-${environment}-writer`,
       }),
+      readers: [
+        rds.ClusterInstance.serverlessV2('reader', {
+          instanceIdentifier: `fizzy-${environment}-reader`,
+        }),
+      ],
       backup: {
         retention: cdk.Duration.days(7),
         preferredWindow: '03:00-04:00',

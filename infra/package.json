@@ -23,7 +23,7 @@
     "typescript": "~5.9.3"
   },
   "dependencies": {
-    "@zarpay/zar-cdk-lib": "^0.29.0",
+    "@zarpay/zar-cdk-lib": "^0.40.0",
     "aws-cdk-lib": "^2.232.1",
     "constructs": "^10.4.3",
     "source-map-support": "^0.5.21"
