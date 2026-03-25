@@ -68,12 +68,7 @@ jobs:
 
   deploy:
     needs: prepare
-    runs-on:
-      - self-hosted
-      - linux
-      - arm64
-      - pi5-01
-      - kamal
+    runs-on: ${{ fromJSON(vars.SELF_HOSTED_RUNNER_LABELS_JSON) }}
     timeout-minutes: 90
     permissions:
       contents: read
@@ -123,6 +118,14 @@ jobs:
       - name: Write deploy secrets to local files
         shell: bash
         env:
+          KAMAL_SERVER_ALIAS: ${{ vars.KAMAL_SERVER_ALIAS }}
+          KAMAL_PUBLIC_HOST: ${{ vars.KAMAL_PUBLIC_HOST }}
+          KAMAL_SSH_USER: ${{ vars.KAMAL_SSH_USER }}
+          KAMAL_STORAGE_PATH: ${{ vars.KAMAL_STORAGE_PATH }}
+          KAMAL_MAILER_FROM_ADDRESS: ${{ vars.KAMAL_MAILER_FROM_ADDRESS }}
+          KAMAL_KNOWN_HOST: ${{ vars.KAMAL_KNOWN_HOST }}
+          S3_ENDPOINT: ${{ vars.S3_ENDPOINT }}
+          S3_BUCKET: ${{ vars.S3_BUCKET }}
           SECRET_KEY_BASE: ${{ secrets.SECRET_KEY_BASE }}
           VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
           VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
@@ -138,6 +141,14 @@ jobs:
           mkdir -p config
 
           {
+            printf 'KAMAL_SERVER_ALIAS=%s\n' "$KAMAL_SERVER_ALIAS"
+            printf 'KAMAL_PUBLIC_HOST=%s\n' "$KAMAL_PUBLIC_HOST"
+            printf 'KAMAL_SSH_USER=%s\n' "$KAMAL_SSH_USER"
+            printf 'KAMAL_STORAGE_PATH=%s\n' "$KAMAL_STORAGE_PATH"
+            printf 'KAMAL_MAILER_FROM_ADDRESS=%s\n' "$KAMAL_MAILER_FROM_ADDRESS"
+            printf 'KAMAL_KNOWN_HOST=%s\n' "$KAMAL_KNOWN_HOST"
+            printf 'S3_ENDPOINT=%s\n' "$S3_ENDPOINT"
+            printf 'S3_BUCKET=%s\n' "$S3_BUCKET"
             printf 'SECRET_KEY_BASE=%s\n' "$SECRET_KEY_BASE"
             printf 'VAPID_PUBLIC_KEY=%s\n' "$VAPID_PUBLIC_KEY"
             printf 'VAPID_PRIVATE_KEY=%s\n' "$VAPID_PRIVATE_KEY"
@@ -159,9 +170,11 @@ jobs:
 
       - name: Verify runner can SSH to homelab-rcc
         shell: bash
+        env:
+          KAMAL_SERVER_ALIAS: ${{ vars.KAMAL_SERVER_ALIAS }}
         run: |
           set -euo pipefail
-          ssh -o BatchMode=yes homelab-rcc "echo runner-ssh-ok >/dev/null"
+          ssh -o BatchMode=yes "$KAMAL_SERVER_ALIAS" "echo runner-ssh-ok >/dev/null"
 
       - name: Log in to GHCR
         shell: bash
@@ -197,14 +210,16 @@ jobs:
 
       - name: Prepare runner SSH state
         shell: bash
+        env:
+          KAMAL_KNOWN_HOST: ${{ vars.KAMAL_KNOWN_HOST }}
         run: |
           set -euo pipefail
           mkdir -p "$HOME/.ssh"
           chmod 700 "$HOME/.ssh"
           touch "$HOME/.ssh/known_hosts"
           chmod 600 "$HOME/.ssh/known_hosts"
-          ssh-keygen -R 10.10.10.106 -f "$HOME/.ssh/known_hosts" >/dev/null 2>&1 || true
-          ssh-keyscan 10.10.10.106 >> "$HOME/.ssh/known_hosts" 2>/dev/null
+          ssh-keygen -R "$KAMAL_KNOWN_HOST" -f "$HOME/.ssh/known_hosts" >/dev/null 2>&1 || true
+          ssh-keyscan "$KAMAL_KNOWN_HOST" >> "$HOME/.ssh/known_hosts" 2>/dev/null
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Run Kamal on runner

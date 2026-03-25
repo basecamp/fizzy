@@ -3,13 +3,17 @@ set -eu
 
 resolve_ssh_user() {
   ruby <<'RUBY'
+require "erb"
 require "yaml"
+require "dotenv"
 
 destination = ENV["KAMAL_DESTINATION"].to_s
 config_path = destination.empty? ? "config/deploy.yml" : "config/deploy.#{destination}.yml"
 
 if File.exist?(config_path)
-  config = YAML.load_file(config_path) || {}
+  Dotenv.load(".env.kamal.local") if File.exist?(".env.kamal.local")
+  rendered = ERB.new(File.read(config_path)).result
+  config = YAML.safe_load(rendered, aliases: true) || {}
   user = config.dig("ssh", "user").to_s
   puts user unless user.empty?
 end
