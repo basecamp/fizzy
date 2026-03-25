@@ -94,7 +94,7 @@ module Fizzy
       def human_line(item)
         return item unless item.is_a?(Hash)
 
-        compact = [item["id"], item["number"], item["name"], item["title"], item["url"]].compact
+        compact = [ item["id"], item["number"], item["name"], item["title"], item["url"] ].compact
         compact.empty? ? item.inspect : compact.join("  ")
       end
 
