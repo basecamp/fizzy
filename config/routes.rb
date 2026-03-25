@@ -27,6 +27,7 @@ Rails.application.routes.draw do
 
   resources :boards do
     scope module: :boards do
+      resources :agent_bootstraps, only: %i[ new create show ]
       resource :subscriptions
       resource :involvement
       resource :publication
@@ -141,6 +142,8 @@ Rails.application.routes.draw do
   end
 
   resources :qr_codes
+
+  post "agent_bootstrap/:token/claim", to: "agent_bootstrap_claims#create", as: :agent_bootstrap_claim
 
   get "join/:code", to: "join_codes#new", as: :join
   post "join/:code", to: "join_codes#create"
