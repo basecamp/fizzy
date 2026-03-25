@@ -32,6 +32,7 @@ allowed_keys=(
   S3_ACCESS_KEY_ID
   S3_SECRET_ACCESS_KEY
   CLOUDFLARED_TOKEN
+  KAMAL_REGISTRY_PASSWORD
 )
 
 while IFS='=' read -r key value; do
@@ -51,14 +52,11 @@ while IFS='=' read -r key value; do
   echo "synced $key"
 done < <(grep -E '^[A-Z0-9_]+=' "$ENV_FILE")
 
-registry_password="${KAMAL_REGISTRY_PASSWORD:-}"
-if [[ -z "$registry_password" ]] && gh auth token >/dev/null 2>&1; then
-  registry_password="$(gh auth token)"
-fi
+registry_password="${KAMAL_REGISTRY_PASSWORD:-$(sed -n 's/^KAMAL_REGISTRY_PASSWORD=//p' "$ENV_FILE" | head -n 1)}"
 
 if [[ -n "$registry_password" ]]; then
   printf '%s' "$registry_password" | gh secret set KAMAL_REGISTRY_PASSWORD --repo "$REPO"
   echo "synced KAMAL_REGISTRY_PASSWORD"
 else
-  echo "warning: KAMAL_REGISTRY_PASSWORD not available; skipping registry secret" >&2
+  echo "warning: KAMAL_REGISTRY_PASSWORD not set in env or $ENV_FILE; skipping registry secret" >&2
 fi
