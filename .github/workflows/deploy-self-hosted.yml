@@ -151,7 +151,6 @@ jobs:
           S3_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY_ID }}
           S3_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_ACCESS_KEY }}
           CLOUDFLARED_TOKEN: ${{ secrets.CLOUDFLARED_TOKEN }}
-          RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
         run: |
           set -euo pipefail
 
@@ -203,13 +202,6 @@ jobs:
           } > .env.kamal.local
 
           chmod 600 .env.kamal.local
-
-          if [ -n "${RAILS_MASTER_KEY:-}" ]; then
-            printf '%s' "$RAILS_MASTER_KEY" > config/master.key
-            chmod 600 config/master.key
-          else
-            rm -f config/master.key
-          fi
 
       - name: Verify runner can SSH to homelab-rcc
         shell: bash

@@ -51,13 +51,6 @@ while IFS='=' read -r key value; do
   echo "synced $key"
 done < <(grep -E '^[A-Z0-9_]+=' "$ENV_FILE")
 
-if [[ -f "$MASTER_KEY_FILE" ]]; then
-  gh secret set RAILS_MASTER_KEY --repo "$REPO" < "$MASTER_KEY_FILE"
-  echo "synced RAILS_MASTER_KEY"
-else
-  echo "warning: $MASTER_KEY_FILE not found; skipping RAILS_MASTER_KEY" >&2
-fi
-
 registry_password="${KAMAL_REGISTRY_PASSWORD:-}"
 if [[ -z "$registry_password" ]] && gh auth token >/dev/null 2>&1; then
   registry_password="$(gh auth token)"
