@@ -14,12 +14,8 @@ That script will:
 1. install CLI dependencies,
 2. build the `fizzy-cli` gem,
 3. install it for the current user.
-
-If `fizzy` is not found after install, add the Ruby user gem bin directory to your `PATH`.
-
-```bash
-export PATH="$PATH:$(ruby -e 'require "rubygems"; print Gem.user_dir + "/bin"')"
-```
+4. install a launcher at `~/.local/bin/fizzy`.
+5. add `~/.local/bin` to your shell startup file when present (`.bashrc` or `.zshrc`), so you can use `fizzy` directly next shell session.
 
 ## Development usage (no install)
 
