@@ -2,8 +2,8 @@
       id: dom_id(event, "timelined"),
       class: "event event--#{ event.action } #{ "golden-effect" if event.card.golden? } center-block flex flex-column full-width align-start justify-start position-relative",
       style: "--card-color: #{ card.closed? ? "var(--color-card-complete)" : card.color };",
-      target: "_top",
       data: {
+        turbo_frame: "_top",
         related_element_target: "related",
         related_element_group_value: card.id,
         action: "mouseover->related-element#highlight mouseout->related-element#unhighlight" } do %>

@@ -54,6 +54,12 @@ export default class extends Controller {
     }
   }
 
+  frameColumnOnMobile(event) {
+    if (!this.#isDesktop) {
+      event.currentTarget.scrollIntoView({ behavior: "smooth", inline: "center" })
+    }
+  }
+
   async #restoreColumnsDisablingTransitions() {
     this.#disableTransitions()
     this.#restoreColumns()

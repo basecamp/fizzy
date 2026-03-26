@@ -24,6 +24,41 @@ class Account::JoinCodesControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to account_join_code_path
   end
 
+  test "show as JSON" do
+    get account_join_code_path, as: :json
+    assert_response :success
+
+    body = @response.parsed_body
+    assert body["code"].present?
+    assert body.key?("usage_count")
+    assert body.key?("usage_limit")
+    assert body.key?("url")
+    assert body.key?("active")
+  end
+
+  test "update as JSON" do
+    put account_join_code_path, params: { account_join_code: { usage_limit: 5 } }, as: :json
+
+    assert_response :no_content
+    assert_equal 5, Current.account.join_code.reload.usage_limit
+  end
+
+  test "update as JSON with invalid data" do
+    huge_number = "99999999999999999999999999999999999"
+
+    put account_join_code_path, params: { account_join_code: { usage_limit: huge_number } }, as: :json
+
+    assert_response :unprocessable_entity
+  end
+
+  test "destroy as JSON" do
+    assert_changes -> { Current.account.join_code.reload.code } do
+      delete account_join_code_path, as: :json
+    end
+
+    assert_response :no_content
+  end
+
   test "update requires admin" do
     logout_and_sign_in_as :david
 

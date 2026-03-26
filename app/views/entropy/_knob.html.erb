@@ -1,6 +1,5 @@
 <%
-  period = form.object.send(name)
-  current_index = knob_options.index(period.to_i / 1.day)
+  current_index = knob_options.index(current_value) || knob_options.index(Entropy::DEFAULT_AUTO_POSTPONE_PERIOD_IN_DAYS)
 %>
 
 <fieldset class="knob" data-controller="knob" data-knob-target="field" style="--knob-options: <%= knob_options.length %>; --knob-index: <%= current_index %>">
@@ -8,7 +7,7 @@
     <% knob_options.each_with_index do |value, index| %>
       <label class="knob__option" style="--i: <%= index %>">
         <%= form.radio_button name,
-              value.days,
+              value,
               data: {
                 action: "change->knob#optionChanged change->form#submit",
                 index: index,

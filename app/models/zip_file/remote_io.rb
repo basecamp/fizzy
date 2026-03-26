@@ -1,4 +1,9 @@
 class ZipFile::RemoteIO < ZipKit::RemoteIO
+  def initialize(url, ssl_verify_peer: true)
+    super(url)
+    @ssl_verify_peer = ssl_verify_peer
+  end
+
   protected
     def request_range(range)
       with_http do |http|
@@ -37,8 +42,7 @@ class ZipFile::RemoteIO < ZipKit::RemoteIO
     def with_http
       http = Net::HTTP.new(@uri.hostname, @uri.port)
       http.use_ssl = @uri.scheme == "https"
-      # FIXME: Disable SSL verification for now to avoid issues with our self-signed certificates for PureStorage
-      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+      http.verify_mode = OpenSSL::SSL::VERIFY_NONE unless @ssl_verify_peer
       http.start { yield http }
     end
 end

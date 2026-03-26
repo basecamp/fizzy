@@ -9,4 +9,11 @@ class Boards::Columns::ClosedsControllerTest < ActionDispatch::IntegrationTest
     get board_columns_closed_path(boards(:writebook))
     assert_response :success
   end
+
+  test "show as JSON" do
+    get board_columns_closed_path(boards(:writebook)), as: :json
+    assert_response :success
+
+    assert_kind_of Array, @response.parsed_body
+  end
 end

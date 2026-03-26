@@ -1,7 +1,7 @@
 <%= turbo_frame_tag @step do %>
   <div class="flex align-center gap-half">
     <%= form_with model: [@card, @step], class: "step", data: { controller: "form" } do |form| %>
-      <%= form.check_box :completed, { class: "step__checkbox", checked: @step.completed?, disabled: true } %>
+      <%= form.check_box :completed, { class: "checkbox", checked: @step.completed?, disabled: true } %>
       <%= form.text_field :content, class: "input step__content step__content--edit hide-focus-ring", placeholder: "Name this step…", required: true, autofocus: true, autocomplete: "off",
           data: { action: "keydown.esc->form#cancel focus->form#select", "1p-ignore": "true" } %>
       <%= form.button type: "submit", class: "btn btn--positive txt-xx-small" do %>

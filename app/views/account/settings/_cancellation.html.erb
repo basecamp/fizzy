@@ -1,26 +1,45 @@
 <% if Current.account.cancellable? && Current.user.owner? %>
-  <section class="settings__section">
+  <section class="settings__section settings__section--negative">
     <header>
-      <h2 class="divider txt-negative">Cancel account</h2>
-      <div>Delete your Fizzy account.</div>
+      <h2 class="divider">Danger zone</h2>
+      <div>Delete your account and everything in&nbsp;it, including all boards and cards.</div>
     </header>
 
-    <div data-controller="dialog" data-dialog-modal-value="true">
-      <button type="button" class="btn btn--negative" data-action="dialog#open">Delete account</button>
+    <div data-controller="dialog toggle-enable" data-dialog-modal-value="true">
+      <button type="button" class="btn btn--negative" data-action="dialog#open">Delete account...</button>
 
-      <dialog class="dialog panel panel--wide shadow" data-dialog-target="dialog" style="--panel-size: 48ch;">
-        <h2 class="margin-none txt-large txt-negative">Delete your account?</h2>
-        <ul class="txt-align-start">
-          <li>All users, including you, will lose access</li>
-          <% if Current.account.try(:active_subscription) %>
-            <li>Your subscription will be canceled</li>
-          <% end %>
-          <li>After 30 days, your data will be permanently deleted</li>
-        </ul>
+      <dialog class="dialog panel panel--wide shadow" data-dialog-target="dialog" data-action="close->toggle-enable#reset" style="--panel-size: 48ch;">
+        <h2 class="margin-none txt-large txt-negative">Delete account</h2>
+        <div class="txt-align-start">
+          <h3 class="margin-block-start margin-block-end-half txt-normal">What happens next:</h3>
+          <ul class="list-unindented margin-block-start-half margin-block-end">
+            <li>Your <strong><%= Current.account.name %></strong> account will be closed immediately.</li>
+            <li>All users, including you, will lose access.</li>
+            <% if Current.account.try(:active_subscription) %>
+              <li>Your subscription will be canceled.</li>
+            <% end %>
+            <li>All your data will be permanently deleted within 30&nbsp;days.</li>
+          </ul>
+
+          <h3 class="margin-block-end-half txt-normal">Remember to export your data</h3>
+          <p class="margin-block-start-half margin-block-end">
+            <button type="button" class="btn btn--plain txt-link" data-controller="dispatch-event" data-dispatch-event-name-value="open-export" data-action="click->dialog#close click->dispatch-event#fire">Export your data</button> before you go. You won’t be able to do it after you delete your account.
+          </p>
+        </div>
+
+        <label class="flex gap justify-start txt-align-start margin-block-end-double">
+          <input type="checkbox" class="checkbox" data-toggle-enable-target="checkbox" data-action="change->toggle-enable#toggle">
+          I’ve read the above and want to continue
+        </label>
 
         <div class="flex gap justify-center">
-          <button type="button" class="btn" data-action="dialog#close">Cancel</button>
-          <%= button_to "Delete my account", account_cancellation_path, method: :post, class: "btn btn--negative", form: { data: { action: "submit->dialog#close", turbo: false } } %>
+          <button type="button" class="btn" autofocus data-action="dialog#close">Not now</button>
+          <%= button_to "Delete my account", account_cancellation_path,
+              method: :post,
+              class: "btn btn--negative",
+              disabled: true,
+              form: { data: { action: "submit->dialog#close", turbo: false } },
+              data: { toggle_enable_target: "element" } %>
         </div>
       </dialog>
     </div>

@@ -59,16 +59,26 @@
     /* ------------------------------------------------------------------------ */
 
     .card-perma {
-      margin-block-start: 0;
+      margin-block-start: var(--block-space-half);
 
       &:not(:has(.card-perma__notch-new-card-buttons)) .card-perma__bg {
-        padding-block: clamp(0.25rem, 2vw, var(--padding-block));
+        padding-block-end: clamp(0.25rem, 2vw, var(--padding-block));
+      }
+
+      .card {
+        background: linear-gradient(to bottom, var(--color-canvas), var(--card-bg-color));
+        box-shadow: unset;
+      }
+
+      .card__board {
+        border-radius: 0 var(--border-radius) var(--border-radius) 0;
       }
     }
 
     .card-perma__bg {
-      border-start-start-radius: calc(0.2em + clamp(0.25rem, 2vw, var(--padding-block)));
-      border-start-end-radius: calc(0.2em + clamp(0.25rem, 2vw, var(--padding-block)));
+      padding-inline: 0;
+      padding-block-start: 0;
+      background-color: unset;
     }
 
     .card-perma__closure-message {
@@ -77,19 +87,8 @@
     }
 
     .card-perma--draft {
-      .card-perma__bg {
-        padding-inline: 0;
-        padding-block-start: 0;
-        background-color: unset;
-      }
-
       .card {
-        background: linear-gradient(to bottom, var(--color-canvas), var(--card-bg-color));
         box-shadow: 0 101vh 0 100vh var(--card-bg-color);
-      }
-
-      .card__board {
-        border-radius: 0 var(--border-radius) var(--border-radius) 0;
       }
 
       .card-perma__notch--bottom {
@@ -128,6 +127,12 @@
 
 [data-bridge-components~=buttons] {
   [data-bridge--buttons-target~=button] {
+    display: none;
+  }
+}
+
+[data-bridge-components~=stamp] {
+  [data-controller~=bridge--stamp] {
     display: none;
   }
 }

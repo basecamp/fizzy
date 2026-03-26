@@ -4,6 +4,7 @@
     controller: "search-form",
     action: "search-form:reset->bar#reset",
     bar_target: "form",
+    turbo_action: defined?(turbo_action) ? turbo_action : nil,
     turbo_frame: defined?(target_turbo_frame) ? target_turbo_frame : nil } do |form| %>
   <%= form.label :q, "Search Fizzy", class: "font-weight-black txt-nowrap" %>
   <%= text_field_tag :q, query_terms,

@@ -21,6 +21,22 @@ class Columns::LeftPositionsControllerTest < ActionDispatch::IntegrationTest
     assert_equal original_position_a, column_b.reload.position
   end
 
+  test "move column left as JSON" do
+    board = boards(:writebook)
+    columns = board.columns.sorted.to_a
+
+    column_a = columns[0]
+    column_b = columns[1]
+    original_position_a = column_a.position
+    original_position_b = column_b.position
+
+    post column_left_position_path(column_b), as: :json
+    assert_response :created
+
+    assert_equal original_position_b, column_a.reload.position
+    assert_equal original_position_a, column_b.reload.position
+  end
+
   test "move left refreshes adjacent columns" do
     column = columns(:writebook_in_progress)
 

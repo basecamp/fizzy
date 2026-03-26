@@ -1,9 +1,13 @@
 <% if @magic_link.for_sign_in? %>
 Please enter this 6-character verification code on the Fizzy sign-in page:
 <% else %>
-Please enter this 6-character verification code on the Fizzy sign-up page to create your new account:
+Please enter this 6-character verification code to finish creating your account:
 <% end %>
 
 <%= @magic_link.code %>
 
 This code will work for <%= distance_of_time_in_words(MagicLink::EXPIRATION_TIME) %>.
+
+<% if account = @magic_link.identity.accounts.last %>
+P.S. If you want to sign-in faster, and make your account more secure, add a passkey: <%= my_passkeys_url(script_name: account.slug) %>
+<% end %>

@@ -30,6 +30,7 @@ class Account::DataTransfer::ActionText::RichTextRecordSetTest < ActiveSupport::
     reader = ZipFile::Reader.new(tempfile)
 
     record_set = Account::DataTransfer::ActionText::RichTextRecordSet.new(importing_account)
+    record_set.importable_model_names = %w[ ActionText::RichText Card ]
 
     error = assert_raises(Account::DataTransfer::RecordSet::IntegrityError) do
       record_set.check(from: reader)

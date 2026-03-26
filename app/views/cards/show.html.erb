@@ -7,7 +7,7 @@
 
 <% content_for :header do %>
   <div class="header__actions header__actions--start">
-    <%= link_back_to_board(@card.board) %>
+    <%= link_back_to_board @card.board, prefer_referrer: [ root_path, cards_path, board_path(@card.board) ] %>
   </div>
 <% end %>
 

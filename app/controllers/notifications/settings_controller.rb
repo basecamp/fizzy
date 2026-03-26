@@ -1,4 +1,6 @@
 class Notifications::SettingsController < ApplicationController
+  wrap_parameters :user_settings, include: %i[ bundle_email_frequency ]
+
   before_action :set_settings
 
   def show
@@ -7,7 +9,11 @@ class Notifications::SettingsController < ApplicationController
 
   def update
     @settings.update!(settings_params)
-    redirect_to notifications_settings_path, notice: "Settings updated"
+
+    respond_to do |format|
+      format.html { redirect_to notifications_settings_path, notice: "Settings updated" }
+      format.json { head :no_content }
+    end
   end
 
   private

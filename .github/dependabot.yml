@@ -12,7 +12,7 @@ updates:
     registries:
       - github-basecamp
     directory: "/"
-    insecure-external-code-execution: allow
+    insecure-external-code-execution: allow # zizmor: ignore[dependabot-execution] -- required for Bundler to resolve gems from the private github-basecamp registry
     open-pull-requests-limit: 10
     vendor: false
     groups:
@@ -25,6 +25,10 @@ updates:
       semver-major-days: 14
   - package-ecosystem: github-actions
     directory: "/"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
     schedule:
       interval: weekly
     open-pull-requests-limit: 10

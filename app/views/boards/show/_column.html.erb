@@ -4,7 +4,7 @@
     drag_and_strum_target: "container",
     collapsible_columns_target: "column",
     controller: "clicker",
-    action: "turbo:before-stream-render@document->collapsible-columns#restoreState focus->collapsible-columns#focusOnColumn"
+    action: "turbo:before-stream-render@document->collapsible-columns#restoreState focus->collapsible-columns#focusOnColumn dialog:show->collapsible-columns#frameColumnOnMobile"
   } do %>
   <header class="cards__header">
     <%= render "boards/show/menu/column", column: column %>

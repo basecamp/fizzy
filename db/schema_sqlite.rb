@@ -69,6 +69,22 @@ ActiveRecord::Schema[8.2].define(version: 2026_02_18_120000) do
     t.index ["external_account_id"], name: "index_accounts_on_external_account_id", unique: true
   end
 
+  create_table "action_pack_passkeys", id: :uuid, force: :cascade do |t|
+    t.string "aaguid", limit: 255
+    t.boolean "backed_up"
+    t.datetime "created_at", null: false
+    t.string "credential_id", limit: 255, null: false
+    t.uuid "holder_id", null: false
+    t.string "holder_type", limit: 255, null: false
+    t.string "name", limit: 255
+    t.binary "public_key", null: false
+    t.integer "sign_count", default: 0, null: false
+    t.text "transports", limit: 65535
+    t.datetime "updated_at", null: false
+    t.index ["credential_id"], name: "index_action_pack_passkeys_on_credential_id", unique: true
+    t.index ["holder_type", "holder_id"], name: "index_action_pack_passkeys_on_holder_type_and_holder_id"
+  end
+
   create_table "action_text_rich_texts", id: :uuid, force: :cascade do |t|
     t.uuid "account_id", null: false
     t.text "body", limit: 4294967295

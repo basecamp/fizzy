@@ -20,6 +20,6 @@ module User::Named
   def familiar_name
     names = name.split
     return name if names.length <= 1
-    "#{names.first} #{names[1..].map { |n| "#{n[0]}." }.join}"
+    "#{names.first}\u00A0#{names[1..].map { |n| "#{n[0]}." }.join}"
   end
 end

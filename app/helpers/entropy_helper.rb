@@ -1,8 +1,4 @@
 module EntropyHelper
-  def entropy_auto_close_options
-    [ 3, 7, 30, 90, 365, 11 ]
-  end
-
   def entropy_bubble_options_for(card)
     {
       daysBeforeReminder: card.entropy.days_before_reminder,

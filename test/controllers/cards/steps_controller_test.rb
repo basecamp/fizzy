@@ -53,6 +53,19 @@ class Cards::StepsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "index as JSON" do
+    card = cards(:logo)
+    card.steps.create!(content: "Step one")
+    card.steps.create!(content: "Step two", completed: true)
+
+    get card_steps_path(card), as: :json
+    assert_response :success
+
+    body = @response.parsed_body
+    assert_equal 2, body.size
+    assert_equal "Step one", body.first["content"]
+  end
+
   test "create as JSON" do
     card = cards(:logo)
 
@@ -62,6 +75,7 @@ class Cards::StepsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :created
     assert_equal card_step_path(card, Step.last, format: :json), @response.headers["Location"]
+    assert_equal "New step", @response.parsed_body["content"]
   end
 
   test "show as JSON" do

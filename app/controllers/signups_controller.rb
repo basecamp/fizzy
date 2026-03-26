@@ -1,4 +1,6 @@
 class SignupsController < ApplicationController
+  wrap_parameters :signup, include: %i[ email_address ]
+
   disallow_account_scope
   allow_unauthenticated_access
   rate_limit to: 10, within: 3.minutes, only: :create, with: -> { redirect_to new_signup_path, alert: "Try again later." }
