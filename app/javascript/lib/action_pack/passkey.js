@@ -78,8 +78,9 @@ class PasskeyButton extends HTMLElement {
   #handleError(error) {
     console.error("Passkey ceremony failed", error)
     const cancelled = error.name === "AbortError" || error.name === "NotAllowedError"
-    this.#showError(cancelled ? "cancelled" : "error")
-    this.button.dispatchEvent(new CustomEvent("passkey:error", { bubbles: true, detail: { error, cancelled } }))
+    const duplicate = error.name === "InvalidStateError"
+    this.#showError(duplicate ? "duplicate" : cancelled ? "cancelled" : "error")
+    this.button.dispatchEvent(new CustomEvent("passkey:error", { bubbles: true, detail: { error, cancelled, duplicate } }))
   }
 
   #showError(type) {
