@@ -1,4 +1,5 @@
 require "test_helper"
+require "shellwords"
 
 class Boards::AgentBootstrapsControllerTest < ActionDispatch::IntegrationTest
   setup do
@@ -32,6 +33,22 @@ class Boards::AgentBootstrapsControllerTest < ActionDispatch::IntegrationTest
     assert_includes body["skill_block"], body["setup_command"]
     assert_equal "watching", body["involvement"]
     assert_equal board.id, body.dig("board", "id")
+  end
+
+  test "setup command shell-escapes board-derived arguments" do
+    board = boards(:writebook)
+    board.update!(name: %(Danger "$(touch /tmp/nope)" `rm -rf /`))
+
+    post board_agent_bootstraps_path(board), as: :json
+
+    assert_response :created
+    command = @response.parsed_body.fetch("setup_command")
+    argv = Shellwords.split(command)
+
+    assert_equal "fizzy", argv[0]
+    assert_equal "auth", argv[1]
+    assert_equal "bootstrap", argv[2]
+    assert_equal "#{board.name} Agent", argv.last
   end
 
   test "new requires account admin" do

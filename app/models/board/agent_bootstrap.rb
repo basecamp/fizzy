@@ -33,6 +33,7 @@ class Board::AgentBootstrap < ApplicationRecord
       raise ActiveRecord::RecordNotFound unless claimable?
 
       identity = Identity.find_or_initialize_by(email_address: email_address)
+      ensure_claimable_identity!(identity)
       identity.save! if identity.new_record?
 
       user = identity.users.find_or_initialize_by(account: account)
@@ -60,4 +61,13 @@ class Board::AgentBootstrap < ApplicationRecord
       { identity:, user:, access_token: }
     end
   end
+
+  private
+    def ensure_claimable_identity!(identity)
+      return if identity.new_record?
+      return if identity.users.where(account: account).exists? && identity.users.where.not(account: account).none?
+
+      errors.add(:base, "Bootstrap claims cannot reuse an identity from another account")
+      raise ActiveRecord::RecordInvalid, self
+    end
 end

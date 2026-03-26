@@ -54,6 +54,26 @@ class AgentBootstrapClaimsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "watching", bootstrap.board.access_for(user).reload.involvement
   end
 
+  test "claim rejects an existing identity from another account" do
+    bootstrap = boards(:writebook).agent_bootstraps.create!(
+      account: accounts("37s"),
+      creator: users(:kevin),
+      expires_at: 30.minutes.from_now
+    )
+
+    untenanted do
+      assert_no_difference -> { Identity::AccessToken.count } do
+        post agent_bootstrap_claim_path(token: bootstrap.token),
+          params: { email_address: identities(:mike).email_address, name: "Mike Agent" },
+          as: :json
+      end
+    end
+
+    assert_response :unprocessable_entity
+    assert_includes @response.parsed_body.fetch("errors"), "Bootstrap claims cannot reuse an identity from another account"
+    assert_not bootstrap.reload.claimed?
+  end
+
   test "claim returns gone for expired bootstrap" do
     bootstrap = boards(:writebook).agent_bootstraps.create!(
       account: accounts("37s"),

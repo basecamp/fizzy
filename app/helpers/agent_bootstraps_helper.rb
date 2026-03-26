@@ -1,4 +1,6 @@
 module AgentBootstrapsHelper
+  require "shellwords"
+
   AGENT_BOOTSTRAP_SKILL_NAME = "fizzy-cli"
 
   def link_to_agent_bootstrap(board)
@@ -21,7 +23,11 @@ module AgentBootstrapsHelper
     suggested_email = "agent+#{agent_bootstrap.board.id.first(8)}@example.com"
     suggested_name = "#{agent_bootstrap.board.name} Agent"
 
-    %(fizzy auth bootstrap "#{agent_bootstrap_claim_url_for(agent_bootstrap)}" --email "#{suggested_email}" --name "#{suggested_name}")
+    Shellwords.shelljoin([
+      "fizzy", "auth", "bootstrap", agent_bootstrap_claim_url_for(agent_bootstrap),
+      "--email", suggested_email,
+      "--name", suggested_name
+    ])
   end
 
   def agent_bootstrap_skill_name
