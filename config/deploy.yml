@@ -58,7 +58,7 @@ env:
     SMTP_ADDRESS: smtp.gmail.com
     MULTI_TENANT: false # Set to true to allow multiple accounts to sign up
     SOLID_QUEUE_IN_PUMA: true # Run background jobs in the app container
-    ACTIVE_STORAGE_SERVICE: mirror_s3
+    ACTIVE_STORAGE_SERVICE: s3
     S3_ENDPOINT: <%= s3_endpoint %>
     S3_REGION: us-east-1
     S3_FORCE_PATH_STYLE: true

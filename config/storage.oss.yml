@@ -11,6 +11,9 @@ mirror_s3:
   primary: local
   mirrors: [ s3 ]
 
+# Legacy production service for blobs created before direct uploads were switched
+# to S3. Keep this definition while existing blobs still reference mirror_s3.
+
 devminio:
   service: S3
   bucket: fizzy-dev-activestorage
