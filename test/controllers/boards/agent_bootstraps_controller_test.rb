@@ -48,6 +48,8 @@ class Boards::AgentBootstrapsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "fizzy", argv[0]
     assert_equal "auth", argv[1]
     assert_equal "bootstrap", argv[2]
+    assert_equal "--email", argv[4]
+    assert_match(/\Aagent\+[A-Za-z0-9]{8}@example\.com\z/, argv[5])
     assert_equal "#{board.name} Agent", argv.last
   end
 

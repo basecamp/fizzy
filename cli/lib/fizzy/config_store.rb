@@ -1,5 +1,6 @@
 require "fileutils"
 require "yaml"
+require_relative "error"
 
 module Fizzy
   class ConfigStore

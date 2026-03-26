@@ -32,18 +32,14 @@ class Board::AgentBootstrap < ApplicationRecord
       lock!
       raise ActiveRecord::RecordNotFound unless claimable?
 
-      identity = Identity.find_or_initialize_by(email_address: email_address)
-      ensure_claimable_identity!(identity)
-      identity.save! if identity.new_record?
-
+      identity = find_or_create_claim_identity!(email_address)
       user = identity.users.find_or_initialize_by(account: account)
       if user.new_record?
         user.name = name
         user.role = :member
-        user.verified_at ||= Time.current
         user.save!
       elsif !user.active?
-        user.update!(identity: identity, active: true)
+        user.update!(identity:, active: true)
       end
 
       board.accesses.find_or_create_by!(user: user) do |access|
@@ -63,6 +59,13 @@ class Board::AgentBootstrap < ApplicationRecord
   end
 
   private
+    def find_or_create_claim_identity!(email_address)
+      identity = Identity.find_or_initialize_by(email_address:)
+      ensure_claimable_identity!(identity)
+      identity.save! if identity.new_record?
+      identity
+    end
+
     def ensure_claimable_identity!(identity)
       return if identity.new_record?
       return if identity.users.where(account: account).exists? && identity.users.where.not(account: account).none?

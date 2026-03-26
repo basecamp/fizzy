@@ -1,10 +1,9 @@
 require "json"
 require "net/http"
 require "uri"
+require_relative "error"
 
 module Fizzy
-  class Error < StandardError; end
-
   class ApiError < Error
     attr_reader :status, :body
 

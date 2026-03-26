@@ -20,7 +20,7 @@ module AgentBootstrapsHelper
   end
 
   def agent_bootstrap_setup_command(agent_bootstrap)
-    suggested_email = "agent+#{agent_bootstrap.board.id.first(8)}@example.com"
+    suggested_email = "agent+#{agent_bootstrap.token.to_s[0, 8]}@example.com"
     suggested_name = "#{agent_bootstrap.board.name} Agent"
 
     Shellwords.shelljoin([

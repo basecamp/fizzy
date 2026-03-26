@@ -1,6 +1,7 @@
 require "test_helper"
+require "open3"
+require "rbconfig"
 require "tmpdir"
-require_relative "../../../cli/lib/fizzy/client"
 require_relative "../../../cli/lib/fizzy/config_store"
 
 class FizzyConfigStoreTest < ActiveSupport::TestCase
@@ -57,5 +58,28 @@ class FizzyConfigStoreTest < ActiveSupport::TestCase
         assert_equal "env-profile", store.current_profile_name
       end
     end
+  end
+
+  test "standalone config_store raises Fizzy::Error without requiring client first" do
+    stdout, stderr, status = Open3.capture3(
+      RbConfig.ruby,
+      "-e",
+      <<~RUBY,
+        require_relative "cli/lib/fizzy/config_store"
+
+        begin
+          Fizzy::ConfigStore.new(path: "tmp/fizzy-config.yml").set_current_profile("missing")
+        rescue => error
+          puts error.class.name
+          puts error.message
+        end
+      RUBY
+      chdir: Rails.root.to_s
+    )
+
+    assert status.success?, stderr
+    lines = stdout.lines.map(&:chomp)
+    assert_equal "Fizzy::Error", lines.first
+    assert_equal "Unknown profile missing", lines.second
   end
 end

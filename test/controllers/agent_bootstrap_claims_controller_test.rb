@@ -25,13 +25,14 @@ class AgentBootstrapClaimsControllerTest < ActionDispatch::IntegrationTest
 
     assert bootstrap.claimed?
     assert_equal identity, bootstrap.claimed_by_identity
+    assert_nil user.verified_at
     assert_equal "watching", bootstrap.board.access_for(user).involvement
     assert_equal bootstrap.account.slug, @response.parsed_body.dig("account", "slug")
     assert_equal bootstrap.board.id, @response.parsed_body.dig("board", "id")
     assert @response.parsed_body["token"].present?
   end
 
-  test "claim reuses an existing user and access" do
+  test "claim reuses an existing user in the same account" do
     bootstrap = boards(:private).agent_bootstraps.create!(
       account: accounts("37s"),
       creator: users(:kevin),
@@ -52,6 +53,7 @@ class AgentBootstrapClaimsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :created
     assert_equal "watching", bootstrap.board.access_for(user).reload.involvement
+    assert_equal user.identity, bootstrap.reload.claimed_by_identity
   end
 
   test "claim rejects an existing identity from another account" do
@@ -72,6 +74,31 @@ class AgentBootstrapClaimsControllerTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
     assert_includes @response.parsed_body.fetch("errors"), "Bootstrap claims cannot reuse an identity from another account"
     assert_not bootstrap.reload.claimed?
+  end
+
+  test "claim returns a token that can access the board while the user remains unverified" do
+    bootstrap = boards(:private).agent_bootstraps.create!(
+      account: accounts("37s"),
+      creator: users(:kevin),
+      expires_at: 30.minutes.from_now
+    )
+
+    body = nil
+
+    untenanted do
+      post agent_bootstrap_claim_path(token: bootstrap.token),
+        params: { email_address: "agent-#{SecureRandom.hex(4)}@example.com", name: "Board Agent" },
+        as: :json
+      assert_response :created
+      body = @response.parsed_body
+    end
+
+    user = Identity.find_by!(email_address: body.dig("user", "email_address")).users.find_by!(account: bootstrap.account)
+    assert_not user.verified?
+
+    get body.dig("board", "url"), as: :json, env: { "HTTP_AUTHORIZATION" => "Bearer #{body.fetch("token")}" }
+
+    assert_response :success
   end
 
   test "claim returns gone for expired bootstrap" do
