@@ -77,9 +77,9 @@ class PasskeyButton extends HTMLElement {
 
   #handleError(error) {
     console.error("Passkey ceremony failed", error)
-    const cancelled = error.name === "AbortError" || error.name === "NotAllowedError"
-    this.#showError(cancelled ? "cancelled" : "error")
-    this.button.dispatchEvent(new CustomEvent("passkey:error", { bubbles: true, detail: { error, cancelled } }))
+    const type = errorType(error)
+    this.#showError(type)
+    this.button.dispatchEvent(new CustomEvent("passkey:error", { bubbles: true, detail: { error, type } }))
   }
 
   #showError(type) {
@@ -139,8 +139,8 @@ class PasskeySignInButton extends PasskeyButton {
         this.form.submit()
       } catch (error) {
         console.error("Passkey conditional mediation failed", error)
-        const cancelled = error.name === "AbortError" || error.name === "NotAllowedError"
-        this.button.dispatchEvent(new CustomEvent("passkey:error", { bubbles: true, detail: { error, cancelled } }))
+        const type = errorType(error)
+        this.button.dispatchEvent(new CustomEvent("passkey:error", { bubbles: true, detail: { error, type } }))
       }
     }
   }
@@ -156,6 +156,15 @@ customElements.define("rails-passkey-registration-button", PasskeyRegistrationBu
 customElements.define("rails-passkey-sign-in-button", PasskeySignInButton)
 
 // -- Shared helpers ----------------------------------------------------------
+
+function errorType(error) {
+  switch (error.name) {
+    case "AbortError":
+    case "NotAllowedError": return "cancelled"
+    case "InvalidStateError": return "duplicate"
+    default: return "error"
+  }
+}
 
 function passkeysAvailable() {
   return !!window.PublicKeyCredential

@@ -9,6 +9,7 @@
 module ActionPack::Passkey::FormHelper
   REGISTRATION_ERROR_MESSAGE = "Something went wrong while registering your passkey."
   REGISTRATION_CANCELLED_MESSAGE = "Passkey registration was cancelled. Try again when you are ready."
+  REGISTRATION_DUPLICATE_MESSAGE = "You already have a passkey registered on this device. Remove the existing one first to re-register."
   SIGN_IN_ERROR_MESSAGE = "Something went wrong while signing in with your passkey."
   SIGN_IN_CANCELLED_MESSAGE = "Passkey sign in was cancelled. Try again when you are ready."
 
@@ -33,6 +34,7 @@ module ActionPack::Passkey::FormHelper
     component_options, form_options, button_options, error_options = partition_passkey_options(url, options)
     error_options[:error][:message] ||= REGISTRATION_ERROR_MESSAGE
     error_options[:cancellation][:message] ||= REGISTRATION_CANCELLED_MESSAGE
+    error_options[:duplicate][:message] ||= REGISTRATION_DUPLICATE_MESSAGE
     param = form_options.delete(:param)
 
     content_tag("rails-passkey-registration-button", **component_options.transform_keys { |key| key.to_s.dasherize }) do
@@ -91,7 +93,7 @@ module ActionPack::Passkey::FormHelper
       form_options = options
         .fetch(:form, {})
         .reverse_merge(method: :post, action: url, class: "button_to", param: :passkey)
-      error_options = options.slice(:error, :cancellation).reverse_merge(error: {}, cancellation: {})
+      error_options = options.slice(:error, :cancellation, :duplicate).reverse_merge(error: {}, cancellation: {}, duplicate: {})
 
       button_options = options.except(:options, :form, *component_options.keys, *error_options.keys)
 
@@ -106,7 +108,7 @@ module ActionPack::Passkey::FormHelper
       end
     end
 
-    def passkey_error_messages(error: {}, cancellation: {})
+    def passkey_error_messages(error: {}, cancellation: {}, duplicate: {})
       error_message = error[:message]
       error_attributes = error.except(:message)
       error_attributes[:data] ||= {}
@@ -117,6 +119,15 @@ module ActionPack::Passkey::FormHelper
       cancellation_attributes[:data] ||= {}
       cancellation_attributes[:data][:passkey_error] = "cancelled"
 
-      tag.div(error_message, hidden: true, **error_attributes) + tag.div(cancellation_message, hidden: true, **cancellation_attributes)
+      messages = tag.div(error_message, hidden: true, **error_attributes) +
+        tag.div(cancellation_message, hidden: true, **cancellation_attributes)
+
+      if duplicate[:message]
+        duplicate_attributes = duplicate.except(:message)
+        duplicate_attributes[:data] = { passkey_error: "duplicate" }
+        messages += tag.div(duplicate[:message], hidden: true, **duplicate_attributes)
+      end
+
+      messages
     end
 end

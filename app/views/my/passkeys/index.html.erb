@@ -18,7 +18,7 @@
   <% end %>
 
   <footer>
-    <%= passkey_registration_button my_passkeys_path, options: @registration_options, error: { class: "txt-negative margin-block-half" }, cancellation: { class: "txt-subtle margin-block-half" }, class: "btn btn--link center txt-medium" do %>
+    <%= passkey_registration_button my_passkeys_path, options: @registration_options, error: { class: "txt-negative margin-block-half" }, cancellation: { class: "txt-subtle margin-block-half" }, duplicate: { class: "txt-negative margin-block-half" }, class: "btn btn--link center txt-medium" do %>
       <%= icon_tag "add" %>
       <span>Register a passkey</span>
     <% end %>
