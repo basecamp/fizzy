@@ -23,14 +23,25 @@
   </div>
 
   <div class="flex flex-column gap-half full-width txt-align-start">
-    <strong>Skill-enabled setup block</strong>
+    <strong>Skill download URL</strong>
+    <input type="text" class="input" readonly value="<%= agent_bootstrap_skill_url_for(@agent_bootstrap) %>">
+    <div class="flex justify-center">
+      <%= button_to_copy_to_clipboard(agent_bootstrap_skill_url_for(@agent_bootstrap)) do %>
+        <span>Copy skill URL</span>
+      <% end %>
+    </div>
+    <p class="txt-small txt-subtle margin-none">Give this URL to an agent so it can download the current <%= agent_bootstrap_skill_name %> skill.</p>
+  </div>
+
+  <div class="flex flex-column gap-half full-width txt-align-start">
+    <strong>Agent prompt</strong>
     <textarea class="input" readonly rows="6"><%= agent_bootstrap_skill_block(@agent_bootstrap) %></textarea>
     <div class="flex justify-center">
       <%= button_to_copy_to_clipboard(agent_bootstrap_skill_block(@agent_bootstrap)) do %>
-        <span>Copy setup + skill</span>
+        <span>Copy agent prompt</span>
       <% end %>
     </div>
-    <p class="txt-small txt-subtle margin-none">This format teaches the agent which skill to use before running the command.</p>
+    <p class="txt-small txt-subtle margin-none">This prompt tells the agent where to fetch the skill, how to bootstrap the CLI, and how to verify access.</p>
   </div>
 
   <div class="flex flex-column gap-half full-width txt-align-start">

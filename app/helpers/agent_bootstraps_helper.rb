@@ -10,7 +10,11 @@ module AgentBootstrapsHelper
   end
 
   def agent_bootstrap_claim_url_for(agent_bootstrap)
-    agent_bootstrap_claim_url(token: agent_bootstrap.token)
+    agent_bootstrap_claim_url(token: agent_bootstrap.token, script_name: nil)
+  end
+
+  def agent_bootstrap_skill_url_for(agent_bootstrap)
+    agent_bootstrap_skill_url(token: agent_bootstrap.token, script_name: nil)
   end
 
   def agent_bootstrap_setup_command(agent_bootstrap)
@@ -24,11 +28,16 @@ module AgentBootstrapsHelper
     AGENT_BOOTSTRAP_SKILL_NAME
   end
 
-  def agent_bootstrap_skill_hint
-    "OpenClaw Skill: #{agent_bootstrap_skill_name}"
-  end
-
   def agent_bootstrap_skill_block(agent_bootstrap)
-    [agent_bootstrap_skill_hint, agent_bootstrap_setup_command(agent_bootstrap)].join("\n")
+    <<~TEXT.strip
+      Download the Fizzy CLI skill from:
+      #{agent_bootstrap_skill_url_for(agent_bootstrap)}
+
+      Load that skill into your agent, then run:
+      #{agent_bootstrap_setup_command(agent_bootstrap)}
+
+      Verify the bootstrap with:
+      fizzy whoami --json
+    TEXT
   end
 end

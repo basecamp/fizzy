@@ -143,6 +143,7 @@ Rails.application.routes.draw do
 
   resources :qr_codes
 
+  get "agent_bootstrap/:token/skill", to: "agent_bootstrap_skills#show", as: :agent_bootstrap_skill
   post "agent_bootstrap/:token/claim", to: "agent_bootstrap_claims#create", as: :agent_bootstrap_claim
 
   get "join/:code", to: "join_codes#new", as: :join

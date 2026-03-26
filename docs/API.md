@@ -196,15 +196,27 @@ __Response:__
   "token": "6dFq9yY9fA5vP4a9QqG4gC8R",
   "expires_at": "2026-03-25T11:30:00Z",
   "bootstrap_url": "https://app.fizzy.do/agent_bootstrap/6dFq9yY9fA5vP4a9QqG4gC8R/claim",
+  "skill_url": "https://app.fizzy.do/agent_bootstrap/6dFq9yY9fA5vP4a9QqG4gC8R/skill",
   "setup_command": "fizzy auth bootstrap \"https://app.fizzy.do/agent_bootstrap/6dFq9yY9fA5vP4a9QqG4gC8R/claim\" --email \"agent+abc123@example.com\" --name \"Writebook Agent\"",
   "skill_name": "fizzy-cli",
-  "skill_block": "OpenClaw Skill: fizzy-cli\nfizzy auth bootstrap \"https://app.fizzy.do/agent_bootstrap/6dFq9yY9fA5vP4a9QqG4gC8R/claim\" --email \"agent+abc123@example.com\" --name \"Writebook Agent\"",
+  "skill_block": "Download the Fizzy CLI skill from:\nhttps://app.fizzy.do/agent_bootstrap/6dFq9yY9fA5vP4a9QqG4gC8R/skill\n\nLoad that skill into your agent, then run:\nfizzy auth bootstrap \"https://app.fizzy.do/agent_bootstrap/6dFq9yY9fA5vP4a9QqG4gC8R/claim\" --email \"agent+abc123@example.com\" --name \"Writebook Agent\"\n\nVerify the bootstrap with:\nfizzy whoami --json",
   "permission": "write",
   "involvement": "watching"
 }
 ```
 
 This endpoint requires account admin or owner privileges. The token is single-use and expires automatically.
+
+#### Download the bootstrap skill
+
+Agents can download the exact skill instructions associated with a bootstrap before running the CLI bootstrap command:
+
+```bash
+curl -H "Accept: text/markdown" \
+  https://app.fizzy.do/agent_bootstrap/6dFq9yY9fA5vP4a9QqG4gC8R/skill
+```
+
+This returns the current `fizzy-cli` `SKILL.md` content for that bootstrap token. Once the bootstrap has expired or been claimed, the endpoint returns `410 Gone`.
 
 #### Claim an agent bootstrap link
 

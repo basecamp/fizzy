@@ -21,9 +21,15 @@ class Boards::AgentBootstrapsControllerTest < ActionDispatch::IntegrationTest
     assert_response :created
     body = @response.parsed_body
     assert body["bootstrap_url"].present?
+    assert body["skill_url"].present?
     assert body["setup_command"].present?
     assert_equal "fizzy-cli", body["skill_name"]
-    assert_includes body["skill_block"], "OpenClaw Skill: fizzy-cli"
+    assert_match %r{/agent_bootstrap/[^/]+/claim\z}, body["bootstrap_url"]
+    assert_match %r{/agent_bootstrap/[^/]+/skill\z}, body["skill_url"]
+    assert_not_includes body["bootstrap_url"], "/#{board.account.slug}/"
+    assert_not_includes body["skill_url"], "/#{board.account.slug}/"
+    assert_includes body["skill_block"], body["skill_url"]
+    assert_includes body["skill_block"], body["setup_command"]
     assert_equal "watching", body["involvement"]
     assert_equal board.id, body.dig("board", "id")
   end
@@ -46,7 +52,8 @@ class Boards::AgentBootstrapsControllerTest < ActionDispatch::IntegrationTest
     get board_agent_bootstrap_path(bootstrap.board, bootstrap)
     assert_response :success
     assert_in_body bootstrap.token
-    assert_in_body "OpenClaw Skill: fizzy-cli"
+    assert_in_body "Copy skill URL"
+    assert_in_body "Copy agent prompt"
   end
 
   test "show requires account admin" do
