@@ -18,6 +18,26 @@ If you want more flexibility to customize your Fizzy installation by changing it
 You are welcome -- and encouraged -- to modify Fizzy to your liking.
 Please see our [Development guide](docs/development.md) for how to get Fizzy set up for local development.
 
+### CLI tool
+
+From this checkout, install the standalone CLI with:
+
+```bash
+./bin/install-fizzy-cli
+```
+
+Then run:
+
+```bash
+fizzy --version
+```
+
+You can also use the in-repo wrapper without installing:
+
+```bash
+./bin/fizzy --help
+```
+
 
 ## Contributing
 

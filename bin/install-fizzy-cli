@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+CLI_DIR="$ROOT_DIR/cli"
+
+if ! command -v bundle >/dev/null; then
+  echo "Bundler is required. Install Ruby dependencies first (Ruby + Bundler)." >&2
+  exit 1
+fi
+
+if [ ! -d "$CLI_DIR" ]; then
+  echo "CLI directory not found: $CLI_DIR" >&2
+  exit 1
+fi
+
+cd "$CLI_DIR"
+
+echo "-> Installing CLI gems"
+bundle install
+
+echo "-> Building fizzy-cli gem"
+build_output=$(bundle exec gem build fizzy-cli.gemspec)
+echo "$build_output"
+gem_file=$(echo "$build_output" | awk '/File:/ {print $2}' | tail -n 1)
+
+if [ -z "$gem_file" ]; then
+  echo "Could not determine built gem file." >&2
+  exit 1
+fi
+
+echo "-> Installing $gem_file for current user"
+gem install --user-install "$gem_file"
+
+user_gem_bin="$(ruby -e 'require "rubygems"; puts Gem.user_dir + "/bin"')"
+
+echo
+
+echo "Installation complete."
+echo "Verify with: fizzy --version"
+if ! command -v fizzy >/dev/null; then
+  echo "Your shell PATH does not include $user_gem_bin yet."
+  echo "Add it with:"
+  echo "export PATH=\"\$PATH:$user_gem_bin\""
+fi
