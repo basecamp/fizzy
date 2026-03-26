@@ -119,13 +119,15 @@ module ActionPack::Passkey::FormHelper
       cancellation_attributes[:data] ||= {}
       cancellation_attributes[:data][:passkey_error] = "cancelled"
 
-      duplicate_message = duplicate[:message]
-      duplicate_attributes = duplicate.except(:message)
-      duplicate_attributes[:data] ||= {}
-      duplicate_attributes[:data][:passkey_error] = "duplicate"
+      messages = tag.div(error_message, hidden: true, **error_attributes) +
+        tag.div(cancellation_message, hidden: true, **cancellation_attributes)
 
-      tag.div(error_message, hidden: true, **error_attributes) +
-        tag.div(cancellation_message, hidden: true, **cancellation_attributes) +
-        tag.div(duplicate_message, hidden: true, **duplicate_attributes)
+      if duplicate[:message]
+        duplicate_attributes = duplicate.except(:message)
+        duplicate_attributes[:data] = { passkey_error: "duplicate" }
+        messages += tag.div(duplicate[:message], hidden: true, **duplicate_attributes)
+      end
+
+      messages
     end
 end
