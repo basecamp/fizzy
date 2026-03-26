@@ -30,17 +30,17 @@ class User::Filtering
 
   # Returns users sorted with selected assignees first
   def users_for_assignee_filter
-    @users_for_assignee_filter ||= sort_users_by_selection(filter.assignees)
+    @users_for_assignee_filter ||= account.users.active.sorted_by_selection(filter.assignees.pluck(:id))
   end
 
   # Returns users sorted with selected creators first
   def users_for_creator_filter
-    @users_for_creator_filter ||= sort_users_by_selection(filter.creators)
+    @users_for_creator_filter ||= account.users.active.sorted_by_selection(filter.creators.pluck(:id))
   end
 
   # Returns users sorted with selected closers first
   def users_for_closer_filter
-    @users_for_closer_filter ||= sort_users_by_selection(filter.closers)
+    @users_for_closer_filter ||= account.users.active.sorted_by_selection(filter.closers.pluck(:id))
   end
 
   def filters
@@ -96,15 +96,5 @@ class User::Filtering
   private
     def account
       user.account
-    end
-
-    def sort_users_by_selection(selected_users)
-      all_users = users.to_a
-      selected_ids = selected_users.pluck(:id).to_set
-      
-      selected = all_users.select { |u| selected_ids.include?(u.id) }
-      unselected = all_users.reject { |u| selected_ids.include?(u.id) }
-      
-      selected + unselected
     end
 end
