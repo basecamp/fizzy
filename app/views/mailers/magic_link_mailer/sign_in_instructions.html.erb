@@ -11,7 +11,7 @@
 
 <p>This code will work for <%= distance_of_time_in_words(MagicLink::EXPIRATION_TIME) %>.</p>
 
-<% if account = @magic_link.identity.accounts.last %>
+<% if (account = @magic_link.identity.accounts.last) && default_url_options[:host].present? %>
   <p>P.S. You can make your account more secure and sign-in faster with a <%= link_to "Passkey", my_passkeys_url(script_name: account.slug) %></p>
 <% end %>
 
