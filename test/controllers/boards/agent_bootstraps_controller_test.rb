@@ -22,6 +22,8 @@ class Boards::AgentBootstrapsControllerTest < ActionDispatch::IntegrationTest
     body = @response.parsed_body
     assert body["bootstrap_url"].present?
     assert body["setup_command"].present?
+    assert_equal "fizzy-cli", body["skill_name"]
+    assert_includes body["skill_block"], "OpenClaw Skill: fizzy-cli"
     assert_equal "watching", body["involvement"]
     assert_equal board.id, body.dig("board", "id")
   end
@@ -44,6 +46,7 @@ class Boards::AgentBootstrapsControllerTest < ActionDispatch::IntegrationTest
     get board_agent_bootstrap_path(bootstrap.board, bootstrap)
     assert_response :success
     assert_in_body bootstrap.token
+    assert_in_body "OpenClaw Skill: fizzy-cli"
   end
 
   test "show requires account admin" do

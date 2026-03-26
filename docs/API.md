@@ -197,6 +197,8 @@ __Response:__
   "expires_at": "2026-03-25T11:30:00Z",
   "bootstrap_url": "https://app.fizzy.do/agent_bootstrap/6dFq9yY9fA5vP4a9QqG4gC8R/claim",
   "setup_command": "fizzy auth bootstrap \"https://app.fizzy.do/agent_bootstrap/6dFq9yY9fA5vP4a9QqG4gC8R/claim\" --email \"agent+abc123@example.com\" --name \"Writebook Agent\"",
+  "skill_name": "fizzy-cli",
+  "skill_block": "OpenClaw Skill: fizzy-cli\nfizzy auth bootstrap \"https://app.fizzy.do/agent_bootstrap/6dFq9yY9fA5vP4a9QqG4gC8R/claim\" --email \"agent+abc123@example.com\" --name \"Writebook Agent\"",
   "permission": "write",
   "involvement": "watching"
 }

@@ -15,6 +15,8 @@ class AgentBootstrapsTest < ApplicationSystemTestCase
     assert_current_path %r{/boards/.*/agent_bootstraps/.*}
     assert_text "Agent setup for Writebook"
     assert_field(type: "textarea", with: /fizzy auth bootstrap/)
+    assert_text "Copy setup + skill"
+    assert_text "OpenClaw Skill: fizzy-cli"
     assert_field(with: /agent_bootstrap\/.*\/claim/)
   end
 end

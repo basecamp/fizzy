@@ -23,6 +23,17 @@
   </div>
 
   <div class="flex flex-column gap-half full-width txt-align-start">
+    <strong>Skill-enabled setup block</strong>
+    <textarea class="input" readonly rows="6"><%= agent_bootstrap_skill_block(@agent_bootstrap) %></textarea>
+    <div class="flex justify-center">
+      <%= button_to_copy_to_clipboard(agent_bootstrap_skill_block(@agent_bootstrap)) do %>
+        <span>Copy setup + skill</span>
+      <% end %>
+    </div>
+    <p class="txt-small txt-subtle margin-none">This format teaches the agent which skill to use before running the command.</p>
+  </div>
+
+  <div class="flex flex-column gap-half full-width txt-align-start">
     <strong>Raw bootstrap URL</strong>
     <input type="text" class="input" readonly value="<%= agent_bootstrap_claim_url_for(@agent_bootstrap) %>">
     <div class="flex justify-center">
