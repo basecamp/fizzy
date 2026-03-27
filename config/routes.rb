@@ -8,7 +8,6 @@ Rails.application.routes.draw do
     resource :settings
     resources :exports, only: [ :create, :show ]
     resources :imports, only: [ :new, :create, :show ]
-    resources :service_accounts, only: :create
   end
 
   resources :users do
