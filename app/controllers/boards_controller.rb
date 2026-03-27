@@ -30,6 +30,8 @@ class BoardsController < ApplicationController
       format.html { redirect_to board_path(@board) }
       format.json { render :show, status: :created, location: board_path(@board, format: :json) }
     end
+  rescue ActiveRecord::RecordInvalid
+    head :unprocessable_entity
   end
 
   def edit
