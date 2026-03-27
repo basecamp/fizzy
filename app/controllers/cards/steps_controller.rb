@@ -31,6 +31,8 @@ class Cards::StepsController < ApplicationController
       format.turbo_stream
       format.json { render :show }
     end
+  rescue ActiveRecord::RecordInvalid
+    head :unprocessable_entity
   end
 
   def destroy
