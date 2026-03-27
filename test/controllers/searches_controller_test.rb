@@ -46,6 +46,36 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
     assert_select ".search__blank-slate", text: "No matches"
   end
 
+  test "search as JSON" do
+    get search_path(q: "broken", script_name: "/#{@account.external_account_id}"), as: :json
+    assert_response :success
+
+    body = @response.parsed_body
+    assert_kind_of Array, body
+    assert_equal 1, body.size
+    assert_equal "Layout is broken", body.first["title"]
+  end
+
+  test "search by card ID as JSON returns array" do
+    get search_path(q: @card.id, script_name: "/#{@account.external_account_id}"), as: :json
+    assert_response :success
+
+    body = @response.parsed_body
+    assert_kind_of Array, body
+    assert_equal 1, body.size
+    assert_equal @card.id, body.first["id"]
+  end
+
+  test "search as JSON deduplicates cards with multiple search hits" do
+    get search_path(q: "haggis", script_name: "/#{@account.external_account_id}"), as: :json
+    assert_response :success
+
+    body = @response.parsed_body
+    assert_kind_of Array, body
+    assert_equal 1, body.size
+    assert_equal @comment2_card.id, body.first["id"]
+  end
+
   test "search highlights matched terms with proper HTML marks" do
     @board.cards.create!(title: "Testing search highlighting", status: "published", creator: @user)
 

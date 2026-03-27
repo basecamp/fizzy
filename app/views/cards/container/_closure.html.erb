@@ -5,6 +5,7 @@
       <%= button_to card_closure_path(card), method: :delete, class: "btn btn--plain borderless fill-transparent" do %>
         <span class="pad-inline-end">Undo</span>
       <% end %>
+      <%= bridged_button_to_board(card.board) %>
     </div>
   <% else %>
     <div class="card-perma__notch card-perma__notch--bottom">

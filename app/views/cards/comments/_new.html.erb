@@ -4,7 +4,7 @@
   </figure>
 
   <div class="comment__content flex-inline flex-column full-width">
-    <div class="comment__body lexxy-content" data-turbo-permanent>
+    <div class="comment__body" data-turbo-permanent>
       <%= form_with model: Comment.new, url: card_comments_path(card), class: "flex flex-column gap full-width",
             data: { controller: "form local-save",
                   local_save_key_value: "comment-#{card.id}",

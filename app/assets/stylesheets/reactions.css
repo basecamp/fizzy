@@ -10,6 +10,7 @@
     flex-wrap: wrap;
     gap: var(--inline-space-half);
     inline-size: 100%;
+    z-index: 3;
 
     &:has([open]) {
       z-index: var(--z-popup);
@@ -17,14 +18,6 @@
 
     &:not(:has(.reaction)) {
       inline-size: auto;
-      inset-block-end: var(--comment-padding-block);
-      inset-inline-end: calc(var(--comment-padding-inline) / 2);
-      margin: 0;
-      position: absolute;
-
-      @media (max-width: 640px) {
-        inset-inline-end: calc(var(--comment-padding-inline) / 3);
-      }
 
       .reactions__list {
         display: none;

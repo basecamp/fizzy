@@ -14,6 +14,13 @@ class Users::RolesControllerTest < ActionDispatch::IntegrationTest
     assert users(:david).reload.admin?
   end
 
+  test "update as JSON" do
+    put user_role_path(users(:david)), params: { user: { role: "admin" } }, as: :json
+
+    assert_response :no_content
+    assert users(:david).reload.admin?
+  end
+
   test "can't promote to special roles" do
     assert_no_changes -> { users(:david).reload.role } do
       put user_role_path(users(:david)), params: { user: { role: "system" } }

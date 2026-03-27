@@ -1,0 +1,35 @@
+<% @page_title = "Registered devices" %>
+
+<section class="panel panel--centered flex flex-column gap" style="--panel-size: auto;">
+  <% if @devices.any? %>
+    <h1 class="txt-x-large font-weight-black txt-tight-lines margin-none">
+      Registered devices
+    </h1>
+    <ul class="flex flex-column gap list-style-none full-width pad border-radius border" style="--inline-space: var(--block-space);">
+      <% @devices.each do |device| %>
+        <li class="flex align-center gap txt-medium txt-align-start">
+          <div class="flex-1 flex flex-column">
+            <span>
+              <strong><%= device.name || "Unnamed device" %></strong>
+              (<%= device.platform == "apple" ? "iOS" : "Android" %>)
+            </span>
+            <span class="txt-subtle txt-x-small">
+              Added <%= local_datetime_tag(device.created_at, style: :daysago) %>
+            </span>
+          </div>
+          <%= button_to saas.my_device_path(device), method: :delete, class: "btn btn--circle-mobile txt-small", data: { confirm: "Remove this device?" }, form: { class: "flex-item-no-shrink" } do %>
+            <%= icon_tag "trash", class: "icon--mobile-only" %>
+            <span class="overflow-ellipsis">Remove</span>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <h1 class="txt-x-large font-weight-black margin-none">No devices registered</h1>
+    <p class="margin-none-block-start">Mobile devices registered with the mobile app will receive push notifications and will be listed here.</p>
+  <% end %>
+
+  <%= link_to session_menu_path(script_name: nil), class: "btn center txt-small margin-block-start hide-on-native", data: { turbo_prefetch: false } do %>
+    <span>Your Fizzy accounts</span>
+  <% end %>
+</section>

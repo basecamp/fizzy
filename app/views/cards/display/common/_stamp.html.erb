@@ -1,15 +1,25 @@
 <% if card.postponed? %>
-  <div class="card__closed <%= "card__closed--system" if card.postponed_by&.system? %>">
+  <%= tag.div class: token_list("card__closed", "card__closed--system": card.postponed_by&.system?), data: {
+    controller: "bridge--stamp",
+    bridge__stamp_scope_selector_value: ".card-perma",
+    bridge_title: "Not Now",
+    bridge_description: card.postponed_at.strftime("%b %d, %Y")
+  } do %>
     <span class="card__closed-title" data-text="Not Now">Not Now</span>
     <strong class="card__closed-date"><%= card.postponed_at.strftime("%b %d, %Y") %></strong>
     <span class="card__closed-by-line">by <span class="card__closed-by"><%= card.postponed_by&.familiar_name %></span></span>
-  </div>
+  <% end %>
 <% end %>
 
 <% if card.closed? %>
-  <div class="card__closed">
+  <%= tag.div class: "card__closed", data: {
+    controller: "bridge--stamp",
+    bridge__stamp_scope_selector_value: ".card-perma",
+    bridge_title: "Done",
+    bridge_description: card.closed_at.strftime("%b %d, %Y")
+  } do %>
     <span class="card__closed-title" data-text="Done">Done</span>
     <strong class="card__closed-date"><%= card.closed_at.strftime("%b %d, %Y") %></strong>
     <span class="card__closed-by-line">by <span class="card__closed-by"><%= card.closed_by.familiar_name %></span></span>
-  </div>
+  <% end %>
 <% end %>

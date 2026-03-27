@@ -31,7 +31,7 @@ class Account::DataTransfer::AccountRecordSet < Account::DataTransfer::RecordSet
       account_data = load(files.first)
       join_code_data = account_data.delete("join_code")
 
-      account.update!(name: account_data.fetch("name"))
+      account.update!(name: account_data.fetch("name"), cards_count: account_data.fetch("cards_count", 0))
       account.join_code.update!(join_code_data.slice("usage_count", "usage_limit"))
       account.join_code.update(code: join_code_data.fetch("code"))
     end

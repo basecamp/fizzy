@@ -286,6 +286,7 @@
       inset-inline-end: 0;
       position: absolute;
       translate: 100%;
+      z-index: 2;
     }
 
     @media (min-width: 640px) {
@@ -769,13 +770,16 @@
     --panel-padding: 2ch;
     --panel-size: 100%;
 
-    display: flex;
     flex-wrap: wrap;
     gap: var(--gap);
     inset-block-start: 0;
     justify-content: center;
     position: absolute;
     z-index: 1;
+
+    &[open] {
+      display: flex;
+    }
   }
 
   /* On Deck (Not Now)
@@ -819,6 +823,10 @@
       position: absolute;
       translate: 20% -20%;
       z-index: 1;
+
+      @media (max-width: 639px) {
+        translate: 20% 0%;
+      }
     }
 
     /* Maybe column: position bubble relative to the title, not the container */

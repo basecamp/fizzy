@@ -62,6 +62,16 @@
     }
   }
 
+  .settings__section--negative {
+    h2 {
+      color: var(--color-negative);
+    }
+
+    .divider {
+      --divider-color: oklch(var(--lch-red-light));
+    }
+  }
+
   .settings__section:has(.settings__scrollable-list) {
     @media (min-width: 640px) {
       display: flex;

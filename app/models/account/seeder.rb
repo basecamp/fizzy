@@ -33,6 +33,12 @@ class Account::Seeder
         <action-text-attachment url="https://videos.37signals.com/fizzy/assets/videos/fizzyorientation-4k.mp4" caption="Fizzy orientation" content-type="video/mp4" filename="fizzyorientation-4k.mp4"></action-text-attachment>
       HTML
 
+      # TODO: Replace the video here with a screencap of creating a passkey
+      playground.cards.create! creator: creator, title: "Then, set up a Passkey", status: "published", description: <<~HTML
+        <p>Passkeys let you sign in securely without using passwords or email codes. To set one up, open the Fizzy menu and go to “<b><strong>My Profile > Manage Passkeys</b></strong>”. Using a passkey is optional, but recommended.</p>
+        <action-text-attachment url="https://videos.37signals.com/fizzy/assets/videos/creating_a_passkey.mp4" alt="Demo of adding a passkey" caption="Create a passkey to sign in without passwords or email codes" content-type="video/mp4" filename="creating_a_passkey.mp4"></action-text-attachment>
+      HTML
+
       playground.cards.create! creator: creator, title: "Now, grab the invite link to invite someone else", status: "published", description: <<~HTML
         <p>Open the Fizzy menu, select “<b><strong>+ Add people</b></strong>”, then copy the invite link. You can give this link to someone else so they can make a login for themselves in your account.</p>
         <action-text-attachment url="https://videos.37signals.com/fizzy/assets/images/invite-link.gif" alt="Demo of copying invite link" caption="Get a link to invite co-workers" content-type="image/*" filename="invite-link.gif" presentation="gallery"></action-text-attachment>

@@ -1,16 +1,14 @@
 class BoardsController < ApplicationController
+  wrap_parameters :board, include: %i[ name all_access auto_postpone_period_in_days public_description ]
+
   include FilterScoped
 
   before_action :set_board, except: %i[ index new create ]
   before_action :ensure_permission_to_admin_board, only: %i[ update destroy ]
 
   def index
-    if request.format.json?
-      set_page_and_extract_portion_from Current.user.boards.ordered_by_recently_accessed
-      fresh_when etag: @page.records
-    else
-      set_page_and_extract_portion_from Current.user.boards
-    end
+    set_page_and_extract_portion_from Current.user.boards.ordered_by_recently_accessed.includes(creator: :identity)
+    fresh_when etag: @page.records
   end
 
   def show
@@ -30,7 +28,7 @@ class BoardsController < ApplicationController
 
     respond_to do |format|
       format.html { redirect_to board_path(@board) }
-      format.json { head :created, location: board_path(@board, format: :json) }
+      format.json { render :show, status: :created, location: board_path(@board, format: :json) }
     end
   end
 
@@ -92,7 +90,7 @@ class BoardsController < ApplicationController
     end
 
     def board_params
-      params.expect(board: [ :name, :all_access, :auto_postpone_period, :public_description ])
+      params.expect(board: [ :name, :all_access, :auto_postpone_period_in_days, :public_description ])
     end
 
     def grantees

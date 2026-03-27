@@ -1,8 +1,8 @@
 <ol class="steps txt-small margin-block">
   <% card.steps.each do |step| %>
     <li class="step">
-      <%= check_box_tag :completed, { class: "step__checkbox", disabled: true, checked: step.completed? } %>
+      <%= check_box_tag :completed, { class: "checkbox", disabled: true, checked: step.completed? } %>
       <%= tag.span step.content, class: "step__content" %>
-    </li> 
+    </li>
   <% end %>
 </ol>

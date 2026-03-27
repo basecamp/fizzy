@@ -1,0 +1,6 @@
+<% if Current.account.nearing_storage_limit? && !Current.identity.staff? %>
+  <div class="txt-small">
+    This account has used <strong><%= number_to_human_size(Current.account.bytes_used) %></strong> of <strong><%= number_to_human_size(Current.account.storage_limit) %></strong> storage.
+    <div><%= link_to "Self-host Fizzy", "https://github.com/basecamp/fizzy", class: "txt-current txt-underline", target: "_blank" %> for unlimited storage.</div>
+  </div>
+<% end %>

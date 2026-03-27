@@ -1,0 +1,89 @@
+{
+  "settings": {
+  },
+  "rules": [
+    {
+      "patterns": [
+        ".*"
+      ],
+      "properties": {
+        "context": "default",
+        "query_string_presentation": "replace",
+        "pull_to_refresh_enabled": true
+      }
+    },
+    {
+      "patterns": [
+        "/new$",
+        "/new\\?.+$",
+        "/edit$",
+        "/edit\\?.+$",
+        "/accounts$",
+        "/cards/[0-9]+/draft"
+      ],
+      "properties": {
+        "context": "modal",
+        "pull_to_refresh_enabled": false
+      }
+    },
+    {
+      "patterns": [
+        "/native/my_menu$"
+      ],
+      "properties": {
+        "context": "modal",
+        "view_controller": "main_menu"
+      }
+    },
+    {
+      "patterns": [
+        "/native/add_account$"
+      ],
+      "properties": {
+        "context": "modal",
+        "view_controller": "login"
+      }
+    },
+    {
+      "patterns": [
+        "/native/login$"
+      ],
+      "properties": {
+        "view_controller": "login"
+      }
+    },
+    {
+      "patterns": [
+        "/my/pins$"
+      ],
+      "properties": {
+        "view_controller": "pinned"
+      }
+    },
+    {
+      "patterns": [
+        "/notifications/tray$"
+      ],
+      "properties": {
+        "view_controller": "notifications"
+      }
+    },
+    {
+      "patterns": [
+        "internal/devtools/enable*"
+      ],
+      "properties": {
+        "context": "modal",
+        "view_controller": "dev_settings_launcher"
+      }
+    },
+    {
+      "patterns": [
+        "/native/settings$"
+      ],
+      "properties": {
+        "view_controller": "settings"
+      }
+    }
+  ]
+}

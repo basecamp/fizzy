@@ -1,6 +1,7 @@
 require_relative "boot"
 require "rails/all"
 require_relative "../lib/fizzy"
+require_relative "../lib/action_pack/railtie"
 
 Bundler.require(*Rails.groups)
 
@@ -24,6 +25,9 @@ module Fizzy
     config.generators do |g|
       g.orm :active_record, primary_key_type: :uuid
     end
+
+    config.action_pack.passkey.draw_routes = false
+    config.action_pack.passkey.challenge_url = -> { my_passkey_challenge_path(script_name: "") }
 
     config.mission_control.jobs.http_basic_auth_enabled = false
   end

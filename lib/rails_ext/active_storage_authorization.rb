@@ -40,6 +40,10 @@ Rails.application.config.to_prepare do
           head :forbidden
         end
       end
+
+      def http_cache_forever(public: false, &block)
+        super(public: public && publicly_accessible_blob?, &block)
+      end
   end
 
   ActiveStorage::Blobs::RedirectController.include ActiveStorage::Authorize

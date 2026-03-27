@@ -1,4 +1,5 @@
 require_relative "transaction_pinning"
+require_relative "true_client_ip"
 require_relative "signup"
 require_relative "authorization"
 require_relative "gvl_instrumentation"
@@ -10,8 +11,9 @@ module Fizzy
       # moved from config/initializers/queenbee.rb
       Queenbee.host_app = Fizzy
 
-      initializer "fizzy_saas.content_security_policy", before: :load_config_initializers do |app|
-        app.config.x.content_security_policy.form_action = "https://checkout.stripe.com https://billing.stripe.com"
+      # Configure ActionPushNative to use the saas database
+      ActiveSupport.on_load(:action_push_native_record) do
+        connects_to database: { writing: :saas, reading: :saas }
       end
 
       initializer "fizzy_saas.assets" do |app|
@@ -23,23 +25,8 @@ module Fizzy
           headers: app.config.public_file_server.headers
       end
 
-      initializer "fizzy.saas.routes", after: :add_routing_paths do |app|
-        # Routes that rely on the implicit account tenant should go here instead of in +routes.rb+.
-        app.routes.prepend do
-          namespace :account do
-            resource :billing_portal, only: :show
-            resource :subscription do
-              scope module: :subscriptions do
-                resource :upgrade, only: :create
-                resource :downgrade, only: :create
-              end
-            end
-          end
-
-          namespace :stripe do
-            resource :webhooks, only: :create
-          end
-        end
+      initializer "fizzy_saas.push_config", after: "action_push_native.config" do |app|
+        app.paths["config/push"].unshift(root.join("config/push.yml").to_s)
       end
 
       initializer "fizzy.saas.mount" do |app|
@@ -50,6 +37,10 @@ module Fizzy
 
       initializer "fizzy_saas.transaction_pinning" do |app|
         app.config.middleware.insert_after(ActiveRecord::Middleware::DatabaseSelector, TransactionPinning::Middleware)
+      end
+
+      initializer "fizzy_saas.true_client_ip" do |app|
+        app.config.middleware.insert_before ActionDispatch::RemoteIp, TrackTrueClientIp
       end
 
       initializer "fizzy_saas.gvl_instrumentation" do |app|
@@ -82,10 +73,6 @@ module Fizzy
         if Rails.env.test?
           require_relative "testing"
         end
-      end
-
-      initializer "fizzy_saas.stripe" do
-        Stripe.api_key = ENV["STRIPE_SECRET_KEY"]
       end
 
       initializer "fizzy_saas.sentry" do
@@ -146,11 +133,16 @@ module Fizzy
       end
 
       config.to_prepare do
-        ::Account.include Account::Billing, Account::Limited
-        ::User.include User::NotifiesAccountOfEmailChange
-        ::Signup.prepend Fizzy::Saas::Signup
-        CardsController.include(Card::LimitedCreation)
-        Cards::PublishesController.include(Card::LimitedPublishing)
+        ::Account.include Account::StorageLimited
+        ::Identity.include Authorization::Identity, Identity::Devices
+        ::Session.include Session::Devices
+        ::Signup.prepend Signup
+        ApplicationController.include Authorization::Controller
+        CardsController.include(Card::StorageLimited::Creation)
+        Cards::CommentsController.include(Card::StorageLimited::Commenting)
+        Cards::PublishesController.include(Card::StorageLimited::Publishing)
+
+        Notification.register_push_target(:native)
 
         Queenbee::Subscription.short_names = Subscription::SHORT_NAMES
 
@@ -162,9 +154,6 @@ module Fizzy
           ::Object.send(:remove_const, const_name) if ::Object.const_defined?(const_name)
           ::Object.const_set const_name, Subscription.const_get(short_name, false)
         end
-
-        ::ApplicationController.include Fizzy::Saas::Authorization::Controller
-        ::Identity.include Fizzy::Saas::Authorization::Identity
       end
     end
   end

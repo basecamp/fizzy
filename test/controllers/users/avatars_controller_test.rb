@@ -49,6 +49,11 @@ class Users::AvatarsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to users(:david)
   end
 
+  test "delete self as JSON" do
+    delete user_avatar_path(users(:david)), as: :json
+    assert_response :no_content
+  end
+
   test "unable to delete other" do
     delete user_avatar_path(users(:kevin))
     assert_response :forbidden

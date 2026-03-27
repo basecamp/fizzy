@@ -17,11 +17,11 @@ module Mentions
     rich_text_associations.collect { send(it.name)&.to_plain_text }.compact.join(" ")
   end
 
-  private
-    def scan_mentionees
-      mentionees_from_attachments & mentionable_users
-    end
+  def scan_mentionees
+    mentionees_from_attachments & mentionable_users
+  end
 
+  private
     def mentionees_from_attachments
       rich_text_associations.flat_map { send(it.name)&.body&.attachments&.collect { it.attachable } }.compact
     end

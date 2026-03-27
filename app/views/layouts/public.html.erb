@@ -2,7 +2,7 @@
 <html lang="en">
   <%= render "layouts/shared/head" %>
 
-  <body class="public <%= @body_class %>" data-controller="local-time timezone-cookie" data-action="turbo:morph@window->local-time#refreshAll">
+  <body class="public <%= @body_class %>" data-controller="local-time timezone-cookie bridge--title bridge--text-size bridge--insets" data-action="turbo:morph@window->local-time#refreshAll" data-platform="<%= platform.type %>" data-bridge--title-title-value="<%= @page_title %>">
     <div id="global-container">
       <header class="header" id="header">
         <a href="#main" class="header__skip-navigation btn" data-turbo="false">Skip to main content</a>

@@ -1,4 +1,6 @@
 class Users::JoinsController < ApplicationController
+  wrap_parameters :user, include: %i[ name avatar ]
+
   layout "public"
 
   def new
@@ -6,7 +8,11 @@ class Users::JoinsController < ApplicationController
 
   def create
     Current.user.update!(user_params)
-    redirect_to landing_path
+
+    respond_to do |format|
+      format.html { redirect_to landing_path }
+      format.json { head :no_content }
+    end
   end
 
   private

@@ -1,4 +1,5 @@
 class Cards::CommentsController < ApplicationController
+  wrap_parameters :comment, include: %i[ body created_at ]
   include CardScoped
 
   before_action :set_comment, only: %i[ show edit update destroy ]
@@ -14,7 +15,7 @@ class Cards::CommentsController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream
-      format.json { head :created, location: card_comment_path(@card, @comment, format: :json) }
+      format.json { render :show, status: :created, location: card_comment_path(@card, @comment, format: :json) }
     end
   end
 

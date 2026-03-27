@@ -1,4 +1,6 @@
 class Signups::CompletionsController < ApplicationController
+  wrap_parameters :signup, include: %i[ full_name ]
+
   layout "public"
 
   disallow_account_scope
@@ -29,7 +31,7 @@ class Signups::CompletionsController < ApplicationController
           redirect_to landing_url(script_name: @signup.account.slug)
         end
 
-        format.json { render json: { account_id: @signup.account.id }, status: :created }
+        format.json { head :created }
       end
     end
 

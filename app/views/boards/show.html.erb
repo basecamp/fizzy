@@ -30,3 +30,5 @@
     <%= render "boards/show/columns", page: @page, board: @board %>
   <% end %>
 <% end %>
+
+<%= bridged_share_url_button(bridge_share_board_description(@board)) %>

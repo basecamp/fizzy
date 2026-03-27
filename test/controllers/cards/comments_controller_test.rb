@@ -56,6 +56,7 @@ class Cards::CommentsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :created
     assert_equal card_comment_path(card, Comment.last, format: :json), @response.headers["Location"]
+    assert_equal Comment.last.id, @response.parsed_body["id"]
   end
 
   test "create as JSON with custom created_at" do
@@ -81,6 +82,26 @@ class Cards::CommentsControllerTest < ActionDispatch::IntegrationTest
     assert_equal card_url(comment.card), @response.parsed_body.dig("card", "url")
     assert_equal card_comment_reactions_url(comment.card, comment), @response.parsed_body["reactions_url"]
     assert_equal card_comment_url(comment.card, comment), @response.parsed_body["url"]
+  end
+
+  test "create as JSON with flat params" do
+    card = cards(:logo)
+
+    assert_difference -> { card.comments.count }, +1 do
+      post card_comments_path(card), params: { body: "Flat comment" }, as: :json
+    end
+
+    assert_response :created
+    assert_equal "Flat comment", Comment.last.body.to_plain_text
+  end
+
+  test "update as JSON with flat params" do
+    comment = comments(:logo_agreement_kevin)
+
+    put card_comment_path(cards(:logo), comment), params: { body: "Flat update" }, as: :json
+
+    assert_response :success
+    assert_equal "Flat update", comment.reload.body.to_plain_text
   end
 
   test "update as JSON" do

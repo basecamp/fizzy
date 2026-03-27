@@ -8,7 +8,7 @@
     </p>
   </header>
 
-  <%= form_with url: session_magic_link_path, method: :post, html: { data: { controller: "magic-link" } } do |form| %>
+  <%= form_with url: session_magic_link_path, method: :post, html: { data: { controller: "magic-link clear-offline-cache", action: "submit->clear-offline-cache#clearCache" } } do |form| %>
     <%= form.text_field :code, required: true, class: "input center txt-align-enter txt-large txt-uppercase",
         autofocus: true, autocorrect: "off", autocapitalize: "off", spellcheck: "false", "data-1p-ignore": true,
         autocomplete: "one-time-code", maxlength: "6", placeholder: "••••••", value: params[:code],

@@ -81,6 +81,18 @@ class MentionsTest < ActiveSupport::TestCase
     end
   end
 
+  test "notify new mentionees when editing a comment to add a mention" do
+    card = boards(:writebook).cards.create title: "Fresh card", description: "Some content", status: :published
+
+    perform_enqueued_jobs do
+      comment = card.comments.create!(body: "Initial thought")
+
+      assert_difference -> { users(:kevin).notifications.count }, +1 do
+        comment.update!(body: "Actually, #{mention_html_for(users(:kevin))}, what do you think?")
+      end
+    end
+  end
+
   test "mentionees are added as watchers of the card" do
     perform_enqueued_jobs only: Mention::CreateJob do
       card = boards(:writebook).cards.create title: "Cleanup", description: "Did you finish up with the cleanup #{mention_html_for(users(:kevin))}?"

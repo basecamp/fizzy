@@ -1,0 +1,13 @@
+<li class="credential" style="view-transition-name: <%= dom_id(passkey) %>">
+  <%= link_to edit_my_passkey_path(passkey), class: "credential__link" do %>
+    <% if icon = passkey.authenticator&.icon %>
+      <%= image_tag icon[:light], size: 24, class: "flex-item-no-shrink hide-on-dark-mode", aria: { hidden: true } %>
+      <%= image_tag icon[:dark], size: 24, class: "flex-item-no-shrink hide-on-light-mode", aria: { hidden: true } %>
+    <% else %>
+      <%= image_tag "passkeys/generic_light.svg", size: 24, class: "flex-item-no-shrink hide-on-dark-mode", aria: { hidden: true } %>
+      <%= image_tag "passkeys/generic_dark.svg", size: 24, class: "flex-item-no-shrink hide-on-light-mode", aria: { hidden: true } %>
+    <% end %>
+    <strong class="overflow-ellipsis min-width"><%= passkey.name.presence || "Passkey" %></strong>
+    <strong class="credential__arrow">→</strong>
+  <% end %>
+</li>

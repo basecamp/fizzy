@@ -5,7 +5,7 @@
     </figure>
 
     <div class="comment__content flex flex-column flex-item-grow full-width">
-      <div class="comment__body lexxy-content" data-turbo-permanent>
+      <div class="comment__body" data-turbo-permanent>
         <%= form_with model: [ @card, @comment ], class: "flex flex-column gap full-width",
               data: { controller: "form", action: "keydown.ctrl+enter->form#submit:prevent keydown.meta+enter->form#submit:prevent keydown.esc->form#cancel:stop" } do |form| %>
           <%= form.rich_textarea :body, required: true, autofocus: true, placeholder: new_comment_placeholder(@card) do %>

@@ -1,0 +1,10 @@
+shared:
+  apple:
+    key_id: <%= ENV["APNS_KEY_ID"] %>
+    encryption_key: <%= Base64.decode64(ENV["APNS_ENCRYPTION_KEY_B64"] || "").dump %>
+    team_id: <%= ENV["APNS_TEAM_ID"] || "2WNYUYRS7G" %>
+    topic: <%= ENV["APNS_TOPIC"] || "do.fizzy.app.ios" %>
+    connect_to_development_server: <%= Rails.env.local? %>
+  google:
+    encryption_key: <%= Base64.decode64(ENV["FCM_ENCRYPTION_KEY_B64"] || "").dump %>
+    project_id: fizzy-a148c

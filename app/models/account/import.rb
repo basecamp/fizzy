@@ -48,6 +48,7 @@ class Account::Import < ApplicationRecord
     end
 
     add_importer_to_all_access_boards
+    reconcile_cards_count
     reconcile_account_storage
 
     mark_completed
@@ -76,6 +77,10 @@ class Account::Import < ApplicationRecord
     def mark_as_failed(failure_reason = nil)
       update!(status: :failed, failure_reason: failure_reason)
       ImportMailer.failed(self).deliver_later
+    end
+
+    def reconcile_cards_count
+      account.update_column :cards_count, [ account.cards_count, account.cards.maximum(:number).to_i ].max
     end
 
     def add_importer_to_all_access_boards

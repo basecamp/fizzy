@@ -1,4 +1,6 @@
 class Cards::Comments::ReactionsController < ApplicationController
+  wrap_parameters :reaction, include: %i[ content ]
+
   include CardScoped
 
   before_action :set_comment
@@ -22,7 +24,7 @@ class Cards::Comments::ReactionsController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render "reactions/create" }
-      format.json { head :created }
+      format.json { render "reactions/show", status: :created }
     end
   end
 

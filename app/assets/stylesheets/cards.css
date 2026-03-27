@@ -207,6 +207,10 @@
     line-height: 1.15;
     text-wrap: balance;
 
+    &.overflow-line-clamp {
+      text-wrap: unset; /* text-wrap: balance breaks -webkit-line-clamp in Safari */
+    }
+
     .card-field__title {
       overflow: hidden; /* prevent scrolling on windows */
       padding-block: var(--autosize-block-padding);
@@ -398,6 +402,7 @@
     position: absolute;
     rotate: 5deg;
     transform-origin: top right;
+    z-index: 2;
 
     .cards & {
       display: none;
@@ -408,12 +413,6 @@
           display: flex;
         }
       }
-    }
-
-    @media (max-width: 639px) {
-      inset: auto calc(var(--card-padding-inline) * -0.5) 100% auto;
-      translate: 0 40%;
-      scale: 75%;
     }
   }
 

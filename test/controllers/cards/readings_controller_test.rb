@@ -39,6 +39,18 @@ class Cards::ReadingsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "create as JSON" do
+    post card_reading_url(cards(:logo)), as: :json
+    assert_response :created
+  end
+
+  test "destroy as JSON" do
+    notifications(:logo_assignment_kevin).read
+
+    delete card_reading_url(cards(:logo)), as: :json
+    assert_response :no_content
+  end
+
   test "unread notification on destroy" do
     notifications(:logo_assignment_kevin).read
 

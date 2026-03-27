@@ -15,7 +15,6 @@ Rails.application.routes.draw do
       resource :avatar
       resource :role
       resource :events
-
       resources :push_subscriptions
 
       resources :email_addresses, param: :token do
@@ -156,6 +155,7 @@ Rails.application.routes.draw do
       resources :transfers
       resource :magic_link
       resource :menu
+      resource :passkey, only: :create
     end
   end
 
@@ -172,8 +172,10 @@ Rails.application.routes.draw do
   resource :landing
 
   namespace :my do
+    resource :passkey_challenge, only: :create
     resource :identity, only: :show
     resources :access_tokens
+    resources :passkeys, except: %i[ show new ]
     resources :pins
     resource :timezone
     resource :menu
@@ -244,6 +246,10 @@ Rails.application.routes.draw do
   get "up", to: "rails/health#show", as: :rails_health_check
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   get "service-worker" => "pwa#service_worker"
+
+  # Mobile clients
+  get "client_configurations/(:platform)_v(:version)" => "client_configurations#show",
+    platform: /android|ios/, version: /\d+/
 
   namespace :admin do
     mount MissionControl::Jobs::Engine, at: "/jobs"

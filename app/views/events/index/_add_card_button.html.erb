@@ -1,7 +1,7 @@
 <div class="header__actions header__actions--start">
   <% if board = user_filtering.single_board_or_first %>
     <%= button_to board_cards_path(board), method: :post, class: "btn btn--link btn--circle-mobile",
-          data: { controller: "hotkey", action: "keydown.c@document->hotkey#click", bridge__buttons_target: "button", bridge_title: "Add a card", bridge_icon_url: bridge_icon("add") } do %>
+          data: { controller: "hotkey", action: "keydown.c@document->hotkey#click", bridge__buttons_target: "button", bridge_title: "Add card", bridge_display_as_primary_action: true, bridge_display_title: true, bridge_icon_url: bridge_icon("add") } do %>
       <%= icon_tag "add" %>
       <span class="overflow-ellipsis">Add a card</span>
       <kbd class="hide-on-touch">C</kbd>

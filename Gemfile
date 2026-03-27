@@ -8,7 +8,7 @@ gem "rails", github: "rails/rails", branch: "main"
 gem "importmap-rails"
 gem "propshaft"
 gem "stimulus-rails"
-gem "turbo-rails"
+gem "turbo-rails", github: "hotwired/turbo-rails", branch: "offline-cache"
 
 # Deployment and drivers
 gem "bootsnap", require: false
@@ -16,18 +16,18 @@ gem "kamal", require: false
 gem "puma", ">= 5.0"
 gem "solid_cable", ">= 3.0"
 gem "solid_cache", "~> 1.0"
-gem "solid_queue", "~> 1.2"
+gem "solid_queue", "~> 1.3"
 gem "sqlite3", ">= 2.0"
 gem "thruster", require: false
-gem "trilogy", "~> 2.9"
+gem "trilogy", "~> 2.10"
 
 # Features
-gem "bcrypt", "~> 3.1.7"
+gem "bcrypt", "~> 3.1.22"
 gem "geared_pagination", "~> 1.2"
 gem "rqrcode"
 gem "rouge"
 gem "jbuilder"
-gem "lexxy", bc: "lexxy"
+gem "lexxy", "0.9.0.beta"
 gem "image_processing", "~> 1.14"
 gem "platform_agent"
 gem "aws-sdk-s3", require: false

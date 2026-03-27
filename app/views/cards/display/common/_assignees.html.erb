@@ -12,8 +12,8 @@
     </span>
   </button>
 
-  <% if Current.user && !local_assigns[:preview] %>
-    <%= button_to "Assign to me", card_assignments_path(card, params: { assignee_id: Current.user.id }), method: :post, data: {controller: "hotkey", action: "keydown.m@document->hotkey#click" }, hidden: true %>
+  <% unless local_assigns[:preview] %>
+    <%= button_to "Assign to me", card_self_assignment_path(card), method: :post, data: {controller: "hotkey", action: "keydown.m@document->hotkey#click" }, hidden: true %>
   <% end %>
 
   <dialog class="popup panel flex-column align-start gap-half fill-white shadow" data-dialog-target="dialog" data-action="turbo:before-morph-attribute->dialog#preventCloseOnMorphing turbo:submit-end->dialog#close">

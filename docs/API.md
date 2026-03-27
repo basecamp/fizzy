@@ -134,6 +134,48 @@ __Response:__
 
 Returns `204 No Content` on success.
 
+#### Create an access token via the API
+
+You can programmatically create a personal access token using either a session cookie or an existing Bearer token:
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -H "Cookie: session_token=eyJfcmFpbHMi..." \
+  -d '{"access_token": {"description": "Fizzy CLI", "permission": "write"}}' \
+  https://app.fizzy.do/1234567/my/access_tokens
+```
+
+Or with a Bearer token (must have `write` permission):
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer put-your-access-token-here" \
+  -d '{"access_token": {"description": "Fizzy CLI", "permission": "write"}}' \
+  https://app.fizzy.do/1234567/my/access_tokens
+```
+
+The `permission` field accepts `read` or `write`.
+
+__Response:__
+
+```
+HTTP/1.1 201 Created
+```
+
+```json
+{
+  "token": "4f9Q6d2wXr8Kp1Ls0Vz3BnTa",
+  "description": "Fizzy CLI",
+  "permission": "write"
+}
+```
+
+Store the `token` value securely — it won't be retrievable again. Use it as a Bearer token for subsequent API requests.
+
 ## Caching
 
 Most endpoints return [ETag](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/ETag) and [Cache-Control](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cache-Control) headers. You can use these to avoid re-downloading unchanged data.
@@ -392,6 +434,7 @@ __Response:__
     "name": "Fizzy",
     "all_access": true,
     "created_at": "2025-12-05T19:36:35.534Z",
+    "auto_postpone_period_in_days": 30,
     "url": "http://fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
     "creator": {
       "id": "03f5v9zjw7pz8717a4no1h8a7",
@@ -418,6 +461,7 @@ __Response:__
   "name": "Fizzy",
   "all_access": true,
   "created_at": "2025-12-05T19:36:35.534Z",
+  "auto_postpone_period_in_days": 30,
   "url": "http://fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
   "creator": {
     "id": "03f5v9zjw7pz8717a4no1h8a7",
@@ -427,9 +471,12 @@ __Response:__
     "email_address": "david@example.com",
     "created_at": "2025-12-05T19:36:35.401Z",
     "url": "http://fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
-  }
+  },
+  "public_url": "http://fizzy.localhost:3006/897362094/public/boards/aB3dEfGhIjKlMnOp"
 }
 ```
+
+The `public_url` field is only present when the board is published.
 
 ### `POST /:account_slug/boards`
 
@@ -439,7 +486,7 @@ Creates a new Board in the account.
 |-----------|------|----------|-------------|
 | `name` | string | Yes | The name of the board |
 | `all_access` | boolean | No | Whether any user in the account can access this board. Defaults to `true` |
-| `auto_postpone_period` | integer | No | Number of days of inactivity before cards are automatically postponed |
+| `auto_postpone_period_in_days` | integer | No | Number of days of inactivity before cards are automatically postponed (e.g. `30`) |
 | `public_description` | string | No | Rich text description shown on the public board page |
 
 __Request:__
@@ -469,7 +516,7 @@ Updates a Board. Only board administrators can update a board.
 |-----------|------|----------|-------------|
 | `name` | string | No | The name of the board |
 | `all_access` | boolean | No | Whether any user in the account can access this board |
-| `auto_postpone_period` | integer | No | Number of days of inactivity before cards are automatically postponed |
+| `auto_postpone_period_in_days` | integer | No | Number of days of inactivity before cards are automatically postponed (e.g. `30`) |
 | `public_description` | string | No | Rich text description shown on the public board page |
 | `user_ids` | array | No | Array of *all* user IDs who should have access to this board (only applicable when `all_access` is `false`) |
 
@@ -479,7 +526,7 @@ __Request:__
 {
   "board": {
     "name": "Updated board name",
-    "auto_postpone_period": 14,
+    "auto_postpone_period_in_days": 30,
     "public_description": "This is a **public** description of the board.",
     "all_access": false,
     "user_ids": [
@@ -501,6 +548,235 @@ Deletes a Board. Only board administrators can delete a board.
 __Response:__
 
 Returns `204 No Content` on success.
+
+## Board Publications
+
+Publishing a board makes it publicly accessible via a shareable link, without requiring authentication. Only board administrators can publish or unpublish a board.
+
+### `POST /:account_slug/boards/:board_id/publication`
+
+Publishes a board, generating a shareable public link.
+
+__Response:__
+
+```
+HTTP/1.1 201 Created
+```
+
+```json
+{
+  "id": "03f5v9zkft4hj9qq0lsn9ohcm",
+  "name": "Fizzy",
+  "all_access": true,
+  "created_at": "2025-12-05T19:36:35.534Z",
+  "auto_postpone_period_in_days": 30,
+  "url": "http://fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
+  "creator": {
+    "id": "03f5v9zjw7pz8717a4no1h8a7",
+    "name": "David Heinemeier Hansson",
+    "role": "owner",
+    "active": true,
+    "email_address": "david@example.com",
+    "created_at": "2025-12-05T19:36:35.401Z",
+    "url": "http://fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
+  },
+  "public_url": "http://fizzy.localhost:3006/897362094/public/boards/aB3dEfGhIjKlMnOp"
+}
+```
+
+If the board is already published, the existing publication is returned.
+
+### `DELETE /:account_slug/boards/:board_id/publication`
+
+Unpublishes a board, removing public access.
+
+__Response:__
+
+Returns `204 No Content` on success.
+
+## Account
+
+### `GET /account/settings`
+
+Returns the current account.
+
+__Response:__
+
+```json
+{
+  "id": "03f5v9zjvypwh0t0e2rfh0h7k",
+  "name": "37signals",
+  "cards_count": 5,
+  "created_at": "2025-12-05T19:36:35.401Z",
+  "auto_postpone_period_in_days": 30
+}
+```
+
+The `auto_postpone_period_in_days` is the account-level default in days (e.g. `30`). Cards are automatically moved to "Not Now" after this period of inactivity. Each board can override this with its own value.
+
+### `PUT /account/entropy`
+
+Updates the account-level default auto close period. Requires admin role.
+
+__Request:__
+
+```json
+{
+  "entropy": {
+    "auto_postpone_period_in_days": 30
+  }
+}
+```
+
+__Response:__
+
+Returns the account object:
+
+```json
+{
+  "id": "03f5v9zjvypwh0t0e2rfh0h7k",
+  "name": "37signals",
+  "cards_count": 5,
+  "created_at": "2025-12-05T19:36:35.401Z",
+  "auto_postpone_period_in_days": 30
+}
+```
+
+### `PUT /:account_slug/boards/:board_id/entropy`
+
+Updates the auto close period for a specific board. Requires board admin permission.
+
+__Request:__
+
+```json
+{
+  "board": {
+    "auto_postpone_period_in_days": 90
+  }
+}
+```
+
+__Response:__
+
+Returns the board object.
+
+## Webhooks
+
+Webhooks notify another application when something happens on a board. Only account admins can list, view, create, update, delete, or reactivate webhooks.
+
+### `GET /:account_slug/boards/:board_id/webhooks`
+
+Returns a paginated list of webhooks for a board.
+
+__Response:__
+
+```json
+[
+  {
+    "id": "03f5v9zkft4hj9qq0lsn9ohcm",
+    "name": "Production API",
+    "payload_url": "https://api.example.com/webhooks",
+    "active": true,
+    "signing_secret": "p94Bx2HjempCdYB4DTyZkY1b",
+    "subscribed_actions": ["card_published", "card_assigned", "card_closed"],
+    "created_at": "2025-12-05T19:36:35.534Z",
+    "url": "http://fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcy/webhooks/03f5v9zkft4hj9qq0lsn9ohcm",
+    "board": {
+      "id": "03f5v9zkft4hj9qq0lsn9ohcy",
+      "name": "Fizzy",
+      "all_access": true,
+      "created_at": "2025-12-05T19:36:35.534Z",
+      "url": "http://fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcy",
+      "creator": {
+        "id": "03f5v9zjw7pz8717a4no1h8a7",
+        "name": "David Heinemeier Hansson",
+        "role": "owner",
+        "active": true,
+        "email_address": "david@example.com",
+        "created_at": "2025-12-05T19:36:35.401Z",
+        "url": "http://fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
+      }
+    }
+  }
+]
+```
+
+### `GET /:account_slug/boards/:board_id/webhooks/:id`
+
+Returns a single webhook.
+
+__Response:__
+
+Returns the same webhook shape shown above.
+
+### `POST /:account_slug/boards/:board_id/webhooks`
+
+Creates a webhook.
+
+__Request:__
+
+```json
+{
+  "webhook": {
+    "name": "Production API",
+    "url": "https://api.example.com/webhooks",
+    "subscribed_actions": ["card_published", "card_assigned", "card_closed"]
+  }
+}
+```
+
+`subscribed_actions` accepts any of:
+`card_assigned`, `card_closed`, `card_postponed`, `card_auto_postponed`, `card_board_changed`, `card_published`, `card_reopened`, `card_sent_back_to_triage`, `card_triaged`, `card_unassigned`, `comment_created`
+
+__Response:__
+
+```
+HTTP/1.1 201 Created
+Location: http://fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcy/webhooks/03f5v9zkft4hj9qq0lsn9ohcm.json
+```
+
+Returns the created webhook in the response body.
+
+### `PATCH /:account_slug/boards/:board_id/webhooks/:id`
+
+Updates a webhook.
+
+__Request:__
+
+```json
+{
+  "webhook": {
+    "name": "Production API",
+    "subscribed_actions": ["card_closed"]
+  }
+}
+```
+
+The `url` is immutable after creation and is ignored on update.
+
+__Response:__
+
+Returns the updated webhook.
+
+### `DELETE /:account_slug/boards/:board_id/webhooks/:id`
+
+Deletes a webhook.
+
+__Response:__
+
+Returns `204 No Content` on success.
+
+### `POST /:account_slug/boards/:board_id/webhooks/:id/activation`
+
+Reactivates a deactivated webhook.
+
+__Response:__
+
+```
+HTTP/1.1 201 Created
+```
+
+Returns the reactivated webhook in the response body.
 
 ## Cards
 
@@ -539,6 +815,7 @@ __Response:__
     "description": "Hello, World!",
     "description_html": "<div class=\"action-text-content\"><p>Hello, World!</p></div>",
     "image_url": null,
+    "has_attachments": false,
     "tags": ["programming"],
     "golden": false,
     "last_active_at": "2025-12-05T19:38:48.553Z",
@@ -549,6 +826,7 @@ __Response:__
       "name": "Fizzy",
       "all_access": true,
       "created_at": "2025-12-05T19:36:35.534Z",
+      "auto_postpone_period_in_days": 30,
       "url": "http://fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
       "creator": {
         "id": "03f5v9zjw7pz8717a4no1h8a7",
@@ -590,6 +868,7 @@ __Response:__
   "description": "Hello, World!",
   "description_html": "<div class=\"action-text-content\"><p>Hello, World!</p></div>",
   "image_url": null,
+  "has_attachments": false,
   "tags": ["programming"],
   "closed": false,
   "golden": false,
@@ -601,6 +880,7 @@ __Response:__
     "name": "Fizzy",
     "all_access": true,
     "created_at": "2025-12-05T19:36:35.534Z",
+    "auto_postpone_period_in_days": 30,
     "url": "http://fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
     "creator": {
       "id": "03f5v9zjw7pz8717a4no1h8a7",
@@ -747,7 +1027,7 @@ Returns `204 No Content` on success.
 
 ### `POST /:account_slug/cards/:card_number/triage`
 
-Moves a card from triage into a column.
+Moves a card into a column.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -857,6 +1137,7 @@ __Response:__
     "description": "Hello, World!",
     "description_html": "<div class=\"action-text-content\"><p>Hello, World!</p></div>",
     "image_url": null,
+    "has_attachments": false,
     "tags": ["programming"],
     "golden": false,
     "last_active_at": "2025-12-05T19:38:48.553Z",
@@ -867,6 +1148,7 @@ __Response:__
       "name": "Fizzy",
       "all_access": true,
       "created_at": "2025-12-05T19:36:35.534Z",
+      "auto_postpone_period_in_days": 30,
       "url": "http://fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
       "creator": {
         "id": "03f5v9zjw7pz8717a4no1h8a7",
