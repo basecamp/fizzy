@@ -1,0 +1,84 @@
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: fizzy:latest
+    restart: unless-stopped
+    networks:
+      - traefik
+    environment:
+      RAILS_ENV: production
+      # Database: sqlite only needs volume; for mysql also start db service and set DATABASE_ADAPTER=mysql
+      DATABASE_ADAPTER: ${DATABASE_ADAPTER:-sqlite}
+      # MySQL only when DATABASE_ADAPTER=mysql
+      # MYSQL_HOST: db
+      # MYSQL_PORT: 3306
+      # MYSQL_USER: ${MYSQL_USER:-fizzy}
+      # MYSQL_PASSWORD: ${MYSQL_PASSWORD:-}
+      # App URL (e.g. for email links)
+      BASE_URL: ${BASE_URL:-http://localhost:3006}
+      # Optional: mail
+      SMTP_ADDRESS: ${SMTP_ADDRESS:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      MAILER_FROM_ADDRESS: ${MAILER_FROM_ADDRESS:-}
+      # Optional: multi-tenant
+      MULTI_TENANT: ${MULTI_TENANT:-false}
+      # Run Solid Queue inside Puma (single container)
+      SOLID_QUEUE_IN_PUMA: "true"
+
+      # Forward Auth (restart container after changing .env: docker compose up -d --force-recreate app)
+      FORWARD_AUTH_ENABLED: ${FORWARD_AUTH_ENABLED:-true}
+      FORWARD_AUTH_TRUSTED_IPS: ${FORWARD_AUTH_TRUSTED_IPS:-}
+      FORWARD_AUTH_SECRET_HEADER: ${FORWARD_AUTH_SECRET_HEADER:-}
+      FORWARD_AUTH_SECRET: ${FORWARD_AUTH_SECRET:-}
+      FORWARD_AUTH_AUTO_PROVISION: ${FORWARD_AUTH_AUTO_PROVISION:-false}
+      FORWARD_AUTH_DEFAULT_ROLE: ${FORWARD_AUTH_DEFAULT_ROLE:-member}
+      FORWARD_AUTH_CREATE_SESSION: ${FORWARD_AUTH_CREATE_SESSION:-true}
+      FORWARD_AUTH_USE_EMAIL_LOCAL_PART_AND_LOCK_EMAIL: ${FORWARD_AUTH_USE_EMAIL_LOCAL_PART_AND_LOCK_EMAIL:-false}
+      FORWARD_AUTH_AUTO_CREATE_ACCOUNT: ${FORWARD_AUTH_AUTO_CREATE_ACCOUNT:-true}
+      FORWARD_AUTH_AUTO_CREATE_ACCOUNT_NAME: ${FORWARD_AUTH_AUTO_CREATE_ACCOUNT_NAME:-My Workspace}
+
+    volumes:
+      - ./fizzy_storage:/rails/storage
+    env_file:
+      - .env
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik
+      - traefik.http.routers.${PROTECTED_PREFIX:-protected}-http.entrypoints=http
+      - traefik.http.routers.${PROTECTED_PREFIX:-protected}-http.middlewares=redir-https
+      - traefik.http.routers.${PROTECTED_PREFIX:-protected}-http.rule=Host(`${PROTECTED_DOMAIN:-fizzy.test.localhost}`)
+      - traefik.http.routers.${PROTECTED_PREFIX:-protected}-http.service=noop@internal
+      - traefik.http.routers.${PROTECTED_PREFIX:-protected}-https.entrypoints=https
+      - traefik.http.routers.${PROTECTED_PREFIX:-protected}-https.tls=true
+      - traefik.http.routers.${PROTECTED_PREFIX:-protected}-https.middlewares=gzip,stargate-auth
+      - traefik.http.routers.${PROTECTED_PREFIX:-protected}-https.rule=Host(`${PROTECTED_DOMAIN:-fizzy.test.localhost}`)
+      - traefik.http.routers.${PROTECTED_PREFIX:-protected}-https.service=${PROTECTED_PREFIX:-protected}-backend
+      - traefik.http.services.${PROTECTED_PREFIX:-protected}-backend.loadbalancer.server.scheme=http
+      - traefik.http.services.${PROTECTED_PREFIX:-protected}-backend.loadbalancer.server.port=3000
+
+  # db:
+  #   image: mysql:8.0
+  #   restart: unless-stopped
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+  #     MYSQL_DATABASE: fizzy_production
+  #     MYSQL_USER: ${MYSQL_USER:-fizzy}
+  #     MYSQL_PASSWORD: ${MYSQL_PASSWORD:-fizzymysql}
+  #   volumes:
+  #     - ./fizzy_mysql_data:/var/lib/mysql
+  #     - ./docker/mysql-init.sql:/docker-entrypoint-initdb.d/01-fizzy-databases.sql:ro
+  #   healthcheck:
+  #     test: ["CMD", "sh", "-c", "mysqladmin ping -h localhost -u root -p\"$$MYSQL_ROOT_PASSWORD\""]
+  #     interval: 5s
+  #     timeout: 5s
+  #     retries: 10
+  #     start_period: 15s
+
+networks:
+  traefik:
+    external: true

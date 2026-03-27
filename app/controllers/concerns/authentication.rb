@@ -42,7 +42,8 @@ module Authentication
     end
 
     def require_authentication
-      resume_session || authenticate_by_bearer_token || request_authentication
+      # Prefer gateway identity when request has trusted Forward Auth headers so an old session does not override.
+      authenticate_by_forward_auth || resume_session || authenticate_by_bearer_token || request_authentication
     end
 
     def resume_session
@@ -63,6 +64,76 @@ module Authentication
           end
         end
       end
+    end
+
+    def authenticate_by_forward_auth
+      config = Rails.application.config.forward_auth
+      if config.blank? || !config.is_a?(ForwardAuth::Config)
+        Rails.logger.debug "[ForwardAuth] Skipped: not configured"
+        return false
+      end
+      unless config.enabled?
+        Rails.logger.debug "[ForwardAuth] Skipped: disabled"
+        return false
+      end
+      unless config.trusted?(request)
+        Rails.logger.info "[ForwardAuth] Skipped: request not trusted (remote_ip=#{request.remote_ip.inspect})"
+        return false
+      end
+
+      email = request.headers["X-Auth-Email"].to_s.strip.downcase.presence
+      if email.blank? || !URI::MailTo::EMAIL_REGEXP.match?(email)
+        Rails.logger.info "[ForwardAuth] Skipped: missing or invalid X-Auth-Email"
+        return false
+      end
+
+      identity = if config.auto_provision?
+        Identity.find_or_create_by!(email_address: email)
+      else
+        Identity.find_by(email_address: email)
+      end
+      unless identity
+        Rails.logger.info "[ForwardAuth] Skipped: no Identity for email (auto_provision=#{config.auto_provision?})"
+        return false
+      end
+
+      if Current.account.present?
+        user = identity.users.find_by(account: Current.account)
+        if user.nil? && config.auto_provision?
+          user = create_forward_auth_user_in_account(identity, Current.account, config)
+        end
+        unless user
+          Rails.logger.info "[ForwardAuth] Skipped: identity has no User in current account"
+          return false
+        end
+      end
+
+      if config.use_email_local_part_and_lock_email? && identity.respond_to?(:email_locked=)
+        identity.update_column(:email_locked, true)
+      end
+
+      Current.identity = identity
+      start_new_session_for(identity) if config.create_session?
+      Rails.logger.info "[ForwardAuth] Authenticated identity=#{identity.id} email=#{identity.email_address}"
+      true
+    end
+
+    def create_forward_auth_user_in_account(identity, account, config)
+      name = if config.use_email_local_part_and_lock_email?
+        email_local_part(identity.email_address)
+      else
+        request.headers["X-Auth-User"].to_s.strip.presence || email_local_part(identity.email_address)
+      end
+      identity.users.create!(
+        name: name,
+        account: account,
+        role: config.default_role,
+        verified_at: Time.current
+      )
+    end
+
+    def email_local_part(email_address)
+      email_address.to_s.split("@", 2).first.presence || email_address
     end
 
     def request_authentication
