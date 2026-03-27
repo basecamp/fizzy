@@ -15,3 +15,6 @@ kevin:
 
 mike:
   email_address: mike@37signals.com
+
+agora_bot:
+  email_address: bot+agora@fizzy.internal

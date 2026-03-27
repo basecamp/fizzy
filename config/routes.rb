@@ -8,6 +8,10 @@ Rails.application.routes.draw do
     resource :settings
     resources :exports, only: [ :create, :show ]
     resources :imports, only: [ :new, :create, :show ]
+    resources :bots, only: %i[ new create show destroy ] do
+      resources :access_tokens, only: %i[ new create destroy ], controller: "bot_access_tokens"
+    end
+    resources :service_accounts, only: :create
   end
 
   resources :users do

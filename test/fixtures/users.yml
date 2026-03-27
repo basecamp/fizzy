@@ -36,6 +36,14 @@ system:
   role: system
   account: 37s_uuid
 
+agora_bot:
+  id: <%= ActiveRecord::FixtureSet.identify("agora_bot", :uuid) %>
+  name: Agora Bot
+  role: bot
+  identity: agora_bot
+  account: 37s_uuid
+  verified_at: <%= Time.current.to_fs(:db) %>
+
 mike:
   id: <%= ActiveRecord::FixtureSet.identify("mike", :uuid) %>
   name: Mike

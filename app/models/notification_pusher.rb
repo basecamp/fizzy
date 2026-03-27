@@ -19,7 +19,7 @@ class NotificationPusher
   private
     def should_push?
       notification.user.push_subscriptions.any? &&
-        !notification.creator.system? &&
+        !notification.creator.system? && !notification.creator.bot? &&
         notification.user.active? &&
         notification.account.active?
     end

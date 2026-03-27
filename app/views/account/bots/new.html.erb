@@ -1,0 +1,19 @@
+<% @page_title = "Create a bot" %>
+
+<% content_for :header do %>
+  <div class="header__actions header__actions--start">
+    <%= back_link_to "Account Settings", account_settings_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+  </div>
+<% end %>
+
+<div class="panel panel--wide shadow center flex flex-column gap">
+  <header>
+    <h2 class="txt-large margin-none font-weight-black"><%= @page_title %></h2>
+    <p class="txt-medium margin-none">Bots can access Fizzy via API using a personal access token</p>
+  </header>
+
+  <%= form_with url: account_bots_path, method: :post, class: "flex align-center gap-half" do |form| %>
+    <%= form.text_field :name, placeholder: "Bot name…", required: true, autofocus: true, class: "input flex-item-grow" %>
+    <%= form.submit "Create bot", class: "btn btn--link" %>
+  <% end %>
+</div>
