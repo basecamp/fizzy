@@ -156,8 +156,8 @@
     }
 
     code {
-      background: var(--color-canvas);
-      border: 1px solid var(--color-ink-lighter);
+      background: var(--color-ink-lighter);
+      border: 1px solid var(--color-ink-light);
     }
 
     .horizontal-divider {
