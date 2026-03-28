@@ -1,0 +1,21 @@
+{
+  "name": "Fizzy",
+  "runArgs": [
+    "--name",
+    "fizzy"
+  ],
+  "build": {
+    "dockerfile": "../Dockerfile",
+    "context": "..",
+    "target": "build"
+  },
+  "workspaceFolder": "/rails",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/rails,type=bind,consistency=cached",
+  "containerEnv": {
+    "RAILS_ENV": "development",
+    "BUNDLE_WITHOUT": "",
+    "BUNDLE_DEPLOYMENT": "0"
+  },
+  "postCreateCommand": "bin/devcontainer",
+  "forwardPorts": [3006]
+}
