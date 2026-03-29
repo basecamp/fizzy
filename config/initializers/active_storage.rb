@@ -52,7 +52,7 @@ module ActiveStorageDirectUploadsControllerExtensions
   included do
     include Authentication
     include Authorization
-    skip_forgery_protection if: :authenticate_by_bearer_token
+    skip_forgery_protection if: -> { authenticate_by_bearer_token || (resume_session && request.format.json?) }
   end
 end
 
