@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_02_18_120000) do
+ActiveRecord::Schema[8.2].define(version: 2026_03_25_120000) do
   create_table "accesses", id: :uuid, force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -42,7 +42,7 @@ ActiveRecord::Schema[8.2].define(version: 2026_02_18_120000) do
     t.uuid "account_id"
     t.datetime "completed_at"
     t.datetime "created_at", null: false
-    t.string "failure_reason", limit: 255
+    t.string "failure_reason"
     t.uuid "identity_id", null: false
     t.string "status", limit: 255, default: "pending", null: false
     t.datetime "updated_at", null: false
@@ -155,6 +155,26 @@ ActiveRecord::Schema[8.2].define(version: 2026_02_18_120000) do
     t.index ["account_id"], name: "index_assignments_on_account_id"
     t.index ["assignee_id", "card_id"], name: "index_assignments_on_assignee_id_and_card_id", unique: true
     t.index ["card_id"], name: "index_assignments_on_card_id"
+  end
+
+  create_table "board_agent_bootstraps", id: :uuid, force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.uuid "board_id", null: false
+    t.datetime "claimed_at"
+    t.uuid "claimed_by_identity_id"
+    t.datetime "created_at", null: false
+    t.uuid "creator_id", null: false
+    t.datetime "expires_at", null: false
+    t.string "involvement", limit: 255, null: false
+    t.string "permission", limit: 255, null: false
+    t.string "token", limit: 255
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_board_agent_bootstraps_on_account_id"
+    t.index ["board_id"], name: "index_board_agent_bootstraps_on_board_id"
+    t.index ["claimed_by_identity_id"], name: "index_board_agent_bootstraps_on_claimed_by_identity_id"
+    t.index ["creator_id"], name: "index_board_agent_bootstraps_on_creator_id"
+    t.index ["expires_at"], name: "index_board_agent_bootstraps_on_expires_at"
+    t.index ["token"], name: "index_board_agent_bootstraps_on_token", unique: true
   end
 
   create_table "board_publications", id: :uuid, force: :cascade do |t|
@@ -316,7 +336,7 @@ ActiveRecord::Schema[8.2].define(version: 2026_02_18_120000) do
     t.datetime "completed_at"
     t.datetime "created_at", null: false
     t.string "status", limit: 255, default: "pending", null: false
-    t.string "type", limit: 255
+    t.string "type"
     t.datetime "updated_at", null: false
     t.uuid "user_id", null: false
     t.index ["account_id"], name: "index_exports_on_account_id"
@@ -512,7 +532,7 @@ ActiveRecord::Schema[8.2].define(version: 2026_02_18_120000) do
     t.string "operation", limit: 255, null: false
     t.uuid "recordable_id"
     t.string "recordable_type", limit: 255
-    t.string "request_id", limit: 255
+    t.string "request_id"
     t.uuid "user_id"
     t.index ["account_id"], name: "index_storage_entries_on_account_id"
     t.index ["blob_id"], name: "index_storage_entries_on_blob_id"

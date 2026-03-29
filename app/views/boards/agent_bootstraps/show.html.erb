@@ -1,0 +1,60 @@
+<% @page_title = "Agent setup" %>
+
+<% content_for :header do %>
+  <div class="header__actions header__actions--start">
+    <%= back_link_to @board.name, @board, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+  </div>
+<% end %>
+
+<article class="panel panel--wide center flex flex-column gap">
+  <header>
+    <h1 class="txt-large margin-none font-weight-black">Agent setup for <%= @board.name %></h1>
+    <p class="margin-none txt-medium">Copy the command below into an agent session. It can be used once until <%= @agent_bootstrap.expires_at.to_fs(:long) %>.</p>
+  </header>
+
+  <div class="flex flex-column gap-half full-width txt-align-start">
+    <strong>Setup command</strong>
+    <textarea class="input" readonly rows="4"><%= agent_bootstrap_setup_command(@agent_bootstrap) %></textarea>
+    <div class="flex justify-center">
+      <%= button_to_copy_to_clipboard(agent_bootstrap_setup_command(@agent_bootstrap)) do %>
+        <span>Copy setup command</span>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="flex flex-column gap-half full-width txt-align-start">
+    <strong>Skill download URL</strong>
+    <input type="text" class="input" readonly value="<%= agent_bootstrap_skill_url_for(@agent_bootstrap) %>">
+    <div class="flex justify-center">
+      <%= button_to_copy_to_clipboard(agent_bootstrap_skill_url_for(@agent_bootstrap)) do %>
+        <span>Copy skill URL</span>
+      <% end %>
+    </div>
+    <p class="txt-small txt-subtle margin-none">Give this URL to an agent so it can download the current <%= agent_bootstrap_skill_name %> skill.</p>
+  </div>
+
+  <div class="flex flex-column gap-half full-width txt-align-start">
+    <strong>Agent prompt</strong>
+    <textarea class="input" readonly rows="6"><%= agent_bootstrap_skill_block(@agent_bootstrap) %></textarea>
+    <div class="flex justify-center">
+      <%= button_to_copy_to_clipboard(agent_bootstrap_skill_block(@agent_bootstrap)) do %>
+        <span>Copy agent prompt</span>
+      <% end %>
+    </div>
+    <p class="txt-small txt-subtle margin-none">This prompt tells the agent where to fetch the skill, how to bootstrap the CLI, and how to verify access.</p>
+  </div>
+
+  <div class="flex flex-column gap-half full-width txt-align-start">
+    <strong>Raw bootstrap URL</strong>
+    <input type="text" class="input" readonly value="<%= agent_bootstrap_claim_url_for(@agent_bootstrap) %>">
+    <div class="flex justify-center">
+      <%= button_to_copy_to_clipboard(agent_bootstrap_claim_url_for(@agent_bootstrap)) do %>
+        <span>Copy bootstrap URL</span>
+      <% end %>
+    </div>
+  </div>
+
+  <footer class="txt-small txt-subtle">
+    <p class="margin-none">This link creates a write token and sets the agent to watch this board.</p>
+  </footer>
+</article>

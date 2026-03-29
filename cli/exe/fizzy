@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+
+$LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
+
+require "fizzy/cli"
+
+begin
+  Fizzy::CLI.start(ARGV)
+rescue Fizzy::Error, Thor::Error => error
+  warn error.message
+  exit(1)
+end
