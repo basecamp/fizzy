@@ -22,6 +22,6 @@ class Notifications::SettingsController < ApplicationController
     end
 
     def settings_params
-      params.expect(user_settings: :bundle_email_frequency)
+      params.expect(user_settings: [ :bundle_email_frequency, :push_notification_level ])
     end
 end
