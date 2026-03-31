@@ -55,6 +55,24 @@ class Account::BotsControllerTest < ActionDispatch::IntegrationTest
     assert_response :created
   end
 
+  test "update bot name" do
+    bot = users(:agora_bot)
+
+    patch account_bot_path(bot), params: { name: "Renamed Bot" }, as: :json
+    assert_response :success
+
+    body = @response.parsed_body
+    assert_equal "Renamed Bot", body["user"]["name"]
+    assert_equal "Renamed Bot", bot.reload.name
+  end
+
+  test "non-admin cannot update bot" do
+    logout_and_sign_in_as :david
+
+    patch account_bot_path(users(:agora_bot)), params: { name: "Nope" }, as: :json
+    assert_response :forbidden
+  end
+
   test "destroy deactivates bot" do
     bot = users(:agora_bot)
 

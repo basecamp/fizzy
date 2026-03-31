@@ -1,6 +1,6 @@
 class Account::BotsController < ApplicationController
   before_action :ensure_admin
-  before_action :set_bot, only: %i[ show destroy ]
+  before_action :set_bot, only: %i[ show update destroy ]
 
   def new
   end
@@ -35,6 +35,15 @@ class Account::BotsController < ApplicationController
     end
   rescue ActiveSupport::MessageVerifier::InvalidSignature
     @new_access_token = nil
+  end
+
+  def update
+    @bot.update!(name: name)
+
+    respond_to do |format|
+      format.html { redirect_to account_bot_path(@bot), notice: "#{@bot.name} has been updated" }
+      format.json { render json: { user: { id: @bot.id, name: @bot.name, role: @bot.role } } }
+    end
   end
 
   def destroy
