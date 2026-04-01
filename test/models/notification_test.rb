@@ -50,6 +50,26 @@ class NotificationTest < ActiveSupport::TestCase
     assert_turbo_stream_broadcasts [ kevin, :notifications ]
   end
 
+  test "broadcast job renders account-scoped URLs" do
+    kevin = users(:kevin)
+    account = kevin.account
+    notifications(:layout_commented_kevin).destroy
+
+    # Enqueue the broadcast job but don't run it yet
+    notification = Notification.create!(user: kevin, source: events(:layout_commented), creator: users(:david))
+
+    # Clear Current to simulate production — the job must restore account context
+    Current.clear_all
+
+    broadcasts = capture_turbo_stream_broadcasts([ kevin, :notifications ]) do
+      perform_enqueued_jobs
+    end
+
+    assert broadcasts.any?, "Expected at least one broadcast"
+    html = broadcasts.last.to_s
+    assert_includes html, "href=\"#{account.slug}/", "Broadcast should include account slug in URLs"
+  end
+
   test "broadcasting on update when read removes" do
     notification = notifications(:layout_commented_kevin)
 

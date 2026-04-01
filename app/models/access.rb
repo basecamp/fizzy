@@ -19,6 +19,6 @@ class Access < ApplicationRecord
     end
 
     def clean_inaccessible_data_later
-      Board::CleanInaccessibleDataJob.perform_later(user, board)
+      Board::CleanInaccessibleDataJob.perform_later(user, board) unless user.destroyed?
     end
 end
