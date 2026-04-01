@@ -13,13 +13,18 @@ unless Fizzy.saas? || ENV["SOLID_QUEUE_IN_PUMA"] == "false"
   plugin :solid_queue
 end
 
-# Expose Prometheus metrics at http://0.0.0.0:9394/metrics (SaaS only).
-# In dev, overridden to http://127.0.0.1:9306/metrics in .mise.toml.
+# Activate Puma control app so yabeda-puma-plugin can fetch thread/backlog stats.
+# SaaS mode additionally exposes Prometheus metrics via yabeda_prometheus plugin.
+control_uri = Rails.env.local? ? "unix://tmp/pumactl.sock" : "auto"
+activate_control_app control_uri, no_token: true
+plugin :yabeda
+
 if Fizzy.saas?
-  control_uri = Rails.env.local? ? "unix://tmp/pumactl.sock" : "auto"
-  activate_control_app control_uri, no_token: true
-  plugin :yabeda
   plugin :yabeda_prometheus
+end
+
+on_worker_boot do
+  Sentry::Yabeda.start_collector! if defined?(Sentry) && Sentry.initialized?
 end
 
 if !Rails.env.local?
