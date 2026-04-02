@@ -46,6 +46,7 @@ Rails.application.routes.draw do
     resources :webhooks do
       scope module: :webhooks do
         resource :activation, only: :create
+        resources :deliveries, only: :index, defaults: { format: :json }
       end
     end
   end
