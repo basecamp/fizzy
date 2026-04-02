@@ -9,6 +9,9 @@ class Event < ApplicationRecord
   has_many :webhook_deliveries, class_name: "Webhook::Delivery", dependent: :delete_all
 
   scope :chronologically, -> { order created_at: :asc, id: :desc }
+  scope :reverse_chronologically, -> { order created_at: :desc, id: :desc }
+  scope :for_creators, ->(ids) { where(creator_id: ids) if ids.present? }
+  scope :for_boards, ->(ids) { where(board_id: ids) if ids.present? }
   scope :preloaded, -> {
     includes(:creator, :board, {
       eventable: [
