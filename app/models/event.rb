@@ -22,6 +22,7 @@ class Event < ApplicationRecord
 
   after_create -> { eventable.event_was_created(self) }
   after_create_commit :dispatch_webhooks
+  after_create_commit :dispatch_to_eventus, if: :card_assigned?
 
   delegate :card, to: :eventable
 
@@ -40,5 +41,13 @@ class Event < ApplicationRecord
   private
     def dispatch_webhooks
       Event::WebhookDispatchJob.perform_later(self)
+    end
+
+    def dispatch_to_eventus
+      Eventus::DispatchJob.perform_later(self)
+    end
+
+    def card_assigned?
+      action.to_s == "card_assigned"
     end
 end
