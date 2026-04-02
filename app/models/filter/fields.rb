@@ -3,6 +3,17 @@ module Filter::Fields
 
   INDEXES = %w[ all closed not_now stalled postponing_soon golden ]
   SORTED_BY = %w[ newest oldest latest ]
+  COLUMN_KEY_ALIASES = {
+    "maybe" => "maybe",
+    "maybe?" => "maybe",
+    "triage" => "maybe",
+    "not_now" => "not_now",
+    "not-now" => "not_now",
+    "notnow" => "not_now",
+    "done" => "done",
+    "closed" => "done",
+    "close" => "done"
+  }
 
   delegate :default_value?, to: :class
 
@@ -27,11 +38,18 @@ module Filter::Fields
         index.humanize
       end
     end
+
+    def normalize_column_key(value)
+      key = value.to_s.strip
+      return if key.blank?
+
+      COLUMN_KEY_ALIASES.fetch(key.downcase, key)
+    end
   end
 
   included do
     store_accessor :fields, :assignment_status, :indexed_by, :sorted_by, :terms,
-      :card_ids, :creation, :closure
+      :card_ids, :creation, :closure, :column_keys
 
     def assignment_status
       super.to_s.inquiry
@@ -59,6 +77,14 @@ module Filter::Fields
 
     def terms=(value)
       super(Array(value).filter(&:present?))
+    end
+
+    def column_keys
+      Array(super).filter_map { |value| self.class.normalize_column_key(value) }.uniq
+    end
+
+    def column_keys=(value)
+      super(Array(value).filter_map { |entry| self.class.normalize_column_key(entry) }.uniq)
     end
   end
 

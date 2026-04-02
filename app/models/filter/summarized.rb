@@ -1,6 +1,12 @@
 module Filter::Summarized
+  SPECIAL_COLUMN_NAMES = {
+    "maybe" => "Maybe?",
+    "not_now" => "Not Now",
+    "done" => "Done"
+  }
+
   def summary
-    [ index_summary, sort_summary, tag_summary, assignee_summary, creator_summary, terms_summary ].compact.to_sentence
+    [ index_summary, column_summary, sort_summary, tag_summary, assignee_summary, creator_summary, terms_summary ].compact.to_sentence
   end
 
   private
@@ -8,6 +14,14 @@ module Filter::Summarized
       unless indexed_by.all?
         indexed_by.humanize
       end
+    end
+
+    def column_summary
+      names = column_keys.filter_map do |key|
+        SPECIAL_COLUMN_NAMES[key] || workflow_column_names_by_id[key]
+      end
+
+      names.uniq.to_choice_sentence if names.any?
     end
 
     def sort_summary
@@ -40,5 +54,9 @@ module Filter::Summarized
       if creators.any?
         "added by #{creators.pluck(:name).to_choice_sentence}"
       end
+    end
+
+    def workflow_column_names_by_id
+      @workflow_column_names_by_id ||= creator.accessible_columns.where(id: column_keys).pluck(:id, :name).to_h
     end
 end

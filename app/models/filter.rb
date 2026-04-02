@@ -35,6 +35,7 @@ class Filter < ApplicationRecord
       result = terms.reduce(result) do |result, term|
         result.mentioning(term, user: creator)
       end
+      result = filter_by_column_keys(result) if column_keys.present?
 
       result.distinct
     end
@@ -66,10 +67,42 @@ class Filter < ApplicationRecord
 
   private
     def include_closed_cards?
-      only_closed? || card_ids.present?
+      only_closed? || column_keys_include?("done") || card_ids.present?
     end
 
     def include_not_now_cards?
-      indexed_by.not_now? || card_ids.present?
+      indexed_by.not_now? || column_keys_include?("not_now") || card_ids.present?
+    end
+
+    def filter_by_column_keys(result)
+      workflow_column_keys = column_keys - %w[ maybe not_now done ]
+      scopes = []
+
+      if workflow_column_keys.any?
+        scopes << result.where(column_id: workflow_column_keys)
+          .where.not(id: Closure.select(:card_id))
+          .where.not(id: Card::NotNow.select(:card_id))
+      end
+
+      if column_keys_include?("maybe")
+        scopes << result.where(column_id: nil)
+          .where.not(id: Closure.select(:card_id))
+          .where.not(id: Card::NotNow.select(:card_id))
+      end
+
+      if column_keys_include?("not_now")
+        scopes << result.where(id: Card::NotNow.select(:card_id))
+          .where.not(id: Closure.select(:card_id))
+      end
+
+      if column_keys_include?("done")
+        scopes << result.where(id: Closure.select(:card_id))
+      end
+
+      scopes.reduce { |combined, scope| combined.or(scope) } || result.none
+    end
+
+    def column_keys_include?(value)
+      column_keys.include?(value)
     end
 end

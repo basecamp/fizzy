@@ -8,6 +8,7 @@ module Filter::Params
     :creation,
     :closure,
     card_ids: [],
+    column_keys: [],
     assignee_ids: [],
     creator_ids: [],
     closer_ids: [],
@@ -30,9 +31,19 @@ module Filter::Params
         .to_h
         .compact_blank
         .reject(&method(:default_value?))
-        .collect { |name, value| [ name, value.is_a?(Array) ? value.collect(&:to_s) : value.to_s ] }
+        .collect { |name, value| [ name, normalize_param(name, value) ] }
         .sort_by { |name, _| name.to_s }
         .to_h
+    end
+
+    def normalize_param(name, value)
+      if name.to_sym == :column_keys
+        Array(value).filter_map { |entry| normalize_column_key(entry) }.uniq.sort
+      elsif value.is_a?(Array)
+        value.collect(&:to_s)
+      else
+        value.to_s
+      end
     end
   end
 
@@ -42,7 +53,7 @@ module Filter::Params
 
   def used?(ignore_boards: false)
     tags.any? || assignees.any? || creators.any? || closers.any? ||
-      terms.any? || card_ids&.any? || (!ignore_boards && boards.present?) ||
+      terms.any? || card_ids&.any? || column_keys.any? || (!ignore_boards && boards.present?) ||
       assignment_status.unassigned? || !indexed_by.all? || !sorted_by.latest?
   end
 
@@ -57,8 +68,9 @@ module Filter::Params
       params[:assignment_status] = assignment_status
       params[:terms]             = terms
       params[:tag_ids]           = tags.ids
-      params[:board_ids]    = boards.ids
+      params[:board_ids]        = boards.ids
       params[:card_ids]          = card_ids
+      params[:column_keys]       = column_keys
       params[:assignee_ids]      = assignees.ids
       params[:creator_ids]       = creators.ids
       params[:closer_ids]        = closers.ids
