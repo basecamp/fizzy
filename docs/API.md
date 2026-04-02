@@ -459,7 +459,7 @@ __Response:__
 {
   "id": "03f5v9zkft4hj9qq0lsn9ohcm",
   "name": "Fizzy",
-  "all_access": true,
+  "all_access": false,
   "created_at": "2025-12-05T19:36:35.534Z",
   "auto_postpone_period_in_days": 30,
   "url": "http://fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
@@ -472,11 +472,17 @@ __Response:__
     "created_at": "2025-12-05T19:36:35.401Z",
     "url": "http://fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
   },
+  "public_description": "Follow along with public product updates.",
+  "public_description_html": "<div class=\"trix-content\"><p>Follow along with public product updates.</p></div>",
+  "user_ids": [
+    "03f5v9zjw7pz8717a4no1h8a7",
+    "03f5v9zppzlksuj4mxba2nbzn"
+  ],
   "public_url": "http://fizzy.localhost:3006/897362094/public/boards/aB3dEfGhIjKlMnOp"
 }
 ```
 
-The `public_url` field is only present when the board is published.
+The `public_url` field is only present when the board is published. The `user_ids` field is only present when `all_access` is `false`; use `GET /:account_slug/users` to resolve those IDs to user records if needed.
 
 ### `POST /:account_slug/boards`
 
