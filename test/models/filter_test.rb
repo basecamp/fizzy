@@ -55,6 +55,16 @@ class FilterTest < ActiveSupport::TestCase
     end
   end
 
+  test "remembering equivalent column key filters with aliases and different order" do
+    assert_difference "Filter.count", +1 do
+      filter = users(:david).filters.remember(column_keys: [ "maybe", columns(:writebook_review).id, "done" ])
+
+      assert_changes "filter.reload.updated_at" do
+        assert_equal filter, users(:david).filters.remember(column_keys: [ "closed", columns(:writebook_review).id, "maybe?" ])
+      end
+    end
+  end
+
   test "remembering equivalent filters for different users" do
     assert_difference "Filter.count", +2 do
       users(:david).filters.remember(assignment_status: "unassigned", tag_ids: [ tags(:mobile).id ])
@@ -113,6 +123,9 @@ class FilterTest < ActiveSupport::TestCase
 
     filters(:jz_assignments).update!(indexed_by: "stalled", sorted_by: "latest")
     assert_equal "Stalled", filters(:jz_assignments).summary
+
+    filters(:jz_assignments).update!(indexed_by: "all", column_keys: [ "maybe", columns(:writebook_review).id ])
+    assert_equal "Maybe? or Review", filters(:jz_assignments).summary
   end
 
   test "get a clone with some changed params" do
@@ -164,6 +177,29 @@ class FilterTest < ActiveSupport::TestCase
 
     assert users(:david).filters.new(board_ids: [ boards(:writebook).id ]).used?
     assert_not users(:david).filters.new(board_ids: [ boards(:writebook).id ]).used?(ignore_boards: true)
+    assert users(:david).filters.new(column_keys: [ "maybe" ]).used?
+  end
+
+  test "column keys filter cards by workflow columns and pseudo columns" do
+    cards(:layout).postpone
+
+    assert_equal [ cards(:text) ], users(:david).filters.new(column_keys: [ columns(:writebook_in_progress).id ]).cards.to_a
+    assert_equal [ cards(:buy_domain) ], users(:david).filters.new(column_keys: [ "maybe" ]).cards.to_a
+    assert_equal [ cards(:layout) ], users(:david).filters.new(column_keys: [ "not_now" ]).cards.to_a
+    assert_equal [ cards(:shipping) ], users(:david).filters.new(column_keys: [ "done" ]).cards.to_a
+  end
+
+  test "column keys are ORed together" do
+    filter = users(:david).filters.new(column_keys: [ "maybe", columns(:writebook_in_progress).id, "done" ])
+
+    assert_equal [ cards(:shipping), cards(:buy_domain), cards(:text) ].sort_by(&:id), filter.cards.to_a.sort_by(&:id)
+  end
+
+  test "column keys are normalized in params" do
+    filter = users(:david).filters.new(column_keys: [ " maybe? ", "not-now", "closed", columns(:writebook_in_progress).id ])
+
+    assert_equal [ "maybe", "not_now", "done", columns(:writebook_in_progress).id ], filter.column_keys
+    assert_equal [ "maybe", "not_now", "done", columns(:writebook_in_progress).id ], filter.as_params[:column_keys]
   end
 
   test "board titles are scoped to creator's account" do
