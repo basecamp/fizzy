@@ -8,6 +8,7 @@ class Board < ApplicationRecord
 
   has_many :tags, -> { distinct }, through: :cards
   has_many :events
+  has_many :agent_bootstraps, class_name: "Board::AgentBootstrap", dependent: :destroy
   has_many :webhooks, dependent: :destroy
 
   scope :alphabetically, -> { order("lower(name)") }
