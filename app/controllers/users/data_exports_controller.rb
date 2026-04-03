@@ -7,11 +7,20 @@ class Users::DataExportsController < ApplicationController
   CURRENT_EXPORT_LIMIT = 10
 
   def show
+    respond_to do |format|
+      format.html
+      format.json { @export ? render(:show) : head(:not_found) }
+    end
   end
 
   def create
-    @user.data_exports.create!(account: Current.account).build_later
-    redirect_to @user, notice: "Export started. You'll receive an email when it's ready."
+    @export = @user.data_exports.create!(account: Current.account)
+    @export.build_later
+
+    respond_to do |format|
+      format.html { redirect_to @user, notice: "Export started. You'll receive an email when it's ready." }
+      format.json { render :show, status: :created }
+    end
   end
 
   private
@@ -28,6 +37,7 @@ class Users::DataExportsController < ApplicationController
     end
 
     def set_export
-      @export = @user.data_exports.completed.find_by(id: params[:id])
+      scope = request.format.json? ? @user.data_exports : @user.data_exports.completed
+      @export = scope.find_by(id: params[:id])
     end
 end
