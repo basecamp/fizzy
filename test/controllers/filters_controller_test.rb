@@ -43,6 +43,12 @@ class FiltersControllerTest < ActionDispatch::IntegrationTest
     assert_equal extra_filter.summary, @response.parsed_body.first["summary"]
   end
 
+  test "index rejects html" do
+    get filters_path
+
+    assert_response :not_acceptable
+  end
+
   test "show as json" do
     filter = filters(:jz_assignments)
 
@@ -53,6 +59,12 @@ class FiltersControllerTest < ActionDispatch::IntegrationTest
     assert_equal filter.summary, @response.parsed_body["summary"]
     assert_equal filter.as_params.as_json, @response.parsed_body["params"]
     assert_equal cards_url(filter_id: filter.id), @response.parsed_body["cards_url"]
+  end
+
+  test "show rejects html" do
+    get filter_path(filters(:jz_assignments))
+
+    assert_response :not_acceptable
   end
 
   test "show only exposes current user's filters" do
@@ -137,7 +149,7 @@ class FiltersControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :unprocessable_entity
-    assert_equal [ "contains unsupported keys" ], @response.parsed_body.dig("errors", "base")
+    assert_equal [ "contains unsupported keys: card_ids" ], @response.parsed_body.dig("errors", "base")
   end
 
   test "destroy as json" do
