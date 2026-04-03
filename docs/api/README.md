@@ -3,6 +3,23 @@
 Fizzy has an API that allows you to integrate your application with it or to create
 a bot to perform various actions for you.
 
+## API Endpoints
+
+- [Authentication](sections/authentication.md)
+- [Identity](sections/identity.md)
+- [Account](sections/account.md)
+- [Boards](sections/boards.md)
+- [Columns](sections/columns.md)
+- [Cards](sections/cards.md)
+- [Pins](sections/pins.md)
+- [Steps](sections/steps.md)
+- [Comments](sections/comments.md)
+- [Reactions](sections/reactions.md)
+- [Tags](sections/tags.md)
+- [Users](sections/users.md)
+- [Notifications](sections/notifications.md)
+- [Webhooks](sections/webhooks.md)
+
 ## Authentication
 
 There are two ways to authenticate with the Fizzy API:
@@ -127,19 +144,4 @@ Some fields accept rich text content. These fields accept HTML input, which will
 
 See the [rich text guide](sections/rich_text.md) for more information, including how to attach files to rich text fields using the direct upload flow.
 
-## API Endpoints
 
-- [Authentication](sections/authentication.md)
-- [Identity](sections/identity.md)
-- [Account](sections/account.md)
-- [Boards](sections/boards.md)
-- [Columns](sections/columns.md)
-- [Cards](sections/cards.md)
-- [Pins](sections/pins.md)
-- [Steps](sections/steps.md)
-- [Comments](sections/comments.md)
-- [Reactions](sections/reactions.md)
-- [Tags](sections/tags.md)
-- [Users](sections/users.md)
-- [Notifications](sections/notifications.md)
-- [Webhooks](sections/webhooks.md)
