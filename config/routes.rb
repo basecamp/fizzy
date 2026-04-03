@@ -124,7 +124,7 @@ Rails.application.routes.draw do
     resources :queries
   end
 
-  resources :filters do
+  resources :filters, only: %i[ index show create destroy ] do
     scope module: :filters do
       collection do
         resource :settings_refresh, only: :create

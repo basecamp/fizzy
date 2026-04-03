@@ -15,6 +15,15 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "index as json supports filter_id" do
+    filter = users(:kevin).filters.create!(creator_ids: [ users(:david).id ])
+
+    get cards_path(filter_id: filter.id), as: :json
+
+    assert_response :success
+    assert @response.parsed_body.all? { |card| card.dig("creator", "id") == users(:david).id }
+  end
+
   test "create a new draft" do
     assert_difference -> { Card.count }, 1 do
       post board_cards_path(boards(:writebook))
