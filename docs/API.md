@@ -778,6 +778,50 @@ HTTP/1.1 201 Created
 
 Returns the reactivated webhook in the response body.
 
+### `GET /:account_slug/boards/:board_id/webhooks/:webhook_id/deliveries`
+
+Returns a paginated list of deliveries for a webhook. Only account admins can access delivery history.
+
+__Response:__
+
+```json
+[
+  {
+    "id": "03f5v9zkft4hj9qq0lsn9ohdn",
+    "state": "completed",
+    "created_at": "2025-12-05T19:36:35.534Z",
+    "updated_at": "2025-12-05T19:36:36.102Z",
+    "request": {
+      "headers": {
+        "User-Agent": "fizzy/1.0.0 Webhook",
+        "Content-Type": "application/json",
+        "X-Webhook-Timestamp": "2025-12-05T19:36:35.401Z"
+      }
+    },
+    "response": {
+      "code": 200,
+      "error": null
+    },
+    "event": {
+      "id": "03f5v9zkft4hj9qq0lsn9ohde",
+      "action": "card_closed",
+      "created_at": "2025-12-05T19:36:35.401Z",
+      "creator": {
+        "id": "03f5v9zjw7pz8717a4no1h8a7",
+        "name": "David Heinemeier Hansson"
+      },
+      "eventable": {
+        "type": "Card",
+        "id": "03f5v9zkft4hj9qq0lsn9ohdb",
+        "url": "http://fizzy.localhost:3006/897362094/cards/1"
+      }
+    }
+  }
+]
+```
+
+`request` and `response` can be `null` for deliveries that have not started yet or are still in progress. The delivery request headers omit the `X-Webhook-Signature` header.
+
 ## Cards
 
 Cards are tasks or items of work on a board. They can be organized into columns, tagged, assigned to users, and have comments.
