@@ -254,7 +254,7 @@ GEM
       logger (~> 1.6)
     letter_opener (1.10.0)
       launchy (>= 2.2, < 4)
-    lexxy (0.9.0.beta)
+    lexxy (0.9.1.beta)
       rails (>= 8.0.2)
     lint_roller (1.1.0)
     logger (1.7.0)
@@ -272,7 +272,7 @@ GEM
     mini_magick (5.3.1)
       logger
     mini_mime (1.1.5)
-    minitest (6.0.2)
+    minitest (6.0.3)
       drb (~> 2.0)
       prism (~> 1.5)
     mission_control-jobs (1.1.0)
@@ -347,7 +347,7 @@ GEM
       nio4r (~> 2.0)
     raabro (1.4.0)
     racc (1.8.1)
-    rack (3.2.5)
+    rack (3.2.6)
     rack-mini-profiler (4.0.1)
       rack (>= 1.2.0)
     rack-session (2.1.1)
@@ -461,7 +461,7 @@ GEM
     thruster (0.1.19-arm64-darwin)
     thruster (0.1.19-x86_64-darwin)
     thruster (0.1.19-x86_64-linux)
-    timeout (0.6.0)
+    timeout (0.6.1)
     trilogy (2.10.0)
       bigdecimal
     tsort (0.2.0)
@@ -518,7 +518,7 @@ DEPENDENCIES
   jbuilder
   kamal
   letter_opener
-  lexxy (= 0.9.0.beta)
+  lexxy (= 0.9.1.beta)
   mission_control-jobs
   mittens
   mocha
