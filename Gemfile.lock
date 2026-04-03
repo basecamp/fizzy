@@ -462,7 +462,7 @@ GEM
     thruster (0.1.19-x86_64-darwin)
     thruster (0.1.19-x86_64-linux)
     timeout (0.6.0)
-    trilogy (2.10.0)
+    trilogy (2.11.1)
       bigdecimal
     tsort (0.2.0)
     tzinfo (2.0.6)
@@ -539,7 +539,7 @@ DEPENDENCIES
   stackprof
   stimulus-rails
   thruster
-  trilogy (~> 2.10)
+  trilogy (~> 2.11)
   turbo-rails!
   useragent!
   vcr
