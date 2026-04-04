@@ -24,7 +24,7 @@
       <% end %>
 
       <ul class="popup__list" data-filter-target="list" role="listbox">
-        <% user_filtering.users.each do |user| %>
+        <% user_filtering.users_for_creator_filter.each do |user| %>
           <%= tag.li class: "popup__item", data: {
                 filter_target: "item", navigable_list_target: "item", multi_selection_combobox_target: "item", multi_selection_combobox_value: user.id, multi_selection_combobox_label: user.familiar_name },
                 role: "checkbox", aria: { checked: filter.creators.include?(user) } do %>
