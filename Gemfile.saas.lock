@@ -632,7 +632,7 @@ GEM
     thruster (0.1.19-arm64-darwin)
     thruster (0.1.19-x86_64-darwin)
     thruster (0.1.19-x86_64-linux)
-    timeout (0.6.0)
+    timeout (0.6.1)
     trilogy (2.10.0)
       bigdecimal
     tsort (0.2.0)
