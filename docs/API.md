@@ -549,6 +549,55 @@ __Response:__
 
 Returns `204 No Content` on success.
 
+## Board Accesses
+
+Board accesses let you see who has access to a board and their involvement level (watching or access only). Any board member can view this information.
+
+### `GET /:account_slug/boards/:board_id/accesses`
+
+Returns all active account users with their access status for the specified board.
+
+__Response:__
+
+```json
+{
+  "board_id": "03f5v9zkft4hj9qq0lsn9ohcm",
+  "all_access": false,
+  "users": [
+    {
+      "id": "03f5v9zjw7pz8717a4no1h8a7",
+      "name": "David Heinemeier Hansson",
+      "role": "owner",
+      "active": true,
+      "email_address": "david@example.com",
+      "created_at": "2025-12-05T19:36:35.401Z",
+      "url": "http://fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7",
+      "avatar_url": "http://fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7/avatar",
+      "has_access": true,
+      "involvement": "watching"
+    },
+    {
+      "id": "03f5v9zppzlksuj4mxba2nbzn",
+      "name": "Kevin Clark",
+      "role": "admin",
+      "active": true,
+      "email_address": "kevin@example.com",
+      "created_at": "2025-12-05T19:36:35.401Z",
+      "url": "http://fizzy.localhost:3006/897362094/users/03f5v9zppzlksuj4mxba2nbzn",
+      "avatar_url": "http://fizzy.localhost:3006/897362094/users/03f5v9zppzlksuj4mxba2nbzn/avatar",
+      "has_access": false,
+      "involvement": null
+    }
+  ]
+}
+```
+
+- `has_access` indicates whether the user has access to the board
+- `involvement` is `"watching"`, `"access_only"`, or `null` (when the user does not have access)
+- When `all_access` is `true`, all active account users have access to the board
+
+To change who has access, use `PUT /:account_slug/boards/:board_id` with the `user_ids` parameter.
+
 ## Board Publications
 
 Publishing a board makes it publicly accessible via a shareable link, without requiring authentication. Only board administrators can publish or unpublish a board.
