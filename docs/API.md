@@ -1547,7 +1547,7 @@ __Response:__
 
 ### `GET /:account_slug/boards/:board_id/columns/:column_id`
 
-Returns the specified column.
+Returns the specified column metadata.
 
 __Response:__
 
@@ -1558,6 +1558,39 @@ __Response:__
   "color": "var(--color-card-default)",
   "created_at": "2025-12-05T19:36:35.534Z"
 }
+```
+
+### `GET /:account_slug/boards/:board_id/columns/:column_id/cards`
+
+Returns a paginated list of open cards in the specified workflow column.
+This only includes cards triaged into that column. Cards in "Maybe?", "Not Now", and "Done"
+are not included.
+
+The response items have the same shape as `GET /:account_slug/cards`.
+
+__Response:__
+
+```json
+[
+  {
+    "id": "03f5vaeq985jlvwv3arl4srq2",
+    "number": 1,
+    "title": "First!",
+    "status": "published",
+    "description": "Hello, World!",
+    "description_html": "<div class=\"action-text-content\"><p>Hello, World!</p></div>",
+    "image_url": null,
+    "has_attachments": false,
+    "tags": ["programming"],
+    "closed": false,
+    "golden": false,
+    "last_active_at": "2025-12-05T19:38:48.553Z",
+    "created_at": "2025-12-05T19:38:48.540Z",
+    "url": "http://fizzy.localhost:3006/897362094/cards/4",
+    "comments_url": "http://fizzy.localhost:3006/897362094/cards/4/comments",
+    "reactions_url": "http://fizzy.localhost:3006/897362094/cards/4/reactions"
+  }
+]
 ```
 
 ### `POST /:account_slug/boards/:board_id/columns`
