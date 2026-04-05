@@ -38,7 +38,11 @@ Rails.application.routes.draw do
         resource :closed
       end
 
-      resources :columns
+      resources :columns do
+        scope module: :columns do
+          resources :cards, only: :index
+        end
+      end
     end
 
     resources :cards, only: :create

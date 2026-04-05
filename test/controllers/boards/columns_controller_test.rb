@@ -55,6 +55,7 @@ class Boards::ColumnsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_equal board.columns.count, @response.parsed_body.count
+    assert_equal board_column_cards_url(board, board.columns.sorted.first), @response.parsed_body.first["cards_url"]
   end
 
   test "show as JSON" do
@@ -64,6 +65,7 @@ class Boards::ColumnsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_equal column.id, @response.parsed_body["id"]
+    assert_equal board_column_cards_url(column.board, column), @response.parsed_body["cards_url"]
   end
 
   test "create as JSON" do
@@ -76,6 +78,7 @@ class Boards::ColumnsControllerTest < ActionDispatch::IntegrationTest
     assert_response :created
     assert_equal board_column_path(board, Column.last, format: :json), @response.headers["Location"]
     assert_equal "New Column", @response.parsed_body["name"]
+    assert_equal board_column_cards_url(board, Column.last), @response.parsed_body["cards_url"]
   end
 
   test "update as JSON" do
