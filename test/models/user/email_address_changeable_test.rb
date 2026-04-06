@@ -54,4 +54,25 @@ class User::EmailAddressChangeableTest < ActiveSupport::TestCase
     assert_not @user.change_email_address_using_token(token)
     assert_equal old_email, @user.reload.identity.email_address
   end
+
+  test "send_email_address_change_confirmation and change_email_address are no-op when identity email_locked" do
+    skip "Identity#email_locked not present" unless @identity.respond_to?(:email_locked?)
+    @identity.update_column(:email_locked, true)
+
+    assert_not @user.send_email_address_change_confirmation(@new_email)
+    assert_no_emails
+
+    assert_not @user.change_email_address(@new_email)
+    assert_equal @old_email, @user.reload.identity.email_address
+  end
+
+  test "change_email_address_using_token returns false when identity email_locked" do
+    skip "Identity#email_locked not present" unless @identity.respond_to?(:email_locked?)
+    token = @user.send(:generate_email_address_change_token, to: @new_email)
+    @identity.update_column(:email_locked, true)
+    @user.reload
+
+    assert_not @user.change_email_address_using_token(token)
+    assert_equal @old_email, @user.reload.identity.email_address
+  end
 end
