@@ -12,6 +12,7 @@ module Filter::Params
     creator_ids: [],
     closer_ids: [],
     board_ids: [],
+    column_ids: [],
     tag_ids: [],
     terms: []
   ]
@@ -57,7 +58,8 @@ module Filter::Params
       params[:assignment_status] = assignment_status
       params[:terms]             = terms
       params[:tag_ids]           = tags.ids
-      params[:board_ids]    = boards.ids
+      params[:board_ids]         = boards.ids
+      params[:column_ids]        = columns.ids
       params[:card_ids]          = card_ids
       params[:assignee_ids]      = assignees.ids
       params[:creator_ids]       = creators.ids
