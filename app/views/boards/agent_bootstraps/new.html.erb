@@ -1,0 +1,24 @@
+<% @page_title = "Agent setup" %>
+
+<% content_for :header do %>
+  <div class="header__actions header__actions--start">
+    <%= back_link_to @board.name, @board, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+  </div>
+<% end %>
+
+<article class="panel panel--wide center flex flex-column gap">
+  <header>
+    <h1 class="txt-large margin-none font-weight-black">Set up an agent for <%= @board.name %></h1>
+    <p class="margin-none txt-medium">This creates a one-time setup link for a CLI agent. The agent will join this account, get a write token, and start watching this board.</p>
+  </header>
+
+  <%= form_with url: board_agent_bootstraps_path(@board), method: :post, html: { class: "flex flex-column gap full-width" } do |form| %>
+    <%= form.hidden_field :permission, value: :write %>
+    <%= form.hidden_field :involvement, value: :watching %>
+    <%= form.hidden_field :expires_in_minutes, value: 30 %>
+
+    <button class="btn">
+      <span>Generate setup command</span>
+    </button>
+  <% end %>
+</article>

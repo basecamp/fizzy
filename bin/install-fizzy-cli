@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+CLI_DIR="$ROOT_DIR/cli"
+USER_BIN_DIR="$HOME/.local/bin"
+USER_FIZZY_BIN="$USER_BIN_DIR/fizzy"
+
+if ! command -v bundle >/dev/null; then
+  echo "Bundler is required. Install Ruby dependencies first (Ruby + Bundler)." >&2
+  exit 1
+fi
+
+if [ ! -d "$CLI_DIR" ]; then
+  echo "CLI directory not found: $CLI_DIR" >&2
+  exit 1
+fi
+
+cd "$CLI_DIR"
+
+echo "-> Installing CLI gems"
+bundle install
+
+echo "-> Building fizzy-cli gem"
+build_output=$(bundle exec gem build fizzy-cli.gemspec)
+echo "$build_output"
+gem_file=$(echo "$build_output" | awk '/File:/ {print $2}' | tail -n 1)
+
+if [ -z "$gem_file" ]; then
+  echo "Could not determine built gem file." >&2
+  exit 1
+fi
+
+echo "-> Installing $gem_file for current user"
+gem install --user-install "$gem_file"
+
+mkdir -p "$USER_BIN_DIR"
+ln -sfn "$ROOT_DIR/bin/fizzy" "$USER_FIZZY_BIN"
+
+if [[ ":$PATH:" != *":$USER_BIN_DIR:"* ]]; then
+  if [ -f "$HOME/.bashrc" ] || [ -f "$HOME/.zshrc" ]; then
+    if [ -f "$HOME/.bashrc" ] && ! grep -qF "Added by fizzy-cli installer" "$HOME/.bashrc" 2>/dev/null; then
+      {
+        echo ""
+        echo "# Added by fizzy-cli installer"
+        echo "export PATH=\"$PATH:$USER_BIN_DIR\""
+      } >> "$HOME/.bashrc"
+      echo "-> Added $USER_BIN_DIR to PATH in $HOME/.bashrc"
+    fi
+    if [ -f "$HOME/.zshrc" ] && ! grep -qF "Added by fizzy-cli installer" "$HOME/.zshrc" 2>/dev/null; then
+      {
+        echo ""
+        echo "# Added by fizzy-cli installer"
+        echo "export PATH=\"$PATH:$USER_BIN_DIR\""
+      } >> "$HOME/.zshrc"
+      echo "-> Added $USER_BIN_DIR to PATH in $HOME/.zshrc"
+    fi
+  fi
+fi
+
+echo
+echo "Installation complete."
+if command -v fizzy >/dev/null; then
+  echo "Verify with: fizzy --version"
+else
+  echo "Verify with: $USER_FIZZY_BIN --version"
+fi
+"$USER_FIZZY_BIN" --version >/dev/null

@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+
+$LOAD_PATH.unshift(File.expand_path("../cli/lib", __dir__))
+
+load File.expand_path("../cli/exe/fizzy", __dir__)

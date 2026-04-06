@@ -1,0 +1,3 @@
+display_name: Fizzy CLI
+short_description: Use the standalone Fizzy CLI with isolated agent credentials and board-scoped bootstrap links.
+default_prompt: Use the Fizzy CLI instead of raw HTTP. Bootstrap first if a setup link is available, verify with `fizzy whoami --json`, and keep each agent on its own profile and token.

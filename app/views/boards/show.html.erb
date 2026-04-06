@@ -7,6 +7,7 @@
 <% content_for :header do %>
   <div class="header__actions header__actions--start hide-on-native">
     <%= link_to_webhooks(@board) if Current.user.admin? %>
+    <%= link_to_agent_bootstrap(@board) if Current.user.admin? %>
   </div>
 
   <h1 class="header__title divider divider--fade full-width" data-bridge--title-target="header">
