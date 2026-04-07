@@ -4,10 +4,11 @@ PORT=3006
 USE_TAILSCALE=0
 USE_PUSH=0
 
+# Set up colors for terminal output
 if [ -t 1 ]; then
-  c_bar='\033[2m▎\033[0m'    # dim bar
+  c_bar='\033[2m▎\033[0m'    # dim
   c_label='\033[37m'         # gray
-  c_url='\033[96m'           # light blue
+  c_url='\033[96m'           # cyan
   c_reset='\033[0m'
 else
   c_bar='▎' c_label='' c_url='' c_reset=''
