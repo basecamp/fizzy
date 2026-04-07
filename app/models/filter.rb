@@ -32,10 +32,7 @@ class Filter < ApplicationRecord
       result = result.where(cards: { created_at: creation_window }) if creation_window
       result = result.closed_at_window(closure_window) if closure_window
       result = result.closed_by(closers) if closers.present?
-      result = terms.reduce(result) do |result, term|
-        result.mentioning(term, user: creator)
-      end
-
+      result = result.mentioning_all(terms, user: creator) if terms.present?
       result.distinct
     end
   end

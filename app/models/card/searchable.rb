@@ -10,6 +10,23 @@ module Card::Searchable
     end
   end
 
+  class_methods do
+    def mentioning_all(terms, user:)
+      query = combined_terms_fts_query(terms)
+      mentioning(query, user: user)
+    end
+
+    private
+
+    def combined_terms_fts_query(terms)
+      terms.map { |term| sanitize_fts_term(term) }.join(' AND ')
+    end
+
+    def sanitize_fts_term(term)
+      term.gsub('"', '""').then { |t| "\"#{t}\"*" }
+    end
+  end
+
   def search_title
     title
   end
