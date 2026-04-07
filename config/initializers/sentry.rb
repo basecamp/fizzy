@@ -15,8 +15,3 @@ Sentry.init do |config|
 end
 
 require "sentry-yabeda"
-
-# Start periodic collection of Yabeda gauge metrics (GC, GVL, Puma).
-# These plugins register collect blocks designed for Prometheus's pull model;
-# the collector triggers them on a timer so metrics flow to Sentry instead.
-Sentry::Yabeda.start_collector!
