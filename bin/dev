@@ -4,7 +4,6 @@ PORT=3006
 USE_TAILSCALE=0
 USE_PUSH=0
 
-# Set up colors for terminal output
 if [ -t 1 ]; then
   c_bar='\033[2m▎\033[0m'    # dim
   c_label='\033[37m'         # gray
