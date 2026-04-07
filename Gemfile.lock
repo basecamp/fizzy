@@ -15,7 +15,7 @@ GIT
 
 GIT
   remote: https://github.com/rails/rails.git
-  revision: 12e24eaf2f0a9613e015653f013dd131317d9bf5
+  revision: 0583b8bcb4630a11232affccb509211b45c15ce2
   branch: main
   specs:
     actioncable (8.2.0.alpha)
@@ -46,7 +46,7 @@ GIT
       rack-session (>= 1.0.1)
       rack-test (>= 0.6.3)
       rails-dom-testing (~> 2.2)
-      rails-html-sanitizer (~> 1.6)
+      rails-html-sanitizer (~> 1.7)
       useragent (~> 0.16)
     actiontext (8.2.0.alpha)
       action_text-trix (~> 2.1.16)
@@ -61,7 +61,7 @@ GIT
       builder (~> 3.1)
       erubi (~> 1.11)
       rails-dom-testing (~> 2.2)
-      rails-html-sanitizer (~> 1.6)
+      rails-html-sanitizer (~> 1.7)
     activejob (8.2.0.alpha)
       activesupport (= 8.2.0.alpha)
       globalid (>= 0.3.6)
@@ -461,7 +461,7 @@ GEM
     thruster (0.1.19-arm64-darwin)
     thruster (0.1.19-x86_64-darwin)
     thruster (0.1.19-x86_64-linux)
-    timeout (0.6.0)
+    timeout (0.6.1)
     trilogy (2.10.0)
       bigdecimal
     tsort (0.2.0)
