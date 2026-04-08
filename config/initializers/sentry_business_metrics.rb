@@ -17,6 +17,16 @@ Rails.application.config.after_initialize do
         board: board.name, from_column: from, to_column: column&.name || "unknown"
       })
     end
+
+  end
+
+  Closure.after_create_commit do
+    Sentry.metrics.distribution(
+      "fizzy.card_lifetime_seconds",
+      value: (Time.now - card.created_at).to_i,
+      unit: "second",
+      attributes: { board: card.board.name }
+    )
   end
 
   Comment.after_create_commit do
