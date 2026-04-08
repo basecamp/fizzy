@@ -49,14 +49,12 @@ gem "sentry-ruby"
 gem "sentry-rails"
 gem "sentry-yabeda", github: "getsentry/sentry-ruby", branch: "feat/sentry-yabeda", glob: "sentry-yabeda/*.gemspec"
 gem "yabeda"
-# gem "yabeda-rails" # Overlaps with Sentry's native request/db/view tracing — no added value
 gem "yabeda-puma-plugin"               # Thread pool utilization, backlog — invisible to Sentry tracing
-gem "yabeda-activejob"                 # Enqueue counts, queue latency — Sentry traces execution but not enqueue/wait
-# gem "yabeda-actioncable"             # WebSocket connection counts — needs ApplicationCable::Channel (no channels in OSS Fizzy)
 gem "yabeda-gc"                        # GC pause time — runtime metric invisible to request tracing
-gem "yabeda-gvl_metrics"               # GVL wait/running/io_wait time — core runtime contention metric
 gem "yabeda-activerecord"              # Connection pool stats — pool exhaustion invisible to Sentry tracing
-gem "yabeda-http_requests"             # External HTTP call counts/duration — S3, web-push, net-http-persistent
+# gem "yabeda-http_requests"           # Removed: its Sniffer integration intercepts the Sentry ingest HTTP call,
+#                                      #   causing a recursive mutex deadlock in the metric buffer flush cycle.
+#                                      #   Fizzy also makes very few outbound HTTP calls (webhooks, S3, web-push).
 
 group :development, :test do
   gem "brakeman", require: false
