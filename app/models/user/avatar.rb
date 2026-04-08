@@ -39,7 +39,7 @@ module User::Avatar
 
   private
     def avatar_content_type_allowed
-      if !ALLOWED_AVATAR_CONTENT_TYPES.include?(avatar.content_type)
+      unless ALLOWED_AVATAR_CONTENT_TYPES.include?(avatar.content_type)
         errors.add(:avatar, "must be a JPEG, PNG, GIF, or WebP image")
       end
     end
