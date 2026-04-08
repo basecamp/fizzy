@@ -34,8 +34,8 @@ Rails.application.configure do
   # Store uploaded files on the local file system (see config/storage.yml for options).
   if Rails.root.join("tmp/minio-dev.txt").exist?
     config.active_storage.service = :devminio
-    config.x.content_security_policy.connect_src = "http://minio.localhost:39000"
-    config.x.content_security_policy.img_src = "http://minio.localhost:39000"
+    config.x.content_security_policy.connect_src = "http://minio.fizzy.localhost:39000"
+    config.x.content_security_policy.img_src = "http://minio.fizzy.localhost:39000"
   else
     config.active_storage.service = :local
   end
