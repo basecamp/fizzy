@@ -35,7 +35,9 @@
       <div class="flex align-center gap">
         <div class="flex align-center gap input input--actor">
           <%= form.email_field :email_address, class: "input full-width", autocomplete: "username", placeholder: "Email address", required: true, readonly: true, value: @user.identity.email_address %>
-          <%= link_to "Change email", new_user_email_address_path(user_id: Current.user.id), class: "btn btn--plain txt-link txt-small txt-nowrap" %>
+          <% unless @user.identity.respond_to?(:email_locked?) && @user.identity.email_locked? %>
+            <%= link_to "Change email", new_user_email_address_path(user_id: Current.user.id), class: "btn btn--plain txt-link txt-small txt-nowrap" %>
+          <% end %>
         </div>
       </div>
 
