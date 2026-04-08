@@ -22,7 +22,7 @@ Rails.application.config.after_initialize do
   Closure.after_create_commit do
     Sentry.metrics.distribution(
       "fizzy.card_lifetime_seconds",
-      value: (Time.now - card.created_at).to_i,
+      (Time.now - card.created_at).to_i,
       unit: "second",
       attributes: { board: card.board.name }
     )

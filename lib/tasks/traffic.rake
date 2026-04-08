@@ -28,6 +28,14 @@ namespace :traffic do
         exit 1
       end
 
+      # Ensure boards have columns so card moves generate metrics
+      boards.each do |board|
+        if board.columns.empty?
+          %w[Backlog Doing Done].each { |name| board.columns.create!(name: name) }
+          puts "  Created columns for #{board.name}: Backlog, Doing, Done"
+        end
+      end
+
       account_path = "/#{account.external_account_id}"
       uri_base = URI(base_url)
       http = Net::HTTP.new(uri_base.host, uri_base.port)
@@ -77,10 +85,16 @@ namespace :traffic do
         )
         print "comment+ "
 
-        # Move card to a column (if columns exist)
-        if (column = board.columns.sample)
-          card.update!(column: column)
-          print "move→#{column.name} "
+        # Triage card into a column, then move it to another
+        columns = board.columns.to_a
+        if columns.any?
+          first = columns.sample
+          card.update!(column: first)
+          print "triage→#{first.name} "
+
+          second = (columns - [ first ]).sample || first
+          card.update!(column: second)
+          print "move→#{second.name} "
         end
 
         # Occasionally close a card
