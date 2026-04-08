@@ -23,10 +23,6 @@ if Fizzy.saas?
   plugin :yabeda_prometheus
 end
 
-on_worker_boot do
-  Sentry::Yabeda.start_collector! if defined?(Sentry) && Sentry.initialized?
-end
-
 if !Rails.env.local?
   # Because we expect fewer I/O waits than Rails apps that connect to the
   # database over the network, let's start with a baseline config of 1

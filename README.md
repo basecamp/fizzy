@@ -9,7 +9,7 @@ Three complementary telemetry layers, each handling what it does best with zero 
 | Layer | What it captures | How |
 |-------|-----------------|-----|
 | **Sentry native tracing** | Request spans, DB queries, view rendering, queue time | Automatic via `sentry-rails` |
-| **Yabeda + sentry-yabeda** | Puma thread pool, GVL contention, GC pauses, job queue latency | Trace-connected aggregate metrics |
+| **Yabeda + sentry-yabeda** | Puma thread pool, GC pauses, connection pool stats | Trace-connected aggregate metrics |
 | **Sentry.metrics.\*** | Business events (cards created, moved, comments, notifications) | Direct API calls in model callbacks |
 
 ### Sentry metrics + Yabeda
@@ -27,36 +27,23 @@ Only plugins that provide metrics Sentry can't capture natively:
 | Plugin | Metrics | Why not native Sentry? |
 |--------|---------|----------------------|
 | [yabeda-puma-plugin](https://github.com/yabeda-rb/yabeda-puma-plugin) | Thread pool utilization, backlog, workers | Process-level, not request-scoped |
-| [yabeda-activejob](https://github.com/Fullscript/yabeda-activejob) | Enqueue counts, queue latency | Sentry traces execution, not enqueue/wait |
 | [yabeda-gc](https://github.com/ianks/yabeda-gc) | GC pause time, heap stats | Runtime metric, invisible to tracing |
-| [yabeda-gvl_metrics](https://github.com/speedshop/yabeda-gvl_metrics) | GVL wait, running, I/O wait time | Core contention metric (Ruby 3.2+) |
 | [yabeda-activerecord](https://github.com/yabeda-rb/yabeda-activerecord) | Connection pool size, busy/idle/waiting | Pool exhaustion invisible to tracing |
-| [yabeda-http_requests](https://github.com/yabeda-rb/yabeda-http_requests) | External HTTP call counts and duration | Outbound calls (S3, web-push) not auto-traced |
 
-Notably **excluded**: `yabeda-rails` (request duration, db/view runtime) overlaps with Sentry's native span instrumentation.
+Notably **excluded**: `yabeda-rails` (overlaps with Sentry spans), `yabeda-http_requests` (causes recursive mutex deadlock in the metric buffer flush — Sniffer intercepts Sentry's own ingest HTTP call), `yabeda-activejob` (Sentry traces execution natively), `yabeda-gvl_metrics` (needs sustained concurrent load to produce data).
 
 ### Pull vs push: the periodic collector
 
 Yabeda's gauge plugins register `collect` blocks designed for Prometheus's pull model -- a scrape request triggers `Yabeda.collect!`. Sentry is push-based, so there's no scrape trigger.
 
-`sentry-yabeda` includes a **periodic collector** that calls `Yabeda.collect!` every 15 seconds on a background thread. This is started after Sentry init:
+`sentry-yabeda` includes a **periodic collector** that calls `Yabeda.collect!` every 15 seconds on a background thread, started automatically when `enable_metrics` is true. Event-driven metrics (counters, histograms) flow immediately -- runtime gauges (GC stats, Puma thread pool) require the collector.
 
-```ruby
-# config/initializers/sentry.rb
-require "sentry-yabeda"
-Sentry::Yabeda.start_collector!
-```
-
-Without the collector, event-driven metrics (counters, histograms) still flow -- but runtime gauges (GC stats, GVL contention, Puma thread pool) won't. The Puma control app must also be enabled so `yabeda-puma-plugin` can fetch thread/backlog stats:
+The Puma control app must be enabled so `yabeda-puma-plugin` can fetch thread/backlog stats:
 
 ```ruby
 # config/puma.rb
 activate_control_app "unix://tmp/pumactl.sock", no_token: true
 plugin :yabeda
-
-on_worker_boot do
-  Sentry::Yabeda.start_collector! if defined?(Sentry) && Sentry.initialized?
-end
 ```
 
 ## Prerequisites
@@ -66,7 +53,7 @@ end
 brew bundle           # installs vips, sentry CLI
 
 # Runtime (via mise)
-mise install          # installs Ruby, Node
+mise install          # installs Ruby
 ```
 
 ## Setup
@@ -103,8 +90,8 @@ ROUNDS=100 DELAY=0.5 bin/rails traffic:generate  # more data, faster
 | Card creation | `fizzy.cards_created` metric + `activerecord.*` query metrics |
 | Comment creation | `fizzy.comments_created` metric |
 | Card moves between columns | `fizzy.cards_moved` metric |
-| Card closures (every 4th round) | Model callbacks, job enqueue metrics |
-| Background collector (every 15s) | Puma, GC, GVL, connection pool gauge metrics |
+| Card closures (every 4th round) | `fizzy.card_lifetime_seconds` distribution metric |
+| Background collector (every 15s) | Puma, GC, connection pool gauge metrics |
 
 Configure with environment variables: `ROUNDS` (default: 20), `DELAY` (default: 1.0s), `FIZZY_URL` (default: http://fizzy.localhost:3006), `FIZZY_USER` (default: dingsdax@sentry.io).
 
@@ -112,13 +99,12 @@ Configure with environment variables: `ROUNDS` (default: 20), `DELAY` (default: 
 
 ```
 config/initializers/
-  sentry.rb                    # Sentry init, metrics enabled, collector started
+  sentry.rb                    # Sentry init, metrics + logs enabled
   sentry_business_metrics.rb   # Direct Sentry.metrics.* calls on model callbacks
-  yabeda.rb                    # Documents which Yabeda plugins are included and why
 lib/tasks/
   traffic.rake                 # Traffic generator for dashboard demos
 Brewfile                       # System deps (vips, sentry CLI)
-.mise.toml                     # Runtime deps (Ruby, Node)
+.mise.toml                     # Runtime deps (Ruby)
 ```
 
 ## Upstream

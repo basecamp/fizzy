@@ -17,7 +17,6 @@ Rails.application.config.after_initialize do
         board: board.name, from_column: from, to_column: column&.name || "unknown"
       })
     end
-
   end
 
   Closure.after_create_commit do

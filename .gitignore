@@ -43,4 +43,3 @@
 .DS_Store
 .mise.toml
 Brewfile
-Gemfile.lock
