@@ -129,7 +129,7 @@ GEM
   specs:
     action_text-trix (2.1.18)
       railties
-    addressable (2.8.9)
+    addressable (2.9.0)
       public_suffix (>= 2.0.2, < 8.0)
     ast (2.4.3)
     autotuner (1.1.0)
