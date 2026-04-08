@@ -217,7 +217,7 @@ GEM
       activemodel (>= 7.0)
       activemodel-serializers-xml (~> 1.0)
       activesupport (>= 7.0)
-    addressable (2.8.9)
+    addressable (2.9.0)
       public_suffix (>= 2.0.2, < 8.0)
     anyway_config (2.7.2)
       ruby-next-core (~> 1.0)
