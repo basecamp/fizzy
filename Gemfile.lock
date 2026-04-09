@@ -15,7 +15,7 @@ GIT
 
 GIT
   remote: https://github.com/rails/rails.git
-  revision: 12e24eaf2f0a9613e015653f013dd131317d9bf5
+  revision: 75f9e28379ac7418b82fa950cfa81f6147275308
   branch: main
   specs:
     actioncable (8.2.0.alpha)
@@ -46,7 +46,7 @@ GIT
       rack-session (>= 1.0.1)
       rack-test (>= 0.6.3)
       rails-dom-testing (~> 2.2)
-      rails-html-sanitizer (~> 1.6)
+      rails-html-sanitizer (~> 1.7)
       useragent (~> 0.16)
     actiontext (8.2.0.alpha)
       action_text-trix (~> 2.1.16)
@@ -61,7 +61,7 @@ GIT
       builder (~> 3.1)
       erubi (~> 1.11)
       rails-dom-testing (~> 2.2)
-      rails-html-sanitizer (~> 1.6)
+      rails-html-sanitizer (~> 1.7)
     activejob (8.2.0.alpha)
       activesupport (= 8.2.0.alpha)
       globalid (>= 0.3.6)
@@ -254,7 +254,7 @@ GEM
       logger (~> 1.6)
     letter_opener (1.10.0)
       launchy (>= 2.2, < 4)
-    lexxy (0.9.2.beta)
+    lexxy (0.9.5.beta)
       rails (>= 8.0.2)
     lint_roller (1.1.0)
     logger (1.7.0)
@@ -518,7 +518,7 @@ DEPENDENCIES
   jbuilder
   kamal
   letter_opener
-  lexxy (= 0.9.2.beta)
+  lexxy (= 0.9.5.beta)
   mission_control-jobs
   mittens
   mocha
