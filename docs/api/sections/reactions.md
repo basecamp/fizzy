@@ -22,9 +22,9 @@ __Response:__
       "active": true,
       "email_address": "david@example.com",
       "created_at": "2025-12-05T19:36:35.401Z",
-      "url": "http://fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
+      "url": "http://app.fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
     },
-    "url": "http://fizzy.localhost:3006/897362094/cards/3/reactions/03f5v9zo9qlcwwpyc0ascnikz"
+    "url": "http://app.fizzy.localhost:3006/897362094/cards/3/reactions/03f5v9zo9qlcwwpyc0ascnikz"
   }
 ]
 ```
@@ -81,9 +81,9 @@ __Response:__
       "active": true,
       "email_address": "david@example.com",
       "created_at": "2025-12-05T19:36:35.401Z",
-      "url": "http://fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
+      "url": "http://app.fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
     },
-    "url": "http://fizzy.localhost:3006/897362094/cards/3/comments/03f5v9zo9qlcwwpyc0ascnikz/reactions/03f5v9zo9qlcwwpyc0ascnikz"
+    "url": "http://app.fizzy.localhost:3006/897362094/cards/3/comments/03f5v9zo9qlcwwpyc0ascnikz/reactions/03f5v9zo9qlcwwpyc0ascnikz"
   }
 ]
 ```

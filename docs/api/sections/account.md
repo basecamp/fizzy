@@ -29,7 +29,7 @@ __Response:__
   "code": "abc123",
   "usage_count": 3,
   "usage_limit": 10,
-  "url": "http://fizzy.localhost:3006/897362094/join/abc123",
+  "url": "http://app.fizzy.localhost:3006/897362094/join/abc123",
   "active": true
 }
 ```

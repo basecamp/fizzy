@@ -60,7 +60,7 @@ if [ "$USE_TAILSCALE" = "1" ]; then
   fi
   echo "Login with david@example.com to: https://$TS_HOSTNAME:$TS_PORT/"
 else
-  echo "Login with david@example.com to: http://fizzy.localhost:$PORT/"
+  echo "Login with david@example.com to: http://app.fizzy.localhost:$PORT/"
 fi
 
 ./bin/rails server -b 0.0.0.0 -p $PORT

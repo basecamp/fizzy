@@ -110,9 +110,9 @@ and we use a dynamic page size where initial pages return fewer results than lat
 If there are more results to fetch, the response will include a `Link` header with a `rel="next"` link to the next page of results:
 
 ```bash
-curl -H "Authorization: Bearer put-your-access-token-here" -H "Accept: application/json" -v http://fizzy.localhost:3006/686465299/cards
+curl -H "Authorization: Bearer put-your-access-token-here" -H "Accept: application/json" -v http://app.fizzy.localhost:3006/686465299/cards
 # ...
-< link: <http://fizzy.localhost:3006/686465299/cards?page=2>; rel="next"
+< link: <http://app.fizzy.localhost:3006/686465299/cards?page=2>; rel="next"
 # ...
 ```
 
@@ -138,7 +138,7 @@ curl -X PUT \
   -H "Authorization: Bearer put-your-access-token-here" \
   -F "user[name]=David H. Hansson" \
   -F "user[avatar]=@/path/to/avatar.jpg" \
-  http://fizzy.localhost:3006/686465299/users/03f5v9zjw7pz8717a4no1h8a7
+  http://app.fizzy.localhost:3006/686465299/users/03f5v9zjw7pz8717a4no1h8a7
 ```
 
 ## Rich Text Fields

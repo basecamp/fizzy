@@ -17,7 +17,7 @@ __Response:__
     "active": true,
     "email_address": "david@example.com",
     "created_at": "2025-12-05T19:36:35.401Z",
-    "url": "http://fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
+    "url": "http://app.fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
   },
   {
     "id": "03f5v9zjysoy0fqs9yg0ei3hq",
@@ -26,7 +26,7 @@ __Response:__
     "active": true,
     "email_address": "jason@example.com",
     "created_at": "2025-12-05T19:36:35.419Z",
-    "url": "http://fizzy.localhost:3006/897362094/users/03f5v9zjysoy0fqs9yg0ei3hq"
+    "url": "http://app.fizzy.localhost:3006/897362094/users/03f5v9zjysoy0fqs9yg0ei3hq"
   },
   {
     "id": "03f5v9zk1dtqduod5bkhv3k8m",
@@ -35,7 +35,7 @@ __Response:__
     "active": true,
     "email_address": "jz@example.com",
     "created_at": "2025-12-05T19:36:35.435Z",
-    "url": "http://fizzy.localhost:3006/897362094/users/03f5v9zk1dtqduod5bkhv3k8m"
+    "url": "http://app.fizzy.localhost:3006/897362094/users/03f5v9zk1dtqduod5bkhv3k8m"
   },
   {
     "id": "03f5v9zk3nw9ja92e7s4h2wbe",
@@ -44,7 +44,7 @@ __Response:__
     "active": true,
     "email_address": "kevin@example.com",
     "created_at": "2025-12-05T19:36:35.451Z",
-    "url": "http://fizzy.localhost:3006/897362094/users/03f5v9zk3nw9ja92e7s4h2wbe"
+    "url": "http://app.fizzy.localhost:3006/897362094/users/03f5v9zk3nw9ja92e7s4h2wbe"
   }
 ]
 ```
@@ -63,7 +63,7 @@ __Response:__
   "active": true,
   "email_address": "david@example.com",
   "created_at": "2025-12-05T19:36:35.401Z",
-  "url": "http://fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
+  "url": "http://app.fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
 }
 ```
 

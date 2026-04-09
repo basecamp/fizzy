@@ -14,7 +14,7 @@ bin/setup              # Initial setup (installs gems, creates DB, loads schema)
 bin/dev                # Start development server (runs on port 3006)
 ```
 
-Development URL: http://fizzy.localhost:3006
+Development URL: http://app.fizzy.localhost:3006
 Login with: david@example.com (development fixtures), password will appear in the browser console
 
 ### Testing
@@ -156,7 +156,7 @@ Allow people to move between OSS and SAAS Fizzy instances:
 
 ### Chrome MCP (Local Dev)
 
-URL: `http://fizzy.localhost:3006`
+URL: `http://app.fizzy.localhost:3006`
 Login: david@example.com (passwordless magic link auth - check rails console for link)
 
 Use Chrome MCP tools to interact with the running dev app for UI testing and debugging.

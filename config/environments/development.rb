@@ -86,7 +86,8 @@ Rails.application.configure do
   end
 
   config.hosts = [
-    "fizzy.localhost",
+    "app.fizzy.localhost",
+    "fizzy.localhost", # here for backwards compat, but will have CORS errors when using minio
     "localhost",
     "127.0.0.1",
     /fizzy-\d+/,   # review apps: fizzy-123, fizzy-456:3000

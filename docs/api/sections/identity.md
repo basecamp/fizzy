@@ -23,7 +23,7 @@ __Response:__
         "active": true,
         "email_address": "david@example.com",
         "created_at": "2025-12-05T19:36:35.401Z",
-        "url": "http://fizzy.localhost:3006/users/03f5v9zjw7pz8717a4no1h8a7"
+        "url": "http://app.fizzy.localhost:3006/users/03f5v9zjw7pz8717a4no1h8a7"
       }
     },
     {
@@ -38,7 +38,7 @@ __Response:__
         "active": true,
         "email_address": "david@example.com",
         "created_at": "2025-12-05T19:36:36.783Z",
-        "url": "http://fizzy.localhost:3006/users/03f5v9zppzlksuj4mxba2nbzn"
+        "url": "http://app.fizzy.localhost:3006/users/03f5v9zppzlksuj4mxba2nbzn"
       }
     }
   ]
