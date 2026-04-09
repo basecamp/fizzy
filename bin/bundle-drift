@@ -33,6 +33,7 @@ class GemfileDriftChecker
     def find_drift
       oss_specs, saas_specs = specs_hash(@oss_lockfile), specs_hash(@saas_lockfile)
       oss_deps, saas_deps = deps_hash(@oss_lockfile), deps_hash(@saas_lockfile)
+      oss_sdeps, saas_sdeps = spec_deps_hash(@oss_lockfile), spec_deps_hash(@saas_lockfile)
       shared_gems = oss_specs.keys & saas_specs.keys
       shared_deps = oss_deps.keys & saas_deps.keys
 
@@ -43,8 +44,15 @@ class GemfileDriftChecker
         oss_dep, saas_dep = oss_deps[name], saas_deps[name]
         dep_drift = shared_deps.include?(name) && oss_dep != saas_dep
 
-        if version_drift || dep_drift
-          { name: name, oss: oss_version, saas: saas_version, oss_dep: oss_dep, saas_dep: saas_dep }
+        oss_sd, saas_sd = oss_sdeps[name] || {}, saas_sdeps[name] || {}
+        subdep_changes = (oss_sd.keys | saas_sd.keys).filter_map do |dep_name|
+          if oss_sd[dep_name] != saas_sd[dep_name]
+            { name: dep_name, oss: oss_sd[dep_name], saas: saas_sd[dep_name] }
+          end
+        end
+
+        if version_drift || dep_drift || subdep_changes.any?
+          { name: name, oss: oss_version, saas: saas_version, oss_dep: oss_dep, saas_dep: saas_dep, subdep_changes: subdep_changes }
         end
       end.sort_by { |d| d[:name] }
     end
@@ -55,6 +63,12 @@ class GemfileDriftChecker
 
     def deps_hash(lockfile)
       lockfile.dependencies.transform_values { |dep| dep.requirement.to_s }
+    end
+
+    def spec_deps_hash(lockfile)
+      lockfile.specs.to_h do |spec|
+        [spec.name, spec.dependencies.map { |d| [d.name, d.requirement.to_s] }.sort.to_h]
+      end
     end
 
     def report(drift)
@@ -77,6 +91,16 @@ class GemfileDriftChecker
           puts "  Dependency requirements:"
           dep_drift.each do |d|
             puts "    #{d[:name]}: #{d[:oss_dep]} (Gemfile.lock) vs #{d[:saas_dep]} (Gemfile.saas.lock)"
+          end
+        end
+
+        subdep_drift = drift.select { |d| d[:subdep_changes]&.any? }
+        if subdep_drift.any?
+          puts "  Spec sub-dependency requirements:"
+          subdep_drift.each do |d|
+            d[:subdep_changes].each do |sd|
+              puts "    #{d[:name]} → #{sd[:name]}: #{sd[:oss] || "(absent)"} (Gemfile.lock) vs #{sd[:saas] || "(absent)"} (Gemfile.saas.lock)"
+            end
           end
         end
 
@@ -156,6 +180,15 @@ class GemfileDriftForwarder
         puts "  #{d[:name]}: dep #{d[:saas_dep]} → #{d[:oss_dep]}"
         patched_content = patch_dependency_requirement(patched_content, d[:name], d[:saas_dep], d[:oss_dep])
       end
+
+      if d[:subdep_changes]&.any?
+        d[:subdep_changes].each do |sd|
+          if sd[:oss] && sd[:saas]
+            puts "  #{d[:name]} → #{sd[:name]}: subdep #{sd[:saas]} → #{sd[:oss]}"
+            patched_content = patch_spec_subdependency(patched_content, d[:name], sd[:name], sd[:saas], sd[:oss])
+          end
+        end
+      end
     end
 
     File.write(GEMFILE_SAAS_LOCK, patched_content)
@@ -175,6 +208,23 @@ class GemfileDriftForwarder
   end
 
   private
+    def patch_spec_subdependency(content, parent_name, dep_name, old_req, new_req)
+      in_parent_spec = false
+      content.lines.map do |line|
+        if line.match?(/\A {4}\S/)
+          in_parent_spec = line.match?(/\A {4}#{Regexp.escape(parent_name)} \(/)
+        elsif !line.match?(/\A {6}/)
+          in_parent_spec = false
+        end
+
+        if in_parent_spec && line.match?(/\A {6}#{Regexp.escape(dep_name)} \(#{Regexp.escape(old_req)}\)/)
+          line.sub("#{dep_name} (#{old_req})", "#{dep_name} (#{new_req})")
+        else
+          line
+        end
+      end.join
+    end
+
     def patch_dependency_requirement(content, name, old_req, new_req)
       in_deps = false
       content.lines.map do |line|
@@ -232,6 +282,24 @@ when "self-test"
 
     DEPENDENCIES
     %{dependencies}
+
+    BUNDLED WITH
+      2.6.2
+  LOCKFILE
+
+  LOCKFILE_WITH_SUBDEPS_TEMPLATE = <<~LOCKFILE
+    GEM
+      remote: https://rubygems.org/
+      specs:
+        child_gem (%{child_version})
+        parent_gem (%{parent_version})
+          child_gem (%{child_req})
+
+    PLATFORMS
+      ruby
+
+    DEPENDENCIES
+      parent_gem (%{parent_dep})
 
     BUNDLED WITH
       2.6.2
@@ -298,10 +366,54 @@ when "self-test"
       refute_includes saas_content, "shared_gem (~> 1.3)"
     end
 
+    def test_detects_spec_subdependency_drift_even_when_versions_match
+      write_lockfiles_with_subdeps(
+        oss_child_req: "~> 3, >= 3.2.0",
+        saas_child_req: "~> 3, >= 3.1.0"
+      )
+
+      drift = GemfileDriftChecker.new.send(:find_drift)
+
+      assert_equal 1, drift.length
+      assert_equal "parent_gem", drift.first[:name]
+      assert_equal 1, drift.first[:subdep_changes].length
+      assert_equal "child_gem", drift.first[:subdep_changes].first[:name]
+    end
+
+    def test_no_drift_when_spec_subdependencies_match
+      write_lockfiles_with_subdeps(
+        oss_child_req: "~> 3, >= 3.2.0",
+        saas_child_req: "~> 3, >= 3.2.0"
+      )
+
+      drift = GemfileDriftChecker.new.send(:find_drift)
+
+      assert_empty drift
+    end
+
+    def test_forward_patches_spec_subdependency_requirements
+      write_lockfiles_with_subdeps(
+        oss_child_req: "~> 3, >= 3.2.0",
+        saas_child_req: "~> 3, >= 3.1.0"
+      )
+
+      capture_io { GemfileDriftForwarder.new.forward }
+
+      saas_content = File.read("Gemfile.saas.lock")
+      assert_includes saas_content, "child_gem (~> 3, >= 3.2.0)"
+      refute_includes saas_content, "child_gem (~> 3, >= 3.1.0)"
+    end
+
     private
       def write_lockfiles(oss_version:, oss_deps:, saas_version:, saas_deps:)
         File.write("Gemfile.lock", LOCKFILE_TEMPLATE % { shared_version: oss_version, dependencies: oss_deps })
         File.write("Gemfile.saas.lock", LOCKFILE_TEMPLATE % { shared_version: saas_version, dependencies: saas_deps })
+      end
+
+      def write_lockfiles_with_subdeps(oss_child_req:, saas_child_req:)
+        common = { parent_version: "1.0.0", child_version: "3.2.0", parent_dep: "~> 1.0" }
+        File.write("Gemfile.lock", LOCKFILE_WITH_SUBDEPS_TEMPLATE % common.merge(child_req: oss_child_req))
+        File.write("Gemfile.saas.lock", LOCKFILE_WITH_SUBDEPS_TEMPLATE % common.merge(child_req: saas_child_req))
       end
   end
 else
