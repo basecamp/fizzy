@@ -249,6 +249,21 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Big if true", card.description.to_plain_text
   end
 
+  test "create as JSON with tag_ids applies tags to the created card" do
+    tag = tags(:mobile)
+
+    assert_difference -> { Card.count }, +1 do
+      post board_cards_path(boards(:writebook)),
+        params: { card: { title: "Tagged card", tag_ids: [ tag.id ] } },
+        as: :json
+      assert_response :created
+    end
+
+    card = Card.last
+    assert_equal [ tag ], card.reload.tags
+    assert_equal [ tag.title ], @response.parsed_body["tags"]
+  end
+
   test "create as JSON with custom created_at" do
     custom_time = Time.utc(2024, 1, 15, 10, 30, 0)
 
@@ -333,6 +348,17 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     assert_equal "Update test", card.reload.title
+  end
+
+  test "update as JSON with tag_ids updates tags on the card" do
+    card = cards(:logo)
+    tag = tags(:mobile)
+
+    put card_path(card, format: :json), params: { card: { tag_ids: [ tag.id ] } }
+    assert_response :success
+
+    assert_equal [ tag ], card.reload.tags
+    assert_equal [ tag.title ], @response.parsed_body["tags"]
   end
 
   test "delete as JSON" do
