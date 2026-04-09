@@ -92,11 +92,4 @@ class Users::PushSubscriptionsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :unprocessable_entity
   end
-
-  private
-    def stub_dns_resolution(*ips)
-      dns_mock = mock("dns")
-      dns_mock.stubs(:each_address).multiple_yields(*ips)
-      Resolv::DNS.stubs(:open).yields(dns_mock)
-    end
 end
