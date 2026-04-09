@@ -19,15 +19,15 @@ ActiveSupport.on_load(:action_text_content) do
   end
 end
 
-# Don't configure replica connections for ActiveStorage::Record.
-# When ActiveStorage uses `connects_to`, it creates a separate connection pool
-# from ApplicationRecord. This causes after_commit callbacks to fire in
-# non-deterministic order - the Attachment's create_variants callback can fire
-# before the User model's upload callback, causing FileNotFoundError when
-# using `process: :immediately` for variants.
-# See: https://github.com/rails/rails/issues/53694
+# ApplicationRecord calls `configure_replica_connections` to set up connection pools for the
+# application models. We want ActiveStorage::Record to use the same pools for transactional
+# integrity, proper callback invocation, joins, etc., however ActiveStorage::Record inherits from
+# ActiveRecord::Base, not ApplicationRecord. This is how we make Active Storage always use the
+# ApplicationRecord connection pool.
 ActiveSupport.on_load(:active_storage_record) do
-  configure_replica_connections
+  class << self
+    delegate :connection_pool, to: "ApplicationRecord"
+  end
 end
 
 module ActiveStorageControllerExtensions

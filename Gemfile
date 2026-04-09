@@ -16,10 +16,10 @@ gem "kamal", require: false
 gem "puma", ">= 5.0"
 gem "solid_cable", ">= 3.0"
 gem "solid_cache", "~> 1.0"
-gem "solid_queue", "~> 1.3"
+gem "solid_queue", "~> 1.4"
 gem "sqlite3", ">= 2.0"
 gem "thruster", require: false
-gem "trilogy", "~> 2.10"
+gem "trilogy", "~> 2.11"
 
 # Features
 gem "bcrypt", "~> 3.1.22"
@@ -27,7 +27,7 @@ gem "geared_pagination", "~> 1.2"
 gem "rqrcode"
 gem "rouge"
 gem "jbuilder"
-gem "lexxy", "0.9.0.beta"
+gem "lexxy", "0.9.5.beta"
 gem "image_processing", "~> 1.14"
 gem "platform_agent"
 gem "aws-sdk-s3", require: false

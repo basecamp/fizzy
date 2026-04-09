@@ -69,7 +69,7 @@ if [ "$USE_TAILSCALE" = "1" ]; then
   fi
   DEV_URL="https://$TS_HOSTNAME:$TS_PORT/"
 else
-  DEV_URL="http://fizzy.localhost:$PORT/"
+  DEV_URL="http://app.fizzy.localhost:$PORT/"
 fi
 
 printf "\n"

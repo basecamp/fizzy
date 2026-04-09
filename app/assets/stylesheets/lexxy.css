@@ -59,6 +59,10 @@
   lexxy-toolbar {
     border-color: var(--lexxy-border-color);
     gap: 0;
+
+    svg {
+      fill: currentColor;
+    }
   }
 
   .lexxy-editor__toolbar-button {
@@ -73,6 +77,13 @@
       &:hover:not([aria-pressed="true"]) {
         background-color: oklch(var(--lch-ink-dark) / 20%);
       }
+    }
+  }
+
+  .lexxy-editor__toolbar-dropdown--chevron {
+    summary:after {
+      block-size: 0.3rem;
+      inline-size: 0.3rem;
     }
   }
 

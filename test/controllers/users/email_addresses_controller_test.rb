@@ -20,6 +20,22 @@ class Users::EmailAddressesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "create with invalid email format" do
+    assert_no_emails do
+      post user_email_addresses_path(@user, script_name: @user.account.slug), params: { email_address: "notanemail" }
+    end
+    assert_redirected_to new_user_email_address_path(@user)
+    assert_equal "Please enter a valid email address", flash[:alert]
+  end
+
+  test "create with same email as current" do
+    assert_no_emails do
+      post user_email_addresses_path(@user, script_name: @user.account.slug), params: { email_address: @user.identity.email_address }
+    end
+    assert_redirected_to new_user_email_address_path(@user)
+    assert_equal "That is already your email address", flash[:alert]
+  end
+
   test "create with existing email in same account" do
     existing_user = users(:kevin)
     existing_email = existing_user.identity.email_address
@@ -34,6 +50,63 @@ class Users::EmailAddressesControllerTest < ActionDispatch::IntegrationTest
 
     assert_no_emails do
       post user_email_addresses_path(other_user, script_name: @user.account.slug), params: { email_address: "newemail@example.com" }
+    end
+    assert_response :not_found
+  end
+
+  test "create as JSON" do
+    assert_emails 1 do
+      post user_email_addresses_path(@user, script_name: @user.account.slug), params: { email_address: "newemail@example.com" }, as: :json
+    end
+    assert_response :created
+  end
+
+  test "create as JSON with existing email in same account" do
+    existing_email = users(:kevin).identity.email_address
+
+    assert_no_emails do
+      post user_email_addresses_path(@user, script_name: @user.account.slug), params: { email_address: existing_email }, as: :json
+    end
+    assert_response :unprocessable_entity
+    assert_equal "You already have a user in this account with that email address", @response.parsed_body["error"]
+  end
+
+  test "create as JSON with blank email" do
+    assert_no_emails do
+      post user_email_addresses_path(@user, script_name: @user.account.slug), params: { email_address: "" }, as: :json
+    end
+    assert_response :bad_request
+  end
+
+  test "create as JSON with same email as current" do
+    assert_no_emails do
+      post user_email_addresses_path(@user, script_name: @user.account.slug), params: { email_address: @user.identity.email_address }, as: :json
+    end
+    assert_response :unprocessable_entity
+    assert_equal "That is already your email address", @response.parsed_body["error"]
+  end
+
+  test "create as JSON with same email different case" do
+    assert_no_emails do
+      post user_email_addresses_path(@user, script_name: @user.account.slug), params: { email_address: @user.identity.email_address.upcase }, as: :json
+    end
+    assert_response :unprocessable_entity
+    assert_equal "That is already your email address", @response.parsed_body["error"]
+  end
+
+  test "create as JSON with invalid email format" do
+    assert_no_emails do
+      post user_email_addresses_path(@user, script_name: @user.account.slug), params: { email_address: "notanemail" }, as: :json
+    end
+    assert_response :unprocessable_entity
+    assert_equal "Please enter a valid email address", @response.parsed_body["error"]
+  end
+
+  test "create as JSON for other user" do
+    other_user = users(:kevin)
+
+    assert_no_emails do
+      post user_email_addresses_path(other_user, script_name: @user.account.slug), params: { email_address: "newemail@example.com" }, as: :json
     end
     assert_response :not_found
   end

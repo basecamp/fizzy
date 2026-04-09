@@ -31,6 +31,10 @@ Rails.application.config.to_prepare do
     end
 
     private
+      def bearer_token_authenticatable_request?
+        true
+      end
+
       def publicly_accessible_blob?
         @blob.publicly_accessible?
       end

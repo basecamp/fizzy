@@ -40,14 +40,14 @@ __Response:__
     "golden": false,
     "last_active_at": "2025-12-05T19:38:48.553Z",
     "created_at": "2025-12-05T19:38:48.540Z",
-    "url": "http://fizzy.localhost:3006/897362094/cards/4",
+    "url": "http://app.fizzy.localhost:3006/897362094/cards/4",
     "board": {
       "id": "03f5v9zkft4hj9qq0lsn9ohcm",
       "name": "Fizzy",
       "all_access": true,
       "created_at": "2025-12-05T19:36:35.534Z",
       "auto_postpone_period_in_days": 30,
-      "url": "http://fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
+      "url": "http://app.fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
       "creator": {
         "id": "03f5v9zjw7pz8717a4no1h8a7",
         "name": "David Heinemeier Hansson",
@@ -55,7 +55,7 @@ __Response:__
         "active": true,
         "email_address": "david@example.com",
         "created_at": "2025-12-05T19:36:35.401Z",
-        "url": "http://fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
+        "url": "http://app.fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
       }
     },
     "creator": {
@@ -65,10 +65,10 @@ __Response:__
       "active": true,
       "email_address": "david@example.com",
       "created_at": "2025-12-05T19:36:35.401Z",
-      "url": "http://fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
+      "url": "http://app.fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
     },
-    "comments_url": "http://fizzy.localhost:3006/897362094/cards/4/comments",
-    "reactions_url": "http://fizzy.localhost:3006/897362094/cards/4/reactions"
+    "comments_url": "http://app.fizzy.localhost:3006/897362094/cards/4/comments",
+    "reactions_url": "http://app.fizzy.localhost:3006/897362094/cards/4/reactions"
   }
 ]
 ```
@@ -94,14 +94,14 @@ __Response:__
   "golden": false,
   "last_active_at": "2025-12-05T19:38:48.553Z",
   "created_at": "2025-12-05T19:38:48.540Z",
-  "url": "http://fizzy.localhost:3006/897362094/cards/4",
+  "url": "http://app.fizzy.localhost:3006/897362094/cards/4",
   "board": {
     "id": "03f5v9zkft4hj9qq0lsn9ohcm",
     "name": "Fizzy",
     "all_access": true,
     "created_at": "2025-12-05T19:36:35.534Z",
     "auto_postpone_period_in_days": 30,
-    "url": "http://fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
+    "url": "http://app.fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
     "creator": {
       "id": "03f5v9zjw7pz8717a4no1h8a7",
       "name": "David Heinemeier Hansson",
@@ -109,7 +109,7 @@ __Response:__
       "active": true,
       "email_address": "david@example.com",
       "created_at": "2025-12-05T19:36:35.401Z",
-      "url": "http://fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
+      "url": "http://app.fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
     }
   },
   "column": {
@@ -128,10 +128,10 @@ __Response:__
     "active": true,
     "email_address": "david@example.com",
     "created_at": "2025-12-05T19:36:35.401Z",
-    "url": "http://fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
+    "url": "http://app.fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
   },
-  "comments_url": "http://fizzy.localhost:3006/897362094/cards/4/comments",
-  "reactions_url": "http://fizzy.localhost:3006/897362094/cards/4/reactions",
+  "comments_url": "http://app.fizzy.localhost:3006/897362094/cards/4/comments",
+  "reactions_url": "http://app.fizzy.localhost:3006/897362094/cards/4/reactions",
   "steps": [
     {
       "id": "03f8huu0sog76g3s975963b5e",

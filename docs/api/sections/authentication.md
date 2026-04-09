@@ -170,3 +170,41 @@ HTTP/1.1 201 Created
 ```
 
 Store the `token` value securely — it won't be retrievable again. Use it as a Bearer token for subsequent API requests.
+
+### List access tokens
+
+Returns all access tokens for the authenticated identity.
+
+```bash
+curl -H "Authorization: Bearer put-your-access-token-here" \
+  -H "Accept: application/json" \
+  https://app.fizzy.do/my/access_tokens
+```
+
+__Response:__
+
+```json
+[
+  {
+    "id": "03f5v9zo9qlcwwpyc0ascnikz",
+    "description": "Fizzy CLI",
+    "permission": "write",
+    "created_at": "2025-12-05T19:36:35.534Z"
+  }
+]
+```
+
+Note: The raw token value is only returned once at creation time and cannot be retrieved again.
+
+### Delete an access token
+
+```bash
+curl -X DELETE \
+  -H "Authorization: Bearer put-your-access-token-here" \
+  -H "Accept: application/json" \
+  https://app.fizzy.do/my/access_tokens/:id
+```
+
+__Response:__
+
+Returns `204 No Content` on success.

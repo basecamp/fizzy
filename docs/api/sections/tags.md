@@ -14,13 +14,13 @@ __Response:__
     "id": "03f5v9zo9qlcwwpyc0ascnikz",
     "title": "bug",
     "created_at": "2025-12-05T19:36:35.534Z",
-    "url": "http://fizzy.localhost:3006/897362094/cards?tag_ids[]=03f5v9zo9qlcwwpyc0ascnikz"
+    "url": "http://app.fizzy.localhost:3006/897362094/cards?tag_ids[]=03f5v9zo9qlcwwpyc0ascnikz"
   },
   {
     "id": "03f5v9zo9qlcwwpyc0ascnilz",
     "title": "feature",
     "created_at": "2025-12-05T19:36:35.534Z",
-    "url": "http://fizzy.localhost:3006/897362094/cards?tag_ids[]=03f5v9zo9qlcwwpyc0ascnilz"
+    "url": "http://app.fizzy.localhost:3006/897362094/cards?tag_ids[]=03f5v9zo9qlcwwpyc0ascnilz"
   }
 ]
 ```
