@@ -3,9 +3,10 @@
 # Since Gemfile.saas evals Gemfile, shared gems should have identical versions.
 #
 # Usage:
-#   bin/bundle-drift [check]   # check for drift (default subcommand)
-#   bin/bundle-drift correct   # restore alignment (Gemfile.saas.lock is authoritative)
-#   bin/bundle-drift forward   # push Gemfile.lock changes into Gemfile.saas.lock
+#   bin/bundle-drift [check]     # check for drift (default subcommand)
+#   bin/bundle-drift correct     # restore alignment (Gemfile.saas.lock is authoritative)
+#   bin/bundle-drift forward     # push Gemfile.lock changes into Gemfile.saas.lock
+#   bin/bundle-drift self-test   # run built-in tests
 require "bundler"
 require "fileutils"
 
@@ -31,12 +32,19 @@ class GemfileDriftChecker
 
     def find_drift
       oss_specs, saas_specs = specs_hash(@oss_lockfile), specs_hash(@saas_lockfile)
+      oss_deps, saas_deps = deps_hash(@oss_lockfile), deps_hash(@saas_lockfile)
       shared_gems = oss_specs.keys & saas_specs.keys
+      shared_deps = oss_deps.keys & saas_deps.keys
 
       shared_gems.filter_map do |name|
         oss_version, saas_version = oss_specs[name], saas_specs[name]
-        if oss_version != saas_version
-          { name: name, oss: oss_version, saas: saas_version }
+        version_drift = oss_version != saas_version
+
+        oss_dep, saas_dep = oss_deps[name], saas_deps[name]
+        dep_drift = shared_deps.include?(name) && oss_dep != saas_dep
+
+        if version_drift || dep_drift
+          { name: name, oss: oss_version, saas: saas_version, oss_dep: oss_dep, saas_dep: saas_dep }
         end
       end.sort_by { |d| d[:name] }
     end
@@ -45,21 +53,31 @@ class GemfileDriftChecker
       lockfile.specs.to_h { |spec| [ spec.name, spec.version.to_s ] }
     end
 
+    def deps_hash(lockfile)
+      lockfile.dependencies.transform_values { |dep| dep.requirement.to_s }
+    end
+
     def report(drift)
       if drift.empty?
         puts "✓ Gemfile.lock and Gemfile.saas.lock are in sync"
       else
         puts "✗ Gemfile lock files have drifted!\n\n"
 
-        name_width = [ drift.map { |d| d[:name].length }.max, "Gem".length ].max
-        oss_width = [ drift.map { |d| d[:oss].length }.max, "Gemfile.lock".length ].max
-        saas_width = [ drift.map { |d| d[:saas].length }.max, "Gemfile.saas.lock".length ].max
+        spec_drift = drift.select { |d| d[:oss] != d[:saas] }
+        dep_drift = drift.select { |d| d[:oss_dep] != d[:saas_dep] }
 
-        puts "  #{"Gem".ljust(name_width)}  #{"Gemfile.lock".ljust(oss_width)}  Gemfile.saas.lock"
-        puts "  #{"-" * name_width}  #{"-" * oss_width}  #{"-" * saas_width}"
+        if spec_drift.any?
+          puts "  Spec versions:"
+          spec_drift.each do |d|
+            puts "    #{d[:name]}: #{d[:oss]} (Gemfile.lock) vs #{d[:saas]} (Gemfile.saas.lock)"
+          end
+        end
 
-        drift.each do |d|
-          puts "  #{d[:name].ljust(name_width)}  #{d[:oss].ljust(oss_width)}  #{d[:saas]}"
+        if dep_drift.any?
+          puts "  Dependency requirements:"
+          dep_drift.each do |d|
+            puts "    #{d[:name]}: #{d[:oss_dep]} (Gemfile.lock) vs #{d[:saas_dep]} (Gemfile.saas.lock)"
+          end
         end
 
         puts "\nRun 'bin/bundle-drift correct' to restore alignment."
@@ -74,13 +92,10 @@ class GemfileDriftCorrector
 
     puts "\nRestoring alignment (Gemfile.saas.lock is authoritative)...\n\n"
 
-    # Save original for diff
     original_content = File.read(GEMFILE_LOCK)
 
-    # Seed Gemfile.lock with Gemfile.saas.lock - Bundler will use these as version hints
     FileUtils.cp(GEMFILE_SAAS_LOCK, GEMFILE_LOCK)
 
-    # Re-lock: Bundler prunes SaaS-only gems while preserving shared versions
     puts "▸ Re-locking Gemfile (seeded from Gemfile.saas.lock)"
     unless system("BUNDLE_GEMFILE=Gemfile bundle lock")
       File.write(GEMFILE_LOCK, original_content)
@@ -124,15 +139,22 @@ class GemfileDriftForwarder
     drift = GemfileDriftChecker.new.check
     return puts "\nNothing to forward." if drift.empty?
 
-    puts "\nForwarding Gemfile.lock versions into Gemfile.saas.lock...\n\n"
+    puts "\nForwarding Gemfile.lock changes into Gemfile.saas.lock...\n\n"
 
     original_content = File.read(GEMFILE_SAAS_LOCK)
     patched_content = original_content.dup
 
     drift.each do |d|
-      puts "  #{d[:name]} (#{d[:saas]}) → #{d[:name]} (#{d[:oss]})"
-      patched_content.gsub!(/#{Regexp.escape(d[:name])} \(#{Regexp.escape(d[:saas])}([^)]*)\)/) do
-        "#{d[:name]} (#{d[:oss]}#{$1})"
+      if d[:oss] != d[:saas]
+        puts "  #{d[:name]}: spec #{d[:saas]} → #{d[:oss]}"
+        patched_content.gsub!(/#{Regexp.escape(d[:name])} \(#{Regexp.escape(d[:saas])}([^)]*)\)/) do
+          "#{d[:name]} (#{d[:oss]}#{$1})"
+        end
+      end
+
+      if d[:oss_dep] && d[:saas_dep] && d[:oss_dep] != d[:saas_dep]
+        puts "  #{d[:name]}: dep #{d[:saas_dep]} → #{d[:oss_dep]}"
+        patched_content = patch_dependency_requirement(patched_content, d[:name], d[:saas_dep], d[:oss_dep])
       end
     end
 
@@ -153,6 +175,23 @@ class GemfileDriftForwarder
   end
 
   private
+    def patch_dependency_requirement(content, name, old_req, new_req)
+      in_deps = false
+      content.lines.map do |line|
+        if line.strip == "DEPENDENCIES"
+          in_deps = true
+        elsif in_deps && line.match?(/\A\S/)
+          in_deps = false
+        end
+
+        if in_deps
+          line.sub(/#{Regexp.escape(name)} \(#{Regexp.escape(old_req)}\)/, "#{name} (#{new_req})")
+        else
+          line
+        end
+      end.join
+    end
+
     def show_diff(original, patched)
       require "tempfile"
 
@@ -176,6 +215,95 @@ when "correct"
   GemfileDriftCorrector.new.correct
 when "forward"
   GemfileDriftForwarder.new.forward
+when "self-test"
+  require "minitest/autorun"
+  require "tmpdir"
+
+  LOCKFILE_TEMPLATE = <<~LOCKFILE
+    GEM
+      remote: https://rubygems.org/
+      specs:
+        shared_gem (%{shared_version})
+        oss_only_gem (1.0.0)
+        saas_only_gem (2.0.0)
+
+    PLATFORMS
+      ruby
+
+    DEPENDENCIES
+    %{dependencies}
+
+    BUNDLED WITH
+      2.6.2
+  LOCKFILE
+
+  class GemfileDriftCheckerTest < Minitest::Test
+    def setup
+      @original_dir = Dir.pwd
+      @tmpdir = Dir.mktmpdir("bundle-drift-test")
+      Dir.chdir(@tmpdir)
+    end
+
+    def teardown
+      Dir.chdir(@original_dir)
+      FileUtils.rm_rf(@tmpdir)
+    end
+
+    def test_detects_spec_version_drift
+      write_lockfiles(
+        oss_version: "1.0.0", oss_deps: "  shared_gem (~> 1.0)\n  oss_only_gem",
+        saas_version: "2.0.0", saas_deps: "  shared_gem (~> 2.0)\n  saas_only_gem"
+      )
+
+      drift = GemfileDriftChecker.new.send(:find_drift)
+
+      assert_equal 1, drift.length
+      assert_equal "shared_gem", drift.first[:name]
+    end
+
+    def test_detects_dependency_requirement_drift_even_when_spec_versions_match
+      write_lockfiles(
+        oss_version: "1.4.0", oss_deps: "  shared_gem (~> 1.4)\n  oss_only_gem",
+        saas_version: "1.4.0", saas_deps: "  shared_gem (~> 1.3)\n  saas_only_gem"
+      )
+
+      drift = GemfileDriftChecker.new.send(:find_drift)
+
+      assert_equal 1, drift.length
+      assert_equal "shared_gem", drift.first[:name]
+    end
+
+    def test_reports_no_drift_when_specs_and_dependencies_match
+      write_lockfiles(
+        oss_version: "1.4.0", oss_deps: "  shared_gem (~> 1.4)\n  oss_only_gem",
+        saas_version: "1.4.0", saas_deps: "  shared_gem (~> 1.4)\n  saas_only_gem"
+      )
+
+      drift = GemfileDriftChecker.new.send(:find_drift)
+
+      assert_empty drift
+    end
+
+    def test_forward_patches_dependency_requirements_in_addition_to_spec_versions
+      write_lockfiles(
+        oss_version: "1.4.0", oss_deps: "  shared_gem (~> 1.4)\n  oss_only_gem",
+        saas_version: "1.3.2", saas_deps: "  shared_gem (~> 1.3)\n  saas_only_gem"
+      )
+
+      capture_io { GemfileDriftForwarder.new.forward }
+
+      saas_content = File.read("Gemfile.saas.lock")
+      assert_includes saas_content, "shared_gem (1.4.0)"
+      assert_includes saas_content, "shared_gem (~> 1.4)"
+      refute_includes saas_content, "shared_gem (~> 1.3)"
+    end
+
+    private
+      def write_lockfiles(oss_version:, oss_deps:, saas_version:, saas_deps:)
+        File.write("Gemfile.lock", LOCKFILE_TEMPLATE % { shared_version: oss_version, dependencies: oss_deps })
+        File.write("Gemfile.saas.lock", LOCKFILE_TEMPLATE % { shared_version: saas_version, dependencies: saas_deps })
+      end
+  end
 else
-  abort "Usage: bin/bundle-drift [check|correct|forward]"
+  abort "Usage: bin/bundle-drift [check|correct|forward|self-test]"
 end
