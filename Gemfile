@@ -45,8 +45,8 @@ gem "stackprof"
 gem "benchmark" # indirect dependency, being removed from Ruby 3.5 stdlib so here to quash warnings
 
 # Telemetry
-gem "sentry-ruby"
-gem "sentry-rails"
+gem "sentry-ruby", github: "getsentry/sentry-ruby", branch: "feat/sentry-yabeda", glob: "sentry-ruby/*.gemspec"
+gem "sentry-rails", github: "getsentry/sentry-ruby", branch: "feat/sentry-yabeda", glob: "sentry-rails/*.gemspec"
 gem "sentry-yabeda", github: "getsentry/sentry-ruby", branch: "feat/sentry-yabeda", glob: "sentry-yabeda/*.gemspec"
 gem "yabeda"
 gem "yabeda-puma-plugin"               # Thread pool utilization, backlog — invisible to Sentry tracing

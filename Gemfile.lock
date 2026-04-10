@@ -6,13 +6,34 @@ GIT
 
 GIT
   remote: https://github.com/getsentry/sentry-ruby.git
-  revision: 855c16595190122cae2a845dfbb5524d57706d9f
+  revision: 36ac89a2d1e59aa9ce73d59fd62840827a09ba66
   branch: feat/sentry-yabeda
   glob: sentry-yabeda/*.gemspec
   specs:
     sentry-yabeda (6.5.0)
       sentry-ruby (~> 6.5)
       yabeda (>= 0.11)
+
+GIT
+  remote: https://github.com/getsentry/sentry-ruby.git
+  revision: 36ac89a2d1e59aa9ce73d59fd62840827a09ba66
+  branch: feat/sentry-yabeda
+  glob: sentry-rails/*.gemspec
+  specs:
+    sentry-rails (6.5.0)
+      railties (>= 5.2.0)
+      sentry-ruby (~> 6.5.0)
+
+GIT
+  remote: https://github.com/getsentry/sentry-ruby.git
+  revision: 36ac89a2d1e59aa9ce73d59fd62840827a09ba66
+  branch: feat/sentry-yabeda
+  glob: sentry-ruby/*.gemspec
+  specs:
+    sentry-ruby (6.5.0)
+      bigdecimal
+      concurrent-ruby (~> 1.0, >= 1.0.2)
+      logger
 
 GIT
   remote: https://github.com/hotwired/turbo-rails.git
@@ -437,13 +458,6 @@ GEM
       rexml (~> 3.2, >= 3.2.5)
       rubyzip (>= 1.2.2, < 4.0)
       websocket (~> 1.0)
-    sentry-rails (6.5.0)
-      railties (>= 5.2.0)
-      sentry-ruby (~> 6.5.0)
-    sentry-ruby (6.5.0)
-      bigdecimal
-      concurrent-ruby (~> 1.0, >= 1.0.2)
-      logger
     solid_cable (3.0.12)
       actioncable (>= 7.2)
       activejob (>= 7.2)
@@ -571,8 +585,8 @@ DEPENDENCIES
   rqrcode
   rubocop-rails-omakase
   selenium-webdriver
-  sentry-rails
-  sentry-ruby
+  sentry-rails!
+  sentry-ruby!
   sentry-yabeda!
   solid_cable (>= 3.0)
   solid_cache (~> 1.0)
