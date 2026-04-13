@@ -8,6 +8,13 @@ module Card::Taggable
     scope :tagged_with, ->(tags) { joins(:taggings).where(taggings: { tag: tags }) }
   end
 
+  def tag_ids=(ids)
+    ids = Array(ids).compact_blank
+    account_scope = account || board&.account || Current.account
+
+    self.tags = ids.present? ? account_scope.tags.find(ids) : []
+  end
+
   def toggle_tag_with(title)
     tag = account.tags.find_or_create_by!(title: title)
 

@@ -38,4 +38,18 @@ class Card::TaggableTest < ActiveSupport::TestCase
     assert @card.reload.updated_at > card_updated_at
     assert board.reload.updated_at > board_updated_at
   end
+
+  test "updating tag_ids raises when a tag does not exist" do
+    assert_raises(ActiveRecord::RecordNotFound) do
+      @card.update!(tag_ids: [ "does-not-exist" ])
+    end
+  end
+
+  test "updating tag_ids raises when the tag belongs to another account" do
+    foreign_tag = accounts(:initech).tags.create!(title: "foreign")
+
+    assert_raises(ActiveRecord::RecordNotFound) do
+      @card.update!(tag_ids: [ foreign_tag.id ])
+    end
+  end
 end

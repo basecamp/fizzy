@@ -264,6 +264,28 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_equal [ tag.title ], @response.parsed_body["tags"]
   end
 
+  test "create as JSON with nonexistent tag_ids returns not found" do
+    assert_no_difference -> { Card.count } do
+      post board_cards_path(boards(:writebook)),
+        params: { card: { title: "Tagged card", tag_ids: [ "does-not-exist" ] } },
+        as: :json
+    end
+
+    assert_response :not_found
+  end
+
+  test "create as JSON with foreign-account tag_ids returns not found" do
+    foreign_tag = accounts(:initech).tags.create!(title: "foreign")
+
+    assert_no_difference -> { Card.count } do
+      post board_cards_path(boards(:writebook)),
+        params: { card: { title: "Tagged card", tag_ids: [ foreign_tag.id ] } },
+        as: :json
+    end
+
+    assert_response :not_found
+  end
+
   test "create as JSON with custom created_at" do
     custom_time = Time.utc(2024, 1, 15, 10, 30, 0)
 
@@ -359,6 +381,16 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
 
     assert_equal [ tag ], card.reload.tags
     assert_equal [ tag.title ], @response.parsed_body["tags"]
+  end
+
+  test "update as JSON with foreign-account tag_ids returns not found" do
+    card = cards(:logo)
+    foreign_tag = accounts(:initech).tags.create!(title: "foreign")
+
+    put card_path(card, format: :json), params: { card: { tag_ids: [ foreign_tag.id ] } }
+
+    assert_response :not_found
+    assert_equal [ tags(:web) ], card.reload.tags
   end
 
   test "update as JSON with description and tag_ids busts the card cache key" do
