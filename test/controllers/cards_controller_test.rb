@@ -361,6 +361,27 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_equal [ tag.title ], @response.parsed_body["tags"]
   end
 
+  test "update as JSON with description and tag_ids busts the card cache key" do
+    card = cards(:logo)
+    original_cache_key = card.cache_key_with_version
+    tag = tags(:mobile)
+
+    travel 1.minute do
+      put card_path(card, format: :json), params: {
+        card: {
+          description: "Updated description",
+          tag_ids: [ tag.id ]
+        }
+      }
+    end
+
+    assert_response :success
+    assert_not_equal original_cache_key, card.reload.cache_key_with_version
+    assert_equal "Updated description", card.description.to_plain_text.strip
+    assert_equal [ tag ], card.tags
+    assert_equal [ tag.title ], @response.parsed_body["tags"]
+  end
+
   test "delete as JSON" do
     card = cards(:logo)
 

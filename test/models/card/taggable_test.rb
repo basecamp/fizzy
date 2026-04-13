@@ -25,4 +25,17 @@ class Card::TaggableTest < ActiveSupport::TestCase
 
     assert_not_equal cards(:logo).tags.last, cards(:paycheck).tags.last
   end
+
+  test "updating just tag_ids touches the card and board" do
+    board = @card.board
+    card_updated_at = @card.updated_at
+    board_updated_at = board.updated_at
+
+    travel 1.minute do
+      @card.update!(tag_ids: [ tags(:web).id, tags(:mobile).id ])
+    end
+
+    assert @card.reload.updated_at > card_updated_at
+    assert board.reload.updated_at > board_updated_at
+  end
 end
