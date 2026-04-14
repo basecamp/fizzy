@@ -28,8 +28,8 @@ module Card::Taggable
 
   private
     def tags_belong_to_account
-      return if tags.all? { it.account_id == account_id }
-
-      errors.add(:tags, "must belong to the card account")
+      if tags.any? { it.account_id != account_id }
+        errors.add(:tags, "must belong to the card account")
+      end
     end
 end
