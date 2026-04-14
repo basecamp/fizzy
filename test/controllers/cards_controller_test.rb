@@ -383,6 +383,16 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_equal [ tag.title ], @response.parsed_body["tags"]
   end
 
+  test "update as JSON without tag_ids preserves existing tags" do
+    card = cards(:logo)
+
+    put card_path(card, format: :json), params: { card: { title: "Updated title" } }
+    assert_response :success
+
+    assert_equal [ tags(:web) ], card.reload.tags
+    assert_equal [ tags(:web).title ], @response.parsed_body["tags"]
+  end
+
   test "update as JSON with foreign-account tag_ids returns not found" do
     card = cards(:logo)
     foreign_tag = accounts(:initech).tags.create!(title: "foreign")

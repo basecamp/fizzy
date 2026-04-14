@@ -38,6 +38,14 @@ class Card::TaggableTest < ActiveSupport::TestCase
     end
   end
 
+  test "updating tag_ids with an empty array clears tags" do
+    assert_equal [ tags(:web) ], @card.tags
+
+    @card.update!(tag_ids: [])
+
+    assert_empty @card.reload.tags
+  end
+
   test "updating tag_ids raises when a tag does not exist" do
     assert_raises(ActiveRecord::RecordNotFound) do
       @card.update!(tag_ids: [ "does-not-exist" ])
