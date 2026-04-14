@@ -52,11 +52,13 @@ class Card::TaggableTest < ActiveSupport::TestCase
     end
   end
 
-  test "updating tag_ids raises when the tag belongs to another account" do
+  test "updating tag_ids is invalid when the tag belongs to another account" do
     foreign_tag = accounts(:initech).tags.create!(title: "foreign")
 
-    assert_raises(ActiveRecord::RecordNotFound) do
+    error = assert_raises(ActiveRecord::RecordInvalid) do
       @card.update!(tag_ids: [ foreign_tag.id ])
     end
+
+    assert_includes error.record.errors[:tags], "must belong to the card account"
   end
 end

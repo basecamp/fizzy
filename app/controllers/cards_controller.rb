@@ -26,6 +26,8 @@ class CardsController < ApplicationController
         render :show, status: :created, location: card_path(@card, format: :json)
       end
     end
+  rescue ActiveRecord::RecordInvalid
+    head :unprocessable_entity
   end
 
   def show
@@ -41,6 +43,8 @@ class CardsController < ApplicationController
       format.turbo_stream
       format.json { render :show }
     end
+  rescue ActiveRecord::RecordInvalid
+    head :unprocessable_entity
   end
 
   def destroy

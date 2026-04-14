@@ -274,7 +274,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
-  test "create as JSON with foreign-account tag_ids returns not found" do
+  test "create as JSON with foreign-account tag_ids returns unprocessable entity" do
     foreign_tag = accounts(:initech).tags.create!(title: "foreign")
 
     assert_no_difference -> { Card.count } do
@@ -283,7 +283,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
         as: :json
     end
 
-    assert_response :not_found
+    assert_response :unprocessable_entity
   end
 
   test "create as JSON with custom created_at" do
@@ -404,13 +404,13 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_empty @response.parsed_body["tags"]
   end
 
-  test "update as JSON with foreign-account tag_ids returns not found" do
+  test "update as JSON with foreign-account tag_ids returns unprocessable entity" do
     card = cards(:logo)
     foreign_tag = accounts(:initech).tags.create!(title: "foreign")
 
     put card_path(card, format: :json), params: { card: { tag_ids: [ foreign_tag.id ] } }
 
-    assert_response :not_found
+    assert_response :unprocessable_entity
     assert_equal [ tags(:web) ], card.reload.tags
   end
 
