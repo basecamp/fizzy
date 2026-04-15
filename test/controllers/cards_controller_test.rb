@@ -122,6 +122,17 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_no_match "reactions", response.body, "Draft card should not show reactions/boost button"
   end
 
+  test "update as HTML with invalid tag_ids renders edit with unprocessable entity" do
+    card = cards(:logo)
+    foreign_tag = accounts(:initech).tags.create!(title: "foreign")
+
+    patch card_path(card), params: { card: { tag_ids: [ foreign_tag.id ] } }
+
+    assert_response :unprocessable_entity
+    assert_equal [ tags(:web) ], card.reload.tags
+    assert_match "Close editor and discard changes", response.body
+  end
+
   test "users can only see cards in boards they have access to" do
     get card_path(cards(:logo))
     assert_response :success

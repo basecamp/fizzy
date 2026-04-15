@@ -45,7 +45,7 @@ class CardsController < ApplicationController
         format.turbo_stream
         format.json { render :show }
       else
-        format.turbo_stream { render :edit, status: :unprocessable_entity }
+        format.html { render :edit, status: :unprocessable_entity }
         format.json { render json: @card.errors, status: :unprocessable_entity }
       end
     end
