@@ -9,6 +9,6 @@ module Account::Searchable
 
   private
     def clear_search_records
-      Search::Record.for(id).destroy_all
+      Search::Record.for(id).where(account_id: id).destroy_all
     end
 end

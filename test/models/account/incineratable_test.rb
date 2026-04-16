@@ -176,4 +176,45 @@ class Account::IncineratableTest < ActiveSupport::TestCase
     # Search records (sharded)
     assert_empty Search::Record.for(account_id).where(account_id: account_id)
   end
+
+  test "incinerating an account clears its own search records but preserves others on the same shard" do
+    doomed = accounts(:initech)
+    shard = Search::Record.for(doomed.id)
+
+    doomed_card = cards(:radio)
+    doomed_record = shard.create!(
+      account_id: doomed_card.account_id,
+      searchable_type: "Card",
+      searchable_id: doomed_card.id,
+      card_id: doomed_card.id,
+      board_id: doomed_card.board_id,
+      title: "doomed",
+      content: "should be destroyed",
+      created_at: Time.current
+    )
+
+    # Simulate a shard collision: plant a record belonging to a different
+    # account directly on doomed's shard, as would happen in production when
+    # two accounts' UUIDs hash to the same shard.
+    foreign_card = cards(:logo)
+    foreign_record = shard.create!(
+      account_id: foreign_card.account_id,
+      searchable_type: "Card",
+      searchable_id: foreign_card.id,
+      card_id: foreign_card.id,
+      board_id: foreign_card.board_id,
+      title: "foreign",
+      content: "should survive",
+      created_at: Time.current
+    )
+
+    Current.account = doomed
+    Current.session = Session.new(identity: identities(:mike))
+    doomed.incinerate
+
+    assert_not shard.exists?(id: doomed_record.id),
+      "the incinerated account's search record should be destroyed"
+    assert shard.exists?(id: foreign_record.id),
+      "another account's search record on the same shard should survive"
+  end
 end
