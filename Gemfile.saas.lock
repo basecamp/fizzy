@@ -1,7 +1,6 @@
 GIT
   remote: https://github.com/basecamp/audits1984
-  revision: 422b8ff25820c828b7cf09aff4923fd8cc2c6795
-  branch: flavorjones/coworker-api
+  revision: 4271a8e1f02f0f35d749c938bf4dcccf902b4190
   specs:
     audits1984 (0.1.7)
       console1984
@@ -23,7 +22,7 @@ GIT
 
 GIT
   remote: https://github.com/basecamp/queenbee-plugin
-  revision: 14312a940471e20617b38cdec7c092a01567d18b
+  revision: c0119be5940edb3739d4bb591c1a5c7064881638
   specs:
     queenbee (3.2.0)
       activeresource
