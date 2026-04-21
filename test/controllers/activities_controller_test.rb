@@ -264,6 +264,75 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
     assert_equal total, all_ids.uniq.count
   end
 
+  test "index filters by since date" do
+    card = cards(:logo)
+    old_event = card.board.events.create!(
+      action: "card_published",
+      creator: users(:kevin),
+      eventable: card,
+      account: accounts("37s"),
+      created_at: 2.days.ago
+    )
+
+    get activities_path(since: Date.today.iso8601), as: :json
+    assert_response :success
+
+    ids = @response.parsed_body.map { |e| e["id"] }
+    assert_not_includes ids, old_event.id
+  end
+
+  test "index filters by until date" do
+    card = cards(:logo)
+    future_event = card.board.events.create!(
+      action: "card_published",
+      creator: users(:kevin),
+      eventable: card,
+      account: accounts("37s"),
+      created_at: 2.days.from_now
+    )
+
+    get activities_path(until: Date.today.iso8601), as: :json
+    assert_response :success
+
+    ids = @response.parsed_body.map { |e| e["id"] }
+    assert_not_includes ids, future_event.id
+  end
+
+  test "index filters by since and until together" do
+    card = cards(:logo)
+    board = card.board
+
+    old_event = board.events.create!(
+      action: "card_published",
+      creator: users(:kevin),
+      eventable: card,
+      account: accounts("37s"),
+      created_at: 5.days.ago
+    )
+    matching_event = board.events.create!(
+      action: "card_published",
+      creator: users(:kevin),
+      eventable: card,
+      account: accounts("37s"),
+      created_at: 2.days.ago
+    )
+    future_event = board.events.create!(
+      action: "card_published",
+      creator: users(:kevin),
+      eventable: card,
+      account: accounts("37s"),
+      created_at: 2.days.from_now
+    )
+
+    get activities_path(since: 3.days.ago.to_date.iso8601, until: Date.today.iso8601), as: :json
+    assert_response :success
+
+    ids = @response.parsed_body.map { |e| e["id"] }
+    assert_includes ids, matching_event.id
+    assert_not_includes ids, old_event.id
+    assert_not_includes ids, future_event.id
+  end
+
   private
     def next_page_from_link_header(link_header)
       url = link_header&.match(/<([^>]+)>;\s*rel="next"/)&.captures&.first
