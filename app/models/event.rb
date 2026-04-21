@@ -12,8 +12,8 @@ class Event < ApplicationRecord
   scope :reverse_chronologically, -> { order created_at: :desc, id: :desc }
   scope :for_creators, ->(ids) { where(creator_id: ids) if ids.present? }
   scope :for_boards, ->(ids) { where(board_id: ids) if ids.present? }
-  scope :since_date, ->(date) { where("events.created_at >= ?", Date.parse(date).beginning_of_day) if date.present? }
-  scope :until_date, ->(date) { where("events.created_at <= ?", Date.parse(date).end_of_day) if date.present? }
+  scope :since_date, ->(date) { where("events.created_at >= ?", Date.iso8601(date).beginning_of_day) if date.present? rescue nil }
+  scope :until_date, ->(date) { where("events.created_at <= ?", Date.iso8601(date).end_of_day) if date.present? rescue nil }
   scope :preloaded, -> {
     includes(:creator, :board, {
       eventable: [

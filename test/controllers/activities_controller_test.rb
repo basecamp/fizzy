@@ -266,35 +266,47 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
 
   test "index filters by since date" do
     card = cards(:logo)
-    old_event = card.board.events.create!(
-      action: "card_published",
-      creator: users(:kevin),
-      eventable: card,
-      account: accounts("37s"),
+    board = card.board
+
+    old_event = board.events.create!(
+      action: "card_published", creator: users(:kevin),
+      eventable: card, account: accounts("37s"),
       created_at: 2.days.ago
     )
+    matching_event = board.events.create!(
+      action: "card_published", creator: users(:kevin),
+      eventable: card, account: accounts("37s"),
+      created_at: 12.hours.ago
+    )
 
-    get activities_path(since: Date.today.iso8601), as: :json
+    get activities_path(since: Date.current.iso8601), as: :json
     assert_response :success
 
     ids = @response.parsed_body.map { |e| e["id"] }
+    assert_includes ids, matching_event.id
     assert_not_includes ids, old_event.id
   end
 
   test "index filters by until date" do
     card = cards(:logo)
-    future_event = card.board.events.create!(
-      action: "card_published",
-      creator: users(:kevin),
-      eventable: card,
-      account: accounts("37s"),
+    board = card.board
+
+    matching_event = board.events.create!(
+      action: "card_published", creator: users(:kevin),
+      eventable: card, account: accounts("37s"),
+      created_at: 12.hours.ago
+    )
+    future_event = board.events.create!(
+      action: "card_published", creator: users(:kevin),
+      eventable: card, account: accounts("37s"),
       created_at: 2.days.from_now
     )
 
-    get activities_path(until: Date.today.iso8601), as: :json
+    get activities_path(until: Date.current.iso8601), as: :json
     assert_response :success
 
     ids = @response.parsed_body.map { |e| e["id"] }
+    assert_includes ids, matching_event.id
     assert_not_includes ids, future_event.id
   end
 
