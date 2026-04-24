@@ -281,7 +281,7 @@ GEM
     drb (2.2.3)
     dry-initializer (3.2.0)
     ed25519 (1.4.0)
-    erb (6.0.2)
+    erb (6.0.4)
     erubi (1.13.1)
     et-orbi (1.4.0)
       tzinfo
