@@ -10,7 +10,7 @@ Possible export statuses are:
 
 Completed export files expire after 24 hours. When that happens, request a new export.
 
-## `POST /account/exports`
+## `POST /:account_slug/account/exports`
 
 Starts an account export for the current account. Only account admins and owners can create account exports.
 
@@ -26,7 +26,7 @@ Returns `201 Created` with the export object:
 }
 ```
 
-## `GET /account/exports/:id`
+## `GET /:account_slug/account/exports/:id`
 
 Returns the status of an account export created by the current user.
 
