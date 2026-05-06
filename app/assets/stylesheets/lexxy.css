@@ -87,6 +87,10 @@
     }
   }
 
+  [data-dropdown-panel] {
+    border-color: oklch(var(--lch-blue-medium) / 20%);
+  }
+
   lexxy-link-dropdown {
     [data-dropdown-panel] {
       --lexxy-toolbar-spacing: 1.5ch;
