@@ -21,6 +21,14 @@ GIT
       rainbow
 
 GIT
+  remote: https://github.com/basecamp/lexxy.git
+  revision: 1b15abd0b9138400e71b4901013ddc2cc54f9927
+  branch: silence-browser-warnings
+  specs:
+    lexxy (0.9.10.beta)
+      rails (>= 8.0.2)
+
+GIT
   remote: https://github.com/basecamp/queenbee-plugin
   revision: c0119be5940edb3739d4bb591c1a5c7064881638
   specs:
@@ -366,8 +374,6 @@ GEM
       logger (~> 1.6)
     letter_opener (1.10.0)
       launchy (>= 2.2, < 4)
-    lexxy (0.9.5.beta)
-      rails (>= 8.0.2)
     lint_roller (1.1.0)
     logger (1.7.0)
     loofah (2.25.1)
@@ -723,7 +729,7 @@ DEPENDENCIES
   jbuilder
   kamal
   letter_opener
-  lexxy (= 0.9.5.beta)
+  lexxy!
   mission_control-jobs
   mittens
   mocha
