@@ -9,4 +9,11 @@ module BoardsHelper
       icon_tag("settings") + tag.span("Settings for #{board.name}", class: "for-screen-reader")
     end
   end
+
+  def link_to_report_board(board)
+    link_to board_report_path(board), class: "btn btn--circle-mobile",
+      data: { controller: "tooltip", bridge__overflow_menu_target: "item", bridge_title: "Reports" } do
+      icon_tag("activity") + tag.span("Reports for #{board.name}", class: "for-screen-reader")
+    end
+  end
 end
