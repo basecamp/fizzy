@@ -1,3 +1,6 @@
 <div class="card__board">
   <%= render "cards/display/common/board", card: card  %>
+  <% if card.points.present? %>
+    <div class="card__points-badge"><%= card.points %></div>
+  <% end %>
 </div>

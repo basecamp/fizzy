@@ -111,6 +111,15 @@
     text-transform: uppercase;
   }
 
+  .card__points-badge {
+    border-inline-start: 1px solid color-mix(in hsl, transparent 75%, currentColor);
+    flex-shrink: 0;
+    font-weight: 600;
+    margin-inline-start: var(--card-header-space);
+    padding-inline-start: var(--card-header-space);
+    text-transform: uppercase;
+  }
+
   .card__board-picker-button {
     inset: 0;
     position: absolute;
