@@ -173,6 +173,42 @@
     text-transform: uppercase;
   }
 
+  .card__points {
+    color: inherit;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .card__points-form {
+    align-items: center;
+    display: flex;
+    gap: 0.25ch;
+  }
+
+  .card__points-input {
+    appearance: textfield;
+    background: transparent;
+    border: 1px solid currentColor;
+    border-radius: 2em;
+    color: inherit;
+    font-size: inherit;
+    font-weight: 600;
+    opacity: 0.7;
+    padding: 0.1em 0.6em;
+    text-align: center;
+    width: 5ch;
+
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      appearance: none;
+    }
+
+    &:focus {
+      opacity: 1;
+      outline: none;
+    }
+  }
+
   /* Body
   /* ------------------------------------------------------------------------ */
 

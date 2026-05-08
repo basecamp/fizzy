@@ -1,12 +1,12 @@
 <%= turbo_frame_tag dom_id(@card, :points) do %>
   <%= form_with model: @card, url: card_points_path(@card), method: :patch,
+        class: "card__points-form",
         data: { turbo_frame: dom_id(@card, :points) } do |f| %>
     <%= f.number_field :points, value: @card.points,
           class: "card__points-input",
           placeholder: "pts",
           autofocus: true,
-          min: 0,
-          style: "width: 4rem;" %>
+          min: 0 %>
     <%= f.submit "✓", class: "btn btn--plain" %>
   <% end %>
 <% end %>
