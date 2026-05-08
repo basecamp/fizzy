@@ -1,52 +1,302 @@
 <% @page_title = "#{@board.name} — Reports" %>
+<% @body_class = "reports-body" %>
 
-<% content_for :header do %>
-  <div class="header__actions header__actions--start hide-on-native">
-    <%= link_back_to_board @board %>
-  </div>
-
-  <h1 class="header__title divider divider--fade full-width">
-    <span class="overflow-ellipsis"><%= @board.name %> — Reports</span>
-  </h1>
-
-  <div class="header__actions header__actions--end hide-on-native">
-    <%= link_to_edit_board @board %>
-  </div>
+<% content_for :head do %>
+  <style>
+    body.reports-body { overflow-x: hidden; }
+    body.reports-body .layout,
+    body.reports-body .header,
+    body.reports-body nav { display: none !important; }
+  </style>
 <% end %>
 
-<div class="container">
-  <table class="reports-table">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Title</th>
-        <th>Status</th>
-        <th>Assignees</th>
-        <th>Points</th>
-        <th>Created</th>
-        <th>Closed</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @cards.each do |card| %>
-        <tr>
-          <td><%= card.number %></td>
-          <td><%= link_to card.title, card_path(card) %></td>
-          <td>
-            <% if card.closed? %>
-              Closed
-            <% elsif card.postponed? %>
-              Postponed
-            <% else %>
-              Open
-            <% end %>
-          </td>
-          <td><%= card.assignees.map(&:name).join(", ") %></td>
-          <td><%= card.points %></td>
-          <td><%= card.created_at.to_date %></td>
-          <td><%= card.closed_at&.to_date %></td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
+<%
+  cards_json = @cards.map do |c|
+    status = if c.closed? then "Closed"
+              elsif c.postponed? then "Postponed"
+              else "Open"
+              end
+    {
+      id:        c.id,
+      number:    c.number,
+      title:     c.title,
+      closedAt:  c.closed_at&.iso8601,
+      createdAt: c.created_at.iso8601,
+      createdBy: c.creator.name,
+      points:    c.points,
+      assignees: c.assignees.map { |a| { name: a.name, hue: (a.name.bytes.sum % 360) } },
+      status:    status,
+      tags:      c.tags.map(&:title),
+      url:       card_path(c)
+    }
+  end.to_json
+
+  events_json = @events.map do |e|
+    card = e.eventable
+    next unless card.is_a?(Card)
+    kind = case e.action.to_s
+           when "card_published" then "created"
+           when "card_closed"    then "completed"
+           when "comment_created" then "commented"
+           else "created"
+           end
+    {
+      kind:          kind,
+      at:            e.created_at.iso8601,
+      actor:         e.creator.name,
+      cardNumber:    card.number,
+      cardTitle:     card.title,
+      cardAssignees: card.assignees.map(&:name),
+      cardClosedAt:  card.closed_at&.iso8601,
+      cardCreatedAt: card.created_at.iso8601
+    }
+  end.compact.to_json
+
+  assignees_json = @board_assignees.map { |u| { id: u.id, name: u.name, hue: (u.name.bytes.sum % 360) } }.to_json
+%>
+
+<div class="reports-page"
+     data-controller="reports"
+     data-reports-cards-value="<%= html_escape(cards_json) %>"
+     data-reports-events-value="<%= html_escape(events_json) %>"
+     data-reports-assignees-value="<%= html_escape(assignees_json) %>"
+     data-action="click->reports#closePopovers">
+
+  <%# Header rule %>
+  <div class="rp-rule">
+    <a href="<%= board_path(@board) %>" class="rp-rule__icon" title="Back to <%= @board.name %>">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    </a>
+    <div class="rp-rule__line"></div>
+    <h1 class="rp-rule__title">Reports</h1>
+    <div class="rp-rule__line"></div>
+    <a href="<%= edit_board_path(@board) %>" class="rp-rule__icon" title="Board settings">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+    </a>
+  </div>
+
+  <%# Filter bar %>
+  <div class="rp-filterbar">
+
+    <%# Assignee filter %>
+    <div class="rp-chip-wrap" data-action="click->reports#toggleAssigneePopover:stop">
+      <button type="button" class="rp-chip" data-reports-target="assigneeChip">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+        <span class="rp-chip__label">Assignee</span>
+        <span class="rp-chip__sep"></span>
+        <span class="rp-chip__value" data-reports-target="assigneeChipValue">Any assignee</span>
+        <span class="rp-chip__x" hidden data-reports-target="assigneeChipX" data-action="click->reports#clearAssignees:stop">×</span>
+      </button>
+
+      <div class="rp-popover" hidden data-reports-target="assigneePopover" data-action="click:stop">
+        <% @board_assignees.each do |user| %>
+          <button type="button" class="rp-popover__row" data-name="<%= user.name %>" data-action="click->reports#toggleAssignee">
+            <span class="rp-avatar" style="width:22px;height:22px;font-size:9px;background:radial-gradient(circle at 30% 25%,hsl(<%= user.name.bytes.sum % 360 %> 70% 78%) 0%,hsl(<%= user.name.bytes.sum % 360 %> 55% 55%) 55%,hsl(<%= user.name.bytes.sum % 360 %> 60% 40%) 100%)">
+              <%= user.name[0].upcase %>
+            </span>
+            <span class="rp-popover__name"><%= user.name %></span>
+            <svg class="rp-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" hidden><path d="M5 12l5 5L20 7"/></svg>
+          </button>
+        <% end %>
+        <% if @board_assignees.any? %>
+          <button type="button" class="rp-popover__clear" data-action="click->reports#clearAssignees">Clear</button>
+        <% else %>
+          <div class="rp-popover__row" style="color:var(--rp-ink-mute)">No assignees yet</div>
+        <% end %>
+      </div>
+    </div>
+
+    <%# Date filter %>
+    <div class="rp-chip-wrap" data-action="click->reports#toggleDatePopover:stop">
+      <button type="button" class="rp-chip" data-reports-target="dateChip">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+        <span class="rp-chip__label">Completed</span>
+        <span class="rp-chip__sep"></span>
+        <span class="rp-chip__value" data-reports-target="dateChipValue">All time</span>
+        <span class="rp-chip__x" hidden data-reports-target="dateChipX" data-action="click->reports#clearDate:stop">×</span>
+      </button>
+
+      <div class="rp-popover rp-popover--wide" hidden data-reports-target="datePopover" data-action="click:stop">
+        <% [["all","All time"],["7","Last 7 days"],["14","Last 14 days"],["30","Last 30 days"],["90","Last 90 days"],["sprint","This sprint"]].each do |preset, label| %>
+          <button type="button" class="rp-popover__row <%= preset == "all" ? "is-active" : "" %>" data-preset="<%= preset %>" data-action="click->reports#setPreset">
+            <span class="rp-popover__name"><%= label %></span>
+            <svg class="rp-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" <%= preset != "all" ? "hidden" : "" %>><path d="M5 12l5 5L20 7"/></svg>
+          </button>
+        <% end %>
+        <div class="rp-popover__custom">
+          <label>From <input type="date" data-action="change->reports#setCustomFrom"></label>
+          <label>To <input type="date" data-action="change->reports#setCustomTo"></label>
+        </div>
+      </div>
+    </div>
+
+    <button type="button" class="rp-link-btn" hidden data-reports-target="clearFilters" data-action="click->reports#clearAll">
+      Clear all filters
+    </button>
+
+    <div class="rp-filterbar__spacer"></div>
+
+    <%# View tabs %>
+    <div class="rp-tabs">
+      <button type="button" class="rp-tab is-active" data-reports-target="tableTab" data-action="click->reports#switchToTable">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></svg>
+        Cards table
+      </button>
+      <button type="button" class="rp-tab" data-reports-target="timelineTab" data-action="click->reports#switchToTimeline">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><path d="M6 8v8M10 6h10M10 18h10M10 12h7"/></svg>
+        Activity timeline
+      </button>
+    </div>
+
+    <%# Export button %>
+    <button type="button" class="rp-export-btn" data-reports-target="exportBtn" data-action="click->reports#exportXlsx">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v12M6 10l6 6 6-6M4 20h16"/></svg>
+      <span data-reports-target="exportBtnLabel">Export</span>
+      <span class="rp-export-btn__ext">.xlsx</span>
+    </button>
+  </div>
+
+  <%# KPI strip %>
+  <div class="rp-kpi-strip">
+    <div class="rp-kpi">
+      <div class="rp-kpi__label">Cards in scope</div>
+      <div class="rp-kpi__value" data-reports-target="kpiScope"><%= @kpi_scope %></div>
+      <div class="rp-kpi__sub">matching filters</div>
+    </div>
+    <div class="rp-kpi">
+      <div class="rp-kpi__label">Completed</div>
+      <div class="rp-kpi__value" data-reports-target="kpiCompleted"><%= @kpi_completed %></div>
+      <div class="rp-kpi__sub" data-reports-target="kpiCompletedSub">
+        <%= @kpi_scope > 0 ? "#{(@kpi_completed.to_f / @kpi_scope * 100).round}% of scope" : "—" %>
+      </div>
+    </div>
+    <div class="rp-kpi">
+      <div class="rp-kpi__label">In flight</div>
+      <div class="rp-kpi__value" data-reports-target="kpiInFlight"><%= @kpi_in_flight %></div>
+      <div class="rp-kpi__sub">not yet done</div>
+    </div>
+    <div class="rp-kpi">
+      <div class="rp-kpi__label">Avg. cycle time</div>
+      <div class="rp-kpi__value" data-reports-target="kpiCycle">
+        <% if @kpi_avg_cycle %>
+          <%= @kpi_avg_cycle < 24 ? "#{@kpi_avg_cycle.round(1)}h" : "#{(@kpi_avg_cycle / 24).round(1)}d" %>
+        <% else %>
+          —
+        <% end %>
+      </div>
+      <div class="rp-kpi__sub">created → done</div>
+    </div>
+  </div>
+
+  <%# Content area %>
+  <div class="rp-content">
+
+    <%# Cards table view %>
+    <div data-reports-target="tableView">
+      <div class="rp-table-wrap">
+        <div class="rp-table-scroll">
+          <table class="rp-cards-table">
+            <thead>
+              <tr>
+                <th data-col="completedAt" data-action="click->reports#sort" class="is-sorted">
+                  Completed On <span class="rp-th-sort">▼</span>
+                </th>
+                <th data-col="createdAt" data-action="click->reports#sort">
+                  Created On <span class="rp-th-sort">↕</span>
+                </th>
+                <th data-col="title" data-action="click->reports#sort">
+                  Card <span class="rp-th-sort">↕</span>
+                </th>
+                <th data-col="createdBy" data-action="click->reports#sort">
+                  Created by <span class="rp-th-sort">↕</span>
+                </th>
+                <th data-col="points" data-action="click->reports#sort">
+                  Story Points <span class="rp-th-sort">↕</span>
+                </th>
+                <th data-col="assignees" data-action="click->reports#sort">
+                  Assignees <span class="rp-th-sort">↕</span>
+                </th>
+                <th data-col="status" data-action="click->reports#sort">
+                  Status <span class="rp-th-sort">↕</span>
+                </th>
+                <th>Tags</th>
+              </tr>
+            </thead>
+            <tbody data-reports-target="tableBody">
+              <% @cards.each do |card| %>
+                <%
+                  status = if card.closed? then "Closed"
+                             elsif card.postponed? then "Postponed"
+                             else "Open"
+                             end
+                  status_cls = { "Closed" => "rp-pill--closed", "Open" => "rp-pill--open", "Postponed" => "rp-pill--postponed" }[status]
+                %>
+                <tr>
+                  <td class="rp-td-mono">
+                    <% if card.closed_at %>
+                      <%= card.closed_at.strftime("%d %b %Y %H:%M") %>
+                    <% else %>
+                      <span class="rp-muted">—</span>
+                    <% end %>
+                  </td>
+                  <td class="rp-td-mono"><%= card.created_at.strftime("%d %b %Y %H:%M") %></td>
+                  <td class="rp-td-card">
+                    <div class="rp-td-card__id">#<%= card.number %></div>
+                    <div class="rp-td-card__title"><%= link_to card.title, card_path(card), style: "color:inherit;text-decoration:none" %></div>
+                  </td>
+                  <td><%= card.creator.name %></td>
+                  <td>
+                    <% if card.points %>
+                      <span class="rp-sp-tag"><%= card.points %></span>
+                    <% else %>
+                      <span class="rp-muted">—</span>
+                    <% end %>
+                  </td>
+                  <td>
+                    <% if card.assignees.any? %>
+                      <div class="rp-assignee-cell">
+                        <% card.assignees.each do |assignee| %>
+                          <% hue = assignee.name.bytes.sum % 360 %>
+                          <span class="rp-avatar" style="width:22px;height:22px;font-size:9px;background:radial-gradient(circle at 30% 25%,hsl(<%= hue %> 70% 78%) 0%,hsl(<%= hue %> 55% 55%) 55%,hsl(<%= hue %> 60% 40%) 100%)" title="<%= assignee.name %>">
+                            <%= assignee.name[0].upcase %>
+                          </span>
+                        <% end %>
+                        <span class="rp-assignee-cell__name"><%= card.assignees.map(&:name).join(", ") %></span>
+                      </div>
+                    <% else %>
+                      <span class="rp-muted">—</span>
+                    <% end %>
+                  </td>
+                  <td><span class="rp-pill <%= status_cls %>"><%= status %></span></td>
+                  <td>
+                    <% if card.tags.any? %>
+                      <% card.tags.each do |tag| %>
+                        <span class="rp-tag-pill"><%= tag.title %></span>
+                      <% end %>
+                    <% else %>
+                      <span class="rp-muted">—</span>
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+              <% if @cards.empty? %>
+                <tr><td colspan="8" class="rp-empty">No cards on this board yet.</td></tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+        <div class="rp-table-foot" data-reports-target="tableFoot">
+          <span><%= @cards.size %> card<%= @cards.size == 1 ? "" : "s" %></span>
+          <span class="rp-muted">Sorted by completed on · descending</span>
+        </div>
+      </div>
+    </div>
+
+    <%# Timeline view (hidden initially) %>
+    <div hidden data-reports-target="timelineView">
+      <div class="rp-timeline" data-reports-target="timelineContainer"></div>
+    </div>
+
+  </div>
+
 </div>
