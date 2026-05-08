@@ -1,0 +1,13 @@
+<%= turbo_frame_tag dom_id(card, :points) do %>
+  <% if card.closed? %>
+    <% if card.points.present? %>
+      <span class="card__points">⬡ <%= card.points %></span>
+    <% end %>
+  <% else %>
+    <%= link_to edit_card_points_path(card),
+          class: "card__points btn btn--plain",
+          data: { turbo_frame: dom_id(card, :points) } do %>
+      ⬡ <%= card.points.present? ? card.points : "pts" %>
+    <% end %>
+  <% end %>
+<% end %>

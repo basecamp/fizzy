@@ -88,6 +88,7 @@ Rails.application.routes.draw do
       resource :image
       resource :not_now
       resource :pin
+      resource :points, only: [ :edit, :update ]
       resource :publish
       resource :reading
       resource :triage
