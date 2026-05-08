@@ -1,1 +1,51 @@
-<p>Reports</p>
+<% @page_title = "#{@board.name} — Reports" %>
+
+<% content_for :header do %>
+  <div class="header__actions header__actions--start hide-on-native">
+  </div>
+
+  <h1 class="header__title divider divider--fade full-width">
+    <span class="overflow-ellipsis"><%= @board.name %> — Reports</span>
+  </h1>
+
+  <div class="header__actions header__actions--end hide-on-native">
+    <%= link_to_edit_board @board %>
+  </div>
+<% end %>
+
+<div class="container">
+  <table class="reports-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Title</th>
+        <th>Status</th>
+        <th>Assignees</th>
+        <th>Points</th>
+        <th>Created</th>
+        <th>Closed</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @cards.each do |card| %>
+        <tr>
+          <td><%= card.number %></td>
+          <td><%= link_to card.title, card_path(card) %></td>
+          <td>
+            <% if card.closed? %>
+              Closed
+            <% elsif card.postponed? %>
+              Postponed
+            <% else %>
+              Open
+            <% end %>
+          </td>
+          <td><%= card.assignees.map(&:name).join(", ") %></td>
+          <td><%= card.points %></td>
+          <td><%= card.created_at.to_date %></td>
+          <td><%= card.closed_at&.to_date %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
