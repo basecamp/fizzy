@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_02_18_120000) do
+ActiveRecord::Schema[8.2].define(version: 2026_05_08_103235) do
   create_table "accesses", id: :uuid, force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -224,6 +224,7 @@ ActiveRecord::Schema[8.2].define(version: 2026_02_18_120000) do
     t.date "due_on"
     t.datetime "last_active_at", null: false
     t.bigint "number", null: false
+    t.integer "points"
     t.string "status", limit: 255, default: "drafted", null: false
     t.string "title", limit: 255
     t.datetime "updated_at", null: false
@@ -244,6 +245,7 @@ ActiveRecord::Schema[8.2].define(version: 2026_02_18_120000) do
     t.uuid "account_id", null: false
     t.uuid "card_id", null: false
     t.datetime "created_at", null: false
+    t.integer "points_awarded"
     t.datetime "updated_at", null: false
     t.uuid "user_id"
     t.index ["account_id"], name: "index_closures_on_account_id"
