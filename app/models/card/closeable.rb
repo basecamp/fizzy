@@ -33,6 +33,7 @@ module Card::Closeable
       transaction do
         not_now&.destroy
         create_closure! user: user
+        award_points_on_close
         track_event :closed, creator: user
       end
     end
