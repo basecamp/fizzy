@@ -9,7 +9,7 @@ Three complementary telemetry layers, each handling what it does best:
 | Layer | What it captures | How |
 |-------|-----------------|-----|
 | **Sentry native tracing** | Request spans, DB queries, view rendering, queue time | Automatic via `sentry-rails` |
-| **Yabeda + sentry-yabeda** | Request aggregates, Puma threads, GC pauses, connection pool, ActionCable | Yabeda plugins bridged to Sentry metrics |
+| **Yabeda + sentry-yabeda** | Request aggregates, Puma threads, GC pauses, connection pool | Yabeda plugins bridged to Sentry metrics |
 | **Sentry.metrics.\*** | Business events (cards created, moved, comments, notifications) | Direct API calls in model callbacks |
 
 ### Sentry metrics + Yabeda
@@ -26,9 +26,8 @@ Sentry supports custom metrics natively via `Sentry.metrics.*`. Yabeda is a vend
 | [yabeda-puma-plugin](https://github.com/yabeda-rb/yabeda-puma-plugin) | Thread pool utilization, backlog, workers | No — process-level, not request-scoped |
 | [yabeda-gc](https://github.com/ianks/yabeda-gc) | GC pause time, heap stats | No — runtime metric, invisible to tracing |
 | [yabeda-activerecord](https://github.com/yabeda-rb/yabeda-activerecord) | Connection pool size, busy/idle/waiting | No — pool exhaustion invisible to tracing |
-| [yabeda-actioncable](https://github.com/palkan/yabeda-actioncable) | WebSocket connections, pubsub latency, broadcast duration | No — Sentry does not instrument WebSocket/Turbo Streams |
 
-Notably **excluded**: `yabeda-http_requests` (its Sniffer integration intercepts Sentry's own ingest HTTP call, causing a recursive mutex deadlock in the metric buffer flush cycle), `yabeda-activejob` (Sentry traces job execution natively via `sentry-rails`), `yabeda-gvl_metrics` (needs sustained concurrent load to produce meaningful data).
+Notably **excluded**: `yabeda-http_requests` (its Sniffer integration intercepts Sentry's own ingest HTTP call, causing a recursive mutex deadlock in the metric buffer flush cycle), `yabeda-activejob` (Sentry traces job execution natively via `sentry-rails`), `yabeda-actioncable` (most metrics require active WebSocket clients or special PubSub measurement setup), `yabeda-gvl_metrics` (needs sustained concurrent load to produce meaningful data).
 
 ### Pull vs push: the periodic collector
 

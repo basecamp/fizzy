@@ -528,11 +528,6 @@ GEM
       anyway_config (>= 1.0, < 3)
       concurrent-ruby
       dry-initializer
-    yabeda-actioncable (0.2.2)
-      actioncable (>= 7.2)
-      activesupport (>= 7.2)
-      railties (>= 7.2)
-      yabeda (~> 0.8)
     yabeda-activerecord (0.1.2)
       activerecord (>= 6.0)
       anyway_config (>= 1.3, < 3.0)
@@ -613,7 +608,6 @@ DEPENDENCIES
   web-push
   webmock
   yabeda
-  yabeda-actioncable
   yabeda-activerecord
   yabeda-gc
   yabeda-puma-plugin

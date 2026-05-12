@@ -53,7 +53,6 @@ gem "yabeda-rails"                     # Request metrics — overlaps with Sentr
 gem "yabeda-puma-plugin"               # Thread pool utilization, backlog — invisible to Sentry tracing
 gem "yabeda-gc"                        # GC pause time — runtime metric invisible to request tracing
 gem "yabeda-activerecord"              # Connection pool stats — pool exhaustion invisible to Sentry tracing
-gem "yabeda-actioncable"               # WebSocket connection count, pubsub latency, broadcast duration
 # gem "yabeda-http_requests"           # Removed: its Sniffer integration intercepts the Sentry ingest HTTP call,
 #                                      #   causing a recursive mutex deadlock in the metric buffer flush cycle.
 #                                      #   Fizzy also makes very few outbound HTTP calls (webhooks, S3, web-push).

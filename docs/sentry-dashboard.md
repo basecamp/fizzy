@@ -173,42 +173,6 @@ sentry dashboard widget add 'Fizzy Observability' 'Requests by Status (Yabeda)' 
   --group-by status --limit 10
 ```
 
-## ActionCable / Turbo Streams
-
-Metrics from `yabeda-actioncable`. Sentry does not instrument WebSocket connections or Turbo Stream broadcasts — these metrics fill that gap.
-
-### Broadcast Duration (Yabeda)
-
-Time to broadcast a message through the PubSub backend (SolidCable/Redis).
-
-```bash
-sentry dashboard widget add 'Fizzy Observability' 'Broadcast Duration (Yabeda)' \
-  --display line --dataset tracemetrics \
-  --query 'p50(value,actioncable.broadcast_duration,distribution,seconds)' \
-  --query 'p95(value,actioncable.broadcast_duration,distribution,seconds)'
-```
-
-### WebSocket Connections (Yabeda)
-
-Open connection count gauge from `yabeda-actioncable`.
-
-```bash
-sentry dashboard widget add 'Fizzy Observability' 'WebSocket Connections (Yabeda)' \
-  --display line --dataset tracemetrics \
-  --query 'max(value,actioncable.connection_count,gauge,none)'
-```
-
-### PubSub Latency (Yabeda)
-
-End-to-end latency through the PubSub backend.
-
-```bash
-sentry dashboard widget add 'Fizzy Observability' 'PubSub Latency (Yabeda)' \
-  --display line --dataset tracemetrics \
-  --query 'p50(value,actioncable.pubsub_latency,distribution,seconds)' \
-  --query 'p95(value,actioncable.pubsub_latency,distribution,seconds)'
-```
-
 ## Infrastructure Health
 
 ![Infrastructure Health](./yabeda.png)
@@ -285,7 +249,7 @@ sentry api --method PUT /organizations/<org>/dashboards/<id>/ --input dashboard.
 
 ```bash
 # Delete all widgets (by index, last to first)
-for i in $(seq 22 -1 0); do
+for i in $(seq 19 -1 0); do
   sentry dashboard widget delete 'Fizzy Observability' --index $i --yes
 done
 
