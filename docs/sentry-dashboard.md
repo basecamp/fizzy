@@ -103,8 +103,8 @@ Distribution of time from card creation to closure.
 ```bash
 sentry dashboard widget add 'Fizzy Observability' 'Card Lifetime (p50 / p95)' \
   --display line --dataset tracemetrics \
-  --query 'p50(value,fizzy.card_lifetime_seconds,distribution,second)' \
-  --query 'p95(value,fizzy.card_lifetime_seconds,distribution,second)'
+  --query 'p50(value,fizzy.card_lifetime_seconds,distribution,seconds)' \
+  --query 'p95(value,fizzy.card_lifetime_seconds,distribution,seconds)'
 ```
 
 ### Cards Moved by Board
@@ -123,6 +123,90 @@ sentry dashboard widget add 'Fizzy Observability' 'Notifications by Kind' \
   --display bar --dataset tracemetrics \
   --query 'sum(value,fizzy.notifications_sent,counter,none)' \
   --group-by kind --limit 10
+```
+
+## Yabeda Rails Metrics
+
+Aggregate request metrics from `yabeda-rails`. These complement Sentry's per-request traces with percentile distributions across all requests.
+
+### Request Throughput (Yabeda)
+
+Total request count from `yabeda-rails`, grouped by controller.
+
+```bash
+sentry dashboard widget add 'Fizzy Observability' 'Request Throughput (Yabeda)' \
+  --display line --dataset tracemetrics \
+  --query 'sum(value,rails.requests_total,counter,none)' \
+  --group-by controller --limit 10
+```
+
+### Request Duration p50/p95 (Yabeda)
+
+Response latency distribution from `yabeda-rails`.
+
+```bash
+sentry dashboard widget add 'Fizzy Observability' 'Request Duration p50/p95 (Yabeda)' \
+  --display line --dataset tracemetrics \
+  --query 'p50(value,rails.request_duration,distribution,seconds)' \
+  --query 'p95(value,rails.request_duration,distribution,seconds)'
+```
+
+### View vs DB Runtime (Yabeda)
+
+Time spent in view rendering vs ActiveRecord, from `yabeda-rails`.
+
+```bash
+sentry dashboard widget add 'Fizzy Observability' 'View vs DB Runtime (Yabeda)' \
+  --display line --dataset tracemetrics \
+  --query 'p95(value,rails.view_runtime,distribution,seconds)' \
+  --query 'p95(value,rails.db_runtime,distribution,seconds)'
+```
+
+### Requests by Status (Yabeda)
+
+Request count grouped by HTTP status code.
+
+```bash
+sentry dashboard widget add 'Fizzy Observability' 'Requests by Status (Yabeda)' \
+  --display bar --dataset tracemetrics \
+  --query 'sum(value,rails.requests_total,counter,none)' \
+  --group-by status --limit 10
+```
+
+## ActionCable / Turbo Streams
+
+Metrics from `yabeda-actioncable`. Sentry does not instrument WebSocket connections or Turbo Stream broadcasts — these metrics fill that gap.
+
+### Broadcast Duration (Yabeda)
+
+Time to broadcast a message through the PubSub backend (SolidCable/Redis).
+
+```bash
+sentry dashboard widget add 'Fizzy Observability' 'Broadcast Duration (Yabeda)' \
+  --display line --dataset tracemetrics \
+  --query 'p50(value,actioncable.broadcast_duration,distribution,seconds)' \
+  --query 'p95(value,actioncable.broadcast_duration,distribution,seconds)'
+```
+
+### WebSocket Connections (Yabeda)
+
+Open connection count gauge from `yabeda-actioncable`.
+
+```bash
+sentry dashboard widget add 'Fizzy Observability' 'WebSocket Connections (Yabeda)' \
+  --display line --dataset tracemetrics \
+  --query 'max(value,actioncable.connection_count,gauge,none)'
+```
+
+### PubSub Latency (Yabeda)
+
+End-to-end latency through the PubSub backend.
+
+```bash
+sentry dashboard widget add 'Fizzy Observability' 'PubSub Latency (Yabeda)' \
+  --display line --dataset tracemetrics \
+  --query 'p50(value,actioncable.pubsub_latency,distribution,seconds)' \
+  --query 'p95(value,actioncable.pubsub_latency,distribution,seconds)'
 ```
 
 ## Infrastructure Health
@@ -201,7 +285,7 @@ sentry api --method PUT /organizations/<org>/dashboards/<id>/ --input dashboard.
 
 ```bash
 # Delete all widgets (by index, last to first)
-for i in $(seq 15 -1 0); do
+for i in $(seq 22 -1 0); do
   sentry dashboard widget delete 'Fizzy Observability' --index $i --yes
 done
 

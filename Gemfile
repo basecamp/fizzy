@@ -45,13 +45,15 @@ gem "stackprof"
 gem "benchmark" # indirect dependency, being removed from Ruby 3.5 stdlib so here to quash warnings
 
 # Telemetry
-gem "sentry-ruby", github: "getsentry/sentry-ruby", branch: "feat/sentry-yabeda", glob: "sentry-ruby/*.gemspec"
-gem "sentry-rails", github: "getsentry/sentry-ruby", branch: "feat/sentry-yabeda", glob: "sentry-rails/*.gemspec"
-gem "sentry-yabeda", github: "getsentry/sentry-ruby", branch: "feat/sentry-yabeda", glob: "sentry-yabeda/*.gemspec"
+gem "sentry-ruby", github: "getsentry/sentry-ruby", branch: "master", glob: "sentry-ruby/*.gemspec"
+gem "sentry-rails", github: "getsentry/sentry-ruby", branch: "master", glob: "sentry-rails/*.gemspec"
+gem "sentry-yabeda", github: "getsentry/sentry-ruby", branch: "master", glob: "sentry-yabeda/*.gemspec"
 gem "yabeda"
+gem "yabeda-rails"                     # Request metrics — overlaps with Sentry tracing, but users will add it
 gem "yabeda-puma-plugin"               # Thread pool utilization, backlog — invisible to Sentry tracing
 gem "yabeda-gc"                        # GC pause time — runtime metric invisible to request tracing
 gem "yabeda-activerecord"              # Connection pool stats — pool exhaustion invisible to Sentry tracing
+gem "yabeda-actioncable"               # WebSocket connection count, pubsub latency, broadcast duration
 # gem "yabeda-http_requests"           # Removed: its Sniffer integration intercepts the Sentry ingest HTTP call,
 #                                      #   causing a recursive mutex deadlock in the metric buffer flush cycle.
 #                                      #   Fizzy also makes very few outbound HTTP calls (webhooks, S3, web-push).

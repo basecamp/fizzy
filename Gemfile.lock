@@ -6,18 +6,8 @@ GIT
 
 GIT
   remote: https://github.com/getsentry/sentry-ruby.git
-  revision: 36ac89a2d1e59aa9ce73d59fd62840827a09ba66
-  branch: feat/sentry-yabeda
-  glob: sentry-yabeda/*.gemspec
-  specs:
-    sentry-yabeda (6.5.0)
-      sentry-ruby (~> 6.5)
-      yabeda (>= 0.11)
-
-GIT
-  remote: https://github.com/getsentry/sentry-ruby.git
-  revision: 36ac89a2d1e59aa9ce73d59fd62840827a09ba66
-  branch: feat/sentry-yabeda
+  revision: 581c12ea9bb76ed9a0b892811658a8b48a788f38
+  branch: master
   glob: sentry-rails/*.gemspec
   specs:
     sentry-rails (6.5.0)
@@ -26,14 +16,24 @@ GIT
 
 GIT
   remote: https://github.com/getsentry/sentry-ruby.git
-  revision: 36ac89a2d1e59aa9ce73d59fd62840827a09ba66
-  branch: feat/sentry-yabeda
+  revision: 581c12ea9bb76ed9a0b892811658a8b48a788f38
+  branch: master
   glob: sentry-ruby/*.gemspec
   specs:
     sentry-ruby (6.5.0)
       bigdecimal
       concurrent-ruby (~> 1.0, >= 1.0.2)
       logger
+
+GIT
+  remote: https://github.com/getsentry/sentry-ruby.git
+  revision: 581c12ea9bb76ed9a0b892811658a8b48a788f38
+  branch: master
+  glob: sentry-yabeda/*.gemspec
+  specs:
+    sentry-yabeda (6.5.0)
+      sentry-ruby (~> 6.5)
+      yabeda (>= 0.11)
 
 GIT
   remote: https://github.com/hotwired/turbo-rails.git
@@ -189,7 +189,7 @@ GEM
     bcrypt (3.1.22)
     bcrypt_pbkdf (1.1.2)
     benchmark (0.5.0)
-    bigdecimal (4.1.1)
+    bigdecimal (4.1.2)
     bindex (0.8.1)
     bootsnap (1.23.0)
       msgpack (~> 1.2)
@@ -228,7 +228,7 @@ GEM
     drb (2.2.3)
     dry-initializer (3.2.0)
     ed25519 (1.4.0)
-    erb (6.0.2)
+    erb (6.0.4)
     erubi (1.13.1)
     et-orbi (1.4.0)
       tzinfo
@@ -261,7 +261,7 @@ GEM
       activesupport (>= 6.0.0)
       railties (>= 6.0.0)
     io-console (0.8.2)
-    irb (1.17.0)
+    irb (1.18.0)
       pp (>= 0.6.0)
       prism (>= 1.3.0)
       rdoc (>= 4.0.0)
@@ -270,7 +270,7 @@ GEM
       actionview (>= 7.0.0)
       activesupport (>= 7.0.0)
     jmespath (1.6.2)
-    json (2.19.2)
+    json (2.19.5)
     jwt (3.1.2)
       base64
     kamal (2.10.1)
@@ -309,7 +309,7 @@ GEM
     mini_magick (5.3.1)
       logger
     mini_mime (1.1.5)
-    minitest (6.0.2)
+    minitest (6.0.6)
       drb (~> 2.0)
       prism (~> 1.5)
     mission_control-jobs (1.1.0)
@@ -343,21 +343,21 @@ GEM
       net-protocol
     net-ssh (7.3.0)
     nio4r (2.7.5)
-    nokogiri (1.19.2-aarch64-linux-gnu)
+    nokogiri (1.19.3-aarch64-linux-gnu)
       racc (~> 1.4)
-    nokogiri (1.19.2-aarch64-linux-musl)
+    nokogiri (1.19.3-aarch64-linux-musl)
       racc (~> 1.4)
-    nokogiri (1.19.2-arm-linux-gnu)
+    nokogiri (1.19.3-arm-linux-gnu)
       racc (~> 1.4)
-    nokogiri (1.19.2-arm-linux-musl)
+    nokogiri (1.19.3-arm-linux-musl)
       racc (~> 1.4)
-    nokogiri (1.19.2-arm64-darwin)
+    nokogiri (1.19.3-arm64-darwin)
       racc (~> 1.4)
-    nokogiri (1.19.2-x86_64-darwin)
+    nokogiri (1.19.3-x86_64-darwin)
       racc (~> 1.4)
-    nokogiri (1.19.2-x86_64-linux-gnu)
+    nokogiri (1.19.3-x86_64-linux-gnu)
       racc (~> 1.4)
-    nokogiri (1.19.2-x86_64-linux-musl)
+    nokogiri (1.19.3-x86_64-linux-musl)
       racc (~> 1.4)
     openssl (4.0.0)
     ostruct (0.6.3)
@@ -384,10 +384,10 @@ GEM
       nio4r (~> 2.0)
     raabro (1.4.0)
     racc (1.8.1)
-    rack (3.2.5)
+    rack (3.2.6)
     rack-mini-profiler (4.0.1)
       rack (>= 1.2.0)
-    rack-session (2.1.1)
+    rack-session (2.1.2)
       base64 (>= 0.1.0)
       rack (>= 3.0.0)
     rack-test (2.2.0)
@@ -402,7 +402,7 @@ GEM
       loofah (~> 2.25)
       nokogiri (>= 1.15.7, != 1.16.7, != 1.16.6, != 1.16.5, != 1.16.4, != 1.16.3, != 1.16.2, != 1.16.1, != 1.16.0.rc1, != 1.16.0)
     rainbow (3.1.1)
-    rake (13.3.1)
+    rake (13.4.2)
     rdoc (7.2.0)
       erb
       psych (>= 4.0.0)
@@ -528,6 +528,11 @@ GEM
       anyway_config (>= 1.0, < 3)
       concurrent-ruby
       dry-initializer
+    yabeda-actioncable (0.2.2)
+      actioncable (>= 7.2)
+      activesupport (>= 7.2)
+      railties (>= 7.2)
+      yabeda (~> 0.8)
     yabeda-activerecord (0.1.2)
       activerecord (>= 6.0)
       anyway_config (>= 1.3, < 3.0)
@@ -538,6 +543,11 @@ GEM
       json
       puma
       yabeda (~> 0.5)
+    yabeda-rails (0.11.0)
+      activesupport
+      anyway_config (>= 1.3, < 3)
+      railties
+      yabeda (~> 0.8)
     zeitwerk (2.7.5)
     zip_kit (6.3.4)
 
@@ -603,9 +613,11 @@ DEPENDENCIES
   web-push
   webmock
   yabeda
+  yabeda-actioncable
   yabeda-activerecord
   yabeda-gc
   yabeda-puma-plugin
+  yabeda-rails
   zip_kit
 
 BUNDLED WITH
