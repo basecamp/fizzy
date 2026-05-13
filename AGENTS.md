@@ -43,6 +43,19 @@ bin/rails db:migrate          # Run migrations
 bin/rails db:reset            # Drop, create, and load schema
 ```
 
+### Traffic & Soak Testing
+```bash
+bin/rails traffic:generate                        # Generate traffic to populate Sentry dashboards (20 rounds, 1s delay)
+ROUNDS=100 DELAY=0.5 bin/rails traffic:generate   # More data, faster
+
+bin/rails soak:test                               # Soak test: sustained traffic + thread/memory leak detection (500 rounds)
+ROUNDS=2000 DELAY=0.1 bin/rails soak:test          # Longer run
+```
+
+Both tasks require a running server (`bin/dev`) and seeded database. They create authenticated sessions, hit HTTP endpoints, and perform model operations (cards, comments, column moves, closures). The traffic generator produces Sentry dashboard data; the soak test additionally monitors Puma RSS and thread count to detect resource leaks.
+
+Env vars: `ROUNDS`, `DELAY`, `FIZZY_URL` (default: http://fizzy.localhost:3006), `FIZZY_USER` (default: dingsdax@sentry.io), `SAMPLE_EVERY` (soak only, default: 10).
+
 ### Other Utilities
 ```bash
 bin/rails dev:email          # Toggle letter_opener for email preview

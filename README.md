@@ -14,9 +14,11 @@ Three complementary telemetry layers, each handling what it does best:
 
 ### Sentry metrics + Yabeda
 
-Sentry supports custom metrics natively via `Sentry.metrics.*`. Yabeda is a vendor-neutral Ruby metrics framework with a rich plugin ecosystem — most plugins are built for Prometheus, exposing process-level runtime data like GC pressure, GVL contention, connection pool saturation, and thread pool utilization.
+Sentry captures request-scoped telemetry well — traces, spans, errors — but it has no visibility into process-level runtime state: how many Puma threads are busy, whether the connection pool is saturated, or how much time the GC is stealing. That data lives in the Ruby VM and server internals, and you typically need a Prometheus-style setup to surface it.
 
-`sentry-yabeda` bridges the two: it registers a Yabeda adapter that routes any metric increment or gauge set to `Sentry.metrics`, making the entire Yabeda plugin ecosystem available in Sentry with no code changes to the plugins themselves. If you already have Yabeda plugins sending to Prometheus, you can send the same data to Sentry in parallel.
+[Yabeda](https://github.com/yabeda-rb/yabeda) is a vendor-neutral Ruby metrics framework whose plugin ecosystem already instruments these internals. `sentry-yabeda` bridges the two: it registers a Yabeda adapter that routes every counter increment, gauge set, and histogram observation to `Sentry.metrics.*`, making the entire Yabeda plugin ecosystem available in Sentry dashboards with no code changes to the plugins themselves.
+
+The result: Sentry traces show you what happened in each request, Yabeda metrics show you what was happening in the process *while* that request ran, and direct `Sentry.metrics.*` calls capture business-level events. All three land in the same Sentry dashboard.
 
 ### Yabeda plugins included
 
@@ -28,6 +30,10 @@ Sentry supports custom metrics natively via `Sentry.metrics.*`. Yabeda is a vend
 | [yabeda-activerecord](https://github.com/yabeda-rb/yabeda-activerecord) | Connection pool size, busy/idle/waiting | No — pool exhaustion invisible to tracing |
 
 Notably **excluded**: `yabeda-http_requests` (its Sniffer integration intercepts Sentry's own ingest HTTP call, causing a recursive mutex deadlock in the metric buffer flush cycle), `yabeda-activejob` (Sentry traces job execution natively via `sentry-rails`), `yabeda-actioncable` (most metrics require active WebSocket clients or special PubSub measurement setup), `yabeda-gvl_metrics` (needs sustained concurrent load to produce meaningful data).
+
+### Unit normalization
+
+Yabeda plugins declare metric units as plural Ruby symbols (`:seconds`, `:milliseconds`). Sentry's canonical unit format is singular (`second`, `millisecond`, `byte`). `sentry-yabeda` normalizes these automatically before emission, so dashboard queries must use the singular form — `distribution,second` not `distribution,seconds`.
 
 ### Pull vs push: the periodic collector
 
@@ -58,7 +64,7 @@ mise install          # installs Ruby
 ```bash
 git clone https://github.com/dingsdax/fizzy.git
 cd fizzy
-git checkout feat/yabeda-rails-soak-test
+git checkout feat/sentry-yabeda-observability
 echo "SENTRY_DSN=https://key@o0.ingest.sentry.io/0" > .env
 bin/setup
 bin/rails db:seed
@@ -88,9 +94,8 @@ ROUNDS=100 DELAY=0.5 bin/rails traffic:generate  # more data, faster
 | Card creation | `fizzy.cards_created` counter + `rails.requests_total` counter |
 | Comment creation | `fizzy.comments_created` counter |
 | Card moves between columns | `fizzy.cards_moved` counter + ActionCable broadcasts |
-| Card closures (every 4th round) | `fizzy.card_lifetime_seconds` distribution |
+| Card closures (deferred 2–8 rounds) | `fizzy.card_lifetime_seconds` distribution |
 | Background collector (every 15s) | Puma, GC, connection pool gauge metrics |
-| Turbo Stream broadcasts | `actioncable.broadcast_duration` histogram |
 
 Configure with environment variables: `ROUNDS` (default: 20), `DELAY` (default: 1.0s), `FIZZY_URL` (default: http://fizzy.localhost:3006), `FIZZY_USER` (default: dingsdax@sentry.io).
 

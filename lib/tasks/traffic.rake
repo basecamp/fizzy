@@ -46,6 +46,8 @@ namespace :traffic do
       puts "  Boards: #{boards.map(&:name).join(', ')}"
       puts
 
+      pending_closures = []
+
       rounds.times do |round|
         print "Round #{round + 1}/#{rounds}: "
 
@@ -97,15 +99,32 @@ namespace :traffic do
           print "move→#{second.name} "
         end
 
-        # Occasionally close a card
+        # Schedule card for closure in a future round (2–8 rounds from now)
         if round % 4 == 0
-          card.close
-          print "closed "
+          close_at = round + rand(2..8)
+          pending_closures << { card: card, close_at: close_at }
+          print "close@round#{close_at} "
         end
+
+        # Close cards whose time has come
+        pending_closures.select { |c| c[:close_at] <= round }.each do |entry|
+          entry[:card].close
+          age = (Time.now - entry[:card].created_at).round(1)
+          print "closed(#{age}s) "
+        end
+        pending_closures.reject! { |c| c[:close_at] <= round }
 
         puts
         sleep delay
       end
+
+      # Close remaining cards
+      pending_closures.each do |entry|
+        entry[:card].close
+        age = (Time.now - entry[:card].created_at).round(1)
+        print "Closing leftover card (#{age}s) "
+      end
+      puts if pending_closures.any?
 
       puts
       puts "Done. #{rounds} rounds completed."

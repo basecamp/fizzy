@@ -89,6 +89,8 @@ namespace :soak do
 
       sample.call(samples, 0, start_time, errors)
 
+      pending_closures = []
+
       rounds.times do |round|
         r = round + 1
 
@@ -126,7 +128,14 @@ namespace :soak do
             card.update!(column: columns.last)
           end
 
-          card.close if r % 4 == 0
+          if r % 4 == 0
+            pending_closures << { card: card, close_at: r + rand(2..8) }
+          end
+
+          pending_closures.select { |c| c[:close_at] <= r }.each do |entry|
+            entry[:card].close
+          end
+          pending_closures.reject! { |c| c[:close_at] <= r }
         rescue => e
           errors += 1
           $stderr.puts "  Model error: #{e.class} #{e.message}"
@@ -136,6 +145,8 @@ namespace :soak do
 
         sleep delay
       end
+
+      pending_closures.each { |entry| entry[:card].close rescue nil }
 
       sample.call(samples, rounds, start_time, errors)
 
