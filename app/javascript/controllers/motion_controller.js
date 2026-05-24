@@ -33,7 +33,7 @@ export default class extends Controller {
       document.documentElement.dataset.motion = "animate"
       this.#restoreViewTransitionMeta()
     } else {
-      delete document.documentElement.dataset.motion  // absent → patch falls through to OS
+      delete document.documentElement.dataset.motion  // transiently absent so the matchMedia patch reads the real OS value
       const reduced = this.#osPreferReducedMotion
       document.documentElement.dataset.motion = reduced ? "reduce" : "animate"
       reduced ? this.#removeViewTransitionMeta() : this.#restoreViewTransitionMeta()
