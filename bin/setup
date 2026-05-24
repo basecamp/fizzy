@@ -40,7 +40,8 @@ if ! command -v mise &>/dev/null; then
   elif command -v brew &>/dev/null; then
     brew install mise
   else
-    curl https://mise.jdx.dev/install.sh | sh
+    echo "Please install mise: https://mise.jdx.dev/installing-mise.html#installation-methods"
+    exit 1
   fi
   echo
 fi
