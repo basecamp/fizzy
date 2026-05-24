@@ -40,8 +40,7 @@ if ! command -v mise &>/dev/null; then
   elif command -v brew &>/dev/null; then
     brew install mise
   else
-    echo "Please install mise: https://mise.jdx.dev/installing-mise.html#installation-methods"
-    exit 1
+    curl https://mise.jdx.dev/install.sh | sh
   fi
   echo
 fi
@@ -111,6 +110,19 @@ gum style --foreground 153 "   ˚ ∘             ∘ ˚   "
 gum style --foreground 111 --bold "  ∘˚˳°∘°  𝒻𝒾𝓏𝓏𝓎  °∘°˳˚∘  "
 echo
 
+if which dnf >/dev/null 2>&1; then
+  ruby_build_deps=(gcc make openssl-devel readline-devel zlib-devel libyaml-devel libffi-devel gdbm-devel ncurses-devel gmp-devel)
+  missing_ruby_deps=()
+  for pkg in "${ruby_build_deps[@]}"; do
+    if ! rpm -q "$pkg" &>/dev/null; then
+      missing_ruby_deps+=("$pkg")
+    fi
+  done
+  if [ ${#missing_ruby_deps[@]} -gt 0 ]; then
+    step "Installing Ruby build dependencies" sudo dnf install -y "${missing_ruby_deps[@]}"
+  fi
+fi
+
 step "Installing Ruby" mise install --yes
 eval "$(mise hook-env -s bash)"
 
@@ -118,6 +130,17 @@ if which pacman >/dev/null 2>&1; then
   packages=(imagemagick mariadb-libs openslide libvips libheif libwebp libjxl libraw poppler-glib libcgif ffmpeg rav1e svt-av1 gitleaks)
   if ! pacman -Q "${packages[@]}" >/dev/null 2>&1; then
     step "Installing packages" sudo pacman -S --noconfirm --needed "${packages[@]}"
+  fi
+elif which dnf >/dev/null 2>&1; then
+  packages=(ImageMagick mariadb-connector-c-devel openslide vips vips-devel vips-magick libheif libwebp libjxl libraw poppler-glib ffmpeg cgif gitleaks)
+  missing_packages=()
+  for pkg in "${packages[@]}"; do
+    if ! rpm -q "$pkg" &>/dev/null; then
+      missing_packages+=("$pkg")
+    fi
+  done
+  if [ ${#missing_packages[@]} -gt 0 ]; then
+    step "Installing packages" sudo dnf install -y "${missing_packages[@]}" || true
   fi
 elif which brew >/dev/null 2>&1; then
   packages=(imagemagick openslide vips gitleaks)
