@@ -1,13 +1,15 @@
 <% @page_title = "#{@board.name} — Reports" %>
-<% @body_class = "reports-body" %>
 
-<% content_for :head do %>
-  <style>
-    body.reports-body { overflow-x: hidden; }
-    body.reports-body .layout,
-    body.reports-body .header,
-    body.reports-body nav { display: none !important; }
-  </style>
+<% content_for :header do %>
+  <div class="header__actions header__actions--start">
+    <%= link_back_to_board(@board) %>
+  </div>
+
+  <h1 class="header__title" data-bridge--title-target="header">Reports</h1>
+
+  <div class="header__actions header__actions--end hide-on-native">
+    <%= link_to_edit_board @board %>
+  </div>
 <% end %>
 
 <%
@@ -61,19 +63,6 @@
      data-reports-events-value="<%= html_escape(events_json) %>"
      data-reports-assignees-value="<%= html_escape(assignees_json) %>"
      data-action="click->reports#closePopovers">
-
-  <%# Header rule %>
-  <div class="rp-rule">
-    <a href="<%= board_path(@board) %>" class="rp-rule__icon" title="Back to <%= @board.name %>">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-    </a>
-    <div class="rp-rule__line"></div>
-    <h1 class="rp-rule__title">Reports</h1>
-    <div class="rp-rule__line"></div>
-    <a href="<%= edit_board_path(@board) %>" class="rp-rule__icon" title="Board settings">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
-    </a>
-  </div>
 
   <%# Filter bar %>
   <div class="rp-filterbar">

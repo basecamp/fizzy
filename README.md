@@ -16,7 +16,25 @@ If you want more flexibility to customize your Fizzy installation by changing it
 ## Development
 
 You are welcome -- and encouraged -- to modify Fizzy to your liking.
-Please see our [Development guide](docs/development.md) for how to get Fizzy set up for local development.
+Please see our [Development guide](docs/development.md) for the full setup guide.
+
+### Quick start
+
+```sh
+bin/setup       # Install gems, create and seed the database
+bin/dev         # Start the development server on port 3006
+```
+
+Open **http://app.fizzy.localhost:3006** in your browser.
+
+To log in, enter `david@example.com` and grab the magic-link verification code from the browser console.
+
+### Running tests
+
+```sh
+bin/rails test   # Unit tests (fast)
+bin/ci           # Full CI suite (style, security, unit, system tests)
+```
 
 
 ## Contributing

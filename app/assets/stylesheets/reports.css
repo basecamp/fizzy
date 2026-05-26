@@ -1,79 +1,33 @@
-/* Reports page — design tokens and component styles */
+/* Reports page — component styles mapped to app design tokens */
 
 .reports-page {
-  --rp-bg:           #fdfcf8;
-  --rp-bg-2:         #f6f1e6;
-  --rp-paper:        #ffffff;
-  --rp-ink:          #0e1726;
-  --rp-ink-2:        #1f2a3d;
-  --rp-ink-soft:     #5a6478;
-  --rp-ink-mute:     #94978f;
-  --rp-line:         #e8e0cc;
-  --rp-line-2:       #efe9d9;
-  --rp-brown:        #8a5a26;
-  --rp-brown-2:      #a87a3d;
-  --rp-gold:         #c9a06b;
-  --rp-gold-soft:    #e9d6ad;
-  --rp-blue:         #2962e0;
-  --rp-green:        #4f9a4a;
-  --rp-red:          #c8423a;
-  --rp-amber:        #d68a1c;
-  --rp-radius:       10px;
-  --rp-radius-lg:    14px;
+  --rp-bg:           var(--color-canvas);
+  --rp-bg-2:         var(--color-ink-lightest);
+  --rp-paper:        var(--color-canvas);
+  --rp-ink:          var(--color-ink);
+  --rp-ink-2:        var(--color-ink-darker);
+  --rp-ink-soft:     var(--color-ink-dark);
+  --rp-ink-mute:     var(--color-ink-medium);
+  --rp-line:         var(--color-ink-lighter);
+  --rp-line-2:       var(--color-ink-lightest);
+  --rp-brown:        var(--color-link);
+  --rp-brown-2:      var(--color-link);
+  --rp-gold:         var(--color-ink-light);
+  --rp-gold-soft:    var(--color-ink-lightest);
+  --rp-blue:         var(--color-link);
+  --rp-green:        var(--color-positive);
+  --rp-red:          var(--color-negative);
+  --rp-amber:        var(--color-link);
+  --rp-radius:       0.5rem;
+  --rp-radius-lg:    0.75rem;
 
-  background: var(--rp-bg);
   color: var(--rp-ink);
-  font-size: 14px;
+  font-size: var(--text-small);
   line-height: 1.45;
-  min-height: 100vh;
-  padding: 18px clamp(20px, 4vw, 56px) 80px;
+  padding: var(--block-space) var(--main-padding) var(--block-space-double);
   display: flex;
   flex-direction: column;
   gap: 18px;
-}
-
-/* Header rule ------------------------------------------------ */
-
-.rp-rule {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  margin-top: 4px;
-}
-
-.rp-rule__line {
-  flex: 1 1 auto;
-  height: 1px;
-  background: var(--rp-line);
-}
-
-.rp-rule__title {
-  margin: 0;
-  font-size: clamp(28px, 3.4vw, 40px);
-  font-weight: 800;
-  letter-spacing: -0.025em;
-  color: var(--rp-ink);
-  white-space: nowrap;
-}
-
-.rp-rule__icon {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  border: 1px solid var(--rp-line);
-  background: var(--rp-paper);
-  color: var(--rp-ink-soft);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-  text-decoration: none;
-  transition: background 120ms ease, color 120ms ease;
-}
-
-.rp-rule__icon:hover {
-  background: var(--rp-bg-2);
-  color: var(--rp-ink);
 }
 
 /* Filter bar ------------------------------------------------- */
@@ -122,9 +76,9 @@
 }
 
 .rp-chip--active {
-  background: linear-gradient(180deg, #fff7e8 0%, #fdeec9 100%);
-  border-color: var(--rp-gold);
-  color: var(--rp-brown);
+  background: var(--color-selected-light);
+  border-color: var(--rp-blue);
+  color: var(--rp-blue);
 }
 
 .rp-chip__label {
@@ -136,7 +90,7 @@
 }
 
 .rp-chip--active .rp-chip__label {
-  color: var(--rp-brown-2);
+  color: var(--rp-blue);
 }
 
 .rp-chip__sep {
@@ -146,7 +100,7 @@
 }
 
 .rp-chip--active .rp-chip__sep {
-  background: var(--rp-gold-soft);
+  background: var(--rp-line);
 }
 
 .rp-chip__value {
@@ -160,15 +114,15 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: rgba(168,122,61,0.15);
-  color: var(--rp-brown-2);
+  background: var(--color-selected);
+  color: var(--rp-blue);
   font-size: 14px;
   line-height: 1;
   margin-left: 2px;
 }
 
 .rp-chip__x:hover {
-  background: rgba(168,122,61,0.30);
+  background: var(--color-selected-dark);
 }
 
 /* Popover */
@@ -213,8 +167,8 @@
 }
 
 .rp-popover__row.is-active {
-  background: rgba(168,122,61,0.10);
-  color: var(--rp-brown);
+  background: var(--color-selected-light);
+  color: var(--rp-blue);
 }
 
 .rp-popover__name {
@@ -318,14 +272,14 @@
   gap: 7px;
   padding: 7px 14px;
   height: 32px;
-  border: 1px solid var(--rp-brown-2);
-  background: linear-gradient(180deg, #b88a4d 0%, #8a5a26 100%);
-  color: #fff7e8;
+  border: 1px solid var(--rp-blue);
+  background: var(--rp-blue);
+  color: var(--color-ink-inverted);
   border-radius: 999px;
   font-size: 12.5px;
   font-weight: 600;
   letter-spacing: 0.01em;
-  box-shadow: 0 1px 0 rgba(255,255,255,0.18) inset, 0 1px 2px rgba(15,23,38,0.10);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.18) inset, 0 1px 2px oklch(var(--lch-black) / 10%);
   transition: transform 120ms ease, filter 120ms ease;
   cursor: pointer;
 }
@@ -481,7 +435,7 @@
 }
 
 .rp-cards-table tr:hover td {
-  background: #fdfaf2;
+  background: var(--rp-bg-2);
 }
 
 .rp-cards-table tr:last-child td {
@@ -551,13 +505,13 @@
   justify-content: center;
   min-width: 28px;
   padding: 3px 9px;
-  background: linear-gradient(180deg, #fff7e8 0%, #f6e6c2 100%);
-  border: 1px solid var(--rp-gold);
+  background: var(--color-selected-light);
+  border: 1px solid var(--color-selected);
   border-radius: 999px;
   font-family: ui-monospace, monospace;
   font-size: 12px;
   font-weight: 700;
-  color: var(--rp-brown);
+  color: var(--rp-blue);
   font-feature-settings: "tnum";
 }
 
@@ -593,9 +547,9 @@
 }
 
 .rp-pill--open {
-  background: rgba(214,138,28,0.12);
-  color: #8b5a0a;
-  border: 1px solid rgba(214,138,28,0.25);
+  background: var(--color-selected-light);
+  color: var(--rp-blue);
+  border: 1px solid var(--color-selected);
 }
 
 .rp-pill--postponed {
@@ -610,7 +564,7 @@
   padding: 10px 16px;
   border-top: 1px solid var(--rp-line);
   font-size: 11.5px;
-  background: #fbf8f0;
+  background: var(--rp-bg-2);
   color: var(--rp-ink-soft);
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -678,7 +632,7 @@
 }
 
 .rp-act-row:hover {
-  background: #fdfaf2;
+  background: var(--rp-bg-2);
 }
 
 .rp-act-icon {
@@ -694,9 +648,9 @@
 }
 
 .rp-act-icon--created {
-  background: rgba(168,122,61,0.10);
-  color: var(--rp-brown);
-  border-color: rgba(168,122,61,0.25);
+  background: var(--color-selected-light);
+  color: var(--rp-blue);
+  border-color: var(--color-selected);
 }
 
 .rp-act-icon--completed {

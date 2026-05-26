@@ -1,6 +1,6 @@
 # Pin npm packages by running ./bin/importmap
 
-pin "xlsx", to: "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"
+pin "xlsx" # @0.18.5
 pin "application"
 pin "@hotwired/turbo-rails", to: "turbo.min.js"
 pin "@hotwired/turbo/offline", to: "turbo-offline.min.js"
