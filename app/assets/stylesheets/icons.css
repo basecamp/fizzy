@@ -24,6 +24,7 @@
     top: -0.1em;
     margin-right: 0.1375em;
   }
+  .icon--activity { --svg: url("activity.svg "); }
   .icon--add { --svg: url("add.svg "); }
   .icon--add--meta { --svg: url("add--meta.svg "); }
   .icon--arrow-left { --svg: url("arrow-left.svg "); }
