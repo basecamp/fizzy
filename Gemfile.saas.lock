@@ -218,6 +218,7 @@ GEM
       activesupport (>= 7.0)
     addressable (2.9.0)
       public_suffix (>= 2.0.2, < 8.0)
+    ansi (1.6.0)
     anyway_config (2.7.2)
       ruby-next-core (~> 1.0)
     ast (2.4.3)
@@ -387,6 +388,11 @@ GEM
     minitest (6.0.6)
       drb (~> 2.0)
       prism (~> 1.5)
+    minitest-reporters (1.8.0)
+      ansi
+      builder
+      minitest (>= 5.0, < 7)
+      ruby-progressbar
     mission_control-jobs (1.1.0)
       actioncable (>= 7.1)
       actionpack (>= 7.1)
@@ -724,6 +730,7 @@ DEPENDENCIES
   kamal
   letter_opener
   lexxy (= 0.9.14.beta)
+  minitest-reporters
   mission_control-jobs
   mittens
   mocha

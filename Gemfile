@@ -59,8 +59,9 @@ end
 
 group :test do
   gem "capybara"
-  gem "selenium-webdriver"
-  gem "webmock"
-  gem "vcr"
+  gem "minitest-reporters", require: false
   gem "mocha"
+  gem "selenium-webdriver"
+  gem "vcr"
+  gem "webmock"
 end
