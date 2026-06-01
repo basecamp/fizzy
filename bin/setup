@@ -111,19 +111,6 @@ gum style --foreground 153 "   ˚ ∘             ∘ ˚   "
 gum style --foreground 111 --bold "  ∘˚˳°∘°  𝒻𝒾𝓏𝓏𝓎  °∘°˳˚∘  "
 echo
 
-if which dnf >/dev/null 2>&1; then
-  ruby_build_deps=(gcc make openssl-devel readline-devel zlib-devel libyaml-devel libffi-devel gdbm-devel ncurses-devel gmp-devel)
-  missing_ruby_deps=()
-  for pkg in "${ruby_build_deps[@]}"; do
-    if ! rpm -q "$pkg" &>/dev/null; then
-      missing_ruby_deps+=("$pkg")
-    fi
-  done
-  if [ ${#missing_ruby_deps[@]} -gt 0 ]; then
-    step "Installing Ruby build dependencies" sudo dnf install -y "${missing_ruby_deps[@]}"
-  fi
-fi
-
 step "Installing Ruby" mise install --yes
 eval "$(mise hook-env -s bash)"
 
