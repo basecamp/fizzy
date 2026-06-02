@@ -1,0 +1,27 @@
+<div class="margin-block-end">
+  <h2 class="divider txt-large">Column names</h2>
+  <p class="margin-none-block-start">Customize the names of the built-in columns on this board.</p>
+
+  <div class="flex flex-column gap margin-block-start">
+    <label>
+      <div class="txt-small translucent margin-block-end-half">Inbox</div>
+      <%= form.text_field :triage_column_name, class: "input full-width", required: true,
+            placeholder: "Maybe?",
+            readonly: !Current.user.can_administer_board?(board) %>
+    </label>
+
+    <label>
+      <div class="txt-small translucent margin-block-end-half">Postponed</div>
+      <%= form.text_field :postponed_column_name, class: "input full-width", required: true,
+            placeholder: "Not Now",
+            readonly: !Current.user.can_administer_board?(board) %>
+    </label>
+
+    <label>
+      <div class="txt-small translucent margin-block-end-half">Closed</div>
+      <%= form.text_field :closed_column_name, class: "input full-width", required: true,
+            placeholder: "Done",
+            readonly: !Current.user.can_administer_board?(board) %>
+    </label>
+  </div>
+</div>
