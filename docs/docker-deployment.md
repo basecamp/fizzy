@@ -70,7 +70,7 @@ If you aren't using SSL at all (for example, if you want to run it locally on yo
 docker run --publish 80:80 --env DISABLE_SSL=true ...
 ```
 
-The TLS_DOMAIN setting uses Thunder and LetsEncrypt to automatically provide SSL/TLS access (https://github.com/basecamp/thruster)
+The TLS_DOMAIN setting uses Thruster and LetsEncrypt to automatically provide SSL/TLS access (https://github.com/basecamp/thruster)
 
 #### SMTP Email
 
