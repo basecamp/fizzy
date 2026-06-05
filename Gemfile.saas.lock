@@ -248,7 +248,7 @@ GEM
     benchmark (0.5.0)
     bigdecimal (4.1.2)
     bindex (0.8.1)
-    bootsnap (1.24.3)
+    bootsnap (1.24.5)
       msgpack (~> 1.2)
     brakeman (8.0.4)
       racc
@@ -406,7 +406,7 @@ GEM
     mittens (0.3.1)
     mocha (3.1.0)
       ruby2_keywords (>= 0.0.5)
-    msgpack (1.8.0)
+    msgpack (1.8.1)
     multi_json (1.19.1)
     net-http (0.9.1)
       uri (>= 0.11.1)
