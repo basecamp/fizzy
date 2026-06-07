@@ -349,7 +349,7 @@ GEM
       date
       stringio
     public_suffix (7.0.5)
-    puma (7.2.0)
+    puma (7.2.1)
       nio4r (~> 2.0)
     raabro (1.4.0)
     racc (1.8.1)
@@ -532,7 +532,7 @@ DEPENDENCIES
   net-http-persistent
   platform_agent
   propshaft
-  puma (>= 5.0)
+  puma (~> 7.2, >= 7.2.1)
   rack-mini-profiler
   rails!
   rouge
