@@ -69,11 +69,17 @@ export default class extends Controller {
     }
   }
 
-  #isEditingText(element) {
+  #isEditingText(target) {
+    const element = target ?? document.activeElement
     if (!element) { return false }
     if (element.isContentEditable) { return true }
+    if (element.closest?.("textarea, select, lexxy-editor")) { return true }
 
-    return element.closest?.("input, textarea, select, lexxy-editor") != null
+    const input = element.closest?.("input")
+    if (!input) { return false }
+
+    const NON_TEXT_INPUT_TYPES = [ "button", "submit", "reset", "checkbox", "radio", "file", "image", "range", "color" ]
+    return !NON_TEXT_INPUT_TYPES.includes((input.type || "text").toLowerCase())
   }
 
   dragEnter(event) {
