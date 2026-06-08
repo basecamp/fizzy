@@ -1,4 +1,4 @@
-name: Rebase fork on upstream
+name: Sync fork with upstream
 
 on:
   schedule:
@@ -6,11 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       target_branch:
-        description: "Branch to rebase (default: main)"
-        required: false
-        default: "main"
-      upstream_branch:
-        description: "Upstream branch to rebase onto (default: main)"
+        description: "Branch to sync (default: main)"
         required: false
         default: "main"
 
@@ -19,92 +15,51 @@ permissions:
   issues: write
 
 jobs:
-  rebase:
+  sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout fork
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
       - name: Set variables
         id: vars
         shell: bash
         run: |
           TARGET_BRANCH="${{ github.event.inputs.target_branch }}"
-          UPSTREAM_BRANCH="${{ github.event.inputs.upstream_branch }}"
-          # Fallback to defaults if inputs are empty (e.g., scheduled runs)
           [ -z "$TARGET_BRANCH" ] && TARGET_BRANCH="main"
-          [ -z "$UPSTREAM_BRANCH" ] && UPSTREAM_BRANCH="main"
           echo "target_branch=$TARGET_BRANCH" >> "$GITHUB_OUTPUT"
-          echo "upstream_branch=$UPSTREAM_BRANCH" >> "$GITHUB_OUTPUT"
 
-      - name: Configure Git user
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-      - name: Add upstream remote
-        env:
-          UPSTREAM_REPO: "https://github.com/basecamp/fizzy.git"
-        run: |
-          if ! git remote | grep -q "^upstream$"; then
-            git remote add upstream "$UPSTREAM_REPO"
-          fi
-          git remote -v
-
-      - name: Fetch all remotes and update origin
-        run: |
-          # Fetch and prune both remotes
-          git fetch origin --prune
-          git fetch upstream --prune
-          # Ensure local branch matches remote
-          git checkout "${{ steps.vars.outputs.target_branch }}"
-          git reset --hard origin/"${{ steps.vars.outputs.target_branch }}"
-
-      - name: Rebase onto upstream
-        id: rebase
+      - name: Sync fork with upstream
+        id: sync
         run: |
           set -e
-          if git rebase "upstream/${{ steps.vars.outputs.upstream_branch }}"; then
-            echo "rebase_status=success" >> "$GITHUB_OUTPUT"
-          else
-            echo "rebase_status=failed" >> "$GITHUB_OUTPUT"
-            git rebase --abort
-            exit 1
-          fi
-
-      - name: Push rebased branch to fork
-        if: steps.rebase.outputs.rebase_status == 'success'
+          response=$(gh api repos/${{ github.repository }}/merge-upstream \
+            --method POST \
+            -f branch="${{ steps.vars.outputs.target_branch }}")
+          merge_type=$(echo "$response" | jq -r '.merge_type')
+          echo "merge_type=$merge_type" >> "$GITHUB_OUTPUT"
+          echo "Sync result: $merge_type"
         env:
-          TOKEN: ${{ secrets.UPSTREAM_SYNC_TOKEN }}
-        run: |
-          set -e
-          REPO="${{ github.repository }}"
-          TARGET="${{ steps.vars.outputs.target_branch }}"
-          git pull --rebase origin "$TARGET"
-          git push --force-with-lease "https://$TOKEN@github.com/$REPO.git" "HEAD:$TARGET"
+          GH_TOKEN: ${{ github.token }}
 
       - name: Create issue on failure
         if: failure()
         uses: actions/github-script@v7
         with:
           script: |
-            const title = '🚨 Automated rebase failed';
-            const body = `The automated rebase of \`${{ steps.vars.outputs.target_branch }}\` onto \`upstream/${{ steps.vars.outputs.upstream_branch }}\` has failed.
+            const title = '🚨 Automated upstream sync failed';
+            const body = `The automated sync of \`${{ steps.vars.outputs.target_branch }}\` with upstream has failed.
 
             **Workflow run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
-            This likely means there are merge conflicts that need manual resolution.
+            This likely means there are merge conflicts between your fork and upstream that need manual resolution.
 
             To resolve:
-            1. Manually rebase your fork: \`git rebase upstream/${{ steps.vars.outputs.upstream_branch }}\`
-            2. Resolve any conflicts
-            3. Force push: \`git push --force-with-lease origin ${{ steps.vars.outputs.target_branch }}\`
+            1. Add upstream remote: \`git remote add upstream https://github.com/basecamp/fizzy.git\`
+            2. Fetch upstream: \`git fetch upstream\`
+            3. Merge or rebase: \`git merge upstream/main\` (or \`git rebase upstream/main\`)
+            4. Resolve any conflicts
+            5. Push: \`git push origin ${{ steps.vars.outputs.target_branch }}\`
 
-            Once resolved, this issue will be automatically closed on the next successful rebase.`;
+            Once resolved, this issue will be automatically closed on the next successful sync.`;
 
-            // Check if there's already an open issue about rebase failures
             const issues = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -122,7 +77,7 @@ jobs:
               });
             }
 
-      - name: Close rebase failure issues on success
+      - name: Close sync failure issues on success
         if: success()
         uses: actions/github-script@v7
         with:
@@ -146,11 +101,11 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: issue.number,
-                body: '✅ Automated rebase succeeded. Closing this issue.'
+                body: '✅ Automated upstream sync succeeded. Closing this issue.'
               });
             }
 
       - name: Print result
         if: success()
         run: |
-          echo "✅ Successfully rebased ${{ steps.vars.outputs.target_branch }} onto upstream/${{ steps.vars.outputs.upstream_branch }} and pushed to origin."
+          echo "✅ Successfully synced ${{ steps.vars.outputs.target_branch }} with upstream (merge_type: ${{ steps.sync.outputs.merge_type }})."
