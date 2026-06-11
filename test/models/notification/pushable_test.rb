@@ -94,4 +94,34 @@ class Notification::PushableTest < ActiveSupport::TestCase
   ensure
     Notification.push_targets = original_targets
   end
+
+  test "push skips targets when push notification level excludes notification type" do
+    notification = notifications(:layout_commented_kevin)
+    notification.user.settings.update!(push_notification_level: :only_mentions)
+
+    target_class = mock("push_target_class")
+    target_class.expects(:process).never
+
+    original_targets = Notification.push_targets
+    Notification.push_targets = [ target_class ]
+
+    notification.push
+  ensure
+    Notification.push_targets = original_targets
+  end
+
+  test "push processes targets when push notification level allows notification type" do
+    notification = notifications(:layout_commented_kevin)
+    notification.user.settings.update!(push_notification_level: :comments_and_mentions)
+
+    target_class = mock("push_target_class")
+    target_class.expects(:process).with(notification)
+
+    original_targets = Notification.push_targets
+    Notification.push_targets = [ target_class ]
+
+    notification.push
+  ensure
+    Notification.push_targets = original_targets
+  end
 end
