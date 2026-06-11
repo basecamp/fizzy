@@ -8,7 +8,7 @@ module Search::Record::Trilogy
     before_save :set_account_key, :stem_content
 
     scope :matching, ->(query, account_id) do
-      full_query = "+account#{account_id} +(#{Search::Stemmer.stem(query)})"
+      full_query = "+account#{account_id} +(#{Search::Stemmer.stem_query(query)})"
       where("MATCH(#{table_name}.account_key, #{table_name}.content, #{table_name}.title) AGAINST(? IN BOOLEAN MODE)", full_query)
     end
 
@@ -38,20 +38,20 @@ module Search::Record::Trilogy
   end
 
   def card_title
-    highlight(card.title, show: :full) if card_id
+    highlight_full(card.title) if card_id
   end
 
   def card_description
-    highlight(card.description.to_plain_text, show: :snippet) if card_id
+    highlight_snippet(card.description.to_plain_text) if card_id
   end
 
   def comment_body
-    highlight(comment.body.to_plain_text, show: :snippet) if comment
+    highlight_snippet(comment.body.to_plain_text) if comment
   end
 
   private
     def stem_content
-      self.title = Search::Stemmer.stem(title) if title_changed?
+      self.title = Search::Stemmer.stem(title).truncate(255, omission: "") if title_changed?
       self.content = Search::Stemmer.stem(content) if content_changed?
     end
 
@@ -59,10 +59,17 @@ module Search::Record::Trilogy
       self.account_key = "account#{account_id}"
     end
 
-    def highlight(text, show:)
+    def highlight_snippet(text)
       if text.present? && attribute?(:query)
-        highlighter = Search::Highlighter.new(query)
-        show == :snippet ? highlighter.snippet(text) : highlighter.highlight(text)
+        Search::Highlighter.new(query).snippet(text)
+      else
+        text
+      end
+    end
+
+    def highlight_full(text)
+      if text.present? && attribute?(:query)
+        Search::Highlighter.new(query).highlight(text)
       else
         text
       end
