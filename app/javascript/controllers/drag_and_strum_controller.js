@@ -49,14 +49,17 @@ export default class extends Controller {
   connect() {
     this.instrumentIndex = 0
     this.preloadedAudioFiles = []
-    document.addEventListener("keydown", this.handleKeyDown.bind(this));
+    this.handleKeyDown = this.handleKeyDown.bind(this)
+    document.addEventListener("keydown", this.handleKeyDown);
   }
 
   disconnect() {
-    document.removeEventListener("keydown", this.handleKeyDown.bind(this));
+    document.removeEventListener("keydown", this.handleKeyDown);
   }
 
   handleKeyDown(event) {
+    if (this.#isEditingText(event.target)) { return }
+
     if (event.shiftKey) {
       this.instrumentIndex = this.#getInstrumentIndex(event)
 
@@ -64,6 +67,19 @@ export default class extends Controller {
         this.#preloadAudioFiles(this.instrumentIndex)
       }
     }
+  }
+
+  #isEditingText(target) {
+    const element = target ?? document.activeElement
+    if (!element) { return false }
+    if (element.isContentEditable) { return true }
+    if (element.closest?.("textarea, select, lexxy-editor")) { return true }
+
+    const input = element.closest?.("input")
+    if (!input) { return false }
+
+    const NON_TEXT_INPUT_TYPES = [ "button", "submit", "reset", "checkbox", "radio", "file", "image", "range", "color" ]
+    return !NON_TEXT_INPUT_TYPES.includes((input.type || "text").toLowerCase())
   }
 
   dragEnter(event) {
