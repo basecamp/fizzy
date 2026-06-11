@@ -25,17 +25,23 @@ jobs:
             db_adapter: sqlite
           - mode: MySQL
             db_adapter: mysql
+            db_image: mysql:8.0
+            db_health: mysqladmin ping
+          - mode: MariaDB
+            db_adapter: mysql
+            db_image: mariadb:11
+            db_health: healthcheck.sh --connect --innodb_initialized
 
     services:
-      mysql:
-        image: mysql:8.0
+      db:
+        image: ${{ matrix.db_image || 'mysql:8.0' }}
         env:
           MYSQL_ALLOW_EMPTY_PASSWORD: yes
           MYSQL_DATABASE: fizzy_test
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping"
+          --health-cmd="${{ matrix.db_health || 'mysqladmin ping' }}"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=3

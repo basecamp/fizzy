@@ -13,7 +13,7 @@ logo_assignment_jz:
   board: writebook_uuid
   eventable: logo_uuid (Card)
   action: card_assigned
-  particulars: <%= { assignee_ids: [ ActiveRecord::FixtureSet.identify("jz", :uuid) ] }.to_json %>
+  particulars: '<%= { assignee_ids: [ ActiveRecord::FixtureSet.identify("jz", :uuid) ] }.to_json %>'
   created_at: <%= 1.week.ago + 1.hour %>
   account: 37s_uuid
 
@@ -23,7 +23,7 @@ logo_assignment_david:
   board: writebook_uuid
   eventable: logo_uuid (Card)
   action: card_assigned
-  particulars: <%= { assignee_ids: [ ActiveRecord::FixtureSet.identify("david", :uuid) ] }.to_json %>
+  particulars: '<%= { assignee_ids: [ ActiveRecord::FixtureSet.identify("david", :uuid) ] }.to_json %>'
   created_at: <%= 1.week.ago + 1.hour %>
   account: 37s_uuid
 
@@ -33,7 +33,7 @@ logo_assignment_km:
   board: writebook_uuid
   eventable: logo_uuid (Card)
   action: card_assigned
-  particulars: <%= { assignee_ids: [ ActiveRecord::FixtureSet.identify("kevin", :uuid) ] }.to_json %>
+  particulars: '<%= { assignee_ids: [ ActiveRecord::FixtureSet.identify("kevin", :uuid) ] }.to_json %>'
   created_at: <%= 1.day.ago %>
   account: 37s_uuid
 
@@ -61,7 +61,7 @@ layout_assignment_jz:
   board: writebook_uuid
   eventable: layout_uuid (Card)
   action: card_assigned
-  particulars: <%= { assignee_ids: [ ActiveRecord::FixtureSet.identify("jz", :uuid) ] }.to_json %>
+  particulars: '<%= { assignee_ids: [ ActiveRecord::FixtureSet.identify("jz", :uuid) ] }.to_json %>'
   created_at: <%= 1.hour.ago %>
   account: 37s_uuid
 
