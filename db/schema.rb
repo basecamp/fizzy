@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_02_18_120000) do
+ActiveRecord::Schema[8.2].define(version: 2026_06_02_120000) do
   create_table "accesses", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -171,9 +171,12 @@ ActiveRecord::Schema[8.2].define(version: 2026_02_18_120000) do
   create_table "boards", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.uuid "account_id", null: false
     t.boolean "all_access", default: false, null: false
+    t.string "closed_column_name", default: "Done", null: false
     t.datetime "created_at", null: false
     t.uuid "creator_id", null: false
     t.string "name", null: false
+    t.string "postponed_column_name", default: "Not Now", null: false
+    t.string "triage_column_name", default: "Maybe?", null: false
     t.datetime "updated_at", null: false
     t.index ["account_id"], name: "index_boards_on_account_id"
     t.index ["creator_id"], name: "index_boards_on_creator_id"

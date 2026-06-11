@@ -1,24 +1,26 @@
 <% if card.postponed? %>
+  <% postponed_column_name = card.board.postponed_column_name %>
   <%= tag.div class: token_list("card__closed", "card__closed--system": card.postponed_by&.system?), data: {
     controller: "bridge--stamp",
     bridge__stamp_scope_selector_value: ".card-perma",
-    bridge_title: "Not Now",
+    bridge_title: postponed_column_name,
     bridge_description: card.postponed_at.strftime("%b %d, %Y")
   } do %>
-    <span class="card__closed-title" data-text="Not Now">Not Now</span>
+    <span class="card__closed-title" data-text="<%= postponed_column_name %>"><%= postponed_column_name %></span>
     <strong class="card__closed-date"><%= card.postponed_at.strftime("%b %d, %Y") %></strong>
     <span class="card__closed-by-line">by <span class="card__closed-by"><%= card.postponed_by&.familiar_name %></span></span>
   <% end %>
 <% end %>
 
 <% if card.closed? %>
+  <% closed_column_name = card.board.closed_column_name %>
   <%= tag.div class: "card__closed", data: {
     controller: "bridge--stamp",
     bridge__stamp_scope_selector_value: ".card-perma",
-    bridge_title: "Done",
+    bridge_title: closed_column_name,
     bridge_description: card.closed_at.strftime("%b %d, %Y")
   } do %>
-    <span class="card__closed-title" data-text="Done">Done</span>
+    <span class="card__closed-title" data-text="<%= closed_column_name %>"><%= closed_column_name %></span>
     <strong class="card__closed-date"><%= card.closed_at.strftime("%b %d, %Y") %></strong>
     <span class="card__closed-by-line">by <span class="card__closed-by"><%= card.closed_by.familiar_name %></span></span>
   <% end %>
