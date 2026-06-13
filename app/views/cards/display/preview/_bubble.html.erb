@@ -1,12 +1,13 @@
 <%= tag.div \
       id: dom_id(card, "bubble"),
       hidden: true,
-      class: "bubble",
+      class: class_names("bubble", "bubble--golden" => card.bubble_up?),
       data: {
         controller: "bubble",
         action: "turbo:morph-element->bubble#update:self",
         bubble_entropy_value: entropy_bubble_options_for(card).to_json,
-        bubble_stalled_value: stalled_bubble_options_for(card)&.to_json
+        bubble_stalled_value: stalled_bubble_options_for(card)&.to_json,
+        bubble_up_value: bubble_up_options_for(card)&.to_json
       } do %>
 
   <svg viewBox="0 0 200 100">
