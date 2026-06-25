@@ -18,12 +18,21 @@ module User::Accessor
         card.update!(created_at: Time.current, updated_at: Time.current, last_active_at: Time.current)
       end
     rescue ActiveRecord::RecordNotUnique
-      retry if (retries += 1) <= 3
+      if (retries += 1) <= 3
+        resync_cards_count_for(board.account)
+        retry
+      end
       raise
     end
   end
 
   private
+    def resync_cards_count_for(acct)
+      acct.reload
+      max_number = acct.cards.maximum(:number).to_i
+      acct.update_column(:cards_count, max_number) if acct.cards_count < max_number
+    end
+
     def grant_access_to_boards
       Access.insert_all account.boards.all_access.ids.collect { |board_id| { id: ActiveRecord::Type::Uuid.generate, board_id: board_id, user_id: id, account_id: account.id } }
     end
