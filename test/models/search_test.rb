@@ -42,4 +42,11 @@ class SearchTest < ActiveSupport::TestCase
     results = Search::Record.for(@user.account_id).search("BC3-IOS-1D8B", user: @user)
     assert results.find { |it| it.card_id == card.id }
   end
+
+  test "search for non-Latin (e.g. Cyrillic) strings" do
+    card = @board.cards.create!(title: "фільтрувати картки", creator: @user, status: "published")
+
+    results = Search::Record.for(@user.account_id).search("картки", user: @user)
+    assert results.find { |it| it.card_id == card.id }
+  end
 end
