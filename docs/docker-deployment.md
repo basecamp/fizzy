@@ -143,6 +143,9 @@ If you're using a provider other than AWS, you will also need some of the follow
 - `S3_REQUEST_CHECKSUM_CALCULATION`
 - `S3_RESPONSE_CHECKSUM_VALIDATION`
 
+If your storage provider is on a different site than your Fizzy instance and doesn't return CORS headers on presigned URL responses, inline images may fail to load.
+In that case, set `SERVICE_WORKER_CORS_ENABLED=false` so the service worker fetches uploaded files without CORS mode.
+
 #### Multi-tenant mode
 
 By default, when you run the Fizzy Docker image you'll be limited to creating a single account (although that account can have as many users as you like).
