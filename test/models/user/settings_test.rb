@@ -54,4 +54,28 @@ class User::SettingsTest < ActiveSupport::TestCase
     @user.update_column(:verified_at, nil)
     assert_not @user.settings.bundling_emails?, "Unverified users should not receive bundled emails"
   end
+
+  test "push_notification_enabled_for? with only_mentions" do
+    @settings.update!(push_notification_level: :only_mentions)
+
+    assert @settings.push_notification_enabled_for?(notifications(:logo_mentioned_david))
+    assert_not @settings.push_notification_enabled_for?(notifications(:logo_assignment_kevin))
+    assert_not @settings.push_notification_enabled_for?(notifications(:layout_commented_kevin))
+  end
+
+  test "push_notification_enabled_for? with comments_and_mentions" do
+    @settings.update!(push_notification_level: :comments_and_mentions)
+
+    assert @settings.push_notification_enabled_for?(notifications(:logo_mentioned_david))
+    assert @settings.push_notification_enabled_for?(notifications(:layout_commented_kevin))
+    assert_not @settings.push_notification_enabled_for?(notifications(:logo_assignment_kevin))
+  end
+
+  test "push_notification_enabled_for? with all_activity" do
+    @settings.update!(push_notification_level: :all_activity)
+
+    assert @settings.push_notification_enabled_for?(notifications(:logo_mentioned_david))
+    assert @settings.push_notification_enabled_for?(notifications(:layout_commented_kevin))
+    assert @settings.push_notification_enabled_for?(notifications(:logo_assignment_kevin))
+  end
 end

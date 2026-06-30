@@ -29,6 +29,7 @@ module Notification::Pushable
 
   def push
     return unless pushable?
+    return unless user.settings.push_notification_enabled_for?(self)
 
     self.class.push_targets.each { |target| push_to(target) }
   end
