@@ -43,7 +43,7 @@ TurboOffline.addRule({
     networkTimeout: 2,
     maxEntrySize: 2 * 1024 * 1024, // 2MB covers about 95% of all Fizzy blobs
     maxEntries: 500,
-    fetchOptions: { mode: "cors" }
+    fetchOptions: { mode: "cors", credentials: "same-origin" }
   })
 })
 
