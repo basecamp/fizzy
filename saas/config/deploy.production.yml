@@ -9,6 +9,8 @@ servers:
       - fizzy-app-102.df-iad-int.37signals.com: df_iad
       - fizzy-app-401.df-ams-int.37signals.com: df_ams
       - fizzy-app-402.df-ams-int.37signals.com: df_ams
+      - fizzy-app-501.sjc-int.37signals.com: sjc
+      - fizzy-app-502.sjc-int.37signals.com: sjc
     labels:
       otel_scrape_enabled: true
   jobs:
@@ -67,7 +69,8 @@ env:
       PRIMARY_DATACENTER: true
     df_ams:
       MYSQL_SOLID_CACHE_HOST: fizzy-solidcache-db-401.df-ams-int.37signals.com
-
+    sjc:
+      MYSQL_SOLID_CACHE_HOST: fizzy-solidcache-db-501.sjc-int.37signals.com
 
 accessories:
   load-balancer:
@@ -79,6 +82,8 @@ accessories:
       - fizzy-lb-02.sc-chi-int.37signals.com
       - fizzy-lb-401.df-ams-int.37signals.com
       - fizzy-lb-402.df-ams-int.37signals.com
+      - fizzy-lb-501.sjc-int.37signals.com
+      - fizzy-lb-502.sjc-int.37signals.com
     labels:
       otel_role: load-balancer
       otel_service: fizzy-load-balancer
