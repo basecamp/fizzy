@@ -28,6 +28,21 @@ class User::Filtering
     @users ||= account.users.active.alphabetically
   end
 
+  # Returns users sorted with selected assignees first
+  def users_for_assignee_filter
+    @users_for_assignee_filter ||= account.users.active.sorted_by_selection(filter.assignees.pluck(:id))
+  end
+
+  # Returns users sorted with selected creators first
+  def users_for_creator_filter
+    @users_for_creator_filter ||= account.users.active.sorted_by_selection(filter.creators.pluck(:id))
+  end
+
+  # Returns users sorted with selected closers first
+  def users_for_closer_filter
+    @users_for_closer_filter ||= account.users.active.sorted_by_selection(filter.closers.pluck(:id))
+  end
+
   def filters
     @filters ||= user.filters.all
   end
