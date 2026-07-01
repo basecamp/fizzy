@@ -49,7 +49,8 @@ export default class extends Controller {
     const sourceContainer = this.sourceContainer
     this.#insertDraggedItem(targetContainer, this.dragItem)
     await this.#submitDropRequest(this.dragItem, targetContainer)
-    this.#reloadSourceFrame(sourceContainer)
+    this.#reloadFrame(sourceContainer)
+    this.#reloadFrame(targetContainer)
   }
 
   dragEnd() {
@@ -143,8 +144,8 @@ export default class extends Controller {
     return post(url, { body, headers: { Accept: "text/vnd.turbo-stream.html" } })
   }
 
-  #reloadSourceFrame(sourceContainer) {
-    const frame = sourceContainer.querySelector("[data-drag-and-drop-refresh]")
+  #reloadFrame(container) {
+    const frame = container.querySelector("[data-drag-and-drop-refresh]")
     if (frame) frame.reload()
   }
 }
