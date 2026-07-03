@@ -112,6 +112,9 @@ module Fizzy
         require "yabeda/gvl"
         Yabeda::GVL.install!
 
+        require "yabeda/active_support_cache"
+        Yabeda::ActiveSupportCache.install!
+
         require_relative "metrics"
       end
 
