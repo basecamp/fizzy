@@ -115,6 +115,9 @@ module Fizzy
         require "yabeda/active_support_cache"
         Yabeda::ActiveSupportCache.install!
 
+        require "yabeda/solid_cache"
+        Yabeda::SolidCache.install!
+
         require_relative "metrics"
       end
 
