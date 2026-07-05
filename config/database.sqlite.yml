@@ -1,7 +1,14 @@
+default_pragmas: &default_pragmas
+  temp_store: memory
+  cache_size: -20000
+  wal_autocheckpoint: 10000
+
 default: &default
   adapter: sqlite3
-  pool: 5
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS", 5) %>
   timeout: 5000
+  pragmas:
+    <<: *default_pragmas
 
 development:
   primary:
@@ -18,10 +25,20 @@ test:
     <<: *default
     database: storage/test.sqlite3
     schema_dump: schema_sqlite.rb
+    timeout: 20000
+    pragmas:
+      <<: *default_pragmas
+      synchronous: "off"
+      mmap_size: 268435456
   cable:
     <<: *default
     database: storage/test_cable.sqlite3
     migrations_paths: db/cable_migrate
+    timeout: 20000
+    pragmas:
+      <<: *default_pragmas
+      synchronous: "off"
+      mmap_size: 268435456
 
 production:
   primary:
