@@ -346,7 +346,7 @@ GEM
       actionview (>= 7.0.0)
       activesupport (>= 7.0.0)
     jmespath (1.6.2)
-    json (2.19.7)
+    json (2.20.0)
     jwt (3.2.0)
       base64
     kamal (2.11.0)
