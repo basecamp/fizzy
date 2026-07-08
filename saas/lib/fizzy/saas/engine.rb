@@ -107,7 +107,12 @@ module Fizzy
         ActiveSupport.on_load(:action_cable_connection) do
           if defined?(Sentry::Rails::ActionCableExtensions::Connection)
             Sentry::Rails::ActionCableExtensions::Connection.class_eval do
-              public :handle_open, :handle_close
+              # Guard per method: a future sentry-rails may rename/remove one, and calling
+              # `public` on an undefined method raises NameError — which would break SaaS
+              # boot here. Only flip the visibility of methods that actually exist.
+              %i[ handle_open handle_close ].each do |method|
+                public method if method_defined?(method) || private_method_defined?(method)
+              end
             end
           end
         end

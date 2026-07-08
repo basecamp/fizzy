@@ -29,6 +29,9 @@ module ActiveStorage
       def purge_dependent_blob
         return if @purge_mode
 
+        # `record.nil?` must be checked first: `dependent` reads `record.attachment_reflections`,
+        # so it can't be evaluated for an orphaned attachment — an absent record falls back to
+        # purge_later.
         if record.nil? || dependent == :purge_later
           purge_blob_if_last(:purge_later)
         elsif dependent == :purge
