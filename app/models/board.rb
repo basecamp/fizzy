@@ -6,6 +6,8 @@ class Board < ApplicationRecord
 
   has_rich_text :public_description
 
+  validates :triage_column_name, :postponed_column_name, :closed_column_name, presence: true
+
   has_many :tags, -> { distinct }, through: :cards
   has_many :events
   has_many :webhooks, dependent: :destroy
