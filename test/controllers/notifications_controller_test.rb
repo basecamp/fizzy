@@ -31,4 +31,14 @@ class NotificationsControllerTest < ActionDispatch::IntegrationTest
     assert_equal card.closed?, notification.dig("card", "closed")
     assert_equal card.postponed?, notification.dig("card", "postponed")
   end
+
+  test "index as JSON includes an explicit null column for cards awaiting triage" do
+    get notifications_path, as: :json
+
+    notification = @response.parsed_body.find { |n| n["id"] == notifications(:buy_domain_sent_back_to_triage_kevin).id }
+
+    assert_nil notifications(:buy_domain_sent_back_to_triage_kevin).card.column
+    assert notification["card"].key?("column")
+    assert_nil notification.dig("card", "column")
+  end
 end

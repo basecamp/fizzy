@@ -14,7 +14,7 @@ gem "turbo-rails", github: "hotwired/turbo-rails", branch: "offline-cache"
 gem "bootsnap", require: false
 gem "kamal", require: false
 gem "puma", "~> 7.2", ">= 7.2.1"
-gem "solid_cable", ">= 3.0"
+gem "solid_cable", github: "rails/solid_cable"
 gem "solid_cache", "~> 1.0"
 gem "solid_queue", "~> 1.4"
 gem "sqlite3", ">= 2.0"
