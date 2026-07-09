@@ -265,7 +265,7 @@ GEM
       logger (~> 1.6)
     letter_opener (1.10.0)
       launchy (>= 2.2, < 4)
-    lexxy (0.9.14.beta)
+    lexxy (0.9.23)
       rails (>= 8.0.2)
     lint_roller (1.1.0)
     logger (1.7.0)
@@ -534,7 +534,7 @@ DEPENDENCIES
   jbuilder
   kamal
   letter_opener
-  lexxy (= 0.9.14.beta)
+  lexxy (= 0.9.23)
   minitest-reporters
   mission_control-jobs
   mittens
