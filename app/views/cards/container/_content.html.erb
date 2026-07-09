@@ -10,19 +10,19 @@
   <% end %>
   </div>
 <% else %>
-  <%= form_with model: card, id: "card_form", data: { controller: "autoresize auto-save" } do |form| %>
+  <%= form_with model: card, id: "card_form", data: { controller: "autoresize auto-save lexxy-focus-guard" } do |form| %>
     <h1 class="card__title">
       <%= form.label :title, class: "flex flex-column align-center autoresize__wrapper", data: { autoresize_target: "wrapper", autoresize_clone_value: "" } do %>
         <%= form.text_area :title, placeholder: "Name it…",
               class: "card-field__title autoresize__textarea input input--textarea full-width borderless txt-align-start hide-focus-ring hide-scrollbar",
               autofocus: card.title.blank?, rows: 1, dir: "auto", maxlength: 255,
-              data: { autoresize_target: "textarea", action: "input->autoresize#resize auto-save#change blur->auto-save#submit keydown.enter->auto-save#submit:prevent" } %>
+              data: { autoresize_target: "textarea", lexxy_focus_guard_target: "title", action: "input->autoresize#resize input->lexxy-focus-guard#arm focus->lexxy-focus-guard#arm auto-save#change blur->auto-save#submit keydown.enter->auto-save#submit:prevent" } %>
       <% end %>
     </h1>
 
     <%= form.rich_textarea :description, class: "card__description lexxy-content",
           placeholder: "Add some notes, context, pictures, or video about this…",
-          data: { action: "lexxy:change->auto-save#change focusout->auto-save#submit" } do %>
+          data: { lexxy_focus_guard_target: "editor", action: "lexxy:change->auto-save#change focusout->auto-save#submit" } do %>
       <%= general_prompts(card.board) %>
     <% end %>
   <% end %>
