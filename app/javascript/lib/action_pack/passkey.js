@@ -30,6 +30,7 @@ class PasskeyButton extends HTMLElement {
   }
 
   disconnectedCallback() {
+    this.abortConditionalMediation?.()
     this.button.removeEventListener("click", this.#perform)
     this.button.disabled = false
     this.#hideErrors()
@@ -53,6 +54,7 @@ class PasskeyButton extends HTMLElement {
 
   // Arrow function to preserve `this` binding for addEventListener/removeEventListener.
   #perform = async () => {
+    await this.abortConditionalMediation?.()
     this.button.disabled = true
     this.#hideErrors()
     this.button.dispatchEvent(new CustomEvent("passkey:start", { bubbles: true }))
@@ -105,6 +107,9 @@ class PasskeyRegistrationButton extends PasskeyButton {
 }
 
 class PasskeySignInButton extends PasskeyButton {
+  #conditionalMediationController = null
+  #conditionalMediationPromise = null
+
   get purpose() { return "authentication" }
 
   connectedCallback() {
@@ -116,12 +121,19 @@ class PasskeySignInButton extends PasskeyButton {
     return this.getAttribute("mediation")
   }
 
-  async perform(options, { mediation } = {}) {
-    return await authenticate(options, { mediation })
+  async perform(options, { signal, mediation } = {}) {
+    return await authenticate(options, { signal, mediation })
   }
 
   fillForm(passkey) {
     fillSignInForm(this.form, passkey)
+  }
+
+  async abortConditionalMediation() {
+    if (this.#conditionalMediationController) {
+      this.#conditionalMediationController.abort()
+      await this.#conditionalMediationPromise
+    }
   }
 
   async #attemptConditionalMediation() {
@@ -130,18 +142,28 @@ class PasskeySignInButton extends PasskeyButton {
 
       this.form.dispatchEvent(new CustomEvent("passkey:start", { bubbles: true }))
 
-      try {
-        await refreshChallenge(options, this.challengeUrl, this.purpose)
-        const passkey = await this.perform(options, { mediation: this.mediation })
+      this.#conditionalMediationController = new AbortController()
+      this.#conditionalMediationPromise = this.#runConditionalMediation(options)
+    }
+  }
 
-        this.form.dispatchEvent(new CustomEvent("passkey:success", { bubbles: true }))
-        this.fillForm(passkey)
-        this.form.submit()
-      } catch (error) {
-        console.error("Passkey conditional mediation failed", error)
-        const type = errorType(error)
-        this.button.dispatchEvent(new CustomEvent("passkey:error", { bubbles: true, detail: { error, type } }))
-      }
+  async #runConditionalMediation(options) {
+    try {
+      await refreshChallenge(options, this.challengeUrl, this.purpose)
+      const passkey = await this.perform(options, { signal: this.#conditionalMediationController.signal, mediation: this.mediation })
+
+      this.form.dispatchEvent(new CustomEvent("passkey:success", { bubbles: true }))
+      this.fillForm(passkey)
+      this.form.submit()
+    } catch (error) {
+      if (error.name === "AbortError") return
+
+      console.error("Passkey conditional mediation failed", error)
+      const type = errorType(error)
+      this.button.dispatchEvent(new CustomEvent("passkey:error", { bubbles: true, detail: { error, type } }))
+    } finally {
+      this.#conditionalMediationController = null
+      this.#conditionalMediationPromise = null
     }
   }
 

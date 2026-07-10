@@ -15,7 +15,11 @@ json.cache! notification do
     json.closed notification.card.closed?
     json.postponed notification.card.postponed?
     json.url card_url(notification.card)
-    json.column notification.card.column, partial: "columns/column", as: :column if notification.card.column
+    if notification.card.column
+      json.column notification.card.column, partial: "columns/column", as: :column
+    else
+      json.column nil
+    end
   end
 
   json.url notification_url(notification)

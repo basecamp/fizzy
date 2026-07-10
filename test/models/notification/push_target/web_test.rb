@@ -5,6 +5,8 @@ class Notification::PushTarget::WebTest < ActiveSupport::TestCase
     @user = users(:david)
     @notification = notifications(:logo_mentioned_david)
 
+    stub_web_push_dns_resolution
+
     @user.push_subscriptions.create!(
       endpoint: "https://fcm.googleapis.com/fcm/send/test123",
       p256dh_key: "test_key",

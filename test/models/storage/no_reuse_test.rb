@@ -57,6 +57,32 @@ class Storage::NoReuseTest < ActiveSupport::TestCase
     ).count
   end
 
+  test "purge touches the record to invalidate cache" do
+    card = @board.cards.create!(title: "Card", creator: users(:david))
+    card.image.attach(io: file_fixture("moon.jpg").open, filename: "moon.jpg", content_type: "image/jpeg")
+
+    original_updated_at = card.reload.updated_at
+
+    travel 1.second do
+      card.image.purge
+    end
+
+    assert card.reload.updated_at > original_updated_at
+  end
+
+  test "purge_later touches the record to invalidate cache" do
+    card = @board.cards.create!(title: "Card", creator: users(:david))
+    card.image.attach(io: file_fixture("moon.jpg").open, filename: "moon.jpg", content_type: "image/jpeg")
+
+    original_updated_at = card.reload.updated_at
+
+    travel 1.second do
+      card.image.purge_later
+    end
+
+    assert card.reload.updated_at > original_updated_at
+  end
+
   test "purge_later does not purge blob when still attached elsewhere" do
     file = file_fixture("moon.jpg")
     blob = ActiveStorage::Blob.create_and_upload! \

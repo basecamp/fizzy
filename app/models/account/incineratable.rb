@@ -11,7 +11,7 @@ module Account::Incineratable
 
   def incinerate
     run_callbacks :incinerate do
-      account.destroy
+      Storage::Entry.suppressing_recording { account.destroy }
     end
   end
 end

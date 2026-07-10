@@ -45,6 +45,45 @@ class Webhook::DeliveryTest < ActiveSupport::TestCase
     assert_not delivery.succeeded?, "the response can't have an error"
   end
 
+  test "sanitized_request strips signature header" do
+    delivery = webhook_deliveries(:successfully_completed)
+    delivery.update!(request: {
+      headers: {
+        "User-Agent" => "fizzy/1.0.0 Webhook",
+        "Content-Type" => "application/json",
+        "X-Webhook-Signature" => "super-secret-signature",
+        "X-Webhook-Timestamp" => "2025-12-05T19:36:35.401Z"
+      }
+    })
+
+    result = delivery.sanitized_request
+    assert_equal %w[ User-Agent Content-Type X-Webhook-Timestamp ], result[:headers].keys
+    assert_not result[:headers].key?("X-Webhook-Signature")
+  end
+
+  test "sanitized_request returns nil when request is blank" do
+    delivery = webhook_deliveries(:pending)
+    delivery.update_columns(request: nil)
+
+    assert_nil delivery.sanitized_request
+  end
+
+  test "response_summary returns code and error" do
+    delivery = webhook_deliveries(:successfully_completed)
+    delivery.update!(response: { code: 200, error: nil })
+
+    result = delivery.response_summary
+    assert_equal 200, result[:code]
+    assert_nil result[:error]
+  end
+
+  test "response_summary returns nil when response is blank" do
+    delivery = webhook_deliveries(:pending)
+    delivery.update_columns(response: nil)
+
+    assert_nil delivery.response_summary
+  end
+
   test "deliver_later" do
     delivery = webhook_deliveries(:pending)
 
@@ -434,11 +473,4 @@ class Webhook::DeliveryTest < ActiveSupport::TestCase
     assert_equal 200, delivery.response[:code]
     assert delivery.succeeded?
   end
-
-  private
-    def stub_dns_resolution(*ips)
-      dns_mock = mock("dns")
-      dns_mock.stubs(:each_address).multiple_yields(*ips)
-      Resolv::DNS.stubs(:open).yields(dns_mock)
-    end
 end

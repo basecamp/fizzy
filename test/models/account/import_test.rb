@@ -226,6 +226,7 @@ class Account::ImportTest < ActiveSupport::TestCase
         name: account.name,
         board_count: Board.where(account: account).count,
         column_count: Column.where(account: account).count,
+        column_colors: Column.where(account: account).order(:id).pluck(:color),
         card_count: Card.where(account: account).count,
         comment_count: Comment.where(account: account).count,
         tag_count: Tag.where(account: account).count

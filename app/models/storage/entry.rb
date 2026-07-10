@@ -5,12 +5,22 @@ class Storage::Entry < ApplicationRecord
 
   scope :pending, ->(last_entry_id) { where.not(id: ..last_entry_id) if last_entry_id }
 
+  thread_mattr_accessor :recording, default: true
+
+  def self.suppressing_recording(&block)
+    original, self.recording = self.recording, false
+    yield
+  ensure
+    self.recording = original
+  end
+
   # Records may be destroyed (during cascading deletes) but .id still works.
   # Skip entirely if account is destroyed - no need to track storage for deleted accounts.
   # Skip materialize jobs for destroyed boards since there's nothing to update.
   def self.record(delta:, operation:, account:, board: nil, recordable: nil, blob: nil)
     return if delta.zero?
     return if account.destroyed?
+    return unless recording
 
     entry = create! \
       account_id: account.id,

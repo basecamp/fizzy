@@ -103,6 +103,25 @@ class Account::ExportsControllerTest < ActionDispatch::IntegrationTest
     assert body["download_url"].present?
   end
 
+  test "show as JSON with bearer token returns a download URL that can be fetched" do
+    export = Account::Export.create!(account: Current.account, user: users(:jason))
+    export.build
+    sign_out
+    bearer_token = { "HTTP_AUTHORIZATION" => "Bearer #{identity_access_tokens(:jasons_api_token).token}" }
+
+    get account_export_path(export), as: :json, env: bearer_token
+    assert_response :success
+
+    body = @response.parsed_body
+    assert_equal export.id, body["id"]
+    assert_equal "completed", body["status"]
+    assert body["download_url"].present?
+
+    get URI(body["download_url"]).request_uri, env: bearer_token
+    assert_response :redirect
+    assert_match %r{rails/active_storage}, response.location
+  end
+
   test "show as JSON with pending export" do
     export = Account::Export.create!(account: Current.account, user: users(:jason))
 

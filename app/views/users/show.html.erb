@@ -39,16 +39,18 @@
       <% end %>
 
       <% if Current.user == @user %>
-        <hr class="separator--horizontal full-width flex-item-grow margin-block-start-double" style="--border-color: var(--color-ink-light);" aria-hidden="true">
+        <div class="flex-inline justify-center flex-wrap gap full-width hide-on-native">
+          <hr class="separator--horizontal full-width margin-block-start-double" style="--border-color: var(--color-ink-light);" aria-hidden="true">
 
-        <%= link_to my_passkeys_path, class: "btn txt-x-small center" do %>
-          <%= icon_tag "authentication" %>
-          <span>Manage passkeys</span>
-        <% end %>
+          <%= link_to my_passkeys_path, class: "btn txt-x-small" do %>
+            <%= icon_tag "authentication" %>
+            <span>Manage passkeys</span>
+          <% end %>
 
-        <%= button_to session_path(script_name: nil), method: :delete, class: "btn txt-x-small center", form: { data: { turbo: false, controller: "clear-offline-cache", action: "submit->clear-offline-cache#clearCache" } } do %>
-          <span>Sign out of Fizzy on this device</span>
-        <% end %>
+          <%= button_to session_path(script_name: nil), method: :delete, class: "btn txt-x-small", form: { data: { turbo: false, controller: "clear-offline-cache", action: "submit->clear-offline-cache#clearCache" } } do %>
+            <span>Sign out of Fizzy on this device</span>
+          <% end %>
+        </div>
       <% end %>
     </div>
   </div>

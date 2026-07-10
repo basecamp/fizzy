@@ -11,7 +11,7 @@ module User::Avatar
   ].freeze
 
   included do
-    has_one_attached :avatar do |attachable|
+    has_one_attached :avatar, dependent: :purge_later do |attachable|
       attachable.variant :thumb, resize_to_fill: [ 256, 256 ], process: :immediately
     end
 
@@ -39,7 +39,7 @@ module User::Avatar
 
   private
     def avatar_content_type_allowed
-      if !ALLOWED_AVATAR_CONTENT_TYPES.include?(avatar.content_type)
+      unless ALLOWED_AVATAR_CONTENT_TYPES.include?(avatar.content_type)
         errors.add(:avatar, "must be a JPEG, PNG, GIF, or WebP image")
       end
     end

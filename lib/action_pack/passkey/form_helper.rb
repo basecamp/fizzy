@@ -1,27 +1,18 @@
-# View helpers for rendering passkey web components.
-#
-# Include this module in your helper or ApplicationHelper to get access to:
-#
-# - +passkey_registration_button+ — render a <rails-passkey-registration-button> web component with
-#   a form, hidden fields, and error messages for the registration ceremony.
-# - +passkey_sign_in_button+ — render a <rails-passkey-sign-in-button> web component with
-#   a form, hidden fields, and error messages for the authentication ceremony.
+# View helpers for rendering passkey registration and sign-in buttons.
 module ActionPack::Passkey::FormHelper
   REGISTRATION_ERROR_MESSAGE = "Something went wrong while registering your passkey."
   REGISTRATION_CANCELLED_MESSAGE = "Passkey registration was cancelled. Try again when you are ready."
-  REGISTRATION_DUPLICATE_MESSAGE = "You already have a passkey registered on this device. Remove the existing one first to re-register."
+  REGISTRATION_DUPLICATE_MESSAGE = "You already have a passkey registered on this device. Remove the existing one first and try again."
   SIGN_IN_ERROR_MESSAGE = "Something went wrong while signing in with your passkey."
   SIGN_IN_CANCELLED_MESSAGE = "Passkey sign in was cancelled. Try again when you are ready."
 
-  # Renders a +<rails-passkey-registration-button>+ web component containing a form with hidden
-  # fields for the passkey registration ceremony and error messages. The form POSTs to +url+ and
-  # includes hidden fields for +client_data_json+, +attestation_object+, and +transports+ —
-  # populated by the web component after the browser credential API resolves.
-  # Accepts a +label+ string or a block for button content.
+  # Renders a button for registering a new passkey. Accepts a +label+ string or a block
+  # for button content.
   #
   # Options:
   # - +options+: WebAuthn creation options (JSON-serializable hash)
   # - +challenge_url+: endpoint to refresh the challenge nonce
+  # - +wrapper+: HTML attributes for the outer web component element
   # - +form+: additional HTML attributes for the +<form>+ tag. Supports a +:param+ key
   #   to set the form parameter namespace (default: +:passkey+)
   # - +error+: HTML attributes for the error message +<div>+. Supports a +:message+ key
@@ -48,15 +39,14 @@ module ActionPack::Passkey::FormHelper
     end
   end
 
-  # Renders a +<rails-passkey-sign-in-button>+ web component containing a form with hidden
-  # fields for the passkey authentication ceremony and error messages. The form POSTs to +url+
-  # and includes hidden fields for +id+, +client_data_json+, +authenticator_data+, and +signature+.
-  # Accepts a +label+ string or a block for button content.
+  # Renders a button for signing in with a passkey. Accepts a +label+ string or a block
+  # for button content.
   #
   # Options:
   # - +options+: WebAuthn request options (JSON-serializable hash)
   # - +challenge_url+: endpoint to refresh the challenge nonce
   # - +mediation+: WebAuthn mediation hint (e.g. +"conditional"+ for autofill-assisted sign in)
+  # - +wrapper+: HTML attributes for the outer web component element
   # - +form+: additional HTML attributes for the +<form>+ tag. Supports a +:param+ key
   #   to set the form parameter namespace (default: +:passkey+)
   # - +error+: HTML attributes for the error message +<div>+. Supports a +:message+ key
@@ -86,18 +76,21 @@ module ActionPack::Passkey::FormHelper
   private
     def partition_passkey_options(url, options)
       passkey_options = options.fetch(:options, {})
+      wrapper_options = options.fetch(:wrapper, {})
 
       component_options = options
         .slice(:challenge_url, :mediation)
         .reverse_merge(challenge_url: default_passkey_challenge_url, options: passkey_options.to_json(except: :challenge))
+
       form_options = options
         .fetch(:form, {})
         .reverse_merge(method: :post, action: url, class: "button_to", param: :passkey)
+
       error_options = options.slice(:error, :cancellation, :duplicate).reverse_merge(error: {}, cancellation: {}, duplicate: {})
 
-      button_options = options.except(:options, :form, *component_options.keys, *error_options.keys)
+      button_options = options.except(:options, :form, :wrapper, *component_options.keys, *error_options.keys)
 
-      [ component_options, form_options, button_options, error_options ]
+      [ wrapper_options.merge(component_options), form_options, button_options, error_options ]
     end
 
     def default_passkey_challenge_url
@@ -109,25 +102,27 @@ module ActionPack::Passkey::FormHelper
     end
 
     def passkey_error_messages(error: {}, cancellation: {}, duplicate: {})
-      error_message = error[:message]
-      error_attributes = error.except(:message)
-      error_attributes[:data] ||= {}
-      error_attributes[:data][:passkey_error] = "error"
-
-      cancellation_message = cancellation[:message]
-      cancellation_attributes = cancellation.except(:message)
-      cancellation_attributes[:data] ||= {}
-      cancellation_attributes[:data][:passkey_error] = "cancelled"
+      error_message, error_attributes = build_passkey_error_options("error", error)
+      cancellation_message, cancellation_attributes = build_passkey_error_options("cancelled", cancellation)
 
       messages = tag.div(error_message, hidden: true, **error_attributes) +
         tag.div(cancellation_message, hidden: true, **cancellation_attributes)
 
       if duplicate[:message]
-        duplicate_attributes = duplicate.except(:message)
-        duplicate_attributes[:data] = { passkey_error: "duplicate" }
-        messages += tag.div(duplicate[:message], hidden: true, **duplicate_attributes)
+        duplicate_message, duplicate_attributes = build_passkey_error_options("duplicate", duplicate)
+        messages += tag.div(duplicate_message, hidden: true, **duplicate_attributes)
       end
 
       messages
+    end
+
+    def build_passkey_error_options(type, options)
+      message = options[:message]
+
+      attributes = options.except(:message)
+      attributes[:data] ||= {}
+      attributes[:data][:passkey_error] = type
+
+      [ message, attributes ]
     end
 end

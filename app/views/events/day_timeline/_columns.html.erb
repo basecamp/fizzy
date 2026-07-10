@@ -1,4 +1,4 @@
-<% cache [ day_timeline.events ] do %>
+<% cache [ day_timeline.events, Time.zone.name ] do %>
   <%# Template Dependency Updated: _layout.html.erb 2026-01-26 %>
   <% if day_timeline.has_activity? %>
     <div class="events__columns">

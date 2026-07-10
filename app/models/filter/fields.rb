@@ -31,7 +31,7 @@ module Filter::Fields
 
   included do
     store_accessor :fields, :assignment_status, :indexed_by, :sorted_by, :terms,
-      :card_ids, :creation, :closure
+      :card_ids, :creation, :closure, :column_ids
 
     def assignment_status
       super.to_s.inquiry
@@ -59,6 +59,14 @@ module Filter::Fields
 
     def terms=(value)
       super(Array(value).filter(&:present?))
+    end
+
+    def column_ids
+      Array(super).filter(&:present?).uniq
+    end
+
+    def column_ids=(value)
+      super(Array(value).filter(&:present?).uniq)
     end
   end
 

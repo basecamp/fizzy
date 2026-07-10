@@ -4,6 +4,15 @@ PORT=3006
 USE_TAILSCALE=0
 USE_PUSH=0
 
+if [ -t 1 ]; then
+  c_bar='\033[2m▎\033[0m'    # dim
+  c_label='\033[37m'         # gray
+  c_url='\033[96m'           # cyan
+  c_reset='\033[0m'
+else
+  c_bar='▎' c_label='' c_url='' c_reset=''
+fi
+
 for arg in "$@"; do
   case $arg in
     --tailscale) USE_TAILSCALE=1 ;;
@@ -58,9 +67,14 @@ if [ "$USE_TAILSCALE" = "1" ]; then
     echo "Error: tailscale serve failed. On Linux, run once: sudo tailscale set --operator=\$USER" >&2
     exit 1
   fi
-  echo "Login with david@example.com to: https://$TS_HOSTNAME:$TS_PORT/"
+  DEV_URL="https://$TS_HOSTNAME:$TS_PORT/"
 else
-  echo "Login with david@example.com to: http://fizzy.localhost:$PORT/"
+  DEV_URL="http://app.fizzy.localhost:$PORT/"
 fi
+
+printf "\n"
+printf " ${c_bar} ${c_label}URL${c_reset}     ${c_url}${DEV_URL}${c_reset}\n"
+printf " ${c_bar} ${c_label}Login${c_reset}   david@example.com\n"
+printf "\n"
 
 ./bin/rails server -b 0.0.0.0 -p $PORT

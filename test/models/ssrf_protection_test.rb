@@ -82,11 +82,4 @@ class SsrfProtectionTest < ActiveSupport::TestCase
     stub_dns_resolution("::93.184.216.34")
     assert_nil SsrfProtection.resolve_public_ip("compat-public.example.com")
   end
-
-  private
-    def stub_dns_resolution(*ips)
-      dns_mock = mock("dns")
-      dns_mock.stubs(:each_address).multiple_yields(*ips)
-      Resolv::DNS.stubs(:open).yields(dns_mock)
-    end
 end

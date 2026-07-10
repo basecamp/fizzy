@@ -66,8 +66,11 @@
       }
 
       .card {
-        background: linear-gradient(to bottom, var(--color-canvas), var(--card-bg-color));
         box-shadow: unset;
+      }
+
+      .card:not(.golden-effect) {
+        background: linear-gradient(to bottom, var(--color-canvas), var(--card-bg-color));
       }
 
       .card__board {

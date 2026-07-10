@@ -44,11 +44,11 @@ class Account::DataTransfer::ActionText::RichTextRecordSetTest < ActiveSupport::
   end
 
   test "transform_body_for_import skips GIDs belonging to another account" do
-    victim_tag = tags(:web)
+    victim_user = users(:david)
     attacker_account = accounts(:initech)
-    assert_not_equal attacker_account.id, victim_tag.account_id
+    assert_not_equal attacker_account.id, victim_user.account_id
 
-    cross_tenant_gid = victim_tag.to_global_id.to_s
+    cross_tenant_gid = victim_user.to_global_id.to_s
     html = %(<action-text-attachment gid="#{cross_tenant_gid}"></action-text-attachment>)
 
     record_set = Account::DataTransfer::ActionText::RichTextRecordSet.new(attacker_account)
@@ -59,11 +59,11 @@ class Account::DataTransfer::ActionText::RichTextRecordSetTest < ActiveSupport::
   end
 
   test "transform_body_for_import converts GIDs belonging to the same account" do
-    own_tag = tags(:web)
+    own_user = users(:david)
     own_account = accounts(:"37s")
-    assert_equal own_account.id, own_tag.account_id
+    assert_equal own_account.id, own_user.account_id
 
-    same_account_gid = own_tag.to_global_id.to_s
+    same_account_gid = own_user.to_global_id.to_s
     html = %(<action-text-attachment gid="#{same_account_gid}"></action-text-attachment>)
 
     record_set = Account::DataTransfer::ActionText::RichTextRecordSet.new(own_account)
@@ -74,7 +74,7 @@ class Account::DataTransfer::ActionText::RichTextRecordSetTest < ActiveSupport::
   end
 
   test "transform_body_for_import handles non-existent record GIDs gracefully" do
-    nonexistent_gid = "gid://fizzy/Tag/00000000000000000000000000"
+    nonexistent_gid = "gid://fizzy/User/00000000000000000000000000"
     html = %(<action-text-attachment gid="#{nonexistent_gid}"></action-text-attachment>)
 
     record_set = Account::DataTransfer::ActionText::RichTextRecordSet.new(accounts(:"37s"))

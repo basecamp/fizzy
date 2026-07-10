@@ -8,6 +8,10 @@ module User::Mentionable
     def to_attachable_partial_path
       "users/attachable"
     end
+
+    def to_editor_content_attachment_partial_path
+      to_attachable_partial_path
+    end
   end
 
   def mentioned_by(mentioner, at:)

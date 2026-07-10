@@ -59,13 +59,18 @@
   lexxy-toolbar {
     border-color: var(--lexxy-border-color);
     gap: 0;
+
+    svg {
+      fill: currentColor;
+    }
   }
 
-  .lexxy-editor__toolbar-button {
+  /* Exclude the link dropdown's action buttons — they keep the gem's accent/gray background. */
+  .lexxy-editor__toolbar-button:not(.lexxy-editor__toolbar-dropdown-actions *) {
     background: transparent;
 
     &[aria-pressed="true"],
-    [open] > & {
+    &[aria-expanded="true"] {
       background-color: oklch(var(--lch-blue-medium) / 20%);
     }
 
@@ -76,10 +81,19 @@
     }
   }
 
-  lexxy-link-dropdown {
-    --lexxy-toolbar-spacing: 1.5ch;
+  .lexxy-editor__toolbar-button--chevron {
+    &:after {
+      block-size: 0.3rem;
+      inline-size: 0.3rem;
+    }
+  }
 
-    .lexxy-editor__toolbar-button {
+  lexxy-link-dropdown {
+    [data-dropdown-panel] {
+      --lexxy-toolbar-spacing: 1.5ch;
+    }
+
+    .lexxy-editor__toolbar-dropdown-actions .lexxy-editor__toolbar-button {
       border-radius: 99rem;
 
       @media(any-hover: hover) {
@@ -89,12 +103,16 @@
         }
       }
 
-      &[type="submit"],
-      &[type="submit"]:hover {
+      &[value="link"] {
         background-color: var(--color-link);
+        color: var(--color-ink-inverted);
+
+        &:hover {
+          background-color: var(--color-link);
+        }
       }
 
-      &[type="button"] {
+      &[value="unlink"] {
         border: 1px solid var(--color-ink-light);
       }
     }

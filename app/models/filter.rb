@@ -27,7 +27,7 @@ class Filter < ApplicationRecord
       result = result.unassigned if assignment_status.unassigned?
       result = result.assigned_to(assignees.ids) if assignees.present?
       result = result.where(creator_id: creators.ids) if creators.present?
-      result = result.where(board: boards.ids) if boards.present?
+      result = filter_boards(result) if boards.present?
       result = result.tagged_with(tags.ids) if tags.present?
       result = result.where(cards: { created_at: creation_window }) if creation_window
       result = result.closed_at_window(closure_window) if closure_window
@@ -35,6 +35,7 @@ class Filter < ApplicationRecord
       result = terms.reduce(result) do |result, term|
         result.mentioning(term, user: creator)
       end
+      result = result.where(column_id: column_ids) if column_ids.present?
 
       result.distinct
     end
@@ -65,6 +66,23 @@ class Filter < ApplicationRecord
   end
 
   private
+    def filter_boards(relation)
+      relation = relation.where(cards: { account_id: creator.account_id }).where(board: boards.ids)
+      if joins_has_many?
+        relation
+      else
+        # Pin the (account_id, last_active_at, status) index so the ordered page is served by a reverse scan, not a filesort.
+        relation.use_index(:index_cards_on_account_id_and_last_active_at_and_status)
+      end
+    end
+
+    # Assignee, tag, and term filters add a has-many join that fans a card into
+    # several rows; the ordered reverse scan loses to a different plan then, so
+    # the pin only applies without them.
+    def joins_has_many?
+      assignees.present? || tags.present? || terms.present?
+    end
+
     def include_closed_cards?
       only_closed? || card_ids.present?
     end

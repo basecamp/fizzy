@@ -8,6 +8,7 @@ module Filter::Params
     :creation,
     :closure,
     card_ids: [],
+    column_ids: [],
     assignee_ids: [],
     creator_ids: [],
     closer_ids: [],

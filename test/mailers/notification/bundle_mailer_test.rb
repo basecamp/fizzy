@@ -106,6 +106,19 @@ class Notification::BundleMailerTest < ActionMailer::TestCase
       "Should not generate a real email when all notifications are stale"
   end
 
+  test "deliver_later works with account context" do
+    # Give user a second account so the mailer includes the account name in the subject
+    second_account = Account.create!(name: "Second account")
+    second_account.users.create!(identity: @user.identity, role: :member, name: @user.name)
+
+    create_notification(@user)
+
+    Notification::BundleMailer.notification(@bundle).deliver_later
+    perform_enqueued_jobs
+
+    assert_emails 1
+  end
+
   private
     def create_notification(user, source: events(:logo_published))
       Notification.create!(user: user, creator: user, source: source, created_at: 30.minutes.ago)

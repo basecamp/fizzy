@@ -22,7 +22,7 @@ if Fizzy.saas?
   plugin :yabeda_prometheus
 end
 
-if !Rails.env.local?
+unless Rails.env.local?
   # Because we expect fewer I/O waits than Rails apps that connect to the
   # database over the network, let's start with a baseline config of 1
   # worker per CPU, 1 thread per worker and tune it from there.

@@ -8,6 +8,11 @@ require "vcr"
 require "mocha/minitest"
 require "turbo/broadcastable/test_helper"
 
+unless [ "0", "false" ].include?(ENV["CI_PROGRESS_BAR"])
+  require "minitest/reporters"
+  Minitest::Reporters.use! Minitest::Reporters::ProgressReporter.new(detailed_skip: false)
+end
+
 WebMock.allow_net_connect!
 
 VCR.configure do |config|
@@ -45,8 +50,18 @@ module ActiveSupport
     fixtures :all
 
     include ActiveJob::TestHelper
-    include ActionTextTestHelper, CachingTestHelper, CardTestHelper, ChangeTestHelper, SessionTestHelper
+    include ActionTextTestHelper, CachingTestHelper, CardTestHelper, ChangeTestHelper, DnsTestHelper, SessionTestHelper
     include Turbo::Broadcastable::TestHelper
+
+    # Jobs must carry their own account context via AccountTenanted,
+    # not rely on Current.account leaking from the test setup.
+    def perform_enqueued_jobs(...)
+      saved_account = Current.account
+      Current.account = nil
+      super
+    ensure
+      Current.account = saved_account
+    end
 
     setup do
       Current.account = accounts("37s")

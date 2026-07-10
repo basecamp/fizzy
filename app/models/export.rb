@@ -2,7 +2,7 @@ class Export < ApplicationRecord
   belongs_to :account
   belongs_to :user
 
-  has_one_attached :file
+  has_one_attached :file, dependent: :purge_later
 
   enum :status, %w[ pending processing completed failed ].index_by(&:itself), default: :pending
 

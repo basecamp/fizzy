@@ -7,6 +7,14 @@ class Column::ColoredTest < ActiveSupport::TestCase
     assert_equal Column::Colored::DEFAULT_COLOR, column.color
   end
 
+  test "reads color from legacy export format" do
+    column = columns(:writebook_triage)
+    # Broken exports serialized Color structs as JSON
+    column.update_column(:color, { "name" => "Lime", "value" => "var(--color-card-4)" }.to_json)
+
+    assert_equal Color.for_value("var(--color-card-4)"), column.reload.color
+  end
+
   test "update the column color" do
     columns(:writebook_triage).update!(color: "var(--color-card-3)")
 

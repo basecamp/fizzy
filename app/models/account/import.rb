@@ -4,7 +4,7 @@ class Account::Import < ApplicationRecord
   belongs_to :account
   belongs_to :identity
 
-  has_one_attached :file
+  has_one_attached :file, dependent: :purge_later
 
   enum :status, %w[ pending processing completed failed ].index_by(&:itself), default: :pending
   enum :failure_reason, %w[ conflict invalid_export ].index_by(&:itself), prefix: :failed_due_to, scopes: false

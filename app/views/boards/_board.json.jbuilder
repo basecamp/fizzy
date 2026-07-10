@@ -6,5 +6,9 @@ json.cache! board do
 
   json.creator board.creator, partial: "users/user", as: :user
 
-  json.public_url published_board_url(board) if board.published?
+  if board.published?
+    json.public_description board.public_description.to_plain_text
+    json.public_description_html board.public_description.to_s
+    json.public_url published_board_url(board)
+  end
 end

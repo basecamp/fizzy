@@ -9,7 +9,7 @@ class Identity < ApplicationRecord
   has_many :users, dependent: :nullify
   has_many :accounts, through: :users
 
-  has_one_attached :avatar
+  has_one_attached :avatar, dependent: :purge_later
 
   before_destroy :deactivate_users, prepend: true
 

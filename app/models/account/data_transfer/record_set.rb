@@ -65,7 +65,7 @@ class Account::DataTransfer::RecordSet
     end
 
     def export_record(record)
-      zip.add_file "data/#{model_dir}/#{record.id}.json", record.to_json
+      zip.add_file "data/#{model_dir}/#{record.id}.json", record.attributes.slice(*attributes).to_json
     end
 
     def files

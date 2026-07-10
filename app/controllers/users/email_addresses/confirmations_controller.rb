@@ -12,9 +12,15 @@ class Users::EmailAddresses::ConfirmationsController < ApplicationController
       terminate_session if Current.session
       start_new_session_for @user.identity
 
-      redirect_to edit_user_url(script_name: @user.account.slug, id: @user)
+      respond_to do |format|
+        format.html { redirect_to edit_user_url(script_name: @user.account.slug, id: @user) }
+        format.json { head :no_content }
+      end
     else
-      render :invalid_token, status: :unprocessable_entity
+      respond_to do |format|
+        format.html { render :invalid_token, status: :unprocessable_entity }
+        format.json { render json: { error: "Token is invalid or has expired" }, status: :unprocessable_entity }
+      end
     end
   end
 

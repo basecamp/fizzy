@@ -120,8 +120,12 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
 
     put user_path(users(:david)), params: { user: { name: "New David" } }, as: :json
 
-    assert_response :no_content
+    assert_response :success
     assert_equal "New David", users(:david).reload.name
+
+    json = @response.parsed_body
+    assert_equal users(:david).id, json["id"]
+    assert_equal "New David", json["name"]
   end
 
   test "update as JSON with invalid avatar returns errors" do
@@ -143,6 +147,26 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :no_content
+  end
+
+  test "bearer token does not authenticate HTML requests" do
+    sign_in_as :jason
+    sign_out
+
+    bearer = { "HTTP_AUTHORIZATION" => "Bearer #{identity_access_tokens(:jasons_api_token).token}" }
+    get user_path(users(:jason)), env: bearer
+
+    assert_response :unauthorized
+  end
+
+  test "bearer token authenticates JSON requests" do
+    sign_in_as :jason
+    sign_out
+
+    bearer = { "HTTP_AUTHORIZATION" => "Bearer #{identity_access_tokens(:jasons_api_token).token}" }
+    get user_path(users(:jason)), env: bearer, as: :json
+
+    assert_response :success
   end
 
   test "index avoids N+1 queries on identity" do

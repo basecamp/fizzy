@@ -30,6 +30,7 @@ class Card < ApplicationRecord
     when "stalled" then stalled
     when "postponing_soon" then postponing_soon
     when "closed" then closed
+    when "maybe" then awaiting_triage
     when "not_now" then postponed.latest
     when "golden" then golden
     when "draft" then drafted
@@ -89,6 +90,6 @@ class Card < ApplicationRecord
     end
 
     def assign_number
-      self.number ||= account.increment!(:cards_count).cards_count
+      self.number ||= account.with_lock { account.increment!(:cards_count).cards_count }
     end
 end

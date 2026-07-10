@@ -53,7 +53,7 @@ class FlatJsonParamsTest < ActionDispatch::IntegrationTest
   end
 
   test "create push subscription with flat JSON" do
-    stub_dns_resolution("142.250.185.206")
+    stub_web_push_dns_resolution
 
     post user_push_subscriptions_path(users(:kevin)),
       params: { endpoint: "https://fcm.googleapis.com/fcm/send/abc123", p256dh_key: "key1", auth_key: "key2" },
@@ -104,11 +104,13 @@ class FlatJsonParamsTest < ActionDispatch::IntegrationTest
       params: { name: "Flat board", auto_postpone_period_in_days: 7, public_description: "<p>Flat public desc</p>" },
       as: :json
 
-    assert_response :no_content
+    assert_response :success
     board.reload
     assert_equal "Flat board", board.name
     assert_equal 7.days, board.entropy.auto_postpone_period
     assert_equal "Flat public desc", board.public_description.to_plain_text
+    assert_equal board.id, @response.parsed_body["id"]
+    assert_equal "Flat board", @response.parsed_body["name"]
   end
 
   test "create column with flat JSON" do
@@ -127,8 +129,10 @@ class FlatJsonParamsTest < ActionDispatch::IntegrationTest
 
     put board_column_path(column.board, column), params: { name: "Flat Updated" }, as: :json
 
-    assert_response :no_content
+    assert_response :success
     assert_equal "Flat Updated", column.reload.name
+    assert_equal column.id, @response.parsed_body["id"]
+    assert_equal "Flat Updated", @response.parsed_body["name"]
   end
 
   test "create step with flat JSON" do
@@ -184,8 +188,10 @@ class FlatJsonParamsTest < ActionDispatch::IntegrationTest
   test "update user with flat JSON" do
     put user_path(users(:david)), params: { name: "Flat Name" }, as: :json
 
-    assert_response :no_content
+    assert_response :success
     assert_equal "Flat Name", users(:david).reload.name
+    assert_equal users(:david).id, @response.parsed_body["id"]
+    assert_equal "Flat Name", @response.parsed_body["name"]
   end
 
   test "create webhook with flat JSON" do
@@ -247,11 +253,4 @@ class FlatJsonParamsTest < ActionDispatch::IntegrationTest
     assert_response :no_content
     assert_equal "Flat Join", users(:david).reload.name
   end
-
-  private
-    def stub_dns_resolution(*ips)
-      dns_mock = mock("dns")
-      dns_mock.stubs(:each_address).multiple_yields(*ips)
-      Resolv::DNS.stubs(:open).yields(dns_mock)
-    end
 end

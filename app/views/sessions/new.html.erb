@@ -11,18 +11,25 @@
     </div>
 
     <% if Account.accepting_signups? %>
-      <p><strong>New here?</strong> <%= link_to "Sign up", new_signup_path %> to create an account. <strong>Already have an account?</strong> Enter your email and we'll get you signed in.</p>
+      <p><strong>New here?</strong> <%= link_to "Sign up", new_signup_path %> to create an account. <strong>Already have an account?</strong> Enter your email and we’ll get you signed in.</p>
     <% else %>
-      <p>Enter your email and we'll get you signed in.</p>
+      <p>Enter your email and we’ll get you signed in.</p>
     <% end %>
 
     <button type="submit" id="log_in" class="btn btn--link center txt-medium">
-      <span>Let's go</span>
+      <span>Let’s go</span>
       <%= icon_tag "arrow-right" %>
     </button>
   <% end %>
 
-  <%= passkey_sign_in_button "Sign in with a passkey", session_passkey_path, options: @authentication_options, mediation: "conditional", class: "btn btn--link center txt-medium", hidden: true %>
+  <div class="margin-block-start">
+    <%= passkey_sign_in_button "Sign in with a passkey", session_passkey_path,
+          options: @authentication_options,
+          mediation: "conditional",
+          error: { class: "txt-negative margin-block-half" },
+          cancellation: { class: "txt-subtle margin-block-half" },
+          class: "btn btn--plain txt-link center txt-small" %>
+  </div>
 
 </div>
 

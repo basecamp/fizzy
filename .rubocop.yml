@@ -13,3 +13,8 @@ AllCops:
     - 'db/schema*.rb'
     - 'saas/db/migrate/**/*'
     - 'saas/db/saas_schema.rb'
+
+Style/NegatedIf:
+  Enabled: true
+Style/NegatedUnless:
+  Enabled: true
