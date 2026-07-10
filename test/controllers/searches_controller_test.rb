@@ -109,6 +109,18 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
     assert_select "li .search__title", text: /Mixed 混合 content/
   end
 
+  test "search with accented characters" do
+    @board.cards.create!(title: "Hälsa och friskvård", description: "Möte i Göteborg", status: "published", creator: @user)
+
+    # Accented characters must survive query sanitization
+    get search_path(q: "hälsa", script_name: "/#{@account.external_account_id}")
+    assert_select "li .search__title", text: /Hälsa och friskvård/
+    assert_match(/<mark class="circled-text"><span><\/span>Hälsa<\/mark>/, response.body)
+
+    get search_path(q: "Göteborg", script_name: "/#{@account.external_account_id}")
+    assert_select "li .search__excerpt", text: /Möte i Göteborg/
+  end
+
   test "search preserves highlight marks but escapes surrounding HTML" do
     @board.cards.create!(
       title: "<b>Bold</b> testing content",
