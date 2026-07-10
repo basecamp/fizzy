@@ -119,6 +119,10 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
 
     get search_path(q: "Göteborg", script_name: "/#{@account.external_account_id}")
     assert_select "li .search__excerpt", text: /Möte i Göteborg/
+
+    # Decomposed form (a + combining diaeresis) must survive sanitization and still match
+    get search_path(q: "ha\u0308lsa", script_name: "/#{@account.external_account_id}")
+    assert_select "li .search__title", text: /Hälsa och friskvård/
   end
 
   test "search preserves highlight marks but escapes surrounding HTML" do

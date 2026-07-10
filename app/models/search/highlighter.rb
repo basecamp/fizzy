@@ -1,6 +1,10 @@
 class Search::Highlighter
   OPENING_MARK = "<mark class=\"circled-text\"><span></span>"
   CLOSING_MARK = "</mark>"
+  # Private-use characters mark matches during term passes, so a later term
+  # can't match inside HTML inserted for an earlier one
+  OPENING_SENTINEL = "\uE000"
+  CLOSING_SENTINEL = "\uE001"
   ELIPSIS = "..."
 
   attr_reader :query
@@ -10,16 +14,16 @@ class Search::Highlighter
   end
 
   def highlight(text)
-    result = text.dup
+    result = text.delete(OPENING_SENTINEL + CLOSING_SENTINEL)
 
     terms.each do |term|
       if term.match?(Search::CJK_PATTERN)
         result.gsub!(/(#{Regexp.escape(term)})/i) do |match|
-          "#{OPENING_MARK}#{match}#{CLOSING_MARK}"
+          "#{OPENING_SENTINEL}#{match}#{CLOSING_SENTINEL}"
         end
       else
         result.gsub!(/(?<![a-zA-Z0-9_])(#{Regexp.escape(term)}[a-zA-Z0-9_]*)(?![a-zA-Z0-9_])/i) do |match|
-          "#{OPENING_MARK}#{match}#{CLOSING_MARK}"
+          "#{OPENING_SENTINEL}#{match}#{CLOSING_SENTINEL}"
         end
       end
     end
@@ -82,8 +86,8 @@ class Search::Highlighter
 
     def escape_highlight_marks(html)
       CGI.escapeHTML(html)
-        .gsub(CGI.escapeHTML(OPENING_MARK), OPENING_MARK.html_safe)
-        .gsub(CGI.escapeHTML(CLOSING_MARK), CLOSING_MARK.html_safe)
+        .gsub(OPENING_SENTINEL, OPENING_MARK)
+        .gsub(CLOSING_SENTINEL, CLOSING_MARK)
         .html_safe
     end
 end

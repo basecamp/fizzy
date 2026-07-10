@@ -157,6 +157,20 @@ class Search::HighlighterTest < ActiveSupport::TestCase
     assert_equal "これは#{mark('日本語TEST')}です", result
   end
 
+  test "highlight does not corrupt markup when a term matches inserted HTML" do
+    highlighter = Search::Highlighter.new("test class")
+    result = highlighter.highlight("test class here")
+
+    assert_equal "#{mark('test')} #{mark('class')} here", result
+  end
+
+  test "highlight terms matching mark tag attributes" do
+    highlighter = Search::Highlighter.new("some text")
+    result = highlighter.highlight("some text to mark up")
+
+    assert_equal "#{mark('some')} #{mark('text')} to mark up", result
+  end
+
   private
     def mark(text)
       "#{Search::Highlighter::OPENING_MARK}#{text}#{Search::Highlighter::CLOSING_MARK}"

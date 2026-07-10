@@ -42,7 +42,7 @@ module Search::Stemmer
             current_word = +""
           end
           tokens << char
-        elsif char =~ /[\p{L}\p{N}_]/
+        elsif char =~ /[\p{L}\p{M}\p{N}_]/
           current_word << char
         else
           if current_word.present?

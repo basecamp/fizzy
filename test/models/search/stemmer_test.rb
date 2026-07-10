@@ -84,4 +84,17 @@ class Search::StemmerTest < ActiveSupport::TestCase
 
     assert_equal '"中 文" run', result
   end
+
+  test "stem preserves accented characters" do
+    result = Search::Stemmer.stem("Hälsa i Göteborg")
+
+    assert_equal "hälsa i göteborg", result
+  end
+
+  test "stem preserves combining marks" do
+    # "cafe\u0301" in NFD form (e + combining acute accent) and Devanagari with matras
+    result = Search::Stemmer.stem("cafe\u0301 हिंदी")
+
+    assert_equal "cafe\u0301 हिंदी", result
+  end
 end
