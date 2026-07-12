@@ -251,6 +251,26 @@ __Response:__
 
 Returns `204 No Content` on success.
 
+## `PUT /:account_slug/cards/:card_number/board`
+
+Moves a card to a different board.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `board_id` | string | Yes | The ID of the board to move the card to |
+
+__Request:__
+
+```json
+{
+  "board_id": "03f5v9zkft4hj9qq0lsn9ohcm"
+}
+```
+
+__Response:__
+
+Returns `200 OK` with the moved card in the same shape as `GET /:account_slug/cards/:card_number`. The `board` field reflects the new board.
+
 ## `POST /:account_slug/cards/:card_number/triage`
 
 Moves a card into a column.

@@ -126,7 +126,33 @@ __Request:__
 
 __Response:__
 
-Returns `204 No Content` on success.
+Returns `200 OK` with the updated board in the same shape as `GET /:account_slug/boards/:board_id`:
+
+```json
+{
+  "id": "03f5v9zkft4hj9qq0lsn9ohcm",
+  "name": "Updated board name",
+  "all_access": false,
+  "created_at": "2025-12-05T19:36:35.534Z",
+  "auto_postpone_period_in_days": 30,
+  "url": "http://app.fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
+  "creator": {
+    "id": "03f5v9zjw7pz8717a4no1h8a7",
+    "name": "David Heinemeier Hansson",
+    "role": "owner",
+    "active": true,
+    "email_address": "david@example.com",
+    "created_at": "2025-12-05T19:36:35.401Z",
+    "url": "http://app.fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
+  },
+  "user_ids": [
+    "03f5v9zppzlksuj4mxba2nbzn",
+    "03f5v9zjw7pz8717a4no1h8a7"
+  ]
+}
+```
+
+If the update succeeds but removes the requesting user's own access to the board, the endpoint instead returns `204 No Content`.
 
 ## `DELETE /:account_slug/boards/:board_id`
 

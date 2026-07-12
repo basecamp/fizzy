@@ -58,7 +58,7 @@ class Card::StallableTest < ActiveSupport::TestCase
     assert_includes Card.stalled, card
 
     travel_to Time.now + card.board.entropy.auto_postpone_period + 1.day
-    assert_includes Card.due_to_be_postponed, card
+    assert_operator card.entropy.auto_clean_at, :<=, Time.now
 
     Card.auto_postpone_all_due
 

@@ -34,6 +34,43 @@ class ActiveStorage::DirectUploadsControllerTest < ActionDispatch::IntegrationTe
     assert_includes response.parsed_body.keys, "direct_upload"
   end
 
+  test "create with session token" do
+    sign_in_as :david
+
+    post rails_direct_uploads_path,
+      params: @blob_params,
+      as: :json
+
+    assert_response :success
+    assert_includes response.parsed_body.keys, "direct_upload"
+  end
+
+  test "create with session token skips forgery protection" do
+    sign_in_as :david
+
+    with_forgery_protection do
+      post rails_direct_uploads_path,
+        params: @blob_params,
+        as: :json
+
+      assert_response :success
+      assert_includes response.parsed_body.keys, "direct_upload"
+    end
+  end
+
+  test "create with session token from a cross-site request is forbidden" do
+    sign_in_as :david
+
+    with_forgery_protection do
+      post rails_direct_uploads_path,
+        params: @blob_params,
+        headers: { "Sec-Fetch-Site" => "cross-site" },
+        as: :json
+
+      assert_response :unprocessable_entity
+    end
+  end
+
   test "create with read-only access token" do
     post rails_direct_uploads_path,
       params: @blob_params,
@@ -82,5 +119,13 @@ class ActiveStorage::DirectUploadsControllerTest < ActionDispatch::IntegrationTe
   private
     def bearer_token_header(token)
       { "Authorization" => "Bearer #{token}" }
+    end
+
+    def with_forgery_protection
+      original = ActionController::Base.allow_forgery_protection
+      ActionController::Base.allow_forgery_protection = true
+      yield
+    ensure
+      ActionController::Base.allow_forgery_protection = original
     end
 end

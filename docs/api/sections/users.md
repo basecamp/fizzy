@@ -88,7 +88,7 @@ __Request:__
 
 __Response:__
 
-Returns `204 No Content` on success.
+Returns `200 OK` with the updated user in the same shape as `GET /:account_slug/users/:user_id`.
 
 ## `DELETE /:account_slug/users/:user_id/avatar`
 
