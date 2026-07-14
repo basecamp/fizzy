@@ -62,13 +62,17 @@ ensure_correct_mise_install() {
   fi
 
   if mise_too_old; then
-    if command -v brew &> /dev/null && brew list --versions mise &> /dev/null; then
+    # Upgrade the ACTIVE mise, classified by the resolved binary's owner — a brew
+    # keg can coexist with the pacman/dpkg/mise.run install PATH actually
+    # resolves, and upgrading an inactive copy would leave the floor unmet.
+    mise_path="$(readlink -f "$(command -v mise)")"
+    if command -v brew &> /dev/null && [[ "$mise_path" = "$(brew --prefix)"/* ]]; then
       # refresh the formula index first: with a stale one (fresh VM images,
       # long-idle machines) brew considers an old mise current and this upgrade
       # is a no-op — found live on the fresh-macOS signoff VM
       brew update --quiet || true
       brew upgrade mise || true
-    elif command -v pacman &> /dev/null && pacman -Q mise &> /dev/null; then
+    elif command -v pacman &> /dev/null && pacman -Qo "$mise_path" &> /dev/null; then
       sudo pacman -Syu --noconfirm mise || true
     else
       mise self-update --yes --no-plugins || true
