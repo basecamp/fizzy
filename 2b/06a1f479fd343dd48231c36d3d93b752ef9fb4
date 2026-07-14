@@ -1,0 +1,19 @@
+Brewfile
+  s_763519953559eb::t_834e438d8a1504 1-4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.13",
+  "base_commit_sha": "2b06a1f479fd343dd48231c36d3d93b752ef9fb4",
+  "prompts": {},
+  "sessions": {
+    "s_763519953559eb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "91e4c1f0-6ea5-4c49-8616-5e9ea30bdc2a",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
