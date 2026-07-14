@@ -127,7 +127,14 @@ fi
 if [ "$manager" = "brew" ]; then
   step "Installing system packages" brew bundle --file="$app_root/Brewfile"
 else
-  step "Installing system packages" mise bootstrap packages apply --manager "$manager" --yes --update
+  # apt refreshes package lists with --update; pacman must NOT — mise maps it to a
+  # forced `pacman -Sy` before a targeted -S, Arch's unsupported partial upgrade.
+  # Install against the existing synchronized database instead.
+  if [ "$manager" = pacman ]; then
+    step "Installing system packages" mise bootstrap packages apply --manager "$manager" --yes
+  else
+    step "Installing system packages" mise bootstrap packages apply --manager "$manager" --yes --update
+  fi
 fi
 
 step "Installing Ruby and tools" mise install --yes
