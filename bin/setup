@@ -21,7 +21,9 @@ step() {
   local step_name="$1"
   shift
 
-  if command -v gum &>/dev/null; then
+  # gum may resolve to a mise shim before this config is trusted or mise meets the
+  # floor; invoking it would abort setup right here, so treat shims as unavailable.
+  if command -v gum &> /dev/null && [[ "$(command -v gum)" != */mise/shims/* ]]; then
     gum style --foreground 135 --bold "▸ $step_name"
     gum style --foreground 240 "$*"
   else
@@ -60,15 +62,6 @@ ensure_correct_mise_install() {
       brew upgrade mise || true
     elif command -v pacman &> /dev/null && pacman -Q mise &> /dev/null; then
       sudo pacman -Syu --noconfirm mise || true
-    elif command -v dpkg &> /dev/null && dpkg -S "$(readlink -f "$(command -v mise)")" &> /dev/null; then
-      # apt can't reach the floor: there's no mise apt repo on our fleet, and mise
-      # disables self-update for package-manager installs. Deliberate ownership
-      # change, matching Shipyard's ensure-mise: install via mise.run, shadowing
-      # the apt package.
-      echo "Replacing your apt-installed mise with a mise.run install (apt has no upgrade path)."
-      curl -fsSL https://mise.run | sh || true
-      export PATH="$HOME/.local/bin:$PATH"
-      hash -r
     else
       mise self-update --yes --no-plugins || true
     fi
