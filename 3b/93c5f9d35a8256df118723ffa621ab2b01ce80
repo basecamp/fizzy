@@ -1,0 +1,19 @@
+bin/setup
+  s_9ce16992e28438::t_cca7a076c71d1e 47-48,50,53,59,61-71
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "3b93c5f9d35a8256df118723ffa621ab2b01ce80",
+  "prompts": {},
+  "sessions": {
+    "s_9ce16992e28438": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cfdb56fe-5a3d-42a1-a926-ace5ca5cec9a",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
