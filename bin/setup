@@ -48,7 +48,9 @@ mise_too_old() {
 
 ensure_correct_mise_install() {
   if ! command -v mise &> /dev/null; then
-    if command -v brew &> /dev/null; then
+    # brew installs are a macOS decision — a Linuxbrew host must not gain a
+    # brew-owned mise moments before the manager gate rejects or ignores it
+    if [ "$(uname -s)" = Darwin ] && command -v brew &> /dev/null; then
       # refresh the formula index first: a stale one (fresh VM images, long-idle
       # machines) resolves an old mise and the version floor is unreachable
       brew update --quiet || true
