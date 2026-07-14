@@ -1,0 +1,21 @@
+app/javascript/controllers/dialog_manager_controller.js
+  s_8054b314927001::t_27f2eb439926f0 5-6,10
+app/javascript/controllers/tooltip_controller.js
+  s_8054b314927001::t_692e5fcd41c409 8-11,15-16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "882f725155c205b2a8892f22916be1c37d17db0e",
+  "prompts": {},
+  "sessions": {
+    "s_8054b314927001": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0684fb1a-0b8a-4b21-a106-b5052642dcbb",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
