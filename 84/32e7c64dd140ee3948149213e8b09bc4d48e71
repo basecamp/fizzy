@@ -1,0 +1,22 @@
+.mise.toml
+  s_763519953559eb::t_ce53501a338a6e 1-2,6-8,11-27
+bin/setup
+  s_763519953559eb::t_ed182e0c90dfb2 19,24-30,39-73,105-122,124,127-137,139,142-145
+  s_763519953559eb::t_ebd76d98324ec1 146
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.13",
+  "base_commit_sha": "8432e7c64dd140ee3948149213e8b09bc4d48e71",
+  "prompts": {},
+  "sessions": {
+    "s_763519953559eb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "91e4c1f0-6ea5-4c49-8616-5e9ea30bdc2a",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
