@@ -44,22 +44,31 @@ mise_too_old() {
 }
 
 ensure_correct_mise_install() {
-  if ! command -v mise &>/dev/null; then
-    if command -v brew &>/dev/null; then
+  if ! command -v mise &> /dev/null; then
+    if command -v brew &> /dev/null; then
       brew install mise
-    elif command -v pacman &>/dev/null; then
+    elif command -v pacman &> /dev/null; then
       sudo pacman -S --noconfirm --needed mise
     else
-      echo "Please install mise: https://mise.jdx.dev/installing-mise.html#installation-methods"
+      echo "Please install mise: https://mise.jdx.dev/"
       exit 1
     fi
   fi
 
   if mise_too_old; then
-    if command -v brew &>/dev/null && brew list --versions mise &>/dev/null; then
+    if command -v brew &> /dev/null && brew list --versions mise &> /dev/null; then
       brew upgrade mise || true
-    elif command -v pacman &>/dev/null && pacman -Q mise &>/dev/null; then
-      sudo pacman -Sy --noconfirm --needed mise || true
+    elif command -v pacman &> /dev/null && pacman -Q mise &> /dev/null; then
+      sudo pacman -Syu --noconfirm mise || true
+    elif command -v dpkg &> /dev/null && dpkg -S "$(readlink -f "$(command -v mise)")" &> /dev/null; then
+      # apt can't reach the floor: there's no mise apt repo on our fleet, and mise
+      # disables self-update for package-manager installs. Deliberate ownership
+      # change, matching Shipyard's ensure-mise: install via mise.run, shadowing
+      # the apt package.
+      echo "Replacing your apt-installed mise with a mise.run install (apt has no upgrade path)."
+      curl -fsSL https://mise.run | sh || true
+      export PATH="$HOME/.local/bin:$PATH"
+      hash -r
     else
       mise self-update --yes --no-plugins || true
     fi
