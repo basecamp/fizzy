@@ -49,6 +49,9 @@ mise_too_old() {
 ensure_correct_mise_install() {
   if ! command -v mise &> /dev/null; then
     if command -v brew &> /dev/null; then
+      # refresh the formula index first: a stale one (fresh VM images, long-idle
+      # machines) resolves an old mise and the version floor is unreachable
+      brew update --quiet || true
       brew install mise
     elif command -v pacman &> /dev/null; then
       sudo pacman -S --noconfirm --needed mise
@@ -60,6 +63,10 @@ ensure_correct_mise_install() {
 
   if mise_too_old; then
     if command -v brew &> /dev/null && brew list --versions mise &> /dev/null; then
+      # refresh the formula index first: with a stale one (fresh VM images,
+      # long-idle machines) brew considers an old mise current and this upgrade
+      # is a no-op — found live on the fresh-macOS signoff VM
+      brew update --quiet || true
       brew upgrade mise || true
     elif command -v pacman &> /dev/null && pacman -Q mise &> /dev/null; then
       sudo pacman -Syu --noconfirm mise || true
