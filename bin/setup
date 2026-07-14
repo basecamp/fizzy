@@ -21,9 +21,10 @@ step() {
   local step_name="$1"
   shift
 
-  # gum may resolve to a mise shim before this config is trusted or mise meets the
-  # floor; invoking it would abort setup right here, so treat shims as unavailable.
-  if command -v gum &> /dev/null && [[ "$(command -v gum)" != */mise/shims/* ]]; then
+  # gum may resolve to a mise shim that aborts before this config is trusted or
+  # mise meets the floor — and the shim dir is configurable, so probe by running
+  # gum rather than matching paths. Any failure falls back to plain echo.
+  if gum --version &> /dev/null; then
     gum style --foreground 135 --bold "▸ $step_name"
     gum style --foreground 240 "$*"
   else
@@ -107,12 +108,14 @@ oss_mysql_setup() {
 step "Ensuring mise install" ensure_correct_mise_install
 step "Trusting mise config" mise trust --yes "$app_root/.mise.toml"
 
-if command -v brew &>/dev/null; then
+# Manager by OS, not PATH: a Linux machine with Homebrew installed must still
+# converge its declared pacman packages, not the macOS Brewfile.
+if [ "$(uname -s)" = Darwin ] && command -v brew &> /dev/null; then
   manager=brew
-elif command -v pacman &>/dev/null; then
+elif [ "$(uname -s)" = Linux ] && command -v pacman &> /dev/null; then
   manager=pacman
 else
-  echo "Unsupported platform: bin/setup needs Homebrew or pacman."
+  echo "Unsupported platform: bin/setup needs Homebrew (macOS) or pacman."
   exit 1
 fi
 
