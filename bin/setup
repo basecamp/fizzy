@@ -16,63 +16,59 @@ if [ -n "$SAAS" ]; then
   export BUNDLE_GEMFILE="Gemfile.saas"
 fi
 
-# Install gum if needed
-if ! command -v gum &>/dev/null; then
-  echo
-  echo "▸ Installing gum"
-  if command -v pacman &>/dev/null; then
-    sudo pacman -S --noconfirm gum
-  elif command -v brew &>/dev/null; then
-    brew install gum
-  else
-    echo "Please install gum: https://github.com/charmbracelet/gum"
-    exit 1
-  fi
-  echo
-fi
-
-# Install mise if needed
-if ! command -v mise &>/dev/null; then
-  echo
-  echo "▸ Installing mise"
-  if command -v pacman &>/dev/null; then
-    sudo pacman -S --noconfirm mise
-  elif command -v brew &>/dev/null; then
-    brew install mise
-  else
-    echo "Please install mise: https://mise.jdx.dev/installing-mise.html#installation-methods"
-    exit 1
-  fi
-  echo
-fi
-
-# Install gh if needed
-if ! command -v gh &>/dev/null; then
-  echo
-  echo "▸ Installing GitHub CLI"
-  if command -v pacman &>/dev/null; then
-    sudo pacman -S --noconfirm github-cli
-  elif command -v brew &>/dev/null; then
-    brew install gh
-  else
-    echo "Please install GitHub CLI: https://github.com/cli/cli#installation"
-    exit 1
-  fi
-  echo
-fi
-
+# gum is a mise-managed tool, so it isn't installed yet on a fresh machine.
 step() {
   local step_name="$1"
   shift
 
-  gum style --foreground 135 --bold "▸ $step_name"
-  gum style --foreground 240 "$*"
+  if command -v gum &>/dev/null; then
+    gum style --foreground 135 --bold "▸ $step_name"
+    gum style --foreground 240 "$*"
+  else
+    echo "▸ $step_name"
+    echo "$*"
+  fi
 
   "$@"
 
   local exit_code=$?
   echo
   return $exit_code
+}
+
+mise_min_version="2026.7.5" # keep in lockstep with min_version in .mise.toml
+
+mise_too_old() {
+  local current="$(mise --version 2>/dev/null | awk '{ print $1; exit }')"
+  [ "$(printf '%s\n' "$mise_min_version" "$current" | sort -V | head -1)" != "$mise_min_version" ]
+}
+
+ensure_correct_mise_install() {
+  if ! command -v mise &>/dev/null; then
+    if command -v brew &>/dev/null; then
+      brew install mise
+    elif command -v pacman &>/dev/null; then
+      sudo pacman -S --noconfirm --needed mise
+    else
+      echo "Please install mise: https://mise.jdx.dev/installing-mise.html#installation-methods"
+      exit 1
+    fi
+  fi
+
+  if mise_too_old; then
+    if command -v brew &>/dev/null && brew list --versions mise &>/dev/null; then
+      brew upgrade mise || true
+    elif command -v pacman &>/dev/null && pacman -Q mise &>/dev/null; then
+      sudo pacman -Sy --noconfirm --needed mise || true
+    else
+      mise self-update --yes --no-plugins || true
+    fi
+  fi
+
+  if mise_too_old; then
+    echo "mise $mise_min_version or newer is required. Please upgrade mise and rerun bin/setup."
+    exit 1
+  fi
 }
 
 needs_seeding() {
@@ -106,31 +102,47 @@ oss_mysql_setup() {
   fi
 }
 
+step "Ensuring mise install" ensure_correct_mise_install
+step "Trusting mise config" mise trust --yes "$app_root/.mise.toml"
+
+if command -v brew &>/dev/null; then
+  manager=brew
+elif command -v pacman &>/dev/null; then
+  manager=pacman
+else
+  echo "Unsupported platform: bin/setup needs Homebrew or pacman."
+  exit 1
+fi
+
+# Native packages before tools: Bundler builds native extensions against them.
+if [ "$manager" = "brew" ]; then
+  step "Installing system packages" brew bundle --file="$app_root/Brewfile"
+else
+  step "Installing system packages" mise bootstrap packages apply --manager "$manager" --yes --update
+fi
+
+step "Installing Ruby and tools" mise install --yes
+eval "$(mise hook-env -s bash)"
+
+# Install gh if needed
+if ! command -v gh &>/dev/null; then
+  echo
+  echo "▸ Installing GitHub CLI"
+  if command -v pacman &>/dev/null; then
+    sudo pacman -S --noconfirm github-cli
+  elif command -v brew &>/dev/null; then
+    brew install gh
+  else
+    echo "Please install GitHub CLI: https://github.com/cli/cli#installation"
+    exit 1
+  fi
+  echo
+fi
+
 echo
 gum style --foreground 153 "   ˚ ∘             ∘ ˚   "
 gum style --foreground 111 --bold "  ∘˚˳°∘°  𝒻𝒾𝓏𝓏𝓎  °∘°˳˚∘  "
 echo
-
-step "Installing Ruby" mise install --yes
-eval "$(mise hook-env -s bash)"
-
-if which pacman >/dev/null 2>&1; then
-  packages=(imagemagick mariadb-libs openslide libvips libheif libwebp libjxl libraw poppler-glib libcgif ffmpeg rav1e svt-av1 gitleaks)
-  if ! pacman -Q "${packages[@]}" >/dev/null 2>&1; then
-    step "Installing packages" sudo pacman -S --noconfirm --needed "${packages[@]}"
-  fi
-elif which brew >/dev/null 2>&1; then
-  packages=(imagemagick openslide vips gitleaks)
-  missing_packages=()
-  for pkg in "${packages[@]}"; do
-    if ! brew list "$pkg" &>/dev/null; then
-      missing_packages+=("$pkg")
-    fi
-  done
-  if [ ${#missing_packages[@]} -gt 0 ]; then
-    step "Installing packages" brew install "${missing_packages[@]}"
-  fi
-fi
 
 bundle config set --local auto_install true
 step "Installing RubyGems" bundle install

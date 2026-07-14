@@ -1,5 +1,27 @@
+min_version = "2026.7.5"
+
 [settings]
 idiomatic_version_file_enable_tools = ["ruby"]
 
+[tools]
+gum = "0.17.0"
+
 [env]
 PROMETHEUS_EXPORTER_URL = "http://127.0.0.1:9306/metrics"
+
+[bootstrap.packages]
+# Arch
+"pacman:imagemagick" = "latest"
+"pacman:mariadb-libs" = "latest"
+"pacman:openslide" = "latest"
+"pacman:libvips" = "latest"
+"pacman:libheif" = "latest"
+"pacman:libwebp" = "latest"
+"pacman:libjxl" = "latest"
+"pacman:libraw" = "latest"
+"pacman:poppler-glib" = "latest"
+"pacman:libcgif" = "latest"
+"pacman:ffmpeg" = "latest"
+"pacman:rav1e" = "latest"
+"pacman:svt-av1" = "latest"
+"pacman:gitleaks" = "latest"
