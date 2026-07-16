@@ -9,16 +9,17 @@ class Boards::ReportsController < ApplicationController
     @active_view            = params[:view].presence || "table"
 
     base_cards = @board.cards
-      .includes(:assignees, :closure, :tags, :not_now, :creator)
+      .includes(:assignees, :closure, :tags, :not_now, :creator, :column)
       .order(created_at: :desc)
 
     @cards = filter_cards(base_cards.to_a)
 
     @events = @board.events
-      .where(eventable_type: "Card", action: %w[card_published card_closed comment_created])
+      .where(eventable_type: "Card", action: %w[card_published card_triaged card_closed])
       .includes(:creator, eventable: [ :closure, :creator ])
       .order(created_at: :desc)
       .limit(200)
+    @event_working_minutes = event_working_minutes(@events)
 
     @board_assignees = User
       .joins("INNER JOIN assignments ON assignments.assignee_id = users.id")
@@ -40,6 +41,21 @@ class Boards::ReportsController < ApplicationController
   end
 
   private
+    def event_working_minutes(events)
+      time_zone = Current.user.timezone.presence || Time.zone
+
+      events.group_by(&:eventable_id).each_with_object({}) do |(_card_id, card_events), durations|
+        chronological_events = card_events.sort_by(&:created_at)
+
+        chronological_events.each_with_index do |event, index|
+          unless event.action.card_closed?
+            status_ended_at = chronological_events[index + 1]&.created_at || Time.current
+            durations[event.id] = WorkingTime.minutes_between(event.created_at, status_ended_at, time_zone: time_zone)
+          end
+        end
+      end
+    end
+
     def filter_cards(cards)
       if @selected_assignee_ids.any?
         cards = cards.select do |c|

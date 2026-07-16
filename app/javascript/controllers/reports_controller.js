@@ -207,6 +207,7 @@ export default class extends Controller {
       "Story Points": c.points || "",
       "Assignees":    c.assignees.map(a => a.name).join(", "),
       "Status":       c.status,
+      "Current tab":  c.currentTab,
       "Tags":         c.tags.join(", ")
     }))
 
@@ -214,6 +215,8 @@ export default class extends Controller {
       "Timestamp": this.fmtDate(new Date(e.at)),
       "Actor":     e.actor,
       "Event":     e.kind,
+      "Destination": e.destination || "",
+      "Working time spent": this.fmtWorkingTime(e.workingMinutes),
       "Card #":    e.cardNumber,
       "Card":      e.cardTitle
     }))
@@ -306,7 +309,8 @@ export default class extends Controller {
       createdBy:   c => c.createdBy,
       points:      c => c.points || 0,
       assignees:   c => c.assignees[0]?.name || "",
-      status:      c => c.status
+      status:      c => c.status,
+      currentTab:  c => c.currentTab
     }
     const fn = sorters[this.sortCol] || sorters.createdAt
     const sorted = [...cards].sort((a, b) => {
@@ -391,7 +395,7 @@ export default class extends Controller {
     if (!this.hasTableBodyTarget) return
 
     if (cards.length === 0) {
-      this.tableBodyTarget.innerHTML = `<tr><td colspan="7" class="rp-empty">No cards match these filters.</td></tr>`
+      this.tableBodyTarget.innerHTML = `<tr><td colspan="9" class="rp-empty">No cards match these filters.</td></tr>`
       this.tableFootTarget.innerHTML = `<span>0 cards</span><span class="rp-muted">No results</span>`
       return
     }
@@ -413,11 +417,12 @@ export default class extends Controller {
           </div>
         </td>
         <td>${this.statusPill(c.status)}</td>
+        <td>${this.currentTabPill(c)}</td>
         <td>${c.tags.map(t => `<span class="rp-tag-pill">${this.esc(t)}</span>`).join(" ") || '<span class="rp-muted">—</span>'}</td>
       </tr>
     `).join("")
 
-    const colLabel = { completedAt: "completed on", createdAt: "created on", title: "title", createdBy: "created by", points: "story points", assignees: "assignee", status: "status" }
+    const colLabel = { completedAt: "completed on", createdAt: "created on", title: "title", createdBy: "created by", points: "story points", assignees: "assignee", status: "status", currentTab: "current tab" }
     this.tableFootTarget.innerHTML = `
       <span>${cards.length} card${cards.length === 1 ? "" : "s"}</span>
       <span class="rp-muted">Sorted by ${colLabel[this.sortCol] || this.sortCol} · ${this.sortDir === "asc" ? "ascending" : "descending"}</span>
@@ -464,9 +469,10 @@ export default class extends Controller {
   }
 
   activityRowHtml(ev) {
-    const iconCls = { created: "rp-act-icon--created", completed: "rp-act-icon--completed", commented: "rp-act-icon--commented" }[ev.kind] || "rp-act-icon--commented"
-    const glyph = { created: "+", completed: "✓", commented: "💬" }[ev.kind] || "·"
-    const verb = { created: "created", completed: "completed", commented: "commented on" }[ev.kind] || ev.kind
+    const iconCls = { created: "rp-act-icon--created", moved: "rp-act-icon--created", completed: "rp-act-icon--completed" }[ev.kind] || "rp-act-icon--commented"
+    const glyph = { created: "+", moved: "→", completed: "✓" }[ev.kind] || "·"
+    const verb = { created: "created", moved: "moved", completed: "moved" }[ev.kind] || ev.kind
+    const destination = ev.destination ? ` to <strong>${this.esc(ev.destination)}</strong>` : ""
 
     const closedAt = ev.cardClosedAt ? new Date(ev.cardClosedAt) : null
     const createdAt = ev.cardCreatedAt ? new Date(ev.cardCreatedAt) : null
@@ -483,8 +489,13 @@ export default class extends Controller {
             <span class="rp-act-verb">${verb}</span>
             <span class="rp-act-card-id">#${ev.cardNumber}</span>
             <span>${this.esc(ev.cardTitle)}</span>
+            ${destination}
           </div>
           <div class="rp-act-meta">${this.fmtDate(new Date(ev.at))}${cycle ? `<span class="rp-act-cycle">${cycle}</span>` : ""}</div>
+        </div>
+        <div class="rp-act-hours">
+          <span class="rp-act-hours__label">Working time spent</span>
+          <strong>${this.fmtWorkingTime(ev.workingMinutes)}</strong>
         </div>
       </div>
     `
@@ -494,6 +505,16 @@ export default class extends Controller {
 
   fmtDate(d) {
     return d.toLocaleString(undefined, { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })
+  }
+
+  fmtWorkingTime(minutes) {
+    if (minutes === null || minutes === undefined) return "—"
+
+    const hours = Math.floor(minutes / 60)
+    const remainingMinutes = minutes % 60
+    if (hours === 0) return `${remainingMinutes}m`
+    if (remainingMinutes === 0) return `${hours}h`
+    return `${hours}h ${remainingMinutes}m`
   }
 
   esc(str) {
@@ -509,5 +530,12 @@ export default class extends Controller {
   statusPill(status) {
     const cls = { "Closed": "rp-pill--closed", "Open": "rp-pill--open", "Postponed": "rp-pill--postponed" }[status] || "rp-pill--open"
     return `<span class="rp-pill ${cls}">${status}</span>`
+  }
+
+  currentTabPill(card) {
+    const cls = card.currentTab === "Done" ? "rp-pill--closed"
+      : card.currentTab === "Not Now" ? "rp-pill--postponed"
+      : "rp-pill--open"
+    return `<span class="rp-pill ${cls}">${this.esc(card.currentTab)}</span>`
   }
 }

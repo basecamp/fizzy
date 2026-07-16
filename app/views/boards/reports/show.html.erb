@@ -28,6 +28,7 @@
       points:    c.points,
       assignees: c.assignees.map { |a| { name: a.name, hue: (a.name.bytes.sum % 360) } },
       status:    status,
+      currentTab: card_current_tab(c),
       tags:      c.tags.map(&:title),
       url:       card_path(c)
     }
@@ -38,12 +39,19 @@
     next unless card.is_a?(Card)
     kind = case e.action.to_s
            when "card_published" then "created"
+           when "card_triaged"   then "moved"
            when "card_closed"    then "completed"
-           when "comment_created" then "commented"
            else "created"
            end
+    destination = case e.action.to_s
+                  when "card_published" then "Todos"
+                  when "card_triaged" then e.particulars.dig("particulars", "column")
+                  when "card_closed" then "Done"
+                  end
     {
       kind:          kind,
+      destination:   destination,
+      workingMinutes: @event_working_minutes[e.id],
       at:            e.created_at.iso8601,
       actor:         e.creator.name,
       cardNumber:    card.number,
@@ -208,6 +216,9 @@
                 <th data-col="status" data-action="click->reports#sort">
                   Status <span class="rp-th-sort">↕</span>
                 </th>
+                <th data-col="currentTab" data-action="click->reports#sort">
+                  Current tab <span class="rp-th-sort">↕</span>
+                </th>
                 <th>Tags</th>
               </tr>
             </thead>
@@ -257,6 +268,7 @@
                     <% end %>
                   </td>
                   <td><span class="rp-pill <%= status_cls %>"><%= status %></span></td>
+                  <td><span class="rp-pill <%= card.closed? ? "rp-pill--closed" : card.postponed? ? "rp-pill--postponed" : "rp-pill--open" %>"><%= card_current_tab(card) %></span></td>
                   <td>
                     <% if card.tags.any? %>
                       <% card.tags.each do |tag| %>
@@ -269,7 +281,7 @@
                 </tr>
               <% end %>
               <% if @cards.empty? %>
-                <tr><td colspan="8" class="rp-empty">No cards on this board yet.</td></tr>
+                <tr><td colspan="9" class="rp-empty">No cards on this board yet.</td></tr>
               <% end %>
             </tbody>
           </table>

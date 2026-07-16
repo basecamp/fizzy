@@ -42,4 +42,21 @@ class Card::PointableTest < ActiveSupport::TestCase
 
     assert_equal 8, card.closure.reload.points_awarded
   end
+
+  test "points must be a non-negative integer" do
+    card = cards(:logo)
+
+    assert card.update(points: 0)
+    assert_not card.update(points: -1)
+    assert_not card.update(points: 1.5)
+    assert_not card.update(points: "lots")
+  end
+
+  test "points can be cleared" do
+    card = cards(:logo)
+    card.update!(points: 5)
+
+    assert card.update(points: nil)
+    assert_nil card.points
+  end
 end

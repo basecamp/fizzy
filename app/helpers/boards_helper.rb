@@ -16,4 +16,16 @@ module BoardsHelper
       icon_tag("activity") + tag.span("Reports for #{board.name}", class: "for-screen-reader")
     end
   end
+
+  def card_current_tab(card)
+    if card.drafted?
+      "Draft"
+    elsif card.closed?
+      "Done"
+    elsif card.postponed?
+      "Not Now"
+    else
+      card.column&.name || "Todos"
+    end
+  end
 end
