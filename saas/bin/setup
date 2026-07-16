@@ -4,9 +4,46 @@ set -eo pipefail
 # SaaS-specific setup tasks
 # This script is called from the main Fizzy bin/setup when SAAS is enabled
 
+# docker-dev is declared in mise.saas.toml — the SaaS-only overlay, loaded via
+# MISE_ENV=saas — and converged declaratively through mise's repos phase. The
+# OSS root .mise.toml never references it; OSS setups never reach this file.
+step "Trusting SaaS mise overlay" mise trust --yes "$app_root/mise.saas.toml"
+
+# shipyard-block: docker-dev-origin v1
+# mise syncs docker-dev from the declared https URL: its repos preflight doesn't
+# equate ssh with https origins, and fresh clones use the URL as-is. docker-dev is
+# private and gh being installed does not imply its git credential helper is
+# configured (gh auth setup-git is a separate step), so prove https auth with a
+# noninteractive probe wherever mise is about to need it: before a fresh clone, and
+# before rewriting the canonical ssh origin of an existing checkout. On failure,
+# stop with guidance and leave any working ssh remote untouched. Forks, mirrors,
+# and dirty checkouts are left for mise to flag.
+docker_dev="$HOME/Work/basecamp/docker-dev"
+docker_dev_url="https://github.com/basecamp/docker-dev.git"
+docker_dev_https_ok() {
+  GIT_TERMINAL_PROMPT=0 GIT_ASKPASS=true git ls-remote "$docker_dev_url" HEAD > /dev/null 2>&1
+}
+docker_dev_auth_required() {
+  echo "docker-dev syncs from $docker_dev_url, but https git auth isn't set up." >&2
+  echo "Run: gh auth setup-git — then rerun bin/setup." >&2
+  exit 1
+}
+if [ ! -e "$docker_dev/.git" ]; then
+  docker_dev_https_ok || docker_dev_auth_required
+else
+  case "$(git -C "$docker_dev" config --get remote.origin.url || true)" in
+    git@github.com:basecamp/docker-dev|git@github.com:basecamp/docker-dev.git|ssh://git@github.com/basecamp/docker-dev|ssh://git@github.com/basecamp/docker-dev.git)
+      docker_dev_https_ok || docker_dev_auth_required
+      git -C "$docker_dev" remote set-url origin "$docker_dev_url";;
+  esac
+fi
+# shipyard-block-end: docker-dev-origin
+
+step "Syncing docker-dev" env MISE_ENV=saas mise bootstrap --only repos --yes
+
 if [ -e tmp/minio-dev.txt ]; then
-  step "Starting Docker services" bash -c "[ -d ~/Work/basecamp/docker-dev ] && git -C ~/Work/basecamp/docker-dev pull || gh repo clone basecamp/docker-dev ~/Work/basecamp/docker-dev && ~/Work/basecamp/docker-dev/setup minio"
+  step "Starting Docker services" ~/Work/basecamp/docker-dev/setup minio
   step "Configuring MinIO" bin/minio-setup
 fi
 
-step "Starting mysql" bash -c "[ -d ~/Work/basecamp/docker-dev ] && git -C ~/Work/basecamp/docker-dev pull || gh repo clone basecamp/docker-dev ~/Work/basecamp/docker-dev && ~/Work/basecamp/docker-dev/setup mysql80"
+step "Starting mysql" ~/Work/basecamp/docker-dev/setup mysql80
