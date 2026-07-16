@@ -19,7 +19,9 @@ class Account::DataTransfer::RecordSet::DuplicateDetector
     # This is an improvement, but it still could be a problem if the number of unique values is very large.
     # In that case, we may need to use a more memory-efficient approach, such as storing the digests in a
     # temporary file, or we could switch to a Bloom filter, or a Merkel tree.
+    # MySQL's default collation compares strings case-insensitively, and UUID columns
+    # cast their values through base36, so values differing only in case are duplicates.
     def digest(values)
-      Digest::SHA256.digest(values.to_json)
+      Digest::SHA256.digest(values.map { |value| value.is_a?(String) ? value.downcase : value }.to_json)
     end
 end

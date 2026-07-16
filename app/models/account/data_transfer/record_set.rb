@@ -53,6 +53,8 @@ class Account::DataTransfer::RecordSet
         callback&.call(record_set: self, file: file_path)
       end
     end
+  ensure
+    clear_duplicate_detector
   end
 
   private
@@ -142,6 +144,10 @@ class Account::DataTransfer::RecordSet
     end
 
     def check_unique_values_arent_duplicated(data)
+      # Import remaps every record to the target account, so account-scoped
+      # unique values must be compared under the target account too.
+      data = data.merge("account_id" => account.id)
+
       if columns = duplicate_detector.detect(data)
         raise IntegrityError, "#{model} has multiple records with the same #{columns.to_sentence}: #{data.values_at(*columns).join(', ')}"
       end
@@ -151,8 +157,12 @@ class Account::DataTransfer::RecordSet
       @duplicate_detector ||= DuplicateDetector.new(unique_key_sets)
     end
 
+    def clear_duplicate_detector
+      @duplicate_detector = nil
+    end
+
     def unique_key_sets
-      @unique_key_sets ||= model.connection.indexes(model.table_name).select(&:unique).map(&:columns)
+      @unique_key_sets ||= [ [ model.primary_key ] ] + model.connection.indexes(model.table_name).select(&:unique).map(&:columns)
     end
 
     def skip_to(file_list, last_id)
