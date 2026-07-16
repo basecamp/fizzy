@@ -2,6 +2,8 @@ class ZipFile::Reader
   def initialize(io)
     @io = io
     @reader = ZipKit::FileReader.read_zip_structure(io: io)
+
+    ensure_unique_entry_names
   rescue ZipKit::FileReader::ReadError, ZipKit::FileReader::MissingEOCD, ZipKit::FileReader::UnsupportedFeature => e
     raise ZipFile::InvalidFileError, e.message
   end
@@ -19,10 +21,19 @@ class ZipFile::Reader
   end
 
   def glob(pattern)
-    @reader.map(&:filename).select { |name| File.fnmatch(pattern, name) }.sort
+    @reader.map(&:filename).select { |name| File.fnmatch(pattern, name, File::FNM_PATHNAME) }.sort
   end
 
   def exists?(file_path)
     @reader.any? { |e| e.filename == file_path }
   end
+
+  private
+    def ensure_unique_entry_names
+      duplicates = @reader.map { |entry| entry.filename.downcase }.tally.filter_map { |name, count| name if count > 1 }
+
+      if duplicates.any?
+        raise ZipFile::InvalidFileError, "Duplicate entries in zip: #{duplicates.join(', ')}"
+      end
+    end
 end

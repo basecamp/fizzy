@@ -119,18 +119,11 @@ class Account::DataTransfer::RecordSetTest < ActiveSupport::TestCase
     assert_match(/multiple records with the same account_id and title/i, error.message)
   end
 
-  test "duplicate detector flags records sharing an id, as duplicate zip entries would" do
-    detector = Account::DataTransfer::RecordSet::DuplicateDetector.new([ %w[ id ] ])
-
-    assert_nil detector.detect({ "id" => "test_closure_id_1234567890123" })
-    assert_equal %w[ id ], detector.detect({ "id" => "test_closure_id_1234567890123" })
-  end
-
-  test "record sets track the primary key alongside the model's unique indexes" do
+  test "record sets track the model's unique indexes but not the primary key" do
     record_set = Account::DataTransfer::RecordSet.new(account: importing_account, model: Closure)
 
-    assert_includes record_set.send(:unique_key_sets), [ "id" ]
     assert_includes record_set.send(:unique_key_sets), [ "card_id" ]
+    assert_not_includes record_set.send(:unique_key_sets), [ "id" ]
   end
 
   test "check rejects users that share an email address" do

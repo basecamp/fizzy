@@ -119,6 +119,40 @@ class ZipFileTest < ActiveSupport::TestCase
     end
   end
 
+  test "reader raises InvalidFileError for duplicate entry names" do
+    tempfile = create_test_zip("data/a.json" => "{}", "data/b.json" => "{}")
+
+    # Our writer refuses to produce duplicate entry names, so forge them by renaming
+    # the second entry onto the first in both its local header and the central directory.
+    forged = StringIO.new(tempfile.read.gsub("data/b.json", "data/a.json"))
+
+    error = assert_raises(ZipFile::InvalidFileError) { ZipFile::Reader.new(forged) }
+    assert_match(/duplicate entries/i, error.message)
+  ensure
+    tempfile&.close
+    tempfile&.unlink
+  end
+
+  test "reader raises InvalidFileError for entry names differing only in case" do
+    tempfile = create_test_zip("data/a.json" => "{}", "data/A.json" => "{}")
+
+    assert_raises(ZipFile::InvalidFileError) { ZipFile::Reader.new(tempfile) }
+  ensure
+    tempfile&.close
+    tempfile&.unlink
+  end
+
+  test "reader glob does not match nested paths" do
+    tempfile = create_test_zip("data/a.json" => "{}", "data/nested/b.json" => "{}")
+
+    reader = ZipFile::Reader.new(tempfile)
+
+    assert_equal [ "data/a.json" ], reader.glob("data/*.json")
+  ensure
+    tempfile&.close
+    tempfile&.unlink
+  end
+
   test "reader raises InvalidFileError for non-zip file" do
     tempfile = Tempfile.new([ "not_a_zip", ".zip" ])
     tempfile.write("this is not a zip file at all")

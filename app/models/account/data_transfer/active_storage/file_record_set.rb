@@ -21,7 +21,7 @@ class Account::DataTransfer::ActiveStorage::FileRecordSet < Account::DataTransfe
     end
 
     def files
-      zip.glob("storage/*")
+      zip.glob("storage/**/*")
     end
 
     def import_batch(files)

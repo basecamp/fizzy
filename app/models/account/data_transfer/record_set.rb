@@ -145,7 +145,7 @@ class Account::DataTransfer::RecordSet
 
     def check_unique_values_arent_duplicated(data)
       # Import remaps every record to the target account, so account-scoped
-      # unique values must be compared under the target account too.
+      # unique values must be compared under the new account too.
       data = data.merge("account_id" => account.id)
 
       if columns = duplicate_detector.detect(data)
@@ -162,7 +162,7 @@ class Account::DataTransfer::RecordSet
     end
 
     def unique_key_sets
-      @unique_key_sets ||= [ [ model.primary_key ] ] + model.connection.indexes(model.table_name).select(&:unique).map(&:columns)
+      @unique_key_sets ||= model.connection.indexes(model.table_name).select(&:unique).map(&:columns)
     end
 
     def skip_to(file_list, last_id)
