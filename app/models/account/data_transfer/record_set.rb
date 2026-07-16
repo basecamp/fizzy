@@ -15,6 +15,12 @@ class Account::DataTransfer::RecordSet
     @importable_model_names = importable_model_names || [ model.name ]
   end
 
+  # Uniquely identifies a record set within the manifest for job continuation cursors.
+  # The model name alone is ambiguous: BlobRecordSet and FileRecordSet share a model.
+  def cursor_key
+    "#{self.class.name}/#{model.name}"
+  end
+
   def export(to:, start: nil)
     with_zip(to) do
       block = lambda do |record|
