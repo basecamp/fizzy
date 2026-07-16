@@ -1,0 +1,21 @@
+mise.saas.toml
+  s_6b0805eb548343::t_121d6ba5f19c5f 1-10
+saas/bin/setup
+  s_6b0805eb548343::t_19278b5f6c6ec5 7-43,45,49
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "6d9c39f3dfe6d00c1a46056573f3a11b8170b9d2",
+  "prompts": {},
+  "sessions": {
+    "s_6b0805eb548343": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "10513905-ee2b-4ba4-9da1-97a254e79a0a",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
