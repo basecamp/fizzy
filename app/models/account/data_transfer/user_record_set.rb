@@ -57,5 +57,11 @@ class Account::DataTransfer::UserRecordSet < Account::DataTransfer::RecordSet
       unless (ATTRIBUTES - data.keys).empty?
         raise IntegrityError, "#{file_path} is missing required fields"
       end
+
+      check_unique_values_arent_duplicated(data)
+    end
+
+    def unique_key_sets
+      super + [ %w[ email_address ] ]
     end
 end

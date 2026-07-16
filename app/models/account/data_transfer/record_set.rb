@@ -101,6 +101,7 @@ class Account::DataTransfer::RecordSet
       end
 
       check_associations_dont_exist(data)
+      check_unique_values_arent_duplicated(data)
     end
 
     def check_associations_dont_exist(data)
@@ -132,6 +133,20 @@ class Account::DataTransfer::RecordSet
       else
         raise IntegrityError, "Unrecognized model type: #{type_name}"
       end
+    end
+
+    def check_unique_values_arent_duplicated(data)
+      if columns = duplicate_detector.detect(data)
+        raise IntegrityError, "#{model} has multiple records with the same #{columns.to_sentence}: #{data.values_at(*columns).join(', ')}"
+      end
+    end
+
+    def duplicate_detector
+      @duplicate_detector ||= DuplicateDetector.new(unique_key_sets)
+    end
+
+    def unique_key_sets
+      @unique_key_sets ||= model.connection.indexes(model.table_name).select(&:unique).map(&:columns)
     end
 
     def skip_to(file_list, last_id)

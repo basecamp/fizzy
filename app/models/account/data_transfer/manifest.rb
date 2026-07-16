@@ -33,8 +33,8 @@ class Account::DataTransfer::Manifest
           ::Column
         ),
         Account::DataTransfer::EntropyRecordSet.new(account),
+        Account::DataTransfer::Board::PublicationRecordSet.new(account),
         *record_sets_for(
-          ::Board::Publication,
           ::Webhook,
           ::Access,
           ::Card,

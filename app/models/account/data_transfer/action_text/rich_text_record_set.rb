@@ -52,6 +52,7 @@ class Account::DataTransfer::ActionText::RichTextRecordSet < Account::DataTransf
       end
 
       check_associations_dont_exist(data)
+      check_unique_values_arent_duplicated(data)
     end
 
     def transform_body_for_export(content)
