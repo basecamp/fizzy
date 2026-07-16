@@ -126,6 +126,21 @@ class Account::DataTransfer::RecordSetTest < ActiveSupport::TestCase
     assert_not_includes record_set.send(:unique_key_sets), [ "id" ]
   end
 
+  test "check rejects file names differing only in case" do
+    closures = [
+      build_closure_data(id: "test_closure_id_123456789012a", card_id: "nonexistent_card_id_123456789"),
+      build_closure_data(id: "test_closure_id_123456789012A", card_id: "nonexistent_card_id_123456780")
+    ]
+
+    record_set = Account::DataTransfer::RecordSet.new(account: importing_account, model: Closure)
+
+    error = assert_raises(Account::DataTransfer::RecordSet::IntegrityError) do
+      record_set.check(from: build_reader(dir: "closures", data: closures))
+    end
+
+    assert_match(/multiple files for the same record/i, error.message)
+  end
+
   test "check rejects users that share an email address" do
     users = [
       build_user_data(id: "test_user_id_1234567890123456", email_address: "dupe@example.com"),

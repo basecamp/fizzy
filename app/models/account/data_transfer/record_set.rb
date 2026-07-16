@@ -15,8 +15,6 @@ class Account::DataTransfer::RecordSet
     @importable_model_names = importable_model_names || [ model.name ]
   end
 
-  # Uniquely identifies a record set within the manifest for job continuation cursors.
-  # The model name alone is ambiguous: BlobRecordSet and FileRecordSet share a model.
   def cursor_key
     "#{self.class.name}/#{model.name}"
   end
@@ -46,6 +44,7 @@ class Account::DataTransfer::RecordSet
   def check(from:, start: nil, callback: nil)
     with_zip(from) do
       file_list = files
+      check_file_names_arent_ambiguous(file_list)
       file_list = skip_to(file_list, start) if start
 
       file_list.each do |file_path|
@@ -89,6 +88,14 @@ class Account::DataTransfer::RecordSet
       end
 
       model.insert_all!(batch_data)
+    end
+
+    def check_file_names_arent_ambiguous(file_list)
+      duplicates = file_list.map(&:downcase).tally.filter_map { |name, count| name if count > 1 }
+
+      if duplicates.any?
+        raise IntegrityError, "#{model} has multiple files for the same record: #{duplicates.join(', ')}"
+      end
     end
 
     def check_record(file_path)
@@ -144,8 +151,10 @@ class Account::DataTransfer::RecordSet
     end
 
     def check_unique_values_arent_duplicated(data)
-      # Import remaps every record to the target account, so account-scoped
-      # unique values must be compared under the new account too.
+      # Remap the data being imported to the account we are importing it to.
+      # This ensures that uniquness checks are valid, else someone could change
+      # the account_id in the export to point to different accounts and circumvent
+      # this check.
       data = data.merge("account_id" => account.id)
 
       if columns = duplicate_detector.detect(data)

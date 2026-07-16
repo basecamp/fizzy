@@ -133,15 +133,6 @@ class ZipFileTest < ActiveSupport::TestCase
     tempfile&.unlink
   end
 
-  test "reader raises InvalidFileError for entry names differing only in case" do
-    tempfile = create_test_zip("data/a.json" => "{}", "data/A.json" => "{}")
-
-    assert_raises(ZipFile::InvalidFileError) { ZipFile::Reader.new(tempfile) }
-  ensure
-    tempfile&.close
-    tempfile&.unlink
-  end
-
   test "reader glob does not match nested paths" do
     tempfile = create_test_zip("data/a.json" => "{}", "data/nested/b.json" => "{}")
 
