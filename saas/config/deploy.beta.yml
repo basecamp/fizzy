@@ -10,36 +10,6 @@
       "dbs" => {
         "solidqueue" => "fizzy-beta-solidqueue-db-101.df-iad-int.37signals.com"
       }
-    },
-    "2" => {
-      "hosts" => {
-        "web" => ["fizzy-beta-app-102.df-iad-int.37signals.com"],
-        "jobs" => ["fizzy-beta-jobs-102.df-iad-int.37signals.com"],
-        "lb" => "fizzy-beta-lb-102.df-iad-int.37signals.com"
-      },
-      "dbs" => {
-        "solidqueue" => "fizzy-beta-solidqueue-db-102.df-iad-int.37signals.com"
-      }
-    },
-    "3" => {
-      "hosts" => {
-        "web" => ["fizzy-beta-app-103.df-iad-int.37signals.com"],
-        "jobs" => ["fizzy-beta-jobs-103.df-iad-int.37signals.com"],
-        "lb" => "fizzy-beta-lb-103.df-iad-int.37signals.com"
-      },
-      "dbs" => {
-        "solidqueue" => "fizzy-beta-solidqueue-db-103.df-iad-int.37signals.com"
-      }
-    },
-    "4" => {
-      "hosts" => {
-        "web" => ["fizzy-beta-app-104.df-iad-int.37signals.com"],
-        "jobs" => ["fizzy-beta-jobs-104.df-iad-int.37signals.com"],
-        "lb" => "fizzy-beta-lb-104.df-iad-int.37signals.com"
-      },
-      "dbs" => {
-        "solidqueue" => "fizzy-beta-solidqueue-db-104.df-iad-int.37signals.com"
-      }
     }
   }
   @beta_number = ENV["BETA_NUMBER"]

@@ -17,6 +17,8 @@ class NotificationDeliveryTest < ActiveSupport::TestCase
     Notification.register_push_target(:web)
     Notification.register_push_target(push_target_with_tracking)
 
+    stub_web_push_dns_resolution
+
     # Give assignee a web push subscription
     @assignee.push_subscriptions.create!(
       endpoint: "https://fcm.googleapis.com/fcm/send/test123",

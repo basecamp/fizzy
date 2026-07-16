@@ -29,7 +29,7 @@ class Boards::ColumnsController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream
-      format.json { head :no_content }
+      format.json { render :show }
     end
   end
 

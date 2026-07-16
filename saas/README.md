@@ -74,20 +74,33 @@ This environment uses a FlashBlade bucket for blob storage.
 
 Beta is primarily intended for testing product features. It uses the same production database and Active Storage configuration.
 
-There are 4 beta environments:
+There is 1 beta environment:
 
 - https://beta1.fizzy-beta.com
-- https://beta2.fizzy-beta.com
-- https://beta3.fizzy-beta.com
-- https://beta4.fizzy-beta.com
 
-Deploy with: `bin/kamal deploy -d beta1` (or `-d beta2`, `-d beta3`, `-d beta4`)
+Deploy with: `bin/kamal deploy -d beta1`
 
 ### Staging
 
 Staging is primarily intended for testing infrastructure changes. It uses production-like but separate database and Active Storage configurations.
 
 - https://app.fizzy-staging.com/
+
+## Maintenance mode
+
+To take production offline for maintenance, run `kamal-proxy stop` on the load balancers via `knife ssh`:
+
+```bash
+knife ssh 'hostname:fizzy-lb-*' "sudo docker exec fizzy-load-balancer kamal-proxy stop fizzy --message='Sorry! Fizzy is undergoing some maintenance and will be back shortly.'"
+```
+
+Verify maintenance is enabled by visiting https://app.fizzy.do/.
+
+To lift maintenance mode:
+
+```bash
+knife ssh 'hostname:fizzy-lb-*' 'sudo docker exec fizzy-load-balancer kamal-proxy resume fizzy'
+```
 
 ## License
 

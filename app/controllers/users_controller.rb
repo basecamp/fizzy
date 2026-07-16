@@ -18,7 +18,7 @@ class UsersController < ApplicationController
     if @user.update(user_params)
       respond_to do |format|
         format.html { redirect_to @user }
-        format.json { head :no_content }
+        format.json { render :show }
       end
     else
       respond_to do |format|

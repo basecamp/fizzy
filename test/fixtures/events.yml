@@ -37,6 +37,15 @@ logo_assignment_km:
   created_at: <%= 1.day.ago %>
   account: 37s_uuid
 
+buy_domain_sent_back_to_triage:
+  id: <%= ActiveRecord::FixtureSet.identify("buy_domain_sent_back_to_triage", :uuid) %>
+  creator: david_uuid
+  board: writebook_uuid
+  eventable: buy_domain_uuid (Card)
+  action: card_sent_back_to_triage
+  created_at: <%= 1.day.ago %>
+  account: 37s_uuid
+
 layout_published:
   id: <%= ActiveRecord::FixtureSet.identify("layout_published", :uuid) %>
   creator: david_uuid

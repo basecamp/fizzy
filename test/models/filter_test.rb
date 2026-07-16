@@ -48,6 +48,15 @@ class FilterTest < ActiveSupport::TestCase
     assert_empty users(:david).filters.new(board_ids: [ boards(:writebook).id ]).boards
   end
 
+  test "board-scoped cards never leak cards from an inaccessible board in the same account" do
+    inaccessible_card = boards(:private).cards.create!(status: "published", creator: users(:kevin))
+
+    filter = users(:david).filters.new(board_ids: [ boards(:private).id, boards(:writebook).id ])
+
+    assert_not_includes filter.cards, inaccessible_card
+    filter.cards.each { |card| assert_includes users(:david).boards, card.board }
+  end
+
   test "remembering equivalent filters" do
     assert_difference "Filter.count", +1 do
       filter = users(:david).filters.remember(sorted_by: "latest", assignment_status: "unassigned", tag_ids: [ tags(:mobile).id ])

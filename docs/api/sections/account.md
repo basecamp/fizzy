@@ -1,6 +1,6 @@
 # Account
 
-## `GET /account/settings`
+## `GET /:account_slug/account/settings`
 
 Returns the current account.
 
@@ -18,7 +18,7 @@ __Response:__
 
 The `auto_postpone_period_in_days` is the account-level default in days (e.g. `30`). Cards are automatically moved to "Not Now" after this period of inactivity. Each board can override this with its own value.
 
-## `GET /account/join_code`
+## `GET /:account_slug/account/join_code`
 
 Returns the account's join code for inviting new users. The join code URL can be shared with people to let them join the account.
 
@@ -36,7 +36,7 @@ __Response:__
 
 A join code is `active` when `usage_count` is less than `usage_limit`.
 
-## `PUT /account/join_code`
+## `PUT /:account_slug/account/join_code`
 
 Updates the join code's usage limit. Requires admin role.
 
@@ -58,7 +58,7 @@ __Response:__
 
 Returns `204 No Content` on success.
 
-## `DELETE /account/join_code`
+## `DELETE /:account_slug/account/join_code`
 
 Resets the join code, generating a new one and invalidating the old code. Requires admin role.
 
@@ -66,7 +66,7 @@ __Response:__
 
 Returns `204 No Content` on success.
 
-## `PUT /account/entropy`
+## `PUT /:account_slug/account/entropy`
 
 Updates the account-level default auto close period. Requires admin role.
 

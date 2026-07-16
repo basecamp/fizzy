@@ -43,5 +43,19 @@ ssh app@fizzy-staging-lb-401.df-ams-int.37signals.com \
       --target=fizzy-staging-app-101.df-iad-int.37signals.com \
       --target=fizzy-staging-app-102.df-iad-int.37signals.com \
       --read-target=fizzy-staging-app-401.df-ams-int.37signals.com \
-      --read-target=fizzy-staging-app-402.df-ams-int.37signals.com 
+      --read-target=fizzy-staging-app-402.df-ams-int.37signals.com
 
+# fizzy-staging-lb-501.sjc-int.37signals.com
+#
+ssh app@fizzy-staging-lb-501.sjc-int.37signals.com \
+  docker exec fizzy-load-balancer \
+    kamal-proxy deploy fizzy \
+      --force \
+      --tls \
+      --host=app.fizzy-staging.com \
+      --writer-affinity-timeout=0 \
+      --tls-acme-cache-path=/certificates \
+      --target=fizzy-staging-app-101.df-iad-int.37signals.com \
+      --target=fizzy-staging-app-102.df-iad-int.37signals.com \
+      --read-target=fizzy-staging-app-501.sjc-int.37signals.com \
+      --read-target=fizzy-staging-app-502.sjc-int.37signals.com

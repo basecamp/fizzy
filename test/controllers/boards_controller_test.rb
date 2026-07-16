@@ -344,8 +344,27 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
 
     put board_path(board), params: { board: { name: "Updated Name" } }, as: :json
 
+    assert_response :success
+    assert_equal "Updated Name", board.reload.name
+
+    json = @response.parsed_body
+    assert_equal board.id, json["id"]
+    assert_equal "Updated Name", json["name"]
+    assert_equal board.creator.id, json["creator"]["id"]
+  end
+
+  test "update as JSON returns no content when user removes themselves from board" do
+    board = boards(:writebook)
+
+    put board_path(board), params: {
+      board: { name: "Updated Name", all_access: false },
+      user_ids: users(:david, :jz).pluck(:id)
+    }, as: :json
+
     assert_response :no_content
     assert_equal "Updated Name", board.reload.name
+    assert_not board.users.include?(users(:kevin))
+    assert_empty response.body
   end
 
   test "destroy as JSON" do

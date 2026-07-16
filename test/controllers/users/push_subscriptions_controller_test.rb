@@ -1,11 +1,9 @@
 require "test_helper"
 
 class Users::PushSubscriptionsControllerTest < ActionDispatch::IntegrationTest
-  PUBLIC_TEST_IP = "142.250.185.206"
-
   setup do
     sign_in_as :david
-    stub_dns_resolution(PUBLIC_TEST_IP)
+    stub_web_push_dns_resolution
   end
 
   test "create new push subscription" do

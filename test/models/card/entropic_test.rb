@@ -69,11 +69,14 @@ class Card::EntropicTest < ActiveSupport::TestCase
     assert_not_includes Card.postponing_soon, cards(:shipping)
   end
 
-  test "due_to_be_postponed scope works properly cross-account" do
+  test "auto postpone all due works properly cross-account" do
     cards(:logo).update!(last_active_at: entropies(:writebook_board).auto_postpone_period.seconds.ago - 2.days)
     cards(:radio).update!(last_active_at: entropies(:miltons_wish_list_board).auto_postpone_period.seconds.ago - 2.days)
 
-    assert_equal(cards(:logo, :radio).to_set, Card.due_to_be_postponed.to_set)
+    Card.auto_postpone_all_due
+
+    assert cards(:logo).reload.postponed?
+    assert cards(:radio).reload.postponed?
   end
 
   test "postponing_soon scope works properly cross-account" do

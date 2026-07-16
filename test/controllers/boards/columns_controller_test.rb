@@ -86,8 +86,12 @@ class Boards::ColumnsControllerTest < ActionDispatch::IntegrationTest
 
     put board_column_path(column.board, column), params: { column: { name: "Updated Name" } }, as: :json
 
-    assert_response :no_content
+    assert_response :success
     assert_equal "Updated Name", column.reload.name
+
+    json = @response.parsed_body
+    assert_equal column.id, json["id"]
+    assert_equal "Updated Name", json["name"]
   end
 
   test "destroy as JSON" do

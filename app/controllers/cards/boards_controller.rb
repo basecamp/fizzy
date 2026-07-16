@@ -14,7 +14,7 @@ class Cards::BoardsController < ApplicationController
 
     respond_to do |format|
       format.html { redirect_to @card }
-      format.json { head :no_content }
+      format.json { render "cards/show" }
     end
   end
 

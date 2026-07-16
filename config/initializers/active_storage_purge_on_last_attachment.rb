@@ -21,9 +21,21 @@ module ActiveStorage
     end
 
     private
-      def purge_dependent_blob_later
-        if (record.nil? || dependent == :purge_later) && !@purge_mode
+      # Rails registers `after_destroy_commit :purge_dependent_blob` (renamed from
+      # `purge_dependent_blob_later` upstream, which also now handles dependent: :purge).
+      # Override the current callback name so reused blobs (ActionText embeds) are only
+      # purged once the last attachment is gone, and skip when an explicit purge/purge_later
+      # is already driving the blob purge via `purge_blob_if_last` (@purge_mode set).
+      def purge_dependent_blob
+        return if @purge_mode
+
+        # `record.nil?` must be checked first: `dependent` reads `record.attachment_reflections`,
+        # so it can't be evaluated for an orphaned attachment — an absent record falls back to
+        # purge_later.
+        if record.nil? || dependent == :purge_later
           purge_blob_if_last(:purge_later)
+        elsif dependent == :purge
+          purge_blob_if_last(:purge)
         end
       end
 

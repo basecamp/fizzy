@@ -90,6 +90,6 @@ class Card < ApplicationRecord
     end
 
     def assign_number
-      self.number ||= account.increment!(:cards_count).cards_count
+      self.number ||= account.with_lock { account.increment!(:cards_count).cards_count }
     end
 end

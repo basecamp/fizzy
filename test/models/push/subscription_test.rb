@@ -1,10 +1,8 @@
 require "test_helper"
 
 class Push::SubscriptionTest < ActiveSupport::TestCase
-  PUBLIC_TEST_IP = "142.250.185.206" # google.com IP
-
   setup do
-    stub_dns_resolution(PUBLIC_TEST_IP)
+    stub_web_push_dns_resolution
   end
 
   test "valid subscription with permitted endpoint" do
@@ -92,7 +90,7 @@ class Push::SubscriptionTest < ActiveSupport::TestCase
       auth_key: "test_auth"
     )
 
-    assert_equal PUBLIC_TEST_IP, subscription.resolved_endpoint_ip
+    assert_equal DnsTestHelper::WEB_PUSH_PUBLIC_TEST_IP, subscription.resolved_endpoint_ip
   end
 
   test "accepts all permitted push service domains" do

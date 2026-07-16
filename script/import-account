@@ -1,0 +1,76 @@
+#!/usr/bin/env ruby
+
+# Imports a Fizzy account export into this instance.
+#
+# Usage:
+#   script/import-account <export-file> <owner-email>
+#
+# Example:
+#   script/import-account ./storage/export.zip owner@example.com
+#
+# A new account is created and owned by the given email address, then the
+# export is loaded into it. The export file itself is left untouched.
+
+require "uri"
+
+zip_path, email_address = ARGV
+
+if zip_path.nil? || email_address.nil?
+  abort <<~USAGE
+    Usage: script/import-account <export-file> <owner-email>
+
+    Example:
+      script/import-account ./storage/export.zip owner@example.com
+  USAGE
+end
+
+abort "❌ Export file not found: #{zip_path}" unless File.file?(zip_path)
+abort "❌ That doesn't look like an email address: #{email_address}" unless email_address.match?(URI::MailTo::EMAIL_REGEXP)
+
+puts "Loading Fizzy..."
+require_relative "../lib/fizzy"
+Fizzy.configure_bundle
+require_relative "../config/environment"
+
+identity = Identity.find_or_create_by!(email_address: email_address)
+signup = Signup.new(identity: identity, full_name: "Import", skip_account_seeding: true)
+
+abort "❌ Couldn't create an account for the import: #{signup.errors.full_messages.to_sentence}" unless signup.complete
+
+account = signup.account
+
+Current.set(account: account, identity: identity) do
+  import = account.imports.create!(identity: identity, file: File.open(zip_path))
+
+  last_announced = nil
+  progress = ->(record_set:, **) do
+    if record_set.model.name != last_announced
+      last_announced = record_set.model.name
+      puts "  #{record_set.model.name.demodulize.titleize.pluralize}..."
+    end
+  end
+
+  begin
+    puts "Checking the export file (nothing is imported yet)..."
+    import.check callback: progress
+
+    last_announced = nil
+    puts "Importing..."
+    import.process callback: progress
+  rescue Account::DataTransfer::RecordSet::ConflictError
+    abort "❌ Import failed: the export conflicts with data that already exists in this instance."
+  rescue Account::DataTransfer::RecordSet::IntegrityError, ZipFile::InvalidFileError
+    abort "❌ Import failed: the file doesn't look like a valid Fizzy export."
+  rescue => error
+    abort "❌ Import failed: #{error.message}"
+  end
+
+  puts
+  puts "✅ Done! The account “#{account.name}” was imported."
+
+  begin
+    puts "   #{email_address} can now sign in at #{Rails.application.routes.url_helpers.root_url(script_name: account.slug)}"
+  rescue ArgumentError
+    puts "   #{email_address} can now sign in to the account at #{account.slug}"
+  end
+end

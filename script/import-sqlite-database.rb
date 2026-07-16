@@ -49,7 +49,7 @@ class Import
               ActiveStorage::Attachment.skip_callback(:commit, :after, :mirror_blob_later)
               ActiveStorage::Attachment.skip_callback(:commit, :after, :analyze_blob_later)
               ActiveStorage::Attachment.skip_callback(:commit, :after, :transform_variants_later)
-              ActiveStorage::Attachment.skip_callback(:commit, :after, :purge_dependent_blob_later)
+              ActiveStorage::Attachment.skip_callback(:commit, :after, :purge_dependent_blob)
             rescue => e
               puts "⚠️  Warning: Could not skip some callbacks: #{e.message}"
             end

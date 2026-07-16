@@ -170,7 +170,7 @@ __Request:__
 
 __Response:__
 
-Returns `204 No Content` on success.
+Returns `200 OK` with the updated column in the same shape as `GET /:account_slug/boards/:board_id/columns/:column_id`.
 
 ## `DELETE /:account_slug/boards/:board_id/columns/:column_id`
 

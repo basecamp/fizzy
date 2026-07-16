@@ -26,7 +26,13 @@ class Cards::BoardsControllerTest < ActionDispatch::IntegrationTest
 
     put card_board_path(card), params: { board_id: new_board.id }, as: :json
 
-    assert_response :no_content
+    assert_response :success
     assert_equal new_board, card.reload.board
+
+    json = @response.parsed_body
+    assert_equal card.id, json["id"]
+    assert_equal card.number, json["number"]
+    assert_equal card.title, json["title"]
+    assert_equal new_board.id, json["board"]["id"]
   end
 end

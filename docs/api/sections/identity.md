@@ -45,7 +45,7 @@ __Response:__
 }
 ```
 
-## `PATCH /my/timezone`
+## `PATCH /:account_slug/my/timezone`
 
 Updates the current user's timezone. This affects how times are displayed in notification emails.
 

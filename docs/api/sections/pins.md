@@ -18,7 +18,7 @@ __Response:__
 
 Returns `204 No Content` on success.
 
-## `GET /my/pins`
+## `GET /:account_slug/my/pins`
 
 Returns the current user's pinned cards. This endpoint is not paginated and returns up to 100 cards.
 
