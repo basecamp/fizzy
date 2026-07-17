@@ -1,0 +1,21 @@
+.mise.toml
+  s_88480afc194ce0::t_4cbfc946348e3c 1
+bin/setup
+  s_88480afc194ce0::t_542b04fbdff6ff 42
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "2a7c22a35e24b2715f31d5ef6a5fb6aee22ad553",
+  "prompts": {},
+  "sessions": {
+    "s_88480afc194ce0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a4d9d33d-563b-49af-a7f4-6db1fbe545e2",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
