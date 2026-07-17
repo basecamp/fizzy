@@ -1,4 +1,4 @@
-min_version = "2026.7.5"
+min_version = "2026.7.10"
 
 [settings]
 idiomatic_version_file_enable_tools = ["ruby"]
