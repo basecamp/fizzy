@@ -9,33 +9,93 @@ set -eo pipefail
 # OSS root .mise.toml never references it; OSS setups never reach this file.
 step "Trusting SaaS mise overlay" mise trust --yes "$app_root/mise.saas.toml"
 
-# shipyard-block: docker-dev-origin v1
-# mise syncs docker-dev from the declared https URL: its repos preflight doesn't
-# equate ssh with https origins, and fresh clones use the URL as-is. docker-dev is
-# private and gh being installed does not imply its git credential helper is
-# configured (gh auth setup-git is a separate step), so prove https auth with a
-# noninteractive probe wherever mise is about to need it: before a fresh clone, and
-# before rewriting the canonical ssh origin of an existing checkout. On failure,
-# stop with guidance and leave any working ssh remote untouched. Forks, mirrors,
-# and dirty checkouts are left for mise to flag.
+# shipyard-block: docker-dev-origin v2
+# mise syncs docker-dev from the declared https URL. Its repos preflight
+# compares origins transport-agnostically (jdx/mise#11034, in every mise the
+# fleet floor admits), so an existing ssh origin matches the https declaration
+# and keeps updating through ssh untouched — v1's rewrite arm is gone. What
+# still needs proving is the https pull mise is about to perform: docker-dev
+# is private, and gh being installed does not imply its git credential helper
+# is configured (gh auth setup-git is a separate step). Probe noninteractively
+# wherever mise is about to need https auth: before a fresh clone (the
+# configured URL) and before updating an existing clean checkout whose origin
+# names the canonical repo over https (its actual origin). Dirty, foreign,
+# unreadable, and malformed checkouts are left alone — mise owns those
+# diagnostics, and a failed auth probe must never mask them.
 docker_dev="$HOME/Work/basecamp/docker-dev"
 docker_dev_url="https://github.com/basecamp/docker-dev.git"
+# git under mise's own config, so every verdict here matches its preflight
+docker_dev_git() { git -C "$docker_dev" -c "safe.directory=$docker_dev" -c core.autocrlf=false "$@"; }
+docker_dev_is_repo() {
+  local top
+  top="$(docker_dev_git rev-parse --show-toplevel 2>/dev/null)" || return 1
+  [ "$(cd "$top" 2>/dev/null && pwd -P)" = "$(cd "$docker_dev" 2>/dev/null && pwd -P)" ]
+}
+docker_dev_is_clean() {
+  local status
+  status="$(docker_dev_git status --porcelain=v1 2>/dev/null)" && [ -z "$status" ]
+}
+# Mirrors mise's repo-identity parsing for the one question this block asks:
+# does the origin name the canonical repo over https? (repos.rs at the fleet
+# floor tag; any divergence is a bug here, decided in mise's favor.) Scheme
+# and host compare case-insensitively, the path does not; all trailing
+# slashes strip, then one .git; :443 is the https default and elides; empty
+# userinfo (https://@github.com/…) carries no credential and matches, any
+# other userinfo is credential material and does not; query, fragment, other
+# ports, hosts, and paths fall through — probing those would mask the origin
+# conflict mise is about to report.
+docker_dev_origin_is_canonical_https() {
+  local url="$1" scheme hostport path
+  url="${url#"${url%%[![:space:]]*}"}"
+  url="${url%"${url##*[![:space:]]}"}"
+  while [ "${url%/}" != "$url" ]; do url="${url%/}"; done
+  url="${url%.git}"
+  case "$url" in *://* ) ;; * ) return 1 ;; esac
+  scheme="$(printf '%s' "${url%%://*}" | tr '[:upper:]' '[:lower:]')"
+  [ "$scheme" = https ] || return 1
+  url="${url#*://}"
+  case "$url" in */* ) ;; * ) return 1 ;; esac
+  hostport="$(printf '%s' "${url%%/*}" | tr '[:upper:]' '[:lower:]')"
+  path="${url#*/}"
+  while [ "${path#/}" != "$path" ]; do path="${path#/}"; done
+  hostport="${hostport#@}"
+  hostport="${hostport%:443}"
+  [ "$hostport" = github.com ] && [ "$path" = basecamp/docker-dev ]
+}
 docker_dev_https_ok() {
-  GIT_TERMINAL_PROMPT=0 GIT_ASKPASS=true git ls-remote "$docker_dev_url" HEAD > /dev/null 2>&1
+  # $1 is the configured url (fresh clone) or the name `origin`, resolved
+  # inside the existing checkout — either way a noninteractive auth probe.
+  if [ "$1" = origin ]; then
+    GIT_TERMINAL_PROMPT=0 GIT_ASKPASS=true docker_dev_git ls-remote origin HEAD > /dev/null 2>&1
+  else
+    GIT_TERMINAL_PROMPT=0 GIT_ASKPASS=true git ls-remote "$1" HEAD > /dev/null 2>&1
+  fi
 }
 docker_dev_auth_required() {
   echo "docker-dev syncs from $docker_dev_url, but https git auth isn't set up." >&2
   echo "Run: gh auth setup-git — then rerun bin/setup." >&2
   exit 1
 }
-if [ ! -e "$docker_dev/.git" ]; then
-  docker_dev_https_ok || docker_dev_auth_required
-else
-  case "$(git -C "$docker_dev" config --get remote.origin.url || true)" in
-    git@github.com:basecamp/docker-dev|git@github.com:basecamp/docker-dev.git|ssh://git@github.com/basecamp/docker-dev|ssh://git@github.com/basecamp/docker-dev.git)
-      docker_dev_https_ok || docker_dev_auth_required
-      git -C "$docker_dev" remote set-url origin "$docker_dev_url";;
-  esac
+docker_dev_origin_auth_required() {
+  echo "docker-dev can't authenticate to its origin $1." >&2
+  echo "Either set up https git auth: gh auth setup-git" >&2
+  echo "or switch the checkout to ssh: git -C ~/Work/basecamp/docker-dev remote set-url origin git@github.com:basecamp/docker-dev.git" >&2
+  echo "— then rerun bin/setup." >&2
+  exit 1
+}
+# "Missing" must be genuinely absent (-e follows symlinks, so a dangling
+# symlink needs its own check — git clone would fail on it locally), and
+# "empty" requires a SUCCESSFUL listing: an unreadable target must not read
+# as empty. Both failures are mise's/git's to diagnose, not auth problems.
+if { [ ! -e "$docker_dev" ] && [ ! -L "$docker_dev" ]; } \
+    || { [ -d "$docker_dev" ] && docker_dev_listing="$(ls -A "$docker_dev" 2>/dev/null)" \
+         && [ -z "$docker_dev_listing" ]; }; then
+  docker_dev_https_ok "$docker_dev_url" || docker_dev_auth_required
+elif docker_dev_is_repo \
+    && docker_dev_origin="$(docker_dev_git config --get remote.origin.url 2>/dev/null)" \
+    && docker_dev_origin_is_canonical_https "$docker_dev_origin" \
+    && docker_dev_is_clean; then
+  docker_dev_https_ok origin || docker_dev_origin_auth_required "$docker_dev_origin"
 fi
 # shipyard-block-end: docker-dev-origin
 
