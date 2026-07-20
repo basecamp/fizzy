@@ -1,10 +1,10 @@
 require "shellwords"
 
 class Account::Import < ApplicationRecord
-  class InsufficientDiskSpaceError < StandardError; end
+  class InsufficientSpaceError < StandardError; end
 
   # Imported blobs roughly mirror the zip's contents, plus database growth and margin.
-  REQUIRED_DISK_SPACE_FACTOR = 2
+  REQUIRED_SPACE_FACTOR = 2
 
   broadcasts_refreshes
 
@@ -14,7 +14,7 @@ class Account::Import < ApplicationRecord
   has_one_attached :file, dependent: :purge_later
 
   enum :status, %w[ pending processing completed failed ].index_by(&:itself), default: :pending
-  enum :failure_reason, %w[ conflict invalid_export insufficient_disk_space ].index_by(&:itself), prefix: :failed_due_to, scopes: false
+  enum :failure_reason, %w[ conflict invalid_export insufficient_space ].index_by(&:itself), prefix: :failed_due_to, scopes: false
 
   scope :expired, -> { where(completed_at: ...24.hours.ago).or(where(status: :failed, created_at: ...7.days.ago)) }
 
@@ -28,7 +28,7 @@ class Account::Import < ApplicationRecord
 
   def check(start: nil, callback: nil)
     processing!
-    ensure_sufficient_disk_space
+    ensure_sufficient_space
 
     ZipFile.read_from(file.blob) do |zip|
       Account::DataTransfer::Manifest.new(account).each_record_set(start: start) do |record_set, last_id|
@@ -41,8 +41,8 @@ class Account::Import < ApplicationRecord
   rescue Account::DataTransfer::RecordSet::IntegrityError, ZipFile::InvalidFileError => e
     mark_as_failed(:invalid_export)
     raise e
-  rescue InsufficientDiskSpaceError => e
-    mark_as_failed(:insufficient_disk_space)
+  rescue InsufficientSpaceError => e
+    mark_as_failed(:insufficient_space)
     raise e
   rescue => e
     mark_as_failed
@@ -54,7 +54,7 @@ class Account::Import < ApplicationRecord
 
     # Free space can change between check and a later process run after a restart.
     # Skip on resume: the import's own writes have consumed part of the estimate.
-    ensure_sufficient_disk_space if start.nil?
+    ensure_sufficient_space if start.nil?
 
     ZipFile.read_from(file.blob) do |zip|
       Account::DataTransfer::Manifest.new(account).each_record_set(start: start) do |record_set, last_id|
@@ -73,8 +73,8 @@ class Account::Import < ApplicationRecord
   rescue Account::DataTransfer::RecordSet::IntegrityError, ZipFile::InvalidFileError => e
     mark_as_failed(:invalid_export)
     raise e
-  rescue InsufficientDiskSpaceError => e
-    mark_as_failed(:insufficient_disk_space)
+  rescue InsufficientSpaceError => e
+    mark_as_failed(:insufficient_space)
     raise e
   rescue => e
     mark_as_failed
@@ -87,14 +87,14 @@ class Account::Import < ApplicationRecord
   end
 
   private
-    def ensure_sufficient_disk_space
+    def ensure_sufficient_space
       return unless path = ZipFile.path_on_disk(file.blob)
 
-      required = file.blob.byte_size * REQUIRED_DISK_SPACE_FACTOR
-      available = available_disk_space(path)
+      required = file.blob.byte_size * REQUIRED_SPACE_FACTOR
+      available = available_space(path)
 
       if available && available < required
-        raise InsufficientDiskSpaceError, "import needs ~#{human_size(required)} free, found #{human_size(available)}"
+        raise InsufficientSpaceError, "import needs ~#{human_size(required)} free, found #{human_size(available)}"
       end
     end
 
@@ -102,7 +102,7 @@ class Account::Import < ApplicationRecord
       ActiveSupport::NumberHelper.number_to_human_size(bytes)
     end
 
-    def available_disk_space(path)
+    def available_space(path)
       fields = `df -Pk #{Shellwords.escape(path)} 2>/dev/null`.lines.last.to_s.split
       # Anchor on the capacity percentage — the only NN% field — since spaces in
       # the filesystem name would shift a fixed column index.

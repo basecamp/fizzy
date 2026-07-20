@@ -48,8 +48,8 @@ class ImportMailerTest < ActionMailer::TestCase
     assert_match "isn't a Fizzy account export", email.body.encoded
   end
 
-  test "failed with insufficient_disk_space reason" do
-    import = Account::Import.create!(account: Current.account, identity: identities(:david), status: :failed, failure_reason: :insufficient_disk_space)
+  test "failed with insufficient_space reason" do
+    import = Account::Import.create!(account: Current.account, identity: identities(:david), status: :failed, failure_reason: :insufficient_space)
     email = ImportMailer.failed(import)
 
     assert_emails 1 do

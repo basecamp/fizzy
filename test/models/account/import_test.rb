@@ -222,16 +222,16 @@ class Account::ImportTest < ActiveSupport::TestCase
 
   test "check fails fast with a clear reason when free disk space is insufficient" do
     import = import_with_attached_zip
-    import.stubs(:available_disk_space).returns(import.file.blob.byte_size)
+    import.stubs(:available_space).returns(import.file.blob.byte_size)
 
-    error = assert_raises(Account::Import::InsufficientDiskSpaceError) { import.check }
+    error = assert_raises(Account::Import::InsufficientSpaceError) { import.check }
     assert_match(/import needs ~.+ free, found/, error.message)
-    assert import.reload.failed_due_to_insufficient_disk_space?
+    assert import.reload.failed_due_to_insufficient_space?
   end
 
   test "check proceeds when free disk space cannot be determined" do
     import = import_with_attached_zip
-    import.stubs(:available_disk_space).returns(nil)
+    import.stubs(:available_space).returns(nil)
 
     assert_raises(ZipFile::InvalidFileError) { import.check }
     assert import.reload.failed_due_to_invalid_export?
@@ -239,35 +239,35 @@ class Account::ImportTest < ActiveSupport::TestCase
 
   test "process fails fast with a clear reason when free disk space is insufficient" do
     import = import_with_attached_zip
-    import.stubs(:available_disk_space).returns(import.file.blob.byte_size)
+    import.stubs(:available_space).returns(import.file.blob.byte_size)
 
-    assert_raises(Account::Import::InsufficientDiskSpaceError) { import.process }
-    assert import.reload.failed_due_to_insufficient_disk_space?
+    assert_raises(Account::Import::InsufficientSpaceError) { import.process }
+    assert import.reload.failed_due_to_insufficient_space?
   end
 
   test "resumed process skips the disk space preflight" do
     import = import_with_attached_zip
-    import.stubs(:available_disk_space).returns(import.file.blob.byte_size)
+    import.stubs(:available_space).returns(import.file.blob.byte_size)
 
     assert_raises(ZipFile::InvalidFileError) { import.process(start: [ "Board", nil ]) }
     assert import.reload.failed_due_to_invalid_export?
   end
 
-  test "available_disk_space is indeterminate when df output is unparseable" do
+  test "available_space is indeterminate when df output is unparseable" do
     import = import_with_attached_zip
     import.stubs(:`).returns("Filesystem 1024-blocks Used Available Capacity Mounted on\n")
 
-    assert_nil import.send(:available_disk_space, "/tmp")
+    assert_nil import.send(:available_space, "/tmp")
   end
 
-  test "available_disk_space parses df output whose filesystem name contains spaces" do
+  test "available_space parses df output whose filesystem name contains spaces" do
     import = import_with_attached_zip
     import.stubs(:`).returns(<<~DF)
       Filesystem 1024-blocks Used Available Capacity Mounted on
       map auto home 1000000 250000 750000 25% /System/Volumes/Data/home
     DF
 
-    assert_equal 750_000 * 1024, import.send(:available_disk_space, "/tmp")
+    assert_equal 750_000 * 1024, import.send(:available_space, "/tmp")
   end
 
   private
