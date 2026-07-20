@@ -1,0 +1,21 @@
+app/javascript/helpers/form_helpers.js
+  s_3814332fedca4c::t_2420a7703682ca 3-9,13
+test/system/draft_autosave_test.rb
+  s_3814332fedca4c::t_f0f025068bd606 1-60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "d82bd0e00de5459b22be434438c3c2b9be5b40c3",
+  "prompts": {},
+  "sessions": {
+    "s_3814332fedca4c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f402d0a2-d851-4126-95b2-55e0ae7d7b91",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
