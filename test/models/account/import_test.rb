@@ -225,7 +225,7 @@ class Account::ImportTest < ActiveSupport::TestCase
     import.stubs(:available_disk_space).returns(import.file.blob.byte_size)
 
     error = assert_raises(Account::Import::InsufficientDiskSpaceError) { import.check }
-    assert_match(/GB free/, error.message)
+    assert_match(/import needs ~.+ free, found/, error.message)
     assert import.reload.failed_due_to_insufficient_disk_space?
   end
 

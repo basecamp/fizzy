@@ -96,8 +96,12 @@ class Account::Import < ApplicationRecord
       available = available_disk_space(path)
 
       if available && available < required
-        raise InsufficientDiskSpaceError, "import needs ~#{required / 1.gigabyte} GB free, found #{available / 1.gigabyte} GB"
+        raise InsufficientDiskSpaceError, "import needs ~#{human_size(required)} free, found #{human_size(available)}"
       end
+    end
+
+    def human_size(bytes)
+      ActiveSupport::NumberHelper.number_to_human_size(bytes)
     end
 
     def available_disk_space(path)
