@@ -1,0 +1,38 @@
+test/models/account/import_test.rb
+  s_30feffad07cd35::t_c2cf94d95f5c83 229,240-244
+  s_30feffad07cd35::t_ee85e70badd9df 245-246
+app/views/mailers/import_mailer/failed.html.erb
+  s_30feffad07cd35::t_1532fe15961d9c 7
+app/views/mailers/import_mailer/failed.text.erb
+  s_30feffad07cd35::t_8cb23c6460531b 7
+app/views/account/imports/show.html.erb
+  s_30feffad07cd35::t_d568e2b61ec8fe 25
+app/models/account/import.rb
+  s_30feffad07cd35::t_be49eeeb77767b 17
+  s_30feffad07cd35::t_a00ce19123a569 6-7
+  s_30feffad07cd35::t_aa56ba35d1cf2d 83-84,86,88-89,96-99
+  s_30feffad07cd35::t_e0a8dfde903bce 45
+test/mailers/import_mailer_test.rb
+  s_30feffad07cd35::t_6bec63c4524d06 50-60
+docs/docker-deployment.md
+  s_30feffad07cd35::t_969ebfc0514f1b 156-166
+app/models/zip_file.rb
+  s_30feffad07cd35::t_44e641961a978a 29-32
+  s_30feffad07cd35::t_b20e93337a4cdc 98-101
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "400d2798370a5060c180346bfd8eadf775c763ba",
+  "prompts": {},
+  "sessions": {
+    "s_30feffad07cd35": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "330bc9fb-c7c8-448b-b6e6-bdc10abecf0a",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
