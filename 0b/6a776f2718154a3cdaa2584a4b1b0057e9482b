@@ -1,0 +1,21 @@
+test/models/ssrf_protection_test.rb
+  s_7aeadd29f28ba5::t_5bc83807b272eb 85-98
+app/models/ssrf_protection.rb
+  s_7aeadd29f28ba5::t_4dce24fd008c9a 14-16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "0b6a776f2718154a3cdaa2584a4b1b0057e9482b",
+  "prompts": {},
+  "sessions": {
+    "s_7aeadd29f28ba5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "05b97e8c-bc9c-4d76-9722-ebb524ab6daf",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
