@@ -1,0 +1,52 @@
+docs/docker-deployment.md
+  s_30feffad07cd35::t_da80d8e6e54f71 160
+app/views/account/imports/show.html.erb
+  s_30feffad07cd35::t_93765f7c967862 26
+  s_9ed1364f524f72::t_bb41f303cb5492 25
+app/views/mailers/import_mailer/failed.html.erb
+  s_30feffad07cd35::t_8c9b5c3f7db291 8
+  s_7aeadd29f28ba5::t_13351368e9b53d 7
+app/views/mailers/import_mailer/failed.text.erb
+  s_30feffad07cd35::t_d42993b7571420 8
+  s_7aeadd29f28ba5::t_1c20ba3f5e23ef 7
+app/jobs/account/data_import_job.rb
+  s_30feffad07cd35::t_9c425e6816de2a 6
+app/models/account/import.rb
+  s_30feffad07cd35::t_79ea9f47a94442 4,7,17,31,44-45,57,76-77,90,93-94,97,105
+test/mailers/import_mailer_test.rb
+  s_30feffad07cd35::t_2ba0e9af4ba379 51-52
+test/models/account/import_test.rb
+  s_30feffad07cd35::t_0b732012f5e1d1 225,227,229,234,242,244-245,250,256,260,263,270
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "8176eb8a1970cc7069415380a8614438250ceda6",
+  "prompts": {},
+  "sessions": {
+    "s_30feffad07cd35": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "330bc9fb-c7c8-448b-b6e6-bdc10abecf0a",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    },
+    "s_7aeadd29f28ba5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "05b97e8c-bc9c-4d76-9722-ebb524ab6daf",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    },
+    "s_9ed1364f524f72": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "70a8485a-17d2-4231-9d1d-a69a30c2c142",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
