@@ -11,7 +11,9 @@ module SsrfProtection
   DISALLOWED_IP_RANGES = [
     IPAddr.new("0.0.0.0/8"),     # "This" network (RFC1700)
     IPAddr.new("100.64.0.0/10"), # Carrier-grade NAT (RFC6598)
-    IPAddr.new("198.18.0.0/15")  # Benchmark testing (RFC2544)
+    IPAddr.new("198.18.0.0/15"), # Benchmark testing (RFC2544)
+    IPAddr.new("64:ff9b::/96"),  # NAT64 well-known prefix (RFC6052)
+    IPAddr.new("2002::/16")      # 6to4 (RFC3056)
   ].freeze
 
   def resolve_public_ip(hostname)

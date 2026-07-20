@@ -82,4 +82,18 @@ class SsrfProtectionTest < ActiveSupport::TestCase
     stub_dns_resolution("::93.184.216.34")
     assert_nil SsrfProtection.resolve_public_ip("compat-public.example.com")
   end
+
+  # IPv6 encapsulation ranges (SSRF bypass prevention)
+
+  test "blocks NAT64 well-known prefix addresses" do
+    assert SsrfProtection.blocked_address?("64:ff9b::a00:1")
+  end
+
+  test "blocks 6to4 addresses" do
+    assert SsrfProtection.blocked_address?("2002::1")
+  end
+
+  test "allows public addresses through blocked_address?" do
+    assert_not SsrfProtection.blocked_address?("93.184.216.34")
+  end
 end
