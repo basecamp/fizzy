@@ -1,0 +1,21 @@
+app/models/account/import.rb
+  s_30feffad07cd35::t_6b8b221282bc29 105-109
+docs/docker-deployment.md
+  s_30feffad07cd35::t_2835f62b25bd49 160
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "55228987e9d47af29f40abafff9857ec335352ad",
+  "prompts": {},
+  "sessions": {
+    "s_30feffad07cd35": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "330bc9fb-c7c8-448b-b6e6-bdc10abecf0a",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
