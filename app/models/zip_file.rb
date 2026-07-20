@@ -91,9 +91,21 @@ class ZipFile
       end
 
       def read_from_disk(blob)
-        blob.open do |file|
-          reader = Reader.new(file)
-          yield reader
+        # Read the stored file in place when the service exposes its path.
+        # blob.open copies the whole blob to a tempfile first — for large
+        # self-hosted imports that's a multi-gigabyte extra disk demand paid
+        # on every read pass, and zip reading only needs random access, which
+        # a plain File handle provides.
+        if blob.service.respond_to?(:path_for)
+          File.open(blob.service.path_for(blob.key), "rb") do |file|
+            reader = Reader.new(file)
+            yield reader
+          end
+        else
+          blob.open do |file|
+            reader = Reader.new(file)
+            yield reader
+          end
         end
       end
   end

@@ -220,7 +220,33 @@ class Account::ImportTest < ActiveSupport::TestCase
     export_tempfile&.unlink
   end
 
+  test "check fails fast with a clear reason when free disk space is insufficient" do
+    import = import_with_attached_zip
+    import.stubs(:available_disk_space).returns(import.file.blob.byte_size)
+
+    error = assert_raises(Account::Import::InsufficientDiskSpaceError) { import.check }
+    assert_match(/GB free/, error.message)
+    assert import.reload.failed_due_to_insufficient_disk?
+  end
+
+  test "check proceeds when free disk space cannot be determined" do
+    import = import_with_attached_zip
+    import.stubs(:available_disk_space).returns(nil)
+
+    assert_raises(ZipFile::InvalidFileError) { import.check }
+    assert import.reload.failed_due_to_invalid_export?
+  end
+
   private
+    def import_with_attached_zip
+      account = Account.create!(name: "Disk Check")
+      import = Account::Import.create!(account: account, identity: identities(:david))
+      Current.set(account: account) do
+        import.file.attach(io: StringIO.new("not actually a zip"), filename: "export.zip", content_type: "application/zip")
+      end
+      import
+    end
+
     def account_digest(account)
       {
         name: account.name,

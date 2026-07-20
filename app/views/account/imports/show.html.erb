@@ -22,6 +22,8 @@
         <div>The account you’re trying to import already exists. Make sure you’re importing a <%= Fizzy.saas? ? "self-hosted" : "fizzy.do" %> account.</div>
       <% elsif @import.failed_due_to_invalid_export? %>
         <div>The .zip file you uploaded doesn’t look like a Fizzy account export.</div>
+      <% elsif @import.failed_due_to_insufficient_disk? %>
+        <div>Your server doesn’t have enough free disk space for this import. Free up at least twice the export file’s size and try again.</div>
       <% else %>
         <div>This may be due to corrupted export data or a conflict with existing data. Please try again with a fresh export.</div>
       <% end %>
