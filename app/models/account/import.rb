@@ -3,9 +3,8 @@ require "shellwords"
 class Account::Import < ApplicationRecord
   class InsufficientDiskSpaceError < StandardError; end
 
-  # Peak disk demand beyond the stored zip itself: the imported attachment
-  # blobs roughly mirror the zip's contents, plus database growth and margin.
-  REQUIRED_DISK_FACTOR = 2
+  # Imported blobs roughly mirror the zip's contents, plus database growth and margin.
+  REQUIRED_DISK_SPACE_FACTOR = 2
 
   broadcasts_refreshes
 
@@ -15,7 +14,7 @@ class Account::Import < ApplicationRecord
   has_one_attached :file, dependent: :purge_later
 
   enum :status, %w[ pending processing completed failed ].index_by(&:itself), default: :pending
-  enum :failure_reason, %w[ conflict invalid_export insufficient_disk ].index_by(&:itself), prefix: :failed_due_to, scopes: false
+  enum :failure_reason, %w[ conflict invalid_export insufficient_disk_space ].index_by(&:itself), prefix: :failed_due_to, scopes: false
 
   scope :expired, -> { where(completed_at: ...24.hours.ago).or(where(status: :failed, created_at: ...7.days.ago)) }
 
@@ -43,7 +42,7 @@ class Account::Import < ApplicationRecord
     mark_as_failed(:invalid_export)
     raise e
   rescue InsufficientDiskSpaceError => e
-    mark_as_failed(:insufficient_disk)
+    mark_as_failed(:insufficient_disk_space)
     raise e
   rescue => e
     mark_as_failed
@@ -81,24 +80,23 @@ class Account::Import < ApplicationRecord
   end
 
   private
-    # Running out of disk mid-import is the worst self-hosted failure mode:
-    # Solid Queue shares the web process, so once its own SQLite writes start
-    # failing ("database or disk is full") the whole app goes down with the
-    # import. Fail fast with a clear reason before consuming the space.
+    # Fail fast before consuming the space: self-hosted Solid Queue shares the web
+    # process, so mid-import ENOSPC ("database or disk is full") takes the app down.
     def ensure_sufficient_disk_space
-      return unless file.blob.service.respond_to?(:root)
+      return unless path = ZipFile.path_on_disk(file.blob)
 
-      required = file.blob.byte_size * REQUIRED_DISK_FACTOR
-      available = available_disk_space
+      required = file.blob.byte_size * REQUIRED_DISK_SPACE_FACTOR
+      available = available_disk_space(path)
 
       if available && available < required
         raise InsufficientDiskSpaceError, "import needs ~#{required / 1.gigabyte} GB free, found #{available / 1.gigabyte} GB"
       end
     end
 
-    def available_disk_space
-      fields = `df -Pk #{Shellwords.escape(file.blob.service.root.to_s)} 2>/dev/null`.lines.last&.split
-      fields && fields[3].to_i * 1024
+    def available_disk_space(path)
+      fields = `df -Pk #{Shellwords.escape(path)} 2>/dev/null`.lines.last&.split
+      kilobytes = fields && Integer(fields[3] || "", exception: false)
+      kilobytes && kilobytes * 1024
     end
 
     def mark_completed

@@ -226,7 +226,7 @@ class Account::ImportTest < ActiveSupport::TestCase
 
     error = assert_raises(Account::Import::InsufficientDiskSpaceError) { import.check }
     assert_match(/GB free/, error.message)
-    assert import.reload.failed_due_to_insufficient_disk?
+    assert import.reload.failed_due_to_insufficient_disk_space?
   end
 
   test "check proceeds when free disk space cannot be determined" do
@@ -235,6 +235,13 @@ class Account::ImportTest < ActiveSupport::TestCase
 
     assert_raises(ZipFile::InvalidFileError) { import.check }
     assert import.reload.failed_due_to_invalid_export?
+  end
+
+  test "available_disk_space is indeterminate when df output is unparseable" do
+    import = import_with_attached_zip
+    import.stubs(:`).returns("Filesystem 1024-blocks Used Available Capacity Mounted on\n")
+
+    assert_nil import.send(:available_disk_space, "/tmp")
   end
 
   private

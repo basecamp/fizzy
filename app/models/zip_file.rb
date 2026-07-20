@@ -26,6 +26,10 @@ class ZipFile
       end
     end
 
+    def path_on_disk(blob)
+      blob.service.path_for(blob.key) if blob.service.respond_to?(:path_for)
+    end
+
     private
       def s3_service?(service)
         # The S3 service doesn't get loaded in development unless it's used
@@ -91,13 +95,10 @@ class ZipFile
       end
 
       def read_from_disk(blob)
-        # Read the stored file in place when the service exposes its path.
-        # blob.open copies the whole blob to a tempfile first — for large
-        # self-hosted imports that's a multi-gigabyte extra disk demand paid
-        # on every read pass, and zip reading only needs random access, which
-        # a plain File handle provides.
-        if blob.service.respond_to?(:path_for)
-          File.open(blob.service.path_for(blob.key), "rb") do |file|
+        # blob.open copies the whole blob to a tempfile; zip reading only needs
+        # random access, so read the stored file in place when we can.
+        if path = path_on_disk(blob)
+          File.open(path, "rb") do |file|
             reader = Reader.new(file)
             yield reader
           end
