@@ -56,6 +56,6 @@ class ImportMailerTest < ActionMailer::TestCase
       email.deliver_now
     end
 
-    assert_match "twice the export file", email.body.encoded
+    assert_match "enough storage space", email.body.encoded
   end
 end

@@ -5,7 +5,7 @@
 <% elsif @import.failed_due_to_invalid_export? %>
   <p>The ZIP file isn't a Fizzy account export.</p>
 <% elsif @import.failed_due_to_insufficient_space? %>
-  <p>There wasn't enough space to process your import. Free up at least twice the export file's size and try again.</p>
+  <p>There wasn't enough storage space to process your import.</p>
 <% else %>
   <p>This may be due to corrupted export data or a conflict with existing data. Please try again with a fresh export, or reach out for help if the problem persists.</p>
 <% end %>
