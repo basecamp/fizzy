@@ -102,8 +102,11 @@ class Account::Import < ApplicationRecord
     def available_space(path)
       fields = `df -Pk #{Shellwords.escape(path)} 2>/dev/null`.lines.last.to_s.split
       capacity_index = fields.index { |field| field.match?(/\A\d+%\z/) }
-      kilobytes = capacity_index && Integer(fields[capacity_index - 1].to_s, exception: false)
-      kilobytes && kilobytes * 1024
+
+      if capacity_index
+        available_kilobytes = Integer(fields[capacity_index - 1], exception: false)
+        available_kilobytes&.kilobytes
+      end
     end
 
     def mark_completed
