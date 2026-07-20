@@ -1,0 +1,35 @@
+test/mailers/import_mailer_test.rb
+  s_30feffad07cd35::t_8dec7987721897 59
+app/views/mailers/import_mailer/failed.html.erb
+  s_30feffad07cd35::t_03ed0dfc66399c 8
+app/views/account/imports/show.html.erb
+  s_30feffad07cd35::t_73b7734d985959 26
+app/views/mailers/import_mailer/failed.text.erb
+  s_7aeadd29f28ba5::t_9c9e2152b9dcec 8
+docs/docker-deployment.md
+  s_7aeadd29f28ba5::t_3d70619259ade4 160
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "44edf2edcaac39abd5a873ea3ec1d835d41cc743",
+  "prompts": {},
+  "sessions": {
+    "s_30feffad07cd35": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "330bc9fb-c7c8-448b-b6e6-bdc10abecf0a",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    },
+    "s_7aeadd29f28ba5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "05b97e8c-bc9c-4d76-9722-ebb524ab6daf",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
