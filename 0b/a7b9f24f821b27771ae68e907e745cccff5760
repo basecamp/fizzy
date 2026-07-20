@@ -1,0 +1,36 @@
+app/views/account/imports/show.html.erb
+  s_9a22f8d5f3caf8::t_27e5c6055ab025 25-26
+app/views/mailers/import_mailer/failed.html.erb
+  s_9a22f8d5f3caf8::t_015a184495fb78 7-8
+app/models/zip_file.rb
+  s_9a22f8d5f3caf8::t_28cad11d38a185 94-108
+app/jobs/account/data_import_job.rb
+  s_9a22f8d5f3caf8::t_8aff97254a46ac 5-6
+app/views/mailers/import_mailer/failed.text.erb
+  s_9a22f8d5f3caf8::t_e253df0201a2ac 7-8
+test/models/account/import_test.rb
+  s_9a22f8d5f3caf8::t_06f12908b88d51 223-239,241-243,247-249
+  s_9a22f8d5f3caf8::t_83f9643ab47159 244-246
+app/models/account/import.rb
+  s_9a22f8d5f3caf8::t_b6ae4cc6d84ec8 32,45-46
+  s_9a22f8d5f3caf8::t_15a60ef6740574 4-9,18
+  s_9a22f8d5f3caf8::t_f0bdd0f46d833c 1-2
+  s_9a22f8d5f3caf8::t_ec15e7ac349f4f 84-103
+  s_9a22f8d5f3caf8::t_624ee5e47cd571 47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "0ba7b9f24f821b27771ae68e907e745cccff5760",
+  "prompts": {},
+  "sessions": {
+    "s_9a22f8d5f3caf8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6350c98a-0c9a-4531-93be-07e27720acff",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
