@@ -52,6 +52,10 @@ class Account::Import < ApplicationRecord
   def process(start: nil, callback: nil)
     processing!
 
+    # Free space can change between check and a later process run after a restart.
+    # Skip on resume: the import's own writes have consumed part of the estimate.
+    ensure_sufficient_disk_space if start.nil?
+
     ZipFile.read_from(file.blob) do |zip|
       Account::DataTransfer::Manifest.new(account).each_record_set(start: start) do |record_set, last_id|
         record_set.import(from: zip, start: last_id, callback: callback)
@@ -68,6 +72,9 @@ class Account::Import < ApplicationRecord
     raise e
   rescue Account::DataTransfer::RecordSet::IntegrityError, ZipFile::InvalidFileError => e
     mark_as_failed(:invalid_export)
+    raise e
+  rescue InsufficientDiskSpaceError => e
+    mark_as_failed(:insufficient_disk_space)
     raise e
   rescue => e
     mark_as_failed
@@ -94,8 +101,11 @@ class Account::Import < ApplicationRecord
     end
 
     def available_disk_space(path)
-      fields = `df -Pk #{Shellwords.escape(path)} 2>/dev/null`.lines.last&.split
-      kilobytes = fields && Integer(fields[3] || "", exception: false)
+      fields = `df -Pk #{Shellwords.escape(path)} 2>/dev/null`.lines.last.to_s.split
+      # Anchor on the capacity percentage — the only NN% field — since spaces in
+      # the filesystem name would shift a fixed column index.
+      capacity_index = fields.index { |field| field.match?(/\A\d+%\z/) }
+      kilobytes = capacity_index && Integer(fields[capacity_index - 1].to_s, exception: false)
       kilobytes && kilobytes * 1024
     end
 
