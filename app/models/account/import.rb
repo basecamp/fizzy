@@ -87,8 +87,6 @@ class Account::Import < ApplicationRecord
   end
 
   private
-    # Fail fast before consuming the space: self-hosted Solid Queue shares the web
-    # process, so mid-import ENOSPC ("database or disk is full") takes the app down.
     def ensure_sufficient_disk_space
       return unless path = ZipFile.path_on_disk(file.blob)
 
