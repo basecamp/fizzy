@@ -14,23 +14,23 @@ class DraftAutosaveTest < ApplicationSystemTestCase
 
     card = board.cards.drafted.order(:created_at).last
 
-    # Flag when the autosave request resolves, so we can assert only after the response
-    # (and any re-render it drives) has been processed by the browser.
+    # Capture the autosave request so we can await it (and any response it renders) before
+    # asserting, rather than racing a timer.
     page.execute_script(<<~JS)
-      window.__autosaveComplete = false
-      const originalFetch = window.fetch
-      window.fetch = async (...args) => {
-        const response = await originalFetch(...args)
-        if (String(args[0]).includes("/cards/")) window.__autosaveComplete = true
-        return response
+      window.__originalFetch = window.fetch
+      window.__cardSave = null
+      window.fetch = (...args) => {
+        const promise = window.__originalFetch(...args)
+        if (String(args[0]).includes("/cards/")) window.__cardSave = promise
+        return promise
       }
     JS
 
-    # Fire an autosave that captures "abc", then — before the response can land — append
-    # "def", as the user would by continuing to type through the round-trip. submitForm
-    # reads the FormData ("abc") synchronously before it awaits, so "def" lives only in
-    # the browser. A Turbo Stream autosave morphs the card container (the draft's own
-    # editing form) and resets the field to "abc", dropping "def".
+    # Fire an autosave that captures "abc", then — before the response lands — append "def",
+    # as the user would by continuing to type through the round-trip. submitForm reads the
+    # FormData ("abc") synchronously before it awaits, so "def" lives only in the browser. A
+    # Turbo Stream autosave morphs the card container (the draft's own editing form) and
+    # resets the field to "abc", dropping "def".
     page.execute_script(<<~JS)
       const input = document.getElementById("card_title")
       input.focus()
@@ -40,21 +40,19 @@ class DraftAutosaveTest < ApplicationSystemTestCase
       input.value = "abcdef"                                         // in-flight keystrokes
     JS
 
-    wait_until { page.evaluate_script("window.__autosaveComplete") }
-    sleep 0.2 # let the browser apply any Turbo Stream from the response before asserting
+    # Barrier: wait for the save's response, then for two animation frames so request.js has
+    # finished applying any Turbo Stream it carried (a morph would land in the microtasks
+    # that drain before the next frame). Restore fetch. No fixed sleep, no timer race.
+    page.evaluate_async_script(<<~JS)
+      const done = arguments[arguments.length - 1]
+      Promise.resolve(window.__cardSave)
+        .then(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+        .then(() => { window.fetch = window.__originalFetch; done() })
+    JS
 
     assert_equal "abc", card.reload.title,
       "expected the autosave to persist the value read when the request was sent"
     assert_equal "abcdef", find("#card_title").value,
       "autosave clobbered keystrokes typed while the save was in flight"
   end
-
-  private
-    def wait_until(timeout: Capybara.default_max_wait_time)
-      deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + timeout
-      until yield
-        flunk "condition not met within #{timeout}s" if Process.clock_gettime(Process::CLOCK_MONOTONIC) > deadline
-        sleep 0.05
-      end
-    end
 end
