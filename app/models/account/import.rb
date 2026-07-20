@@ -3,7 +3,6 @@ require "shellwords"
 class Account::Import < ApplicationRecord
   class InsufficientSpaceError < StandardError; end
 
-  # Imported blobs roughly mirror the zip's contents, plus database growth and margin.
   REQUIRED_SPACE_FACTOR = 2
 
   broadcasts_refreshes
@@ -52,8 +51,6 @@ class Account::Import < ApplicationRecord
   def process(start: nil, callback: nil)
     processing!
 
-    # Free space can change between check and a later process run after a restart.
-    # Skip on resume: the import's own writes have consumed part of the estimate.
     ensure_sufficient_space if start.nil?
 
     ZipFile.read_from(file.blob) do |zip|
@@ -104,8 +101,6 @@ class Account::Import < ApplicationRecord
 
     def available_space(path)
       fields = `df -Pk #{Shellwords.escape(path)} 2>/dev/null`.lines.last.to_s.split
-      # Anchor on the capacity percentage — the only NN% field — since spaces in
-      # the filesystem name would shift a fixed column index.
       capacity_index = fields.index { |field| field.match?(/\A\d+%\z/) }
       kilobytes = capacity_index && Integer(fields[capacity_index - 1].to_s, exception: false)
       kilobytes && kilobytes * 1024

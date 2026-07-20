@@ -95,8 +95,6 @@ class ZipFile
       end
 
       def read_from_disk(blob)
-        # blob.open copies the whole blob to a tempfile; zip reading only needs
-        # random access, so read the stored file in place when we can.
         if path = path_on_disk(blob)
           File.open(path, "rb") do |file|
             reader = Reader.new(file)
