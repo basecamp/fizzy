@@ -8,20 +8,14 @@ module SsrfProtection
     8.8.8.8
   ]
 
-  # IPv4 ranges that must never be a fetch target (RFC 5735/6890 special-use,
-  # plus CGNAT and benchmarking). RFC1918/loopback/link-local are also covered
-  # by the IPAddr predicates in #blocked_address?.
+  # IPv4 special-use ranges (RFC 5735/6890) not already covered by the
+  # private?/loopback?/link_local? predicates in #blocked_address?.
   DISALLOWED_IP_RANGES = [
     IPAddr.new("0.0.0.0/8"),       # "This" network (RFC1700)
-    IPAddr.new("10.0.0.0/8"),      # Private (RFC1918)
     IPAddr.new("100.64.0.0/10"),   # Carrier-grade NAT (RFC6598)
-    IPAddr.new("127.0.0.0/8"),     # Loopback
-    IPAddr.new("169.254.0.0/16"),  # Link-local (incl. AWS metadata)
-    IPAddr.new("172.16.0.0/12"),   # Private (RFC1918)
     IPAddr.new("192.0.0.0/24"),    # IETF protocol assignments (RFC6890)
     IPAddr.new("192.0.2.0/24"),    # TEST-NET-1 (RFC5737)
     IPAddr.new("192.88.99.0/24"),  # 6to4 relay anycast (RFC7526)
-    IPAddr.new("192.168.0.0/16"),  # Private (RFC1918)
     IPAddr.new("198.18.0.0/15"),   # Benchmark testing (RFC2544)
     IPAddr.new("198.51.100.0/24"), # TEST-NET-2 (RFC5737)
     IPAddr.new("203.0.113.0/24"),  # TEST-NET-3 (RFC5737)
