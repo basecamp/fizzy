@@ -1,0 +1,30 @@
+<%= javascript_tag nonce: true do %>
+  function prefersReducedMotion() {
+    const pref = localStorage.getItem("motion")
+    if (pref === "reduce")  return true
+    if (pref === "animate") return false
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  }
+
+  const reduced = prefersReducedMotion()
+  document.documentElement.dataset.motion = reduced ? "reduce" : "animate"
+  
+  if (reduced) document.querySelector('meta[name="view-transition"]')?.remove()
+
+  const originalMatchMedia = window.matchMedia.bind(window)
+  window.matchMedia = function(query) {
+    if (!query.includes("prefers-reduced-motion")) return originalMatchMedia(query)
+    
+    const pref = document.documentElement.dataset.motion
+    if (pref !== "reduce" && pref !== "animate") return originalMatchMedia(query)
+    
+    return new Proxy(originalMatchMedia(query), {
+      get(target, prop) {
+        if (prop === "matches") return pref === "reduce"
+        
+        const value = target[prop]
+        return typeof value === "function" ? value.bind(target) : value
+      }
+    })
+  }
+<% end %>
