@@ -1,5 +1,5 @@
 class CardsController < ApplicationController
-  wrap_parameters :card, include: %i[ title description image created_at last_active_at ]
+  wrap_parameters :card, include: %i[ title description image created_at last_active_at tag_ids ]
 
   include FilterScoped
 
@@ -20,8 +20,13 @@ class CardsController < ApplicationController
       end
 
       format.json do
-        @card = @board.cards.create! card_params.merge(creator: Current.user, status: "published")
-        render :show, status: :created, location: card_path(@card, format: :json)
+        @card = @board.cards.new card_params.merge(creator: Current.user, status: "published")
+
+        if @card.save
+          render :show, status: :created, location: card_path(@card, format: :json)
+        else
+          render json: @card.errors, status: :unprocessable_entity
+        end
       end
     end
   end
@@ -33,11 +38,14 @@ class CardsController < ApplicationController
   end
 
   def update
-    @card.update! card_params
-
     respond_to do |format|
-      format.turbo_stream
-      format.json { render :show }
+      if @card.update(card_params)
+        format.turbo_stream
+        format.json { render :show }
+      else
+        format.html { render :edit, status: :unprocessable_entity }
+        format.json { render json: @card.errors, status: :unprocessable_entity }
+      end
     end
   end
 
@@ -68,6 +76,6 @@ class CardsController < ApplicationController
     end
 
     def card_params
-      params.expect(card: [ :title, :description, :image, :created_at, :last_active_at ])
+      params.expect(card: [ :title, :description, :image, :created_at, :last_active_at, tag_ids: [] ])
     end
 end
