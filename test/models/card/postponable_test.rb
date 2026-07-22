@@ -45,6 +45,17 @@ class Card::PostponableTest < ActiveSupport::TestCase
     assert card.events.last.action.card_auto_postponed?
   end
 
+  test "postponing pops bubble up if present" do
+    card = cards(:text)
+    card.bubble_up_at 1.hour.ago
+
+    assert card.bubble_up?
+    card.postpone
+
+    assert_not card.reload.bubble_up?
+    assert card.events.last.action.card_postponed?
+  end
+
   test "scopes" do
     logo = cards(:logo)
     text = cards(:text)
