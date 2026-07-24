@@ -310,7 +310,7 @@ class Webhook::DeliveryTest < ActiveSupport::TestCase
     assert_equal expected, content
   end
 
-  test "slack webhook payload html-escapes special characters" do
+  test "slack webhook payload escapes slack control characters but preserves quotes" do
     cards(:logo).update_column(:title, %(Tom & Jerry's <Great> "Adventure"))
 
     webhook = Webhook.create!(
@@ -330,7 +330,7 @@ class Webhook::DeliveryTest < ActiveSupport::TestCase
     text = JSON.parse(captured_body)["text"]
 
     expected = <<~TEXT.strip
-      David added &quot;Tom &amp; Jerry&#39;s &lt;Great&gt; &quot;Adventure&quot;&quot; <http://example.com/897362094/cards/1|Open in Fizzy>
+      David added "Tom &amp; Jerry's &lt;Great&gt; "Adventure"" <http://example.com/897362094/cards/1|Open in Fizzy>
     TEXT
     assert_equal expected, text
   end
