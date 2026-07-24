@@ -39,7 +39,7 @@ step() {
   return $exit_code
 }
 
-mise_min_version="2026.7.5" # keep in lockstep with min_version in .mise.toml
+mise_min_version="2026.7.8" # keep in lockstep with min_version in .mise.toml
 
 mise_too_old() {
   local current="$(mise --version 2>/dev/null | awk '{ print $1; exit }')"
