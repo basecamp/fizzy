@@ -57,5 +57,19 @@ class Account::DataTransfer::UserRecordSet < Account::DataTransfer::RecordSet
       unless (ATTRIBUTES - data.keys).empty?
         raise IntegrityError, "#{file_path} is missing required fields"
       end
+
+      if User.exists?(id: data["id"])
+        raise ConflictError, "User record with ID #{data['id']} already exists"
+      end
+
+      check_unique_values_arent_duplicated data.merge("email_address" => normalized_email_address(data))
+    end
+
+    def normalized_email_address(data)
+      Identity.normalize_value_for(:email_address, data["email_address"])
+    end
+
+    def unique_key_sets
+      super + [ %w[ email_address ] ]
     end
 end

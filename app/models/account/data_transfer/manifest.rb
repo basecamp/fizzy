@@ -9,16 +9,18 @@ class Account::DataTransfer::Manifest
     raise ArgumentError, "No block given" unless block_given?
 
     started = start.nil?
-    record_class, last_id = start if start
+    cursor_key, last_id = start if start
 
     record_sets.each do |record_set|
       if started
         yield record_set
-      elsif record_set.model.name == record_class
+      elsif record_set.cursor_key == cursor_key
         started = true
         yield record_set, last_id
       end
     end
+
+    raise ArgumentError, "Unknown record set cursor: #{cursor_key}" unless started
   end
 
   private
@@ -33,8 +35,8 @@ class Account::DataTransfer::Manifest
           ::Column
         ),
         Account::DataTransfer::EntropyRecordSet.new(account),
+        Account::DataTransfer::Board::PublicationRecordSet.new(account),
         *record_sets_for(
-          ::Board::Publication,
           ::Webhook,
           ::Access,
           ::Card,
