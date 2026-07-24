@@ -5,13 +5,15 @@ export default class extends Controller {
   static targets = [ "tooltip" ]
 
   connect() {
-    this.element.addEventListener("mouseenter", this.mouseEnter.bind(this))
-    this.element.addEventListener("mouseout", this.mouseOut.bind(this))
+    this.boundMouseEnter = this.mouseEnter.bind(this)
+    this.boundMouseOut = this.mouseOut.bind(this)
+    this.element.addEventListener("mouseenter", this.boundMouseEnter)
+    this.element.addEventListener("mouseout", this.boundMouseOut)
   }
 
   disconnect() {
-    this.element.removeEventListener("mouseenter", this.mouseEnter.bind(this))
-    this.element.removeEventListener("mouseout", this.mouseOut.bind(this))
+    this.element.removeEventListener("mouseenter", this.boundMouseEnter)
+    this.element.removeEventListener("mouseout", this.boundMouseOut)
   }
 
   mouseEnter(event) {
