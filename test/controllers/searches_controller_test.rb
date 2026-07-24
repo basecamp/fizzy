@@ -83,6 +83,48 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "search with CJK content" do
+    skip "MySQL fulltext requires tokens of 3+ characters" unless ActiveRecord::Base.connection.adapter_name == "SQLite"
+
+    @board.cards.create!(title: "中文测试卡片", description: "这是中文描述", status: "published", creator: @user)
+    @board.cards.create!(title: "日本語テスト", description: "日本語の説明", status: "published", creator: @user)
+    @board.cards.create!(title: "한국어 테스트", description: "한국어 설명", status: "published", creator: @user)
+    @board.cards.create!(title: "Mixed 混合 content", description: "English and 中文 together", status: "published", creator: @user)
+
+    # Chinese search
+    get search_path(q: "中文", script_name: "/#{@account.external_account_id}")
+    assert_select "li .search__title", text: /中文测试卡片/
+    assert_match(/<mark class="circled-text"><span><\/span>中文<\/mark>/, response.body)
+
+    # Japanese search
+    get search_path(q: "日本語", script_name: "/#{@account.external_account_id}")
+    assert_select "li .search__title", text: /日本語テスト/
+
+    # Korean search
+    get search_path(q: "한국어", script_name: "/#{@account.external_account_id}")
+    assert_select "li .search__title", text: /한국어 테스트/
+
+    # Mixed CJK/English search
+    get search_path(q: "混合", script_name: "/#{@account.external_account_id}")
+    assert_select "li .search__title", text: /Mixed 混合 content/
+  end
+
+  test "search with accented characters" do
+    @board.cards.create!(title: "Hälsa och friskvård", description: "Möte i Göteborg", status: "published", creator: @user)
+
+    # Accented characters must survive query sanitization
+    get search_path(q: "hälsa", script_name: "/#{@account.external_account_id}")
+    assert_select "li .search__title", text: /Hälsa och friskvård/
+    assert_match(/<mark class="circled-text"><span><\/span>Hälsa<\/mark>/, response.body)
+
+    get search_path(q: "Göteborg", script_name: "/#{@account.external_account_id}")
+    assert_select "li .search__excerpt", text: /Möte i Göteborg/
+
+    # Decomposed form (a + combining diaeresis) must survive sanitization and still match
+    get search_path(q: "ha\u0308lsa", script_name: "/#{@account.external_account_id}")
+    assert_select "li .search__title", text: /Hälsa och friskvård/
+  end
+
   test "search preserves highlight marks but escapes surrounding HTML" do
     @board.cards.create!(
       title: "<b>Bold</b> testing content",
