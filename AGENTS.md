@@ -1,115 +1,34 @@
 # Fizzy
 
-This file provides guidance to AI coding agents working with this repository.
+Guidance for AI coding agents working with this repository.
 
-## What is Fizzy?
-
-Fizzy is a collaborative project management and issue tracking application built by 37signals/Basecamp. It's a kanban-style tool for teams to create and manage cards (tasks/issues) across boards, organize work into columns representing workflow stages, and collaborate via comments, mentions, and assignments.
-
-## Development Commands
-
-### Setup and Server
-```bash
-bin/setup              # Initial setup (installs gems, creates DB, loads schema)
-bin/dev                # Start development server (runs on port 3006)
-```
-
-Development URL: http://app.fizzy.localhost:3006
-Login with: david@example.com (development fixtures), password will appear in the browser console
-
-### Testing
-```bash
-bin/rails test                    # Run unit tests (fast)
-bin/rails test test/path/file_test.rb  # Run single test file
-bin/rails test:system             # Run system tests (Capybara + Selenium)
-bin/ci                            # Run full CI suite (style, security, tests)
-
-# For parallel test execution issues, use:
-PARALLEL_WORKERS=1 bin/rails test
-```
-
-CI pipeline (`bin/ci`) runs:
-1. Rubocop (style)
-2. Bundler audit (gem security)
-3. Importmap audit
-4. Brakeman (security scan)
-5. Application tests
-6. System tests
-
-### Database
-```bash
-bin/rails db:fixtures:load   # Load fixture data
-bin/rails db:migrate          # Run migrations
-bin/rails db:reset            # Drop, create, and load schema
-```
-
-### Other Utilities
-```bash
-bin/rails dev:email          # Toggle letter_opener for email preview
-bin/jobs                     # Manage Solid Queue jobs
-bin/kamal deploy             # Deploy (requires 1Password CLI for secrets)
-```
+Fizzy is a kanban-style project management and issue tracker: cards move across columns on boards, with comments, mentions, and assignments.
 
 ## Deploy
 
 Default branch: `main`
 Pre-deploy: `bin/rails saas:enable`
 Deploy: `bin/kamal deploy -d <destination>`
-Destinations: production, staging, beta, beta1, beta2, beta3, beta4
-Note: `beta` is a template requiring `BETA_NUMBER` env var; typical targets are `beta1`-`beta4`.
+Destinations: production, staging, beta, beta1
+Note: `beta` is a template requiring `BETA_NUMBER` env var; `beta1` is the only numbered target that exists.
 
 ## Architecture Overview
 
 ### Multi-Tenancy (URL-Based)
 
 Fizzy uses **URL path-based multi-tenancy**:
-- Each Account (tenant) has a unique `external_account_id` (7+ digits)
+- Accounts have a unique decimal `external_account_id` used in URL prefixes
 - URLs are prefixed: `/{account_id}/boards/...`
 - Middleware (`AccountSlug::Extractor`) extracts the account ID from the URL and sets `Current.account`
 - The slug is moved from `PATH_INFO` to `SCRIPT_NAME`, making Rails think it's "mounted" at that path
-- All models include `account_id` for data isolation
+- Tenant-scoped domain records are account-isolated; global identity, session, and authentication records are exceptions
 - Background jobs automatically serialize and restore account context
 
 **Key insight**: This architecture allows multi-tenancy without subdomains or separate databases, making local development and testing simpler.
 
 ### Authentication & Authorization
 
-**Passwordless magic link authentication**:
-- Global `Identity` (email-based) can have `Users` in multiple Accounts
-- Users belong to an Account and have roles: owner, admin, member, system
-- Sessions managed via signed cookies
-- Board-level access control via `Access` records
-
-### Core Domain Models
-
-**Account** → The tenant/organization
-- Has users, boards, cards, tags, webhooks
-- Has entropy configuration for auto-postponement
-
-**Identity** → Global user (email)
-- Can have Users in multiple Accounts
-- Session management tied to Identity
-
-**User** → Account membership
-- Belongs to Account and Identity
-- Has role (owner/admin/member/system)
-- Board access via explicit `Access` records
-
-**Board** → Primary organizational unit
-- Has columns for workflow stages
-- Can be "all access" or selective
-- Can be published publicly with shareable key
-
-**Card** → Main work item (task/issue)
-- Sequential number within each Account
-- Rich text description and attachments
-- Lifecycle: triage → columns → closed/not_now
-- Automatically postpones after inactivity ("entropy")
-
-**Event** → Records all significant actions
-- Polymorphic association to changed object
-- Drives activity timeline, notifications, webhooks
-- Has JSON `particulars` for action-specific data
+Passwordless magic link authentication. A global `Identity` (email-based) can have `Users` in multiple Accounts, so an email is not a single account membership. Users have roles: owner, admin, member, system. Board-level access control via `Access` records.
 
 ### Entropy System
 
@@ -133,17 +52,11 @@ Database-backed job queue (no Redis):
 - Jobs automatically capture/restore `Current.account`
 - Mission Control::Jobs for monitoring
 
-Key recurring tasks (via `config/recurring.yml`):
-- Deliver bundled notifications (every 30 min)
-- Auto-postpone stale cards (hourly)
-- Cleanup jobs for expired links, deliveries
+Recurring tasks are declared in `config/recurring.yml`.
 
 ### Sharded Full-Text Search
 
-16-shard MySQL full-text search instead of Elasticsearch:
-- Shards determined by account ID hash (CRC32)
-- Search records denormalized for performance
-- Models in `app/models/search/`
+Full-text search runs in the database, not Elasticsearch. On MySQL it is sharded 16 ways by CRC32 of the account ID (`Search::Record::Trilogy`); on SQLite it is a single FTS5 index (`Search::Record::SQLite`). Don't assume the sharded shape when working under SQLite. Models in `app/models/search/`.
 
 ### Imports and exports
 
@@ -152,15 +65,6 @@ Allow people to move between OSS and SAAS Fizzy instances:
 - Must be able to handle very large ZIP files (500+GB)
 - Models in `app/models/account/data_transfer/`, `app/models/zip_file`
 
-## Tools
-
-### Chrome MCP (Local Dev)
-
-URL: `http://app.fizzy.localhost:3006`
-Login: david@example.com (passwordless magic link auth - check rails console for link)
-
-Use Chrome MCP tools to interact with the running dev app for UI testing and debugging.
-
 ## Coding style
 
-@STYLE.md
+Before editing or reviewing code, read STYLE.md.
