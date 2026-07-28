@@ -38,11 +38,17 @@ SHELL="${SHELL#*: }"
 # Tested support surface: bash, zsh, fish (test/bcenv-matrix-test). C shells
 # were never supported — csh/tcsh reject `-l` combined with `-c` outright,
 # before any payload syntax is reached.
-# Seed the base PATH a login shell normally inherits from PAM. With PATH unset,
-# /etc/profile.d scripts run without /usr/bin, and a not-found command can send a
-# command-not-found handler recursing into a fork bomb. The login profile still
-# rebuilds the full PATH on top.
-base_path="/usr/local/bin:/usr/bin:/bin"
+# Seed the base PATH a login shell normally inherits from PAM, plus mise's
+# standard install locations: ~/.local/bin (the mise.run installer) and
+# /opt/homebrew/bin (Apple Silicon brew; Intel brew is /usr/local/bin, package
+# managers are /usr/bin). The login shell here is non-interactive (-l -c), so
+# a profile that only activates mise in interactive rc files (.bashrc/.zshrc —
+# mise's documented setup) never adds it to PATH; the shims probe below must
+# find mise from the seed alone. With PATH unset, /etc/profile.d scripts run
+# without /usr/bin, and a not-found command can send a command-not-found
+# handler recursing into a fork bomb. The login profile still rebuilds its
+# PATH on top.
+base_path="$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
 
 # shellcheck disable=SC2016  # the preamble expands in the login shell, not here
 case "${SHELL##*/}" in
