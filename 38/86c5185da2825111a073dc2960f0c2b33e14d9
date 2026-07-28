@@ -1,0 +1,23 @@
+config/ci.rb
+  s_a52fe7cbc4c484::t_5fdbce8b257614 20-21
+test/setup-phases-test
+  s_a52fe7cbc4c484::t_17850eea4d8099 187-192
+test/fixtures/setup_phases/ci-sim/output.txt
+  s_a52fe7cbc4c484::t_536bae2a150380 6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "3886c5185da2825111a073dc2960f0c2b33e14d9",
+  "prompts": {},
+  "sessions": {
+    "s_a52fe7cbc4c484": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "20f18ae5-8f61-4a61-82fe-444666fe7ed2",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
