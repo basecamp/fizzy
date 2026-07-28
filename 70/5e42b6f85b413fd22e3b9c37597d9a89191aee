@@ -1,0 +1,31 @@
+docs/development.md
+  s_a52fe7cbc4c484::t_d093861d5fb686 22-40
+bin/tasks/db/prepare
+  s_a52fe7cbc4c484::t_0e6d85f7f78fbb 1-2
+bin/tasks/db/reset
+  s_a52fe7cbc4c484::t_b70bd8d2cab797 1-2
+bin/tasks/db/seed
+  s_a52fe7cbc4c484::t_41b3c5e36cb0e0 1-2
+bin/tasks/setup/cleanup
+  s_a52fe7cbc4c484::t_04911e97f04c44 1-2
+bin/tasks/setup/mysql-create
+  s_a52fe7cbc4c484::t_21e1d4ff1a7d21 1-2
+bin/tasks/setup/mysql-start
+  s_a52fe7cbc4c484::t_a8c91bff5d9a4e 1-2
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "705e42b6f85b413fd22e3b9c37597d9a89191aee",
+  "prompts": {},
+  "sessions": {
+    "s_a52fe7cbc4c484": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "20f18ae5-8f61-4a61-82fe-444666fe7ed2",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
