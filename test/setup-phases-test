@@ -184,7 +184,12 @@ run_scenario() { # run_scenario <name> <args> [VAR=value|SAAS_FILE=1|MINIO_FILE=
   local rc=0
   ( cd "$sb" && env -i "${envs[@]}" bin/setup $args ) > "$sb/output.raw" 2>&1 || rc=$?
   printf 'exit: %s\n' "$rc" >> "$sb/commands.txt"
-  sed -e "s|$sb/home|\$HOME|g" -e "s|$sb|\$APP|g" \
+  # ANSI escapes (mise colors some lines even under TERM=dumb, and coloring
+  # varies by version/environment) are styling, not behavior — strip them so
+  # the goldens stay stable.
+  local esc; esc="$(printf '\033')"
+  sed -e "s/${esc}\[[0-9;]*[A-Za-z]//g" \
+      -e "s|$sb/home|\$HOME|g" -e "s|$sb|\$APP|g" \
       -e 's/([0-9][0-9]* sec)/(N sec)/' "$sb/output.raw" > "$sb/output.txt"
 
   if [ "${REGEN:-}" = 1 ]; then

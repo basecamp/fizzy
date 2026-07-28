@@ -17,6 +17,8 @@ CI.run do
   step "Security: Brakeman audit", "bin/brakeman --quiet --no-pager --exit-on-warn --exit-on-error"
   step "Security: Gitleaks audit", "bin/gitleaks-audit"
 
+  step "Tests: Setup phases", "test/setup-phases-test"
+
   if Fizzy.saas?
     step "Tests: SaaS",          "#{SAAS_ENV} bin/rails test"
     step "Tests: SaaS System",   "#{SAAS_ENV} #{SYSTEM_TEST_ENV} bin/rails test:system"

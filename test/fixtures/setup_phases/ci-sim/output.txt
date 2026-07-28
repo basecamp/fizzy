@@ -3,7 +3,7 @@ ensure_correct_mise_install
 
 ▸ Trusting mise config
 mise trust --yes $APP/.mise.toml
-[2mmise[0m trusted $APP
+mise trusted $APP
 
 ▸ Installing system packages
 brew bundle --file=$APP/Brewfile
