@@ -99,17 +99,11 @@ elif docker_dev_is_repo \
 fi
 # shipyard-block-end: docker-dev-origin
 
-# Phase bodies live in mise.saas.toml [tasks], individually runnable with the
-# overlay loaded: `env MISE_ENV=saas mise run saas:mysql`. The env-var form
-# matters twice over — it makes the overlay's tasks visible to `mise run`, and
-# the child processes (saas:repos runs `mise bootstrap` itself) inherit it.
-# --skip-deps keeps this script's explicit ordering from double-running the
-# depends chains, which serve standalone runs.
-step "Syncing docker-dev" env MISE_ENV=saas mise run --skip-deps saas:repos
+step "Syncing docker-dev" env MISE_ENV=saas mise bootstrap --only repos --yes
 
 if [ -e tmp/minio-dev.txt ]; then
-  step "Starting Docker services" env MISE_ENV=saas mise run --skip-deps saas:minio
-  step "Configuring MinIO" env MISE_ENV=saas mise run --skip-deps saas:minio-config
+  step "Starting Docker services" ~/Work/basecamp/docker-dev/setup minio
+  step "Configuring MinIO" bin/minio-setup
 fi
 
-step "Starting mysql" env MISE_ENV=saas mise run --skip-deps saas:mysql
+step "Starting mysql" ~/Work/basecamp/docker-dev/setup mysql80

@@ -8,38 +8,3 @@ min_version = "2026.7.5"
 
 [bootstrap.repos]
 "~/Work/basecamp/docker-dev" = { url = "https://github.com/basecamp/docker-dev.git", ref = "master" }
-
-# SaaS setup phases, individually runnable from a bare shell at the repo root
-# with the overlay loaded: `env MISE_ENV=saas mise run saas:mysql`. Deliberately
-# several tasks rather than one umbrella: mise runs a task's dependencies in
-# parallel (--jobs), and these docker operations must keep today's strict
-# ordering. saas/bin/setup drives them one at a time with --skip-deps; the
-# depends chains serve standalone runs. Behavior is pinned by
-# test/setup-phases-test.
-
-[tasks."saas:repos"]
-description = "Sync private repos (docker-dev) declared in this overlay"
-quiet = true
-run = "mise bootstrap --only repos --yes"
-
-[tasks."saas:minio"]
-description = "Start the MinIO docker-dev service"
-quiet = true
-depends = ["saas:repos"]
-run = "~/Work/basecamp/docker-dev/setup minio"
-
-[tasks."saas:minio-config"]
-description = "Create the development MinIO bucket"
-quiet = true
-depends = ["saas:minio"]
-# bin/minio-setup boots config/environment directly — config/boot.rb picks the
-# OSS Gemfile before Fizzy.configure_bundle could intervene — so standalone
-# runs need the SaaS gemfile selected explicitly here.
-env = { SAAS = "1", BUNDLE_GEMFILE = "Gemfile.saas" }
-run = "bin/minio-setup"
-
-[tasks."saas:mysql"]
-description = "Start the MySQL 8.0 docker-dev service"
-quiet = true
-depends = ["saas:repos"]
-run = "~/Work/basecamp/docker-dev/setup mysql80"

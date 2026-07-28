@@ -11,6 +11,9 @@ brew bundle --file=$APP/Brewfile
 ▸ Installing Ruby and tools
 mise install --yes
 
+▸ Installing Git pre-commit hooks
+git config core.hooksPath .githooks
+
 
    ˚ ∘             ∘ ˚   
   ∘˚˳°∘°  𝒻𝒾𝓏𝓏𝓎  °∘°˳˚∘  
@@ -23,21 +26,21 @@ mise trust --yes $APP/mise.saas.toml
 mise trusted $APP
 
 ▸ Syncing docker-dev
-env MISE_ENV=saas mise run --skip-deps saas:repos
+env MISE_ENV=saas mise bootstrap --only repos --yes
 
 ▸ Starting Docker services
-env MISE_ENV=saas mise run --skip-deps saas:minio
+$HOME/Work/basecamp/docker-dev/setup minio
 
 ▸ Configuring MinIO
-env MISE_ENV=saas mise run --skip-deps saas:minio-config
+bin/minio-setup
 
 ▸ Starting mysql
-env MISE_ENV=saas mise run --skip-deps saas:mysql
+$HOME/Work/basecamp/docker-dev/setup mysql80
 
 ▸ Preparing the database
-mise run --skip-deps db:prepare
+rails db:prepare
 
 ▸ Cleaning up logs and tempfiles
-mise run --skip-deps setup:cleanup
+rails log:clear tmp:clear
 
 ✓ Done (N sec)

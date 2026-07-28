@@ -11,6 +11,9 @@ brew bundle --file=$APP/Brewfile
 ▸ Installing Ruby and tools
 mise install --yes
 
+▸ Installing Git pre-commit hooks
+git config core.hooksPath .githooks
+
 
    ˚ ∘             ∘ ˚   
   ∘˚˳°∘°  𝒻𝒾𝓏𝓏𝓎  °∘°˳˚∘  
@@ -23,12 +26,11 @@ mise trust --yes $APP/mise.saas.toml
 mise trusted $APP
 
 ▸ Syncing docker-dev
-env MISE_ENV=saas mise run --skip-deps saas:repos
+env MISE_ENV=saas mise bootstrap --only repos --yes
 
 ▸ Starting Docker services
-env MISE_ENV=saas mise run --skip-deps saas:minio
+$HOME/Work/basecamp/docker-dev/setup minio
 
 ▸ Configuring MinIO
-env MISE_ENV=saas mise run --skip-deps saas:minio-config
+bin/minio-setup
 stub-fail: minio-setup [SAAS=1 BUNDLE_GEMFILE=Gemfile.saas]
-[saas:minio-config] ERROR task failed

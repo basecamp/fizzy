@@ -1,2 +1,0 @@
-#!/bin/sh
-exec mise run db:seed "$@"

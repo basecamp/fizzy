@@ -11,6 +11,9 @@ brew bundle --file=$APP/Brewfile
 ▸ Installing Ruby and tools
 mise install --yes
 
+▸ Installing Git pre-commit hooks
+git config core.hooksPath .githooks
+
 
    ˚ ∘             ∘ ˚   
   ∘˚˳°∘°  𝒻𝒾𝓏𝓏𝓎  °∘°˳˚∘  
@@ -19,9 +22,9 @@ mise install --yes
 bundle install
 
 ▸ Preparing the database
-mise run --skip-deps db:prepare
+rails db:prepare
 
 ▸ Cleaning up logs and tempfiles
-mise run --skip-deps setup:cleanup
+rails log:clear tmp:clear
 
 ✓ Done (N sec)

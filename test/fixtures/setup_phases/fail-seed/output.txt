@@ -11,6 +11,9 @@ brew bundle --file=$APP/Brewfile
 ▸ Installing Ruby and tools
 mise install --yes
 
+▸ Installing Git pre-commit hooks
+git config core.hooksPath .githooks
+
 
    ˚ ∘             ∘ ˚   
   ∘˚˳°∘°  𝒻𝒾𝓏𝓏𝓎  °∘°˳˚∘  
@@ -19,9 +22,8 @@ mise install --yes
 bundle install
 
 ▸ Preparing the database
-mise run --skip-deps db:prepare
+rails db:prepare
 
 ▸ Seeding the database
-mise run --skip-deps db:seed
+rails db:seed
 stub-fail: rails db:seed
-[db:seed] ERROR task failed

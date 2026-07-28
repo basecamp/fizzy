@@ -47,6 +47,11 @@ build_sandbox() { # build_sandbox <dir>
   cp "$ROOT/mise.saas.toml" "$sb/mise.saas.toml"
   cp "$ROOT/Brewfile" "$sb/Brewfile"
   : > "$sb/home/global-mise.toml"
+  # The sandbox must be a git repo: bin/setup's pre-commit hooks step runs
+  # `git config core.hooksPath`, which needs one (and writes only sandbox-local
+  # config). The docker-dev fenced-block probes stay unaffected — the sandbox
+  # toplevel never equals the docker-dev path, so they skip as before.
+  git -C "$sb" init -q
 
   # Recorders append one normalized line per invocation. STUB_FAIL names a
   # recorded-command prefix that should exit 9 AFTER recording, so the stop
