@@ -19,6 +19,25 @@ You'll be able to access the app in development at http://app.fizzy.localhost:30
 
 To login, enter `david@example.com` and grab the verification code from the browser console to sign in.
 
+### Running setup phases individually
+
+`bin/setup`'s post-prelude phases are defined as mise tasks, so each one is also runnable on its own from the repo root:
+
+```sh
+mise tasks ls        # list them
+mise run db:prepare  # create or migrate the databases
+mise run db:seed     # seed development data (prepares the database first)
+bin/tasks/db/seed    # generated stubs — same thing, tab-completable
+```
+
+SaaS-only tasks live in the `mise.saas.toml` overlay and need it loaded explicitly:
+
+```sh
+env MISE_ENV=saas mise run saas:mysql
+```
+
+Standalone runs follow each task's declared dependencies (`saas:mysql` syncs docker-dev first, `db:seed` prepares the database first). `bin/setup` remains the orchestrator: it drives the same tasks with `--skip-deps` under its own ordering, guards, and conditionals.
+
 ### Web Push Notifications
 
 Fizzy uses VAPID (Voluntary Application Server Identification) keys to send browser push notifications. For notifications to work in development you'll need to generate a key pair and set these environment variables:
