@@ -50,8 +50,10 @@ build_sandbox() { # build_sandbox <dir>
   # The sandbox must be a git repo: bin/setup's pre-commit hooks step runs
   # `git config core.hooksPath`, which needs one (and writes only sandbox-local
   # config). The docker-dev fenced-block probes stay unaffected — the sandbox
-  # toplevel never equals the docker-dev path, so they skip as before.
-  git -C "$sb" init -q
+  # toplevel never equals the docker-dev path, so they skip as before. Init
+  # hermetically: host git config (init.templateDir, hooks) must not leak in.
+  env HOME="$sb/home" GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null \
+    git -C "$sb" init -q
 
   # Recorders append one normalized line per invocation. STUB_FAIL names a
   # recorded-command prefix that should exit 9 AFTER recording, so the stop
