@@ -19,8 +19,9 @@ mise install --yes
 bundle install
 
 ▸ Preparing the database
-rails db:prepare
+mise run --skip-deps db:prepare
 
 ▸ Seeding the database
-rails db:seed
+mise run --skip-deps db:seed
 stub-fail: rails db:seed
+[db:seed] ERROR task failed

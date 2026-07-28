@@ -19,9 +19,9 @@ mise install --yes
 bundle install
 
 ▸ Preparing the database
-rails db:prepare
+mise run --skip-deps db:prepare
 
 ▸ Cleaning up logs and tempfiles
-rails log:clear tmp:clear
+mise run --skip-deps setup:cleanup
 
 ✓ Done (N sec)

@@ -23,21 +23,21 @@ mise trust --yes $APP/mise.saas.toml
 mise trusted $APP
 
 ▸ Syncing docker-dev
-env MISE_ENV=saas mise bootstrap --only repos --yes
+env MISE_ENV=saas mise run --skip-deps saas:repos
 
 ▸ Starting Docker services
-$HOME/Work/basecamp/docker-dev/setup minio
+env MISE_ENV=saas mise run --skip-deps saas:minio
 
 ▸ Configuring MinIO
-bin/minio-setup
+env MISE_ENV=saas mise run --skip-deps saas:minio-config
 
 ▸ Starting mysql
-$HOME/Work/basecamp/docker-dev/setup mysql80
+env MISE_ENV=saas mise run --skip-deps saas:mysql
 
 ▸ Preparing the database
-rails db:prepare
+mise run --skip-deps db:prepare
 
 ▸ Cleaning up logs and tempfiles
-rails log:clear tmp:clear
+mise run --skip-deps setup:cleanup
 
 ✓ Done (N sec)

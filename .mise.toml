@@ -25,3 +25,55 @@ PROMETHEUS_EXPORTER_URL = "http://127.0.0.1:9306/metrics"
 "pacman:rav1e" = "latest"
 "pacman:svt-av1" = "latest"
 "pacman:gitleaks" = "latest"
+
+# bin/setup's post-prelude phases, individually runnable from a bare shell at
+# the repo root (`mise run db:prepare`) — they depend on nothing bin/setup
+# exports; bin/rails selects the SaaS gemfile itself when tmp/saas.txt exists.
+# bin/setup remains the orchestrator and drives these with --skip-deps so its
+# explicit ordering isn't double-run by the dependency graph. SaaS-only tasks
+# live in mise.saas.toml. Behavior is pinned by test/setup-phases-test.
+
+[tasks."db:prepare"]
+description = "Create or migrate the development and test databases"
+quiet = true
+run = "bin/rails db:prepare"
+
+[tasks."db:reset"]
+description = "Drop, recreate, and reseed the databases"
+quiet = true
+run = "bin/rails db:reset"
+
+[tasks."db:seed"]
+description = "Seed development data (prepares the database first when run standalone)"
+quiet = true
+depends = ["db:prepare"]
+run = "bin/rails db:seed"
+
+[tasks."setup:mysql-start"]
+description = "Start the existing fizzy-mysql Docker container"
+quiet = true
+run = "docker start fizzy-mysql"
+
+[tasks."setup:mysql-create"]
+description = "Create and start the fizzy-mysql Docker container"
+quiet = true
+# The inner bash -c is bin/setup's original block verbatim — deliberately NOT
+# flattened into this task's own shell: mise runs tasks under `sh -c` with
+# errexit/pipefail, and a failed `docker pull` here must keep falling through
+# to `docker run` exactly as it always has (the image may already be local).
+run = '''
+bash -c '
+  docker pull mysql:8.4
+  docker run -d \
+    --name fizzy-mysql \
+    -e MYSQL_ALLOW_EMPTY_PASSWORD=yes \
+    -p 3306:3306 \
+    mysql:8.4
+  echo "MySQL is starting… (it may take a few seconds)"
+'
+'''
+
+[tasks."setup:cleanup"]
+description = "Clear logs and tempfiles"
+quiet = true
+run = "bin/rails log:clear tmp:clear"

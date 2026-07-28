@@ -19,5 +19,6 @@ mise install --yes
 bundle install
 
 ▸ Preparing the database
-rails db:prepare
+mise run --skip-deps db:prepare
 stub-fail: rails db:prepare
+[db:prepare] ERROR task failed

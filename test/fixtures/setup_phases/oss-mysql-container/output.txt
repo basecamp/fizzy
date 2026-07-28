@@ -19,12 +19,12 @@ mise install --yes
 bundle install
 
 ▸ Starting MySQL
-docker start fizzy-mysql
+mise run --skip-deps setup:mysql-start
 
 ▸ Preparing the database
-rails db:prepare
+mise run --skip-deps db:prepare
 
 ▸ Cleaning up logs and tempfiles
-rails log:clear tmp:clear
+mise run --skip-deps setup:cleanup
 
 ✓ Done (N sec)

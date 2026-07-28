@@ -100,20 +100,17 @@ needs_seeding() {
   fi
 }
 
+# Phase bodies live in .mise.toml [tasks] (SaaS ones in mise.saas.toml) so
+# they're individually runnable: `mise run db:prepare`. bin/setup remains the
+# orchestrator — all guards and conditionals stay here in bash, and every
+# dispatch uses --skip-deps so this explicit ordering isn't double-run by the
+# task graph's depends (which serve standalone runs).
 oss_mysql_setup() {
   if ! nc -z localhost 3306 2>/dev/null; then
     if docker ps -aq -f name=fizzy-mysql | grep -q .; then
-      step "Starting MySQL" docker start fizzy-mysql
+      step "Starting MySQL" mise run --skip-deps setup:mysql-start
     else
-      step "Setting up MySQL" bash -c '
-        docker pull mysql:8.4
-        docker run -d \
-          --name fizzy-mysql \
-          -e MYSQL_ALLOW_EMPTY_PASSWORD=yes \
-          -p 3306:3306 \
-          mysql:8.4
-        echo "MySQL is starting… (it may take a few seconds)"
-      '
+      step "Setting up MySQL" mise run --skip-deps setup:mysql-create
     fi
   fi
 }
@@ -181,15 +178,15 @@ else
 fi
 
 if [[ $* == *--reset* ]]; then
-  step "Resetting the database" rails db:reset
+  step "Resetting the database" mise run --skip-deps db:reset
 else
-  step "Preparing the database" rails db:prepare
+  step "Preparing the database" mise run --skip-deps db:prepare
 
   if needs_seeding; then
-    step "Seeding the database" rails db:seed
+    step "Seeding the database" mise run --skip-deps db:seed
   fi
 fi
 
-step "Cleaning up logs and tempfiles" rails log:clear tmp:clear
+step "Cleaning up logs and tempfiles" mise run --skip-deps setup:cleanup
 
 gum style --foreground 46 "✓ Done (${SECONDS} sec)"
