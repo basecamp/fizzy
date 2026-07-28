@@ -1,0 +1,35 @@
+.mise.toml
+  s_e7f35ff4dfc068::t_001ff11cc6fdd0 8
+.githooks/pre-commit
+  s_e7f35ff4dfc068::t_ecf981bbdf11cd 1-2
+bin/bcenv
+  s_e7f35ff4dfc068::t_2d9e4f5fc7d1a6 1-57
+bin/setup
+  s_8afd334856f1e2::t_d3693cc617e7c1 152-153
+prek.toml
+  s_e7f35ff4dfc068::t_c0001547631ab3 1-14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "c78f2dcba8a9b49e32fe9d4833dcc8e08697493c",
+  "prompts": {},
+  "sessions": {
+    "s_8afd334856f1e2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "24cf5053-17e5-4451-9309-3b3743e1530c",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    },
+    "s_e7f35ff4dfc068": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "26213cdd-36a0-4e69-820b-1d68a49b16d1",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
