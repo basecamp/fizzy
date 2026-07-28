@@ -7,10 +7,12 @@ Fizzy is a kanban-style project management and issue tracker: cards move across 
 ## Deploy
 
 Default branch: `main`
-Pre-deploy: `bin/rails saas:enable`
-Deploy: `bin/kamal deploy -d <destination>`
-Destinations: production, staging, beta, beta1
-Note: `beta` is a template requiring `BETA_NUMBER` env var; `beta1` is the only numbered target that exists.
+
+Self-hosted deploys run Kamal against `config/deploy.yml` — see `docs/kamal-deployment.md`.
+
+## SaaS mode
+
+For local agent work, `tmp/saas.txt` is the checkout-level SaaS switch used by `bin/setup`. When present, read `saas/AGENTS.md` before continuing. Otherwise, do not apply its instructions.
 
 ## Architecture Overview
 
