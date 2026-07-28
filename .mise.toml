@@ -5,6 +5,7 @@ idiomatic_version_file_enable_tools = ["ruby"]
 
 [tools]
 gum = "0.17.0"
+prek = "0.4.11"
 
 [env]
 PROMETHEUS_EXPORTER_URL = "http://127.0.0.1:9306/metrics"

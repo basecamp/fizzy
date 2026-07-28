@@ -149,6 +149,8 @@ fi
 step "Installing Ruby and tools" mise install --yes
 eval "$(mise hook-env -s bash)"
 
+step "Installing Git pre-commit hooks" git config core.hooksPath .githooks
+
 # Install gh if needed
 if ! command -v gh &>/dev/null; then
   echo

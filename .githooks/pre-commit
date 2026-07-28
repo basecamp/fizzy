@@ -1,0 +1,2 @@
+#!/usr/bin/env -S bin/bcenv bash
+exec prek run

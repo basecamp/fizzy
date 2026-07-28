@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+set -e
+
+# macOS doesn't launch GUI apps through a login shell, but
+# login shell profiles are how we conventionally set user-
+# specific environment variables like PATH. This can cause
+# trouble with apps like Tower that need to run git hooks.
+#
+# The `bcenv` command transparently re-execs the command
+# specified in the argument list through a login shell.
+
+if [ $# -eq 0 ]; then
+  echo "usage: bcenv command [args...]" 2>&1
+  exit 1
+fi
+
+if command -v dscl >/dev/null; then
+  read -r SHELL < <( dscl . -read "/Users/$(whoami)" UserShell )
+elif command -v getent >/dev/null; then
+  SHELL="$( getent passwd "$(whoami)" | cut -d: -f7 )"
+else
+  SHELL="/bin/sh"
+fi
+
+SHELL="${SHELL#*: }"
+
+# mise-managed tools (node, ruby, bundler) must resolve in this context even when
+# the user's profile only activates mise for interactive shells — git hooks run
+# through bcenv as non-interactive login shells. Shims are mise's recommended
+# non-interactive activation; no-op when mise isn't on the login PATH. The snippet
+# is generated for the detected login shell; unknown shells get no preamble.
+#
+# The argument vector is forwarded POSITIONALLY, never serialized into shell
+# source text: no quoting dialect survives every login shell (bash %q output
+# is not fish syntax — newline and tab arguments made fish exit 127). POSIX
+# shells receive the vector after a $0 sentinel; fish exposes it as $argv.
+#
+# Tested support surface: bash, zsh, fish (test/bcenv-matrix-test). C shells
+# were never supported — csh/tcsh reject `-l` combined with `-c` outright,
+# before any payload syntax is reached.
+# Seed the base PATH a login shell normally inherits from PAM. With PATH unset,
+# /etc/profile.d scripts run without /usr/bin, and a not-found command can send a
+# command-not-found handler recursing into a fork bomb. The login profile still
+# rebuilds the full PATH on top.
+base_path="/usr/local/bin:/usr/bin:/bin"
+
+# shellcheck disable=SC2016  # the preamble expands in the login shell, not here
+case "${SHELL##*/}" in
+  bash | zsh | sh )
+    mise_shims='command -v mise >/dev/null && eval "$(mise activate bash --shims)"; '
+    exec env PATH="$base_path" "$SHELL" -l -c "${mise_shims}exec \"\$@\"" bcenv "$@" ;;
+  fish )
+    mise_shims='command -v mise >/dev/null; and mise activate fish --shims | source; '
+    exec env PATH="$base_path" "$SHELL" -l -c "${mise_shims}exec \$argv" "$@" ;;
+  * )
+    exec env PATH="$base_path" "$SHELL" -l -c 'exec "$@"' bcenv "$@" ;;
+esac
