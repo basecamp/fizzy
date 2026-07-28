@@ -8,4 +8,11 @@
 
 `saas:enable` is a prerequisite for deploying, not just for local development. Only under that flag does `bin/kamal` pass `-c` pointing at this gem's `config/deploy.yml`. Skip it and Kamal reads the root `config/deploy.yml` instead — the self-hosting example, which knows nothing about our destinations.
 
-Destinations are production, staging, beta, and beta1, one `config/deploy.<destination>.yml` each. `beta` is a template requiring the `BETA_NUMBER` env var; `beta1` is the only numbered target that exists. The `.kamal/secrets.beta2` through `secrets.beta4` symlinks are leftovers and don't make those destinations real.
+## Deploy
+
+Deploy: `bin/kamal deploy -d <destination>`
+Destinations: production, staging, beta, beta1
+
+One `config/deploy.<destination>.yml` each. `beta` is a template requiring the `BETA_NUMBER` env var; `beta1` is the only numbered target that exists. The `.kamal/secrets.beta2` through `secrets.beta4` symlinks are leftovers and don't make those destinations real.
+
+The default branch stays in the root `AGENTS.md` — it describes the repository, not the hosted deployment.
