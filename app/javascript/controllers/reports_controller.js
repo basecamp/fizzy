@@ -224,7 +224,7 @@ export default class extends Controller {
     const closed = cards.filter(c => c.closedAt)
     const inFlight = cards.filter(c => !c.closedAt)
     const summaryRows = [
-      ["Fizzy — Reports export"],
+      ["Dayzy — Reports export"],
       ["Generated", this.fmtDate(new Date())],
       [],
       ["Filters"],
@@ -244,7 +244,7 @@ export default class extends Controller {
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(activityRows), "Activity")
 
     const stamp = new Date().toISOString().slice(0, 16).replace(/[:T]/g, "-")
-    XLSX.writeFile(wb, `fizzy-reports-${stamp}.xlsx`)
+    XLSX.writeFile(wb, `dayzy-reports-${stamp}.xlsx`)
 
     this.exportBtnLabelTarget.textContent = "Exported"
     this.exportBtnTarget.classList.add("is-flash")

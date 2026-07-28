@@ -3,7 +3,7 @@ Date: 2026-05-08
 
 ## Summary
 
-Add story points to cards in Fizzy. Anyone can assign a free numeric point value to any card. When a card is closed, the points are awarded to the assignee as a snapshot on the closure record. Reports will sum awarded points per user.
+Add story points to cards in Dayzy. Anyone can assign a free numeric point value to any card. When a card is closed, the points are awarded to the assignee as a snapshot on the closure record. Reports will sum awarded points per user.
 
 ---
 
@@ -52,7 +52,7 @@ Responsibilities:
 - Exposes `award_points_on_close` method
 - Called from inside `Card::Closeable#close` transaction (one line added)
 
-No changes to `Cards::ClosuresController`. Award logic stays in the model layer per Fizzy's vanilla Rails philosophy.
+No changes to `Cards::ClosuresController`. Award logic stays in the model layer per Dayzy's vanilla Rails philosophy.
 
 ---
 

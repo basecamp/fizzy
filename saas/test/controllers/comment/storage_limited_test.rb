@@ -11,7 +11,7 @@ class Comment::StorageLimitedTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "strong", text: /used all/
-    assert_select "a[href='https://github.com/basecamp/fizzy']", text: "Self-host Fizzy"
+    assert_select "a[href='https://github.com/basecamp/fizzy']", text: "Self-host Dayzy"
     assert_select "##{dom_id(cards(:logo), :new_comment)}", count: 0
   end
 

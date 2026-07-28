@@ -8,20 +8,20 @@ class ApplicationHelperTest < ActionView::TestCase
   test "page_title_tag on untenanted page" do
     Current.account = nil
 
-    assert_select parse(page_title_tag), "title", text: "Fizzy"
+    assert_select parse(page_title_tag), "title", text: "Dayzy"
   end
 
   test "page_title_tag on untenanted page with a page title" do
     @page_title = "Holodeck"
     Current.account = nil
 
-    assert_select parse(page_title_tag), "title", text: "Holodeck | Fizzy"
+    assert_select parse(page_title_tag), "title", text: "Holodeck | Dayzy"
   end
 
   test "page_title_tag on tenanted page when user has a single account" do
     Current.session = sessions(:david)
 
-    assert_select parse(page_title_tag), "title", text: "Fizzy"
+    assert_select parse(page_title_tag), "title", text: "Dayzy"
   end
 
   test "page_title_tag on tenanted page when user has multiple accounts" do
@@ -29,14 +29,14 @@ class ApplicationHelperTest < ActionView::TestCase
     other_account = Account.create!(external_account_id: "dangling-tenant", name: "Other Account")
     identities(:david).users.create!(account: other_account, name: "David")
 
-    assert_select parse(page_title_tag), "title", text: "37signals | Fizzy"
+    assert_select parse(page_title_tag), "title", text: "37signals | Dayzy"
   end
 
   test "page_title_tag on tenanted page with a page title when user has a single account" do
     Current.session = sessions(:david)
     @page_title = "Holodeck"
 
-    assert_select parse(page_title_tag), "title", text: "Holodeck | Fizzy"
+    assert_select parse(page_title_tag), "title", text: "Holodeck | Dayzy"
   end
 
   test "page_title_tag on tenanted page with a page title when user has multiple account" do
@@ -45,6 +45,6 @@ class ApplicationHelperTest < ActionView::TestCase
     identities(:david).users.create!(account: other_account, name: "David")
     @page_title = "Holodeck"
 
-    assert_select parse(page_title_tag), "title", text: "Holodeck | 37signals | Fizzy"
+    assert_select parse(page_title_tag), "title", text: "Holodeck | 37signals | Dayzy"
   end
 end

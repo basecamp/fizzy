@@ -7,7 +7,7 @@
   >
     <% if @accounts.any? %>
       <h1 class="txt-x-large font-weight-black txt-tight-lines margin-none">
-        Your Fizzy accounts
+        Your Dayzy accounts
       </h1>
       <menu class="popup__list pad border-radius border" style="--block-space: var(--inline-space);">
         <% @accounts.each do |account| %>
@@ -21,11 +21,11 @@
       </menu>
     <% else %>
       <h1 class="txt-x-large font-weight-black margin-none">Hmm...</h1>
-      <p class="margin-none-block-start">You don’t have any Fizzy accounts.</p>
+      <p class="margin-none-block-start">You don’t have any Dayzy accounts.</p>
     <% end %>
 
     <%= link_to new_signup_path, class: "btn center txt-small margin-block-start", data: { turbo_prefetch: false } do %>
-      <span>Sign up for a new Fizzy account</span>
+      <span>Sign up for a new Dayzy account</span>
     <% end %>
   </section>
 <% end %>

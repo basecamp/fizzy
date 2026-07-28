@@ -1,6 +1,6 @@
 # Authentication
 
-There are two ways to authenticate with the Fizzy API:
+There are two ways to authenticate with the Dayzy API:
 
 1. **Personal access tokens** - Long-lived tokens for scripts and integrations
 2. **Magic link authentication** - Session-based authentication for native apps
@@ -138,7 +138,7 @@ curl -X POST \
   -H "Content-Type: application/json" \
   -H "Accept: application/json" \
   -H "Cookie: session_token=eyJfcmFpbHMi..." \
-  -d '{"access_token": {"description": "Fizzy CLI", "permission": "write"}}' \
+  -d '{"access_token": {"description": "Dayzy CLI", "permission": "write"}}' \
   https://app.fizzy.do/1234567/my/access_tokens
 ```
 
@@ -149,7 +149,7 @@ curl -X POST \
   -H "Content-Type: application/json" \
   -H "Accept: application/json" \
   -H "Authorization: Bearer put-your-access-token-here" \
-  -d '{"access_token": {"description": "Fizzy CLI", "permission": "write"}}' \
+  -d '{"access_token": {"description": "Dayzy CLI", "permission": "write"}}' \
   https://app.fizzy.do/1234567/my/access_tokens
 ```
 
@@ -164,7 +164,7 @@ HTTP/1.1 201 Created
 ```json
 {
   "token": "4f9Q6d2wXr8Kp1Ls0Vz3BnTa",
-  "description": "Fizzy CLI",
+  "description": "Dayzy CLI",
   "permission": "write"
 }
 ```
@@ -187,7 +187,7 @@ __Response:__
 [
   {
     "id": "03f5v9zo9qlcwwpyc0ascnikz",
-    "description": "Fizzy CLI",
+    "description": "Dayzy CLI",
     "permission": "write",
     "created_at": "2025-12-05T19:36:35.534Z"
   }

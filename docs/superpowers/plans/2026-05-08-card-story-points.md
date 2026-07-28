@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add story points to Fizzy cards — a numeric value set by anyone, awarded to the assignee when the card is closed.
+**Goal:** Add story points to Dayzy cards — a numeric value set by anyone, awarded to the assignee when the card is closed.
 
-**Architecture:** Two column additions (cards.points, closures.points_awarded), a new Card::Pointable concern following Fizzy's existing concern pattern, a Cards::PointsController with edit/update, and Turbo Frame inline edit views placed next to the tags area.
+**Architecture:** Two column additions (cards.points, closures.points_awarded), a new Card::Pointable concern following Dayzy's existing concern pattern, a Cards::PointsController with edit/update, and Turbo Frame inline edit views placed next to the tags area.
 
 **Tech Stack:** Ruby on Rails, Turbo Frames, Minitest, SQLite (dev)
 

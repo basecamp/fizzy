@@ -34,7 +34,7 @@ __Supported actions:__
 | `card_unassigned` | `Card` | `{ "assignee_ids": [USER_ID, ...] }` |
 | `comment_created` | `Comment` | `{}` |
 
-`particulars` is always an object. It contains action-specific metadata in a normalized format intended for API clients. It does not necessarily mirror the internal event JSON stored by Fizzy. Unknown keys may appear in the future and should be ignored. For `card_assigned` and `card_unassigned`, `assignee_ids` is currently a single-element array in practice.
+`particulars` is always an object. It contains action-specific metadata in a normalized format intended for API clients. It does not necessarily mirror the internal event JSON stored by Dayzy. Unknown keys may appear in the future and should be ignored. For `card_assigned` and `card_unassigned`, `assignee_ids` is currently a single-element array in practice.
 
 __`particulars` examples:__
 
@@ -158,4 +158,4 @@ __Response:__
 ]
 ```
 
-All `url` fields are opaque absolute URLs for the current Fizzy instance. Clients should not construct them.
+All `url` fields are opaque absolute URLs for the current Dayzy instance. Clients should not construct them.

@@ -1,6 +1,6 @@
 # Identity
 
-An Identity represents a person using Fizzy.
+An Identity represents a person using Dayzy.
 
 ## `GET /my/identity`
 

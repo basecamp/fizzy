@@ -21,13 +21,13 @@ class My::AccessTokensControllerTest < ActionDispatch::IntegrationTest
 
   test "create new token via JSON with session" do
     assert_difference -> { identities(:kevin).access_tokens.count }, +1 do
-      post my_access_tokens_path, params: { access_token: { description: "Fizzy CLI", permission: "write" } }, as: :json
+      post my_access_tokens_path, params: { access_token: { description: "Dayzy CLI", permission: "write" } }, as: :json
     end
     assert_response :created
     body = @response.parsed_body
     assert body["id"].present?
     assert body["token"].present?
-    assert_equal "Fizzy CLI", body["description"]
+    assert_equal "Dayzy CLI", body["description"]
     assert_equal "write", body["permission"]
     assert body["created_at"].present?
   end
@@ -37,12 +37,12 @@ class My::AccessTokensControllerTest < ActionDispatch::IntegrationTest
     bearer_token = { "HTTP_AUTHORIZATION" => "Bearer #{identity_access_tokens(:davids_api_token).token}" }
 
     assert_difference -> { identities(:david).access_tokens.count }, +1 do
-      post my_access_tokens_path, params: { access_token: { description: "Fizzy CLI", permission: "read" } }, env: bearer_token, as: :json
+      post my_access_tokens_path, params: { access_token: { description: "Dayzy CLI", permission: "read" } }, env: bearer_token, as: :json
     end
     assert_response :created
     body = @response.parsed_body
     assert body["token"].present?
-    assert_equal "Fizzy CLI", body["description"]
+    assert_equal "Dayzy CLI", body["description"]
     assert_equal "read", body["permission"]
   end
 
@@ -51,7 +51,7 @@ class My::AccessTokensControllerTest < ActionDispatch::IntegrationTest
     bearer_token = { "HTTP_AUTHORIZATION" => "Bearer #{identity_access_tokens(:jasons_api_token).token}" }
 
     assert_no_difference -> { identities(:jason).access_tokens.count } do
-      post my_access_tokens_path, params: { access_token: { description: "Fizzy CLI", permission: "read" } }, env: bearer_token, as: :json
+      post my_access_tokens_path, params: { access_token: { description: "Dayzy CLI", permission: "read" } }, env: bearer_token, as: :json
     end
     assert_response :unauthorized
   end

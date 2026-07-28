@@ -1,6 +1,6 @@
-# How to contribute to Fizzy
+# How to contribute to Dayzy
 
-Fizzy uses GitHub
+Dayzy uses GitHub
 [discussions](https://github.com/basecamp/fizzy/discussions) to track
 feature requests and questions, rather than [the issue
 tracker](https://github.com/basecamp/fizzy/issues). If you're considering

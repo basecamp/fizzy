@@ -21,7 +21,7 @@ __Response:__
     "url": "http://app.fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcy/webhooks/03f5v9zkft4hj9qq0lsn9ohcm",
     "board": {
       "id": "03f5v9zkft4hj9qq0lsn9ohcy",
-      "name": "Fizzy",
+      "name": "Dayzy",
       "all_access": true,
       "created_at": "2025-12-05T19:36:35.534Z",
       "url": "http://app.fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcy",

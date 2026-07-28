@@ -1,6 +1,6 @@
 require "test_helper"
 
-class Fizzy::Saas::SignupTest < ActiveSupport::TestCase
+class Dayzy::Saas::SignupTest < ActiveSupport::TestCase
   test "#complete creates queenbee account and uses its id as tenant" do
     queenbee_account = mock("queenbee_account")
     queenbee_account.stubs(:id).returns(123456)

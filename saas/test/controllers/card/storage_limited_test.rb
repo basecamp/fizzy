@@ -11,7 +11,7 @@ class Card::StorageLimitedTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select ".card-perma__notch" do
       assert_select "strong", text: /used all/
-      assert_select "a[href='https://github.com/basecamp/fizzy']", text: "Self-host Fizzy"
+      assert_select "a[href='https://github.com/basecamp/fizzy']", text: "Self-host Dayzy"
     end
     assert_select ".card-perma__notch-new-card-buttons", count: 0
   end

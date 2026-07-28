@@ -9,7 +9,7 @@ class ImportMailerTest < ActionMailer::TestCase
     end
 
     assert_equal [ "david@37signals.com" ], email.to
-    assert_equal "Your Fizzy account import is done", email.subject
+    assert_equal "Your Dayzy account import is done", email.subject
     assert_match accounts(:"37s").slug, email.body.encoded
   end
 
@@ -22,7 +22,7 @@ class ImportMailerTest < ActionMailer::TestCase
     end
 
     assert_equal [ "david@37signals.com" ], email.to
-    assert_equal "Your Fizzy account import failed", email.subject
+    assert_equal "Your Dayzy account import failed", email.subject
     assert_match "corrupted export data", email.body.encoded
   end
 
@@ -45,6 +45,6 @@ class ImportMailerTest < ActionMailer::TestCase
       email.deliver_now
     end
 
-    assert_match "isn't a Fizzy account export", email.body.encoded
+    assert_match "isn't a Dayzy account export", email.body.encoded
   end
 end

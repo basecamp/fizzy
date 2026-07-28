@@ -1,10 +1,10 @@
-# Fizzy
+# Dayzy
 
 This file provides guidance to AI coding agents working with this repository.
 
-## What is Fizzy?
+## What is Dayzy?
 
-Fizzy is a collaborative project management and issue tracking application built by 37signals/Basecamp. It's a kanban-style tool for teams to create and manage cards (tasks/issues) across boards, organize work into columns representing workflow stages, and collaborate via comments, mentions, and assignments.
+Dayzy is a collaborative project management and issue tracking application built by 37signals/Basecamp. It's a kanban-style tool for teams to create and manage cards (tasks/issues) across boards, organize work into columns representing workflow stages, and collaborate via comments, mentions, and assignments.
 
 ## Development Commands
 
@@ -62,7 +62,7 @@ Note: `beta` is a template requiring `BETA_NUMBER` env var; typical targets are 
 
 ### Multi-Tenancy (URL-Based)
 
-Fizzy uses **URL path-based multi-tenancy**:
+Dayzy uses **URL path-based multi-tenancy**:
 - Each Account (tenant) has a unique `external_account_id` (7+ digits)
 - URLs are prefixed: `/{account_id}/boards/...`
 - Middleware (`AccountSlug::Extractor`) extracts the account ID from the URL and sets `Current.account`
@@ -147,7 +147,7 @@ Key recurring tasks (via `config/recurring.yml`):
 
 ### Imports and exports
 
-Allow people to move between OSS and SAAS Fizzy instances:
+Allow people to move between OSS and SAAS Dayzy instances:
 - Exports/Imports can be written to/read from local or S3 storage depending on the config of the instance (both must be supported)
 - Must be able to handle very large ZIP files (500+GB)
 - Models in `app/models/account/data_transfer/`, `app/models/zip_file`

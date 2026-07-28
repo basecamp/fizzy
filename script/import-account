@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Imports a Fizzy account export into this instance.
+# Imports a Dayzy account export into this instance.
 #
 # Usage:
 #   script/import-account <export-file> <owner-email>
@@ -27,7 +27,7 @@ end
 abort "❌ Export file not found: #{zip_path}" unless File.file?(zip_path)
 abort "❌ That doesn't look like an email address: #{email_address}" unless email_address.match?(URI::MailTo::EMAIL_REGEXP)
 
-puts "Loading Fizzy..."
+puts "Loading Dayzy..."
 require_relative "../lib/fizzy"
 Fizzy.configure_bundle
 require_relative "../config/environment"
@@ -60,7 +60,7 @@ Current.set(account: account, identity: identity) do
   rescue Account::DataTransfer::RecordSet::ConflictError
     abort "❌ Import failed: the export conflicts with data that already exists in this instance."
   rescue Account::DataTransfer::RecordSet::IntegrityError, ZipFile::InvalidFileError
-    abort "❌ Import failed: the file doesn't look like a valid Fizzy export."
+    abort "❌ Import failed: the file doesn't look like a valid Dayzy export."
   rescue => error
     abort "❌ Import failed: #{error.message}"
   end

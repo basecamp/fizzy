@@ -176,7 +176,7 @@ class Webhook::Delivery < ApplicationRecord
       text = event.description_for(nil).to_plain_text
       url = polymorphic_url(event.eventable, base_url_options.merge(script_name: account.slug))
 
-      { text: "#{text} <#{url}|Open in Fizzy>" }.to_json
+      { text: "#{text} <#{url}|Open in Dayzy>" }.to_json
     end
 
     def base_url_options

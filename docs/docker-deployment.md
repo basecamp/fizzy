@@ -1,15 +1,15 @@
 ## Deploying with Docker
 
-We provide pre-built Docker images that can be used to run Fizzy on your own server.
+We provide pre-built Docker images that can be used to run Dayzy on your own server.
 
-If you don't need to change the source code, and just want the out-of-the-box Fizzy experience, this can be a great way to get started.
+If you don't need to change the source code, and just want the out-of-the-box Dayzy experience, this can be a great way to get started.
 
-You'll find the latest version of Fizzy's Docker image at `ghcr.io/basecamp/fizzy:main`.
+You'll find the latest version of Dayzy's Docker image at `ghcr.io/basecamp/fizzy:main`.
 To run it you'll need three things: a machine that runs Docker; a mounted volume (so that your database is stored somewhere that is kept around between restarts); and some environment variables for configuration.
 
 ### Mounting a storage volume
 
-The standard Fizzy setup keeps all of its storage inside the path `/rails/storage`.
+The standard Dayzy setup keeps all of its storage inside the path `/rails/storage`.
 By default Docker containers don't persist storage between runs, so you'll want to mount a persistent volume into that location.
 
 The simplest way to do this is with the `--volume` flag with `docker run`. For example:
@@ -26,17 +26,17 @@ Check the Docker documentation to find out more about what's available.
 
 ### Configuring with environment variables
 
-To configure your Fizzy installation, you can use environment variables.
-Fizzy has several of them.
+To configure your Dayzy installation, you can use environment variables.
+Dayzy has several of them.
 Many of these are optional, but at a minimum you'll want to configure your secret key, your SSL domain, and your SMTP email settings.
 
 #### Secret Key Base
 
-Various features inside Fizzy rely on cryptography to work (such as secure links).
+Various features inside Dayzy rely on cryptography to work (such as secure links).
 To set this up, you need to provide a secret value that will be used as the basis of those secrets.
 This value can be anything, but it should be unguessable, and specific to your instance.
 
-You can use any long random string for this, or you can have the Fizzy codebase generate one for you by running:
+You can use any long random string for this, or you can have the Dayzy codebase generate one for you by running:
 
 ```sh
 bin/rails secret
@@ -50,7 +50,7 @@ docker run --env SECRET_KEY_BASE=abcdefabcdef ...
 
 #### SSL
 
-If you want the Fizzy container to handle its own SSL automatically, you just need to specify the domain name that you're running it on.
+If you want the Dayzy container to handle its own SSL automatically, you just need to specify the domain name that you're running it on.
 You can do that with the `TLS_DOMAIN` environment variable.
 Note that if you're using SSL, you'll want to allow traffic on ports 80 and 443.
 So if you were running on `fizzy.example.com` you could enable SSL like this:
@@ -59,7 +59,7 @@ So if you were running on `fizzy.example.com` you could enable SSL like this:
 docker run --publish 80:80 --publish 443:443 --env TLS_DOMAIN=fizzy.example.com ...
 ```
 
-If you are terminating SSL in some other proxy in front of Fizzy, then you don't need to set `TLS_DOMAIN`, and can just publish port 80:
+If you are terminating SSL in some other proxy in front of Dayzy, then you don't need to set `TLS_DOMAIN`, and can just publish port 80:
 ```sh
 docker run --publish 80:80 ...
 ```
@@ -72,13 +72,13 @@ docker run --publish 80:80 --env DISABLE_SSL=true ...
 
 #### SMTP Email
 
-Fizzy needs to be able to send email for its sign up/sign in flow, and for its regular summary emails.
+Dayzy needs to be able to send email for its sign up/sign in flow, and for its regular summary emails.
 The easiest way to set this up is to use a 3rd-party email provider (such as Postmark, Sendgrid, and so on).
 If email is not configured, you can still sign in by finding the 6-character verification code in your Docker container's logs.
 
-You can then plug all your SMTP settings from that provider into Fizzy via the following environment variables:
+You can then plug all your SMTP settings from that provider into Dayzy via the following environment variables:
 
-- `MAILER_FROM_ADDRESS` - the "from" address that Fizzy should use to send email
+- `MAILER_FROM_ADDRESS` - the "from" address that Dayzy should use to send email
 - `SMTP_ADDRESS` - the address of the SMTP server you'll send through
 - `SMTP_PORT` - the port number (defaults to 465 when `SMTP_TLS` is set, 587 otherwise)
 - `SMTP_USERNAME`/`SMTP_PASSWORD` - the credentials for logging in to the SMTP server
@@ -94,8 +94,8 @@ You can find out more about all these settings in the [Rails Action Mailer docum
 
 #### Base URL
 
-Fizzy needs to know the public URL of your instance so it can generate correct links in certain situations (like when sending emails).
-Set `BASE_URL` to the full URL where your Fizzy instance is accessible:
+Dayzy needs to know the public URL of your instance so it can generate correct links in certain situations (like when sending emails).
+Set `BASE_URL` to the full URL where your Dayzy instance is accessible:
 
 ```sh
 docker run --env BASE_URL=https://fizzy.example.com ...
@@ -103,7 +103,7 @@ docker run --env BASE_URL=https://fizzy.example.com ...
 
 #### VAPID keys
 
-Fizzy can also send Web Push notifications.
+Dayzy can also send Web Push notifications.
 To do this it needs a VAPID key pair.
 
 You can create your own keys by starting a development console with:
@@ -143,19 +143,19 @@ If you're using a provider other than AWS, you will also need some of the follow
 - `S3_REQUEST_CHECKSUM_CALCULATION`
 - `S3_RESPONSE_CHECKSUM_VALIDATION`
 
-If your storage provider is on a different site than your Fizzy instance and doesn't return CORS headers on presigned URL responses, inline images may fail to load.
+If your storage provider is on a different site than your Dayzy instance and doesn't return CORS headers on presigned URL responses, inline images may fail to load.
 In that case, set `SERVICE_WORKER_CORS_ENABLED=false` so the service worker fetches uploaded files without CORS mode.
 
 #### Multi-tenant mode
 
-By default, when you run the Fizzy Docker image you'll be limited to creating a single account (although that account can have as many users as you like).
+By default, when you run the Dayzy Docker image you'll be limited to creating a single account (although that account can have as many users as you like).
 This is for convenience: typically when you self-host you'll be running a single account, so in this mode new account signups are automatically disabled as soon as you've created your first account.
 
 If you do want to allow multiple accounts to be created in your instance, set `MULTI_TENANT=true`
 
 ## Example
 
-Here's an example of a `docker-compose.yml` that you could use to run Fizzy via `docker compose up`
+Here's an example of a `docker-compose.yml` that you could use to run Dayzy via `docker compose up`
 
 ```yaml
 services:

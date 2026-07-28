@@ -101,7 +101,7 @@ class Account::ImportTest < ActiveSupport::TestCase
     assert_nil import.failure_reason
   end
 
-  test "check sets failure_reason to invalid_export for non-Fizzy ZIP" do
+  test "check sets failure_reason to invalid_export for non-Dayzy ZIP" do
     target_account = Account.create!(name: "Import Test")
     import = Account::Import.create!(identity: identities(:david), account: target_account)
 

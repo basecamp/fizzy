@@ -1,13 +1,13 @@
-## Deploying Fizzy with Kamal
+## Deploying Dayzy with Kamal
 
-If you'd like to run Fizzy on your own server while having the freedom to easily make changes to its code, we recommend deploying it with [Kamal](https://kamal-deploy.org/).
+If you'd like to run Dayzy on your own server while having the freedom to easily make changes to its code, we recommend deploying it with [Kamal](https://kamal-deploy.org/).
 Kamal makes it easy to set up a bare server, copy the application to it, and manage the configuration settings that it uses.
 
-(Kamal is also what we use to deploy Fizzy at 37signals. If you're curious about what our deployment configuration looks like, you can find it inside [`fizzy-saas`](https://github.com/basecamp/fizzy-saas).)
+(Kamal is also what we use to deploy Dayzy at 37signals. If you're curious about what our deployment configuration looks like, you can find it inside [`fizzy-saas`](https://github.com/basecamp/fizzy-saas).)
 
 This repo contains a starter deployment file that you can modify for your own specific use. That file lives at [config/deploy.yml](config/deploy.yml), which is the default place where Kamal will look for it.
 
-The steps to configure your very own Fizzy are:
+The steps to configure your very own Dayzy are:
 
 1. Fork the repo
 2. Initialize Kamal by running `kamal init`. This command generates the `.kamal` directory along with the required configuration files, including `.kamal/secrets`.
@@ -18,7 +18,7 @@ We'll go through each of these in turn.
 
 ### Fork the repo
 
-To make it easy to customise Fizzy's settings for your own instance, you should start by creating your own GitHub fork of the repo.
+To make it easy to customise Dayzy's settings for your own instance, you should start by creating your own GitHub fork of the repo.
 That allows you to commit your changes, and track them over time.
 You can always re-sync your fork to pick up new changes from the main repo over time.
 
@@ -33,12 +33,12 @@ We've added comments to that file to highlight what each setting needs to be, bu
 - `servers/web`: Enter the hostname of the server you're deploying to here. This should be an address that you can access via `ssh`.
 - `ssh/user`: If you access your server a `root` you can leave this alone; if you use a different user, set it here.
 - `proxy/ssl` and `proxy/host`: Kamal can set up SSL certificates for you automatically. To enable that, set the hostname again as `host`. If you don't want SSL for some reason, you can set `ssl: false` to turn it off.
-- `env/clear/BASE_URL`: The public URL of your Fizzy instance (e.g., `https://fizzy.example.com`). Used when generating links.
-- `env/clear/MAILER_FROM_ADDRESS`: This is the email address that Fizzy will send emails from. It should usually be an address from the same domain where you're running Fizzy.
+- `env/clear/BASE_URL`: The public URL of your Dayzy instance (e.g., `https://fizzy.example.com`). Used when generating links.
+- `env/clear/MAILER_FROM_ADDRESS`: This is the email address that Dayzy will send emails from. It should usually be an address from the same domain where you're running Dayzy.
 - `env/clear/SMTP_ADDRESS`: The address of an SMTP server that you can send email through. You can use a 3rd-party service for this, like Sendgrid or Postmark, in which case their documentation will tell you what to use for this.
-- `env/clear/MULTI_TENANT`: Set to `true` if you want to allow multiple accounts to sign up on your server (by default, Fizzy will allow you to create a single account).
+- `env/clear/MULTI_TENANT`: Set to `true` if you want to allow multiple accounts to sign up on your server (by default, Dayzy will allow you to create a single account).
 
-Fizzy also requires a few environment variables to be set up, some of which contain secrets.
+Dayzy also requires a few environment variables to be set up, some of which contain secrets.
 The simplest way to do this is to put them in a file called `.kamal/secrets`.
 Because this file will contain secret credentials, it's important that you DON'T CHECK THIS FILE INTO YOUR REPO! You can add the filename to `.gitignore` to ensure you don't commit this file accidentally.
 
@@ -76,7 +76,7 @@ The values you enter here will be specific to you, and you can get or create the
 
 Once you've made all those changes, commit them to your fork so they're saved.
 
-### Deploy Fizzy!
+### Deploy Dayzy!
 
 You can now do your first deploy by running:
 
@@ -84,7 +84,7 @@ You can now do your first deploy by running:
 bin/kamal setup
 ```
 
-This will set up Docker (if needed), build your Fizzy app container, configure it, and start it running.
+This will set up Docker (if needed), build your Dayzy app container, configure it, and start it running.
 
 After the first deploy is done, any subsequent steps won't need to do that initial setup. So for future deploys you can just run:
 

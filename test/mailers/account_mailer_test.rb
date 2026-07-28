@@ -33,7 +33,7 @@ class AccountMailerTest < ActionMailer::TestCase
   test "cancellation has correct subject" do
     email = AccountMailer.cancellation(@cancellation)
 
-    assert_equal "Your Fizzy account was cancelled", email.subject
+    assert_equal "Your Dayzy account was cancelled", email.subject
   end
 
   test "cancellation has both HTML and text parts" do

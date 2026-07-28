@@ -330,7 +330,7 @@ class Webhook::DeliveryTest < ActiveSupport::TestCase
     text = JSON.parse(captured_body)["text"]
 
     expected = <<~TEXT.strip
-      David added &quot;Tom &amp; Jerry&#39;s &lt;Great&gt; &quot;Adventure&quot;&quot; <http://example.com/897362094/cards/1|Open in Fizzy>
+      David added &quot;Tom &amp; Jerry&#39;s &lt;Great&gt; &quot;Adventure&quot;&quot; <http://example.com/897362094/cards/1|Open in Dayzy>
     TEXT
     assert_equal expected, text
   end

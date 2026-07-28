@@ -42,7 +42,7 @@ class Export < ApplicationRecord
 
   private
     def filename
-      "fizzy-export-#{id}.zip"
+      "dayzy-export-#{id}.zip"
     end
 
     def with_context

@@ -1,6 +1,6 @@
-# Fizzy API
+# Dayzy API
 
-Fizzy has an API that allows you to integrate your application with it or to create
+Dayzy has an API that allows you to integrate your application with it or to create
 a bot to perform various actions for you.
 
 ## API Endpoints
@@ -25,7 +25,7 @@ a bot to perform various actions for you.
 
 ## Authentication
 
-There are two ways to authenticate with the Fizzy API:
+There are two ways to authenticate with the Dayzy API:
 
 1. **Personal access tokens** - Long-lived tokens for scripts and integrations
 2. **Magic link authentication** - Session-based authentication for native apps

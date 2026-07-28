@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  IMAGE_DESCRIPTION: Fizzy is Kanban as it should be. Not as it has been.
+  IMAGE_DESCRIPTION: Dayzy is Kanban as it should be. Not as it has been.
   SOURCE_URL: https://github.com/${{ github.repository }}
 
 jobs:
@@ -205,5 +205,4 @@ jobs:
             echo "Signing $tag"
             cosign sign --yes "$tag"
           done <<< "$tags"
-
 

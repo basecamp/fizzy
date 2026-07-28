@@ -7,7 +7,7 @@ kevin = find_or_create_user "Kevin Mcconnell", "kevin@example.com"
 
 login_as david
 
-create_board("Fizzy", access_to: [ jason, jz, kevin ]).tap do |fizzy|
+create_board("Dayzy", access_to: [ jason, jz, kevin ]).tap do |fizzy|
   create_card("Prepare sign-up page", description: "We need to do this before the launch.", board: fizzy)
 
   create_card("Prepare sign-up page", description: "We need to do this before the launch.", board: fizzy).tap do |card|

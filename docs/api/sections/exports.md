@@ -37,7 +37,7 @@ __Response:__
   "id": "03f8huu0sog76g3s97596abcd",
   "status": "completed",
   "created_at": "2026-04-02T12:34:56Z",
-  "download_url": "https://app.fizzy.do/rails/active_storage/blobs/redirect/.../fizzy-account-export.zip"
+  "download_url": "https://app.fizzy.do/rails/active_storage/blobs/redirect/.../dayzy-account-export.zip"
 }
 ```
 
@@ -70,7 +70,7 @@ __Response:__
   "id": "03f8huu0sog76g3s97596wxyz",
   "status": "completed",
   "created_at": "2026-04-02T12:34:56Z",
-  "download_url": "https://app.fizzy.do/rails/active_storage/blobs/redirect/.../fizzy-user-data-export.zip"
+  "download_url": "https://app.fizzy.do/rails/active_storage/blobs/redirect/.../dayzy-user-data-export.zip"
 }
 ```
 

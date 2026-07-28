@@ -73,7 +73,7 @@ __Response:__
     "url": "http://fizzy.localhost:3006/897362094/cards/4",
     "board": {
       "id": "03f5v9zkft4hj9qq0lsn9ohcm",
-      "name": "Fizzy",
+      "name": "Dayzy",
       "all_access": true,
       "created_at": "2025-12-05T19:36:35.534Z",
       "auto_postpone_period_in_days": 30,

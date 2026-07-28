@@ -12,7 +12,7 @@ __Response:__
 [
   {
     "id": "03f5v9zkft4hj9qq0lsn9ohcm",
-    "name": "Fizzy",
+    "name": "Dayzy",
     "all_access": true,
     "created_at": "2025-12-05T19:36:35.534Z",
     "auto_postpone_period_in_days": 30,
@@ -39,7 +39,7 @@ __Response:__
 ```json
 {
   "id": "03f5v9zkft4hj9qq0lsn9ohcm",
-  "name": "Fizzy",
+  "name": "Dayzy",
   "all_access": false,
   "created_at": "2025-12-05T19:36:35.534Z",
   "auto_postpone_period_in_days": 30,
@@ -229,7 +229,7 @@ HTTP/1.1 201 Created
 ```json
 {
   "id": "03f5v9zkft4hj9qq0lsn9ohcm",
-  "name": "Fizzy",
+  "name": "Dayzy",
   "all_access": true,
   "created_at": "2025-12-05T19:36:35.534Z",
   "auto_postpone_period_in_days": 30,

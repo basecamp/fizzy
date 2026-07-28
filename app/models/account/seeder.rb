@@ -28,35 +28,35 @@ class Account::Seeder
       playground.update! auto_postpone_period: 365.days
 
       # Cards
-      playground.cards.create! creator: creator, title: "Finally, watch this Fizzy orientation video", status: "published", description: <<~HTML
-        <p>There’s a whole lot more you can do in Fizzy. In the video below, 37signals founder and CEO, Jason Fried, will walk you through the basics in just 17 minutes.</p>
-        <action-text-attachment url="https://videos.37signals.com/fizzy/assets/videos/fizzyorientation-4k.mp4" caption="Fizzy orientation" content-type="video/mp4" filename="fizzyorientation-4k.mp4"></action-text-attachment>
+      playground.cards.create! creator: creator, title: "Finally, watch this Dayzy orientation video", status: "published", description: <<~HTML
+        <p>There’s a whole lot more you can do in Dayzy. In the video below, 37signals founder and CEO, Jason Fried, will walk you through the basics in just 17 minutes.</p>
+        <action-text-attachment url="https://videos.37signals.com/fizzy/assets/videos/fizzyorientation-4k.mp4" caption="Dayzy orientation" content-type="video/mp4" filename="fizzyorientation-4k.mp4"></action-text-attachment>
       HTML
 
       # TODO: Replace the video here with a screencap of creating a passkey
       playground.cards.create! creator: creator, title: "Then, set up a Passkey", status: "published", description: <<~HTML
-        <p>Passkeys let you sign in securely without using passwords or email codes. To set one up, open the Fizzy menu and go to “<b><strong>My Profile > Manage Passkeys</b></strong>”. Using a passkey is optional, but recommended.</p>
+        <p>Passkeys let you sign in securely without using passwords or email codes. To set one up, open the Dayzy menu and go to “<b><strong>My Profile > Manage Passkeys</b></strong>”. Using a passkey is optional, but recommended.</p>
         <action-text-attachment url="https://videos.37signals.com/fizzy/assets/videos/creating_a_passkey.mp4" alt="Demo of adding a passkey" caption="Create a passkey to sign in without passwords or email codes" content-type="video/mp4" filename="creating_a_passkey.mp4"></action-text-attachment>
       HTML
 
       playground.cards.create! creator: creator, title: "Now, grab the invite link to invite someone else", status: "published", description: <<~HTML
-        <p>Open the Fizzy menu, select “<b><strong>+ Add people</b></strong>”, then copy the invite link. You can give this link to someone else so they can make a login for themselves in your account.</p>
+        <p>Open the Dayzy menu, select “<b><strong>+ Add people</b></strong>”, then copy the invite link. You can give this link to someone else so they can make a login for themselves in your account.</p>
         <action-text-attachment url="https://videos.37signals.com/fizzy/assets/images/invite-link.gif" alt="Demo of copying invite link" caption="Get a link to invite co-workers" content-type="image/*" filename="invite-link.gif" presentation="gallery"></action-text-attachment>
       HTML
 
       playground.cards.create! creator: creator, title: "Then, head back home to check out activity", status: "published", description: <<~HTML
-        <p>Hit “1” or pull down the Fizzy menu and select “Home”.</p>
+        <p>Hit “1” or pull down the Dayzy menu and select “Home”.</p>
         <action-text-attachment url="https://videos.37signals.com/fizzy/assets/images/back-to-home.gif" alt="Demo of visiting Home" caption="Go back to Home for Latest Activity" content-type="image/*" filename="back-to-home.gif" presentation="gallery"></action-text-attachment>
       HTML
 
       playground.cards.create! creator: creator, title: "Now, check out all cards assigned to you", status: "published", description: <<~HTML
-        <p>Pull down the Fizzy menu at the top of the screen, and select “<b><strong>Assigned to me</b></strong>” or just hit “2” on your keyboard any time.</p>
+        <p>Pull down the Dayzy menu at the top of the screen, and select “<b><strong>Assigned to me</b></strong>” or just hit “2” on your keyboard any time.</p>
         <action-text-attachment url="https://videos.37signals.com/fizzy/assets/images/all-assigned.gif" alt="Demo of navigating to 'Assigned to Me'" caption="See all cards assigned to me" content-type="image/*" filename="all-assigned.gif" presentation="gallery"></action-text-attachment>
       HTML
 
-      playground.cards.create! creator: creator, title: "Then, open the Fizzy menu", status: "published", description: <<~HTML
-        <p>The Fizzy menu is how you get around the app. Click “<b><strong>Fizzy</b></strong>” at the top of the screen or hit the “J” key on your keyboard to pop it open.</p>
-        <action-text-attachment url="https://videos.37signals.com/fizzy/assets/images/open-menu.gif" alt="Demo of opening the main menu" caption="Open the Fizzy menu" content-type="image/*" filename="open-menu.gif" presentation="gallery"></action-text-attachment>
+      playground.cards.create! creator: creator, title: "Then, open the Dayzy menu", status: "published", description: <<~HTML
+        <p>The Dayzy menu is how you get around the app. Click “<b><strong>Dayzy</b></strong>” at the top of the screen or hit the “J” key on your keyboard to pop it open.</p>
+        <action-text-attachment url="https://videos.37signals.com/fizzy/assets/images/open-menu.gif" alt="Demo of opening the main menu" caption="Open the Dayzy menu" content-type="image/*" filename="open-menu.gif" presentation="gallery"></action-text-attachment>
       HTML
 
       playground.cards.create! creator: creator, title: "Next, assign this card to yourself", status: "published", description: <<~HTML

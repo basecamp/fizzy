@@ -5,7 +5,7 @@ class AccountMailer < ApplicationMailer
 
     mail(
       to: @user.identity.email_address,
-      subject: "Your Fizzy account was cancelled"
+      subject: "Your Dayzy account was cancelled"
     )
   end
 end
