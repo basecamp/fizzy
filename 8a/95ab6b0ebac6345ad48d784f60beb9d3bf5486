@@ -1,0 +1,49 @@
+test/setup-phases-test
+  s_a52fe7cbc4c484::t_b3af052302ebe2 50-54
+bin/setup
+  s_a52fe7cbc4c484::t_5ee23ad033a1c0 106,108-116,186,188,191,195
+saas/bin/setup
+  s_a52fe7cbc4c484::t_1ccce67efd8666 102,105-106,109
+test/fixtures/setup_phases/ci-sim/output.txt
+  s_a52fe7cbc4c484::t_7f0b2fa342fa3c 14-16,25,28
+test/fixtures/setup_phases/fail-db-prepare/output.txt
+  s_a52fe7cbc4c484::t_169c0d6cf7154b 14-16,25
+test/fixtures/setup_phases/fail-mysql-pull/output.txt
+  s_a52fe7cbc4c484::t_207a5fde4c75a7 14-16,25-33,38,41
+test/fixtures/setup_phases/fail-saas-minio-config/output.txt
+  s_a52fe7cbc4c484::t_9d095ffd84cf16 14-16,29,32,35
+test/fixtures/setup_phases/fail-seed/output.txt
+  s_a52fe7cbc4c484::t_ae8eab11031b9c 14-16,25,28
+test/fixtures/setup_phases/oss-mysql-container/output.txt
+  s_a52fe7cbc4c484::t_e9aabc47db305f 14-16,25,28,31
+test/fixtures/setup_phases/oss-mysql-fresh/output.txt
+  s_a52fe7cbc4c484::t_fb9304e93802d1 14-16,25-33,37,40
+test/fixtures/setup_phases/oss-mysql-running/output.txt
+  s_a52fe7cbc4c484::t_5e4e38c010bb10 14-16,25,28
+test/fixtures/setup_phases/oss-reset/output.txt
+  s_a52fe7cbc4c484::t_8ff33b3cf6730e 14-16,25,28
+test/fixtures/setup_phases/oss-sqlite-seeded/output.txt
+  s_a52fe7cbc4c484::t_7e0451c47518fe 14-16,25,28,31
+test/fixtures/setup_phases/oss-sqlite/output.txt
+  s_a52fe7cbc4c484::t_f665129e2c0002 14-16,25,28
+test/fixtures/setup_phases/saas-minio/output.txt
+  s_a52fe7cbc4c484::t_4d25198e9c71e6 14-16,29,32,35,38,41,44
+test/fixtures/setup_phases/saas-no-minio/output.txt
+  s_a52fe7cbc4c484::t_6c062f4dec772d 14-16,29,32,35,38
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "8a95ab6b0ebac6345ad48d784f60beb9d3bf5486",
+  "prompts": {},
+  "sessions": {
+    "s_a52fe7cbc4c484": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "20f18ae5-8f61-4a61-82fe-444666fe7ed2",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
