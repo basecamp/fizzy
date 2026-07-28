@@ -1,0 +1,52 @@
+mise.saas.toml
+  s_a52fe7cbc4c484::t_05a4fb3290739f 11-45
+bin/setup
+  s_a52fe7cbc4c484::t_da972f3921375e 103-107,111,113
+  s_a52fe7cbc4c484::t_97f15e46b23981 181,183,186,190
+.mise.toml
+  s_a52fe7cbc4c484::t_5ebad713c0d670 28-79
+saas/bin/setup
+  s_a52fe7cbc4c484::t_ac5d8a0fd91990 102-108,111-112,115
+test/fixtures/setup_phases/ci-sim/output.txt
+  s_a52fe7cbc4c484::t_861dfcb65e6017 22,25
+test/fixtures/setup_phases/fail-db-prepare/output.txt
+  s_a52fe7cbc4c484::t_e8f1b35cd0620f 22,24
+test/fixtures/setup_phases/fail-mysql-pull/output.txt
+  s_a52fe7cbc4c484::t_c489310ec76972 22,27,30
+test/fixtures/setup_phases/fail-saas-minio-config/output.txt
+  s_a52fe7cbc4c484::t_654194603e8444 26,29,32,34
+test/fixtures/setup_phases/fail-seed/output.txt
+  s_a52fe7cbc4c484::t_2226f166d1af34 22,25,27
+test/fixtures/setup_phases/oss-mysql-container/output.txt
+  s_a52fe7cbc4c484::t_9e8c62b6c4386e 22,25,28
+test/fixtures/setup_phases/oss-mysql-fresh/output.txt
+  s_a52fe7cbc4c484::t_a9d0281c38d14e 22,26,29
+test/fixtures/setup_phases/oss-mysql-running/output.txt
+  s_a52fe7cbc4c484::t_70f26bfcf5cb5a 22,25
+test/fixtures/setup_phases/oss-reset/output.txt
+  s_a52fe7cbc4c484::t_2090d14b39b0b5 22,25
+test/fixtures/setup_phases/oss-sqlite-seeded/output.txt
+  s_a52fe7cbc4c484::t_3d4335c30f994e 22,25,28
+test/fixtures/setup_phases/oss-sqlite/output.txt
+  s_a52fe7cbc4c484::t_51b92989d51b2a 22,25
+test/fixtures/setup_phases/saas-minio/output.txt
+  s_a52fe7cbc4c484::t_8e6758f4d5ef24 26,29,32,35,38,41
+test/fixtures/setup_phases/saas-no-minio/output.txt
+  s_a52fe7cbc4c484::t_de112ec31ec7c9 26,29,32,35
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "66840ba16958eba017f1fe4cabf90dbb01f3aebe",
+  "prompts": {},
+  "sessions": {
+    "s_a52fe7cbc4c484": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "20f18ae5-8f61-4a61-82fe-444666fe7ed2",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
