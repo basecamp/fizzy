@@ -1,0 +1,19 @@
+bin/bcenv
+  s_e7f35ff4dfc068::t_113a015cefdf83 41-51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "d23df0078a13e78b50b052121aaff0ba16e7d180",
+  "prompts": {},
+  "sessions": {
+    "s_e7f35ff4dfc068": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "26213cdd-36a0-4e69-820b-1d68a49b16d1",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
