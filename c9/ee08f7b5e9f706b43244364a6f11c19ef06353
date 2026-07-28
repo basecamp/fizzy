@@ -1,0 +1,20 @@
+test/setup-phases-test
+  s_a52fe7cbc4c484::t_4d2e81491b2478 160
+  s_a52fe7cbc4c484::t_8906de10e8f296 116-125
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "c9ee08f7b5e9f706b43244364a6f11c19ef06353",
+  "prompts": {},
+  "sessions": {
+    "s_a52fe7cbc4c484": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "20f18ae5-8f61-4a61-82fe-444666fe7ed2",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
