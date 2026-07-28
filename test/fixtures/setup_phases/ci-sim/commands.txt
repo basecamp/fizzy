@@ -1,0 +1,6 @@
+brew bundle --file=$APP/Brewfile
+bundle config set --local auto_install true
+bundle install
+rails db:prepare
+rails log:clear tmp:clear
+exit: 0

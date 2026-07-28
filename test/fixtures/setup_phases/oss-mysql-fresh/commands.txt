@@ -1,0 +1,11 @@
+brew bundle --file=$APP/Brewfile
+bundle config set --local auto_install true
+bundle install
+nc -z localhost 3306
+docker ps -aq -f name=fizzy-mysql
+docker pull mysql:8.4
+docker run -d --name fizzy-mysql -e MYSQL_ALLOW_EMPTY_PASSWORD=yes -p 3306:3306 mysql:8.4
+rails db:prepare
+rails runner pp Account.all.any?
+rails log:clear tmp:clear
+exit: 0

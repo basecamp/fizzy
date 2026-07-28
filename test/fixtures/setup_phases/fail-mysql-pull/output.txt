@@ -1,0 +1,40 @@
+▸ Ensuring mise install
+ensure_correct_mise_install
+
+▸ Trusting mise config
+mise trust --yes $APP/.mise.toml
+mise trusted $APP
+
+▸ Installing system packages
+brew bundle --file=$APP/Brewfile
+
+▸ Installing Ruby and tools
+mise install --yes
+
+
+   ˚ ∘             ∘ ˚   
+  ∘˚˳°∘°  𝒻𝒾𝓏𝓏𝓎  °∘°˳˚∘  
+
+▸ Installing RubyGems
+bundle install
+
+▸ Setting up MySQL
+bash -c 
+        docker pull mysql:8.4
+        docker run -d \
+          --name fizzy-mysql \
+          -e MYSQL_ALLOW_EMPTY_PASSWORD=yes \
+          -p 3306:3306 \
+          mysql:8.4
+        echo "MySQL is starting… (it may take a few seconds)"
+      
+stub-fail: docker pull mysql:8.4
+MySQL is starting… (it may take a few seconds)
+
+▸ Preparing the database
+rails db:prepare
+
+▸ Cleaning up logs and tempfiles
+rails log:clear tmp:clear
+
+✓ Done (N sec)
