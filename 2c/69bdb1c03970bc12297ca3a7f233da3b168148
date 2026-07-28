@@ -1,0 +1,74 @@
+test/setup-phases-test
+  s_a52fe7cbc4c484::t_5c030858bc3b2f 31-33
+  s_a52fe7cbc4c484::t_7b5c0a391e4446 107-108,111
+  s_a52fe7cbc4c484::t_53b1c448064d37 40
+  s_a52fe7cbc4c484::t_e23003febf15d4 1-30,34-39,41-106,109-110,112-238
+test/fixtures/setup_phases/ci-sim/commands.txt
+  s_a52fe7cbc4c484::t_fe281015ba2a14 1-6
+test/fixtures/setup_phases/ci-sim/output.txt
+  s_a52fe7cbc4c484::t_0378d42940d40a 1-27
+test/fixtures/setup_phases/fail-db-prepare/commands.txt
+  s_a52fe7cbc4c484::t_9af4ce6f034408 1-5
+test/fixtures/setup_phases/fail-db-prepare/output.txt
+  s_a52fe7cbc4c484::t_f245e27f86ab7e 1-23
+test/fixtures/setup_phases/fail-mysql-pull/commands.txt
+  s_a52fe7cbc4c484::t_11aa3f1c286833 1-11
+test/fixtures/setup_phases/fail-mysql-pull/output.txt
+  s_a52fe7cbc4c484::t_712f2dae92bd3c 1-40
+test/fixtures/setup_phases/fail-saas-minio-config/commands.txt
+  s_a52fe7cbc4c484::t_13045099f9d875 1-6
+test/fixtures/setup_phases/fail-saas-minio-config/output.txt
+  s_a52fe7cbc4c484::t_fa78dd74f3c7f6 1-33
+test/fixtures/setup_phases/fail-seed/commands.txt
+  s_a52fe7cbc4c484::t_e2840f874a6dfb 1-7
+test/fixtures/setup_phases/fail-seed/output.txt
+  s_a52fe7cbc4c484::t_3a644adb2602c8 1-26
+test/fixtures/setup_phases/oss-mysql-container/commands.txt
+  s_a52fe7cbc4c484::t_35f214d28c4cb6 1-10
+test/fixtures/setup_phases/oss-mysql-container/output.txt
+  s_a52fe7cbc4c484::t_8f3b1d3cef541c 1-30
+test/fixtures/setup_phases/oss-mysql-fresh/commands.txt
+  s_a52fe7cbc4c484::t_6d5d262d800d38 1-11
+test/fixtures/setup_phases/oss-mysql-fresh/output.txt
+  s_a52fe7cbc4c484::t_4d4db356c0b400 1-39
+test/fixtures/setup_phases/oss-mysql-running/commands.txt
+  s_a52fe7cbc4c484::t_fffe2c2ab1a09b 1-8
+test/fixtures/setup_phases/oss-mysql-running/output.txt
+  s_a52fe7cbc4c484::t_e0c45790e070be 1-27
+test/fixtures/setup_phases/oss-reset/commands.txt
+  s_a52fe7cbc4c484::t_27f6dd9e368f5c 1-6
+test/fixtures/setup_phases/oss-reset/output.txt
+  s_a52fe7cbc4c484::t_56a57a4230a306 1-27
+test/fixtures/setup_phases/oss-sqlite-seeded/commands.txt
+  s_a52fe7cbc4c484::t_80906120c6ebff 1-8
+test/fixtures/setup_phases/oss-sqlite-seeded/output.txt
+  s_a52fe7cbc4c484::t_c134e146f6525a 1-30
+test/fixtures/setup_phases/oss-sqlite/commands.txt
+  s_a52fe7cbc4c484::t_ac5129ee18ecef 1-7
+test/fixtures/setup_phases/oss-sqlite/output.txt
+  s_a52fe7cbc4c484::t_0cc1f95c41e930 1-27
+test/fixtures/setup_phases/saas-minio/commands.txt
+  s_a52fe7cbc4c484::t_57b2dc1bf107c4 1-10
+test/fixtures/setup_phases/saas-minio/output.txt
+  s_a52fe7cbc4c484::t_4ad127faf6519f 1-43
+test/fixtures/setup_phases/saas-no-minio/commands.txt
+  s_a52fe7cbc4c484::t_df1ec9e7809407 1-8
+test/fixtures/setup_phases/saas-no-minio/output.txt
+  s_a52fe7cbc4c484::t_d53ed7065b2e58 1-37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "2c69bdb1c03970bc12297ca3a7f233da3b168148",
+  "prompts": {},
+  "sessions": {
+    "s_a52fe7cbc4c484": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "20f18ae5-8f61-4a61-82fe-444666fe7ed2",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
