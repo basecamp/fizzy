@@ -113,6 +113,16 @@ rec "\$label"; die_if_fail "\$label"
 EOF
   done
 
+  # Pin the sandbox to the macOS/brew branch on every host: the bracket
+  # asserts ONE platform's command sequence, and bin/setup's own platform
+  # probes (`uname -s` + command -v) would otherwise route Arch hosts down
+  # the pacman branch and diverge from the goldens. Platform branching is
+  # bin/setup's behavior under test elsewhere, not this bracket's concern.
+  cat > "$sb/stubbin/uname" <<'EOF'
+#!/usr/bin/env bash
+echo Darwin
+EOF
+
   # Not a recorder: gum is presentation. --version fails so step() takes its
   # deterministic plain-echo fallback; direct `gum style` calls print their
   # text arguments.
@@ -147,7 +157,7 @@ EOF
 
   chmod +x "$sb/bin/rails" "$sb/bin/minio-setup" "$sb/home/Work/basecamp/docker-dev/setup" \
            "$sb/stubbin/docker" "$sb/stubbin/nc" "$sb/stubbin/brew" "$sb/stubbin/bundle" \
-           "$sb/stubbin/gh" "$sb/stubbin/gum" "$sb/stubbin/mise"
+           "$sb/stubbin/gh" "$sb/stubbin/gum" "$sb/stubbin/mise" "$sb/stubbin/uname"
 }
 
 run_scenario() { # run_scenario <name> <args> [VAR=value|SAAS_FILE=1|MINIO_FILE=1]...
