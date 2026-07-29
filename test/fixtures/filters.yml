@@ -1,6 +1,6 @@
 jz_assignments:
   id: <%= ActiveRecord::FixtureSet.identify("jz_assignments", :uuid) %>
   creator: david_uuid
-  fields: <%= { indexed_by: :all, sorted_by: :newest }.to_json %>
+  fields: '<%= { indexed_by: :all, sorted_by: :newest }.to_json %>'
   params_digest: <%= Filter.digest_params({ indexed_by: :all, sorted_by: :newest, tag_ids: [ ActiveRecord::FixtureSet.identify("mobile", :uuid) ], assignee_ids: [ ActiveRecord::FixtureSet.identify("jz", :uuid) ] }) %>
   account: 37s_uuid
