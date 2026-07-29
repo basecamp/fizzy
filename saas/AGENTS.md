@@ -10,6 +10,7 @@
 
 ## Deploy
 
+Pre-deploy: `bin/rails saas:enable`
 Deploy: `bin/kamal deploy -d <destination>`
 Destinations: production, staging, beta, beta1
 
