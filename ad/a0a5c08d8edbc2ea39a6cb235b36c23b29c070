@@ -1,0 +1,21 @@
+test/prek-hook-test
+  s_499780d6614983::t_b37dae01a2116f 1-404
+.githooks/pre-commit
+  s_499780d6614983::t_aa45777f72c98f 1-82
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "ada0a5c08d8edbc2ea39a6cb235b36c23b29c070",
+  "prompts": {},
+  "sessions": {
+    "s_499780d6614983": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "538e90fe-efe5-4d83-a204-ade88503aa5a",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
