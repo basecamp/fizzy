@@ -1,0 +1,316 @@
+#!/usr/bin/env -S -u BASH_ENV /bin/bash
+# shellcheck shell=bash
+# Contract test for .githooks/pre-commit.
+#
+# Run it DIRECTLY -- ./test/prek-hook-test -- never `bash test/prek-hook-test`.
+# The whole shebang is load-bearing, and for hygiene rather than for defence
+# against this repository, which supplies this file anyway. -u BASH_ENV:
+# non-interactive bash sources $BASH_ENV before line 1, so a value inherited
+# from an unrelated tool runs arbitrary code ahead of everything below.
+# /bin/bash rather than bash: the interpreter is chosen before line 1 too, so
+# an ambient PATH would otherwise decide which bash reads this. Either can
+# quietly change what this test reports, and neither can be checked from inside
+# the file -- so the "test harness interpreter" section re-runs line 1 against
+# both.
+#
+# Git runs that hook two ways: from a terminal, where a login profile has
+# already built PATH, and from a GUI client (Tower, Fork, GitHub Desktop) with
+# a bare launchd/systemd environment and no profile. Both must resolve this
+# project's mise-managed toolchain and export its [env].
+#
+# Run it directly:  ./test/prek-hook-test
+#
+# Deliberately small, but not empty. Shims-path canonicalisation and trailing-
+# slash handling were dropped once the real environment was measured: shipyard
+# already orders ~/.local/bin and mise's shims above /usr/bin, so `mise exec`
+# resolves the toolchain unaided. What stayed is the part measurement justified.
+# A GUI launch runs no login profile, so nothing orders coexisting mise
+# installations for it -- the hook picks by version floor instead, and refuses
+# to let a prerelease satisfy the stable floor it precedes. Both are exercised
+# below.
+
+set -uo pipefail
+
+# Sanitize PATH first -- before `cd`, before `dirname`, before any external
+# command at all. This runs with a checkout as its cwd and shipyard puts ./bin
+# at high precedence, so whichever tree you are in supplies the dirname, sed and
+# mise this test depends on, and the result would quietly describe that tree
+# instead of this one. Builtins only: a filter built from external tools would
+# already be too late.
+_inherited_path=$PATH   # before sanitizing; the terminal fallback needs the real one
+_absolute=''
+IFS=:
+for _dir in $PATH; do
+  case $_dir in /*) _absolute="${_absolute:+$_absolute:}$_dir" ;; esac
+done
+unset IFS _dir
+PATH="${_absolute:+$_absolute:}$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+export PATH
+unset _absolute
+
+# Line 1 is re-asserted below, and `cd` invalidates a relative $0 -- read it
+# now, with a builtin, before either happens. Pre-set it so an unreadable $0
+# fails that assertion under `set -u` rather than aborting the whole run.
+self_shebang=''
+IFS= read -r self_shebang < "$0"
+
+cd "$(dirname "$0")/.." || exit 1
+
+HOOK=.githooks/pre-commit
+# shellcheck disable=SC2016  # the literal text of the hook's final line
+LAST_LINE='exec "$mise" exec -- prek run'
+pass=0 fail=0
+
+ok() { pass=$((pass + 1)); printf '  ok %s\n' "$1"; }
+no() { fail=$((fail + 1)); printf '  NOT OK %s\n' "$1"; shift; [ $# -gt 0 ] && printf '       %s\n' "$@"; }
+die() { printf 'FATAL: %s\n' "$1" >&2; exit 1; }
+
+command -v mise >/dev/null || die "mise is not installed"
+
+# Ground truth from the config file, not from the dispatch under test. An empty
+# result is fatal rather than a silent skip, which would turn a broken
+# extraction into a false pass.
+env_section=$(sed -n '/^\[env\]/,/^\[/p' .mise.toml) || die "could not read .mise.toml"
+env_keys=$(printf '%s\n' "$env_section" | grep -E '^[A-Za-z_][A-Za-z0-9_]*[[:space:]]*=' | sed 's/[[:space:]]*=.*//')
+[ -n "$env_keys" ] || die "no [env] keys found in .mise.toml"
+
+[ "$(tail -n 1 "$HOOK")" = "$LAST_LINE" ] || die "hook's last line is not: $LAST_LINE"
+
+workdir=$(mktemp -d "${TMPDIR:-/tmp}/prek-hook-test.XXXXXX") || die "mktemp failed"
+relbin=$(mktemp -d ./prek-hook-test.XXXXXX) || die "mktemp failed"
+trap 'rm -rf "$workdir" "$relbin"' EXIT
+
+# --- this harness's own interpreter ------------------------------------------
+# Everything below trusts that line 1 named the interpreter absolutely and
+# dropped BASH_ENV. Both take effect before any line of this file runs, so
+# neither can be observed from the inside -- instead run a probe carrying this
+# file's shebang verbatim, under the two environments it defends against.
+echo "test harness interpreter:"
+if [ "$self_shebang" = '#!/usr/bin/env -S -u BASH_ENV /bin/bash' ]; then
+  ok "shebang names /bin/bash absolutely and unsets BASH_ENV"
+else
+  no "shebang names /bin/bash absolutely and unsets BASH_ENV" "line 1: ${self_shebang:-<empty>}"
+fi
+
+hostile="$workdir/hostile"
+mkdir -p "$hostile"
+printf '#!/bin/sh\necho HOSTILE_BASH_RAN\nexit 0\n' > "$hostile/bash"
+chmod +x "$hostile/bash"
+printf 'echo POISONED_BASH_ENV_RAN\n' > "$workdir/bash_env"
+printf '%s\necho PROBE_RAN\n' "$self_shebang" > "$workdir/shebang-probe"
+chmod +x "$workdir/shebang-probe"
+shebang_out=$(env -i HOME="$HOME" PATH="$hostile:/usr/bin:/bin" \
+  BASH_ENV="$workdir/bash_env" "$workdir/shebang-probe" 2>&1)
+# The probe has to reach its own body first; without that the two absences
+# below would pass for a probe that never ran at all.
+case $shebang_out in
+  *PROBE_RAN*) ok "the probe runs under a hostile PATH and a poisoned BASH_ENV" ;;
+  *) no "the probe runs under a hostile PATH and a poisoned BASH_ENV" "output: ${shebang_out:-<empty>}" ;;
+esac
+case $shebang_out in
+  *HOSTILE_BASH_RAN*) no "a bash earlier on PATH is not the interpreter" "output: $shebang_out" ;;
+  *) ok "a bash earlier on PATH is not the interpreter" ;;
+esac
+case $shebang_out in
+  *POISONED_BASH_ENV_RAN*) no "an inherited BASH_ENV is not sourced" "output: $shebang_out" ;;
+  *) ok "an inherited BASH_ENV is not sourced" ;;
+esac
+
+probe="$workdir/probe"
+cat > "$probe" <<'PROBE'
+#!/bin/sh
+printf 'ruby=%s\n' "$(ruby -e 'print RUBY_VERSION' 2>/dev/null || echo NONE)"
+printf 'MISE_PICK=%s\n' "${MISE_PICK-<UNSET>}"
+for k in $PROBE_ENV_KEYS; do
+  eval "printf '%s=%s\n' \"\$k\" \"\${$k-<UNSET>}\""
+done
+PROBE
+chmod +x "$probe"
+
+# Swap only the hook's final exec for the probe, so its PATH handling runs
+# verbatim.
+hook_with_probe() {
+  local tmp="$workdir/hook.$1"
+  sed "s|^$(printf '%s' "$LAST_LINE" | sed 's/[[\.*^$/]/\\&/g')\$|exec \"\$mise\" exec -- $probe|" "$HOOK" > "$tmp"
+  chmod +x "$tmp"
+  printf '%s' "$tmp"
+}
+
+field() { printf '%s\n' "$1" | sed -n "s/^$2=//p"; }
+
+# Extra KEY=VALUE arguments after the hook are added to the modelled
+# environment. Used to give the terminal scenario the store configuration a
+# login profile supplies; the GUI scenario deliberately gets none.
+run_hook() {
+  local path=$1 hook=$2
+  shift 2
+  env -i HOME="$HOME" USER="${USER:-$(id -un)}" LOGNAME="${USER:-$(id -un)}" \
+    SHELL=/bin/sh TMPDIR="${TMPDIR:-/tmp}" PROBE_ENV_KEYS="$env_keys" \
+    ${1+"$@"} PATH="$path" "$hook" 2>&1
+}
+
+expected_ruby=$(mise exec -- ruby -e 'print RUBY_VERSION' 2>/dev/null)
+[ -n "$expected_ruby" ] || die "could not determine the project's ruby via mise"
+
+assert_run() {
+  local label=$1 out=$2 k want got
+  got=$(field "$out" ruby)
+  if [ "$got" = "$expected_ruby" ]; then
+    ok "$label: ruby is the project's $expected_ruby"
+  else
+    no "$label: ruby is the project's $expected_ruby" "got: ${got:-<empty>}"
+  fi
+  for k in $env_keys; do
+    want=$(printf '%s\n' "$env_section" | grep -E "^${k}[[:space:]]*=" | head -1 \
+      | sed 's/^[^=]*=[[:space:]]*//; s/^"//; s/"$//')
+    got=$(field "$out" "$k")
+    if [ "$got" = "$want" ]; then ok "$label: $k exported"
+    else no "$label: $k exported" "expected: $want" "actual: $got"; fi
+  done
+}
+
+# --- a GUI client's bare environment ----------------------------------------
+# No login profile has run, so PATH is whatever launchd/systemd provides. This
+# is the case bin/bcenv existed for.
+echo "GUI launch (no login profile):"
+assert_run gui "$(run_hook "/usr/bin:/bin:/usr/sbin:/sbin" "$(hook_with_probe gui)")"
+
+# --- a terminal, with the login profile applied ------------------------------
+echo "terminal launch (login profile applied):"
+# What the profile supplies: PATH, the store mise installs into, and the state
+# directory holding per-config trust records. expected_ruby resolves against
+# whatever this test inherits, so modelling the terminal from a subset of that
+# would compare two different mise configurations and fail a working setup.
+#
+# Harvest through the developer's OWN login shell. bin/bcenv detected it with
+# dscl/getent for exactly this reason: hardcoding bash models bash's profile for
+# someone whose PATH comes from zsh's, and reports a pass or failure they can
+# never reproduce. bash and zsh both take -lc with POSIX printf. fish does not,
+# and rebuilding bcenv's multi-shell matrix to read four variables is not worth
+# it -- fish and anything else fall back to the environment this process
+# inherited, which is itself a terminal's.
+_mise_dirs='MISE_DATA_DIR XDG_DATA_HOME MISE_STATE_DIR XDG_STATE_HOME'
+login_shell=$(dscl . -read "/Users/$(id -un)" UserShell 2>/dev/null | sed 's/^UserShell: *//')
+[ -n "$login_shell" ] || login_shell=$(getent passwd "$(id -un)" 2>/dev/null | cut -d: -f7)
+[ -n "$login_shell" ] || login_shell=${SHELL:-}
+case ${login_shell##*/} in
+  bash | zsh) ;;
+  *) login_shell='' ;;
+esac
+
+login_store=()
+if [ -n "$login_shell" ] && [ -x "$login_shell" ]; then
+  # shellcheck disable=SC2016  # these must expand in the login shell, not here
+  login_env=$(env -i HOME="$HOME" USER="${USER:-$(id -un)}" TERM=dumb \
+    "$login_shell" -lc 'printf "%s\n" "$PATH"
+      for v in '"$_mise_dirs"'; do eval "printf \"%s\\n\" \"\${$v-}\""; done' \
+    2>/dev/null)
+  login_path=$(printf '%s\n' "$login_env" | sed -n 1p)
+  _line=1
+  for _var in $_mise_dirs; do
+    _line=$((_line + 1))
+    _value=$(printf '%s\n' "$login_env" | sed -n "${_line}p")
+    [ -n "$_value" ] && login_store+=("$_var=$_value")
+  done
+  _from="$login_shell login profile"
+else
+  login_path=$_inherited_path
+  for _var in $_mise_dirs; do
+    eval "_value=\${$_var-}"
+    [ -n "$_value" ] && login_store+=("$_var=$_value")
+  done
+  _from="inherited environment (login shell ${login_shell:-unknown} not reconstructable)"
+fi
+echo "  environment from: $_from"
+unset _var _value _line _mise_dirs
+# ${login_store[@]+...} because macOS ships bash 3.2, where expanding an empty
+# array under `set -u` is an error.
+assert_run terminal "$(run_hook "${login_path:-$_inherited_path}" "$(hook_with_probe login)" \
+  ${login_store[@]+"${login_store[@]}"})"
+
+# --- coexisting installations ------------------------------------------------
+# bin/setup upgrades whichever mise it resolved and leaves the rest installed,
+# so a stale copy can sit ahead of or behind the maintained one. A GUI launch
+# has no login profile to order them. Both orders are exercised, so a fix that
+# merely reorders PATH cannot pass.
+echo "coexisting installations are chosen by version, not position:"
+min_version=$(sed -n 's/^[[:space:]]*min_version[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p' .mise.toml | head -1)
+if [ -z "$min_version" ]; then
+  die ".mise.toml declares no min_version; the hook's selection cannot be tested"
+fi
+mk_mise() { # dir, reported version, marker
+  mkdir -p "$1"
+  cat > "$1/mise" <<EOF
+#!/bin/sh
+if [ "\$1" = --version ]; then echo "$2 test"; exit 0; fi
+MISE_PICK=$3
+export MISE_PICK
+exec "$(command -v mise)" "\$@"
+EOF
+  chmod +x "$1/mise"
+}
+stale="$workdir/stale/bin"; fresh="$workdir/fresh/bin"
+mk_mise "$stale" 1.0.0 stale
+mk_mise "$fresh" 9999.1.1 fresh
+for order in stale-first fresh-first; do
+  case $order in
+    stale-first) candidates="$stale:$fresh" ;;
+    fresh-first) candidates="$fresh:$stale" ;;
+  esac
+  out=$(run_hook "$candidates:/usr/bin:/bin" "$(hook_with_probe "$order")")
+  if [ "$(field "$out" MISE_PICK)" = fresh ]; then
+    ok "$order: skips the below-floor mise, picks the one meeting min_version"
+  else
+    no "$order: skips the below-floor mise, picks the one meeting min_version" \
+       "picked: $(field "$out" MISE_PICK)"
+  fi
+done
+
+# --- a prerelease does not satisfy the stable floor it precedes ---------------
+echo "prerelease handling:"
+pre="$workdir/pre/bin"; stable="$workdir/stable/bin"
+mk_mise "$pre" "$min_version-rc.1" prerelease
+mk_mise "$stable" "$min_version" stable
+out=$(run_hook "$pre:$stable:/usr/bin:/bin" "$(hook_with_probe prerelease)")
+if [ "$(field "$out" MISE_PICK)" = stable ]; then
+  ok "skips $min_version-rc.1 and picks the stable $min_version behind it"
+else
+  no "skips $min_version-rc.1 and picks the stable $min_version behind it" \
+     "picked: $(field "$out" MISE_PICK)"
+fi
+
+# --- relative PATH entries do not decide which mise runs ----------------------
+# Shipyard puts ./bin at high PATH precedence and a hook's cwd is the working
+# tree, so a relative entry resolves against whatever is being committed in.
+# Worth preventing as accidental shadowing. NOT a security boundary: git runs
+# the repository's own tracked .githooks/pre-commit, so a hostile checkout has
+# already chosen what executes before PATH matters at all.
+echo "relative PATH entries do not supply mise:"
+cat > "$relbin/mise" <<EOF
+#!/bin/sh
+MISE_PICK=repo-local
+export MISE_PICK
+exec "$(command -v mise)" "\$@"
+EOF
+chmod +x "$relbin/mise"
+out=$(run_hook "$relbin:.:/usr/bin:/bin" "$(hook_with_probe relative)")
+if [ "$(field "$out" MISE_PICK)" = repo-local ]; then
+  no "a mise in a relative PATH entry is not executed" "the hook ran ./$relbin/mise"
+else
+  ok "a mise in a relative PATH entry is not executed"
+fi
+
+
+# --- the accepted boundary ---------------------------------------------------
+# A mise reachable only through a login profile is not found under a GUI
+# launch. That must fail loudly, and must not point at bin/setup, which accepts
+# such an installation unchanged.
+echo "unreachable mise (the accepted profile-only boundary):"
+if grep -q 'GUI git client' "$HOOK"; then ok "diagnostic names the GUI/login-profile boundary"
+else no "diagnostic names the GUI/login-profile boundary"; fi
+if grep -q 'bin/setup will not help' "$HOOK"; then ok "diagnostic says rerunning bin/setup will not help"
+else no "diagnostic says rerunning bin/setup will not help"; fi
+
+echo
+printf '%d passed, %d failed\n' "$pass" "$fail"
+[ "$fail" -eq 0 ]
