@@ -3,11 +3,11 @@
 # Query optimizer hints for ActiveRecord
 #
 # Provides methods to pass optimizer hints to the database query planner.
-# Uses MySQL 8 optimizer hint query comments. Other databases (MariaDB, SQLite, etc.)
+# Uses MySQL 8.4 optimizer hint query comments. Other databases (MariaDB, SQLite, etc.)
 # ignore these comments, making this a safe no-op across all databases.
 #
 # Documentation:
-#   * https://dev.mysql.com/doc/refman/8.0/en/optimizer-hints.html
+#   * https://dev.mysql.com/doc/refman/8.4/en/optimizer-hints.html
 #
 # Examples:
 #   Card.use_index(:index_cards_on_account_id_and_board_id_and_status).where(...)
@@ -37,11 +37,11 @@ end
 
 module ActiveRecordRelationOptimizerHintExtensions
   # Pass index hints to the query optimizer using SQL comment hints.
-  # Uses MySQL 8 optimizer hint query comments. Other databases (MariaDB, SQLite, etc.)
+  # Uses MySQL 8.4 optimizer hint query comments. Other databases (MariaDB, SQLite, etc.)
   # ignore these comments, making this a safe no-op across all databases.
   #
   # Documentation:
-  #   * https://dev.mysql.com/doc/refman/8.0/en/optimizer-hints.html
+  #   * https://dev.mysql.com/doc/refman/8.4/en/optimizer-hints.html
   #
   # Example:
   #   Card.use_index(:index_cards_on_account_id_and_board_id_and_status)
@@ -66,10 +66,10 @@ module ActiveRecordRelationOptimizerHintExtensions
   end
 
   # Optimizer hint to override the default join order.
-  # Uses MySQL 8 optimizer hints. Other databases ignore these hints.
+  # Uses MySQL 8.4 optimizer hints. Other databases ignore these hints.
   #
   # Documentation:
-  #    https://dev.mysql.com/doc/refman/8.0/en/optimizer-hints.html#optimizer-hints-join-order
+  #    https://dev.mysql.com/doc/refman/8.4/en/optimizer-hints.html#optimizer-hints-join-order
   #
   # Example:
   #   Event.joins(:recording).join_prefix(:events)
