@@ -1,0 +1,21 @@
+lib/rails_ext/active_record_optimizer_hints.rb
+  s_7b1a7231ed912f::t_63ac5716c12c2e 6,40,69
+  s_7b1a7231ed912f::t_8614944be32bd7 10,44
+  s_7b1a7231ed912f::t_5851d6142e650c 72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.17",
+  "base_commit_sha": "564708d66459cc34ff08aa2e91f4e71351b53b7a",
+  "prompts": {},
+  "sessions": {
+    "s_7b1a7231ed912f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "217ca94a-b92d-45e3-95ed-ad10af079690",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
