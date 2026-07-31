@@ -7,7 +7,7 @@ class ApplicationPushNotification < ActionPushNative::Notification
     # ENABLE_NATIVE_PUSH=true is the escape hatch for development (via exe/push-dev)
     # or any environment that gets credentials later.
     def enable?
-      Fizzy.saas? && (Rails.env.production? || Rails.env.beta? || ENV["ENABLE_NATIVE_PUSH"] == "true")
+      Rails.env.production? || Rails.env.beta? || ENV["ENABLE_NATIVE_PUSH"] == "true"
     end
 
     def verify_credentials!
