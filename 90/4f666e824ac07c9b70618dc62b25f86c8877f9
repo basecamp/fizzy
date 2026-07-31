@@ -1,0 +1,19 @@
+test/prek-hook-test
+  s_ef18dd16bc589b::t_b1933f1eb51951 16-21,23-31,33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "904f666e824ac07c9b70618dc62b25f86c8877f9",
+  "prompts": {},
+  "sessions": {
+    "s_ef18dd16bc589b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "975082cb-640e-4780-bbfe-1c03e79d1e5b",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
