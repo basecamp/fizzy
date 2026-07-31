@@ -212,7 +212,7 @@ echo "terminal launch (login profile applied):"
 # and rebuilding bcenv's multi-shell matrix to read four variables is not worth
 # it -- fish and anything else fall back to the environment this process
 # inherited, which is itself a terminal's.
-_mise_dirs='MISE_SHIMS_DIR MISE_DATA_DIR XDG_DATA_HOME MISE_STATE_DIR XDG_STATE_HOME'
+_mise_dirs='MISE_SHIMS_DIR MISE_INSTALLS_DIR MISE_DATA_DIR XDG_DATA_HOME MISE_STATE_DIR XDG_STATE_HOME'
 login_shell=$(dscl . -read "/Users/$(id -un)" UserShell 2>/dev/null | sed 's/^UserShell: *//')
 [ -n "$login_shell" ] || login_shell=$(getent passwd "$(id -un)" 2>/dev/null | cut -d: -f7)
 [ -n "$login_shell" ] || login_shell=${SHELL:-}
@@ -261,11 +261,19 @@ assert_run terminal "$(run_hook "${login_path:-$_inherited_path}" "$(hook_with_p
 # The store variables are forwarded, not re-derived: this models an agent
 # session, so the hook must resolve the same store the PATH below was built
 # from. __MISE_ORIG_PATH is what a real agent session carries.
+#
+# MISE_INSTALLS_DIR is forwarded because this scenario asserts the resolved
+# path, which is an INSTALL path -- and run_hook rebuilds the environment with
+# `env -i`. Measured against `mise which ruby`, exactly two variables relocate
+# the install tree: MISE_INSTALLS_DIR and MISE_DATA_DIR (XDG_DATA_HOME only
+# through the latter's default). Leaving the first out would resolve the
+# default tree here while expected_ruby_path named the custom one, failing a
+# working hook -- the same defect already fixed for the terminal scenario.
 echo "agent session (shims ordered below /usr/bin):"
 agent_shims=${MISE_SHIMS_DIR:-${MISE_DATA_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/mise}/shims}
 agent_path="/usr/bin:/bin:$agent_shims:/usr/sbin:/sbin"
 agent_env=()
-for _var in MISE_SHIMS_DIR MISE_DATA_DIR XDG_DATA_HOME MISE_STATE_DIR XDG_STATE_HOME; do
+for _var in MISE_SHIMS_DIR MISE_INSTALLS_DIR MISE_DATA_DIR XDG_DATA_HOME MISE_STATE_DIR XDG_STATE_HOME; do
   eval "_value=\${$_var-}"
   [ -n "$_value" ] && agent_env+=("$_var=$_value")
 done
