@@ -1,0 +1,19 @@
+saas/app/models/application_push_notification.rb
+  s_8db83fb27979eb::t_80a6d3228619b7 10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "fbef1bc09f86fa2617d910bf011fe10b5e39889c",
+  "prompts": {},
+  "sessions": {
+    "s_8db83fb27979eb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "42b3017b-1451-49fe-b594-5d9d2ec32480",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
