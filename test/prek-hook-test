@@ -20,14 +20,21 @@
 #
 # Run it directly:  ./test/prek-hook-test
 #
-# Deliberately small, but not empty. Shims-path canonicalisation and trailing-
-# slash handling were dropped once the real environment was measured: shipyard
-# already orders ~/.local/bin and mise's shims above /usr/bin, so `mise exec`
-# resolves the toolchain unaided. What stayed is the part measurement justified.
-# A GUI launch runs no login profile, so nothing orders coexisting mise
-# installations for it -- the hook picks by version floor instead, and refuses
-# to let a prerelease satisfy the stable floor it precedes. Both are exercised
-# below.
+# Git also runs it from an agent session -- Claude Code, Codex and opencode are
+# provisioned fleet-wide -- whose PATH orders mise's shims BELOW /usr/bin.
+# `mise exec` substitutes its install dirs at the shims entry's position, so
+# that ordering silently resolves /usr/bin/ruby. An earlier revision of this
+# file recorded the opposite, that shipyard "already orders ~/.local/bin and
+# mise's shims above /usr/bin, so `mise exec` resolves the toolchain unaided",
+# and dropped the shims handling as unnecessary. A login shell does order them
+# that way; an agent session does not, and it was on that premise that the hook
+# shipped resolving the wrong ruby. The hook now declares the shims directory
+# itself, and the third scenario below is what holds that premise to account.
+#
+# Deliberately small, but not empty. A GUI launch runs no login profile, so
+# nothing orders coexisting mise installations for it -- the hook picks by
+# version floor instead, and refuses to let a prerelease satisfy the stable
+# floor it precedes. Both are exercised below.
 
 set -uo pipefail
 
@@ -245,7 +252,7 @@ else
   _from="inherited environment (login shell ${login_shell:-unknown} not reconstructable)"
 fi
 echo "  environment from: $_from"
-unset _var _value _line _mise_dirs
+unset _var _value _line
 # ${login_store[@]+...} because macOS ships bash 3.2, where expanding an empty
 # array under `set -u` is an error.
 assert_run terminal "$(run_hook "${login_path:-$_inherited_path}" "$(hook_with_probe login)" \
@@ -262,22 +269,23 @@ assert_run terminal "$(run_hook "${login_path:-$_inherited_path}" "$(hook_with_p
 # session, so the hook must resolve the same store the PATH below was built
 # from. __MISE_ORIG_PATH is what a real agent session carries.
 #
-# MISE_INSTALLS_DIR is forwarded because this scenario asserts the resolved
-# path, which is an INSTALL path -- and run_hook rebuilds the environment with
-# `env -i`. Measured against `mise which ruby`, exactly two variables relocate
-# the install tree: MISE_INSTALLS_DIR and MISE_DATA_DIR (XDG_DATA_HOME only
-# through the latter's default). Leaving the first out would resolve the
-# default tree here while expected_ruby_path named the custom one, failing a
-# working hook -- the same defect already fixed for the terminal scenario.
+# The same $_mise_dirs the terminal scenario harvests, deliberately not a second
+# list: the two exist for one reason -- name the mise configuration the expected
+# values were derived from -- and a copy drifts. MISE_INSTALLS_DIR is in it
+# because this scenario asserts the resolved path, which is an INSTALL path.
+# Measured against `mise which ruby`, exactly two variables relocate the install
+# tree: MISE_INSTALLS_DIR and MISE_DATA_DIR (XDG_DATA_HOME only through the
+# latter's default). Omitting the first resolved the default tree here while
+# expected_ruby_path named the custom one, failing a working hook.
 echo "agent session (shims ordered below /usr/bin):"
 agent_shims=${MISE_SHIMS_DIR:-${MISE_DATA_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/mise}/shims}
 agent_path="/usr/bin:/bin:$agent_shims:/usr/sbin:/sbin"
 agent_env=()
-for _var in MISE_SHIMS_DIR MISE_INSTALLS_DIR MISE_DATA_DIR XDG_DATA_HOME MISE_STATE_DIR XDG_STATE_HOME; do
+for _var in $_mise_dirs; do
   eval "_value=\${$_var-}"
   [ -n "$_value" ] && agent_env+=("$_var=$_value")
 done
-unset _var _value
+unset _var _value _mise_dirs
 assert_run agent "$(run_hook "$agent_path" "$(hook_with_probe agent)" \
   "__MISE_ORIG_PATH=$agent_path" ${agent_env[@]+"${agent_env[@]}"})"
 
