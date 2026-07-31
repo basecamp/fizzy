@@ -13,23 +13,24 @@
 # the file -- so the "test harness interpreter" section re-runs line 1 against
 # both.
 #
-# Git runs that hook two ways: from a terminal, where a login profile has
-# already built PATH, and from a GUI client (Tower, Fork, GitHub Desktop) with
-# a bare launchd/systemd environment and no profile. Both must resolve this
-# project's mise-managed toolchain and export its [env].
+# Git runs that hook three ways: from a terminal, where a login profile has
+# already built PATH; from a GUI client (Tower, Fork, GitHub Desktop) with a
+# bare launchd/systemd environment and no profile; and from an agent session --
+# Claude Code, Codex and opencode are provisioned fleet-wide -- whose PATH
+# orders mise's shims BELOW /usr/bin. All three must resolve this project's
+# mise-managed toolchain and export its [env].
+#
+# That third one is why the hook declares the shims directory itself. `mise
+# exec` substitutes its install dirs at the shims entry's position, so shims
+# ordered below /usr/bin silently resolve /usr/bin/ruby. An earlier revision of
+# this file recorded the opposite -- that shipyard "already orders ~/.local/bin
+# and mise's shims above /usr/bin, so `mise exec` resolves the toolchain
+# unaided" -- and dropped the shims handling as unnecessary. A login shell does
+# order them that way; an agent session does not, and on that premise the hook
+# shipped resolving the wrong ruby. The third scenario below is what now holds
+# the premise to account.
 #
 # Run it directly:  ./test/prek-hook-test
-#
-# Git also runs it from an agent session -- Claude Code, Codex and opencode are
-# provisioned fleet-wide -- whose PATH orders mise's shims BELOW /usr/bin.
-# `mise exec` substitutes its install dirs at the shims entry's position, so
-# that ordering silently resolves /usr/bin/ruby. An earlier revision of this
-# file recorded the opposite, that shipyard "already orders ~/.local/bin and
-# mise's shims above /usr/bin, so `mise exec` resolves the toolchain unaided",
-# and dropped the shims handling as unnecessary. A login shell does order them
-# that way; an agent session does not, and it was on that premise that the hook
-# shipped resolving the wrong ruby. The hook now declares the shims directory
-# itself, and the third scenario below is what holds that premise to account.
 #
 # Deliberately small, but not empty. A GUI launch runs no login profile, so
 # nothing orders coexisting mise installations for it -- the hook picks by
