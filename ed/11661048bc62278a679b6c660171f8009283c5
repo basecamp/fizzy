@@ -1,0 +1,20 @@
+saas/config/database.yml
+  s_d298b6294133e9::t_0217a5a97ded50 24-28
+  s_d298b6294133e9::t_8ce1c96142cc73 120-124
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "ed11661048bc62278a679b6c660171f8009283c5",
+  "prompts": {},
+  "sessions": {
+    "s_d298b6294133e9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4e0a0b9b-84c5-4e1f-9536-0c8266ae664d",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
