@@ -97,6 +97,19 @@ EOF
   exit 1
 }
 
+# `mise exec` does not prepend its tool directories unconditionally: when the shims
+# directory is already on PATH it substitutes the install dirs at that entry's position.
+# A login profile puts shims ahead of /usr/bin; an agent session's PATH does not, and the
+# hook then lints against /usr/bin/ruby while reporting plausible paths. Declaring the
+# shims directory here makes resolution independent of inherited ordering.
+#
+# Precedence mirrors mise's own, so a customised store is still honoured. bin/bcenv covered
+# this by sourcing a login profile; this replaces that, and is why the hook no longer
+# depends on what the caller's PATH happened to look like.
+mise_shims=${MISE_SHIMS_DIR:-${MISE_DATA_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/mise}/shims}
+PATH="$mise_shims:$PATH"
+export PATH
+
 # `mise exec` rather than bare `prek`: shims alone resolve the toolchain but do
 # not export the project's [env] table, which is what bcenv silently lost.
 exec "$mise" exec -- prek run

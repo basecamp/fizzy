@@ -120,6 +120,7 @@ probe="$workdir/probe"
 cat > "$probe" <<'PROBE'
 #!/bin/sh
 printf 'ruby=%s\n' "$(ruby -e 'print RUBY_VERSION' 2>/dev/null || echo NONE)"
+printf 'ruby_path=%s\n' "$(command -v ruby || echo NONE)"
 printf 'MISE_PICK=%s\n' "${MISE_PICK-<UNSET>}"
 for k in $PROBE_ENV_KEYS; do
   eval "printf '%s=%s\n' \"\$k\" \"\${$k-<UNSET>}\""
@@ -151,6 +152,8 @@ run_hook() {
 
 expected_ruby=$(mise exec -- ruby -e 'print RUBY_VERSION' 2>/dev/null)
 [ -n "$expected_ruby" ] || die "could not determine the project's ruby via mise"
+expected_ruby_path=$(mise which ruby 2>/dev/null)
+[ -n "$expected_ruby_path" ] || die "could not determine the project's ruby path via mise"
 
 assert_run() {
   local label=$1 out=$2 k want got
@@ -159,6 +162,26 @@ assert_run() {
     ok "$label: ruby is the project's $expected_ruby"
   else
     no "$label: ruby is the project's $expected_ruby" "got: ${got:-<empty>}"
+  fi
+  # The resolved path, for the agent scenario only. A version comparison cannot
+  # see the ordering bug on Arch, where /usr/bin/ruby is also 3.4.10 -- a broken
+  # hook passes. The path distinguishes them on both platforms.
+  #
+  # Scoped rather than global: expected_ruby_path is derived in the invoking
+  # environment, so it names the invoking environment's store. The GUI scenario
+  # deliberately receives no store variables and therefore resolves the DEFAULT
+  # store, so asserting this everywhere would contradict the GUI model and fail
+  # a working hook whenever the two stores differ. The agent scenario is exempt
+  # because it forwards those variables, so the two agree by construction.
+  # Neither of the others can reach the ordering bug anyway: one has no shims
+  # entry at all, the other harvests an already-ordered PATH.
+  if [ "$label" = agent ]; then
+    got=$(field "$out" ruby_path)
+    if [ "$got" = "$expected_ruby_path" ]; then
+      ok "$label: ruby resolves to $expected_ruby_path"
+    else
+      no "$label: ruby resolves to $expected_ruby_path" "got: ${got:-<empty>}"
+    fi
   fi
   for k in $env_keys; do
     want=$(printf '%s\n' "$env_section" | grep -E "^${k}[[:space:]]*=" | head -1 \
@@ -189,7 +212,7 @@ echo "terminal launch (login profile applied):"
 # and rebuilding bcenv's multi-shell matrix to read four variables is not worth
 # it -- fish and anything else fall back to the environment this process
 # inherited, which is itself a terminal's.
-_mise_dirs='MISE_DATA_DIR XDG_DATA_HOME MISE_STATE_DIR XDG_STATE_HOME'
+_mise_dirs='MISE_SHIMS_DIR MISE_DATA_DIR XDG_DATA_HOME MISE_STATE_DIR XDG_STATE_HOME'
 login_shell=$(dscl . -read "/Users/$(id -un)" UserShell 2>/dev/null | sed 's/^UserShell: *//')
 [ -n "$login_shell" ] || login_shell=$(getent passwd "$(id -un)" 2>/dev/null | cut -d: -f7)
 [ -n "$login_shell" ] || login_shell=${SHELL:-}
@@ -227,6 +250,28 @@ unset _var _value _line _mise_dirs
 # array under `set -u` is an error.
 assert_run terminal "$(run_hook "${login_path:-$_inherited_path}" "$(hook_with_probe login)" \
   ${login_store[@]+"${login_store[@]}"})"
+
+# --- an agent session's environment ------------------------------------------
+# Claude Code, Codex and opencode are provisioned fleet-wide, and their PATH
+# orders mise's shims below /usr/bin. `mise exec` substitutes install dirs at
+# the shims entry's position, so inherited ordering -- not the hook -- decided
+# the toolchain. Neither scenario above can catch that: one has no shims entry
+# at all, the other harvests an already-correct order from the login profile.
+#
+# The store variables are forwarded, not re-derived: this models an agent
+# session, so the hook must resolve the same store the PATH below was built
+# from. __MISE_ORIG_PATH is what a real agent session carries.
+echo "agent session (shims ordered below /usr/bin):"
+agent_shims=${MISE_SHIMS_DIR:-${MISE_DATA_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/mise}/shims}
+agent_path="/usr/bin:/bin:$agent_shims:/usr/sbin:/sbin"
+agent_env=()
+for _var in MISE_SHIMS_DIR MISE_DATA_DIR XDG_DATA_HOME MISE_STATE_DIR XDG_STATE_HOME; do
+  eval "_value=\${$_var-}"
+  [ -n "$_value" ] && agent_env+=("$_var=$_value")
+done
+unset _var _value
+assert_run agent "$(run_hook "$agent_path" "$(hook_with_probe agent)" \
+  "__MISE_ORIG_PATH=$agent_path" ${agent_env[@]+"${agent_env[@]}"})"
 
 # --- coexisting installations ------------------------------------------------
 # bin/setup upgrades whichever mise it resolved and leaves the rest installed,
