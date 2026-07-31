@@ -1,0 +1,28 @@
+saas/test/models/application_push_notification_test.rb
+  s_8db83fb27979eb::t_adc546594d8b41 1-4,6-8,15-89
+  s_8db83fb27979eb::t_6e7c0b807d4aae 5
+  s_8db83fb27979eb::t_8a83a915691e22 9-14
+bin/dev
+  s_8db83fb27979eb::t_cf8634fcaacb97 33-34
+saas/exe/push-dev
+  s_8db83fb27979eb::t_2dbec826c2572f 34-35
+  s_8db83fb27979eb::t_f906232fd95e10 20-21
+saas/app/models/application_push_notification.rb
+  s_8db83fb27979eb::t_27aad287305501 3-25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "5bdf34c725c41998140ab4ef9d956c95c128ed4d",
+  "prompts": {},
+  "sessions": {
+    "s_8db83fb27979eb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "42b3017b-1451-49fe-b594-5d9d2ec32480",
+        "model": "claude-fable-5"
+      },
+      "human_author": null
+    }
+  }
+}
