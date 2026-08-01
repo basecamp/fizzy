@@ -158,6 +158,16 @@ run_hook() {
     ${1+"$@"} PATH="$path" "$hook" 2>&1
 }
 
+# Ground truth, and it cannot be poisoned by the ordering these scenarios test,
+# which is worth saying because it looks like it could be: this runs in the
+# invoking environment, and that may itself be an agent shell with shims below
+# /usr/bin. The distinction is what mise is asked to resolve. `mise exec -- ruby`
+# and `mise which ruby` name a TOOL, which mise resolves from its own registry;
+# both return the project's ruby even with a decoy ruby ahead of the shims entry
+# on PATH. `mise exec -- <script>` -- what the hook does, and how prek reaches
+# bin/rubocop's `#!/usr/bin/env ruby` -- only hands the script a PATH, and that
+# PATH is where the substitution bites. Measured both ways against a fake ruby
+# placed first: the tool form returned 3.4.10, the script form ran the fake.
 expected_ruby=$(mise exec -- ruby -e 'print RUBY_VERSION' 2>/dev/null)
 [ -n "$expected_ruby" ] || die "could not determine the project's ruby via mise"
 expected_ruby_path=$(mise which ruby 2>/dev/null)
