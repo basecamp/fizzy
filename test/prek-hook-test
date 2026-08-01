@@ -230,7 +230,7 @@ echo "terminal launch (login profile applied):"
 # and rebuilding bcenv's multi-shell matrix to read four variables is not worth
 # it -- fish and anything else fall back to the environment this process
 # inherited, which is itself a terminal's.
-_mise_dirs='MISE_SHIMS_DIR MISE_INSTALLS_DIR MISE_DATA_DIR XDG_DATA_HOME MISE_STATE_DIR XDG_STATE_HOME'
+_mise_dirs='MISE_SHIMS_DIR MISE_INSTALLS_DIR MISE_SHARED_INSTALL_DIRS MISE_DATA_DIR XDG_DATA_HOME MISE_STATE_DIR XDG_STATE_HOME'
 login_shell=$(dscl . -read "/Users/$(id -un)" UserShell 2>/dev/null | sed 's/^UserShell: *//')
 [ -n "$login_shell" ] || login_shell=$(getent passwd "$(id -un)" 2>/dev/null | cut -d: -f7)
 [ -n "$login_shell" ] || login_shell=${SHELL:-}
@@ -282,12 +282,21 @@ assert_run terminal "$(run_hook "${login_path:-$_inherited_path}" "$(hook_with_p
 #
 # The same $_mise_dirs the terminal scenario harvests, deliberately not a second
 # list: the two exist for one reason -- name the mise configuration the expected
-# values were derived from -- and a copy drifts. MISE_INSTALLS_DIR is in it
-# because this scenario asserts the resolved path, which is an INSTALL path.
-# Measured against `mise which ruby`, exactly two variables relocate the install
-# tree: MISE_INSTALLS_DIR and MISE_DATA_DIR (XDG_DATA_HOME only through the
-# latter's default). Omitting the first resolved the default tree here while
-# expected_ruby_path named the custom one, failing a working hook.
+# values were derived from -- and a copy drifts.
+#
+# The install-tree variables matter here specifically, because this scenario
+# asserts the resolved path and that is an INSTALL path. Three relocate it:
+# MISE_INSTALLS_DIR, MISE_SHARED_INSTALL_DIRS, and MISE_DATA_DIR (XDG_DATA_HOME
+# only through the latter's default). Omitting one resolves the default tree
+# here while expected_ruby_path names the custom one, failing a working hook.
+#
+# Establish that against an EMPTY local store, or the finding hides: a populated
+# local store satisfies the lookup first and masks every fallback behind it.
+# MISE_SHARED_INSTALL_DIRS was missed exactly that way. The check that keeps the
+# method honest is a made-up variable name -- MISE_TOTALLY_MADE_UP_DIRS must
+# leave `mise which ruby` unresolved, or the probe is proving nothing. mise also
+# distinguishes "Setting [x] is not set" (known, unset) from "Unknown setting:
+# x"; only the second means mise does not read it.
 echo "agent session (shims ordered below /usr/bin):"
 agent_shims=${MISE_SHIMS_DIR:-${MISE_DATA_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/mise}/shims}
 agent_path="/usr/bin:/bin:$agent_shims:/usr/sbin:/sbin"
