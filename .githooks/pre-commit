@@ -97,8 +97,23 @@ EOF
   exit 1
 }
 
-# `mise exec` does not prepend its tool directories unconditionally: when the shims
-# directory is already on PATH it substitutes the install dirs at that entry's position.
+# `mise exec` does not prepend its tool directories unconditionally. It strips the
+# install directories it recognises out of the inherited PATH, then inserts the
+# resolved ones immediately BEFORE the shims entry -- keeping that entry -- or
+# prepends them when there is no shims entry at all. Ask it directly, rather than
+# inferring it from which binary won, and the rewrite is plain (measured on 2026.7.10,
+# the floor above, and on 2026.7.16):
+#
+#   in   /usr/bin:$shims:/bin                  out  /usr/bin:<installs>:$shims:/bin
+#   in   $installs/ruby/4/bin:/usr/bin:$shims  out  /usr/bin:<installs>:$shims
+#   in   /usr/bin:/bin                         out  <installs>:/usr/bin:/bin
+#   in   $decoy:/usr/bin:$shims                out  $decoy:/usr/bin:<installs>:$shims
+#
+# Row 2 is the counterintuitive one, and it is why a globally activated
+# installs/ruby/4/bin can sit nine places ahead of /usr/bin and still lose to it: mise
+# strips that entry, then re-lands the toolchain at the shims position, which is behind
+# /usr/bin. Foreign entries -- row 4 -- are never touched.
+#
 # A login profile puts shims ahead of /usr/bin; an agent session's PATH does not, and the
 # hook then lints against /usr/bin/ruby while reporting plausible paths. Declaring the
 # shims directory here makes resolution independent of inherited ordering.
