@@ -297,6 +297,14 @@ assert_run terminal "$(run_hook "${login_path:-$_inherited_path}" "$(hook_with_p
 # leave `mise which ruby` unresolved, or the probe is proving nothing. mise also
 # distinguishes "Setting [x] is not set" (known, unset) from "Unknown setting:
 # x"; only the second means mise does not read it.
+#
+# The honest limit of this list: it is bounded by measurement, not enumerated
+# from mise. `mise settings --all` does not report the path settings at all --
+# not data_dir, not installs_dir, not shared_install_dirs -- so there is no
+# authoritative set to copy, and a variable nobody thought to probe would be
+# missed the same way. A miss shows up as this scenario failing a working hook
+# under a store override, never as a false pass: the assertion compares the
+# hook's resolution against mise's own, so the two disagreeing is the symptom.
 echo "agent session (shims ordered below /usr/bin):"
 agent_shims=${MISE_SHIMS_DIR:-${MISE_DATA_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/mise}/shims}
 agent_path="/usr/bin:/bin:$agent_shims:/usr/sbin:/sbin"
