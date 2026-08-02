@@ -1,0 +1,14 @@
+test/prek-hook-test
+  h_7c48a88bf05c0d 427-437,439
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "bb4cedf523f3df1bc72a0ea762cbf0281386d4e5",
+  "prompts": {},
+  "humans": {
+    "h_7c48a88bf05c0d": {
+      "author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
