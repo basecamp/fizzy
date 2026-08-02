@@ -424,8 +424,19 @@ removed=$(( $(wc -l < "$mutant_src") - $(wc -l < "$mutant") ))
 # probe substitution or a mutant that never executed would produce. That is the
 # same liveness hole this control exists to close, and it would close it for the
 # scenarios above while leaving it open here.
+#
+# MISE_ACTIVATE_AGGRESSIVE is forced off for the MUTANT invocations only. With it
+# on, `mise exec` prepends the resolved installs to the very front of PATH --
+# ahead of the decoy -- instead of inserting them before the retained shims
+# entry, so it repairs the mutant and this control cannot demonstrate anything.
+# The scenarios above deliberately keep whatever the developer has set, because
+# that is their real session and the hook genuinely does resolve correctly for
+# them either way; it is only the mutation that needs the canonical ordering to
+# be meaningful. Forced to 0 rather than unset: activate_aggressive is a real
+# mise setting, so a config file can turn it on with no variable in the
+# environment at all, and only an explicit 0 overrides that.
 for _mode in keep bare; do
-  out=$(run_hook_inheriting "$decoy_path" "$mutant" "$_mode")
+  out=$(MISE_ACTIVATE_AGGRESSIVE=0 run_hook_inheriting "$decoy_path" "$mutant" "$_mode")
   got=$(field "$out" ruby_path)
   want=$(field "$out" ruby)
   if [ "$got" = "$decoy/ruby" ] && [ "$want" = DECOY_RUBY ]; then
