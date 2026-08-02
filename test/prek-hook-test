@@ -425,17 +425,35 @@ removed=$(( $(wc -l < "$mutant_src") - $(wc -l < "$mutant") ))
 # same liveness hole this control exists to close, and it would close it for the
 # scenarios above while leaving it open here.
 #
-# MISE_ACTIVATE_AGGRESSIVE is forced off for the MUTANT invocations only. With it
+# MISE_ACTIVATE_AGGRESSIVE is forced off for BOTH halves of this control. With it
 # on, `mise exec` prepends the resolved installs to the very front of PATH --
 # ahead of the decoy -- instead of inserting them before the retained shims
-# entry, so it repairs the mutant and this control cannot demonstrate anything.
-# The scenarios above deliberately keep whatever the developer has set, because
-# that is their real session and the hook genuinely does resolve correctly for
-# them either way; it is only the mutation that needs the canonical ordering to
-# be meaningful. Forced to 0 rather than unset: activate_aggressive is a real
-# mise setting, so a config file can turn it on with no variable in the
-# environment at all, and only an explicit 0 overrides that.
+# entry, so it repairs the mutant and nothing can be demonstrated.
+#
+# Forcing it off for the mutant alone is not enough, and the reason is the whole
+# point of the control. On a machine with the setting on, the scenarios above
+# pass because mise prepends, NOT because the hook's shims prepend works -- they
+# are insensitive to the regression there. A mutant run under a *different*
+# setting than the scenarios it vouches for demonstrates nothing about them: the
+# suite would go green while a developer edited the prepend away, and ship a
+# hook broken for everyone whose activation is not aggressive. So the control
+# runs a REAL-hook probe and a mutant probe under one identical configuration,
+# and requires them to disagree. That is what sensitivity means here.
+#
+# Forced to 0 rather than unset: activate_aggressive is a real mise setting, so a
+# config file can turn it on with no variable in the environment at all, and only
+# an explicit 0 overrides that.
 for _mode in keep bare; do
+  # The real hook, under the same forced setting as the mutant below.
+  out=$(MISE_ACTIVATE_AGGRESSIVE=0 run_hook_inheriting "$decoy_path" "$mutant_src" "$_mode")
+  got=$(field "$out" ruby_path)
+  if [ "$got" = "$expected_ruby_path" ]; then
+    ok "$_mode: with the shims prepend the project's ruby beats the decoy"
+  else
+    no "$_mode: with the shims prepend the project's ruby beats the decoy" \
+       "ruby_path: ${got:-<empty>} (want $expected_ruby_path)" \
+       "the paired mutant check below is meaningless unless this passes"
+  fi
   out=$(MISE_ACTIVATE_AGGRESSIVE=0 run_hook_inheriting "$decoy_path" "$mutant" "$_mode")
   got=$(field "$out" ruby_path)
   want=$(field "$out" ruby)
