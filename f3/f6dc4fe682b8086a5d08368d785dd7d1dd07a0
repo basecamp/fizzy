@@ -1,0 +1,21 @@
+test/lib/rails_ext/active_storage_vips_transformation_guard_test.rb
+  s_80c15ba381cceb::t_6c02f5c7e5f6d2 35-47
+lib/rails_ext/active_storage_vips_transformation_guard.rb
+  s_80c15ba381cceb::t_e8852d168f89d6 25-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "f3f6dc4fe682b8086a5d08368d785dd7d1dd07a0",
+  "prompts": {},
+  "sessions": {
+    "s_80c15ba381cceb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d5a7b695-412d-4fb4-8678-2d08a52609c1",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
