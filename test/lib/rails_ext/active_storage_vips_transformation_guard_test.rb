@@ -32,6 +32,19 @@ class ActiveStorageVipsTransformationGuardTest < ActiveSupport::TestCase
     assert_raises(UnsupportedMethod) { @blob.variant(bogusnotreal: true).processed }
   end
 
+  test "a libvips operation nickname is rejected even though libvips knows it" do
+    # Vips::Image#method_missing resolves unknown names against libvips operation nicknames, so the
+    # reachable surface is wider than Vips::Image's own methods. These are real operations.
+    assert_raises(UnsupportedMethod) { @blob.variant(gaussblur: 5).processed }
+    assert_raises(UnsupportedMethod) { @blob.variant(invert: true).processed }
+  end
+
+  test "combine_options is still rejected by the base transformer" do
+    # Pins the super chain: the guard raises for its own cases but must keep delegating, or the
+    # base ImageProcessingTransformer's only check silently disappears.
+    assert_raises(ArgumentError) { @blob.variant(combine_options: { resize: "100x100" }).processed }
+  end
+
   # A direct operation name needs no nested selector: Chainable#method_missing turns it into an
   # operation and Processor#apply_operation calls Vips::Image#public_send with it. The argument is
   # the *destination path*, so this writes where the transformation says, not to Active Storage's

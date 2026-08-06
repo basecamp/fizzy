@@ -22,9 +22,14 @@
 # image_processing 1.14.0 instance_eval: "<ruby>" runs arbitrary code -- the side effect lands before
 # the pipeline fails on the operation's nil return, so the eventual error is not a defense.
 #
-# So enforce the allowlist here the way ImageMagick does. It admits nothing dangerous on this path:
-# of its 284 names, 6 reach an ImageProcessing macro, 6 reach a pure Vips::Image accessor (clone,
-# format, log, median, scale, size), and the remaining 272 resolve to nothing.
+# So enforce the allowlist here the way ImageMagick does. It admits nothing dangerous on this path.
+# Note the reachable surface is wider than Vips::Image's own methods: Vips::Image#method_missing
+# resolves an unknown name against libvips operation nicknames, so allowlisted names reach those too.
+# Counting all three routes, 30 of its 284 names resolve to anything at all -- 6 ImageProcessing
+# macros, 21 libvips operations (affine, canny, colourspace, crop, flip, resize, sharpen, thumbnail
+# and the like), and a few pure accessors (clone, format, log, median, size). None of them writes to
+# disk or takes a filename, and every *save/*load nickname is absent. The other 254 resolve to
+# nothing.
 module ActiveStorageVipsTransformationGuard
   # CVE-2025-24293 removed loader and saver from the allowlist, but Attachments::VARIANTS signs
   # loader: { n: -1 } into variant URLs that never expire, so those names have to keep resolving.
