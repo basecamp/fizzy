@@ -23,8 +23,9 @@ class Account::Import < ApplicationRecord
     processing!
 
     ZipFile.read_from(file.blob) do |zip|
-      Account::DataTransfer::Manifest.new(account).each_record_set(start: start) do |record_set, last_id|
-        record_set.check(from: zip, start: last_id, callback: callback)
+      Account::DataTransfer::Manifest.new(account).each_record_set(start: start) do |record_set|
+        # The last_id is ignored so that we can check for record uniquness when interrupted
+        record_set.check(from: zip, callback: callback)
       end
     end
   rescue Account::DataTransfer::RecordSet::ConflictError => e

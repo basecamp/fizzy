@@ -8,13 +8,13 @@ class Account::DataImportJob < ApplicationJob
     step :check do |step|
       import.check \
         start: step.cursor,
-        callback: ->(record_set:, file:) { step.set!([ record_set.model.name, file ]) }
+        callback: ->(record_set:, file:) { step.set!([ record_set.cursor_key, file ]) }
     end
 
     step :process do |step|
       import.process \
         start: step.cursor,
-        callback: ->(record_set:, files:) { step.set!([ record_set.model.name, files.last ]) }
+        callback: ->(record_set:, files:) { step.set!([ record_set.cursor_key, files.last ]) }
     end
   end
 end

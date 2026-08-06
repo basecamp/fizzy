@@ -51,7 +51,12 @@ class Account::DataTransfer::ActionText::RichTextRecordSet < Account::DataTransf
         raise IntegrityError, "#{file_path} is missing required fields: #{missing.join(', ')}"
       end
 
+      if ::ActionText::RichText.exists?(id: data["id"])
+        raise ConflictError, "ActionTextRichText record with ID #{data['id']} already exists"
+      end
+
       check_associations_dont_exist(data)
+      check_unique_values_arent_duplicated(data)
     end
 
     def transform_body_for_export(content)
