@@ -99,7 +99,7 @@ class Webhook::Delivery < ApplicationRecord
 
     def resolved_ip
       return @resolved_ip if defined?(@resolved_ip)
-      @resolved_ip = SsrfProtection.resolve_public_ip(uri.host)
+      @resolved_ip = Surfguard.resolve_public_ips(uri.host).first
     end
 
     def uri

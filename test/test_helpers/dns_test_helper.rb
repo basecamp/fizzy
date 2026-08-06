@@ -3,10 +3,10 @@ module DnsTestHelper
 
   private
 
+  # Surfguard resolves through Resolv.getaddresses, which honours /etc/hosts and
+  # search domains and returns every address a host answers with.
   def stub_dns_resolution(*ips)
-    dns_mock = mock("dns")
-    dns_mock.stubs(:each_address).multiple_yields(*ips)
-    Resolv::DNS.stubs(:open).yields(dns_mock)
+    Resolv.stubs(:getaddresses).returns(ips.map(&:to_s))
   end
 
   def stub_web_push_dns_resolution
