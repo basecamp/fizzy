@@ -1,0 +1,30 @@
+app/models/webhook/delivery.rb
+  s_b69cae1e0dc7ce::t_5e49ebea8e653b 102
+app/models/push/subscription.rb
+  s_b69cae1e0dc7ce::t_903275f319ddb6 29
+test/test_helpers/dns_test_helper.rb
+  s_b69cae1e0dc7ce::t_c92220fb16a24b 6-7,9
+Gemfile
+  s_b69cae1e0dc7ce::t_42db1593d196d4 36
+test/models/surfguard_policy_test.rb
+  s_b69cae1e0dc7ce::t_81c644d1c2728e 166-172
+  s_b69cae1e0dc7ce::t_b8ad081b7dbe0e 3-7,10,15,20,25,30,35,40,45,50,55,62,67,72,77,82,87,92,97,103,106-116,119-135,140,143,148,153,156,159,164
+Gemfile.lock
+  s_b69cae1e0dc7ce::t_629227195bad99 1-6,571
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "b3e4246588edd155a4f4ff51eb9e7d01b8efc1f5",
+  "prompts": {},
+  "sessions": {
+    "s_b69cae1e0dc7ce": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f1213f01-7eb8-4002-aacc-f88c20606c3b",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
