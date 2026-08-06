@@ -26,6 +26,10 @@ class ZipFile
       end
     end
 
+    def path_on_disk(blob)
+      blob.service.path_for(blob.key) if blob.service.respond_to?(:path_for)
+    end
+
     private
       def s3_service?(service)
         # The S3 service doesn't get loaded in development unless it's used
@@ -91,9 +95,16 @@ class ZipFile
       end
 
       def read_from_disk(blob)
-        blob.open do |file|
-          reader = Reader.new(file)
-          yield reader
+        if path = path_on_disk(blob)
+          File.open(path, "rb") do |file|
+            reader = Reader.new(file)
+            yield reader
+          end
+        else
+          blob.open do |file|
+            reader = Reader.new(file)
+            yield reader
+          end
         end
       end
   end

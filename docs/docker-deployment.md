@@ -153,6 +153,17 @@ This is for convenience: typically when you self-host you'll be running a single
 
 If you do want to allow multiple accounts to be created in your instance, set `MULTI_TENANT=true`
 
+## Importing an existing Fizzy account
+
+You can move an account between Fizzy instances by exporting it on the old instance and uploading the export zip to the new one during signup.
+
+Imports need free space: at least twice the export file's size, beyond the export itself, since the imported attachments roughly mirror the zip's contents. If there isn't enough, the import fails fast with "There wasn't enough storage space to process your import." — free up space (or grow the volume) and try again. If free space can't be determined, the check is skipped and the import proceeds.
+
+For very large exports:
+
+- Browser uploads pass through Thruster, which drops slow uploads after its read timeout (a 502 before the import ever starts). Raise `THRUSTER_HTTP_READ_TIMEOUT` (seconds) and recreate the container so the setting takes effect.
+- `script/import-account` runs the import directly on the server from a zip already on disk, bypassing the browser upload entirely — handy for multi-gigabyte exports.
+
 ## Example
 
 Here's an example of a `docker-compose.yml` that you could use to run Fizzy via `docker compose up`
