@@ -15,12 +15,6 @@
       html[data-theme="dark"] & {
         mix-blend-mode: screen;
       }
-
-      @media (prefers-color-scheme: dark) {
-        html:not([data-theme]) & {
-          mix-blend-mode: screen;
-        }
-      }
     }
 
     span::before,
