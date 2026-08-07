@@ -26,7 +26,7 @@ class Push::Subscription < ApplicationRecord
 
   def resolved_endpoint_ip
     return @resolved_endpoint_ip if defined?(@resolved_endpoint_ip)
-    @resolved_endpoint_ip = SsrfProtection.resolve_public_ip(endpoint_uri&.host)
+    @resolved_endpoint_ip = Surfguard.resolve_public_ips(endpoint_uri&.host).first
   end
 
   private

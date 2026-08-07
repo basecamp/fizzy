@@ -38,6 +38,12 @@ GIT
       rails (>= 6.0.0)
 
 GIT
+  remote: https://github.com/basecamp/surfguard
+  revision: 0972277a8116412ac7ab35e9b512a99e700ef4b6
+  specs:
+    surfguard (0.1.0)
+
+GIT
   remote: https://github.com/basecamp/useragent
   revision: 433ca320a42db1266c4b89df74d0abdb9a880c5e
   specs:
@@ -772,6 +778,7 @@ DEPENDENCIES
   sqlite3 (>= 2.0)
   stackprof
   stimulus-rails
+  surfguard!
   thruster
   trilogy (~> 2.12)
   turbo-rails!
