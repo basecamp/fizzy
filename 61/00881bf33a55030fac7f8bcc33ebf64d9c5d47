@@ -1,0 +1,19 @@
+Gemfile.saas.lock
+  s_b69cae1e0dc7ce::t_6c444916d416a7 40-45,781
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "6100881bf33a55030fac7f8bcc33ebf64d9c5d47",
+  "prompts": {},
+  "sessions": {
+    "s_b69cae1e0dc7ce": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f1213f01-7eb8-4002-aacc-f88c20606c3b",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
