@@ -1,0 +1,19 @@
+script/check_agents_docs
+  s_984673782461c8::t_1f30ab0011217e 24,203-205,209,248-250,252,255-258
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "7eaa6c83931cdafb5cb10933f6411b6eafd5e01d",
+  "prompts": {},
+  "sessions": {
+    "s_984673782461c8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c363fb9b-b32b-4030-92e4-bd5642805d1e",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
