@@ -1,0 +1,264 @@
+#!/usr/bin/env ruby
+#
+# CI check for agent instruction files. Ported from bc3's gate of the same
+# name; the rules and their rationale are shared, the pins are ours.
+#
+#   1. The import chain resolves: CLAUDE.md's @imports load, stay in the repo,
+#      and nest no deeper than Claude follows. An imported file is followed for
+#      its own imports; it is not otherwise scanned.
+#   2. AGENTS.md doesn't re-fork the shared shipyard instructions.
+#   3. Literal values restated in the docs match the file that defines them,
+#      at every site that restates them.
+#
+# Deliberately narrow. It does NOT check that every backticked path or rake task
+# in the docs is real — those were open-ended promises this script could not keep,
+# and each attempt to keep them added parsing surface with its own edge cases.
+# What is left is closed-form: a fixed set of pins against named authorities, and
+# a two-file import chain.
+#
+# Scan roots are part of the contract. A new place where agent-facing claims
+# live must be added here, or it isn't covered.
+#
+
+require "pathname"
+
+ROOT = Pathname.new(File.expand_path("..", __dir__))
+ROOT_REAL = ROOT.realpath
+
+# Containment must be canonical, not lexical: cleanpath collapses ".." textually
+# and cannot see that an in-repo symlink points out of the tree.
+def canonicalize(path)
+  if path.exist?
+    path.realpath
+  elsif path.dirname.exist?
+    path.dirname.realpath / path.basename
+  else
+    path.cleanpath
+  end
+end
+
+# Compare path COMPONENTS, not a string prefix: an in-root file legitimately
+# named "..notes.md" starts with ".." without escaping anything.
+def escapes_repository?(path)
+  path.relative_path_from(ROOT_REAL).each_filename.include?("..")
+rescue ArgumentError
+  true
+end
+
+# Fizzy's bridge file is .claude/CLAUDE.md (there is no root CLAUDE.md);
+# saas/AGENTS.md is the gated 37signals-only overlay.
+SCAN_ROOTS = [
+  ".claude/CLAUDE.md",
+  "AGENTS.md",
+  "STYLE.md",
+  "saas/AGENTS.md"
+]
+
+# Roots without a glob are required to exist. Without this, deleting AGENTS.md
+# just shrinks the scanned set and the gate still reports success.
+REQUIRED_ROOTS = SCAN_ROOTS.reject { it.include?("*") }
+
+# Claude loads CLAUDE.md and expands its @imports at session start, so a broken
+# import silently drops instructions everyone believes are in context.
+#
+# An import is recognised only as a line that is *nothing but* the import, at
+# column zero. That is the form every real import in this repo takes, and it is
+# a convention, not a guess: it means this script never has to decide whether a
+# given `@token` sits in a fence, a code span, an indented block, or
+# list-continuation text. Every one of those judgements was a bug at some point
+# in bc3's original; none of them exist now.
+#
+# The cost is that a literal example must avoid the exact standalone form:
+# indent it, or put it inline in a sentence. A fence does NOT exempt it — this
+# script no longer knows what a fence is, which is the point.
+IMPORT_PATTERN = /\A@([A-Za-z0-9_.~\/][\w.\/~-]*)[ \t]*\z/
+
+MAX_IMPORT_HOPS = 4
+
+# Every literal value the always-on instructions restate must be pinned to the
+# file that defines it. A literal that can't be pinned shouldn't be restated.
+#
+# `pattern` must capture the AUTHORITATIVE assignment, not merely find the
+# value somewhere in the file. Each pin is anchored at BOTH ends: a regex
+# locating the claim in the document that makes it, and a regex locating the
+# authoritative assignment. Comparing captures catches drift in either
+# direction.
+PINNED_LITERALS = [
+  { describes: "SaaS switch path",
+    claims: [ { path: "AGENTS.md", pattern: /`(tmp\/saas\.txt)` is the checkout-level SaaS switch/ } ],
+    defined_in: "lib/fizzy.rb", pattern: /File\.exist\?\(File\.expand_path\("\.\.\/(tmp\/saas\.txt)"/ },
+  { describes: "search shard count",
+    claims: [ { path: "AGENTS.md", pattern: /sharded (\d+) ways/ } ],
+    defined_in: "app/models/search/record/trilogy.rb", pattern: /SHARD_COUNT = (\d+)/ },
+  { describes: "beta deploy template gate",
+    claims: [ { path: "saas/AGENTS.md", pattern: /template requiring the `(\w+)` env var/ } ],
+    defined_in: "saas/config/deploy.beta.yml", pattern: /must be given" unless ENV\["(\w+)"\]/ }
+]
+
+# Identifiers owned by shipyard's share/AGENTS.md, which every session already
+# loads. Restating them here means maintaining a second, lossy copy.
+SHARED_FILE_IDENTIFIERS = [
+  "PC96415006F908B67",
+  "e38bdfea-097e-47fa-a7ab-774fd2487741",
+  "6PouH8j4z"
+]
+
+abort "Usage: script/check_agents_docs" if ARGV.any?
+
+errors = []
+
+files = SCAN_ROOTS.flat_map { Dir[ROOT.join(it)] }.uniq.sort
+if files.empty?
+  abort "check_agents_docs: no files matched SCAN_ROOTS; the scan contract is broken."
+end
+
+# Per-root, not just overall: a glob that stops matching shrinks what we check
+# while the other roots keep the run green — the same "passed without checking
+# anything" failure this script exists to prevent, one root at a time.
+SCAN_ROOTS.each do |root|
+  next unless root.include?("*")
+  abort "check_agents_docs: #{root} matched no files; the scan contract is broken." if Dir[ROOT.join(root)].empty?
+end
+
+# Canonicalize before reading. A scan root that is a symlink out of the tree
+# would otherwise be ingested wholesale — the alias is kept for reporting.
+documents = files.filter_map do |file|
+  path = Pathname.new(file)
+  alias_name = path.relative_path_from(ROOT)
+  resolved = canonicalize(path)
+
+  if escapes_repository?(resolved)
+    errors << "#{alias_name}: resolves outside the repository; refusing to read"
+    nil
+  elsif !resolved.file?
+    errors << "#{alias_name}: is not a regular file"
+    nil
+  else
+    [ alias_name, resolved.read ]
+  end
+end
+
+# 1. Required roots are present
+REQUIRED_ROOTS.each do |required|
+  errors << "required scan root #{required} is missing" unless ROOT.join(required).exist?
+end
+
+# 1b. @imports resolve, stay inside the repo, and nest no deeper than Claude follows
+# Depth is measured from CLAUDE.md, the only file Claude loads on its own —
+# everything else is reached *through* it. Seeding the frontier with every
+# scanned document would restart the count at each one, so a chain Claude
+# drops would pass here. The full scanned set is still checked for paths and
+# literals below; it just isn't a set of traversal roots.
+scanned = documents.map { canonicalize(ROOT.join(it.first)) }.to_set
+entry_point = documents.find { it.first.to_s == ".claude/CLAUDE.md" }
+visited = [ canonicalize(ROOT.join(".claude/CLAUDE.md")) ].to_set
+frontier = [ entry_point ].compact
+
+# An import inside a depth-d file is itself depth d+1. Files up to
+# MAX_IMPORT_HOPS load; one past that does not. A chain ending exactly at hop 4
+# is valid — it's an import *from* the hop-4 file that Claude would drop.
+(1..MAX_IMPORT_HOPS + 1).each do |depth|
+  beyond_limit = depth > MAX_IMPORT_HOPS
+  discovered = []
+
+  frontier.each do |relative, content|
+    content.lines.filter_map { it.chomp[IMPORT_PATTERN, 1] }.each do |target|
+      if beyond_limit
+        errors << "#{relative}: import `@#{target}` is hop #{depth}, past Claude's " \
+                  "#{MAX_IMPORT_HOPS}-hop limit; it is not loaded"
+        next
+      end
+
+      if target.start_with?("~")
+        errors << "#{relative}: import `@#{target}` points outside the repository " \
+                  "(home directory) and can't be verified here"
+        next
+      end
+
+      resolved = canonicalize(ROOT.join(relative).dirname / Pathname.new(target))
+
+      if escapes_repository?(resolved)
+        errors << "#{relative}: import `@#{target}` resolves outside the repository"
+      elsif !resolved.exist?
+        errors << "#{relative}: import `@#{target}` does not resolve — Claude would load nothing"
+      elsif !resolved.file?
+        errors << "#{relative}: import `@#{target}` is not a regular file, so Claude loads nothing from it"
+      elsif visited.add?(resolved)
+        discovered << [ resolved.relative_path_from(ROOT_REAL), resolved.read ]
+      end
+    end
+  end
+
+  break if discovered.empty?
+
+  # Imported files are loaded into every session exactly like the roots, so
+  # their claims must face the same checks below — not merely have their own
+  # imports followed. Imports that are already scan roots would otherwise be
+  # checked twice and report doubled errors.
+  documents.concat(discovered.reject { scanned.include?(canonicalize(ROOT.join(it.first))) })
+  frontier = discovered
+end
+
+# 2. No re-fork of the shared shipyard instructions
+documents.select { |relative, _| relative.to_s.end_with?("AGENTS.md") }.each do |relative, content|
+  SHARED_FILE_IDENTIFIERS.each do |identifier|
+    if content.include?(identifier)
+      errors << "#{relative}: contains `#{identifier}`, which belongs to shipyard's share/AGENTS.md. " \
+                "Sessions that need it already load that file — don't fork it."
+    end
+  end
+end
+
+# 3. Documented literals match their defining file, in both directions —
+#    at every site that restates them, not just the first.
+def read_contained(path, describes, errors)
+  file = ROOT.join(path)
+
+  if !file.exist?
+    errors << "#{path} is missing, so the #{describes} claim can't be checked"
+    nil
+  elsif escapes_repository?(canonicalize(file))
+    errors << "#{path} resolves outside the repository; refusing to read"
+    nil
+  else
+    file.read
+  end
+end
+
+PINNED_LITERALS.each do |literal|
+  describes = literal[:describes]
+  source = read_contained(literal[:defined_in], describes, errors)
+  next if source.nil?
+
+  defined = source[literal[:pattern], 1]
+
+  if defined.nil?
+    errors << "#{literal[:defined_in]}: the #{describes} assignment matching " \
+              "#{literal[:pattern].inspect} is gone — the docs still claim it"
+    next
+  end
+
+  literal[:claims].each do |site|
+    path, claim = site[:path], site[:pattern]
+    content = read_contained(path, describes, errors)
+    next if content.nil?
+
+    claimed = content[claim, 1]
+
+    if claimed.nil?
+      errors << "#{path}: the #{describes} claim matching #{claim.inspect} is " \
+                "gone — reword the doc or update this pin"
+    elsif claimed != defined
+      errors << "#{path} states #{describes} #{claimed}, but #{literal[:defined_in]} defines #{defined}"
+    end
+  end
+end
+
+if errors.any?
+  puts "Agent docs check failed:\n\n"
+  errors.each { puts "  #{it}" }
+  puts
+  exit 1
+else
+  puts "Agent docs check passed (#{documents.size} files)."
+end

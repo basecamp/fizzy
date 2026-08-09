@@ -61,6 +61,9 @@ jobs:
       - name: Lint code for consistent style
         run: bin/rubocop
 
+      - name: Agent docs
+        run: script/check_agents_docs
+
   zizmor:
     name: GitHub Actions audit
     runs-on: ubuntu-latest
