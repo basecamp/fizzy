@@ -1,0 +1,27 @@
+AGENTS.md
+  s_984673782461c8::t_446f980ffb33be 3-4,6-9,21,23-29,31-33,35,37-40,42,44-47,49,51-54
+saas/AGENTS.md
+  s_984673782461c8::t_659e5c90d027c6 5-6
+.github/workflows/ci-checks.yml
+  s_984673782461c8::t_b0fa0ebbcacb98 64-66
+config/ci.rb
+  s_984673782461c8::t_7e6b300d03ba82 12-13
+script/check_agents_docs
+  s_984673782461c8::t_37eb50dd4d6dbf 1-264
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "567e058970d16022f7481087ef266b6aff8afa9f",
+  "prompts": {},
+  "sessions": {
+    "s_984673782461c8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c363fb9b-b32b-4030-92e4-bd5642805d1e",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
