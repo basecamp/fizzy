@@ -21,6 +21,7 @@
 #
 
 require "pathname"
+require "set"
 
 ROOT = Pathname.new(File.expand_path("..", __dir__))
 ROOT_REAL = ROOT.realpath
@@ -199,12 +200,13 @@ frontier = [ entry_point ].compact
   frontier = discovered
 end
 
-# 2. No re-fork of the shared shipyard instructions
-documents.select { |relative, _| relative.to_s.end_with?("AGENTS.md") }.each do |relative, content|
+# 2. No re-fork of the shared shipyard instructions — checked in every file a
+#    session loads: the scan roots and everything they import.
+documents.each do |relative, content|
   SHARED_FILE_IDENTIFIERS.each do |identifier|
     if content.include?(identifier)
       errors << "#{relative}: contains `#{identifier}`, which belongs to shipyard's share/AGENTS.md. " \
-                "Sessions that need it already load that file — don't fork it."
+                "Sessions already load that file — don't fork it."
     end
   end
 end
@@ -243,13 +245,17 @@ PINNED_LITERALS.each do |literal|
     content = read_contained(path, describes, errors)
     next if content.nil?
 
-    claimed = content[claim, 1]
+    # Every occurrence, not just the first: a correct first restatement must
+    # not shield a stale duplicate later in the same file.
+    claimed = content.scan(claim).flatten
 
-    if claimed.nil?
+    if claimed.empty?
       errors << "#{path}: the #{describes} claim matching #{claim.inspect} is " \
                 "gone — reword the doc or update this pin"
-    elsif claimed != defined
-      errors << "#{path} states #{describes} #{claimed}, but #{literal[:defined_in]} defines #{defined}"
+    else
+      claimed.reject { it == defined }.each do |value|
+        errors << "#{path} states #{describes} #{value}, but #{literal[:defined_in]} defines #{defined}"
+      end
     end
   end
 end
