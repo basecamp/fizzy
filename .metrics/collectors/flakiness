@@ -1,0 +1,33 @@
+#!/usr/bin/env ruby
+
+# How many tests disagreed with themselves the last time bin/flaky repeated the suite.
+#
+# This reads the summary bin/flaky already wrote rather than repeating the suite itself: a
+# collector runs on every recorded commit, and one that ran the suite three times would be
+# the most expensive thing in the build by a wide margin. Only the nightly produces this,
+# so on an ordinary commit there is nothing to say and the collector says nothing.
+#
+# The count is a number, not a verdict. Nothing fails on it -- a flakiness figure that can
+# block a merge is a figure people learn to suppress. It is here to be read as a trend:
+# whether the suite is getting less trustworthy, and how fast.
+
+require "json"
+require_relative "../../lib/fizzy"
+
+SUMMARY = File.expand_path("../../tmp/flaky/summary.json", __dir__)
+
+if File.exist?(SUMMARY)
+  summary = JSON.parse(File.read(SUMMARY))
+  mode = Fizzy.saas? ? "saas" : "oss"
+
+  # Broken rides along because the two are read together. A jump in flakiness while the
+  # suite is red usually means the red test poisoned the others, not that five things
+  # became flaky overnight.
+  puts JSON.generate \
+    "tests.flaky.#{mode}" => summary.fetch("flaky").size,
+    "tests.broken.#{mode}" => summary.fetch("broken").size
+else
+  # Nothing to say is not an error: `bin/metrics collect` skips an empty object, so the
+  # commits that never ran bin/flaky still record every other metric.
+  puts "{}"
+end

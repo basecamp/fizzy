@@ -1,0 +1,268 @@
+#!/usr/bin/env ruby
+
+# Hunts flaky tests by running the suite several times, each under a different seed, and
+# reporting the tests that did not agree with themselves. See docs/flaky-tests.md.
+#
+# The seeds have to differ, and that is the whole trick. Minitest derives both the suite
+# order and the method order within a suite from the seed, and with work stealing off the
+# round-robin distributor turns that arrival order into a fixed test-to-worker assignment.
+# So one seed run three times is the same run three times: an order-dependent test fails
+# all three and never flips. Different seeds are what make it flip -- and because each seed
+# still replays exactly, what make the flip reproducible once it has.
+#
+# A test that fails under every seed is not flaky, it is broken, and the two are reported
+# apart. Only the second one is a reason to fail the build.
+
+require "fileutils"
+require "json"
+require "optparse"
+require "set"
+
+options = {
+  runs: 3,
+  # Fixed rather than :number_of_processors so the reproduce command means the same thing
+  # on a laptop as it did on the runner. Worker count is part of the distribution, so a
+  # different one is a different run.
+  workers: 4,
+  directory: "tmp/flaky",
+  json: false
+}
+
+OptionParser.new do |parser|
+  parser.banner = "Usage: bin/flaky [options] [test paths...]"
+  parser.on("-n", "--runs N", Integer, "Times to run the suite (default: 3)") { |runs| options[:runs] = runs }
+  parser.on("-w", "--workers N", Integer, "Parallel workers per run (default: 4)") { |workers| options[:workers] = workers }
+  parser.on("-d", "--directory PATH", "Where to write logs and the summary (default: tmp/flaky)") { |path| options[:directory] = path }
+  parser.on("--json", "Print the summary as JSON instead of prose") { options[:json] = true }
+  parser.on_tail("-h", "--help", "Print this help") { puts parser; exit }
+end.parse!
+
+abort "bin/flaky needs at least 2 runs to see a test disagree with itself." if options[:runs] < 2
+
+Dir.chdir(File.expand_path("..", __dir__))
+
+# One pass of the suite: which tests ran, what each did, and the order they ran in on each
+# worker. The order is the part worth keeping -- it is what turns "this went red sometimes"
+# into a list of tests to bisect.
+class Run
+  attr_reader :seed, :workers, :outcomes, :details
+
+  def initialize(seed:, workers:, entries:)
+    @seed, @workers = seed, workers
+    @outcomes = entries.to_h { |entry| [ entry["test"], entry["outcome"] ] }
+    @details = entries.to_h { |entry| [ entry["test"], entry["detail"] ] }
+    @entries = entries
+  end
+
+  def tests
+    @outcomes.keys
+  end
+
+  def failed?(test)
+    %w[ fail error ].include?(@outcomes[test])
+  end
+
+  def passed?(test)
+    @outcomes[test] == "pass"
+  end
+
+  def worker_of(test)
+    entry_for(test)&.fetch("worker")
+  end
+
+  # Everything that ran ahead of this test on the same worker. Tests on the other workers
+  # are in genuinely separate processes with their own databases, so they could not have
+  # left anything behind for this one to trip over.
+  def predecessors_of(test)
+    if entry = entry_for(test)
+      lane(entry["worker"]).take_while { |other| other["sequence"] < entry["sequence"] }.map { |other| other["test"] }.to_set
+    else
+      Set.new
+    end
+  end
+
+  private
+    def entry_for(test)
+      index[test]
+    end
+
+    def index
+      @index ||= @entries.to_h { |entry| [ entry["test"], entry ] }
+    end
+
+    def lane(worker)
+      lanes[worker] ||= []
+    end
+
+    def lanes
+      @lanes ||= @entries.group_by { |entry| entry["worker"] }
+        .transform_values { |entries| entries.sort_by { |entry| entry["sequence"] } }
+    end
+end
+
+module Suite
+  module_function
+
+  def repeat(runs:, workers:, directory:, paths:)
+    FileUtils.rm_rf(directory)
+
+    Array.new(runs) do |index|
+      seed = Random.rand(1..999_999)
+      $stderr.puts "\n== Run #{index + 1} of #{runs}, seed #{seed}"
+      execute(seed: seed, workers: workers, directory: File.join(directory, "run-#{index + 1}"), paths: paths)
+    end
+  end
+
+  def execute(seed:, workers:, directory:, paths:)
+    environment = { "WORK_STEALING" => "false", "PARALLEL_WORKERS" => workers.to_s, "FLAKY_LOG" => directory }
+    system(environment, "bin/rails", "test", *paths, "--seed", seed.to_s)
+
+    Run.new(seed: seed, workers: workers, entries: entries_in(directory, seed))
+  end
+
+  # An empty log means the suite never got as far as running a test -- a boot error, a
+  # missing database. Failures are the data here, but that is not a failure, and treating
+  # it as "nothing was flaky" would report a green night for a build that never ran.
+  def entries_in(directory, seed)
+    entries = Dir.glob(File.join(directory, "*.jsonl")).flat_map { |path| File.readlines(path).map { |line| JSON.parse(line) } }
+    abort "Run with seed #{seed} recorded no tests. The suite did not start." if entries.empty?
+    entries
+  end
+end
+
+# Flaky is disagreement: the same test passed under one seed and failed under another.
+# Everything else the suite says is either steady green or steady red, and neither is what
+# this is looking for.
+module Verdict
+  module_function
+
+  def of(runs)
+    tests = runs.flat_map(&:tests).uniq.sort
+    flaky, broken = [], []
+
+    tests.each do |test|
+      failed, passed = runs.select { |run| run.failed?(test) }, runs.select { |run| run.passed?(test) }
+
+      if failed.any? && passed.any?
+        flaky << flake(test, runs, failed, passed)
+      elsif failed.any?
+        broken << { "test" => test, "detail" => failed.first.details[test] }
+      end
+    end
+
+    { "flaky" => flaky, "broken" => broken }
+  end
+
+  # The suspects are the tests that ran ahead of this one on its worker every time it
+  # failed and never did when it passed. That difference is the reason to look at them:
+  # they are the only tests that were present for the failure and absent for the success.
+  def flake(test, runs, failed, passed)
+    suspects = failed.map { |run| run.predecessors_of(test) }.reduce(:&) -
+      passed.map { |run| run.predecessors_of(test) }.reduce(:|)
+
+    {
+      "test" => test,
+      "worker" => failed.first.worker_of(test),
+      "detail" => failed.first.details[test],
+      "reproduce" => reproduce(failed.first),
+      "outcomes" => runs.map { |run| { "seed" => run.seed, "outcome" => run.outcomes.fetch(test, "absent") } },
+      "suspects" => suspects.to_a.sort
+    }
+  end
+
+  # The whole suite, not the one test. Filtering down to the failing test would throw away
+  # the order that caused the failure, which is the only thing being reproduced here.
+  def reproduce(run)
+    "WORK_STEALING=false PARALLEL_WORKERS=#{run.workers} bin/rails test --seed #{run.seed}"
+  end
+end
+
+module Report
+  module_function
+
+  SUSPECTS_SHOWN = 5
+
+  def print(summary)
+    puts header(summary)
+    puts flaky(summary["flaky"])
+    puts broken(summary["broken"])
+  end
+
+  def header(summary)
+    "#{count(summary["runs"], "run")} of the suite, #{count(summary["workers"], "worker")} each, " \
+      "seeds #{summary["seeds"].join(" ")}.\n\n"
+  end
+
+  def flaky(flakes)
+    if flakes.empty?
+      "No test disagreed with itself. Nothing flaky in these runs.\n"
+    else
+      "FLAKY (#{flakes.size}) — passed under one seed and failed under another\n\n" +
+        flakes.map { |flake| indent(describe(flake)) }.join("\n")
+    end
+  end
+
+  def describe(flake)
+    [
+      "#{flake["test"]}\n",
+      indent("#{flake["outcomes"].map { |outcome| "#{outcome["outcome"]} (seed #{outcome["seed"]})" }.join(" · ")}\n"),
+      indent("#{flake["detail"]}\n"),
+      indent(suspects(flake)),
+      indent("\nReproduce:\n#{indent(flake["reproduce"])}\n")
+    ].join
+  end
+
+  # Capped, because a worker's share of the suite is hundreds of tests and a wall of names
+  # is not a lead. The full list is in the summary for anything that wants to bisect it.
+  def suspects(flake)
+    names = flake["suspects"]
+
+    if names.empty?
+      "Nothing ran ahead of it that did not also run ahead of a passing attempt, so look\n" \
+        "at the clock and at shared state outside the database before suspecting the order.\n"
+    else
+      "Ran on worker #{flake["worker"]}. #{count(names.size, "test")} preceded it only when it failed:\n" +
+        indent(names.first(SUSPECTS_SHOWN).join("\n") + "\n") +
+        (names.size > SUSPECTS_SHOWN ? indent("… and #{names.size - SUSPECTS_SHOWN} more, in the summary\n") : "")
+    end
+  end
+
+  def broken(failures)
+    if failures.empty?
+      ""
+    else
+      "\nBROKEN (#{failures.size}) — failed under every seed, so this is not flakiness\n\n" +
+        failures.map { |failure| indent("#{failure["test"]}\n#{indent(failure["detail"].to_s)}\n") }.join
+    end
+  end
+
+  def indent(text)
+    text.gsub(/^(?=.)/, "  ")
+  end
+
+  def count(number, noun)
+    "#{number} #{noun}#{"s" unless number == 1}"
+  end
+end
+
+runs = Suite.repeat(runs: options[:runs], workers: options[:workers], directory: options[:directory], paths: ARGV)
+
+summary = Verdict.of(runs).merge \
+  "runs" => runs.size,
+  "workers" => options[:workers],
+  "seeds" => runs.map(&:seed)
+
+summary_path = File.join(options[:directory], "summary.json")
+File.write(summary_path, JSON.pretty_generate(summary))
+
+if options[:json]
+  puts JSON.pretty_generate(summary)
+else
+  Report.print(summary)
+  $stderr.puts "\nWrote #{summary_path}"
+end
+
+# Flakiness is a number to watch, not a verdict -- failing the build on it would make the
+# nightly something to silence rather than something to read. A suite that is red under
+# every seed is a different matter.
+exit(summary["broken"].empty? ? 0 : 1)

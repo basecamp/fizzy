@@ -1,0 +1,100 @@
+name: Nightly flaky test hunt
+
+# Repeats the suite under different seeds to find tests that do not agree with themselves,
+# and records how many there were. See docs/flaky-tests.md.
+#
+# Nightly rather than per-pull-request for two reasons. It costs three suite runs, which is
+# too much to put in front of every merge. And running at a fixed hour, on a schedule that
+# marches through month and year boundaries, is the only thing here that ever catches a test
+# that depends on the wall clock.
+
+on:
+  schedule:
+    - cron: "17 3 * * *" # 03:17 UTC. Off the hour, because everyone else's cron is on it.
+  workflow_dispatch:
+    inputs:
+      runs:
+        description: Times to repeat the suite
+        type: number
+        default: 3
+
+permissions:
+  contents: read
+
+jobs:
+  hunt:
+    name: Hunt flaky tests
+    runs-on: ubuntu-latest
+    # Three runs of 1,542 tests take under three minutes on a developer machine. An hour is
+    # room for a runner several times slower, and still short enough that a hung night gets
+    # noticed rather than quietly costing the afternoon.
+    timeout-minutes: 60
+
+    # Only the metrics push needs to write, and it is the last thing this job does.
+    permissions:
+      contents: write
+
+    env:
+      RAILS_ENV: test
+      # SQLite alone. The adapters share the test bodies, and it is the test bodies that
+      # leak state between each other -- a second adapter would mostly re-find the same
+      # flakes for twice the runtime.
+      DATABASE_ADAPTER: sqlite
+
+    steps:
+      - name: Install system packages
+        timeout-minutes: 10
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y cmake libsqlite3-0 libvips curl ffmpeg
+
+      # Credentials are kept because the last step pushes the metrics branch.
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: true # zizmor: ignore[artipacked]
+
+      - uses: ruby/setup-ruby@d45b1a4e94b71acab930e56e79c6aa188764e7f9 # v1.316.0
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      - name: Prepare the database
+        run: bin/rails db:setup
+
+      # Fails the job only when a test failed under every seed, which means main is red and
+      # is worth waking up to. Flakiness itself is recorded, not enforced.
+      #
+      # The input arrives as an environment variable rather than interpolated into the
+      # script, so a dispatch cannot inject shell through it.
+      - name: Repeat the suite
+        env:
+          RUNS: ${{ inputs.runs || 3 }}
+        run: bin/flaky --runs "$RUNS" --workers 4
+
+      # The logs are the reproduce material: which tests ran in what order on which worker,
+      # per seed. Without them a flake found tonight is just a name.
+      - name: Upload the flakiness report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: flaky-report
+          path: tmp/flaky/
+          retention-days: 14
+
+      - name: Add flakiness summary
+        if: always()
+        run: |
+          test -f tmp/flaky/summary.json || exit 0
+          {
+            echo '```'
+            ruby -rjson -e '
+              summary = JSON.parse(File.read("tmp/flaky/summary.json"))
+              puts "#{summary["flaky"].size} flaky, #{summary["broken"].size} broken over #{summary["runs"]} runs (seeds #{summary["seeds"].join(", ")})"
+              summary["flaky"].each { |flake| puts "\n#{flake["test"]}\n  #{flake["reproduce"]}" }
+              summary["broken"].each { |failure| puts "\nBROKEN #{failure["test"]}" }'
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # Recorded whether or not the suite was red: the count describes the night either way,
+      # and a night where main was broken is exactly the one you want in the history.
+      - name: Record the flakiness metric
+        if: always()
+        run: bin/metrics collect && bin/metrics record

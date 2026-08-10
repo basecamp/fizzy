@@ -73,6 +73,11 @@ legs were collated.
 Mode is part of the name because OSS and SaaS measure different trees. They are two metrics
 that share a formula, not one metric with a flag.
 
+`tests.flaky.oss`, `tests.broken.oss` — how many tests disagreed with themselves, and how
+many failed outright, the last time the nightly repeated the suite under different seeds.
+See [flaky tests](flaky-tests.md). Only the nightly produces these, so most commits record
+neither.
+
 Note what this is **not**. The [changed-code coverage gate](development.md#running-tests)
 is what can fail a build, and it judges only the diff. These numbers judge nothing. A
 number that can block a merge invites gaming; a number that only informs invites reading.
@@ -108,9 +113,11 @@ Guidelines that keep this useful rather than merely full:
 - **A number, not a verdict.** Record the offense count, not whether it is acceptable.
   Thresholds change with context; the history should not have to be rewritten when they do.
 
-New collectors run in CI as soon as they are merged. Anything they need must be present in
-the `coverage` job of `.github/workflows/test.yml`, which is where `bin/metrics collect`
-runs.
+New collectors run in CI as soon as they are merged. Anything they need must be present
+wherever `bin/metrics collect` runs — the `coverage` job of `.github/workflows/test.yml`,
+and the nightly in `.github/workflows/nightly-flaky.yml`. Both run every collector, which
+is why having nothing to say has to be cheap: on a nightly the coverage collector prints
+`{}`, and on a main commit the flakiness one does.
 
 ## How CI wires it up
 

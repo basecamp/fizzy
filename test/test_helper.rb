@@ -19,6 +19,11 @@ unless [ "0", "false" ].include?(ENV["CI_PROGRESS_BAR"])
   Minitest::Reporters.use! Minitest::Reporters::ProgressReporter.new(detailed_skip: false)
 end
 
+if ENV["FLAKY_LOG"]
+  require_relative "flaky_recorder"
+  FlakyRecorder.install(ENV["FLAKY_LOG"])
+end
+
 WebMock.allow_net_connect!
 
 VCR.configure do |config|

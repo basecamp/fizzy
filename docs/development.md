@@ -110,6 +110,21 @@ recorded on every `main` commit so its direction over months is visible — see
 bin/metrics trend
 ```
 
+### Flaky tests
+
+Tests run in a random order every time, and the order is a different one on every run. When
+that surfaces a test that only fails sometimes, the seed printed at the top of the run is
+how you get the order back — but only with work stealing off, which is what makes the
+worker assignment follow the seed rather than the timing:
+
+```sh
+WORK_STEALING=false PARALLEL_WORKERS=4 bin/rails test --seed 4927
+```
+
+A nightly job repeats the whole suite under different seeds and reports which tests
+disagreed with themselves, along with the tests that preceded each failure. See [flaky
+tests](flaky-tests.md).
+
 ### Database configuration
 
 Fizzy works with SQLite by default and supports MySQL too. You can switch adapters with the `DATABASE_ADAPTER` environment variable. For example, to develop locally against MySQL:

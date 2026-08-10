@@ -121,3 +121,19 @@ evidence you can cite. See `docs/code-health-metrics.md`, including how to add a
 A `pre-push` hook runs the gate when a push touches Ruby under `app/` or `lib/`, so expect
 roughly a minute's pause there rather than treating it as a hang. It judges committed state
 only. Never reach for `git push --no-verify` to get around a finding — fix the coverage.
+
+## Flaky tests
+
+Tests run in a random order, reshuffled every run, so a test that depends on another having
+run first will fail intermittently. When you hit one, the seed printed at the top of the run
+replays it — but only with work stealing off, which is what ties the worker assignment to
+the seed instead of to timing:
+
+```
+WORK_STEALING=false PARALLEL_WORKERS=4 bin/rails test --seed <seed>
+```
+
+Run the whole suite, not the failing test alone: filtering discards the order that caused
+the failure. A nightly job repeats the suite under different seeds and reports which tests
+flipped and which tests preceded each failure — see `docs/flaky-tests.md`. Never fix a flake
+by pinning the order or adding a `sleep`; find the state one test left behind for another.
