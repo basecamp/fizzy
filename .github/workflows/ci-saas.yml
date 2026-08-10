@@ -35,7 +35,7 @@ jobs:
     name: Record code health metrics
     needs: [ test_oss, test_saas ]
     if: >-
-      always() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/claude/code-health-metrics-076f9f')
+      always() && github.ref == 'refs/heads/main'
       && (needs.test_oss.result == 'success' || needs.test_saas.result == 'success')
     runs-on: ubuntu-latest
 
