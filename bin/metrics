@@ -1,0 +1,401 @@
+#!/usr/bin/env ruby
+
+# Records code-health metrics over time so trends are visible to people and to agents.
+# See docs/code-health-metrics.md.
+#
+# A metric is a name and a number. Nothing else. Producing one is a collector: any
+# executable under .metrics/collectors that prints a JSON object of name => number.
+# Adding a metric means adding a file there — no registry, no config, no schema.
+#
+# Storage is an append-only JSONL file on an orphan branch in this same repository, so
+# the whole system needs no vendor, no account, and no secret beyond the GITHUB_TOKEN
+# that Actions already hands every job. The branch is written with git plumbing rather
+# than a checkout, so recording never touches your working tree.
+#
+#   bin/metrics collect   # run the collectors, leaving JSON in tmp/metrics
+#   bin/metrics record    # merge that into one record and append it to the metrics branch
+#   bin/metrics trend     # print the history
+#   bin/metrics page      # rebuild the HTML chart from the history
+
+require "fileutils"
+require "json"
+require "optparse"
+require "time"
+
+BRANCH = ENV.fetch("METRICS_BRANCH", "metrics")
+REMOTE = ENV.fetch("METRICS_REMOTE", "origin")
+COLLECTORS_DIRECTORY = ".metrics/collectors"
+PENDING_DIRECTORY = ENV.fetch("METRICS_DIR", "tmp/metrics")
+DATA_FILE = "metrics.jsonl"
+PAGE_FILE = "index.html"
+PUSH_ATTEMPTS = 5
+
+Dir.chdir(File.expand_path("..", __dir__))
+
+module Git
+  module_function
+
+  def capture(*arguments, input: nil, quiet: false)
+    output = IO.popen([ "git", *arguments, ({ err: File::NULL } if quiet) ].compact, input ? "r+" : "r") do |io|
+      if input
+        io.write(input)
+        io.close_write
+      end
+      io.read
+    end
+
+    raise "git #{arguments.join(" ")} failed" unless $?.success?
+    output
+  end
+
+  # For commands whose failure is an answer rather than a problem: a branch that does not
+  # exist yet, a push that lost a race.
+  def try(*arguments, input: nil, quiet: false)
+    capture(*arguments, input: input, quiet: quiet)
+  rescue RuntimeError
+    nil
+  end
+
+  # commit-tree refuses to run without an identity, and a CI runner has none configured.
+  def identify
+    if try("config", "user.email").nil?
+      ENV["GIT_AUTHOR_NAME"] = ENV["GIT_COMMITTER_NAME"] = "fizzy-metrics"
+      ENV["GIT_AUTHOR_EMAIL"] = ENV["GIT_COMMITTER_EMAIL"] = "metrics@users.noreply.github.com"
+    end
+  end
+end
+
+# Runs the collectors and leaves their output in PENDING_DIRECTORY, one file each. The two
+# halves are split because in CI they happen in different jobs: the job that ran the tests
+# knows the coverage numbers, and a later job is the one allowed to write the branch.
+module Collect
+  module_function
+
+  def run
+    collectors = Dir.glob("#{COLLECTORS_DIRECTORY}/*").select { |path| File.executable?(path) }.sort
+
+    if collectors.empty?
+      abort "No executable collectors in #{COLLECTORS_DIRECTORY}. A collector prints a JSON\n" \
+            "object of metric name => number on stdout. Remember to chmod +x it."
+    end
+
+    FileUtils.mkdir_p(PENDING_DIRECTORY)
+    collectors.each { |collector| run_collector(collector) }
+  end
+
+  def run_collector(collector)
+    name = File.basename(collector)
+    output = IO.popen([ File.expand_path(collector) ], &:read)
+
+    if !$?.success?
+      abort "Collector #{name} exited #{$?.exitstatus}."
+    elsif (metrics = parse(output, name)).empty?
+      $stderr.puts "#{name}: nothing to record"
+    else
+      File.write(File.join(PENDING_DIRECTORY, "#{name}.json"), JSON.generate(metrics))
+      $stderr.puts "#{name}: #{metrics.map { |key, value| "#{key}=#{value}" }.join(" ")}"
+    end
+  end
+
+  def parse(output, name)
+    metrics = JSON.parse(output)
+    raise JSON::ParserError, "not an object" unless metrics.is_a?(Hash)
+
+    metrics.each do |key, value|
+      abort "Collector #{name} gave #{key} a #{value.class}. Metrics are numbers." unless value.is_a?(Numeric)
+    end
+  rescue JSON::ParserError => error
+    abort "Collector #{name} did not print a JSON object of name => number (#{error.message})."
+  end
+end
+
+# The metrics branch, read and written through plumbing. There is no checkout of it, so a
+# concurrent build cannot corrupt a working tree, and a losing push is just a retry.
+module Store
+  module_function
+
+  def records
+    read(tip).map { |line| JSON.parse(line) }
+  end
+
+  def append(metrics)
+    Git.identify
+    commit, at = Git.capture("log", "-1", "--format=%H%n%cI").split("\n")
+    record = { "commit" => commit, "at" => at, "metrics" => metrics }
+
+    PUSH_ATTEMPTS.times do |attempt|
+      parent = tip
+      return record if push(build(parent, read(parent) + [ JSON.generate(record) ], commit))
+      $stderr.puts "Push lost a race, retrying (#{attempt + 1}/#{PUSH_ATTEMPTS})"
+      sleep(attempt + 1)
+    end
+
+    abort "Could not append to #{BRANCH} after #{PUSH_ATTEMPTS} attempts."
+  end
+
+  # Fetched into a private ref rather than a remote-tracking one, so REMOTE can be a URL as
+  # easily as a name and nothing anyone else relies on gets clobbered. The ref is dropped
+  # first because a stale copy of a branch the remote no longer has would make every push
+  # a non-fast-forward, and the retry loop would spin on it.
+  LOCAL_REF = "refs/metrics/#{BRANCH}"
+
+  def tip
+    Git.try("update-ref", "-d", LOCAL_REF)
+    Git.try("fetch", "--quiet", REMOTE, "+refs/heads/#{BRANCH}:#{LOCAL_REF}", quiet: true)
+    Git.try("rev-parse", "--verify", "--quiet", LOCAL_REF)&.strip
+  end
+
+  def read(commit)
+    if commit
+      Git.try("show", "#{commit}:#{DATA_FILE}").to_s.split("\n").reject(&:empty?)
+    else
+      []
+    end
+  end
+
+  def build(parent, lines, subject)
+    tree = write_tree \
+      DATA_FILE => lines.join("\n") + "\n",
+      PAGE_FILE => Page.render(lines.map { |line| JSON.parse(line) }),
+      "README.md" => readme
+
+    arguments = [ "commit-tree", tree, "-m", "Record metrics for #{subject[0, 7]}" ]
+    arguments.push("-p", parent) if parent
+    Git.capture(*arguments).strip
+  end
+
+  def write_tree(files)
+    entries = files.map do |name, content|
+      "100644 blob #{Git.capture("hash-object", "-w", "--stdin", input: content).strip}\t#{name}\n"
+    end
+
+    Git.capture("mktree", input: entries.join).strip
+  end
+
+  # A plain push, never forced: if two builds finish at once, the loser retries on top of
+  # the winner rather than dropping its record.
+  #
+  # --no-verify is not a bypass of anything that judges this content. The pre-push hook
+  # exists to gate source code heading for main, and it works by stashing the working tree
+  # -- which, fired by a background recording of generated data onto an orphan branch,
+  # would be both meaningless and a good way to disturb someone's uncommitted work.
+  def push(commit)
+    !Git.try("push", "--quiet", "--no-verify", REMOTE, "#{commit}:refs/heads/#{BRANCH}").nil?
+  end
+
+  def readme
+    <<~MARKDOWN
+      # Metrics
+
+      Generated by `bin/metrics`. Nothing here is written by hand, and nothing here is
+      merged into #{BRANCH == "metrics" ? "main" : "the default branch"}.
+
+      - `#{DATA_FILE}` — one JSON record per commit, appended forever.
+      - `#{PAGE_FILE}` — the same data as a chart. Download it and open it; it is self-contained.
+
+      To read the history without cloning:
+
+          git show #{REMOTE}/#{BRANCH}:#{DATA_FILE}
+    MARKDOWN
+  end
+end
+
+# One self-contained HTML file: data inlined, chart drawn as SVG, no scripts and no
+# requests. That way it works from a file:// URL, from GitHub Pages, or from an email
+# attachment, and nothing about it needs to be hosted.
+module Page
+  module_function
+
+  WIDTH = 720
+  HEIGHT = 140
+  INSET = 8 # Keeps the highest and lowest points, and the marker drawn on the last one, inside the box.
+
+  def render(records)
+    series = series_from(records)
+
+    <<~HTML
+      <!doctype html>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>Code health metrics</title>
+      <style>#{styles}</style>
+      <h1>Code health metrics</h1>
+      <p class="meta">#{records.size} records · updated #{Time.now.utc.strftime("%Y-%m-%d %H:%M UTC")}</p>
+      #{series.map { |name, points| card(name, points) }.join("\n")}
+    HTML
+  end
+
+  def series_from(records)
+    records.each_with_object({}) do |record, series|
+      record.fetch("metrics", {}).each do |name, value|
+        (series[name] ||= []) << { at: record["at"], commit: record["commit"], value: value }
+      end
+    end.sort.to_h
+  end
+
+  def card(name, points)
+    latest = points.last
+    previous = points[-2]
+    change = previous ? latest[:value] - previous[:value] : nil
+
+    <<~HTML
+      <section>
+        <h2>#{escape(name)}</h2>
+        <p class="value">#{format_value(latest[:value])}#{delta(change)}</p>
+        #{chart(points)}
+        <p class="meta">#{points.size} points · #{escape(day(points.first[:at]))} → #{escape(day(latest[:at]))} · low #{format_value(points.map { |point| point[:value] }.min)} · high #{format_value(points.map { |point| point[:value] }.max)}</p>
+      </section>
+    HTML
+  end
+
+  # A flat series would divide by zero on the y scale, so give it a band to sit in.
+  def chart(points)
+    values = points.map { |point| point[:value] }
+    low, high = values.min, values.max
+    low, high = low - 1, high + 1 if low == high
+    span = WIDTH - INSET * 2
+    height = HEIGHT - INSET * 2
+
+    coordinates = values.each_with_index.map do |value, index|
+      x = points.size == 1 ? WIDTH / 2.0 : INSET + index * span.to_f / (points.size - 1)
+      [ x.round(2), (INSET + height - (value - low) / (high - low) * height).round(2) ]
+    end
+
+    <<~SVG
+      <svg viewBox="0 0 #{WIDTH} #{HEIGHT}" role="img" aria-label="trend">
+        <polyline points="#{coordinates.map { |x, y| "#{x},#{y}" }.join(" ")}" />
+        <circle cx="#{coordinates.last[0]}" cy="#{coordinates.last[1]}" r="4" />
+      </svg>
+    SVG
+  end
+
+  def delta(change)
+    if change.nil? || change.zero?
+      ""
+    else
+      %( <span class="delta #{change.positive? ? "up" : "down"}">#{change.positive? ? "+" : ""}#{format_value(change)}</span>)
+    end
+  end
+
+  def format_value(value)
+    value == value.to_i ? value.to_i.to_s : format("%.2f", value)
+  end
+
+  def day(timestamp)
+    timestamp.to_s[0, 10]
+  end
+
+  def escape(text)
+    text.to_s.gsub("&", "&amp;").gsub("<", "&lt;").gsub(">", "&gt;")
+  end
+
+  def styles
+    <<~CSS
+      :root { color-scheme: light dark; --ink: #16181d; --dim: #6b7280; --line: #2563eb; --rule: #e5e7eb; --bg: #fff; }
+      @media (prefers-color-scheme: dark) { :root { --ink: #e8eaed; --dim: #9aa1ac; --line: #60a5fa; --rule: #2b2f36; --bg: #14161a; } }
+      body { max-width: 46rem; margin: 3rem auto; padding: 0 1.25rem; background: var(--bg); color: var(--ink);
+             font: 15px/1.5 ui-sans-serif, system-ui, sans-serif; }
+      h1 { font-size: 1.35rem; margin: 0; }
+      h2 { font-size: .9rem; font-weight: 600; margin: 0; font-family: ui-monospace, monospace; }
+      section { border-top: 1px solid var(--rule); padding-top: 1.5rem; margin-top: 2.5rem; }
+      svg { display: block; width: 100%; height: auto; }
+      polyline { fill: none; stroke: var(--line); stroke-width: 2; vector-effect: non-scaling-stroke;
+                 stroke-linejoin: round; stroke-linecap: round; }
+      circle { fill: var(--line); }
+      .value { font-size: 2rem; font-weight: 600; margin: .25rem 0 1rem; }
+      .delta { font-size: .95rem; font-weight: 500; }
+      .up { color: #15803d; } .down { color: #b91c1c; }
+      @media (prefers-color-scheme: dark) { .up { color: #4ade80; } .down { color: #f87171; } }
+      .meta { color: var(--dim); font-size: .8rem; margin: .5rem 0 0; }
+    CSS
+  end
+end
+
+# The terminal view. Agents get the same numbers as JSON with --json.
+module Trend
+  module_function
+
+  BLOCKS = %w[ ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ]
+
+  def print(records, pattern:, limit:, json:)
+    series = Page.series_from(records)
+    series = series.select { |name, _| name.include?(pattern) } if pattern
+    series = series.transform_values { |points| points.last(limit) }
+
+    if series.empty?
+      puts "No metrics recorded#{" matching #{pattern}" if pattern}."
+    elsif json
+      puts JSON.pretty_generate(series)
+    else
+      series.each { |name, points| puts line(name, points) }
+    end
+  end
+
+  def line(name, points)
+    values = points.map { |point| point[:value] }
+    change = values.size > 1 ? values.last - values.first : 0
+
+    format("%-28s %8s  %-9s %s  %s..%s (%d)",
+      name, Page.format_value(values.last), arrow(change), sparkline(values),
+      points.first[:at].to_s[0, 10], points.last[:at].to_s[0, 10], points.size)
+  end
+
+  def arrow(change)
+    if change.zero?
+      "flat"
+    else
+      "#{change.positive? ? "▲ +" : "▼ "}#{Page.format_value(change)}"
+    end
+  end
+
+  def sparkline(values)
+    low, high = values.min, values.max
+    values.map { |value| high == low ? BLOCKS[3] : BLOCKS[((value - low) / (high - low) * (BLOCKS.size - 1)).round] }.join
+  end
+end
+
+options = { limit: 60, json: false, dry_run: false, out: "tmp/metrics/index.html" }
+
+parser = OptionParser.new do |parser|
+  parser.banner = <<~BANNER
+    Usage: bin/metrics <command> [options]
+
+      collect          Run .metrics/collectors/* and leave their JSON in #{PENDING_DIRECTORY}
+      record           Append everything in #{PENDING_DIRECTORY} to the #{BRANCH} branch as one record
+      trend [pattern]  Print recorded history, optionally filtered by name
+      page             Rebuild the HTML chart from recorded history
+
+  BANNER
+  parser.on("-n", "--limit N", Integer, "Points to show in trend (default: #{options[:limit]})") { |limit| options[:limit] = limit }
+  parser.on("--json", "Print trend as JSON") { options[:json] = true }
+  parser.on("--dry-run", "Print the record instead of pushing it") { options[:dry_run] = true }
+  parser.on("-o", "--out PATH", "Where page writes (default: #{options[:out]})") { |out| options[:out] = out }
+  parser.on_tail("-h", "--help", "Print this help") { puts parser; exit }
+end
+parser.parse!
+
+case ARGV.shift
+when "collect"
+  Collect.run
+when "record"
+  pending = Dir.glob("#{PENDING_DIRECTORY}/**/*.json").sort
+  abort "Nothing to record: no JSON under #{PENDING_DIRECTORY}. Run `bin/metrics collect` first." if pending.empty?
+
+  metrics = pending.reduce({}) { |merged, path| merged.merge(JSON.parse(File.read(path))) }
+
+  if options[:dry_run]
+    puts JSON.pretty_generate(metrics)
+  else
+    record = Store.append(metrics)
+    puts "Recorded #{record["metrics"].size} metrics for #{record["commit"][0, 7]} on #{BRANCH}."
+  end
+when "trend"
+  Trend.print(Store.records, pattern: ARGV.shift, limit: options[:limit], json: options[:json])
+when "page"
+  FileUtils.mkdir_p(File.dirname(options[:out]))
+  File.write(options[:out], Page.render(Store.records))
+  puts "Wrote #{options[:out]}"
+else
+  puts parser
+  exit 1
+end

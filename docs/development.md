@@ -102,6 +102,14 @@ The full continuous integration tests can be run with:
 bin/ci
 ```
 
+The gate above judges the diff and can fail a build. Separately, repo-wide coverage is
+recorded on every `main` commit so its direction over months is visible — see
+[code health metrics](code-health-metrics.md). Those numbers gate nothing:
+
+```sh
+bin/metrics trend
+```
+
 ### Database configuration
 
 Fizzy works with SQLite by default and supports MySQL too. You can switch adapters with the `DATABASE_ADAPTER` environment variable. For example, to develop locally against MySQL:
