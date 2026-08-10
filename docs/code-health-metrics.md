@@ -119,10 +119,16 @@ legs, and uploads `tmp/metrics` as a `metrics-oss` / `metrics-saas` artifact. It
 on `main` only, and regardless of whether the changed-code gate passed — the numbers
 describe the commit either way.
 
-The `metrics` job in `ci-saas.yml` waits for both test legs, downloads every `metrics-*`
-artifact, and appends one record. Splitting collection from recording means the many jobs
-that can *produce* a metric need no write permission, and the one job that writes the
-branch needs to know nothing about what it is writing.
+The `metrics` job in `ci-saas.yml` waits for both test legs but requires only one to have
+passed, then downloads every `metrics-*` artifact and appends one record. Splitting
+collection from recording means the many jobs that can *produce* a metric need no write
+permission, and the one job that writes the branch needs to know nothing about what it is
+writing.
+
+A failing leg contributes nothing rather than contributing bad numbers: its `coverage` job
+never runs, so it uploads no artifact. Requiring *both* legs would be stricter but wrong —
+forks cannot install the private SaaS gems, so their SaaS leg always fails, and the whole
+system would quietly never record anything. Expect OSS-only records outside Basecamp.
 
 The push uses `GITHUB_TOKEN`, and pushes made with it do not trigger workflows, so writing
 the branch cannot start another build.

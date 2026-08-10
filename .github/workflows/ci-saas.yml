@@ -20,16 +20,23 @@ jobs:
     secrets:
       FIZZY_GH_TOKEN: ${{ secrets.FIZZY_GH_TOKEN }}
 
-  # Appends one record per main commit to the orphan `metrics` branch. It needs both test
-  # legs because OSS and SaaS measure different trees, and it waits for them so a broken
-  # build never contributes a number. See docs/code-health-metrics.md.
+  # Appends one record per main commit to the orphan `metrics` branch, from whichever test
+  # legs produced numbers. See docs/code-health-metrics.md.
+  #
+  # It waits for both legs but requires only one to have passed. A leg that failed uploads
+  # no artifact -- its `coverage` job never runs -- so a broken suite cannot contribute a
+  # number either way, and demanding both would mean a fork that cannot run the private
+  # SaaS gems never records anything at all. That is the case in every fork of this repo,
+  # so the stricter rule would have made the whole thing dead code outside Basecamp.
   #
   # The push uses GITHUB_TOKEN, which by design does not trigger workflows, so writing the
   # branch cannot start another build.
   metrics:
     name: Record code health metrics
     needs: [ test_oss, test_saas ]
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/claude/code-health-metrics-076f9f'
+    if: >-
+      always() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/claude/code-health-metrics-076f9f')
+      && (needs.test_oss.result == 'success' || needs.test_saas.result == 'success')
     runs-on: ubuntu-latest
 
     permissions:
