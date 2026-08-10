@@ -1,0 +1,10 @@
+# Shared undercover configuration, read automatically from the project root.
+#
+# It lives here rather than in bin/coverage so that local runs, bin/ci, GitHub Actions,
+# and a bare `bundle exec undercover` all reach the same verdict.
+#
+# Undercover's built-in exclude globs already skip test/*, spec/*, db/*, and config/*.
+# bin/coverage appends the saas/ globs when running in SaaS mode.
+
+--simplecov coverage/coverage.json
+--include-files {app,lib}/**/*.{rb,rake}

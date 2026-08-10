@@ -1,0 +1,18 @@
+#!/bin/sh
+# A `Coverage-exempt:` trailer bypasses the changed-line coverage gate in CI, which reads
+# the reason with `sed -n 's/^Coverage-exempt:[[:space:]]*//p'`. A bare trailer yields an
+# empty string there and still bypasses -- an unexplained hole in the one gate protecting
+# main. Require the reason here, where the author can still fix it.
+if grep -qi '^Coverage-exempt:' "$1"; then
+  if ! grep -qiE '^Coverage-exempt:[[:space:]]*[^[:space:]]+' "$1"; then
+    cat >&2 <<'MESSAGE'
+commit-msg: `Coverage-exempt:` needs a reason.
+
+This trailer switches off the coverage gate for this commit, so it has to say why:
+
+  Coverage-exempt: rescue path only reachable on a libvips segfault
+
+MESSAGE
+    exit 1
+  fi
+fi

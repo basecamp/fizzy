@@ -70,3 +70,49 @@ Allow people to move between OSS and SAAS Fizzy instances:
 ## Coding style
 
 Before editing or reviewing code, read STYLE.md.
+
+## Test coverage
+
+Every line you add or change must be executed by a test, and every conditional branch on
+those lines must be taken in both directions. CI enforces this on changed code only — the
+existing suite's gaps are not your problem, the diff you are writing is.
+
+**Workflow.** Run `bin/coverage <test paths>` for a fast loop while writing tests. Run
+`bin/coverage` with no arguments before calling a change complete. A targeted run prints an
+advisory banner and never fails, because it reports changed code covered by tests it didn't
+run as if it were uncovered.
+
+**What the gate measures:** changed-line coverage — lines *and* branches — from the non-browser
+suite. That is everything `bin/rails test` runs, controller and integration tests included; only
+`test/system` is excluded. CI measures the same thing, so your local verdict and the one on the
+pull request always agree.
+
+Scope follows the mode: `app/` and `lib/` always, plus `saas/app/` and `saas/lib/` when
+`Fizzy.saas?` is true. CI gates both modes.
+
+Browser tests are excluded deliberately: rendering a page marks whatever it touches as covered,
+which records that code loaded rather than that anything checked it. So if a code path is
+reachable only through the browser, the gate will ask for a test — write a controller or model
+test for it instead of leaning on a system test.
+
+Editing existing files needs no staging — unstaged edits are checked. But if you create a
+new file under `app/` or `lib/`, `git add` it: a file git has never seen cannot appear in a
+diff, so the guard refuses to run until you do.
+
+**Reading a branch warning.** This is the part that trips people up: the line ran, but one
+path through it never did — the `else`, the `nil` case, the early return, the untriggered
+`rescue`, the right side of an `||`. Fix it by writing a test that drives the code down that
+path. Do not restructure code to have fewer branches just to satisfy the tool.
+
+**The anti-pattern to refuse.** Coverage records whether a line *ran*, not whether it is
+*correct*. A test that executes a branch without asserting its outcome satisfies the tool and
+defeats the entire purpose. Never add assertion-free tests, and never weaken an assertion, to
+move this number.
+
+Do not silence warnings with SimpleCov `:nocov:` comments. The only bypass is a
+`Coverage-exempt: <reason>` trailer on the commit message; it needs a real reason (a
+`commit-msg` hook rejects an empty one) and it is visible in review.
+
+A `pre-push` hook runs the gate when a push touches Ruby under `app/` or `lib/`, so expect
+roughly a minute's pause there rather than treating it as a hang. It judges committed state
+only. Never reach for `git push --no-verify` to get around a finding — fix the coverage.
