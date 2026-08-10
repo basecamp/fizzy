@@ -86,8 +86,11 @@ MAX_IMPORT_HOPS = 4
 # direction.
 PINNED_LITERALS = [
   { describes: "SaaS switch path",
-    claims: [ { path: "AGENTS.md", pattern: /`(tmp\/saas\.txt)` is the checkout-level SaaS switch/ } ],
-    defined_in: "lib/fizzy.rb", pattern: /File\.exist\?\(File\.expand_path\("\.\.\/(tmp\/saas\.txt)"/ },
+    # Both captures are permissive: a doc claiming a WRONG path (or a moved
+    # switch in lib/fizzy.rb) must be captured to be compared, not silently
+    # fail to match the pattern.
+    claims: [ { path: "AGENTS.md", pattern: /`([\w.\/]+)` is the checkout-level SaaS switch/ } ],
+    defined_in: "lib/fizzy.rb", pattern: /File\.exist\?\(File\.expand_path\("\.\.\/([\w.\/]+)", __dir__\)\)/ },
   { describes: "search shard count",
     claims: [ { path: "AGENTS.md", pattern: /sharded (\d+) ways/ } ],
     defined_in: "app/models/search/record/trilogy.rb", pattern: /SHARD_COUNT = (\d+)/ },
