@@ -91,7 +91,10 @@ jobs:
   # adapter (the sharded MySQL search, say) is not reported as uncovered. Runs for both
   # modes: the SaaS leg is what gates saas/app and saas/lib.
   coverage:
-    name: Changed coverage (${{ inputs.saas && 'SaaS' || 'OSS' }})
+    # Static on purpose. The caller already prefixes the mode ("Test (OSS) / ..."), and
+    # GitHub leaves a job's name expression unevaluated when the job is skipped -- which
+    # would register this as a differently-named check and make it useless as a required one.
+    name: Changed coverage
     needs: test
     runs-on: ubuntu-latest
 

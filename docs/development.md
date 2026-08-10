@@ -67,7 +67,7 @@ exactly the same thing, so a local run and a pull request always agree.
 Scope follows the mode. In OSS mode the gate covers `app/` and `lib/`; in SaaS mode it also
 covers `saas/app/` and `saas/lib/`. Mode comes from `Fizzy.saas?`, the same switch the app
 uses, so `tmp/saas.txt` works exactly as it does everywhere else. CI gates both, producing
-two required checks — `Changed coverage (OSS)` and `Changed coverage (SaaS)`.
+two required checks — `Test (OSS) / Changed coverage` and `Test (SaaS) / Changed coverage`.
 
 System tests still run in CI for correctness, but their coverage is excluded on purpose:
 rendering a page marks whatever it touches as covered — class declarations, `def` lines, bare
