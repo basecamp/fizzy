@@ -113,6 +113,11 @@ Do not silence warnings with SimpleCov `:nocov:` comments. The only bypass is a
 `Coverage-exempt: <reason>` trailer on the commit message; it needs a real reason (a
 `commit-msg` hook rejects an empty one) and it is visible in review.
 
+**Trends, as opposed to gates.** Repo-wide coverage is recorded on every `main` commit and
+gates nothing. Run `bin/metrics trend` (add `--json` when parsing) before proposing work that
+turns on where the codebase is heading — whether coverage is drifting down, and how fast, is
+evidence you can cite. See `docs/code-health-metrics.md`, including how to add a metric.
+
 A `pre-push` hook runs the gate when a push touches Ruby under `app/` or `lib/`, so expect
 roughly a minute's pause there rather than treating it as a hang. It judges committed state
 only. Never reach for `git push --no-verify` to get around a finding — fix the coverage.

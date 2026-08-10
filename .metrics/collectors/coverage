@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+
+# Repo-wide line and branch coverage, as SimpleCov last recorded it.
+#
+# This reads coverage/.last_run.json rather than running anything: by the time metrics are
+# collected in CI the suite has already run and the adapter legs have been collated, and a
+# collector that re-ran the suite would double the build. Locally, run `bin/coverage` first.
+#
+# The mode is part of the name because OSS and SaaS measure different trees. They are two
+# metrics that happen to share a formula, not one metric with a flag.
+
+require "json"
+require_relative "../../lib/fizzy"
+
+REPORT = File.expand_path("../../coverage/.last_run.json", __dir__)
+
+if File.exist?(REPORT)
+  result = JSON.parse(File.read(REPORT)).fetch("result")
+  mode = Fizzy.saas? ? "saas" : "oss"
+
+  puts JSON.generate("coverage.line.#{mode}" => result.fetch("line"), "coverage.branch.#{mode}" => result.fetch("branch"))
+else
+  # Nothing to say is not an error: `bin/metrics collect` skips an empty object, so a
+  # checkout that has not run coverage still collects every other metric.
+  puts "{}"
+end

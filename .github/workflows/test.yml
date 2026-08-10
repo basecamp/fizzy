@@ -181,3 +181,19 @@ jobs:
           name: coverage-${{ inputs.saas && 'saas' || 'oss' }}
           path: coverage/
           retention-days: 7
+
+      # Repo-wide coverage is a trend, not a gate, so it is collected whether or not the
+      # changed-code gate above passed -- the numbers describe the commit either way. Only
+      # main is tracked: a branch's history is not a trend anyone reads. The recording job
+      # in ci-saas.yml picks these up; see docs/code-health-metrics.md.
+      - name: Collect code health metrics
+        if: always() && github.ref == 'refs/heads/main'
+        run: bin/metrics collect
+
+      - name: Upload code health metrics
+        if: always() && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: metrics-${{ inputs.saas && 'saas' || 'oss' }}
+          path: tmp/metrics
+          retention-days: 1
