@@ -55,7 +55,7 @@ jobs:
     steps:
       - name: Install system packages
         timeout-minutes: 10
-        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libsqlite3-0 libvips curl ffmpeg
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y cmake libsqlite3-0 libvips curl ffmpeg
 
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -67,7 +67,117 @@ jobs:
           bundler-cache: true
 
       - name: Run tests
+        env:
+          COVERAGE: 1
+          COVERAGE_COMMAND: ${{ inputs.saas && 'saas' || 'oss' }}-${{ matrix.db_adapter }}
         run: bin/rails db:setup test
 
+      # Intentionally no COVERAGE here. System tests exercise whatever a page render touches,
+      # which measures loading, not testing — see bin/coverage. They run for correctness only.
       - name: Run system tests
+        env:
+          PARALLEL_WORKERS: 1
         run: bin/rails test:system
+
+      - name: Upload coverage result
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: simplecov-${{ inputs.saas && 'saas' || 'oss' }}-${{ matrix.db_adapter }}
+          path: coverage/.resultset.json
+          include-hidden-files: true
+          retention-days: 1
+
+  # Collates the SQLite and MySQL legs before judging, so code reachable on only one
+  # adapter (the sharded MySQL search, say) is not reported as uncovered. Runs for both
+  # modes: the SaaS leg is what gates saas/app and saas/lib.
+  coverage:
+    # Static on purpose. The caller already prefixes the mode ("Test (OSS) / ..."), and
+    # GitHub leaves a job's name expression unevaluated when the job is skipped -- which
+    # would register this as a differently-named check and make it useless as a required one.
+    name: Changed coverage
+    needs: test
+    runs-on: ubuntu-latest
+
+    env:
+      RAILS_ENV: test
+      ${{ inputs.saas && 'SAAS' || 'SAAS_DISABLED' }}: ${{ inputs.saas && '1' || '' }}
+      BUNDLE_GEMFILE: ${{ inputs.saas && 'Gemfile.saas' || 'Gemfile' }}
+      BUNDLE_GITHUB__COM: ${{ inputs.saas && format('x-access-token:{0}', secrets.FIZZY_GH_TOKEN) || '' }} # zizmor: ignore[secrets-outside-env]
+      # Pull requests name the base commit directly, which matters for fork PRs where
+      # origin/main is the fork's copy. Pushes carry no payload, so use the tracking ref.
+      # Either way undercover resolves the merge base with HEAD itself.
+      COVERAGE_BASE: ${{ github.event.pull_request.base.sha || 'origin/main' }}
+
+    steps:
+      - name: Install system packages
+        timeout-minutes: 10
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y cmake
+
+      # Full history so undercover can resolve the merge base with origin/main itself.
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: ruby/setup-ruby@d45b1a4e94b71acab930e56e79c6aa188764e7f9 # v1.316.0
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      - name: Download coverage results
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: simplecov-${{ inputs.saas && 'saas' || 'oss' }}-*
+          path: coverage-results
+
+      - name: Collate coverage results
+        run: bundle exec ruby -rsimplecov -e 'SimpleCov.collate Dir["coverage-results/**/.resultset.json"]'
+
+      - name: Check for a coverage exemption
+        id: exemption
+        run: |
+          reason="$(git log -1 --format=%B | sed -n 's/^Coverage-exempt:[[:space:]]*//p' | head -1)"
+          if test -n "$reason"; then
+            echo "reason=$reason" >> "$GITHUB_OUTPUT"
+            echo "⚠️ **COVERAGE GATE BYPASSED** — $reason" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      # pipefail matters: without it the exit status would be tee's and the gate would
+      # pass no matter what undercover reported.
+      - name: Check changed code coverage
+        continue-on-error: ${{ steps.exemption.outputs.reason != '' }}
+        run: |
+          set -o pipefail
+          bin/coverage --report-only | tee coverage/changed-coverage.txt
+
+      # The same verdict as changed-coverage.txt, one record per violation instead of prose,
+      # for tooling that reads the run rather than the page. Never fails the job: the step
+      # above is the gate, and this has to survive it failing to be worth having.
+      - name: Write the result as JSON
+        if: always()
+        run: bin/coverage --report-only --json > coverage/changed-coverage.json || true
+
+      - name: Add coverage summary
+        if: always()
+        run: |
+          {
+            if test -f coverage/changed-coverage.txt; then
+              echo '```'
+              cat coverage/changed-coverage.txt
+              echo '```'
+            fi
+            if test -f coverage/.last_run.json; then
+              echo "_Repo-wide totals, for context only — the gate above is the only thing that can fail this job._"
+              ruby -rjson -e 'totals = JSON.parse(File.read("coverage/.last_run.json"))["result"]
+                              puts "- Line: #{totals["line"]}%"
+                              puts "- Branch: #{totals["branch"]}%"'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: coverage-${{ inputs.saas && 'saas' || 'oss' }}
+          path: coverage/
+          retention-days: 7

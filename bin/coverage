@@ -1,0 +1,159 @@
+#!/usr/bin/env ruby
+
+# Measures changed-line coverage — lines and branches — from the non-browser suite, and
+# reports anything you added or changed that no test exercised. See docs/development.md.
+#
+# Browser tests are excluded on purpose: rendering a page marks whatever it touches as
+# covered — class declarations, def lines, bare string literals — which says the code ran,
+# not that anything checked it. Counting that would let incidental execution satisfy the
+# gate. Everything else `bin/rails test` runs counts, controller tests included.
+
+require "fileutils"
+require "json"
+require "optparse"
+require_relative "../lib/fizzy"
+
+options = {
+  compare: ENV.fetch("COVERAGE_BASE", "origin/main"),
+  json: false,
+  report_only: false
+}
+
+OptionParser.new do |parser|
+  parser.banner = "Usage: bin/coverage [options] [test paths...]"
+  parser.on("-c", "--compare REF", "Git ref to compare against (default: origin/main)") { |ref| options[:compare] = ref }
+  parser.on("--json", "Print the changed-code result as JSON") { options[:json] = true }
+  parser.on("--report-only", "Report on existing coverage data without running tests") { options[:report_only] = true }
+  parser.on_tail("-h", "--help", "Print this help") { puts parser; exit }
+end.parse!
+
+root = File.expand_path("..", __dir__)
+Dir.chdir(root)
+
+# Fizzy.saas? so this agrees with the app, bin/setup, and .simplecov. A local ENV check
+# would miss tmp/saas.txt and silently leave saas/ ungated while the SaaS app runs.
+SAAS = Fizzy.saas?
+COVERED_DIRECTORIES = SAAS ? %w[ app lib saas/app saas/lib ] : %w[ app lib ]
+COVERAGE_REPORT = "coverage/coverage.json"
+INCLUDE_GLOB = "{#{COVERED_DIRECTORIES.join(",")}}/**/*.{rb,rake}"
+
+# Undercover diffs the index and the working tree, so a file that has never been added is
+# invisible to it. Rather than silently passing new code, say so. (`git add -N` would be the
+# obvious fix, but its zero-length index entries make rugged raise a FilesystemError.)
+def untracked_covered_files
+  `git ls-files --others --exclude-standard -- #{COVERED_DIRECTORIES.join(" ")}`.split("\n").grep(/\.(rb|rake)\z/)
+end
+
+# Undercover calls the report stale when any changed file is newer than it — including docs
+# and config that cannot possibly affect coverage — and then suppresses its verdict and exits
+# 0. A gate that silently passes because you edited a README is worse than no gate, so decide
+# staleness here instead, over the files that actually carry coverage.
+def stale_coverage?
+  reported_at = File.mtime(COVERAGE_REPORT)
+  covered_files.any? { |path| File.mtime(path) > reported_at }
+end
+
+# .simplecov decides what gets measured, .undercover decides what gets judged, and the two
+# globs are separate literals that can drift apart. Only one direction hurts: a file undercover
+# judges but SimpleCov never measured has no coverage data, so undercover flags every line in
+# it — false failures that read as missing tests rather than as a config gap. (Measuring more
+# than we judge is harmless.) Catch that direction here, where we can name the cause.
+def unmeasured_files
+  measured = JSON.parse(File.read(COVERAGE_REPORT))["coverage"].keys
+  covered_files - measured
+end
+
+def covered_files
+  Dir.glob(INCLUDE_GLOB)
+end
+
+# The echo is progress, not output, so it goes to stderr -- otherwise it lands in the middle
+# of `--json` and the result no longer parses. Terminals show both, so local runs look the same.
+def run(environment, *command, fatal: true)
+  $stderr.puts "$ #{environment.map { |key, value| "#{key}=#{value}" }.join(" ")} #{command.join(" ")}".strip
+  succeeded = system(environment, *command)
+  exit($?.exitstatus || 1) if !succeeded && fatal
+  succeeded
+end
+
+def advisory_banner
+  <<~BANNER
+
+    ── ADVISORY: partial run ─────────────────────────────────────────
+    Only the tests you named ran, so changed code that other tests
+    cover is reported below as uncovered. Run `bin/coverage` with no
+    arguments for the authoritative verdict.
+    ──────────────────────────────────────────────────────────────────
+
+  BANNER
+end
+
+untracked = untracked_covered_files
+
+if untracked.any?
+  puts "These Ruby files have never been added to git, so the coverage guard cannot see them:"
+  puts untracked.map { |path| "  #{path}" }
+  puts "\nRun `git add` on them, then re-run."
+  puts "\n(Unstaged edits to files already in git are checked normally. You only see this"
+  puts "for brand-new files: a file git has never seen cannot appear in a diff at all.)"
+  exit 1
+end
+
+mode = SAAS ? "saas" : "oss"
+adapter = ENV.fetch("DATABASE_ADAPTER", "sqlite")
+targeted = ARGV.any?
+
+if options[:report_only] && !targeted
+  if !File.exist?(COVERAGE_REPORT)
+    puts "No coverage data at #{COVERAGE_REPORT}, so there is nothing to report on."
+    puts "\nRun `bin/coverage` to generate it."
+    exit 1
+  elsif stale_coverage?
+    puts "Coverage data is older than the code it describes, so any verdict would be meaningless."
+    puts "\nRun `bin/coverage` to regenerate it."
+    exit 1
+  end
+end
+
+unless options[:report_only]
+  run({}, "bundle", "exec", "simplecov", "clean", "-q")
+
+  if targeted
+    run({ "COVERAGE" => "1", "COVERAGE_COMMAND" => "#{mode}-#{adapter}-targeted" }, "bin/rails", "test", *ARGV)
+  else
+    run({ "COVERAGE" => "1", "COVERAGE_COMMAND" => "#{mode}-#{adapter}" }, "bin/rails", "test")
+  end
+end
+
+unmeasured = unmeasured_files
+
+if unmeasured.any?
+  puts "\n.simplecov and .undercover have drifted apart."
+  puts "\nThese files are judged by the coverage gate but never measured, so undercover will"
+  puts "report every changed line in them as uncovered:"
+  puts unmeasured.first(10).map { |path| "  #{path}" }
+  puts "  ...and #{unmeasured.size - 10} more" if unmeasured.size > 10
+  puts "\nMake `SimpleCov.cover` in .simplecov cover everything `--include-files` in .undercover"
+  puts "judges. Measuring more than you judge is fine; the reverse is not."
+  exit 1
+end
+
+# Having established above that the report covers the current code, clear undercover's
+# broader staleness check so it cannot suppress a verdict over an unrelated doc edit.
+FileUtils.touch(COVERAGE_REPORT) if !targeted && File.exist?(COVERAGE_REPORT)
+
+# Everything else undercover needs lives in .undercover, so local runs and CI agree.
+guard_command = [ "bundle", "exec", "undercover", "--compare", options[:compare] ]
+guard_command.push("--include-files", INCLUDE_GLOB) if SAAS
+guard_command.push("--format", "json") if options[:json]
+
+puts advisory_banner if targeted
+covered = run({}, *guard_command, fatal: false)
+
+unless covered
+  if targeted
+    puts "\nAdvisory run — not failing. Run `bin/coverage` with no arguments for the real verdict."
+  else
+    exit 1
+  end
+end

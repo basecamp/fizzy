@@ -355,6 +355,8 @@ GEM
     image_processing (1.14.0)
       mini_magick (>= 4.9.5, < 6)
       ruby-vips (>= 2.0.17, < 3)
+    imagen (0.2.0)
+      parser (>= 2.5, != 2.5.1.1)
     importmap-rails (2.2.3)
       actionpack (>= 6.0.0)
       activesupport (>= 6.0.0)
@@ -604,6 +606,7 @@ GEM
       logger
     ruby2_keywords (0.0.5)
     rubyzip (3.3.0)
+    rugged (1.9.6)
     securerandom (0.4.1)
     selenium-webdriver (4.44.0)
       base64 (~> 0.2)
@@ -611,6 +614,8 @@ GEM
       rexml (~> 3.2, >= 3.2.5)
       rubyzip (>= 1.2.2, < 4.0)
       websocket (~> 1.0)
+    simplecov (1.0.3)
+    simplecov_json_formatter (0.1.4)
     sentry-rails (6.2.0)
       railties (>= 5.2.0)
       sentry-ruby (~> 6.2.0)
@@ -660,6 +665,15 @@ GEM
     tsort (0.2.0)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
+    undercover (0.8.5)
+      base64
+      benchmark
+      bigdecimal
+      imagen (>= 0.2.0)
+      rainbow (>= 2.1, < 4.0)
+      rugged (>= 0.27, < 1.10)
+      simplecov
+      simplecov_json_formatter
     unicode-display_width (3.2.0)
       unicode-emoji (~> 4.1)
     unicode-emoji (4.1.0)
@@ -766,6 +780,7 @@ DEPENDENCIES
   selenium-webdriver
   sentry-rails
   sentry-ruby
+  simplecov
   solid_cable!
   solid_cache (~> 1.0)
   solid_queue!
@@ -775,6 +790,7 @@ DEPENDENCIES
   thruster
   trilogy (~> 2.12)
   turbo-rails!
+  undercover
   useragent!
   vcr
   web-console!

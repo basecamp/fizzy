@@ -1,7 +1,18 @@
+# Hooks default to running at every stage. Pin them to pre-commit so that adding the
+# pre-push hook below did not silently start running rubocop and the builtins on push too.
+default_stages = ["pre-commit"]
+
 [[repos]]
 repo = "local"
 hooks = [
   { id = "rubocop", name = "rubocop", language = "system", entry = "bin/rubocop --force-exclusion", types = ["ruby"] },
+  # pass_filenames = false is load-bearing: bin/coverage reads positional arguments as test
+  # paths, so leaking changed filenames into it would run a targeted (advisory) check that
+  # always exits 0 -- a gate that looks installed and enforces nothing.
+  #
+  # `files` keeps the ~60s cost off pushes that cannot move the metric. Skipping the gate
+  # entirely is `git push --no-verify`; CI still decides.
+  { id = "coverage", name = "changed-line coverage", language = "system", entry = "bin/coverage", stages = ["pre-push"], pass_filenames = false, files = '^(app|lib|saas/(app|lib))/.*\.(rb|rake)$' },
 ]
 
 [[repos]]

@@ -1,0 +1,27 @@
+#!/bin/sh
+# git feeds pre-push one line per ref on stdin: "<local ref> <local sha> <remote ref>
+# <remote sha>". prek does not read that itself, and without an explicit range it falls
+# back to *staged* files -- which are empty once you have committed, so every real push
+# would report "no files to check" and skip the gate entirely. Translate the range here.
+zero=0000000000000000000000000000000000000000
+from=''
+to=''
+
+# First non-deleting ref decides the range. Pushing several branches at once is rare
+# enough that checking the first is a better trade than running the suite per ref.
+while read -r _local_ref local_sha _remote_ref remote_sha; do
+  [ "$local_sha" = "$zero" ] && continue
+  to=$local_sha
+  if [ "$remote_sha" = "$zero" ]; then
+    # New branch on the remote: nothing to diff against, so use the merge base with main.
+    from=$(git merge-base origin/main "$local_sha" 2>/dev/null) || from=origin/main
+  else
+    from=$remote_sha
+  fi
+  break
+done
+
+# Deletions only, or no input (hook run by hand): nothing to check.
+[ -n "$to" ] || exit 0
+
+exec "$(dirname "$0")/run-prek" pre-push --from-ref "$from" --to-ref "$to"
