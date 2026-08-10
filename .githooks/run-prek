@@ -3,7 +3,8 @@
 # it to prek. It exists so pre-commit and pre-push resolve the toolchain identically:
 # GUI clients push as well as commit, and a second copy of the logic below would drift
 # from this one, which is the exact failure the comments here describe fighting.
-stage=${1:?usage: run-prek <stage>}
+stage=${1:?usage: run-prek <stage> [prek args...]}
+shift
 
 # Keep the developer's own PATH -- bin/setup accepts whichever mise it finds and
 # upgrades that one -- but drop relative entries first. Shipyard puts ./bin at
@@ -133,4 +134,4 @@ export PATH
 
 # `mise exec` rather than bare `prek`: shims alone resolve the toolchain but do
 # not export the project's [env] table, which is what bcenv silently lost.
-exec "$mise" exec -- prek run --stage "$stage"
+exec "$mise" exec -- prek run --stage "$stage" "$@"

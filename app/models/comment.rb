@@ -20,9 +20,7 @@ class Comment < ApplicationRecord
   delegate :publicly_accessible?, :accessible_to?, :board, :watch_by, to: :card
 
   def to_partial_path
-    if 1 == 1
-      "cards/#{super}"
-    end
+    "cards/#{super}"
   end
 
   private
