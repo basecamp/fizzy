@@ -67,8 +67,10 @@ def covered_files
   Dir.glob(INCLUDE_GLOB)
 end
 
+# The echo is progress, not output, so it goes to stderr -- otherwise it lands in the middle
+# of `--json` and the result no longer parses. Terminals show both, so local runs look the same.
 def run(environment, *command, fatal: true)
-  puts "$ #{environment.map { |key, value| "#{key}=#{value}" }.join(" ")} #{command.join(" ")}".strip
+  $stderr.puts "$ #{environment.map { |key, value| "#{key}=#{value}" }.join(" ")} #{command.join(" ")}".strip
   succeeded = system(environment, *command)
   exit($?.exitstatus || 1) if !succeeded && fatal
   succeeded

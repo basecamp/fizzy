@@ -150,6 +150,13 @@ jobs:
           set -o pipefail
           bin/coverage --report-only | tee coverage/changed-coverage.txt
 
+      # The same verdict as changed-coverage.txt, one record per violation instead of prose,
+      # for tooling that reads the run rather than the page. Never fails the job: the step
+      # above is the gate, and this has to survive it failing to be worth having.
+      - name: Write the result as JSON
+        if: always()
+        run: bin/coverage --report-only --json > coverage/changed-coverage.json || true
+
       - name: Add coverage summary
         if: always()
         run: |
