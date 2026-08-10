@@ -200,6 +200,14 @@ frontier = [ entry_point ].compact
   frontier = discovered
 end
 
+# 1c. The bridge actually reaches the root instructions. .claude/CLAUDE.md is the
+# only file Claude loads on its own, so an emptied bridge would load nothing
+# while AGENTS.md stays present, scanned, and green.
+unless visited.include?(canonicalize(ROOT.join("AGENTS.md")))
+  errors << ".claude/CLAUDE.md does not import AGENTS.md (directly or transitively) — " \
+            "Claude would load none of these instructions"
+end
+
 # 2. No re-fork of the shared shipyard instructions — checked in every file a
 #    session loads: the scan roots and everything they import.
 documents.each do |relative, content|
@@ -242,20 +250,23 @@ PINNED_LITERALS.each do |literal|
 
   literal[:claims].each do |site|
     path, claim = site[:path], site[:pattern]
-    content = read_contained(path, describes, errors)
-    next if content.nil?
 
-    # Every occurrence, not just the first: a correct first restatement must
-    # not shield a stale duplicate later in the same file.
-    claimed = content.scan(claim).flatten
+    # Checked against EVERY loaded document, not just the claim's declared
+    # home: an imported file restating a pinned value lands in sessions
+    # exactly like the roots, so every occurrence anywhere must agree. Only
+    # the declared home is required to make the claim at all.
+    declared_seen = false
+    documents.each do |relative, content|
+      values = content.scan(claim).flatten
+      declared_seen = true if relative.to_s == path && values.any?
+      values.reject { it == defined }.each do |value|
+        errors << "#{relative} states #{describes} #{value}, but #{literal[:defined_in]} defines #{defined}"
+      end
+    end
 
-    if claimed.empty?
+    unless declared_seen
       errors << "#{path}: the #{describes} claim matching #{claim.inspect} is " \
                 "gone — reword the doc or update this pin"
-    else
-      claimed.reject { it == defined }.each do |value|
-        errors << "#{path} states #{describes} #{value}, but #{literal[:defined_in]} defines #{defined}"
-      end
     end
   end
 end
