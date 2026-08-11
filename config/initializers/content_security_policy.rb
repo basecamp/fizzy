@@ -99,12 +99,15 @@ Rails.application.configure do
   # The same public/ pages served through the error path (a real 404/500
   # renders public/404.html via the exceptions app, bypassing the static
   # file server) get it too. JSON error responses pass through untouched.
-  # Decorates a configured exceptions app rather than replacing it.
-  public_exceptions = config.exceptions_app || ActionDispatch::PublicExceptions.new(Rails.public_path)
-  config.exceptions_app = ->(env) do
-    public_exceptions.call(env).tap do |_status, headers, _body|
-      if headers[Rack::CONTENT_TYPE].to_s.start_with?("text/html")
-        headers[static_policy_header] = static_policy
+  # A deployment that configures its own exceptions_app keeps full control
+  # of its responses, headers included.
+  if config.exceptions_app.nil?
+    public_exceptions = ActionDispatch::PublicExceptions.new(Rails.public_path)
+    config.exceptions_app = ->(env) do
+      public_exceptions.call(env).tap do |_status, headers, _body|
+        if headers[Rack::CONTENT_TYPE].to_s.start_with?("text/html")
+          headers[static_policy_header] = static_policy
+        end
       end
     end
   end
