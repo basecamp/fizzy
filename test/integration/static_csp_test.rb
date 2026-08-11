@@ -13,7 +13,7 @@ class StaticCspTest < ActionDispatch::IntegrationTest
       assert_response :ok
       assert_equal STATIC_POLICY, response.headers[ActionDispatch::Constants::CONTENT_SECURITY_POLICY],
         "#{page} must carry the static CSP"
-      assert_no_match(/<script|onclick=|javascript:/i, response.body, "#{page} must stay script-free")
+      assert_no_match(/<script|\bon\w+\s*=|javascript:/i, response.body, "#{page} must stay script-free")
     end
   end
 
