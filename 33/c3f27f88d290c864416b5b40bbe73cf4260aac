@@ -1,0 +1,21 @@
+config/initializers/content_security_policy.rb
+  s_8fd96480e43974::t_e8384ba6ad4fb9 85-89,93,102
+test/integration/static_csp_test.rb
+  s_8fd96480e43974::t_c60dda757294a2 16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "33c3f27f88d290c864416b5b40bbe73cf4260aac",
+  "prompts": {},
+  "sessions": {
+    "s_8fd96480e43974": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "055a8b31-29bb-4438-bc59-13e504363c31",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
