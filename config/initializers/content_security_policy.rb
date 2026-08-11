@@ -82,6 +82,10 @@ Rails.application.configure do
   static_policy = "default-src 'none'; img-src 'self'; style-src 'self'; " \
     "base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
 
+  # Report violations from the static pages to the same collector as the
+  # app policy, so a report-only rollout sees them too.
+  static_policy += "; report-uri #{report_uri}" if report_uri
+
   # Honor report-only mode for the static policy too, so the report_only
   # switch disables enforcement everywhere at once.
   static_policy_header = report_only ? ActionDispatch::Constants::CONTENT_SECURITY_POLICY_REPORT_ONLY \
@@ -95,7 +99,8 @@ Rails.application.configure do
   # The same public/ pages served through the error path (a real 404/500
   # renders public/404.html via the exceptions app, bypassing the static
   # file server) get it too. JSON error responses pass through untouched.
-  public_exceptions = ActionDispatch::PublicExceptions.new(Rails.public_path)
+  # Decorates a configured exceptions app rather than replacing it.
+  public_exceptions = config.exceptions_app || ActionDispatch::PublicExceptions.new(Rails.public_path)
   config.exceptions_app = ->(env) do
     public_exceptions.call(env).tap do |_status, headers, _body|
       if headers[Rack::CONTENT_TYPE].to_s.start_with?("text/html")
