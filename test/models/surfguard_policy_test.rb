@@ -164,6 +164,18 @@ class SurfguardPolicyTest < ActiveSupport::TestCase
     assert_not_nil resolve("v6-public.example.com")
   end
 
+  # The distinction Webhook::Delivery and Push::Subscription rely on: a host that
+  # resolves to nothing raises Unresolvable (a lookup failure), while a host that
+  # resolves only to blocked addresses returns no public IP without raising (a
+  # refusal). Collapsing the two would report a DNS failure as a blocked address.
+  test "raises Unresolvable on a resolution failure, distinct from a blocked address" do
+    stub_dns_failure
+    assert_raises(Surfguard::Unresolvable) { resolve("nxdomain.example.invalid") }
+
+    stub_dns_resolution("10.0.0.1")
+    assert_nil resolve("blocked.example.com")
+  end
+
   private
     # Exactly what Webhook::Delivery#resolved_ip and
     # Push::Subscription#resolved_endpoint_ip do with the host they pin on.

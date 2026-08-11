@@ -27,6 +27,11 @@ class Push::Subscription < ApplicationRecord
   def resolved_endpoint_ip
     return @resolved_endpoint_ip if defined?(@resolved_endpoint_ip)
     @resolved_endpoint_ip = Surfguard.resolve_public_ips(endpoint_uri&.host).first
+  rescue Surfguard::Unresolvable
+    # A host that resolves to nothing has no usable public IP, same outcome as
+    # one whose only addresses are blocked: no endpoint IP to pin, which fails
+    # endpoint validation. Push has no lookup-failed surface to distinguish.
+    @resolved_endpoint_ip = nil
   end
 
   private

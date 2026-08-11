@@ -79,7 +79,7 @@ class Webhook::Delivery < ApplicationRecord
       end
     rescue ResponseTooLarge
       { error: :response_too_large }
-    rescue Resolv::ResolvTimeout, Resolv::ResolvError, SocketError
+    rescue Surfguard::Unresolvable, Resolv::ResolvTimeout, Resolv::ResolvError, SocketError
       { error: :dns_lookup_failed }
     rescue Net::OpenTimeout, Net::ReadTimeout, Errno::ETIMEDOUT
       { error: :connection_timeout }

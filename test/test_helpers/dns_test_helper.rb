@@ -9,6 +9,13 @@ module DnsTestHelper
     Resolv.stubs(:getaddresses).returns(ips.map(&:to_s))
   end
 
+  # A host that resolves to nothing: the resolver errors (timeout/NXDOMAIN),
+  # which Surfguard catches and reports as Unresolvable, distinct from a host
+  # that resolves only to blocked addresses.
+  def stub_dns_failure(error = Resolv::ResolvError)
+    Resolv.stubs(:getaddresses).raises(error)
+  end
+
   def stub_web_push_dns_resolution
     stub_dns_resolution(WEB_PUSH_PUBLIC_TEST_IP)
   end
