@@ -75,4 +75,27 @@ Rails.application.configure do
 
   # Report violations without enforcing the policy.
   config.content_security_policy_report_only = report_only
+
+  # Locked-down policy for the static pages served from public/ (error pages).
+  # They carry no script or inline styles at all, so everything falls back to
+  # default-src 'none'.
+  static_policy = "default-src 'none'; img-src 'self'; style-src 'self'; " \
+    "base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+
+  # Files served straight from public/ return before the CSP middleware runs,
+  # so they get the static policy stamped by the file server.
+  config.public_file_server.headers = (config.public_file_server.headers || {}) \
+    .merge(ActionDispatch::Constants::CONTENT_SECURITY_POLICY => static_policy)
+
+  # The same public/ pages served through the error path (a real 404/500
+  # renders public/404.html via the exceptions app, bypassing the static
+  # file server) get it too. JSON error responses pass through untouched.
+  public_exceptions = ActionDispatch::PublicExceptions.new(Rails.public_path)
+  config.exceptions_app = ->(env) do
+    public_exceptions.call(env).tap do |_status, headers, _body|
+      if headers[Rack::CONTENT_TYPE].to_s.start_with?("text/html")
+        headers[ActionDispatch::Constants::CONTENT_SECURITY_POLICY] = static_policy
+      end
+    end
+  end
 end unless ENV["DISABLE_CSP"]
