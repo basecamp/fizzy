@@ -161,6 +161,9 @@ module Fizzy
         require "yabeda/solid_cache"
         Yabeda::SolidCache.install!
 
+        require "yabeda/hot_cell"
+        Yabeda::HotCell.install!
+
         require_relative "metrics"
       end
 

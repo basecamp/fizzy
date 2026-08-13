@@ -82,6 +82,19 @@ module Fizzy
           end
         end
 
+        # What /hotcellz reports. Every check answers rather than raises, because the page's job is to be
+        # the last step of booting an accessory — the moment when a cell most likely cannot answer.
+        #
+        # describe and metrics ask the control socket, and a descriptor never crosses that, so both answer
+        # happily for a cell whose work socket the app cannot use at all. The echo round trip is the only
+        # one of the three that says anything about the socket real files travel over. The volume-ownership
+        # mistakes fail as EACCES on the first real request, and nothing else here would say so.
+        def diagnostics
+          { root: root, groups: processing_attachments? ? groups : [],
+            describe: reporting { cell.describe }, metrics: reporting { cell.metrics&.result },
+            echo: reporting { echo } }
+        end
+
         # A fixed payload through example.echo, which is the only check that crosses the work socket —
         # describe and metrics both answer on the control socket, and a descriptor never crosses that.
         # The client verifies access modes, so the input must be "rb" and the output "wb"; Tempfile.create
@@ -101,6 +114,18 @@ module Fizzy
         end
 
         private
+          # The registered cell answers this rather than the module, because a cell registered with an
+          # explicit dir: is reachable whatever HOTCELL_ROOT says.
+          def reporting
+            if cell.enabled?
+              { ok: true, result: yield }
+            else
+              { ok: false, error: "HOTCELL_ROOT is unset, so no cell is configured" }
+            end
+          rescue => error
+            { ok: false, error: "#{error.class}: #{error.message}" }
+          end
+
           # What each group installs when it has moved, and what Rails runs when it has not. The constants
           # resolve here rather than in a table at load time, because this file is required during
           # Bundler.require, before Active Storage has defined its own.

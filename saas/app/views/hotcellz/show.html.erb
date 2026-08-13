@@ -1,0 +1,44 @@
+<% @page_title = "HotCell" %>
+
+<% content_for :header do %>
+  <h1 class="header__title"><%= @page_title %></h1>
+<% end %>
+
+<section class="settings">
+  <div class="settings__panel panel shadow">
+    <div class="flex flex-column gap margin-block-half">
+      <div class="flex flex-column gap-half">
+        <header>
+          <h2 class="divider txt-medium margin-block-start">Switches</h2>
+        </header>
+        <div class="flex gap-half">
+          <div class="flex flex-column gap-quarter flex-item-grow">
+            <div class="txt-x-small">HOTCELL_ROOT</div>
+            <div class="txt-large"><strong><%= @diagnostics[:root] || "unset" %></strong></div>
+          </div>
+          <div class="flex flex-column gap-quarter flex-item-grow">
+            <div class="txt-x-small">Processing</div>
+            <div class="txt-large">
+              <strong><%= @diagnostics[:groups].any? ? @diagnostics[:groups].join(", ") : "nothing" %></strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <% { echo: "Echo — the only check that crosses the work socket",
+           describe: "Describe — the inventory and the limits, over the control socket",
+           metrics: "Metrics — the counters, over the control socket" }.each do |check, title| %>
+        <div class="flex flex-column gap-half">
+          <header>
+            <h2 class="divider txt-medium margin-block-start"><%= title %></h2>
+          </header>
+          <% answer = @diagnostics[check] %>
+          <div class="txt-large">
+            <strong><%= answer[:ok] ? "OK" : "FAILED" %></strong>
+          </div>
+          <pre class="txt-x-small overflow-x-auto"><%= JSON.pretty_generate(answer[:ok] ? answer[:result] : answer[:error]) %></pre>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</section>
