@@ -32,6 +32,10 @@ module Fizzy
       # graph is the classification and every retryable failure would be written down as permanent.
       class ProcessingUnavailable < StandardError; end
 
+      # A /hotcellz check that answered, but answered badly. Its message is already a sentence, so it is
+      # reported without an exception class in front of it.
+      class CheckFailed < StandardError; end
+
       # Listed in the order Active Storage should see their classes, because the first analyzer or
       # previewer that accepts a blob is the one that runs.
       GROUPS = %i[ images pdfs media ]
@@ -89,9 +93,16 @@ module Fizzy
         # happily for a cell whose work socket the app cannot use at all. The echo round trip is the only
         # one of the three that says anything about the socket real files travel over. The volume-ownership
         # mistakes fail as EACCES on the first real request, and nothing else here would say so.
+        # Neither control call raises for itself: describe returns nil after warning, and metrics returns a
+        # response that is simply not ok. Reported as they come back, both say "ok" with an empty result
+        # for a cell that never answered — the same shape as a healthy one.
+        # `at` is spelled the way the cell spells it in its own log lines — same key, same UTC ISO8601 with
+        # milliseconds — so a reading taken here lines up mechanically against the cell's logs in Loki.
         def diagnostics
-          { root: root, groups: processing_attachments? ? groups : [],
-            describe: reporting { cell.describe }, metrics: reporting { cell.metrics&.result },
+          { at: Time.now.utc.iso8601(3),
+            root: root, groups: processing_attachments? ? groups : [],
+            describe: reporting { cell.describe or raise CheckFailed, "the cell did not answer; see metrics" },
+            metrics: reporting { answered cell.metrics },
             echo: reporting { echo } }
         end
 
@@ -122,8 +133,17 @@ module Fizzy
             else
               { ok: false, error: "HOTCELL_ROOT is unset, so no cell is configured" }
             end
+          rescue CheckFailed => error
+            { ok: false, error: error.message }
           rescue => error
             { ok: false, error: "#{error.class}: #{error.message}" }
+          end
+
+          def answered(response)
+            raise CheckFailed, "no answer from the control socket" if response.nil?
+            raise CheckFailed, response.failure.to_s unless response.ok?
+
+            response.result
           end
 
           # What each group installs when it has moved, and what Rails runs when it has not. The constants
