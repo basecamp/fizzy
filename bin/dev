@@ -1,8 +1,12 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 PORT=3006
 USE_TAILSCALE=0
 USE_PUSH=0
+USE_HOTCELL=0
+FOREMAN_ARGS=()
+
+export PORT
 
 if [ -t 1 ]; then
   c_bar='\033[2m▎\033[0m'    # dim
@@ -17,6 +21,26 @@ for arg in "$@"; do
   case $arg in
     --tailscale) USE_TAILSCALE=1 ;;
     --push) USE_PUSH=1 ;;
+    --hotcell) USE_HOTCELL=1 ;;
+    --help|-h)
+      cat <<USAGE
+Usage: bin/dev [options]
+
+Starts the Fizzy development processes using foreman.
+
+Options:
+  --tailscale   Expose the dev server via tailscale serve
+  --push        Load push notification credentials from 1Password (implies SaaS mode)
+  --hotcell     Route attachment processing through the cell, not just boot it
+  -h, --help    Show this help
+
+In SaaS mode a hotcell cell boots beside the server and HOTCELL_ROOT is set, so
+/hotcellz answers while every conversion still runs in the app — the same
+position production step one is in. --hotcell moves the work to the cell.
+USAGE
+      exit 0
+      ;;
+    *) FOREMAN_ARGS+=("$arg") ;;
   esac
 done
 
@@ -42,6 +66,21 @@ fi
 
 if [ -f tmp/oss-config.txt ]; then
   export OSS_CONFIG=1
+fi
+
+# The cell is SaaS-only, and it runs uncontainerized here: a container cannot receive a descriptor on
+# macOS, where Docker runs a Linux VM and SCM_RIGHTS has nothing meaningful to hand across two kernels.
+if [ -f tmp/saas.txt ]; then
+  export HOTCELL_ROOT=tmp/hotcell
+  if [ "$USE_HOTCELL" = "1" ]; then
+    export HOTCELL_ACTIVE_STORAGE=all
+  fi
+  if [ ! -f saas/hotcell/Gemfile.lock ]; then
+    echo "Error: the cell has no bundle. Run bin/setup." >&2
+    exit 1
+  fi
+else
+  FOREMAN_ARGS=("-m" "all=1,cell=0" "${FOREMAN_ARGS[@]}")
 fi
 
 if [ "$USE_TAILSCALE" = "1" ]; then
@@ -72,9 +111,20 @@ else
   DEV_URL="http://app.fizzy.localhost:$PORT/"
 fi
 
+# Not in the bundle, on purpose: it manages the bundle's processes rather than running inside one.
+if ! foreman version >/dev/null 2>&1; then
+  echo "Installing foreman..."
+  gem install foreman
+fi
+
 printf "\n"
 printf " ${c_bar} ${c_label}URL${c_reset}     ${c_url}${DEV_URL}${c_reset}\n"
 printf " ${c_bar} ${c_label}Login${c_reset}   david@example.com\n"
+if [ -n "$HOTCELL_ROOT" ]; then
+  printf " ${c_bar} ${c_label}Cell${c_reset}    ${c_url}${DEV_URL}hotcellz${c_reset}"
+  if [ "$USE_HOTCELL" = "1" ]; then printf " (processing attachments)"; else printf " (idle — add --hotcell)"; fi
+  printf "\n"
+fi
 printf "\n"
 
-./bin/rails server -b 0.0.0.0 -p $PORT
+foreman start -f Procfile.dev "${FOREMAN_ARGS[@]}"

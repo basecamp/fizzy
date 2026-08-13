@@ -107,3 +107,16 @@ if [ -e tmp/minio-dev.txt ]; then
 fi
 
 step "Starting mysql" ~/Work/basecamp/docker-dev/setup mysql84
+
+# The cell has its own Gemfile — the same one its image build copies — and nothing in the app's setup
+# installs it, so without this a fresh checkout cannot boot a cell.
+step "Installing the cell's RubyGems" \
+  env -u RUBYOPT -u BUNDLE_BIN_PATH BUNDLE_GEMFILE="$app_root/saas/hotcell/Gemfile" bundle install
+
+# The dev cell runs uncontainerized and does not need the image. Build it anyway: a Dockerfile that only
+# ever builds in CI or at deploy time is one that breaks at the worst moment.
+if docker info &> /dev/null; then
+  step "Building the cell's image" "$app_root/saas/hotcell/build"
+else
+  echo "▸ Skipping the cell's image (docker is not running)"
+fi

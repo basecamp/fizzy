@@ -23,6 +23,9 @@ PROMETHEUS_EXPORTER_URL = "http://127.0.0.1:9306/metrics"
 "pacman:poppler-glib" = "latest"
 "pacman:libcgif" = "latest"
 "pacman:ffmpeg" = "latest"
+# An uncontainerized dev cell shells out to the host, so every tool in saas/hotcell/Dockerfile needs an
+# equivalent here or those operations fail in development only.
+"pacman:mupdf-tools" = "latest"
 "pacman:rav1e" = "latest"
 "pacman:svt-av1" = "latest"
 "pacman:gitleaks" = "latest"

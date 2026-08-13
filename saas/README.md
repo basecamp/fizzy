@@ -56,6 +56,46 @@ bin/dev --push
 
 This will ask for your 1Password authorization to fetch the push credentials. Note that this loads the **production** APNs and FCM credentials into your environment.
 
+## Attachment processing in a hotcell cell
+
+Image variants, blob analysis and PDF and video previews can run in an unprivileged sibling container with no network, instead of in the app process beside the database credentials. The cell lives in `saas/hotcell/` — its `Dockerfile`, its own `Gemfile`, its limits in `config.rb`, and the operations it serves.
+
+### Running it
+
+In SaaS mode `bin/dev` boots a cell beside the server, through `Procfile.dev` and foreman. The cell runs uncontainerized, because a container cannot receive a file descriptor on macOS — Docker runs a Linux VM there and `SCM_RIGHTS` has nothing meaningful to hand across two kernels.
+
+```sh
+bin/dev            # the cell boots and /hotcellz answers; conversions still run in the app
+bin/dev --hotcell  # attachment processing goes to the cell
+```
+
+`/hotcellz` is the staff-only page that says whether the cell is reachable. It reports `describe`, `metrics`, and an `example.echo` round trip — only the last of those crosses the work socket, which is the socket that carries real files.
+
+Because the dev cell shells out to your laptop rather than to the image, every tool in `saas/hotcell/Dockerfile` needs a host equivalent. `bin/setup` installs them; if you add a tool to the image, add it to `.mise.toml` and the `Brewfile` too, or that operation will fail in development only.
+
+### Two switches
+
+| variable | what it does |
+| --- | --- |
+| `HOTCELL_ROOT` | Registers the cell. Metrics, `describe`, the healthcheck and `/hotcellz` answer, and every conversion still runs in the app. |
+| `HOTCELL_ACTIVE_STORAGE` | Moves the work. A comma-separated list of `images`, `pdfs`, `media`, or `all`. |
+
+They are separate because a cell being reachable and a cell taking traffic are different questions, and the second is a list because the rollout moves operations in groups. `images` carries the image analyzer along with the transformer whether or not you ask: Rails' image analyzers test `variant_processor == :vips`, so pointing the transformer at a class makes them decline and blobs get marked analyzed with no dimensions.
+
+An unknown group name raises at boot rather than meaning "off".
+
+### Building and shipping the image
+
+Kamal builds app images and not accessory images, so the cell's image has its own two scripts. They are separate so that building can happen anywhere and publishing is deliberate.
+
+```sh
+saas/hotcell/build                        # tags with the revision of the last commit touching saas/hotcell
+saas/hotcell/build --platform=linux/amd64 # what the hosts run
+saas/hotcell/deploy                       # pushes, and prints the line for saas/config/deploy.yml
+```
+
+Tags are immutable and there is no `latest`: a deploy does not update an accessory, so `bin/kamal accessory reboot hotcell -d <destination>` pulls whatever the tag names at that moment. A moving tag would make what a host runs depend on when it last rebooted.
+
 ## Environments
 
 Fizzy is deployed with [Kamal](https://kamal-deploy.org/). You'll need to have the 1Password CLI set up in order to access the secrets that are used when deploying. Provided you have that, it should be as simple as `bin/kamal deploy` to the correct environment.

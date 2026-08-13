@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# Publishes an already-built cell image, and prints the line to paste into saas/config/deploy.yml.
+#
+# Pushing is the irreversible half, which is why it is not in saas/hotcell/build. Rebooting the accessory
+# stays explicit and is not done here:
+#
+#   bin/kamal accessory reboot hotcell -d <destination>
+set -euo pipefail
+
+cell_dir="$(cd "$(dirname "$0")" && pwd)"
+repo_root="$(cd "$cell_dir/../.." && pwd)"
+
+source "$cell_dir/image"
+
+for arg in "$@"; do
+  case $arg in
+    --help|-h)
+      cat <<USAGE
+Usage: saas/hotcell/deploy
+
+Pushes the image saas/hotcell/build made to $HOTCELL_IMAGE_REPOSITORY, then prints the accessory
+image line for saas/config/deploy.yml. Build it first if it is not there.
+USAGE
+      exit 0
+      ;;
+  esac
+done
+
+tag="$(hotcell_image_tag "$repo_root")"
+
+if ! docker image inspect "$tag" > /dev/null 2>&1; then
+  echo "No local image $tag. Build it first: saas/hotcell/build" >&2
+  exit 1
+fi
+
+# Production runs amd64. An arm64 image pushed from a laptop reaches a host that cannot run it, and the
+# accessory crash-loops with nothing in the app to say why.
+architecture="$(docker image inspect --format '{{.Architecture}}' "$tag")"
+if [ "$architecture" != "amd64" ]; then
+  echo "$tag is $architecture and the hosts are amd64." >&2
+  echo "Rebuild it: saas/hotcell/build --platform=linux/amd64" >&2
+  exit 1
+fi
+
+echo "Pushing $tag"
+docker push "$tag"
+
+cat <<NEXT
+
+Published $tag.
+
+Point the accessory at it in saas/config/deploy.yml:
+
+    accessories:
+      hotcell:
+        image: $tag
+
+Then boot it, which a deploy does not do:
+
+    bin/kamal accessory reboot hotcell -d <destination>
+NEXT

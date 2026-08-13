@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+# Builds the cell's image. Kamal builds app images and not accessory images, so this is how the cell's
+# image gets made.
+#
+# It touches no registry: publishing is saas/hotcell/deploy, so this can run on every laptop from
+# bin/setup. Tags are immutable and there is no `latest`, because a deploy does not update an accessory —
+# `kamal accessory reboot` pulls whatever the tag names at that moment, and a moving tag would make what a
+# host runs depend on when it last rebooted.
+set -euo pipefail
+
+cell_dir="$(cd "$(dirname "$0")" && pwd)"
+repo_root="$(cd "$cell_dir/../.." && pwd)"
+
+source "$cell_dir/image"
+
+platform=""
+for arg in "$@"; do
+  case $arg in
+    --platform=*) platform="${arg#*=}" ;;
+    --help|-h)
+      cat <<USAGE
+Usage: saas/hotcell/build [--platform=linux/amd64]
+
+Builds the hotcell cell image and tags it with the revision of the last commit that touched
+saas/hotcell. Pushing is a separate step: saas/hotcell/deploy.
+
+Environment:
+  GITHUB_TOKEN   Defaults to the gh CLI's oauth token. The cell's bundle comes from a private
+                 repository, so the build needs one.
+USAGE
+      exit 0
+      ;;
+  esac
+done
+
+# The tag names what is in the image, so a dirty tree would mint a tag for bytes no commit holds.
+if [ -n "$(git -C "$repo_root" status --porcelain -- "$cell_dir")" ]; then
+  echo "saas/hotcell has uncommitted changes, so any tag built from it would name a revision that does" >&2
+  echo "not hold these bytes. Commit them first." >&2
+  exit 1
+fi
+
+# Exported, not just set: --secret env=GITHUB_TOKEN reads the environment, and a shell variable that is
+# only assigned reaches the build as an empty string — which fails as "Authentication failed" rather
+# than as a missing credential.
+: "${GITHUB_TOKEN:=$(gh config get -h github.com oauth_token 2>/dev/null || true)}"
+export GITHUB_TOKEN
+if [ -z "$GITHUB_TOKEN" ]; then
+  echo "GITHUB_TOKEN is unset and the gh CLI has no token. Run: gh auth login" >&2
+  exit 1
+fi
+
+tag="$(hotcell_image_tag "$repo_root")"
+
+echo "Building $tag"
+docker build \
+  ${platform:+--platform="$platform"} \
+  --secret id=GITHUB_TOKEN,env=GITHUB_TOKEN \
+  --tag "$tag" \
+  "$cell_dir"
+
+# Bundler writes the token into every git remote it touches, in more places than one line of the
+# Dockerfile can be trusted to name. A credential that reaches the image is inside the blast radius, so
+# check the built bytes rather than the intent, and destroy the tag if it is there.
+echo "Checking the image for the credential"
+if docker run --rm --entrypoint sh -e TOKEN="$GITHUB_TOKEN" "$tag" \
+     -c 'grep -rlF "$TOKEN" /hotcell /usr/local/bundle /root /home /tmp 2>/dev/null | head -5' | grep -q .; then
+  docker image rm --force "$tag" > /dev/null 2>&1 || true
+  echo "The GITHUB_TOKEN survived into $tag, so the tag has been removed." >&2
+  echo "Find it with: grep -rlF \"\$GITHUB_TOKEN\" / — then widen the rm in the Dockerfile." >&2
+  exit 1
+fi
+
+echo
+echo "Built $tag. It is local only — publish it with saas/hotcell/deploy."

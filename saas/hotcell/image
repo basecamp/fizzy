@@ -1,0 +1,13 @@
+# Sourced by build and deploy, so the two cannot disagree about what an image is called.
+
+HOTCELL_IMAGE_REPOSITORY="${HOTCELL_IMAGE_REPOSITORY:-registry.37signals.com/basecamp/fizzy-hotcell}"
+
+# The revision of the last commit that touched saas/hotcell, rather than HEAD: it identifies what is in
+# the image, so an unrelated commit does not mint a new tag for identical bytes.
+hotcell_image_tag() {
+  local repo_root="$1"
+  local revision
+
+  revision="$(git -C "$repo_root" log -1 --format=%h -- "$repo_root/saas/hotcell")"
+  echo "$HOTCELL_IMAGE_REPOSITORY:$revision"
+}
