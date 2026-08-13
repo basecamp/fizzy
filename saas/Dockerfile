@@ -61,6 +61,12 @@ RUN apt-get update -qq && \
 COPY --from=build /usr/local/bundle /usr/local/bundle
 COPY --from=build /rails /rails
 
+# Where the hotcell socket volume mounts, owned by the cell's uid rather than this image's user. A new
+# named volume takes its ownership from the directory it covers in whichever container mounts it first,
+# and on a new host that is the app. Left to Docker to create, it is root-owned and the cell cannot create
+# its sockets in it — which fails as EACCES when the accessory boots, with nothing here to say why.
+RUN mkdir -p /run/hotcell/active_storage && chown -R 10001:10001 /run/hotcell
+
 # Run and own only the runtime files as a non-root user for security
 RUN useradd rails --create-home --shell /bin/bash && \
     chown -R rails:rails db log storage tmp

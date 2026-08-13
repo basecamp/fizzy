@@ -10,6 +10,19 @@ servers:
 
 volumes:
   - fizzy:/rails/storage
+  # The cell's sockets. The app resolves a cell's name under HOTCELL_ROOT, so this path is
+  # $HOTCELL_ROOT/<cell name> while the cell writes them at its own HOTCELL_DIR — only the volume name
+  # has to match. saas/Dockerfile creates this directory owned by 10001, because a new named volume takes
+  # its ownership from the directory it covers in whichever container mounts it first, and on a new host
+  # that is the app.
+  - hotcell-active-storage:/run/hotcell/active_storage
+
+env:
+  clear:
+    # Registers the cell: metrics, describe, the healthcheck and /hotcellz answer, and every conversion
+    # still runs in the app. HOTCELL_ACTIVE_STORAGE is what moves the work, and it is deliberately not
+    # here yet.
+    HOTCELL_ROOT: /run/hotcell
 
 proxy:
   ssl: true
@@ -27,6 +40,44 @@ builder:
     - GITHUB_TOKEN
   remote: ssh://app@docker-builder-102
   local: <%= ENV.fetch("KAMAL_BUILDER_LOCAL", "true") %>
+
+# Attachment processing, in a container with no network that holds nothing worth stealing. Declared here
+# rather than per destination because a deploy never touches an accessory — booting one is explicit —
+# so this is inert until someone runs:
+#
+#   bin/kamal accessory reboot hotcell -d <destination>
+#
+# An accessory rather than an app role because Kamal hard-codes --network kamal for roles, and network:
+# none is the point.
+accessories:
+  hotcell:
+    # Immutable, and never `latest`: a reboot pulls whatever the tag names at that moment, so a moving tag
+    # would make what a host runs depend on when it last rebooted. saas/hotcell/deploy prints this line.
+    # Until that has been run the pull fails loudly, which is the right way for an unbuilt image to fail.
+    image: registry.37signals.com/basecamp/fizzy-hotcell:6d770f57
+    roles: [ web, jobs ]  # a descriptor cannot cross machines, so a cell lives on its caller's host
+    volumes:
+      - hotcell-active-storage:/run/hotcell/cell
+    options:
+      # Performance. Docker applies no limit to a flag left out, so a cell without these can take the
+      # host. Sized as arithmetic against the cell's own limits rather than measured — 4 workers × 128MB
+      # of file_size is 512MB of scratch, so the tmpfs is 768m, and the cgroup counts the tmpfs and has to
+      # stay above the cell's 1536MB rlimit, so memory is 3g. Load testing owns the real numbers.
+      cpus: 2
+      memory: 3g
+      memory-swap: 3g  # equal to memory; omitted, Docker allows twice memory in swap and the limit stops holding
+      ulimit: stack=2097152:2097152  # glibc reads RLIMIT_STACK once at exec, so this cannot be a cell setting
+
+      # Security. Omit one and the protection is gone while the cell serves requests exactly as before.
+      network: none
+      read-only: true
+      cap-drop: ALL
+      security-opt: no-new-privileges:true
+      user: 10001:10001
+      pids-limit: 512
+
+      # noexec is security — scratch is where a dropped payload lands; the size is performance.
+      tmpfs: /tmp:rw,nosuid,nodev,noexec,size=768m
 
 aliases:
   console: app exec -i --reuse -e CONSOLE_USER:<%= ENV["USER"] %> "bin/rails console"
