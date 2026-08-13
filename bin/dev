@@ -34,9 +34,9 @@ Options:
   --hotcell     Route attachment processing through the cell, not just boot it
   -h, --help    Show this help
 
-In SaaS mode a hotcell cell boots beside the server and HOTCELL_ROOT is set, so
-/hotcellz answers while every conversion still runs in the app — the same
-position production step one is in. --hotcell moves the work to the cell.
+In SaaS mode a hotcell cell boots beside the server with HOTCELL_ROOT set, while
+every conversion still runs in the app — the same position production step one
+is in. --hotcell moves the work to the cell.
 USAGE
       exit 0
       ;;
@@ -120,11 +120,6 @@ fi
 printf "\n"
 printf " ${c_bar} ${c_label}URL${c_reset}     ${c_url}${DEV_URL}${c_reset}\n"
 printf " ${c_bar} ${c_label}Login${c_reset}   david@example.com\n"
-if [ -n "$HOTCELL_ROOT" ]; then
-  printf " ${c_bar} ${c_label}Cell${c_reset}    ${c_url}${DEV_URL}hotcellz${c_reset}"
-  if [ "$USE_HOTCELL" = "1" ]; then printf " (processing attachments)"; else printf " (idle — add --hotcell)"; fi
-  printf "\n"
-fi
 printf "\n"
 
 foreman start -f Procfile.dev "${FOREMAN_ARGS[@]}"

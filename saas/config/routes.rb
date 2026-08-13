@@ -5,8 +5,7 @@ Fizzy::Saas::Engine.routes.draw do
     resources :devices, only: [ :index, :create, :destroy ]
   end
 
-  # Beside "up", because it answers the same kind of question — but staff-only, since it reports what the
-  # cell's image carries.
+  # Beside "up", because it answers the same kind of question and is polled the same way.
   get "hotcellz", to: "hotcellz#show"
 
   namespace :admin do

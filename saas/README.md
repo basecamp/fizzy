@@ -69,7 +69,7 @@ bin/dev            # the cell boots and /hotcellz answers; conversions still run
 bin/dev --hotcell  # attachment processing goes to the cell
 ```
 
-`/hotcellz` is the staff-only page that says whether the cell is reachable. It reports `describe`, `metrics`, and an `example.echo` round trip — only the last of those crosses the work socket, which is the socket that carries real files.
+`/hotcellz` says whether the cell is reachable. It reports `describe`, `metrics`, and an `example.echo` round trip — only the last of those crosses the work socket, which is the socket that carries real files. It answers 200 when all three pass and 503 when any fails, and it is unauthenticated so a monitor can poll it.
 
 Because the dev cell shells out to your laptop rather than to the image, every tool in `saas/hotcell/Dockerfile` needs a host equivalent. `bin/setup` installs them; if you add a tool to the image, add it to `.mise.toml` and the `Brewfile` too, or that operation will fail in development only.
 
