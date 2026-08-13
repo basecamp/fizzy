@@ -31,6 +31,11 @@ env MISE_ENV=saas mise bootstrap --only repos --yes
 ▸ Starting mysql
 $HOME/Work/basecamp/docker-dev/setup mysql84
 
+▸ Installing the cell's RubyGems
+env -u RUBYOPT -u BUNDLE_BIN_PATH BUNDLE_GEMFILE=$APP/saas/hotcell/Gemfile bundle install
+
+▸ Skipping the cell's image (saas/hotcell/build is not here)
+
 ▸ Preparing the database
 rails db:prepare
 

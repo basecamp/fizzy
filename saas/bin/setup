@@ -113,10 +113,16 @@ step "Starting mysql" ~/Work/basecamp/docker-dev/setup mysql84
 step "Installing the cell's RubyGems" \
   env -u RUBYOPT -u BUNDLE_BIN_PATH BUNDLE_GEMFILE="$app_root/saas/hotcell/Gemfile" bundle install
 
-# The dev cell runs uncontainerized and does not need the image. Build it anyway: a Dockerfile that only
-# ever builds in CI or at deploy time is one that breaks at the worst moment.
-if docker info &> /dev/null; then
-  step "Building the cell's image" "$app_root/saas/hotcell/build"
-else
+# The dev cell runs uncontainerized and does not need the image. Build it anyway, where that is possible:
+# a Dockerfile that only ever builds in CI or at deploy time is one that breaks at the worst moment. A
+# failed build stops setup on purpose — but not being able to attempt one is not a failure, so probe for
+# the script before docker, and skip rather than abort when either is missing.
+if [ ! -x "$app_root/saas/hotcell/build" ]; then
+  echo "▸ Skipping the cell's image (saas/hotcell/build is not here)"
+  echo
+elif ! docker info &> /dev/null; then
   echo "▸ Skipping the cell's image (docker is not running)"
+  echo
+else
+  step "Building the cell's image" "$app_root/saas/hotcell/build"
 fi
