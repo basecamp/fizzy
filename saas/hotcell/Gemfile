@@ -1,0 +1,15 @@
+# frozen_string_literal: true
+
+# The cell's Gemfile. Keep it short: every gem loaded here is inside the blast radius and paid for on
+# every request. hotcell-client and rails do not belong here.
+#
+# Spell the git source exactly as Gemfile.saas spells it. The app and the cell lock separately against a
+# moving branch, and a client/server revision skew is a `protocol` failure at runtime. A test asserts the
+# two lockfiles agree.
+
+source "https://rubygems.org"
+
+git "https://github.com/basecamp/hotcell", branch: "master" do
+  gem "hotcell-server"
+  gem "activestorage-hotcell-server"
+end

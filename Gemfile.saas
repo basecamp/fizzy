@@ -10,6 +10,10 @@ gem "fizzy-saas", path: "saas"
 gem "console1984", bc: "console1984"
 gem "audits1984", bc: "audits1984"
 
+# Attachment processing in an unprivileged sibling container
+gem "hotcell-client", bc: "hotcell"
+gem "activestorage-hotcell-client", bc: "hotcell"
+
 # Native push notifications (iOS/Android)
 gem "action_push_native"
 

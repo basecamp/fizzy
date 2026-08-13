@@ -21,6 +21,18 @@ GIT
       rainbow
 
 GIT
+  remote: https://github.com/basecamp/hotcell
+  revision: d934bdeb85f47576e2443f78ac06b03b69a00c95
+  specs:
+    activestorage-hotcell-client (0.1.0)
+      activestorage (>= 8.1)
+      hotcell-client (>= 0.1.0)
+    hotcell-client (0.1.0)
+      activesupport (>= 7.1)
+      hotcell-core (= 0.1.0)
+    hotcell-core (0.1.0)
+
+GIT
   remote: https://github.com/basecamp/queenbee-plugin
   revision: c0119be5940edb3739d4bb591c1a5c7064881638
   specs:
@@ -727,6 +739,7 @@ DEPENDENCIES
   action_push_native
   actionpack-xml_parser
   activeresource
+  activestorage-hotcell-client!
   audits1984!
   autotuner
   aws-sdk-s3
@@ -742,6 +755,7 @@ DEPENDENCIES
   fizzy-saas!
   geared_pagination (~> 1.2)
   gvltools
+  hotcell-client!
   image_processing (~> 1.14)
   importmap-rails
   jbuilder
@@ -808,6 +822,7 @@ CHECKSUMS
   activerecord (8.2.0.alpha)
   activeresource (6.2.0) sha256=818ca60d3cd1ff7bbb7277f41250ad4d61a7cdbe30fbf52b2145e1b66ed13900
   activestorage (8.2.0.alpha)
+  activestorage-hotcell-client (0.1.0)
   activesupport (8.2.0.alpha)
   addressable (2.9.0) sha256=7fdf6ac3660f7f4e867a0838be3f6cf722ace541dd97767fa42bc6cfa980c7af
   ansi (1.6.0) sha256=ac9ea0c0ea8d32fb4e271348e609963ac78882f34b73836c2a02b3622e666658
@@ -869,6 +884,8 @@ CHECKSUMS
   googleauth (1.16.1) sha256=36776bce9d55d8c1a0c6638c939b000dcee5954ca5b728f06ec4c2df4a46709c
   gvltools (0.5.0) sha256=a15e480b3860e7e9661e5e53aff9b1802fe9018fa42a5e845adc2a19a7bcc65d
   hashdiff (1.2.1) sha256=9c079dbc513dfc8833ab59c0c2d8f230fa28499cc5efb4b8dd276cf931457cd1
+  hotcell-client (0.1.0)
+  hotcell-core (0.1.0)
   http-2 (1.1.1) sha256=1141a5a03c2f4e6b8d2fa62394de581e1ff6387711cd7ed577212e9d95562bba
   httpx (1.7.1) sha256=ae380461539203c92f3ee65c13b22dfccb0d975156426869f57820505cacdf56
   i18n (1.15.2) sha256=00f9eb62412fe593b2a65a97daa75300d37abb8f7202ec748e94b6d46a9dd1b5

@@ -3,6 +3,7 @@ require_relative "true_client_ip"
 require_relative "signup"
 require_relative "authorization"
 require_relative "gvl_instrumentation"
+require_relative "cell"
 require_relative "../../rails_ext/active_record_tasks_database_tasks.rb"
 
 module Fizzy
@@ -45,6 +46,20 @@ module Fizzy
 
       initializer "fizzy_saas.gvl_instrumentation" do |app|
         app.config.middleware.insert_before(Rack::Runtime, GvlInstrumentation)
+      end
+
+      # Before active_storage.configs, which is where Active Storage reads these settings off config.
+      initializer "fizzy_saas.hotcell", before: "active_storage.configs" do |app|
+        Cell.register!
+
+        app.config.active_storage.merge! Cell.active_storage_configuration
+      end
+
+      # Warns when a client wants an operation the cell does not carry, and when the timeout is too tight
+      # for what the cell says it may take. Never fails boot: a cell that is restarting is a degraded
+      # deployment, not a broken one.
+      config.after_initialize do
+        ::HotCell.describe_cells
       end
 
       initializer "fizzy_saas.solid_queue" do
