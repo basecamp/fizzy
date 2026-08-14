@@ -78,6 +78,16 @@ class Fizzy::Saas::CellTest < ActiveSupport::TestCase
     assert_operator Cell::TIMEOUT, :>=, queue_wait + deadline + kill_and_reply
   end
 
+  # The gem's default, asserted rather than set, because nothing here should own the number — but a control
+  # call on the work timeout is what blanks a host's metrics instead of reporting its cell down. Yabeda
+  # collects inside the scrape request, so this has to answer well within one.
+  test "control calls are bounded tighter than work calls and than a scrape" do
+    scrape_timeout = 10
+
+    assert_operator Cell.cell.control_timeout, :<, scrape_timeout
+    assert_operator Cell.cell.control_timeout, :<, Cell::TIMEOUT
+  end
+
   private
     def configuration_for(groups)
       with_env "HOTCELL_ROOT" => "tmp/hotcell", "HOTCELL_ACTIVE_STORAGE" => groups do
