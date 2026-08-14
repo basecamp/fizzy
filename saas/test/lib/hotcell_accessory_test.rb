@@ -66,6 +66,23 @@ class HotcellAccessoryTest < ActiveSupport::TestCase
     assert_equal [ "web", "jobs" ], accessory["roles"]
   end
 
+  # Three numbers in three places that must agree, and nothing else checks them. The cell's gid is what a
+  # descriptor's group is set to; the app must be in that group to set it, and must be told which group it
+  # is. Any one of them alone is a cell that answers echo and fails every operation that hands a tool a
+  # filename.
+  test "the app shares the cell's group, and is told the same number" do
+    DESTINATIONS.each do |destination|
+      cell_gid = flag(run_command(destination), "--user")[/:(\d+)\z/, 1]
+
+      configuration(destination).roles.each do |role|
+        assert_equal cell_gid, role.option_args.join(" ")[/--group-add "(\d+)"/, 1],
+          "#{destination} #{role.name} group-add"
+        assert_equal cell_gid, role.env(role.hosts.first).clear["HOTCELL_GROUP"].to_s,
+          "#{destination} #{role.name} HOTCELL_GROUP"
+      end
+    end
+  end
+
   test "the image tag is immutable" do
     assert_no_match(/:latest$/, accessory["image"])
   end
@@ -92,10 +109,13 @@ class HotcellAccessoryTest < ActiveSupport::TestCase
     end
 
     def run_command(destination)
-      configuration = Kamal::Configuration.create_from(
-        config_file: Rails.root.join("saas/config/deploy.yml"), destination: destination, version: "test")
+      Kamal::Commands::Accessory.new(configuration(destination), name: :hotcell).run.flatten.join(" ")
+    end
 
-      Kamal::Commands::Accessory.new(configuration, name: :hotcell).run.flatten.join(" ")
+    def configuration(destination)
+      @configurations ||= {}
+      @configurations[destination] ||= Kamal::Configuration.create_from(
+        config_file: Rails.root.join("saas/config/deploy.yml"), destination: destination, version: "test")
     end
 
     # Kamal quotes what it argumentizes, so a flag's value ends at the closing quote.

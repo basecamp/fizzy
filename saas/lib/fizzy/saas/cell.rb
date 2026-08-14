@@ -114,28 +114,43 @@ module Fizzy
             root: root, groups: processing_attachments? ? groups : [],
             describe: reporting { cell.describe or raise CheckFailed, "the cell did not answer; see metrics" },
             metrics: reporting { answered cell.metrics },
-            echo: reporting { echo } }
+            echo: reporting { echo },
+            reopen: reporting { reopen } }
         end
 
-        # A fixed payload through example.echo, which is the only check that crosses the work socket —
-        # describe and metrics both answer on the control socket, and a descriptor never crosses that.
-        # The client verifies access modes, so the input must be "rb" and the output "wb"; Tempfile.create
-        # yields "r+", which it rejects.
+        # A fixed payload through example.echo, which reads the descriptor directly.
         def echo(message = "hotcell")
-          Dir.mktmpdir do |directory|
-            source = File.join(directory, "in")
-            destination = File.join(directory, "out")
-            File.write source, message
+          round_trip Echo, message
+        end
 
-            result = File.open(source, "rb") do |input|
-              File.open(destination, "wb") { |output| Echo.perform_in_hotcell input, output }
-            end
-
-            result.merge(echoed: File.read(destination) == message)
-          end
+        # The same payload through example.reopen, which reads the input by name. `/dev/fd/N` is a fresh
+        # open, rechecked against the cell's uid and the file's mode, so this succeeds only where the two
+        # sides share a group. Every operation that hands a tool a filename does exactly this, and echo
+        # never does — so a cell missing the group answers echo perfectly and fails every real conversion.
+        def reopen(message = "hotcell")
+          round_trip Reopen, message
         end
 
         private
+          # The checks that cross the work socket. describe and metrics both answer on the control socket,
+          # and a descriptor never crosses that.
+          #
+          # The client verifies access modes, so the input must be "rb" and the output "wb";
+          # Tempfile.create yields "r+", which it rejects.
+          def round_trip(client, message)
+            Dir.mktmpdir do |directory|
+              source = File.join(directory, "in")
+              destination = File.join(directory, "out")
+              File.write source, message
+
+              result = File.open(source, "rb") do |input|
+                File.open(destination, "wb") { |output| client.perform_in_hotcell input, output }
+              end
+
+              result.merge(echoed: File.read(destination) == message)
+            end
+          end
+
           # The registered cell answers this rather than the module, because a cell registered with an
           # explicit dir: is reachable whatever HOTCELL_ROOT says.
           def reporting
@@ -207,6 +222,11 @@ module Fizzy
       class Echo < ::HotCell::Client
         hotcell NAME
         operation "example.echo"
+      end
+
+      class Reopen < ::HotCell::Client
+        hotcell NAME
+        operation "example.reopen"
       end
     end
   end

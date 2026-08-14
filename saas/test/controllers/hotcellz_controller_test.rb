@@ -9,7 +9,7 @@ class HotcellzControllerTest < ActionDispatch::IntegrationTest
     get HOTCELLZ
 
     assert_equal "application/json", response.media_type
-    assert_equal %w[ at host root groups describe metrics echo ], response.parsed_body.keys
+    assert_equal %w[ at host root groups describe metrics echo reopen ], response.parsed_body.keys
   end
 
   # A poll lands on one of the web hosts and the answer is about that host's cell, so an answer that does
@@ -39,7 +39,7 @@ class HotcellzControllerTest < ActionDispatch::IntegrationTest
   test "reports an unconfigured cell rather than raising" do
     get HOTCELLZ
 
-    assert_equal [ false, false, false ], checks.map { it["ok"] }
+    assert_equal [ false, false, false, false ], checks.map { it["ok"] }
     assert_match "HOTCELL_ROOT is unset", response.parsed_body["echo"]["error"]
   end
 
@@ -48,12 +48,21 @@ class HotcellzControllerTest < ActionDispatch::IntegrationTest
 
     get HOTCELLZ
 
-    assert_equal [ false, false, false ], checks.map { it["ok"] }
+    assert_equal [ false, false, false, false ], checks.map { it["ok"] }
     assert_match "Errno::ENOENT", response.parsed_body["echo"]["error"]
+  end
+
+  # echo reads the descriptor and reopen reads it by name, so a cell missing the shared group answers the
+  # first perfectly and fails the second. Reporting only one of them is how that ships unnoticed.
+  test "reports the reopen round trip beside the echo one" do
+    get HOTCELLZ
+
+    assert_response :service_unavailable
+    assert_not_nil response.parsed_body["reopen"]
   end
 
   private
     def checks
-      response.parsed_body.values_at("describe", "metrics", "echo")
+      response.parsed_body.values_at("describe", "metrics", "echo", "reopen")
     end
 end

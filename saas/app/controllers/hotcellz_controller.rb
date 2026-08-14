@@ -15,6 +15,6 @@ class HotcellzController < ApplicationController
 
   private
     def healthy?(diagnostics)
-      diagnostics.values_at(:describe, :metrics, :echo).all? { it[:ok] }
+      diagnostics.values_at(:describe, :metrics, :echo, :reopen).all? { it[:ok] }
     end
 end
