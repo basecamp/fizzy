@@ -66,7 +66,9 @@ accessories:
       cpus: 2
       memory: 3g
       memory-swap: 3g  # equal to memory; omitted, Docker allows twice memory in swap and the limit stops holding
-      ulimit: stack=2097152:2097152  # glibc reads RLIMIT_STACK once at exec, so this cannot be a cell setting
+      # Deliberately no `ulimit: stack`, so the cell inherits the daemon's 8MB. A thread that overflows a
+      # smaller stack dies on SIGSEGV, which the supervisor maps to killed/memory — permanent, so the
+      # verdict is written against the customer's file. Raise the cell's own memory instead.
 
       # Security. Omit one and the protection is gone while the cell serves requests exactly as before.
       network: none
