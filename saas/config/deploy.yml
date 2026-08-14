@@ -56,6 +56,10 @@ accessories:
     # Until that has been run the pull fails loudly, which is the right way for an unbuilt image to fail.
     image: registry.37signals.com/basecamp/fizzy-hotcell:4d53fb4d
     roles: [ web, jobs ]  # a descriptor cannot cross machines, so a cell lives on its caller's host
+    # An accessory's own key, not one of the options below. Kamal always emits a --network of its own,
+    # defaulting to `kamal`, so the same setting under `options:` is a second --network flag and Docker
+    # refuses the container outright.
+    network: none
     volumes:
       - hotcell-active-storage:/run/hotcell/cell
     options:
@@ -71,7 +75,7 @@ accessories:
       # verdict is written against the customer's file. Raise the cell's own memory instead.
 
       # Security. Omit one and the protection is gone while the cell serves requests exactly as before.
-      network: none
+      # `network: none` is above, because it is an accessory key rather than a raw Docker flag.
       read-only: true
       cap-drop: ALL
       security-opt: no-new-privileges:true

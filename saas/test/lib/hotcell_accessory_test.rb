@@ -1,33 +1,65 @@
 require "test_helper"
 require "erb"
+require "kamal"
 
 # Every one of these flags is what makes a cell a cell. Omit one and the protection is gone while the
 # cell goes on serving requests exactly as before, so nothing else would notice.
+#
+# Asserted against the `docker run` Kamal generates rather than against the YAML this repository wrote,
+# because the two are not the same document. Kamal contributes flags of its own, so a setting can be
+# present in the file and reach the daemon twice — which is a `docker: conflicting options` and a cell that
+# never starts, from a file that reads correctly.
+#
+# Every destination, because a destination file is deep-merged into the base and arrays are replaced rather
+# than merged.
 class HotcellAccessoryTest < ActiveSupport::TestCase
-  test "the cell has no network, no capabilities, and a read-only root" do
-    assert_equal "none", options["network"]
-    assert_equal true, options["read-only"]
-    assert_equal "ALL", options["cap-drop"]
-    assert_equal "no-new-privileges:true", options["security-opt"]
-    assert_equal "10001:10001", options["user"]
+  # Derived rather than listed, so a destination added later is covered the day it lands. `beta` is the
+  # shared template the numbered betas render, and it raises without BETA_NUMBER rather than deploying.
+  DESTINATIONS = Dir[Rails.root.join("saas/config/deploy.*.yml")]
+    .map { File.basename(it, ".yml").delete_prefix("deploy.") } - %w[ beta ]
+
+  test "the cell has exactly one network, and it is none" do
+    each_destination do |command|
+      assert_equal 1, command.scan(/--network\b/).size, "Kamal supplies one of its own"
+      assert_match(/--network "?none"?/, command)
+    end
+  end
+
+  test "the cell has no capabilities and a read-only root" do
+    each_destination do |command|
+      assert_match "--read-only", command
+      assert_equal "ALL", flag(command, "--cap-drop")
+      assert_equal "no-new-privileges:true", flag(command, "--security-opt")
+      assert_equal "10001:10001", flag(command, "--user")
+      assert_equal "512", flag(command, "--pids-limit")
+    end
   end
 
   test "scratch is not executable" do
-    assert_match(/\bnoexec\b/, options["tmpfs"])
-    assert_match(/\bnosuid\b/, options["tmpfs"])
-    assert_match(/\bnodev\b/, options["tmpfs"])
+    each_destination do |command|
+      assert_match(/\bnoexec\b/, flag(command, "--tmpfs"))
+      assert_match(/\bnosuid\b/, flag(command, "--tmpfs"))
+      assert_match(/\bnodev\b/, flag(command, "--tmpfs"))
+    end
   end
 
   test "memory-swap matches memory, or the memory limit stops holding" do
-    assert_equal options["memory"], options["memory-swap"]
+    each_destination do |command|
+      assert_equal flag(command, "--memory"), flag(command, "--memory-swap")
+    end
   end
 
   test "concurrent workers filling scratch cannot outgrow the tmpfs" do
-    assert_operator megabytes(options["tmpfs"][/size=(\S+)/, 1]), :>=, concurrency * file_size_megabytes
+    each_destination do |command|
+      assert_operator megabytes(flag(command, "--tmpfs")[/size=(\S+)/, 1]), :>=, concurrency * file_size_megabytes
+    end
   end
 
   test "the cgroup stays above the cell's own rlimit, so a breach is a verdict rather than a SIGKILL" do
-    assert_operator megabytes(options["memory"]), :>, cell_memory_megabytes + megabytes(options["tmpfs"][/size=(\S+)/, 1])
+    each_destination do |command|
+      assert_operator megabytes(flag(command, "--memory")), :>,
+        cell_memory_megabytes + megabytes(flag(command, "--tmpfs")[/size=(\S+)/, 1])
+    end
   end
 
   test "the cell lands on the hosts that call it" do
@@ -51,16 +83,32 @@ class HotcellAccessoryTest < ActiveSupport::TestCase
   end
 
   private
+    def each_destination
+      DESTINATIONS.each do |destination|
+        yield run_command(destination)
+      rescue Minitest::Assertion => error
+        raise error.class, "#{destination}: #{error.message}"
+      end
+    end
+
+    def run_command(destination)
+      configuration = Kamal::Configuration.create_from(
+        config_file: Rails.root.join("saas/config/deploy.yml"), destination: destination, version: "test")
+
+      Kamal::Commands::Accessory.new(configuration, name: :hotcell).run.flatten.join(" ")
+    end
+
+    # Kamal quotes what it argumentizes, so a flag's value ends at the closing quote.
+    def flag(command, name)
+      command[/#{Regexp.escape(name)} "([^"]+)"/, 1]
+    end
+
     def deploy_configuration
       @deploy_configuration ||= YAML.load(ERB.new(Rails.root.join("saas/config/deploy.yml").read).result)
     end
 
     def accessory
       deploy_configuration.dig("accessories", "hotcell")
-    end
-
-    def options
-      accessory["options"]
     end
 
     def socket_volume
