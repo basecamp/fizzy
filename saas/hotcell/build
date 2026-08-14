@@ -61,15 +61,37 @@ docker build \
 
 # Bundler writes the token into every git remote it touches, in more places than one line of the
 # Dockerfile can be trusted to name. A credential that reaches the image is inside the blast radius, so
-# check the built bytes rather than the intent, and destroy the tag if it is there.
+# check the built bytes rather than the intent.
+#
+# As root, because the image runs as 10001 and /root is mode 700 — a scan that cannot read what it names is
+# not a scan. And grep alone, because a pipeline's status is its last command's: with `| head` the status
+# was always success, so neither a refused path nor a failed `docker run` could be told from a clean image.
 echo "Checking the image for the credential"
-if docker run --rm --entrypoint sh -e TOKEN="$GITHUB_TOKEN" "$tag" \
-     -c 'grep -rlF "$TOKEN" /hotcell /usr/local/bundle /root /home /tmp 2>/dev/null | head -5' | grep -q .; then
-  docker image rm --force "$tag" > /dev/null 2>&1 || true
-  echo "The GITHUB_TOKEN survived into $tag, so the tag has been removed." >&2
-  echo "Find it with: grep -rlF \"\$GITHUB_TOKEN\" / — then widen the rm in the Dockerfile." >&2
-  exit 1
-fi
+set +e
+leaked="$(docker run --rm --user 0 --entrypoint sh -e TOKEN="$GITHUB_TOKEN" "$tag" \
+  -c 'grep -rlF "$TOKEN" /hotcell /usr/local/bundle /root /home /tmp')"
+scan_status=$?
+set -e
+
+# Only a clean answer passes: publishing an image nobody could look at is the same mistake as publishing a
+# leaky one. The tag survives either way — deleting it is yours to do, and a leaky image is worth opening
+# before it goes.
+case $scan_status in
+  1) ;;  # grep found nothing
+  0)
+    echo "The GITHUB_TOKEN survived into $tag, in:" >&2
+    echo "$leaked" >&2
+    echo "Widen the rm in the Dockerfile. Do not publish this image; delete it with:" >&2
+    echo "  docker image rm --force $tag" >&2
+    exit 1
+    ;;
+  *)
+    echo "The credential scan did not run (exit $scan_status), so $tag is unverified." >&2
+    echo "Do not publish it until the scan passes. Delete it with:" >&2
+    echo "  docker image rm --force $tag" >&2
+    exit 1
+    ;;
+esac
 
 echo
 echo "Built $tag. It is local only — publish it with saas/hotcell/deploy."
