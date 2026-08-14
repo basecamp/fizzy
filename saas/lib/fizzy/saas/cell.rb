@@ -47,8 +47,15 @@ module Fizzy
         end
 
         # Unset in development, where the app and its cell run as one user and there is no group to share.
+        # Integer() rather than to_i, because a group name or a typo is 0 under to_i — root — and the
+        # client would chown every descriptor to it.
         def group
-          ENV["HOTCELL_GROUP"].presence&.to_i
+          value = ENV["HOTCELL_GROUP"].presence
+          return nil if value.nil?
+
+          Integer(value)
+        rescue ArgumentError
+          raise ArgumentError, "HOTCELL_GROUP must be a gid, not #{value.inspect}"
         end
 
         def enabled?
@@ -135,6 +142,10 @@ module Fizzy
           # The checks that cross the work socket. describe and metrics both answer on the control socket,
           # and a descriptor never crosses that.
           #
+          # Both verdicts raise rather than being reported beside an `ok`, because a caller reads the
+          # status and not the body: a cell that answers with the wrong bytes is not a healthy cell, and
+          # reporting `echoed: false` under `ok: true` is a 200 for a broken one.
+          #
           # The client verifies access modes, so the input must be "rb" and the output "wb";
           # Tempfile.create yields "r+", which it rejects.
           def round_trip(client, message)
@@ -147,8 +158,19 @@ module Fizzy
                 File.open(destination, "wb") { |output| client.perform_in_hotcell input, output }
               end
 
-              result.merge(echoed: File.read(destination) == message)
+              verified result, File.read(destination), message
             end
+          end
+
+          # Staged means the worker read a copy on its own scratch rather than the caller's file, so the
+          # round trip proved nothing about the descriptor it exists to prove.
+          def verified(result, returned, message)
+            raise CheckFailed, "the cell returned #{returned.bytesize} bytes, not the #{message.bytesize} " \
+                               "sent" unless returned == message
+            raise CheckFailed, "the input was staged onto the worker's scratch, so this did not cross a " \
+                               "descriptor" if result[:staged]
+
+            result.merge(echoed: true)
           end
 
           # The registered cell answers this rather than the module, because a cell registered with an

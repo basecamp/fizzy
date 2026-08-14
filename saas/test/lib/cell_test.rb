@@ -17,12 +17,29 @@ class Fizzy::Saas::CellTest < ActiveSupport::TestCase
     end
   end
 
-  test "the group reaches the client as a number" do
-    with_env "HOTCELL_GROUP" => "10001" do
-      Cell.register!
+  # A group name, or any typo, is `0` under to_i — root — and the client would chown every descriptor to
+  # it. Same reason HOTCELL_ACTIVE_STORAGE raises on a name it does not know: a mistake in a deploy file
+  # must not look like a working configuration.
+  test "a group that is not a number raises rather than meaning root" do
+    with_env "HOTCELL_GROUP" => "hotcell" do
+      error = assert_raises(ArgumentError) { Cell.register! }
 
-      assert_equal 10001, HotCell.group
+      assert_match "hotcell", error.message
     end
+  end
+
+  # The round trips report what they compared, and nothing above them looked at it — so a cell returning
+  # the wrong bytes answered /hotcellz with a 200.
+  test "a round trip that returns different bytes is not ok" do
+    assert_raises(Cell::CheckFailed) { Cell.send :round_trip, silent_client, "hotcell" }
+  end
+
+  # Staged means the worker read a copy on its own scratch rather than the caller's file, so the check
+  # proved nothing about the descriptor it was written to prove.
+  test "a round trip whose input was staged is not ok" do
+    error = assert_raises(Cell::CheckFailed) { Cell.send :round_trip, staging_client, "hotcell" }
+
+    assert_match "staged", error.message
   end
 
   test "the cell is registered even with no root, so callers get an answer rather than an UnregisteredCell" do
@@ -107,6 +124,23 @@ class Fizzy::Saas::CellTest < ActiveSupport::TestCase
   end
 
   private
+    # Answers without writing the output, so the bytes cannot match.
+    def silent_client
+      Class.new do
+        def self.perform_in_hotcell(input, output) = { bytes: 0, staged: false }
+      end
+    end
+
+    # Returns the right bytes, having read a copy on its own scratch rather than the caller's file.
+    def staging_client
+      Class.new do
+        def self.perform_in_hotcell(input, output)
+          output.write File.read(input.path)
+          { bytes: 7, staged: true }
+        end
+      end
+    end
+
     def configuration_for(groups)
       with_env "HOTCELL_ROOT" => "tmp/hotcell", "HOTCELL_ACTIVE_STORAGE" => groups do
         Cell.active_storage_configuration

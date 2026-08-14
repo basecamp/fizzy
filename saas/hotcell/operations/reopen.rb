@@ -8,9 +8,9 @@
 # never establishes that, which is why both exist: a cell missing the shared group answers echo perfectly
 # and fails this with EACCES, and every operation that hands a tool a filename fails with it.
 #
-# `staged` is always false here, because this reads fd_path and never path. It is asserted as a canary
-# rather than as the proof: if it ever comes back true, someone has rewritten this to stage onto scratch,
-# the reopen is reading a copy the worker owns, and the check has stopped testing the group.
+# `staged` is always false here, because this reads fd_path and never path. The caller fails the check on
+# a true, because that would mean this had been rewritten to stage onto scratch — reading a copy the worker
+# owns, which tests nothing about the group.
 module Examples
   class Reopen < HotCell::Operation
     operation "example.reopen"

@@ -69,7 +69,7 @@ bin/dev            # the cell boots and /hotcellz answers; conversions still run
 bin/dev --hotcell  # attachment processing goes to the cell
 ```
 
-`/hotcellz` says whether the cell is reachable. It reports `describe`, `metrics`, and an `example.echo` round trip — only the last of those crosses the work socket, which is the socket that carries real files. It answers 200 when all three pass and 503 when any fails, and it is unauthenticated so a monitor can poll it.
+`/hotcellz` says whether the cell is reachable. It reports `describe`, `metrics`, and two round trips — `example.echo` and `example.reopen` — of which only the last two cross the work socket, the socket that carries real files. The two prove different halves of it: echo reads its descriptor directly, while reopen re-opens it by name, which is what every operation that hands a tool a filename does. A cell whose group is wrong answers echo perfectly and fails reopen, so echo alone will tell you a broken cell is healthy. It answers 200 when all four pass and 503 when any fails, and it is unauthenticated so a monitor can poll it.
 
 Because the dev cell shells out to your laptop rather than to the image, every tool in `saas/hotcell/Dockerfile` needs a host equivalent. `bin/setup` installs them; if you add a tool to the image, add it to `.mise.toml` and the `Brewfile` too, or that operation will fail in development only.
 
@@ -79,6 +79,7 @@ Because the dev cell shells out to your laptop rather than to the image, every t
 | --- | --- |
 | `HOTCELL_ROOT` | Registers the cell. Metrics, `describe`, the healthcheck and `/hotcellz` answer, and every conversion still runs in the app. |
 | `HOTCELL_ACTIVE_STORAGE` | Moves the work. A comma-separated list of `images`, `pdfs`, `media`, or `all`. |
+| `HOTCELL_GROUP` | The gid the app and the cell share, so the cell can open a file the app hands it by name. Must match the `group-add` on the app's roles and the cell's own gid. Unset in development, where both sides run as one user. |
 
 They are separate because a cell being reachable and a cell taking traffic are different questions, and the second is a list because the rollout moves operations in groups. `images` carries the image analyzer along with the transformer whether or not you ask: Rails' image analyzers test `variant_processor == :vips`, so pointing the transformer at a class makes them decline and blobs get marked analyzed with no dimensions.
 
