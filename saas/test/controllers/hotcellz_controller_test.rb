@@ -9,7 +9,15 @@ class HotcellzControllerTest < ActionDispatch::IntegrationTest
     get HOTCELLZ
 
     assert_equal "application/json", response.media_type
-    assert_equal %w[ at root groups describe metrics echo ], response.parsed_body.keys
+    assert_equal %w[ at host root groups describe metrics echo ], response.parsed_body.keys
+  end
+
+  # A poll lands on one of the web hosts and the answer is about that host's cell, so an answer that does
+  # not say which one cannot be acted on.
+  test "names the host that answered" do
+    get HOTCELLZ
+
+    assert_equal Socket.gethostname, response.parsed_body["host"]
   end
 
   # Spelled the way the cell spells `at` in its own log lines, so a reading lines up against them.
