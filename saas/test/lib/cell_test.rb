@@ -7,6 +7,24 @@ class Fizzy::Saas::CellTest < ActiveSupport::TestCase
   # or every later test in whatever order minitest chose runs without a registered cell.
   teardown { Cell.register! }
 
+  # Development runs the app and its cell as one user, so there is no group to share and chowning into one
+  # the app is not in would be EPERM on every conversion.
+  test "no group is set when the environment names none" do
+    with_env "HOTCELL_GROUP" => nil do
+      Cell.register!
+
+      assert_nil HotCell.group
+    end
+  end
+
+  test "the group reaches the client as a number" do
+    with_env "HOTCELL_GROUP" => "10001" do
+      Cell.register!
+
+      assert_equal 10001, HotCell.group
+    end
+  end
+
   test "the cell is registered even with no root, so callers get an answer rather than an UnregisteredCell" do
     with_env "HOTCELL_ROOT" => nil do
       Cell.register!

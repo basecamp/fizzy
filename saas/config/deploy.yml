@@ -5,8 +5,18 @@ hooks_path: <%= File.join(Gem::Specification.find_by_name("fizzy-saas").gem_dir,
 secrets_path: <%= File.join(Gem::Specification.find_by_name("fizzy-saas").gem_dir, ".kamal/secrets") %>
 
 servers:
+  # group-add on both roles, because an operation that hands a tool a filename re-opens the caller's
+  # descriptor as /dev/fd/N. That is a fresh open, rechecked against the cell's uid, so a mode 0600
+  # tempfile the app owns is EACCES — which is every Active Storage operation this cell carries except the
+  # analyzers. The app owns the files, so it must be in the group to put them in it: without this the
+  # failure moves rather than goes, from EACCES in the cell to EPERM in the app. Must match HOTCELL_GROUP.
+  web:
+    options:
+      group-add: 10001
   jobs:
     cmd: bin/jobs
+    options:
+      group-add: 10001
 
 volumes:
   - fizzy:/rails/storage
@@ -19,9 +29,15 @@ volumes:
 
 env:
   clear:
-    # Registers the cell: metrics, describe, the healthcheck and /hotcellz answer, and every conversion
-    # still runs in the app.
+    # HOTCELL_ROOT registers the cell, so metrics, describe, the healthcheck and /hotcellz answer.
+    # HOTCELL_GROUP is the gid both sides hold, and it must match the group-add above; the client puts
+    # each descriptor in it and narrows the mode, so a cell may read an input and write an output and
+    # neither the reverse nor wider. It is read from the environment rather than written in the source
+    # because development runs the app and its cell as one user, where it must stay unset.
+    # HOTCELL_ACTIVE_STORAGE is what moves work, one group at a time: images, pdfs, media, or all.
+    # Whatever is not listed still runs in the app, and shrinking this list is the rollback.
     HOTCELL_ROOT: /run/hotcell
+    HOTCELL_GROUP: 10001
     HOTCELL_ACTIVE_STORAGE: pdfs
 
 proxy:

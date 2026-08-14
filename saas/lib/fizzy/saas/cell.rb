@@ -46,6 +46,11 @@ module Fizzy
           ENV["HOTCELL_ROOT"].presence
         end
 
+        # Unset in development, where the app and its cell run as one user and there is no group to share.
+        def group
+          ENV["HOTCELL_GROUP"].presence&.to_i
+        end
+
         def enabled?
           root.present?
         end
@@ -54,6 +59,7 @@ module Fizzy
         # rather than an UnregisteredCell, and the metrics collector has one shape to iterate.
         def register!
           ::HotCell.root = root
+          ::HotCell.group = group
           ::HotCell.register NAME, timeout: TIMEOUT,
             permanent: UnprocessableAttachment, transient: ProcessingUnavailable
         end
