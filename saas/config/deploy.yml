@@ -20,9 +20,9 @@ volumes:
 env:
   clear:
     # Registers the cell: metrics, describe, the healthcheck and /hotcellz answer, and every conversion
-    # still runs in the app. HOTCELL_ACTIVE_STORAGE is what moves the work, and it is deliberately not
-    # here yet.
+    # still runs in the app.
     HOTCELL_ROOT: /run/hotcell
+    HOTCELL_ACTIVE_STORAGE: pdfs
 
 proxy:
   ssl: true
