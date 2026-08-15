@@ -56,11 +56,9 @@ export default class extends Controller {
   }
 
   selectCurrentOrReset(event) {
-    if (this.currentItem) {
-      this.#setCurrentFrom(this.currentItem)
-    } else {
-      this.reset()
-    }
+    const fallbackIndex = this.reverseOrderValue ? -1 : 0;
+    const item = this.currentItem || this.#visibleItems.at(fallbackIndex);
+    this.#setCurrentFrom(item, false);
   }
 
   selectFirst() {
@@ -91,10 +89,9 @@ export default class extends Controller {
 
     await nextFrame()
 
-    if (this.autoScrollValue) { this.currentItem.scrollIntoView({ block: "nearest", inline: "nearest" }) }
     if (this.hasNestedNavigationValue) { this.#activateNestedNavigableList() }
 
-    if (!skipFocus && this.focusOnSelectionValue) { this.currentItem.focus({ preventScroll: !this.autoScrollValue }) }
+    if (!skipFocus && this.focusOnSelectionValue) { this.currentItem.focus({ preventScroll: true }) }
   }
 
   isSelected(item) {
@@ -103,11 +100,12 @@ export default class extends Controller {
 
   // Private
 
-  async #setCurrentFrom(element) {
+  async #setCurrentFrom(element, autoScroll = this.autoScrollValue) {
     const selectedItem = this.#visibleItems.find(item => item.contains(element))
 
     if (selectedItem) {
       await this.selectItem(selectedItem)
+      if (autoScroll) { selectedItem.scrollIntoView({ block: "nearest", inline: "nearest" }) }
     }
   }
 
