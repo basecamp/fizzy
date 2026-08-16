@@ -1,2 +1,2 @@
 web: bin/rails server -b 0.0.0.0 -p ${PORT:-3006}
-cell: env -u RUBYOPT -u BUNDLE_BIN_PATH BUNDLE_GEMFILE=$PWD/saas/hotcell/Gemfile HOTCELL_DIR=$PWD/tmp/hotcell/active_storage HOTCELL_CONFIG=$PWD/saas/hotcell/config.rb HOTCELL_OPERATIONS=$PWD/saas/hotcell/operations bundle exec hotcell
+cell: env -u RUBYOPT -u RUBYLIB -u BUNDLER_SETUP -u BUNDLER_VERSION -u BUNDLE_BIN_PATH -u BUNDLE_LOCKFILE BUNDLE_GEMFILE=$PWD/saas/hotcell/Gemfile HOTCELL_DIR=$PWD/tmp/hotcell/active_storage HOTCELL_CONFIG=$PWD/saas/hotcell/config.rb HOTCELL_OPERATIONS=$PWD/saas/hotcell/operations bundle exec hotcell
