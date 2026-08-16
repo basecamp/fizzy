@@ -116,13 +116,17 @@ module Fizzy
         # through the load balancer lands on whichever host it lands on, and an answer that does not say
         # which one cannot be acted on. Kamal boots a container with the deploy host and a random suffix as
         # its hostname, so this names the machine and the container on it.
-        def diagnostics
+        # Control socket only by default, which the supervisor answers inline with no fork and no queue.
+        # `work: true` is opt-in because it puts a request on the cell's queue and forks a worker for each
+        # round trip: the caller that wants to spend that has to say so.
+        def diagnostics(work: false)
+          checks = { describe: reporting { cell.describe or raise CheckFailed, "the cell did not answer; see metrics" },
+                     metrics: reporting { answered cell.metrics } }
+
+          checks.merge! echo: reporting { echo }, reopen: reporting { reopen } if work
+
           { at: Time.now.utc.iso8601(3), host: Socket.gethostname,
-            root: root, groups: processing_attachments? ? groups : [],
-            describe: reporting { cell.describe or raise CheckFailed, "the cell did not answer; see metrics" },
-            metrics: reporting { answered cell.metrics },
-            echo: reporting { echo },
-            reopen: reporting { reopen } }
+            root: root, groups: processing_attachments? ? groups : [] }.merge(checks)
         end
 
         # A fixed payload through example.echo, which reads the descriptor directly.

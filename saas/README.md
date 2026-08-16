@@ -69,7 +69,11 @@ bin/dev            # the cell boots and /hotcellz answers; conversions still run
 bin/dev --hotcell  # attachment processing goes to the cell
 ```
 
-`/hotcellz` says whether the cell is reachable. It reports `describe`, `metrics`, and two round trips — `example.echo` and `example.reopen` — of which only the last two cross the work socket, the socket that carries real files. The two prove different halves of it: echo reads its descriptor directly, while reopen re-opens it by name, which is what every operation that hands a tool a filename does. A cell whose group is wrong answers echo perfectly and fails reopen, so echo alone will tell you a broken cell is healthy. It answers 200 when all four pass and 503 when any fails, and it is unauthenticated so a monitor can poll it.
+`/hotcellz` says whether the cell is reachable. It asks the control socket only — `describe` and `metrics`, which the supervisor answers inline with no fork — and replies `OK` or `FAIL` with a 200 or a 503. It is unauthenticated so a monitor can poll it, and it says nothing else, because a stranger has no business knowing the cell's inventory or how loaded it is.
+
+`/hotcellz/test` is staff-only and returns the full diagnosis as JSON, including two round trips over the work socket, the socket that carries real files. The two prove different halves of it: `example.echo` reads its descriptor directly, while `example.reopen` re-opens it by name, which is what every operation that hands a tool a filename does. A cell whose group is wrong answers echo perfectly and fails reopen — so echo alone will tell you a broken cell is healthy. Each round trip forks a worker, which is why this is the half behind authentication.
+
+**A monitor therefore cannot see a broken work socket.** Only the round trips can, and they are staff-only. That is deliberate: it is a configuration error rather than something that degrades on its own, so run `/hotcellz/test` — or the `Cell.diagnostics(work: true)` runner — by hand whenever the configuration changes.
 
 Because the dev cell shells out to your laptop rather than to the image, every tool in `saas/hotcell/Dockerfile` needs a host equivalent. `bin/setup` installs them; if you add a tool to the image, add it to `.mise.toml` and the `Brewfile` too, or that operation will fail in development only.
 

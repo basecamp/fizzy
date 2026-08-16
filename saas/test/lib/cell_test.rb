@@ -28,6 +28,19 @@ class Fizzy::Saas::CellTest < ActiveSupport::TestCase
     end
   end
 
+  # Anything that reaches the work socket forks a worker and takes a queue slot, so it is opt-in: a caller
+  # that only wants to know whether the cell is there must not be able to spend one by accident.
+  test "diagnostics puts nothing on the cell's queue unless asked" do
+    Cell.stubs(:echo).raises("echo must not run here")
+    Cell.stubs(:reopen).raises("reopen must not run here")
+
+    assert_equal %i[ at host root groups describe metrics ], Cell.diagnostics.keys
+  end
+
+  test "work asks for the round trips as well" do
+    assert_equal %i[ at host root groups describe metrics echo reopen ], Cell.diagnostics(work: true).keys
+  end
+
   # The round trips report what they compared, and nothing above them looked at it — so a cell returning
   # the wrong bytes answered /hotcellz with a 200.
   test "a round trip that returns different bytes is not ok" do
