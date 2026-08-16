@@ -8,7 +8,11 @@ class Yabeda::HotCellTest < ActiveSupport::TestCase
   COUNTERS = { uptime_s: 41, running: 2, queued: 3, queue_high_water: 7, cancelled: 1,
                requests: {}, killed_by: { memory: 5, deadline: 2 } }
 
-  setup { Yabeda::TestAdapter.instance.reset! }
+  setup do
+    Yabeda::TestAdapter.instance.reset!
+    @log = StringIO.new
+    Rails.logger.broadcast_to ActiveSupport::Logger.new(@log)
+  end
 
   teardown { Fizzy::Saas::Cell.register! }
 
@@ -72,6 +76,27 @@ class Yabeda::HotCellTest < ActiveSupport::TestCase
     assert_equal 1, counter(:requests, code: "capacity")
   end
 
+  # The histogram says how long transforms take on a host; it cannot say what one upload paid. That is
+  # what a request's own log line is for, and it must carry both the cell's time and the caller's, because
+  # their difference is the queue and the socket — the number that says whether the cell or the plumbing
+  # was slow.
+  test "logs what each call cost" do
+    Yabeda::HotCell.record_perform perform_event(perform_ms: 250, duration_ms: 310, bytes_in: 4096, bytes_out: 512)
+
+    assert_equal "active_storage.transformers.image.vips", logged["operation"]
+    assert_equal "ok", logged["code"]
+    assert_equal 250, logged["perform_ms"]
+    assert_equal 310, logged["duration_ms"]
+    assert_equal 4096, logged["bytes_in"]
+    assert_equal 512, logged["bytes_out"]
+  end
+
+  test "logs a failure under its own code" do
+    Yabeda::HotCell.record_perform perform_event(code: "capacity")
+
+    assert_equal "capacity", logged["code"]
+  end
+
   test "reports a permanent failure as information about one file" do
     Rails.error.expects(:report).with { |error, options| error.is_a?(Fizzy::Saas::Cell::UnprocessableAttachment) &&
       options[:severity] == :info }
@@ -111,10 +136,17 @@ class Yabeda::HotCellTest < ActiveSupport::TestCase
       cell.stubs(:metrics).returns(stub(ok?: true, result: counters))
     end
 
-    def perform_event(code: nil, perform_ms: 0, cause: nil)
-      ActiveSupport::Notifications::Event.new("perform.hot_cell", nil, nil, nil,
+    # `duration_ms` is what the caller waited, which the event measures itself; the payload only carries
+    # what the cell reported. Faking it takes the same start/finish the real event has.
+    def perform_event(code: nil, perform_ms: 0, cause: nil, duration_ms: 0, bytes_in: nil, bytes_out: nil)
+      start = Time.now
+      ActiveSupport::Notifications::Event.new("perform.hot_cell", start, start + duration_ms / 1000.0, nil,
         { cell: Fizzy::Saas::Cell::NAME, operation: "active_storage.transformers.image.vips",
-          code: code, cause: cause, perform_ms: perform_ms })
+          code: code, cause: cause, perform_ms: perform_ms, bytes_in: bytes_in, bytes_out: bytes_out })
+    end
+
+    def logged
+      JSON.parse @log.string[/^hotcell (\{.*\})$/, 1]
     end
 
     def gauge(metric, **tags)

@@ -67,7 +67,27 @@ module Yabeda
 
       Yabeda.hotcell.requests.increment(labels.merge(code: code || "ok"))
       Yabeda.hotcell.perform_seconds.measure(labels, (event.payload[:perform_ms] || 0) / 1000.0)
+      log_perform event, labels, code
       report_failure event, labels, code if code
+    end
+
+    # One line per call, so an upload that ran a conversion inline shows what it paid. The histogram cannot
+    # say that: it knows how long transforms take on a host, not which request waited for one. Two clocks
+    # on purpose — `perform_ms` is what the cell measured inside the worker, `duration_ms` is what this
+    # process waited — because their difference is the queue and the socket, which is the number that says
+    # whether the cell or the plumbing was slow.
+    #
+    # `Rails.logger.info` rather than `logger.struct`, because `struct` is a method on the per-request
+    # proxy a controller or job holds, and a notification subscriber has neither. Structured logging still
+    # gathers every line written during a request onto that request's record, so this lands beside the
+    # request's own duration.
+    private_class_method def self.log_perform(event, labels, code)
+      ::Rails.logger.info "hotcell " + labels.merge(
+        code: code || "ok",
+        perform_ms: event.payload[:perform_ms],
+        duration_ms: event.duration.round(1),
+        bytes_in: event.payload[:bytes_in],
+        bytes_out: event.payload[:bytes_out]).to_json
     end
 
     # A permanent code is a verdict about one file, which is information rather than an incident.
