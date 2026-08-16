@@ -70,7 +70,7 @@ accessories:
     # Immutable, and never `latest`: a reboot pulls whatever the tag names at that moment, so a moving tag
     # would make what a host runs depend on when it last rebooted. saas/hotcell/deploy prints this line.
     # Until that has been run the pull fails loudly, which is the right way for an unbuilt image to fail.
-    image: registry.37signals.com/basecamp/fizzy-hotcell:3a2b0b61
+    image: registry.37signals.com/basecamp/fizzy-hotcell:fdc4ad6a
     roles: [ web, jobs ]  # a descriptor cannot cross machines, so a cell lives on its caller's host
     # An accessory's own key, not one of the options below. Kamal always emits a --network of its own,
     # defaulting to `kamal`, so the same setting under `options:` is a second --network flag and Docker
