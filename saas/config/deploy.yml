@@ -38,7 +38,7 @@ env:
     # Whatever is not listed still runs in the app, and shrinking this list is the rollback.
     HOTCELL_ROOT: /run/hotcell
     HOTCELL_GROUP: 10001
-    HOTCELL_ACTIVE_STORAGE: pdfs
+    HOTCELL_ACTIVE_STORAGE: images,pdfs
 
 proxy:
   ssl: true
