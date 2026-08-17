@@ -71,7 +71,7 @@ accessories:
     # would make what a host runs depend on when it last rebooted. saas/hotcell/bin/build writes this line;
     # saas/hotcell/bin/push publishes the tag. Until push has run the pull fails loudly, which is the right
     # way for an unbuilt image to fail.
-    image: registry.37signals.com/basecamp/fizzy-hotcell:f3bf1446ad52
+    image: registry.37signals.com/basecamp/fizzy-hotcell:169ab8e5aef3
     roles: [ web, jobs ]  # a descriptor cannot cross machines, so a cell lives on its caller's host
     # An accessory's own key, not one of the options below. Kamal always emits a --network of its own,
     # defaulting to `kamal`, so the same setting under `options:` is a second --network flag and Docker
