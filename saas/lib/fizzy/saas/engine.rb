@@ -4,6 +4,7 @@ require_relative "signup"
 require_relative "authorization"
 require_relative "gvl_instrumentation"
 require_relative "cell"
+require_relative "unprocessable_attachments"
 require_relative "../../rails_ext/active_record_tasks_database_tasks.rb"
 
 module Fizzy
@@ -53,6 +54,15 @@ module Fizzy
         Cell.register!
 
         app.config.active_storage.merge! Cell.active_storage_configuration
+      end
+
+      # to_prepare rather than after_initialize, for the same reason the client gem's retry hook is: the
+      # job classes live in a reloadable engine and are redefined on every code reload, and a discard_on
+      # applied once at boot would silently vanish after the first file save in development.
+      initializer "fizzy_saas.unprocessable_attachments" do |app|
+        app.config.to_prepare do
+          UnprocessableAttachments.install!
+        end
       end
 
       # Warns when a client wants an operation the cell does not carry, and when the timeout is too tight
