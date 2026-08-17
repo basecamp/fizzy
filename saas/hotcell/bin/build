@@ -2,11 +2,11 @@
 # Builds the cell's image, at the hotcell revision the application is running.
 #
 # The application's lockfile is the source of truth. This makes the cell's lockfile name the same revision
-# — writing it if it differs — and then builds. A client and server one revision apart is a `protocol`
-# failure on every request, so the two are never allowed to be set separately: update the gem in the app,
-# run this, commit the lot as one change.
+# — writing it if it differs — builds, and pins the accessory to what it built. A client and server one
+# revision apart is a `protocol` failure on every request, so neither lockfile nor the pin is ever set on
+# its own: update the gem in the app, run this, commit the lot as one change.
 #
-# It touches no registry: publishing is saas/hotcell/bin/deploy, so this can run on every laptop from
+# It touches no registry: publishing is saas/hotcell/bin/push, so this can run on every laptop from
 # bin/setup. Tags are immutable and there is no `latest`, because a deploy does not update an accessory —
 # `kamal accessory reboot` pulls whatever the tag names at that moment, and a moving tag would make what a
 # host runs depend on when it last rebooted.
@@ -26,8 +26,9 @@ for arg in "$@"; do
       cat <<USAGE
 Usage: saas/hotcell/bin/build [--platform=linux/amd64]
 
-Locks saas/hotcell/Gemfile.lock to the hotcell revision in Gemfile.saas.lock, builds the cell image, and
-tags it with a hash of what went into it. Pushing is a separate step: saas/hotcell/bin/deploy.
+Locks saas/hotcell/Gemfile.lock to the hotcell revision in Gemfile.saas.lock, builds the cell image, tags
+it with a hash of what went into it, and pins saas/config/deploy.yml to that tag. Pushing is a separate
+step: saas/hotcell/bin/push.
 
 To move the cell to a new hotcell revision, update the gem in the application first:
 
@@ -118,13 +119,27 @@ case $scan_status in
     ;;
 esac
 
-pinned="$(grep -o 'fizzy-hotcell:[a-f0-9]*' "$repo_root/saas/config/deploy.yml" | head -1 | cut -d: -f2)"
+# Written here rather than in push, because the tag is a hash of the image's contents: the commit that
+# changes them is the commit that has to carry the new pin. Left to push, the pin moves after that commit
+# is already made, which is how a tree that builds one image and deploys another gets committed.
+#
+# Verified rather than assumed. A pin this cannot find is a silent no-op that reports success, which is the
+# one failure a script whose whole job is writing that line must not have.
+# `|| true` because a file naming no image at all is what the check below reports: under pipefail and
+# set -e, grep finding nothing would kill the script here instead, with nothing printed.
+pinned="$(grep -o "$HOTCELL_IMAGE_REPOSITORY:[a-f0-9]*" "$repo_root/saas/config/deploy.yml" | head -1 | cut -d: -f2 || true)"
 
 echo
-echo "Built $tag. It is local only — publish it with saas/hotcell/bin/deploy."
+echo "Built $tag. It is local only — publish it with saas/hotcell/bin/push."
 if [ "$pinned" != "${tag##*:}" ]; then
-  echo
-  echo "saas/config/deploy.yml pins fizzy-hotcell:$pinned. Point it at this build:"
-  echo
-  echo "    image: $tag"
+  sed -i "s|image: $HOTCELL_IMAGE_REPOSITORY:[a-f0-9]*|image: $tag|" "$repo_root/saas/config/deploy.yml"
+
+  if ! grep -q "image: $tag\$" "$repo_root/saas/config/deploy.yml"; then
+    echo "Could not pin saas/config/deploy.yml: it names no $HOTCELL_IMAGE_REPOSITORY image to replace." >&2
+    echo "Set it by hand:" >&2
+    echo "    image: $tag" >&2
+    exit 1
+  fi
+
+  echo "Pinned saas/config/deploy.yml to ${tag##*:} (was ${pinned:-none})"
 fi

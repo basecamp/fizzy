@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Publishes an already-built cell image, and prints the line to paste into saas/config/deploy.yml.
+# Publishes an already-built cell image. The pin in saas/config/deploy.yml is saas/hotcell/bin/build's job,
+# because the tag is a hash of the image's contents and belongs in the commit that changes them.
 #
 # Pushing is the irreversible half, which is why it is not in saas/hotcell/bin/build. Rebooting the accessory
 # stays explicit and is not done here:
@@ -17,10 +18,10 @@ for arg in "$@"; do
   case $arg in
     --help|-h)
       cat <<USAGE
-Usage: saas/hotcell/bin/deploy
+Usage: saas/hotcell/bin/push
 
-Pushes the image saas/hotcell/bin/build made to $HOTCELL_IMAGE_REPOSITORY, then prints the accessory
-image line for saas/config/deploy.yml. Build it first if it is not there.
+Pushes the image saas/hotcell/bin/build made to $HOTCELL_IMAGE_REPOSITORY. Build it first if it is not
+there; build is also what pins saas/config/deploy.yml to the tag.
 USAGE
       exit 0
       ;;
@@ -48,15 +49,9 @@ docker push "$tag"
 
 cat <<NEXT
 
-Published $tag.
+Published $tag, which saas/config/deploy.yml already pins — saas/hotcell/bin/build wrote it.
 
-Point the accessory at it in saas/config/deploy.yml:
-
-    accessories:
-      hotcell:
-        image: $tag
-
-Then boot it, which a deploy does not do:
+Boot it, which a deploy does not do:
 
     bin/kamal accessory reboot hotcell -d <destination>
 NEXT
