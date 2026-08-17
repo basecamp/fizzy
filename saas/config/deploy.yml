@@ -34,11 +34,11 @@ env:
     # each descriptor in it and narrows the mode, so a cell may read an input and write an output and
     # neither the reverse nor wider. It is read from the environment rather than written in the source
     # because development runs the app and its cell as one user, where it must stay unset.
-    # HOTCELL_ACTIVE_STORAGE is what moves work, one group at a time: images, pdfs, media, or all.
-    # Whatever is not listed still runs in the app, and shrinking this list is the rollback.
+    # HOTCELL_ACTIVE_STORAGE is what moves work, one group at a time: images, pdfs, media, or all. It
+    # lives in each destination's own file rather than here, because how far a destination has rolled out
+    # is a per-destination decision and a list here advances all of them at once.
     HOTCELL_ROOT: /run/hotcell
     HOTCELL_GROUP: 10001
-    HOTCELL_ACTIVE_STORAGE: images,pdfs
 
 proxy:
   ssl: true

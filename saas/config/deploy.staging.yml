@@ -28,6 +28,7 @@ ssh:
 
 env:
   clear:
+    HOTCELL_ACTIVE_STORAGE: images,pdfs,media
     RAILS_ENV: staging
     RAILS_LOG_LEVEL: fatal # suppress unstructured log lines
     MYSQL_DATABASE_HOST: fizzy-staging-mysql-primary
