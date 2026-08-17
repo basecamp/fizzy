@@ -1,0 +1,22 @@
+lib/rails_ext/active_storage_authorization.rb
+  s_f1b1ddc3227a77::t_11728d51025edf 44-51,53
+test/integration/pagination_blob_html_xss_test.rb
+  s_f1b1ddc3227a77::t_03c2d47ba1ee34 92,97
+  s_f1b1ddc3227a77::t_b1a336ca064148 54-71
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "a99d0f1f73390e2b26d7fefb7378ad98b455ecb4",
+  "prompts": {},
+  "sessions": {
+    "s_f1b1ddc3227a77": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "aa38ec3e-f66b-4bdc-be25-38b380ef0254",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
