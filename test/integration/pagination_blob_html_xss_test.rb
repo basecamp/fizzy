@@ -51,6 +51,24 @@ class PaginationBlobHtmlXssTest < ActionDispatch::IntegrationTest
     assert_match %r{attachment}, response.headers["Content-Disposition"].to_s
   end
 
+  # Link 4, malformed variant: a declared type such as "text/html,foo" is not a
+  # canonical MIME type, so splitting only on ";" leaves it intact — it matches
+  # neither our dangerous list nor Active Storage's exact binary list — yet a
+  # client can still treat its "text/html" prefix as HTML. The essence must
+  # normalize down to text/html and be forced to binary.
+  test "unattached blob with a malformed text/html type is served as octet-stream" do
+    blob = create_unattached_html_blob(content_type: "text/html,foo")
+
+    sign_in_as :david
+
+    get rails_storage_proxy_path(blob)
+
+    assert_response :success
+    assert_equal "application/octet-stream", response.media_type,
+      "a malformed text/html type must not be served as executable html"
+    assert_match %r{attachment}, response.headers["Content-Disposition"].to_s
+  end
+
   # Documents the downstream sink (link 5): the token-mint endpoint is reachable
   # from any authenticated identity and returns a raw identity-scoped write
   # token. Not changed by this fix — the chain is broken upstream — but pinned so
@@ -71,12 +89,12 @@ class PaginationBlobHtmlXssTest < ActionDispatch::IntegrationTest
     # Mirrors Fizzy's S3 direct-upload path: create_before_direct_upload! stores
     # the client-supplied content type verbatim (no re-identification), then the
     # bytes are written straight to the service. The blob is left UNATTACHED.
-    def create_unattached_html_blob
+    def create_unattached_html_blob(content_type: "text/html;charset=utf-8")
       html = ATTACKER_HTML
       blob = Current.with(account: accounts("37s"), session: sessions(:david)) do
         ActiveStorage::Blob.create_before_direct_upload! \
           filename: "video-exfil.html",
-          content_type: "text/html;charset=utf-8",
+          content_type: content_type,
           byte_size: html.bytesize,
           checksum: OpenSSL::Digest::MD5.base64digest(html)
       end

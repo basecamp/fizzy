@@ -41,8 +41,16 @@ ActiveSupport.on_load :active_storage_blob do
       ActiveStorage::DANGEROUS_INLINE_MEDIA_TYPES.include?(media_type_for_serving)
     end
 
+    # Extract the media-type essence for comparison against the dangerous list.
+    # A canonical essence is "type/subtype" with no whitespace, so anything from
+    # the first parameter delimiter (";"), stray comma, or whitespace onward is
+    # dropped. Splitting only on ";" would leave a malformed declared type such
+    # as "text/html,foo" intact — it matches neither this list nor Active
+    # Storage's exact binary list, yet a client (Turbo's frame check, browser
+    # sniffing) can still treat it as HTML — so it must normalize down to
+    # "text/html" here and be forced to binary (HackerOne #3943339).
     def media_type_for_serving
-      content_type.to_s.split(";").first.to_s.strip.downcase
+      content_type.to_s.strip[/\A[^;,\s]*/].downcase
     end
 end
 
