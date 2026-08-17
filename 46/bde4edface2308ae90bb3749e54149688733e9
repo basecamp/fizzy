@@ -1,0 +1,21 @@
+Gemfile
+  s_96bd0e97dc55d2::t_7850e873c9a318 3-6
+Gemfile.lock
+  s_96bd0e97dc55d2::t_284efd2b8b8c97 768-770
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "46bde4edface2308ae90bb3749e54149688733e9",
+  "prompts": {},
+  "sessions": {
+    "s_96bd0e97dc55d2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9bd7646f-535f-4680-9544-e70e7f0e6769",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
