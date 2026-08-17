@@ -1,0 +1,29 @@
+app/helpers/pagination_helper.rb
+  s_d826deb7de3802::t_f2322e96ac5812 76-79
+  s_d826deb7de3802::t_00a58d8b1565b4 2-12
+  s_d826deb7de3802::t_a3c1f42a7ac854 25
+test/integration/pagination_blob_html_xss_test.rb
+  s_d826deb7de3802::t_5641b6cc864c8a 1-86
+test/helpers/pagination_helper_test.rb
+  s_d826deb7de3802::t_d89c185b94c0ec 13-14
+  s_d826deb7de3802::t_d0414eb4781325 1-12,15-46,67,75-84
+  s_d826deb7de3802::t_386dc691c42f28 47-66,68-74
+lib/rails_ext/active_storage_authorization.rb
+  s_d826deb7de3802::t_6eeade0df06448 1-9,12-18,24-46
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "ab976a32f65b247b0d361d0d13ca1e166ac4d529",
+  "prompts": {},
+  "sessions": {
+    "s_d826deb7de3802": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6c9170d8-717f-4f71-90ea-61059c53309c",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
