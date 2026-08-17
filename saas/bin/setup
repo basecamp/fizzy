@@ -124,12 +124,12 @@ step "Installing the cell's RubyGems" \
 # a Dockerfile that only ever builds in CI or at deploy time is one that breaks at the worst moment. A
 # failed build stops setup on purpose — but not being able to attempt one is not a failure, so probe for
 # the script before docker, and skip rather than abort when either is missing.
-if [ ! -x "$app_root/saas/hotcell/build" ]; then
-  echo "▸ Skipping the cell's image (saas/hotcell/build is not here)"
+if [ ! -x "$app_root/saas/hotcell/bin/build" ]; then
+  echo "▸ Skipping the cell's image (saas/hotcell/bin/build is not here)"
   echo
 elif ! docker info &> /dev/null; then
   echo "▸ Skipping the cell's image (docker is not running)"
   echo
 else
-  step "Building the cell's image" "$app_root/saas/hotcell/build"
+  step "Building the cell's image" "$app_root/saas/hotcell/bin/build"
 fi

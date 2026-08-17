@@ -27,7 +27,7 @@ COPY Gemfile Gemfile.lock ./
 # layer would still be there to read.
 #
 # The mirror is under $BUNDLE_PATH/ruby/<abi>/cache/bundler/git, not $BUNDLE_PATH/cache. Removing the
-# latter removes nothing and leaves `url = https://<token>@github.com/...` in the image. saas/hotcell/build
+# latter removes nothing and leaves `url = https://<token>@github.com/...` in the image. saas/hotcell/bin/build
 # scans the result for the token rather than trusting this line.
 RUN --mount=type=secret,id=GITHUB_TOKEN \
     BUNDLE_GITHUB__COM="$(cat /run/secrets/GITHUB_TOKEN):x-oauth-basic" bundle install && \

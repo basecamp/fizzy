@@ -6,16 +6,17 @@
 # failure on every request, so the two are never allowed to be set separately: update the gem in the app,
 # run this, commit the lot as one change.
 #
-# It touches no registry: publishing is saas/hotcell/deploy, so this can run on every laptop from
+# It touches no registry: publishing is saas/hotcell/bin/deploy, so this can run on every laptop from
 # bin/setup. Tags are immutable and there is no `latest`, because a deploy does not update an accessory —
 # `kamal accessory reboot` pulls whatever the tag names at that moment, and a moving tag would make what a
 # host runs depend on when it last rebooted.
 set -euo pipefail
 
-cell_dir="$(cd "$(dirname "$0")" && pwd)"
+bin_dir="$(cd "$(dirname "$0")" && pwd)"
+cell_dir="$(cd "$bin_dir/.." && pwd)"
 repo_root="$(cd "$cell_dir/../.." && pwd)"
 
-source "$cell_dir/image"
+source "$bin_dir/image"
 
 platform=""
 for arg in "$@"; do
@@ -23,15 +24,15 @@ for arg in "$@"; do
     --platform=*) platform="${arg#*=}" ;;
     --help|-h)
       cat <<USAGE
-Usage: saas/hotcell/build [--platform=linux/amd64]
+Usage: saas/hotcell/bin/build [--platform=linux/amd64]
 
 Locks saas/hotcell/Gemfile.lock to the hotcell revision in Gemfile.saas.lock, builds the cell image, and
-tags it with a hash of what went into it. Pushing is a separate step: saas/hotcell/deploy.
+tags it with a hash of what went into it. Pushing is a separate step: saas/hotcell/bin/deploy.
 
 To move the cell to a new hotcell revision, update the gem in the application first:
 
     BUNDLE_GEMFILE=Gemfile.saas bundle update hotcell-client activestorage-hotcell-client
-    saas/hotcell/build
+    saas/hotcell/bin/build
 
 then commit the two lockfiles, the deploy.yml pin, and anything else, together.
 
@@ -120,7 +121,7 @@ esac
 pinned="$(grep -o 'fizzy-hotcell:[a-f0-9]*' "$repo_root/saas/config/deploy.yml" | head -1 | cut -d: -f2)"
 
 echo
-echo "Built $tag. It is local only — publish it with saas/hotcell/deploy."
+echo "Built $tag. It is local only — publish it with saas/hotcell/bin/deploy."
 if [ "$pinned" != "${tag##*:}" ]; then
   echo
   echo "saas/config/deploy.yml pins fizzy-hotcell:$pinned. Point it at this build:"

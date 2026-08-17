@@ -92,10 +92,10 @@ class HotcellAccessoryTest < ActiveSupport::TestCase
   # every request. The tag is a hash of exactly what the image is built from, so the two can only agree if
   # the pin moved with the contents. Nothing else notices; this shipped once already.
   test "the pinned image is the one this tree builds" do
-    built = `bash -c "source #{Rails.root}/saas/hotcell/image && hotcell_image_tag #{Rails.root}"`.strip.split(":").last
+    built = `bash -c "source #{Rails.root}/saas/hotcell/bin/image && hotcell_image_tag #{Rails.root}"`.strip.split(":").last
 
     assert_equal built, accessory["image"][/:([^:]+)\z/, 1],
-      "saas/hotcell's contents changed since the accessory was pinned — run saas/hotcell/build and re-pin"
+      "saas/hotcell's contents changed since the accessory was pinned — run saas/hotcell/bin/build and re-pin"
   end
 
   test "the app mounts the same volume the cell writes its sockets to" do

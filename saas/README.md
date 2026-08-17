@@ -94,9 +94,9 @@ An unknown group name raises at boot rather than meaning "off".
 Kamal builds app images and not accessory images, so the cell's image has its own two scripts. They are separate so that building can happen anywhere and publishing is deliberate.
 
 ```sh
-saas/hotcell/build                        # tags with the revision of the last commit touching saas/hotcell
-saas/hotcell/build --platform=linux/amd64 # what the hosts run
-saas/hotcell/deploy                       # pushes, and prints the line for saas/config/deploy.yml
+saas/hotcell/bin/build                        # tags with the revision of the last commit touching saas/hotcell
+saas/hotcell/bin/build --platform=linux/amd64 # what the hosts run
+saas/hotcell/bin/deploy                       # pushes, and prints the line for saas/config/deploy.yml
 ```
 
 Tags are immutable and there is no `latest`: a deploy does not update an accessory, so `bin/kamal accessory reboot hotcell -d <destination>` pulls whatever the tag names at that moment. A moving tag would make what a host runs depend on when it last rebooted.
