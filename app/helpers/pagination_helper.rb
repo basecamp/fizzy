@@ -1,4 +1,15 @@
 module PaginationHelper
+  # url_for treats these keys as URL-generation control options rather than
+  # query parameters. Forwarding them from untrusted request params lets an
+  # attacker rewrite the generated pagination path — e.g. `script_name` can
+  # prepend an Active Storage blob-proxy route (HackerOne #3943339). The
+  # route-selection keys (controller/action) come from routing, not the query
+  # string, so they are left in place for url_for to resolve the real route.
+  URL_FOR_CONTROL_OPTIONS = %i[
+    script_name host protocol port subdomain domain tld_length
+    trailing_slash only_path relative_url_root anchor params _recall
+  ].freeze
+
   def pagination_frame_tag(namespace, page, data: {}, **attributes, &)
     turbo_frame_tag pagination_frame_id_for(namespace, page.number), data: { timeline_target: "frame", **data }, role: "presentation", **attributes, &
   end
@@ -11,7 +22,7 @@ module PaginationHelper
   end
 
   def pagination_link(namespace, page_number, activate_when_observed: false, label: default_pagination_label(activate_when_observed), url_params: {}, data: {}, **attributes)
-    link_to label, url_for(params.permit!.to_h.merge(page: page_number, **url_params)),
+    link_to label, url_for(forwardable_request_params.merge(page: page_number, **url_params)),
       "aria-label": "Load page #{page_number}",
       id: "#{namespace}-pagination-link-#{page_number}",
       class: class_names(attributes.delete(:class), "pagination-link", { "pagination-link--active-when-observed" => activate_when_observed }),
@@ -62,6 +73,10 @@ module PaginationHelper
   end
 
   private
+    def forwardable_request_params
+      params.permit!.to_h.symbolize_keys.except(*URL_FOR_CONTROL_OPTIONS)
+    end
+
     def pagination_list(name, tag_element: :div, paginate_on_scroll: false, **properties, &block)
       classes = properties.delete(:class)
       properties[:id] ||= "#{name}-pagination-list"
