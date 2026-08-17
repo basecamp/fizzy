@@ -13,7 +13,7 @@ module Yabeda
         group :hotcell
 
         counter :requests, comment: "Calls through perform_in_hotcell, by outcome",
-          tags: %i[ cell operation code ]
+          tags: %i[ cell operation code cause ]
         histogram :perform_seconds, comment: "Time the cell spent performing", unit: :seconds,
           tags: %i[ cell operation ], buckets: [ 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10, 30, 120 ]
 
@@ -69,7 +69,9 @@ module Yabeda
       labels = { cell: event.payload[:cell], operation: event.payload[:operation] }
       code = event.payload[:code]
 
-      Yabeda.hotcell.requests.increment(labels.merge(code: code || "ok"))
+      # cause is empty rather than absent for every code but killed: a label that is sometimes missing is a
+      # separate series in Prometheus, and a query by code would silently split.
+      Yabeda.hotcell.requests.increment(labels.merge(code: code || "ok", cause: event.payload[:cause].to_s))
       Yabeda.hotcell.perform_seconds.measure(labels, (event.payload[:perform_ms] || 0) / 1000.0)
       log_perform event, labels, code
     end

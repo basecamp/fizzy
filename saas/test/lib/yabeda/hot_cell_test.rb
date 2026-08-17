@@ -66,14 +66,23 @@ class Yabeda::HotCellTest < ActiveSupport::TestCase
   test "counts a successful call as ok and measures what the cell spent" do
     Yabeda::HotCell.record_perform perform_event(perform_ms: 250)
 
-    assert_equal 1, counter(:requests, code: "ok")
+    assert_equal 1, counter(:requests, code: "ok", cause: "")
     assert_equal 0.25, histogram(:perform_seconds)
   end
 
   test "counts a failure under its own code" do
     Yabeda::HotCell.record_perform perform_event(code: "capacity")
 
-    assert_equal 1, counter(:requests, code: "capacity")
+    assert_equal 1, counter(:requests, code: "capacity", cause: "")
+  end
+
+  # `killed` is one code and several verdicts: which limit the worker hit decides whether the file did it.
+  # The counter carries the cause so a graph can stack kills by it, and every other code carries an empty
+  # one — a label that is sometimes absent is a separate series in Prometheus, not the same one.
+  test "counts a kill under its cause" do
+    Yabeda::HotCell.record_perform perform_event(code: "killed", cause: "fsize")
+
+    assert_equal 1, counter(:requests, code: "killed", cause: "fsize")
   end
 
   # The histogram says how long transforms take on a host; it cannot say what one upload paid. That is
