@@ -92,7 +92,7 @@ module Fizzy
 
       # Rails edge (actioncable 647ce6769c, 2026-05-28) extracted WebSocket handling
       # into ActionCable::Server::Socket, which now calls connection.handle_open /
-      # handle_close *publicly*. sentry-rails (through 6.6.2 and master as of 2026-07)
+      # handle_close *publicly*. sentry-rails (through 6.7.0 and master as of 2026-08)
       # still prepends these onto ActionCable::Connection::Base as `private`, matching
       # the old internal calling convention, so the external call raises NoMethodError
       # and every WebSocket connection dies. Restore public visibility on Sentry's
