@@ -1,0 +1,19 @@
+Dockerfile
+  s_96bd0e97dc55d2::t_e4fef67edede74 39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "f65ddd4193af88fb4f73d558959bd0b99829ed36",
+  "prompts": {},
+  "sessions": {
+    "s_96bd0e97dc55d2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9bd7646f-535f-4680-9544-e70e7f0e6769",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
