@@ -63,9 +63,8 @@ module Yabeda
 
     # Deliberately no Sentry report from here. The client raises the cell's verdict as the registered
     # permanent or transient class, and that raise reaches Sentry with the right class wherever nothing
-    # rescues it. A report from this subscriber was a second copy of the same event under a second name —
-    # and a wrong one: the payload carries `code` and not `cause`, and `killed` is permanent or transient
-    # by its cause alone, so every kill was filed as the transient class at warning.
+    # rescues it; where something rescues it to keep a save from failing, that rescue reports. A report
+    # from this subscriber as well was a second copy of the same event under a second name.
     def self.record_perform(event)
       labels = { cell: event.payload[:cell], operation: event.payload[:operation] }
       code = event.payload[:code]
@@ -88,6 +87,7 @@ module Yabeda
     private_class_method def self.log_perform(event, labels, code)
       ::Rails.logger.info "hotcell " + labels.merge(
         code: code || "ok",
+        cause: event.payload[:cause],
         perform_ms: event.payload[:perform_ms],
         duration_ms: event.duration.round(1),
         bytes_in: event.payload[:bytes_in],

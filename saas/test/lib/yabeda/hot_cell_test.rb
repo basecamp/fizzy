@@ -97,6 +97,14 @@ class Yabeda::HotCellTest < ActiveSupport::TestCase
     assert_equal "capacity", logged["code"]
   end
 
+  # `killed` alone says a worker died; the cause says whether the file did it. Both travel on the event.
+  test "logs why a worker was killed" do
+    Yabeda::HotCell.record_perform perform_event(code: "killed", cause: "fsize")
+
+    assert_equal "killed", logged["code"]
+    assert_equal "fsize", logged["cause"]
+  end
+
   # The raise the caller sees already reaches Sentry with the right class. A report from here was a second
   # copy of the same event under a second name — and a wrong one, because the payload carries `code` and
   # not `cause`, so `killed` could not be told permanent from transient and every kill was filed as the
