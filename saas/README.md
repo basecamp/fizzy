@@ -77,15 +77,23 @@ bin/dev --hotcell  # attachment processing goes to the cell
 
 Because the dev cell shells out to your laptop rather than to the image, every tool in `saas/hotcell/Dockerfile` needs a host equivalent. `bin/setup` installs them; if you add a tool to the image, add it to `.mise.toml` and the `Brewfile` too, or that operation will fail in development only.
 
-### Two switches
+### The switches
 
-| variable | what it does |
-| --- | --- |
-| `HOTCELL_ROOT` | Registers the cell. Metrics, `describe`, the healthcheck and `/hotcellz` answer, and every conversion still runs in the app. |
-| `HOTCELL_ACTIVE_STORAGE` | Moves the work. A comma-separated list of `images`, `pdfs`, `media`, or `all`. |
-| `HOTCELL_GROUP` | The gid the app and the cell share, so the cell can open a file the app hands it by name. Must match the `group-add` on the app's roles and the cell's own gid. Unset in development, where both sides run as one user. |
+| variable | what it does | where it lives |
+| --- | --- | --- |
+| `HOTCELL_ROOT` | Registers the cell. Metrics, `describe`, the healthcheck and `/hotcellz` answer, and every conversion still runs in the app. | `saas/config/deploy.yml` |
+| `HOTCELL_GROUP` | The gid the app and the cell share, so the cell can open a file the app hands it by name. Must match the `group-add` on the app's roles and the cell's own gid. Unset in development, where both sides run as one user. | `saas/config/deploy.yml` |
+| `HOTCELL_ACTIVE_STORAGE` | Moves the work. A comma-separated list of `images`, `pdfs`, `media`, or `all`. | each `saas/config/deploy.<destination>.yml` |
 
-They are separate because a cell being reachable and a cell taking traffic are different questions, and the second is a list because the rollout moves operations in groups. `images` carries the image analyzer along with the transformer whether or not you ask: Rails' image analyzers test `variant_processor == :vips`, so pointing the transformer at a class makes them decline and blobs get marked analyzed with no dimensions.
+Registering and moving work are separate questions, and the second is a list because the rollout moves
+operations in groups. `images` carries the image analyzer along with the transformer whether or not you
+ask: Rails' image analyzers test `variant_processor == :vips`, so pointing the transformer at a class makes
+them decline and blobs get marked analyzed with no dimensions.
+
+The first two are the same everywhere and belong in the base file. **`HOTCELL_ACTIVE_STORAGE` belongs in
+the destination files**, because how far a destination has rolled out is a per-destination decision — in
+the base it moves every destination at once. A destination naming no list keeps its cell registered and
+idle, which is where one that has not started should be.
 
 An unknown group name raises at boot rather than meaning "off".
 
@@ -94,10 +102,22 @@ An unknown group name raises at boot rather than meaning "off".
 Kamal builds app images and not accessory images, so the cell's image has its own two scripts. They are separate so that building can happen anywhere and publishing is deliberate.
 
 ```sh
-saas/hotcell/bin/build                        # tags with the revision of the last commit touching saas/hotcell
+saas/hotcell/bin/build                        # locks the cell to the app's hotcell revision, then builds
 saas/hotcell/bin/build --platform=linux/amd64 # what the hosts run
 saas/hotcell/bin/deploy                       # pushes, and prints the line for saas/config/deploy.yml
 ```
+
+**The tag is a content hash**, the first 12 characters of a SHA-256 over the `Dockerfile`, `Gemfile`,
+`Gemfile.lock`, `config.rb` and `operations/*.rb` — see `bin/image`. Not a git revision: the commit that
+bumps the gem and pins the result could never name itself, because amending it changed the SHA the pin was
+meant to hold. Identical bytes give an identical tag, and changing something the image does not contain
+leaves it alone. `saas/test/lib/hotcell_accessory_test.rb` holds the pin in `deploy.yml` equal to what the
+tree builds, so a stale pin fails in CI.
+
+**`build` locks the cell's `Gemfile.lock` to the hotcell revision in the app's `Gemfile.saas.lock`**,
+writing it if the two differ, and then builds. The app's lockfile is the source of truth: a client and
+server one revision apart is a `protocol` failure on every request. So move the gem in the application
+first, then build.
 
 Tags are immutable and there is no `latest`: a deploy does not update an accessory, so `bin/kamal accessory reboot hotcell -d <destination>` pulls whatever the tag names at that moment. A moving tag would make what a host runs depend on when it last rebooted.
 
