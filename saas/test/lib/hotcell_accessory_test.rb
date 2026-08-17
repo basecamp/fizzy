@@ -89,13 +89,13 @@ class HotcellAccessoryTest < ActiveSupport::TestCase
 
   # A deploy never touches an accessory, so a pin left behind runs the old cell against the new app until
   # somebody reboots it by hand — a client and server revision apart, which is a `protocol` failure on
-  # every request. The tag names the last commit that touched saas/hotcell, so the two can only agree if
-  # the pin moved with it. Nothing else notices; this shipped once already.
+  # every request. The tag is a hash of exactly what the image is built from, so the two can only agree if
+  # the pin moved with the contents. Nothing else notices; this shipped once already.
   test "the pinned image is the one this tree builds" do
-    built = `git log -1 --format=%h -- #{Rails.root.join("saas/hotcell")}`.strip
+    built = `bash -c "source #{Rails.root}/saas/hotcell/image && hotcell_image_tag #{Rails.root}"`.strip.split(":").last
 
     assert_equal built, accessory["image"][/:([^:]+)\z/, 1],
-      "saas/hotcell has moved since the accessory was pinned — rebuild, publish, and re-pin"
+      "saas/hotcell's contents changed since the accessory was pinned — run saas/hotcell/build and re-pin"
   end
 
   test "the app mounts the same volume the cell writes its sockets to" do

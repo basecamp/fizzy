@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
-# Builds the cell's image. Kamal builds app images and not accessory images, so this is how the cell's
-# image gets made.
+# Builds the cell's image, at the hotcell revision the application is running.
+#
+# The application's lockfile is the source of truth. This makes the cell's lockfile name the same revision
+# — writing it if it differs — and then builds. A client and server one revision apart is a `protocol`
+# failure on every request, so the two are never allowed to be set separately: update the gem in the app,
+# run this, commit the lot as one change.
 #
 # It touches no registry: publishing is saas/hotcell/deploy, so this can run on every laptop from
 # bin/setup. Tags are immutable and there is no `latest`, because a deploy does not update an accessory —
@@ -21,8 +25,15 @@ for arg in "$@"; do
       cat <<USAGE
 Usage: saas/hotcell/build [--platform=linux/amd64]
 
-Builds the hotcell cell image and tags it with the revision of the last commit that touched
-saas/hotcell. Pushing is a separate step: saas/hotcell/deploy.
+Locks saas/hotcell/Gemfile.lock to the hotcell revision in Gemfile.saas.lock, builds the cell image, and
+tags it with a hash of what went into it. Pushing is a separate step: saas/hotcell/deploy.
+
+To move the cell to a new hotcell revision, update the gem in the application first:
+
+    BUNDLE_GEMFILE=Gemfile.saas bundle update hotcell-client activestorage-hotcell-client
+    saas/hotcell/build
+
+then commit the two lockfiles, the deploy.yml pin, and anything else, together.
 
 Environment:
   GITHUB_TOKEN   Defaults to the gh CLI's oauth token. The cell's bundle comes from a private
@@ -33,11 +44,24 @@ USAGE
   esac
 done
 
-# The tag names what is in the image, so a dirty tree would mint a tag for bytes no commit holds.
-if [ -n "$(git -C "$repo_root" status --porcelain -- "$cell_dir")" ]; then
-  echo "saas/hotcell has uncommitted changes, so any tag built from it would name a revision that does" >&2
-  echo "not hold these bytes. Commit them first." >&2
+# The revision the application runs. Read off the lockfile rather than asked of bundler, so this needs no
+# bundle to be installed and cannot be answered by a stale one.
+app_revision="$(awk '/remote: https:\/\/github.com\/basecamp\/hotcell/{f=1} f&&/revision:/{print $2; exit}' "$repo_root/Gemfile.saas.lock")"
+cell_revision="$(awk '/remote: https:\/\/github.com\/basecamp\/hotcell/{f=1} f&&/revision:/{print $2; exit}' "$cell_dir/Gemfile.lock")"
+
+if [ -z "$app_revision" ]; then
+  echo "Gemfile.saas.lock names no hotcell revision. Is the app in SaaS mode?" >&2
   exit 1
+fi
+
+# The cell's Gemfile pins the branch, so `bundle update` would take the branch head rather than the
+# application's revision. Setting the revision in the lockfile and installing against it is what pins the
+# cell to exactly what the app runs; bundler honours the lockfile's revision over the branch's tip.
+if [ "$cell_revision" != "$app_revision" ]; then
+  echo "Locking the cell to the application's hotcell revision ${app_revision:0:8} (was ${cell_revision:0:8})"
+  sed -i "s/revision: $cell_revision/revision: $app_revision/" "$cell_dir/Gemfile.lock"
+  env -u RUBYOPT -u RUBYLIB -u BUNDLER_SETUP -u BUNDLER_VERSION -u BUNDLE_BIN_PATH -u BUNDLE_LOCKFILE \
+    BUNDLE_GEMFILE="$cell_dir/Gemfile" bundle install --quiet
 fi
 
 # Exported, not just set: --secret env=GITHUB_TOKEN reads the environment, and a shell variable that is
@@ -93,5 +117,13 @@ case $scan_status in
     ;;
 esac
 
+pinned="$(grep -o 'fizzy-hotcell:[a-f0-9]*' "$repo_root/saas/config/deploy.yml" | head -1 | cut -d: -f2)"
+
 echo
 echo "Built $tag. It is local only — publish it with saas/hotcell/deploy."
+if [ "$pinned" != "${tag##*:}" ]; then
+  echo
+  echo "saas/config/deploy.yml pins fizzy-hotcell:$pinned. Point it at this build:"
+  echo
+  echo "    image: $tag"
+fi
