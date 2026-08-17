@@ -92,6 +92,7 @@ class Yabeda::HotCellTest < ActiveSupport::TestCase
   test "logs what each call cost" do
     Yabeda::HotCell.record_perform perform_event(perform_ms: 250, duration_ms: 310, bytes_in: 4096, bytes_out: 512)
 
+    assert_match(/^  HotCell \(310\.0ms\) \{/, @log.string)
     assert_equal "active_storage.transformers.image.vips", logged["operation"]
     assert_equal "ok", logged["code"]
     assert_equal 250, logged["perform_ms"]
@@ -154,8 +155,10 @@ class Yabeda::HotCellTest < ActiveSupport::TestCase
           code: code, cause: cause, perform_ms: perform_ms, bytes_in: bytes_in, bytes_out: bytes_out })
     end
 
+    # The line reads like Active Storage's own — `Storage (211.3ms) Downloaded file...` — with the duration
+    # up front where the eye expects it, and the detail as JSON after.
     def logged
-      JSON.parse @log.string[/^hotcell (\{.*\})$/, 1]
+      JSON.parse @log.string[/^  HotCell \([\d.]+ms\) (\{.*\})$/, 1]
     end
 
     def gauge(metric, **tags)

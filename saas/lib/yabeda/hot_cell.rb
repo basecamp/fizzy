@@ -85,13 +85,16 @@ module Yabeda
     # `Rails.logger.info` rather than `logger.struct`, because `struct` is a method on the per-request
     # proxy a controller or job holds, and a notification subscriber has neither. Structured logging still
     # gathers every line written during a request onto that request's record, so this lands beside the
-    # request's own duration.
+    # request's own duration. Shaped like Active Storage's own `Storage (211.3ms) Downloaded file...`, with
+    # the duration up front where the eye expects it and the detail as JSON after.
     private_class_method def self.log_perform(event, labels, code)
-      ::Rails.logger.info "hotcell " + labels.merge(
+      duration_ms = event.duration.round(1)
+
+      ::Rails.logger.info "  HotCell (#{duration_ms}ms) " + labels.merge(
         code: code || "ok",
         cause: event.payload[:cause],
         perform_ms: event.payload[:perform_ms],
-        duration_ms: event.duration.round(1),
+        duration_ms: duration_ms,
         bytes_in: event.payload[:bytes_in],
         bytes_out: event.payload[:bytes_out]).to_json
     end
