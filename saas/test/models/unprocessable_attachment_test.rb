@@ -69,13 +69,22 @@ class Fizzy::Saas::UnprocessableAttachmentTest < ActiveSupport::TestCase
     assert_nothing_raised { comment_with_embed }
   end
 
-  # The perform.hot_cell subscriber already reports every cell failure, so rescuing the verdict must not
-  # report it again — the same event under two messages is two Sentry issues.
-  test "rescuing a verdict does not report it a second time" do
+  # Rescuing is where the raise stops, so it is the one place a permanent verdict has to be reported from —
+  # elsewhere the raise reaches Sentry on its own. Once per variant, not twice: the perform.hot_cell
+  # subscriber reports nothing.
+  test "a permanent verdict on the job path is reported once" do
     transforms_raise Fizzy::Saas::Cell::UnprocessableAttachment.new("killed: fsize")
-    Rails.error.expects(:report).never
+    Rails.error.expects(:report).with { |error, **| error.is_a?(Fizzy::Saas::Cell::UnprocessableAttachment) }
+      .times(Attachments::VARIANTS.size)
 
     comment_with_embed
+  end
+
+  test "a permanent verdict on the form path is reported once" do
+    transforms_raise Fizzy::Saas::Cell::UnprocessableAttachment.new("killed: fsize")
+    Rails.error.expects(:report).with { |error, **| error.is_a?(Fizzy::Saas::Cell::UnprocessableAttachment) }.once
+
+    users(:david).update!(avatar: Rack::Test::UploadedFile.new(file_fixture("moon.jpg"), "image/jpeg"))
   end
 
   private

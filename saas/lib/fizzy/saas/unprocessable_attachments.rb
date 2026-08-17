@@ -14,8 +14,11 @@ module Fizzy
     # The transient class is deliberately caught by neither: a saturated cell says nothing about the file,
     # and the client gem already retries it. Nothing is recorded against the blob either — one variant
     # failing says nothing about the others, and Rails will attempt the failed one again on next request,
-    # which is the behaviour it had before the cell. Discarded rather than reported: the perform.hot_cell
-    # subscriber already reports every cell failure once.
+    # which is the behaviour it had before the cell.
+    #
+    # Reported, because discarding is the one place a permanent verdict stops: elsewhere the raise reaches
+    # Sentry on its own, and the perform.hot_cell subscriber reports nothing so as not to double it. On the
+    # form path the rescue reports for the same reason.
     module UnprocessableAttachments
       # Rails' own loop, with the rescue inside it rather than around it: one variant failing must not skip
       # the rest, and the loop's last line marks the variants as processed — miss it and Rails re-runs every
@@ -30,7 +33,8 @@ module Fizzy
 
               begin
                 blob.variant(named_variant.transformations).process_from_io(io)
-              rescue Cell::UnprocessableAttachment
+              rescue Cell::UnprocessableAttachment => error
+                Rails.error.report error, handled: true, severity: :info
               end
               io.rewind if io.respond_to?(:rewind)
             end
@@ -43,7 +47,7 @@ module Fizzy
         ActiveSupport.on_load(:active_storage_attachment) { prepend Attachment }
 
         %w[ ActiveStorage::CreateVariantsJob ActiveStorage::TransformJob ].each do |job|
-          job.constantize.discard_on Cell::UnprocessableAttachment
+          job.constantize.discard_on Cell::UnprocessableAttachment, report: true
         end
       end
     end

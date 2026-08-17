@@ -97,24 +97,16 @@ class Yabeda::HotCellTest < ActiveSupport::TestCase
     assert_equal "capacity", logged["code"]
   end
 
-  test "reports a permanent failure as information about one file" do
-    Rails.error.expects(:report).with { |error, options| error.is_a?(Fizzy::Saas::Cell::UnprocessableAttachment) &&
-      options[:severity] == :info }
+  # The raise the caller sees already reaches Sentry with the right class. A report from here was a second
+  # copy of the same event under a second name — and a wrong one, because the payload carries `code` and
+  # not `cause`, so `killed` could not be told permanent from transient and every kill was filed as the
+  # transient class at warning.
+  test "does not report a failure to Sentry, because the raise already does" do
+    Rails.error.expects(:report).never
 
-    Yabeda::HotCell.record_perform perform_event(code: "unreadable")
-  end
-
-  test "reports a transient failure as a warning about the cell" do
-    Rails.error.expects(:report).with { |error, options| error.is_a?(Fizzy::Saas::Cell::ProcessingUnavailable) &&
-      options[:severity] == :warning }
-
+    Yabeda::HotCell.record_perform perform_event(code: "killed", cause: "fsize")
     Yabeda::HotCell.record_perform perform_event(code: "capacity")
-  end
-
-  test "a code from a newer cell is a warning rather than an ArgumentError" do
-    Rails.error.expects(:report).with { |error, options| options[:severity] == :warning }
-
-    Yabeda::HotCell.record_perform perform_event(code: "invented_by_a_later_deploy")
+    Yabeda::HotCell.record_perform perform_event(code: "unreadable")
   end
 
   test "a metrics bug arrives as missing metrics rather than as a failed conversion" do

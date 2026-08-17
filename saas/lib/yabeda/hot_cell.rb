@@ -61,6 +61,11 @@ module Yabeda
       end
     end
 
+    # Deliberately no Sentry report from here. The client raises the cell's verdict as the registered
+    # permanent or transient class, and that raise reaches Sentry with the right class wherever nothing
+    # rescues it. A report from this subscriber was a second copy of the same event under a second name —
+    # and a wrong one: the payload carries `code` and not `cause`, and `killed` is permanent or transient
+    # by its cause alone, so every kill was filed as the transient class at warning.
     def self.record_perform(event)
       labels = { cell: event.payload[:cell], operation: event.payload[:operation] }
       code = event.payload[:code]
@@ -68,7 +73,6 @@ module Yabeda
       Yabeda.hotcell.requests.increment(labels.merge(code: code || "ok"))
       Yabeda.hotcell.perform_seconds.measure(labels, (event.payload[:perform_ms] || 0) / 1000.0)
       log_perform event, labels, code
-      report_failure event, labels, code if code
     end
 
     # One line per call, so an upload that ran a conversion inline shows what it paid. The histogram cannot
@@ -88,28 +92,6 @@ module Yabeda
         duration_ms: event.duration.round(1),
         bytes_in: event.payload[:bytes_in],
         bytes_out: event.payload[:bytes_out]).to_json
-    end
-
-    # A permanent code is a verdict about one file, which is information rather than an incident.
-    # Everything else says the cell is having a bad day, and that is worth watching a trend for. The
-    # classes are the registered cell's own, so Sentry groups these the same way it groups the exception
-    # the caller actually saw.
-    private_class_method def self.report_failure(event, labels, code)
-      return unless ::HotCell.cell?(labels[:cell])
-
-      cell = ::HotCell.cell(labels[:cell])
-      permanent = permanent?(code, event.payload[:cause])
-      error = (permanent ? cell.permanent : cell.transient).new("#{labels[:operation]}: #{code}")
-
-      ::Rails.error.report error, handled: true, severity: permanent ? :info : :warning,
-        context: labels.merge(code: code, cause: event.payload[:cause])
-    end
-
-    # Codes.permanent? raises ArgumentError on a code it has never heard of, which is exactly what a
-    # deploy skew produces — so ask whether it knows the code first, and treat an unknown one the way the
-    # taxonomy treats everything uncertain.
-    private_class_method def self.permanent?(code, cause)
-      ::HotCell::Codes.known?(code) && ::HotCell::Codes.permanent?(code, cause: cause)
     end
 
     private_class_method def self.set_counters(cell, counters)
