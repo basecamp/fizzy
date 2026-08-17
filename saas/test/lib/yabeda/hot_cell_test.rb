@@ -67,7 +67,7 @@ class Yabeda::HotCellTest < ActiveSupport::TestCase
     Yabeda::HotCell.record_perform perform_event(perform_ms: 250)
 
     assert_equal 1, counter(:requests, code: "ok", cause: "")
-    assert_equal 0.25, histogram(:perform_seconds)
+    assert_equal 0.25, histogram(:perform)
   end
 
   test "counts a failure under its own code" do
