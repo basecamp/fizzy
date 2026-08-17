@@ -1,13 +1,20 @@
 module PaginationHelper
   # url_for treats these keys as URL-generation control options rather than
   # query parameters. Forwarding them from untrusted request params lets an
-  # attacker rewrite the generated pagination path — e.g. `script_name` can
-  # prepend an Active Storage blob-proxy route (HackerOne #3943339). The
-  # route-selection keys (controller/action) come from routing, not the query
-  # string, so they are left in place for url_for to resolve the real route.
+  # attacker rewrite the generated pagination path — both `script_name` and
+  # `original_script_name` are prepended to the generated script name by
+  # RouteSet#url_for before route generation, so either can retarget the link
+  # onto an arbitrary same-origin route such as an Active Storage blob-proxy
+  # path (HackerOne #3943339). These are the RESERVED_OPTIONS url_for strips
+  # before route generation, plus the two control keys it deletes outside that
+  # list (_recall, relative_url_root). We forward path parameters
+  # (controller/action and route segments like board_id) untouched so url_for
+  # can regenerate the current parameterized route; only these control keys are
+  # stripped.
   URL_FOR_CONTROL_OPTIONS = %i[
-    script_name host protocol port subdomain domain tld_length
-    trailing_slash only_path relative_url_root anchor params _recall
+    script_name original_script_name host protocol port subdomain domain
+    tld_length trailing_slash only_path relative_url_root anchor params
+    _recall
   ].freeze
 
   def pagination_frame_tag(namespace, page, data: {}, **attributes, &)

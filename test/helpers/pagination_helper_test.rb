@@ -34,6 +34,21 @@ class PaginationHelperTest < ActionView::TestCase
     end
   end
 
+  # original_script_name is prepended to script_name by url_for exactly as
+  # script_name is (RouteSet#url_for), so it opens the same path-rewrite vector.
+  test "next-page link does not honor an attacker-supplied original_script_name" do
+    with_request_params controller: "public/boards/columns/streams", action: "show",
+      board_id: "the-board",
+      original_script_name: "/rails/active_storage/blobs/proxy/SIGNED/x.html%23" do
+      href = pagination_href(:stream_column, 2)
+
+      assert_no_match %r{active_storage}, href,
+        "original_script_name must not be able to rewrite the pagination path onto a blob-proxy route"
+      assert_match %r{\A/public/boards/the-board/columns/stream}, href,
+        "the link should still point at the real next-page route"
+    end
+  end
+
   test "next-page link preserves ordinary filter params" do
     with_request_params controller: "public/boards/columns/streams", action: "show",
       board_id: "the-board", previous: "true", tag: "urgent" do
