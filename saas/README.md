@@ -62,7 +62,7 @@ Image variants, blob analysis and PDF and video previews can run in an unprivile
 
 ### Running it
 
-In SaaS mode `bin/dev` boots a cell beside the server, through `Procfile.dev` and foreman. The cell runs uncontainerized, because a container cannot receive a file descriptor on macOS — Docker runs a Linux VM there and `SCM_RIGHTS` has nothing meaningful to hand across two kernels.
+In SaaS mode `bin/dev` boots a cell beside the server, through `saas/Procfile.dev` and foreman. The cell runs uncontainerized, because a container cannot receive a file descriptor on macOS — Docker runs a Linux VM there and `SCM_RIGHTS` has nothing meaningful to hand across two kernels.
 
 ```sh
 bin/dev            # the cell boots and /hotcellz answers; conversions still run in the app
