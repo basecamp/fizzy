@@ -71,7 +71,7 @@ accessories:
     # would make what a host runs depend on when it last rebooted. saas/hotcell/bin/build writes this line;
     # saas/hotcell/bin/push publishes the tag. Until push has run the pull fails loudly, which is the right
     # way for an unbuilt image to fail.
-    image: registry.37signals.com/basecamp/fizzy-hotcell:169ab8e5aef3
+    image: registry.37signals.com/basecamp/fizzy-hotcell:703cbaeedea5
     roles: [ web, jobs ]  # a descriptor cannot cross machines, so a cell lives on its caller's host
     # An accessory's own key, not one of the options below. Kamal always emits a --network of its own,
     # defaulting to `kamal`, so the same setting under `options:` is a second --network flag and Docker
@@ -81,12 +81,12 @@ accessories:
       - hotcell-active-storage:/run/hotcell/cell
     options:
       # Performance. Docker applies no limit to a flag left out, so a cell without these can take the
-      # host. Sized as arithmetic against the cell's own limits rather than measured — 4 workers × 128MB
-      # of file_size is 512MB of scratch, so the tmpfs is 768m, and the cgroup counts the tmpfs and has to
-      # stay above the cell's 1536MB rlimit, so memory is 3g. Load testing owns the real numbers.
+      # host. Sized as arithmetic against the cell's own limits rather than measured — 4 workers × 256MB
+      # of file_size is 1GB of scratch, so the tmpfs is 1536m, and the cgroup counts the tmpfs and has to
+      # stay above the cell's 1536MB rlimit, so memory is 4g. Load testing owns the real numbers.
       cpus: 2
-      memory: 3g
-      memory-swap: 3g  # equal to memory; omitted, Docker allows twice memory in swap and the limit stops holding
+      memory: 4g
+      memory-swap: 4g  # equal to memory; omitted, Docker allows twice memory in swap and the limit stops holding
       # Deliberately no `ulimit: stack`, so the cell inherits the daemon's 8MB. A thread that overflows a
       # smaller stack dies on SIGSEGV, which the supervisor maps to killed/memory — permanent, so the
       # verdict is written against the customer's file. Raise the cell's own memory instead.
@@ -100,7 +100,7 @@ accessories:
       pids-limit: 512
 
       # noexec is security — scratch is where a dropped payload lands; the size is performance.
-      tmpfs: /tmp:rw,nosuid,nodev,noexec,size=768m
+      tmpfs: /tmp:rw,nosuid,nodev,noexec,size=1536m
 
 aliases:
   console: app exec -i --reuse -e CONSOLE_USER:<%= ENV["USER"] %> "bin/rails console"
