@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+export DEBIAN_FRONTEND=noninteractive
+
+apt-get update
+apt-get install -y --no-install-recommends \
+  ca-certificates \
+  curl \
+  gh \
+  gum \
+  zlib1g-dev
+
+rm -rf /var/lib/apt/lists/*
+
+if ! command -v mise >/dev/null 2>&1; then
+  curl -fsSL https://mise.jdx.dev/install.sh | sh
+  ln -sfn "$HOME/.local/bin/mise" /usr/local/bin/mise
+  mise trust
+fi
+
+bin/setup
