@@ -34,6 +34,7 @@ env:
     MYSQL_DATABASE_REPLICA_HOST: fizzy-mysql-replica
     MYSQL_SOLID_CABLE_HOST: fizzy-mysql-primary
     MYSQL_SOLID_QUEUE_HOST: fizzy-mysql-primary
+    HOTCELL_ACTIVE_STORAGE: images,pdfs,media
   secret:
     - RAILS_MASTER_KEY
     - MYSQL_ALTER_PASSWORD
