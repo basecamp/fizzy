@@ -53,6 +53,7 @@ env:
     MYSQL_SOLID_CABLE_HOST: fizzy-mysql-primary
     MYSQL_SOLID_QUEUE_HOST: <%= @solidqueue_db %>
     MYSQL_SOLID_CACHE_HOST: fizzy-beta-solidcache-db-101.df-iad-int.37signals.com
+    HOTCELL_ACTIVE_STORAGE: images,pdfs,media
   secret:
     - RAILS_MASTER_KEY
     - MYSQL_ALTER_PASSWORD
