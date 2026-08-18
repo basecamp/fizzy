@@ -1,0 +1,21 @@
+test/lib/vips_loader_policy_test.rb
+  s_f25b121b50d4e7::t_fb6d181213d4f2 30-35
+config/initializers/vips.rb
+  s_f25b121b50d4e7::t_2f2aebf4318b0b 10-18,20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "a22a50a23b87dc6612faf8bf9f2b534618d8f864",
+  "prompts": {},
+  "sessions": {
+    "s_f25b121b50d4e7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "947ea828-dcd7-4737-b581-fa01dadd7b29",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
