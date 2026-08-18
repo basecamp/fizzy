@@ -27,8 +27,12 @@ class VipsLoaderPolicyTest < ActiveSupport::TestCase
     assert_equal "VipsForeignLoadJpegFile", loader_for(encode("jpg"))
   end
 
-  test "loads TIFF" do
-    assert_equal "VipsForeignLoadTiffFile", loader_for(encode("tif"))
+  test "denies TIFF through tiffload" do
+    assert_nil loader_for(encode("tif"))
+  end
+
+  test "denies TIFF loader operations" do
+    assert_loader_blocked :tiffload, ".tif"
   end
 
   test "loads WebP" do
