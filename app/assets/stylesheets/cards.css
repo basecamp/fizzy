@@ -226,8 +226,8 @@
     }
 
     code {
-      background-color: var(--color-canvas);
-      border: 1px solid var(--color-ink-lighter);
+      background-color: var(--color-ink-lighter);
+      border: 1px solid var(--color-ink-light);
       border-radius: 0.25ch;
       font-family: var(--font-mono);
       font-size: smaller;
