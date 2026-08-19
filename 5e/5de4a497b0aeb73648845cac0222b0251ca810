@@ -1,0 +1,19 @@
+saas/Dockerfile
+  s_bdaa4a6b315986::t_7717bc2be3b33b 57
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "5e5de4a497b0aeb73648845cac0222b0251ca810",
+  "prompts": {},
+  "sessions": {
+    "s_bdaa4a6b315986": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "bbc2fabf-8244-44d3-b248-793ca2da268c",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
