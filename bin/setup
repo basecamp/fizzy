@@ -165,15 +165,22 @@ pacman_package_satisfied() {
 }
 
 install_pacman_packages() {
-  local declared manager package rest status missing=()
+  local declared rows manager package rest status missing=()
 
   # Captured here rather than read through a process substitution: neither set -e nor pipefail
   # propagates a failure out of one, so a broken status run would yield no rows and report every
   # declared package installed — silently skipping the phase that the plain apply used to abort.
-  declared="$(mise bootstrap packages status)" || {
-    echo "mise bootstrap packages status failed — refusing to report declared packages as installed." >&2
+  status=0
+  declared="$(mise bootstrap packages status)" || status=$?
+  rows="$(printf '%s\n' "$declared" | awk '$1 == "pacman"')"
+
+  # status takes no --manager, so it reports every manager and another manager's failure must not
+  # abort this phase — the manager-scoped apply it replaced could not fail that way. Abort only
+  # when pacman rows are missing too, which is when we cannot tell what needs installing.
+  if [ "$status" -ne 0 ] && [ -z "$rows" ]; then
+    echo "mise bootstrap packages status failed and reported no pacman packages." >&2
     return 1
-  }
+  fi
 
   while read -r manager package rest; do
     [ "$manager" = pacman ] && [ -n "$package" ] || continue
@@ -186,7 +193,7 @@ install_pacman_packages() {
     127) missing+=("pacman:$package") ;;
     *) return 1 ;;
     esac
-  done <<< "$declared"
+  done <<< "$rows"
 
   if [ "${#missing[@]}" -gt 0 ]; then
     mise bootstrap packages apply --yes "${missing[@]}"
