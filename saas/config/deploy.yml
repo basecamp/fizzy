@@ -79,14 +79,20 @@ accessories:
     network: none
     volumes:
       - hotcell-active-storage:/run/hotcell/cell
+      # Scratch from the host's disk rather than a tmpfs, so it stops being RAM charged to the cgroup and
+      # its size stops moving with file_size. A named volume, so the first boot creates it with the
+      # image's /tmp permissions and no host needs preparing by hand. Uncapped and without noexec —
+      # Docker can set neither on a volume — so the bound on a runaway write is deadline × disk
+      # throughput, and a fill lands on the host's docker filesystem.
+      - hotcell-scratch:/tmp
     options:
       # Performance. Docker applies no limit to a flag left out, so a cell without these can take the
-      # host. Sized as arithmetic against the cell's own limits rather than measured — 4 workers × 256MB
-      # of file_size is 1GB of scratch, so the tmpfs is 1536m, and the cgroup counts the tmpfs and has to
-      # stay above the cell's 1536MB rlimit, so memory is 4g. Load testing owns the real numbers.
+      # host. With scratch on disk the cgroup holds only processes, so memory is sized from
+      # concurrency × peak RSS, kept above the cell's 1536MB rlimit so a breach is a verdict rather than
+      # a SIGKILL. Load testing owns the real numbers.
       cpus: 2
-      memory: 4g
-      memory-swap: 4g  # equal to memory; omitted, Docker allows twice memory in swap and the limit stops holding
+      memory: 2g
+      memory-swap: 2g  # equal to memory; omitted, Docker allows twice memory in swap and the limit stops holding
       # Deliberately no `ulimit: stack`, so the cell inherits the daemon's 8MB. A thread that overflows a
       # smaller stack dies on SIGSEGV, which the supervisor maps to killed/memory — permanent, so the
       # verdict is written against the customer's file. Raise the cell's own memory instead.
@@ -98,9 +104,6 @@ accessories:
       security-opt: no-new-privileges:true
       user: 10001:10001
       pids-limit: 512
-
-      # noexec is security — scratch is where a dropped payload lands; the size is performance.
-      tmpfs: /tmp:rw,nosuid,nodev,noexec,size=1536m
 
 aliases:
   console: app exec -i --reuse -e CONSOLE_USER:<%= ENV["USER"] %> "bin/rails console"

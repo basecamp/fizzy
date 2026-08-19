@@ -35,11 +35,25 @@ class HotcellAccessoryTest < ActiveSupport::TestCase
     end
   end
 
-  test "scratch is not executable" do
+  # A named volume is host disk, not cgroup-charged RAM, and the first boot creates it with the image's
+  # /tmp permissions — no host preparation. From here we can only hold the mount itself: scratch is the
+  # volume and no tmpfs competes for /tmp.
+  test "scratch is a disk-backed volume, not a tmpfs" do
     each_destination do |command|
-      assert_match(/\bnoexec\b/, flag(command, "--tmpfs"))
-      assert_match(/\bnosuid\b/, flag(command, "--tmpfs"))
-      assert_match(/\bnodev\b/, flag(command, "--tmpfs"))
+      assert_match "--volume hotcell-scratch:/tmp", command
+      assert_no_match(/--tmpfs/, command)
+    end
+  end
+
+  # Step two of the scratch rollout: once app_kamal provisions the capped loopback filesystem on every
+  # cell host, the volume becomes a bind mount of it and this replaces the named-volume test above. The
+  # size cap and the nosuid,nodev,noexec flags ride that host mount, where this suite cannot see them —
+  # the chef recipe owns those.
+  test "scratch is the provisioned loopback filesystem" do
+    skip "un-skip when the volume moves to the chef-provisioned /var/lib/hotcell-scratch"
+
+    each_destination do |command|
+      assert_match "--volume /var/lib/hotcell-scratch:/tmp", command
     end
   end
 
@@ -49,16 +63,10 @@ class HotcellAccessoryTest < ActiveSupport::TestCase
     end
   end
 
-  test "concurrent workers filling scratch cannot outgrow the tmpfs" do
-    each_destination do |command|
-      assert_operator megabytes(flag(command, "--tmpfs")[/size=(\S+)/, 1]), :>=, concurrency * file_size_megabytes
-    end
-  end
-
+  # Scratch no longer lives in the cgroup, so memory holds only processes.
   test "the cgroup stays above the cell's own rlimit, so a breach is a verdict rather than a SIGKILL" do
     each_destination do |command|
-      assert_operator megabytes(flag(command, "--memory")), :>,
-        cell_memory_megabytes + megabytes(flag(command, "--tmpfs")[/size=(\S+)/, 1])
+      assert_operator megabytes(flag(command, "--memory")), :>, cell_memory_megabytes
     end
   end
 
@@ -148,14 +156,6 @@ class HotcellAccessoryTest < ActiveSupport::TestCase
 
     def cell_configuration
       @cell_configuration ||= Rails.root.join("saas/hotcell/config.rb").read
-    end
-
-    def concurrency
-      cell_configuration[/concurrency:\s*(\d+)/, 1].to_i
-    end
-
-    def file_size_megabytes
-      cell_configuration[/file_size:\s*(\d+) \* 1024\*\*2/, 1].to_i
     end
 
     def cell_memory_megabytes
