@@ -1,0 +1,22 @@
+test/lib/vips_loader_policy_test.rb
+  s_f25b121b50d4e7::t_fb6d181213d4f2 30-35
+config/initializers/vips.rb
+  s_f25b121b50d4e7::t_2f2aebf4318b0b 10,12,14
+  s_f25b121b50d4e7::t_0cef5dee1fa7c1 11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "6768ab9806bc44b291edd93381629ca93bc84761",
+  "prompts": {},
+  "sessions": {
+    "s_f25b121b50d4e7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "947ea828-dcd7-4737-b581-fa01dadd7b29",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": null
+    }
+  }
+}
