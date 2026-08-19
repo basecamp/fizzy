@@ -22,7 +22,7 @@ GIT
 
 GIT
   remote: https://github.com/basecamp/hotcell
-  revision: a8ee27f39638b0bcb57aeca4dd05f2548c2d7301
+  revision: 20b92e9cc8a5e83ae460be13bad05d7d12d58dc3
   specs:
     activestorage-hotcell-client (0.1.0)
       activestorage (>= 8.2.0.alpha)
