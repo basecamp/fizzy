@@ -22,7 +22,7 @@ class Fizzy::Saas::CellTest < ActiveSupport::TestCase
   # must not look like a working configuration.
   test "a group that is not a number raises rather than meaning root" do
     with_env "HOTCELL_GROUP" => "hotcell" do
-      error = assert_raises(ArgumentError) { Cell.register! }
+      error = assert_raises(HotCell::ConfigurationError) { Cell.register! }
 
       assert_match "hotcell", error.message
     end

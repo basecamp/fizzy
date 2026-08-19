@@ -47,15 +47,9 @@ module Fizzy
         end
 
         # Unset in development, where the app and its cell run as one user and there is no group to share.
-        # Integer() rather than to_i, because a group name or a typo is 0 under to_i — root — and the
-        # client would chown every descriptor to it.
+        # The gem's setter coerces and raises ConfigurationError for a value that is not a numeric gid.
         def group
-          value = ENV["HOTCELL_GROUP"].presence
-          return nil if value.nil?
-
-          Integer(value)
-        rescue ArgumentError
-          raise ArgumentError, "HOTCELL_GROUP must be a gid, not #{value.inspect}"
+          ENV["HOTCELL_GROUP"].presence
         end
 
         def enabled?

@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/basecamp/hotcell
-  revision: 93d046408756fbffc2b44f81527b3533cea66b21
+  revision: bf40cfe85fd61d5f8258cfb5a724d0e487c130bb
   branch: master
   specs:
     activestorage-hotcell-server (0.1.0)
