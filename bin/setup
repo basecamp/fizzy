@@ -146,29 +146,47 @@ fi
 # asymmetric — percona provides mariadb-clients, but nothing provides percona's own name, so a
 # machine already carrying another provider would otherwise be handed a conflicting install.
 pacman_package_satisfied() {
-  local requirement="$1"
+  local requirement="$1" status
 
   if [ "$requirement" = percona-server-clients ]; then
     requirement=mysql-clients
   fi
 
   pacman -T -- "$requirement" > /dev/null
-}
+  status=$?
 
-unsatisfied_pacman_packages() {
-  local package
+  # 0 satisfied, 127 unsatisfied — any other status is pacman failing rather than answering,
+  # and must not read as "missing" and send us on to install something
+  if [ "$status" -ne 0 ] && [ "$status" -ne 127 ]; then
+    echo "pacman -T $requirement failed (status $status)" >&2
+  fi
 
-  while read -r package; do
-    pacman_package_satisfied "$package" || echo "$package"
-  done < <(mise bootstrap packages status | awk '$1 == "pacman" { print $2 }')
+  return $status
 }
 
 install_pacman_packages() {
-  local package missing=()
+  local declared manager package rest status missing=()
 
-  while read -r package; do
-    missing+=("pacman:$package")
-  done < <(unsatisfied_pacman_packages)
+  # Captured here rather than read through a process substitution: neither set -e nor pipefail
+  # propagates a failure out of one, so a broken status run would yield no rows and report every
+  # declared package installed — silently skipping the phase that the plain apply used to abort.
+  declared="$(mise bootstrap packages status)" || {
+    echo "mise bootstrap packages status failed — refusing to report declared packages as installed." >&2
+    return 1
+  }
+
+  while read -r manager package rest; do
+    [ "$manager" = pacman ] && [ -n "$package" ] || continue
+
+    status=0
+    pacman_package_satisfied "$package" || status=$?
+
+    case $status in
+    0) ;;
+    127) missing+=("pacman:$package") ;;
+    *) return 1 ;;
+    esac
+  done <<< "$declared"
 
   if [ "${#missing[@]}" -gt 0 ]; then
     mise bootstrap packages apply --yes "${missing[@]}"
