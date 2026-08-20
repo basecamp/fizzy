@@ -17,7 +17,7 @@ gem "turbo-rails", github: "hotwired/turbo-rails", branch: "offline-cache"
 # Deployment and drivers
 gem "bootsnap", require: false
 gem "kamal", require: false
-gem "puma", "~> 7.2", ">= 7.2.1"
+gem "puma", "~> 8.0"
 gem "solid_cable", github: "rails/solid_cable"
 gem "solid_cache", "~> 1.0"
 gem "solid_queue", github: "rails/solid_queue"
