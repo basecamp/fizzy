@@ -1,5 +1,5 @@
 class Card < ApplicationRecord
-  include Accessible, Assignable, Attachments, Broadcastable, Closeable, Colored, Commentable,
+  include Accessible, Assignable, Attachments, Broadcastable, BubblesUp, Closeable, Colored, Commentable,
     Entropic, Eventable, Exportable, Golden, Mentions, Multistep, Pinnable, Postponable, Promptable,
     Readable, Searchable, Stallable, Statuses, Storage::Tracked, Taggable, Triageable, Watchable
 
