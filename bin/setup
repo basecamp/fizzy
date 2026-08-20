@@ -185,6 +185,21 @@ install_pacman_packages() {
   while read -r manager package rest; do
     [ "$manager" = pacman ] && [ -n "$package" ] || continue
 
+    # status renders a pinned declaration as name@version — a display token, not the
+    # dependency syntax pacman -T reads — and pacman cannot install a pinned version at all.
+    # Take mise's own verdict for those rather than deriving one: testing the token would
+    # read a satisfied pin as missing and then hand pacman an operand it cannot resolve.
+    case "$package" in
+    *@*)
+      case "$rest" in
+      *installed) continue ;;
+      esac
+
+      echo "pacman cannot install the pinned declaration $package." >&2
+      return 1
+      ;;
+    esac
+
     status=0
     pacman_package_satisfied "$package" || status=$?
 
