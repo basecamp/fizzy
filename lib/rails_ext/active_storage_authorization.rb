@@ -1,11 +1,57 @@
+# HackerOne #3943339: never serve HTML/XML/SVG blobs inline as their declared
+# content type. Parameterized MIME types such as "text/html;charset=utf-8" slip
+# past Active Storage's exact-string binary list, so these must be forced to
+# binary after normalizing the media type. (SVG/XML are scriptable when rendered
+# inline same-origin, so they are neutralized here as well.)
+ActiveStorage::DANGEROUS_INLINE_MEDIA_TYPES = %w[
+  text/html application/xhtml+xml image/svg+xml application/xml text/xml
+].freeze
+
 ActiveSupport.on_load :active_storage_blob do
   def accessible_to?(user)
-    attachments.includes(:record).any? { |attachment| attachment.accessible_to?(user) } || attachments.none?
+    attached = attachments.includes(:record).to_a
+
+    if attached.any?
+      attached.any? { |attachment| attachment.accessible_to?(user) }
+    else
+      unattached_accessible_to?(user)
+    end
   end
 
   def publicly_accessible?
     attachments.includes(:record).any? { |attachment| attachment.publicly_accessible? }
   end
+
+  private
+    # An unattached blob is only meant to be viewable in the brief window
+    # between direct upload and attachment (commit 196d685f8d). Scope that
+    # fail-open to a principal inside the blob's own account, so an attacker's
+    # deliberately-unattached blob is not authorized to unrelated identities in
+    # other accounts (HackerOne #3943339). Cross-account access falls through to
+    # the forbidden path.
+    def unattached_accessible_to?(user)
+      user.present? && account_id == user.account_id
+    end
+
+    def forcibly_serve_as_binary?
+      super || dangerous_inline_media_type?
+    end
+
+    def dangerous_inline_media_type?
+      ActiveStorage::DANGEROUS_INLINE_MEDIA_TYPES.include?(media_type_for_serving)
+    end
+
+    # Extract the media-type essence for comparison against the dangerous list.
+    # A canonical essence is "type/subtype" with no whitespace, so anything from
+    # the first parameter delimiter (";"), stray comma, or whitespace onward is
+    # dropped. Splitting only on ";" would leave a malformed declared type such
+    # as "text/html,foo" intact — it matches neither this list nor Active
+    # Storage's exact binary list, yet a client (Turbo's frame check, browser
+    # sniffing) can still treat it as HTML — so it must normalize down to
+    # "text/html" here and be forced to binary (HackerOne #3943339).
+    def media_type_for_serving
+      content_type.to_s.strip[/\A[^;,\s]*/].downcase
+    end
 end
 
 ActiveSupport.on_load :active_storage_attachment do
