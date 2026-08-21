@@ -31,7 +31,7 @@ To get started, the parts you need to change are all in the "About your deployme
 We've added comments to that file to highlight what each setting needs to be, but the main ones are:
 
 - `servers/web`: Enter the hostname of the server you're deploying to here. This should be an address that you can access via `ssh`.
-- `ssh/user`: If you access your server a `root` you can leave this alone; if you use a different user, set it here.
+- `ssh/user`: If you access your server as `root` you can leave this alone; if you use a different user, set it here.
 - `proxy/ssl` and `proxy/host`: Kamal can set up SSL certificates for you automatically. To enable that, set the hostname again as `host`. If you don't want SSL for some reason, you can set `ssl: false` to turn it off.
 - `env/clear/BASE_URL`: The public URL of your Fizzy instance (e.g., `https://fizzy.example.com`). Used when generating links.
 - `env/clear/MAILER_FROM_ADDRESS`: This is the email address that Fizzy will send emails from. It should usually be an address from the same domain where you're running Fizzy.
