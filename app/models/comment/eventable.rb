@@ -13,7 +13,7 @@ module Comment::Eventable
 
   private
     def should_track_event?
-      !creator.system?
+      !creator.system? && !creator.bot?
     end
 
     def track_creation

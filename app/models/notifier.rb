@@ -43,6 +43,6 @@ class Notifier
     end
 
     def should_notify?
-      !creator.system?
+      !creator.system? && !creator.bot?
     end
 end
