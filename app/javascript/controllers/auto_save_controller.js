@@ -5,6 +5,7 @@ const AUTOSAVE_INTERVAL = 3000
 
 export default class extends Controller {
   #timer
+  #saving
 
   // Lifecycle
 
@@ -16,8 +17,10 @@ export default class extends Controller {
 
   async submit() {
     if (this.#dirty) {
-      await this.#save()
+      this.#save()
     }
+
+    await this.#saving
   }
 
   change(event) {
@@ -32,9 +35,9 @@ export default class extends Controller {
     this.#timer = setTimeout(() => this.#save(), AUTOSAVE_INTERVAL)
   }
 
-  async #save() {
+  #save() {
     this.#resetTimer()
-    await submitForm(this.element)
+    this.#saving = submitForm(this.element)
   }
 
   #resetTimer() {
