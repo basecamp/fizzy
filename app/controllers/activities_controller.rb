@@ -25,6 +25,8 @@ class ActivitiesController < ApplicationController
         .where(action: ACTIONS)
         .for_creators(params[:creator_ids])
         .for_boards(params[:board_ids])
+        .since_date(params[:since])
+        .until_date(params[:until])
         .reverse_chronologically
     end
 end
