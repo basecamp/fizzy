@@ -32,7 +32,7 @@ gem "rqrcode"
 gem "rouge"
 gem "jbuilder"
 gem "lexxy", "0.9.31"
-gem "image_processing", "~> 1.14"
+gem "image_processing", "~> 2.0"
 gem "platform_agent"
 gem "aws-sdk-s3", require: false
 gem "web-push"
