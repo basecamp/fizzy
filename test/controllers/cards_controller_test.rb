@@ -122,6 +122,17 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_no_match "reactions", response.body, "Draft card should not show reactions/boost button"
   end
 
+  test "update as HTML with invalid tag_ids renders edit with unprocessable entity" do
+    card = cards(:logo)
+    foreign_tag = accounts(:initech).tags.create!(title: "foreign")
+
+    patch card_path(card), params: { card: { tag_ids: [ foreign_tag.id ] } }
+
+    assert_response :unprocessable_entity
+    assert_equal [ tags(:web) ], card.reload.tags
+    assert_match "Close editor and discard changes", response.body
+  end
+
   test "users can only see cards in boards they have access to" do
     get card_path(cards(:logo))
     assert_response :success
@@ -228,6 +239,43 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Big if true", card.description.to_plain_text
   end
 
+  test "create as JSON with tag_ids applies tags to the created card" do
+    tag = tags(:mobile)
+
+    assert_difference -> { Card.count }, +1 do
+      post board_cards_path(boards(:writebook)),
+        params: { card: { title: "Tagged card", tag_ids: [ tag.id ] } },
+        as: :json
+      assert_response :created
+    end
+
+    card = Card.last
+    assert_equal [ tag ], card.reload.tags
+    assert_equal [ tag.title ], @response.parsed_body["tags"]
+  end
+
+  test "create as JSON with nonexistent tag_ids returns not found" do
+    assert_no_difference -> { Card.count } do
+      post board_cards_path(boards(:writebook)),
+        params: { card: { title: "Tagged card", tag_ids: [ "does-not-exist" ] } },
+        as: :json
+    end
+
+    assert_response :not_found
+  end
+
+  test "create as JSON with foreign-account tag_ids returns unprocessable entity" do
+    foreign_tag = accounts(:initech).tags.create!(title: "foreign")
+
+    assert_no_difference -> { Card.count } do
+      post board_cards_path(boards(:writebook)),
+        params: { card: { title: "Tagged card", tag_ids: [ foreign_tag.id ] } },
+        as: :json
+    end
+
+    assert_response :unprocessable_entity
+  end
+
   test "create as JSON with custom created_at" do
     custom_time = Time.utc(2024, 1, 15, 10, 30, 0)
 
@@ -312,6 +360,69 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     assert_equal "Update test", card.reload.title
+  end
+
+  test "update as JSON with tag_ids updates tags on the card" do
+    card = cards(:logo)
+    tag = tags(:mobile)
+
+    put card_path(card, format: :json), params: { card: { tag_ids: [ tag.id ] } }
+    assert_response :success
+
+    assert_equal [ tag ], card.reload.tags
+    assert_equal [ tag.title ], @response.parsed_body["tags"]
+  end
+
+  test "update as JSON without tag_ids preserves existing tags" do
+    card = cards(:logo)
+
+    put card_path(card, format: :json), params: { card: { title: "Updated title" } }
+    assert_response :success
+
+    assert_equal [ tags(:web) ], card.reload.tags
+    assert_equal [ tags(:web).title ], @response.parsed_body["tags"]
+  end
+
+  test "update as JSON with empty tag_ids clears existing tags" do
+    card = cards(:logo)
+    assert_equal [ tags(:web) ], card.tags
+
+    put card_path(card, format: :json), params: { card: { tag_ids: [] } }
+    assert_response :success
+
+    assert_empty card.reload.tags
+    assert_empty @response.parsed_body["tags"]
+  end
+
+  test "update as JSON with foreign-account tag_ids returns unprocessable entity" do
+    card = cards(:logo)
+    foreign_tag = accounts(:initech).tags.create!(title: "foreign")
+
+    put card_path(card, format: :json), params: { card: { tag_ids: [ foreign_tag.id ] } }
+
+    assert_response :unprocessable_entity
+    assert_equal [ tags(:web) ], card.reload.tags
+  end
+
+  test "update as JSON with description and tag_ids busts the card cache key" do
+    card = cards(:logo)
+    original_cache_key = card.cache_key_with_version
+    tag = tags(:mobile)
+
+    travel 1.minute do
+      put card_path(card, format: :json), params: {
+        card: {
+          description: "Updated description",
+          tag_ids: [ tag.id ]
+        }
+      }
+    end
+
+    assert_response :success
+    assert_not_equal original_cache_key, card.reload.cache_key_with_version
+    assert_equal "Updated description", card.description.to_plain_text.strip
+    assert_equal [ tag ], card.tags
+    assert_equal [ tag.title ], @response.parsed_body["tags"]
   end
 
   test "delete as JSON" do
