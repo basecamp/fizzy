@@ -1,0 +1,21 @@
+app/models/account/data_transfer/record_set.rb
+  s_964922bad4d340::t_6669e733d9b275 135-139
+test/models/account/data_transfer/record_set_test.rb
+  s_964922bad4d340::t_5de65d44e405e8 76-86
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "1b8df1070a995abd92ac4a88c00fcbe17baebc9b",
+  "prompts": {},
+  "sessions": {
+    "s_964922bad4d340": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b315b378-55b7-45e0-911e-b964de3ac103",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
