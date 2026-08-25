@@ -52,7 +52,9 @@ class Account::DataImportJobTest < ActiveJob::TestCase
     end
 
     assert_nothing_raised do
-      Account::DataImportJob.perform_now(import)
+      assert_no_enqueued_jobs only: Account::DataImportJob do
+        Account::DataImportJob.perform_now(import)
+      end
     end
 
     assert import.reload.failed_due_to_conflict?
