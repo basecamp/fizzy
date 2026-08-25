@@ -73,6 +73,17 @@ class Account::DataTransfer::RecordSetTest < ActiveSupport::TestCase
     assert_match(/appears more than once/i, error.message)
   end
 
+  test "check rejects a blank unique key" do
+    publication_data = build_publication_data(key: nil)
+
+    error = assert_raises(Account::DataTransfer::RecordSet::IntegrityError) do
+      publication_record_set.check(from: build_reader(dir: "board_publications", data: publication_data))
+    end
+
+    assert_match(/key must be present/i, error.message)
+    assert_not error.is_a?(Account::DataTransfer::RecordSet::ConflictError)
+  end
+
   test "check accepts a fresh unique key" do
     boards(:writebook).create_publication!
     publication_data = build_publication_data(key: SecureRandom.base58(24))

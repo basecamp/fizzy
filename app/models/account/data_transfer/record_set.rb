@@ -132,7 +132,11 @@ class Account::DataTransfer::RecordSet
 
     def check_unique_keys_available(data)
       unique_keys.each do |column|
-        if value = data[column]
+        value = data[column]
+
+        if value.blank?
+          raise IntegrityError, "#{model} #{column} must be present"
+        else
           check_unique_key_available(column, value)
         end
       end
