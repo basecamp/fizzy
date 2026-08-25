@@ -82,6 +82,26 @@ class Account::DataTransfer::RecordSetTest < ActiveSupport::TestCase
     end
   end
 
+  test "import converts a duplicate-key constraint violation to a conflict error" do
+    existing = boards(:writebook).create_publication!
+    publication_data = build_publication_data(key: existing.key)
+
+    error = assert_raises(Account::DataTransfer::RecordSet::ConflictError) do
+      publication_record_set.import(from: build_reader(dir: "board_publications", data: publication_data))
+    end
+
+    assert_match(/uniqueness constraint/i, error.message)
+    assert_not Board::Publication.exists?(id: publication_data["id"])
+  end
+
+  test "import inserts a publication when its key is unique" do
+    publication_data = build_publication_data(key: SecureRandom.base58(24))
+
+    publication_record_set.import(from: build_reader(dir: "board_publications", data: publication_data))
+
+    assert Board::Publication.exists?(id: publication_data["id"], key: publication_data["key"])
+  end
+
   private
     def importing_account
       @importing_account ||= Account.create!(name: "Importing Account", external_account_id: 99999999)
