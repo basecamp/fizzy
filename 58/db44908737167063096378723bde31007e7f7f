@@ -1,0 +1,63 @@
+test/lib/action_pack/web_authn/cbor_decoder_test.rb
+  s_964922bad4d340::t_ea7931fb2c1eae 296-319
+lib/action_pack/web_authn/authenticator/attestation.rb
+  s_964922bad4d340::t_c692e09a62a5f7 61-64
+lib/action_pack/web_authn/cbor_decoder.rb
+  s_964922bad4d340::t_1f7eff613a961f 258-273
+  s_964922bad4d340::t_814bb308a70bca 169-173
+  s_964922bad4d340::t_615d3dc7f96084 182
+db/migrate/20260825120000_widen_action_pack_passkeys_sign_count_to_bigint.rb
+  s_964922bad4d340::t_dad5afa467eb72 1-10
+test/lib/action_pack/web_authn/public_key_credential_test.rb
+  s_964922bad4d340::t_64615f89ab8582 1-35
+test/lib/action_pack/passkey_test.rb
+  s_964922bad4d340::t_0106c5ea5486ed 46-55
+test/test_helpers/webauthn_test_helper.rb
+  s_964922bad4d340::t_88f050c351667d 36
+test/lib/action_pack/web_authn_test.rb
+  s_964922bad4d340::t_073d3503f099e3 1-17
+lib/action_pack/web_authn/authenticator/response.rb
+  s_964922bad4d340::t_af49449e115fb5 131-133
+  s_964922bad4d340::t_1ae5a9c5ce3c36 65-67,69-73
+  s_964922bad4d340::t_00b62217083544 92-101
+test/lib/action_pack/web_authn/cose_key_test.rb
+  s_964922bad4d340::t_10e0b37862db6f 255-287
+lib/action_pack/web_authn.rb
+  s_964922bad4d340::t_7abdd7aad9f48a 33-43
+app/controllers/my/passkeys_controller.rb
+  s_964922bad4d340::t_d3c6f870f2acb1 15-18
+lib/action_pack/web_authn/public_key_credential.rb
+  s_964922bad4d340::t_25afdfd7b706c2 146
+test/lib/action_pack/web_authn/authenticator/attestation_response_test.rb
+  s_964922bad4d340::t_01d5caefc67e74 170-203
+test/controllers/my/passkeys_controller_test.rb
+  s_964922bad4d340::t_f3d9b854835b03 26-54
+lib/action_pack/passkey.rb
+  s_964922bad4d340::t_b55e737dc543d4 89
+lib/action_pack/web_authn/cose_key.rb
+  s_964922bad4d340::t_cdfd4696f09b6e 160,165-169
+  s_964922bad4d340::t_3dbb3d34a7111f 119
+  s_964922bad4d340::t_72216b18dfc09a 170-171
+  s_964922bad4d340::t_f27e44848ff042 143
+  s_964922bad4d340::t_36b5cdcff0ae03 172
+db/schema.rb
+  s_964922bad4d340::t_9781bdd8a899cc 13,81
+db/schema_sqlite.rb
+  s_964922bad4d340::t_fda920729552a8 13,81
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "58db44908737167063096378723bde31007e7f7f",
+  "prompts": {},
+  "sessions": {
+    "s_964922bad4d340": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b315b378-55b7-45e0-911e-b964de3ac103",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
