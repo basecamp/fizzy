@@ -62,7 +62,7 @@ Rails.application.routes.draw do
   end
 
   namespace :columns do
-    resources :cards do
+    resources :cards, only: [] do
       scope module: :cards do
         namespace :drops do
           resource :not_now
