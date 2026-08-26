@@ -1,0 +1,22 @@
+app/jobs/account/data_import_job.rb
+  s_964922bad4d340::t_cd2447c8ce1b63 4-8,11,26-30
+test/jobs/account/data_import_job_test.rb
+  s_964922bad4d340::t_b2e328001982c3 31-49,54-59
+  s_964922bad4d340::t_d6953001b62e50 50-53
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "9fd3a1c2ba486e6bd8d48ffb5c2a268ae3a80694",
+  "prompts": {},
+  "sessions": {
+    "s_964922bad4d340": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b315b378-55b7-45e0-911e-b964de3ac103",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
