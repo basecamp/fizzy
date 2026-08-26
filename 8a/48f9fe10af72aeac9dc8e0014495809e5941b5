@@ -1,0 +1,23 @@
+saas/lib/fizzy/saas/unprocessable_attachments.rb
+  s_964922bad4d340::t_c625c3cb69c28e 7-12
+  s_964922bad4d340::t_69a7453f7812e3 43-47
+saas/test/integration/unprocessable_representation_test.rb
+  s_964922bad4d340::t_b0b9893ca747f4 1-17,26-28,30-53
+  s_964922bad4d340::t_710ae75c80647d 18-25,29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "8a48f9fe10af72aeac9dc8e0014495809e5941b5",
+  "prompts": {},
+  "sessions": {
+    "s_964922bad4d340": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b315b378-55b7-45e0-911e-b964de3ac103",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": null
+    }
+  }
+}
