@@ -1,0 +1,22 @@
+saas/lib/fizzy/saas/unprocessable_attachments.rb
+  s_964922bad4d340::t_69a7453f7812e3 43-47
+  s_964922bad4d340::t_c625c3cb69c28e 7-12
+saas/test/integration/unprocessable_representation_test.rb
+  s_964922bad4d340::t_b0b9893ca747f4 1-45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "db59c41160be85a8653816af3cdf84d72831bded",
+  "prompts": {},
+  "sessions": {
+    "s_964922bad4d340": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b315b378-55b7-45e0-911e-b964de3ac103",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
