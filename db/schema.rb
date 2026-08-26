@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_07_09_120000) do
+ActiveRecord::Schema[8.2].define(version: 2026_08_25_120000) do
   create_table "accesses", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -348,6 +348,7 @@ ActiveRecord::Schema[8.2].define(version: 2026_07_09_120000) do
     t.string "email_address", null: false
     t.boolean "staff", default: false, null: false
     t.datetime "updated_at", null: false
+    t.bigint "transfer_token_generation", default: 0, null: false
     t.index ["email_address"], name: "index_identities_on_email_address", unique: true
   end
 

@@ -1,25 +1,69 @@
 require "test_helper"
 
 class Identity::TransferableTest < ActiveSupport::TestCase
-  test "transfer_id" do
+  test "transfer_id is a string and does not consume the token" do
     identity = identities(:david)
-    transfer_id = identity.transfer_id
 
+    transfer_id = identity.transfer_id
     assert_kind_of String, transfer_id
+
+    # Minting is a pure read: the generation is untouched and the token still redeems.
+    assert_no_difference -> { identity.reload.transfer_token_generation } do
+      identity.transfer_id
+    end
+    assert_equal identity, Identity.find_by_transfer_id(transfer_id)
   end
 
-  test "find_by_transfer_id" do
+  test "find_by_transfer_id redeems a valid token" do
+    identity = identities(:kevin)
+
+    assert_equal identity, Identity.find_by_transfer_id(identity.transfer_id)
+  end
+
+  test "find_by_transfer_id rejects a tampered or malformed token" do
+    assert_nil Identity.find_by_transfer_id("invalid_id")
+  end
+
+  test "find_by_transfer_id rejects an expired token" do
     identity = identities(:kevin)
     transfer_id = identity.transfer_id
 
-    found = Identity.find_by_transfer_id(transfer_id)
-    assert_equal identity, found
+    travel Identity::Transferable::TRANSFER_LINK_EXPIRY_DURATION + 1.second do
+      assert_nil Identity.find_by_transfer_id(transfer_id)
+    end
+  end
 
-    found = Identity.find_by_transfer_id("invalid_id")
-    assert_nil found
+  test "a transfer token is single-use: a second redemption is rejected" do
+    identity = identities(:kevin)
+    transfer_id = identity.transfer_id
 
-    expired_id = identity.signed_id(purpose: :transfer, expires_in: -1.second)
-    found = Identity.find_by_transfer_id(expired_id)
-    assert_nil found
+    assert_equal identity, Identity.find_by_transfer_id(transfer_id)
+    assert_nil Identity.find_by_transfer_id(transfer_id)
+  end
+
+  test "regenerating revokes previously issued tokens" do
+    identity = identities(:kevin)
+    transfer_id = identity.transfer_id
+
+    identity.regenerate_transfer_token!
+
+    assert_nil Identity.find_by_transfer_id(transfer_id)
+    # A freshly minted token still works after regeneration.
+    assert_equal identity, Identity.find_by_transfer_id(identity.transfer_id)
+  end
+
+  test "consume is a compare-and-swap on the generation" do
+    identity = identities(:kevin)
+    generation = identity.transfer_token_generation
+
+    # The redemption is an atomic conditional UPDATE keyed on the presented
+    # generation, so only the matching generation is consumed and it advances by one.
+    assert_equal identity, identity.consume_transfer_token(generation)
+    assert_equal generation + 1, identity.reload.transfer_token_generation
+
+    # A stale generation (a replay, or a token superseded by a regenerate) matches no
+    # row: nothing is consumed and the counter does not move.
+    assert_nil identity.consume_transfer_token(generation)
+    assert_equal generation + 1, identity.reload.transfer_token_generation
   end
 end
