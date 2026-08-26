@@ -1,0 +1,22 @@
+config/routes.rb
+  s_964922bad4d340::t_411ec52a5f21eb 65
+test/routes_test.rb
+  s_964922bad4d340::t_5047fbe8d97830 17,20
+  s_964922bad4d340::t_cf2dbed4825b83 15-16,18-19,21-25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "c58b4f0ea5e228497bf01aa635b23a2c244a80cc",
+  "prompts": {},
+  "sessions": {
+    "s_964922bad4d340": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b315b378-55b7-45e0-911e-b964de3ac103",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
