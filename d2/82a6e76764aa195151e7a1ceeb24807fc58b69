@@ -1,0 +1,24 @@
+app/views/my/access_tokens/index.html.erb
+  s_964922bad4d340::t_28e75778b2e360 5-9
+app/views/my/passkeys/index.html.erb
+  s_964922bad4d340::t_c70950b039a2db 5-9
+test/controllers/my/access_tokens_controller_test.rb
+  s_964922bad4d340::t_bc78ab414c3455 9-10
+  s_964922bad4d340::t_136f9c546e6512 8,11-19,23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "d282a6e76764aa195151e7a1ceeb24807fc58b69",
+  "prompts": {},
+  "sessions": {
+    "s_964922bad4d340": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b315b378-55b7-45e0-911e-b964de3ac103",
+        "model": "claude-fable-5"
+      },
+      "human_author": null
+    }
+  }
+}
