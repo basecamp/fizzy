@@ -45,6 +45,13 @@ class ActionPack::WebAuthn::Authenticator::Response
   validate :user_must_be_verified_when_required
 
   def initialize(client_data_json:, origin: nil, user_verification: :preferred)
+    # Strong parameters permit scalars, so a JSON request body can deliver a
+    # non-string here (e.g. a number or object). Reject it at the boundary
+    # rather than crashing later on JSON.parse/#encoding with an uncaught error.
+    unless client_data_json.is_a?(String)
+      raise ActionPack::WebAuthn::InvalidResponseError, "Client data is missing or malformed"
+    end
+
     @client_data_json = client_data_json
     @origin = origin
     @user_verification = user_verification.to_sym

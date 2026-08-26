@@ -254,8 +254,8 @@ class ActionPack::WebAuthn::CoseKeyTest < ActiveSupport::TestCase
   end
 
   test "raises error for RSA modulus padded with leading zero bytes below 2048 bits" do
-    # 2048 encoded bytes, but the actual number is only ~1024 bits — the old
-    # byte-length check would have accepted this.
+    # 256 encoded bytes (which the old bytesize*8 check read as 2048 bits), but
+    # the actual number is only ~1024 bits once the leading zero bytes are dropped.
     padded_n = ("\x00" * 128) + RSA_N[0, 128]
     parameters = @rsa_parameters.merge(-1 => padded_n)
     key = ActionPack::WebAuthn::CoseKey.new(key_type: 3, algorithm: -257, parameters: parameters)
@@ -284,5 +284,12 @@ class ActionPack::WebAuthn::CoseKeyTest < ActiveSupport::TestCase
     key = ActionPack::WebAuthn::CoseKey.new(key_type: 1, algorithm: -8, parameters: parameters)
 
     assert_raises(ActionPack::WebAuthn::InvalidKeyError) { key.to_openssl_key }
+  end
+
+  test "raises error when the decoded COSE key is not a map" do
+    # CBOR null (0xf6) decodes to nil, not a key map.
+    assert_raises(ActionPack::WebAuthn::InvalidKeyError) do
+      ActionPack::WebAuthn::CoseKey.decode("\xf6".b)
+    end
   end
 end

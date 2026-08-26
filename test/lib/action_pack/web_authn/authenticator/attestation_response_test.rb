@@ -201,6 +201,54 @@ class ActionPack::WebAuthn::Authenticator::AttestationResponseTest < ActiveSuppo
     assert_equal "Malformed attestation object", error.message
   end
 
+  test "raises for a non-string client data json or attestation object instead of a 500" do
+    assert_raises(ActionPack::WebAuthn::InvalidResponseError) do
+      ActionPack::WebAuthn::Authenticator::AttestationResponse.new(
+        client_data_json: 123, attestation_object: ATTESTATION_NONE_VERIFIED, origin: @origin
+      )
+    end
+
+    assert_raises(ActionPack::WebAuthn::InvalidResponseError) do
+      ActionPack::WebAuthn::Authenticator::AttestationResponse.new(
+        client_data_json: @client_data_json, attestation_object: 123, origin: @origin
+      )
+    end
+  end
+
+  test "validate! raises when attested credential data is missing (no AT flag)" do
+    # Valid CBOR + binary authData, but flags 0x05 (UP+UV, no AT), so there is
+    # no credential id / public key to persist. Must reject, not 500 on to_h.
+    auth_data = Digest::SHA256.digest("example.com") + [ 0x05 ].pack("C") + [ 0 ].pack("N")
+
+    response = ActionPack::WebAuthn::Authenticator::AttestationResponse.new(
+      client_data_json: @client_data_json,
+      attestation_object: none_attestation_object(auth_data),
+      origin: @origin
+    )
+
+    error = assert_raises(ActionPack::WebAuthn::InvalidResponseError) { response.validate! }
+    assert_match(/Attested credential data is missing/, error.message)
+  end
+
+  # Builds a base64url "none" attestation object wrapping the given authData.
+  def none_attestation_object(auth_data)
+    cbor = "\xa3".b # map(3)
+    cbor << "\x63".b << "fmt".b << "\x64".b << "none".b
+    cbor << "\x67".b << "attStmt".b << "\xa0".b # {}
+    cbor << "\x68".b << "authData".b << cbor_byte_string_header(auth_data.bytesize) << auth_data.b
+    Base64.urlsafe_encode64(cbor, padding: false)
+  end
+
+  def cbor_byte_string_header(length)
+    if length < 24
+      [ 0x40 | length ].pack("C")
+    elsif length < 256
+      [ 0x58, length ].pack("C*")
+    else
+      [ 0x59 ].pack("C") + [ length ].pack("n")
+    end
+  end
+
   test "validate! calls registered verifier for custom format" do
     verified = false
     custom_verifier = Object.new

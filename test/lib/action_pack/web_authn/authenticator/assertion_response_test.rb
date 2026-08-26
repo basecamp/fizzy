@@ -43,6 +43,28 @@ class ActionPack::WebAuthn::Authenticator::AssertionResponseTest < ActiveSupport
     end
   end
 
+  test "raises for a non-string signature or authenticator data instead of a 500" do
+    assert_raises(ActionPack::WebAuthn::InvalidResponseError) do
+      ActionPack::WebAuthn::Authenticator::AssertionResponse.new(
+        client_data_json: @client_data_json,
+        authenticator_data: @authenticator_data,
+        signature: 123, # scalar from a JSON request body
+        credential: @credential,
+        origin: @origin
+      )
+    end
+
+    assert_raises(ActionPack::WebAuthn::InvalidResponseError) do
+      ActionPack::WebAuthn::Authenticator::AssertionResponse.new(
+        client_data_json: @client_data_json,
+        authenticator_data: { not: "a string" },
+        signature: @signature,
+        credential: @credential,
+        origin: @origin
+      )
+    end
+  end
+
   test "validate! raises when type is not webauthn.get" do
     client_data_json = {
       challenge: @challenge,

@@ -78,6 +78,11 @@ class ActionPack::WebAuthn::CoseKey
     #   cose_key.algorithm # => -7 (ES256)
     def decode(bytes)
       data = ActionPack::WebAuthn::CborDecoder.decode(bytes)
+
+      unless data.is_a?(Hash)
+        raise ActionPack::WebAuthn::InvalidKeyError, "COSE key is not a map"
+      end
+
       new(
         key_type: data[KEY_TYPE_LABEL],
         algorithm: data[ALGORITHM_LABEL],

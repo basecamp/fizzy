@@ -38,6 +38,11 @@ class ActionPack::WebAuthn::Authenticator::AssertionResponse < ActionPack::WebAu
 
   def initialize(credential:, authenticator_data:, signature:, **attributes)
     super(**attributes)
+
+    unless signature.is_a?(String) && authenticator_data.is_a?(String)
+      raise ActionPack::WebAuthn::InvalidResponseError, "Assertion response is missing or malformed"
+    end
+
     @credential = credential
     @signature = signature
     @signature = Base64.urlsafe_decode64(@signature) unless @signature.encoding == Encoding::BINARY

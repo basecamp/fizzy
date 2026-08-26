@@ -30,10 +30,16 @@ class ActionPack::WebAuthn::Authenticator::AttestationResponse < ActionPack::Web
   attr_reader :attestation_object
 
   validate :client_data_type_must_be_create
+  validate :attested_credential_data_must_be_present
   validate :attestation_must_be_valid
 
   def initialize(attestation_object:, **attributes)
     super(**attributes)
+
+    unless attestation_object.is_a?(String)
+      raise ActionPack::WebAuthn::InvalidResponseError, "Attestation object is missing or malformed"
+    end
+
     @attestation_object = attestation_object
   end
 
@@ -56,6 +62,15 @@ class ActionPack::WebAuthn::Authenticator::AttestationResponse < ActionPack::Web
     def client_data_type_must_be_create
       unless client_data["type"] == "webauthn.create"
         errors.add(:base, "Client data type is not webauthn.create")
+      end
+    end
+
+    def attested_credential_data_must_be_present
+      # A registration attestation must carry attested credential data (the AT
+      # flag). Without it credential_id/public_key are nil and persistence would
+      # crash; treat it as a malformed registration response.
+      if attestation.credential_id.nil? || attestation.public_key_bytes.nil?
+        errors.add(:base, "Attested credential data is missing")
       end
     end
 
