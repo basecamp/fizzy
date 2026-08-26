@@ -105,6 +105,26 @@ class Account::DataTransfer::RecordSetTest < ActiveSupport::TestCase
     assert_not Board::Publication.exists?(id: publication_data["id"])
   end
 
+  test "import converts a constraint violation raised by an overridden import_batch to a conflict error" do
+    existing = boards(:writebook).create_publication!
+    publication_data = build_publication_data(key: existing.key)
+
+    subclass = Class.new(Account::DataTransfer::RecordSet) do
+      private
+        def import_batch(files)
+          batch_data = files.map { |file| load(file).merge("account_id" => account.id) }
+          model.insert_all!(batch_data)
+        end
+    end
+    record_set = subclass.new(account: importing_account, model: Board::Publication, unique_keys: %w[ key ])
+
+    error = assert_raises(Account::DataTransfer::RecordSet::ConflictError) do
+      record_set.import(from: build_reader(dir: "board_publications", data: publication_data))
+    end
+
+    assert_match(/uniqueness constraint/i, error.message)
+  end
+
   test "import inserts a publication when its key is unique" do
     publication_data = build_publication_data(key: SecureRandom.base58(24))
 

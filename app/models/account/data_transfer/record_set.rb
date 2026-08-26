@@ -36,6 +36,8 @@ class Account::DataTransfer::RecordSet
         callback&.call(record_set: self, files: file_batch)
       end
     end
+  rescue ActiveRecord::RecordNotUnique => e
+    raise ConflictError, "#{model} import violated a uniqueness constraint: #{e.message}"
   end
 
   def check(from:, start: nil, callback: nil)
@@ -82,8 +84,6 @@ class Account::DataTransfer::RecordSet
       end
 
       model.insert_all!(batch_data)
-    rescue ActiveRecord::RecordNotUnique => e
-      raise ConflictError, "#{model} import violated a uniqueness constraint: #{e.message}"
     end
 
     def check_record(file_path)
