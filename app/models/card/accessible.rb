@@ -17,7 +17,7 @@ module Card::Accessible
 
   private
     def grant_access_to_assignees
-      board.accesses.grant_to(assignees)
+      board.accesses.grant_to(assignees) if Current.user&.can_administer_board?(board)
     end
 
     def clean_inaccessible_data_later

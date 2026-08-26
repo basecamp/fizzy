@@ -114,16 +114,34 @@ class CardTest < ActiveSupport::TestCase
     end
   end
 
-  test "grants access to assignees when moved to a new board" do
+  test "grants access to assignees when an authorized mover moves the card to a new board" do
+    Current.session = sessions(:kevin) # kevin can administer the private board (its creator)
     card = cards(:logo)
-    assignee = users(:david)
-    card.toggle_assignment(assignee)
-
+    assignee = users(:jz) # already assigned to the card via fixtures, no access to the private board
     board = boards(:private)
-    assert_not_includes board.users, assignee
+
+    assert Current.user.can_administer_board?(board)
+    assert_includes card.assignees, assignee
+    assert_not board.accessible_to?(assignee)
 
     card.update!(board: board)
     assert_includes board.users.reload, assignee
+  end
+
+  test "does not grant board access to assignees when the mover cannot administer the destination board" do
+    Current.session = sessions(:david) # david is a plain member: not an admin and not the private board's creator
+    card = cards(:logo)
+    assignee = users(:jz) # already assigned to the card via fixtures, no access to the private board
+    board = boards(:private)
+
+    assert_not Current.user.can_administer_board?(board)
+    assert_includes card.assignees, assignee
+    assert_not board.accessible_to?(assignee)
+
+    card.update!(board: board)
+
+    assert_not_includes board.users.reload, assignee,
+      "a non-administering mover must not grant a user access to a private board via a card move"
   end
 
   test "move cards to a different board" do
