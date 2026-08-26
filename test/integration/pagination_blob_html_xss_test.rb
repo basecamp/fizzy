@@ -79,6 +79,7 @@ class PaginationBlobHtmlXssTest < ActionDispatch::IntegrationTest
     text/html+json
     text/vnd.turbo-stream.html
     application/xhtml+xml+xxe
+    text/htmlé
   ].each do |declared_type|
     test "unattached blob declared #{declared_type} is served as octet-stream" do
       blob = create_unattached_html_blob(content_type: declared_type)

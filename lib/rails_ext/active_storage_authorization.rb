@@ -51,7 +51,13 @@ ActiveSupport.on_load :active_storage_blob do
     end
 
     def dangerous_inline_media_type?
-      ActiveStorage::DANGEROUS_INLINE_MEDIA_TYPE.match?(content_type.to_s.strip)
+      declared = content_type.to_s.strip
+      # A legitimate MIME type is ASCII; a non-ASCII declared type is malformed
+      # and force-binary. This also closes a word-boundary gap: Turbo's \b (JS,
+      # ASCII) treats "text/htmlé" as HTML, but Ruby's Unicode \b would not, so
+      # forcing all non-ASCII types to binary keeps the regex congruent with
+      # Turbo (it only ever sees ASCII, where the boundaries agree).
+      !declared.ascii_only? || ActiveStorage::DANGEROUS_INLINE_MEDIA_TYPE.match?(declared)
     end
 end
 
