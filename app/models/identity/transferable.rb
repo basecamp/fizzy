@@ -27,23 +27,21 @@ module Identity::Transferable
   end
 
   # Revokes every outstanding transfer token by advancing the generation. Used when a
-  # person asks for a fresh link — the previously issued ones stop verifying.
-  def regenerate_transfer_token!
-    bump_transfer_token_generation transfer_token_generation
+  # person asks for a fresh link — the previously issued ones stop verifying. The
+  # increment is unconditional (keyed only on id), so it advances even from a stale
+  # in-memory generation.
+  def regenerate_transfer_token
+    self.class.where(id: id).update_all("transfer_token_generation = transfer_token_generation + 1")
     reload
   end
 
-  # Atomically consumes the presented generation. The conditional UPDATE is a
-  # compare-and-swap: exactly one caller can advance a given generation, so a replay
-  # or a token from an already-superseded generation matches no row and is rejected.
-  # This closes the redemption race (TOCTOU) without a lock.
+  # Atomically consumes the presented generation. The UPDATE is conditional on that
+  # generation — a compare-and-swap: exactly one caller can advance a given
+  # generation, so a replay or a token from an already-superseded generation matches
+  # no row and is rejected. This closes the redemption race (TOCTOU) without a lock.
   def consume_transfer_token(generation)
-    self if bump_transfer_token_generation(generation) == 1
+    consumed = self.class.where(id: id, transfer_token_generation: generation)
+      .update_all("transfer_token_generation = transfer_token_generation + 1") == 1
+    self if consumed
   end
-
-  private
-    def bump_transfer_token_generation(from)
-      self.class.where(id: id, transfer_token_generation: from)
-        .update_all("transfer_token_generation = transfer_token_generation + 1")
-    end
 end

@@ -6,6 +6,10 @@ class Sessions::TransfersController < ApplicationController
   end
 
   def update
+    # find_by_transfer_id consumes the token before the session is established, so a
+    # failure here burns the link (fail-closed) rather than leaving a single-use token
+    # redeemable. That's the safe direction for an auth credential; the person just
+    # generates a fresh link.
     if identity = Identity.find_by_transfer_id(params[:id])
       start_new_session_for identity
       redirect_to session_menu_path(script_name: nil)
