@@ -69,6 +69,31 @@ class PaginationBlobHtmlXssTest < ActionDispatch::IntegrationTest
     assert_match %r{attachment}, response.headers["Content-Disposition"].to_s
   end
 
+  # Link 4, Turbo-matcher variants: Turbo's own FetchResponse#isHTML matcher
+  # (/^(?:text\/([^\s;,]+\b)?html|application\/xhtml\+xml)\b/) renders a whole
+  # family of non-canonical declared types as HTML in a frame, well beyond the
+  # canonical "text/html". Each of these must be forced to octet-stream or the
+  # script-execution sink stays open (HackerOne #3943339).
+  %w[
+    text/x-html
+    text/html+json
+    text/vnd.turbo-stream.html
+    application/xhtml+xml+xxe
+  ].each do |declared_type|
+    test "unattached blob declared #{declared_type} is served as octet-stream" do
+      blob = create_unattached_html_blob(content_type: declared_type)
+
+      sign_in_as :david
+
+      get rails_storage_proxy_path(blob)
+
+      assert_response :success
+      assert_equal "application/octet-stream", response.media_type,
+        "#{declared_type} is rendered as HTML by Turbo's frame matcher and must not be served inline"
+      assert_match %r{attachment}, response.headers["Content-Disposition"].to_s
+    end
+  end
+
   # Documents the downstream sink (link 5): the token-mint endpoint is reachable
   # from any authenticated identity and returns a raw identity-scoped write
   # token. Not changed by this fix — the chain is broken upstream — but pinned so

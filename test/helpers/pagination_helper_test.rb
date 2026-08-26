@@ -25,12 +25,18 @@ class PaginationHelperTest < ActionView::TestCase
   end
 
   test "next-page link does not honor other url_for control options" do
+    # No only_path here: with host present and only_path absent, pre-patch
+    # url_for emits an absolute https://attacker.example/... URL, so this
+    # genuinely fails without the filter rather than passing for the wrong
+    # reason.
     with_request_params controller: "public/boards/columns/streams", action: "show",
-      board_id: "the-board", host: "attacker.example", protocol: "https", only_path: "false" do
+      board_id: "the-board", host: "attacker.example", protocol: "https" do
       href = pagination_href(:stream_column, 2)
 
       assert_no_match %r{attacker\.example}, href,
-        "host/protocol/only_path must not turn the link into an absolute cross-origin URL"
+        "host/protocol must not turn the link into an absolute cross-origin URL"
+      assert_match %r{\A/public/boards/the-board/columns/stream}, href,
+        "the link must stay a relative path on the real next-page route"
     end
   end
 

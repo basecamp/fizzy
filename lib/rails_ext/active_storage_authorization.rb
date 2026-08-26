@@ -1,11 +1,24 @@
-# HackerOne #3943339: never serve HTML/XML/SVG blobs inline as their declared
-# content type. Parameterized MIME types such as "text/html;charset=utf-8" slip
-# past Active Storage's exact-string binary list, so these must be forced to
-# binary after normalizing the media type. (SVG/XML are scriptable when rendered
-# inline same-origin, so they are neutralized here as well.)
-ActiveStorage::DANGEROUS_INLINE_MEDIA_TYPES = %w[
-  text/html application/xhtml+xml image/svg+xml application/xml text/xml
-].freeze
+# HackerOne #3943339: never serve a blob inline with a media type a browser or
+# Turbo will execute as markup. An exact-string list is too narrow: Turbo's
+# frame renderer treats a whole family of declared types as HTML — its
+# FetchResponse#isHTML test is /^(?:text\/([^\s;,]+\b)?html|application\/xhtml\+xml)\b/,
+# which matches non-canonical forms such as "text/x-html", "text/html+foo",
+# "text/vnd.turbo-stream.html", and "application/xhtml+xml+foo" that an exact
+# list misses — and Content-Disposition does not stop Turbo's fetch. This regex
+# mirrors that matcher (case-insensitively, so a "TEXT/HTML" echo is caught too)
+# and adds the browser-scriptable SVG/XML types, so every such blob is forced to
+# application/octet-stream. Parameterized types like "text/html;charset=utf-8"
+# and malformed ones like "text/html,foo" are covered by the leading essence
+# match ending at a word boundary.
+ActiveStorage::DANGEROUS_INLINE_MEDIA_TYPE = %r{
+  \A(?:
+      text/(?:[^\s;,]+\b)?html
+    | application/xhtml\+xml
+    | image/svg\+xml
+    | application/xml
+    | text/xml
+  )\b
+}xi
 
 ActiveSupport.on_load :active_storage_blob do
   def accessible_to?(user)
@@ -38,19 +51,7 @@ ActiveSupport.on_load :active_storage_blob do
     end
 
     def dangerous_inline_media_type?
-      ActiveStorage::DANGEROUS_INLINE_MEDIA_TYPES.include?(media_type_for_serving)
-    end
-
-    # Extract the media-type essence for comparison against the dangerous list.
-    # A canonical essence is "type/subtype" with no whitespace, so anything from
-    # the first parameter delimiter (";"), stray comma, or whitespace onward is
-    # dropped. Splitting only on ";" would leave a malformed declared type such
-    # as "text/html,foo" intact — it matches neither this list nor Active
-    # Storage's exact binary list, yet a client (Turbo's frame check, browser
-    # sniffing) can still treat it as HTML — so it must normalize down to
-    # "text/html" here and be forced to binary (HackerOne #3943339).
-    def media_type_for_serving
-      content_type.to_s.strip[/\A[^;,\s]*/].downcase
+      ActiveStorage::DANGEROUS_INLINE_MEDIA_TYPE.match?(content_type.to_s.strip)
     end
 end
 
