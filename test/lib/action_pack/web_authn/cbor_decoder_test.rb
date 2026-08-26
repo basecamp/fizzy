@@ -293,6 +293,30 @@ class ActionPack::WebAuthn::CborDecoderTest < ActiveSupport::TestCase
     assert_equal "Input exceeds maximum size", error.message
   end
 
+  test "rejects an array whose declared length exceeds the remaining input" do
+    # 0x9a = array, 4-byte length follows = 0xffffffff (~4.3 billion elements)
+    # from a 5-byte input. Without a bound this drives a multi-gigabyte
+    # pre-allocation (memory-exhaustion DoS) before any element is decoded.
+    error = assert_raises(ActionPack::WebAuthn::InvalidCborError) do
+      decode("9affffffff")
+    end
+
+    assert_equal "Declared length exceeds remaining input", error.message
+  end
+
+  test "rejects a map whose declared length exceeds the remaining input" do
+    # 0xba = map, 4-byte pair count follows = 0xffffffff.
+    error = assert_raises(ActionPack::WebAuthn::InvalidCborError) do
+      decode("baffffffff")
+    end
+
+    assert_equal "Declared length exceeds remaining input", error.message
+  end
+
+  test "still decodes a well-formed definite-length array" do
+    assert_equal [ 1, 2, 3 ], decode("83010203")
+  end
+
   private
     def decode(hex)
       bytes = [ hex ].pack("H*").bytes

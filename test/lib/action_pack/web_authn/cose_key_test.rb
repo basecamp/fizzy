@@ -252,4 +252,37 @@ class ActionPack::WebAuthn::CoseKeyTest < ActiveSupport::TestCase
 
     assert_match(/at least 2048 bits/i, error.message)
   end
+
+  test "raises error for RSA modulus padded with leading zero bytes below 2048 bits" do
+    # 2048 encoded bytes, but the actual number is only ~1024 bits — the old
+    # byte-length check would have accepted this.
+    padded_n = ("\x00" * 128) + RSA_N[0, 128]
+    parameters = @rsa_parameters.merge(-1 => padded_n)
+    key = ActionPack::WebAuthn::CoseKey.new(key_type: 3, algorithm: -257, parameters: parameters)
+
+    error = assert_raises(ActionPack::WebAuthn::InvalidKeyError) { key.to_openssl_key }
+    assert_match(/at least 2048 bits/i, error.message)
+  end
+
+  test "raises error for degenerate RSA public exponent e=1" do
+    parameters = @rsa_parameters.merge(-2 => "\x01") # e = 1, forgeable
+    key = ActionPack::WebAuthn::CoseKey.new(key_type: 3, algorithm: -257, parameters: parameters)
+
+    error = assert_raises(ActionPack::WebAuthn::InvalidKeyError) { key.to_openssl_key }
+    assert_match(/public exponent/i, error.message)
+  end
+
+  test "raises error for non-string EC2 coordinates" do
+    parameters = @ec2_parameters.merge(-2 => 12345) # integer instead of bytes
+    key = ActionPack::WebAuthn::CoseKey.new(key_type: 2, algorithm: -7, parameters: parameters)
+
+    assert_raises(ActionPack::WebAuthn::InvalidKeyError) { key.to_openssl_key }
+  end
+
+  test "raises error for non-string OKP coordinate" do
+    parameters = @okp_parameters.merge(-2 => 12345)
+    key = ActionPack::WebAuthn::CoseKey.new(key_type: 1, algorithm: -8, parameters: parameters)
+
+    assert_raises(ActionPack::WebAuthn::InvalidKeyError) { key.to_openssl_key }
+  end
 end

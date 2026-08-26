@@ -78,7 +78,7 @@ ActiveRecord::Schema[8.2].define(version: 2026_08_28_120000) do
     t.string "holder_type", limit: 255, null: false
     t.string "name", limit: 255
     t.binary "public_key", null: false
-    t.integer "sign_count", default: 0, null: false
+    t.bigint "sign_count", default: 0, null: false
     t.text "transports", limit: 65535
     t.datetime "updated_at", null: false
     t.index ["credential_id"], name: "index_action_pack_passkeys_on_credential_id", unique: true

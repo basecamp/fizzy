@@ -62,9 +62,15 @@ class ActionPack::WebAuthn::Authenticator::Response
   end
 
   # Parses the client data JSON string into a Hash. Raises
-  # +InvalidResponseError+ if the JSON is malformed.
+  # +InvalidResponseError+ if the JSON is malformed or is not a JSON object
+  # (anything other than an object would break the field lookups below with an
+  # uncaught TypeError).
   def client_data
-    @client_data ||= JSON.parse(client_data_json)
+    @client_data ||= JSON.parse(client_data_json).tap do |parsed|
+      unless parsed.is_a?(Hash)
+        raise ActionPack::WebAuthn::InvalidResponseError, "Client data is not a JSON object"
+      end
+    end
   rescue JSON::ParserError
     raise ActionPack::WebAuthn::InvalidResponseError, "Client data is not valid JSON"
   end
@@ -83,7 +89,16 @@ class ActionPack::WebAuthn::Authenticator::Response
     def challenge_must_not_be_expired
       return if errors.any?
 
-      signed_message = Base64.urlsafe_decode64(client_data["challenge"])
+      challenge = client_data["challenge"]
+
+      # A non-string challenge (object/array/number) would blow up Base64
+      # decoding with an uncaught error; reject it as invalid.
+      unless challenge.is_a?(String)
+        errors.add(:base, "Challenge is invalid")
+        return
+      end
+
+      signed_message = Base64.urlsafe_decode64(challenge)
 
       unless ActionPack::WebAuthn.challenge_verifier.verified(signed_message, purpose: challenge_purpose)
         errors.add(:base, "Challenge has expired")
@@ -113,7 +128,9 @@ class ActionPack::WebAuthn::Authenticator::Response
     end
 
     def must_not_have_token_binding
-      if client_data.dig("tokenBinding", "status") == "present"
+      token_binding = client_data["tokenBinding"]
+
+      if token_binding.is_a?(Hash) && token_binding["status"] == "present"
         errors.add(:base, "Token binding is not supported")
       end
     end

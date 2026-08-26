@@ -166,7 +166,11 @@ class ActionPack::WebAuthn::CborDecoder
       if indefinite_length?
         Array.new.tap { |arr| arr << decode until break_code? }
       else
-        Array.new(read_argument) { decode }
+        # Build incrementally rather than Array.new(count) { ... }: a declared
+        # count must not pre-size the backing store. read_length caps the count
+        # at the remaining bytes, and nested containers still exhaust the input
+        # (and hit the depth limit) before the array can grow large.
+        Array.new.tap { |arr| read_length.times { arr << decode } }
       end
     end
 
@@ -175,7 +179,7 @@ class ActionPack::WebAuthn::CborDecoder
         Hash.new.tap { |hash| hash[decode] = decode until break_code? }
       else
         Hash.new.tap do |hash|
-          read_argument.times do
+          read_length.times do
             hash[decode] = decode
           end
         end
@@ -249,6 +253,22 @@ class ActionPack::WebAuthn::CborDecoder
 
     def break_code?
       read_byte if peek == BREAK_CODE
+    end
+
+    # Reads a definite-length container's element count and rejects any count
+    # that exceeds the number of bytes left to read. Every CBOR data item
+    # occupies at least one byte, so a well-formed array or map can never
+    # declare more elements than there are remaining bytes. Without this bound
+    # a tiny input can name a multi-billion element array (e.g. 0x9a ff ff ff
+    # ff) and drive an out-of-memory pre-allocation before decoding begins.
+    def read_length
+      length = read_argument
+
+      if length > @bytes.length - @position
+        raise ActionPack::WebAuthn::InvalidCborError, "Declared length exceeds remaining input"
+      end
+
+      length
     end
 
     def read_bytes(length)

@@ -30,11 +30,17 @@
 #   ActionPack::WebAuthn.register_attestation_verifier("packed", MyPackedVerifier.new)
 #
 module ActionPack::WebAuthn
-  class InvalidResponseError < StandardError; end
-  class InvalidCborError < StandardError; end
-  class InvalidKeyError < StandardError; end
-  class UnsupportedKeyTypeError < StandardError; end
-  class InvalidOptionsError < StandardError; end
+  # Base class for every error raised while parsing or verifying a WebAuthn
+  # ceremony response. Callers can rescue this single class to turn any
+  # malformed, unsupported, or failed-verification input into a 4xx response
+  # instead of letting it surface as an unhandled 500.
+  class Error < StandardError; end
+
+  class InvalidResponseError < Error; end
+  class InvalidCborError < Error; end
+  class InvalidKeyError < Error; end
+  class UnsupportedKeyTypeError < Error; end
+  class InvalidOptionsError < Error; end
 
   class << self
     # Returns a new RelyingParty configured from the current request context.

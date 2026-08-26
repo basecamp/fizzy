@@ -58,6 +58,10 @@ class ActionPack::WebAuthn::Authenticator::Attestation
   def self.decode(bytes)
     cbor = ActionPack::WebAuthn::CborDecoder.decode(bytes)
 
+    unless cbor.is_a?(Hash) && cbor["authData"].is_a?(String)
+      raise ActionPack::WebAuthn::InvalidResponseError, "Malformed attestation object"
+    end
+
     new(
       authenticator_data: ActionPack::WebAuthn::Authenticator::Data.decode(cbor["authData"]),
       format: cbor["fmt"],

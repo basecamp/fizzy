@@ -116,7 +116,7 @@ class ActionPack::WebAuthn::CoseKey
 
       x = parameters[EC2_X_LABEL]
       y = parameters[EC2_Y_LABEL]
-      raise ActionPack::WebAuthn::InvalidKeyError, "Missing EC2 key coordinates" if x.nil? || y.nil?
+      raise ActionPack::WebAuthn::InvalidKeyError, "Missing EC2 key coordinates" unless x.is_a?(String) && y.is_a?(String)
       raise ActionPack::WebAuthn::InvalidKeyError, "Invalid EC2 coordinate length" unless x.bytesize == P256_COORDINATE_LENGTH && y.bytesize == P256_COORDINATE_LENGTH
 
       # Uncompressed point format: 0x04 || x || y
@@ -140,7 +140,7 @@ class ActionPack::WebAuthn::CoseKey
       raise ActionPack::WebAuthn::UnsupportedKeyTypeError, "Unsupported OKP curve: #{curve}" unless curve == ED25519
 
       x = parameters[OKP_X_LABEL]
-      raise ActionPack::WebAuthn::InvalidKeyError, "Missing OKP key coordinate" if x.nil?
+      raise ActionPack::WebAuthn::InvalidKeyError, "Missing OKP key coordinate" unless x.is_a?(String)
 
       asn1 = OpenSSL::ASN1::Sequence([
         OpenSSL::ASN1::Sequence([
@@ -157,11 +157,18 @@ class ActionPack::WebAuthn::CoseKey
     def build_rsa_rs256_key
       n_bytes = parameters[RSA_N_LABEL]
       e_bytes = parameters[RSA_E_LABEL]
-      raise ActionPack::WebAuthn::InvalidKeyError, "Missing RSA key parameters" if n_bytes.nil? || e_bytes.nil?
-      raise ActionPack::WebAuthn::InvalidKeyError, "RSA key must be at least #{MINIMUM_RSA_KEY_BITS} bits" if n_bytes.bytesize * 8 < MINIMUM_RSA_KEY_BITS
+      raise ActionPack::WebAuthn::InvalidKeyError, "Missing RSA key parameters" unless n_bytes.is_a?(String) && e_bytes.is_a?(String)
 
       n = OpenSSL::BN.new(n_bytes, 2)
       e = OpenSSL::BN.new(e_bytes, 2)
+
+      # Validate the *actual* modulus size, not the encoded byte length: a
+      # leading-zero encoding can pad a much smaller modulus up to 2048 bytes.
+      raise ActionPack::WebAuthn::InvalidKeyError, "RSA key must be at least #{MINIMUM_RSA_KEY_BITS} bits" if n.num_bits < MINIMUM_RSA_KEY_BITS
+      # Reject degenerate public exponents (e.g. e=1, which makes signatures
+      # trivially forgeable) and require the standard odd exponent form.
+      exponent = e.to_i
+      raise ActionPack::WebAuthn::InvalidKeyError, "Invalid RSA public exponent" if exponent < 3 || exponent.even?
 
       asn1 = OpenSSL::ASN1::Sequence([
         OpenSSL::ASN1::Sequence([

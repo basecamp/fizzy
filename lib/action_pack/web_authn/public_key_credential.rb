@@ -143,7 +143,7 @@ class ActionPack::WebAuthn::PublicKeyCredential
   def to_h
     {
       credential_id: id,
-      public_key: public_key.to_der,
+      public_key: public_key.public_to_der,
       sign_count: sign_count,
       aaguid: aaguid,
       backed_up: backed_up,

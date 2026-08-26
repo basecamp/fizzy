@@ -167,6 +167,40 @@ class ActionPack::WebAuthn::Authenticator::AttestationResponseTest < ActiveSuppo
     assert_equal "Unsupported attestation format: packed", error.message
   end
 
+  test "validate! raises for non-object client data instead of a 500" do
+    response = ActionPack::WebAuthn::Authenticator::AttestationResponse.new(
+      client_data_json: "123", # valid JSON, but not an object
+      attestation_object: ATTESTATION_NONE_VERIFIED,
+      origin: @origin
+    )
+
+    error = assert_raises(ActionPack::WebAuthn::InvalidResponseError) { response.validate! }
+    assert_equal "Client data is not a JSON object", error.message
+  end
+
+  test "validate! raises for a non-string challenge instead of a 500" do
+    client_data_json = { challenge: { nested: "object" }, origin: @origin, type: "webauthn.create" }.to_json
+    response = ActionPack::WebAuthn::Authenticator::AttestationResponse.new(
+      client_data_json: client_data_json,
+      attestation_object: ATTESTATION_NONE_VERIFIED,
+      origin: @origin
+    )
+
+    error = assert_raises(ActionPack::WebAuthn::InvalidResponseError) { response.validate! }
+    assert_match(/Challenge (is invalid|missing)/, error.message)
+  end
+
+  test "validate! raises for an attestation object that is not a CBOR map instead of a 500" do
+    response = ActionPack::WebAuthn::Authenticator::AttestationResponse.new(
+      client_data_json: @client_data_json,
+      attestation_object: Base64.urlsafe_encode64("\x01".b, padding: false), # CBOR integer 1
+      origin: @origin
+    )
+
+    error = assert_raises(ActionPack::WebAuthn::InvalidResponseError) { response.validate! }
+    assert_equal "Malformed attestation object", error.message
+  end
+
   test "validate! calls registered verifier for custom format" do
     verified = false
     custom_verifier = Object.new
