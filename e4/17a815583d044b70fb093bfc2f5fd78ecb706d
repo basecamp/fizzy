@@ -1,0 +1,21 @@
+app/controllers/users/events_controller.rb
+  s_964922bad4d340::t_101d5b1f28eb7a 7,9-12
+app/controllers/concerns/day_timelines_scoped.rb
+  s_964922bad4d340::t_27d2269797f2ce 12-13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "e417a815583d044b70fb093bfc2f5fd78ecb706d",
+  "prompts": {},
+  "sessions": {
+    "s_964922bad4d340": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b315b378-55b7-45e0-911e-b964de3ac103",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
