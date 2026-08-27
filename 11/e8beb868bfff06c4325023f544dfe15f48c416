@@ -1,0 +1,30 @@
+test/controllers/users/events_controller_test.rb
+  s_964922bad4d340::t_86c493ec0d5526 27-31
+  s_964922bad4d340::t_1ca6fe85a5d7ee 17-26
+app/controllers/concerns/day_timelines_scoped.rb
+  s_964922bad4d340::t_6fa37a4f89003e 12-16,20,25-26
+test/controllers/events/day_timeline/columns_controller_test.rb
+  s_964922bad4d340::t_5985443ca1ad36 30-34
+test/controllers/events_controller_test.rb
+  s_964922bad4d340::t_80f5a8153204b3 40-44
+app/controllers/users/events_controller.rb
+  s_964922bad4d340::t_f9a19a5830ca56 7-9,11-14,23,28-29
+test/controllers/events/days_controller_test.rb
+  s_964922bad4d340::t_f2888db8e8312c 1-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "11e8beb868bfff06c4325023f544dfe15f48c416",
+  "prompts": {},
+  "sessions": {
+    "s_964922bad4d340": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b315b378-55b7-45e0-911e-b964de3ac103",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": null
+    }
+  }
+}
