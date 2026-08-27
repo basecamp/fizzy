@@ -9,16 +9,20 @@ module DayTimelinesScoped
 
   private
     def set_day_timeline
-      @day_timeline = Current.user.timeline_for(day, filter: @filter)
+      if day
+        @day_timeline = Current.user.timeline_for(day, filter: @filter)
+      else
+        head :not_found
+      end
     end
 
     def day
-      if params[:day].present?
+      @day ||= if params[:day].present?
         Time.zone.parse(params[:day])
       else
         Time.current
       end
-    rescue ArgumentError
-      head :not_found
+    rescue ArgumentError, TypeError
+      nil
     end
 end

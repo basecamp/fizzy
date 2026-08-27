@@ -27,4 +27,9 @@ class Events::DayTimeline::ColumnsControllerTest < ActionDispatch::IntegrationTe
     get events_day_timeline_column_path("invalid")
     assert_response :not_found
   end
+
+  test "show returns not found for an unparseable day param" do
+    get events_day_timeline_column_path("added", day: "garbage")
+    assert_response :not_found
+  end
 end
