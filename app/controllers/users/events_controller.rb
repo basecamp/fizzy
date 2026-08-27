@@ -4,14 +4,12 @@ class Users::EventsController < ApplicationController
   before_action :set_user, :set_filter, :set_user_filtering
 
   def show
-    if day_param
-      @filter = Current.user.filters.new(creator_ids: [ @user.id ])
-      @day_timeline = Current.user.timeline_for(day_param, filter: @filter)
+    raise ActiveRecord::RecordNotFound unless day_param
 
-      fresh_when @day_timeline
-    else
-      head :not_found
-    end
+    @filter = Current.user.filters.new(creator_ids: [ @user.id ])
+    @day_timeline = Current.user.timeline_for(day_param, filter: @filter)
+
+    fresh_when @day_timeline
   end
 
   private

@@ -9,11 +9,8 @@ module DayTimelinesScoped
 
   private
     def set_day_timeline
-      if day
-        @day_timeline = Current.user.timeline_for(day, filter: @filter)
-      else
-        head :not_found
-      end
+      raise ActiveRecord::RecordNotFound unless day
+      @day_timeline = Current.user.timeline_for(day, filter: @filter)
     end
 
     def day
