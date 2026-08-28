@@ -203,6 +203,7 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     assert_not client.authenticate_secret("wrong")
     assert_not client.authenticate_secret("")
     assert_not client.authenticate_secret(nil)
+    assert_not client.authenticate_secret([ "confidential_secret_789" ])
     assert_not oauth_clients(:mcp_client).authenticate_secret("confidential_secret_789")
   end
 
