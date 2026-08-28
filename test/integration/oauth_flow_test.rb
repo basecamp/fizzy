@@ -157,6 +157,8 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     body = response.parsed_body
 
     assert_not_nil body["access_token"]
+    assert_not_nil body["refresh_token"]
+    assert_operator body["expires_in"], :>, 0
     assert_equal "Bearer", body["token_type"]
     assert_equal "read", body["scope"]
 
@@ -297,6 +299,118 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
   end
 
 
+  # Refresh Grant
+
+  test "refresh grant rotates access and refresh tokens" do
+    client = oauth_clients(:mcp_client)
+    token = identities(:david).access_tokens.create!(oauth_client: client)
+    old_access_token, old_refresh_token = token.token, token.refresh_token
+
+    assert_no_difference "Identity::AccessToken.count" do
+      untenanted do
+        post oauth_token_path, params: {
+          grant_type: "refresh_token",
+          refresh_token: old_refresh_token,
+          client_id: client.client_id
+        }, as: :json
+      end
+    end
+
+    assert_response :success
+    body = response.parsed_body
+
+    assert_not_nil body["access_token"]
+    assert_not_nil body["refresh_token"]
+    assert_operator body["expires_in"], :>, 0
+    assert_not_equal old_access_token, body["access_token"]
+    assert_not_equal old_refresh_token, body["refresh_token"]
+  end
+
+  test "refresh grant works after the access token expires" do
+    client = oauth_clients(:mcp_client)
+    token = identities(:david).access_tokens.create!(oauth_client: client)
+
+    travel Identity::AccessToken::EXPIRES_IN + 1.minute do
+      untenanted do
+        post oauth_token_path, params: {
+          grant_type: "refresh_token",
+          refresh_token: token.refresh_token,
+          client_id: client.client_id
+        }, as: :json
+      end
+
+      assert_response :success
+      assert_not Identity::AccessToken.find_by(token: response.parsed_body["access_token"]).expired?
+    end
+  end
+
+  test "refresh grant invalidates the previous refresh token" do
+    client = oauth_clients(:mcp_client)
+    token = identities(:david).access_tokens.create!(oauth_client: client)
+    old_refresh_token = token.refresh_token
+
+    untenanted do
+      post oauth_token_path, params: {
+        grant_type: "refresh_token",
+        refresh_token: old_refresh_token,
+        client_id: client.client_id
+      }, as: :json
+    end
+    assert_response :success
+
+    untenanted do
+      post oauth_token_path, params: {
+        grant_type: "refresh_token",
+        refresh_token: old_refresh_token,
+        client_id: client.client_id
+      }, as: :json
+    end
+
+    assert_response :bad_request
+    assert_equal "invalid_grant", response.parsed_body["error"]
+  end
+
+  test "refresh grant rejects a client mismatch" do
+    token = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client))
+
+    untenanted do
+      post oauth_token_path, params: {
+        grant_type: "refresh_token",
+        refresh_token: token.refresh_token,
+        client_id: oauth_clients(:trusted_client).client_id
+      }, as: :json
+    end
+
+    assert_response :bad_request
+    assert_equal "invalid_grant", response.parsed_body["error"]
+  end
+
+  test "refresh grant rejects unknown refresh token" do
+    untenanted do
+      post oauth_token_path, params: {
+        grant_type: "refresh_token",
+        refresh_token: "nonexistent",
+        client_id: oauth_clients(:mcp_client).client_id
+      }, as: :json
+    end
+
+    assert_response :bad_request
+    assert_equal "invalid_grant", response.parsed_body["error"]
+  end
+
+  test "refresh grant rejects blank refresh token" do
+    untenanted do
+      post oauth_token_path, params: {
+        grant_type: "refresh_token",
+        client_id: oauth_clients(:mcp_client).client_id
+      }, as: :json
+    end
+
+    assert_response :bad_request
+    assert_equal "invalid_grant", response.parsed_body["error"]
+  end
+
+
   # Token Revocation (RFC 7009)
 
   test "revocation deletes access token" do
@@ -305,6 +419,18 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_difference "Identity::AccessToken.count", -1 do
       untenanted do
         post oauth_revocation_path, params: { token: token.token }, as: :json
+      end
+    end
+
+    assert_response :success
+  end
+
+  test "revocation by refresh token revokes the grant" do
+    token = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client))
+
+    assert_difference "Identity::AccessToken.count", -1 do
+      untenanted do
+        post oauth_revocation_path, params: { token: token.refresh_token }, as: :json
       end
     end
 
