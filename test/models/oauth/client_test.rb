@@ -75,6 +75,16 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     assert_includes client.errors[:redirect_uris], "must not contain fragments"
   end
 
+  test "redirect URIs must not contain empty fragments" do
+    client = Oauth::Client.new(
+      name: "Empty Fragment",
+      redirect_uris: %w[ https://connector.example.com/callback# ],
+      dynamically_registered: true
+    )
+    assert_not client.valid?
+    assert_includes client.errors[:redirect_uris], "must not contain fragments"
+  end
+
   test "dynamically registered clients can use 127.0.0.1" do
     client = Oauth::Client.new(
       name: "Loopback",
@@ -102,16 +112,6 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     assert client.valid?
   end
 
-  test "loopback? returns true for loopback-only clients" do
-    client = Oauth::Client.new(redirect_uris: %w[ http://127.0.0.1:8888/cb http://localhost:9999/cb ])
-    assert client.loopback?
-  end
-
-  test "loopback? returns false for non-loopback clients" do
-    client = Oauth::Client.new(redirect_uris: %w[ https://example.com/cb ])
-    assert_not client.loopback?
-  end
-
   test "allows_redirect? matches exact URI" do
     client = Oauth::Client.new(redirect_uris: %w[ http://127.0.0.1:8888/callback ])
     assert client.allows_redirect?("http://127.0.0.1:8888/callback")
@@ -127,6 +127,13 @@ class Oauth::ClientTest < ActiveSupport::TestCase
   test "allows_redirect? requires matching path for loopback flexibility" do
     client = Oauth::Client.new(redirect_uris: %w[ http://127.0.0.1:8888/callback ])
     assert_not client.allows_redirect?("http://127.0.0.1:9999/other")
+  end
+
+  test "allows_redirect? keeps loopback flexibility for mixed registrations" do
+    client = Oauth::Client.new(redirect_uris: %w[ http://127.0.0.1:8888/callback https://connector.example.com/callback ])
+    assert client.allows_redirect?("http://127.0.0.1:9999/callback")
+    assert client.allows_redirect?("https://connector.example.com/callback")
+    assert_not client.allows_redirect?("https://connector.example.com:8443/callback")
   end
 
   test "allows_scope? checks client scopes" do
