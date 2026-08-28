@@ -15,12 +15,8 @@ class Oauth::Client < ApplicationRecord
   scope :dynamically_registered, -> { where dynamically_registered: true }
 
 
-  def loopback?
-    redirect_uris.all? { |uri| loopback_uri?(uri) }
-  end
-
   def allows_redirect?(uri)
-    redirect_uris.include?(uri) || (loopback? && loopback_uri?(uri) && matching_loopback?(uri))
+    redirect_uris.include?(uri) || (loopback_uri?(uri) && matching_loopback?(uri))
   end
 
   def allows_scope?(requested_scope)
@@ -36,7 +32,7 @@ class Oauth::Client < ApplicationRecord
     def validate_redirect_uri(uri)
       parsed = URI.parse(uri)
 
-      if parsed.fragment.present?
+      unless parsed.fragment.nil?
         errors.add :redirect_uris, "must not contain fragments"
       end
 
