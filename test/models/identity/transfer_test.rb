@@ -16,6 +16,17 @@ class Identity::TransferTest < ActiveSupport::TestCase
     end
   end
 
+  test "consume rejects a transfer that expires between load and delete" do
+    transfer = identities(:kevin).transfers.create!
+    loaded = Identity::Transfer.active.find_by(token: transfer.token)
+
+    travel Identity::Transfer::EXPIRATION_TIME + 1.second do
+      assert_nil loaded.consume
+    end
+
+    assert Identity::Transfer.exists?(transfer.id)
+  end
+
   test "consume is atomic: only one holder of a shared token wins" do
     transfer = identities(:kevin).transfers.create!
     one = Identity::Transfer.active.find_by(token: transfer.token)

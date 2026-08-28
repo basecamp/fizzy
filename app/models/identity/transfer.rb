@@ -19,6 +19,6 @@ class Identity::Transfer < ApplicationRecord
   end
 
   def consume
-    self if self.class.where(id: id).delete_all == 1
+    self if self.class.active.where(id: id).delete_all == 1
   end
 end
