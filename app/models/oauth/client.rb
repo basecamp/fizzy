@@ -44,17 +44,17 @@ class Oauth::Client < ApplicationRecord
     end
 
     def loopback_uri?(uri)
-      Oauth::LOOPBACK_HOSTS.include?(URI.parse(uri).host)
+      Oauth.loopback_host?(URI.parse(uri).host)
     rescue URI::InvalidURIError
       false
     end
 
     def valid_loopback_uri?(parsed)
-      parsed.scheme == "http" && parsed.host.in?(Oauth::LOOPBACK_HOSTS)
+      parsed.scheme == "http" && Oauth.loopback_host?(parsed.host)
     end
 
     def valid_https_uri?(parsed)
-      parsed.scheme == "https" && parsed.host.present? && !parsed.host.in?(Oauth::LOOPBACK_HOSTS)
+      parsed.scheme == "https" && parsed.host.present? && !Oauth.loopback_host?(parsed.host)
     end
 
     def matching_loopback?(uri)
@@ -64,8 +64,8 @@ class Oauth::Client < ApplicationRecord
         redirect = URI.parse(redirect_uri)
 
         redirect.scheme == parsed.scheme &&
-          redirect.host.in?(Oauth::LOOPBACK_HOSTS) &&
-          parsed.host.in?(Oauth::LOOPBACK_HOSTS) &&
+          Oauth.loopback_host?(redirect.host) &&
+          Oauth.loopback_host?(parsed.host) &&
           redirect.path == parsed.path
       end
     rescue URI::InvalidURIError

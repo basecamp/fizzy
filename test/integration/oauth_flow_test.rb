@@ -422,6 +422,20 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_equal "invalid_redirect_uri", response.parsed_body["error"]
   end
 
+  test "DCR rejects https loopback redirect regardless of host case" do
+    assert_no_difference "Oauth::Client.count" do
+      untenanted do
+        post oauth_clients_path, params: {
+          client_name: "Cased Loopback",
+          redirect_uris: [ "https://LOCALHOST:8888/callback" ]
+        }, as: :json
+      end
+    end
+
+    assert_response :bad_request
+    assert_equal "invalid_redirect_uri", response.parsed_body["error"]
+  end
+
   test "DCR rejects https redirect with fragment" do
     assert_no_difference "Oauth::Client.count" do
       untenanted do
@@ -459,6 +473,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
       }
     end
     assert_response :success
+    assert_match "connector.example.com", response.body
 
     untenanted do
       get new_oauth_authorization_path, params: {

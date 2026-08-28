@@ -52,11 +52,11 @@ class Oauth::ClientsController < Oauth::BaseController
     end
 
     def loopback_uri?(parsed)
-      parsed.scheme == "http" && Oauth::LOOPBACK_HOSTS.include?(parsed.host)
+      parsed.scheme == "http" && Oauth.loopback_host?(parsed.host)
     end
 
     def https_uri?(parsed)
-      parsed.scheme == "https" && parsed.host.present? && !Oauth::LOOPBACK_HOSTS.include?(parsed.host)
+      parsed.scheme == "https" && parsed.host.present? && !Oauth.loopback_host?(parsed.host)
     end
 
     def validated_scopes
