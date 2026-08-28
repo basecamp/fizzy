@@ -1,43 +1,54 @@
 <section class="settings__section">
-  <% url = session_transfer_url(user.identity.transfer_id, script_name: nil) %>
+  <% transfer = user.identity.transfer %>
 
   <header>
     <h2 class="divider">Devices</h2>
-    <p class="margin-none" id="session_transfer_label">Link to automatically log in on another device. It can be used once, then expires; generate a new one to revoke any link you shared earlier.</p>
+    <p class="margin-none" id="session_transfer_label">Link to automatically log in on another device. It works once, then expires; generate a new one to revoke any link you shared earlier.</p>
   </header>
 
-  <input type="text" class="input fill-white" id="session_transfer_url" value="<%= url %>" aria-labelledby="session_transfer_label" readonly>
+  <% if transfer %>
+    <% url = session_transfer_url(transfer.token, script_name: nil) %>
 
-  <div class="flex justify-center gap">
-    <div data-controller="dialog" data-dialog-modal-value="true" class="flex-inline">
-      <%= tag.button class: "btn", data: { action: "dialog#open", controller: "tooltip" } do %>
-        <%= icon_tag "qr-code" %>
-        <span class="for-screen-reader">Display auto-login QR code</span>
+    <input type="text" class="input fill-white" id="session_transfer_url" value="<%= url %>" aria-labelledby="session_transfer_label" readonly>
+
+    <div class="flex justify-center gap">
+      <div data-controller="dialog" data-dialog-modal-value="true" class="flex-inline">
+        <%= tag.button class: "btn", data: { action: "dialog#open", controller: "tooltip" } do %>
+          <%= icon_tag "qr-code" %>
+          <span class="for-screen-reader">Display auto-login QR code</span>
+        <% end %>
+
+        <dialog class="dialog panel shadow" data-dialog-target="dialog" style="--panel-size: 50ch;">
+          <p class="margin-none-block-start txt-balance">
+            <strong>Scan this code to instantly log in on another device:</strong>
+          </p>
+
+          <%= qr_code_image(url) %>
+
+          <form method="dialog" class="margin-block-start flex justify-center">
+            <button class="btn">
+              <span>Done</span>
+            </button>
+          </form>
+        </dialog>
+      </div>
+
+      <%= button_to_copy_to_clipboard(url) do %>
+        <%= icon_tag "copy-paste" %>
+        <span class="for-screen-reader">Copy auto-login link</span>
       <% end %>
 
-      <dialog class="dialog panel shadow" data-dialog-target="dialog" style="--panel-size: 50ch;">
-        <p class="margin-none-block-start txt-balance">
-          <strong>Scan this code to instantly log in on another device:</strong>
-        </p>
-
-        <%= qr_code_image(url) %>
-
-        <form method="dialog" class="margin-block-start flex justify-center">
-          <button class="btn">
-            <span>Done</span>
-          </button>
-        </form>
-      </dialog>
+      <%= button_to transfer_token_path, method: :post, class: "btn", data: { controller: "tooltip" } do %>
+        <%= icon_tag "refresh" %>
+        <span class="for-screen-reader">Generate a new auto-login link and revoke the old one</span>
+      <% end %>
     </div>
-
-    <%= button_to_copy_to_clipboard(url) do %>
-      <%= icon_tag "copy-paste" %>
-      <span class="for-screen-reader">Copy auto-login link</span>
-    <% end %>
-
-    <%= button_to transfer_token_path, method: :post, class: "btn", data: { controller: "tooltip" } do %>
-      <%= icon_tag "refresh" %>
-      <span class="for-screen-reader">Generate a new auto-login link and revoke the old one</span>
-    <% end %>
-  </div>
+  <% else %>
+    <div class="flex justify-center">
+      <%= button_to transfer_token_path, method: :post, class: "btn" do %>
+        <%= icon_tag "refresh" %>
+        <span>Generate an auto-login link</span>
+      <% end %>
+    </div>
+  <% end %>
 </section>

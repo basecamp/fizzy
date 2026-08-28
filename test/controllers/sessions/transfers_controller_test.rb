@@ -9,7 +9,7 @@ class Sessions::TransfersControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "update establishes a session when the code is valid" do
+  test "update establishes a session when the token is valid" do
     identity = identities(:david)
 
     untenanted do
@@ -21,19 +21,16 @@ class Sessions::TransfersControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "a transfer token is single-use: a zero-cookie replay is rejected" do
-    identity = identities(:david)
-    transfer_id = identity.transfer_id
+    token = identities(:david).transfer_id
 
     untenanted do
-      put session_transfer_path(transfer_id)
+      put session_transfer_path(token)
       assert_redirected_to session_menu_url(script_name: nil)
     end
 
-    # Replay the same link from a fresh, cookieless client, as the reported
-    # redemptions did. The token is already consumed, so it is rejected.
     reset!
     untenanted do
-      put session_transfer_path(transfer_id)
+      put session_transfer_path(token)
       assert_response :bad_request
     end
   end
