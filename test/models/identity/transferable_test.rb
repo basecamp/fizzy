@@ -43,4 +43,16 @@ class Identity::TransferableTest < ActiveSupport::TestCase
     assert_nil Identity.find_by_transfer_id(old_token)
     assert_equal identity, Identity.find_by_transfer_id(identity.transfer.token)
   end
+
+  test "regenerating collapses every outstanding transfer into exactly one" do
+    identity = identities(:kevin)
+    first = identity.transfer_id
+    second = identity.transfers.create!.token
+
+    identity.regenerate_transfer_token
+
+    assert_equal 1, identity.transfers.active.count
+    assert_nil Identity.find_by_transfer_id(first)
+    assert_nil Identity.find_by_transfer_id(second)
+  end
 end

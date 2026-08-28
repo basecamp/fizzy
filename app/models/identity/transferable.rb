@@ -12,7 +12,7 @@ module Identity::Transferable
   end
 
   def transfer
-    transfers.active.first
+    ApplicationRecord.with_writing_role { transfers.active.first }
   end
 
   def transfer_id
@@ -20,7 +20,9 @@ module Identity::Transferable
   end
 
   def regenerate_transfer_token
-    transfers.delete_all
-    transfers.create!
+    with_lock do
+      transfers.delete_all
+      transfers.create!
+    end
   end
 end

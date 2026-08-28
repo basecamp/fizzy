@@ -3,7 +3,7 @@
 
   <header>
     <h2 class="divider">Devices</h2>
-    <p class="margin-none" id="session_transfer_label">Link to automatically log in on another device. It works once, then expires; generate a new one to revoke any link you shared earlier.</p>
+    <p class="margin-none" id="session_transfer_label">Single-use link to automatically log in on another device.</p>
   </header>
 
   <% if transfer %>
@@ -40,14 +40,14 @@
 
       <%= button_to transfer_token_path, method: :post, class: "btn", data: { controller: "tooltip" } do %>
         <%= icon_tag "refresh" %>
-        <span class="for-screen-reader">Generate a new auto-login link and revoke the old one</span>
+        <span class="for-screen-reader">Generate a new auto-login link</span>
       <% end %>
     </div>
   <% else %>
     <div class="flex justify-center">
       <%= button_to transfer_token_path, method: :post, class: "btn" do %>
         <%= icon_tag "refresh" %>
-        <span>Generate an auto-login link</span>
+        <span>Generate a new auto-login link</span>
       <% end %>
     </div>
   <% end %>
