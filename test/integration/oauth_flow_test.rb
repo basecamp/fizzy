@@ -832,6 +832,8 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_equal %w[ query ], body["response_modes_supported"]
     assert_match %r{/oauth/revocation$}, body["revocation_endpoint"]
     assert_equal %w[ none ], body["revocation_endpoint_auth_methods_supported"]
+    assert_includes body["grant_types_supported"], "authorization_code"
+    assert_includes body["grant_types_supported"], "refresh_token"
   end
 
   test "protected resource metadata includes authorization server" do
@@ -865,6 +867,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_not_nil body["client_id"]
     assert_equal "Test MCP Client", body["client_name"]
     assert_equal [ "http://127.0.0.1:8888/callback" ], body["redirect_uris"]
+    assert_equal %w[ authorization_code refresh_token ], body["grant_types"]
   end
 
   test "DCR registering write also registers read, which write implies" do

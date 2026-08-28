@@ -33,9 +33,11 @@ class Oauth::TokensController < Oauth::BaseController
         oauth_error "invalid_grant", "Authorization code already used"
       end
     else
-      @access_token.refresh!
-
-      render json: token_response(@access_token)
+      if @access_token.refresh
+        render json: token_response(@access_token)
+      else
+        oauth_error "invalid_grant", "Invalid refresh token"
+      end
     end
   end
 
