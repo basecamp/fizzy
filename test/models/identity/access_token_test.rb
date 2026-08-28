@@ -25,17 +25,26 @@ class Identity::AccessTokenTest < ActiveSupport::TestCase
     end
   end
 
-  test "refresh! rotates both tokens and extends expiry" do
+  test "refresh rotates both tokens and extends expiry" do
     token = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client))
     old_token, old_refresh_token = token.token, token.refresh_token
 
     travel Identity::AccessToken::EXPIRES_IN + 1.minute do
-      token.refresh!
+      assert token.refresh
 
       assert_not_equal old_token, token.token
       assert_not_equal old_refresh_token, token.refresh_token
       assert_not token.expired?
     end
+  end
+
+  test "refresh fails when the presented refresh token was already rotated" do
+    token = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client))
+    stale = Identity::AccessToken.find(token.id)
+
+    assert token.refresh
+    assert_not stale.refresh
+    assert_equal token.reload.token, token.token
   end
 
   test "active scope excludes expired tokens" do

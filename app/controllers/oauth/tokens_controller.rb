@@ -27,9 +27,11 @@ class Oauth::TokensController < Oauth::BaseController
 
       render json: token_response(access_token, scope: granted.join(" "))
     else
-      @access_token.refresh!
-
-      render json: token_response(@access_token)
+      if @access_token.refresh
+        render json: token_response(@access_token)
+      else
+        oauth_error "invalid_grant", "Invalid refresh token"
+      end
     end
   end
 

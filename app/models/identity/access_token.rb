@@ -25,10 +25,17 @@ class Identity::AccessToken < ApplicationRecord
     (expires_at - Time.current).to_i if expires_at?
   end
 
-  def refresh!
-    update! token: self.class.generate_unique_secure_token,
+  # Rotates atomically on the presented refresh token, so a concurrent
+  # rotation wins the row and the loser comes up empty-handed.
+  def refresh
+    rotated = { token: self.class.generate_unique_secure_token,
       refresh_token: self.class.generate_unique_secure_token,
-      expires_at: EXPIRES_IN.from_now
+      expires_at: EXPIRES_IN.from_now, updated_at: Time.current }
+
+    if self.class.where(id: id, refresh_token: refresh_token).update_all(rotated) == 1
+      assign_attributes rotated
+      true
+    end
   end
 
   private

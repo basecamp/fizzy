@@ -468,6 +468,8 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_match %r{/oauth/clients$}, body["registration_endpoint"]
     assert_includes body["response_types_supported"], "code"
     assert_includes body["code_challenge_methods_supported"], "S256"
+    assert_includes body["grant_types_supported"], "authorization_code"
+    assert_includes body["grant_types_supported"], "refresh_token"
   end
 
   test "protected resource metadata includes authorization server" do
@@ -501,6 +503,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_not_nil body["client_id"]
     assert_equal "Test MCP Client", body["client_name"]
     assert_equal [ "http://127.0.0.1:8888/callback" ], body["redirect_uris"]
+    assert_equal %w[ authorization_code refresh_token ], body["grant_types"]
   end
 
   test "DCR creates client with https redirect" do
