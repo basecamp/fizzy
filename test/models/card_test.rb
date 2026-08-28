@@ -114,13 +114,16 @@ class CardTest < ActiveSupport::TestCase
     end
   end
 
-  test "grants access to assignees when an authorized mover moves the card to a new board" do
-    Current.session = sessions(:kevin) # kevin can administer the private board (its creator)
+  test "an admin mover grants access to assignees when moving the card to a new board" do
+    board = accounts("37s").boards.create!(name: "David's board", creator: users(:david), all_access: false)
+    board.accesses.grant_to(users(:kevin)) # kevin can reach the board, but did not create it
+    Current.session = sessions(:kevin) # admin, and a member of both the source and destination boards
     card = cards(:logo)
-    assignee = users(:jz) # already assigned to the card via fixtures, no access to the private board
-    board = boards(:private)
+    assignee = users(:jz) # already assigned to the card via fixtures, no access to the destination board
 
-    assert Current.user.can_administer_board?(board)
+    assert Current.user.admin?
+    assert_not_equal Current.user, board.creator # authorized through the admin role, not the creator path
+    assert board.accessible_to?(users(:kevin))
     assert_includes card.assignees, assignee
     assert_not board.accessible_to?(assignee)
 
@@ -128,12 +131,29 @@ class CardTest < ActiveSupport::TestCase
     assert_includes board.users.reload, assignee
   end
 
-  test "does not grant board access to assignees when the mover cannot administer the destination board" do
-    Current.session = sessions(:david) # david is a plain member: not an admin and not the private board's creator
+  test "a non-admin board creator grants access to assignees when moving the card to a new board" do
+    Current.session = sessions(:david) # plain member, but the creator of the destination board
+    board = accounts("37s").boards.create!(name: "David's board", creator: users(:david), all_access: false)
+    card = cards(:logo)
+    assignee = users(:jz) # already assigned to the card via fixtures, no access to the new board
+
+    assert_not Current.user.admin?
+    assert Current.user.can_administer_board?(board) # authorized through the creator path, not the admin role
+    assert_includes card.assignees, assignee
+    assert_not board.accessible_to?(assignee)
+
+    card.update!(board: board)
+    assert_includes board.users.reload, assignee
+  end
+
+  test "a member with mere board access does not grant assignees access when moving the card" do
+    Current.session = sessions(:david) # plain member: not an admin and not the private board's creator
+    board = boards(:private)
+    board.accesses.grant_to(users(:david)) # david holds mere access to the private board, not administration rights
     card = cards(:logo)
     assignee = users(:jz) # already assigned to the card via fixtures, no access to the private board
-    board = boards(:private)
 
+    assert board.accessible_to?(users(:david))
     assert_not Current.user.can_administer_board?(board)
     assert_includes card.assignees, assignee
     assert_not board.accessible_to?(assignee)
@@ -141,7 +161,7 @@ class CardTest < ActiveSupport::TestCase
     card.update!(board: board)
 
     assert_not_includes board.users.reload, assignee,
-      "a non-administering mover must not grant a user access to a private board via a card move"
+      "a member with mere board access must not grant others access to a private board via a card move"
   end
 
   test "move cards to a different board" do
