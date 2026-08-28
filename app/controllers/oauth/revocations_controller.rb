@@ -1,5 +1,6 @@
 class Oauth::RevocationsController < Oauth::BaseController
   allow_unauthenticated_access
+  skip_forgery_protection
 
   before_action :set_access_token
 
