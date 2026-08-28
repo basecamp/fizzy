@@ -8,7 +8,7 @@ module Oauth
   end
 
   def self.loopback_host?(host)
-    LOOPBACK_HOSTS.include?(host.to_s.downcase)
+    LOOPBACK_HOSTS.include?(URI.decode_www_form_component(host.to_s).downcase)
   end
 
   def self.table_name_prefix
