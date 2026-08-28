@@ -2,6 +2,8 @@ class Oauth::TokensController < Oauth::BaseController
   allow_unauthenticated_access
   skip_forgery_protection
 
+  after_action :prevent_caching
+
   rate_limit to: 20, within: 1.minute, only: :create, with: :oauth_rate_limit_exceeded
 
   before_action :validate_grant_type

@@ -352,6 +352,32 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_equal "invalid_client", response.parsed_body["error"]
   end
 
+  test "token exchange for confidential client rejects a non-string client secret" do
+    client = oauth_clients(:confidential_client)
+    code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+    code_challenge = Base64.urlsafe_encode64(Digest::SHA256.digest(code_verifier), padding: false)
+
+    code = Oauth::AuthorizationCode.generate \
+      client_id: client.client_id,
+      identity_id: identities(:david).id,
+      code_challenge: code_challenge,
+      redirect_uri: "https://connector.example.com/callback",
+      scope: "read"
+
+    untenanted do
+      post oauth_token_path, params: {
+        grant_type: "authorization_code",
+        code: code,
+        redirect_uri: "https://connector.example.com/callback",
+        code_verifier: code_verifier,
+        client_secret: [ "confidential_secret_789" ]
+      }, as: :json
+    end
+
+    assert_response :unauthorized
+    assert_equal "invalid_client", response.parsed_body["error"]
+  end
+
   test "token exchange for confidential client succeeds with the client secret" do
     client = oauth_clients(:confidential_client)
     code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
@@ -822,6 +848,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
 
     assert_equal "client_secret_post", body["token_endpoint_auth_method"]
     assert_not_nil body["client_secret"]
+    assert_equal "no-store", response.headers["Cache-Control"]
     assert Oauth::Client.find_by(client_id: body["client_id"]).confidential?
   end
 
