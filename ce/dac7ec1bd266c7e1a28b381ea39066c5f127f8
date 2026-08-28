@@ -1,0 +1,19 @@
+.dockerignore
+  s_cb8638fd4deb07::t_91f7d0eb236da6 46-48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "cedac7ec1bd266c7e1a28b381ea39066c5f127f8",
+  "prompts": {},
+  "sessions": {
+    "s_cb8638fd4deb07": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7799bc4b-8db5-43d6-af8e-1895e0ebc853",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
