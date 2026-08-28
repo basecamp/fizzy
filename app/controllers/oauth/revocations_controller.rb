@@ -13,7 +13,8 @@ class Oauth::RevocationsController < Oauth::BaseController
   private
     def set_access_token
       if (token = params[:token]).present?
-        @access_token = Identity::AccessToken.find_by(token: token)
+        @access_token = Identity::AccessToken.find_by(token: token) ||
+          Identity::AccessToken.find_by(refresh_token: token)
       else
         oauth_error "invalid_request", "token is required"
       end
