@@ -116,11 +116,15 @@ class Oauth::TokensController < Oauth::BaseController
       granted_scopes(permission).join(" ")
     end
 
+    # client_secret_post authenticates with client_id and client_secret in
+    # the request body, per RFC 6749 §2.3.1.
     def authenticate_client
       client = @client || @access_token.oauth_client
 
-      if client.confidential? && !client.authenticate_secret(params[:client_secret])
-        oauth_error "invalid_client", "Client authentication failed", status: :unauthorized
+      if client.confidential?
+        unless params[:client_id] == client.client_id && client.authenticate_secret(params[:client_secret])
+          oauth_error "invalid_client", "Client authentication failed", status: :unauthorized
+        end
       end
     end
 

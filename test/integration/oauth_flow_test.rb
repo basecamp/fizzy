@@ -397,6 +397,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
           code: code,
           redirect_uri: "https://connector.example.com/callback",
           code_verifier: code_verifier,
+          client_id: client.client_id,
           client_secret: "confidential_secret_789"
         }, as: :json
       end
@@ -404,6 +405,32 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_not_nil response.parsed_body["access_token"]
+  end
+
+  test "token exchange for confidential client requires a matching client_id" do
+    client = oauth_clients(:confidential_client)
+    code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+    code_challenge = Base64.urlsafe_encode64(Digest::SHA256.digest(code_verifier), padding: false)
+
+    code = Oauth::AuthorizationCode.generate \
+      client_id: client.client_id,
+      identity_id: identities(:david).id,
+      code_challenge: code_challenge,
+      redirect_uri: "https://connector.example.com/callback",
+      scope: "read"
+
+    untenanted do
+      post oauth_token_path, params: {
+        grant_type: "authorization_code",
+        code: code,
+        redirect_uri: "https://connector.example.com/callback",
+        code_verifier: code_verifier,
+        client_secret: "confidential_secret_789"
+      }, as: :json
+    end
+
+    assert_response :unauthorized
+    assert_equal "invalid_client", response.parsed_body["error"]
   end
 
   test "refresh grant for confidential client requires the client secret" do
@@ -658,6 +685,8 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_includes body["code_challenge_methods_supported"], "S256"
     assert_includes body["grant_types_supported"], "authorization_code"
     assert_includes body["grant_types_supported"], "refresh_token"
+    assert_includes body["token_endpoint_auth_methods_supported"], "none"
+    assert_includes body["token_endpoint_auth_methods_supported"], "client_secret_post"
   end
 
   test "protected resource metadata includes authorization server" do
@@ -848,6 +877,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
 
     assert_equal "client_secret_post", body["token_endpoint_auth_method"]
     assert_not_nil body["client_secret"]
+    assert_equal 0, body["client_secret_expires_at"]
     assert_equal "no-store", response.headers["Cache-Control"]
     assert Oauth::Client.find_by(client_id: body["client_id"]).confidential?
   end
@@ -865,6 +895,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
 
     assert_equal "none", body["token_endpoint_auth_method"]
     assert_not body.key?("client_secret")
+    assert_not body.key?("client_secret_expires_at")
   end
 
   test "DCR rejects unsupported token_endpoint_auth_method" do
