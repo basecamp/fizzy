@@ -40,8 +40,8 @@ class Oauth::Client < ApplicationRecord
         errors.add :redirect_uris, "must not contain fragments"
       end
 
-      if dynamically_registered? && !valid_loopback_uri?(parsed)
-        errors.add :redirect_uris, "must be a local loopback URI for dynamically registered clients"
+      if dynamically_registered? && !valid_loopback_uri?(parsed) && !valid_https_uri?(parsed)
+        errors.add :redirect_uris, "must be an https or local loopback URI for dynamically registered clients"
       end
     rescue URI::InvalidURIError
       errors.add :redirect_uris, "includes an invalid URI"
@@ -55,6 +55,10 @@ class Oauth::Client < ApplicationRecord
 
     def valid_loopback_uri?(parsed)
       parsed.scheme == "http" && parsed.host.in?(Oauth::LOOPBACK_HOSTS)
+    end
+
+    def valid_https_uri?(parsed)
+      parsed.scheme == "https" && parsed.host.present? && !parsed.host.in?(Oauth::LOOPBACK_HOSTS)
     end
 
     def matching_loopback?(uri)

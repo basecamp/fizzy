@@ -377,18 +377,101 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_equal [ "http://127.0.0.1:8888/callback" ], body["redirect_uris"]
   end
 
-  test "DCR rejects non-loopback redirect" do
+  test "DCR creates client with https redirect" do
+    assert_difference "Oauth::Client.count", 1 do
+      untenanted do
+        post oauth_clients_path, params: {
+          client_name: "Hosted Connector",
+          redirect_uris: [ "https://connector.example.com/callback" ]
+        }, as: :json
+      end
+    end
+
+    assert_response :created
+    body = response.parsed_body
+
+    assert_not_nil body["client_id"]
+    assert_equal [ "https://connector.example.com/callback" ], body["redirect_uris"]
+  end
+
+  test "DCR rejects plain http non-loopback redirect" do
     assert_no_difference "Oauth::Client.count" do
       untenanted do
         post oauth_clients_path, params: {
           client_name: "Evil Client",
-          redirect_uris: [ "https://evil.com/steal" ]
+          redirect_uris: [ "http://evil.com/steal" ]
         }, as: :json
       end
     end
 
     assert_response :bad_request
     assert_equal "invalid_redirect_uri", response.parsed_body["error"]
+  end
+
+  test "DCR rejects https loopback redirect" do
+    assert_no_difference "Oauth::Client.count" do
+      untenanted do
+        post oauth_clients_path, params: {
+          client_name: "HTTPS Loopback",
+          redirect_uris: [ "https://127.0.0.1:8888/callback" ]
+        }, as: :json
+      end
+    end
+
+    assert_response :bad_request
+    assert_equal "invalid_redirect_uri", response.parsed_body["error"]
+  end
+
+  test "DCR rejects https redirect with fragment" do
+    assert_no_difference "Oauth::Client.count" do
+      untenanted do
+        post oauth_clients_path, params: {
+          client_name: "Fragment Client",
+          redirect_uris: [ "https://connector.example.com/callback#section" ]
+        }, as: :json
+      end
+    end
+
+    assert_response :bad_request
+    assert_equal "invalid_redirect_uri", response.parsed_body["error"]
+  end
+
+  test "https redirect requires exact match in authorization" do
+    sign_in_as :david
+
+    untenanted do
+      post oauth_clients_path, params: {
+        client_name: "Hosted Connector",
+        redirect_uris: [ "https://connector.example.com/callback" ]
+      }, as: :json
+    end
+    client_id = response.parsed_body["client_id"]
+
+    untenanted do
+      get new_oauth_authorization_path, params: {
+        client_id: client_id,
+        redirect_uri: "https://connector.example.com/callback",
+        response_type: "code",
+        code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+        code_challenge_method: "S256",
+        scope: "read",
+        state: "xyz123"
+      }
+    end
+    assert_response :success
+
+    untenanted do
+      get new_oauth_authorization_path, params: {
+        client_id: client_id,
+        redirect_uri: "https://connector.example.com:8443/callback",
+        response_type: "code",
+        code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+        code_challenge_method: "S256",
+        scope: "read",
+        state: "xyz123"
+      }
+    end
+    assert_response :bad_request
   end
 
   test "DCR requires redirect_uris" do
