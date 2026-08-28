@@ -44,17 +44,17 @@ class Oauth::Client < ApplicationRecord
     end
 
     def loopback_uri?(uri)
-      Oauth::LOOPBACK_HOSTS.include?(URI.parse(uri).host)
+      Oauth.loopback_host?(URI.parse(uri).host)
     rescue URI::InvalidURIError
       false
     end
 
     def valid_loopback_uri?(parsed)
-      parsed.scheme == "http" && parsed.host.in?(Oauth::LOOPBACK_HOSTS)
+      parsed.scheme == "http" && Oauth.loopback_host?(parsed.host)
     end
 
     def valid_https_uri?(parsed)
-      parsed.scheme == "https" && parsed.host.present? && !parsed.host.in?(Oauth::LOOPBACK_HOSTS)
+      parsed.scheme == "https" && parsed.host.present? && !Oauth.loopback_host?(parsed.host)
     end
 
     # Only the port may vary, and only for an http loopback redirect (RFC 8252
@@ -68,7 +68,7 @@ class Oauth::Client < ApplicationRecord
         redirect = URI.parse(redirect_uri)
 
         redirect.scheme == "http" && parsed.scheme == "http" &&
-          redirect.host.in?(Oauth::LOOPBACK_HOSTS) &&
+          Oauth.loopback_host?(redirect.host) &&
           redirect.host.casecmp?(parsed.host.to_s) &&
           redirect.path == parsed.path &&
           redirect.query == parsed.query

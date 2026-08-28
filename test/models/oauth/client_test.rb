@@ -45,6 +45,16 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     assert_includes client.errors[:redirect_uris], "must be an https or local loopback URI for dynamically registered clients"
   end
 
+  test "dynamically registered clients reject https loopback regardless of host case" do
+    client = Oauth::Client.new(
+      name: "Cased Loopback",
+      redirect_uris: %w[ https://LOCALHOST:8888/callback ],
+      dynamically_registered: true
+    )
+    assert_not client.valid?
+    assert_includes client.errors[:redirect_uris], "must be an https or local loopback URI for dynamically registered clients"
+  end
+
   test "dynamically registered clients reject https loopback" do
     client = Oauth::Client.new(
       name: "HTTPS Loopback",

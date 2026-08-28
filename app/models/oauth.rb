@@ -7,6 +7,10 @@ module Oauth
     scope.to_s.split.include?("write") ? "read write" : "read"
   end
 
+  def self.loopback_host?(host)
+    LOOPBACK_HOSTS.include?(host.to_s.downcase)
+  end
+
   def self.table_name_prefix
     "oauth_"
   end
