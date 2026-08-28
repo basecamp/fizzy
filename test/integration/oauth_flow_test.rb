@@ -407,6 +407,31 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_not_nil response.parsed_body["access_token"]
   end
 
+  test "token exchange for confidential client rejects credentials in the query string" do
+    client = oauth_clients(:confidential_client)
+    code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+    code_challenge = Base64.urlsafe_encode64(Digest::SHA256.digest(code_verifier), padding: false)
+
+    code = Oauth::AuthorizationCode.generate \
+      client_id: client.client_id,
+      identity_id: identities(:david).id,
+      code_challenge: code_challenge,
+      redirect_uri: "https://connector.example.com/callback",
+      scope: "read"
+
+    untenanted do
+      post oauth_token_path(client_id: client.client_id, client_secret: "confidential_secret_789"), params: {
+        grant_type: "authorization_code",
+        code: code,
+        redirect_uri: "https://connector.example.com/callback",
+        code_verifier: code_verifier
+      }, as: :json
+    end
+
+    assert_response :unauthorized
+    assert_equal "invalid_client", response.parsed_body["error"]
+  end
+
   test "token exchange for confidential client requires a matching client_id" do
     client = oauth_clients(:confidential_client)
     code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
