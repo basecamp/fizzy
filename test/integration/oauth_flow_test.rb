@@ -270,6 +270,33 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
   end
 
 
+  test "token endpoint accepts form-encoded requests with forgery protection active" do
+    code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+    code_challenge = Base64.urlsafe_encode64(Digest::SHA256.digest(code_verifier), padding: false)
+
+    code = Oauth::AuthorizationCode.generate \
+      client_id: oauth_clients(:mcp_client).client_id,
+      identity_id: identities(:david).id,
+      code_challenge: code_challenge,
+      redirect_uri: "http://127.0.0.1:8888/callback",
+      scope: "read"
+
+    with_forgery_protection do
+      untenanted do
+        post oauth_token_path, params: {
+          grant_type: "authorization_code",
+          code: code,
+          redirect_uri: "http://127.0.0.1:8888/callback",
+          code_verifier: code_verifier
+        }, headers: { "X-Forwarded-Proto" => "https" }
+      end
+    end
+
+    assert_response :success
+    assert_not_nil response.parsed_body["access_token"]
+  end
+
+
   # Token Revocation (RFC 7009)
 
   test "revocation deletes access token" do
@@ -434,4 +461,12 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_not_nil body["access_token"]
     assert_equal "Bearer", body["token_type"]
   end
+
+  private
+    def with_forgery_protection
+      ActionController::Base.allow_forgery_protection = true
+      yield
+    ensure
+      ActionController::Base.allow_forgery_protection = false
+    end
 end
