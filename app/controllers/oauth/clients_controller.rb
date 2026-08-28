@@ -6,7 +6,7 @@ class Oauth::ClientsController < Oauth::BaseController
 
   before_action :require_issuance_enabled
   before_action :validate_redirect_uris
-  before_action :validate_loopback_uris
+  before_action :validate_redirect_uri_origins
   before_action :validate_auth_method
 
   def create
@@ -34,9 +34,9 @@ class Oauth::ClientsController < Oauth::BaseController
       end
     end
 
-    def validate_loopback_uris
-      unless performed? || all_loopback_uris?(params[:redirect_uris])
-        oauth_error "invalid_redirect_uri", "Only loopback redirect URIs are allowed for dynamic registration"
+    def validate_redirect_uri_origins
+      unless performed? || all_registrable_uris?(params[:redirect_uris])
+        oauth_error "invalid_redirect_uri", "Only https or local loopback redirect URIs are allowed for dynamic registration"
       end
     end
 
@@ -46,22 +46,28 @@ class Oauth::ClientsController < Oauth::BaseController
       end
     end
 
-    def all_loopback_uris?(uris)
+    def all_registrable_uris?(uris)
       uris.is_a?(Array) &&
-        uris.all? { |uri| uri.is_a?(String) && valid_loopback_uri?(uri) }
+        uris.all? { |uri| uri.is_a?(String) && registrable_uri?(uri) }
     end
 
-    def valid_loopback_uri?(uri)
+    def registrable_uri?(uri)
       parsed = URI.parse(uri)
-      parsed.scheme == "http" &&
-        Oauth::LOOPBACK_HOSTS.include?(parsed.host) &&
-        parsed.fragment.nil?
+      parsed.fragment.nil? && (loopback_uri?(parsed) || https_uri?(parsed))
     rescue URI::InvalidURIError
       false
     end
 
     def registered_client_name
       (params[:client_name] if params[:client_name].is_a?(String)).presence || "MCP Client"
+    end
+
+    def loopback_uri?(parsed)
+      parsed.scheme == "http" && Oauth::LOOPBACK_HOSTS.include?(parsed.host)
+    end
+
+    def https_uri?(parsed)
+      parsed.scheme == "https" && parsed.host.present? && !Oauth::LOOPBACK_HOSTS.include?(parsed.host)
     end
 
     def validated_scopes

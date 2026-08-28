@@ -26,14 +26,23 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     assert_includes client.errors[:redirect_uris], "can't be blank"
   end
 
-  test "dynamically registered clients must use http loopback URIs" do
+  test "dynamically registered clients can use https URIs" do
+    client = Oauth::Client.new(
+      name: "Hosted Connector",
+      redirect_uris: %w[ https://connector.example.com/callback ],
+      dynamically_registered: true
+    )
+    assert client.valid?
+  end
+
+  test "dynamically registered clients reject plain http for non-loopback hosts" do
     client = Oauth::Client.new(
       name: "External",
-      redirect_uris: %w[ https://evil.com/callback ],
+      redirect_uris: %w[ http://example.com/callback ],
       dynamically_registered: true
     )
     assert_not client.valid?
-    assert_includes client.errors[:redirect_uris], "must be a local loopback URI for dynamically registered clients"
+    assert_includes client.errors[:redirect_uris], "must be an https or local loopback URI for dynamically registered clients"
   end
 
   test "dynamically registered clients reject https loopback" do
@@ -43,7 +52,17 @@ class Oauth::ClientTest < ActiveSupport::TestCase
       dynamically_registered: true
     )
     assert_not client.valid?
-    assert_includes client.errors[:redirect_uris], "must be a local loopback URI for dynamically registered clients"
+    assert_includes client.errors[:redirect_uris], "must be an https or local loopback URI for dynamically registered clients"
+  end
+
+  test "dynamically registered clients reject custom schemes" do
+    client = Oauth::Client.new(
+      name: "Native App",
+      redirect_uris: %w[ myapp://callback ],
+      dynamically_registered: true
+    )
+    assert_not client.valid?
+    assert_includes client.errors[:redirect_uris], "must be an https or local loopback URI for dynamically registered clients"
   end
 
   test "redirect URIs must not contain fragments" do
