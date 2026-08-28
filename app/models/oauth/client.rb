@@ -23,7 +23,7 @@ class Oauth::Client < ApplicationRecord
   end
 
   def authenticate_secret(secret)
-    confidential? && client_secret.present? && secret.present? &&
+    confidential? && client_secret.present? && secret.is_a?(String) && secret.present? &&
       ActiveSupport::SecurityUtils.secure_compare(client_secret, secret)
   end
 
