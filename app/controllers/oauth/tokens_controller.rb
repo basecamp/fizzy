@@ -20,6 +20,8 @@ class Oauth::TokensController < Oauth::BaseController
     before_action :set_refresh_scope
   end
 
+  before_action :authenticate_client
+
   def create
     if authorization_code_grant?
       granted = @auth_code.scope.to_s.split
@@ -110,6 +112,14 @@ class Oauth::TokensController < Oauth::BaseController
 
     def scope_for(permission)
       granted_scopes(permission).join(" ")
+    end
+
+    def authenticate_client
+      client = @client || @access_token.oauth_client
+
+      if client.confidential? && !client.authenticate_secret(params[:client_secret])
+        oauth_error "invalid_client", "Client authentication failed", status: :unauthorized
+      end
     end
 
     def token_response(access_token, scope: nil)

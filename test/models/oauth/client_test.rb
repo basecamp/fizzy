@@ -171,6 +171,41 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     assert_equal %w[ read ], client.scopes
   end
 
+  test "confidential clients generate a client secret on create" do
+    client = Oauth::Client.create!(
+      name: "Confidential",
+      redirect_uris: %w[ https://connector.example.com/callback ],
+      token_endpoint_auth_method: "client_secret_post"
+    )
+    assert client.confidential?
+    assert_not_nil client.client_secret
+  end
+
+  test "public clients get no client secret" do
+    client = Oauth::Client.create!(name: "Public", redirect_uris: %w[ http://127.0.0.1:8888/callback ])
+    assert_not client.confidential?
+    assert_nil client.client_secret
+  end
+
+  test "token_endpoint_auth_method must be supported" do
+    client = Oauth::Client.new(
+      name: "Basic",
+      redirect_uris: %w[ http://127.0.0.1/cb ],
+      token_endpoint_auth_method: "client_secret_basic"
+    )
+    assert_not client.valid?
+    assert_includes client.errors[:token_endpoint_auth_method], "is not included in the list"
+  end
+
+  test "authenticate_secret" do
+    client = oauth_clients(:confidential_client)
+    assert client.authenticate_secret("confidential_secret_789")
+    assert_not client.authenticate_secret("wrong")
+    assert_not client.authenticate_secret("")
+    assert_not client.authenticate_secret(nil)
+    assert_not oauth_clients(:mcp_client).authenticate_secret("confidential_secret_789")
+  end
+
   test "trusted scope" do
     trusted = Oauth::Client.trusted
     assert trusted.all?(&:trusted?)

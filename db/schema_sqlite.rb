@@ -436,11 +436,13 @@ ActiveRecord::Schema[8.2].define(version: 2026_08_28_120000) do
 
   create_table "oauth_clients", id: :uuid, force: :cascade do |t|
     t.string "client_id", limit: 255, null: false
+    t.string "client_secret", limit: 255
     t.datetime "created_at", null: false
     t.boolean "dynamically_registered", default: false
     t.string "name", limit: 255, null: false
     t.json "redirect_uris"
     t.json "scopes"
+    t.string "token_endpoint_auth_method", limit: 255, default: "none", null: false
     t.boolean "trusted", default: false
     t.datetime "updated_at", null: false
     t.index ["client_id"], name: "index_oauth_clients_on_client_id", unique: true
