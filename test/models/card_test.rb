@@ -212,7 +212,10 @@ class CardTest < ActiveSupport::TestCase
     assert_not boards(:private).accessible_to?(david)
     assert card.assigned_to?(david)
 
-    card.clean_inaccessible_data
+    travel 1.minute
+    assert_changes -> { card.reload.updated_at }, "cleanup must touch the card so board views refresh" do
+      card.clean_inaccessible_data
+    end
 
     assert_not card.reload.assigned_to?(david)
   end

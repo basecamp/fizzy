@@ -47,7 +47,7 @@ module Board::Accessible
     notifications_for_user(user).destroy_all
     watches_for(user).destroy_all
     pins_for(user).destroy_all
-    assignments_for(user).delete_all
+    assignments_for(user).destroy_all
   end
 
   def watchers
