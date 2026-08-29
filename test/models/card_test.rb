@@ -204,6 +204,19 @@ class CardTest < ActiveSupport::TestCase
     assert_not card.watched_by?(david), "David's watch should be deleted (no board access)"
   end
 
+  test "clean_inaccessible_data removes assignments for users without board access" do
+    card = boards(:private).cards.create!(title: "Secret", creator: users(:kevin))
+    david = users(:david)
+    card.assignments.create!(assignee: david, assigner: users(:kevin))
+
+    assert_not boards(:private).accessible_to?(david)
+    assert card.assigned_to?(david)
+
+    card.clean_inaccessible_data
+
+    assert_not card.reload.assigned_to?(david)
+  end
+
   test "card has reactions association" do
     card = cards(:logo)
     user = users(:david)

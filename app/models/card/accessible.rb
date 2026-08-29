@@ -13,6 +13,7 @@ module Card::Accessible
     accessible_user_ids = board.accesses.pluck(:user_id)
     pins.where.not(user_id: accessible_user_ids).in_batches.destroy_all
     watches.where.not(user_id: accessible_user_ids).in_batches.destroy_all
+    assignments.where.not(assignee_id: accessible_user_ids).in_batches.delete_all
   end
 
   private

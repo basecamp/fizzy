@@ -81,6 +81,21 @@ class AccessTest < ActiveSupport::TestCase
     assert_not card.watched_by?(kevin)
   end
 
+  test "assignments are destroyed when access is lost" do
+    kevin = users(:kevin)
+    card = cards(:logo) # Kevin is assigned to this card
+
+    assert card.assigned_to?(kevin)
+
+    kevin_access = accesses(:writebook_kevin)
+
+    perform_enqueued_jobs only: Board::CleanInaccessibleDataJob do
+      kevin_access.destroy
+    end
+
+    assert_not card.reload.assigned_to?(kevin)
+  end
+
   test "pins are destroyed when access is lost" do
     kevin = users(:kevin)
     board = boards(:writebook)

@@ -47,6 +47,7 @@ module Board::Accessible
     notifications_for_user(user).destroy_all
     watches_for(user).destroy_all
     pins_for(user).destroy_all
+    assignments_for(user).delete_all
   end
 
   def watchers
@@ -99,6 +100,10 @@ module Board::Accessible
 
     def watches_for(user)
       Watch.where(card: cards, user: user)
+    end
+
+    def assignments_for(user)
+      Assignment.where(card: cards, assignee: user)
     end
 
     def pins_for(user)
