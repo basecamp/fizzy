@@ -25,4 +25,40 @@ class Card::TaggableTest < ActiveSupport::TestCase
 
     assert_not_equal cards(:logo).tags.last, cards(:paycheck).tags.last
   end
+
+  test "updating just tag_ids touches the card and board" do
+    board = @card.board
+
+    travel 1.minute do
+      assert_changes -> { @card.reload.updated_at } do
+        assert_changes -> { board.reload.updated_at } do
+          @card.update!(tag_ids: [ tags(:web).id, tags(:mobile).id ])
+        end
+      end
+    end
+  end
+
+  test "updating tag_ids with an empty array clears tags" do
+    assert_equal [ tags(:web) ], @card.tags
+
+    @card.update!(tag_ids: [])
+
+    assert_empty @card.reload.tags
+  end
+
+  test "updating tag_ids raises when a tag does not exist" do
+    assert_raises(ActiveRecord::RecordNotFound) do
+      @card.update!(tag_ids: [ "does-not-exist" ])
+    end
+  end
+
+  test "updating tag_ids is invalid when the tag belongs to another account" do
+    foreign_tag = accounts(:initech).tags.create!(title: "foreign")
+
+    error = assert_raises(ActiveRecord::RecordInvalid) do
+      @card.update!(tag_ids: [ foreign_tag.id ])
+    end
+
+    assert_includes error.record.errors[:tags], "must belong to the card account"
+  end
 end
