@@ -36,6 +36,14 @@ system:
   role: system
   account: 37s_uuid
 
+deploy_bot:
+  id: <%= ActiveRecord::FixtureSet.identify("deploy_bot", :uuid) %>
+  name: Deploy Bot
+  role: bot
+  identity: deploy_bot
+  account: 37s_uuid
+  verified_at: <%= Time.current.to_fs(:db) %>
+
 mike:
   id: <%= ActiveRecord::FixtureSet.identify("mike", :uuid) %>
   name: Mike
