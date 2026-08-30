@@ -419,6 +419,26 @@ class Webhook::DeliveryTest < ActiveSupport::TestCase
     assert_not delivery.succeeded?
   end
 
+  test "reports a DNS resolution failure as a lookup failure, not a blocked address" do
+    webhook = Webhook.create!(
+      board: boards(:writebook),
+      name: "Unresolvable",
+      url: "https://nxdomain.example.invalid/webhook"
+    )
+    event = events(:layout_commented)
+    delivery = Webhook::Delivery.create!(webhook: webhook, event: event)
+
+    # Host resolves to nothing (timeout/NXDOMAIN), distinct from resolving to a
+    # blocked address, which stays private_uri (see the rebinding test above).
+    stub_dns_failure
+
+    delivery.deliver
+
+    assert_equal "completed", delivery.state
+    assert_equal "dns_lookup_failed", delivery.response[:error]
+    assert_not delivery.succeeded?
+  end
+
   test "connects to the pinned IP address preventing DNS re-resolution" do
     webhook = Webhook.create!(
       board: boards(:writebook),

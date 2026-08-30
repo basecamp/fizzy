@@ -13,4 +13,10 @@ class TagsControllerTest < ActionDispatch::IntegrationTest
     assert_equal tags.count, @response.parsed_body.count
     assert_equal tags.pluck(:title), @response.parsed_body.pluck("title")
   end
+
+  test "index rejects HTML" do
+    get tags_path
+
+    assert_response :not_acceptable
+  end
 end

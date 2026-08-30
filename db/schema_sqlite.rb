@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_07_09_120000) do
+ActiveRecord::Schema[8.2].define(version: 2026_08_28_120000) do
   create_table "accesses", id: :uuid, force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -359,6 +359,15 @@ ActiveRecord::Schema[8.2].define(version: 2026_07_09_120000) do
     t.string "token", limit: 255
     t.datetime "updated_at", null: false
     t.index ["identity_id"], name: "index_access_token_on_identity_id"
+  end
+
+  create_table "identity_transfers", id: :uuid, force: :cascade do |t|
+    t.uuid "identity_id", null: false
+    t.string "token", limit: 255, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["identity_id"], name: "index_identity_transfers_on_identity_id"
+    t.index ["token"], name: "index_identity_transfers_on_token", unique: true
   end
 
   create_table "magic_links", id: :uuid, force: :cascade do |t|

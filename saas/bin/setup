@@ -107,3 +107,29 @@ if [ -e tmp/minio-dev.txt ]; then
 fi
 
 step "Starting mysql" ~/Work/basecamp/docker-dev/setup mysql84
+
+# The cell has its own Gemfile — the same one its image build copies — and nothing in the app's setup
+# installs it, so without this a fresh checkout cannot boot a cell.
+#
+# Every one of these must be unset, not just BUNDLE_GEMFILE overridden. Bundler exports its whole
+# environment into each child, and BUNDLE_LOCKFILE outranks an explicit BUNDLE_GEMFILE — so run from
+# inside a bundle, as bin/ci does, the cell's Gemfile resolves against the app's lockfile and bundler
+# reports the git source as "not yet checked out". That variable is new in Bundler 4, which is how a list
+# that used to be enough stopped being enough.
+step "Installing the cell's RubyGems" \
+  env -u RUBYOPT -u RUBYLIB -u BUNDLER_SETUP -u BUNDLER_VERSION -u BUNDLE_BIN_PATH -u BUNDLE_LOCKFILE \
+    BUNDLE_GEMFILE="$app_root/saas/hotcell/Gemfile" bundle install
+
+# The dev cell runs uncontainerized and does not need the image. Build it anyway, where that is possible:
+# a Dockerfile that only ever builds in CI or at deploy time is one that breaks at the worst moment. A
+# failed build stops setup on purpose — but not being able to attempt one is not a failure, so probe for
+# the script before docker, and skip rather than abort when either is missing.
+if [ ! -x "$app_root/saas/hotcell/bin/build" ]; then
+  echo "▸ Skipping the cell's image (saas/hotcell/bin/build is not here)"
+  echo
+elif ! docker info &> /dev/null; then
+  echo "▸ Skipping the cell's image (docker is not running)"
+  echo
+else
+  step "Building the cell's image" "$app_root/saas/hotcell/bin/build"
+fi

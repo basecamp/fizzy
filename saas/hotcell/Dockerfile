@@ -1,0 +1,62 @@
+# The cell's image. Everything here is inside the blast radius, so treat this file as a budget rather
+# than an inventory.
+
+ARG RUBY_VERSION=3.4
+
+# The bundle is built in a stage of its own, because installing it needs a compiler for the native
+# extensions, which the image that runs untrusted bytes must not carry.
+FROM ruby:${RUBY_VERSION}-slim AS build
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends build-essential pkg-config && \
+    rm -rf /var/lib/apt/lists/*
+
+ENV BUNDLE_PATH=/hotcell/bundle \
+    BUNDLE_WITHOUT=development \
+    BUNDLE_FROZEN=true
+
+WORKDIR /hotcell
+COPY Gemfile Gemfile.lock ./
+
+RUN bundle install && rm -rf "$BUNDLE_PATH"/ruby/*/cache
+
+
+FROM ruby:${RUBY_VERSION}-slim
+
+# The tools this cell's operations run, and nothing else. No LibreOffice: Fizzy accepts office documents
+# and never previews them, so its parsers would be blast radius bought for nothing.
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends libvips42 mupdf-tools ffmpeg && \
+    rm -rf /var/lib/apt/lists/*
+
+# The cell's user: high and outside any host user range, with no home directory and no shell.
+RUN groupadd --gid 10001 hotcell && \
+    useradd --uid 10001 --gid 10001 --no-create-home --shell /usr/sbin/nologin hotcell
+
+# The socket volume's mount point must exist here, owned by the cell's user, because a new named volume
+# takes its ownership from the directory it covers.
+RUN mkdir -p /run/hotcell/cell /hotcell/operations && chown -R hotcell:hotcell /run/hotcell /hotcell
+
+# HOME is /tmp because the cell's user has no home directory, and bundler wants one. A worker replaces
+# it with its slot's home before it serves a request.
+ENV HOME=/tmp \
+    BUNDLE_PATH=/hotcell/bundle \
+    BUNDLE_WITHOUT=development \
+    BUNDLE_FROZEN=true \
+    HOTCELL_OPERATIONS=/hotcell/operations \
+    HOTCELL_DIR=/run/hotcell/cell
+
+WORKDIR /hotcell
+
+COPY --from=build --chown=hotcell:hotcell /hotcell/bundle /hotcell/bundle
+COPY --chown=hotcell:hotcell Gemfile Gemfile.lock ./
+COPY --chown=hotcell:hotcell config.rb /hotcell/config.rb
+COPY --chown=hotcell:hotcell operations/ /hotcell/operations/
+
+USER hotcell
+
+# Probes the supervisor's control socket from inside the container, where network: none does not apply.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD ["bundle", "exec", "hotcell-health"]
+
+CMD ["bundle", "exec", "hotcell"]

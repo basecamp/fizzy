@@ -23,6 +23,8 @@ updates:
     cooldown:
       default-days: 7
       semver-major-days: 14
+      exclude:
+        - "brakeman"
   - package-ecosystem: github-actions
     directory: "/"
     groups:

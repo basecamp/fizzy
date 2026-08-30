@@ -3,6 +3,8 @@ require_relative "true_client_ip"
 require_relative "signup"
 require_relative "authorization"
 require_relative "gvl_instrumentation"
+require_relative "cell"
+require_relative "unprocessable_attachments"
 require_relative "../../rails_ext/active_record_tasks_database_tasks.rb"
 
 module Fizzy
@@ -45,6 +47,29 @@ module Fizzy
 
       initializer "fizzy_saas.gvl_instrumentation" do |app|
         app.config.middleware.insert_before(Rack::Runtime, GvlInstrumentation)
+      end
+
+      # Before active_storage.configs, which is where Active Storage reads these settings off config.
+      initializer "fizzy_saas.hotcell", before: "active_storage.configs" do |app|
+        Cell.register!
+
+        app.config.active_storage.merge! Cell.active_storage_configuration
+      end
+
+      # to_prepare rather than after_initialize, for the same reason the client gem's retry hook is: the
+      # job classes live in a reloadable engine and are redefined on every code reload, and a discard_on
+      # applied once at boot would silently vanish after the first file save in development.
+      initializer "fizzy_saas.unprocessable_attachments" do |app|
+        app.config.to_prepare do
+          UnprocessableAttachments.install!
+        end
+      end
+
+      # Warns when a client wants an operation the cell does not carry, and when the timeout is too tight
+      # for what the cell says it may take. Never fails boot: a cell that is restarting is a degraded
+      # deployment, not a broken one.
+      config.after_initialize do
+        ::HotCell.describe_cells
       end
 
       initializer "fizzy_saas.solid_queue" do
@@ -92,7 +117,7 @@ module Fizzy
 
       # Rails edge (actioncable 647ce6769c, 2026-05-28) extracted WebSocket handling
       # into ActionCable::Server::Socket, which now calls connection.handle_open /
-      # handle_close *publicly*. sentry-rails (through 6.6.2 and master as of 2026-07)
+      # handle_close *publicly*. sentry-rails (through 6.7.0 and master as of 2026-08)
       # still prepends these onto ActionCable::Connection::Base as `private`, matching
       # the old internal calling convention, so the external call raises NoMethodError
       # and every WebSocket connection dies. Restore public visibility on Sentry's
@@ -145,6 +170,9 @@ module Fizzy
 
         require "yabeda/solid_cache"
         Yabeda::SolidCache.install!
+
+        require "yabeda/hot_cell"
+        Yabeda::HotCell.install!
 
         require_relative "metrics"
       end

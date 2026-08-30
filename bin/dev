@@ -1,8 +1,11 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 PORT=3006
 USE_TAILSCALE=0
 USE_PUSH=0
+FOREMAN_ARGS=()
+
+export PORT
 
 if [ -t 1 ]; then
   c_bar='\033[2m▎\033[0m'    # dim
@@ -17,6 +20,23 @@ for arg in "$@"; do
   case $arg in
     --tailscale) USE_TAILSCALE=1 ;;
     --push) USE_PUSH=1 ;;
+    --help|-h)
+      cat <<USAGE
+Usage: bin/dev [options]
+
+Starts the Fizzy development processes using foreman.
+
+Options:
+  --tailscale   Expose the dev server via tailscale serve
+  --push        Load push notification credentials from 1Password (implies SaaS mode)
+  -h, --help    Show this help
+
+In SaaS mode a hotcell cell boots beside the server with HOTCELL_ROOT set, and
+attachment processing runs in it — the same position production is in.
+USAGE
+      exit 0
+      ;;
+    *) FOREMAN_ARGS+=("$arg") ;;
   esac
 done
 
@@ -42,6 +62,20 @@ fi
 
 if [ -f tmp/oss-config.txt ]; then
   export OSS_CONFIG=1
+fi
+
+# The cell is SaaS-only, so it lives in saas/Procfile.dev — its gems come from a private repository,
+# and the root Procfile.dev must run for an open-source checkout that can never install them. It runs
+# uncontainerized here: a container cannot receive a descriptor on macOS, where Docker runs a Linux VM
+# and SCM_RIGHTS has nothing meaningful to hand across two kernels.
+PROCFILE=Procfile.dev
+if [ -f tmp/saas.txt ]; then
+  PROCFILE=saas/Procfile.dev
+  export HOTCELL_ROOT=tmp/hotcell
+  if [ ! -f saas/hotcell/Gemfile.lock ]; then
+    echo "Error: the cell has no bundle. Run bin/setup." >&2
+    exit 1
+  fi
 fi
 
 if [ "$USE_TAILSCALE" = "1" ]; then
@@ -72,9 +106,17 @@ else
   DEV_URL="http://app.fizzy.localhost:$PORT/"
 fi
 
+# Not in the bundle, on purpose: it manages the bundle's processes rather than running inside one.
+if ! foreman version >/dev/null 2>&1; then
+  echo "Installing foreman..."
+  gem install foreman
+fi
+
 printf "\n"
 printf " ${c_bar} ${c_label}URL${c_reset}     ${c_url}${DEV_URL}${c_reset}\n"
 printf " ${c_bar} ${c_label}Login${c_reset}   david@example.com\n"
 printf "\n"
 
-./bin/rails server -b 0.0.0.0 -p $PORT
+# -d ".": foreman roots itself at the Procfile's own directory, which for saas/Procfile.dev would run
+# everything from saas/.
+foreman start -f "$PROCFILE" -d . "${FOREMAN_ARGS[@]}"

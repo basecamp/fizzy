@@ -1,0 +1,107 @@
+#!/usr/bin/env bash
+# Builds the cell's image, at the hotcell version the application is running.
+#
+# The application's lockfile is the source of truth. This makes the cell's lockfile name the same version
+# — writing it if it differs — builds, and pins the accessory to what it built. A client and server one
+# version apart is a `protocol` failure on every request, so neither lockfile nor the pin is ever set on
+# its own: update the gem in the app, run this, commit the lot as one change.
+#
+# It touches no registry: publishing is saas/hotcell/bin/push, so this can run on every laptop from
+# bin/setup. Tags are immutable and there is no `latest`, because a deploy does not update an accessory —
+# `kamal accessory reboot` pulls whatever the tag names at that moment, and a moving tag would make what a
+# host runs depend on when it last rebooted.
+set -euo pipefail
+
+bin_dir="$(cd "$(dirname "$0")" && pwd)"
+cell_dir="$(cd "$bin_dir/.." && pwd)"
+repo_root="$(cd "$cell_dir/../.." && pwd)"
+
+source "$bin_dir/image"
+
+platform=""
+for arg in "$@"; do
+  case $arg in
+    --platform=*) platform="${arg#*=}" ;;
+    --help|-h)
+      cat <<USAGE
+Usage: saas/hotcell/bin/build [--platform=linux/amd64]
+
+Locks saas/hotcell/Gemfile.lock to the hotcell version in Gemfile.saas.lock, builds the cell image, tags
+it with a hash of what went into it, and pins saas/config/deploy.yml to that tag. Pushing is a separate
+step: saas/hotcell/bin/push.
+
+To move the cell to a new hotcell version, update the gem in the application first:
+
+    BUNDLE_GEMFILE=Gemfile.saas bundle update --conservative hotcell-client activestorage-hotcell-client hotcell-core
+    saas/hotcell/bin/build
+
+then commit the two lockfiles, the deploy.yml pin, and anything else, together.
+USAGE
+      exit 0
+      ;;
+  esac
+done
+
+# The version the application runs, anchored on hotcell-core because both sides depend on it with an
+# exact constraint. Read off the lockfile rather than asked of bundler, so this needs no bundle to be
+# installed and cannot be answered by a stale one.
+app_version="$(awk '$1 == "hotcell-core" && $2 ~ /^\([0-9]/ {gsub(/[()]/, "", $2); print $2; exit}' "$repo_root/Gemfile.saas.lock")"
+cell_version="$(awk '$1 == "hotcell-core" && $2 ~ /^\([0-9]/ {gsub(/[()]/, "", $2); print $2; exit}' "$cell_dir/Gemfile.lock")"
+
+if [ -z "$app_version" ]; then
+  echo "Gemfile.saas.lock names no hotcell-core version. Is the app in SaaS mode?" >&2
+  exit 1
+fi
+
+# Written into the lockfile rather than resolved by bundler, because `bundle update` takes the newest
+# release the Gemfile's constraint admits — which makes RubyGems the source of truth and an app
+# deliberately holding an older version a build failure. The application's lockfile is the source of
+# truth, and pinning below a requirement is exactly what a lockfile is for.
+if [ "$cell_version" != "$app_version" ]; then
+  echo "Locking the cell to the application's hotcell $app_version (was ${cell_version:-none})"
+  sed -i "/hotcell/s/$cell_version/$app_version/g" "$cell_dir/Gemfile.lock"
+  env -u RUBYOPT -u RUBYLIB -u BUNDLER_SETUP -u BUNDLER_VERSION -u BUNDLE_BIN_PATH -u BUNDLE_LOCKFILE \
+    BUNDLE_GEMFILE="$cell_dir/Gemfile" bundle install --quiet
+
+  # Re-read rather than trust: a sed that matched nothing leaves the old version behind a green
+  # install, and the two sides skew silently.
+  cell_version="$(awk '$1 == "hotcell-core" && $2 ~ /^\([0-9]/ {gsub(/[()]/, "", $2); print $2; exit}' "$cell_dir/Gemfile.lock")"
+  if [ "$cell_version" != "$app_version" ]; then
+    echo "The cell's lockfile still resolves hotcell-core $cell_version against the application's $app_version." >&2
+    echo "Regenerate it: rm saas/hotcell/Gemfile.lock && BUNDLE_GEMFILE=saas/hotcell/Gemfile bundle install, then rerun." >&2
+    exit 1
+  fi
+fi
+
+tag="$(hotcell_image_tag "$repo_root")"
+
+echo "Building $tag"
+docker build \
+  ${platform:+--platform="$platform"} \
+  --tag "$tag" \
+  "$cell_dir"
+
+# Written here rather than in push, because the tag is a hash of the image's contents: the commit that
+# changes them is the commit that has to carry the new pin. Left to push, the pin moves after that commit
+# is already made, which is how a tree that builds one image and deploys another gets committed.
+#
+# Verified rather than assumed. A pin this cannot find is a silent no-op that reports success, which is the
+# one failure a script whose whole job is writing that line must not have.
+# `|| true` because a file naming no image at all is what the check below reports: under pipefail and
+# set -e, grep finding nothing would kill the script here instead, with nothing printed.
+pinned="$(grep -o "$HOTCELL_IMAGE_REPOSITORY:[a-f0-9]*" "$repo_root/saas/config/deploy.yml" | head -1 | cut -d: -f2 || true)"
+
+echo
+echo "Built $tag. It is local only — publish it with saas/hotcell/bin/push."
+if [ "$pinned" != "${tag##*:}" ]; then
+  sed -i "s|image: $HOTCELL_IMAGE_REPOSITORY:[a-f0-9]*|image: $tag|" "$repo_root/saas/config/deploy.yml"
+
+  if ! grep -q "image: $tag\$" "$repo_root/saas/config/deploy.yml"; then
+    echo "Could not pin saas/config/deploy.yml: it names no $HOTCELL_IMAGE_REPOSITORY image to replace." >&2
+    echo "Set it by hand:" >&2
+    echo "    image: $tag" >&2
+    exit 1
+  fi
+
+  echo "Pinned saas/config/deploy.yml to ${tag##*:} (was ${pinned:-none})"
+fi

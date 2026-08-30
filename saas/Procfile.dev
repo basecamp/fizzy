@@ -1,0 +1,4 @@
+# SaaS development: the app plus a hotcell cell beside it. This file lives here rather than in the root
+# Procfile.dev because the cell is SaaS-only and the open-source checkout must never boot one.
+web: bin/rails server -b 0.0.0.0 -p ${PORT:-3006}
+cell: env -u RUBYOPT -u RUBYLIB -u BUNDLER_SETUP -u BUNDLER_VERSION -u BUNDLE_BIN_PATH -u BUNDLE_LOCKFILE BUNDLE_GEMFILE=$PWD/saas/hotcell/Gemfile HOTCELL_DIR=$PWD/tmp/hotcell/active_storage HOTCELL_CONFIG=$PWD/saas/hotcell/config.rb HOTCELL_OPERATIONS=$PWD/saas/hotcell/operations bundle exec hotcell

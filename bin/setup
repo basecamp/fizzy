@@ -39,7 +39,7 @@ step() {
   return $exit_code
 }
 
-mise_min_version="2026.7.10" # keep in lockstep with min_version in .mise.toml
+mise_min_version="2026.8.10" # keep in lockstep with min_version in .mise.toml
 
 mise_too_old() {
   local current="$(mise --version 2>/dev/null | awk '{ print $1; exit }')"
@@ -132,6 +132,90 @@ else
   exit 1
 fi
 
+# shipyard-block: pacman-packages v1
+# mise matches declared package names exactly against what pacman reports installed, but pacman
+# satisfies a name from any installed provider and answers under the provider's name. A
+# provider-satisfied declaration therefore reads as missing, and mise hands pacman a package
+# that conflicts with the provider already installed (jdx/mise#12181, fixed upstream by #12183 —
+# this block still carries every machine below that floor).
+#
+# The mysql client is the one declaration with interchangeable providers: mariadb-clients,
+# mariadb-lts-clients and percona-server-clients all provide mysql-clients and all own
+# /usr/bin/mysql, so pacman refuses to add a second. The fleet declares percona-server-clients
+# so fresh machines get it; test the virtual rather than that name, because the provides are
+# asymmetric — percona provides mariadb-clients, but nothing provides percona's own name, so a
+# machine already carrying another provider would otherwise be handed a conflicting install.
+pacman_package_satisfied() {
+  local requirement="$1" status
+
+  if [ "$requirement" = percona-server-clients ]; then
+    requirement=mysql-clients
+  fi
+
+  pacman -T -- "$requirement" > /dev/null
+  status=$?
+
+  # 0 satisfied, 127 unsatisfied — any other status is pacman failing rather than answering,
+  # and must not read as "missing" and send us on to install something
+  if [ "$status" -ne 0 ] && [ "$status" -ne 127 ]; then
+    echo "pacman -T $requirement failed (status $status)" >&2
+  fi
+
+  return $status
+}
+
+install_pacman_packages() {
+  local declared manager package rest status missing=()
+
+  # Captured here rather than read through a process substitution: neither set -e nor pipefail
+  # propagates a failure out of one, so a broken status run would yield no rows and report every
+  # declared package installed — silently skipping the phase that the plain apply used to abort.
+  #
+  # status takes no --manager, and it queries managers in turn and gives up on the first one that
+  # errors, so an unrelated manager could abort a pacman run — something the manager-scoped apply
+  # it replaced could not do. Scope it with the setting's own env var; excluded managers are
+  # reported as skipped and never queried. A mise without the setting ignores the variable.
+  declared="$(MISE_SYSTEM_PACKAGES_MANAGERS=pacman mise bootstrap packages status)" || {
+    echo "mise bootstrap packages status failed — refusing to report declared packages as installed." >&2
+    return 1
+  }
+
+  while read -r manager package rest; do
+    [ "$manager" = pacman ] && [ -n "$package" ] || continue
+
+    # status renders a pinned declaration as name@version — a display token, not the
+    # dependency syntax pacman -T reads — and pacman cannot install a pinned version at all.
+    # Take mise's own verdict for those rather than deriving one: testing the token would
+    # read a satisfied pin as missing and then hand pacman an operand it cannot resolve.
+    case "$package" in
+    *@*)
+      case "$rest" in
+      *installed) continue ;;
+      esac
+
+      echo "pacman cannot install the pinned declaration $package." >&2
+      return 1
+      ;;
+    esac
+
+    status=0
+    pacman_package_satisfied "$package" || status=$?
+
+    case $status in
+    0) ;;
+    127) missing+=("pacman:$package") ;;
+    *) return 1 ;;
+    esac
+  done <<< "$declared"
+
+  if [ "${#missing[@]}" -gt 0 ]; then
+    mise bootstrap packages apply --yes "${missing[@]}"
+  else
+    echo "All declared pacman packages are already installed."
+  fi
+}
+# shipyard-block-end: pacman-packages
+
 # Native packages before tools: Bundler builds native extensions against them.
 if [ "$manager" = "brew" ]; then
   step "Installing system packages" brew bundle --file="$app_root/Brewfile"
@@ -140,7 +224,7 @@ else
   # forced `pacman -Sy` before a targeted -S, Arch's unsupported partial upgrade.
   # Install against the existing synchronized database instead.
   if [ "$manager" = pacman ]; then
-    step "Installing system packages" mise bootstrap packages apply --manager "$manager" --yes
+    step "Installing system packages" install_pacman_packages
   else
     step "Installing system packages" mise bootstrap packages apply --manager "$manager" --yes --update
   fi

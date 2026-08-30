@@ -1,0 +1,13 @@
+# frozen_string_literal: true
+
+# The cell's Gemfile. Keep it short: every gem loaded here is inside the blast radius and paid for on
+# every request. hotcell-client and rails do not belong here.
+#
+# The app and the cell lock separately, and a client/server version skew is a `protocol` failure at
+# runtime. bin/build locks these to the version in Gemfile.saas.lock, and a test asserts the two
+# lockfiles agree.
+
+source "https://rubygems.org"
+
+gem "hotcell-server", "~> 0.2.0"
+gem "activestorage-hotcell-server", "~> 0.2.0"

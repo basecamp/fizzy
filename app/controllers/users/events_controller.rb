@@ -4,6 +4,8 @@ class Users::EventsController < ApplicationController
   before_action :set_user, :set_filter, :set_user_filtering
 
   def show
+    raise ActiveRecord::RecordNotFound unless day_param
+
     @filter = Current.user.filters.new(creator_ids: [ @user.id ])
     @day_timeline = Current.user.timeline_for(day_param, filter: @filter)
 
@@ -16,10 +18,12 @@ class Users::EventsController < ApplicationController
     end
 
     def day_param
-      if params[:day].present?
+      @day_param ||= if params[:day].present?
         Time.zone.parse(params[:day])
       else
         Time.current
       end
+    rescue ArgumentError, TypeError
+      nil
     end
 end

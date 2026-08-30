@@ -5,9 +5,22 @@ class My::AccessTokensControllerTest < ActionDispatch::IntegrationTest
     sign_in_as :kevin
   end
 
+  test "index renders untenanted" do
+    identities(:kevin).access_tokens.create!(description: "Fizzy CLI", permission: "read")
+
+    untenanted do
+      get my_access_tokens_path
+
+      assert_response :success
+      assert_in_body session_menu_path
+      assert_not_in_body user_path(users(:kevin))
+    end
+  end
+
   test "create new token" do
     get my_access_tokens_path
     assert_response :success
+    assert_in_body user_path(users(:kevin))
 
     get new_my_access_token_path
     assert_response :success

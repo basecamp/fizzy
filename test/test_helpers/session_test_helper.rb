@@ -52,11 +52,11 @@ module SessionTestHelper
   end
 
   def untenanted(&block)
-    original_script_name = integration_session.default_url_options[:script_name]
-    integration_session.default_url_options[:script_name] = ""
+    original_options = integration_session.default_url_options
+    integration_session.default_url_options = original_options.merge(script_name: "")
     yield
   ensure
-    integration_session.default_url_options[:script_name] = original_script_name
+    integration_session.default_url_options = original_options
   end
 
   def with_multi_tenant_mode(enabled)
