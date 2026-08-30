@@ -15,6 +15,10 @@ class Account::DataTransfer::RecordSet
     @importable_model_names = importable_model_names || [ model.name ]
   end
 
+  def cursor_key
+    "#{self.class.name}/#{model.name}"
+  end
+
   def export(to:, start: nil)
     with_zip(to) do
       block = lambda do |record|
@@ -40,6 +44,7 @@ class Account::DataTransfer::RecordSet
   def check(from:, start: nil, callback: nil)
     with_zip(from) do
       file_list = files
+      check_file_names_arent_ambiguous(file_list)
       file_list = skip_to(file_list, start) if start
 
       file_list.each do |file_path|
@@ -47,6 +52,8 @@ class Account::DataTransfer::RecordSet
         callback&.call(record_set: self, file: file_path)
       end
     end
+  ensure
+    clear_duplicate_detector
   end
 
   private
@@ -83,6 +90,14 @@ class Account::DataTransfer::RecordSet
       model.insert_all!(batch_data)
     end
 
+    def check_file_names_arent_ambiguous(file_list)
+      duplicates = file_list.map(&:downcase).tally.filter_map { |name, count| name if count > 1 }
+
+      if duplicates.any?
+        raise IntegrityError, "#{model} has multiple files for the same record: #{duplicates.join(', ')}"
+      end
+    end
+
     def check_record(file_path)
       data = load(file_path)
       expected_id = File.basename(file_path, ".json")
@@ -101,6 +116,7 @@ class Account::DataTransfer::RecordSet
       end
 
       check_associations_dont_exist(data)
+      check_unique_values_arent_duplicated(data)
     end
 
     def check_associations_dont_exist(data)
@@ -132,6 +148,30 @@ class Account::DataTransfer::RecordSet
       else
         raise IntegrityError, "Unrecognized model type: #{type_name}"
       end
+    end
+
+    def check_unique_values_arent_duplicated(data)
+      # Remap the data being imported to the account we are importing it to.
+      # This ensures that uniquness checks are valid, else someone could change
+      # the account_id in the export to point to different accounts and circumvent
+      # this check.
+      data = data.merge("account_id" => account.id)
+
+      if columns = duplicate_detector.detect(data)
+        raise IntegrityError, "#{model} has multiple records with the same #{columns.to_sentence}: #{data.values_at(*columns).join(', ')}"
+      end
+    end
+
+    def duplicate_detector
+      @duplicate_detector ||= DuplicateDetector.new(unique_key_sets)
+    end
+
+    def clear_duplicate_detector
+      @duplicate_detector = nil
+    end
+
+    def unique_key_sets
+      @unique_key_sets ||= model.connection.indexes(model.table_name).select(&:unique).map(&:columns)
     end
 
     def skip_to(file_list, last_id)
