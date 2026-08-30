@@ -105,6 +105,16 @@ Rails.application.config.to_prepare do
 
   ActiveStorage::Blobs::RedirectController.include ActiveStorage::Authorize
   ActiveStorage::Blobs::ProxyController.include ActiveStorage::Authorize
-  ActiveStorage::Representations::RedirectController.include ActiveStorage::Authorize
-  ActiveStorage::Representations::ProxyController.include ActiveStorage::Authorize
+
+  # set_representation is a before_action on Representations::BaseController that runs
+  # @blob.representation(...).processed — the ffmpeg/mutool/libvips parser. Because it is
+  # registered on the parent, it precedes the authorization callbacks this concern appends,
+  # so the parser would otherwise run against an unauthorized (or anonymous) request before
+  # ensure_accessible is ever consulted. Re-append set_representation on each representations
+  # controller so it runs after require_authentication and ensure_accessible.
+  [ ActiveStorage::Representations::RedirectController, ActiveStorage::Representations::ProxyController ].each do |controller|
+    controller.include ActiveStorage::Authorize
+    controller.skip_before_action :set_representation
+    controller.before_action :set_representation
+  end
 end
