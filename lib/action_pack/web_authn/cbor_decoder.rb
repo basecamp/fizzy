@@ -159,7 +159,15 @@ class ActionPack::WebAuthn::CborDecoder
 
     def decode_byte_string
       if indefinite_length?
-        String.new(encoding: Encoding::ASCII_8BIT).tap { |str| str << decode_byte_string until break_code? }
+        # Charge each chunk: an indefinite byte string is a stream of chunks,
+        # so a flood of empty 0x40 chunks would otherwise iterate and allocate
+        # without touching the array/map budget.
+        String.new(encoding: Encoding::ASCII_8BIT).tap do |str|
+          until break_code?
+            charge_element
+            str << decode_byte_string
+          end
+        end
       else
         read_bytes(read_argument).pack("C*")
       end
@@ -167,7 +175,12 @@ class ActionPack::WebAuthn::CborDecoder
 
     def decode_text_string
       if indefinite_length?
-        String.new(encoding: Encoding::UTF_8).tap { |str| str << decode_text_string until break_code? }
+        String.new(encoding: Encoding::UTF_8).tap do |str|
+          until break_code?
+            charge_element
+            str << decode_text_string
+          end
+        end
       else
         read_bytes(read_argument).pack("C*").force_encoding(Encoding::UTF_8)
       end

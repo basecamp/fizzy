@@ -361,6 +361,30 @@ class ActionPack::WebAuthn::CborDecoderTest < ActiveSupport::TestCase
     assert_equal "Decoded element count exceeds maximum", error.message
   end
 
+  test "rejects an indefinite-length byte string that streams more chunks than the budget" do
+    # 0x5f opens an indefinite byte string, each 0x40 is an empty chunk, 0xff
+    # closes it. Chunks carry almost no bytes but each is an iteration and an
+    # allocation, so they must be charged like array entries and map pairs.
+    payload = [ 0x5f ] + Array.new(6, 0x40) + [ 0xff ]
+
+    error = assert_raises(ActionPack::WebAuthn::InvalidCborError) do
+      ActionPack::WebAuthn::CborDecoder.decode(payload, max_elements: 5)
+    end
+
+    assert_equal "Decoded element count exceeds maximum", error.message
+  end
+
+  test "rejects an indefinite-length text string that streams more chunks than the budget" do
+    # 0x7f opens an indefinite text string, each 0x60 is an empty chunk.
+    payload = [ 0x7f ] + Array.new(6, 0x60) + [ 0xff ]
+
+    error = assert_raises(ActionPack::WebAuthn::InvalidCborError) do
+      ActionPack::WebAuthn::CborDecoder.decode(payload, max_elements: 5)
+    end
+
+    assert_equal "Decoded element count exceeds maximum", error.message
+  end
+
   test "decodes a container whose element count is exactly at the budget" do
     # Non-vacuity: the guard rejects strictly above the budget, so a container
     # sized right at it still decodes. A five-element array under a budget of
