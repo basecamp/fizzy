@@ -326,6 +326,59 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_not_equal old_refresh_token, body["refresh_token"]
   end
 
+  test "refresh grant echoes the granted scope" do
+    client = oauth_clients(:mcp_client)
+    token = identities(:david).access_tokens.create!(oauth_client: client, permission: :write)
+
+    untenanted do
+      post oauth_token_path, params: {
+        grant_type: "refresh_token",
+        refresh_token: token.refresh_token,
+        client_id: client.client_id
+      }, as: :json
+    end
+
+    assert_response :success
+    assert_equal "read write", response.parsed_body["scope"]
+  end
+
+  test "refresh grant narrows the token to a requested subset scope" do
+    client = oauth_clients(:mcp_client)
+    token = identities(:david).access_tokens.create!(oauth_client: client, permission: :write)
+
+    untenanted do
+      post oauth_token_path, params: {
+        grant_type: "refresh_token",
+        refresh_token: token.refresh_token,
+        client_id: client.client_id,
+        scope: "read"
+      }, as: :json
+    end
+
+    assert_response :success
+    assert_equal "read", response.parsed_body["scope"]
+    assert_equal "read", Identity::AccessToken.find_by(token: response.parsed_body["access_token"]).permission
+  end
+
+  test "refresh grant rejects a scope broader than the original grant" do
+    client = oauth_clients(:mcp_client)
+    token = identities(:david).access_tokens.create!(oauth_client: client, permission: :read)
+    old_refresh_token = token.refresh_token
+
+    untenanted do
+      post oauth_token_path, params: {
+        grant_type: "refresh_token",
+        refresh_token: old_refresh_token,
+        client_id: client.client_id,
+        scope: "write"
+      }, as: :json
+    end
+
+    assert_response :bad_request
+    assert_equal "invalid_scope", response.parsed_body["error"]
+    assert_equal old_refresh_token, token.reload.refresh_token
+  end
+
   test "refresh grant works after the access token expires" do
     client = oauth_clients(:mcp_client)
     token = identities(:david).access_tokens.create!(oauth_client: client)

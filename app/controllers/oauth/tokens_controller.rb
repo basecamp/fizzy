@@ -17,6 +17,7 @@ class Oauth::TokensController < Oauth::BaseController
   with_options unless: :authorization_code_grant? do
     before_action :set_refreshable_access_token
     before_action :validate_refresh_client
+    before_action :set_refresh_scope
   end
 
   def create
@@ -27,8 +28,8 @@ class Oauth::TokensController < Oauth::BaseController
 
       render json: token_response(access_token, scope: granted.join(" "))
     else
-      if @access_token.refresh
-        render json: token_response(@access_token)
+      if @access_token.refresh(permission: @refresh_permission)
+        render json: token_response(@access_token, scope: scope_for(@access_token.permission))
       else
         oauth_error "invalid_grant", "Invalid refresh token"
       end
@@ -87,6 +88,28 @@ class Oauth::TokensController < Oauth::BaseController
       unless @access_token.oauth_client.client_id == params[:client_id]
         oauth_error "invalid_grant", "Refresh token was not issued to this client"
       end
+    end
+
+    # A refresh request may narrow scope but never widen it (RFC 6749 §6). An
+    # omitted scope keeps the original grant; a requested subset narrows the
+    # rotated token; anything beyond the grant is invalid_scope.
+    def set_refresh_scope
+      granted = granted_scopes(@access_token.permission)
+      requested = params[:scope].present? ? params[:scope].split : granted
+
+      if requested.present? && requested.all? { |scope| granted.include?(scope) }
+        @refresh_permission = requested.include?("write") ? "write" : "read"
+      else
+        oauth_error "invalid_scope", "Requested scope exceeds the original grant"
+      end
+    end
+
+    def granted_scopes(permission)
+      permission == "write" ? %w[ read write ] : %w[ read ]
+    end
+
+    def scope_for(permission)
+      granted_scopes(permission).join(" ")
     end
 
     def token_response(access_token, scope: nil)
