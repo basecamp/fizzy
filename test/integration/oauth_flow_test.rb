@@ -485,6 +485,22 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "refresh grant for confidential client omitting client_id fails as invalid_client" do
+    client = oauth_clients(:confidential_client)
+    token = identities(:david).access_tokens.create!(oauth_client: client)
+
+    untenanted do
+      post oauth_token_path, params: {
+        grant_type: "refresh_token",
+        refresh_token: token.refresh_token,
+        client_secret: "confidential_secret_789"
+      }, as: :json
+    end
+
+    assert_response :unauthorized
+    assert_equal "invalid_client", response.parsed_body["error"]
+  end
+
 
   # Refresh Grant
 

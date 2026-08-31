@@ -16,13 +16,18 @@ class Oauth::TokensController < Oauth::BaseController
     before_action :set_identity
   end
 
+  before_action :set_refreshable_access_token, unless: :authorization_code_grant?
+
+  # Authenticate the posted client before validating that the refresh token
+  # belongs to it: a confidential client that fails auth must see invalid_client
+  # (401), not the invalid_grant that a client_id mismatch would raise first —
+  # which a client could misread as a revoked grant and discard.
+  before_action :authenticate_client
+
   with_options unless: :authorization_code_grant? do
-    before_action :set_refreshable_access_token
     before_action :validate_refresh_client
     before_action :set_refresh_scope
   end
-
-  before_action :authenticate_client
 
   def create
     if authorization_code_grant?
