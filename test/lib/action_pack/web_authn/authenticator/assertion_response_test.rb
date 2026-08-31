@@ -65,6 +65,24 @@ class ActionPack::WebAuthn::Authenticator::AssertionResponseTest < ActiveSupport
     end
   end
 
+  test "accepts a predecoded Authenticator::Data instance, preserving Data.wrap's documented input" do
+    # A library caller may decode once and hand the response an existing
+    # Authenticator::Data (Data.wrap returns it as-is). The malformed-input
+    # guard must not reject that supported branch.
+    data = ActionPack::WebAuthn::Authenticator::Data.wrap(@authenticator_data)
+
+    response = ActionPack::WebAuthn::Authenticator::AssertionResponse.new(
+      client_data_json: @client_data_json,
+      authenticator_data: data,
+      signature: @signature,
+      credential: @credential,
+      origin: @origin
+    )
+
+    assert_same data, response.authenticator_data
+    assert_nothing_raised { response.validate! }
+  end
+
   test "validate! raises when type is not webauthn.get" do
     client_data_json = {
       challenge: @challenge,
