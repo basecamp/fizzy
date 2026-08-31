@@ -385,6 +385,33 @@ class ActionPack::WebAuthn::CborDecoderTest < ActiveSupport::TestCase
     assert_equal "Decoded element count exceeds maximum", error.message
   end
 
+  test "rejects an indefinite-length byte string whose chunk is itself indefinite instead of overflowing the stack" do
+    # RFC 8949 requires each chunk of an indefinite-length string to be a
+    # definite-length string of the same type. A chunk that is itself an
+    # indefinite byte string (0x5f) used to recurse without passing through the
+    # depth check, overflowing the stack (an uncaught SystemStackError) on a
+    # deeply nested payload. It must be rejected as InvalidCborError instead.
+    payload = [ 0x5f, 0x5f, 0xff, 0xff ]
+
+    error = assert_raises(ActionPack::WebAuthn::InvalidCborError) do
+      ActionPack::WebAuthn::CborDecoder.decode(payload)
+    end
+
+    assert_equal "Indefinite-length string chunk must be a definite-length string of the same type", error.message
+  end
+
+  test "rejects an indefinite-length string chunk of a mismatched major type" do
+    # 0x5f opens an indefinite byte string; 0x00 is an integer, not a byte-string
+    # chunk. Deeply nesting these was the stack-overflow vector.
+    payload = [ 0x5f, 0x00, 0xff ]
+
+    error = assert_raises(ActionPack::WebAuthn::InvalidCborError) do
+      ActionPack::WebAuthn::CborDecoder.decode(payload)
+    end
+
+    assert_equal "Indefinite-length string chunk must be a definite-length string of the same type", error.message
+  end
+
   test "decodes a container whose element count is exactly at the budget" do
     # Non-vacuity: the guard rejects strictly above the budget, so a container
     # sized right at it still decodes. A five-element array under a budget of

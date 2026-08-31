@@ -159,15 +159,7 @@ class ActionPack::WebAuthn::CborDecoder
 
     def decode_byte_string
       if indefinite_length?
-        # Charge each chunk: an indefinite byte string is a stream of chunks,
-        # so a flood of empty 0x40 chunks would otherwise iterate and allocate
-        # without touching the array/map budget.
-        String.new(encoding: Encoding::ASCII_8BIT).tap do |str|
-          until break_code?
-            charge_element
-            str << decode_byte_string
-          end
-        end
+        read_indefinite_string(BYTE_STRING_TYPE, Encoding::ASCII_8BIT)
       else
         read_bytes(read_argument).pack("C*")
       end
@@ -175,14 +167,29 @@ class ActionPack::WebAuthn::CborDecoder
 
     def decode_text_string
       if indefinite_length?
-        String.new(encoding: Encoding::UTF_8).tap do |str|
-          until break_code?
-            charge_element
-            str << decode_text_string
-          end
-        end
+        read_indefinite_string(TEXT_STRING_TYPE, Encoding::UTF_8)
       else
         read_bytes(read_argument).pack("C*").force_encoding(Encoding::UTF_8)
+      end
+    end
+
+    # Assembles an indefinite-length string from its chunks. RFC 8949 requires
+    # every chunk to be a definite-length string of the same major type, so read
+    # each one inline rather than recursing: a nested indefinite marker (or any
+    # other item) is rejected, which also removes the unbounded recursion that
+    # would otherwise overflow the stack before MAX_DEPTH or the element budget
+    # could intervene. Each chunk is charged so a flood of empty chunks is bound.
+    def read_indefinite_string(major, encoding)
+      String.new(encoding: encoding).tap do |str|
+        until break_code?
+          charge_element
+
+          unless major_type == major && additional_info(consume: false) != INDEFINITE_LENGTH_MAJOR_TYPE
+            raise ActionPack::WebAuthn::InvalidCborError, "Indefinite-length string chunk must be a definite-length string of the same type"
+          end
+
+          str << read_bytes(read_argument).pack("C*").force_encoding(encoding)
+        end
       end
     end
 
