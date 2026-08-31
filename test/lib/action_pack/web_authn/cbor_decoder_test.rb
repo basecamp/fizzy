@@ -428,6 +428,44 @@ class ActionPack::WebAuthn::CborDecoderTest < ActiveSupport::TestCase
     assert_equal "Indefinite-length string chunk must be a definite-length string of the same type", error.message
   end
 
+  test "raises for an unterminated indefinite-length byte string instead of crashing at EOF" do
+    # 0x5f opens an indefinite byte string, 0x40 is an empty chunk, and the
+    # input ends with no 0xff break. break_code? reads falsy at EOF, so without
+    # the guard major_type would do nil >> 5 and raise an uncaught NoMethodError.
+    error = assert_raises(ActionPack::WebAuthn::InvalidCborError) do
+      decode("5f40")
+    end
+
+    assert_equal "Unexpected end of input", error.message
+  end
+
+  test "decodes a small CBOR bignum" do
+    # 0xc2 = tag 2 (positive bignum), 0x42 = byte string of length 2, 0x0100.
+    assert_equal 256, decode("c2420100")
+  end
+
+  test "rejects a CBOR bignum larger than the bignum byte limit" do
+    # Bignum conversion is quadratic, so an oversized value would tie up a
+    # worker. 0xc2 tag 2, 0x59 = byte string with a 2-byte length = 1025.
+    over = ActionPack::WebAuthn::CborDecoder::MAX_BIGNUM_BYTES + 1
+    payload = [ 0xc2, 0x59 ] + [ over ].pack("n").bytes + Array.new(over, 0x00)
+
+    error = assert_raises(ActionPack::WebAuthn::InvalidCborError) do
+      ActionPack::WebAuthn::CborDecoder.decode(payload)
+    end
+
+    assert_equal "Bignum exceeds maximum size", error.message
+  end
+
+  test "rejects a CBOR bignum whose tagged value is not a byte string" do
+    # 0xc2 = tag 2 wrapping the integer 1, which has no #bytes.
+    error = assert_raises(ActionPack::WebAuthn::InvalidCborError) do
+      decode("c201")
+    end
+
+    assert_equal "Bignum value must be a byte string", error.message
+  end
+
   test "decodes a container whose element count is exactly at the budget" do
     # Non-vacuity: the guard rejects strictly above the budget, so a container
     # sized right at it still decodes. A five-element array under a budget of

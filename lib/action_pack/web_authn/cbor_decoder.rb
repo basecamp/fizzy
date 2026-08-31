@@ -96,6 +96,13 @@ class ActionPack::WebAuthn::CborDecoder
   POSITIVE_BIGNUM_TAG = 2
   NEGATIVE_BIGNUM_TAG = 3
 
+  # Bounds the byte length of a CBOR bignum (tag 2/3). Conversion shifts an
+  # ever-growing integer one byte at a time, which is quadratic, so a multi-MB
+  # bignum permitted by MAX_SIZE would tie up a worker for seconds. WebAuthn
+  # attestation objects carry no bignums; this ceiling is generous for any
+  # legitimate value while keeping the conversion trivially cheap.
+  MAX_BIGNUM_BYTES = 1024
+
   class << self
     # Decodes a CBOR-encoded byte sequence into a Ruby object.
     #
@@ -189,6 +196,11 @@ class ActionPack::WebAuthn::CborDecoder
     def read_indefinite_string(major, encoding)
       String.new(encoding: encoding).tap do |str|
         until break_code?
+          # break_code? reads falsy at EOF (peek returns nil), so guard here or
+          # major_type below would do nil >> 5 and raise an uncaught NoMethodError
+          # on an unterminated indefinite string such as 0x5f 0x40.
+          raise ActionPack::WebAuthn::InvalidCborError, "Unexpected end of input" if @position >= @bytes.length
+
           charge_element
 
           unless major_type == major && additional_info(consume: false) != INDEFINITE_LENGTH_MAJOR_TYPE
@@ -266,10 +278,24 @@ class ActionPack::WebAuthn::CborDecoder
       value = decode
 
       case tag
-      when POSITIVE_BIGNUM_TAG then value.bytes.inject(0) { |n, b| (n << 8) | b }
-      when NEGATIVE_BIGNUM_TAG then -1 - value.bytes.inject(0) { |n, b| (n << 8) | b }
+      when POSITIVE_BIGNUM_TAG then decode_bignum(value)
+      when NEGATIVE_BIGNUM_TAG then -1 - decode_bignum(value)
       else value
       end
+    end
+
+    def decode_bignum(value)
+      # A bignum's content must be a byte string; anything else (an integer,
+      # array, ...) would otherwise raise NoMethodError on #bytes below.
+      unless value.is_a?(String)
+        raise ActionPack::WebAuthn::InvalidCborError, "Bignum value must be a byte string"
+      end
+
+      if value.bytesize > MAX_BIGNUM_BYTES
+        raise ActionPack::WebAuthn::InvalidCborError, "Bignum exceeds maximum size"
+      end
+
+      value.bytes.inject(0) { |n, b| (n << 8) | b }
     end
 
     def decode_half_float
