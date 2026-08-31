@@ -317,6 +317,59 @@ class ActionPack::WebAuthn::CborDecoderTest < ActiveSupport::TestCase
     assert_equal [ 1, 2, 3 ], decode("83010203")
   end
 
+  test "rejects a definite-length array declaring more elements than the budget before allocating them" do
+    # 0x9a = array with a 4-byte element count = MAX_ELEMENTS + 1, followed by
+    # exactly that many one-byte items (unsigned integer 0). The declared count
+    # slips under both MAX_SIZE and the remaining-bytes bound, so only the
+    # element budget stops it from building tens of thousands of Ruby objects.
+    # The count is charged in read_length before the build loop runs, so the
+    # array is never grown.
+    over_budget = ActionPack::WebAuthn::CborDecoder::MAX_ELEMENTS + 1
+    header = [ 0x9a, over_budget ].pack("CN").bytes
+    payload = header + Array.new(over_budget, 0x00)
+
+    error = assert_raises(ActionPack::WebAuthn::InvalidCborError) do
+      ActionPack::WebAuthn::CborDecoder.decode(payload)
+    end
+
+    assert_equal "Decoded element count exceeds maximum", error.message
+  end
+
+  test "rejects an indefinite-length array that streams more elements than the budget" do
+    # Indefinite-length containers carry no declared count, so the byte bound in
+    # read_length never sees them. 0x9f opens the stream, 0xff closes it; the
+    # per-element charge is what bounds it. Uses a small override to keep the
+    # fixture tiny while exercising the same guard as the default limit.
+    payload = [ 0x9f ] + Array.new(5, 0x00) + [ 0xff ]
+
+    error = assert_raises(ActionPack::WebAuthn::InvalidCborError) do
+      ActionPack::WebAuthn::CborDecoder.decode(payload, max_elements: 4)
+    end
+
+    assert_equal "Decoded element count exceeds maximum", error.message
+  end
+
+  test "rejects a definite-length map declaring more pairs than the budget" do
+    # 0xb8 = map with a 1-byte pair count. Six pairs (twelve one-byte items)
+    # exceed a budget of five.
+    payload = [ 0xb8, 0x06 ] + Array.new(12, 0x00)
+
+    error = assert_raises(ActionPack::WebAuthn::InvalidCborError) do
+      ActionPack::WebAuthn::CborDecoder.decode(payload, max_elements: 5)
+    end
+
+    assert_equal "Decoded element count exceeds maximum", error.message
+  end
+
+  test "decodes a container whose element count is exactly at the budget" do
+    # Non-vacuity: the guard rejects strictly above the budget, so a container
+    # sized right at it still decodes. A five-element array under a budget of
+    # five proves the limit is a real boundary, not an always-raise.
+    payload = [ 0x85, 0x01, 0x02, 0x03, 0x04, 0x05 ]
+
+    assert_equal [ 1, 2, 3, 4, 5 ], ActionPack::WebAuthn::CborDecoder.decode(payload, max_elements: 5)
+  end
+
   private
     def decode(hex)
       bytes = [ hex ].pack("H*").bytes

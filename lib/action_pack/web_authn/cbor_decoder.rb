@@ -83,6 +83,15 @@ class ActionPack::WebAuthn::CborDecoder
   MAX_DEPTH = 16
   MAX_SIZE = 10.megabytes
 
+  # Caps the total number of container elements (array entries and map pairs)
+  # decoded from a single input. The byte-size limit alone is not enough: a
+  # definite-length array of millions of one-byte items, or an indefinite-length
+  # container of the same, stays under MAX_SIZE yet forces the decoder to build
+  # millions of Ruby objects (hundreds of MB) before any later type check can
+  # reject it. Real WebAuthn attestation objects hold only a handful of elements,
+  # so this ceiling is generous while still bounding worst-case allocation.
+  MAX_ELEMENTS = 65_536
+
   # Tags
   POSITIVE_BIGNUM_TAG = 2
   NEGATIVE_BIGNUM_TAG = 3
@@ -98,13 +107,15 @@ class ActionPack::WebAuthn::CborDecoder
     end
   end
 
-  def initialize(bytes, max_depth: MAX_DEPTH, max_size: MAX_SIZE) # :nodoc:
+  def initialize(bytes, max_depth: MAX_DEPTH, max_size: MAX_SIZE, max_elements: MAX_ELEMENTS) # :nodoc:
     raise ActionPack::WebAuthn::InvalidCborError, "Input exceeds maximum size" if bytes.length > max_size
 
     @bytes = bytes
     @max_depth = max_depth
+    @max_elements = max_elements
     @position = 0
     @depth = 0
+    @element_count = 0
   end
 
   # Decodes the next CBOR data item from the byte sequence.
@@ -164,25 +175,49 @@ class ActionPack::WebAuthn::CborDecoder
 
     def decode_array
       if indefinite_length?
-        Array.new.tap { |arr| arr << decode until break_code? }
+        # No declared count to charge up front, so charge each element as it
+        # arrives to bound an indefinite stream of tiny items.
+        Array.new.tap { |arr| arr << decode_element until break_code? }
       else
         # Build incrementally rather than Array.new(count) { ... }: a declared
         # count must not pre-size the backing store. read_length caps the count
-        # at the remaining bytes, and nested containers still exhaust the input
-        # (and hit the depth limit) before the array can grow large.
+        # at the remaining bytes and against the element budget, rejecting an
+        # oversized declaration before a single element is built.
         Array.new.tap { |arr| read_length.times { arr << decode } }
       end
     end
 
     def decode_map
       if indefinite_length?
-        Hash.new.tap { |hash| hash[decode] = decode until break_code? }
+        # decode_element charges the pair as the key arrives; the break check
+        # runs first, so a closing 0xFF is never charged.
+        Hash.new.tap { |hash| hash[decode_element] = decode until break_code? }
       else
         Hash.new.tap do |hash|
           read_length.times do
             hash[decode] = decode
           end
         end
+      end
+    end
+
+    # Decodes one element of an indefinite-length container, charging it against
+    # the element budget first so the stream is bounded even without a declared
+    # length.
+    def decode_element
+      charge_element
+      decode
+    end
+
+    # Charges +count+ elements against the running budget, rejecting the input
+    # once the total would exceed MAX_ELEMENTS. Mirrors the byte-size ceiling:
+    # a bound on how much the decoder will allocate, independent of the declared
+    # or streamed shape of the data.
+    def charge_element(count = 1)
+      @element_count += count
+
+      if @element_count > @max_elements
+        raise ActionPack::WebAuthn::InvalidCborError, "Decoded element count exceeds maximum"
       end
     end
 
@@ -267,6 +302,11 @@ class ActionPack::WebAuthn::CborDecoder
       if length > @bytes.length - @position
         raise ActionPack::WebAuthn::InvalidCborError, "Declared length exceeds remaining input"
       end
+
+      # Charge the whole declared count before decoding any element, so an
+      # array or map that names millions of one-byte items is rejected up front
+      # rather than after the backing store has already been grown.
+      charge_element(length)
 
       length
     end
