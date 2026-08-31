@@ -65,6 +65,17 @@ class ActionPack::WebAuthn::Authenticator::AssertionResponseTest < ActiveSupport
     end
   end
 
+  test "rejects an oversized Base64 authenticator data before decoding it" do
+    max_encoded = ActionPack::WebAuthn::CborDecoder::MAX_SIZE / 3 * 4 + 4
+    oversized = "A" * (max_encoded + 1)
+
+    error = assert_raises(ActionPack::WebAuthn::InvalidResponseError) do
+      ActionPack::WebAuthn::Authenticator::Data.wrap(oversized)
+    end
+
+    assert_equal "Authenticator data is too large", error.message
+  end
+
   test "accepts a predecoded Authenticator::Data instance, preserving Data.wrap's documented input" do
     # A library caller may decode once and hand the response an existing
     # Authenticator::Data (Data.wrap returns it as-is). The malformed-input

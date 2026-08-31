@@ -215,6 +215,20 @@ class ActionPack::WebAuthn::Authenticator::AttestationResponseTest < ActiveSuppo
     end
   end
 
+  test "rejects an oversized Base64 attestation object before decoding it" do
+    # An encoded value larger than the byte ceiling can only decode to an
+    # oversized blob, so Attestation.wrap must reject it before Base64 allocates
+    # the decoded copy.
+    max_encoded = ActionPack::WebAuthn::CborDecoder::MAX_SIZE / 3 * 4 + 4
+    oversized = "A" * (max_encoded + 1)
+
+    error = assert_raises(ActionPack::WebAuthn::InvalidResponseError) do
+      ActionPack::WebAuthn::Authenticator::Attestation.wrap(oversized)
+    end
+
+    assert_equal "Attestation object is too large", error.message
+  end
+
   test "accepts a predecoded Attestation instance, preserving Attestation.wrap's documented input" do
     # A library caller may decode once and hand the response an existing
     # Attestation (Attestation.wrap returns it as-is). The malformed-input guard

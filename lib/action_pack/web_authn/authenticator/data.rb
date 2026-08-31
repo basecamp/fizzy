@@ -66,7 +66,19 @@ class ActionPack::WebAuthn::Authenticator::Data
       if data.is_a?(self)
         data
       else
-        data = Base64.urlsafe_decode64(data) unless data.encoding == Encoding::BINARY
+        unless data.encoding == Encoding::BINARY
+          # Reject before Base64.urlsafe_decode64 allocates the decoded copy: an
+          # encoded value larger than the byte ceiling can only decode to an
+          # oversized blob. Authenticator data is small, so this only bounds the
+          # allocation an attacker-controlled string would otherwise force.
+          max_encoded = ActionPack::WebAuthn::CborDecoder::MAX_SIZE / 3 * 4 + 4
+          if data.bytesize > max_encoded
+            raise ActionPack::WebAuthn::InvalidResponseError, "Authenticator data is too large"
+          end
+
+          data = Base64.urlsafe_decode64(data)
+        end
+
         decode(data)
       end
     rescue ArgumentError
