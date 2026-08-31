@@ -36,7 +36,7 @@ class User < ApplicationRecord
     update!(verified_at: Time.current) unless verified?
   end
 
-  def close_remote_connections
-    ActionCable.server.remote_connections.where(current_user: self).disconnect(reconnect: false)
+  def close_remote_connections(reconnect: false)
+    ActionCable.server.remote_connections.where(current_user: self).disconnect(reconnect:)
   end
 end
