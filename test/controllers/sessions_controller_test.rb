@@ -87,6 +87,19 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "destroy closes the signed-out identity's live realtime connections" do
+    sign_in_as :kevin
+
+    remote_connections = mock
+    ActionCable.server.stubs(:remote_connections).returns(remote_connections)
+    remote_connections.expects(:where).with(current_user: users(:kevin)).returns(remote_connections)
+    remote_connections.expects(:disconnect).with(reconnect: false)
+
+    untenanted do
+      delete session_path
+    end
+  end
+
   test "create via JSON" do
     untenanted do
       post session_path(format: :json), params: { email_address: identities(:david).email_address }

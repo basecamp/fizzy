@@ -106,6 +106,7 @@ module Authentication
 
     def terminate_session
       Current.session.destroy
+      Current.identity&.close_remote_connections
       cookies.delete(:session_token)
     end
 

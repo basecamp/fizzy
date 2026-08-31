@@ -34,6 +34,10 @@ class Identity < ApplicationRecord
     users.joins(:account).merge(Account.active).includes(:account)
   end
 
+  def close_remote_connections
+    users.find_each(&:close_remote_connections)
+  end
+
   private
     def deactivate_users
       users.find_each(&:deactivate)
