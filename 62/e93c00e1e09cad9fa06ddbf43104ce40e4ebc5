@@ -1,0 +1,24 @@
+test/lib/action_pack/web_authn/cbor_decoder_test.rb
+  s_964922bad4d340::t_6a5d4557978f80 431-468
+lib/action_pack/web_authn/cbor_decoder.rb
+  s_964922bad4d340::t_287657e461a0b2 99-105
+  s_964922bad4d340::t_7c7166ab7dab29 281-282,287-298
+  s_964922bad4d340::t_03c6acbf737d84 199-203
+  s_964922bad4d340::t_6f77df187ff068 299-300
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "62e93c00e1e09cad9fa06ddbf43104ce40e4ebc5",
+  "prompts": {},
+  "sessions": {
+    "s_964922bad4d340": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b315b378-55b7-45e0-911e-b964de3ac103",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
