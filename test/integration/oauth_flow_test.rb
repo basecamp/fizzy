@@ -450,6 +450,20 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_equal "invalid_redirect_uri", response.parsed_body["error"]
   end
 
+  test "DCR rejects a redirect whose host decodes to invalid UTF-8" do
+    assert_no_difference "Oauth::Client.count" do
+      untenanted do
+        post oauth_clients_path, params: {
+          client_name: "Broken Host",
+          redirect_uris: [ "https://%FF/callback" ]
+        }, as: :json
+      end
+    end
+
+    assert_response :bad_request
+    assert_equal "invalid_redirect_uri", response.parsed_body["error"]
+  end
+
   test "DCR rejects https redirect with fragment" do
     assert_no_difference "Oauth::Client.count" do
       untenanted do
