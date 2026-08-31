@@ -1,0 +1,35 @@
+test/lib/action_pack/web_authn/cose_key_test.rb
+  s_964922bad4d340::t_d518b32c2aa728 257-258
+  s_964922bad4d340::t_8908e127ecf3cc 288-294
+test/lib/action_pack/web_authn/authenticator/assertion_response_test.rb
+  s_964922bad4d340::t_bfce037c2fefe6 46-67
+test/lib/action_pack/web_authn/authenticator/attestation_response_test.rb
+  s_964922bad4d340::t_e6e3bf72826672 204-232
+  s_964922bad4d340::t_31a4b31f6e081e 233-251
+lib/action_pack/web_authn/cose_key.rb
+  s_964922bad4d340::t_409695efff397c 81-85
+lib/action_pack/web_authn/authenticator/assertion_response.rb
+  s_964922bad4d340::t_8a6b3988e9773b 41-45
+lib/action_pack/web_authn/authenticator/attestation_response.rb
+  s_964922bad4d340::t_dc9d89b34fda2a 33
+  s_964922bad4d340::t_994e084acde9c0 68-76
+  s_964922bad4d340::t_82dfffad175efb 38-42
+lib/action_pack/web_authn/authenticator/response.rb
+  s_964922bad4d340::t_82823808f52640 48-54
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "442e99889444380309460ab74ba78bd5e71022db",
+  "prompts": {},
+  "sessions": {
+    "s_964922bad4d340": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b315b378-55b7-45e0-911e-b964de3ac103",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Jeremy Daer <jeremy@37signals.com>"
+    }
+  }
+}
