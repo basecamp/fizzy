@@ -215,6 +215,22 @@ class ActionPack::WebAuthn::Authenticator::AttestationResponseTest < ActiveSuppo
     end
   end
 
+  test "accepts a predecoded Attestation instance, preserving Attestation.wrap's documented input" do
+    # A library caller may decode once and hand the response an existing
+    # Attestation (Attestation.wrap returns it as-is). The malformed-input guard
+    # must not reject that supported branch.
+    attestation = ActionPack::WebAuthn::Authenticator::Attestation.wrap(ATTESTATION_NONE_VERIFIED)
+
+    response = ActionPack::WebAuthn::Authenticator::AttestationResponse.new(
+      client_data_json: @client_data_json,
+      attestation_object: attestation,
+      origin: @origin
+    )
+
+    assert_same attestation, response.attestation
+    assert_nothing_raised { response.validate! }
+  end
+
   test "validate! raises when attested credential data is missing (no AT flag)" do
     # Valid CBOR + binary authData, but flags 0x05 (UP+UV, no AT), so there is
     # no credential id / public key to persist. Must reject, not 500 on to_h.

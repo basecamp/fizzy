@@ -36,7 +36,13 @@ class ActionPack::WebAuthn::Authenticator::AttestationResponse < ActionPack::Web
   def initialize(attestation_object:, **attributes)
     super(**attributes)
 
-    unless attestation_object.is_a?(String)
+    # A request-supplied attestation object arrives as a serialized String, and
+    # strong parameters may deliver a scalar (e.g. a number) that would crash on
+    # #encoding before decoding — reject those here. But Attestation.wrap also
+    # accepts an already-decoded Attestation (returned as-is), which library
+    # callers pass when constructing a response for a custom verifier; keep that
+    # documented branch reachable.
+    unless attestation_object.is_a?(String) || attestation_object.is_a?(ActionPack::WebAuthn::Authenticator::Attestation)
       raise ActionPack::WebAuthn::InvalidResponseError, "Attestation object is missing or malformed"
     end
 
