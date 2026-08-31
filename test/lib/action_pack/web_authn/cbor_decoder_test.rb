@@ -293,6 +293,22 @@ class ActionPack::WebAuthn::CborDecoderTest < ActiveSupport::TestCase
     assert_equal "Input exceeds maximum size", error.message
   end
 
+  test "rejects an oversized string input before materializing its bytes" do
+    # A String over the limit must be rejected before String#bytes runs, since
+    # that conversion is itself the ~8x allocation the limit exists to prevent.
+    # This String refuses to be converted, so reaching #bytes would raise the
+    # wrong error and fail the assertion below.
+    oversized = Class.new(String) do
+      def bytes = raise "must not materialize bytes for an oversized input"
+    end.new("x" * 100)
+
+    error = assert_raises(ActionPack::WebAuthn::InvalidCborError) do
+      ActionPack::WebAuthn::CborDecoder.decode(oversized, max_size: 10)
+    end
+
+    assert_equal "Input exceeds maximum size", error.message
+  end
+
   test "rejects an array whose declared length exceeds the remaining input" do
     # 0x9a = array, 4-byte length follows = 0xffffffff (~4.3 billion elements)
     # from a 5-byte input. Without a bound this drives a multi-gigabyte

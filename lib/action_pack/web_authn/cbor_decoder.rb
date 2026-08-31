@@ -101,9 +101,16 @@ class ActionPack::WebAuthn::CborDecoder
     #
     #   ActionPack::WebAuthn::CborDecoder.decode("\xa2\x61a\x01\x61b\x02")
     #   # => {"a" => 1, "b" => 2}
-    def decode(bytes, **args)
+    def decode(bytes, max_size: MAX_SIZE, **args)
+      # Enforce the size limit before String#bytes materializes an array with
+      # one slot per byte (~8x the input on a 64-bit VM). Otherwise a huge
+      # string balloons memory before the initializer's length check rejects it.
+      if bytes.respond_to?(:bytesize) && bytes.bytesize > max_size
+        raise ActionPack::WebAuthn::InvalidCborError, "Input exceeds maximum size"
+      end
+
       bytes = bytes.bytes if bytes.respond_to?(:bytes)
-      new(bytes, **args).decode
+      new(bytes, max_size: max_size, **args).decode
     end
   end
 
