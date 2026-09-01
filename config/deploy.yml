@@ -51,7 +51,7 @@ env:
 
 # Use a local registry to deploy
 registry:
-  server: 5.161.75.133:5000
+  server: 5.78.71.207:5000
   username: deploy
   password:
     - KAMAL_REGISTRY_PASSWORD
