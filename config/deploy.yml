@@ -11,7 +11,7 @@ image: fizzy
 # Where to deploy fizzy
 servers:
   web:
-    - 5.161.75.133
+    - 5.78.71.207
 
 # How you connect to your server
 ssh:
@@ -19,7 +19,7 @@ ssh:
 
 # Automatic SSL
 proxy:
-  ssl: true
+  ssl: false
   host: fizzy.evansparkman.dev
   healthcheck:
     interval: 2
