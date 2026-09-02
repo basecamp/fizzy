@@ -1,8 +1,34 @@
 #!/bin/bash -e
 
+SECRETS_FILE="/rails/secrets/secrets.env"
+mkdir -p "$(dirname "$SECRETS_FILE")"
+
+# On first boot: generate SECRET_KEY_BASE and VAPID keys, persist to secrets file
+if [ ! -f "$SECRETS_FILE" ]; then
+  echo "==> First boot detected: generating SECRET_KEY_BASE and VAPID keys..."
+
+  SECRET_KEY_BASE=$(bundle exec rails secret) || { echo "ERROR: Failed to generate SECRET_KEY_BASE"; exit 1; }
+
+  VAPID_KEYS=$(bundle exec ruby -e "require 'web-push'; vapid = WebPush.generate_key; puts 'VAPID_PUBLIC_KEY=' + vapid.public_key; puts 'VAPID_PRIVATE_KEY=' + vapid.private_key") || { echo "ERROR: Failed to generate VAPID keys"; exit 1; }
+
+  TMPFILE=$(mktemp)
+  {
+    echo "SECRET_KEY_BASE=${SECRET_KEY_BASE}"
+    echo "${VAPID_KEYS}"
+  } > "$TMPFILE" && mv "$TMPFILE" "$SECRETS_FILE" || { echo "ERROR: Failed to write secrets file"; rm -f "$TMPFILE"; exit 1; }
+
+  echo "==> Secrets written to ${SECRETS_FILE}. Back up the fizzy_secrets volume to preserve these."
+fi
+
+# On every boot: load the secrets file so all vars are exported into the environment
+set -a
+# shellcheck source=/dev/null
+source "$SECRETS_FILE"
+set +a
+
 # If running the rails server then create or migrate existing database
 if [ "${1}" == "./bin/thrust" ] && [ "${2}" == "./bin/rails" ] && [ "${3}" == "server" ]; then
   MIGRATE=1 ./bin/rails db:prepare
 fi
 
-exec "${@}"
+exec "$@"
