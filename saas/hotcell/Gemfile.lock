@@ -1,8 +1,8 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    activestorage-hotcell-server (0.3.0)
-      hotcell-server (= 0.3.0)
+    activestorage-hotcell-server (0.3.1)
+      hotcell-server (= 0.3.1)
       image_processing (>= 2.0)
       mini_magick (>= 5.2.0)
       ruby-vips (>= 2.2.1)
@@ -17,9 +17,9 @@ GEM
     ffi (1.17.4-x86_64-darwin)
     ffi (1.17.4-x86_64-linux-gnu)
     ffi (1.17.4-x86_64-linux-musl)
-    hotcell-core (0.3.0)
-    hotcell-server (0.3.0)
-      hotcell-core (= 0.3.0)
+    hotcell-core (0.3.1)
+    hotcell-server (0.3.1)
+      hotcell-core (= 0.3.1)
     image_processing (2.0.3)
     logger (1.7.0)
     mini_magick (5.3.3)
@@ -42,11 +42,11 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
-  activestorage-hotcell-server (~> 0.3.0)
-  hotcell-server (~> 0.3.0)
+  activestorage-hotcell-server (~> 0.3.1)
+  hotcell-server (~> 0.3.1)
 
 CHECKSUMS
-  activestorage-hotcell-server (0.3.0) sha256=e82db5cc602651ca4ce49486cf19c7c01e86cdeddb7105106b3aca50ae67f98b
+  activestorage-hotcell-server (0.3.1) sha256=660839dc4ef34b7b5cc0b4b8733bc5b90b6667a469eee72ff2c07a41c7703935
   bundler (4.0.18) sha256=02d9a17429de1847b4e0c9f27a9ee4b20c0a74c0a641b4e77195d6019e3618ac
   ffi (1.17.4) sha256=bcd1642e06f0d16fc9e09ac6d49c3a7298b9789bcb58127302f934e437d60acf
   ffi (1.17.4-aarch64-linux-gnu) sha256=b208f06f91ffd8f5e1193da3cae3d2ccfc27fc36fba577baf698d26d91c080df
@@ -59,8 +59,8 @@ CHECKSUMS
   ffi (1.17.4-x86_64-darwin) sha256=aa70390523cf3235096cf64962b709b4cfbd5c082a2cb2ae714eb0fe2ccda496
   ffi (1.17.4-x86_64-linux-gnu) sha256=9d3db14c2eae074b382fa9c083fe95aec6e0a1451da249eab096c34002bc752d
   ffi (1.17.4-x86_64-linux-musl) sha256=3fdf9888483de005f8ef8d1cf2d3b20d86626af206cbf780f6a6a12439a9c49e
-  hotcell-core (0.3.0) sha256=b9665e2e78586293c40d03de5f4408cb9c344402750dafd502e118eb8660be2e
-  hotcell-server (0.3.0) sha256=bb1c0137921ffa9c3d99709c2acc4704a49b1c6a6ebf48b08d24d78ae73571c1
+  hotcell-core (0.3.1) sha256=c72bc2b6d151a8bf22600eb2ad202b72baf6c5c454077684d63547db176c77ed
+  hotcell-server (0.3.1) sha256=170b68343d30c325392d86b24263507a69b2790e8e0a31a1e7063a2e0da89614
   image_processing (2.0.3) sha256=793e33f38470edd0a2d6bfd00acf8cb239c76284ba2e3dfb76633ac2b457f23a
   logger (1.7.0) sha256=196edec7cc44b66cfb40f9755ce11b392f21f7967696af15d274dde7edff0203
   mini_magick (5.3.3) sha256=b3beed8a8cef36bd03666365f14b89cd344da0ecd373af53e617c71bfd426aab

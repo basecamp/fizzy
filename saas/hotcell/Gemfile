@@ -9,5 +9,5 @@
 
 source "https://rubygems.org"
 
-gem "hotcell-server", "~> 0.3.0"
-gem "activestorage-hotcell-server", "~> 0.3.0"
+gem "hotcell-server", "~> 0.3.1"
+gem "activestorage-hotcell-server", "~> 0.3.1"

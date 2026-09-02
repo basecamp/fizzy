@@ -245,9 +245,9 @@ GEM
       activemodel (>= 7.0)
       activemodel-serializers-xml (~> 1.0)
       activesupport (>= 7.0)
-    activestorage-hotcell-client (0.3.0)
+    activestorage-hotcell-client (0.3.1)
       activestorage (>= 8.2.0.alpha)
-      hotcell-client (= 0.3.0)
+      hotcell-client (= 0.3.1)
     addressable (2.9.0)
       public_suffix (>= 2.0.2, < 8.0)
     ansi (1.6.0)
@@ -356,10 +356,10 @@ GEM
       signet (>= 0.16, < 2.a)
     gvltools (0.5.0)
     hashdiff (1.2.1)
-    hotcell-client (0.3.0)
+    hotcell-client (0.3.1)
       activesupport (>= 7.1)
-      hotcell-core (= 0.3.0)
-    hotcell-core (0.3.0)
+      hotcell-core (= 0.3.1)
+    hotcell-core (0.3.1)
     http-2 (1.1.1)
     httpx (1.7.1)
       http-2 (>= 1.0.0)
@@ -742,7 +742,7 @@ DEPENDENCIES
   action_push_native
   actionpack-xml_parser
   activeresource
-  activestorage-hotcell-client (~> 0.3.0)
+  activestorage-hotcell-client (~> 0.3.1)
   audits1984!
   autotuner
   aws-sdk-s3
@@ -758,7 +758,7 @@ DEPENDENCIES
   fizzy-saas!
   geared_pagination (~> 1.2)
   gvltools
-  hotcell-client (~> 0.3.0)
+  hotcell-client (~> 0.3.1)
   image_processing (~> 1.14)
   importmap-rails
   jbuilder
@@ -826,7 +826,7 @@ CHECKSUMS
   activerecord (8.2.0.alpha)
   activeresource (6.2.0) sha256=818ca60d3cd1ff7bbb7277f41250ad4d61a7cdbe30fbf52b2145e1b66ed13900
   activestorage (8.2.0.alpha)
-  activestorage-hotcell-client (0.3.0) sha256=ee437b08b57673df0f823c2c902504d19483672566e2931e6cfafe10c70b6e6c
+  activestorage-hotcell-client (0.3.1) sha256=57c62cf0825eddcb47970ffce4bae4d05ca1b63740a21b67f676313cc66a4cd7
   activesupport (8.2.0.alpha)
   addressable (2.9.0) sha256=7fdf6ac3660f7f4e867a0838be3f6cf722ace541dd97767fa42bc6cfa980c7af
   ansi (1.6.0) sha256=ac9ea0c0ea8d32fb4e271348e609963ac78882f34b73836c2a02b3622e666658
@@ -888,8 +888,8 @@ CHECKSUMS
   googleauth (1.16.1) sha256=36776bce9d55d8c1a0c6638c939b000dcee5954ca5b728f06ec4c2df4a46709c
   gvltools (0.5.0) sha256=a15e480b3860e7e9661e5e53aff9b1802fe9018fa42a5e845adc2a19a7bcc65d
   hashdiff (1.2.1) sha256=9c079dbc513dfc8833ab59c0c2d8f230fa28499cc5efb4b8dd276cf931457cd1
-  hotcell-client (0.3.0) sha256=c2839b6e1e19991660c69f24bf1516936d61c510c9e2cc9be40abc863762cc1e
-  hotcell-core (0.3.0) sha256=b9665e2e78586293c40d03de5f4408cb9c344402750dafd502e118eb8660be2e
+  hotcell-client (0.3.1) sha256=bd1760634b532c660f1c37051eda20da2e0a4b0f8bfca239e04f5df1b4a32aff
+  hotcell-core (0.3.1) sha256=c72bc2b6d151a8bf22600eb2ad202b72baf6c5c454077684d63547db176c77ed
   http-2 (1.1.1) sha256=1141a5a03c2f4e6b8d2fa62394de581e1ff6387711cd7ed577212e9d95562bba
   httpx (1.7.1) sha256=ae380461539203c92f3ee65c13b22dfccb0d975156426869f57820505cacdf56
   i18n (1.15.2) sha256=00f9eb62412fe593b2a65a97daa75300d37abb8f7202ec748e94b6d46a9dd1b5
