@@ -1,4 +1,36 @@
 ENV["RAILS_ENV"] ||= "test"
+
+# Opt-in, since instrumenting coverage slows down every test run. Set by
+# `bin/rails test:report`; plain `bin/rails test` runs uninstrumented.
+coverage_enabled = ENV["COVERAGE"] && ![ "0", "false", "" ].include?(ENV["COVERAGE"])
+
+if coverage_enabled
+  require "json"
+  require "simplecov"
+
+  SimpleCov.start "rails" do
+    SimpleCov.at_exit do
+      result = SimpleCov.result
+      result.format!
+
+      if (path = ENV["COVERAGE_REPORT_JSON"])
+        File.write(path, JSON.generate(
+          covered_percent: result.covered_percent,
+          covered_lines: result.covered_lines,
+          total_lines: result.total_lines,
+          groups: result.groups.transform_values do |file_list|
+            {
+              covered_percent: file_list.covered_percent,
+              covered_lines: file_list.covered_lines,
+              total_lines: file_list.lines_of_code
+            }
+          end
+        ))
+      end
+    end
+  end
+end
+
 require_relative "../config/environment"
 
 require "rails/test_help"
@@ -8,9 +40,16 @@ require "vcr"
 require "mocha/minitest"
 require "turbo/broadcastable/test_helper"
 
-unless [ "0", "false" ].include?(ENV["CI_PROGRESS_BAR"])
+progress_bar_enabled = ![ "0", "false" ].include?(ENV["CI_PROGRESS_BAR"])
+
+if progress_bar_enabled || ENV["TEST_REPORT_JSON"]
   require "minitest/reporters"
-  Minitest::Reporters.use! Minitest::Reporters::ProgressReporter.new(detailed_skip: false)
+
+  reporters = []
+  reporters << Minitest::Reporters::ProgressReporter.new(detailed_skip: false) if progress_bar_enabled
+  reporters << TestReportJsonReporter.new(ENV["TEST_REPORT_JSON"]) if ENV["TEST_REPORT_JSON"]
+
+  Minitest::Reporters.use! reporters
 end
 
 WebMock.allow_net_connect!
