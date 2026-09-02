@@ -84,4 +84,14 @@ class NotificationTest < ActiveSupport::TestCase
       notification.destroy
     end
   end
+
+  test "bundle skips without raising when user has no settings" do
+    jason = users(:jason)
+    assert_nil jason.settings
+
+    assert_no_difference -> { Notification::Bundle.count } do
+      notification = Notification.create!(user: jason, source: events(:layout_commented), creator: users(:david))
+      assert notification.persisted?
+    end
+  end
 end

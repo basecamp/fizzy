@@ -57,7 +57,7 @@ class Notification < ApplicationRecord
     end
 
     def bundle
-      user.bundle(self) if user.settings.bundling_emails?
+      user.bundle(self) if user.settings&.bundling_emails?
     end
 
     def broadcast_update
