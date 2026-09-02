@@ -1,0 +1,22 @@
+<li id="<%= dom_id(roadmap_card.card, :roadmap) %>" class="roadmap__card list-style-none margin-none flex align-center flex-wrap gap full-width">
+  <%= link_to "##{roadmap_card.number} #{roadmap_card.title}", card_path(roadmap_card.card), class: "txt-ink txt-medium overflow-ellipsis" %>
+
+  <% if roadmap_card.domains.any? %>
+    <div class="flex gap-half">
+      <% roadmap_card.domains.each do |domain| %>
+        <span class="btn btn--plain txt-x-small txt-uppercase txt-subtle"><%= domain %></span>
+      <% end %>
+    </div>
+  <% end %>
+
+  <span class="separator--horizontal flex-item-grow" style="--border-color: var(--color-ink-medium); --border-style: dashed" aria-hidden="true"></span>
+
+  <% if roadmap_card.steps_total > 0 %>
+    <span class="flex align-center gap-half txt-small flex-item-no-shrink">
+      <span class="steps__icon"><%= icon_tag "check" %></span>
+      <strong><%= "#{roadmap_card.steps_completed}/#{roadmap_card.steps_total}" %></strong>
+    </span>
+  <% end %>
+
+  <span class="btn btn--plain txt-x-small txt-uppercase flex-item-no-shrink <%= roadmap_status_class(roadmap_card.status) %>"><%= roadmap_status_label(roadmap_card.status) %></span>
+</li>

@@ -6,6 +6,10 @@
 
 <% content_for :header do %>
   <div class="header__actions header__actions--start hide-on-native">
+    <%= link_to board_roadmap_path(@board), class: "btn btn--circle-mobile",
+          data: { controller: "tooltip", bridge__overflow_menu_target: "item", bridge_title: "Roadmap" } do %>
+      <%= icon_tag "history" %> <span class="for-screen-reader">Roadmap</span>
+    <% end %>
     <%= link_to_webhooks(@board) if Current.user.admin? %>
   </div>
 

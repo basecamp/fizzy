@@ -1,0 +1,21 @@
+<%
+  rollup = phase_group.rollup
+  rollup_parts = Board::Roadmap::STATUS_ORDER.filter_map do |status|
+    count = rollup.public_send(status)
+    "#{count} #{roadmap_status_label(status).downcase}" if count > 0
+  end
+%>
+
+<section id="roadmap_phase_<%= phase_group.label.parameterize %>" class="roadmap__phase margin-block-end-double">
+  <h2 class="divider divider--fade">
+    <span class="overflow-ellipsis"><%= phase_group.title %></span>
+  </h2>
+
+  <% if rollup_parts.any? %>
+    <p class="txt-small txt-subtle"><%= rollup_parts.join(" · ") %></p>
+  <% end %>
+
+  <ul class="roadmap__cards flex flex-column gap-half margin-none unpad">
+    <%= render partial: "boards/roadmaps/roadmap_card", collection: phase_group.ordered_cards, as: :roadmap_card %>
+  </ul>
+</section>

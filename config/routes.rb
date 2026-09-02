@@ -34,6 +34,7 @@ Rails.application.routes.draw do
       resource :involvement
       resource :publication
       resource :entropy
+      resource :roadmap, only: :show
 
       namespace :columns do
         resource :not_now

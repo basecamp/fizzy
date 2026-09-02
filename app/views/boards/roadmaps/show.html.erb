@@ -1,0 +1,42 @@
+<% @page_title = "#{@board.name} roadmap" %>
+<% turbo_exempts_page_from_cache %>
+
+<%= turbo_stream_from @board %>
+
+<% content_for :header do %>
+  <div class="header__actions header__actions--start">
+    <%= link_back_to_board(@board) %>
+  </div>
+
+  <h1 class="header__title divider divider--fade full-width" data-bridge--title-target="header">
+    <span class="overflow-ellipsis">Roadmap</span>
+  </h1>
+<% end %>
+
+<div class="panel panel--wide shadow center roadmap">
+  <% summary = @roadmap.summary %>
+  <ul class="roadmap__summary flex flex-wrap gap margin-none unpad list-style-none margin-block-end-double">
+    <li class="flex flex-column gap-none">
+      <strong class="txt-x-large"><%= summary.epics_shipped %>/<%= summary.total_epics %></strong>
+      <span class="txt-small txt-subtle txt-uppercase">Epics shipped</span>
+    </li>
+    <li class="flex flex-column gap-none">
+      <strong class="txt-x-large"><%= summary.in_flight %></strong>
+      <span class="txt-small txt-subtle txt-uppercase">In flight</span>
+    </li>
+    <li class="flex flex-column gap-none">
+      <strong class="txt-x-large"><%= summary.deferred %></strong>
+      <span class="txt-small txt-subtle txt-uppercase">Deferred</span>
+    </li>
+    <li class="flex flex-column gap-none">
+      <strong class="txt-x-large"><%= summary.planned %></strong>
+      <span class="txt-small txt-subtle txt-uppercase">Planned</span>
+    </li>
+  </ul>
+
+  <% if @roadmap.phase_groups.empty? %>
+    <p class="txt-subtle">No cards on this board yet.</p>
+  <% else %>
+    <%= render partial: "boards/roadmaps/phase_group", collection: @roadmap.phase_groups, as: :phase_group %>
+  <% end %>
+</div>
