@@ -60,6 +60,7 @@ class Account::Import < ApplicationRecord
     end
 
     add_importer_to_all_access_boards
+    create_missing_user_settings
     reconcile_cards_count
     reconcile_account_storage
 
@@ -129,6 +130,10 @@ class Account::Import < ApplicationRecord
       account.boards.all_access.find_each do |board|
         board.accesses.grant_to(importer)
       end
+    end
+
+    def create_missing_user_settings
+      account.users.where.not(role: :system).where.missing(:settings).find_each(&:create_settings!)
     end
 
     def reconcile_account_storage
