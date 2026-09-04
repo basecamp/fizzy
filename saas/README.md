@@ -83,54 +83,31 @@ Because the dev cell shells out to your laptop rather than to the image, every t
 | `HOTCELL_ROOT` | Registers the cell, which then carries every conversion. Unset, everything runs in the app. | `saas/config/deploy.yml` |
 | `HOTCELL_GROUP` | The gid the app and the cell share, so the cell can open a file the app hands it by name. Must match the `group-add` on the app's roles and the cell's own gid. Unset in development, where both sides run as one user. | `saas/config/deploy.yml` |
 
-### Building and shipping the image
-
-Kamal builds app images and not accessory images, so the cell's image has its own two scripts. They are separate so that building can happen anywhere and publishing is deliberate.
+### Deploying
 
 ```sh
-saas/hotcell/bin/build                        # locks the gem version, builds, pins deploy.yml to the tag
-saas/hotcell/bin/build --platform=linux/amd64 # what the hosts run
-saas/hotcell/bin/push                         # pushes that tag to the registry
-saas/hotcell/bin/check <destination>          # is that destination's accessory running the pinned tag?
+bin/deploy <destination>
 ```
 
-**The tag is a content hash**, the first 12 characters of a SHA-256 over the `Dockerfile`, `Gemfile`,
-`Gemfile.lock`, `config.rb` and `operations/*.rb` — see `bin/image`. Not a git revision: the commit that
-bumps the gem and pins the result could never name itself, because amending it changed the SHA the pin was
-meant to hold. Identical bytes give an identical tag, and changing something the image does not contain
-leaves it alone. `saas/test/lib/hotcell_accessory_test.rb` holds the pin in `deploy.yml` equal to what the
-tree builds, so a stale pin fails in CI.
+That is the whole deploy. It brings the destination's hotcell accessory onto the image this commit pins, then runs `bin/kamal deploy -d <destination>`. It takes nothing but the destination. For any other kamal argument run `bin/kamal deploy` yourself, with `SKIP_HOTCELL_CHECKS=1` if you mean to deploy over a broken cell.
 
-**`build` locks the cell's `Gemfile.lock` to the hotcell version in the app's `Gemfile.saas.lock`**,
-writing it if the two differ, and then builds. The app's lockfile is the source of truth: a client and
-server one version apart is a `protocol` failure on every request. So move the gem in the application
-first, then build.
+Underneath, `bin/deploy` forwards to `saas/bin/deploy`, which drives three scripts in `saas/hotcell/bin/`:
 
-**`build` also writes the pin in `saas/config/deploy.yml`**, and it belongs there rather than in `push`:
-the tag is a hash of the tree's contents, so the pin has to land in the same commit as the contents that
-produced it. `push` happens after that commit, so pinning there would leave every commit holding a stale
-pin. Both lockfiles, the operations, and the pin go in one change.
+| script | what it does |
+| --- | --- |
+| `check <destination>` | Is the pinned image in the registry, and is the accessory on one host of `<destination>` running it? The exit status names the fix: 2 build and push, 3 reboot, 1 the check could not tell. |
+| `build [--platform=linux/amd64]` | Locks `saas/hotcell/Gemfile.lock` to the hotcell version in `Gemfile.saas.lock`, builds the image, and pins `saas/config/deploy.yml` to its tag. |
+| `push` | Pushes the built tag to the registry. |
 
-Tags are immutable and there is no `latest`: a deploy does not update an accessory, so `bin/kamal accessory reboot hotcell -d <destination>` pulls whatever the tag names at that moment. A moving tag would make what a host runs depend on when it last rebooted.
+`bin/deploy` runs `check`, applies the fix its status names (`build --platform=linux/amd64` and `push`, then `bin/kamal accessory reboot hotcell`; or the reboot alone), runs `check` again, and only then deploys the app. `saas/.kamal/hooks/pre-deploy` runs the same `check` before a direct `bin/kamal deploy`, so a stale cell stops that deploy too, with the fix spelled out.
 
-### The pre-deploy check
+The check fails rather than guesses when it cannot answer: docker not logged in, ssh not getting through. Telling someone to rebuild a published image because `docker manifest inspect` could not authenticate is the failure mode that costs the most.
 
-Because a deploy never touches an accessory, an app that has been moved onto a cell can reach a host whose cell is still running an older pinned image, or no cell at all. `saas/hotcell/bin/check` is what `saas/.kamal/hooks/pre-deploy` runs to catch that, and it takes a destination so you can run it by hand at any time. `SKIP_HOTCELL_CHECKS=1` skips it in a deploy.
+### Changing the cell
 
-It asks two questions in order, because they have different fixes:
+Anything under `saas/hotcell/` that the image copies in, or a hotcell gem moving in `Gemfile.saas.lock`, means a new image. CI tells you when you owe one: `saas/test/lib/hotcell_accessory_test.rb` fails if the pin in `deploy.yml` no longer matches what the tree builds.
 
-1. **Is the pinned tag in the registry?** `docker manifest inspect` locally, so it costs no ssh. Missing means nobody built and pushed this commit's cell, and the remedy is `build` (with `--platform=linux/amd64` when your docker host is not amd64), `push`, then `accessory reboot`.
-2. **Is the accessory running it?** `docker inspect` of the `<service>-hotcell` container on one randomly chosen host. The image is published by this point, so the remedy is only `bin/kamal accessory reboot hotcell` — never a build or a push.
-
-Either question failing for a reason that is not an answer — docker not logged in, ssh not getting through — is reported as the check failing rather than as a verdict on the cell. Telling someone to rebuild a published image because `docker manifest inspect` could not authenticate is the failure mode that costs the most.
-
-### Deploying the cell: the runbook
-
-Deploy the cell when anything under `saas/hotcell/` changes, or when the hotcell gems move in
-`Gemfile.saas.lock`. CI tells you when you owe one: `hotcell_accessory_test.rb` fails if the pin in
-`deploy.yml` no longer matches what the tree builds.
-
-1. Build the image and pin it:
+1. Build, which pins `saas/config/deploy.yml`:
 
    ```sh
    saas/hotcell/bin/build --platform=linux/amd64
@@ -142,32 +119,29 @@ Deploy the cell when anything under `saas/hotcell/` changes, or when the hotcell
    bin/rails test saas/test/lib/hotcell_accessory_test.rb
    ```
 
-3. Commit everything together: the lockfiles, the `saas/config/deploy.yml` pin, and whatever
-   changed under `saas/hotcell/`.
+3. Commit everything together: both lockfiles, the pin, and whatever changed under `saas/hotcell/`.
 
-4. Push the image:
-
-   ```sh
-   saas/hotcell/bin/push
-   ```
-
-5. Reboot the accessory on each destination:
+4. Deploy each destination. `bin/deploy` sees the new pin is not in the registry, pushes it, reboots the cell, and deploys the app:
 
    ```sh
-   bin/kamal accessory reboot hotcell -d <destination>
+   bin/deploy <destination>
    ```
 
-6. Verify the destination: `/hotcellz` answers `OK`, `/hotcellz/test` (staff-only) passes all four
-   checks, `hotcell_up == 1` for every host in Prometheus, and no `WARN`/`ERROR` lines in Loki
-   under `{service_name="hotcell"}`.
+5. Verify the destination: `/hotcellz` answers `OK`, `/hotcellz/test` (staff-only) passes all four checks, `hotcell_up == 1` for every host in Prometheus, and no `WARN`/`ERROR` lines in Loki under `{service_name="hotcell"}`.
 
-When the hotcell gems moved, the app has to be deployed too — the usual rollout, separate from
-this one. A client and server more than one revision apart fail every request with a `protocol`
-error, so keep the two close together.
+`build` is the one step by hand, because the pin it writes belongs in your commit: the tag is a content hash and the commit that changes the contents has to carry it. `bin/deploy` refuses to push a pin that is not committed.
+
+#### Why it is built this way
+
+**The tag is a content hash**, the first 12 characters of a SHA-256 over the `Dockerfile`, `Gemfile`, `Gemfile.lock`, `config.rb` and `operations/*.rb` (see `saas/hotcell/bin/image`). Not a git revision: the commit that bumps the gem and pins the result could never name itself, because amending it changed the SHA the pin was meant to hold. Identical bytes give an identical tag, and changing something the image does not contain leaves it alone.
+
+**`build` locks the cell's `Gemfile.lock` to the app's hotcell version** because a client and server one version apart is a `protocol` failure on every request. The app's lockfile is the source of truth: move the gem in the application first, then build.
+
+**Tags are immutable and there is no `latest`.** A deploy does not update an accessory; `kamal accessory reboot` pulls whatever the tag names at that moment, and a moving tag would make what a host runs depend on when it last rebooted. That is also why a deploy that only bumps the gem still has to reboot the cell, and why `bin/deploy` does it for you.
 
 ## Environments
 
-Fizzy is deployed with [Kamal](https://kamal-deploy.org/). You'll need to have the 1Password CLI set up in order to access the secrets that are used when deploying. Provided you have that, it should be as simple as `bin/kamal deploy` to the correct environment.
+Fizzy is deployed with [Kamal](https://kamal-deploy.org/). You'll need to have the 1Password CLI set up in order to access the secrets that are used when deploying. Provided you have that, it should be as simple as `bin/deploy <destination>`.
 
 ## Handbook
 

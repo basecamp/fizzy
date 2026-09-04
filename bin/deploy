@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Deploys one destination. The work is SaaS-only, so it lives in saas/bin/deploy; this forwards there
+# once SaaS mode is on, the way bin/setup runs saas/bin/setup, and bin/kamal picks the SaaS config.
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$repo_root"
+
+if ! ruby -r./lib/fizzy -e 'exit Fizzy.saas?'; then
+  echo "bin/deploy deploys the SaaS app. Run bin/rails saas:enable first." >&2
+  exit 1
+fi
+
+exec saas/bin/deploy "$@"

@@ -1,0 +1,120 @@
+#!/usr/bin/env bash
+# Runs bin/deploy in a sandbox where bin/kamal and the saas/hotcell/bin scripts are recorder stubs, and
+# asserts the commands it issues for each answer saas/hotcell/bin/check can give.
+#
+#   saas/test/deploy-test
+set -uo pipefail
+
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+
+pass=0 fail=0
+ok()  { pass=$((pass+1)); echo "  ok: $1"; }
+bad() { fail=$((fail+1)); echo "  FAIL: $1"; }
+
+build_sandbox() { # build_sandbox <dir>
+  local sb="$1"
+  mkdir -p "$sb/bin" "$sb/saas/bin" "$sb/saas/hotcell/bin" "$sb/saas/config" "$sb/lib"
+  cp "$ROOT/bin/deploy" "$sb/bin/deploy"
+  cp "$ROOT/saas/bin/deploy" "$sb/saas/bin/deploy"
+  cp "$ROOT/lib/fizzy.rb" "$sb/lib/fizzy.rb"
+  echo "image: registry.example/fizzy-hotcell:abc" > "$sb/saas/config/deploy.yml"
+  env GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null git -C "$sb" init -q
+  env GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null git -C "$sb" \
+    -c user.name=test -c user.email=test@example.com add -A
+  env GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null git -C "$sb" \
+    -c user.name=test -c user.email=test@example.com commit -q -m init
+
+  # Every stub records itself. check exits with the first status queued in STUB_CHECK_QUEUE and drops it,
+  # so a scenario can answer "needs a reboot" and then "fine". build moves the pin when STUB_BUILD_MOVES_PIN
+  # is set, as the real one does when the tree's pin is stale.
+  cat > "$sb/stub" <<'STUB'
+#!/usr/bin/env bash
+name="$(basename "$0")"
+printf '%s %s\n' "$name" "$*" >> "$STUB_RECORD"
+case "$name" in
+  check)
+    status="$(head -n1 "$STUB_CHECK_QUEUE")"
+    sed -i 1d "$STUB_CHECK_QUEUE"
+    exit "$status"
+    ;;
+  build)
+    if [ -n "${STUB_BUILD_MOVES_PIN:-}" ]; then
+      echo "image: registry.example/fizzy-hotcell:def" > "$(dirname "$0")/../../config/deploy.yml"
+    fi
+    ;;
+esac
+STUB
+  chmod +x "$sb/stub"
+  cp "$sb/stub" "$sb/bin/kamal"
+  for script in check build push; do cp "$sb/stub" "$sb/saas/hotcell/bin/$script"; done
+}
+
+run_scenario() { # run_scenario <name> <args> <check statuses> <expected commands> [VAR=value]...
+  local name="$1" args="$2" check_statuses="$3" expected="$4"; shift 4
+  local sb; sb="$(mktemp -d "${TMPDIR:-/tmp}/deploy-test.XXXXXX")"
+  build_sandbox "$sb"
+  printf '%s\n' $check_statuses > "$sb/check-queue"
+
+  echo "scenario: $name"
+  ( cd "$sb" && env SAAS=1 STUB_RECORD="$sb/commands.txt" STUB_CHECK_QUEUE="$sb/check-queue" "$@" \
+      bin/deploy $args > "$sb/output.txt" 2>&1 )
+  printf 'exit: %s\n' "$?" >> "$sb/commands.txt"
+
+  if [ "$(cat "$sb/commands.txt")" = "$expected" ]; then
+    ok "commands"
+  else
+    bad "commands"
+    diff -u <(echo "$expected") "$sb/commands.txt" | sed 's/^/    /'
+    sed 's/^/    | /' "$sb/output.txt"
+  fi
+  rm -rf "$sb"
+}
+
+run_scenario "cell is fine" staging 0 \
+"check -q staging
+kamal deploy -d staging
+exit: 0"
+
+run_scenario "cell needs a reboot" staging "3 0" \
+"check -q staging
+kamal accessory reboot hotcell -d staging
+check staging
+kamal deploy -d staging
+exit: 0"
+
+run_scenario "image is not in the registry" staging "2 0" \
+"check -q staging
+build --platform=linux/amd64
+push 
+kamal accessory reboot hotcell -d staging
+check staging
+kamal deploy -d staging
+exit: 0"
+
+run_scenario "the check cannot tell" staging 1 \
+"check -q staging
+exit: 1"
+
+run_scenario "the fix did not take" staging "3 3" \
+"check -q staging
+kamal accessory reboot hotcell -d staging
+check staging
+exit: 3"
+
+run_scenario "building moved the pin" staging "2" \
+"check -q staging
+build --platform=linux/amd64
+exit: 1" STUB_BUILD_MOVES_PIN=1
+
+run_scenario "no destination" "" "" \
+"exit: 1"
+
+run_scenario "extra arguments belong to kamal" "staging --skip-push" "" \
+"exit: 1"
+
+run_scenario "not in saas mode" staging "" \
+"exit: 1" SAAS=false
+
+echo
+echo "$pass passed, $fail failed"
+[ "$fail" -eq 0 ]

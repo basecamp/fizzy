@@ -13,7 +13,7 @@ Shared 37signals context: if "37signals Development Context" isn't already loade
 ## Deploy
 
 Pre-deploy: `bin/rails saas:enable`
-Deploy: `bin/kamal deploy -d <destination>`
+Deploy: `bin/deploy <destination>` — brings the hotcell accessory onto the pinned image, then runs `bin/kamal deploy -d <destination>`. Use `bin/kamal deploy` directly only when you need other kamal arguments.
 Destinations: production, staging, beta, beta1
 
 One `saas/config/deploy.<destination>.yml` each — paths here are given from the repository root, because that's where you're working from, and `config/deploy.yml` at the root is the self-hosting example rather than ours. `beta` is a template requiring the `BETA_NUMBER` env var; `beta1` is the only numbered target that exists. The `saas/.kamal/secrets.beta2` through `saas/.kamal/secrets.beta4` symlinks are leftovers and don't make those destinations real.

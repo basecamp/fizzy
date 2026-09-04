@@ -9,24 +9,34 @@
 #
 # Asks one randomly chosen host out of the accessory's roles: sshing all ten costs a minute on
 # production, and the pin drifts per destination rather than per host.
+#
+# The exit status names the fix, so bin/deploy can apply it: 2 when the pinned image has to be built and
+# pushed, 3 when the accessory only has to be rebooted, 1 when the check itself could not tell. -q keeps
+# the verdict and drops the explanation, for a caller that will act on the status rather than read it.
 set -uo pipefail
 
 bin_dir="$(cd "$(dirname "$0")" && pwd)"
 cell_dir="$(cd "$bin_dir/.." && pwd)"
 repo_root="$(cd "$cell_dir/../.." && pwd)"
 
-destination="${1:-${KAMAL_DESTINATION:-production}}"
-
-case "${1:-}" in
-  --help|-h)
-    cat <<USAGE
-Usage: saas/hotcell/bin/check <destination>
+quiet=""
+destination=""
+for arg in "$@"; do
+  case $arg in
+    -q|--quiet) quiet=1 ;;
+    --help|-h)
+      cat <<USAGE
+Usage: saas/hotcell/bin/check [-q] <destination>
 
 Checks the hotcell accessory on one host of <destination> against the pin in saas/config/deploy.yml.
+With -q, reports the verdict and leaves the explanation and the fix to the caller.
 USAGE
-    exit 0
-    ;;
-esac
+      exit 0
+      ;;
+    *) destination="$arg" ;;
+  esac
+done
+destination="${destination:-${KAMAL_DESTINATION:-production}}"
 
 cd "$repo_root"
 
@@ -42,10 +52,16 @@ build_command() {
   fi
 }
 
+# The explanation and fix for a verdict. A caller passing -q acts on the exit status instead.
+explain() {
+  if [ -n "$quiet" ]; then cat >/dev/null; else cat >&2; fi
+}
+
 skip_note() {
+  [ -z "$quiet" ] || return 0
   cat >&2 <<MSG
 
-To deploy anyway and sort the cell out afterwards:
+bin/deploy $destination should do all of this for you. To deploy anyway and sort the cell out afterwards:
 
     SKIP_HOTCELL_CHECKS=1 bin/kamal deploy -d $destination
 MSG
@@ -81,8 +97,8 @@ if docker manifest inspect "$pinned" >/dev/null 2>"$errors"; then
   rm -f "$errors"
 elif grep -qiE 'manifest unknown|manifest_unknown|not found|no such manifest' "$errors"; then
   rm -f "$errors"
-  cat >&2 <<MSG
-  registry:  missing
+  echo "  registry:  missing"
+  explain <<MSG
 
 STOP. The hotcell image this commit pins has never been pushed.
 
@@ -99,7 +115,7 @@ Build it, push it, then boot it:
 Then deploy again.
 MSG
   skip_note
-  exit 1
+  exit 2
 else
   cat >&2 <<MSG
   registry:  unknown
@@ -124,8 +140,9 @@ running=$(ssh "app@$host" "docker inspect --format '{{.Config.Image}}' $service-
 
 if [ -z "$running" ]; then
   if grep -qiE 'no such object|no such container' "$errors"; then
-    cat >&2 <<MSG
-  running:   nothing (on $host)
+    status=3
+    echo "  running:   nothing (on $host)"
+    explain <<MSG
 
 STOP. No hotcell accessory is running on $host.
 
@@ -141,6 +158,7 @@ accessory, so boot it by hand:
 Then deploy again.
 MSG
   else
+    status=1
     cat >&2 <<MSG
   running:   unknown (on $host)
 
@@ -154,13 +172,13 @@ MSG
   fi
   rm -f "$errors"
   skip_note
-  exit 1
+  exit $status
 fi
 rm -f "$errors"
 
 if [ "$running" != "$pinned" ]; then
-  cat >&2 <<MSG
-  running:   $running (on $host)
+  echo "  running:   $running (on $host)"
+  explain <<MSG
 
 STOP. The hotcell accessory is running an image other than the one this commit pins.
 
@@ -177,7 +195,7 @@ is no latest, so the accessory goes on running what it booted with until it is r
 Then deploy again.
 MSG
   skip_note
-  exit 1
+  exit 3
 fi
 
 echo "  running:   the pinned image (on $host)"

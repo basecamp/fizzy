@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# Deploys one SaaS destination: gets its hotcell accessory onto the image this commit pins, then deploys
+# the app. bin/deploy forwards here once it has checked that SaaS mode is on. A deploy never touches an accessory, so the two drift apart; this is the one command that moves
+# them together.
+#
+# saas/hotcell/bin/check says what the cell needs and its exit status names the fix. An image nobody has
+# pushed is built for the hosts' platform, pushed, and booted; an accessory running something else, or
+# nothing, is rebooted. The app deploys only once the check passes. The first check is quiet because the
+# fix is applied here; the one after the fix is not, because if it still fails the reader has to act. Anything else — other kamal
+# arguments, deploying over a broken cell — is bin/kamal deploy, with SKIP_HOTCELL_CHECKS=1 if you mean it.
+#
+# saas/test/deploy-test runs this against stubs; run it after changing anything here.
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "$0")/../.." && pwd)"
+
+usage() {
+  cat >&2 <<USAGE
+Usage: bin/deploy <destination>
+
+Brings <destination>'s hotcell accessory onto the pinned image, then runs bin/kamal deploy -d <destination>.
+Pass anything else to kamal directly.
+USAGE
+  exit 1
+}
+
+[ $# -eq 1 ] || usage
+case "$1" in -*) usage ;; esac
+destination="$1"
+
+cd "$repo_root"
+
+status=0
+saas/hotcell/bin/check -q "$destination" || status=$?
+
+case $status in
+  0) ;;
+  2)
+    echo
+    echo "The pinned cell image is not in the registry. Building and pushing it, then rebooting the cell on $destination."
+    saas/hotcell/bin/build --platform=linux/amd64
+    # The tag is a hash of the cell's contents, so a build that moved the pin means this commit pinned
+    # an image it does not build. Deploying that pin is deploying an uncommitted config.
+    if ! git diff --quiet -- saas/config/deploy.yml saas/hotcell/Gemfile.lock; then
+      echo "Building moved the hotcell pin. Commit saas/config/deploy.yml and saas/hotcell/Gemfile.lock, then deploy again." >&2
+      exit 1
+    fi
+    saas/hotcell/bin/push
+    bin/kamal accessory reboot hotcell -d "$destination"
+    saas/hotcell/bin/check "$destination"
+    ;;
+  3)
+    echo
+    echo "$destination is not running the pinned cell image. Rebooting the cell."
+    bin/kamal accessory reboot hotcell -d "$destination"
+    saas/hotcell/bin/check "$destination"
+    ;;
+  *) exit $status ;;
+esac
+
+echo
+echo "The cell is on the pinned image. Deploying the app to $destination."
+bin/kamal deploy -d "$destination"
