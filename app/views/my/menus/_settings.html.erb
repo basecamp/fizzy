@@ -3,6 +3,14 @@
   <%= filter_place_menu_item user_path(Current.user), "My Profile", "person" %>
   <%= filter_place_menu_item notifications_path, "All notifications", "bell" %>
   <%= filter_place_menu_item notifications_settings_path, "Notification Settings", "settings" %>
+  <script>console.log(navigator.userAgent)</script>
+
+  <%= tag.li class: "popup__item hidden", data: { controller: "pwa-install", filter_target: "item", navigable_list_target: "item" } do %>
+    <%= icon_tag "install-edge", class: "popup__icon" %>
+    <button class="popup__btn btn" data-action="pwa-install#install" data-pwa-install-target="button">
+      <span>Install Fizzy App</span>
+    </button>
+  <% end %>
 
   <%= tag.li class: "popup__item", data: { filter_target: "item", navigable_list_target: "item" } do %>
     <%= icon_tag "logout", class: "popup__icon" %>
