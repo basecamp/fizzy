@@ -75,6 +75,21 @@ class FlatJsonParamsTest < ActionDispatch::IntegrationTest
     assert_equal "Flat description", card.description.to_plain_text
   end
 
+  test "create card with flat JSON and tag_ids" do
+    tag = tags(:mobile)
+
+    assert_difference -> { Card.count }, +1 do
+      post board_cards_path(boards(:writebook)),
+        params: { title: "Flat tagged card", tag_ids: [ tag.id ] },
+        as: :json
+    end
+
+    assert_response :created
+    card = Card.last
+    assert_equal [ tag ], card.reload.tags
+    assert_equal [ tag.title ], @response.parsed_body["tags"]
+  end
+
   test "update card with flat JSON" do
     card = cards(:logo)
 
@@ -86,6 +101,19 @@ class FlatJsonParamsTest < ActionDispatch::IntegrationTest
     card.reload
     assert_equal "Flat update", card.title
     assert_equal "Updated flat", card.description.to_plain_text
+  end
+
+  test "update card with flat JSON and tag_ids" do
+    card = cards(:logo)
+    tag = tags(:mobile)
+
+    put card_path(card),
+      params: { tag_ids: [ tag.id ] },
+      as: :json
+
+    assert_response :success
+    assert_equal [ tag ], card.reload.tags
+    assert_equal [ tag.title ], @response.parsed_body["tags"]
   end
 
   test "create board with flat JSON" do
