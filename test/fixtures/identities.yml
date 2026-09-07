@@ -15,3 +15,6 @@ kevin:
 
 mike:
   email_address: mike@37signals.com
+
+deploy_bot:
+  email_address: bot+deploy@fizzy.internal
