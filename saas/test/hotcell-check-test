@@ -1,0 +1,279 @@
+#!/usr/bin/env bash
+# Runs saas/hotcell/bin/check and the two kamal hooks that call it in a sandbox where docker, ssh, bundle,
+# bin/kamal, saas/hotcell/bin/build and saas/hotcell/bin/push are recorder stubs, and asserts the commands
+# issued for each state the registry and the hosts can be in.
+#
+#   saas/test/hotcell-check-test
+set -uo pipefail
+
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+
+pass=0 fail=0
+ok()  { pass=$((pass+1)); echo "  ok: $1"; }
+bad() { fail=$((fail+1)); echo -e "  FAIL: $1"; }
+
+git_q() { env GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null git -c user.name=test -c user.email=test@example.com "$@"; }
+
+# The sandbox is a repo pinning registry.example/fizzy-hotcell:aaa, with staging hosts h1 (and h2 when
+# STUB_HOSTS says so). State lives in files the stubs read and write: registry/<tag> exists when the
+# tag has been pushed, running/<host> holds the image that host's cell runs.
+build_sandbox() { # build_sandbox <dir> <hosts...>
+  local sb="$1"; shift
+  mkdir -p "$sb/bin" "$sb/saas/hotcell/bin" "$sb/saas/config" "$sb/saas/.kamal/hooks" "$sb/stubbin" "$sb/state/registry" "$sb/state/running"
+  cp "$ROOT/saas/hotcell/bin/check" "$ROOT/saas/hotcell/bin/image" "$sb/saas/hotcell/bin/"
+  cp "$ROOT/saas/.kamal/hooks/pre-build" "$ROOT/saas/.kamal/hooks/pre-deploy" "$sb/saas/.kamal/hooks/"
+  printf 'service: fizzy\naccessories:\n  hotcell:\n    image: registry.example/fizzy-hotcell:aaa\n    roles: [ web ]\n' > "$sb/saas/config/deploy.yml"
+  git_q -C "$sb" init -q && git_q -C "$sb" add -A && git_q -C "$sb" commit -q -m init
+
+  cat > "$sb/stub" <<'STUB'
+#!/usr/bin/env bash
+name="$(basename "$0")"
+case "$name $1" in "docker version") ;; "bundle exec") printf 'bundle exec ruby\n' >> "$STUB_RECORD" ;; *) printf '%s %s\n' "$name" "$*" >> "$STUB_RECORD" ;; esac
+pin() { sed -n 's/.*image: \(registry.example\/fizzy-hotcell:[a-z0-9]*\).*/\1/p' "$STUB_SANDBOX/saas/config/deploy.yml" | head -1; }
+case "$name" in
+  bundle)
+    echo fizzy; cat "$STUB_SANDBOX/state/all-hosts" ;;
+  kamal)
+    case "$1 $2" in
+      "accessory reboot")
+        [ -n "${STUB_REBOOT_NOOP:-}" ] && exit 0
+        hosts="$(printf '%s\n' "$@" | sed -n 's/^--hosts=//p' | tr ',' ' ')"
+        [ -n "$hosts" ] || hosts="$(cat "$STUB_SANDBOX/state/all-hosts")"
+        for h in $hosts; do echo "$(pin)" > "$STUB_SANDBOX/state/running/$h"; done ;;
+    esac ;;
+  docker)
+    case "$1 $2" in
+      "manifest inspect") [ -e "$STUB_SANDBOX/state/registry/${3##*:}" ] || { echo "manifest unknown" >&2; exit 1; } ;;
+      *) echo amd64 ;;
+    esac ;;
+  ssh)
+    for a in "$@"; do case $a in app@*) host="${a#app@}";; esac; done
+    f="$STUB_SANDBOX/state/running/$host"
+    [ -e "$f" ] || { echo "Error: No such object: fizzy-hotcell" >&2; exit 1; }
+    cat "$f" ;;
+  build)
+    [ -n "${STUB_BUILD_MOVES_PIN:-}" ] && sed -i 's/fizzy-hotcell:[a-z0-9]*/fizzy-hotcell:moved/' "$STUB_SANDBOX/saas/config/deploy.yml"
+    exit 0 ;;
+  push) touch "$STUB_SANDBOX/state/registry/${STUB_PUSHED_TAG:-$(pin | cut -d: -f2)}" ;;
+esac
+STUB
+  chmod +x "$sb/stub"
+  cp "$sb/stub" "$sb/bin/kamal"
+  for s in build push; do cp "$sb/stub" "$sb/saas/hotcell/bin/$s"; done
+  for s in docker ssh bundle; do cp "$sb/stub" "$sb/stubbin/$s"; done
+  printf '%s\n' "$@" > "$sb/state/all-hosts"
+}
+
+# run_scenario <name> <command> <expected> [VAR=value | REGISTRY=tag | RUNNING=host:tag | HOSTS="h1 h2"]...
+# The command runs from the sandbox root with the stubs first on PATH. Expected is the recorded command
+# list plus the exit line; a line in it may be a regex when it starts with "~".
+run_scenario() {
+  local name="$1" command="$2" expected="$3"; shift 3
+  local sb; sb="$(mktemp -d "${TMPDIR:-/tmp}/hotcell-check-test.XXXXXX")"
+  local hosts="h1" vars=()
+  for setting in "$@"; do case $setting in HOSTS=*) hosts="${setting#HOSTS=}";; esac; done
+  build_sandbox "$sb" $hosts
+  for setting in "$@"; do
+    case $setting in
+      REGISTRY=*) touch "$sb/state/registry/${setting#REGISTRY=}" ;;
+      RUNNING=*)  local pair="${setting#RUNNING=}"; echo "registry.example/fizzy-hotcell:${pair#*:}" > "$sb/state/running/${pair%%:*}" ;;
+      HOSTS=*) ;;
+      *) vars+=("$setting") ;;
+    esac
+  done
+
+  echo "scenario: $name"
+  ( cd "$sb" && env PATH="$sb/stubbin:$PATH" STUB_RECORD="$sb/commands.txt" STUB_SANDBOX="$sb" \
+      HOTCELL_IMAGE_REPOSITORY=registry.example/fizzy-hotcell GIT_CONFIG_GLOBAL=/dev/null "${vars[@]}" \
+      bash -c "$command" > "$sb/output.txt" 2>&1 )
+  printf 'exit: %s\n' "$?" >> "$sb/commands.txt"
+
+  if lines_match "$expected" "$sb/commands.txt"; then
+    ok "commands"
+  else
+    bad "commands\n$(diff -u <(echo "$expected") "$sb/commands.txt" | sed 's/^/    /')\n$(sed 's/^/    | /' "$sb/output.txt")"
+  fi
+  LAST_OUTPUT="$(cat "$sb/output.txt")"
+  rm -rf "$sb"
+}
+
+lines_match() { # lines_match <expected> <file>
+  local expected_lines actual_lines i
+  mapfile -t expected_lines <<< "$1"
+  mapfile -t actual_lines < "$2"
+  [ "${#expected_lines[@]}" -eq "${#actual_lines[@]}" ] || return 1
+  for i in "${!expected_lines[@]}"; do
+    case "${expected_lines[$i]}" in
+      "~"*) [[ "${actual_lines[$i]}" =~ ${expected_lines[$i]#"~"} ]] || return 1 ;;
+      *)    [ "${actual_lines[$i]}" = "${expected_lines[$i]}" ] || return 1 ;;
+    esac
+  done
+}
+
+expect_output() { # expect_output <pattern>
+  if grep -qE "$1" <<< "$LAST_OUTPUT"; then ok "output has: $1"; else bad "output lacks: $1\n$(sed 's/^/    | /' <<< "$LAST_OUTPUT")"; fi
+}
+
+reject_output() { # reject_output <pattern>
+  if grep -qE "$1" <<< "$LAST_OUTPUT"; then bad "output has: $1\n$(sed 's/^/    | /' <<< "$LAST_OUTPUT")"; else ok "output lacks: $1"; fi
+}
+
+CONFIG="bundle exec ruby"
+MANIFEST="docker manifest inspect registry.example/fizzy-hotcell:aaa"
+SSH_H1="ssh app@h1 docker inspect --format '{{.Config.Image}}' fizzy-hotcell"
+REBOOT="kamal accessory reboot hotcell -d staging --skip-hooks"
+
+run_scenario "bare check, cell is fine" "saas/hotcell/bin/check staging" \
+"$CONFIG
+$MANIFEST
+$SSH_H1
+exit: 0" REGISTRY=aaa RUNNING=h1:aaa
+
+run_scenario "bare check, image missing" "saas/hotcell/bin/check staging" \
+"$CONFIG
+$MANIFEST
+exit: 2" RUNNING=h1:aaa
+expect_output "STOP. The hotcell image this commit pins has never been pushed"
+
+run_scenario "bare check, cell stale" "saas/hotcell/bin/check staging" \
+"$CONFIG
+$MANIFEST
+$SSH_H1
+exit: 3" REGISTRY=aaa RUNNING=h1:old
+expect_output "STOP. The hotcell accessory is running an image other than"
+
+run_scenario "bare check, nothing running" "saas/hotcell/bin/check staging" \
+"$CONFIG
+$MANIFEST
+$SSH_H1
+exit: 3" REGISTRY=aaa
+expect_output "STOP. No hotcell accessory is running on h1"
+
+run_scenario "--publish builds and pushes a missing image, and never sshes" "saas/hotcell/bin/check staging --publish" \
+"$CONFIG
+$MANIFEST
+build --platform=linux/amd64
+push 
+$MANIFEST
+exit: 0"
+expect_output "not in the registry. Building and pushing it"
+reject_output "STOP"
+
+run_scenario "--publish is satisfied by a present image" "saas/hotcell/bin/check staging --publish" \
+"$CONFIG
+$MANIFEST
+exit: 0" REGISTRY=aaa
+
+run_scenario "--publish refuses a build that moved the pin" "saas/hotcell/bin/check staging --publish" \
+"$CONFIG
+$MANIFEST
+build --platform=linux/amd64
+exit: 2" STUB_BUILD_MOVES_PIN=1
+expect_output "moved the hotcell pin"
+
+run_scenario "--reboot reboots a stale cell and checks again" "saas/hotcell/bin/check staging --reboot" \
+"$CONFIG
+$MANIFEST
+$SSH_H1
+$REBOOT
+$SSH_H1
+exit: 0" REGISTRY=aaa RUNNING=h1:old
+expect_output "staging is not running the pinned cell image. Rebooting the cell"
+reject_output "STOP"
+
+run_scenario "--reboot does not publish" "saas/hotcell/bin/check staging --reboot" \
+"$CONFIG
+$MANIFEST
+exit: 2" RUNNING=h1:old
+
+run_scenario "--reboot explains a reboot that did not take" "saas/hotcell/bin/check staging --reboot" \
+"$CONFIG
+$MANIFEST
+$SSH_H1
+$REBOOT
+$SSH_H1
+exit: 3" REGISTRY=aaa RUNNING=h1:old STUB_REBOOT_NOOP=1
+expect_output "STOP. The hotcell accessory is running an image other than"
+
+run_scenario "--apply does both" "saas/hotcell/bin/check staging --apply" \
+"$CONFIG
+$MANIFEST
+build --platform=linux/amd64
+push 
+$MANIFEST
+$SSH_H1
+$REBOOT
+$SSH_H1
+exit: 0"
+
+run_scenario "--hosts checks and reboots only those hosts" "saas/hotcell/bin/check staging --reboot --hosts=h2,h9" \
+"$CONFIG
+$MANIFEST
+ssh app@h2 docker inspect --format '{{.Config.Image}}' fizzy-hotcell
+$REBOOT --hosts=h2
+ssh app@h2 docker inspect --format '{{.Config.Image}}' fizzy-hotcell
+exit: 0" HOSTS="h1 h2" REGISTRY=aaa RUNNING=h1:old RUNNING=h2:old
+
+run_scenario "--hosts naming every cell host samples one and reboots them all" "saas/hotcell/bin/check staging --reboot --hosts=h1,h2" \
+"$CONFIG
+$MANIFEST
+~ssh app@h[12] docker inspect
+$REBOOT
+~ssh app@h[12] docker inspect
+exit: 0" HOSTS="h1 h2" REGISTRY=aaa RUNNING=h1:old RUNNING=h2:old
+
+run_scenario "--hosts naming no cell host is an error" "saas/hotcell/bin/check staging --hosts=h9" \
+"$CONFIG
+exit: 1" REGISTRY=aaa RUNNING=h1:aaa
+
+run_scenario "--version reads the pin from that commit, not the tree" \
+  "sed -i 's/fizzy-hotcell:aaa/fizzy-hotcell:bbb/' saas/config/deploy.yml && saas/hotcell/bin/check staging --version=\$(git rev-parse HEAD)" \
+"$CONFIG
+$MANIFEST
+$SSH_H1
+exit: 0" REGISTRY=aaa RUNNING=h1:aaa
+
+run_scenario "--version that is not a commit falls back to the tree" \
+  "sed -i 's/fizzy-hotcell:aaa/fizzy-hotcell:bbb/' saas/config/deploy.yml && saas/hotcell/bin/check staging --version=abc123_uncommitted_9f" \
+"$CONFIG
+docker manifest inspect registry.example/fizzy-hotcell:bbb
+$SSH_H1
+exit: 0" REGISTRY=bbb RUNNING=h1:bbb
+
+run_scenario "--version naming an unfetched commit warns and uses the tree" \
+  "saas/hotcell/bin/check staging --version=0123456789abcdef0123456789abcdef01234567" \
+"$CONFIG
+$MANIFEST
+$SSH_H1
+exit: 0" REGISTRY=aaa RUNNING=h1:aaa
+expect_output "is not in this repository; using the working tree's pin"
+
+run_scenario "--publish will not build a commit's image from a different tree" \
+  "sed -i 's/fizzy-hotcell:aaa/fizzy-hotcell:bbb/' saas/config/deploy.yml && saas/hotcell/bin/check staging --publish --version=\$(git rev-parse HEAD)" \
+"$CONFIG
+$MANIFEST
+exit: 2"
+expect_output "this tree builds registry.example/fizzy-hotcell:bbb"
+
+run_scenario "pre-build hook publishes for the version being built" \
+  "cp stub saas/hotcell/bin/check && saas/.kamal/hooks/pre-build" \
+"check staging --version=abc123 --publish
+exit: 0" KAMAL_DESTINATION=staging KAMAL_VERSION=abc123
+
+run_scenario "pre-deploy hook reboots for the version and hosts being deployed" \
+  "cp stub saas/hotcell/bin/check && saas/.kamal/hooks/pre-deploy" \
+"check staging --version=abc123 --hosts=h1,h2 --reboot
+exit: 0" KAMAL_DESTINATION=staging KAMAL_VERSION=abc123 KAMAL_HOSTS=h1,h2 KAMAL_LOCK=true
+
+run_scenario "pre-deploy hook without KAMAL_HOSTS reboots every host" \
+  "cp stub saas/hotcell/bin/check && saas/.kamal/hooks/pre-deploy" \
+"check staging --version=abc123 --reboot
+exit: 0" KAMAL_DESTINATION=staging KAMAL_VERSION=abc123
+
+run_scenario "SKIP_HOTCELL_CHECKS silences both hooks" \
+  "cp stub saas/hotcell/bin/check && saas/.kamal/hooks/pre-build && saas/.kamal/hooks/pre-deploy" \
+"exit: 0" SKIP_HOTCELL_CHECKS=1 KAMAL_DESTINATION=staging KAMAL_VERSION=abc123 KAMAL_HOSTS=h1
+
+echo
+echo "$pass passed, $fail failed"
+[ "$fail" -eq 0 ]

@@ -4,6 +4,12 @@ asset_path: /rails/public/assets
 hooks_path: <%= File.join(Gem::Specification.find_by_name("fizzy-saas").gem_dir, ".kamal", "hooks") %>
 secrets_path: <%= File.join(Gem::Specification.find_by_name("fizzy-saas").gem_dir, ".kamal/secrets") %>
 
+# Kamal logs a hook's output at DEBUG, so the cell build, push, and reboot the hooks do would otherwise
+# only show under -v.
+hooks_output:
+  pre-build: verbose
+  pre-deploy: verbose
+
 servers:
   # group-add on both roles, because an operation that hands a tool a filename re-opens the caller's
   # descriptor as /dev/fd/N. That is a fresh open, rechecked against the cell's uid, so a mode 0600

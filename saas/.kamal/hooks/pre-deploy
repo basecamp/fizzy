@@ -3,7 +3,10 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "$0")/../../.." && pwd)"
 
-# A deploy never touches an accessory, so the cell can be older than the app that expects it.
+# A deploy never touches an accessory, so the cell can be older than the app that expects it. The check
+# reboots it onto the pin of the version being shipped, which on a rollback is the old one, and only on
+# the hosts this deploy is for. The nested kamal runs under the deploy lock this hook holds.
 if [ -z "${SKIP_HOTCELL_CHECKS:-}" ]; then
-    "$repo_root/saas/hotcell/bin/check" "${KAMAL_DESTINATION:-production}"
+    "$repo_root/saas/hotcell/bin/check" "${KAMAL_DESTINATION:-production}" "--version=$KAMAL_VERSION" \
+        ${KAMAL_HOSTS:+"--hosts=$KAMAL_HOSTS"} --reboot
 fi

@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "$0")/../../.." && pwd)"
+
+# The cell's image is built and pushed here, before the deploy lock and with no ssh; saas/.kamal/hooks/pre-deploy
+# reboots the accessory onto it under the lock.
+if [ -z "${SKIP_HOTCELL_CHECKS:-}" ]; then
+    "$repo_root/saas/hotcell/bin/check" "${KAMAL_DESTINATION:-production}" "--version=$KAMAL_VERSION" --publish
+fi
