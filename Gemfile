@@ -33,6 +33,7 @@ gem "rouge"
 gem "jbuilder"
 gem "lexxy", "0.9.31"
 gem "image_processing", "~> 2.0"
+gem "ruby-vips" # image_processing 2 no longer depends on it
 gem "platform_agent"
 gem "aws-sdk-s3", require: false
 gem "web-push"
