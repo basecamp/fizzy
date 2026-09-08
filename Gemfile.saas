@@ -11,9 +11,9 @@ gem "console1984", bc: "console1984"
 gem "audits1984", bc: "audits1984"
 
 # Attachment processing in an unprivileged sibling container
-gem "hotcell-client", "~> 0.3.1"
-gem "activestorage-hotcell-client", "~> 0.3.1"
-gem "mini_magick", require: false # activestorage-hotcell-client 0.3.1 loads the ImageMagick transformer even when unused
+gem "hotcell-client", "~> 0.4.0"
+gem "activestorage-hotcell-client", "~> 0.4.0"
+gem "mini_magick", require: false # activestorage-hotcell-client loads the ImageMagick transformer even when unused
 
 # Native push notifications (iOS/Android)
 gem "action_push_native"
