@@ -739,7 +739,7 @@ DEPENDENCIES
   action_push_native
   actionpack-xml_parser
   activeresource
-  activestorage-hotcell-client (~> 0.4.0)
+  activestorage-hotcell-client (= 0.4.1)
   audits1984!
   autotuner
   aws-sdk-s3
@@ -755,7 +755,7 @@ DEPENDENCIES
   fizzy-saas!
   geared_pagination (~> 1.2)
   gvltools
-  hotcell-client (~> 0.4.0)
+  hotcell-client (= 0.4.1)
   image_processing (~> 2.0)
   importmap-rails
   jbuilder

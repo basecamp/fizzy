@@ -42,8 +42,8 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
-  activestorage-hotcell-server (~> 0.4.0)
-  hotcell-server (~> 0.4.0)
+  activestorage-hotcell-server (= 0.4.1)
+  hotcell-server (= 0.4.1)
 
 CHECKSUMS
   activestorage-hotcell-server (0.4.1) sha256=00a7d7691d2f03ca3dd4ad455fc1cf79b61cb7d37974f737e6e08e8ee8660f77
