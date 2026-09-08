@@ -107,6 +107,12 @@ class Yabeda::HotCellTest < ActiveSupport::TestCase
     assert_equal "fsize", logged["cause"]
   end
 
+  test "logs what a failed tool wrote to stderr" do
+    Yabeda::HotCell.record_perform perform_event(code: "killed", cause: "signal", stderr: "libgomp: Thread creation failed")
+
+    assert_equal "libgomp: Thread creation failed", logged["stderr"]
+  end
+
   test "does not report a failure to Sentry, because the raise already does" do
     Rails.error.expects(:report).never
 
@@ -136,11 +142,11 @@ class Yabeda::HotCellTest < ActiveSupport::TestCase
 
     # duration_ms is measured by the event itself, not carried in the payload, so faking it takes the
     # same start/finish the real event has.
-    def perform_event(code: nil, perform_ms: 0, cause: nil, duration_ms: 0, bytes_in: nil, bytes_out: nil)
+    def perform_event(code: nil, perform_ms: 0, cause: nil, stderr: nil, duration_ms: 0, bytes_in: nil, bytes_out: nil)
       start = Time.now
       ActiveSupport::Notifications::Event.new("perform.hot_cell", start, start + duration_ms / 1000.0, nil,
         { cell: Fizzy::Saas::Cell::NAME, operation: "active_storage.transformers.image.vips",
-          code: code, cause: cause, perform_ms: perform_ms, bytes_in: bytes_in, bytes_out: bytes_out })
+          code: code, cause: cause, stderr: stderr, perform_ms: perform_ms, bytes_in: bytes_in, bytes_out: bytes_out })
     end
 
     def logged

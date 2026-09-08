@@ -78,6 +78,7 @@ module Yabeda
       ::Rails.logger.info "  HotCell (#{duration_ms}ms) " + labels.merge(
         code: code || "ok",
         cause: event.payload[:cause],
+        stderr: event.payload[:stderr],
         perform_ms: event.payload[:perform_ms],
         duration_ms: duration_ms,
         bytes_in: event.payload[:bytes_in],
