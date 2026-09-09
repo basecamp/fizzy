@@ -50,4 +50,21 @@ class EventTest < ActiveSupport::TestCase
     assert_equal({ "old_title" => "", "new_title" => "" }, title_event.api_particulars)
     assert_equal({ "column" => "" }, triage_event.api_particulars)
   end
+
+  test "particulars is a JSON attribute however the adapter reports the column" do
+    assert_instance_of ActiveRecord::Type::Json, Event.type_for_attribute(:particulars)
+  end
+
+  test "store accessors round-trip through the database" do
+    event = boards(:writebook).events.create!(
+      action: "card_assigned",
+      creator: users(:david),
+      eventable: cards(:logo),
+      account: accounts("37s"),
+      assignee_ids: [ users(:jz).id ]
+    )
+
+    assert_equal({ "assignee_ids" => [ users(:jz).id ] }, event.reload.particulars)
+    assert_equal [ users(:jz) ], event.assignees.to_a
+  end
 end

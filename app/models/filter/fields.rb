@@ -30,6 +30,9 @@ module Filter::Fields
   end
 
   included do
+    # MariaDB reports JSON columns as LONGTEXT, so declare the type store_accessor needs.
+    attribute :fields, :json
+
     store_accessor :fields, :assignment_status, :indexed_by, :sorted_by, :terms,
       :card_ids, :creation, :closure, :column_ids
 

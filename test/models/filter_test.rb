@@ -203,4 +203,16 @@ class FilterTest < ActiveSupport::TestCase
     assert_not_includes filter.board_titles, "Writebook"
     assert_not_includes filter.board_titles, "Private board"
   end
+
+  test "fields is a JSON attribute however the adapter reports the column" do
+    assert_instance_of ActiveRecord::Type::Json, Filter.type_for_attribute(:fields)
+  end
+
+  test "store accessors round-trip through the database" do
+    filter = users(:david).filters.create! indexed_by: "closed", terms: [ "haggis" ]
+
+    assert_equal({ "indexed_by" => "closed", "terms" => [ "haggis" ] }, filter.reload.fields)
+    assert_equal "closed", filter.indexed_by
+    assert_equal [ "haggis" ], filter.terms
+  end
 end
