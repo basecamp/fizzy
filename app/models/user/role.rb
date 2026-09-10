@@ -23,7 +23,7 @@ module User::Role
   end
 
   def sole_owner?
-    owner? && account.users.owner.excluding(self).none?
+    active? && owner? && account.users.owner.excluding(self).none?
   end
 
   def can_administer_board?(board)

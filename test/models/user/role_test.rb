@@ -69,6 +69,9 @@ class User::RoleTest < ActiveSupport::TestCase
 
     users(:kevin).update!(active: false)
     assert users(:jason).sole_owner?
+
+    users(:jason).update!(active: false)
+    assert_not users(:jason).sole_owner?
   end
 
   test "can administer board?" do
