@@ -22,8 +22,8 @@ class Oauth::TokensController < Oauth::BaseController
 
   # Authenticate the posted client before validating that the code or refresh
   # token was issued to it: a confidential client that fails auth must see
-  # invalid_client (401), not the invalid_grant that a client_id mismatch would
-  # raise first — which a client could misread as a revoked grant and discard.
+  # invalid_client, not the invalid_grant that a client_id mismatch would raise
+  # first — which a client could misread as a revoked grant and discard.
   before_action :authenticate_client
   before_action :validate_client_id
   before_action :set_refresh_scope, unless: :authorization_code_grant?
@@ -149,7 +149,9 @@ class Oauth::TokensController < Oauth::BaseController
 
     # client_secret_post authenticates with client_id and client_secret in
     # the request body, per RFC 6749 §2.3.1 — never the query string, where
-    # secrets leak into proxy and access logs.
+    # secrets leak into proxy and access logs. A failure is a 400 invalid_client
+    # (RFC 6749 §5.2): 401 is reserved for header-based schemes and would owe a
+    # WWW-Authenticate challenge we have no scheme to fill.
     def authenticate_client
       client = @client || @access_token.oauth_client
 
@@ -157,7 +159,7 @@ class Oauth::TokensController < Oauth::BaseController
         credentials = request.request_parameters
 
         unless credentials["client_id"] == client.client_id && client.authenticate_secret(credentials["client_secret"])
-          oauth_error "invalid_client", "Client authentication failed", status: :unauthorized
+          oauth_error "invalid_client", "Client authentication failed"
         end
       end
     end

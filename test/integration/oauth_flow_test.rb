@@ -655,7 +655,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
       }, as: :json
     end
 
-    assert_response :unauthorized
+    assert_response :bad_request
     assert_equal "invalid_client", response.parsed_body["error"]
   end
 
@@ -681,7 +681,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
       }, as: :json
     end
 
-    assert_response :unauthorized
+    assert_response :bad_request
     assert_equal "invalid_client", response.parsed_body["error"]
   end
 
@@ -707,7 +707,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
       }, as: :json
     end
 
-    assert_response :unauthorized
+    assert_response :bad_request
     assert_equal "invalid_client", response.parsed_body["error"]
   end
 
@@ -761,7 +761,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
       }, as: :json
     end
 
-    assert_response :unauthorized
+    assert_response :bad_request
     assert_equal "invalid_client", response.parsed_body["error"]
   end
 
@@ -787,7 +787,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
       }, as: :json
     end
 
-    assert_response :unauthorized
+    assert_response :bad_request
     assert_equal "invalid_client", response.parsed_body["error"]
   end
 
@@ -803,7 +803,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
       }, as: :json
     end
 
-    assert_response :unauthorized
+    assert_response :bad_request
     assert_equal "invalid_client", response.parsed_body["error"]
 
     untenanted do
@@ -830,7 +830,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
         untenanted { post oauth_token_path, params: exchange.merge(client_id), as: :json }
       end
 
-      assert_response :unauthorized
+      assert_response :bad_request
       assert_equal "invalid_client", response.parsed_body["error"]
     end
   end
@@ -847,7 +847,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
       }, as: :json
     end
 
-    assert_response :unauthorized
+    assert_response :bad_request
     assert_equal "invalid_client", response.parsed_body["error"]
   end
 
