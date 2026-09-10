@@ -58,6 +58,19 @@ class User::RoleTest < ActiveSupport::TestCase
     assert_not_includes accounts("37s").users.admin, users(:kevin)
   end
 
+  test "sole owner?" do
+    assert users(:jason).sole_owner?
+    assert_not users(:kevin).sole_owner?
+    assert_not users(:david).sole_owner?
+
+    users(:kevin).update!(role: :owner)
+    assert_not users(:jason).sole_owner?
+    assert_not users(:kevin).sole_owner?
+
+    users(:kevin).update!(active: false)
+    assert users(:jason).sole_owner?
+  end
+
   test "can administer board?" do
     writebook_board = boards(:writebook)
     private_board = boards(:private)
