@@ -379,6 +379,25 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_equal old_refresh_token, token.reload.refresh_token
   end
 
+  test "refresh grant rejects a blank scope rather than restoring the full grant" do
+    client = oauth_clients(:mcp_client)
+    token = identities(:david).access_tokens.create!(oauth_client: client, permission: :write)
+    old_refresh_token = token.refresh_token
+
+    untenanted do
+      post oauth_token_path, params: {
+        grant_type: "refresh_token",
+        refresh_token: old_refresh_token,
+        client_id: client.client_id,
+        scope: " "
+      }, as: :json
+    end
+
+    assert_response :bad_request
+    assert_equal "invalid_scope", response.parsed_body["error"]
+    assert_equal old_refresh_token, token.reload.refresh_token
+  end
+
   test "refresh grant works after the access token expires" do
     client = oauth_clients(:mcp_client)
     token = identities(:david).access_tokens.create!(oauth_client: client)
