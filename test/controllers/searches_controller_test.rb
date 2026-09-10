@@ -36,19 +36,16 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
     assert_select "li .search__excerpt--comment", text: /I love haggis/ # one entry for the comment
     assert_match(/<mark class="circled-text"><span><\/span>haggis<\/mark>/, response.body)
 
-    # Searching by card id
-    get search_path(q: @card.id, script_name: "/#{@account.external_account_id}")
-    assert_select "form[data-controller='auto-submit']"
-
-    # Searching by card number without prefix uses full search (no direct redirect)
+    # Searching by card number
     get search_path(q: @card.number, script_name: "/#{@account.external_account_id}")
-    assert_select "form[data-controller='auto-submit']", count: 0
-
-    # Searching by card number with hash prefix
-    get search_path(q: "##{@card.number}", script_name: "/#{@account.external_account_id}")
     assert_select "form[data-controller='auto-submit']"
 
-    # Searching with non-existent card id
+    # Searching by the number of a card the user cannot access
+    get search_path(q: hidden_card.number, script_name: "/#{@account.external_account_id}")
+    assert_select "form[data-controller='auto-submit']", count: 0
+    assert_select ".search__blank-slate", text: "No matches"
+
+    # Searching with non-existent card number
     get search_path(q: "999999", script_name: "/#{@account.external_account_id}")
     assert_select "form[data-controller='auto-submit']", count: 0
     assert_select ".search__blank-slate", text: "No matches"
@@ -64,8 +61,8 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Layout is broken", body.first["title"]
   end
 
-  test "search by card ID as JSON returns array" do
-    get search_path(q: @card.id, script_name: "/#{@account.external_account_id}"), as: :json
+  test "search by card number as JSON returns array" do
+    get search_path(q: @card.number, script_name: "/#{@account.external_account_id}"), as: :json
     assert_response :success
 
     body = @response.parsed_body
@@ -106,4 +103,11 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
     # But should preserve highlight marks around "testing"
     assert_match(/<mark class="circled-text"><span><\/span>testing<\/mark>/, response.body)
   end
+
+  private
+    def hidden_card
+      hidden_board = Board.create!(name: "Hidden Board", account: @account, creator: @user)
+      hidden_board.accesses.revoke_from(@user)
+      hidden_board.cards.create!(title: "Hidden card", status: "published", creator: @user)
+    end
 end
