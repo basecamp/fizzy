@@ -31,7 +31,7 @@ gem "geared_pagination", "~> 1.2"
 gem "rqrcode"
 gem "rouge"
 gem "jbuilder"
-gem "lexxy", "0.9.31"
+gem "lexxy", "0.9.32"
 gem "image_processing", "~> 2.0"
 gem "ruby-vips", require: false # image_processing 2 no longer depends on it; Active Storage loads it itself
 gem "platform_agent"
