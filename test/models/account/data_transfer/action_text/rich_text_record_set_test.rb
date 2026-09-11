@@ -167,16 +167,24 @@ class Account::DataTransfer::ActionText::RichTextRecordSetTest < ActiveSupport::
 
   private
     def with_default_url_host(host)
+      options = nil
+      had_key = false
+      original = nil
+      changed_host = false
+
       options = Rails.application.routes.default_url_options
       had_key = options.key?(:host)
       original = options[:host]
       options[:host] = host
+      changed_host = true
       yield
     ensure
-      if had_key
-        options[:host] = original
-      else
-        options.delete(:host)
+      if changed_host
+        if had_key
+          options[:host] = original
+        else
+          options.delete(:host)
+        end
       end
     end
 end
