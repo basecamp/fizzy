@@ -1,0 +1,15 @@
+<article class="panel panel--wide shadow center txt-align-start">
+  <div class="flex flex-column gap">
+    <h2 class="margin-none">Authorization Error</h2>
+
+    <p class="txt-muted margin-none">
+      <%= @error_description %>
+    </p>
+
+    <p class="txt-small txt-muted margin-none">
+      Error code: <code><%= @error %></code>
+    </p>
+
+    <%= link_to "Go back", request.referer || root_path, class: "btn btn--outline center txt-medium" %>
+  </div>
+</article>

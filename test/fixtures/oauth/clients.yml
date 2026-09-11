@@ -1,0 +1,21 @@
+mcp_client:
+  client_id: mcp_test_client_123
+  name: Test MCP Client
+  redirect_uris:
+    - http://127.0.0.1:8888/callback
+  scopes:
+    - read
+    - write
+  dynamically_registered: true
+  trusted: false
+
+trusted_client:
+  client_id: trusted_client_456
+  name: Trusted First-Party App
+  redirect_uris:
+    - https://app.example.com/oauth/callback
+  scopes:
+    - read
+    - write
+  dynamically_registered: false
+  trusted: true
