@@ -23,10 +23,11 @@ module Card::Pinnable
     pins.find_by(user: user).tap { it.destroy }
   end
 
-  # Renders each tray in the same breath as it picks the pins to render, so that access
-  # revoked between the two cannot be broadcast.
+  # Renders the board this run has loaded, so it picks its recipients from that same board:
+  # a card that moves again while the job runs cannot widen the audience, and access revoked
+  # before the job runs is already gone from board.users.
   def broadcast_pin_updates
-    pins.accessible.find_each do |pin|
+    pins.where(user: board.users).find_each do |pin|
       pin.broadcast_replace_to [ pin.user, :pins_tray ], partial: "my/pins/pin"
     end
   end
