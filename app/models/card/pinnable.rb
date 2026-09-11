@@ -25,7 +25,7 @@ module Card::Pinnable
 
   private
     def broadcast_pin_updates
-      pins.find_each do |pin|
+      pins.accessible.find_each do |pin|
         pin.broadcast_replace_later_to [ pin.user, :pins_tray ], partial: "my/pins/pin"
       end
     end

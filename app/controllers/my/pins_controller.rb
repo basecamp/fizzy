@@ -6,7 +6,7 @@ class My::PinsController < ApplicationController
 
   private
     def user_pins
-      Current.user.pins.includes(:card).ordered.limit(pins_limit)
+      Current.user.pins.accessible.includes(:card).ordered.limit(pins_limit)
     end
 
     def pins_limit
