@@ -35,6 +35,15 @@ class Card::PinnableTest < ActiveSupport::TestCase
     end
   end
 
+  test "does not broadcast pin update to a pinner whose access is revoked before the broadcast runs" do
+    cards(:logo).update!(title: "New title")
+    accesses(:writebook_kevin).destroy
+
+    assert_turbo_stream_broadcasts([ pins(:logo_kevin).user, :pins_tray ], count: 0) do
+      perform_enqueued_jobs except: Board::CleanInaccessibleDataJob
+    end
+  end
+
   test "does not broadcast pin update when other properties change" do
     perform_enqueued_jobs do
       assert_turbo_stream_broadcasts([ pins(:logo_kevin).user, :pins_tray ], count: 0) do

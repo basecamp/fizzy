@@ -4,7 +4,7 @@ module Card::Pinnable
   included do
     has_many :pins, dependent: :destroy
 
-    after_update_commit :broadcast_pin_updates, if: :preview_changed?
+    after_update_commit :broadcast_pin_updates_later, if: :preview_changed?
   end
 
   def pinned_by?(user)
@@ -23,10 +23,16 @@ module Card::Pinnable
     pins.find_by(user: user).tap { it.destroy }
   end
 
+  # Renders each tray in the same breath as it picks the pins to render, so that access
+  # revoked between the two cannot be broadcast.
+  def broadcast_pin_updates
+    pins.accessible.find_each do |pin|
+      pin.broadcast_replace_to [ pin.user, :pins_tray ], partial: "my/pins/pin"
+    end
+  end
+
   private
-    def broadcast_pin_updates
-      pins.accessible.find_each do |pin|
-        pin.broadcast_replace_later_to [ pin.user, :pins_tray ], partial: "my/pins/pin"
-      end
+    def broadcast_pin_updates_later
+      Card::BroadcastPinUpdatesJob.perform_later(self)
     end
 end
