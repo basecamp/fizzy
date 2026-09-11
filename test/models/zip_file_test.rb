@@ -119,6 +119,72 @@ class ZipFileTest < ActiveSupport::TestCase
     end
   end
 
+  test "reader reads an entry at the size limit" do
+    content = "a" * ZipFile::Reader::MAX_BUFFERED_ENTRY_SIZE
+    tempfile = create_test_zip("data/tags/big.json" => content)
+
+    reader = ZipFile::Reader.new(tempfile)
+
+    assert_equal content.bytesize, reader.read("data/tags/big.json").bytesize
+  end
+
+  test "reader raises EntryTooLargeError for an entry over the size limit" do
+    content = "a" * (ZipFile::Reader::MAX_BUFFERED_ENTRY_SIZE + 1)
+    tempfile = create_test_zip("data/tags/bomb.json" => content)
+
+    reader = ZipFile::Reader.new(tempfile)
+
+    assert_raises(ZipFile::EntryTooLargeError) { reader.read("data/tags/bomb.json") }
+  end
+
+  test "reader raises EntryTooLargeError when the zip understates an entry's size" do
+    content = "a" * (4 * ZipFile::Reader::MAX_BUFFERED_ENTRY_SIZE)
+    tempfile = understate_declared_size(create_test_zip("data/tags/bomb.json" => content), "data/tags/bomb.json", 1024)
+
+    reader = ZipFile::Reader.new(tempfile)
+
+    assert_equal 1024, reader.instance_variable_get(:@reader).find { |e| e.filename == "data/tags/bomb.json" }.uncompressed_size
+    assert_raises(ZipFile::EntryTooLargeError) { reader.read("data/tags/bomb.json") }
+  end
+
+  test "reader streams an entry over the size limit when given a block" do
+    content = "a" * (2 * ZipFile::Reader::MAX_BUFFERED_ENTRY_SIZE)
+    tempfile = create_test_zip("storage/blob_key" => content)
+
+    reader = ZipFile::Reader.new(tempfile)
+    streamed = 0
+    reader.read("storage/blob_key") do |io|
+      streamed += io.read.bytesize until io.eof?
+    end
+
+    assert_equal content.bytesize, streamed
+  end
+
+  test "reader io returns no more than the length asked for from a deflated entry" do
+    content = "a" * 2.megabytes
+    tempfile = create_test_zip("storage/blob_key" => content)
+
+    reader = ZipFile::Reader.new(tempfile)
+    reader.read("storage/blob_key") do |io|
+      assert_equal 1024, io.read(1024).bytesize
+    end
+  end
+
+  test "reader io streams a deflated entry intact in small reads" do
+    content = ("fizzy" * 200_000).b
+    tempfile = create_test_zip("storage/blob_key" => content)
+
+    reader = ZipFile::Reader.new(tempfile)
+    streamed = "".b
+    reader.read("storage/blob_key") do |io|
+      while chunk = io.read(7919)
+        streamed << chunk
+      end
+    end
+
+    assert_equal content, streamed
+  end
+
   test "reader raises InvalidFileError for non-zip file" do
     tempfile = Tempfile.new([ "not_a_zip", ".zip" ])
     tempfile.write("this is not a zip file at all")
@@ -131,6 +197,30 @@ class ZipFileTest < ActiveSupport::TestCase
   end
 
   private
+    # Rewrites the uncompressed size the central directory declares for one
+    # entry, the way a crafted archive would.
+    def understate_declared_size(tempfile, path, size)
+      bytes = File.binread(tempfile.path)
+      offset = 0
+
+      while offset = bytes.index("PK\x01\x02".b, offset)
+        name_length = bytes[offset + 28, 2].unpack1("v")
+
+        if bytes[offset + 46, name_length] == path.b
+          bytes[offset + 24, 4] = [ size ].pack("V")
+          break
+        end
+
+        offset += 4
+      end
+
+      Tempfile.new([ "understated", ".zip" ]).tap do |patched|
+        patched.binmode
+        patched.write(bytes)
+        patched.rewind
+      end
+    end
+
     def create_test_zip(files)
       tempfile = Tempfile.new([ "test", ".zip" ])
       tempfile.binmode
