@@ -1,9 +1,10 @@
 class ZipFile::Reader::IO
   STORED = 0
 
-  def initialize(entry, io)
+  def initialize(entry, io, reader)
     @entry = entry
     @io = io
+    @reader = reader
     rewind
   end
 
@@ -47,6 +48,7 @@ class ZipFile::Reader::IO
         if chunk.nil?
           @drained = true
         else
+          @reader.count_expanded chunk.bytesize
           @buffer << chunk
         end
       end

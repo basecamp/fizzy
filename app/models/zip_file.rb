@@ -1,10 +1,12 @@
 class ZipFile
   class InvalidFileError < StandardError; end
 
-  # Inherits from InvalidFileError so an oversized entry is handled everywhere a
-  # bad export already is: the import stops with an "invalid export" reason, and
-  # the job discards it rather than resuming against the same entry.
+  # Both inherit from InvalidFileError so an archive that busts a limit is
+  # handled everywhere a bad export already is: the import stops with an
+  # "invalid export" reason, and the job discards it rather than resuming
+  # against the same entry.
   class EntryTooLargeError < InvalidFileError; end
+  class ArchiveTooLargeError < InvalidFileError; end
 
   class << self
     def create_for(attachment, filename:)

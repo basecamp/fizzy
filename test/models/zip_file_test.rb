@@ -197,6 +197,33 @@ class ZipFileTest < ActiveSupport::TestCase
     assert_operator reads, :<, 100
   end
 
+  test "reader raises ArchiveTooLargeError when a streamed entry expands past what the archive can account for" do
+    tempfile = Tempfile.new([ "bomb", ".zip" ])
+    tempfile.binmode
+    writer = ZipFile::Writer.new(tempfile)
+    writer.add_file("storage/blob_key") do |sink|
+      chunk = "a" * 1.megabyte
+      80.times { sink.write(chunk) }
+    end
+    writer.close
+    tempfile.rewind
+
+    reader = ZipFile::Reader.new(tempfile)
+    streamed = 0
+
+    error = assert_raises(ZipFile::ArchiveTooLargeError) do
+      reader.read("storage/blob_key") do |io|
+        streamed += io.read(64.kilobytes).bytesize until io.eof?
+      end
+    end
+
+    assert_operator streamed, :<, 80.megabytes
+    assert_match(/over the \d+ byte limit/, error.message)
+  ensure
+    tempfile&.close
+    tempfile&.unlink
+  end
+
   test "reader raises InvalidFileError for non-zip file" do
     tempfile = Tempfile.new([ "not_a_zip", ".zip" ])
     tempfile.write("this is not a zip file at all")
