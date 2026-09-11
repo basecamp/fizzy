@@ -22,13 +22,14 @@ class ZipFile::Reader::IO
   end
 
   def eof?
-    buffered.zero? && @extractor.eof?
+    buffered.zero? && drained?
   end
 
   def rewind
     @extractor = @entry.extractor_from(@io)
     @buffer = "".b
     @consumed = 0
+    @drained = false
     0
   end
 
@@ -38,14 +39,24 @@ class ZipFile::Reader::IO
 
   private
     def fill_buffer_for(length)
-      until @extractor.eof? || (length && buffered >= length)
+      until drained? || (length && buffered >= length)
         drop_consumed
 
         chunk = @extractor.extract(slice_size(length))
-        break if chunk.nil?
 
-        @buffer << chunk
+        if chunk.nil?
+          @drained = true
+        else
+          @buffer << chunk
+        end
       end
+    end
+
+    # An entry whose compressed data runs out before the deflate stream ends
+    # leaves the extractor short of eof while it has nothing left to give, so
+    # take its first nil as the end too rather than asking again forever.
+    def drained?
+      @drained || @extractor.eof?
     end
 
     # A deflated entry hands back whatever it inflates to, which is the archive
