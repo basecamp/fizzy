@@ -185,6 +185,18 @@ class ZipFileTest < ActiveSupport::TestCase
     assert_equal content, streamed
   end
 
+  test "reader io stops at a truncated deflate stream" do
+    tempfile = understate_declared_size(create_test_zip("storage/blob_key" => "a" * 64.kilobytes), "storage/blob_key", 16, offset: 20)
+
+    reader = ZipFile::Reader.new(tempfile)
+    reads = 0
+    reader.read("storage/blob_key") do |io|
+      reads += 1 while io.read(1024)
+    end
+
+    assert_operator reads, :<, 100
+  end
+
   test "reader raises InvalidFileError for non-zip file" do
     tempfile = Tempfile.new([ "not_a_zip", ".zip" ])
     tempfile.write("this is not a zip file at all")
@@ -197,21 +209,22 @@ class ZipFileTest < ActiveSupport::TestCase
   end
 
   private
-    # Rewrites the uncompressed size the central directory declares for one
-    # entry, the way a crafted archive would.
-    def understate_declared_size(tempfile, path, size)
+    # Rewrites a size the central directory declares for one entry, the way a
+    # crafted archive would: offset 24 is the uncompressed size, 20 the
+    # compressed one.
+    def understate_declared_size(tempfile, path, size, offset: 24)
       bytes = File.binread(tempfile.path)
-      offset = 0
+      cdir = 0
 
-      while offset = bytes.index("PK\x01\x02".b, offset)
-        name_length = bytes[offset + 28, 2].unpack1("v")
+      while cdir = bytes.index("PK\x01\x02".b, cdir)
+        name_length = bytes[cdir + 28, 2].unpack1("v")
 
-        if bytes[offset + 46, name_length] == path.b
-          bytes[offset + 24, 4] = [ size ].pack("V")
+        if bytes[cdir + 46, name_length] == path.b
+          bytes[cdir + offset, 4] = [ size ].pack("V")
           break
         end
 
-        offset += 4
+        cdir += 4
       end
 
       Tempfile.new([ "understated", ".zip" ]).tap do |patched|
