@@ -74,7 +74,7 @@ class Oauth::ClientsController < Oauth::BaseController
         client_name: client.name,
         redirect_uris: client.redirect_uris,
         token_endpoint_auth_method: "none",
-        grant_types: %w[ authorization_code ],
+        grant_types: %w[ authorization_code refresh_token ],
         response_types: %w[ code ],
         scope: client.scopes.join(" ")
       }
