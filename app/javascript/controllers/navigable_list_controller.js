@@ -24,6 +24,16 @@ export default class extends Controller {
     return !isMobile()
   }
 
+  // Targets connect before connect() runs, so the remembered selection has to be loaded here.
+  initialize() {
+    this.rememberedItemId = sessionStorage.getItem(this.#rememberedSelectionKey)
+
+    queueMicrotask(() => {
+      sessionStorage.removeItem(this.#rememberedSelectionKey)
+      if (!this.#hasLoadingFrame) { this.forgetSelection() }
+    })
+  }
+
   connect() {
     if (this.autoSelectValue) {
       this.reset()
@@ -71,6 +81,23 @@ export default class extends Controller {
     this.#setCurrentFrom(this.#visibleItems[this.#visibleItems.length - 1])
   }
 
+  rememberSelection() {
+    if (this.currentItem?.contains(document.activeElement)) {
+      sessionStorage.setItem(this.#rememberedSelectionKey, this.currentItem.id)
+    }
+  }
+
+  forgetSelection() {
+    this.rememberedItemId = null
+  }
+
+  itemTargetConnected(item) {
+    if (!this.rememberedItemId || item.id !== this.rememberedItemId) { return }
+
+    this.forgetSelection()
+    if (this.#visibleItems.includes(item)) { this.selectItem(item) }
+  }
+
   deselectWhenClickingOutside(event) {
     if (this.element.contains(event.target)) {
       return
@@ -109,6 +136,14 @@ export default class extends Controller {
     if (selectedItem) {
       await this.selectItem(selectedItem)
     }
+  }
+
+  get #hasLoadingFrame() {
+    return !!this.element.querySelector("turbo-frame[src]:not([complete])")
+  }
+
+  get #rememberedSelectionKey() {
+    return `navigable-list-selection:${location.pathname}`
   }
 
   get #parentNavigableListController() {
