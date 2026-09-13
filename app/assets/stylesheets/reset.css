@@ -83,18 +83,31 @@
 
   /* Remove all animations and transitions for people that prefer not to see them */
   @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
+    :root:not([data-motion="animate"]) {
+      & *,
+      & *::before,
+      & *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+
+      scroll-behavior: initial;
+    }
+  }
+
+  html[data-motion="reduce"] {
+    & *,
+    & *::before,
+    & *::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
 
-    html {
-      scroll-behavior: initial;
-    }
+    scroll-behavior: initial;
   }
 
   dialog {
