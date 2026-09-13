@@ -115,6 +115,21 @@ class Webhook::DeliveryTest < ActiveSupport::TestCase
     assert delivery.succeeded?
   end
 
+  test "deliver a comment whose body has a content attachment" do
+    comment = comments(:layout_overflowing_david)
+    comment.update! body: %(<action-text-attachment content-type="text/html" content="&lt;p&gt;Embedded content&lt;/p&gt;"></action-text-attachment>)
+    delivery = Webhook::Delivery.create!(webhook: webhooks(:active), event: events(:layout_commented))
+
+    request_stub = stub_request(:post, delivery.webhook.url)
+      .with { |request| JSON.parse(request.body).dig("eventable", "body", "html").include?("Embedded content") }
+      .to_return(status: 200, headers: { "content-type" => "application/json" })
+
+    delivery.deliver
+
+    assert_requested request_stub
+    assert_equal "completed", delivery.state
+  end
+
   test "deliver when the network timeouts" do
     delivery = webhook_deliveries(:pending)
     stub_request(:post, delivery.webhook.url).to_timeout
