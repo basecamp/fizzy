@@ -8,7 +8,7 @@ module ActionTextContentAttachmentHtml
   def to_html
     @to_html ||= content_instance.render \
       partial: content_instance.to_partial_path,
-      locals: { content: content_instance },
+      object: content_instance,
       formats: :html
   end
 end
