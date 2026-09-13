@@ -33,7 +33,7 @@ class Search::Query < ApplicationRecord
     end
 
     def remove_invalid_search_characters(terms)
-      terms.gsub(/[^\w"]/, " ")
+      terms.gsub(/[^[[:word:]]"]/, " ")
     end
 
     def remove_unbalanced_quotes(terms)
