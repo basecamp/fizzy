@@ -55,7 +55,7 @@ export default class extends Controller {
 
   #clearTurboFrame() {
     this.turboFrameTarget.removeAttribute("src")
-    this.turboFrameTarget.innerHtml = ""
+    this.turboFrameTarget.innerHTML = ""
   }
 
   async #showItem(element) {
