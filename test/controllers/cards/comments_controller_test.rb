@@ -13,6 +13,16 @@ class Cards::CommentsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "create with an HTML content attachment in the body" do
+    body = %(<p><action-text-attachment content-type="text/html" content="&lt;p&gt;Nested&lt;/p&gt;"></action-text-attachment></p>)
+
+    assert_difference -> { cards(:logo).comments.count }, +1 do
+      post card_comments_path(cards(:logo)), params: { comment: { body: body } }, as: :turbo_stream
+    end
+
+    assert_response :success
+  end
+
   test "create on draft card is forbidden" do
     draft_card = boards(:writebook).cards.create!(status: :drafted, creator: users(:kevin))
 

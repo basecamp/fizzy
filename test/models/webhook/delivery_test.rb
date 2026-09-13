@@ -251,6 +251,28 @@ class Webhook::DeliveryTest < ActiveSupport::TestCase
     assert delivery.succeeded?
   end
 
+  test "generic webhook payload renders a comment body with an HTML content attachment" do
+    comments(:layout_overflowing_david).update! \
+      body: %(<p><action-text-attachment content-type="text/html" content="&lt;p&gt;Nested&lt;/p&gt;"></action-text-attachment></p>)
+
+    webhook = Webhook.create!(
+      board: boards(:writebook),
+      name: "Generic",
+      url: "https://example.com/webhook"
+    )
+    delivery = Webhook::Delivery.create!(webhook: webhook, event: events(:layout_commented))
+
+    captured_body = nil
+    stub_request(:post, webhook.url)
+      .with { |request| captured_body = request.body; true }
+      .to_return(status: 200)
+
+    delivery.deliver
+
+    assert delivery.succeeded?
+    assert_includes JSON.parse(captured_body).dig("eventable", "body", "html"), "Nested"
+  end
+
   test "cleanup" do
     webhook = webhooks(:active)
     event = events(:layout_commented)
