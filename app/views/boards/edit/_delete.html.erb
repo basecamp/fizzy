@@ -4,8 +4,8 @@
     <span>Delete this board</span>
   </button>
   <dialog class="dialog panel fill-white shadow gap flex-column" style="--panel-size: 40ch" data-dialog-target="dialog">
-    <h3 class="txt-large txt-bold">Delete this board?</h3>
-    <p class="txt-medium margin-block-half">Are you sure you want to permanently delete this board and all the cards on it? This can't be undone.</p>
+    <h3 class="txt-large txt-bold">Delete "<%= board.name %>"?</h3>
+    <p class="txt-medium margin-block-half">Are you sure you want to permanently delete "<%= board.name %>" and <%= board.cards.size == 1 ? "1 card" : "all #{board.cards.size} cards" %> on it? This can't be undone.</p>
     <div class="flex gap-half justify-center margin-block-start">
       <button type="button" class="btn" data-action="dialog#close">Cancel</button>
       <%= button_to board_path(board), method: :delete, class: "btn txt-negative", data: { turbo_frame: "_top" } do %>
