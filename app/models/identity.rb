@@ -17,7 +17,7 @@ class Identity < ApplicationRecord
   normalizes :email_address, with: ->(value) { value.strip.downcase.presence }
 
   def self.find_by_permissable_access_token(token, method:)
-    if (access_token = AccessToken.find_by(token: token)) && access_token.allows?(method)
+    if (access_token = AccessToken.active.find_by(token: token)) && access_token.allows?(method)
       access_token.identity
     end
   end
