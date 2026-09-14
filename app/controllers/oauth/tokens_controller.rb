@@ -2,6 +2,8 @@ class Oauth::TokensController < Oauth::BaseController
   allow_unauthenticated_access
   skip_forgery_protection
 
+  after_action :prevent_caching
+
   rate_limit to: 20, within: 1.minute, only: :create, with: :oauth_rate_limit_exceeded
 
   before_action :validate_grant_type
@@ -14,8 +16,15 @@ class Oauth::TokensController < Oauth::BaseController
     before_action :set_identity
   end
 
+  before_action :set_refreshable_access_token, unless: :authorization_code_grant?
+
+  # Authenticate the posted client before validating that the refresh token
+  # belongs to it: a confidential client that fails auth must see invalid_client,
+  # not the invalid_grant that a client_id mismatch would raise first — which a
+  # client could misread as a revoked grant and discard.
+  before_action :authenticate_client
+
   with_options unless: :authorization_code_grant? do
-    before_action :set_refreshable_access_token
     before_action :validate_refresh_client
     before_action :set_refresh_scope
   end
@@ -113,6 +122,23 @@ class Oauth::TokensController < Oauth::BaseController
 
     def scope_for(permission)
       granted_scopes(permission).join(" ")
+    end
+
+    # client_secret_post authenticates with client_id and client_secret in
+    # the request body, per RFC 6749 §2.3.1 — never the query string, where
+    # secrets leak into proxy and access logs. A failure is a 400 invalid_client
+    # (RFC 6749 §5.2): 401 is reserved for header-based schemes and would owe a
+    # WWW-Authenticate challenge we have no scheme to fill.
+    def authenticate_client
+      client = @client || @access_token.oauth_client
+
+      if client.confidential?
+        credentials = request.request_parameters
+
+        unless credentials["client_id"] == client.client_id && client.authenticate_secret(credentials["client_secret"])
+          oauth_error "invalid_client", "Client authentication failed"
+        end
+      end
     end
 
     def token_response(access_token, scope: nil)
