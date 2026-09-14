@@ -22,6 +22,10 @@ module User::Role
     admin? && !other.owner? && other != self
   end
 
+  def sole_owner?
+    active? && owner? && account.users.owner.excluding(self).none?
+  end
+
   def can_administer_board?(board)
     admin? || board.creator == self
   end
