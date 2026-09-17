@@ -35,6 +35,26 @@ class StaticCspTest < ActionDispatch::IntegrationTest
     assert_not_equal STATIC_POLICY, csp
   end
 
+  test "Trusted Types telemetry rides a report-only header and never the enforcing policy" do
+    sign_in_as identities(:david)
+    get root_url
+
+    # Report-only pilot: the enforcing policy must not carry the directive, or an
+    # un-migrated sink would throw on Chromium.
+    enforcing = response.headers[ActionDispatch::Constants::CONTENT_SECURITY_POLICY]
+    assert_not_includes enforcing.to_s, "require-trusted-types-for",
+      "the enforcing CSP must stay free of Trusted Types in the report-only pilot"
+
+    report_only = response.headers[ActionDispatch::Constants::CONTENT_SECURITY_POLICY_REPORT_ONLY]
+    assert_includes report_only.to_s, "require-trusted-types-for 'script'",
+      "a report-only header must collect Trusted Types violations"
+
+    # No named createHTML policy is registered in this pilot, so no `trusted-types`
+    # allowlist is emitted.
+    assert_not_includes report_only.to_s, "trusted-types ",
+      "the pilot registers no named policy, so it emits no trusted-types allowlist"
+  end
+
   private
     # Suppress the diagnostics page the test environment would otherwise
     # render, so the request falls through to the exceptions app like in
