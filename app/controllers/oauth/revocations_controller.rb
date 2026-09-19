@@ -12,6 +12,8 @@ class Oauth::RevocationsController < Oauth::BaseController
 
   private
     def set_access_token
-      @access_token = Identity::AccessToken.find_by(token: params.require(:token))
+      token = params.require(:token)
+      @access_token = Identity::AccessToken.find_by(token: token) ||
+        Identity::AccessToken.find_by(refresh_token: token)
     end
 end
