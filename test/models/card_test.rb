@@ -73,7 +73,7 @@ class CardTest < ActiveSupport::TestCase
 
   test "open" do
     assert_equal cards(:logo, :layout, :text, :buy_domain).to_set, accounts("37s").cards.open.to_set
-    assert_equal cards(:radio, :paycheck, :unfinished_thoughts).to_set, accounts("initech").cards.open.to_set
+    assert_equal cards(:radio, :paycheck, :unfinished_thoughts, :postponed_idea).to_set, accounts("initech").cards.open.to_set
   end
 
   test "card_unassigned" do
