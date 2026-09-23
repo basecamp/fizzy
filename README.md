@@ -18,6 +18,15 @@ curl https://get.once.com/fizzy | sh
 
 If you'd rather run our pre-built Docker image yourself, you can find the details in our [Docker deployment guide](docs/docker-deployment.md).
 
+### Deploying with Easypanel
+
+If you'd rather not manage the container yourself, [Easypanel](https://easypanel.io) is a self-hosted deployment platform with a one-click Fizzy template:
+
+[![Deploy on Easypanel][easypanel-btn]][easypanel-deploy]
+
+[easypanel-btn]: https://easypanel.io/img/deploy-on-easypanel-40.svg
+[easypanel-deploy]: https://easypanel.io/templates/fizzy
+
 ### Deploying with Kamal
 
 If you want more flexibility to customize your Fizzy installation by changing its code, and deploy those changes to your server, then we recommend you deploy Fizzy with Kamal. You can find a complete walkthrough of doing that in our [Kamal deployment guide](docs/kamal-deployment.md).
