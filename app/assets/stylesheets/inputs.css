@@ -141,12 +141,6 @@
       --caret-icon: var(--caret-icon-dark);
     }
 
-    @media (prefers-color-scheme: dark) {
-      html:not([data-theme]) & {
-        --caret-icon: var(--caret-icon-dark);
-      }
-    }
-
     option {
       background-color: var(--color-canvas);
       color: var(--color-ink);
