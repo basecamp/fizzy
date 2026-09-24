@@ -1,0 +1,78 @@
+@layer components {
+  .work-plan__team {
+    border-block-end: var(--border);
+    margin-block-end: var(--block-space);
+    padding-block-end: var(--block-space);
+    text-align: start;
+
+    fieldset { border: 0; margin: 0 0 var(--block-space); padding: 0; }
+    legend { margin-block-end: var(--block-space-half); }
+    p { margin-block: 0 var(--block-space); }
+  }
+
+  .work-plan__members {
+    list-style: none;
+    margin: 0;
+    max-block-size: 15rem;
+    overflow-y: auto;
+    padding: 0;
+  }
+
+  .work-plan__members li[hidden] { display: none; }
+
+  .work-plan__members li + li { border-block-start: var(--border); }
+
+  .work-plan__member {
+    align-items: center;
+    display: flex;
+    gap: var(--inline-space-half);
+    padding-block: var(--block-space-half);
+    text-align: start;
+  }
+
+  .work-plan__member-name { flex: 1 1 auto; min-inline-size: 0; }
+
+  .work-plan__loading,
+  .work-plan__empty {
+    padding-block: var(--block-space-double);
+    text-align: center;
+  }
+
+  .work-plan__summary { margin-block-end: var(--block-space); }
+
+  .work-plan__people {
+    display: flex;
+    flex-direction: column;
+    gap: var(--block-space-double);
+  }
+
+  .work-plan__person-heading {
+    align-items: center;
+    display: flex;
+    gap: var(--inline-space-half);
+    margin-block-end: var(--block-space-half);
+  }
+
+  .work-plan__avatar { --avatar-size: 1.5em; }
+  .work-plan__person-name { flex: 1 1 auto; min-inline-size: 0; }
+
+  .work-plan__cards { list-style: none; margin: 0; padding: 0; }
+
+  .work-plan__card {
+    align-items: baseline;
+    border-block-start: var(--border);
+    display: flex;
+    gap: var(--inline-space);
+    padding-block: var(--block-space-half);
+  }
+
+  .work-plan__number { color: var(--color-ink-dark); font-size: var(--text-small); font-weight: 700; }
+  .work-plan__title { flex: 1 1 auto; min-inline-size: 0; overflow-wrap: anywhere; }
+  .work-plan__badges { color: var(--color-ink-dark); font-size: var(--text-x-small); }
+
+  .work-plan__footer {
+    border-block-start: var(--border);
+    margin-block-start: var(--block-space);
+    padding-block-start: var(--block-space);
+  }
+}

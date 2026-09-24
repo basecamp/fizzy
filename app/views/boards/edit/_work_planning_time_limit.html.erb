@@ -1,0 +1,20 @@
+<section class="settings__section">
+  <header>
+    <h2 class="divider">Planning time</h2>
+    <div>Choose how long SolverForge should plan when generating a board assignment plan.</div>
+  </header>
+
+  <div class="flex align-start gap txt-align-center">
+    <div class="flex flex-column flex-1">
+      <%= form_with model: board, data: { controller: "form" } do |form| %>
+        <%= render "entropy/knob",
+          form: form,
+          name: :work_planning_time_limit_in_seconds,
+          current_value: board.work_planning_time_limit_in_seconds,
+          knob_options: Board::WORK_PLANNING_TIME_LIMIT_OPTIONS_IN_SECONDS,
+          label: "Seconds",
+          disabled: disabled %>
+      <% end %>
+    </div>
+  </div>
+</section>

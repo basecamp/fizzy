@@ -1,0 +1,47 @@
+<% @page_title = "Assign work" %>
+
+<% content_for :header do %>
+  <div class="header__actions header__actions--start">
+    <%= link_back_to_board(@board) %>
+  </div>
+
+  <h1 class="header__title" data-bridge--title-target="header"><%= @page_title %></h1>
+<% end %>
+
+<%= tag.section class: "panel panel--wide shadow center work-plan" do %>
+  <%= form_with url: board_work_plan_proposal_path(@board), method: :post,
+        data: { turbo_frame: dom_id(@board, :work_plan), controller: "filter toggle-class" }, class: "work-plan__team" do %>
+    <fieldset>
+      <legend class="divider txt-medium">Who should get work?</legend>
+      <p class="txt-small txt-subtle">Everyone on this board starts selected. Uncheck anyone to leave out.</p>
+      <%= search_field_tag nil, nil, placeholder: "Filter…", "aria-label": "Filter people by name", class: "input full-width txt-small",
+            data: { filter_target: "input", action: "input->filter#filter" } %>
+      <div class="flex align-center justify-end gap-half">
+        <%= button_tag "Select all", type: "button", class: "btn btn--plain txt-x-small txt-link font-weight-normal", data: { action: "click->toggle-class#checkAll" } %>
+        <span class="txt-subtle">&middot;</span>
+        <%= button_tag "Select none", type: "button", class: "btn btn--plain txt-x-small txt-link font-weight-normal", data: { action: "click->toggle-class#checkNone" } %>
+      </div>
+      <%= hidden_field_tag "user_ids[]", "" %>
+      <ul class="work-plan__members">
+        <% @eligible_users.each do |user| %>
+          <li data-filter-target="item">
+            <label class="work-plan__member">
+              <%= avatar_preview_tag(user, class: "work-plan__avatar", hidden_for_screen_reader: true) %>
+              <span class="work-plan__member-name"><%= user.name %></span>
+              <%= check_box_tag "user_ids[]", user.id, !@excluded_user_ids.include?(user.id), id: nil, data: { toggle_class_target: "checkbox" } %>
+            </label>
+          </li>
+        <% end %>
+      </ul>
+    </fieldset>
+    <%= submit_tag "Review plan", class: "btn btn--link", data: { turbo_submits_with: "Planning…" } %>
+  <% end %>
+
+  <%= turbo_frame_tag dom_id(@board, :work_plan), src: (board_work_plan_path(@board) if @proposal) do %>
+    <% if @proposal %>
+      <%= render "boards/work_plans/loading" %>
+    <% else %>
+      <p class="work-plan__empty txt-subtle">Choose who’s on this plan, then review it here.</p>
+    <% end %>
+  <% end %>
+<% end %>

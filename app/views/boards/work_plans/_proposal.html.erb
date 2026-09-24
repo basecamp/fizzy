@@ -1,0 +1,50 @@
+<%= turbo_frame_tag dom_id(@board, :work_plan) do %>
+  <% if @preview_error %>
+    <div class="work-plan__empty">
+      <p class="txt-negative"><%= @preview_error %></p>
+      <p class="txt-small txt-subtle">Adjust the people above and review another plan.</p>
+    </div>
+  <% elsif @page&.used? %>
+    <p class="work-plan__summary txt-small txt-subtle">
+      <%= pluralize(@proposal.assignments.count, "card") %> for <%= pluralize(@assignee_card_counts.size, "person") %>
+    </p>
+
+    <div class="work-plan__people">
+      <%= with_automatic_pagination :work_plan, @page do %>
+        <% @page.records.group_by(&:assignee).sort_by { |assignee, _| assignee.name }.each do |assignee, assignments| %>
+          <section class="work-plan__person" aria-label="Cards for <%= assignee.name %>">
+            <header class="work-plan__person-heading">
+              <%= avatar_preview_tag(assignee, class: "work-plan__avatar") %>
+              <strong class="work-plan__person-name">
+                <%= assignee.name %><% if assignee.id == @continuing_assignee_id %> <span class="txt-small txt-subtle">(continued)</span><% end %>
+              </strong>
+              <span class="txt-small txt-subtle"><%= pluralize(@assignee_card_counts.fetch(assignee.id), "card") %></span>
+            </header>
+
+            <ul class="work-plan__cards">
+              <% assignments.each do |assignment| %>
+                <% card = assignment.card %>
+                <li class="work-plan__card">
+                  <span class="work-plan__number">#<%= card.number %></span>
+                  <span class="work-plan__title"><%= card.title.presence || "Untitled" %></span>
+                  <% if badges = urgency_badges(card).presence %>
+                    <span class="work-plan__badges"><%= badges %></span>
+                  <% end %>
+                </li>
+              <% end %>
+            </ul>
+          </section>
+        <% end %>
+      <% end %>
+    </div>
+
+    <div class="work-plan__footer">
+      <p class="txt-small txt-subtle">Nothing changes until you approve.</p>
+      <%= button_to "Approve and assign", board_work_plan_approval_path(@board),
+            params: { proposal_id: @proposal.id }, class: "btn btn--link full-width",
+            data: { turbo_frame: "_top" } %>
+    </div>
+  <% else %>
+    <p class="work-plan__empty txt-subtle">Choose who’s on this plan, then review it here.</p>
+  <% end %>
+<% end %>

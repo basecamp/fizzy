@@ -1,5 +1,6 @@
 <%
-  current_index = knob_options.index(current_value) || knob_options.index(Entropy::DEFAULT_AUTO_POSTPONE_PERIOD_IN_DAYS)
+  current_index = knob_options.index(current_value) || 0
+  label = local_assigns.fetch(:label, "Days")
 %>
 
 <fieldset class="knob" data-controller="knob" data-knob-target="field" style="--knob-options: <%= knob_options.length %>; --knob-index: <%= current_index %>">
@@ -30,5 +31,5 @@
     <div class="knob__knob" aria-hidden></div>
   </div>
 
-  <div id="<%= dom_id(form.object, name) %>" class="knob__label">Days</div>
+  <div id="<%= dom_id(form.object, name) %>" class="knob__label"><%= label %></div>
 </fieldset>
