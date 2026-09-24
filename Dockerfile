@@ -32,7 +32,7 @@ FROM base AS build
 
 # Install packages needed to build gems
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential git libyaml-dev pkg-config && \
+    apt-get install --no-install-recommends -y build-essential cargo git libyaml-dev pkg-config rustc && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Install application gems
@@ -45,6 +45,12 @@ RUN bundle install && \
 
 # Copy application code
 COPY . .
+
+# Build the SolverForge planner and place the binary at the fixed runtime path.
+RUN cargo build --manifest-path tools/solverforge-board-planner/Cargo.toml --release --target-dir tmp/solverforge-board-planner-target && \
+    mkdir -p vendor/bin && \
+    cp tmp/solverforge-board-planner-target/release/solverforge-board-planner vendor/bin/solverforge-board-planner && \
+    rm -rf tmp/solverforge-board-planner-target
 
 # Precompile bootsnap code for faster boot times.
 # -j 1 disable parallel compilation to avoid a QEMU bug: https://github.com/rails/bootsnap/issues/495
