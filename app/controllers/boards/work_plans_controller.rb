@@ -5,6 +5,7 @@ class Boards::WorkPlansController < ApplicationController
 
   def show
     @request_payload = Board::WorkPlan::BuildRequest.new(board: @board).call
+    @assignees_by_id = @board.users.active.index_by { |user| user.id.to_s }
 
     if request_payload.users.empty? || request_payload.candidate_work_units.empty?
       @preview_error = request_payload.users.empty? ? "No active board users available" : "No eligible cards to plan"

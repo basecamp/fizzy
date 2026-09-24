@@ -44,41 +44,35 @@
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
-    gap: var(--block-space);
+    gap: var(--block-space-double);
     min-block-size: 0;
     overflow-y: auto;
   }
 
-  .work-plan__person {
-    background: var(--color-ink-lightest);
-    border: var(--border);
-    border-radius: 0.75rem;
-    flex: none;
-    overflow: hidden;
-  }
+  .work-plan__person { flex: none; }
 
   .work-plan__person-heading {
-    align-items: baseline;
+    align-items: center;
     display: flex;
-    flex-wrap: wrap;
-    gap: var(--inline-space-half) var(--inline-space-double);
-    padding: var(--block-space-half) var(--inline-space-double);
+    gap: var(--inline-space-half);
+    margin-block-end: var(--block-space-half);
   }
+
+  .work-plan__avatar { --avatar-size: 1.5em; }
+  .work-plan__person-name { flex: 1 1 auto; min-inline-size: 0; }
 
   .work-plan__cards { list-style: none; margin: 0; padding: 0; }
 
   .work-plan__card {
     align-items: baseline;
-    background: var(--color-canvas);
     border-block-start: var(--border);
     display: flex;
-    flex-wrap: wrap;
-    gap: var(--inline-space-half) var(--inline-space);
-    padding: var(--block-space-half) var(--inline-space-double);
+    gap: var(--inline-space);
+    padding-block: var(--block-space-half);
   }
 
   .work-plan__number { color: var(--color-ink-dark); font-size: var(--text-small); font-weight: 700; }
-  .work-plan__title { flex: 1 1 12ch; min-inline-size: 0; overflow-wrap: anywhere; }
+  .work-plan__title { flex: 1 1 auto; min-inline-size: 0; overflow-wrap: anywhere; }
   .work-plan__badges { color: var(--color-ink-dark); font-size: var(--text-x-small); }
 
   .work-plan__footer {

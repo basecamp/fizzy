@@ -18,7 +18,10 @@
 
         <section class="work-plan__person" aria-label="Cards for <%= user.name %>">
           <header class="work-plan__person-heading">
-            <strong><%= user.name %></strong>
+            <% if assignee = @assignees_by_id[assignee_id] %>
+              <%= avatar_preview_tag(assignee, class: "work-plan__avatar") %>
+            <% end %>
+            <strong class="work-plan__person-name"><%= user.name %></strong>
             <span class="txt-small txt-subtle"><%= pluralize(units.size, "card") %></span>
           </header>
 
