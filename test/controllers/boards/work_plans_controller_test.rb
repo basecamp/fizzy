@@ -46,6 +46,42 @@ class Boards::WorkPlansControllerTest < ActionDispatch::IntegrationTest
     assert_equal 1, Board::WorkPlan::Proposal.where(board: @board).count
   end
 
+  test "each page shows only its cards while approval assigns the whole proposal" do
+    cards = [ @card ] + 15.times.map do |number|
+      with_current_user(:kevin) do
+        @board.cards.create!(title: "Planned card #{number}", column: @card.column, status: :published)
+      end
+    end
+    request = Board::WorkPlan::BuildRequest.new(board: @board).call
+    result = Board::WorkPlan::Solve::Result.new(
+      status: "feasible", score: "0hard/0medium/0soft", elapsed_ms: 1,
+      proposed_assignments: cards.map { |card| { card_id: card.id, assignee_id: users(:kevin).id } }
+    )
+    proposal = Board::WorkPlan::Proposal.issue(board: @board, request: request, result: result, user: users(:kevin))
+
+    get board_work_plan_path(@board), headers: turbo_frame_headers
+
+    assert_response :success
+    assert_select ".work-plan__summary", /16 cards for 1 person/
+    assert_select ".work-plan__card", count: 15
+    assert_select ".work-plan__person-heading", /16 cards/
+    assert_select "a[href=?]", board_work_plan_path(@board, page: 2), count: 1
+    first_page = css_select(".work-plan__title").map(&:text)
+
+    get board_work_plan_path(@board, page: 2), headers: { "Turbo-Frame" => "work_plan-pagination-contents-2" }
+
+    assert_response :success
+    assert_select "turbo-frame#work_plan-pagination-contents-2 .work-plan__card", count: 1
+    assert_select ".work-plan__person-heading", /continued.*16 cards/m
+    assert_equal cards.map(&:title).sort, (first_page + css_select(".work-plan__title").map(&:text)).sort
+
+    post board_work_plan_approval_path(@board), params: { proposal_id: proposal.id }
+
+    assert_redirected_to @board
+    assert_equal 0, @board.cards.triaged.unassigned.count
+    assert cards.all? { |card| card.reload.assigned_to?(users(:kevin)) }
+  end
+
   test "approval of a stale proposal writes nothing" do
     get board_work_plan_path(@board), headers: turbo_frame_headers
     proposal_id = css_select("input[name=proposal_id]").first["value"]

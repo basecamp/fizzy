@@ -13,6 +13,16 @@ class Boards::WorkPlansController < ApplicationController
     def render_proposal
       @proposal = Board::WorkPlan::Proposal.current_for(@board) || plan_work
 
+      if @proposal
+        set_page_and_extract_portion_from @proposal.assignments
+        @assignee_card_counts = @proposal.assignments.group(:assignee_id).count
+
+        if @page.number > 1 && (first = @page.records.first)
+          @continuing_assignee_id = first.assignee_id if @proposal.assignments.where(assignee_id: first.assignee_id)
+            .where("position < ?", first.position).exists?
+        end
+      end
+
       render partial: "proposal"
     end
 

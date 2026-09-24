@@ -4,35 +4,37 @@
       <p class="txt-negative"><%= @preview_error %></p>
       <%= link_to "Try again", board_work_plan_path(@board), data: { turbo_frame: dom_id(@board, :work_plan) }, class: "btn" %>
     </div>
-  <% elsif @proposal&.assignments&.any? %>
-    <% grouped = @proposal.assignments.group_by(&:assignee) %>
-
+  <% elsif @page&.used? %>
     <p class="work-plan__summary txt-small txt-subtle">
-      <%= pluralize(@proposal.assignments.size, "card") %> for <%= pluralize(grouped.size, "person") %>
+      <%= pluralize(@proposal.assignments.count, "card") %> for <%= pluralize(@assignee_card_counts.size, "person") %>
     </p>
 
     <div class="work-plan__people">
-      <% grouped.sort_by { |assignee, _| assignee.name }.each do |assignee, assignments| %>
-        <section class="work-plan__person" aria-label="Cards for <%= assignee.name %>">
-          <header class="work-plan__person-heading">
-            <%= avatar_preview_tag(assignee, class: "work-plan__avatar") %>
-            <strong class="work-plan__person-name"><%= assignee.name %></strong>
-            <span class="txt-small txt-subtle"><%= pluralize(assignments.size, "card") %></span>
-          </header>
+      <%= with_automatic_pagination :work_plan, @page do %>
+        <% @page.records.group_by(&:assignee).sort_by { |assignee, _| assignee.name }.each do |assignee, assignments| %>
+          <section class="work-plan__person" aria-label="Cards for <%= assignee.name %>">
+            <header class="work-plan__person-heading">
+              <%= avatar_preview_tag(assignee, class: "work-plan__avatar") %>
+              <strong class="work-plan__person-name">
+                <%= assignee.name %><% if assignee.id == @continuing_assignee_id %> <span class="txt-small txt-subtle">(continued)</span><% end %>
+              </strong>
+              <span class="txt-small txt-subtle"><%= pluralize(@assignee_card_counts.fetch(assignee.id), "card") %></span>
+            </header>
 
-          <ul class="work-plan__cards">
-            <% assignments.each do |assignment| %>
-              <% card = assignment.card %>
-              <li class="work-plan__card">
-                <span class="work-plan__number">#<%= card.number %></span>
-                <span class="work-plan__title"><%= card.title.presence || "Untitled" %></span>
-                <% if badges = urgency_badges(card).presence %>
-                  <span class="work-plan__badges"><%= badges %></span>
-                <% end %>
-              </li>
-            <% end %>
-          </ul>
-        </section>
+            <ul class="work-plan__cards">
+              <% assignments.each do |assignment| %>
+                <% card = assignment.card %>
+                <li class="work-plan__card">
+                  <span class="work-plan__number">#<%= card.number %></span>
+                  <span class="work-plan__title"><%= card.title.presence || "Untitled" %></span>
+                  <% if badges = urgency_badges(card).presence %>
+                    <span class="work-plan__badges"><%= badges %></span>
+                  <% end %>
+                </li>
+              <% end %>
+            </ul>
+          </section>
+        <% end %>
       <% end %>
     </div>
 
