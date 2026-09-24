@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+MANIFEST_PATH="$ROOT/tools/solverforge-board-planner/Cargo.toml"
+LOCKFILE_PATH="$ROOT/tools/solverforge-board-planner/Cargo.lock"
+TARGET_DIR="$ROOT/tmp/solverforge-board-planner-target"
+BINARY_PATH="$TARGET_DIR/release/solverforge-board-planner"
+
+needs_build() {
+  [ ! -x "$BINARY_PATH" ] && return 0
+  [ "$MANIFEST_PATH" -nt "$BINARY_PATH" ] && return 0
+  [ -f "$LOCKFILE_PATH" ] && [ "$LOCKFILE_PATH" -nt "$BINARY_PATH" ] && return 0
+  find "$ROOT/tools/solverforge-board-planner/src" -type f -newer "$BINARY_PATH" | grep -q .
+}
+
+if needs_build; then
+  cargo build --quiet --manifest-path "$MANIFEST_PATH" --release --target-dir "$TARGET_DIR"
+fi
+
+exec "$BINARY_PATH" "$@"
