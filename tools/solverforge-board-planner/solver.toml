@@ -12,8 +12,9 @@ construction_obligation = "assign_when_candidate_exists"
 type = "local_search"
 
 # Stop once the score stops improving so small boards return in a couple of
-# seconds instead of spending the whole budget. This must live on the phase:
-# a phase termination replaces the top-level one while the phase runs.
+# seconds instead of spending the whole budget. The phase overlay is additive:
+# the solver-wide budget from the solution's config hook keeps running inside
+# the phase, so both the unimproved limit and the board budget hold.
 [phases.termination]
 unimproved_seconds_spent_limit = 2
 
