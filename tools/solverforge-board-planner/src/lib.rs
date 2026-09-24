@@ -1,6 +1,7 @@
 pub mod constraints;
 pub mod domain;
 pub mod io;
+mod model;
 
 use std::error::Error;
 use std::io::{Read, Write};
@@ -20,7 +21,7 @@ where
     match command.as_ref() {
         "solve" => {
             let request = io::read_request(reader)?;
-            let response = constraints::solve_request(&request);
+            let response = constraints::solve_request(&request)?;
             io::write_response(writer, &response)?;
             Ok(())
         }

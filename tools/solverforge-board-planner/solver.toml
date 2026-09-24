@@ -1,0 +1,24 @@
+[termination]
+seconds_spent_limit = 90
+
+[[phases]]
+type = "construction_heuristic"
+construction_heuristic_type = "cheapest_insertion"
+construction_obligation = "assign_when_candidate_exists"
+
+[[phases]]
+type = "local_search"
+
+[phases.move_selector]
+type = "union_move_selector"
+selection_order = "round_robin"
+
+[[phases.move_selector.selectors]]
+type = "change_move_selector"
+entity_class = "Task"
+variable_name = "person_idx"
+
+[[phases.move_selector.selectors]]
+type = "swap_move_selector"
+entity_class = "Task"
+variable_name = "person_idx"
