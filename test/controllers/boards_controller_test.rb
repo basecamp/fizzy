@@ -51,12 +51,25 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "edit shows access toggles for all active account users" do
+    board = boards(:writebook)
+
+    get edit_board_path(board)
+
+    assert_response :success
+    assert_select "input.switch__input[name='user_ids[]']", count: board.account.users.active.count
+    board.account.users.active.each do |user|
+      assert_select "input.switch__input[name='user_ids[]'][value='#{user.id}']"
+    end
+  end
+
   test "update" do
     patch board_path(boards(:writebook)), params: {
       board: {
         name: "Writebook bugs",
         all_access: false,
-        auto_postpone_period_in_days: 7
+        auto_postpone_period_in_days: 7,
+        work_planning_time_limit_in_seconds: 60
       },
       user_ids: users(:kevin, :jz).pluck(:id)
     }
@@ -65,6 +78,7 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Writebook bugs", boards(:writebook).reload.name
     assert_equal users(:kevin, :jz).sort, boards(:writebook).users.sort
     assert_equal 7.days, entropies(:writebook_board).auto_postpone_period
+    assert_equal 60, boards(:writebook).work_planning_time_limit_in_seconds
     assert_not boards(:writebook).all_access?
   end
 
