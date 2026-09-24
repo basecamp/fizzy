@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_09_24_120000) do
+ActiveRecord::Schema[8.2].define(version: 2026_09_24_120001) do
   create_table "accesses", id: :uuid, force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -186,6 +186,7 @@ ActiveRecord::Schema[8.2].define(version: 2026_09_24_120000) do
     t.datetime "board_updated_at", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.json "excluded_user_ids", null: false
     t.index ["board_id", "created_at"], name: "index_board_work_plan_proposals_on_board_id_and_created_at"
   end
 

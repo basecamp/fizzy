@@ -33,8 +33,9 @@ module Board::WorkPlan
       end
     end
 
-    def initialize(board:)
+    def initialize(board:, excluded_user_ids: [])
       @board = board
+      @excluded_user_ids = excluded_user_ids
     end
 
     def call
@@ -49,10 +50,10 @@ module Board::WorkPlan
     end
 
     private
-      attr_reader :board
+      attr_reader :board, :excluded_user_ids
 
       def users
-        @users ||= board.users.active.alphabetically.map do |user|
+        @users ||= board.users.active.where.not(id: excluded_user_ids).alphabetically.map do |user|
           PlannerUser.new(id: user.id.to_s, name: user.name)
         end
       end

@@ -67,6 +67,20 @@ class Board::WorkPlan::ApplyTest < ActiveSupport::TestCase
     assert_not @card.reload.assigned?
   end
 
+  test "an excluded board member cannot appear in the solver proposal" do
+    @board.accesses.create!(user: users(:david))
+    request = Board::WorkPlan::BuildRequest.new(board: @board, excluded_user_ids: [ users(:david).id ]).call
+    result = Board::WorkPlan::Solve::Result.new(
+      status: "feasible", score: "0hard/0medium/0soft", elapsed_ms: 1,
+      proposed_assignments: [ { card_id: @card.id, assignee_id: users(:david).id } ]
+    )
+
+    assert_raises(Board::WorkPlan::Proposal::Invalid) do
+      Board::WorkPlan::Proposal.issue(board: @board, request: request, result: result, user: users(:kevin))
+    end
+    assert_not @card.reload.assigned?
+  end
+
   test "issuing a new proposal discards the board's previous one" do
     build_proposal
     build_proposal

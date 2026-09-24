@@ -26,6 +26,29 @@ class Board::WorkPlan::BuildRequestTest < ActiveSupport::TestCase
     assert_not_includes result.candidate_card_ids, ineligible_draft.id.to_s
   end
 
+  test "Not Now cards are neither candidates nor pinned workload" do
+    candidate = create_card(title: "Ready to assign")
+    postponed = create_card(title: "Not Now")
+    postponed.assign_to(users(:kevin), assigner: users(:david))
+    with_current_user(:kevin) { postponed.postpone }
+
+    result = Board::WorkPlan::BuildRequest.new(board: @board).call
+
+    assert_includes result.candidate_card_ids, candidate.id.to_s
+    assert_not_includes result.candidate_card_ids, postponed.id.to_s
+    assert_not_includes result.work_units.map(&:card_id), postponed.id.to_s
+  end
+
+  test "excluded board members are absent from the solver request and its pinned workload" do
+    pinned = create_card(title: "Already owned")
+    pinned.assign_to(users(:kevin), assigner: users(:david))
+
+    result = Board::WorkPlan::BuildRequest.new(board: @board, excluded_user_ids: [ users(:kevin).id ]).call
+
+    assert_not_includes result.users.map(&:id), users(:kevin).id
+    assert_empty result.pinned_work_units_for(users(:kevin).id)
+  end
+
   test "build_request computes urgency weights with configured bonuses" do
     travel_to Time.zone.local(2026, 3, 26, 10, 0, 0) do
       overdue = create_card(

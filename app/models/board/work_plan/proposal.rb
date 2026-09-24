@@ -14,6 +14,21 @@ module Board::WorkPlan
     scope :recent_first, -> { order(created_at: :desc) }
 
     class << self
+      def plan(board:, user_ids:, user: Current.user)
+        board_user_ids = board.users.active.ids.map(&:to_s)
+
+        raise Invalid, "Choose at least one person for this plan" if user_ids.empty?
+        raise Invalid, "Board members changed; choose people again" if (user_ids - board_user_ids).any?
+
+        request = BuildRequest.new(board: board, excluded_user_ids: board_user_ids - user_ids).call
+        raise Invalid, "No eligible cards to plan" if request.candidate_work_units.empty?
+
+        result = Solve.new(request: request).call
+        raise Invalid, "No feasible plan was found" unless result.feasible?
+
+        issue(board: board, request: request, result: result, user: user)
+      end
+
       def current_for(board)
         proposal = where(board: board).recent_first.first
         proposal if proposal&.current?
@@ -29,7 +44,8 @@ module Board::WorkPlan
 
         transaction do
           discard_proposals_for(board)
-          proposal = create!(board: board, creator: user, board_updated_at: board.updated_at)
+          proposal = create!(board: board, creator: user, board_updated_at: board.updated_at,
+            excluded_user_ids: board.users.active.ids.map(&:to_s) - request.users.map(&:id))
           proposal.assignments.insert_all(
             assignments.each_with_index.map do |assignment, position|
               {
