@@ -7,6 +7,10 @@
 
 # For a containerized dev environment, see Dev Containers: https://guides.rubyonrails.org/getting_started_with_devcontainer.html
 
+# Make sure RUBY_VERSION matches the Ruby version in .ruby-version.
+# Declared before the first stage: ARGs between stages are stage-scoped.
+ARG RUBY_VERSION=3.4.8
+
 # Build the native board planner in a matching Rust toolchain, then ship the
 # artifact into the runtime image instead of compiling it at boot.
 FROM docker.io/library/rust:1.98-slim-bookworm AS planner-build
@@ -14,8 +18,6 @@ WORKDIR /planner
 COPY tools/solverforge-board-planner ./
 RUN cargo build --locked --release
 
-# Make sure RUBY_VERSION matches the Ruby version in .ruby-version
-ARG RUBY_VERSION=3.4.8
 FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
 
 # Rails app lives here
