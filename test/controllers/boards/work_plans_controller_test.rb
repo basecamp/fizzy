@@ -13,7 +13,8 @@ class Boards::WorkPlansControllerTest < ActionDispatch::IntegrationTest
     get board_work_plan_path(@board)
 
     assert_response :success
-    assert_select "p", /score 0hard\//
+    assert_select ".work-plan__summary", /1 card for 1 person/
+    assert_select ".work-plan__card", text: /Work to plan/
     assert_select "input[name=proposal_token]", count: 1
     assert_not @card.reload.assigned?
 

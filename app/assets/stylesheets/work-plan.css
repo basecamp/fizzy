@@ -1,13 +1,18 @@
 @layer components {
   .work-plan {
     --panel-size: min(64ch, 100%);
+  }
 
-    max-block-size: min(85dvh, 48rem);
-    overflow: auto;
+  .work-plan[open] {
+    display: flex;
+    flex-direction: column;
+    max-block-size: min(72dvh, 40rem);
+    overflow: hidden;
   }
 
   .work-plan__heading {
     border-block-end: var(--border);
+    flex: none;
     margin-block-end: var(--block-space);
     padding-block-end: var(--block-space);
 
@@ -15,29 +20,40 @@
     p { margin-block: var(--block-space-half) 0; }
   }
 
+  /* The result frame owns the scrollable region so the action stays pinned. */
+  .work-plan > turbo-frame {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-block-size: 0;
+  }
+
   .work-plan__loading,
   .work-plan__empty {
+    flex: 1 1 auto;
     padding-block: var(--block-space-double);
     text-align: center;
   }
 
   .work-plan__summary {
-    align-items: baseline;
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--inline-space);
+    flex: none;
     margin-block-end: var(--block-space);
   }
 
   .work-plan__people {
-    display: grid;
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
     gap: var(--block-space);
+    min-block-size: 0;
+    overflow-y: auto;
   }
 
   .work-plan__person {
     background: var(--color-ink-lightest);
     border: var(--border);
     border-radius: 0.75rem;
+    flex: none;
     overflow: hidden;
   }
 
@@ -66,15 +82,9 @@
   .work-plan__badges { color: var(--color-ink-dark); font-size: var(--text-x-small); }
 
   .work-plan__footer {
-    align-items: center;
     border-block-start: var(--border);
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--block-space-half) var(--inline-space-double);
-    justify-content: space-between;
+    flex: none;
     margin-block-start: var(--block-space);
     padding-block-start: var(--block-space);
-
-    p { margin: 0; }
   }
 }
