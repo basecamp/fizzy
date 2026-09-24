@@ -1,9 +1,9 @@
 <header class="work-plan__heading flex align-start justify-space-between gap">
   <div>
-    <h2>Plan work</h2>
-    <p class="txt-small txt-subtle">Balance the unassigned cards. Nothing changes until you approve.</p>
+    <h2>Assign work</h2>
+    <p class="txt-small txt-subtle">Assign the board’s unassigned cards. Nothing changes until you approve.</p>
   </div>
-  <button type="button" class="btn btn--plain txt-small" data-action="dialog#close" aria-label="Close work plan">Close</button>
+  <button type="button" class="btn btn--plain txt-small" data-action="dialog#close" aria-label="Close">Close</button>
 </header>
 
 <%= turbo_frame_tag(dom_id(board, :work_plan), src: board_work_plan_path(board), loading: "lazy", data: {

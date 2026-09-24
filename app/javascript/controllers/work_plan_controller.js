@@ -25,7 +25,7 @@ export default class extends Controller {
   updateTimer() {
     if (this.hasTimerTarget) {
       const seconds = Math.floor((performance.now() - this.#startedAt) / 1000)
-      this.timerTarget.textContent = `Planning… ${seconds}s of up to ${this.timeLimitValue}s`
+      this.timerTarget.textContent = `Assigning… ${seconds}s of up to ${this.timeLimitValue}s`
     }
   }
 }
