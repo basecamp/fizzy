@@ -14,7 +14,7 @@ class Board < ApplicationRecord
   has_many :tags, -> { distinct }, through: :cards
   has_many :events
   has_many :webhooks, dependent: :destroy
-  has_many :work_plan_proposals, class_name: "Board::WorkPlan::Proposal", dependent: :delete_all
+  has_many :work_plan_proposals, class_name: "Board::WorkPlan::Proposal", dependent: :destroy
 
   validates :work_planning_time_limit_in_seconds, inclusion: { in: WORK_PLANNING_TIME_LIMIT_OPTIONS_IN_SECONDS }
 
