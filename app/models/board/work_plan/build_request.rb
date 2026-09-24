@@ -1,6 +1,4 @@
 module Board::WorkPlan
-  require_relative "domain"
-
   class BuildRequest
     Request = Struct.new(:board_id, :time_limit_seconds, :users, :work_units, :candidate_work_units, :pinned_work_units, keyword_init: true) do
       def to_h
