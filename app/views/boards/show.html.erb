@@ -8,12 +8,7 @@
   <div class="header__actions header__actions--start hide-on-native">
     <%= link_to_webhooks(@board) if Current.user.admin? %>
     <% if Current.user.can_administer_board?(@board) %>
-      <div data-controller="dialog" data-action="keydown.esc@window->dialog#close">
-        <%= button_to_work_plan(@board) %>
-        <dialog class="dialog panel panel--wide shadow work-plan" data-dialog-target="dialog" aria-label="Assign work">
-          <%= render "boards/work_plans/dialog", board: @board %>
-        </dialog>
-      </div>
+      <%= link_to_work_plan(@board) %>
     <% end %>
   </div>
 

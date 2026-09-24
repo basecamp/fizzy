@@ -1,8 +1,8 @@
 module Boards::WorkPlansHelper
-  def button_to_work_plan(board)
-    tag.button type: "button", class: "btn btn--circle-mobile",
-      data: { controller: "tooltip", action: "click->dialog#open", dialog_target: "focusMouse",
-        bridge__overflow_menu_target: "item", bridge_title: "Assign work" } do
+  def link_to_work_plan(board)
+    link_to board_work_plan_path(board_id: board),
+        class: "btn btn--circle-mobile",
+        data: { controller: "tooltip", bridge__overflow_menu_target: "item", bridge_title: "Assign work" } do
       icon_tag("everyone") + tag.span("Assign work", class: "for-screen-reader")
     end
   end

@@ -1,48 +1,17 @@
-<%= turbo_frame_tag dom_id(@board, :work_plan) do %>
-  <% if @preview_error %>
-    <div class="work-plan__empty">
-      <p class="txt-negative"><%= @preview_error %></p>
-      <%= link_to "Try again", board_work_plan_path(@board), data: { turbo_frame: dom_id(@board, :work_plan) }, class: "btn" %>
-    </div>
-  <% elsif @proposal&.assignments&.any? %>
-    <% grouped = @proposal.assignments.group_by(&:assignee) %>
+<% @page_title = "Assign work" %>
 
-    <p class="work-plan__summary txt-small txt-subtle">
-      <%= pluralize(@proposal.assignments.size, "card") %> for <%= pluralize(grouped.size, "person") %>
-    </p>
+<% content_for :header do %>
+  <div class="header__actions header__actions--start">
+    <%= link_back_to_board(@board) %>
+  </div>
 
-    <div class="work-plan__people">
-      <% grouped.sort_by { |assignee, _| assignee.name }.each do |assignee, assignments| %>
-        <section class="work-plan__person" aria-label="Cards for <%= assignee.name %>">
-          <header class="work-plan__person-heading">
-            <%= avatar_preview_tag(assignee, class: "work-plan__avatar") %>
-            <strong class="work-plan__person-name"><%= assignee.name %></strong>
-            <span class="txt-small txt-subtle"><%= pluralize(assignments.size, "card") %></span>
-          </header>
+  <h1 class="header__title" data-bridge--title-target="header"><%= @page_title %></h1>
+<% end %>
 
-          <ul class="work-plan__cards">
-            <% assignments.each do |assignment| %>
-              <% card = assignment.card %>
-              <li class="work-plan__card">
-                <span class="work-plan__number">#<%= card.number %></span>
-                <span class="work-plan__title"><%= card.title.presence || "Untitled" %></span>
-                <% if badges = urgency_badges(card).presence %>
-                  <span class="work-plan__badges"><%= badges %></span>
-                <% end %>
-              </li>
-            <% end %>
-          </ul>
-        </section>
-      <% end %>
-    </div>
+<%= tag.section class: "panel panel--wide shadow center work-plan" do %>
+  <p class="work-plan__intro txt-subtle">Assign the board’s unassigned cards. Nothing changes until you approve.</p>
 
-    <div class="work-plan__footer">
-      <%= form_with url: board_work_plan_approval_path(@board), data: { turbo_frame: "_top" }, method: :post do |form| %>
-        <%= hidden_field_tag :proposal_id, @proposal.id %>
-        <%= form.submit "Approve and assign", class: "btn btn--link full-width" %>
-      <% end %>
-    </div>
-  <% else %>
-    <p class="work-plan__empty txt-subtle">No cards to assign right now.</p>
+  <%= turbo_frame_tag dom_id(@board, :work_plan), src: board_work_plan_path(@board) do %>
+    <%= render "boards/work_plans/loading", board: @board %>
   <% end %>
 <% end %>

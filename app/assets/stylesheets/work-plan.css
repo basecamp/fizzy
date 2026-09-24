@@ -1,55 +1,19 @@
 @layer components {
-  .work-plan {
-    --panel-size: min(64ch, 100%);
-  }
-
-  .work-plan[open] {
-    display: flex;
-    flex-direction: column;
-    max-block-size: min(72dvh, 40rem);
-    overflow: hidden;
-  }
-
-  .work-plan__heading {
-    border-block-end: var(--border);
-    flex: none;
-    margin-block-end: var(--block-space);
-    padding-block-end: var(--block-space);
-
-    h2 { font-size: var(--text-large); margin: 0; }
-    p { margin-block: var(--block-space-half) 0; }
-  }
-
-  /* The result frame owns the scrollable region so the action stays pinned. */
-  .work-plan > turbo-frame {
-    display: flex;
-    flex: 1 1 auto;
-    flex-direction: column;
-    min-block-size: 0;
-  }
+  .work-plan__intro { margin-block-end: var(--block-space); }
 
   .work-plan__loading,
   .work-plan__empty {
-    flex: 1 1 auto;
     padding-block: var(--block-space-double);
     text-align: center;
   }
 
-  .work-plan__summary {
-    flex: none;
-    margin-block-end: var(--block-space);
-  }
+  .work-plan__summary { margin-block-end: var(--block-space); }
 
   .work-plan__people {
     display: flex;
-    flex: 1 1 auto;
     flex-direction: column;
     gap: var(--block-space-double);
-    min-block-size: 0;
-    overflow-y: auto;
   }
-
-  .work-plan__person { flex: none; }
 
   .work-plan__person-heading {
     align-items: center;
@@ -77,7 +41,6 @@
 
   .work-plan__footer {
     border-block-start: var(--border);
-    flex: none;
     margin-block-start: var(--block-space);
     padding-block-start: var(--block-space);
   }

@@ -4,12 +4,18 @@ class Boards::WorkPlansController < ApplicationController
   before_action :ensure_permission_to_admin_board
 
   def show
-    @proposal = Board::WorkPlan::Proposal.current_for(@board) || plan_work
+    return render_proposal if turbo_frame_request?
 
-    render :show, status: :unprocessable_entity unless @proposal
+    render :show
   end
 
   private
+    def render_proposal
+      @proposal = Board::WorkPlan::Proposal.current_for(@board) || plan_work
+
+      render partial: "proposal"
+    end
+
     def plan_work
       request_payload = Board::WorkPlan::BuildRequest.new(board: @board).call
 

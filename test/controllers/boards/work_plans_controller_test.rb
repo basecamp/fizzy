@@ -9,8 +9,18 @@ class Boards::WorkPlansControllerTest < ActionDispatch::IntegrationTest
     @board.update!(work_planning_time_limit_in_seconds: 5)
   end
 
-  test "preview uses the real solver without assigning a card until approved" do
+  test "the page loads instantly and plans within its frame" do
     get board_work_plan_path(@board)
+
+    assert_response :success
+    assert_select ".work-plan__intro"
+    assert_select "turbo-frame[src=?]", board_work_plan_path(@board)
+    assert_select ".work-plan__summary", count: 0
+    assert_not @card.reload.assigned?
+  end
+
+  test "preview uses the real solver without assigning a card until approved" do
+    get board_work_plan_path(@board), headers: turbo_frame_headers
 
     assert_response :success
     assert_select ".work-plan__summary", /1 card for 1 person/
@@ -26,10 +36,10 @@ class Boards::WorkPlansControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "a second preview reuses the plan instead of solving again" do
-    get board_work_plan_path(@board)
+    get board_work_plan_path(@board), headers: turbo_frame_headers
     proposal_id = css_select("input[name=proposal_id]").first["value"]
 
-    get board_work_plan_path(@board)
+    get board_work_plan_path(@board), headers: turbo_frame_headers
 
     assert_response :success
     assert_equal proposal_id, css_select("input[name=proposal_id]").first["value"]
@@ -37,7 +47,7 @@ class Boards::WorkPlansControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "approval of a stale proposal writes nothing" do
-    get board_work_plan_path(@board)
+    get board_work_plan_path(@board), headers: turbo_frame_headers
     proposal_id = css_select("input[name=proposal_id]").first["value"]
     @card.update!(title: "Changed since planning")
 
@@ -48,7 +58,7 @@ class Boards::WorkPlansControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "another user cannot approve a proposal for a board they cannot access" do
-    get board_work_plan_path(@board)
+    get board_work_plan_path(@board), headers: turbo_frame_headers
     proposal_id = css_select("input[name=proposal_id]").first["value"]
     logout_and_sign_in_as :jz
 
@@ -68,4 +78,9 @@ class Boards::WorkPlansControllerTest < ActionDispatch::IntegrationTest
     post board_work_plan_approval_path(board), params: { proposal_id: "whatever" }
     assert_response :forbidden
   end
+
+  private
+    def turbo_frame_headers
+      { "Turbo-Frame" => dom_id(@board, :work_plan) }
+    end
 end
