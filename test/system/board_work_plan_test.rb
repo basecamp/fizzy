@@ -29,4 +29,31 @@ class BoardWorkPlanTest < ApplicationSystemTestCase
     assert_text "Work plan applied"
     assert @card.reload.assigned_to?(users(:kevin))
   end
+
+  test "a board with 200 members has a bounded searchable chooser" do
+    now = Time.current
+    extra_users = Array.new(200 - @board.users.active.count) do |number|
+      { id: ActiveRecord::Type::Uuid.generate, account_id: @board.account_id,
+        name: "Planner member #{number}", role: "member", created_at: now, updated_at: now }
+    end
+    User.insert_all!(extra_users)
+    Access.insert_all!(extra_users.map do |user|
+      { id: ActiveRecord::Type::Uuid.generate, account_id: @board.account_id,
+        board_id: @board.id, user_id: user.fetch(:id), created_at: now, updated_at: now }
+    end)
+
+    sign_in_as users(:kevin)
+    visit board_path(@board)
+    click_on "Assign work"
+    assert_selector ".work-plan__team"
+
+    assert_equal 200, page.evaluate_script("document.querySelectorAll('.work-plan__members li').length")
+    assert_operator page.evaluate_script("document.querySelector('.work-plan__members').scrollHeight"), :>,
+      page.evaluate_script("document.querySelector('.work-plan__members').clientHeight")
+
+    fill_in "Filter…", with: extra_users.last.fetch(:name)
+
+    assert_selector ".work-plan__members li:not([hidden])", count: 1, text: extra_users.last.fetch(:name)
+    assert_equal "post", page.evaluate_script("document.querySelector('.work-plan__team').method")
+  end
 end
