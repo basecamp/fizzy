@@ -35,6 +35,7 @@ Rails.application.routes.draw do
       resource :publication
       resource :entropy
       resource :work_plan, only: :show do
+        resource :proposal, only: :create, module: :work_plans
         resource :approval, only: :create, module: :work_plans
       end
 

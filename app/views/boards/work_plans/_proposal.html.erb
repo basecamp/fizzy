@@ -2,7 +2,7 @@
   <% if @preview_error %>
     <div class="work-plan__empty">
       <p class="txt-negative"><%= @preview_error %></p>
-      <%= link_to "Try again", board_work_plan_path(@board), data: { turbo_frame: dom_id(@board, :work_plan) }, class: "btn" %>
+      <p class="txt-small txt-subtle">Adjust the people above and review another plan.</p>
     </div>
   <% elsif @page&.used? %>
     <p class="work-plan__summary txt-small txt-subtle">
@@ -39,11 +39,12 @@
     </div>
 
     <div class="work-plan__footer">
+      <p class="txt-small txt-subtle">Nothing changes until you approve.</p>
       <%= button_to "Approve and assign", board_work_plan_approval_path(@board),
             params: { proposal_id: @proposal.id }, class: "btn btn--link full-width",
             data: { turbo_frame: "_top" } %>
     </div>
   <% else %>
-    <p class="work-plan__empty txt-subtle">No cards to assign right now.</p>
+    <p class="work-plan__empty txt-subtle">Choose who’s on this plan, then review it here.</p>
   <% end %>
 <% end %>

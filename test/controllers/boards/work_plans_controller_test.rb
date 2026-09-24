@@ -13,14 +13,17 @@ class Boards::WorkPlansControllerTest < ActionDispatch::IntegrationTest
     get board_work_plan_path(@board)
 
     assert_response :success
-    assert_select ".work-plan__intro"
-    assert_select "turbo-frame[src=?]", board_work_plan_path(@board)
+    assert_select "fieldset legend", /Who should get work/
+    assert_select "form[action=?]", board_work_plan_proposal_path(@board)
+    assert_select "input[type=submit][value='Review plan']"
+    assert_select "input[name='user_ids[]'][value=?][checked]", users(:kevin).id
+    assert_select "turbo-frame##{dom_id(@board, :work_plan)}[src]", count: 0
     assert_select ".work-plan__summary", count: 0
     assert_not @card.reload.assigned?
   end
 
   test "preview uses the real solver without assigning a card until approved" do
-    get board_work_plan_path(@board), headers: turbo_frame_headers
+    review_plan
 
     assert_response :success
     assert_select ".work-plan__summary", /1 card for 1 person/
@@ -36,7 +39,7 @@ class Boards::WorkPlansControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "a second preview reuses the plan instead of solving again" do
-    get board_work_plan_path(@board), headers: turbo_frame_headers
+    review_plan
     proposal_id = css_select("input[name=proposal_id]").first["value"]
 
     get board_work_plan_path(@board), headers: turbo_frame_headers
@@ -44,6 +47,43 @@ class Boards::WorkPlansControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_equal proposal_id, css_select("input[name=proposal_id]").first["value"]
     assert_equal 1, Board::WorkPlan::Proposal.where(board: @board).count
+  end
+
+  test "an admin can leave out a board member without changing board access" do
+    @board.accesses.create!(user: users(:david))
+    @board.reload
+
+    review_plan(user_ids: [ users(:kevin).id ])
+
+    assert_response :success
+    proposal = Board::WorkPlan::Proposal.find(css_select("input[name=proposal_id]").first["value"])
+    assert_equal [ users(:david).id ], proposal.excluded_user_ids
+    assert_equal [ users(:kevin).id ], proposal.assignments.pluck(:assignee_id).uniq
+    assert @board.accessible_to?(users(:david))
+
+    get board_work_plan_path(@board)
+
+    assert_response :success
+    assert_select "input[name='user_ids[]'][value=?][checked]", users(:kevin).id
+    assert_select "input[name='user_ids[]'][value=?][checked]", users(:david).id, count: 0
+    assert_select "turbo-frame[src=?]", board_work_plan_path(@board)
+  end
+
+  test "only board members can be excluded from a plan" do
+    review_plan(user_ids: [ users(:kevin).id, users(:jz).id ])
+
+    assert_response :success
+    assert_select ".work-plan__empty", /Board members changed/
+    assert_equal 0, Board::WorkPlan::Proposal.where(board: @board).count
+    assert_not @card.reload.assigned?
+  end
+
+  test "a plan needs at least one eligible person" do
+    review_plan(user_ids: [ "" ])
+
+    assert_response :success
+    assert_select ".work-plan__empty", /Choose at least one person/
+    assert_equal 0, Board::WorkPlan::Proposal.where(board: @board).count
   end
 
   test "each page shows only its cards while approval assigns the whole proposal" do
@@ -83,7 +123,7 @@ class Boards::WorkPlansControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "approval of a stale proposal writes nothing" do
-    get board_work_plan_path(@board), headers: turbo_frame_headers
+    review_plan
     proposal_id = css_select("input[name=proposal_id]").first["value"]
     @card.update!(title: "Changed since planning")
 
@@ -94,7 +134,7 @@ class Boards::WorkPlansControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "another user cannot approve a proposal for a board they cannot access" do
-    get board_work_plan_path(@board), headers: turbo_frame_headers
+    review_plan
     proposal_id = css_select("input[name=proposal_id]").first["value"]
     logout_and_sign_in_as :jz
 
@@ -111,11 +151,20 @@ class Boards::WorkPlansControllerTest < ActionDispatch::IntegrationTest
     get board_work_plan_path(board)
     assert_response :forbidden
 
+    post board_work_plan_proposal_path(board), params: { user_ids: [ users(:jz).id ] }
+    assert_response :forbidden
+
     post board_work_plan_approval_path(board), params: { proposal_id: "whatever" }
     assert_response :forbidden
   end
 
   private
+    def review_plan(user_ids: [ users(:kevin).id ])
+      post board_work_plan_proposal_path(@board), params: { user_ids: user_ids }, headers: turbo_frame_headers
+      assert_redirected_to board_work_plan_path(@board)
+      get board_work_plan_path(@board), headers: turbo_frame_headers
+    end
+
     def turbo_frame_headers
       { "Turbo-Frame" => dom_id(@board, :work_plan) }
     end

@@ -15,15 +15,18 @@ class BoardWorkPlanTest < ApplicationSystemTestCase
     visit board_path(@board)
 
     click_on "Assign work"
+    @board.users.active.where.not(id: users(:kevin).id).each { |user| uncheck user.name }
+    click_on "Review plan"
 
     # The solver runs while the frame loads, so wait past the default timeout.
     assert_selector ".work-plan__summary", wait: 15
     assert_selector ".work-plan__person-name"
     assert_text "Plan this card"
+    assert_selector ".work-plan__person-name", text: users(:kevin).name
 
     click_on "Approve and assign"
 
     assert_text "Work plan applied"
-    assert @card.reload.assigned?
+    assert @card.reload.assigned_to?(users(:kevin))
   end
 end
