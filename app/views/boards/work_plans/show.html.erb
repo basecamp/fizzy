@@ -14,7 +14,7 @@
     <fieldset>
       <legend class="divider txt-medium">Who should get work?</legend>
       <p class="txt-small txt-subtle">Everyone on this board starts selected. Uncheck anyone to leave out.</p>
-      <%= search_field_tag nil, nil, placeholder: "Filter…", class: "input full-width txt-small",
+      <%= search_field_tag nil, nil, placeholder: "Filter…", "aria-label": "Filter people by name", class: "input full-width txt-small",
             data: { filter_target: "input", action: "input->filter#filter" } %>
       <div class="flex align-center justify-end gap-half">
         <%= button_tag "Select all", type: "button", class: "btn btn--plain txt-x-small txt-link font-weight-normal", data: { action: "click->toggle-class#checkAll" } %>
@@ -39,7 +39,7 @@
 
   <%= turbo_frame_tag dom_id(@board, :work_plan), src: (board_work_plan_path(@board) if @proposal) do %>
     <% if @proposal %>
-      <%= render "boards/work_plans/loading", board: @board %>
+      <%= render "boards/work_plans/loading" %>
     <% else %>
       <p class="work-plan__empty txt-subtle">Choose who’s on this plan, then review it here.</p>
     <% end %>
