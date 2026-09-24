@@ -15,6 +15,16 @@
 
   <div class="header__actions header__actions--end hide-on-native">
     <%= link_to_edit_board @board %>
+    <% if Current.user.can_administer_board?(@board) %>
+      <div class="board-plan-work-action" data-controller="dialog" data-action="keydown.esc@window->dialog#close">
+        <button type="button" class="btn btn--circle-mobile" data-controller="tooltip" data-action="click->dialog#open" data-dialog-target="focusMouse">
+          Plan work
+        </button>
+        <dialog class="dialog panel panel--wide shadow txt-small" data-dialog-target="dialog">
+          <%= render "boards/work_plans/dialog", board: @board %>
+        </dialog>
+      </div>
+    <% end %>
   </div>
 <% end %>
 

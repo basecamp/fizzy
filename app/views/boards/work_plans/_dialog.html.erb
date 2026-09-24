@@ -1,0 +1,16 @@
+<header class="popup__title flex align-start justify-space-between gap">
+  <strong>Plan work</strong>
+  <button type="button" class="btn btn--plain btn--plain-small txt-xx-small" data-action="dialog#close">Close</button>
+</header>
+
+<%= turbo_frame_tag(dom_id(board, :work_plan), src: preview_board_work_plan_path(board), loading: "lazy", data: {
+      controller: "work-plan",
+      work_plan_board_id_value: board.id,
+      work_plan_time_limit_value: board.work_planning_time_limit_in_seconds,
+      work_plan_candidate_count_value: board.cards.triaged.unassigned.count,
+      work_plan_user_count_value: board.users.active.count,
+      work_plan_status_value: "",
+      action: "turbo:before-fetch-request->work-plan#start turbo:frame-load->work-plan#stop"
+    }) do %>
+  <%= render "boards/work_plans/loading", board: board %>
+<% end %>

@@ -1,0 +1,87 @@
+<% request_payload = @request_payload %>
+
+<%= turbo_frame_tag dom_id(@board, :work_plan) do %>
+  <div class="flex flex-column gap-half">
+    <h2 class="txt-medium divider">Plan work</h2>
+
+    <% if @preview_error %>
+      <p class="txt-negative"><%= @preview_error %></p>
+      <%= button_to "Retry", preview_board_work_plan_path(@board), method: :get, form: { data: { turbo_frame: dom_id(@board, :work_plan) } }, class: "btn" %>
+    <% elsif @solve_result&.proposed_assignments&.any? %>
+      <p class="txt-subtle" data-work-plan-target="statusLine">
+        Planning <%= request_payload.candidate_work_units.count %> cards across <%= request_payload.users.count %> people… up to <%= request_payload.time_limit_seconds %>s
+      </p>
+
+      <% grouped = Hash.new do |memo, assignee_id| %>
+        <% user = request_payload.users_by_id[assignee_id]
+           memo[assignee_id] = {
+             name: user&.name || "Unknown",
+             before_urgency: request_payload.pinned_work_units_for(assignee_id).sum(&:urgency_weight),
+             before_cards: request_payload.pinned_work_units_for(assignee_id).size,
+             assignments: []
+           } %>
+      <% end %>
+
+      <% @solve_result.proposed_assignments.each do |proposal| %>
+        <% assignment = request_payload.candidate_by_card_id(proposal[:card_id]) %>
+        <% next unless assignment %>
+
+        <% grouped_entry = grouped[proposal[:assignee_id]] %>
+        <% next if grouped_entry.nil? %>
+
+        <% entry = grouped_entry %>
+        <% entry[:assignments] << { work_unit: assignment, card_id: proposal[:card_id], assignee_id: proposal[:assignee_id] } %>
+        <% entry[:after_urgency] = (entry[:after_urgency] || entry[:before_urgency]) + assignment.urgency_weight %>
+        <% entry[:after_cards] = (entry[:after_cards] || entry[:before_cards]) + 1 %>
+      <% end %>
+
+      <% grouped.select! { |_, value| value[:assignments].any? } %>
+
+      <% if grouped.empty? %>
+        <p>No assignments were generated for this board.</p>
+      <% else %>
+        <div class="flex flex-column gap-half" data-work-plan-target="statusLine">
+          <% grouped.each_value.sort_by { |entry| entry[:name] }.each do |entry| %>
+            <section class="border rounded txt-small">
+              <header class="txt-medium border-bottom margin-block-end">
+                <%= entry[:name] %>
+                <span class="txt-subtle txt-xx-small margin-inline-start">
+                  (Urgent <%= entry[:before_urgency] %> → <%= entry[:after_urgency] || entry[:before_urgency] %> / cards <%= entry[:before_cards] %> → <%= entry[:after_cards] || entry[:before_cards] %>)
+                </span>
+              </header>
+
+              <ul class="txt-x-small">
+                <% entry[:assignments].each do |assignment| %>
+                  <li>
+                    <strong class="txt-small">#<%= assignment[:work_unit].card_number %></strong>
+                    <span><%= assignment[:work_unit].title || "Untitled" %></span>
+                    <span class="txt-subtle margin-inline-start">
+                      <%= urgency_badges(assignment[:work_unit]) %>
+                    </span>
+                  </li>
+                <% end %>
+              </ul>
+            </section>
+          <% end %>
+        </div>
+
+        <p class="txt-subtle">Solver score: <%= @solve_result.score %></p>
+        <p class="txt-subtle">Solve time: <%= @solve_result.elapsed_ms %>ms</p>
+
+        <%= form_with url: apply_board_work_plan_path(@board), data: { turbo_frame: "_top" }, method: :post do |form| %>
+          <%= hidden_field_tag "plan[based_on_board_updated_at]", @board.updated_at.iso8601(6) %>
+          <% @solve_result.proposed_assignments.each do |proposal| %>
+            <%= hidden_field_tag "plan[proposed_assignments][][card_id]", proposal[:card_id] %>
+            <%= hidden_field_tag "plan[proposed_assignments][][assignee_id]", proposal[:assignee_id] %>
+          <% end %>
+
+          <%= form.submit "Apply assignments", class: "btn btn--primary" %>
+        <% end %>
+      <% end %>
+    <% else %>
+      <p>No proposed assignments were returned.</p>
+    <% end %>
+
+    <p class="txt-subtle" data-work-plan-target="timer"></p>
+  </div>
+<% end %>
