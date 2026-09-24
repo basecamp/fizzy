@@ -1,10 +1,14 @@
 use solverforge::prelude::*;
 use solverforge::stream::collector::LoadBalance;
-use solverforge::IncrementalConstraint;
+use solverforge::{IncrementalConstraint, SolverConfig};
 
 use super::{Person, Task};
 
-#[planning_solution(constraints = "define_constraints", solver_toml = "../../solver.toml")]
+#[planning_solution(
+    constraints = "define_constraints",
+    solver_toml = "../../solver.toml",
+    config = "solver_config"
+)]
 pub struct Plan {
     #[problem_fact_collection]
     pub people: Vec<Person>,
@@ -14,6 +18,14 @@ pub struct Plan {
 
     #[planning_score]
     pub score: Option<HardMediumSoftScore>,
+
+    pub time_limit_seconds: u64,
+}
+
+// The board's planning budget is the solver's time limit. Applying it here
+// keeps termination inside the solver instead of relying on an external kill.
+fn solver_config(plan: &Plan, config: SolverConfig) -> SolverConfig {
+    config.with_termination_seconds(plan.time_limit_seconds.max(1))
 }
 
 fn define_constraints() -> impl ConstraintSet<Plan, HardMediumSoftScore> {
@@ -78,7 +90,18 @@ mod tests {
                     count_weight: 1, pinned_to: Some(1), allowed_people: vec![1], person_idx: Some(1) },
             ],
             score: None,
+            time_limit_seconds: 1,
         }
+    }
+
+    #[test]
+    fn runtime_config_uses_the_plan_budget() {
+        let mut plan = plan();
+        plan.time_limit_seconds = 7;
+
+        let config = solver_config(&plan, SolverConfig::default());
+
+        assert_eq!(config.time_limit(), Some(std::time::Duration::from_secs(7)));
     }
 
     #[test]

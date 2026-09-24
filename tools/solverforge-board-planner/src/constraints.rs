@@ -21,9 +21,7 @@ pub fn solve_request(request: &PlannerRequest) -> Result<PlannerResponse, Box<dy
     }
 
     let (job_id, mut events) = MANAGER.solve(plan)?;
-    let deadline = started + Duration::from_secs(request.time_limit_seconds.max(1));
     let mut best = None;
-    let mut cancelling = false;
 
     let result = loop {
         match events.try_recv() {
@@ -38,12 +36,7 @@ pub fn solve_request(request: &PlannerRequest) -> Result<PlannerResponse, Box<dy
             Err(_) if events.is_closed() => {
                 return Err("Solver stopped without a terminal event".into());
             }
-            Err(_) => {
-                if Instant::now() >= deadline && !cancelling && MANAGER.cancel(job_id).is_ok() {
-                    cancelling = true;
-                }
-                std::thread::sleep(Duration::from_millis(10));
-            }
+            Err(_) => std::thread::sleep(Duration::from_millis(10)),
         }
     };
     MANAGER.delete(job_id)?;
@@ -154,6 +147,7 @@ fn prepare(request: &PlannerRequest) -> Result<Plan, Box<dyn Error>> {
         people,
         tasks,
         score: None,
+        time_limit_seconds: request.time_limit_seconds.max(1),
     })
 }
 

@@ -33,9 +33,11 @@ module Board::WorkPlan
       def run_solver(payload)
         command = [ planner_binary_path, "solve" ]
         stdin_data = JSON.generate(payload)
+        # The solver terminates itself at the board's budget; this is only a
+        # watchdog against a wedged process.
         timeout = request.respond_to?(:time_limit_seconds) ? request.time_limit_seconds : 30
 
-        Timeout.timeout(timeout + 1) do
+        Timeout.timeout(timeout + 5) do
           stdout, stderr, status = Open3.capture3(*command, stdin_data: stdin_data)
           raise ExecutionError, stderr.presence || "Planner command failed" unless status.success?
 

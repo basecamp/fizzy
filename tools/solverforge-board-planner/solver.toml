@@ -1,6 +1,6 @@
 [termination]
-# Hard ceiling for a solve. Rails cancels at the board's own planning budget,
-# which is the value an admin actually configures.
+# Fallback only. The solution's config hook replaces this with the board's
+# planning budget carried on the request, so termination lives in the solver.
 seconds_spent_limit = 90
 
 [[phases]]
