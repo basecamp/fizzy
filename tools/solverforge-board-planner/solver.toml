@@ -1,4 +1,6 @@
 [termination]
+# Hard ceiling for a solve. Rails cancels at the board's own planning budget,
+# which is the value an admin actually configures.
 seconds_spent_limit = 90
 
 [[phases]]
@@ -8,6 +10,12 @@ construction_obligation = "assign_when_candidate_exists"
 
 [[phases]]
 type = "local_search"
+
+# Stop once the score stops improving so small boards return in a couple of
+# seconds instead of spending the whole budget. This must live on the phase:
+# a phase termination replaces the top-level one while the phase runs.
+[phases.termination]
+unimproved_seconds_spent_limit = 2
 
 [phases.move_selector]
 type = "union_move_selector"
