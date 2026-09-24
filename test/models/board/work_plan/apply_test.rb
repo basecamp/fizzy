@@ -88,13 +88,29 @@ class Board::WorkPlan::ApplyTest < ActiveSupport::TestCase
     assert_equal 1, Board::WorkPlan::Proposal.where(board: @board).count
   end
 
+  test "a board that changed while the solver ran cannot receive the proposal" do
+    request = Board::WorkPlan::BuildRequest.new(board: @board).call
+    result = feasible_result
+    planned_at = @board.updated_at
+    @card.update!(title: "Changed while solving")
+
+    assert_raises(Board::WorkPlan::Proposal::Invalid) do
+      Board::WorkPlan::Proposal.issue(board: @board, request: request, result: result, user: users(:kevin), planned_at: planned_at)
+    end
+    assert_equal 0, Board::WorkPlan::Proposal.where(board: @board).count
+    assert_not @card.reload.assigned?
+  end
+
   private
-    def build_proposal
-      request = Board::WorkPlan::BuildRequest.new(board: @board).call
-      result = Board::WorkPlan::Solve::Result.new(
+    def feasible_result
+      Board::WorkPlan::Solve::Result.new(
         status: "feasible", score: "0hard/0medium/0soft", elapsed_ms: 1,
         proposed_assignments: [ { card_id: @card.id, assignee_id: users(:kevin).id } ]
       )
-      Board::WorkPlan::Proposal.issue(board: @board, request: request, result: result, user: users(:kevin))
+    end
+
+    def build_proposal
+      request = Board::WorkPlan::BuildRequest.new(board: @board).call
+      Board::WorkPlan::Proposal.issue(board: @board, request: request, result: feasible_result, user: users(:kevin))
     end
 end

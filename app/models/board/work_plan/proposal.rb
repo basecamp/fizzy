@@ -15,6 +15,7 @@ module Board::WorkPlan
 
     class << self
       def plan(board:, user_ids:, user: Current.user)
+        planned_at = board.updated_at
         board_user_ids = board.users.active.ids.map(&:to_s)
 
         raise Invalid, "Choose at least one person for this plan" if user_ids.empty?
@@ -26,7 +27,7 @@ module Board::WorkPlan
         result = Solve.new(request: request).call
         raise Invalid, "No feasible plan was found" unless result.feasible?
 
-        issue(board: board, request: request, result: result, user: user)
+        issue(board: board, request: request, result: result, user: user, planned_at: planned_at)
       end
 
       def current_for(board)
@@ -34,7 +35,7 @@ module Board::WorkPlan
         proposal if proposal&.current?
       end
 
-      def issue(board:, request:, result:, user: Current.user)
+      def issue(board:, request:, result:, user: Current.user, planned_at: board.updated_at)
         assignments = result.proposed_assignments
 
         unless result.feasible? && assignments.map { |assignment| assignment.fetch(:card_id) }.sort == request.candidate_card_ids.sort &&
@@ -42,9 +43,17 @@ module Board::WorkPlan
           raise Invalid, "The planner returned an incomplete proposal"
         end
 
-        transaction do
+        board.with_lock do
+          # The plan was derived from the board as of planned_at. If anything
+          # touched the board while the solver ran, the snapshot is gone.
+          if board.updated_at.iso8601(6) != planned_at.iso8601(6)
+            raise Invalid, "Board changed while planning; try again"
+          end
+
           discard_proposals_for(board)
-          proposal = create!(board: board, creator: user, board_updated_at: board.updated_at,
+          # Create through the association: discard's delete_all leaves the
+          # in-memory collection loaded, and dependent: :destroy trusts it.
+          proposal = board.work_plan_proposals.create!(creator: user, board_updated_at: board.updated_at,
             excluded_user_ids: board.users.active.ids.map(&:to_s) - request.users.map(&:id))
           proposal.assignments.insert_all(
             assignments.each_with_index.map do |assignment, position|
