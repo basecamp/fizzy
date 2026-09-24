@@ -18,7 +18,7 @@ CI.run do
   step "Security: Importmap audit", "bin/importmap audit"
   step "Security: Brakeman audit", "bin/brakeman --quiet --no-pager --exit-on-warn --exit-on-error"
   step "Security: Gitleaks audit", "bin/gitleaks-audit"
-  step "Tests: Rust Planner", "cargo test --manifest-path tools/solverforge-board-planner/Cargo.toml"
+  step "Tests: Rust Planner", "cargo test --locked --manifest-path tools/solverforge-board-planner/Cargo.toml"
 
   step "Tests: Setup phases", "test/setup-phases-test"
 
