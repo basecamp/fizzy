@@ -1,0 +1,80 @@
+@layer components {
+  .work-plan {
+    --panel-size: min(64ch, 100%);
+
+    max-block-size: min(85dvh, 48rem);
+    overflow: auto;
+  }
+
+  .work-plan__heading {
+    border-block-end: var(--border);
+    margin-block-end: var(--block-space);
+    padding-block-end: var(--block-space);
+
+    h2 { font-size: var(--text-large); margin: 0; }
+    p { margin-block: var(--block-space-half) 0; }
+  }
+
+  .work-plan__loading,
+  .work-plan__empty {
+    padding-block: var(--block-space-double);
+    text-align: center;
+  }
+
+  .work-plan__summary {
+    align-items: baseline;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--inline-space);
+    margin-block-end: var(--block-space);
+  }
+
+  .work-plan__people {
+    display: grid;
+    gap: var(--block-space);
+  }
+
+  .work-plan__person {
+    background: var(--color-ink-lightest);
+    border: var(--border);
+    border-radius: 0.75rem;
+    overflow: hidden;
+  }
+
+  .work-plan__person-heading {
+    align-items: baseline;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--inline-space-half) var(--inline-space-double);
+    padding: var(--block-space-half) var(--inline-space-double);
+  }
+
+  .work-plan__cards { list-style: none; margin: 0; padding: 0; }
+
+  .work-plan__card {
+    align-items: baseline;
+    background: var(--color-canvas);
+    border-block-start: var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--inline-space-half) var(--inline-space);
+    padding: var(--block-space-half) var(--inline-space-double);
+  }
+
+  .work-plan__number { color: var(--color-ink-dark); font-size: var(--text-small); font-weight: 700; }
+  .work-plan__title { flex: 1 1 12ch; min-inline-size: 0; overflow-wrap: anywhere; }
+  .work-plan__badges { color: var(--color-ink-dark); font-size: var(--text-x-small); }
+
+  .work-plan__footer {
+    align-items: center;
+    border-block-start: var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--block-space-half) var(--inline-space-double);
+    justify-content: space-between;
+    margin-block-start: var(--block-space);
+    padding-block-start: var(--block-space);
+
+    p { margin: 0; }
+  }
+}
