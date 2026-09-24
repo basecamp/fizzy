@@ -18,7 +18,9 @@ class Boards::WorkPlansController < ApplicationController
 
       if @proposal
         set_page_and_extract_portion_from @proposal.assignments
-        @assignee_card_counts = @proposal.assignments.group(:assignee_id).count
+        # reorder(nil): the association's ORDER BY is invalid inside this
+        # grouped aggregate under MySQL's ONLY_FULL_GROUP_BY.
+        @assignee_card_counts = @proposal.assignments.reorder(nil).group(:assignee_id).count
 
         if @page.number > 1 && (first = @page.records.first)
           @continuing_assignee_id = first.assignee_id if @proposal.assignments.where(assignee_id: first.assignee_id)
