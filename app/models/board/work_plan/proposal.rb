@@ -1,56 +1,63 @@
-require "digest"
-
 module Board::WorkPlan
-  class Proposal
+  class Proposal < ApplicationRecord
     class Invalid < StandardError; end
-    class Stale < StandardError; end
 
-    def self.issue(board:, request:, result:, user: Current.user)
-      assignments = result.proposed_assignments
-      candidate_ids = request.candidate_card_ids
+    self.table_name = "board_work_plan_proposals"
 
-      unless result.feasible? && assignments.map { |assignment| assignment.fetch(:card_id) }.sort == candidate_ids.sort &&
-          assignments.all? { |assignment| request.users_by_id.key?(assignment.fetch(:assignee_id)) }
-        raise Invalid, "The planner returned an incomplete proposal"
+    belongs_to :account, default: -> { board.account }
+    belongs_to :board
+    belongs_to :creator, class_name: "User"
+
+    has_many :assignments, -> { ordered.preload(card: [ :goldness, :activity_spike ]) },
+      class_name: "Board::WorkPlan::Proposal::Assignment", inverse_of: :proposal, dependent: :delete_all
+
+    scope :recent_first, -> { order(created_at: :desc) }
+
+    class << self
+      def current_for(board)
+        proposal = where(board: board).recent_first.first
+        proposal if proposal&.current?
       end
 
-      verifier.generate({
-        board_id: board.id,
-        user_id: user.id,
-        board_updated_at: board.updated_at.iso8601(6),
-        request_digest: digest(request),
-        proposed_assignments: assignments
-      }, expires_in: 10.minutes)
-    end
+      def issue(board:, request:, result:, user: Current.user)
+        assignments = result.proposed_assignments
 
-    def self.verify(token, board:, user: Current.user)
-      payload = verifier.verify(token).deep_symbolize_keys
+        unless result.feasible? && assignments.map { |assignment| assignment.fetch(:card_id) }.sort == request.candidate_card_ids.sort &&
+            assignments.all? { |assignment| request.users_by_id.key?(assignment.fetch(:assignee_id)) }
+          raise Invalid, "The planner returned an incomplete proposal"
+        end
 
-      unless payload.fetch(:board_id) == board.id && payload.fetch(:user_id) == user.id
-        raise Invalid, "This proposal belongs to another board or user"
+        transaction do
+          discard_proposals_for(board)
+          proposal = create!(board: board, creator: user, board_updated_at: board.updated_at)
+          proposal.assignments.insert_all(
+            assignments.each_with_index.map do |assignment, position|
+              {
+                id: ActiveRecord::Type::Uuid.generate,
+                account_id: board.account_id,
+                proposal_id: proposal.id,
+                card_id: assignment.fetch(:card_id),
+                assignee_id: assignment.fetch(:assignee_id),
+                position: position,
+                created_at: Time.current,
+                updated_at: Time.current
+              }
+            end
+          )
+          proposal
+        end
       end
 
-      request = BuildRequest.new(board: board).call
-      unless payload.fetch(:board_updated_at) == board.updated_at.iso8601(6) &&
-          payload.fetch(:request_digest) == digest(request)
-        raise Stale, "Board changed since plan was created"
-      end
-
-      payload.fetch(:proposed_assignments)
-    rescue ActiveSupport::MessageVerifier::InvalidSignature, KeyError, TypeError
-      raise Invalid, "Proposal is invalid or has expired; plan again"
+      private
+        # A board only ever needs its latest plan; older ones are dead weight.
+        def discard_proposals_for(board)
+          Proposal::Assignment.where(proposal_id: board.work_plan_proposals.select(:id)).delete_all
+          board.work_plan_proposals.delete_all
+        end
     end
 
-    def self.digest(request)
-      payload = request.to_h
-      payload[:users].sort_by! { |user| user.fetch(:id) }
-      payload[:work_units].sort_by! { |unit| unit.fetch(:id) }
-      Digest::SHA256.hexdigest(JSON.generate(payload))
+    def current?
+      board_updated_at.iso8601(6) == board.updated_at.iso8601(6)
     end
-
-    def self.verifier
-      Rails.application.message_verifier(:board_work_plans)
-    end
-    private_class_method :digest, :verifier
   end
 end

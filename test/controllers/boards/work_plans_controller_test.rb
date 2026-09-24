@@ -15,22 +15,33 @@ class Boards::WorkPlansControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select ".work-plan__summary", /1 card for 1 person/
     assert_select ".work-plan__card", text: /Work to plan/
-    assert_select "input[name=proposal_token]", count: 1
+    assert_select "input[name=proposal_id]", count: 1
     assert_not @card.reload.assigned?
 
-    token = css_select("input[name=proposal_token]").first["value"]
-    post board_work_plan_approval_path(@board), params: { proposal_token: token }
+    proposal_id = css_select("input[name=proposal_id]").first["value"]
+    post board_work_plan_approval_path(@board), params: { proposal_id: proposal_id }
 
     assert_redirected_to @board
     assert @card.reload.assigned_to?(users(:kevin))
   end
 
+  test "a second preview reuses the plan instead of solving again" do
+    get board_work_plan_path(@board)
+    proposal_id = css_select("input[name=proposal_id]").first["value"]
+
+    get board_work_plan_path(@board)
+
+    assert_response :success
+    assert_equal proposal_id, css_select("input[name=proposal_id]").first["value"]
+    assert_equal 1, Board::WorkPlan::Proposal.where(board: @board).count
+  end
+
   test "approval of a stale proposal writes nothing" do
     get board_work_plan_path(@board)
-    token = css_select("input[name=proposal_token]").first["value"]
+    proposal_id = css_select("input[name=proposal_id]").first["value"]
     @card.update!(title: "Changed since planning")
 
-    post board_work_plan_approval_path(@board), params: { proposal_token: token }
+    post board_work_plan_approval_path(@board), params: { proposal_id: proposal_id }
 
     assert_redirected_to @board
     assert_not @card.reload.assigned?
@@ -38,10 +49,10 @@ class Boards::WorkPlansControllerTest < ActionDispatch::IntegrationTest
 
   test "another user cannot approve a proposal for a board they cannot access" do
     get board_work_plan_path(@board)
-    token = css_select("input[name=proposal_token]").first["value"]
+    proposal_id = css_select("input[name=proposal_id]").first["value"]
     logout_and_sign_in_as :jz
 
-    post board_work_plan_approval_path(@board), params: { proposal_token: token }
+    post board_work_plan_approval_path(@board), params: { proposal_id: proposal_id }
 
     assert_response :not_found
     assert_not @card.reload.assigned?
@@ -54,7 +65,7 @@ class Boards::WorkPlansControllerTest < ActionDispatch::IntegrationTest
     get board_work_plan_path(board)
     assert_response :forbidden
 
-    post board_work_plan_approval_path(board), params: { proposal_token: "invalid" }
+    post board_work_plan_approval_path(board), params: { proposal_id: "whatever" }
     assert_response :forbidden
   end
 end

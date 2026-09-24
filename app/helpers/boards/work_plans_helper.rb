@@ -7,14 +7,13 @@ module Boards::WorkPlansHelper
     end
   end
 
-  def urgency_badges(work_unit)
+  def urgency_badges(card)
     badges = []
 
-    if work_unit.due_on
-      due_on = Date.iso8601(work_unit.due_on)
-      distance = due_on - Time.zone.today
+    if card.due_on
+      distance = card.due_on - Time.zone.today
 
-      if distance < 0
+      if distance.negative?
         badges << "Overdue"
       elsif distance.zero?
         badges << "Due today"
@@ -23,8 +22,8 @@ module Boards::WorkPlansHelper
       end
     end
 
-    badges << "Golden" if work_unit.golden
-    badges << "Stalled" if work_unit.stalled
+    badges << "Golden" if card.golden?
+    badges << "Stalled" if card.stalled?
 
     badges.join(" • ")
   end

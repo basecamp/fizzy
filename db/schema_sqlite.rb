@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_08_28_120000) do
+ActiveRecord::Schema[8.2].define(version: 2026_09_24_120000) do
   create_table "accesses", id: :uuid, force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -166,6 +166,27 @@ ActiveRecord::Schema[8.2].define(version: 2026_08_28_120000) do
     t.index ["account_id"], name: "index_board_publications_on_account_id"
     t.index ["board_id"], name: "index_board_publications_on_board_id"
     t.index ["key"], name: "index_board_publications_on_key", unique: true
+  end
+
+  create_table "board_work_plan_proposal_assignments", id: :uuid, force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.uuid "proposal_id", null: false
+    t.uuid "card_id", null: false
+    t.uuid "assignee_id", null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["proposal_id", "assignee_id", "position"], name: "idx_on_proposal_id_assignee_id_position_d89297df65"
+  end
+
+  create_table "board_work_plan_proposals", id: :uuid, force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.uuid "board_id", null: false
+    t.uuid "creator_id", null: false
+    t.datetime "board_updated_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["board_id", "created_at"], name: "index_board_work_plan_proposals_on_board_id_and_created_at"
   end
 
   create_table "boards", id: :uuid, force: :cascade do |t|
