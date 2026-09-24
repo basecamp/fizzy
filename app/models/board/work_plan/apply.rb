@@ -4,26 +4,21 @@ module Board::WorkPlan
     class StalePlanError < Error; end
     class InvalidPlanError < Error; end
 
-    Result = Struct.new(:applied_assignments, :updated_board, :based_on_board_updated_at, keyword_init: true)
+    Result = Struct.new(:applied_assignments, :updated_board, keyword_init: true)
 
-    def initialize(board:, plan:)
+    def initialize(board:, token:)
       @board = board
-      @plan = plan || {}
+      @token = token
     end
 
     def call
-      parsed_board_updated_at = parse_board_timestamp
-      ensure_board_unchanged!(parsed_board_updated_at)
+      board.with_lock do
+        assignments = Proposal.verify(token, board: board)
+        proposals = normalized_proposals(assignments)
+        ensure_unique_cards!(proposals)
+        proposals.each { |proposal| validate_proposal!(proposal) }
 
-      ensure_unique_cards!
-      proposals = normalized_proposals
-
-      proposals.each do |proposal|
-        validate_proposal!(proposal)
-      end
-
-      applied = []
-      ActiveRecord::Base.transaction do
+        applied = []
         proposals.each do |proposal|
           card = proposal.fetch(:card)
           assignee = proposal.fetch(:assignee)
@@ -33,42 +28,30 @@ module Board::WorkPlan
 
           applied << proposal.fetch(:card)
         end
-      end
 
-      Result.new(applied_assignments: applied, updated_board: board, based_on_board_updated_at: parsed_board_updated_at)
+        Result.new(applied_assignments: applied, updated_board: board)
+      end
+    rescue Proposal::Stale => error
+      raise StalePlanError, error.message
+    rescue Proposal::Invalid => error
+      raise InvalidPlanError, error.message
     end
 
     private
-      attr_reader :board, :plan
+      attr_reader :board, :token
 
-      def parse_board_timestamp
-        raw_timestamp = plan.fetch("based_on_board_updated_at") { plan.fetch(:based_on_board_updated_at) { raise InvalidPlanError, "Missing board timestamp" } }
-
-        Time.zone.parse(raw_timestamp.to_s) or raise InvalidPlanError, "Invalid board timestamp"
-      rescue ArgumentError
-        raise InvalidPlanError, "Invalid board timestamp"
-      end
-
-      def ensure_board_unchanged!(parsed_board_updated_at)
-        raise StalePlanError, "Board changed since plan was created" unless board.updated_at.iso8601(6) == parsed_board_updated_at.iso8601(6)
-      end
-
-      def normalized_proposals
-        Array(proposed_assignments_param).map do |proposal|
+      def normalized_proposals(assignments)
+        assignments.map do |proposal|
           {
-            card_id: proposal.fetch(:card_id, proposal.fetch("card_id", nil))&.to_s,
-            assignee_id: proposal.fetch(:assignee_id, proposal.fetch("assignee_id", nil))&.to_s
+            card_id: proposal.fetch(:card_id).to_s,
+            assignee_id: proposal.fetch(:assignee_id).to_s
           }
         end
       end
 
-      def ensure_unique_cards!
-        duplicates = normalized_proposals.group_by { |proposal| proposal[:card_id].to_s }.select { |_, entries| entries.size > 1 }
+      def ensure_unique_cards!(proposals)
+        duplicates = proposals.group_by { |proposal| proposal[:card_id] }.select { |_, entries| entries.size > 1 }
         raise InvalidPlanError, "Duplicate card assignments in plan" if duplicates.any?
-      end
-
-      def proposed_assignments_param
-        plan[:proposed_assignments] || plan["proposed_assignments"] || []
       end
 
       def validate_proposal!(proposal)

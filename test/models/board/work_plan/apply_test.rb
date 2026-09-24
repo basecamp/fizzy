@@ -2,102 +2,71 @@ require "test_helper"
 
 class Board::WorkPlan::ApplyTest < ActiveSupport::TestCase
   setup do
-    @board = boards(:writebook)
-    @triage_column = columns(:writebook_triage)
-  end
-
-  test "apply assigns each proposed card to requested assignee" do
-    card = create_card(title: "Staging card", due_on: Time.zone.today)
-
-    plan = {
-      based_on_board_updated_at: @board.updated_at.iso8601(6),
-      proposed_assignments: [
-        { card_id: card.id, assignee_id: users(:jz).id }
-      ]
-    }
-
-    result = Board::WorkPlan::Apply.new(board: @board, plan: plan).call
-
-    assert_equal [ card ], result.applied_assignments
-    assert_equal @board, result.updated_board
-    assert card.reload.assigned_to?(users(:jz))
-  end
-
-  test "apply fails when board changed since preview" do
-    card = create_card(title: "Stale board card", due_on: Time.zone.today)
-
-    plan = {
-      based_on_board_updated_at: (@board.updated_at - 1.minute).iso8601(6),
-      proposed_assignments: [
-        { card_id: card.id, assignee_id: users(:jz).id }
-      ]
-    }
-
-    assert_raises(Board::WorkPlan::Apply::StalePlanError) do
-      Board::WorkPlan::Apply.new(board: @board, plan: plan).call
-    end
-    assert_not card.reload.assigned_to?(users(:jz))
-  end
-
-  test "apply requires cards to still be eligible" do
-    card = create_card(title: "Assigned card")
-    card.assign_to(users(:david), assigner: users(:kevin))
-
-    plan = {
-      based_on_board_updated_at: @board.updated_at.iso8601(6),
-      proposed_assignments: [
-        { card_id: card.id, assignee_id: users(:jz).id }
-      ]
-    }
-
-    assert_raises(Board::WorkPlan::Apply::StalePlanError) do
-      Board::WorkPlan::Apply.new(board: @board, plan: plan).call
+    @board = with_current_user(:kevin) { Board.create!(name: "Planning", all_access: false) }
+    @column = @board.columns.create!(name: "Doing")
+    @card = with_current_user(:kevin) do
+      @board.cards.create!(title: "Unassigned work", column: @column, status: :published)
     end
   end
 
-  test "apply requires assignee to still be an active board user" do
-    card = create_card(title: "Assignee not in board")
+  test "only an approved, signed proposal persists the assignment" do
+    token = proposal_token
 
-    plan = {
-      based_on_board_updated_at: @board.updated_at.iso8601(6),
-      proposed_assignments: [
-        { card_id: card.id, assignee_id: users(:jason).id }
-      ]
-    }
+    assert_not @card.reload.assigned?
+    result = with_current_user(:kevin) { Board::WorkPlan::Apply.new(board: @board, token: token).call }
+
+    assert_equal [ @card ], result.applied_assignments
+    assert @card.reload.assigned_to?(users(:kevin))
 
     assert_raises(Board::WorkPlan::Apply::StalePlanError) do
-      Board::WorkPlan::Apply.new(board: @board, plan: plan).call
+      with_current_user(:kevin) { Board::WorkPlan::Apply.new(board: @board, token: token).call }
     end
+    assert_equal 1, @card.assignments.count
   end
 
-  test "apply rejects duplicate card assignments" do
-    card = create_card(title: "Duplicate card")
+  test "a board change makes a proposal stale before any write" do
+    token = proposal_token
+    @card.update!(title: "Changed after preview")
 
-    plan = {
-      based_on_board_updated_at: @board.updated_at.iso8601(6),
-      proposed_assignments: [
-        { card_id: card.id, assignee_id: users(:jz).id },
-        { card_id: card.id, assignee_id: users(:david).id }
-      ]
-    }
+    assert_raises(Board::WorkPlan::Apply::StalePlanError) do
+      with_current_user(:kevin) { Board::WorkPlan::Apply.new(board: @board, token: token).call }
+    end
+    assert_not @card.reload.assigned?
+  end
+
+  test "a changed board member makes a proposal stale" do
+    token = proposal_token
+    @board.accesses.find_by!(user: users(:kevin)).destroy!
+
+    assert_raises(Board::WorkPlan::Apply::StalePlanError) do
+      with_current_user(:kevin) { Board::WorkPlan::Apply.new(board: @board, token: token).call }
+    end
+    assert_not @card.reload.assigned?
+  end
+
+  test "forged, cross-board and cross-user proposals cannot be applied" do
+    token = proposal_token
+    another_board = with_current_user(:kevin) { Board.create!(name: "Elsewhere", all_access: false) }
 
     assert_raises(Board::WorkPlan::Apply::InvalidPlanError) do
-      Board::WorkPlan::Apply.new(board: @board, plan: plan).call
+      with_current_user(:kevin) { Board::WorkPlan::Apply.new(board: @board, token: token.reverse).call }
     end
+    assert_raises(Board::WorkPlan::Apply::InvalidPlanError) do
+      with_current_user(:kevin) { Board::WorkPlan::Apply.new(board: another_board, token: token).call }
+    end
+    assert_raises(Board::WorkPlan::Apply::InvalidPlanError) do
+      with_current_user(:jz) { Board::WorkPlan::Apply.new(board: @board, token: token).call }
+    end
+    assert_not @card.reload.assigned?
   end
 
   private
-    def create_card(title:, **attributes)
-      with_current_user(:kevin) do
-        @board.cards.create!(
-          creator: users(:kevin),
-          account: accounts("37s"),
-          board: @board,
-          column: @triage_column,
-          status: :published,
-          title: title,
-          **attributes
-        )
-      end
+    def proposal_token
+      request = Board::WorkPlan::BuildRequest.new(board: @board).call
+      result = Board::WorkPlan::Solve::Result.new(
+        status: "feasible", score: "0hard/0medium/0soft", elapsed_ms: 1,
+        proposed_assignments: [ { card_id: @card.id, assignee_id: users(:kevin).id } ]
+      )
+      Board::WorkPlan::Proposal.issue(board: @board, request: request, result: result, user: users(:kevin))
     end
 end

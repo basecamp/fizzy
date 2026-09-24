@@ -1,0 +1,52 @@
+<%= turbo_frame_tag dom_id(@board, :work_plan) do %>
+  <% if @preview_error %>
+    <div class="work-plan__empty">
+      <p class="txt-negative"><%= @preview_error %></p>
+      <%= link_to "Try again", board_work_plan_path(@board), data: { turbo_frame: dom_id(@board, :work_plan) }, class: "btn" %>
+    </div>
+  <% elsif @solve_result&.proposed_assignments&.any? %>
+    <% grouped = @solve_result.proposed_assignments.group_by { |assignment| assignment.fetch(:assignee_id) } %>
+
+    <div class="work-plan__summary">
+      <strong><%= @solve_result.proposed_assignments.size %> proposed <%= "assignment".pluralize(@solve_result.proposed_assignments.size) %></strong>
+      <span class="txt-small txt-subtle">for <%= grouped.size %> <%= "person".pluralize(grouped.size) %></span>
+    </div>
+
+    <div class="work-plan__people">
+      <% grouped.sort_by { |assignee_id, _| @request_payload.users_by_id.fetch(assignee_id).name }.each do |assignee_id, assignments| %>
+        <% user = @request_payload.users_by_id.fetch(assignee_id) %>
+        <% pinned = @request_payload.pinned_work_units_for(assignee_id) %>
+        <% units = assignments.map { |assignment| @request_payload.candidate_by_card_id(assignment.fetch(:card_id)) } %>
+
+        <section class="work-plan__person" aria-label="Proposed work for <%= user.name %>">
+          <header class="work-plan__person-heading">
+            <strong><%= user.name %></strong>
+            <span class="txt-small txt-subtle"><%= pinned.size %> → <%= pinned.size + units.size %> cards · urgency <%= pinned.sum(&:urgency_weight) %> → <%= pinned.sum(&:urgency_weight) + units.sum(&:urgency_weight) %></span>
+          </header>
+
+          <ul class="work-plan__cards">
+            <% units.each do |unit| %>
+              <li class="work-plan__card">
+                <span class="work-plan__number">#<%= unit.card_number %></span>
+                <span class="work-plan__title"><%= unit.title.presence || "Untitled" %></span>
+                <% if badges = urgency_badges(unit).presence %>
+                  <span class="work-plan__badges"><%= badges %></span>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        </section>
+      <% end %>
+    </div>
+
+    <div class="work-plan__footer">
+      <p class="txt-small txt-subtle">Preview only · score <%= @solve_result.score %> · <%= @solve_result.elapsed_ms %>ms</p>
+      <%= form_with url: board_work_plan_approval_path(@board), data: { turbo_frame: "_top" }, method: :post do |form| %>
+        <%= hidden_field_tag :proposal_token, @proposal_token %>
+        <%= form.submit "Approve and assign", class: "btn btn--link" %>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="work-plan__empty txt-subtle">No assignments to propose right now.</p>
+  <% end %>
+<% end %>
