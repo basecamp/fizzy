@@ -43,6 +43,16 @@ class ActionPack::PasskeyTest < ActiveSupport::TestCase
     assert @passkey.backed_up?
   end
 
+  test "persists a spec-legal uint32-max sign count" do
+    # WebAuthn sign counts are unsigned 32-bit; the column must hold the full
+    # range. A signed INT4 column overflowed at 2147483647 with a RangeError.
+    max_uint32 = 4_294_967_295
+
+    @passkey.update!(sign_count: max_uint32)
+
+    assert_equal max_uint32, @passkey.reload.sign_count
+  end
+
   test "to_public_key_credential" do
     credential = @passkey.to_public_key_credential
 

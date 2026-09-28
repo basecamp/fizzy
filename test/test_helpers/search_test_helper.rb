@@ -26,16 +26,4 @@ module SearchTestHelper
     Account.find_by(name: "Search Test")&.destroy
     Identity.find_by(email_address: "test@example.com")&.destroy
   end
-
-  private
-    def clear_search_records
-      if ActiveRecord::Base.connection.adapter_name == "SQLite"
-        ActiveRecord::Base.connection.execute("DELETE FROM search_records")
-        ActiveRecord::Base.connection.execute("DELETE FROM search_records_fts")
-      else
-        Search::Record::Trilogy::SHARD_COUNT.times do |shard_id|
-          ActiveRecord::Base.connection.execute("DELETE FROM search_records_#{shard_id}")
-        end
-      end
-    end
 end

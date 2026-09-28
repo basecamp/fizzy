@@ -34,4 +34,10 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
       visit session_transfer_url(user.identity.transfer_id, script_name: nil)
       assert_current_path root_path
     end
+
+    def fill_in_lexxy(selector = "lexxy-editor", with:)
+      editor_element = find(selector)
+      editor_element.set with
+      page.execute_script("arguments[0].value = '#{with}'", editor_element)
+    end
 end

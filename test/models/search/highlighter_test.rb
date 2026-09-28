@@ -1,178 +1,64 @@
 require "test_helper"
 
 class Search::HighlighterTest < ActiveSupport::TestCase
-  test "highlight simple word match" do
-    highlighter = Search::Highlighter.new("hello")
-    result = highlighter.highlight("Hello world")
-
-    assert_equal "#{mark('Hello')} world", result
+  test "CJK matches preserve original text and group adjacent characters" do
+    assert_equal "这是#{mark('中文')}测试", highlight("这是中文测试", "中文")
+    assert_equal "#{mark('日本語')}の説明", highlight("日本語の説明", "日本語")
+    assert_equal "#{mark('한국어')} 설명", highlight("한국어 설명", "한국어")
   end
 
-  test "highlight multiple occurrences" do
-    highlighter = Search::Highlighter.new("test")
-    result = highlighter.highlight("This is a test and another test")
-
-    assert_equal "This is a #{mark('test')} and another #{mark('test')}", result
+  test "CJK phrases do not highlight reversed or separated characters" do
+    assert_equal "文中 中间文 #{mark('中文')}", highlight("文中 中间文 中文", "中文")
   end
 
-  test "highlight case insensitive" do
-    highlighter = Search::Highlighter.new("ruby")
-    result = highlighter.highlight("Ruby is great and RUBY rocks")
-
-    assert_equal "#{mark('Ruby')} is great and #{mark('RUBY')} rocks", result
+  test "mixed adjacent scripts share the same boundaries as the index" do
+    assert_equal "#{mark('Fizzy中文')}测试", highlight("Fizzy中文测试", "Fizzy中文")
   end
 
-  test "highlight quoted phrases" do
-    highlighter = Search::Highlighter.new('"hello world"')
-    result = highlighter.highlight("Say hello world to everyone")
-
-    assert_equal "Say #{mark('hello world')} to everyone", result
+  test "stemming highlights the original word" do
+    assert_equal "Card to #{mark('delete')}", highlight("Card to delete", "deleting")
+    assert_equal "#{mark('Running')} tests", highlight("Running tests", "run")
   end
 
-  test "snippet returns full text with highlights when under limit" do
-    highlighter = Search::Highlighter.new("ruby")
-    result = highlighter.snippet("Ruby is great", max_chars: 100)
-
-    assert_equal "#{mark('Ruby')} is great", result
+  test "Latin accents and decomposed queries highlight the original word" do
+    assert_equal "#{mark('Hälsa')} och friskvård", highlight("Hälsa och friskvård", "ha\u0308lsa")
+    assert_equal "#{mark("ha\u0308lsa")}", highlight("ha\u0308lsa", "hälsa")
   end
 
-  test "snippet creates excerpt around match" do
-    highlighter = Search::Highlighter.new("match")
-    text = "word " * 10 + "match " + "word " * 10
-    result = highlighter.snippet(text, max_chars: 50)
-
-    assert result.start_with?("...")
-    assert result.end_with?("...")
-    assert_includes result, mark("match")
+  test "decomposed Japanese accents stay attached to their character" do
+    assert_equal mark("カ\u3099"), highlight("カ\u3099", "ガ")
   end
 
-  test "snippet adds leading ellipsis when match is not at start" do
-    highlighter = Search::Highlighter.new("middle")
-    text = "word " * 20 + "middle"
-    result = highlighter.snippet(text, max_chars: 50)
-
-    assert result.start_with?("...")
-    assert_not result.end_with?("...")
-    assert_includes result, mark("middle")
+  test "overlapping query terms produce one pair of markers" do
+    assert_equal mark("中文测试"), highlight("中文测试", "中文 中文测试")
+    assert_equal mark("testing"), highlight("testing", "test testing")
   end
 
-  test "snippet adds trailing ellipsis when text continues after excerpt" do
-    highlighter = Search::Highlighter.new("start")
-    text = "start " + "word " * 30
-    result = highlighter.snippet(text, max_chars: 50)
-
-    assert result.end_with?("...")
-    assert_not result.start_with?("...")
-    assert_includes result, mark("start")
+  test "query terms never match generated markup" do
+    assert_equal "#{mark('test')} #{mark('class')}", highlight("test class", "test class")
   end
 
-  test "snippet falls back to truncation when no match found" do
-    highlighter = Search::Highlighter.new("nomatch")
-    text = "This text does not contain the search term " + "word " * 50
-    result = highlighter.snippet(text, max_chars: 50)
-
-    assert_includes result, "..."
-    assert_not_includes result, Search::Highlighter::OPENING_MARK
+  test "quoted phrases retain original spacing and punctuation" do
+    assert_equal "Say #{mark('hello, world')}!", highlight("Say hello, world!", '"hello world"')
   end
 
-  test "highlight escapes HTML and preserves marks" do
-    highlighter = Search::Highlighter.new("test")
-    result = highlighter.highlight("<script>test</script>")
-
-    assert_equal "&lt;script&gt;#{mark('test')}&lt;/script&gt;", result
+  test "long CJK snippets use character boundaries and mark both cuts" do
+    text = "前" * 40 + "中文" + "后" * 40
+    assert_equal "...前前前前前#{mark('中文')}后后后...",
+      Search::Highlighter.new("中文").snippet(text, max_words: 10)
   end
 
-  test "highlight CJK text" do
-    highlighter = Search::Highlighter.new("中文")
-    result = highlighter.highlight("这是中文测试")
-
-    assert_equal "这是#{mark('中文')}测试", result
-  end
-
-  test "highlight Japanese text" do
-    highlighter = Search::Highlighter.new("日本")
-    result = highlighter.highlight("これは日本語です")
-
-    assert_equal "これは#{mark('日本')}語です", result
-  end
-
-  test "highlight Korean text" do
-    highlighter = Search::Highlighter.new("한국")
-    result = highlighter.highlight("이것은 한국어입니다")
-
-    assert_equal "이것은 #{mark('한국')}어입니다", result
-  end
-
-  test "highlight mixed CJK and English" do
-    highlighter = Search::Highlighter.new("test 中文")
-    result = highlighter.highlight("This is a test about 中文内容")
-
-    assert_equal "This is a #{mark('test')} about #{mark('中文')}内容", result
-  end
-
-  test "snippet handles CJK text without spaces" do
-    highlighter = Search::Highlighter.new("中文")
-    text = "这是一段很长的中文文本用于测试摘要功能是否正常工作"
-    result = highlighter.snippet(text, max_chars: 100)
-
-    assert_includes result, mark("中文")
-  end
-
-  test "snippet truncates long CJK text around match" do
-    highlighter = Search::Highlighter.new("目标")
-    text = "前面有很多很多很多很多很多的文字内容" + "目标词汇" + "后面也有很多很多很多很多很多的文字内容"
-    result = highlighter.snippet(text, max_chars: 30)
-
-    assert_includes result, mark("目标")
-    assert result.start_with?("...")
-    assert result.end_with?("...")
-  end
-
-  test "highlight stems terms for better matching" do
-    highlighter = Search::Highlighter.new("running")
-    result = highlighter.highlight("I like to run every day")
-
-    assert_equal "I like to #{mark('run')} every day", result
-  end
-
-  test "snippet finds match case-insensitively" do
-    highlighter = Search::Highlighter.new("test")
-    text = "これは非常に長い日本語のテキストでTESTという単語を含む" * 3
-    result = highlighter.snippet(text, max_chars: 30)
-
-    assert_includes result, mark("TEST")
-  end
-
-  test "highlight Latin terms adjacent to CJK characters" do
-    highlighter = Search::Highlighter.new("test")
-    result = highlighter.highlight("日本語TESTテスト")
-
-    assert_equal "日本語#{mark('TEST')}テスト", result
-  end
-
-  test "highlight mixed CJK and Latin term case-insensitively" do
-    highlighter = Search::Highlighter.new("日本語test")
-    result = highlighter.highlight("これは日本語TESTです")
-
-    assert_equal "これは#{mark('日本語TEST')}です", result
-  end
-
-  test "highlight does not corrupt markup when a term matches inserted HTML" do
-    highlighter = Search::Highlighter.new("test class")
-    result = highlighter.highlight("test class here")
-
-    assert_equal "#{mark('test')} #{mark('class')} here", result
-  end
-
-  test "highlight terms matching mark tag attributes" do
-    highlighter = Search::Highlighter.new("some text")
-    result = highlighter.highlight("some text to mark up")
-
-    assert_equal "#{mark('some')} #{mark('text')} to mark up", result
+  test "long text without matches adds no markers" do
+    text = "Some text " * 30
+    assert_equal text, Search::Highlighter.new("中文").snippet(text, max_words: 10)
   end
 
   private
+    def highlight(text, query)
+      Search::Highlighter.new(query).highlight(text)
+    end
+
     def mark(text)
-      "#{Search::Highlighter::OPENING_MARK}#{text}#{Search::Highlighter::CLOSING_MARK}"
+      "#{ActiveSearch::Highlighting::STORE_OPEN_MARKER}#{text}#{ActiveSearch::Highlighting::STORE_CLOSE_MARKER}"
     end
 end

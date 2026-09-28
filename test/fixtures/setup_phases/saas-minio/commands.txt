@@ -1,0 +1,11 @@
+brew bundle --file=$APP/Brewfile
+bundle config set --local auto_install true
+bundle install
+docker-dev/setup minio
+minio-setup [SAAS=1 BUNDLE_GEMFILE=Gemfile.saas]
+docker-dev/setup mysql84
+bundle install
+rails db:prepare
+rails runner pp Account.all.any?
+rails log:clear tmp:clear
+exit: 0

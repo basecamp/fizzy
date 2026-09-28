@@ -1,0 +1,17 @@
+default: &default
+  adapter: <%= ActiveRecord::Base.connection.adapter_name == "SQLite" ? "sqlite_cjk" : "mysql_sharded" %>
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+
+production:
+  <<: *default
+
+beta:
+  <<: *default
+
+staging:
+  <<: *default

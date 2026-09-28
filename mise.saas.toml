@@ -1,0 +1,10 @@
+# SaaS-only mise overlay, loaded when MISE_ENV=saas (mise environment
+# configs: mise.saas.toml loads above .mise.toml in the same directory).
+#
+# Private Basecamp infrastructure is declared ONLY here — the OSS root
+# .mise.toml must never reference it. Consumed by saas/bin/setup, which runs
+# the repos phase under MISE_ENV=saas after proving https git auth.
+min_version = "2026.7.5"
+
+[bootstrap.repos]
+"~/Work/basecamp/docker-dev" = { url = "https://github.com/basecamp/docker-dev.git", ref = "master" }

@@ -8,22 +8,18 @@ class SearchReindexJobTest < ActiveJob::TestCase
     card.reindex
     comment.reindex
 
-    card_shard = Search::Record.for(card.account_id)
-    comment_shard = Search::Record.for(comment.account_id)
+    assert search_record_exists?(card.account_id, type: "Card", id: card.id)
+    assert search_record_exists?(comment.account_id, type: "Comment", id: comment.id)
 
-    assert card_shard.exists?(searchable_type: "Card", searchable_id: card.id)
-    assert comment_shard.exists?(searchable_type: "Comment", searchable_id: comment.id)
+    clear_search_records
 
-    card_shard.delete_all
-    comment_shard.delete_all unless comment_shard == card_shard
-
-    assert_not card_shard.exists?(searchable_type: "Card", searchable_id: card.id)
-    assert_not comment_shard.exists?(searchable_type: "Comment", searchable_id: comment.id)
+    assert_not search_record_exists?(card.account_id, type: "Card", id: card.id)
+    assert_not search_record_exists?(comment.account_id, type: "Comment", id: comment.id)
 
     SearchReindexJob.perform_now
 
-    assert card_shard.exists?(searchable_type: "Card", searchable_id: card.id)
-    assert comment_shard.exists?(searchable_type: "Comment", searchable_id: comment.id)
+    assert search_record_exists?(card.account_id, type: "Card", id: card.id)
+    assert search_record_exists?(comment.account_id, type: "Comment", id: comment.id)
   end
 
   test "skips records whose rich text exceeds rich_text_limit" do
@@ -36,13 +32,20 @@ class SearchReindexJobTest < ActiveJob::TestCase
       status: :published,
       description: "x" * 5_000
     )
+    small_card = boards(:writebook).cards.create!(
+      creator: users(:david),
+      title: "small enough to index",
+      status: :published,
+      description: "x" * 100
+    )
 
-    nuke_search_records
+    clear_search_records
 
     SearchReindexJob.perform_now(rich_text_limit: 1_000)
 
-    shard = Search::Record.for(big_card.account_id)
-    assert_not shard.exists?(searchable_type: "Card", searchable_id: big_card.id)
+    assert_not search_record_exists?(big_card.account_id, type: "Card", id: big_card.id)
+    assert search_record_exists?(small_card.account_id, type: "Card", id: small_card.id),
+      "control: the job swallows every exception, so absence alone would also mean it indexed nothing"
   end
 
   test "does not index drafted cards or their comments" do
@@ -57,26 +60,19 @@ class SearchReindexJobTest < ActiveJob::TestCase
     comment = card.comments.create!(creator: users(:david), body: "on a card that will be drafted")
     card.update!(status: :drafted)
 
-    nuke_search_records
+    sibling = boards(:writebook).cards.create!(
+      creator: users(:david),
+      title: "stays published",
+      status: :published
+    )
+
+    clear_search_records
 
     SearchReindexJob.perform_now
 
-    shard = Search::Record.for(card.account_id)
-    assert_not shard.exists?(searchable_type: "Card", searchable_id: card.id)
-    assert_not shard.exists?(searchable_type: "Comment", searchable_id: comment.id)
+    assert_not search_record_exists?(card.account_id, type: "Card", id: card.id)
+    assert_not search_record_exists?(comment.account_id, type: "Comment", id: comment.id)
+    assert search_record_exists?(sibling.account_id, type: "Card", id: sibling.id),
+      "control: the job swallows every exception, so absence alone would also mean it indexed nothing"
   end
-
-  private
-    def sqlite?
-      ActiveRecord::Base.connection.adapter_name == "SQLite"
-    end
-
-    def nuke_search_records
-      if sqlite?
-        ActiveRecord::Base.connection.execute("DELETE FROM search_records")
-        ActiveRecord::Base.connection.execute("DELETE FROM search_records_fts")
-      else
-        Search::Record::Trilogy::SHARD_CLASSES.each(&:delete_all)
-      end
-    end
 end

@@ -47,4 +47,16 @@ class ImportMailerTest < ActionMailer::TestCase
 
     assert_match "isn't a Fizzy account export", email.body.encoded
   end
+
+  test "failed with insufficient_storage_space reason keeps the server's storage out of the email" do
+    import = Account::Import.create!(account: Current.account, identity: identities(:david), status: :failed, failure_reason: :insufficient_storage_space)
+    email = ImportMailer.failed(import)
+
+    assert_emails 1 do
+      email.deliver_now
+    end
+
+    assert_match "reach out for help if the problem persists", email.body.encoded
+    assert_no_match "storage", email.body.encoded
+  end
 end

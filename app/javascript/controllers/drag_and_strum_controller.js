@@ -49,11 +49,12 @@ export default class extends Controller {
   connect() {
     this.instrumentIndex = 0
     this.preloadedAudioFiles = []
-    document.addEventListener("keydown", this.handleKeyDown.bind(this));
+    this.boundHandleKeyDown = this.handleKeyDown.bind(this)
+    document.addEventListener("keydown", this.boundHandleKeyDown);
   }
 
   disconnect() {
-    document.removeEventListener("keydown", this.handleKeyDown.bind(this));
+    document.removeEventListener("keydown", this.boundHandleKeyDown);
   }
 
   handleKeyDown(event) {

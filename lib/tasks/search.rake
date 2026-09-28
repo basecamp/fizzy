@@ -2,11 +2,12 @@ namespace :search do
   desc "Reindex all cards and comments in the search index"
   task reindex: :environment do
     puts "Clearing search records..."
+    # Raw deletes rather than a per-account remove: a row whose account is gone has no account to visit.
     if ActiveRecord::Base.connection.adapter_name == "SQLite"
       ActiveRecord::Base.connection.execute("DELETE FROM search_records")
       ActiveRecord::Base.connection.execute("DELETE FROM search_records_fts")
     else
-      Search::Record::Trilogy::SHARD_COUNT.times do |shard_id|
+      ActiveSearch::StoreAdapters::MysqlSharded::SHARD_COUNT.times do |shard_id|
         ActiveRecord::Base.connection.execute("DELETE FROM search_records_#{shard_id}")
       end
     end

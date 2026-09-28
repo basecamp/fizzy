@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_07_09_120000) do
+ActiveRecord::Schema[8.2].define(version: 2026_09_28_120000) do
   create_table "accesses", id: :uuid, force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -78,7 +78,7 @@ ActiveRecord::Schema[8.2].define(version: 2026_07_09_120000) do
     t.string "holder_type", limit: 255, null: false
     t.string "name", limit: 255
     t.binary "public_key", null: false
-    t.integer "sign_count", default: 0, null: false
+    t.bigint "sign_count", default: 0, null: false
     t.text "transports", limit: 65535
     t.datetime "updated_at", null: false
     t.index ["credential_id"], name: "index_action_pack_passkeys_on_credential_id", unique: true
@@ -361,6 +361,15 @@ ActiveRecord::Schema[8.2].define(version: 2026_07_09_120000) do
     t.index ["identity_id"], name: "index_access_token_on_identity_id"
   end
 
+  create_table "identity_transfers", id: :uuid, force: :cascade do |t|
+    t.uuid "identity_id", null: false
+    t.string "token", limit: 255, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["identity_id"], name: "index_identity_transfers_on_identity_id"
+    t.index ["token"], name: "index_identity_transfers_on_token", unique: true
+  end
+
   create_table "magic_links", id: :uuid, force: :cascade do |t|
     t.string "code", limit: 255, null: false
     t.datetime "created_at", null: false
@@ -630,6 +639,6 @@ ActiveRecord::Schema[8.2].define(version: 2026_07_09_120000) do
     t.index ["account_id"], name: "index_webhooks_on_account_id"
     t.index ["board_id", "subscribed_actions"], name: "index_webhooks_on_board_id_and_subscribed_actions"
   end
-  execute "CREATE VIRTUAL TABLE search_records_fts USING fts5(\n  title,\n  content,\n  tokenize='unicode61'\n)"
+  execute "CREATE VIRTUAL TABLE search_records_fts USING fts5(\n        title,\n        content,\n        tokenize='porter'\n      )"
 
 end

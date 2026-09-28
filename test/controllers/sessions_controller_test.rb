@@ -87,6 +87,29 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "destroy closes every remote connection for the signed-out identity and lets valid sessions reconnect" do
+    kevin = users(:kevin)
+    other_account_user = User.create!(identity: kevin.identity, account: accounts(:initech), role: "member", name: "Kevin Elsewhere")
+
+    sign_in_as :kevin
+
+    disconnected_users = []
+    reconnect_flags = []
+    remote_connections = Object.new
+    remote_connections.define_singleton_method(:where) { |current_user:| disconnected_users << current_user; self }
+    remote_connections.define_singleton_method(:disconnect) { |reconnect:| reconnect_flags << reconnect }
+    ActionCable.server.stubs(:remote_connections).returns(remote_connections)
+
+    untenanted do
+      delete session_path
+    end
+
+    assert_equal [ kevin, other_account_user ].map(&:id).sort, disconnected_users.map(&:id).sort,
+      "sign-out must disconnect every per-account user of the signed-out identity"
+    assert_equal [ true, true ], reconnect_flags,
+      "reconnect must stay true so still-valid sessions on other devices recover"
+  end
+
   test "create via JSON" do
     untenanted do
       post session_path(format: :json), params: { email_address: identities(:david).email_address }

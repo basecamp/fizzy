@@ -3,14 +3,14 @@ require "test_helper"
 class Card::SearchableTest < ActiveSupport::TestCase
   include SearchTestHelper
 
-  test "searchable? returns true for published cards" do
+  test "published cards are indexed" do
     card = @board.cards.create!(title: "Published Card", status: "published", creator: @user)
-    assert card.searchable?
+    assert_not_nil find_search_record(@account.id, type: "Card", id: card.id)
   end
 
-  test "searchable? returns false for draft cards" do
+  test "draft cards are not indexed" do
     card = @board.cards.create!(title: "Draft Card", status: "drafted", creator: @user)
-    assert_not card.searchable?
+    assert_nil find_search_record(@account.id, type: "Card", id: card.id)
   end
 
   test "card search" do
@@ -43,91 +43,77 @@ class Card::SearchableTest < ActiveSupport::TestCase
   end
 
   test "search content is truncated to a reasonable limit" do
-    search_record_class = Search::Record.for(@user.account_id)
+    long_content = "asdf " * 8000
+    assert_operator long_content.bytesize, :>, Card::SEARCH_CONTENT_LIMIT,
+      "this test only bites when the description exceeds the limit"
 
-    # Create a card with unreasonably long content
-    long_content = "asdf " * Searchable::SEARCH_CONTENT_LIMIT
-    card = @board.cards.create!(title: "Card with long description", status: "published", creator: @user)
-    card.description = ActionText::Content.new(long_content)
-    card.save!
+    card = @board.cards.create!(title: "Card with long description", status: "published", creator: @user, description: long_content)
 
-    # Check if was indexed
-    results = Card.mentioning("asdf", user: @user)
-    assert_includes results, card
-
-    # Check the content length was within the limit
-    search_record = search_record_class.find_by(searchable_type: "Card", searchable_id: card.id)
-    assert search_record.content.bytesize <= Searchable::SEARCH_CONTENT_LIMIT
+    content = indexed_content_for(@account.id, type: "Card", id: card.id)
+    assert_predicate content, :present?
+    assert_operator content.bytesize, :<=, Card::SEARCH_CONTENT_LIMIT
   end
 
-  test "deleting card removes search record and FTS entry" do
-    search_record_class = Search::Record.for(@user.account_id)
+  test "editing a description reindexes the card" do
+    card = @board.cards.create!(title: "Card to edit", status: "published", creator: @user)
+    card.update!(description: "kestrelbravo appears only after the edit")
+
+    assert_includes Card.mentioning("kestrelbravo", user: @user), card
+  end
+
+  test "editing a comment body reindexes it" do
+    card = @board.cards.create!(title: "Card with a comment", status: "published", creator: @user)
+    comment = card.comments.create!(body: "original text", creator: @user)
+    comment.update!(body: "kestrelcharlie appears only after the edit")
+
+    assert_includes Card.mentioning("kestrelcharlie", user: @user), card
+  end
+
+  test "deleting card removes search record" do
     card = @board.cards.create!(title: "Card to delete", status: "published", creator: @user)
 
     # Verify search record exists
-    search_record = search_record_class.find_by(searchable_type: "Card", searchable_id: card.id)
+    search_record = find_search_record(@account.id, type: "Card", id: card.id)
     assert_not_nil search_record, "Search record should exist after card creation"
-
-    # For SQLite, verify FTS entry exists
-    if search_record_class.connection.adapter_name == "SQLite"
-      fts_entry = search_record.search_records_fts
-      assert_not_nil fts_entry, "FTS entry should exist"
-      # FTS stores stemmed content for search matching, not original text
-      assert_equal Search::Stemmer.stem(card.title), fts_entry.title
-    end
 
     # Delete the card
     card.destroy
 
     # Verify search record is deleted
-    search_record = search_record_class.find_by(searchable_type: "Card", searchable_id: card.id)
+    search_record = find_search_record(@account.id, type: "Card", id: card.id)
     assert_nil search_record, "Search record should be deleted after card deletion"
-
-    # For SQLite, verify FTS entry is deleted
-    if search_record_class.connection.adapter_name == "SQLite"
-      fts_count = Search::Record::SQLite::Fts.where(rowid: card.id).count
-      assert_equal 0, fts_count, "FTS entry should be deleted"
-    end
   end
 
   test "updating a draft card does not index it" do
-    search_record_class = Search::Record.for(@user.account_id)
-
     card = @board.cards.create!(title: "Draft card", creator: @user, status: "drafted")
-    assert_nil search_record_class.find_by(searchable_type: "Card", searchable_id: card.id)
+    assert_nil find_search_record(@account.id, type: "Card", id: card.id)
 
     card.update!(title: "Updated draft card")
-    assert_nil search_record_class.find_by(searchable_type: "Card", searchable_id: card.id),
-      "Draft card should not be indexed after update"
+    assert_nil find_search_record(@account.id, type: "Card", id: card.id), "Draft card should not be indexed after update"
 
     results = Card.mentioning("Updated", user: @user)
     assert_not_includes results, card
   end
 
   test "publishing a draft card indexes it" do
-    search_record_class = Search::Record.for(@user.account_id)
-
     card = @board.cards.create!(title: "Draft to publish", creator: @user, status: "drafted")
-    assert_nil search_record_class.find_by(searchable_type: "Card", searchable_id: card.id)
+    assert_nil find_search_record(@account.id, type: "Card", id: card.id)
 
     card.publish
-    search_record = search_record_class.find_by(searchable_type: "Card", searchable_id: card.id)
+    search_record = find_search_record(@account.id, type: "Card", id: card.id)
     assert_not_nil search_record, "Published card should be indexed"
-    assert_equal card.id, search_record.card_id
 
     results = Card.mentioning("publish", user: @user)
     assert_includes results, card
   end
 
   test "unpublishing a draft card removes it from the search index" do
-    search_record_class = Search::Record.for(@user.account_id)
-
     card = @board.cards.create!(title: "Draft to publish", creator: @user, status: "published")
-    assert_not_nil search_record_class.find_by(searchable_type: "Card", searchable_id: card.id)
+    assert_not_nil find_search_record(@account.id, type: "Card", id: card.id)
 
     card.update!(status: "drafted")
 
-    assert_nil search_record_class.find_by(searchable_type: "Card", searchable_id: card.id)
+    assert_nil find_search_record(@account.id, type: "Card", id: card.id)
     results = Card.mentioning("publish", user: @user)
     assert_not_includes results, card
   end

@@ -1,0 +1,557 @@
+#!/usr/bin/env -S -u BASH_ENV /bin/bash
+# shellcheck shell=bash
+# Contract test for .githooks/pre-commit.
+#
+# Run it DIRECTLY -- ./test/prek-hook-test -- never `bash test/prek-hook-test`.
+# The whole shebang is load-bearing, and for hygiene rather than for defence
+# against this repository, which supplies this file anyway. -u BASH_ENV:
+# non-interactive bash sources $BASH_ENV before line 1, so a value inherited
+# from an unrelated tool runs arbitrary code ahead of everything below.
+# /bin/bash rather than bash: the interpreter is chosen before line 1 too, so
+# an ambient PATH would otherwise decide which bash reads this. Either can
+# quietly change what this test reports, and neither can be checked from inside
+# the file -- so the "test harness interpreter" section re-runs line 1 against
+# both.
+#
+# Git runs that hook three ways: from a terminal, where a login profile has
+# already built PATH; from a GUI client (Tower, Fork, GitHub Desktop) with a
+# bare launchd/systemd environment and no profile; and from an agent session --
+# Claude Code, Codex and opencode are provisioned fleet-wide -- whose PATH
+# orders mise's shims BELOW /usr/bin. All three must resolve this project's
+# mise-managed toolchain and export its [env].
+#
+# That third one is why the hook declares the shims directory itself. `mise
+# exec` strips the install directories it recognises out of the inherited PATH,
+# then inserts the resolved ones immediately BEFORE the shims entry, keeping
+# that entry -- or prepends them when there is no shims entry at all. So shims
+# ordered below /usr/bin silently resolve /usr/bin/ruby, and a globally
+# activated installs/ruby/4/bin nine places AHEAD of /usr/bin loses to it too,
+# because mise strips that entry and re-lands the toolchain at the shims
+# position. Foreign entries are never touched. An earlier revision of
+# this file recorded the opposite -- that shipyard "already orders ~/.local/bin
+# and mise's shims above /usr/bin, so `mise exec` resolves the toolchain
+# unaided" -- and dropped the shims handling as unnecessary. A login shell does
+# order them that way; an agent session does not, and on that premise the hook
+# shipped resolving the wrong ruby. The third scenario below is what now holds
+# the premise to account.
+#
+# Run it directly:  ./test/prek-hook-test
+#
+# Deliberately small, but not empty. A GUI launch runs no login profile, so
+# nothing orders coexisting mise installations for it -- the hook picks by
+# version floor instead, and refuses to let a prerelease satisfy the stable
+# floor it precedes. Both are exercised below.
+
+set -uo pipefail
+
+# Sanitize PATH first -- before `cd`, before `dirname`, before any external
+# command at all. This runs with a checkout as its cwd and shipyard puts ./bin
+# at high precedence, so whichever tree you are in supplies the dirname, sed and
+# mise this test depends on, and the result would quietly describe that tree
+# instead of this one. Builtins only: a filter built from external tools would
+# already be too late.
+_inherited_path=$PATH   # before sanitizing; the terminal fallback needs the real one
+_absolute=''
+IFS=:
+for _dir in $PATH; do
+  case $_dir in /*) _absolute="${_absolute:+$_absolute:}$_dir" ;; esac
+done
+unset IFS _dir
+PATH="${_absolute:+$_absolute:}$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+export PATH
+unset _absolute
+
+# Line 1 is re-asserted below, and `cd` invalidates a relative $0 -- read it
+# now, with a builtin, before either happens. Pre-set it so an unreadable $0
+# fails that assertion under `set -u` rather than aborting the whole run.
+self_shebang=''
+IFS= read -r self_shebang < "$0"
+
+cd "$(dirname "$0")/.." || exit 1
+
+HOOK=.githooks/pre-commit
+# shellcheck disable=SC2016  # the literal text of the hook's final line
+LAST_LINE='exec "$mise" exec -- prek run'
+pass=0 fail=0
+
+ok() { pass=$((pass + 1)); printf '  ok %s\n' "$1"; }
+no() { fail=$((fail + 1)); printf '  NOT OK %s\n' "$1"; shift; [ $# -gt 0 ] && printf '       %s\n' "$@"; }
+die() { printf 'FATAL: %s\n' "$1" >&2; exit 1; }
+
+command -v mise >/dev/null || die "mise is not installed"
+
+# Ground truth from the config file, not from the dispatch under test. An empty
+# result is fatal rather than a silent skip, which would turn a broken
+# extraction into a false pass.
+env_section=$(sed -n '/^\[env\]/,/^\[/p' .mise.toml) || die "could not read .mise.toml"
+env_keys=$(printf '%s\n' "$env_section" | grep -E '^[A-Za-z_][A-Za-z0-9_]*[[:space:]]*=' | sed 's/[[:space:]]*=.*//')
+[ -n "$env_keys" ] || die "no [env] keys found in .mise.toml"
+
+[ "$(tail -n 1 "$HOOK")" = "$LAST_LINE" ] || die "hook's last line is not: $LAST_LINE"
+
+workdir=$(mktemp -d "${TMPDIR:-/tmp}/prek-hook-test.XXXXXX") || die "mktemp failed"
+relbin=$(mktemp -d ./prek-hook-test.XXXXXX) || die "mktemp failed"
+trap 'rm -rf "$workdir" "$relbin"' EXIT
+
+# --- this harness's own interpreter ------------------------------------------
+# Everything below trusts that line 1 named the interpreter absolutely and
+# dropped BASH_ENV. Both take effect before any line of this file runs, so
+# neither can be observed from the inside -- instead run a probe carrying this
+# file's shebang verbatim, under the two environments it defends against.
+echo "test harness interpreter:"
+if [ "$self_shebang" = '#!/usr/bin/env -S -u BASH_ENV /bin/bash' ]; then
+  ok "shebang names /bin/bash absolutely and unsets BASH_ENV"
+else
+  no "shebang names /bin/bash absolutely and unsets BASH_ENV" "line 1: ${self_shebang:-<empty>}"
+fi
+
+hostile="$workdir/hostile"
+mkdir -p "$hostile"
+printf '#!/bin/sh\necho HOSTILE_BASH_RAN\nexit 0\n' > "$hostile/bash"
+chmod +x "$hostile/bash"
+printf 'echo POISONED_BASH_ENV_RAN\n' > "$workdir/bash_env"
+printf '%s\necho PROBE_RAN\n' "$self_shebang" > "$workdir/shebang-probe"
+chmod +x "$workdir/shebang-probe"
+shebang_out=$(env -i HOME="$HOME" PATH="$hostile:/usr/bin:/bin" \
+  BASH_ENV="$workdir/bash_env" "$workdir/shebang-probe" 2>&1)
+# The probe has to reach its own body first; without that the two absences
+# below would pass for a probe that never ran at all.
+case $shebang_out in
+  *PROBE_RAN*) ok "the probe runs under a hostile PATH and a poisoned BASH_ENV" ;;
+  *) no "the probe runs under a hostile PATH and a poisoned BASH_ENV" "output: ${shebang_out:-<empty>}" ;;
+esac
+case $shebang_out in
+  *HOSTILE_BASH_RAN*) no "a bash earlier on PATH is not the interpreter" "output: $shebang_out" ;;
+  *) ok "a bash earlier on PATH is not the interpreter" ;;
+esac
+case $shebang_out in
+  *POISONED_BASH_ENV_RAN*) no "an inherited BASH_ENV is not sourced" "output: $shebang_out" ;;
+  *) ok "an inherited BASH_ENV is not sourced" ;;
+esac
+
+probe="$workdir/probe"
+cat > "$probe" <<'PROBE'
+#!/bin/sh
+printf 'ruby=%s\n' "$(ruby -e 'print RUBY_VERSION' 2>/dev/null || echo NONE)"
+printf 'ruby_path=%s\n' "$(command -v ruby || echo NONE)"
+printf 'MISE_PICK=%s\n' "${MISE_PICK-<UNSET>}"
+for k in $PROBE_ENV_KEYS; do
+  eval "printf '%s=%s\n' \"\$k\" \"\${$k-<UNSET>}\""
+done
+PROBE
+chmod +x "$probe"
+
+# Swap only the hook's final exec for the probe, so its PATH handling runs
+# verbatim.
+hook_with_probe() {
+  local tmp="$workdir/hook.$1"
+  sed "s|^$(printf '%s' "$LAST_LINE" | sed 's/[[\.*^$/]/\\&/g')\$|exec \"\$mise\" exec -- $probe|" "$HOOK" > "$tmp"
+  chmod +x "$tmp"
+  printf '%s' "$tmp"
+}
+
+field() { printf '%s\n' "$1" | sed -n "s/^$2=//p"; }
+
+# Extra KEY=VALUE arguments after the hook are added to the modelled
+# environment. Used to give the terminal scenario the store configuration a
+# login profile supplies; the GUI scenario deliberately gets none.
+run_hook() {
+  local path=$1 hook=$2
+  shift 2
+  env -i HOME="$HOME" USER="${USER:-$(id -un)}" LOGNAME="${USER:-$(id -un)}" \
+    SHELL=/bin/sh TMPDIR="${TMPDIR:-/tmp}" PROBE_ENV_KEYS="$env_keys" \
+    ${1+"$@"} PATH="$path" "$hook" 2>&1
+}
+
+# The agent scenario inherits the invoking environment rather than rebuilding it.
+# An agent session does inherit the developer's environment, so this models one
+# directly -- and it is why no store variables are forwarded: expected_ruby_path
+# is derived in this same environment, so the two agree by construction, under
+# any store configuration. The forwarded list this replaces had to name every
+# variable that can relocate mise's install tree, and twice did not.
+#
+# It could not have been completed even in principle, which is the real argument
+# for deleting it rather than extending it a third time. shared_install_dirs is
+# a genuine mise SETTING, so a config FILE relocates the install tree just as an
+# environment variable does -- and the list named no config-dir variable at all.
+# Measured: with MISE_CONFIG_DIR pointing at a config declaring
+# shared_install_dirs, the old harness failed a working hook and this one
+# passes. (data_dir, shims_dir and installs_dir are environment-only by
+# contrast: `mise settings get` calls them "Unknown setting", not merely unset,
+# and a config file setting them is ignored with a warning.)
+#
+# Three overrides and two removals. PATH is the thing under test.
+# __MISE_ORIG_PATH is what a real agent session carries, and must describe the
+# PATH we are supplying, not the one we inherited -- so __MISE_DIFF, which
+# describes the inherited PATH, is dropped as incoherent with it.
+#
+# The [env] keys are unset because this environment may already carry them: a
+# mise-activated project shell exports PROMETHEUS_EXPORTER_URL, and running the
+# suite that way is normal. Inheriting them would let the [env] assertions pass
+# on ambient state instead of on what the hook exported -- decorative exactly
+# the way two assertions in this file already once shipped decorative. The list
+# is $env_keys, read from .mise.toml, so it carries no completeness obligation.
+#
+# Accepted consequence: a genuinely broken developer environment (say
+# MISE_AUTO_INSTALL=0) now surfaces here. That is fidelity, not flakiness --
+# their actual hook would fail the same way.
+# The third argument picks how much of mise's activation state to carry:
+#
+#   keep  drop __MISE_DIFF only. The faithful model -- a real agent session
+#         inherits a shell that mise activated, so it does carry the rest.
+#   bare  also drop __MISE_SESSION, MISE_SHELL and __MISE_EXE.
+#
+# Both are exercised, because neither is obviously the right one. `keep` leaves a
+# combination no real shell produces (activated, but with the PATH delta removed)
+# out of undocumented mise internals; `bare` is coherent but drifts from the
+# session being modelled. Rather than pick one interpretation and hope, assert
+# the hook resolves correctly under both -- which is the property actually
+# wanted, and which stays checked if a future mise changes what these mean.
+run_hook_inheriting() {
+  local path=$1 hook=$2 activation=${3:-keep} k
+  local scrub=()
+  for k in $env_keys; do scrub+=(-u "$k"); done
+  case $activation in
+    keep) ;;
+    bare) scrub+=(-u __MISE_SESSION -u MISE_SHELL -u __MISE_EXE) ;;
+    *) die "run_hook_inheriting: unknown activation mode '$activation'" ;;
+  esac
+  # ${scrub[@]+...} for the same bash 3.2 reason as $login_store below, even
+  # though $env_keys is fatal-if-empty above and so this array never is.
+  env ${scrub[@]+"${scrub[@]}"} -u __MISE_DIFF \
+    PATH="$path" __MISE_ORIG_PATH="$path" PROBE_ENV_KEYS="$env_keys" \
+    "$hook" 2>&1
+}
+
+# Ground truth, and it cannot be poisoned by the ordering these scenarios test,
+# which is worth saying because it looks like it could be: this runs in the
+# invoking environment, and that may itself be an agent shell with shims below
+# /usr/bin. The distinction is what mise is asked to resolve. `mise exec -- ruby`
+# and `mise which ruby` name a TOOL, which mise resolves from its own registry;
+# both return the project's ruby even with a decoy ruby ahead of the shims entry
+# on PATH. `mise exec -- <script>` -- what the hook does, and how prek reaches
+# bin/rubocop's `#!/usr/bin/env ruby` -- only hands the script a PATH, and that
+# PATH is where the substitution bites. Measured both ways against a fake ruby
+# placed first: the tool form returned 3.4.10, the script form ran the fake.
+expected_ruby=$(mise exec -- ruby -e 'print RUBY_VERSION' 2>/dev/null)
+[ -n "$expected_ruby" ] || die "could not determine the project's ruby via mise"
+expected_ruby_path=$(mise which ruby 2>/dev/null)
+[ -n "$expected_ruby_path" ] || die "could not determine the project's ruby path via mise"
+
+assert_run() {
+  local label=$1 out=$2 k want got
+  got=$(field "$out" ruby)
+  if [ "$got" = "$expected_ruby" ]; then
+    ok "$label: ruby is the project's $expected_ruby"
+  else
+    no "$label: ruby is the project's $expected_ruby" "got: ${got:-<empty>}"
+  fi
+  # The resolved path, for the two inheriting scenarios only. A version
+  # comparison cannot see the ordering bug on Arch, where /usr/bin/ruby is also
+  # 3.4.10 -- a broken hook passes. The path distinguishes them on both
+  # platforms.
+  #
+  # Scoped rather than global: expected_ruby_path is derived in the invoking
+  # environment, so it names the invoking environment's store. The GUI scenario
+  # deliberately receives no store variables and therefore resolves the DEFAULT
+  # store, so asserting this everywhere would contradict the GUI model and fail
+  # a working hook whenever the two stores differ. The agent and decoy scenarios
+  # are exempt -- in either activation mode -- because they inherit that
+  # environment wholesale, so the two agree by
+  # construction under any store configuration. Neither of the others can reach
+  # the ordering bug anyway: one has no shims entry at all, the other harvests
+  # an already-ordered PATH.
+  case $label in
+    agent* | decoy*)
+      got=$(field "$out" ruby_path)
+      if [ "$got" = "$expected_ruby_path" ]; then
+        ok "$label: ruby resolves to $expected_ruby_path"
+      else
+        no "$label: ruby resolves to $expected_ruby_path" "got: ${got:-<empty>}"
+      fi
+      ;;
+  esac
+  for k in $env_keys; do
+    want=$(printf '%s\n' "$env_section" | grep -E "^${k}[[:space:]]*=" | head -1 \
+      | sed 's/^[^=]*=[[:space:]]*//; s/^"//; s/"$//')
+    got=$(field "$out" "$k")
+    if [ "$got" = "$want" ]; then ok "$label: $k exported"
+    else no "$label: $k exported" "expected: $want" "actual: $got"; fi
+  done
+}
+
+# --- a GUI client's bare environment ----------------------------------------
+# No login profile has run, so PATH is whatever launchd/systemd provides. This
+# is the case bin/bcenv existed for.
+echo "GUI launch (no login profile):"
+assert_run gui "$(run_hook "/usr/bin:/bin:/usr/sbin:/sbin" "$(hook_with_probe gui)")"
+
+# --- a terminal, with the login profile applied ------------------------------
+echo "terminal launch (login profile applied):"
+# What the profile supplies: PATH, the store mise installs into, and the state
+# directory holding per-config trust records. expected_ruby resolves against
+# whatever this test inherits, so modelling the terminal from a subset of that
+# would compare two different mise configurations and fail a working setup.
+#
+# Harvest through the developer's OWN login shell. bin/bcenv detected it with
+# dscl/getent for exactly this reason: hardcoding bash models bash's profile for
+# someone whose PATH comes from zsh's, and reports a pass or failure they can
+# never reproduce. bash and zsh both take -lc with POSIX printf. fish does not,
+# and rebuilding bcenv's multi-shell matrix to read four variables is not worth
+# it -- fish and anything else fall back to the environment this process
+# inherited, which is itself a terminal's.
+#
+# What $_mise_dirs is for, now that it serves only this scenario: model the
+# developer's store faithfully, so the terminal case exercises their actual
+# configuration rather than a default one they do not run. It names the store,
+# install-tree and state variables a login profile can set. It carries no
+# completeness obligation -- a variable missing from it means this scenario
+# models a slightly plainer store than the developer's, not that an assertion
+# goes wrong. (It once carried one, when the agent scenario forwarded the same
+# list into an `env -i`; that scenario now inherits the environment instead.)
+_mise_dirs='MISE_SHIMS_DIR MISE_INSTALLS_DIR MISE_SHARED_INSTALL_DIRS MISE_DATA_DIR XDG_DATA_HOME MISE_STATE_DIR XDG_STATE_HOME'
+login_shell=$(dscl . -read "/Users/$(id -un)" UserShell 2>/dev/null | sed 's/^UserShell: *//')
+[ -n "$login_shell" ] || login_shell=$(getent passwd "$(id -un)" 2>/dev/null | cut -d: -f7)
+[ -n "$login_shell" ] || login_shell=${SHELL:-}
+case ${login_shell##*/} in
+  bash | zsh) ;;
+  *) login_shell='' ;;
+esac
+
+login_store=()
+if [ -n "$login_shell" ] && [ -x "$login_shell" ]; then
+  # shellcheck disable=SC2016  # these must expand in the login shell, not here
+  login_env=$(env -i HOME="$HOME" USER="${USER:-$(id -un)}" TERM=dumb \
+    "$login_shell" -lc 'printf "%s\n" "$PATH"
+      for v in '"$_mise_dirs"'; do eval "printf \"%s\\n\" \"\${$v-}\""; done' \
+    2>/dev/null)
+  login_path=$(printf '%s\n' "$login_env" | sed -n 1p)
+  _line=1
+  for _var in $_mise_dirs; do
+    _line=$((_line + 1))
+    _value=$(printf '%s\n' "$login_env" | sed -n "${_line}p")
+    [ -n "$_value" ] && login_store+=("$_var=$_value")
+  done
+  _from="$login_shell login profile"
+else
+  login_path=$_inherited_path
+  for _var in $_mise_dirs; do
+    eval "_value=\${$_var-}"
+    [ -n "$_value" ] && login_store+=("$_var=$_value")
+  done
+  _from="inherited environment (login shell ${login_shell:-unknown} not reconstructable)"
+fi
+echo "  environment from: $_from"
+unset _var _value _line _mise_dirs
+# ${login_store[@]+...} because macOS ships bash 3.2, where expanding an empty
+# array under `set -u` is an error.
+assert_run terminal "$(run_hook "${login_path:-$_inherited_path}" "$(hook_with_probe login)" \
+  ${login_store[@]+"${login_store[@]}"})"
+
+# --- an agent session's environment ------------------------------------------
+# Claude Code, Codex and opencode are provisioned fleet-wide, and their PATH
+# orders mise's shims below /usr/bin. `mise exec` substitutes install dirs at
+# the shims entry's position, so inherited ordering -- not the hook -- decided
+# the toolchain. Neither scenario above can catch that: one has no shims entry
+# at all, the other harvests an already-correct order from the login profile.
+#
+# This scenario runs through run_hook_inheriting: no store variables are
+# forwarded, because the environment is inherited whole. agent_shims gets the
+# same benefit incidentally -- it is computed from the invoking environment's
+# variables, and the hook now inherits those same variables, so the modelled
+# PATH and the hook's own derivation agree by construction rather than by
+# matching lists.
+echo "agent session (shims ordered below /usr/bin):"
+agent_shims=${MISE_SHIMS_DIR:-${MISE_DATA_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/mise}/shims}
+agent_path="/usr/bin:/bin:$agent_shims:/usr/sbin:/sbin"
+assert_run agent "$(run_hook_inheriting "$agent_path" "$(hook_with_probe agent)" keep)"
+assert_run agent-bare "$(run_hook_inheriting "$agent_path" "$(hook_with_probe agent-bare)" bare)"
+
+# --- an unrelated ruby earlier on PATH ---------------------------------------
+# A deterministic foreign-ruby fixture. NOT a different mise code path, which is
+# worth stating because it is the obvious thing to claim and it is wrong: the
+# agent scenario already carries a foreign ruby ahead of the shims entry, since
+# /usr/bin/ruby is itself foreign and mise never strips it.
+#
+# What this adds is independence and an unmistakable signal. The agent
+# scenario's competitor is whatever ruby the platform happens to ship at
+# /usr/bin -- 2.6.10 on macOS, 3.4.10 on Arch, and eventually nothing at all,
+# since Apple is removing it; on a host without one that scenario would quietly
+# have nothing left to beat, and would pass whatever the hook did. This one
+# always has a competitor, and it fails as DECOY_RUBY rather than as a version
+# string that might coincide with the project's.
+#
+# Kept separate rather than folded into the agent PATH deliberately: with a
+# decoy winning, a broken hook would fail by version everywhere, and the suite
+# would lose the Arch-specific evidence that it fails there by PATH alone
+# (/usr/bin/ruby is also 3.4.10 on Arch). Both properties are worth holding.
+echo "an unrelated ruby earlier on PATH does not win:"
+decoy="$workdir/decoy"
+mkdir -p "$decoy"
+printf '#!/bin/sh\necho DECOY_RUBY\n' > "$decoy/ruby"
+chmod +x "$decoy/ruby"
+decoy_path="$decoy:$agent_path"
+assert_run decoy "$(run_hook_inheriting "$decoy_path" "$(hook_with_probe decoy)" keep)"
+assert_run decoy-bare "$(run_hook_inheriting "$decoy_path" "$(hook_with_probe decoy-bare)" bare)"
+
+# --- the negative control -----------------------------------------------------
+# Everything above is green, and green proves nothing on its own: it has to be
+# possible for a broken hook to turn it red. That is not a theoretical worry
+# here. This file used to build its scenarios with `env -i`, and twice shipped
+# assertions that could not fail -- `env -i` stripped PWD, so the case under
+# test never ran at all. The scenarios above inherit the environment instead,
+# which trades that hazard for a new one: inherited mise state could
+# reconstitute the install directories and repair a hook that is actually
+# broken, leaving these assertions decorative in exactly the same way.
+#
+# So mutate the hook here, in the suite, rather than trusting a measurement
+# someone once took by hand and wrote in a pull request. Remove the two lines
+# that declare the shims directory -- the fix itself -- and require the decoy
+# scenario to notice. Failure to mutate is fatal, not a skip: a silently
+# unmutated hook would "pass" this control while proving nothing.
+echo "the inheriting scenarios are sensitive to the fix (negative control):"
+mutant="$workdir/hook.mutant-stripped"
+mutant_src=$(hook_with_probe mutant)
+# shellcheck disable=SC2016  # the literal text of the two lines being removed
+grep -v -e '^PATH="\$mise_shims:\$PATH"$' \
+        -e '^mise_shims=\${MISE_SHIMS_DIR' "$mutant_src" > "$mutant"
+chmod +x "$mutant"
+removed=$(( $(wc -l < "$mutant_src") - $(wc -l < "$mutant") ))
+[ "$removed" -eq 2 ] || die "negative control could not mutate the hook: removed $removed lines, expected 2"
+# Assert the decoy POSITIVELY -- name the exact path and the exact version --
+# rather than merely differing from expected_ruby_path. "Not the expected path"
+# is also satisfied by an empty field, which is what an early exit, a failed
+# probe substitution or a mutant that never executed would produce. That is the
+# same liveness hole this control exists to close, and it would close it for the
+# scenarios above while leaving it open here.
+#
+# MISE_ACTIVATE_AGGRESSIVE is forced off for BOTH halves of this control. With it
+# on, `mise exec` prepends the resolved installs to the very front of PATH --
+# ahead of the decoy -- instead of inserting them before the retained shims
+# entry, so it repairs the mutant and nothing can be demonstrated.
+#
+# Forcing it off for the mutant alone is not enough, and the reason is the whole
+# point of the control. On a machine with the setting on, the scenarios above
+# pass because mise prepends, NOT because the hook's shims prepend works -- they
+# are insensitive to the regression there. A mutant run under a *different*
+# setting than the scenarios it vouches for demonstrates nothing about them: the
+# suite would go green while a developer edited the prepend away, and ship a
+# hook broken for everyone whose activation is not aggressive. So the control
+# runs a REAL-hook probe and a mutant probe under one identical configuration,
+# and requires them to disagree. That is what sensitivity means here.
+#
+# Forced to 0 rather than unset: activate_aggressive is a real mise setting, so a
+# config file can turn it on with no variable in the environment at all, and only
+# an explicit 0 overrides that.
+for _mode in keep bare; do
+  # The real hook, under the same forced setting as the mutant below.
+  out=$(MISE_ACTIVATE_AGGRESSIVE=0 run_hook_inheriting "$decoy_path" "$mutant_src" "$_mode")
+  got=$(field "$out" ruby_path)
+  if [ "$got" = "$expected_ruby_path" ]; then
+    ok "$_mode: with the shims prepend the project's ruby beats the decoy"
+  else
+    no "$_mode: with the shims prepend the project's ruby beats the decoy" \
+       "ruby_path: ${got:-<empty>} (want $expected_ruby_path)" \
+       "the paired mutant check below is meaningless unless this passes"
+  fi
+  out=$(MISE_ACTIVATE_AGGRESSIVE=0 run_hook_inheriting "$decoy_path" "$mutant" "$_mode")
+  got=$(field "$out" ruby_path)
+  want=$(field "$out" ruby)
+  if [ "$got" = "$decoy/ruby" ] && [ "$want" = DECOY_RUBY ]; then
+    ok "$_mode: without the shims prepend the decoy wins"
+  else
+    no "$_mode: without the shims prepend the decoy wins" \
+       "ruby_path: ${got:-<empty>} (want $decoy/ruby)" \
+       "ruby: ${want:-<empty>} (want DECOY_RUBY)" \
+       "if it resolved the project's ruby, inherited state is repairing the break" \
+       "and the decoy assertions above cannot fail"
+  fi
+done
+unset _mode
+
+# --- coexisting installations ------------------------------------------------
+# bin/setup upgrades whichever mise it resolved and leaves the rest installed,
+# so a stale copy can sit ahead of or behind the maintained one. A GUI launch
+# has no login profile to order them. Both orders are exercised, so a fix that
+# merely reorders PATH cannot pass.
+echo "coexisting installations are chosen by version, not position:"
+min_version=$(sed -n 's/^[[:space:]]*min_version[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p' .mise.toml | head -1)
+if [ -z "$min_version" ]; then
+  die ".mise.toml declares no min_version; the hook's selection cannot be tested"
+fi
+mk_mise() { # dir, reported version, marker
+  mkdir -p "$1"
+  cat > "$1/mise" <<EOF
+#!/bin/sh
+if [ "\$1" = --version ]; then echo "$2 test"; exit 0; fi
+MISE_PICK=$3
+export MISE_PICK
+exec "$(command -v mise)" "\$@"
+EOF
+  chmod +x "$1/mise"
+}
+stale="$workdir/stale/bin"; fresh="$workdir/fresh/bin"
+mk_mise "$stale" 1.0.0 stale
+mk_mise "$fresh" 9999.1.1 fresh
+for order in stale-first fresh-first; do
+  case $order in
+    stale-first) candidates="$stale:$fresh" ;;
+    fresh-first) candidates="$fresh:$stale" ;;
+  esac
+  out=$(run_hook "$candidates:/usr/bin:/bin" "$(hook_with_probe "$order")")
+  if [ "$(field "$out" MISE_PICK)" = fresh ]; then
+    ok "$order: skips the below-floor mise, picks the one meeting min_version"
+  else
+    no "$order: skips the below-floor mise, picks the one meeting min_version" \
+       "picked: $(field "$out" MISE_PICK)"
+  fi
+done
+
+# --- a prerelease does not satisfy the stable floor it precedes ---------------
+echo "prerelease handling:"
+pre="$workdir/pre/bin"; stable="$workdir/stable/bin"
+mk_mise "$pre" "$min_version-rc.1" prerelease
+mk_mise "$stable" "$min_version" stable
+out=$(run_hook "$pre:$stable:/usr/bin:/bin" "$(hook_with_probe prerelease)")
+if [ "$(field "$out" MISE_PICK)" = stable ]; then
+  ok "skips $min_version-rc.1 and picks the stable $min_version behind it"
+else
+  no "skips $min_version-rc.1 and picks the stable $min_version behind it" \
+     "picked: $(field "$out" MISE_PICK)"
+fi
+
+# --- relative PATH entries do not decide which mise runs ----------------------
+# Shipyard puts ./bin at high PATH precedence and a hook's cwd is the working
+# tree, so a relative entry resolves against whatever is being committed in.
+# Worth preventing as accidental shadowing. NOT a security boundary: git runs
+# the repository's own tracked .githooks/pre-commit, so a hostile checkout has
+# already chosen what executes before PATH matters at all.
+echo "relative PATH entries do not supply mise:"
+cat > "$relbin/mise" <<EOF
+#!/bin/sh
+MISE_PICK=repo-local
+export MISE_PICK
+exec "$(command -v mise)" "\$@"
+EOF
+chmod +x "$relbin/mise"
+out=$(run_hook "$relbin:.:/usr/bin:/bin" "$(hook_with_probe relative)")
+if [ "$(field "$out" MISE_PICK)" = repo-local ]; then
+  no "a mise in a relative PATH entry is not executed" "the hook ran ./$relbin/mise"
+else
+  ok "a mise in a relative PATH entry is not executed"
+fi
+
+
+# --- the accepted boundary ---------------------------------------------------
+# A mise reachable only through a login profile is not found under a GUI
+# launch. That must fail loudly, and must not point at bin/setup, which accepts
+# such an installation unchanged.
+echo "unreachable mise (the accepted profile-only boundary):"
+if grep -q 'GUI git client' "$HOOK"; then ok "diagnostic names the GUI/login-profile boundary"
+else no "diagnostic names the GUI/login-profile boundary"; fi
+if grep -q 'bin/setup will not help' "$HOOK"; then ok "diagnostic says rerunning bin/setup will not help"
+else no "diagnostic says rerunning bin/setup will not help"; fi
+
+echo
+printf '%d passed, %d failed\n' "$pass" "$fail"
+[ "$fail" -eq 0 ]

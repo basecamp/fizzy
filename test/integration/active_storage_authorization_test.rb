@@ -63,6 +63,39 @@ class ActiveStorageAuthorizationTest < ActionDispatch::IntegrationTest
     assert_response :forbidden
   end
 
+  # Authorization must gate the preview parser itself, not just the returned bytes.
+  # set_representation runs @blob.representation(...).processed (ffmpeg/mutool/libvips);
+  # a forbidden or unauthenticated request must never reach it.
+  test "unauthenticated user does not run the representation parser" do
+    representation_path = rails_representation_path(@blob.representation(resize_to_limit: [ 100, 100 ]))
+    proxy_path = rails_storage_proxy_path(@blob.representation(resize_to_limit: [ 100, 100 ]))
+
+    ActiveStorage::Blob.any_instance.expects(:representation).never
+
+    get representation_path
+    assert_response :redirect
+    assert_match %r{/session/new}, response.location
+
+    get proxy_path
+    assert_response :redirect
+    assert_match %r{/session/new}, response.location
+  end
+
+  test "authenticated user without board access does not run the representation parser" do
+    sign_in_as :mike
+
+    representation_path = rails_representation_path(@blob.representation(resize_to_limit: [ 100, 100 ]))
+    proxy_path = rails_storage_proxy_path(@blob.representation(resize_to_limit: [ 100, 100 ]))
+
+    ActiveStorage::Blob.any_instance.expects(:representation).never
+
+    get representation_path
+    assert_response :forbidden
+
+    get proxy_path
+    assert_response :forbidden
+  end
+
   test "unauthenticated user can view blob on published board with published card" do
     @board.publish
 

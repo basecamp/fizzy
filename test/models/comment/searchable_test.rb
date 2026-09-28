@@ -7,48 +7,39 @@ class Comment::SearchableTest < ActiveSupport::TestCase
     @card = @board.cards.create!(title: "Test Card", status: "published", creator: @user)
   end
 
-  test "searchable? returns true for comments on published cards" do
+  test "comments on published cards are indexed" do
     comment = @card.comments.create!(body: "test comment", creator: @user)
-    assert comment.searchable?
+    assert_not_nil find_search_record(@account.id, type: "Comment", id: comment.id)
   end
 
-  test "searchable? returns false for comments on draft cards" do
-    draft_card = @board.cards.create!(title: "Draft Card", status: "drafted", creator: @user)
-    comment = draft_card.comments.build(body: "test comment", creator: @user)
-    assert_not comment.searchable?
+  test "unpublishing a card leaves its comments indexed until they are reindexed" do
+    card = @board.cards.create!(title: "Card to draft", status: "published", creator: @user)
+    comment = card.comments.create!(body: "test comment", creator: @user)
+    assert_not_nil find_search_record(@account.id, type: "Comment", id: comment.id)
+
+    card.update!(status: "drafted")
+    assert_not_nil find_search_record(@account.id, type: "Comment", id: comment.id)
+
+    card.reindex_comments
+    assert_nil find_search_record(@account.id, type: "Comment", id: comment.id)
   end
 
   test "comment search" do
-    search_record_class = Search::Record.for(@user.account_id)
     # Comment is indexed on create
     comment = @card.comments.create!(body: "searchable comment text", creator: @user)
-    record = search_record_class.find_by(searchable_type: "Comment", searchable_id: comment.id)
+    record = find_search_record(@account.id, type: "Comment", id: comment.id)
     assert_not_nil record
 
     # Comment is updated in index
     comment.update!(body: "updated text")
-    record = search_record_class.find_by(searchable_type: "Comment", searchable_id: comment.id)
-    assert_match /updat/, record.content
+    assert_equal [ comment ], @user.search("updated").results.to_a
+    assert_empty @user.search("searchable").results.to_a
 
     # Comment is removed from index on destroy
     comment_id = comment.id
-    search_record_id = record.id
-
-    # For SQLite, verify FTS entry exists before deletion
-    if search_record_class.connection.adapter_name == "SQLite"
-      fts_entry = record.search_records_fts
-      assert_not_nil fts_entry, "FTS entry should exist before comment deletion"
-    end
-
     comment.destroy
-    record = search_record_class.find_by(searchable_type: "Comment", searchable_id: comment_id)
-    assert_nil record
-
-    # For SQLite, verify FTS entry is also deleted
-    if search_record_class.connection.adapter_name == "SQLite"
-      fts_count = Search::Record::SQLite::Fts.where(rowid: search_record_id).count
-      assert_equal 0, fts_count, "FTS entry should be deleted after comment deletion"
-    end
+    record = find_search_record(@account.id, type: "Comment", id: comment_id)
+    assert_nil record, "Search record should be deleted after comment deletion"
 
     # Finding cards via comment search
     card_with_comment = @board.cards.create!(title: "Card One", status: "published", creator: @user)
@@ -60,8 +51,23 @@ class Comment::SearchableTest < ActiveSupport::TestCase
 
     # Comment stores parent card_id and board_id
     new_comment = @card.comments.create!(body: "test comment", creator: @user)
-    record = search_record_class.find_by(searchable_type: "Comment", searchable_id: new_comment.id)
+    record = find_search_record(@account.id, type: "Comment", id: new_comment.id)
     assert_equal @card.id, record.card_id
     assert_equal @board.id, record.board_id
+  end
+
+  test "reindexing clears a stored column the document does not supply" do
+    skip "SQLite keeps text fields in the FTS table, not the record row" unless sharded_search?
+
+    comment = @card.comments.create!(body: "clears absent columns", creator: @user)
+    record = find_search_record(@account.id, type: "Comment", id: comment.id)
+    assert_not_nil record
+
+    search_shard_for(@account.id).where(id: record.id).update_all(title: "stale title")
+    assert_equal "stale title", find_search_record(@account.id, type: "Comment", id: comment.id).title
+
+    comment.reindex
+
+    assert_nil find_search_record(@account.id, type: "Comment", id: comment.id).title
   end
 end

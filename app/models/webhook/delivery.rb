@@ -79,7 +79,7 @@ class Webhook::Delivery < ApplicationRecord
       end
     rescue ResponseTooLarge
       { error: :response_too_large }
-    rescue Resolv::ResolvTimeout, Resolv::ResolvError, SocketError
+    rescue Surfguard::Unresolvable, Resolv::ResolvTimeout, Resolv::ResolvError, SocketError
       { error: :dns_lookup_failed }
     rescue Net::OpenTimeout, Net::ReadTimeout, Errno::ETIMEDOUT
       { error: :connection_timeout }
@@ -99,7 +99,7 @@ class Webhook::Delivery < ApplicationRecord
 
     def resolved_ip
       return @resolved_ip if defined?(@resolved_ip)
-      @resolved_ip = SsrfProtection.resolve_public_ip(uri.host)
+      @resolved_ip = Surfguard.resolve_public_ips(uri.host).first
     end
 
     def uri

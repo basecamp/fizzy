@@ -167,6 +167,118 @@ class ActionPack::WebAuthn::Authenticator::AttestationResponseTest < ActiveSuppo
     assert_equal "Unsupported attestation format: packed", error.message
   end
 
+  test "validate! raises for non-object client data instead of a 500" do
+    response = ActionPack::WebAuthn::Authenticator::AttestationResponse.new(
+      client_data_json: "123", # valid JSON, but not an object
+      attestation_object: ATTESTATION_NONE_VERIFIED,
+      origin: @origin
+    )
+
+    error = assert_raises(ActionPack::WebAuthn::InvalidResponseError) { response.validate! }
+    assert_equal "Client data is not a JSON object", error.message
+  end
+
+  test "validate! raises for a non-string challenge instead of a 500" do
+    client_data_json = { challenge: { nested: "object" }, origin: @origin, type: "webauthn.create" }.to_json
+    response = ActionPack::WebAuthn::Authenticator::AttestationResponse.new(
+      client_data_json: client_data_json,
+      attestation_object: ATTESTATION_NONE_VERIFIED,
+      origin: @origin
+    )
+
+    error = assert_raises(ActionPack::WebAuthn::InvalidResponseError) { response.validate! }
+    assert_match(/Challenge (is invalid|missing)/, error.message)
+  end
+
+  test "validate! raises for an attestation object that is not a CBOR map instead of a 500" do
+    response = ActionPack::WebAuthn::Authenticator::AttestationResponse.new(
+      client_data_json: @client_data_json,
+      attestation_object: Base64.urlsafe_encode64("\x01".b, padding: false), # CBOR integer 1
+      origin: @origin
+    )
+
+    error = assert_raises(ActionPack::WebAuthn::InvalidResponseError) { response.validate! }
+    assert_equal "Malformed attestation object", error.message
+  end
+
+  test "raises for a non-string client data json or attestation object instead of a 500" do
+    assert_raises(ActionPack::WebAuthn::InvalidResponseError) do
+      ActionPack::WebAuthn::Authenticator::AttestationResponse.new(
+        client_data_json: 123, attestation_object: ATTESTATION_NONE_VERIFIED, origin: @origin
+      )
+    end
+
+    assert_raises(ActionPack::WebAuthn::InvalidResponseError) do
+      ActionPack::WebAuthn::Authenticator::AttestationResponse.new(
+        client_data_json: @client_data_json, attestation_object: 123, origin: @origin
+      )
+    end
+  end
+
+  test "rejects an oversized Base64 attestation object before decoding it" do
+    # An encoded value larger than the byte ceiling can only decode to an
+    # oversized blob, so Attestation.wrap must reject it before Base64 allocates
+    # the decoded copy.
+    max_encoded = ActionPack::WebAuthn::CborDecoder::MAX_SIZE / 3 * 4 + 4
+    oversized = "A" * (max_encoded + 1)
+
+    error = assert_raises(ActionPack::WebAuthn::InvalidResponseError) do
+      ActionPack::WebAuthn::Authenticator::Attestation.wrap(oversized)
+    end
+
+    assert_equal "Attestation object is too large", error.message
+  end
+
+  test "accepts a predecoded Attestation instance, preserving Attestation.wrap's documented input" do
+    # A library caller may decode once and hand the response an existing
+    # Attestation (Attestation.wrap returns it as-is). The malformed-input guard
+    # must not reject that supported branch.
+    attestation = ActionPack::WebAuthn::Authenticator::Attestation.wrap(ATTESTATION_NONE_VERIFIED)
+
+    response = ActionPack::WebAuthn::Authenticator::AttestationResponse.new(
+      client_data_json: @client_data_json,
+      attestation_object: attestation,
+      origin: @origin
+    )
+
+    assert_same attestation, response.attestation
+    assert_nothing_raised { response.validate! }
+  end
+
+  test "validate! raises when attested credential data is missing (no AT flag)" do
+    # Valid CBOR + binary authData, but flags 0x05 (UP+UV, no AT), so there is
+    # no credential id / public key to persist. Must reject, not 500 on to_h.
+    auth_data = Digest::SHA256.digest("example.com") + [ 0x05 ].pack("C") + [ 0 ].pack("N")
+
+    response = ActionPack::WebAuthn::Authenticator::AttestationResponse.new(
+      client_data_json: @client_data_json,
+      attestation_object: none_attestation_object(auth_data),
+      origin: @origin
+    )
+
+    error = assert_raises(ActionPack::WebAuthn::InvalidResponseError) { response.validate! }
+    assert_match(/Attested credential data is missing/, error.message)
+  end
+
+  # Builds a base64url "none" attestation object wrapping the given authData.
+  def none_attestation_object(auth_data)
+    cbor = "\xa3".b # map(3)
+    cbor << "\x63".b << "fmt".b << "\x64".b << "none".b
+    cbor << "\x67".b << "attStmt".b << "\xa0".b # {}
+    cbor << "\x68".b << "authData".b << cbor_byte_string_header(auth_data.bytesize) << auth_data.b
+    Base64.urlsafe_encode64(cbor, padding: false)
+  end
+
+  def cbor_byte_string_header(length)
+    if length < 24
+      [ 0x40 | length ].pack("C")
+    elsif length < 256
+      [ 0x58, length ].pack("C*")
+    else
+      [ 0x59 ].pack("C") + [ length ].pack("n")
+    end
+  end
+
   test "validate! calls registered verifier for custom format" do
     verified = false
     custom_verifier = Object.new

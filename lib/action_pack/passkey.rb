@@ -86,7 +86,7 @@ class ActionPack::Passkey < Rails.configuration.action_pack.passkey.parent_class
     credential.authenticate(passkey)
     update!(sign_count: credential.sign_count, backed_up: credential.backed_up)
     self
-  rescue ActionPack::WebAuthn::InvalidResponseError
+  rescue ActionPack::WebAuthn::Error
     nil
   end
 

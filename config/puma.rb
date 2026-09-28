@@ -7,14 +7,14 @@ pidfile ENV.fetch("PIDFILE", "tmp/pids/server.pid")
 # Allow puma to be restarted by `bin/rails restart` command.
 plugin :tmp_restart
 
-# Run Solid Queue with Puma by default.
-# Disabled when running fizzy-saas or via SOLID_QUEUE_IN_PUMA=false.
-unless Fizzy.saas? || ENV["SOLID_QUEUE_IN_PUMA"] == "false"
+# Only production configures a queue database, so a local supervisor dies on the missing
+# solid_queue_recurring_tasks and takes Puma down with it.
+unless Fizzy.saas? || Rails.env.local? || ENV["SOLID_QUEUE_IN_PUMA"] == "false"
   plugin :solid_queue
 end
 
 # Expose Prometheus metrics at http://0.0.0.0:9394/metrics (SaaS only).
-# In dev, overridden to http://127.0.0.1:9306/metrics in .mise.toml.
+# In dev, bound to loopback instead by PROMETHEUS_EXPORTER_URL in .mise.toml.
 if Fizzy.saas?
   control_uri = Rails.env.local? ? "unix://tmp/pumactl.sock" : "auto"
   activate_control_app control_uri, no_token: true

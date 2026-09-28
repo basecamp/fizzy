@@ -75,4 +75,40 @@ Rails.application.configure do
 
   # Report violations without enforcing the policy.
   config.content_security_policy_report_only = report_only
+
+  # Locked-down policy for the static pages served from public/ (error pages).
+  # They carry no script or inline styles at all, so everything falls back to
+  # default-src 'none'.
+  static_policy = "default-src 'none'; img-src 'self'; style-src 'self'; " \
+    "base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+
+  # Report violations from the static pages to the same collector as the
+  # app policy, so a report-only rollout sees them too.
+  static_policy += "; report-uri #{report_uri}" if report_uri
+
+  # Honor report-only mode for the static policy too, so the report_only
+  # switch disables enforcement everywhere at once.
+  static_policy_header = report_only ? ActionDispatch::Constants::CONTENT_SECURITY_POLICY_REPORT_ONLY \
+                                     : ActionDispatch::Constants::CONTENT_SECURITY_POLICY
+
+  # Files served straight from public/ return before the CSP middleware runs,
+  # so they get the static policy stamped by the file server.
+  config.public_file_server.headers = (config.public_file_server.headers || {}) \
+    .merge(static_policy_header => static_policy)
+
+  # The same public/ pages served through the error path (a real 404/500
+  # renders public/404.html via the exceptions app, bypassing the static
+  # file server) get it too. JSON error responses pass through untouched.
+  # A deployment that configures its own exceptions_app keeps full control
+  # of its responses, headers included.
+  if config.exceptions_app.nil?
+    public_exceptions = ActionDispatch::PublicExceptions.new(Rails.public_path)
+    config.exceptions_app = ->(env) do
+      public_exceptions.call(env).tap do |_status, headers, _body|
+        if headers[Rack::CONTENT_TYPE].to_s.start_with?("text/html")
+          headers[static_policy_header] = static_policy
+        end
+      end
+    end
+  end
 end unless ENV["DISABLE_CSP"]

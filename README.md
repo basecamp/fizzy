@@ -5,10 +5,20 @@ This is the source code of [Fizzy](https://fizzy.do/), the Kanban tracking tool 
 
 ## Running your own Fizzy instance
 
-If you want to run your own Fizzy instance, but don't need to change its code, you can use our pre-built Docker image.
-You'll need access to a server on which you can run Docker, and you'll need to configure some options to customize your installation.
+The easiest way to self-host Fizzy is with [ONCE](https://github.com/basecamp/once).
+It will guide you through the initial setup, and keep your instance up to date automatically. It has everything you need for a fully-functional, single-machine deployment.
 
-You can find the details of how to do a Docker-based deployment in our [Docker deployment guide](docs/docker-deployment.md).
+To get started, run this on the machine where you want to install Fizzy:
+
+```sh
+curl https://get.once.com/fizzy | sh
+```
+
+### Deploying with Docker
+
+If you'd rather run our pre-built Docker image yourself, you can find the details in our [Docker deployment guide](docs/docker-deployment.md).
+
+### Deploying with Kamal
 
 If you want more flexibility to customize your Fizzy installation by changing its code, and deploy those changes to your server, then we recommend you deploy Fizzy with Kamal. You can find a complete walkthrough of doing that in our [Kamal deployment guide](docs/kamal-deployment.md).
 

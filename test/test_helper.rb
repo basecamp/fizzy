@@ -50,7 +50,8 @@ module ActiveSupport
     fixtures :all
 
     include ActiveJob::TestHelper
-    include ActionTextTestHelper, CachingTestHelper, CardTestHelper, ChangeTestHelper, DnsTestHelper, SessionTestHelper
+    include ActionTextTestHelper, CachingTestHelper, CardTestHelper, ChangeTestHelper, DnsTestHelper,
+      SearchIndexTestHelper, SessionTestHelper
     include Turbo::Broadcastable::TestHelper
 
     # Jobs must carry their own account context via AccountTenanted,
@@ -75,7 +76,7 @@ end
 
 class ActionDispatch::IntegrationTest
   setup do
-    integration_session.default_url_options[:script_name] = "/#{ActiveRecord::FixtureSet.identify("37signals")}"
+    integration_session.default_url_options = integration_session.default_url_options.merge(script_name: "/#{ActiveRecord::FixtureSet.identify("37signals")}")
   end
 
   private
@@ -92,7 +93,7 @@ end
 
 class ActionDispatch::SystemTestCase
   setup do
-    self.default_url_options[:script_name] = "/#{ActiveRecord::FixtureSet.identify("37signals")}"
+    self.default_url_options = default_url_options.merge(script_name: "/#{ActiveRecord::FixtureSet.identify("37signals")}")
   end
 end
 

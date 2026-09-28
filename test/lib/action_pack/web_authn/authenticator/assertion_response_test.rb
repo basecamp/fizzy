@@ -43,6 +43,57 @@ class ActionPack::WebAuthn::Authenticator::AssertionResponseTest < ActiveSupport
     end
   end
 
+  test "raises for a non-string signature or authenticator data instead of a 500" do
+    assert_raises(ActionPack::WebAuthn::InvalidResponseError) do
+      ActionPack::WebAuthn::Authenticator::AssertionResponse.new(
+        client_data_json: @client_data_json,
+        authenticator_data: @authenticator_data,
+        signature: 123, # scalar from a JSON request body
+        credential: @credential,
+        origin: @origin
+      )
+    end
+
+    assert_raises(ActionPack::WebAuthn::InvalidResponseError) do
+      ActionPack::WebAuthn::Authenticator::AssertionResponse.new(
+        client_data_json: @client_data_json,
+        authenticator_data: { not: "a string" },
+        signature: @signature,
+        credential: @credential,
+        origin: @origin
+      )
+    end
+  end
+
+  test "rejects an oversized Base64 authenticator data before decoding it" do
+    max_encoded = ActionPack::WebAuthn::CborDecoder::MAX_SIZE / 3 * 4 + 4
+    oversized = "A" * (max_encoded + 1)
+
+    error = assert_raises(ActionPack::WebAuthn::InvalidResponseError) do
+      ActionPack::WebAuthn::Authenticator::Data.wrap(oversized)
+    end
+
+    assert_equal "Authenticator data is too large", error.message
+  end
+
+  test "accepts a predecoded Authenticator::Data instance, preserving Data.wrap's documented input" do
+    # A library caller may decode once and hand the response an existing
+    # Authenticator::Data (Data.wrap returns it as-is). The malformed-input
+    # guard must not reject that supported branch.
+    data = ActionPack::WebAuthn::Authenticator::Data.wrap(@authenticator_data)
+
+    response = ActionPack::WebAuthn::Authenticator::AssertionResponse.new(
+      client_data_json: @client_data_json,
+      authenticator_data: data,
+      signature: @signature,
+      credential: @credential,
+      origin: @origin
+    )
+
+    assert_same data, response.authenticator_data
+    assert_nothing_raised { response.validate! }
+  end
+
   test "validate! raises when type is not webauthn.get" do
     client_data_json = {
       challenge: @challenge,

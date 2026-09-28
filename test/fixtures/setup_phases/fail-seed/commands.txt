@@ -1,0 +1,7 @@
+brew bundle --file=$APP/Brewfile
+bundle config set --local auto_install true
+bundle install
+rails db:prepare
+rails runner pp Account.all.any?
+rails db:seed
+exit: 9

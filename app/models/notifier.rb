@@ -15,7 +15,7 @@ class Notifier
   def notify
     if should_notify?
       # Processing recipients in order avoids deadlocks if notifications overlap.
-      recipients.sort_by(&:id).map do |recipient|
+      accessible_recipients.sort_by(&:id).map do |recipient|
         notification = Notification.create_or_find_by(user: recipient, card: source.card) do |n|
           n.source = source
           n.creator = creator
@@ -44,5 +44,10 @@ class Notifier
 
     def should_notify?
       !creator.system?
+    end
+
+    def accessible_recipients
+      accessible_user_ids = source.card.board.accesses.pluck(:user_id).to_set
+      recipients.select { |recipient| !recipient.active? || accessible_user_ids.include?(recipient.id) }
     end
 end

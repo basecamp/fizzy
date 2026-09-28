@@ -43,3 +43,6 @@
 /app/assets/builds/*
 !/app/assets/builds/.keep
 /public/assets
+
+# Ignore agent session state — worktrees under .claude/ are whole extra checkouts of this repo.
+/.claude

@@ -33,8 +33,8 @@ class Account::DataTransfer::Manifest
           ::Column
         ),
         Account::DataTransfer::EntropyRecordSet.new(account),
+        record_set_for(::Board::Publication, unique_keys: %w[ key ]),
         *record_sets_for(
-          ::Board::Publication,
           ::Webhook,
           ::Access,
           ::Card,
@@ -71,8 +71,8 @@ class Account::DataTransfer::Manifest
       end
     end
 
-    def record_set_for(model)
-      Account::DataTransfer::RecordSet.new(account: account, model: model)
+    def record_set_for(model, **options)
+      Account::DataTransfer::RecordSet.new(account: account, model: model, **options)
     end
 
     def set_importable_model_names(record_sets)

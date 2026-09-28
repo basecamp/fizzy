@@ -93,11 +93,4 @@ class SmokeTest < ApplicationSystemTestCase
     column_el.find(".cards__expander-count", text: cards_count + 1)
     assert_equal("Triage", card.reload.column.name)
   end
-
-  private
-    def fill_in_lexxy(selector = "lexxy-editor", with:)
-      editor_element = find(selector)
-      editor_element.set with
-      page.execute_script("arguments[0].value = '#{with}'", editor_element)
-    end
 end

@@ -14,7 +14,7 @@ ActiveSupport.on_load(:action_text_content) do
     # Ensure all <action-text-attachment>s have a "url" attribute that's a relative
     # path (for portability across host name changes, beta environments, etc).
     def to_rich_text_attributes(*)
-      super.merge url: Rails.application.routes.url_helpers.polymorphic_url(self, only_path: true)
+      super.merge url: Rails.application.routes.url_helpers.polymorphic_url(self, only_path: true, script_name: Current.account&.slug)
     end
   end
 end

@@ -7,7 +7,7 @@
   <% end %>
 
   <%= form_with model: @card, id: dom_id(@card, :edit_form),
-        data: { controller: "autoresize form local-save", local_save_key_value: "card-#{@card.id}", action: "turbo:submit-end->local-save#submit" } do |form| %>
+        data: { controller: "autoresize form local-save morph-guard", local_save_key_value: "card-#{@card.id}", action: "turbo:submit-end->local-save#submit" } do |form| %>
     <h1 class="card__title flex align-start gap-half">
       <%= form.label :title, class: "flex flex-column align-center autoresize__wrapper", data: { autoresize_target: "wrapper", autoresize_clone_value: "" } do %>
         <%= form.text_area :title, class: "card-field__title autoresize__textarea input input--textarea full-width borderless txt-align-start hide-focus-ring hide-scrollbar",

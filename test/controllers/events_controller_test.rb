@@ -37,4 +37,9 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
       assert_includes event.text, boards(:writebook).name
     end
   end
+
+  test "index returns not found for an unparseable day param" do
+    get events_path(day: "garbage")
+    assert_response :not_found
+  end
 end

@@ -1,0 +1,260 @@
+#!/usr/bin/env bash
+# Snapshot bracket for bin/setup's post-prelude phases: run bin/setup in a
+# hermetic sandbox where every effectful command is a recorder stub, and
+# compare the ordered command sequence and step output against goldens in
+# test/fixtures/setup_phases/. The commands goldens are the contract — any
+# refactor of how bin/setup dispatches its phases must leave them
+# byte-identical, including the exit trailer. Output goldens pin the step
+# labels; only the dim command-echo lines may change across a dispatch
+# refactor.
+#
+# The sandbox stubs bin/rails, bin/minio-setup, docker, nc, brew, bundle, gh,
+# gum, and ~/Work/basecamp/docker-dev/setup (under a fake HOME). mise is a
+# dispatcher: run/tasks/trust exec the REAL mise against the sandbox's own
+# TOML (whose task leaves are the recorders), with --skip-tools injected so
+# nothing downloads; install/bootstrap/self-update no-op. Requires a real
+# mise >= the repo floor on PATH — the same thing bin/setup's prelude
+# guarantees on any dev machine.
+#
+# Invocation (from anywhere):
+#
+#   test/setup-phases-test            # compare against goldens
+#   REGEN=1 test/setup-phases-test    # regenerate goldens
+set -uo pipefail
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+FIXTURES="$ROOT/test/fixtures/setup_phases"
+REAL_MISE="$(command -v mise)" || { echo "error: setup-phases-test needs mise on PATH" >&2; exit 1; }
+
+WORK="$(mktemp -d "${TMPDIR:-/tmp}/setup-phases.XXXXXX")"
+trap 'rm -rf "$WORK"' EXIT
+# Physical path: bin/setup canonicalizes app_root with pwd, and recorded
+# paths must match it for $APP normalization (macOS /var -> /private/var).
+WORK="$(cd "$WORK" && pwd -P)"
+
+pass=0 fail=0
+ok()  { pass=$((pass+1)); echo "  ok: $1"; }
+bad() { fail=$((fail+1)); echo "  FAIL: $1"; }
+
+build_sandbox() { # build_sandbox <dir>
+  local sb="$1" stub
+  mkdir -p "$sb/bin" "$sb/saas/bin" "$sb/tmp" "$sb/tmpdir" "$sb/stubbin" \
+           "$sb/home/Work/basecamp/docker-dev" "$sb/home/.config" \
+           "$sb/home/.local/share" "$sb/home/.local/state" "$sb/home/.cache"
+  cp "$ROOT/bin/setup" "$sb/bin/setup"
+  cp "$ROOT/saas/bin/setup" "$sb/saas/bin/setup"
+  cp "$ROOT/.mise.toml" "$sb/.mise.toml"
+  cp "$ROOT/mise.saas.toml" "$sb/mise.saas.toml"
+  cp "$ROOT/Brewfile" "$sb/Brewfile"
+  : > "$sb/home/global-mise.toml"
+  # The sandbox must be a git repo: bin/setup's pre-commit hooks step runs
+  # `git config core.hooksPath`, which needs one (and writes only sandbox-local
+  # config). The docker-dev fenced-block probes stay unaffected — the sandbox
+  # toplevel never equals the docker-dev path, so they skip as before. Init
+  # hermetically: host git config (init.templateDir, hooks) must not leak in.
+  env HOME="$sb/home" GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null \
+    git -C "$sb" init -q
+
+  # Recorders append one normalized line per invocation. STUB_FAIL names a
+  # recorded-command prefix that should exit 9 AFTER recording, so the stop
+  # point stays visible in commands.txt.
+  cat > "$sb/stubbin/_stublib" <<'EOF'
+rec() {
+  local line="$1"
+  line="${line//$STUB_SANDBOX\/home/\$HOME}"
+  line="${line//$STUB_SANDBOX/\$APP}"
+  printf '%s\n' "$line" >> "$STUB_RECORD"
+}
+die_if_fail() {
+  case "$1" in "${STUB_FAIL:-__none__}"*) echo "stub-fail: $1" >&2; exit 9;; esac
+}
+EOF
+
+  cat > "$sb/bin/rails" <<'EOF'
+#!/usr/bin/env bash
+source "$STUB_LIB"
+label="rails $*"
+rec "$label"; die_if_fail "$label"
+if [ "${1:-}" = runner ]; then echo "${STUB_HAS_DATA:-false}"; fi
+EOF
+
+  # Env markers prove the SaaS gemfile selection survives however this
+  # command is dispatched: bin/minio-setup boots config/environment directly,
+  # so it lives or dies by BUNDLE_GEMFILE.
+  cat > "$sb/bin/minio-setup" <<'EOF'
+#!/usr/bin/env bash
+source "$STUB_LIB"
+label="minio-setup${*:+ $*} [SAAS=${SAAS:-unset} BUNDLE_GEMFILE=${BUNDLE_GEMFILE:-unset}]"
+rec "$label"; die_if_fail "$label"
+EOF
+
+  cat > "$sb/home/Work/basecamp/docker-dev/setup" <<'EOF'
+#!/usr/bin/env bash
+source "$STUB_LIB"
+label="docker-dev/setup $*"
+rec "$label"; die_if_fail "$label"
+EOF
+
+  cat > "$sb/stubbin/docker" <<'EOF'
+#!/usr/bin/env bash
+source "$STUB_LIB"
+label="docker $*"
+rec "$label"; die_if_fail "$label"
+if [ "${1:-}" = ps ] && [ "${STUB_MYSQL_CONTAINER:-0}" = 1 ]; then echo "3fa85f64c001"; fi
+EOF
+
+  cat > "$sb/stubbin/nc" <<'EOF'
+#!/usr/bin/env bash
+source "$STUB_LIB"
+label="nc $*"
+rec "$label"; die_if_fail "$label"
+if [ "${STUB_MYSQL_RUNNING:-0}" = 1 ]; then exit 0; else exit 1; fi
+EOF
+
+  for stub in brew bundle gh; do
+    cat > "$sb/stubbin/$stub" <<EOF
+#!/usr/bin/env bash
+source "\$STUB_LIB"
+label="$stub \$*"
+rec "\$label"; die_if_fail "\$label"
+EOF
+  done
+
+  # Pin the sandbox to the macOS/brew branch on every host: the bracket
+  # asserts ONE platform's command sequence, and bin/setup's own platform
+  # probes (`uname -s` + command -v) would otherwise route Arch hosts down
+  # the pacman branch and diverge from the goldens. Platform branching is
+  # bin/setup's behavior under test elsewhere, not this bracket's concern.
+  cat > "$sb/stubbin/uname" <<'EOF'
+#!/usr/bin/env bash
+echo Darwin
+EOF
+
+  # Not a recorder: gum is presentation. --version fails so step() takes its
+  # deterministic plain-echo fallback; direct `gum style` calls print their
+  # text arguments.
+  cat > "$sb/stubbin/gum" <<'EOF'
+#!/usr/bin/env bash
+case "${1:-}" in
+  --version) exit 1 ;;
+  style)
+    shift
+    while [ $# -gt 0 ] && [ "${1#--}" != "$1" ]; do
+      case "$1" in --foreground) shift 2 ;; *) shift ;; esac
+    done
+    printf '%s\n' "$*"
+    ;;
+esac
+EOF
+
+  # Orchestration, not an effect: never recorded. run/tasks/trust exec the
+  # real mise against the sandbox's TOML; --skip-tools keeps the harness
+  # offline (installing tools is the prelude's job, outside this bracket).
+  cat > "$sb/stubbin/mise" <<'EOF'
+#!/usr/bin/env bash
+label="mise $*"
+case "$label" in "${STUB_FAIL:-__none__}"*) echo "stub-fail: $label" >&2; exit 9;; esac
+case "${1:-}" in
+  run) shift; exec "$STUB_REAL_MISE" run --skip-tools "$@" ;;
+  tasks|trust) exec "$STUB_REAL_MISE" "$@" ;;
+  --version) exec "$STUB_REAL_MISE" --version ;;
+  *) exit 0 ;;
+esac
+EOF
+
+  chmod +x "$sb/bin/rails" "$sb/bin/minio-setup" "$sb/home/Work/basecamp/docker-dev/setup" \
+           "$sb/stubbin/docker" "$sb/stubbin/nc" "$sb/stubbin/brew" "$sb/stubbin/bundle" \
+           "$sb/stubbin/gh" "$sb/stubbin/gum" "$sb/stubbin/mise" "$sb/stubbin/uname"
+}
+
+run_scenario() { # run_scenario <name> <args> [VAR=value|SAAS_FILE=1|MINIO_FILE=1]...
+  local name="$1" args="$2"; shift 2
+  local sb="$WORK/$name"
+  build_sandbox "$sb"
+
+  local envs=(
+    PATH="$sb/stubbin:/usr/bin:/bin:/usr/sbin:/sbin"
+    HOME="$sb/home"
+    TMPDIR="$sb/tmpdir"
+    TERM=dumb
+    STUB_SANDBOX="$sb"
+    STUB_RECORD="$sb/commands.txt"
+    STUB_LIB="$sb/stubbin/_stublib"
+    STUB_REAL_MISE="$REAL_MISE"
+    XDG_CONFIG_HOME="$sb/home/.config"
+    XDG_DATA_HOME="$sb/home/.local/share"
+    XDG_STATE_HOME="$sb/home/.local/state"
+    XDG_CACHE_HOME="$sb/home/.cache"
+    MISE_TRUSTED_CONFIG_PATHS="$sb"
+    MISE_GLOBAL_CONFIG_FILE="$sb/home/global-mise.toml"
+  )
+  local kv
+  for kv in "$@"; do
+    case "$kv" in
+      SAAS_FILE=1)  touch "$sb/tmp/saas.txt" ;;
+      MINIO_FILE=1) touch "$sb/tmp/minio-dev.txt" ;;
+      *) envs+=("$kv") ;;
+    esac
+  done
+
+  : > "$sb/commands.txt"
+  local rc=0
+  ( cd "$sb" && env -i "${envs[@]}" bin/setup $args ) > "$sb/output.raw" 2>&1 || rc=$?
+  printf 'exit: %s\n' "$rc" >> "$sb/commands.txt"
+  # ANSI escapes (mise colors some lines even under TERM=dumb, and coloring
+  # varies by version/environment) are styling, not behavior — strip them so
+  # the goldens stay stable.
+  local esc; esc="$(printf '\033')"
+  sed -e "s/${esc}\[[0-9;]*[A-Za-z]//g" \
+      -e "s|$sb/home|\$HOME|g" -e "s|$sb|\$APP|g" \
+      -e 's/([0-9][0-9]* sec)/(N sec)/' "$sb/output.raw" > "$sb/output.txt"
+
+  if [ "${REGEN:-}" = 1 ]; then
+    mkdir -p "$FIXTURES/$name"
+    cp "$sb/commands.txt" "$FIXTURES/$name/commands.txt"
+    cp "$sb/output.txt" "$FIXTURES/$name/output.txt"
+    echo "regenerated: $name (exit: $rc)"
+  else
+    echo "=== $name"
+    if diff -u "$FIXTURES/$name/commands.txt" "$sb/commands.txt" > "$sb/commands.diff" 2>&1; then
+      ok "commands match golden"
+    else
+      bad "commands diverge from golden"; sed 's/^/    /' "$sb/commands.diff"
+    fi
+    if diff -u "$FIXTURES/$name/output.txt" "$sb/output.txt" > "$sb/output.diff" 2>&1; then
+      ok "output matches golden"
+    else
+      bad "output diverges from golden"; sed 's/^/    /' "$sb/output.diff"
+    fi
+  fi
+}
+
+# State scenarios: every post-prelude branch of bin/setup.
+run_scenario oss-sqlite          ""        STUB_HAS_DATA=true
+run_scenario oss-sqlite-seeded   ""        STUB_HAS_DATA=false
+run_scenario oss-reset           "--reset" STUB_HAS_DATA=true
+run_scenario oss-mysql-fresh     ""        STUB_HAS_DATA=true DATABASE_ADAPTER=mysql
+run_scenario oss-mysql-container ""        STUB_HAS_DATA=true DATABASE_ADAPTER=mysql STUB_MYSQL_CONTAINER=1
+run_scenario oss-mysql-running   ""        STUB_HAS_DATA=true DATABASE_ADAPTER=mysql STUB_MYSQL_RUNNING=1
+run_scenario saas-minio          ""        STUB_HAS_DATA=true SAAS_FILE=1 MINIO_FILE=1
+run_scenario saas-no-minio       ""        STUB_HAS_DATA=true SAAS_FILE=1
+run_scenario ci-sim              ""        STUB_HAS_DATA=false CI=true
+
+# Failure-injection scenarios: exit status and stop point are part of the
+# contract. fail-mysql-pull pins the deliberate non-errexit interior of the
+# MySQL creation block — a failed pull falls through to `docker run` and the
+# phase still succeeds, exactly as bin/setup has always behaved.
+run_scenario fail-db-prepare        ""  STUB_HAS_DATA=false "STUB_FAIL=rails db:prepare"
+run_scenario fail-seed              ""  STUB_HAS_DATA=false "STUB_FAIL=rails db:seed"
+run_scenario fail-mysql-pull        ""  STUB_HAS_DATA=true DATABASE_ADAPTER=mysql "STUB_FAIL=docker pull mysql:8.4"
+run_scenario fail-saas-minio-config ""  STUB_HAS_DATA=true SAAS_FILE=1 MINIO_FILE=1 "STUB_FAIL=minio-setup"
+
+echo
+if [ "${REGEN:-}" = 1 ]; then
+  echo "goldens regenerated in $FIXTURES"
+elif [ "$fail" = 0 ]; then
+  echo "ALL $pass ASSERTIONS PASSED"
+else
+  echo "$fail FAILED, $pass passed"
+  exit 1
+fi

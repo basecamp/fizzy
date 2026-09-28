@@ -1,5 +1,34 @@
+min_version = "2026.8.10"
+
 [settings]
 idiomatic_version_file_enable_tools = ["ruby"]
 
+[tools]
+gum = "0.17.0"
+prek = "0.4.11"
+
 [env]
-PROMETHEUS_EXPORTER_URL = "http://127.0.0.1:9306/metrics"
+# Loopback rather than the plugin's 0.0.0.0, but keep its port: 9306 is Manticore's, and
+# the active_search gem's containers then stop Puma booting at all.
+PROMETHEUS_EXPORTER_URL = "http://127.0.0.1:9394/metrics"
+
+[bootstrap.packages]
+# Arch
+"pacman:imagemagick" = "latest"
+"pacman:mariadb-libs" = "latest"
+"pacman:openslide" = "latest"
+"pacman:libvips" = "latest"
+"pacman:libheif" = "latest"
+"pacman:libwebp" = "latest"
+"pacman:libjxl" = "latest"
+"pacman:libraw" = "latest"
+"pacman:poppler-glib" = "latest"
+"pacman:libcgif" = "latest"
+"pacman:ffmpeg" = "latest"
+# An uncontainerized dev cell shells out to the host, so every tool in saas/hotcell/Dockerfile needs an
+# equivalent here or those operations fail in development only.
+"pacman:mupdf-tools" = "latest"
+"pacman:rav1e" = "latest"
+"pacman:svt-av1" = "latest"
+"pacman:gitleaks" = "latest"
+

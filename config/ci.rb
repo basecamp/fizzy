@@ -9,6 +9,8 @@ SYSTEM_TEST_ENV = "PARALLEL_WORKERS=1" # system tests can't run reliably in para
 CI.run do
   step "Setup", "bin/setup --skip-server"
 
+  step "Docs: agent instructions", "script/check_agents_docs"
+
   step "Style: Ruby", "bin/rubocop -f simple"
 
   step "Gemfile: Drift check", "bin/bundle-drift check"
@@ -16,6 +18,8 @@ CI.run do
   step "Security: Importmap audit", "bin/importmap audit"
   step "Security: Brakeman audit", "bin/brakeman --quiet --no-pager --exit-on-warn --exit-on-error"
   step "Security: Gitleaks audit", "bin/gitleaks-audit"
+
+  step "Tests: Setup phases", "test/setup-phases-test"
 
   if Fizzy.saas?
     step "Tests: SaaS",          "#{SAAS_ENV} bin/rails test"

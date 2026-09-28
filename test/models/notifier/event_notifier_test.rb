@@ -117,6 +117,26 @@ class Notifier::EventNotifierTest < ActiveSupport::TestCase
     assert_equal [ users(:jz) ], notifications.map(&:user)
   end
 
+  test "does not notify a watcher who lost board access after the card moved" do
+    card = cards(:logo)
+    david = users(:david)
+    card.watch_by(david)
+
+    Current.set(session: sessions(:kevin), user: users(:kevin)) do
+      card.update!(board: boards(:private))
+    end
+
+    assert_not boards(:private).accessible_to?(david), "david must not have destination-board access"
+    assert_includes card.reload.watchers, david, "stale watch persists in the async cleanup window"
+
+    comment = card.comments.create!(body: "Confidential", creator: users(:kevin))
+    event = card.board.events.create!(action: "comment_created", creator: users(:kevin), eventable: comment)
+
+    notifications = Notifier.for(event).notify
+
+    assert_not_includes notifications.map(&:user), david
+  end
+
   private
     def mention_html_for(user)
       ActionText::Attachment.from_attachable(user).to_html

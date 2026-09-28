@@ -4,9 +4,132 @@ set -eo pipefail
 # SaaS-specific setup tasks
 # This script is called from the main Fizzy bin/setup when SAAS is enabled
 
+# docker-dev is declared in mise.saas.toml — the SaaS-only overlay, loaded via
+# MISE_ENV=saas — and converged declaratively through mise's repos phase. The
+# OSS root .mise.toml never references it; OSS setups never reach this file.
+step "Trusting SaaS mise overlay" mise trust --yes "$app_root/mise.saas.toml"
+
+# shipyard-block: docker-dev-origin v2
+# mise syncs docker-dev from the declared https URL. Its repos preflight
+# compares origins transport-agnostically (jdx/mise#11034, in every mise the
+# fleet floor admits), so an existing ssh origin matches the https declaration
+# and keeps updating through ssh untouched — v1's rewrite arm is gone. What
+# still needs proving is the https pull mise is about to perform: docker-dev
+# is private, and gh being installed does not imply its git credential helper
+# is configured (gh auth setup-git is a separate step). Probe noninteractively
+# wherever mise is about to need https auth: before a fresh clone (the
+# configured URL) and before updating an existing clean checkout whose origin
+# names the canonical repo over https (its actual origin). Dirty, foreign,
+# unreadable, and malformed checkouts are left alone — mise owns those
+# diagnostics, and a failed auth probe must never mask them.
+docker_dev="$HOME/Work/basecamp/docker-dev"
+docker_dev_url="https://github.com/basecamp/docker-dev.git"
+# git under mise's own config, so every verdict here matches its preflight
+docker_dev_git() { git -C "$docker_dev" -c "safe.directory=$docker_dev" -c core.autocrlf=false "$@"; }
+docker_dev_is_repo() {
+  local top
+  top="$(docker_dev_git rev-parse --show-toplevel 2>/dev/null)" || return 1
+  [ "$(cd "$top" 2>/dev/null && pwd -P)" = "$(cd "$docker_dev" 2>/dev/null && pwd -P)" ]
+}
+docker_dev_is_clean() {
+  local status
+  status="$(docker_dev_git status --porcelain=v1 2>/dev/null)" && [ -z "$status" ]
+}
+# Mirrors mise's repo-identity parsing for the one question this block asks:
+# does the origin name the canonical repo over https? (repos.rs at the fleet
+# floor tag; any divergence is a bug here, decided in mise's favor.) Scheme
+# and host compare case-insensitively, the path does not; all trailing
+# slashes strip, then one .git; :443 is the https default and elides; empty
+# userinfo (https://@github.com/…) carries no credential and matches, any
+# other userinfo is credential material and does not; query, fragment, other
+# ports, hosts, and paths fall through — probing those would mask the origin
+# conflict mise is about to report.
+docker_dev_origin_is_canonical_https() {
+  local url="$1" scheme hostport path
+  url="${url#"${url%%[![:space:]]*}"}"
+  url="${url%"${url##*[![:space:]]}"}"
+  while [ "${url%/}" != "$url" ]; do url="${url%/}"; done
+  url="${url%.git}"
+  case "$url" in *://* ) ;; * ) return 1 ;; esac
+  scheme="$(printf '%s' "${url%%://*}" | tr '[:upper:]' '[:lower:]')"
+  [ "$scheme" = https ] || return 1
+  url="${url#*://}"
+  case "$url" in */* ) ;; * ) return 1 ;; esac
+  hostport="$(printf '%s' "${url%%/*}" | tr '[:upper:]' '[:lower:]')"
+  path="${url#*/}"
+  while [ "${path#/}" != "$path" ]; do path="${path#/}"; done
+  hostport="${hostport#@}"
+  hostport="${hostport%:443}"
+  [ "$hostport" = github.com ] && [ "$path" = basecamp/docker-dev ]
+}
+docker_dev_https_ok() {
+  # $1 is the configured url (fresh clone) or the name `origin`, resolved
+  # inside the existing checkout — either way a noninteractive auth probe.
+  if [ "$1" = origin ]; then
+    GIT_TERMINAL_PROMPT=0 GIT_ASKPASS=true docker_dev_git ls-remote origin HEAD > /dev/null 2>&1
+  else
+    GIT_TERMINAL_PROMPT=0 GIT_ASKPASS=true git ls-remote "$1" HEAD > /dev/null 2>&1
+  fi
+}
+docker_dev_auth_required() {
+  echo "docker-dev syncs from $docker_dev_url, but https git auth isn't set up." >&2
+  echo "Run: gh auth setup-git — then rerun bin/setup." >&2
+  exit 1
+}
+docker_dev_origin_auth_required() {
+  echo "docker-dev can't authenticate to its origin $1." >&2
+  echo "Either set up https git auth: gh auth setup-git" >&2
+  echo "or switch the checkout to ssh: git -C ~/Work/basecamp/docker-dev remote set-url origin git@github.com:basecamp/docker-dev.git" >&2
+  echo "— then rerun bin/setup." >&2
+  exit 1
+}
+# "Missing" must be genuinely absent (-e follows symlinks, so a dangling
+# symlink needs its own check — git clone would fail on it locally), and
+# "empty" requires a SUCCESSFUL listing: an unreadable target must not read
+# as empty. Both failures are mise's/git's to diagnose, not auth problems.
+if { [ ! -e "$docker_dev" ] && [ ! -L "$docker_dev" ]; } \
+    || { [ -d "$docker_dev" ] && docker_dev_listing="$(ls -A "$docker_dev" 2>/dev/null)" \
+         && [ -z "$docker_dev_listing" ]; }; then
+  docker_dev_https_ok "$docker_dev_url" || docker_dev_auth_required
+elif docker_dev_is_repo \
+    && docker_dev_origin="$(docker_dev_git config --get remote.origin.url 2>/dev/null)" \
+    && docker_dev_origin_is_canonical_https "$docker_dev_origin" \
+    && docker_dev_is_clean; then
+  docker_dev_https_ok origin || docker_dev_origin_auth_required "$docker_dev_origin"
+fi
+# shipyard-block-end: docker-dev-origin
+
+step "Syncing docker-dev" env MISE_ENV=saas mise bootstrap --only repos --yes
+
 if [ -e tmp/minio-dev.txt ]; then
-  step "Starting Docker services" bash -c "[ -d ~/Work/basecamp/docker-dev ] && git -C ~/Work/basecamp/docker-dev pull || gh repo clone basecamp/docker-dev ~/Work/basecamp/docker-dev && ~/Work/basecamp/docker-dev/setup minio"
+  step "Starting Docker services" ~/Work/basecamp/docker-dev/setup minio
   step "Configuring MinIO" bin/minio-setup
 fi
 
-step "Starting mysql" bash -c "[ -d ~/Work/basecamp/docker-dev ] && git -C ~/Work/basecamp/docker-dev pull || gh repo clone basecamp/docker-dev ~/Work/basecamp/docker-dev && ~/Work/basecamp/docker-dev/setup mysql80"
+step "Starting mysql" ~/Work/basecamp/docker-dev/setup mysql84
+
+# The cell has its own Gemfile — the same one its image build copies — and nothing in the app's setup
+# installs it, so without this a fresh checkout cannot boot a cell.
+#
+# Every one of these must be unset, not just BUNDLE_GEMFILE overridden. Bundler exports its whole
+# environment into each child, and BUNDLE_LOCKFILE outranks an explicit BUNDLE_GEMFILE — so run from
+# inside a bundle, as bin/ci does, the cell's Gemfile resolves against the app's lockfile and bundler
+# reports the git source as "not yet checked out". That variable is new in Bundler 4, which is how a list
+# that used to be enough stopped being enough.
+step "Installing the cell's RubyGems" \
+  env -u RUBYOPT -u RUBYLIB -u BUNDLER_SETUP -u BUNDLER_VERSION -u BUNDLE_BIN_PATH -u BUNDLE_LOCKFILE \
+    BUNDLE_GEMFILE="$app_root/saas/hotcell/Gemfile" bundle install
+
+# The dev cell runs uncontainerized and does not need the image. Build it anyway, where that is possible:
+# a Dockerfile that only ever builds in CI or at deploy time is one that breaks at the worst moment. A
+# failed build stops setup on purpose — but not being able to attempt one is not a failure, so probe for
+# the script before docker, and skip rather than abort when either is missing.
+if [ ! -x "$app_root/saas/hotcell/bin/build" ]; then
+  echo "▸ Skipping the cell's image (saas/hotcell/bin/build is not here)"
+  echo
+elif ! docker info &> /dev/null; then
+  echo "▸ Skipping the cell's image (docker is not running)"
+  echo
+else
+  step "Building the cell's image" "$app_root/saas/hotcell/bin/build"
+fi

@@ -1,0 +1,130 @@
+#!/bin/sh
+# Keep the developer's own PATH -- bin/setup accepts whichever mise it finds and
+# upgrades that one -- but drop relative entries first. Shipyard puts ./bin at
+# high precedence, and a hook runs with a checkout as its cwd, so a relative
+# entry resolves against whatever tree you happen to be committing in.
+#
+# That is all this prevents: accidental shadowing. It is deliberately not a
+# defence against a hostile checkout, because there cannot be one here. Git runs
+# THIS file, which the repository tracks under core.hooksPath, and shipyard
+# trusts .mise.toml under the worktree roots -- so a checkout already decides
+# what executes long before any PATH is examined. Earlier revisions filtered
+# absolute in-tree paths too, canonicalising against the worktree; that defended
+# a boundary that does not exist, and cost three rounds of its own bugs.
+#
+# Filtered with shell builtins so the filter itself does not come from the PATH
+# being filtered.
+absolute=''
+IFS=:
+for dir in $PATH; do
+  case $dir in /*) absolute="${absolute:+$absolute:}$dir" ;; esac
+done
+unset IFS
+
+# Then mise's standard install locations, for GUI clients: they run no login
+# profile, so their PATH is whatever launchd or systemd provides.
+#
+# Retiring bin/bcenv, which re-execed through a login shell, gives up what that
+# profile provided. Two consequences, both confined to GUI launches. A mise
+# reachable only through the profile is not found -- that one is accepted, and
+# the diagnostic below says so. And shipyard's PATH ordering does not apply, so
+# where bin/setup left an older package-manager mise beside a newer mise.run
+# one, position no longer favours the newer. That second one is not accepted:
+# it is why the selection below goes by version floor rather than PATH order.
+#
+# A third is accepted. If the login profile sets MISE_DATA_DIR or XDG_DATA_HOME,
+# bin/setup installed the toolchain into that store, and a GUI launch -- having
+# no profile -- points mise at its default one instead. mise provisions the
+# project's toolchain there: the right versions, but ~26s the first time and
+# again after each version bump. bin/bcenv covered this by sourcing a profile;
+# this does not. Accepted rather than fixed, because the alternative is state
+# bin/setup must write and this hook must keep in step, across five
+# repositories, for a configuration shipyard does not create.
+#
+# Do not "fix" it by turning auto-install off. MISE_AUTO_INSTALL=0 returns in
+# 0s with /usr/bin/ruby 2.6.10 instead of the project's 3.4.10 -- silently the
+# wrong toolchain, which is the single outcome this hook exists to prevent. The
+# delay is mise doing the right thing.
+PATH="${absolute:+$absolute:}$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+export PATH
+
+# Several mise installations can coexist: bin/setup upgrades whichever one it
+# resolved and leaves the rest in place, so a stale mise.run copy in
+# ~/.local/bin can sit beside a current brew or pacman one, or the reverse. A
+# terminal orders them through the login profile; a GUI launch does not, and
+# designers here do commit from GUI clients. So pick the first installation
+# that satisfies this project's floor rather than the first on PATH.
+min_version=$(sed -n 's/^[[:space:]]*min_version[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p' .mise.toml 2>/dev/null | head -1)
+mise=''
+first_mise=''
+IFS=:
+for dir in $PATH; do
+  [ -x "$dir/mise" ] || continue
+  [ -n "$first_mise" ] || first_mise="$dir/mise"
+  [ -n "$min_version" ] || { mise="$dir/mise"; break; }
+  # MISE_OFFLINE: `mise --version` also checks for a newer mise, which would be
+  # a network round trip per candidate on every commit.
+  version=$(MISE_OFFLINE=1 "$dir/mise" --version 2>/dev/null | awk '{ print $1; exit }')
+  [ -n "$version" ] || continue
+  # `sort -V` orders 2026.7.10 ahead of 2026.7.10-rc.1, so compare the release
+  # part and never let a prerelease satisfy the stable floor it precedes.
+  release=${version%%-*}
+  [ "$(printf '%s\n%s\n' "$min_version" "$release" | sort -V | head -1)" = "$min_version" ] || continue
+  [ "$release" != "$version" ] && [ "$release" = "$min_version" ] && continue
+  mise="$dir/mise"
+  break
+done
+unset IFS
+
+# Nothing satisfied the floor: use the first found and let mise print its own
+# version error, which names both versions.
+[ -n "$mise" ] || mise=$first_mise
+
+[ -n "$mise" ] || {
+  cat >&2 <<EOF
+pre-commit: mise not found.
+
+If this succeeds in a terminal but fails from a GUI git client, your mise is
+reachable only through your login profile, which GUI clients do not run.
+Rerunning bin/setup will not help: it accepts that installation as-is.
+
+Make mise reachable without your profile -- symlink or install it into
+~/.local/bin (or /opt/homebrew/bin, /usr/local/bin, /usr/bin), or add its
+directory to the PATH GUI processes inherit.
+
+Searched: $PATH
+EOF
+  exit 1
+}
+
+# `mise exec` does not prepend its tool directories unconditionally. It strips the
+# install directories it recognises out of the inherited PATH, then inserts the
+# resolved ones immediately BEFORE the shims entry -- keeping that entry -- or
+# prepends them when there is no shims entry at all. Ask it directly, rather than
+# inferring it from which binary won, and the rewrite is plain (measured on 2026.7.10,
+# the floor above, and on 2026.7.16):
+#
+#   in   /usr/bin:$shims:/bin                  out  /usr/bin:<installs>:$shims:/bin
+#   in   $installs/ruby/4/bin:/usr/bin:$shims  out  /usr/bin:<installs>:$shims
+#   in   /usr/bin:/bin                         out  <installs>:/usr/bin:/bin
+#   in   $decoy:/usr/bin:$shims                out  $decoy:/usr/bin:<installs>:$shims
+#
+# Row 2 is the counterintuitive one, and it is why a globally activated
+# installs/ruby/4/bin can sit nine places ahead of /usr/bin and still lose to it: mise
+# strips that entry, then re-lands the toolchain at the shims position, which is behind
+# /usr/bin. Foreign entries -- row 4 -- are never touched.
+#
+# A login profile puts shims ahead of /usr/bin; an agent session's PATH does not, and the
+# hook then lints against /usr/bin/ruby while reporting plausible paths. Declaring the
+# shims directory here makes resolution independent of inherited ordering.
+#
+# Precedence mirrors mise's own, so a customised store is still honoured. bin/bcenv covered
+# this by sourcing a login profile; this replaces that, and is why the hook no longer
+# depends on what the caller's PATH happened to look like.
+mise_shims=${MISE_SHIMS_DIR:-${MISE_DATA_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/mise}/shims}
+PATH="$mise_shims:$PATH"
+export PATH
+
+# `mise exec` rather than bare `prek`: shims alone resolve the toolchain but do
+# not export the project's [env] table, which is what bcenv silently lost.
+exec "$mise" exec -- prek run

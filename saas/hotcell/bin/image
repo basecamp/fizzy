@@ -1,0 +1,18 @@
+# Sourced by build and deploy, so the two cannot disagree about what an image is called.
+
+HOTCELL_IMAGE_REPOSITORY="${HOTCELL_IMAGE_REPOSITORY:-registry.37signals.com/basecamp/fizzy-hotcell}"
+
+# A hash of exactly what the Dockerfile copies in — Dockerfile, both Gemfiles, config.rb, operations/ —
+# rather than a commit. A commit-derived tag moved whenever anything in this directory changed, including
+# the build script and the pin that names the tag, so a commit that bumped the gem and pinned the result
+# could never name itself: amending it changed the SHA the pin was supposed to hold. Identical bytes,
+# identical tag, and a change to nothing the image contains leaves it alone.
+hotcell_image_tag() {
+  local repo_root="$1"
+  local cell_dir="$repo_root/saas/hotcell"
+  local digest
+
+  digest="$(cat "$cell_dir/Dockerfile" "$cell_dir/Gemfile" "$cell_dir/Gemfile.lock" "$cell_dir/config.rb" \
+                "$cell_dir"/operations/*.rb | sha256sum | cut -c1-12)"
+  echo "$HOTCELL_IMAGE_REPOSITORY:$digest"
+}

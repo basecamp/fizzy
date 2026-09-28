@@ -1,6 +1,6 @@
 <section class="search">
   <div class="search__results">
-    <% if !page.used? && query %>
+    <% if page.results.empty? && query %>
       <div class="search__blank-slate blank-slate">
         No matches
       </div>
@@ -8,7 +8,7 @@
 
     <ul class="search__list">
       <%= with_automatic_pagination :filtered_search_results, page do %>
-        <%= render partial: "searches/result", collection: page.records %>
+        <%= render partial: "searches/result", collection: page.results %>
       <% end %>
     </ul>
   </div>

@@ -15,9 +15,12 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "search" do
-    # Search query is blank
+    # Search query is blank: the landing state, not a search that found nothing
     get search_path(q: "", script_name: "/#{@account.external_account_id}")
-    assert @query.nil?
+    assert_response :success
+    assert_select "h1.header__title", text: "Search"
+    assert_select "li .search__title", count: 0
+    assert_select ".search__blank-slate", count: 0
 
     # Searching by card title
     get search_path(q: "broken", script_name: "/#{@account.external_account_id}")
@@ -36,11 +39,16 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
     assert_select "li .search__excerpt--comment", text: /I love haggis/ # one entry for the comment
     assert_match(/<mark class="circled-text"><span><\/span>haggis<\/mark>/, response.body)
 
-    # Searching by card id
-    get search_path(q: @card.id, script_name: "/#{@account.external_account_id}")
+    # Searching by card number
+    get search_path(q: @card.number, script_name: "/#{@account.external_account_id}")
     assert_select "form[data-controller='auto-submit']"
 
-    # Searching with non-existent card id
+    # Searching by the number of a card the user cannot access
+    get search_path(q: hidden_card.number, script_name: "/#{@account.external_account_id}")
+    assert_select "form[data-controller='auto-submit']", count: 0
+    assert_select ".search__blank-slate", text: "No matches"
+
+    # Searching with non-existent card number
     get search_path(q: "999999", script_name: "/#{@account.external_account_id}")
     assert_select "form[data-controller='auto-submit']", count: 0
     assert_select ".search__blank-slate", text: "No matches"
@@ -56,8 +64,8 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Layout is broken", body.first["title"]
   end
 
-  test "search by card ID as JSON returns array" do
-    get search_path(q: @card.id, script_name: "/#{@account.external_account_id}"), as: :json
+  test "search by card number as JSON returns array" do
+    get search_path(q: @card.number, script_name: "/#{@account.external_account_id}"), as: :json
     assert_response :success
 
     body = @response.parsed_body
@@ -76,11 +84,104 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
     assert_equal @comment2_card.id, body.first["id"]
   end
 
-  test "search highlights matched terms with proper HTML marks" do
-    @board.cards.create!(title: "Testing search highlighting", status: "published", creator: @user)
+  test "search preserves highlight marks but escapes surrounding HTML" do
+    @board.cards.create!(
+      title: "<b>Bold</b> testing content",
+      status: "published",
+      creator: @user
+    )
 
-    get search_path(q: "highlighting", script_name: "/#{@account.external_account_id}")
+    get search_path(q: "testing", script_name: "/#{@account.external_account_id}")
     assert_response :success
+
+    # Should escape <b> tags
+    assert response.body.include?("&lt;b&gt;")
+    # But should preserve highlight marks around "testing"
+    assert_match(/<mark class="circled-text"><span><\/span>testing<\/mark>/, response.body)
+  end
+
+  test "an excerpt cut out of a longer description marks each end it cut" do
+    filler = ([ "word" ] * 20).join(" ")
+    @board.cards.create!(title: "Long winded", description: "#{filler} needle #{filler}",
+      status: "published", creator: @user)
+
+    get search_path(q: "needle", script_name: "/#{@account.external_account_id}")
+    assert_response :success
+
+    excerpt = search_result_excerpts.sole
+
+    assert_includes excerpt, "needle", "control: no match in the excerpt leaves the ellipses proving nothing"
+    assert excerpt.start_with?("..."), excerpt
+    assert excerpt.end_with?("..."), excerpt
+  end
+
+  test "an excerpt reaching the end of a description marks only the end it cut" do
+    @board.cards.create!(title: "Front loaded", description: "needle #{([ 'word' ] * 40).join(' ')}",
+      status: "published", creator: @user)
+
+    get search_path(q: "needle", script_name: "/#{@account.external_account_id}")
+    assert_response :success
+
+    excerpt = search_result_excerpts.sole
+
+    assert_includes excerpt, "needle", "control: no match in the excerpt leaves the ellipses proving nothing"
+    assert_not excerpt.start_with?("..."), excerpt
+    assert excerpt.end_with?("..."), excerpt
+  end
+
+  test "search pages through more results than the default limit" do
+    20.times { |i| @board.cards.create!(title: "paginated card #{i}", status: "published", creator: @user) }
+
+    get search_path(q: "paginated", script_name: "/#{@account.external_account_id}")
+    assert_response :success
+    first_page = search_result_titles
+
+    get search_path(q: "paginated", page: 2, script_name: "/#{@account.external_account_id}")
+    assert_response :success
+    second_page = search_result_titles
+
+    assert_equal 15, first_page.size, "the first page should honour the 15-record ratio"
+    assert_equal 5, second_page.size, "the second page should hold the remainder"
+    assert_empty first_page & second_page, "pages should not repeat records"
+  end
+
+  test "the next-page link appears on the first page and not on the last" do
+    20.times { |i| @board.cards.create!(title: "paginated card #{i}", status: "published", creator: @user) }
+
+    get search_path(q: "paginated", script_name: "/#{@account.external_account_id}")
+    assert_select "a#filtered_search_results-pagination-link-2", count: 1
+
+    get search_path(q: "paginated", page: 2, script_name: "/#{@account.external_account_id}")
+    assert_select "a#filtered_search_results-pagination-link-3", count: 0
+  end
+
+  test "a junk page param falls back to the first page" do
+    20.times { |i| @board.cards.create!(title: "paginated card #{i}", status: "published", creator: @user) }
+
+    %w[ 0 -1 abc ].each do |junk|
+      get search_path(q: "paginated", page: junk, script_name: "/#{@account.external_account_id}")
+
+      assert_response :success
+      assert_equal 15, search_result_titles.size, "page=#{junk} should render the first page"
+    end
+  end
+
+  test "a page past the store's result window renders instead of raising" do
+    get search_path(q: "haggis", page: 5000, script_name: "/#{@account.external_account_id}")
+
+    assert_response :success
+  end
+
+  test "MAX_SEARCH_PAGE is the last page the store's result window allows" do
+    window = ActiveSearch.index(:searchable).store.capabilities.max_result_window
+    relation = ActiveSearch.index(:searchable).search("haggis")
+
+    last = relation.page(SearchesController::MAX_SEARCH_PAGE, per_page: SearchesController::SEARCH_PAGE_SIZES)
+    assert_operator last.offset + last.limit, :<=, window
+
+    assert_raises ActiveSearch::ResultWindowExceeded do
+      relation.page(SearchesController::MAX_SEARCH_PAGE + 1, per_page: SearchesController::SEARCH_PAGE_SIZES)
+    end
   end
 
   test "search with CJK content" do
@@ -125,19 +226,19 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
     assert_select "li .search__title", text: /Hälsa och friskvård/
   end
 
-  test "search preserves highlight marks but escapes surrounding HTML" do
-    @board.cards.create!(
-      title: "<b>Bold</b> testing content",
-      status: "published",
-      creator: @user
-    )
+  private
+    def search_result_titles
+      css_select("li .search__title").map { |element| element.text.strip }
+    end
 
-    get search_path(q: "testing", script_name: "/#{@account.external_account_id}")
-    assert_response :success
+    def search_result_excerpts
+      css_select("li .search__excerpt:not(.search__excerpt--comment)")
+        .map { |element| element.inner_html.gsub(/\s+/, " ").strip }
+    end
 
-    # Should escape <b> tags
-    assert response.body.include?("&lt;b&gt;")
-    # But should preserve highlight marks around "testing"
-    assert_match(/<mark class="circled-text"><span><\/span>testing<\/mark>/, response.body)
-  end
+    def hidden_card
+      hidden_board = Board.create!(name: "Hidden Board", account: @account, creator: @user)
+      hidden_board.accesses.revoke_from(@user)
+      hidden_board.cards.create!(title: "Hidden card", status: "published", creator: @user)
+    end
 end

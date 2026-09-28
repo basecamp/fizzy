@@ -1,15 +1,28 @@
 module Identity::Transferable
   extend ActiveSupport::Concern
 
-  TRANSFER_LINK_EXPIRY_DURATION = 4.hours
+  included do
+    has_many :transfers, class_name: "Identity::Transfer", dependent: :delete_all
+  end
 
   class_methods do
-    def find_by_transfer_id(id)
-      find_signed(id, purpose: :transfer)
+    def find_by_transfer_id(token)
+      Identity::Transfer.consume(token)&.identity
     end
   end
 
+  def transfer
+    ApplicationRecord.with_writing_role { transfers.active.first }
+  end
+
   def transfer_id
-    signed_id(purpose: :transfer, expires_in: TRANSFER_LINK_EXPIRY_DURATION)
+    transfers.create!.token
+  end
+
+  def regenerate_transfer_token
+    with_lock do
+      transfers.delete_all
+      transfers.create!
+    end
   end
 end

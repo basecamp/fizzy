@@ -2,7 +2,11 @@
 
 <% content_for :header do %>
   <div class="header__actions header__actions--start">
-    <%= back_link_to "My profile", user_path(Current.user), "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+    <% if Current.user %>
+      <%= back_link_to "My profile", user_path(Current.user), "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+    <% else %>
+      <%= back_link_to "Menu", session_menu_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+    <% end %>
   </div>
 
   <h1 class="header__title" data-bridge--title-target="header"><%= @page_title %></h1>

@@ -1,93 +1,76 @@
-class Search::Highlighter
-  OPENING_MARK = "<mark class=\"circled-text\"><span></span>"
-  CLOSING_MARK = "</mark>"
-  # Private-use characters mark matches during term passes, so a later term
-  # can't match inside HTML inserted for an earlier one
-  OPENING_SENTINEL = "\uE000"
-  CLOSING_SENTINEL = "\uE001"
-  ELIPSIS = "..."
+require "mittens"
 
-  attr_reader :query
+# Produces the store markers that ActiveSearch escapes and formats for each field.
+# Match offsets always refer to the original text, never to generated HTML.
+class Search::Highlighter
+  STEMMER = Mittens::Stemmer.new
+  TOKEN = /(?:#{Search::CJK_PATTERN})\p{M}*|(?:(?!#{Search::CJK_PATTERN})[\p{L}\p{M}\p{N}_])+/
 
   def initialize(query)
-    @query = query
+    @phrases = query.scan(/"([^"]+)"|(\S+)/).map { |quoted, word| tokens(quoted || word).map(&:first) }
+      .reject(&:empty?)
   end
 
   def highlight(text)
-    result = text.delete(OPENING_SENTINEL + CLOSING_SENTINEL)
-
-    terms.each do |term|
-      if term.match?(Search::CJK_PATTERN)
-        result.gsub!(/(#{Regexp.escape(term)})/i) do |match|
-          "#{OPENING_SENTINEL}#{match}#{CLOSING_SENTINEL}"
-        end
-      else
-        result.gsub!(/(?<![a-zA-Z0-9_])(#{Regexp.escape(term)}[a-zA-Z0-9_]*)(?![a-zA-Z0-9_])/i) do |match|
-          "#{OPENING_SENTINEL}#{match}#{CLOSING_SENTINEL}"
-        end
-      end
-    end
-
-    escape_highlight_marks(result)
+    mark(text, matching_ranges(tokens(text)))
   end
 
-  def snippet(text, max_chars: 100)
-    if text.length <= max_chars
-      highlight(text)
-    elsif (match_index = first_match_position(text))
-      start_index = [ 0, match_index - max_chars / 2 ].max
-      end_index = [ text.length, start_index + max_chars ].min
+  def snippet(text, max_words:)
+    words = tokens(text)
+    ranges = matching_ranges(words)
+    return text if ranges.empty?
+    return mark(text, ranges) if words.size <= max_words
 
-      snippet_text = text[start_index...end_index]
-      snippet_text = "#{ELIPSIS}#{snippet_text}" if start_index > 0
-      snippet_text = "#{snippet_text}#{ELIPSIS}" if end_index < text.length
-
-      highlight(snippet_text)
-    else
-      "#{text[0, max_chars]}#{ELIPSIS}"
+    match_index = words.index { |_, start, _| start == ranges.first.first }
+    first = [ 0, match_index - max_words / 2 ].max
+    last = [ words.size - 1, first + max_words - 1 ].min
+    start = first.zero? ? 0 : words[first][1]
+    finish = last == words.size - 1 ? text.length : words[last][2]
+    clipped = ranges.filter_map do |left, right|
+      [ [ left, start ].max - start, [ right, finish ].min - start ] if left < finish && right > start
     end
+    excerpt = mark(text[start...finish], clipped)
+    excerpt = "...#{excerpt}" if start > 0
+    excerpt = "#{excerpt}..." if finish < text.length
+    excerpt
   end
 
   private
-    def terms
-      @terms ||= begin
-        terms = []
-
-        query.scan(/"([^"]+)"/) do |phrase|
-          terms << phrase.first
-        end
-
-        unquoted = query.gsub(/"[^"]+"/, "")
-        unquoted.split(/\s+/).each do |word|
-          next unless word.present?
-
-          if word.match?(Search::CJK_PATTERN)
-            terms << word
-          else
-            stemmed = Search::Stemmer.stem(word)
-            terms << stemmed
-            terms << word.downcase unless word.downcase.start_with?(stemmed)
-          end
-        end
-
-        terms.uniq
+    def tokens(text)
+      text.to_enum(:scan, TOKEN).map do
+        match = Regexp.last_match
+        word = match[0].unicode_normalize(:nfc).downcase
+        # unicode61 removes Latin diacritics before porter stemming.
+        word = word.gsub(/\p{Latin}/) { |char| char.unicode_normalize(:nfd).gsub(/\p{M}/, "") }
+        [ STEMMER.stem(word), match.begin(0), match.end(0) ]
       end
     end
 
-    def first_match_position(text)
-      terms.filter_map do |term|
-        if term.match?(Search::CJK_PATTERN)
-          text =~ /#{Regexp.escape(term)}/i
-        else
-          text =~ /(?<![a-zA-Z0-9_])#{Regexp.escape(term)}/i
+    def matching_ranges(words)
+      ranges = @phrases.flat_map do |phrase|
+        words.each_cons(phrase.size).filter_map do |sequence|
+          [ sequence.first[1], sequence.last[2] ] if sequence.map(&:first) == phrase
         end
-      end.min
+      end.sort
+
+      ranges.each_with_object([]) do |range, merged|
+        if merged.any? && range.first <= merged.last.last
+          merged.last[1] = [ merged.last.last, range.last ].max
+        else
+          merged << range
+        end
+      end
     end
 
-    def escape_highlight_marks(html)
-      CGI.escapeHTML(html)
-        .gsub(OPENING_SENTINEL, OPENING_MARK)
-        .gsub(CLOSING_SENTINEL, CLOSING_MARK)
-        .html_safe
+    def mark(text, ranges)
+      result = +""
+      position = 0
+      ranges.each do |left, right|
+        result << text[position...left]
+        result << ActiveSearch::Highlighting::STORE_OPEN_MARKER << text[left...right]
+        result << ActiveSearch::Highlighting::STORE_CLOSE_MARKER
+        position = right
+      end
+      result << text[position..]
     end
 end

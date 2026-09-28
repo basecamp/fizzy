@@ -115,6 +115,21 @@ class Webhook::DeliveryTest < ActiveSupport::TestCase
     assert delivery.succeeded?
   end
 
+  test "deliver a comment whose body has a content attachment" do
+    comment = comments(:layout_overflowing_david)
+    comment.update! body: %(<action-text-attachment content-type="text/html" content="&lt;p&gt;Embedded content&lt;/p&gt;"></action-text-attachment>)
+    delivery = Webhook::Delivery.create!(webhook: webhooks(:active), event: events(:layout_commented))
+
+    request_stub = stub_request(:post, delivery.webhook.url)
+      .with { |request| JSON.parse(request.body).dig("eventable", "body", "html").include?("Embedded content") }
+      .to_return(status: 200, headers: { "content-type" => "application/json" })
+
+    delivery.deliver
+
+    assert_requested request_stub
+    assert_equal "completed", delivery.state
+  end
+
   test "deliver when the network timeouts" do
     delivery = webhook_deliveries(:pending)
     stub_request(:post, delivery.webhook.url).to_timeout
@@ -416,6 +431,26 @@ class Webhook::DeliveryTest < ActiveSupport::TestCase
 
     assert_equal "completed", delivery.state
     assert_equal "private_uri", delivery.response[:error]
+    assert_not delivery.succeeded?
+  end
+
+  test "reports a DNS resolution failure as a lookup failure, not a blocked address" do
+    webhook = Webhook.create!(
+      board: boards(:writebook),
+      name: "Unresolvable",
+      url: "https://nxdomain.example.invalid/webhook"
+    )
+    event = events(:layout_commented)
+    delivery = Webhook::Delivery.create!(webhook: webhook, event: event)
+
+    # Host resolves to nothing (timeout/NXDOMAIN), distinct from resolving to a
+    # blocked address, which stays private_uri (see the rebinding test above).
+    stub_dns_failure
+
+    delivery.deliver
+
+    assert_equal "completed", delivery.state
+    assert_equal "dns_lookup_failed", delivery.response[:error]
     assert_not delivery.succeeded?
   end
 

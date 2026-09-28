@@ -13,6 +13,23 @@ class Cards::CommentsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "create with a content attachment in the body" do
+    post card_comments_path(cards(:logo)), params: { comment: { body: content_attachment_html } }, as: :turbo_stream
+
+    assert_response :success
+    assert_includes response.body, "Embedded content"
+  end
+
+  test "show as JSON with a content attachment in the body" do
+    comment = comments(:logo_agreement_kevin)
+    comment.update! body: content_attachment_html
+
+    get card_comment_path(cards(:logo), comment), as: :json
+
+    assert_response :success
+    assert_includes response.parsed_body.dig("body", "html"), "Embedded content"
+  end
+
   test "create on draft card is forbidden" do
     draft_card = boards(:writebook).cards.create!(status: :drafted, creator: users(:kevin))
 
@@ -146,4 +163,9 @@ class Cards::CommentsControllerTest < ActionDispatch::IntegrationTest
     assert_response :no_content
     assert_not Comment.exists?(comment.id)
   end
+
+  private
+    def content_attachment_html
+      %(<action-text-attachment content-type="text/html" content="&lt;p&gt;Embedded content&lt;/p&gt;"></action-text-attachment>)
+    end
 end

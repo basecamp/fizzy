@@ -1,4 +1,10 @@
+require "shellwords"
+
 class Account::Import < ApplicationRecord
+  class InsufficientStorageSpaceError < StandardError; end
+
+  REQUIRED_STORAGE_SPACE_FACTOR = 2
+
   broadcasts_refreshes
 
   belongs_to :account
@@ -7,7 +13,7 @@ class Account::Import < ApplicationRecord
   has_one_attached :file, dependent: :purge_later
 
   enum :status, %w[ pending processing completed failed ].index_by(&:itself), default: :pending
-  enum :failure_reason, %w[ conflict invalid_export ].index_by(&:itself), prefix: :failed_due_to, scopes: false
+  enum :failure_reason, %w[ conflict invalid_export insufficient_storage_space ].index_by(&:itself), prefix: :failed_due_to, scopes: false
 
   scope :expired, -> { where(completed_at: ...24.hours.ago).or(where(status: :failed, created_at: ...7.days.ago)) }
 
@@ -21,6 +27,7 @@ class Account::Import < ApplicationRecord
 
   def check(start: nil, callback: nil)
     processing!
+    ensure_sufficient_storage_space
 
     ZipFile.read_from(file.blob) do |zip|
       Account::DataTransfer::Manifest.new(account).each_record_set(start: start) do |record_set, last_id|
@@ -33,6 +40,9 @@ class Account::Import < ApplicationRecord
   rescue Account::DataTransfer::RecordSet::IntegrityError, ZipFile::InvalidFileError => e
     mark_as_failed(:invalid_export)
     raise e
+  rescue InsufficientStorageSpaceError => e
+    mark_as_failed(:insufficient_storage_space)
+    raise e
   rescue => e
     mark_as_failed
     raise e
@@ -41,6 +51,8 @@ class Account::Import < ApplicationRecord
   def process(start: nil, callback: nil)
     processing!
 
+    ensure_sufficient_storage_space if start.nil?
+
     ZipFile.read_from(file.blob) do |zip|
       Account::DataTransfer::Manifest.new(account).each_record_set(start: start) do |record_set, last_id|
         record_set.import(from: zip, start: last_id, callback: callback)
@@ -48,6 +60,7 @@ class Account::Import < ApplicationRecord
     end
 
     add_importer_to_all_access_boards
+    create_missing_user_settings
     reconcile_cards_count
     reconcile_account_storage
 
@@ -57,6 +70,9 @@ class Account::Import < ApplicationRecord
     raise e
   rescue Account::DataTransfer::RecordSet::IntegrityError, ZipFile::InvalidFileError => e
     mark_as_failed(:invalid_export)
+    raise e
+  rescue InsufficientStorageSpaceError => e
+    mark_as_failed(:insufficient_storage_space)
     raise e
   rescue => e
     mark_as_failed
@@ -69,6 +85,31 @@ class Account::Import < ApplicationRecord
   end
 
   private
+    def ensure_sufficient_storage_space
+      return unless path = ZipFile.path_on_disk(file.blob)
+
+      required = file.blob.byte_size * REQUIRED_STORAGE_SPACE_FACTOR
+      available = available_storage_space(path)
+
+      if available && available < required
+        raise InsufficientStorageSpaceError, "import needs ~#{human_size(required)} free, found #{human_size(available)}"
+      end
+    end
+
+    def human_size(bytes)
+      ActiveSupport::NumberHelper.number_to_human_size(bytes)
+    end
+
+    def available_storage_space(path)
+      fields = `df -Pk #{Shellwords.escape(path)} 2>/dev/null`.lines.last.to_s.split
+      capacity_index = fields.index { |field| field.match?(/\A\d+%\z/) }
+
+      if capacity_index
+        available_kilobytes = Integer(fields[capacity_index - 1], exception: false)
+        available_kilobytes&.kilobytes
+      end
+    end
+
     def mark_completed
       update!(status: :completed, completed_at: Time.current)
       ImportMailer.completed(identity, account).deliver_later
@@ -89,6 +130,10 @@ class Account::Import < ApplicationRecord
       account.boards.all_access.find_each do |board|
         board.accesses.grant_to(importer)
       end
+    end
+
+    def create_missing_user_settings
+      account.users.where.not(role: :system).where.missing(:settings).find_each(&:create_settings!)
     end
 
     def reconcile_account_storage

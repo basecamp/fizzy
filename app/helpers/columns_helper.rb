@@ -40,7 +40,7 @@ module ColumnsHelper
         navigable_list_actionable_items_value: "true",
         navigable_list_only_act_on_focused_items_value: "true",
         card_hotkeys_disabled: hotkeys_disabled,
-        action: "keydown->navigable-list#navigate"
+        action: "keydown->navigable-list#navigate turbo:before-visit@document->navigable-list#rememberSelection turbo:frame-load->navigable-list#forgetSelection"
       }, &block)
     end
   end

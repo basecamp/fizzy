@@ -46,6 +46,19 @@ module ActiveRecordReplicaSupport
         yield
       end
     end
+
+    # Execute block against the primary (writing) role so reads observe just-written
+    # rows. No-op when no replica is configured.
+    #
+    # Example:
+    #   ApplicationRecord.with_writing_role { identity.transfer }
+    def with_writing_role(&block)
+      if replica_configured?
+        connected_to(role: :writing, &block)
+      else
+        yield
+      end
+    end
   end
 end
 

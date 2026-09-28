@@ -1,5 +1,4 @@
 <% if card.published? %>
-  <div data-turbo-permanent>
   <%= turbo_frame_tag card, :edit do %>
     <%# When canceling an edit (with the ESC key), restore the button area to show "Edit" instead of "Save changes". %>
     <%= turbo_stream.replace dom_id(card, :card_closure_toggle) do %>
@@ -8,7 +7,6 @@
 
     <%= render "cards/container/content_display", card: card %>
   <% end %>
-  </div>
 <% else %>
   <%= form_with model: card, id: "card_form", data: { controller: "autoresize auto-save" } do |form| %>
     <h1 class="card__title">

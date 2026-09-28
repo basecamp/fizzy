@@ -52,14 +52,23 @@ RUN SECRET_KEY_BASE_DUMMY=1 \
 # Final stage for app image
 FROM base
 
-# Install packages needed for deployment
+# Install packages needed for deployment. No libvips, ffmpeg or mupdf-tools: every conversion runs
+# in the hotcell cell, whose image carries its own. Rails' active_storage/vips tolerates the missing
+# library (ActiveStorage::VIPS_AVAILABLE=false), and config/initializers/vips.rb only demands it
+# when no cell is registered.
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl libsqlite3-0 libvips build-essential ffmpeg groff libreoffice-writer libreoffice-impress libreoffice-calc mupdf-tools sqlite3 libjemalloc-dev && \
+    apt-get install --no-install-recommends -y libsqlite3-0 sqlite3 libjemalloc-dev && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Copy built artifacts: gems, application
 COPY --from=build /usr/local/bundle /usr/local/bundle
 COPY --from=build /rails /rails
+
+# Where the hotcell socket volume mounts, owned by the cell's uid rather than this image's user. A new
+# named volume takes its ownership from the directory it covers in whichever container mounts it first,
+# and on a new host that is the app. Left to Docker to create, it is root-owned and the cell cannot create
+# its sockets in it — which fails as EACCES when the accessory boots, with nothing here to say why.
+RUN mkdir -p /run/hotcell/active_storage && chown -R 10001:10001 /run/hotcell
 
 # Run and own only the runtime files as a non-root user for security
 RUN useradd rails --create-home --shell /bin/bash && \

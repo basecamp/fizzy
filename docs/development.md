@@ -17,7 +17,7 @@ bin/dev
 
 You'll be able to access the app in development at http://app.fizzy.localhost:3006.
 
-To login, enter `david@example.com` and grab the verification code from the browser console to sign in.
+To log in, enter `david@example.com`. In development the verification code is shown on the page itself, under "Psst, here's your code" — no need to check your email.
 
 ### Web Push Notifications
 

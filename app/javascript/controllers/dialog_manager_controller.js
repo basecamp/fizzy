@@ -2,11 +2,12 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   connect() {
-    this.element.addEventListener("dialog:show", this.handleDialogShow.bind(this))
+    this.boundHandleDialogShow = this.handleDialogShow.bind(this)
+    this.element.addEventListener("dialog:show", this.boundHandleDialogShow)
   }
 
   disconnect() {
-    this.element.removeEventListener("dialog:show", this.handleDialogShow.bind(this))
+    this.element.removeEventListener("dialog:show", this.boundHandleDialogShow)
   }
 
   handleDialogShow(event) {

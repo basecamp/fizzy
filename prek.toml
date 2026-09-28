@@ -1,0 +1,14 @@
+[[repos]]
+repo = "local"
+hooks = [
+  { id = "rubocop", name = "rubocop", language = "system", entry = "bin/rubocop --force-exclusion", types = ["ruby"] },
+]
+
+[[repos]]
+repo = "builtin"
+hooks = [
+  { id = "check-merge-conflict" },
+  { id = "check-case-conflict" },
+  { id = "check-added-large-files" },
+  { id = "detect-private-key" },
+]

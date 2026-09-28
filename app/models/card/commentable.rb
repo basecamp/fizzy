@@ -9,7 +9,16 @@ module Card::Commentable
     published?
   end
 
+  # A comment's document carries its card's board_id, so a board move strands them all.
+  def reindex_comments
+    comments.includes(:rich_text_body, :card).find_each(&:reindex)
+  end
+
   private
+    def reindex_comments_later
+      Card::ReindexCommentsJob.perform_later(self)
+    end
+
     STORAGE_BATCH_SIZE = 1000
 
     # Override to include comments, but only load comments that have attachments.

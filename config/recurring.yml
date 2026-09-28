@@ -24,6 +24,9 @@ production: &production
   cleanup_magic_links:
     command: "MagicLink.cleanup"
     schedule: every 4 hours
+  cleanup_transfers:
+    command: "Identity::Transfer.cleanup"
+    schedule: every 4 hours
   cleanup_exports:
     command: "Export.cleanup"
     schedule: every hour at minute 20

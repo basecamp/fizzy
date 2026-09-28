@@ -33,6 +33,7 @@ class Account::ImportTest < ActiveSupport::TestCase
     identity = exporter.identity
 
     source_account_digest = account_digest(source_account)
+    source_user_settings = user_settings_digest(source_account)
 
     export = Account::Export.create!(account: source_account, user: exporter)
     export.build
@@ -57,9 +58,48 @@ class Account::ImportTest < ActiveSupport::TestCase
     assert import.completed?
 
     assert_equal source_account_digest, account_digest(target_account)
+    assert_equal source_user_settings, user_settings_digest(target_account).slice(*source_user_settings.keys)
+    assert_empty users_without_settings(target_account)
+    assert_empty duplicate_user_settings(target_account)
   ensure
     export_tempfile&.close
     export_tempfile&.unlink
+  end
+
+  test "import creates settings for users whose export carried none" do
+    source_account = accounts("37s")
+    exporter = users(:david)
+    identity = exporter.identity
+
+    export = Account::Export.create!(account: source_account, user: exporter)
+    export.build
+
+    export_tempfile = Tempfile.new([ "export", ".zip" ])
+    export.file.open { |f| FileUtils.cp(f.path, export_tempfile.path) }
+
+    stripped_tempfile = zip_without(export_tempfile.path, "data/user_settings/*")
+
+    source_account.destroy!
+
+    target_account = Account.create_with_owner(account: { name: "Import Test" }, owner: { identity: identity, name: exporter.name })
+    import = Account::Import.create!(identity: identity, account: target_account)
+    Current.set(account: target_account) do
+      import.file.attach(io: File.open(stripped_tempfile.path), filename: "export.zip", content_type: "application/zip")
+    end
+
+    import.check
+    import.process
+
+    assert import.completed?
+    assert_operator User.where(account: target_account).where.not(role: :system).count, :>, 1
+    assert_empty users_without_settings(target_account)
+    assert_empty duplicate_user_settings(target_account)
+    assert_empty User::Settings.where(account: target_account).joins(:user).where(user: { role: :system })
+  ensure
+    export_tempfile&.close
+    export_tempfile&.unlink
+    stripped_tempfile&.close
+    stripped_tempfile&.unlink
   end
 
   test "import reconciles cards count so new cards get correct numbers" do
@@ -220,7 +260,66 @@ class Account::ImportTest < ActiveSupport::TestCase
     export_tempfile&.unlink
   end
 
+  test "check fails fast with a clear reason when free storage space is insufficient" do
+    import = import_with_attached_zip
+    import.stubs(:available_storage_space).returns(import.file.blob.byte_size)
+
+    error = assert_raises(Account::Import::InsufficientStorageSpaceError) { import.check }
+    assert_match(/import needs ~.+ free, found/, error.message)
+    assert import.reload.failed_due_to_insufficient_storage_space?
+  end
+
+  test "check proceeds when free storage space cannot be determined" do
+    import = import_with_attached_zip
+    import.stubs(:available_storage_space).returns(nil)
+
+    assert_raises(ZipFile::InvalidFileError) { import.check }
+    assert import.reload.failed_due_to_invalid_export?
+  end
+
+  test "process fails fast with a clear reason when free storage space is insufficient" do
+    import = import_with_attached_zip
+    import.stubs(:available_storage_space).returns(import.file.blob.byte_size)
+
+    assert_raises(Account::Import::InsufficientStorageSpaceError) { import.process }
+    assert import.reload.failed_due_to_insufficient_storage_space?
+  end
+
+  test "resumed process skips the storage space preflight" do
+    import = import_with_attached_zip
+    import.stubs(:available_storage_space).returns(import.file.blob.byte_size)
+
+    assert_raises(ZipFile::InvalidFileError) { import.process(start: [ "Board", nil ]) }
+    assert import.reload.failed_due_to_invalid_export?
+  end
+
+  test "available_storage_space is indeterminate when df output is unparseable" do
+    import = import_with_attached_zip
+    import.stubs(:`).returns("Filesystem 1024-blocks Used Available Capacity Mounted on\n")
+
+    assert_nil import.send(:available_storage_space, "/tmp")
+  end
+
+  test "available_storage_space parses df output whose filesystem name contains spaces" do
+    import = import_with_attached_zip
+    import.stubs(:`).returns(<<~DF)
+      Filesystem 1024-blocks Used Available Capacity Mounted on
+      map auto home 1000000 250000 750000 25% /System/Volumes/Data/home
+    DF
+
+    assert_equal 750_000 * 1024, import.send(:available_storage_space, "/tmp")
+  end
+
   private
+    def import_with_attached_zip
+      account = Account.create!(name: "Disk Check")
+      import = Account::Import.create!(account: account, identity: identities(:david))
+      Current.set(account: account) do
+        import.file.attach(io: StringIO.new("not actually a zip"), filename: "export.zip", content_type: "application/zip")
+      end
+      import
+    end
+
     def account_digest(account)
       {
         name: account.name,
@@ -229,7 +328,41 @@ class Account::ImportTest < ActiveSupport::TestCase
         column_colors: Column.where(account: account).order(:id).pluck(:color),
         card_count: Card.where(account: account).count,
         comment_count: Comment.where(account: account).count,
-        tag_count: Tag.where(account: account).count
+        tag_count: Tag.where(account: account).count,
+        user_ids: User.where(account: account).where.not(role: :system).order(:id).pluck(:id)
       }
+    end
+
+    def user_settings_digest(account)
+      User::Settings.where(account: account).pluck(:user_id, :bundle_email_frequency).to_h
+    end
+
+    def users_without_settings(account)
+      User.where(account: account).where.not(role: :system).where.missing(:settings)
+    end
+
+    def duplicate_user_settings(account)
+      User::Settings.where(account: account).group(:user_id).having("COUNT(*) > 1").count
+    end
+
+    def zip_without(path, pattern)
+      tempfile = Tempfile.new([ "stripped_export", ".zip" ])
+      tempfile.binmode
+      writer = ZipFile::Writer.new(tempfile)
+
+      File.open(path, "rb") do |file|
+        reader = ZipFile::Reader.new(file)
+
+        reader.glob("*").each do |entry|
+          next if entry.end_with?("/")
+          next if File.fnmatch(pattern, entry)
+
+          writer.add_file(entry, reader.read(entry))
+        end
+      end
+
+      writer.close
+      tempfile.rewind
+      tempfile
     end
 end

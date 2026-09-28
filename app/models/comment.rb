@@ -1,5 +1,5 @@
 class Comment < ApplicationRecord
-  include Attachments, Eventable, Mentions, Promptable, Searchable, Storage::Tracked
+  include Attachments, Eventable, Mentions, Promptable, Storage::Tracked
 
   belongs_to :account, default: -> { card.account }
   belongs_to :card, touch: true
@@ -7,6 +7,14 @@ class Comment < ApplicationRecord
   has_many :reactions, -> { order(:created_at) }, as: :reactable, dependent: :delete_all
 
   has_rich_text :body
+
+  has_search index: :searchable, async: false, if: ->(comment) { comment.card.published? },
+    scope: -> { preload(card: [ :board, :creator ]).with_rich_text_body },
+    serializer: ->(comment) {
+    { account_id: comment.account_id, card_id: comment.card_id, board_id: comment.card.board_id,
+      title: nil, content: comment.body.to_plain_text.truncate_bytes(Card::SEARCH_CONTENT_LIMIT, omission: ""),
+      created_at: comment.created_at }
+  }
 
   validate :card_is_commentable
 

@@ -1,7 +1,10 @@
 # Automatically use UUID type for all binary(16) columns and generate defaults
 
 module UuidPrimaryKeyDefault
-  def load_schema!
+  # Rails builds the schema context's attribute set (applying pending attribute
+  # modifications) inside `load_schema`, before the model's own `load_schema!`
+  # hook runs, so the default has to be registered as the context is built.
+  def build_schema_context
     define_uuid_primary_key_pending_default
     super
   end

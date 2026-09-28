@@ -47,7 +47,18 @@ class ActionPack::WebAuthn::Authenticator::Attestation
     if data.is_a?(self)
       data
     else
-      data = Base64.urlsafe_decode64(data) unless data.encoding == Encoding::BINARY
+      unless data.encoding == Encoding::BINARY
+        # Base64URL expands 3 bytes into 4 characters, so an encoded value whose
+        # decoded size would exceed the CBOR byte limit is rejected before
+        # Base64.urlsafe_decode64 allocates the decoded copy.
+        max_encoded = ActionPack::WebAuthn::CborDecoder::MAX_SIZE / 3 * 4 + 4
+        if data.bytesize > max_encoded
+          raise ActionPack::WebAuthn::InvalidResponseError, "Attestation object is too large"
+        end
+
+        data = Base64.urlsafe_decode64(data)
+      end
+
       decode(data)
     end
   rescue ArgumentError
@@ -57,6 +68,10 @@ class ActionPack::WebAuthn::Authenticator::Attestation
   # Decodes a CBOR-encoded attestation object into an Attestation instance.
   def self.decode(bytes)
     cbor = ActionPack::WebAuthn::CborDecoder.decode(bytes)
+
+    unless cbor.is_a?(Hash) && cbor["authData"].is_a?(String)
+      raise ActionPack::WebAuthn::InvalidResponseError, "Malformed attestation object"
+    end
 
     new(
       authenticator_data: ActionPack::WebAuthn::Authenticator::Data.decode(cbor["authData"]),

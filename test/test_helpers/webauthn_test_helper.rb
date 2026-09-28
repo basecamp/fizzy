@@ -33,8 +33,7 @@ module WebauthnTestHelper
       WEBAUTHN_PRIVATE_KEY
     end
 
-    def build_attestation_params(challenge:)
-      credential_id = SecureRandom.random_bytes(32)
+    def build_attestation_params(challenge:, credential_id: SecureRandom.random_bytes(32))
       auth_data = build_attestation_auth_data(credential_id: credential_id)
 
       {

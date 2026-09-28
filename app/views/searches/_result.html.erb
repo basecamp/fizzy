@@ -1,21 +1,23 @@
+<%# Records must come from a search: ActiveSearch sets #hit only on ones it hydrated. %>
 <li>
-  <%= link_to result.source, class: "search__result", data: { turbo_frame: "_top", action: "bar#reset" } do %>
+  <% card = result.is_a?(Card) ? result : result.card %>
+  <%= link_to result, class: "search__result", data: { turbo_frame: "_top", action: "bar#reset" } do %>
     <div>
       <h3 class="search__title txt--medium margin-none">
-        # <%= result.card.number %> <%= result.card_title %>
+        # <%= card.number %> <%= result.hit.highlight(:title) || card.title %>
       </h3>
 
-      <% if result.comment.present? %>
+      <% if result.is_a?(Comment) %>
         <div class="search__excerpt search__excerpt--comment">
-          <%= avatar_preview_tag result.card.creator %>
-          <div><%= result.comment_body %></div>
+          <%= avatar_preview_tag card.creator %>
+          <div><%= result.hit.highlight(:content) || result.body.to_plain_text.truncate(200) %></div>
         </div>
-      <% elsif result.card_id.present? %>
-        <div class="search__excerpt"><%= result.card_description %></div>
+      <% else %>
+        <div class="search__excerpt"><%= result.hit.highlight(:content) || card.description.to_plain_text.truncate(200) %></div>
       <% end %>
     </div>
     <div class="overflow-ellipsis translucent txt-ink">
-      <%= result.card.board.name %> · <%= local_datetime_tag(result.created_at, style: :timeordate) %>
+      <%= card.board.name %> · <%= local_datetime_tag(result.created_at, style: :timeordate) %>
     </div>
   <% end %>
 </li>

@@ -52,11 +52,15 @@ module SessionTestHelper
   end
 
   def untenanted(&block)
-    original_script_name = integration_session.default_url_options[:script_name]
-    integration_session.default_url_options[:script_name] = ""
+    # integration_session is built on first read, and one built before the routes are
+    # drawn has no mounted-engine proxies. Nothing else here forces them.
+    Rails.application.reload_routes_unless_loaded
+
+    original_options = integration_session.default_url_options
+    integration_session.default_url_options = original_options.merge(script_name: "")
     yield
   ensure
-    integration_session.default_url_options[:script_name] = original_script_name
+    integration_session.default_url_options = original_options
   end
 
   def with_multi_tenant_mode(enabled)

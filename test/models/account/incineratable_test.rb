@@ -174,12 +174,12 @@ class Account::IncineratableTest < ActiveSupport::TestCase
     assert_empty ActionText::RichText.where(account_id: account_id)
 
     # Search records (sharded)
-    assert_empty Search::Record.for(account_id).where(account_id: account_id)
+    assert_empty search_records_for(account_id)
   end
 
   test "incinerating an account clears its own search records but preserves others on the same shard" do
     doomed = accounts(:initech)
-    shard = Search::Record.for(doomed.id)
+    shard = search_shard_for(doomed.id)
 
     doomed_card = cards(:radio)
     doomed_record = shard.create!(
