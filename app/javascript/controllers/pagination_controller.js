@@ -39,6 +39,10 @@ export default class extends Controller {
     }
   }
 
+  paginationLinkTargetDisconnected(linkElement) {
+    this.observer?.unobserve(linkElement)
+  }
+
   // Actions
 
   loadPage({ target }) {
@@ -47,15 +51,20 @@ export default class extends Controller {
 
   // Private
 
-  #intersect = ([ entry ]) => {
-    if (entry?.isIntersecting && entry.intersectionRatio === 1) {
-      this.#loadPaginationLink(entry.target)
+  #intersect = (entries) => {
+    for (const entry of entries) {
+      if (entry.isIntersecting && entry.intersectionRatio === 1 && !this.#isLoaded(entry.target)) {
+        this.#loadPaginationLink(entry.target)
+      }
     }
   }
 
-  #loadPaginationLink(linkElement) {
-    this.observer?.unobserve(linkElement)
+  // Links stay observed so a page whose frame a morph removed loads again.
+  #isLoaded(linkElement) {
+    return this.element.querySelector(`turbo-frame#${linkElement.dataset.frame}`) !== null
+  }
 
+  #loadPaginationLink(linkElement) {
     keepingScrollPosition(this.#closestSiblingTo(linkElement) || linkElement.parentNode, this.#expandPaginationLink(linkElement))
   }
 
