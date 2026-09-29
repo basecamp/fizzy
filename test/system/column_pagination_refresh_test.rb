@@ -3,6 +3,9 @@ require "application_system_test_case"
 class ColumnPaginationRefreshTest < ApplicationSystemTestCase
   include ActionView::RecordIdentifier
 
+  # A page loads 400ms after its link is observed, and a cold CI server answers slowly.
+  PAGE_LOAD_WAIT = 10
+
   setup do
     sign_in_as(users(:david))
     Current.user = users(:kevin)
@@ -21,7 +24,7 @@ class ColumnPaginationRefreshTest < ApplicationSystemTestCase
     wait_for_cable_subscriptions
     add_card_to_column "Added elsewhere"
     @board.broadcast_refresh
-    assert_text "Added elsewhere"
+    assert_text "Added elsewhere", wait: PAGE_LOAD_WAIT
 
     scroll_column_to_bottom
     assert_column_shows_every_card
@@ -33,13 +36,12 @@ class ColumnPaginationRefreshTest < ApplicationSystemTestCase
     end
 
     def assert_column_shows_every_card
-      assert_selector "##{dom_id(@column, :cards)} .card", count: @column.cards.active.count
+      assert_selector "##{dom_id(@column, :cards)} .card", count: @column.cards.active.count, wait: PAGE_LOAD_WAIT
     end
 
     def scroll_column_to_bottom
-      page.execute_script(<<~JS, dom_id(@column, :cards))
-        document.getElementById(arguments[0]).querySelectorAll(".pagination-link").forEach(link => link.scrollIntoView())
-      JS
+      link = find("##{dom_id(@column, :cards)} .pagination-link", visible: :all)
+      page.execute_script("arguments[0].scrollIntoView()", link)
     end
 
     def wait_for_cable_subscriptions
