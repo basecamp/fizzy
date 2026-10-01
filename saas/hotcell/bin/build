@@ -32,7 +32,7 @@ step: saas/hotcell/bin/push.
 
 To move the cell to a new hotcell version, update the gem in the application first:
 
-    BUNDLE_GEMFILE=Gemfile.saas bundle update --conservative hotcell-client activestorage-hotcell-client hotcell-core
+    BUNDLE_GEMFILE=Gemfile.saas bundle update --conservative hotcell-client activestorage-hotcell-client yabeda-hotcell hotcell-core
     saas/hotcell/bin/build
 
 then commit the two lockfiles, the deploy.yml pin, and anything else, together.

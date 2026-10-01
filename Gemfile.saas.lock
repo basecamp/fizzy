@@ -707,6 +707,9 @@ GEM
       yabeda (~> 0.8)
     yabeda-gc (0.4.0)
       yabeda (~> 0.6)
+    yabeda-hotcell (0.6.0)
+      hotcell-client (= 0.6.0)
+      yabeda (>= 0.12)
     yabeda-http_requests (0.3.0)
       anyway_config (>= 1.3, < 3.0)
       sniffer
@@ -807,6 +810,7 @@ DEPENDENCIES
   yabeda-actioncable
   yabeda-activejob!
   yabeda-gc
+  yabeda-hotcell (= 0.6.0)
   yabeda-http_requests
   yabeda-prometheus-mmap
   yabeda-puma-plugin
@@ -1059,6 +1063,7 @@ CHECKSUMS
   yabeda-actioncable (0.2.2) sha256=dcfaf23d36a7c9f7a939aac82e34f5db6bb83cdde26f0a3d6e21816410edb579
   yabeda-activejob (0.6.0)
   yabeda-gc (0.4.0) sha256=bdc50e133b6c5ba27071f00d63f9184d0338acec3d0f20403900427b9b718ff3
+  yabeda-hotcell (0.6.0) sha256=97723f5192d30432b5a0927c1ef27d04e9ea33f242302bab56fad5f3be130bc8
   yabeda-http_requests (0.3.0) sha256=f2705a6e41dbe2ebcc1911abdfce22c1d3d89c2f067201f0e636bda91adcf927
   yabeda-prometheus-mmap (0.4.0) sha256=1a66120756d6f931f03a7784e08e79060d71681ff83a9f5287df2ff756e9e2c9
   yabeda-puma-plugin (0.9.0) sha256=b78673ecc7ee30bc50691ddc41b7022c1c1801843900d5101418f4a14b550bc8
