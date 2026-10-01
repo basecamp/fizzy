@@ -19,9 +19,10 @@ class HotcellzTest < ActionDispatch::IntegrationTest
   end
 
   test "sends a caller without a session to sign in before the test action" do
-    get HOTCELLZ_TEST
-
-    assert_response :redirect
+    untenanted do
+      get HOTCELLZ_TEST
+      assert_redirected_to new_session_path
+    end
   end
 
   test "refuses the test action to a signed-in identity that is not staff" do
