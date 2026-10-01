@@ -14,7 +14,6 @@ gem "audits1984", bc: "audits1984"
 gem "hotcell-client", "0.6.0"
 gem "activestorage-hotcell-client", "0.6.0"
 gem "yabeda-hotcell", "0.6.0"
-gem "mini_magick", require: false # activestorage-hotcell-client loads the ImageMagick transformer even when unused
 
 # Native push notifications (iOS/Android)
 gem "action_push_native"
