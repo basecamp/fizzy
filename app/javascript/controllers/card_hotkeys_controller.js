@@ -116,8 +116,10 @@ export default class extends Controller {
       controller.selectLast()
     } else {
       const nextIndex = Math.min(currentIndex, newVisibleItems.length - 1)
-      if (newVisibleItems[nextIndex]) {
-        await controller.selectItem(newVisibleItems[nextIndex])
+      const nextItem = newVisibleItems[nextIndex]
+      if (nextItem) {
+        await controller.selectItem(nextItem)
+        if (controller.autoScrollValue) { nextItem.scrollIntoView({ block: "nearest", inline: "nearest" }) }
       }
     }
   }
