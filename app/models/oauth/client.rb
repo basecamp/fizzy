@@ -15,12 +15,8 @@ class Oauth::Client < ApplicationRecord
   scope :dynamically_registered, -> { where dynamically_registered: true }
 
 
-  def loopback?
-    redirect_uris.all? { |uri| loopback_uri?(uri) }
-  end
-
   def allows_redirect?(uri)
-    redirect_uris.include?(uri) || (loopback? && loopback_uri?(uri) && matching_loopback?(uri))
+    redirect_uris.include?(uri) || (loopback_uri?(uri) && matching_loopback?(uri))
   end
 
   def allows_scope?(requested_scope)
@@ -36,25 +32,29 @@ class Oauth::Client < ApplicationRecord
     def validate_redirect_uri(uri)
       parsed = URI.parse(uri)
 
-      if parsed.fragment.present?
+      unless parsed.fragment.nil?
         errors.add :redirect_uris, "must not contain fragments"
       end
 
-      if dynamically_registered? && !valid_loopback_uri?(parsed)
-        errors.add :redirect_uris, "must be a local loopback URI for dynamically registered clients"
+      if dynamically_registered? && !valid_loopback_uri?(parsed) && !valid_https_uri?(parsed)
+        errors.add :redirect_uris, "must be an https or local loopback URI for dynamically registered clients"
       end
     rescue URI::InvalidURIError
       errors.add :redirect_uris, "includes an invalid URI"
     end
 
     def loopback_uri?(uri)
-      Oauth::LOOPBACK_HOSTS.include?(URI.parse(uri).host)
+      Oauth.loopback_host?(URI.parse(uri).host)
     rescue URI::InvalidURIError
       false
     end
 
     def valid_loopback_uri?(parsed)
-      parsed.scheme == "http" && parsed.host.in?(Oauth::LOOPBACK_HOSTS)
+      parsed.scheme == "http" && Oauth.loopback_host?(parsed.host)
+    end
+
+    def valid_https_uri?(parsed)
+      parsed.scheme == "https" && parsed.host.present? && !Oauth.loopback_host?(parsed.host)
     end
 
     def matching_loopback?(uri)
@@ -64,8 +64,8 @@ class Oauth::Client < ApplicationRecord
         redirect = URI.parse(redirect_uri)
 
         redirect.scheme == parsed.scheme &&
-          redirect.host.in?(Oauth::LOOPBACK_HOSTS) &&
-          parsed.host.in?(Oauth::LOOPBACK_HOSTS) &&
+          Oauth.loopback_host?(redirect.host) &&
+          Oauth.loopback_host?(parsed.host) &&
           redirect.path == parsed.path
       end
     rescue URI::InvalidURIError
