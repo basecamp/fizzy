@@ -16,13 +16,21 @@ servers:
   # tempfile the app owns is EACCES — which is every Active Storage operation this cell carries except the
   # analyzers. The app owns the files, so it must be in the group to put them in it: without this the
   # failure moves rather than goes, from EACCES in the cell to EPERM in the app. Must match HOTCELL_GROUP.
+  #
+  # publish on both roles, because the OTel collector scrapes Yabeda on 9394 from the host. On a rootless
+  # Docker host (staging) the host cannot reach a container's bridge address, so the port has to be
+  # published on loopback. No host port, so Docker picks a free one: the collector itself listens on 9394,
+  # and during a deploy the old and new containers run at the same time. The collector reads the port
+  # from Docker.
   web:
     options:
       group-add: 10001
+      publish: "127.0.0.1::9394"
   jobs:
     cmd: bin/jobs
     options:
       group-add: 10001
+      publish: "127.0.0.1::9394"
 
 volumes:
   - fizzy:/rails/storage
