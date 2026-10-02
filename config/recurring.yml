@@ -10,6 +10,9 @@ production: &production
   auto_postpone_all_due:
     command: "Card.auto_postpone_all_due"
     schedule: every hour at minute 50
+  bubble_up_all_due:
+    command: "Card::BubbleUp.resurface_all_due"
+    schedule: every hour
   delete_unused_tags:
     class: DeleteUnusedTagsJob
     schedule: every day at 04:02
