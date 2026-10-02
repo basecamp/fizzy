@@ -7,8 +7,8 @@ Fizzy::Saas::Engine.routes.draw do
 
   # Beside "up", because it answers the same kind of question and is polled the same way. The work-socket
   # round trips are a separate action because they fork a worker, and only staff may spend one.
-  get "hotcellz", to: "hotcellz#show"
-  get "hotcellz/test", to: "hotcellz#test"
+  get "hotcellz", to: "hot_cell/health#show"
+  get "hotcellz/test", to: "hot_cell/diagnostics#show"
 
   namespace :admin do
     mount Audits1984::Engine, at: "/console"

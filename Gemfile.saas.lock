@@ -224,9 +224,9 @@ GEM
       activemodel (>= 7.0)
       activemodel-serializers-xml (~> 1.0)
       activesupport (>= 7.0)
-    activestorage-hotcell-client (0.4.1)
+    activestorage-hotcell-client (0.6.0)
       activestorage (>= 8.2.0.alpha)
-      hotcell-client (= 0.4.1)
+      hotcell-client (= 0.6.0)
     addressable (2.9.0)
       public_suffix (>= 2.0.2, < 8.0)
     ansi (1.6.0)
@@ -344,10 +344,10 @@ GEM
     herb (0.10.4-x86_64-darwin)
     herb (0.10.4-x86_64-linux-gnu)
     herb (0.10.4-x86_64-linux-musl)
-    hotcell-client (0.4.1)
+    hotcell-client (0.6.0)
       activesupport (>= 7.1)
-      hotcell-core (= 0.4.1)
-    hotcell-core (0.4.1)
+      hotcell-core (= 0.6.0)
+    hotcell-core (0.6.0)
     http-2 (1.1.1)
     httpx (1.7.1)
       http-2 (>= 1.0.0)
@@ -404,8 +404,6 @@ GEM
       net-smtp
     marcel (2.1.0)
     matrix (0.4.3)
-    mini_magick (5.3.3)
-      logger
     mini_mime (1.1.5)
     minitest (6.0.6)
       drb (~> 2.0)
@@ -707,6 +705,9 @@ GEM
       yabeda (~> 0.8)
     yabeda-gc (0.4.0)
       yabeda (~> 0.6)
+    yabeda-hotcell (0.6.0)
+      hotcell-client (= 0.6.0)
+      yabeda (>= 0.12)
     yabeda-http_requests (0.3.0)
       anyway_config (>= 1.3, < 3.0)
       sniffer
@@ -742,7 +743,7 @@ DEPENDENCIES
   action_push_native
   actionpack-xml_parser
   activeresource
-  activestorage-hotcell-client (= 0.4.1)
+  activestorage-hotcell-client (= 0.6.0)
   audits1984!
   autotuner
   aws-sdk-s3
@@ -758,14 +759,13 @@ DEPENDENCIES
   fizzy-saas!
   geared_pagination (~> 1.2)
   gvltools
-  hotcell-client (= 0.4.1)
+  hotcell-client (= 0.6.0)
   image_processing (~> 2.1)
   importmap-rails
   jbuilder
   kamal
   letter_opener
   lexxy (= 0.9.32)
-  mini_magick
   minitest-reporters
   mission_control-jobs
   mittens
@@ -807,6 +807,7 @@ DEPENDENCIES
   yabeda-actioncable
   yabeda-activejob!
   yabeda-gc
+  yabeda-hotcell (= 0.6.0)
   yabeda-http_requests
   yabeda-prometheus-mmap
   yabeda-puma-plugin
@@ -829,7 +830,7 @@ CHECKSUMS
   activerecord (8.2.0.alpha)
   activeresource (6.2.0) sha256=818ca60d3cd1ff7bbb7277f41250ad4d61a7cdbe30fbf52b2145e1b66ed13900
   activestorage (8.2.0.alpha)
-  activestorage-hotcell-client (0.4.1) sha256=46e09962ea839044241b026153c2c27b2f786ad929d4f8e493bcde1965244e1c
+  activestorage-hotcell-client (0.6.0) sha256=3c303c601d65586f938a360bfceb773c009501ad7bdc9e5ab106fa962223c22a
   activesupport (8.2.0.alpha)
   addressable (2.9.0) sha256=7fdf6ac3660f7f4e867a0838be3f6cf722ace541dd97767fa42bc6cfa980c7af
   ansi (1.6.0) sha256=ac9ea0c0ea8d32fb4e271348e609963ac78882f34b73836c2a02b3622e666658
@@ -899,8 +900,8 @@ CHECKSUMS
   herb (0.10.4-x86_64-darwin) sha256=50d522b19732e38a9c6f332e1ffaf70054ad2eca9395dd3bb81dde1f73cb2e67
   herb (0.10.4-x86_64-linux-gnu) sha256=36591472b92e0f601e512b108bf25dbb761f32636703cb79d3f5388425476b1b
   herb (0.10.4-x86_64-linux-musl) sha256=3b5fc05c0224f156bb05993703c309d53c52a1385d37c65a956cb4d40695d70c
-  hotcell-client (0.4.1) sha256=45ad9c7e083a01df861d9906aa758efbd5dc1e2cf3fb6ba887b92bf57c14a019
-  hotcell-core (0.4.1) sha256=5a5fff74264074122113a65080d09fe35d73bee6bed5c11e26562d050616eab6
+  hotcell-client (0.6.0) sha256=836bb52c35621204c204e409e2aa0391be5c44ff3d98dcd2f47b4e78a5bcda0c
+  hotcell-core (0.6.0) sha256=de72cc17afd3e1bf09179021fa193e2b38e491fbaa23a7f1663e0b86a6a4f62b
   http-2 (1.1.1) sha256=1141a5a03c2f4e6b8d2fa62394de581e1ff6387711cd7ed577212e9d95562bba
   httpx (1.7.1) sha256=ae380461539203c92f3ee65c13b22dfccb0d975156426869f57820505cacdf56
   i18n (1.15.2) sha256=00f9eb62412fe593b2a65a97daa75300d37abb8f7202ec748e94b6d46a9dd1b5
@@ -923,7 +924,6 @@ CHECKSUMS
   mail (2.9.1) sha256=06574eca475253d6c18145dd70af80d0eb970182d55053497c5f4d797ea160e8
   marcel (2.1.0) sha256=f8b0327111dc7e516331eeefe052e981ce50e2bd826c1042a53cdf047fcc3512
   matrix (0.4.3) sha256=a0d5ab7ddcc1973ff690ab361b67f359acbb16958d1dc072b8b956a286564c5b
-  mini_magick (5.3.3) sha256=b3beed8a8cef36bd03666365f14b89cd344da0ecd373af53e617c71bfd426aab
   mini_mime (1.1.5) sha256=8681b7e2e4215f2a159f9400b5816d85e9d8c6c6b491e96a12797e798f8bccef
   minitest (6.0.6) sha256=153ea36d1d987a62942382b61075745042a2b3123b1cd48f4c3675af9cc7d6f1
   minitest-reporters (1.8.0) sha256=8ce5280fb73ad3178ae525454df169b6f28c1b38b1d088ea91815d3a370ba384
@@ -1059,6 +1059,7 @@ CHECKSUMS
   yabeda-actioncable (0.2.2) sha256=dcfaf23d36a7c9f7a939aac82e34f5db6bb83cdde26f0a3d6e21816410edb579
   yabeda-activejob (0.6.0)
   yabeda-gc (0.4.0) sha256=bdc50e133b6c5ba27071f00d63f9184d0338acec3d0f20403900427b9b718ff3
+  yabeda-hotcell (0.6.0) sha256=97723f5192d30432b5a0927c1ef27d04e9ea33f242302bab56fad5f3be130bc8
   yabeda-http_requests (0.3.0) sha256=f2705a6e41dbe2ebcc1911abdfce22c1d3d89c2f067201f0e636bda91adcf927
   yabeda-prometheus-mmap (0.4.0) sha256=1a66120756d6f931f03a7784e08e79060d71681ff83a9f5287df2ff756e9e2c9
   yabeda-puma-plugin (0.9.0) sha256=b78673ecc7ee30bc50691ddc41b7022c1c1801843900d5101418f4a14b550bc8

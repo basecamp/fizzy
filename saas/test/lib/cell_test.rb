@@ -23,27 +23,6 @@ class Fizzy::Saas::CellTest < ActiveSupport::TestCase
     end
   end
 
-  test "diagnostics puts nothing on the cell's queue unless asked" do
-    Cell.stubs(:echo).raises("echo must not run here")
-    Cell.stubs(:reopen).raises("reopen must not run here")
-
-    assert_equal %i[ at host root describe metrics ], Cell.diagnostics.keys
-  end
-
-  test "work asks for the round trips as well" do
-    assert_equal %i[ at host root describe metrics echo reopen ], Cell.diagnostics(work: true).keys
-  end
-
-  test "a round trip that returns different bytes is not ok" do
-    assert_raises(Cell::CheckFailed) { Cell.send :round_trip, silent_client, "hotcell" }
-  end
-
-  test "a round trip whose input was staged is not ok" do
-    error = assert_raises(Cell::CheckFailed) { Cell.send :round_trip, staging_client, "hotcell" }
-
-    assert_match "staged", error.message
-  end
-
   test "the cell is registered even with no root, so callers get an answer rather than an UnregisteredCell" do
     with_env "HOTCELL_ROOT" => nil do
       Cell.register!
@@ -110,21 +89,6 @@ class Fizzy::Saas::CellTest < ActiveSupport::TestCase
   end
 
   private
-    def silent_client
-      Class.new do
-        def self.perform_in_hotcell(input, output) = { bytes: 0, staged: false }
-      end
-    end
-
-    def staging_client
-      Class.new do
-        def self.perform_in_hotcell(input, output)
-          output.write File.read(input.path)
-          { bytes: 7, staged: true }
-        end
-      end
-    end
-
     def hotcell_classes
       ->(klass) { klass.name.start_with?("ActiveStorage::HotCell::Client::") }
     end

@@ -52,6 +52,7 @@ module Fizzy
       # Before active_storage.configs, which is where Active Storage reads these settings off config.
       initializer "fizzy_saas.hotcell", before: "active_storage.configs" do |app|
         Cell.register!
+        ::HotCell.diagnostics_controller_parent = "AdminController"
 
         app.config.active_storage.merge! Cell.active_storage_configuration
       end
