@@ -172,8 +172,11 @@ class Webhook::Delivery < ApplicationRecord
       document.text
     end
 
+    # https://docs.slack.dev/messaging/formatting-message-text/#escaping
+    SLACK_ESCAPE = { "&" => "&amp;", "<" => "&lt;", ">" => "&gt;" }.freeze
+
     def slack_payload
-      text = event.description_for(nil).to_plain_text
+      text = CGI.unescapeHTML(event.description_for(nil).to_plain_text).gsub(/[&<>]/, SLACK_ESCAPE)
       url = polymorphic_url(event.eventable, base_url_options.merge(script_name: account.slug))
 
       { text: "#{text} <#{url}|Open in Fizzy>" }.to_json
