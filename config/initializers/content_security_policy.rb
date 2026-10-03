@@ -16,6 +16,45 @@
 #   script_src, style_src, connect_src, frame_src, img_src, font_src, media_src,
 #   worker_src, frame_ancestors, form_action, report_uri, report_only
 
+# Trusted Types report-only pilot — XSS counteroffensive Tier C (Chromium-only).
+#
+# Collects telemetry on raw-string writes to DOM sinks (innerHTML, outerHTML,
+# insertAdjacentHTML, document.write, ...) without enforcing anything. It rides
+# a SEPARATE Content-Security-Policy-Report-Only header so it never touches the
+# enforcing policy below — report-only can only report, never block, so no
+# un-migrated sink throws on Chromium. Non-Chromium browsers ignore the
+# directive entirely.
+#
+# Only `require-trusted-types-for 'script'` is emitted. We deliberately omit a
+# `trusted-types` policy-name allowlist: this pilot registers no named createHTML
+# policy (that is the parked enforcement phase, gated on the shared sanitize()
+# chokepoint), and leaving the allowlist off keeps policy creation unrestricted
+# so lexxy's isolated DOMPurify policy and any duplicates raise no policy-creation
+# noise — we only want sink-write violations.
+class TrustedTypesReportOnly
+  DIRECTIVE = "require-trusted-types-for 'script'"
+  HEADER = ActionDispatch::Constants::CONTENT_SECURITY_POLICY_REPORT_ONLY
+
+  def initialize(app, report_uri = nil)
+    @app = app
+    @policy = report_uri ? "#{DIRECTIVE}; report-uri #{report_uri}" : DIRECTIVE
+  end
+
+  def call(env)
+    status, headers, body = @app.call(env)
+
+    # Only documents run script, so only they can trip a Trusted Types sink.
+    # Stack as an additional report-only policy rather than overwriting: when the
+    # app policy is itself report-only, both headers ride together, each
+    # reporting independently.
+    if headers[Rack::CONTENT_TYPE].to_s.start_with?("text/html")
+      headers[HEADER] = [ headers[HEADER], @policy ].compact.join("\n")
+    end
+
+    [ status, headers, body ]
+  end
+end
+
 Rails.application.configure do
   # Helper to get additional CSP sources from ENV or config.x.
   # Supports: nil, string, space-separated string, or array.
@@ -75,6 +114,11 @@ Rails.application.configure do
 
   # Report violations without enforcing the policy.
   config.content_security_policy_report_only = report_only
+
+  # Trusted Types telemetry rides its own report-only header. Inserted outside
+  # the Rails CSP middleware so it appends after that header is written, letting
+  # it stack alongside (never clobber) an app policy that is itself report-only.
+  config.middleware.insert_before ActionDispatch::ContentSecurityPolicy::Middleware, TrustedTypesReportOnly, report_uri
 
   # Locked-down policy for the static pages served from public/ (error pages).
   # They carry no script or inline styles at all, so everything falls back to
