@@ -3,6 +3,7 @@ class UsersController < ApplicationController
 
   before_action :set_user, except: %i[ index ]
   before_action :ensure_permission_to_change_user, only: %i[ update destroy ]
+  before_action :ensure_user_is_not_sole_owner, only: %i[ destroy ]
 
   def index
     set_page_and_extract_portion_from Current.account.users.active.alphabetically.includes(:identity)
@@ -44,6 +45,15 @@ class UsersController < ApplicationController
 
     def ensure_permission_to_change_user
       head :forbidden unless Current.user.can_change?(@user)
+    end
+
+    def ensure_user_is_not_sole_owner
+      if @user.sole_owner?
+        respond_to do |format|
+          format.html { redirect_to account_settings_path, alert: "You're the only owner of this account and can't be removed" }
+          format.json { head :unprocessable_entity }
+        end
+      end
     end
 
     def user_params

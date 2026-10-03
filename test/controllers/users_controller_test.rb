@@ -55,6 +55,65 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert users(:jason).reload.active
   end
 
+  test "owner cannot deactivate themself while the only owner" do
+    sign_in_as :jason
+
+    assert_no_difference -> { User.active.count } do
+      delete user_path(users(:jason))
+    end
+
+    assert_redirected_to account_settings_path
+    assert_equal "You're the only owner of this account and can't be removed", flash[:alert]
+    assert users(:jason).reload.active
+    assert_includes accounts(:"37s").users.owner, users(:jason)
+  end
+
+  test "owner cannot deactivate themself while the only owner as JSON" do
+    sign_in_as :jason
+
+    assert_no_difference -> { User.active.count } do
+      delete user_path(users(:jason)), as: :json
+    end
+
+    assert_response :unprocessable_entity
+    assert users(:jason).reload.active
+  end
+
+  test "owner can deactivate themself when another owner remains" do
+    users(:kevin).update!(role: :owner)
+    sign_in_as :jason
+
+    assert_difference -> { User.active.count }, -1 do
+      delete user_path(users(:jason))
+    end
+
+    assert_redirected_to account_settings_path
+    assert_not users(:jason).reload.active
+    assert_includes accounts(:"37s").users.owner, users(:kevin)
+  end
+
+  test "admin can deactivate themself" do
+    sign_in_as :kevin
+
+    assert_difference -> { User.active.count }, -1 do
+      delete user_path(users(:kevin))
+    end
+
+    assert_redirected_to account_settings_path
+    assert_not users(:kevin).reload.active
+  end
+
+  test "member can deactivate themself" do
+    sign_in_as :jz
+
+    assert_difference -> { User.active.count }, -1 do
+      delete user_path(users(:jz))
+    end
+
+    assert_redirected_to account_settings_path
+    assert_not users(:jz).reload.active
+  end
+
   test "non-admins cannot perform actions" do
     sign_in_as :jz
 
