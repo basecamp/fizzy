@@ -1,0 +1,33 @@
+[termination]
+# Fallback only. The solution's config hook replaces this with the board's
+# planning budget carried on the request, so termination lives in the solver.
+seconds_spent_limit = 90
+
+[[phases]]
+type = "construction_heuristic"
+construction_heuristic_type = "cheapest_insertion"
+construction_obligation = "assign_when_candidate_exists"
+
+[[phases]]
+type = "local_search"
+
+# Stop once the score stops improving so small boards return in a couple of
+# seconds instead of spending the whole budget. The phase overlay is additive:
+# the solver-wide budget from the solution's config hook keeps running inside
+# the phase, so both the unimproved limit and the board budget hold.
+[phases.termination]
+unimproved_seconds_spent_limit = 2
+
+[phases.move_selector]
+type = "union_move_selector"
+selection_order = "round_robin"
+
+[[phases.move_selector.selectors]]
+type = "change_move_selector"
+entity_class = "Task"
+variable_name = "person_idx"
+
+[[phases.move_selector.selectors]]
+type = "swap_move_selector"
+entity_class = "Task"
+variable_name = "person_idx"
