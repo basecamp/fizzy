@@ -11,7 +11,7 @@ class Account::DataTransfer::RecordSetTest < ActiveSupport::TestCase
     record_set = Account::DataTransfer::RecordSet.new(account: importing_account, model: Event, importable_model_names: @importable_model_names)
 
     error = assert_raises(Account::DataTransfer::RecordSet::IntegrityError) do
-      record_set.check(from: build_reader(dir: "events", data: event_data))
+      record_set.check(from: build_reader(dir: "events", data: event_data, users: [ exported_user_data ]))
     end
 
     assert_match(/unrecognized.*type/i, error.message)
@@ -23,7 +23,7 @@ class Account::DataTransfer::RecordSetTest < ActiveSupport::TestCase
     record_set = Account::DataTransfer::RecordSet.new(account: importing_account, model: Event, importable_model_names: @importable_model_names)
 
     error = assert_raises(Account::DataTransfer::RecordSet::IntegrityError) do
-      record_set.check(from: build_reader(dir: "events", data: event_data))
+      record_set.check(from: build_reader(dir: "events", data: event_data, users: [ exported_user_data ]))
     end
 
     assert_match(/unrecognized.*type/i, error.message)
@@ -35,7 +35,7 @@ class Account::DataTransfer::RecordSetTest < ActiveSupport::TestCase
     record_set = Account::DataTransfer::RecordSet.new(account: importing_account, model: Event, importable_model_names: @importable_model_names)
 
     error = assert_raises(Account::DataTransfer::RecordSet::IntegrityError) do
-      record_set.check(from: build_reader(dir: "events", data: event_data))
+      record_set.check(from: build_reader(dir: "events", data: event_data, users: [ exported_user_data ]))
     end
 
     assert_match(/unrecognized.*type/i, error.message)
@@ -47,8 +47,20 @@ class Account::DataTransfer::RecordSetTest < ActiveSupport::TestCase
     record_set = Account::DataTransfer::RecordSet.new(account: importing_account, model: Event, importable_model_names: @importable_model_names)
 
     assert_nothing_raised do
+      record_set.check(from: build_reader(dir: "events", data: event_data, users: [ exported_user_data ]))
+    end
+  end
+
+  test "check rejects a record whose creator is not a user in the export" do
+    event_data = build_event_data(eventable_type: "Card")
+
+    record_set = Account::DataTransfer::RecordSet.new(account: importing_account, model: Event, importable_model_names: @importable_model_names)
+
+    error = assert_raises(Account::DataTransfer::RecordSet::IntegrityError) do
       record_set.check(from: build_reader(dir: "events", data: event_data))
     end
+
+    assert_match(/creator .* not a user in the export/i, error.message)
   end
 
   test "check rejects a unique key that already exists in the destination database" do
@@ -143,7 +155,7 @@ class Account::DataTransfer::RecordSetTest < ActiveSupport::TestCase
         "id" => "test_event_id_12345678901234",
         "account_id" => "nonexistent_account_id_1234567",
         "board_id" => "nonexistent_board_id_12345678",
-        "creator_id" => "nonexistent_user_id_123456789",
+        "creator_id" => exported_user_data["id"],
         "eventable_type" => eventable_type,
         "eventable_id" => "nonexistent_id_1234567890123",
         "action" => "created",
@@ -168,13 +180,23 @@ class Account::DataTransfer::RecordSetTest < ActiveSupport::TestCase
       }
     end
 
-    def build_reader(dir:, data:)
+    def exported_user_data
+      @exported_user_data ||= {
+        "id" => ActiveRecord::Type::Uuid.generate,
+        "name" => "Exported User"
+      }
+    end
+
+    def build_reader(dir:, data:, users: [])
       tempfile = Tempfile.new([ "import_test", ".zip" ])
       tempfile.binmode
 
       writer = ZipFile::Writer.new(tempfile)
       Array.wrap(data).each do |record_data|
         writer.add_file("data/#{dir}/#{record_data['id']}.json", record_data.to_json)
+      end
+      users.each do |user_data|
+        writer.add_file("data/users/#{user_data['id']}.json", user_data.to_json)
       end
       writer.close
       tempfile.rewind

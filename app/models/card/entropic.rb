@@ -28,11 +28,20 @@ module Card::Entropic
             .where(board_id: boards.map(&:id))
             .where(last_active_at: ..(as_of - period))
             .find_each do |card|
-              card.auto_postpone(user: account.system_user)
+              auto_postpone_reporting_errors(card, account)
             end
         end
       end
     end
+
+    private
+      # A card that can't be postponed is reported and skipped, so it doesn't
+      # stop the sweep for every card and account after it.
+      def auto_postpone_reporting_errors(card, account)
+        card.auto_postpone(user: account.system_user)
+      rescue => error
+        Rails.error.report(error, context: { card_id: card.id, account_id: account.id })
+      end
   end
 
   def entropy
