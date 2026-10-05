@@ -19,7 +19,7 @@
   <%= render "cards/messages",  card: @card %>
 
   <%= render "layouts/lightbox" do %>
-    <%= button_to_remove_card_image(@card) if @card.image.attached? %>
+    <%= button_to_remove_card_image(@card) if @card.image.attached? && !@card.board_archived? %>
   <% end %>
 </div>
 

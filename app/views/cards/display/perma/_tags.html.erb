@@ -2,7 +2,7 @@
   <div data-controller="dialog"
         data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside mouseenter->dialog#loadLazyFrames" <%= "hidden" if card.closed? %>>
     <button class="card__tag-picker-button btn btn--ensure-tap-target-size card__hide-on-index" style="--btn-background: var(--card-bg-color);"
-        data-controller="tooltip hotkey" data-action="click->dialog#open:stop keydown.t@document->hotkey#click">
+        data-controller="tooltip hotkey" data-action="click->dialog#open:stop keydown.t@document->hotkey#click" <%= "disabled" if card.board_archived? %>>
       <%= icon_tag "tag" %>
       <span class="for-screen-reader">Add a tag</span>
     </button>

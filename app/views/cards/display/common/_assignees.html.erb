@@ -1,7 +1,7 @@
 <div id="<%= dom_id(card, :assignees) %>" class="position-relative"
     data-controller="dialog"
     data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside mouseenter->dialog#loadLazyFrames" <%= "hidden" if card.closed? %>>
-  <button class="card__assignees-trigger" data-action="click->dialog#open:stop keydown.a@document->hotkey#click" data-controller="tooltip hotkey" tabindex=<%= (local_assigns.key?(:preview) && local_assigns[:preview]) ? -1 : 0 %>>
+  <button class="card__assignees-trigger" data-action="click->dialog#open:stop keydown.a@document->hotkey#click" data-controller="tooltip hotkey" tabindex=<%= (local_assigns.key?(:preview) && local_assigns[:preview]) ? -1 : 0 %> <%= "disabled" if card.board_archived? %>>
     <% card.assignees.each do |assignee| %>
       <%= avatar_preview_tag assignee, tabindex: (local_assigns.key?(:preview) && local_assigns[:preview]) ? -1 : 0 %>
     <% end %>
@@ -12,7 +12,7 @@
     </span>
   </button>
 
-  <% unless local_assigns[:preview] %>
+  <% unless local_assigns[:preview] || card.board_archived? %>
     <%= button_to "Assign to me", card_self_assignment_path(card), method: :post, data: {controller: "hotkey", action: "keydown.m@document->hotkey#click" }, hidden: true %>
   <% end %>
 

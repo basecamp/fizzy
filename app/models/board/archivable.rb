@@ -21,10 +21,29 @@ module Board::Archivable
   end
 
   def archive(user: Current.user)
-    create_archival!(user: user) unless archived?
+    unless archived?
+      transaction do
+        create_archival!(user: user)
+        touch_contents
+      end
+    end
   end
 
   def unarchive
-    archival&.destroy
+    if archived?
+      transaction do
+        archival.destroy
+        touch_contents
+      end
+    end
   end
+
+  private
+    # Cards, columns and comments render their edit controls inside fragments cached on their
+    # own keys, so they need new keys when the board becomes read-only or writable again.
+    def touch_contents
+      cards.touch_all
+      columns.touch_all
+      Comment.where(card: cards).touch_all
+    end
 end

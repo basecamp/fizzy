@@ -1,7 +1,9 @@
 <%= messages_tag(card) do %>
   <% if card.published? %>
     <%= render partial: "cards/comments/comment", collection: card.comments.preloaded.chronologically, cached: true %>
-    <% if Fizzy.saas? %>
+    <% if card.board_archived? %>
+      <p class="txt-small txt-subtle txt-align-center">This board is archived, so new comments are turned off.</p>
+    <% elsif Fizzy.saas? %>
       <%= render "cards/comments/saas/new", card: card %>
     <% else %>
       <%= render "cards/comments/new", card: card %>
@@ -10,7 +12,7 @@
     <%= render "cards/comments/watchers", card: card %>
   <% end %>
 
-  <% if Current.user.can_administer_card?(card) %>
+  <% if Current.user.can_administer_card?(card) && !card.board_archived? %>
     <footer class="delete-card txt-align-center full-width flex flex-column margin-block-start-double">
       <hr class="separator--horizontal full-width margin-block" style="--border-color: var(--color-ink-lighter)">
       <%= render "cards/delete", card: card %>

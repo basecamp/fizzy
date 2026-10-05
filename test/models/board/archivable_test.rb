@@ -51,6 +51,22 @@ class Board::ArchivableTest < ActiveSupport::TestCase
     end
   end
 
+  test "archiving and unarchiving refresh the board's cards, columns and comments" do
+    card, column, comment = cards(:logo), boards(:writebook).columns.first, boards(:writebook).cards.joins(:comments).first.comments.first
+
+    assert_changes -> { [ card.reload.updated_at, column.reload.updated_at, comment.reload.updated_at ] } do
+      travel_to 1.minute.from_now do
+        boards(:writebook).archive
+      end
+    end
+
+    assert_changes -> { [ card.reload.updated_at, column.reload.updated_at, comment.reload.updated_at ] } do
+      travel_to 2.minutes.from_now do
+        boards(:writebook).unarchive
+      end
+    end
+  end
+
   test "destroying the board destroys its archival" do
     boards(:writebook).archive
 

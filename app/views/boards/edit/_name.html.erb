@@ -3,6 +3,6 @@
     <strong><%= form.text_field :name, name: "board[name]", class: "input full-width txt-medium",
           required: true, autofocus: false, placeholder: "Board name…",
           data: { action: "keydown.enter->form#submit:prevent, keydown.esc->form#cancel" },
-          readonly: !Current.user.can_administer_board?(board) %></strong>
+          readonly: !board_editable?(board) %></strong>
   </label>
 </div>

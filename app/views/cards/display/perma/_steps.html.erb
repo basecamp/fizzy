@@ -1,7 +1,7 @@
 <ol class="steps txt-small margin-block-start-auto">
   <%= render partial: "cards/steps/step", collection: card.steps, as: :step %>
 
-  <% unless card.closed? %>
+  <% unless card.closed? || card.board_archived? %>
     <li id="<%= dom_id(card, :new_step) %>" class="step">
       <input type="checkbox" class="checkbox" disabled>
       <%= form_with model: [card, Step.new], url: card_steps_path(card), class: "min-width", data: { controller: "form", action: "submit->form#preventEmptySubmit submit->form#preventComposingSubmit turbo:submit-end->form#reset" } do |form| %>
