@@ -22,25 +22,43 @@ module Card::Entropic
     # last_active_at <= ?` rides the existing index instead of computing the
     # threshold per row across every card in the system.
     def auto_postpone_all_due(as_of: Time.now)
+      failures = {}
+
       Account.find_each do |account|
         account.boards.includes(:entropy).group_by(&:auto_postpone_period).each do |period, boards|
           account.cards.active
             .where(board_id: boards.map(&:id))
             .where(last_active_at: ..(as_of - period))
             .find_each do |card|
-              auto_postpone_reporting_errors(card, account)
+              card.auto_postpone(user: account.system_user)
+            rescue => error
+              failures[card.id] = error
             end
         end
       end
+
+      raise AutoPostponeError.new(failures) if failures.any?
+    end
+  end
+
+  # Raised once the sweep has gone through every account, so one card that
+  # can't be postponed doesn't stop the rest but still fails the job.
+  class AutoPostponeError < StandardError
+    DESCRIBED_FAILURES_LIMIT = 10
+
+    attr_reader :failures
+
+    def initialize(failures)
+      @failures = failures
+      super("Couldn't auto-postpone #{failures.size} #{"card".pluralize(failures.size)}: #{describe(failures)}")
     end
 
     private
-      # A card that can't be postponed is reported and skipped, so it doesn't
-      # stop the sweep for every card and account after it.
-      def auto_postpone_reporting_errors(card, account)
-        card.auto_postpone(user: account.system_user)
-      rescue => error
-        Rails.error.report(error, context: { card_id: card.id, account_id: account.id })
+      def describe(failures)
+        described = failures.first(DESCRIBED_FAILURES_LIMIT).map { |card_id, error| "#{card_id} (#{error.class}: #{error.message})" }
+        remaining = failures.size - described.size
+        described << "and #{remaining} more" if remaining > 0
+        described.join(", ")
       end
   end
 
