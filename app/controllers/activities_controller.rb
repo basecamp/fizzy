@@ -21,6 +21,7 @@ class ActivitiesController < ApplicationController
   private
     def activities
       Current.user.accessible_events
+        .where.not(board_id: Current.user.boards.archived.select(:id))
         .preloaded
         .where(action: ACTIONS)
         .for_creators(params[:creator_ids])

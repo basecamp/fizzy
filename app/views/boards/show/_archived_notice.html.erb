@@ -1,0 +1,18 @@
+<div class="flex flex-column align-center gap-half txt-small txt-align-center">
+  <strong>This board is archived</strong>
+  <span>
+    <% if board.archived_by %>
+      Archived by <%= board.archived_by.name %> on <%= local_datetime_tag board.archived_at, style: :shortdate %>.
+    <% else %>
+      Archived on <%= local_datetime_tag board.archived_at, style: :shortdate %>.
+    <% end %>
+    Cards can’t be added or changed.
+  </span>
+
+  <% if Current.user.can_administer_board?(board) %>
+    <%= button_to board_archival_path(board), method: :delete, class: "btn btn--link", form: { data: { turbo_frame: "_top" } } do %>
+      <%= icon_tag "refresh" %>
+      <span>Unarchive</span>
+    <% end %>
+  <% end %>
+</div>

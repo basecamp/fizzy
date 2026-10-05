@@ -1,5 +1,5 @@
 <%= tag.div class: "card-columns hide-scrollbar", data: {
-      controller: "collapsible-columns drag-and-drop drag-and-strum navigable-list card-hotkeys",
+      controller: token_list("collapsible-columns", "drag-and-drop drag-and-strum": !board.archived?, "navigable-list card-hotkeys": true),
       drag_and_drop_dragged_item_class: "drag-and-drop__dragged-item",
       drag_and_drop_hover_container_class: "drag-and-drop__hover-container",
       collapsible_columns_board_value: board.id,
@@ -34,6 +34,6 @@
     <%= render partial: "boards/show/column", collection: board.columns.sorted, cached: ->(column){ [ column, column.leftmost?, column.rightmost? ] } %>
     <%= render "boards/show/closed", board: board %>
 
-    <%= render "boards/show/menu/columns", board: board %>
+    <%= render "boards/show/menu/columns", board: board unless board.archived? %>
   </div>
 <% end %>

@@ -1,0 +1,14 @@
+<li class="flex align-center gap-half">
+  <%= link_to board, class: "txt-ink flex gap-half align-center min-width" do %>
+    <div class="txt-align-start overflow-ellipsis">
+      <strong><%= board.name %></strong>
+      <div class="txt-x-small">Archived <%= local_datetime_tag board.archived_at, style: :shortdate %><%= " by #{board.archived_by.name}" if board.archived_by %></div>
+    </div>
+  <% end %>
+
+  <hr class="separator--horizontal flex-item-grow" style="--border-color: var(--color-ink-medium); --border-style: dashed" aria-hidden="true">
+
+  <%= button_to board_archival_path(board), method: :delete, class: "btn txt-small", disabled: !Current.user.can_administer_board?(board) do %>
+    <span>Unarchive</span>
+  <% end %>
+</li>

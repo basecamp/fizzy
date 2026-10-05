@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_08_28_120000) do
+ActiveRecord::Schema[8.2].define(version: 2026_10_05_120000) do
   create_table "accesses", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -155,6 +155,17 @@ ActiveRecord::Schema[8.2].define(version: 2026_08_28_120000) do
     t.index ["account_id"], name: "index_assignments_on_account_id"
     t.index ["assignee_id", "card_id"], name: "index_assignments_on_assignee_id_and_card_id", unique: true
     t.index ["card_id"], name: "index_assignments_on_card_id"
+  end
+
+  create_table "board_archivals", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "account_id", null: false
+    t.uuid "board_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "user_id"
+    t.index ["account_id"], name: "index_board_archivals_on_account_id"
+    t.index ["board_id"], name: "index_board_archivals_on_board_id", unique: true
+    t.index ["user_id"], name: "index_board_archivals_on_user_id"
   end
 
   create_table "board_publications", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|

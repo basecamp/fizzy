@@ -1,0 +1,22 @@
+<% @page_title = "Archived boards" %>
+
+<% content_for :header do %>
+  <div class="header__actions header__actions--start">
+    <%= back_link_to "Account Settings", account_settings_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+  </div>
+<% end %>
+
+<div class="panel panel--wide shadow center flex flex-column gap">
+  <header>
+    <h2 class="txt-large margin-none font-weight-black"><%= @page_title %></h2>
+    <p class="txt-medium margin-none">Archived boards are hidden and read-only until they’re unarchived.</p>
+  </header>
+
+  <% if @boards.any? %>
+    <ul class="list-unindented flex flex-column gap-half margin-none">
+      <%= render partial: "account/archived_boards/board", collection: @boards %>
+    </ul>
+  <% else %>
+    <p class="txt-subtle margin-none">There are no archived boards.</p>
+  <% end %>
+</div>
