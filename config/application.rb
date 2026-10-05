@@ -10,6 +10,12 @@ module Fizzy
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 8.1
 
+    # Set here rather than in an initializer: Active Record copies these into filter_attributes when it
+    # loads, and config/initializers/extensions.rb loads it before later initializers run.
+    config.filter_parameters += %i[
+      passw secret token _key crypt salt certificate otp ssn
+    ]
+
     # Include the `lib` directory in autoload paths. Use the `ignore:` option
     # to list subdirectories that don't contain `.rb` files or that shouldn't
     # be reloaded or eager loaded.
