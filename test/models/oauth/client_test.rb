@@ -416,6 +416,16 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     assert_operator lock, :<, cascade
   end
 
+  test "destroying a client takes a grant issued after its grants were loaded" do
+    client = register_client
+    client.access_tokens.load
+    late = identities(:david).access_tokens.create!(oauth_client: Oauth::Client.find(client.id))
+
+    client.destroy
+
+    assert_not Identity::AccessToken.exists?(late.id)
+  end
+
   test "destroying a client takes its grants' retired refresh tokens too" do
     client = register_client
     grant = identities(:david).access_tokens.create!(oauth_client: client)
