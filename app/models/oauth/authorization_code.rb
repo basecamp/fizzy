@@ -1,6 +1,8 @@
 # Codes are stateless, so single use is enforced where they are redeemed: each
 # carries a jti that the grant it mints is stamped with (Identity::AccessToken.redeem).
 module Oauth::AuthorizationCode
+  # RFC 7636 §4.1: 43 to 128 unreserved characters.
+  VERIFIER = /\A[A-Za-z0-9._~-]{43,128}\z/
   Details = ::Data.define(:client_id, :identity_id, :code_challenge, :redirect_uri, :scope, :jti)
 
   class << self
@@ -24,7 +26,7 @@ module Oauth::AuthorizationCode
     end
 
     def valid_pkce?(code_data, code_verifier)
-      code_data && code_verifier.present? &&
+      code_data && code_verifier.is_a?(String) && code_verifier.match?(VERIFIER) &&
         ActiveSupport::SecurityUtils.secure_compare(pkce_challenge(code_verifier), code_data.code_challenge)
     end
 

@@ -119,6 +119,22 @@ class Oauth::AuthorizationCodeTest < ActiveSupport::TestCase
     assert Oauth::AuthorizationCode.valid_pkce?(details, code_verifier)
   end
 
+  test "valid_pkce? refuses a verifier outside RFC 7636's 43 to 128 unreserved characters, even one that matches" do
+    [ "short", "a" * 42, "a" * 129, "#{"a" * 42}!", "#{"a" * 42}é" ].each do |code_verifier|
+      details = Oauth::AuthorizationCode::Details.new client_id: "test", identity_id: 1, redirect_uri: "http://127.0.0.1/cb", scope: "read", jti: "test-jti",
+        code_challenge: Base64.urlsafe_encode64(Digest::SHA256.digest(code_verifier), padding: false)
+
+      assert_not Oauth::AuthorizationCode.valid_pkce?(details, code_verifier), code_verifier
+    end
+
+    [ "a" * 43, "A1._~-" * 21 + "ab" ].each do |code_verifier|
+      details = Oauth::AuthorizationCode::Details.new client_id: "test", identity_id: 1, redirect_uri: "http://127.0.0.1/cb", scope: "read", jti: "test-jti",
+        code_challenge: Base64.urlsafe_encode64(Digest::SHA256.digest(code_verifier), padding: false)
+
+      assert Oauth::AuthorizationCode.valid_pkce?(details, code_verifier), code_verifier
+    end
+  end
+
   test "valid_pkce? returns false for wrong verifier" do
     code_verifier = "correct_verifier"
     code_challenge = Base64.urlsafe_encode64(Digest::SHA256.digest(code_verifier), padding: false)
