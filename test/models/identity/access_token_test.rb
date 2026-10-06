@@ -57,12 +57,23 @@ class Identity::AccessTokenTest < ActiveSupport::TestCase
     end
   end
 
-  test "find_permissable rejects expired tokens" do
+  test "find_honored rejects expired tokens" do
     token = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client), permission: :write)
 
-    assert_equal token, Identity::AccessToken.find_permissable(token.token, method: "GET")
+    assert_equal token, Identity::AccessToken.find_honored(token.token)
     travel Identity::AccessToken::EXPIRES_IN + 1.second do
-      assert_nil Identity::AccessToken.find_permissable(token.token, method: "GET")
+      assert_nil Identity::AccessToken.find_honored(token.token)
     end
+  end
+
+  test "find_honored returns a read-only token and leaves the method check to the caller" do
+    token = identity_access_tokens(:jasons_api_token)
+
+    assert_equal token, Identity::AccessToken.find_honored(token.token)
+    assert_not token.allows?("POST")
+  end
+
+  test "find_honored rejects unknown tokens" do
+    assert_nil Identity::AccessToken.find_honored("nonsense")
   end
 end
