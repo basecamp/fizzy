@@ -70,7 +70,7 @@ Status key:
 | Exact `redirect_uri` equality with the code (§4.1.3) | **Conformant** |
 | Responses, errors included, carry `Cache-Control: no-store` (§5.1) | **Fixed** #3082 `1ad66b5d5`, `d7795f51b` (`prevent_caching` is now a before_action, so halted chains are covered too) |
 | A confidential client authenticates before anything about the grant is looked up, so a wrong secret reveals nothing about whether a code or refresh token is live | **Fixed** #3082 `a1c6aad55`, `d7795f51b` "Authenticate the named client before resolving the grant…" |
-| A client that fails authentication gets 401 `invalid_client`, with `WWW-Authenticate: Basic` only when the request carried an Authorization header (§5.2) | **Fixed** #3082 `9b2755792` "Name the Basic scheme only to a client that tried the Authorization header". The same at the token endpoint and revocation, and the same as bc3 (bc3#13678). A body-only failure gets no challenge. |
+| A client that fails authentication gets `invalid_client`: 401 + `WWW-Authenticate: Basic` only for a failed Basic attempt, and 400 with no challenge for anything else (a body credential, a public client presenting a secret, a secret that authenticates no client, a body failure beside another scheme's header) (§5.2) | **Fixed** #3082 `b6b83296a` "Answer invalid_client with 400 unless Basic authentication failed". The same at the token endpoint and revocation. A bare 401 breaks RFC 9110 §15.5.2; a Basic challenge to a request that never tried Basic applies to nothing; oauth4webapi and openid-client surface a challenged 401 as `WWWAuthenticateChallengeError`, not `invalid_client`; and a Basic challenge on a form POST can pop a browser auth dialog. |
 | Client credentials are read from the request body only, never the query string | **Conformant** (#3082 `38fd57bbc`) |
 | Per-IP rate limit of 20/min on the token endpoint | **Conformant**. A per-client budget after confidential authentication is **Planned** (Phase C); the per-IP limit blocks hosted use. |
 
@@ -100,7 +100,7 @@ Status key:
 | Revokes an access or refresh token, destroying the whole grant; always 200 for unknown tokens (§2.2) | **Conformant** |
 | Missing token answers `invalid_request` JSON (§2.2.1) | **Fixed** #2296 `51155c5e3` |
 | Confidential clients authenticate, and the token must have been issued to the requesting client (§2.1) | **Fixed** #3082 `e80b5b615` "Authenticate clients at revocation and revoke only their own tokens". A public client names its `client_id`. Unknown tokens, and tokens belonging to another client, get 200 and nothing is revoked. |
-| A presented client secret that authenticates no client is refused with 401, whatever the token | **Deliberate**, and stricter than bc3: #3082 `c9375f186`, `29a5d118c`. A 200 would tell a client with a mistyped `client_id` that a live grant was dead. bc3 is being aligned to this. |
+| A presented client secret that authenticates no client is refused with 400 `invalid_client` (401 + Basic if it came in a Basic header), whatever the token | **Deliberate**, and stricter than bc3: #3082 `c9375f186`, `29a5d118c`. A 200 would tell a client with a mistyped `client_id` that a live grant was dead. bc3 is being aligned to this. |
 | A personal access token can be revoked here by whoever holds it. It has no client, so holding it is the credential; client credentials sent alongside must still authenticate | **Fixed** #3082 `98619ab8f` "Revoke personal access tokens at the revocation endpoint again". Revocation works the same for every kind of token, which helps incident response such as revoking a leaked token. It also keeps the endpoint ready if personal access tokens become OAuth tokens, as in bc3. |
 | Revocation is throttled like the token endpoint: 20 per minute per IP, then 429 `slow_down` (RFC 6749 §2.3.1, RFC 7009 §5) | **Fixed** #3082 `11e8e1ad8` "Throttle revocation like the token endpoint". Once revocation authenticated confidential clients, it became a place to guess secrets |
 
@@ -170,7 +170,8 @@ train, or planned.
 D1 through D4 were decided and are built: replay detection (#3160), idle
 expiry (#3161), `client_secret_basic` (#3082), and client authentication at
 revocation (#3082). For D4, personal access tokens stay revocable by whoever
-holds them, and a client secret that authenticates no client gets 401.
+holds them, and a client secret that authenticates no client gets 400
+`invalid_client` (401 + Basic only when it came in a Basic header).
 
 5. **D5: consent for self-registered clients.** For the consent design pass:
    lead with the redirect host rather than the self-asserted `client_name`, and
