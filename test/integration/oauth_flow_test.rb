@@ -168,6 +168,19 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_not_includes Oauth::Client.stale, client
   end
 
+  test "consent issues no code for a client swept while consent was submitted" do
+    sign_in_as :david
+    client = Oauth::Client.create!(name: "Swept", redirect_uris: %w[ http://127.0.0.1:8888/callback ], dynamically_registered: true)
+
+    # The sweep deletes the client between consent reading it and touching it.
+    Oauth::Client.any_instance.stubs(:allows_redirect?).with { client.delete }.returns(true)
+    Oauth::AuthorizationCode.expects(:generate).never
+
+    post_consent client: client
+
+    assert_response :bad_request
+  end
+
   test "denying consent leaves a self-registered client's retention period alone" do
     sign_in_as :david
     client = travel_to(31.days.ago) { Oauth::Client.create!(name: "Returning", redirect_uris: %w[ http://127.0.0.1:8888/callback ], dynamically_registered: true) }
