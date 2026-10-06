@@ -345,18 +345,6 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     assert Oauth::Client.exists?(client.id)
   end
 
-  test "cleanup removes OAuth tokens whose client is gone" do
-    client = register_client
-    orphan = identities(:david).access_tokens.create!(oauth_client: client)
-    personal = identities(:david).access_tokens.create!
-    client.delete
-
-    Oauth::Client.cleanup
-
-    assert_not Identity::AccessToken.exists?(orphan.id)
-    assert Identity::AccessToken.exists?(personal.id)
-  end
-
   private
     def register_client(**attributes)
       Oauth::Client.create! name: "Abandoned", redirect_uris: %w[ http://127.0.0.1:8888/callback ], dynamically_registered: true, **attributes

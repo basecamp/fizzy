@@ -32,21 +32,25 @@ class Oauth::Client < ApplicationRecord
   # swept for having registered long ago.
   scope :stale, -> { dynamically_registered.where.missing(:access_tokens).where(updated_at: ...UNUSED_RETENTION.ago) }
 
-  # The tokens are swept after the clients: an exchange that read its client
-  # before a sweep deleted it can still commit a token for it, and an orphan
-  # would break its owner's Connected Apps until removed. The token endpoint
-  # already refuses to refresh one.
   def self.cleanup
     stale.find_each(&:destroy_if_still_unused)
-    Identity::AccessToken.oauth.where.missing(:oauth_client).delete_all
   end
 
-  # Locks and rechecks: a grant may have landed since the sweep picked this
-  # client, and deleting it then would orphan the grant.
+  # The sweep and #redeem take the same row lock, so a grant either lands
+  # before the recheck, which then spares the client, or finds the client
+  # already gone and is never issued. There is no foreign key to refuse a
+  # token for a deleted client.
   def destroy_if_still_unused
-    transaction do
-      lock!
+    with_lock do
       destroy unless access_tokens.exists?
+    end
+  end
+
+  # Raises ActiveRecord::RecordNotFound if the client has been swept since it
+  # was read.
+  def redeem(authorization_code, identity:, permission:)
+    with_lock do
+      identity.access_tokens.redeem authorization_code, oauth_client: self, permission: permission
     end
   end
 

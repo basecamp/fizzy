@@ -46,7 +46,7 @@ class Oauth::TokensController < Oauth::BaseController
       granted = Oauth.canonical_scope(@auth_code.scope)
       permission = granted.split.include?("write") ? "write" : "read"
 
-      if access_token = @identity.access_tokens.redeem(@auth_code, oauth_client: @client, permission: permission)
+      if access_token = @client.redeem(@auth_code, identity: @identity, permission: permission)
         render json: token_response(access_token, scope: granted)
       else
         oauth_error "invalid_grant", "Authorization code already used"
@@ -61,6 +61,8 @@ class Oauth::TokensController < Oauth::BaseController
     else
       oauth_error "invalid_grant", "Invalid refresh token"
     end
+  rescue ActiveRecord::RecordNotFound
+    oauth_error "invalid_grant", "Unknown client"
   end
 
   private
