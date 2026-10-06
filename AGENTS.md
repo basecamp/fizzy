@@ -61,7 +61,7 @@ file.
 
 ## New third parties and personal data
 
-If a change sends customer or visitor personal data to a new third party or a new service, sends new kinds of personal data to a third party we already use, or changes what personal data we collect, say so in the PR and file a card on the [Trust & Compliance On Call board](https://app.basecamp.com/2914079/buckets/48697456/card_tables/10263279046) before it ships. A new subprocessor needs notice before we authorize it ([DPA §5.2](https://37signals.com/policies/privacy/dpa)), and customers then have 10 business days to object (§5.3), so file early. The current list is at <https://37signals.com/policies/privacy/fizzy-subprocessors>. Reviewers, human or agent: call this out when you see it.
+If a change starts any new flow of customer or visitor personal data to a third party (a new vendor or service, new kinds of data to one we already use, or an existing service in a new place), or changes what personal data we collect, say so in the PR and file a card on the [Trust & Compliance On Call board](https://app.basecamp.com/2914079/buckets/48697456/card_tables/10263279046) as soon as you're considering it, before signing up for the service or shipping the change. A new subprocessor needs notice before we authorize it ([DPA §5.2](https://37signals.com/policies/privacy/dpa#subprocessors)), and customers then have 10 business days to object ([§5.3](https://37signals.com/policies/privacy/dpa#subprocessors)). The current list is at <https://37signals.com/policies/privacy/fizzy-subprocessors>. Reviewers, human or agent: call this out when you see it.
 
 Outside contributors without Basecamp access: flag it in the PR, and a maintainer will file the card.
 
