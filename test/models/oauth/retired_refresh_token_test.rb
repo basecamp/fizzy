@@ -32,6 +32,19 @@ class Oauth::RetiredRefreshTokenTest < ActiveSupport::TestCase
     end
   end
 
+  test "destroying a grant locks it before deleting its retired tokens, the order rotation takes them in" do
+    @grant.refresh
+    statements = []
+    subscriber = ActiveSupport::Notifications.subscribe("sql.active_record") { |*, payload| statements << payload[:sql] }
+
+    @grant.destroy
+
+    ActiveSupport::Notifications.unsubscribe(subscriber)
+    lock = statements.index { |sql| sql.match?(/\ASELECT \W?identity_access_tokens\W?\.\W?id\W? FROM \W?identity_access_tokens\W? WHERE/) }
+    delete = statements.index { |sql| sql.match?(/\ADELETE FROM \W?oauth_retired_refresh_tokens\W?/) }
+    assert lock && delete && lock < delete, statements.join("\n")
+  end
+
   test "cleanup deletes retired tokens past retention, keeping the rest" do
     freeze_time
     @grant.refresh

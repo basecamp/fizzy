@@ -5,6 +5,11 @@ class Identity::AccessToken < ApplicationRecord
   belongs_to :oauth_client, class_name: "Oauth::Client", optional: true
   has_many :retired_refresh_tokens, class_name: "Oauth::RetiredRefreshToken", dependent: :delete_all
 
+  # Rotation locks the grant and then adds a retired token. Destroying takes
+  # the same locks in the same order, grant first, so a refresh racing a
+  # revocation waits rather than deadlocking against the retired-token delete.
+  before_destroy :lock_grant, prepend: true
+
   scope :personal, -> { where oauth_client_id: nil }
   scope :oauth, -> { where.not oauth_client_id: nil }
   scope :active, -> { where(expires_at: nil).or(where(expires_at: Time.current..)) }
@@ -74,6 +79,10 @@ class Identity::AccessToken < ApplicationRecord
   end
 
   private
+    def lock_grant
+      self.class.lock.where(id: id).pluck(:id)
+    end
+
     def set_expiry_and_refresh_token
       self.expires_at ||= EXPIRES_IN.from_now
       self.refresh_token ||= self.class.generate_unique_secure_token
