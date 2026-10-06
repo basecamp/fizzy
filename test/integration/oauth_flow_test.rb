@@ -659,6 +659,52 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_not_equal old_refresh_token, body["refresh_token"]
   end
 
+  test "refresh grant requires refresh_token and client_id" do
+    client = oauth_clients(:mcp_client)
+    token = identities(:david).access_tokens.create!(oauth_client: client)
+    complete = { grant_type: "refresh_token", refresh_token: token.refresh_token, client_id: client.client_id }
+
+    %i[ refresh_token client_id ].each do |name|
+      untenanted { post oauth_token_path, params: complete.except(name), as: :json }
+
+      assert_response :bad_request
+      assert_equal "invalid_request", response.parsed_body["error"], "missing #{name}"
+      assert_match name.to_s, response.parsed_body["error_description"]
+    end
+
+    assert_equal complete[:refresh_token], token.reload.refresh_token
+  end
+
+  test "a reused code revokes the grant it issued, refreshed or not" do
+    code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+    client = oauth_clients(:mcp_client)
+    exchange = { grant_type: "authorization_code", client_id: client.client_id,
+      code: authorization_code_for(client, code_verifier: code_verifier),
+      redirect_uri: "http://127.0.0.1:8888/callback", code_verifier: code_verifier }
+
+    untenanted { post oauth_token_path, params: exchange, as: :json }
+    assert_response :success
+
+    untenanted do
+      post oauth_token_path, params: { grant_type: "refresh_token",
+        refresh_token: response.parsed_body["refresh_token"], client_id: client.client_id }, as: :json
+    end
+    assert_response :success
+    refreshed = response.parsed_body
+
+    untenanted { post oauth_token_path, params: exchange, as: :json }
+    assert_response :bad_request
+    assert_equal "invalid_grant", response.parsed_body["error"]
+
+    assert_not Identity::AccessToken.exists?(token: refreshed["access_token"])
+    untenanted do
+      post oauth_token_path, params: { grant_type: "refresh_token",
+        refresh_token: refreshed["refresh_token"], client_id: client.client_id }, as: :json
+    end
+    assert_response :bad_request
+    assert_equal "invalid_grant", response.parsed_body["error"]
+  end
+
   test "refresh grant echoes the granted scope" do
     client = oauth_clients(:mcp_client)
     token = identities(:david).access_tokens.create!(oauth_client: client, permission: :write)
@@ -803,16 +849,17 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_equal "invalid_grant", response.parsed_body["error"]
   end
 
-  test "refresh grant rejects blank refresh token" do
+  test "refresh grant rejects blank refresh token as a malformed request" do
     untenanted do
       post oauth_token_path, params: {
         grant_type: "refresh_token",
+        refresh_token: "",
         client_id: oauth_clients(:mcp_client).client_id
       }, as: :json
     end
 
     assert_response :bad_request
-    assert_equal "invalid_grant", response.parsed_body["error"]
+    assert_equal "invalid_request", response.parsed_body["error"]
   end
 
 
