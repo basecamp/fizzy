@@ -188,6 +188,10 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     assert client.allows_redirect?("http://127.0.0.1:9999/callback")
     assert client.allows_redirect?("https://connector.example.com/callback")
     assert_not client.allows_redirect?("https://connector.example.com:8443/callback")
+
+    https_loopback = Oauth::Client.new(redirect_uris: %w[ https://127.0.0.1:8443/callback https://connector.example.com/callback ])
+    assert https_loopback.allows_redirect?("https://127.0.0.1:8443/callback")
+    assert_not https_loopback.allows_redirect?("https://127.0.0.1:9443/callback")
   end
 
   test "allows_scope? checks client scopes" do
