@@ -868,7 +868,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
 
   test "DCR rejects a redirect whose authority isn't plain" do
     %w[ https://%65vil.example/callback https://user:secret@connector.example.com/callback
-        https://connector.example.com:65536/callback http://user@127.0.0.1:8888/callback ].each do |uri|
+        https://connector.example.com:65536/callback http://user@127.0.0.1:8888/callback http://%5B%3A%3A1%5D:8888/callback ].each do |uri|
       assert_no_difference "Oauth::Client.count" do
         untenanted { post oauth_clients_path, params: { client_name: "Unplain", redirect_uris: [ uri ] }, as: :json }
       end
