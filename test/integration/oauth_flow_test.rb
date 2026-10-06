@@ -98,6 +98,36 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_match "code_challenge", redirect_params["error_description"].first
   end
 
+  test "authorization errors for a self-registered https client render here instead of redirecting" do
+    sign_in_as :david
+    client = Oauth::Client.create!(name: "Hosted", redirect_uris: %w[ https://connector.example.com/callback ], dynamically_registered: true)
+
+    get_consent_screen client: client, code_challenge: nil
+
+    assert_response :bad_request
+    assert_select "code", text: "invalid_request"
+  end
+
+  test "authorization errors for a self-registered loopback client still redirect" do
+    sign_in_as :david
+
+    get_consent_screen code_challenge: nil
+
+    assert_response :redirect
+    assert_equal "invalid_request", Rack::Utils.parse_query(URI.parse(response.location).query)["error"]
+  end
+
+  test "denying a self-registered https client still redirects, after the consent screen named its host" do
+    sign_in_as :david
+    client = Oauth::Client.create!(name: "Hosted", redirect_uris: %w[ https://connector.example.com/callback ], dynamically_registered: true)
+
+    post_consent client: client, error: "access_denied"
+
+    assert_response :redirect
+    assert_match %r{\Ahttps://connector\.example\.com/callback\?}, response.location
+    assert_equal "access_denied", Rack::Utils.parse_query(URI.parse(response.location).query)["error"]
+  end
+
   test "authorization consent issues code" do
     sign_in_as :david
     client = oauth_clients(:mcp_client)
