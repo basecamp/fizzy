@@ -59,6 +59,10 @@ Data transfer between instances (`app/models/account/data_transfer/`,
 archives can exceed hundreds of gigabytes — stream, never buffer a whole
 file.
 
+## New third parties and personal data
+
+If a change sends customer or visitor personal data to a third party we don't already list (a new service, SDK, analytics or tracking script, or API integration), or changes what personal data we collect, say so in the PR and file a card on the [Trust & Compliance On Call board](https://app.basecamp.com/2914079/buckets/48697456/card_tables/10263279046) before it ships. A new subprocessor needs a customer notice at least 10 business days before we start using it (DPA §5.2); the current list is at <https://37signals.com/policies/privacy/fizzy-subprocessors>. Reviewers, human or agent: call this out when you see it.
+
 ## Coding style
 
 Before editing or reviewing code, read STYLE.md.
