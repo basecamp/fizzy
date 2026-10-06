@@ -41,10 +41,16 @@ class Oauth::TokensController < Oauth::BaseController
     # A missing parameter is a malformed request (invalid_request), not a dead
     # grant (invalid_grant), which a client would act on by discarding it.
     # client_id is required of every client: none authenticates by header.
+    # Each is a single string; an array or object from a JSON body or a
+    # name[] form field is just as malformed, and must not reach a lookup.
     def require_params
-      if (missing = %w[ code code_verifier redirect_uri client_id ].select { |name| params[name].blank? }).any?
-        oauth_error "invalid_request", "Missing required parameter: #{missing.to_sentence}"
+      if (missing = %w[ code code_verifier redirect_uri client_id ].reject { |name| string_param?(name) }).any?
+        oauth_error "invalid_request", "Missing or malformed parameter: #{missing.to_sentence}"
       end
+    end
+
+    def string_param?(name)
+      params[name].is_a?(String) && params[name].present?
     end
 
     def set_auth_code

@@ -451,6 +451,27 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "token exchange rejects non-string parameters as a malformed request" do
+    code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+    client = oauth_clients(:mcp_client)
+    complete = { grant_type: "authorization_code", code_verifier: code_verifier,
+      redirect_uri: "http://127.0.0.1:8888/callback", client_id: client.client_id }
+
+    %i[ code code_verifier redirect_uri client_id ].each do |name|
+      request = complete.merge(code: authorization_code_for(client, code_verifier: code_verifier))
+
+      [ [ request[name] ], { "value" => request[name] }, 1 ].each do |malformed|
+        assert_no_difference "Identity::AccessToken.count" do
+          untenanted { post oauth_token_path, params: request.merge(name => malformed), as: :json }
+        end
+
+        assert_response :bad_request
+        assert_equal "invalid_request", response.parsed_body["error"], "#{name} as #{malformed.class}"
+        assert_match name.to_s, response.parsed_body["error_description"]
+      end
+    end
+  end
+
   test "token exchange rejects a code issued to another client" do
     code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
     code = authorization_code_for(oauth_clients(:mcp_client), code_verifier: code_verifier)
