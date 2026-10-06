@@ -92,6 +92,18 @@ When a request fails, the API response will communicate the source of the proble
 | `422 Unprocessable Entity` | Validation failed (see error response format above) |
 | `500 Internal Server Error` | An unexpected error occurred on the server |
 
+Authentication failures carry a `WWW-Authenticate: Bearer` challenge (RFC 6750) that says what went wrong:
+
+- A request with no credentials gets `401` and a challenge with no `error`.
+- An access token that is expired, revoked or unknown gets `401` with `error="invalid_token"`. For an OAuth token, refresh it and retry.
+- A read-only access token used to change data gets `403` with `error="insufficient_scope", scope="write"`. Refreshing won't help: get a token with write access.
+
+```
+WWW-Authenticate: Bearer realm="Application", resource_metadata="https://app.fizzy.do/.well-known/oauth-protected-resource", error="invalid_token", error_description="The access token is expired, revoked, or invalid"
+```
+
+When the server offers OAuth, `resource_metadata` points to its protected resource metadata (RFC 9728), from which a client can find the authorization server.
+
 If a request contains invalid data for fields, such as entering a string into a number field, in most cases the API will respond with a `500 Internal Server Error`. Clients are expected to perform some validation on their end before making a request.
 
 A validation error will produce a `422 Unprocessable Entity` response, which will sometimes be accompanied by details about the error:

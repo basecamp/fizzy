@@ -77,17 +77,36 @@ module Authentication
     end
 
     def authenticate_by_bearer_token
-      if request.authorization.to_s.include?("Bearer")
+      if bearer_authorization?
         if bearer_token_authenticatable_request?
-          authenticate_or_request_with_http_token do |token|
-            if access_token = Identity::AccessToken.find_permissable(token, method: request.method)
-              Current.access_token = access_token
-              Current.identity = access_token.identity
-            end
-          end
+          authenticate_with_bearer_token
         else
-          request_http_token_authentication
+          request_bearer_authentication error: "invalid_request", error_description: "Bearer tokens authenticate JSON requests only"
         end
+      end
+    end
+
+    # The auth-scheme is a case-insensitive token (RFC 9110 §11.1), read with the
+    # same pattern Rails parses the header with.
+    def bearer_authorization?
+      request.authorization.to_s[ActionController::HttpAuthentication::Token::AUTH_SCHEME_REGEX, 1].to_s.casecmp?("Bearer")
+    end
+
+    # A token that is unknown, expired, revoked or not honored is invalid_token,
+    # which tells an OAuth client to refresh. A good token without the permission
+    # the method needs is insufficient_scope: refreshing can't widen a grant, so
+    # the client must ask for write instead (RFC 6750 §3.1).
+    def authenticate_with_bearer_token
+      access_token = authenticate_with_http_token(scheme: "Bearer") { |token| Identity::AccessToken.find_honored(token) }
+
+      if access_token&.allows?(request.method)
+        Current.access_token = access_token
+        Current.identity = access_token.identity
+      elsif access_token
+        request_bearer_authentication status: :forbidden, error: "insufficient_scope",
+          error_description: "The access token is read-only", scope: "write"
+      else
+        request_bearer_authentication error: "invalid_token", error_description: "The access token is expired, revoked, or invalid"
       end
     end
 
@@ -96,11 +115,41 @@ module Authentication
     end
 
     def request_authentication
-      if Current.account.present?
-        session[:return_to_after_authenticating] = request.url
-      end
+      if bearer_challengeable_request?
+        request_bearer_authentication
+      else
+        if Current.account.present?
+          session[:return_to_after_authenticating] = request.url
+        end
 
-      redirect_to_login_url
+        redirect_to_login_url
+      end
+    end
+
+    # API clients that sent no credentials get a challenge rather than a sign-in
+    # page (RFC 6750 §3). Our own pages keep the redirect: they send a session
+    # cookie, stale or not, or ask over XHR, and @rails/request.js navigates to a
+    # 401's WWW-Authenticate value as if it were a URL.
+    def bearer_challengeable_request?
+      request.format.json? && !request.xhr? && cookies[:session_token].blank?
+    end
+
+    def request_bearer_authentication(status: :unauthorized, **params)
+      headers["WWW-Authenticate"] = bearer_challenge(**params)
+      head status
+    end
+
+    def bearer_challenge(**params)
+      params = { realm: "Application", resource_metadata: protected_resource_metadata_url, **params }.compact
+      "Bearer " + params.map { |name, value| %(#{name}="#{value}") }.join(", ")
+    end
+
+    # RFC 9728 §5.1. Discovery 404s while OAuth is dark, so the challenge names it
+    # only while it answers.
+    def protected_resource_metadata_url
+      if Oauth::Availability.acceptance_enabled?
+        "#{main_app.root_url(script_name: nil)}.well-known/oauth-protected-resource"
+      end
     end
 
     def after_authentication_url

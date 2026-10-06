@@ -88,7 +88,7 @@ class My::AccessTokensControllerTest < ActionDispatch::IntegrationTest
     assert_no_difference -> { identities(:jason).access_tokens.count } do
       post my_access_tokens_path, params: { access_token: { description: "Fizzy CLI", permission: "read" } }, env: bearer_token, as: :json
     end
-    assert_response :unauthorized
+    assert_response :forbidden
   end
 
   test "index as JSON" do

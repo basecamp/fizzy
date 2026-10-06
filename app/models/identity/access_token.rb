@@ -14,8 +14,10 @@ class Identity::AccessToken < ApplicationRecord
   before_create :set_expiry_and_refresh_token, if: :oauth_client_id?
 
   class << self
-    def find_permissable(token, method:)
-      if (access_token = active.find_by(token: token)) && access_token.honored? && access_token.allows?(method)
+    # The token a bearer request may authenticate with: active and honored.
+    # Whether it permits the request's method is the caller's question.
+    def find_honored(token)
+      if (access_token = active.find_by(token: token)) && access_token.honored?
         access_token
       end
     end
