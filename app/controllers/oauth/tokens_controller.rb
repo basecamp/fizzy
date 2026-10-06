@@ -190,9 +190,15 @@ class Oauth::TokensController < Oauth::BaseController
     # §4.3.1 describes, so the grant is revoked, successor and all. A retry
     # whose successor has itself rotated is refused without revoking: the
     # client holds the live descendant.
+    #
+    # The successor is read before the retry check, so a rotation that lands
+    # between the two shows up as supersession and is refused. Checking first
+    # would let that rotation's fresh pair out as the retry's answer.
     def answer_refresh_replay(retired_refresh_token)
+      grant = retired_refresh_token.access_token.reload
+
       if retired_refresh_token.retryable?
-        render json: refresh_response(retired_refresh_token.access_token.reload)
+        render json: refresh_response(grant)
       elsif retired_refresh_token.within_grace?
         oauth_error "invalid_grant", "Refresh token superseded"
       else
