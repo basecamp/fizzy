@@ -35,10 +35,10 @@ class Oauth::TokensController < Oauth::BaseController
     before_action :set_identity
   end
 
-  # A rotated refresh token is answered as a retry or a replay before any
-  # scope is weighed, so no scope parameter can steer a replay around the
-  # revocation it earns.
-  before_action :set_refresh_scope, unless: -> { authorization_code_grant? || @retired_refresh_token }
+  # A replay outside the grace window is revoked before any scope is weighed,
+  # so no scope parameter can steer it around the revocation it earns. A retry
+  # inside the window is weighed like the live refresh it repeats.
+  before_action :set_refresh_scope, unless: -> { authorization_code_grant? || revocable_replay? }
 
   def create
     if authorization_code_grant?
@@ -145,6 +145,10 @@ class Oauth::TokensController < Oauth::BaseController
       unless oauth_client_id == (@client || @access_token.oauth_client).client_id
         oauth_error "invalid_grant", authorization_code_grant? ? "Invalid or expired authorization code" : "Invalid refresh token"
       end
+    end
+
+    def revocable_replay?
+      @retired_refresh_token && !@retired_refresh_token.within_grace?
     end
 
     # A refresh request may narrow scope but never widen it (RFC 6749 §6). An

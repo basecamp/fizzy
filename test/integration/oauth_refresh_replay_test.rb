@@ -94,6 +94,23 @@ class OauthRefreshReplayTest < ActionDispatch::IntegrationTest
     assert_grant_revoked successor
   end
 
+  test "a retry within the grace window weighs its scope as a live refresh would" do
+    presented = @grant.refresh_token
+    refresh presented
+    successor = response.parsed_body
+
+    [ "read write", "", "admin" ].each do |scope|
+      untenanted do
+        post oauth_token_path, params: { grant_type: "refresh_token", refresh_token: presented, client_id: @client.client_id, scope: scope }
+      end
+
+      assert_response :bad_request, scope.inspect
+      assert_equal "invalid_scope", response.parsed_body["error"], scope.inspect
+    end
+
+    assert_equal successor["refresh_token"], @grant.reload.refresh_token
+  end
+
   test "a successor rotated by a host whose clock runs behind still supersedes the retry" do
     ancestor = @grant.refresh_token
     refresh ancestor
