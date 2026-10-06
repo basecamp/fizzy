@@ -27,6 +27,9 @@ production: &production
   cleanup_transfers:
     command: "Identity::Transfer.cleanup"
     schedule: every 4 hours
+  cleanup_oauth_retired_refresh_tokens:
+    command: "Oauth::RetiredRefreshToken.cleanup"
+    schedule: every day at 04:22
   cleanup_exports:
     command: "Export.cleanup"
     schedule: every hour at minute 20

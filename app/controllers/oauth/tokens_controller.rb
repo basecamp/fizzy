@@ -35,7 +35,10 @@ class Oauth::TokensController < Oauth::BaseController
     before_action :set_identity
   end
 
-  before_action :set_refresh_scope, unless: :authorization_code_grant?
+  # A replay outside the grace window is revoked before any scope is weighed,
+  # so no scope parameter can steer it around the revocation it earns. A retry
+  # inside the window is weighed like the live refresh it repeats.
+  before_action :set_refresh_scope, unless: -> { authorization_code_grant? || revocable_replay? }
 
   def create
     if authorization_code_grant?
@@ -47,12 +50,15 @@ class Oauth::TokensController < Oauth::BaseController
       else
         oauth_error "invalid_grant", "Authorization code already used"
       end
+    elsif @retired_refresh_token
+      answer_refresh_replay @retired_refresh_token
+    elsif @access_token.refresh(permission: @refresh_permission)
+      render json: refresh_response(@access_token)
+    elsif retired_refresh_token = Oauth::RetiredRefreshToken.find_by(refresh_token: params[:refresh_token])
+      # A concurrent refresh won the rotation: this is the same retry.
+      answer_refresh_replay retired_refresh_token
     else
-      if @access_token.refresh(permission: @refresh_permission)
-        render json: token_response(@access_token, scope: Oauth.canonical_scope(@access_token.permission))
-      else
-        oauth_error "invalid_grant", "Invalid refresh token"
-      end
+      oauth_error "invalid_grant", "Invalid refresh token"
     end
   end
 
@@ -119,8 +125,14 @@ class Oauth::TokensController < Oauth::BaseController
       end
     end
 
+    # A rotated refresh token still resolves to its grant, so that presenting
+    # it again can be told apart as a retry or a replay once the client is
+    # known to be the grant's own.
     def set_refreshable_access_token
-      unless @access_token = Identity::AccessToken.oauth.find_by(refresh_token: params[:refresh_token])
+      @access_token = Identity::AccessToken.find_by_refresh_token(params[:refresh_token]) ||
+        (@retired_refresh_token = Oauth::RetiredRefreshToken.find_by(refresh_token: params[:refresh_token]))&.access_token
+
+      unless @access_token
         oauth_error "invalid_grant", "Invalid refresh token"
       end
     end
@@ -133,6 +145,10 @@ class Oauth::TokensController < Oauth::BaseController
       unless oauth_client_id == (@client || @access_token.oauth_client).client_id
         oauth_error "invalid_grant", authorization_code_grant? ? "Invalid or expired authorization code" : "Invalid refresh token"
       end
+    end
+
+    def revocable_replay?
+      @retired_refresh_token && !@retired_refresh_token.within_grace?
     end
 
     # A refresh request may narrow scope but never widen it (RFC 6749 §6). An
@@ -170,6 +186,46 @@ class Oauth::TokensController < Oauth::BaseController
       unless performed? || !attempts_client_authentication? || authenticated_client&.confidential?
         client_authentication_failed
       end
+    end
+
+    # A retry of the rotation that just happened gets the successor that
+    # rotation issued, rather than a revocation for losing a response. Any
+    # other replay of a rotated refresh token is the theft signal OAuth 2.1
+    # §4.3.1 describes, so the grant is revoked, successor and all. A retry
+    # whose successor has itself rotated is refused without revoking: the
+    # client holds the live descendant. So is one whose grant has just been
+    # deleted out from under it.
+    #
+    # The grant is read once, and the retry is judged against that same read,
+    # so a concurrent rotation can't let a newer pair out as the answer.
+    def answer_refresh_replay(retired_refresh_token)
+      if grant = Identity::AccessToken.find_by(id: retired_refresh_token.access_token_id)
+        if retired_refresh_token.retryable?(grant)
+          answer_refresh_retry grant
+        elsif retired_refresh_token.within_grace?
+          oauth_error "invalid_grant", "Refresh token superseded"
+        else
+          grant.destroy
+          oauth_error "invalid_grant", "Refresh token reuse detected"
+        end
+      else
+        oauth_error "invalid_grant", "Invalid refresh token"
+      end
+    end
+
+    # A retry repeats the rotation it lost the response to, so it must ask for
+    # what that rotation produced. One asking for less can't be handed the
+    # wider successor that already exists.
+    def answer_refresh_retry(grant)
+      if @refresh_permission == grant.permission
+        render json: refresh_response(grant)
+      else
+        oauth_error "invalid_scope", "Requested scope differs from the rotation being retried"
+      end
+    end
+
+    def refresh_response(access_token)
+      token_response(access_token, scope: Oauth.canonical_scope(access_token.permission))
     end
 
     def token_response(access_token, scope: nil)

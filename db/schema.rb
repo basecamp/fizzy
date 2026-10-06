@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_08_28_120000) do
+ActiveRecord::Schema[8.2].define(version: 2026_10_06_120000) do
   create_table "accesses", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -448,6 +448,16 @@ ActiveRecord::Schema[8.2].define(version: 2026_08_28_120000) do
     t.boolean "trusted", default: false
     t.datetime "updated_at", null: false
     t.index ["client_id"], name: "index_oauth_clients_on_client_id", unique: true
+  end
+
+  create_table "oauth_retired_refresh_tokens", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "access_token_id", null: false
+    t.datetime "created_at", null: false
+    t.string "refresh_token", null: false
+    t.string "successor_refresh_token", null: false
+    t.index ["access_token_id"], name: "index_oauth_retired_refresh_tokens_on_access_token_id"
+    t.index ["created_at"], name: "index_oauth_retired_refresh_tokens_on_created_at"
+    t.index ["refresh_token"], name: "index_oauth_retired_refresh_tokens_on_refresh_token", unique: true
   end
 
   create_table "pins", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
