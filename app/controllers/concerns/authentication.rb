@@ -59,8 +59,9 @@ module Authentication
       if request.authorization.to_s.include?("Bearer")
         if bearer_token_authenticatable_request?
           authenticate_or_request_with_http_token do |token|
-            if identity = Identity.find_by_permissable_access_token(token, method: request.method)
-              Current.identity = identity
+            if access_token = Identity::AccessToken.find_permissable(token, method: request.method)
+              Current.access_token = access_token
+              Current.identity = access_token.identity
             end
           end
         else

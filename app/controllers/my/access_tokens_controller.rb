@@ -3,6 +3,11 @@ class My::AccessTokensController < ApplicationController
 
   skip_before_action :require_account
 
+  # A personal access token outlives the app that minted it: it isn't listed
+  # under Connected Apps and survives a disconnect. So an OAuth grant may not
+  # manage personal access tokens at all.
+  before_action :forbid_oauth_grants
+
   def index
     @access_tokens = my_access_tokens.order(created_at: :desc)
   end
@@ -44,6 +49,10 @@ class My::AccessTokensController < ApplicationController
   end
 
   private
+    def forbid_oauth_grants
+      head :forbidden if Current.access_token&.oauth_client_id?
+    end
+
     def my_access_tokens
       Current.identity.access_tokens.personal
     end

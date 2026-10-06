@@ -9,6 +9,12 @@ class Identity::AccessToken < ApplicationRecord
   enum :permission, %w[ read write ].index_by(&:itself), default: :read
 
   class << self
+    def find_permissable(token, method:)
+      if (access_token = find_by(token: token)) && access_token.honored? && access_token.allows?(method)
+        access_token
+      end
+    end
+
     # An authorization code redeems at most once (RFC 6749 §4.1.2): the grant it
     # mints is stamped with the code's jti, and the unique index refuses a second
     # stamp. A replay also revokes the grant the first redemption issued.
