@@ -26,7 +26,17 @@ module Oauth
   # a browser accepts. Rejecting anything else at registration, rather than
   # canonicalizing it wherever it's shown or compared, keeps one rule in one place.
   def self.plain_authority?(uri)
-    uri.userinfo.nil? && uri.host.to_s.match?(PLAIN_HOST) && uri.port.to_i.between?(1, 65535)
+    uri.userinfo.nil? && plain_host?(uri.host.to_s) && uri.port.to_i.between?(1, 65535)
+  end
+
+  # Browsers parse a host whose last label is all digits as IPv4 (WHATWG URL),
+  # so such a host is plain only as a dotted quad of octets.
+  def self.plain_host?(host)
+    if host.match?(/(?:\A|\.)\d+\z/)
+      host.match?(/\A(?:\d{1,3}\.){3}\d{1,3}\z/) && host.split(".").all? { |octet| octet.to_i <= 255 }
+    else
+      host.match?(PLAIN_HOST)
+    end
   end
 
   def self.table_name_prefix

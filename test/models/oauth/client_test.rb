@@ -67,14 +67,16 @@ class Oauth::ClientTest < ActiveSupport::TestCase
 
   test "dynamically registered clients name their redirect authority plainly" do
     %w[ https://%65vil.example/callback https://user:secret@connector.example.com/callback http://user@127.0.0.1:8888/callback
-        https://connector.example.com:65536/callback https://connector.example.com:0/callback http://%5B%3A%3A1%5D:8888/callback ].each do |uri|
+        https://connector.example.com:65536/callback https://connector.example.com:0/callback http://%5B%3A%3A1%5D:8888/callback
+        https://999.999.999.999/callback https://10.1/callback https://example.123/callback ].each do |uri|
       client = Oauth::Client.new(name: "Unplain", redirect_uris: [ uri ], dynamically_registered: true)
 
       assert_not client.valid?, uri
       assert_includes client.errors[:redirect_uris], "must be an https or local loopback URI for dynamically registered clients", uri
     end
 
-    %w[ https://connector.example.com:8443/callback https://Connector.Example.com/callback http://[::1]:8888/callback http://localhost/callback ].each do |uri|
+    %w[ https://connector.example.com:8443/callback https://Connector.Example.com/callback http://[::1]:8888/callback http://localhost/callback
+        https://203.0.113.7/callback https://3com.example/callback ].each do |uri|
       assert Oauth::Client.new(name: "Plain", redirect_uris: [ uri ], dynamically_registered: true).valid?, uri
     end
   end
