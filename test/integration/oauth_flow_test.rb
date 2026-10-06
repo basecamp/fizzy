@@ -675,6 +675,24 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_equal complete[:refresh_token], token.reload.refresh_token
   end
 
+  test "refresh grant rejects non-string refresh_token and client_id as a malformed request" do
+    client = oauth_clients(:mcp_client)
+    token = identities(:david).access_tokens.create!(oauth_client: client)
+    complete = { grant_type: "refresh_token", refresh_token: token.refresh_token, client_id: client.client_id }
+
+    %i[ refresh_token client_id ].each do |name|
+      [ [ complete[name] ], { "value" => complete[name] }, 1 ].each do |malformed|
+        untenanted { post oauth_token_path, params: complete.merge(name => malformed), as: :json }
+
+        assert_response :bad_request
+        assert_equal "invalid_request", response.parsed_body["error"], "#{name} as #{malformed.class}"
+        assert_match name.to_s, response.parsed_body["error_description"]
+      end
+    end
+
+    assert_equal complete[:refresh_token], token.reload.refresh_token
+  end
+
   test "a reused code revokes the grant it issued, refreshed or not" do
     code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
     client = oauth_clients(:mcp_client)
