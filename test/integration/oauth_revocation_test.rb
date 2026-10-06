@@ -80,13 +80,63 @@ class OauthRevocationTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "a personal access token is no client's to revoke" do
-    token = identity_access_tokens(:davids_api_token)
+  # A personal access token has no client, so possession is the credential:
+  # whoever holds one may revoke it, the same as signing out of it.
 
-    revoke token.token, params: { client_id: oauth_clients(:mcp_client).client_id }
+  test "a personal access token is revoked by whoever presents it" do
+    [ {}, { client_id: oauth_clients(:mcp_client).client_id }, { client_id: "no-such-client" } ].each do |params|
+      token = personal_token
 
-    assert_response :success
+      revoke token.token, params: params
+
+      assert_response :success, params.inspect
+      assert_not Identity::AccessToken.exists?(token.id), params.inspect
+    end
+  end
+
+  test "a personal access token is revoked beside client credentials that authenticate" do
+    [ [ { client_id: @client.client_id, client_secret: @secret }, {} ], [ {}, basic(@client.client_id, @secret) ] ].each do |params, headers|
+      token = personal_token
+
+      revoke token.token, params: params, headers: headers
+
+      assert_response :success
+      assert_not Identity::AccessToken.exists?(token.id)
+    end
+  end
+
+  test "client credentials that fail to authenticate are refused before a personal access token is revoked" do
+    token = personal_token
+
+    [ [ { client_id: @client.client_id }, {}, false ], [ { client_id: @client.client_id, client_secret: "wrong" }, {}, false ],
+      [ { client_secret: @secret }, {}, false ], [ { client_id: oauth_clients(:mcp_client).client_id, client_secret: "anything" }, {}, false ],
+      [ {}, basic(@client.client_id, "wrong"), true ], [ {}, basic("no-such-client", "x"), true ] ].each do |params, headers, challenged|
+      revoke token.token, params: params, headers: headers
+
+      assert_client_authentication_failed [ params, headers ].inspect, challenged: challenged
+    end
+
     assert Identity::AccessToken.exists?(token.id)
+  end
+
+  test "a personal access token is not revoked by two client authentication methods at once" do
+    token = personal_token
+
+    revoke token.token, params: { client_secret: @secret }, headers: basic(@client.client_id, @secret)
+
+    assert_response :bad_request
+    assert Identity::AccessToken.exists?(token.id)
+  end
+
+  test "a revoked personal access token no longer authenticates" do
+    token = personal_token
+    get user_path(users(:david)), env: { "HTTP_AUTHORIZATION" => "Bearer #{token.token}" }, as: :json
+    assert_response :success
+
+    revoke token.token
+
+    get user_path(users(:david)), env: { "HTTP_AUTHORIZATION" => "Bearer #{token.token}" }, as: :json
+    assert_response :unauthorized
   end
 
   test "a Basic header that fails to authenticate is refused at revocation, whatever the token" do
@@ -135,6 +185,10 @@ class OauthRevocationTest < ActionDispatch::IntegrationTest
   end
 
   private
+    def personal_token
+      identities(:david).access_tokens.create!(permission: :read)
+    end
+
     def grant_for(client)
       identities(:david).access_tokens.create!(oauth_client: client, permission: :read)
     end

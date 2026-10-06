@@ -7,6 +7,10 @@
 # exist. Only failed authentication is refused: a known confidential client
 # with a missing or wrong secret, a Basic header that doesn't authenticate,
 # or a client secret that authenticates no client.
+#
+# A personal access token was issued to no client, so possession of it is the
+# credential: whoever presents one revokes it, client or not. Client
+# credentials presented beside it must still authenticate, by the same rules.
 class Oauth::RevocationsController < Oauth::BaseController
   include Oauth::ClientAuthentication
 
@@ -17,14 +21,11 @@ class Oauth::RevocationsController < Oauth::BaseController
   before_action :require_token
 
   def create
-    if client = authenticated_client
-      revocable_tokens(client).find_by(token: params[:token])&.destroy ||
-        revocable_tokens(client).find_by(refresh_token: params[:token])&.destroy
-
-      head :ok
-    elsif attempts_client_authentication?
+    if attempts_client_authentication? && !authenticated_client
       client_authentication_failed
     else
+      revocable_token&.destroy
+
       head :ok
     end
   end
@@ -36,7 +37,14 @@ class Oauth::RevocationsController < Oauth::BaseController
       end
     end
 
-    def revocable_tokens(client)
-      Identity::AccessToken.oauth.where(oauth_client: client)
+    def revocable_token
+      Identity::AccessToken.personal.find_by(token: params[:token]) || client_token
+    end
+
+    def client_token
+      if client = authenticated_client
+        tokens = Identity::AccessToken.oauth.where(oauth_client: client)
+        tokens.find_by(token: params[:token]) || tokens.find_by(refresh_token: params[:token])
+      end
     end
 end
