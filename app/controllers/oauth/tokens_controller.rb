@@ -201,7 +201,7 @@ class Oauth::TokensController < Oauth::BaseController
     def answer_refresh_replay(retired_refresh_token)
       if grant = Identity::AccessToken.find_by(id: retired_refresh_token.access_token_id)
         if retired_refresh_token.retryable?(grant)
-          render json: refresh_response(grant)
+          answer_refresh_retry grant
         elsif retired_refresh_token.within_grace?
           oauth_error "invalid_grant", "Refresh token superseded"
         else
@@ -210,6 +210,17 @@ class Oauth::TokensController < Oauth::BaseController
         end
       else
         oauth_error "invalid_grant", "Invalid refresh token"
+      end
+    end
+
+    # A retry repeats the rotation it lost the response to, so it must ask for
+    # what that rotation produced. One asking for less can't be handed the
+    # wider successor that already exists.
+    def answer_refresh_retry(grant)
+      if @refresh_permission == grant.permission
+        render json: refresh_response(grant)
+      else
+        oauth_error "invalid_scope", "Requested scope differs from the rotation being retried"
       end
     end
 

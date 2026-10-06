@@ -111,6 +111,26 @@ class OauthRefreshReplayTest < ActionDispatch::IntegrationTest
     assert_equal successor["refresh_token"], @grant.reload.refresh_token
   end
 
+  test "a retry within the grace window must ask for the scope the rotation produced" do
+    @grant.update! permission: :write
+    presented = @grant.refresh_token
+    refresh presented
+    successor = response.parsed_body
+    assert_equal "read write", successor["scope"]
+
+    untenanted do
+      post oauth_token_path, params: { grant_type: "refresh_token", refresh_token: presented, client_id: @client.client_id, scope: "read" }
+    end
+    assert_response :bad_request
+    assert_equal "invalid_scope", response.parsed_body["error"]
+
+    untenanted do
+      post oauth_token_path, params: { grant_type: "refresh_token", refresh_token: presented, client_id: @client.client_id, scope: "read write" }
+    end
+    assert_response :success
+    assert_equal successor["refresh_token"], response.parsed_body["refresh_token"]
+  end
+
   test "a successor rotated by a host whose clock runs behind still supersedes the retry" do
     ancestor = @grant.refresh_token
     refresh ancestor
