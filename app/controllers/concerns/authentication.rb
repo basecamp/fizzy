@@ -4,7 +4,7 @@ module Authentication
   included do
     before_action :require_account # Checking and setting account must happen first
     before_action :require_authentication
-    helper_method :authenticated?
+    helper_method :authenticated?, :oauth_grant?
     helper_method :email_address_pending_authentication
 
     etag { Current.identity.id if authenticated? }
@@ -29,7 +29,10 @@ module Authentication
     # outlive disconnecting the app, and anything it removed would be another
     # app's. Declared on every controller that does either: personal access
     # tokens, Connected Apps, passkeys, transfer links, email changes and OAuth
-    # consent.
+    # consent. For the same reason it may not read a credential that would
+    # outlive the grant: the account join code, and account exports, which carry
+    # that code and every webhook's credentials. Webhooks themselves stay
+    # readable but withhold their credentials (see webhooks/_webhook.json).
     def disallow_oauth_grants(**options)
       before_action :forbid_oauth_grant, **options
     end
@@ -45,8 +48,12 @@ module Authentication
       Current.identity.present?
     end
 
+    def oauth_grant?
+      Current.access_token&.oauth_client_id?
+    end
+
     def forbid_oauth_grant
-      head :forbidden if Current.access_token&.oauth_client_id?
+      head :forbidden if oauth_grant?
     end
 
     def require_account
