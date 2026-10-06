@@ -37,6 +37,14 @@ module Oauth::ClientAuthentication
       end
     end
 
+    # A request attempts client authentication when it uses Basic, names a
+    # confidential client, or carries a client secret. This turns on what the
+    # request presents, so refusing a failed attempt reveals nothing about
+    # which clients exist.
+    def attempts_client_authentication?
+      client_secret_basic? || requesting_client&.confidential? || oauth_client_secret.present?
+    end
+
     def requesting_client
       if oauth_client_id
         @requesting_client ||= Oauth::Client.find_by(client_id: oauth_client_id)

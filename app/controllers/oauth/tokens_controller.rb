@@ -170,10 +170,6 @@ class Oauth::TokensController < Oauth::BaseController
       end
     end
 
-    def attempts_client_authentication?
-      client_secret_basic? || requesting_client&.confidential? || oauth_client_secret.present?
-    end
-
     def token_response(access_token, scope: nil)
       {
         access_token: access_token.token,

@@ -103,6 +103,20 @@ class OauthRevocationTest < ActionDispatch::IntegrationTest
     assert Identity::AccessToken.exists?(token.id)
   end
 
+  test "a body client_secret that authenticates no client is refused, whatever the token" do
+    token = grant_for(@client)
+
+    [ { client_secret: @secret }, { client_id: "no-such-client", client_secret: @secret } ].each do |params|
+      [ token.token, "not-a-token" ].each do |presented|
+        revoke presented, params: params
+
+        assert_client_authentication_failed params.inspect
+      end
+    end
+
+    assert Identity::AccessToken.exists?(token.id)
+  end
+
   test "revocation refuses Basic beside a body client_secret" do
     token = grant_for(@client)
 

@@ -5,7 +5,8 @@
 # is unknown or belongs to another client, gets the same 200 as a successful
 # revocation (§2.2), so the endpoint is no oracle for which tokens or clients
 # exist. Only failed authentication is refused: a known confidential client
-# with a missing or wrong secret, or a Basic header that doesn't authenticate.
+# with a missing or wrong secret, a Basic header that doesn't authenticate,
+# or a client secret that authenticates no client.
 class Oauth::RevocationsController < Oauth::BaseController
   include Oauth::ClientAuthentication
 
@@ -21,7 +22,7 @@ class Oauth::RevocationsController < Oauth::BaseController
         revocable_tokens(client).find_by(refresh_token: params[:token])&.destroy
 
       head :ok
-    elsif client_secret_basic? || requesting_client&.confidential?
+    elsif attempts_client_authentication?
       client_authentication_failed
     else
       head :ok
