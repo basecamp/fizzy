@@ -57,12 +57,12 @@ class Identity::AccessTokenTest < ActiveSupport::TestCase
     end
   end
 
-  test "find_by_permissable_access_token rejects expired tokens" do
+  test "find_permissable rejects expired tokens" do
     token = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client), permission: :write)
 
-    assert_equal identities(:david), Identity.find_by_permissable_access_token(token.token, method: "GET")
+    assert_equal token, Identity::AccessToken.find_permissable(token.token, method: "GET")
     travel Identity::AccessToken::EXPIRES_IN + 1.second do
-      assert_nil Identity.find_by_permissable_access_token(token.token, method: "GET")
+      assert_nil Identity::AccessToken.find_permissable(token.token, method: "GET")
     end
   end
 end
