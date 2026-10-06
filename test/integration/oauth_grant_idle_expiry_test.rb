@@ -69,28 +69,26 @@ class OauthGrantIdleExpiryTest < ActionDispatch::IntegrationTest
     assert_equal presented, @grant.reload.refresh_token
   end
 
-  test "a grant written without an expiry, as by old code mid-deploy, lapses from its last rotation" do
-    Identity::AccessToken.where(id: @grant.id).update_all(refresh_token_expires_at: nil)
+  test "the idle clock is the grant's last rotation, so a rotation by older code mid-deploy restarts it too" do
+    later_by Identity::AccessToken::REFRESH_IDLE_LIMIT - 1.day
+    rotated_by_older_code = Identity::AccessToken.generate_unique_secure_token
+    Identity::AccessToken.where(id: @grant.id).update_all(refresh_token: rotated_by_older_code, updated_at: Time.current)
 
-    later_by Identity::AccessToken::REFRESH_IDLE_LIMIT + 1.second
-    refresh @grant.refresh_token
-
-    assert_response :bad_request
-    assert_equal "invalid_grant", response.parsed_body["error"]
-  end
-
-  test "a grant written without an expiry still refreshes inside the window, gains an expiry, and shows in Connected Apps" do
-    Identity::AccessToken.where(id: @grant.id).update_all(refresh_token_expires_at: nil)
-    sign_in_as :david
-
-    get my_connected_apps_path
-    assert_match @client.name, response.body
-
-    later_by 1.day
-    refresh @grant.refresh_token
+    later_by Identity::AccessToken::REFRESH_IDLE_LIMIT - 1.day
+    refresh rotated_by_older_code
 
     assert_response :success
-    assert_not_nil @grant.reload.read_attribute(:refresh_token_expires_at)
+  end
+
+  test "a lapsed grant takes its entry point off the profile page too" do
+    sign_in_as :david
+
+    get user_path(users(:david))
+    assert_match my_connected_apps_path, response.body
+
+    later_by Identity::AccessToken::REFRESH_IDLE_LIMIT + 1.second
+    get user_path(users(:david))
+    assert_no_match my_connected_apps_path, response.body
   end
 
   private
