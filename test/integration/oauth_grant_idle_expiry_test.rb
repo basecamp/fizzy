@@ -61,6 +61,17 @@ class OauthGrantIdleExpiryTest < ActionDispatch::IntegrationTest
     assert Identity::AccessToken.exists?(personal.id)
   end
 
+  test "the sweep spares a grant renewed after it was selected" do
+    selected = Identity::AccessToken.where(id: @grant.id)
+    Identity::AccessToken.stubs(:lapsed).returns(selected)
+
+    later_by Identity::AccessToken::REFRESH_IDLE_LIMIT + 1.second
+    selected.update_all(updated_at: Time.current)
+    Identity::AccessToken.cleanup
+
+    assert Identity::AccessToken.exists?(@grant.id)
+  end
+
   test "rotation itself refuses a lapsed grant, so one racing the deadline can't renew it" do
     later_by Identity::AccessToken::REFRESH_IDLE_LIMIT + 1.second
     presented = @grant.refresh_token

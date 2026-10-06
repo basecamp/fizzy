@@ -37,8 +37,15 @@ class Identity::AccessToken < ApplicationRecord
       end
     end
 
+    # Each grant is rechecked under its lock, so one renewed after it was
+    # selected (by code from before idle expiry, mid-deploy, whose rotation
+    # doesn't check for lapse) is spared.
     def cleanup
-      lapsed.find_each(&:destroy)
+      lapsed.find_each do |grant|
+        grant.with_lock { grant.destroy if grant.lapsed? }
+      rescue ActiveRecord::RecordNotFound
+        # Already gone.
+      end
     end
 
     def find_by_refresh_token(refresh_token)
