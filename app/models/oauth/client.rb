@@ -57,7 +57,8 @@ class Oauth::Client < ApplicationRecord
       parsed.scheme == "http" && parsed.host.in?(Oauth::LOOPBACK_HOSTS)
     end
 
-    # Only the port may vary (RFC 8252 §7.3). The host must match too:
+    # Only the port may vary, and only for an http loopback redirect (RFC 8252
+    # §7.3): https or a native scheme on loopback stays exact. The host must match too:
     # 127.0.0.1, localhost and ::1 are not interchangeable, and localhost
     # may not even resolve to loopback (RFC 8252 §8.3).
     def matching_loopback?(uri)
@@ -66,7 +67,7 @@ class Oauth::Client < ApplicationRecord
       redirect_uris.any? do |redirect_uri|
         redirect = URI.parse(redirect_uri)
 
-        redirect.scheme == parsed.scheme &&
+        redirect.scheme == "http" && parsed.scheme == "http" &&
           redirect.host.in?(Oauth::LOOPBACK_HOSTS) &&
           redirect.host.casecmp?(parsed.host.to_s) &&
           redirect.path == parsed.path &&
