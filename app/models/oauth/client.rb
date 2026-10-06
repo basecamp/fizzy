@@ -72,7 +72,7 @@ class Oauth::Client < ApplicationRecord
     def matching_loopback?(uri)
       parsed = URI.parse(uri)
 
-      redirect_uris.any? do |redirect_uri|
+      Oauth.plain_authority?(parsed) && redirect_uris.any? do |redirect_uri|
         redirect = URI.parse(redirect_uri)
 
         redirect.scheme == "http" && parsed.scheme == "http" &&

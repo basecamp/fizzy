@@ -192,6 +192,13 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     assert_not client.allows_redirect?("http://alice@127.0.0.1:8888/callback")
   end
 
+  test "allows_redirect? never varies a loopback port out of the usable range" do
+    client = Oauth::Client.new(redirect_uris: %w[ http://127.0.0.1:8888/callback https://connector.example.com/callback ])
+    assert client.allows_redirect?("http://127.0.0.1:65535/callback")
+    assert_not client.allows_redirect?("http://127.0.0.1:65536/callback")
+    assert_not client.allows_redirect?("http://127.0.0.1:0/callback")
+  end
+
   test "allows_redirect? requires matching path for loopback flexibility" do
     client = Oauth::Client.new(redirect_uris: %w[ http://127.0.0.1:8888/callback ])
     assert_not client.allows_redirect?("http://127.0.0.1:9999/other")
