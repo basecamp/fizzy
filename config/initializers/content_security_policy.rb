@@ -33,7 +33,7 @@
 # noise — we only want sink-write violations.
 class TrustedTypesReportOnly
   DIRECTIVE = "require-trusted-types-for 'script'"
-  HEADER = ActionDispatch::Constants::CONTENT_SECURITY_POLICY_REPORT_ONLY
+  HEADER = ActionDispatch::Constants::CONTENT_SECURITY_POLICY_REPORT_ONLY.downcase # Rack 3 header names are lowercase
 
   def initialize(app, report_uri = nil)
     @app = app

@@ -2,7 +2,7 @@ require "test_helper"
 require "rack/lint"
 
 class TrustedTypesReportOnlyTest < ActiveSupport::TestCase
-  HEADER = ActionDispatch::Constants::CONTENT_SECURITY_POLICY_REPORT_ONLY
+  HEADER = "content-security-policy-report-only"
   DIRECTIVE = "require-trusted-types-for 'script'"
 
   test "adds the directive as the only report-only policy when the app sets none" do
