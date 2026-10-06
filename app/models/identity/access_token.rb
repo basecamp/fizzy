@@ -3,6 +3,7 @@ class Identity::AccessToken < ApplicationRecord
 
   belongs_to :identity
   belongs_to :oauth_client, class_name: "Oauth::Client", optional: true
+  has_many :retired_refresh_tokens, class_name: "Oauth::RetiredRefreshToken", dependent: :delete_all
 
   scope :personal, -> { where oauth_client_id: nil }
   scope :oauth, -> { where.not oauth_client_id: nil }
@@ -18,6 +19,10 @@ class Identity::AccessToken < ApplicationRecord
       if (access_token = active.find_by(token: token)) && access_token.honored? && access_token.allows?(method)
         access_token
       end
+    end
+
+    def find_by_refresh_token(refresh_token)
+      oauth.find_by(refresh_token: refresh_token)
     end
 
     # An authorization code redeems at most once (RFC 6749 §4.1.2): the grant it
@@ -51,15 +56,20 @@ class Identity::AccessToken < ApplicationRecord
   end
 
   # Rotates atomically on the presented refresh token, so a concurrent
-  # rotation wins the row and the loser comes up empty-handed.
+  # rotation wins the row and the loser comes up empty-handed. The presented
+  # token is retired, not forgotten, so presenting it again is recognized as
+  # a retry or a replay (see Oauth::RetiredRefreshToken).
   def refresh(permission: self.permission)
     rotated = { token: self.class.generate_unique_secure_token,
       refresh_token: self.class.generate_unique_secure_token,
       expires_at: EXPIRES_IN.from_now, permission: permission, updated_at: Time.current }
 
-    if self.class.where(id: id, refresh_token: refresh_token).update_all(rotated) == 1
-      assign_attributes rotated
-      true
+    transaction do
+      if self.class.where(id: id, refresh_token: refresh_token).update_all(rotated) == 1
+        retired_refresh_tokens.create! refresh_token: refresh_token
+        assign_attributes rotated
+        true
+      end
     end
   end
 

@@ -1184,6 +1184,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     end
     assert_response :success
 
+    travel Oauth::RetiredRefreshToken::GRACE + 1.second
     untenanted do
       post oauth_token_path, params: {
         grant_type: "refresh_token",

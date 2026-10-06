@@ -35,7 +35,10 @@ class Oauth::TokensController < Oauth::BaseController
     before_action :set_identity
   end
 
-  before_action :set_refresh_scope, unless: :authorization_code_grant?
+  # A rotated refresh token is answered as a retry or a replay before any
+  # scope is weighed, so no scope parameter can steer a replay around the
+  # revocation it earns.
+  before_action :set_refresh_scope, unless: -> { authorization_code_grant? || @retired_refresh_token }
 
   def create
     if authorization_code_grant?
@@ -47,12 +50,15 @@ class Oauth::TokensController < Oauth::BaseController
       else
         oauth_error "invalid_grant", "Authorization code already used"
       end
+    elsif @retired_refresh_token
+      answer_refresh_replay @retired_refresh_token
+    elsif @access_token.refresh(permission: @refresh_permission)
+      render json: refresh_response(@access_token)
+    elsif retired_refresh_token = Oauth::RetiredRefreshToken.find_by(refresh_token: params[:refresh_token])
+      # A concurrent refresh won the rotation: this is the same retry.
+      answer_refresh_replay retired_refresh_token
     else
-      if @access_token.refresh(permission: @refresh_permission)
-        render json: token_response(@access_token, scope: Oauth.canonical_scope(@access_token.permission))
-      else
-        oauth_error "invalid_grant", "Invalid refresh token"
-      end
+      oauth_error "invalid_grant", "Invalid refresh token"
     end
   end
 
@@ -119,8 +125,14 @@ class Oauth::TokensController < Oauth::BaseController
       end
     end
 
+    # A rotated refresh token still resolves to its grant, so that presenting
+    # it again can be told apart as a retry or a replay once the client is
+    # known to be the grant's own.
     def set_refreshable_access_token
-      unless @access_token = Identity::AccessToken.oauth.find_by(refresh_token: params[:refresh_token])
+      @access_token = Identity::AccessToken.find_by_refresh_token(params[:refresh_token]) ||
+        (@retired_refresh_token = Oauth::RetiredRefreshToken.find_by(refresh_token: params[:refresh_token]))&.access_token
+
+      unless @access_token
         oauth_error "invalid_grant", "Invalid refresh token"
       end
     end
@@ -170,6 +182,27 @@ class Oauth::TokensController < Oauth::BaseController
       unless performed? || !attempts_client_authentication? || authenticated_client&.confidential?
         client_authentication_failed
       end
+    end
+
+    # A retry of the rotation that just happened gets the successor that
+    # rotation issued, rather than a revocation for losing a response. Any
+    # other replay of a rotated refresh token is the theft signal OAuth 2.1
+    # §4.3.1 describes, so the grant is revoked, successor and all. A retry
+    # whose successor has itself rotated is refused without revoking: the
+    # client holds the live descendant.
+    def answer_refresh_replay(retired_refresh_token)
+      if retired_refresh_token.retryable?
+        render json: refresh_response(retired_refresh_token.access_token.reload)
+      elsif retired_refresh_token.within_grace?
+        oauth_error "invalid_grant", "Refresh token superseded"
+      else
+        retired_refresh_token.access_token.destroy
+        oauth_error "invalid_grant", "Refresh token reuse detected"
+      end
+    end
+
+    def refresh_response(access_token)
+      token_response(access_token, scope: Oauth.canonical_scope(access_token.permission))
     end
 
     def token_response(access_token, scope: nil)
