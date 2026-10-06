@@ -454,7 +454,8 @@ ActiveRecord::Schema[8.2].define(version: 2026_10_06_120000) do
     t.uuid "access_token_id", null: false
     t.datetime "created_at", null: false
     t.string "refresh_token", null: false
-    t.index ["access_token_id", "created_at"], name: "index_oauth_retired_refresh_tokens_on_access_token_id"
+    t.string "successor_refresh_token", null: false
+    t.index ["access_token_id"], name: "index_oauth_retired_refresh_tokens_on_access_token_id"
     t.index ["created_at"], name: "index_oauth_retired_refresh_tokens_on_created_at"
     t.index ["refresh_token"], name: "index_oauth_retired_refresh_tokens_on_refresh_token", unique: true
   end

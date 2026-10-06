@@ -21,7 +21,7 @@ class Oauth::RetiredRefreshTokenTest < ActiveSupport::TestCase
     assert_nil loser.refresh
 
     assert_equal 1, Oauth::RetiredRefreshToken.count
-    assert Oauth::RetiredRefreshToken.find_by(refresh_token: presented).retryable?
+    assert Oauth::RetiredRefreshToken.find_by(refresh_token: presented).retryable?(@grant.reload)
   end
 
   test "revoking a grant deletes its retired refresh tokens" do

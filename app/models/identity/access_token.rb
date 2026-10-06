@@ -66,7 +66,7 @@ class Identity::AccessToken < ApplicationRecord
 
     transaction do
       if self.class.where(id: id, refresh_token: refresh_token).update_all(rotated) == 1
-        retired_refresh_tokens.create! refresh_token: refresh_token
+        retired_refresh_tokens.create! refresh_token: refresh_token, successor_refresh_token: rotated[:refresh_token]
         assign_attributes rotated
         true
       end

@@ -94,6 +94,34 @@ class OauthRefreshReplayTest < ActionDispatch::IntegrationTest
     assert_grant_revoked successor
   end
 
+  test "a successor rotated by a host whose clock runs behind still supersedes the retry" do
+    ancestor = @grant.refresh_token
+    refresh ancestor
+    travel(-5.seconds)
+    refresh response.parsed_body["refresh_token"]
+    successor = response.parsed_body
+
+    travel 10.seconds
+    refresh ancestor
+
+    assert_response :bad_request
+    assert_equal "invalid_grant", response.parsed_body["error"]
+    assert_equal successor["refresh_token"], @grant.reload.refresh_token
+  end
+
+  test "a replay whose grant vanished mid-request is refused, not an error" do
+    presented = @grant.refresh_token
+    loser = Identity::AccessToken.find(@grant.id)
+    refresh presented
+    Identity::AccessToken.where(id: @grant.id).delete_all
+
+    Identity::AccessToken.stubs(:find_by_refresh_token).returns(loser)
+    refresh presented
+
+    assert_response :bad_request
+    assert_equal "invalid_grant", response.parsed_body["error"]
+  end
+
   test "another client replaying a rotated token is refused, without revoking" do
     presented = @grant.refresh_token
     refresh presented

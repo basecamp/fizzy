@@ -189,21 +189,23 @@ class Oauth::TokensController < Oauth::BaseController
     # other replay of a rotated refresh token is the theft signal OAuth 2.1
     # §4.3.1 describes, so the grant is revoked, successor and all. A retry
     # whose successor has itself rotated is refused without revoking: the
-    # client holds the live descendant.
+    # client holds the live descendant. So is one whose grant has just been
+    # deleted out from under it.
     #
-    # The successor is read before the retry check, so a rotation that lands
-    # between the two shows up as supersession and is refused. Checking first
-    # would let that rotation's fresh pair out as the retry's answer.
+    # The grant is read once, and the retry is judged against that same read,
+    # so a concurrent rotation can't let a newer pair out as the answer.
     def answer_refresh_replay(retired_refresh_token)
-      grant = retired_refresh_token.access_token.reload
-
-      if retired_refresh_token.retryable?
-        render json: refresh_response(grant)
-      elsif retired_refresh_token.within_grace?
-        oauth_error "invalid_grant", "Refresh token superseded"
+      if grant = Identity::AccessToken.find_by(id: retired_refresh_token.access_token_id)
+        if retired_refresh_token.retryable?(grant)
+          render json: refresh_response(grant)
+        elsif retired_refresh_token.within_grace?
+          oauth_error "invalid_grant", "Refresh token superseded"
+        else
+          grant.destroy
+          oauth_error "invalid_grant", "Refresh token reuse detected"
+        end
       else
-        retired_refresh_token.access_token.destroy
-        oauth_error "invalid_grant", "Refresh token reuse detected"
+        oauth_error "invalid_grant", "Invalid refresh token"
       end
     end
 

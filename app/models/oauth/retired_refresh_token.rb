@@ -1,7 +1,8 @@
 # A refresh token its grant has rotated away from. Presenting one again is
 # either a client retrying a rotation whose response it lost, or someone
 # replaying a stolen token (OAuth 2.1 §4.3.1). Within GRACE of the rotation,
-# and only while the successor it produced is still current, it's a retry.
+# and only while the successor it produced is still the grant's current
+# refresh token, it's a retry.
 # Otherwise it's a replay, and the whole grant is revoked.
 class Oauth::RetiredRefreshToken < ApplicationRecord
   # bc3's refresh_replay_grace default (Oauth::RefreshToken::Rotation).
@@ -21,8 +22,12 @@ class Oauth::RetiredRefreshToken < ApplicationRecord
     end
   end
 
-  def retryable?
-    within_grace? && !superseded?
+  # Whether a replay now is a retry the grant can answer with the successor
+  # this rotation produced. Pass the grant as just read: comparing against
+  # that one read, rather than querying again, leaves no gap for a concurrent
+  # rotation to slip into.
+  def retryable?(grant)
+    within_grace? && !superseded?(grant)
   end
 
   def within_grace?
@@ -30,8 +35,10 @@ class Oauth::RetiredRefreshToken < ApplicationRecord
   end
 
   # The successor this rotation produced has been rotated in turn, so the
-  # client demonstrably received it and moved on.
-  def superseded?
-    access_token.retired_refresh_tokens.where("created_at > ?", created_at).exists?
+  # client demonstrably received it and moved on. This is read from the
+  # grant's current token, never from timestamp order, which skewed host
+  # clocks could invert.
+  def superseded?(grant)
+    grant.refresh_token != successor_refresh_token
   end
 end
