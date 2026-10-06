@@ -818,6 +818,39 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "code grant for confidential client with a missing or wrong client_id fails as invalid_client" do
+    code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+    client = oauth_clients(:confidential_client)
+    exchange = { grant_type: "authorization_code", client_secret: "confidential_secret_789",
+      code: authorization_code_for(client, code_verifier: code_verifier),
+      redirect_uri: "http://127.0.0.1:8888/callback", code_verifier: code_verifier }
+
+    [ {}, { client_id: oauth_clients(:mcp_client).client_id } ].each do |client_id|
+      assert_no_difference "Identity::AccessToken.count" do
+        untenanted { post oauth_token_path, params: exchange.merge(client_id), as: :json }
+      end
+
+      assert_response :unauthorized
+      assert_equal "invalid_client", response.parsed_body["error"]
+    end
+  end
+
+  test "refresh grant for confidential client omitting client_id fails as invalid_client" do
+    client = oauth_clients(:confidential_client)
+    token = identities(:david).access_tokens.create!(oauth_client: client)
+
+    untenanted do
+      post oauth_token_path, params: {
+        grant_type: "refresh_token",
+        refresh_token: token.refresh_token,
+        client_secret: "confidential_secret_789"
+      }, as: :json
+    end
+
+    assert_response :unauthorized
+    assert_equal "invalid_client", response.parsed_body["error"]
+  end
+
 
   # Refresh Grant
 

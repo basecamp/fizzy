@@ -19,10 +19,14 @@ class Oauth::TokensController < Oauth::BaseController
   end
 
   before_action :set_refreshable_access_token, unless: :authorization_code_grant?
+
+  # Authenticate the posted client before validating that the code or refresh
+  # token was issued to it: a confidential client that fails auth must see
+  # invalid_client (401), not the invalid_grant that a client_id mismatch would
+  # raise first — which a client could misread as a revoked grant and discard.
+  before_action :authenticate_client
   before_action :validate_client_id
   before_action :set_refresh_scope, unless: :authorization_code_grant?
-
-  before_action :authenticate_client
 
   def create
     if authorization_code_grant?
@@ -58,7 +62,8 @@ class Oauth::TokensController < Oauth::BaseController
 
     # A missing parameter is a malformed request (invalid_request), not a dead
     # grant (invalid_grant), which a client would act on by discarding it.
-    # client_id is required of every client: none authenticates by header.
+    # client_id is required too, but checked after client authentication (see
+    # validate_client_id), so a confidential client omitting it is invalid_client.
     # Each is a single string; an array or object from a JSON body or a
     # name[] form field is just as malformed, and must not reach a lookup.
     def require_params
@@ -68,7 +73,7 @@ class Oauth::TokensController < Oauth::BaseController
     end
 
     def required_params
-      authorization_code_grant? ? %w[ code code_verifier redirect_uri client_id ] : %w[ refresh_token client_id ]
+      authorization_code_grant? ? %w[ code code_verifier redirect_uri ] : %w[ refresh_token ]
     end
 
     def string_param?(name)
@@ -114,7 +119,9 @@ class Oauth::TokensController < Oauth::BaseController
     # The code or refresh token must have been issued to the client_id in the
     # request (RFC 6749 §4.1.3, §6).
     def validate_client_id
-      unless params[:client_id] == (@client || @access_token.oauth_client).client_id
+      if params[:client_id].blank?
+        oauth_error "invalid_request", "Missing required parameter: client_id"
+      elsif params[:client_id] != (@client || @access_token.oauth_client).client_id
         oauth_error "invalid_grant", "Grant was not issued to this client"
       end
     end
