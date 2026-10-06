@@ -159,7 +159,7 @@ Fizzy includes an OAuth 2.1 authorization server so that tools such as MCP clien
 
 To turn it on, set `OAUTH_ACCEPTANCE_ENABLED=true`.
 
-If you need to stop new connections without breaking existing ones, also set `OAUTH_ISSUANCE_ENABLED=false`: connected apps keep working, but nothing new can connect. People can always disconnect apps from their profile, whichever way these are set.
+If you need to stop new connections in an emergency, also set `OAUTH_ISSUANCE_ENABLED=false`: nothing new can connect and no token is refreshed, while access tokens already issued keep working until they expire, an hour after issue. People can always disconnect apps from their profile, whichever way these are set.
 
 ## Importing an existing Fizzy account
 
