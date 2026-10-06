@@ -178,6 +178,17 @@ class OauthRevocationTest < ActionDispatch::IntegrationTest
     assert Identity::AccessToken.exists?(token.id)
   end
 
+  # Revocation authenticates clients, so it is a place to guess secrets: it is
+  # throttled like the token endpoint (RFC 6749 §2.3.1, RFC 7009 §5).
+  test "revocation is rate limited like the token endpoint" do
+    ActiveSupport::Cache::NullStore.any_instance.stubs(:increment).returns(21)
+
+    revoke "not-a-token", params: { client_id: @client.client_id, client_secret: "guess" }
+
+    assert_response :too_many_requests
+    assert_equal "slow_down", response.parsed_body["error"]
+  end
+
   test "metadata advertises client_secret_basic for revocation" do
     untenanted { get "/.well-known/oauth-authorization-server" }
 

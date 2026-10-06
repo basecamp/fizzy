@@ -17,6 +17,10 @@ class Oauth::RevocationsController < Oauth::BaseController
   allow_unauthenticated_access
   skip_forgery_protection
 
+  # Client authentication happens here too, so secrets can be guessed here:
+  # throttled like the token endpoint (RFC 6749 §2.3.1, RFC 7009 §5).
+  rate_limit to: 20, within: 1.minute, only: :create, with: :oauth_rate_limit_exceeded
+
   before_action :reject_ambiguous_client_credentials
   before_action :require_token
 
