@@ -65,6 +65,20 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     assert_includes client.errors[:redirect_uris], "must be an https or local loopback URI for dynamically registered clients"
   end
 
+  test "dynamically registered clients name their redirect authority plainly" do
+    %w[ https://%65vil.example/callback https://user:secret@connector.example.com/callback http://user@127.0.0.1:8888/callback
+        https://connector.example.com:65536/callback https://connector.example.com:0/callback ].each do |uri|
+      client = Oauth::Client.new(name: "Unplain", redirect_uris: [ uri ], dynamically_registered: true)
+
+      assert_not client.valid?, uri
+      assert_includes client.errors[:redirect_uris], "must be an https or local loopback URI for dynamically registered clients", uri
+    end
+
+    %w[ https://connector.example.com:8443/callback https://Connector.Example.com/callback http://[::1]:8888/callback http://localhost/callback ].each do |uri|
+      assert Oauth::Client.new(name: "Plain", redirect_uris: [ uri ], dynamically_registered: true).valid?, uri
+    end
+  end
+
   test "dynamically registered clients reject https loopback" do
     client = Oauth::Client.new(
       name: "HTTPS Loopback",
@@ -170,6 +184,12 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     client = Oauth::Client.new(redirect_uris: %w[ https://127.0.0.1:8443/callback ])
     assert client.allows_redirect?("https://127.0.0.1:8443/callback")
     assert_not client.allows_redirect?("https://127.0.0.1:9443/callback")
+  end
+
+  test "allows_redirect? never varies a loopback port onto different userinfo" do
+    client = Oauth::Client.new(redirect_uris: %w[ http://127.0.0.1:8888/callback https://connector.example.com/callback ])
+    assert_not client.allows_redirect?("http://alice:secret@127.0.0.1:9999/callback")
+    assert_not client.allows_redirect?("http://alice@127.0.0.1:8888/callback")
   end
 
   test "allows_redirect? requires matching path for loopback flexibility" do

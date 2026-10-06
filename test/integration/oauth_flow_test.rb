@@ -145,6 +145,16 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_equal "invalid_request", Rack::Utils.parse_query(URI.parse(response.location).query)["error"]
   end
 
+  test "consent names a self-registered redirect's port when it isn't the default" do
+    sign_in_as :david
+    client = Oauth::Client.create!(name: "Hosted", redirect_uris: %w[ https://connector.example.com:8443/callback ], dynamically_registered: true)
+
+    get_consent_screen client: client
+
+    assert_response :success
+    assert_select "strong", text: "connector.example.com:8443"
+  end
+
   test "denying a self-registered https client still redirects, after the consent screen named its host" do
     sign_in_as :david
     client = Oauth::Client.create!(name: "Hosted", redirect_uris: %w[ https://connector.example.com/callback ], dynamically_registered: true)
@@ -854,6 +864,18 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
 
     assert_response :bad_request
     assert_equal "invalid_redirect_uri", response.parsed_body["error"]
+  end
+
+  test "DCR rejects a redirect whose authority isn't plain" do
+    %w[ https://%65vil.example/callback https://user:secret@connector.example.com/callback
+        https://connector.example.com:65536/callback http://user@127.0.0.1:8888/callback ].each do |uri|
+      assert_no_difference "Oauth::Client.count" do
+        untenanted { post oauth_clients_path, params: { client_name: "Unplain", redirect_uris: [ uri ] }, as: :json }
+      end
+
+      assert_response :bad_request, uri
+      assert_equal "invalid_redirect_uri", response.parsed_body["error"], uri
+    end
   end
 
   test "DCR rejects a redirect whose host decodes to invalid UTF-8" do
