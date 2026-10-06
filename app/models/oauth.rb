@@ -29,11 +29,16 @@ module Oauth
     uri.userinfo.nil? && plain_host?(uri.host.to_s) && uri.port.to_i.between?(1, 65535)
   end
 
-  # Browsers parse a host whose last label is all digits as IPv4 (WHATWG URL),
-  # so such a host is plain only as a dotted quad of octets.
+  # Browsers parse a host whose last label is a number, decimal or 0x hex, as
+  # IPv4 (WHATWG URL's ends-in-a-number check), and read a leading zero as
+  # octal. So such a host is plain only as a dotted quad of canonical decimal
+  # octets: 0-255, with no leading zeroes.
+  DECIMAL_OCTET = /(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)/
+  DOTTED_QUAD = /\A#{DECIMAL_OCTET}(?:\.#{DECIMAL_OCTET}){3}\z/
+
   def self.plain_host?(host)
-    if host.match?(/(?:\A|\.)\d+\z/)
-      host.match?(/\A(?:\d{1,3}\.){3}\d{1,3}\z/) && host.split(".").all? { |octet| octet.to_i <= 255 }
+    if host.match?(/(?:\A|\.)(?:\d+|0x\h*)\z/i)
+      host.match?(DOTTED_QUAD)
     else
       host.match?(PLAIN_HOST)
     end
