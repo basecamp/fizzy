@@ -26,6 +26,51 @@ class ActiveStorageAuthorizationTest < ActionDispatch::IntegrationTest
     assert_match %r{rails/active_storage}, response.location
   end
 
+  test "session without single sign-on cannot view blob when single sign-on is configured" do
+    sign_in_as :david
+
+    with_single_sign_on do
+      get rails_blob_path(@blob, disposition: :inline)
+      assert_response :forbidden
+
+      current_session.update!(single_sign_on_authenticated_at: Time.current)
+
+      get rails_blob_path(@blob, disposition: :inline)
+      assert_match %r{rails/active_storage}, response.location
+    end
+  end
+
+  test "bearer token cannot view blob when single sign-on is configured" do
+    bearer_token = { "HTTP_AUTHORIZATION" => "Bearer #{identity_access_tokens(:davids_api_token).token}" }
+
+    with_single_sign_on do
+      get rails_blob_path(@blob, disposition: :inline), env: bearer_token
+      assert_response :forbidden
+    end
+  end
+
+  test "unauthenticated user can view blob on published board when single sign-on is configured" do
+    @board.publish
+
+    with_single_sign_on do
+      get rails_blob_path(@blob, disposition: :inline)
+    end
+
+    assert_match %r{rails/active_storage}, response.location
+  end
+
+  test "session outside the account group cannot view blob" do
+    sign_in_as :david
+    current_session.update!(single_sign_on_authenticated_at: Time.current, single_sign_on_groups: [ "/sales" ])
+
+    with_single_sign_on do
+      @account.update!(single_sign_on_group: "/engineering/fizzy")
+
+      get rails_blob_path(@blob, disposition: :inline)
+      assert_response :forbidden
+    end
+  end
+
   test "authenticated user without board access cannot view blob" do
     sign_in_as :mike
 

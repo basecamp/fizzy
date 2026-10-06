@@ -10,11 +10,16 @@ module User::EmailAddressChangeable
     old_email_address = parsed_token&.params&.fetch("old_email_address")
     new_email_address = parsed_token&.params&.fetch("new_email_address")
 
-    if parsed_token.nil? || parsed_token.find != self || identity.email_address != old_email_address
+    if parsed_token.nil? || parsed_token.find != self || identity.email_address != old_email_address || !email_address_changeable?
       false
     else
       change_email_address(new_email_address)
     end
+  end
+
+  # A change moves the user to another identity, which drops the single sign-on link.
+  def email_address_changeable?
+    identity.present? && !identity.single_sign_on_linked?
   end
 
   def send_email_address_change_confirmation(new_email_address)

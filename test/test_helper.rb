@@ -51,7 +51,7 @@ module ActiveSupport
 
     include ActiveJob::TestHelper
     include ActionTextTestHelper, CachingTestHelper, CardTestHelper, ChangeTestHelper, DnsTestHelper,
-      SearchIndexTestHelper, SessionTestHelper
+      SearchIndexTestHelper, SessionTestHelper, SingleSignOnTestHelper
     include Turbo::Broadcastable::TestHelper
 
     # Jobs must carry their own account context via AccountTenanted,

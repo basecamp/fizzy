@@ -153,6 +153,10 @@ This is for convenience: typically when you self-host you'll be running a single
 
 If you do want to allow multiple accounts to be created in your instance, set `MULTI_TENANT=true`
 
+#### Single sign-on (optional)
+
+Fizzy can sign people in through an OpenID Connect identity provider. To do so, set `SINGLE_SIGN_ON_ISSUER`, `SINGLE_SIGN_ON_CLIENT_ID`, and `SINGLE_SIGN_ON_CLIENT_SECRET`. For all the steps, refer to the [Single sign-on with OpenID Connect](single-sign-on.md) documentation.
+
 ## Importing an existing Fizzy account
 
 You can move an account between Fizzy instances by exporting it on the old instance and uploading the export zip to the new one during signup.

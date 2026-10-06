@@ -1,6 +1,16 @@
 require "test_helper"
 
 class My::PasskeyChallengesControllerTest < ActionDispatch::IntegrationTest
+  test "not found with single sign-on" do
+    with_single_sign_on do
+      untenanted do
+        post my_passkey_challenge_url
+      end
+    end
+
+    assert_response :not_found
+  end
+
   test "returns a fresh challenge" do
     untenanted do
       post my_passkey_challenge_url

@@ -3,6 +3,7 @@ class Sessions::PasskeysController < ApplicationController
 
   disallow_account_scope
   require_unauthenticated_access
+  before_action :ensure_sign_in_without_single_sign_on_allowed
   rate_limit to: 10, within: 3.minutes, only: :create, with: :rate_limit_exceeded
 
   def create

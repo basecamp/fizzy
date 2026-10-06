@@ -6,3 +6,6 @@
 Rails.application.config.filter_parameters += %i[
   passw secret token _key crypt salt certificate otp ssn
 ]
+
+# Exact match, so parameters such as `code_challenge` stay readable.
+Rails.application.config.filter_parameters += [ /\Acode\z/ ]

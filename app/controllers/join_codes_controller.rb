@@ -4,6 +4,7 @@ class JoinCodesController < ApplicationController
 
   before_action :set_join_code
   before_action :ensure_join_code_is_valid
+  before_action :ensure_join_codes_without_single_sign_on
   before_action :set_identity, only: :create
 
   layout "public"
@@ -50,6 +51,13 @@ class JoinCodesController < ApplicationController
         head :not_found
       elsif !@join_code.active?
         render :inactive, status: :gone
+      end
+    end
+
+    # With single sign-on, the account group decides who joins.
+    def ensure_join_codes_without_single_sign_on
+      if SingleSignOn.configured?
+        render :single_sign_on, status: :gone
       end
     end
 end

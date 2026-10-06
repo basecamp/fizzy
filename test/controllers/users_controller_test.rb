@@ -8,6 +8,30 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_in_body users(:david).name
   end
 
+  test "show offers passkeys, access tokens, and auto-login links" do
+    sign_in_as :kevin
+
+    get user_path(users(:kevin))
+
+    assert_select "a[href='#{my_passkeys_path}']"
+    assert_select "a[href='#{my_access_tokens_path}']"
+    assert_select "form[action='#{transfer_token_path}']"
+  end
+
+  test "show hides passkeys, access tokens, and auto-login links with single sign-on" do
+    sign_in_as :kevin
+    current_session.update!(single_sign_on_authenticated_at: Time.current)
+
+    with_single_sign_on do
+      get user_path(users(:kevin))
+    end
+
+    assert_response :success
+    assert_select "a[href='#{my_passkeys_path}']", count: 0
+    assert_select "a[href*='access_tokens']", count: 0
+    assert_select "form[action$='/transfer_token']", count: 0
+  end
+
   test "update oneself" do
     sign_in_as :kevin
 

@@ -1,0 +1,4 @@
+jz:
+  identity: jz
+  issuer: https://id.example.com
+  subject: jz-subject

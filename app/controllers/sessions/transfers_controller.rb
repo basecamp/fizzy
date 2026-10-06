@@ -1,6 +1,7 @@
 class Sessions::TransfersController < ApplicationController
   disallow_account_scope
   require_unauthenticated_access
+  before_action :ensure_sign_in_without_single_sign_on_allowed
 
   def show
   end

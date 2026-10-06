@@ -14,6 +14,37 @@ class Sessions::MenusControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :success, "Renders an empty menu"
+    assert_select "a[href='/signup/new']"
+  end
+
+  test "show offers the signup link to the admin group" do
+    sign_in_as @identity
+    current_session.update!(single_sign_on_authenticated_at: Time.current, single_sign_on_groups: [ "/fizzy/admin" ])
+    @identity.users.delete_all
+
+    with_single_sign_on admin_group: "/fizzy/admin" do
+      untenanted do
+        get session_menu_url
+      end
+    end
+
+    assert_response :success
+    assert_select "a[href='/signup/new']"
+  end
+
+  test "show hides the signup link outside the admin group" do
+    sign_in_as @identity
+    current_session.update!(single_sign_on_authenticated_at: Time.current, single_sign_on_groups: [ "/sales" ])
+    @identity.users.delete_all
+
+    with_single_sign_on admin_group: "/fizzy/admin" do
+      untenanted do
+        get session_menu_url
+      end
+    end
+
+    assert_response :success
+    assert_select "a[href='/signup/new']", count: 0
   end
 
   test "show with exactly one account" do

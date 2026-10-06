@@ -1,5 +1,5 @@
 class Identity < ApplicationRecord
-  include Joinable, Transferable
+  include Joinable, SingleSignOnLinkable, Transferable
 
   has_passkeys name: :email_address, display_name: -> { Current.user&.name || email_address }
 

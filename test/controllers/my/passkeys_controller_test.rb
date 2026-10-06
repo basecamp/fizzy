@@ -7,6 +7,16 @@ class My::PasskeysControllerTest < ActionDispatch::IntegrationTest
     sign_in_as :kevin
   end
 
+  test "not found with single sign-on" do
+    current_session.update!(single_sign_on_authenticated_at: Time.current)
+
+    with_single_sign_on do
+      get my_passkeys_path
+    end
+
+    assert_response :not_found
+  end
+
   test "index" do
     get my_passkeys_path
     assert_response :success

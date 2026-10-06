@@ -1,6 +1,16 @@
 require "test_helper"
 
 class SignupsControllerTest < ActionDispatch::IntegrationTest
+  test "new is not available with single sign-on" do
+    with_single_sign_on do
+      untenanted do
+        get new_signup_path
+      end
+    end
+
+    assert_redirected_to new_session_url(script_name: nil)
+  end
+
   test "new" do
     untenanted do
       get new_signup_path
@@ -15,6 +25,19 @@ class SignupsControllerTest < ActionDispatch::IntegrationTest
 
     untenanted do
       get new_signup_path
+
+      assert_redirected_to new_signup_completion_path
+    end
+  end
+
+  test "new for an authenticated user with single sign-on" do
+    sign_in_as :kevin
+    current_session.update!(single_sign_on_authenticated_at: Time.current)
+
+    untenanted do
+      with_single_sign_on do
+        get new_signup_path
+      end
 
       assert_redirected_to new_signup_completion_path
     end

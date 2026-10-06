@@ -1,0 +1,29 @@
+<% provider_name = SingleSignOn.provider_name %>
+<% single_sign_on_admin = Current.session&.single_sign_on_admin? %>
+
+<section class="settings__section">
+  <header>
+    <h2 class="divider"><%= provider_name %> group</h2>
+    <div>
+      Only members of the group below can access this account.
+    </div>
+  </header>
+
+  <%= form_with model: account, url: account_single_sign_on_path, method: :patch, scope: :account,
+        class: "flex align-center gap-half", data: { controller: "form" } do |form| %>
+    <%= form.text_field :single_sign_on_group, class: "input full-width", placeholder: "/sales",
+          autocomplete: "off", spellcheck: false, readonly: !single_sign_on_admin, aria: { label: "#{provider_name} group" } %>
+
+    <% if single_sign_on_admin %>
+      <%= form.button "Save", class: "btn txt-small", data: { form_target: "submit" } %>
+    <% end %>
+  <% end %>
+
+  <p class="txt-small margin-block-start-half margin-none-block-end">
+    Enter the full group path.
+    <% if SingleSignOn.admin_group %>
+      Only members of <code><%= SingleSignOn.admin_group %></code> can change this.
+    <% end %>
+    Leave this blank to allow access for every member of this account.
+  </p>
+</section>
