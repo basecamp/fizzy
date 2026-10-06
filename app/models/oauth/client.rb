@@ -13,6 +13,11 @@ class Oauth::Client < ApplicationRecord
 
   has_secure_token :client_id, length: 32
 
+  # A code exchange locks the client and then issues a grant (#redeem).
+  # Destroying a client takes the same lock before its grants cascade, in the
+  # same order, so no grant can land after the cascade and be stranded.
+  before_destroy :lock_client, prepend: true
+
   validates :name, presence: true, length: { maximum: 255 }
   validates :client_id, uniqueness: true, allow_nil: true
   validates :redirect_uris, presence: true
@@ -84,6 +89,10 @@ class Oauth::Client < ApplicationRecord
   end
 
   private
+    def lock_client
+      self.class.lock.where(id: id).pluck(:id)
+    end
+
     def generate_client_secret
       self.client_secret ||= self.class.generate_unique_secure_token
     end

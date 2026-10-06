@@ -399,6 +399,23 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     assert_not transactions["identity_access_tokens"].equal?(transactions["oauth_clients"]), "the client was touched inside the grant's transaction"
   end
 
+  # A code exchange locks the client, then issues a grant. Destroying a client
+  # takes the client's lock first too, so no grant can land after the cascade
+  # has run and be stranded by the client's deletion.
+  test "destroying a client locks it before destroying its grants" do
+    client = register_client
+    identities(:david).access_tokens.create!(oauth_client: client)
+    statements = []
+    record = ->(*, payload) { statements << payload[:sql] }
+
+    ActiveSupport::Notifications.subscribed(record, "sql.active_record") { client.destroy }
+
+    lock = statements.index { it.match?(/\ASELECT .*FROM [`"]?oauth_clients\b/) }
+    cascade = statements.index { it.match?(/\ADELETE FROM [`"]?identity_access_tokens\b/) }
+    assert lock, "the client was never locked"
+    assert_operator lock, :<, cascade
+  end
+
   test "destroying a client takes its grants' retired refresh tokens too" do
     client = register_client
     grant = identities(:david).access_tokens.create!(oauth_client: client)
