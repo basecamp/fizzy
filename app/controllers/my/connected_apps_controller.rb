@@ -1,4 +1,6 @@
 class My::ConnectedAppsController < ApplicationController
+  disallow_oauth_grants
+
   before_action :set_connected_apps, only: :index
   before_action :set_oauth_client, only: :destroy
 

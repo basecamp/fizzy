@@ -14,6 +14,7 @@ class Oauth::AuthorizationsController < Oauth::BaseController
   before_action :require_issuance_enabled, unless: :denial?
   before_action :save_oauth_return_url
   before_action :require_authentication
+  disallow_oauth_grants
 
   before_action :set_client
   before_action :validate_redirect_uri

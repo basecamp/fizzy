@@ -24,6 +24,14 @@ module Authentication
       allow_unauthorized_access **options
     end
 
+    # An OAuth grant acts for an app on the user's data. It may not manage the
+    # user's credentials or consent to apps: anything it minted there would
+    # outlive disconnecting the app, and anything it removed would be another
+    # app's. Declared on every controller that does either.
+    def disallow_oauth_grants(**options)
+      before_action :forbid_oauth_grant, **options
+    end
+
     def disallow_account_scope(**options)
       skip_before_action :require_account, **options
       before_action :redirect_tenanted_request, **options
@@ -33,6 +41,10 @@ module Authentication
   private
     def authenticated?
       Current.identity.present?
+    end
+
+    def forbid_oauth_grant
+      head :forbidden if Current.access_token&.oauth_client_id?
     end
 
     def require_account
