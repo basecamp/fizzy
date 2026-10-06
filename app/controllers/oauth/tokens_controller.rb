@@ -118,12 +118,12 @@ class Oauth::TokensController < Oauth::BaseController
     # A refresh request may narrow scope but never widen it (RFC 6749 §6). An
     # omitted scope keeps the original grant; a requested subset narrows the
     # rotated token; anything beyond the grant is invalid_scope. Only an absent
-    # parameter means "keep the grant" — a blank one names no scope, and the
-    # empty scope list below rejects it, since no scope-token is a malformed
-    # scope (RFC 6749 §3.3), not a request for the full grant.
+    # parameter means "keep the grant" — a blank one, or a JSON null, names no
+    # scope, and the empty scope list below rejects it, since no scope-token is
+    # a malformed scope (RFC 6749 §3.3), not a request for the full grant.
     def set_refresh_scope
       granted = granted_scopes(@access_token.permission)
-      requested = params[:scope].nil? ? granted : params[:scope].to_s.split
+      requested = params.key?(:scope) ? params[:scope].to_s.split : granted
 
       if requested.present? && requested.all? { |scope| granted.include?(scope) }
         @refresh_permission = requested.include?("write") ? "write" : "read"
