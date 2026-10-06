@@ -126,6 +126,138 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
   end
 
 
+  test "authorization preselects Read + Write when the client requests read write" do
+    sign_in_as :david
+
+    get_consent_screen scope: "read write"
+
+    assert_response :success
+    assert_select "select[name=scope] option[selected]", count: 1
+    assert_select "select[name=scope] option[selected][value=?]", "read write"
+  end
+
+  test "authorization preselects Read + Write when the client requests write" do
+    sign_in_as :david
+
+    get_consent_screen scope: "write"
+
+    assert_response :success
+    assert_select "select[name=scope] option[selected][value=?]", "read write"
+  end
+
+  test "authorization preselects Read for a read request" do
+    sign_in_as :david
+
+    get_consent_screen scope: "read"
+
+    assert_response :success
+    assert_select "select[name=scope] option[selected][value=?]", "read"
+  end
+
+  test "authorization offers no write option to a read-only client" do
+    sign_in_as :david
+    client = Oauth::Client.create!(name: "Reader", redirect_uris: %w[ http://127.0.0.1:8888/callback ], scopes: %w[ read ], dynamically_registered: true)
+
+    get_consent_screen client: client, scope: "read"
+
+    assert_response :success
+    assert_select "select[name=scope] option", count: 1
+    assert_select "select[name=scope] option[value=?]", "read"
+  end
+
+  test "consent grants the canonical read write scope" do
+    sign_in_as :david
+    code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+
+    post_consent scope: "read write", code_challenge: Base64.urlsafe_encode64(Digest::SHA256.digest(code_verifier), padding: false)
+    code = Rack::Utils.parse_query(URI.parse(response.location).query)["code"]
+
+    untenanted do
+      post oauth_token_path, params: {
+        grant_type: "authorization_code",
+        client_id: oauth_clients(:mcp_client).client_id,
+        code: code,
+        redirect_uri: "http://127.0.0.1:8888/callback",
+        code_verifier: code_verifier
+      }, as: :json
+    end
+
+    assert_response :success
+    assert_equal "read write", response.parsed_body["scope"]
+    assert_equal "write", Identity::AccessToken.find_by(token: response.parsed_body["access_token"]).permission
+  end
+
+  test "authorization redirects carry the issuer from the metadata (RFC 9207)" do
+    sign_in_as :david
+
+    untenanted { get "/.well-known/oauth-authorization-server" }
+    issuer = response.parsed_body["issuer"]
+    assert_predicate issuer, :present?
+
+    post_consent
+    assert_equal issuer, Rack::Utils.parse_query(URI.parse(response.location).query)["iss"]
+
+    post_consent error: "access_denied"
+    denied = Rack::Utils.parse_query(URI.parse(response.location).query)
+    assert_equal "access_denied", denied["error"]
+    assert_equal issuer, denied["iss"]
+
+    get_consent_screen code_challenge: nil
+    assert_response :redirect
+    invalid = Rack::Utils.parse_query(URI.parse(response.location).query)
+    assert_equal "invalid_request", invalid["error"]
+    assert_equal issuer, invalid["iss"]
+  end
+
+  test "authorization redirect keeps the registered query alongside iss" do
+    sign_in_as :david
+    client = Oauth::Client.create!(name: "Query", redirect_uris: %w[ https://app.example.com/cb?tenant=acme ], scopes: %w[ read ])
+
+    post_consent client: client, redirect_uri: "https://app.example.com/cb?tenant=acme"
+
+    query = Rack::Utils.parse_query(URI.parse(response.location).query)
+    assert_equal "acme", query["tenant"]
+    assert_equal "http://www.example.com/", query["iss"]
+  end
+
+  test "consent screen lets the form redirect to the validated loopback origin" do
+    sign_in_as :david
+
+    get_consent_screen redirect_uri: "http://127.0.0.1:53682/callback"
+
+    assert_response :success
+    assert_equal [ "'self'", "http://127.0.0.1:53682" ], form_action_sources
+  end
+
+  test "consent screen lets the form redirect to the validated https origin" do
+    sign_in_as :david
+
+    get_consent_screen client: oauth_clients(:trusted_client), redirect_uri: "https://app.example.com/oauth/callback"
+
+    assert_response :success
+    assert_equal [ "'self'", "https://app.example.com" ], form_action_sources
+  end
+
+  test "consent screen allows only the http scheme for an IPv6 loopback, which CSP cannot name" do
+    sign_in_as :david
+    client = Oauth::Client.create!(name: "IPv6", redirect_uris: %w[ http://[::1]:8888/callback ], dynamically_registered: true)
+
+    get_consent_screen client: client, redirect_uri: "http://[::1]:9999/callback"
+
+    assert_response :success
+    assert_equal [ "'self'", "http:" ], form_action_sources
+  end
+
+  test "an unvalidated redirect_uri adds nothing to form-action" do
+    sign_in_as :david
+
+    get_consent_screen redirect_uri: "http://evil.com/steal"
+
+    assert_response :bad_request
+    assert_equal [ "'self'" ], form_action_sources
+  end
+
+
   # Token Endpoint
 
   test "token exchange with valid code and PKCE" do
@@ -165,6 +297,24 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_equal client, token.oauth_client
     assert_equal identity, token.identity
     assert_equal "read", token.permission
+  end
+
+  test "token exchange reports a legacy write scope canonically" do
+    code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+    client = oauth_clients(:mcp_client)
+
+    untenanted do
+      post oauth_token_path, params: {
+        grant_type: "authorization_code",
+        client_id: client.client_id,
+        code: authorization_code_for(client, code_verifier: code_verifier, scope: "write"),
+        redirect_uri: "http://127.0.0.1:8888/callback",
+        code_verifier: code_verifier
+      }, as: :json
+    end
+
+    assert_response :success
+    assert_equal "read write", response.parsed_body["scope"]
   end
 
   test "token exchange rejects invalid code" do
@@ -436,6 +586,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_match %r{/oauth/clients$}, body["registration_endpoint"]
     assert_includes body["response_types_supported"], "code"
     assert_includes body["code_challenge_methods_supported"], "S256"
+    assert_equal true, body["authorization_response_iss_parameter_supported"]
   end
 
   test "protected resource metadata includes authorization server" do
@@ -469,6 +620,20 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_not_nil body["client_id"]
     assert_equal "Test MCP Client", body["client_name"]
     assert_equal [ "http://127.0.0.1:8888/callback" ], body["redirect_uris"]
+  end
+
+  test "DCR registering write also registers read, which write implies" do
+    untenanted do
+      post oauth_clients_path, params: {
+        client_name: "Writer",
+        redirect_uris: [ "http://127.0.0.1:8888/callback" ],
+        scope: "write"
+      }, as: :json
+    end
+
+    assert_response :created
+    assert_equal "read write", response.parsed_body["scope"]
+    assert_equal %w[ read write ], Oauth::Client.find_by(client_id: response.parsed_body["client_id"]).scopes
   end
 
   test "DCR rejects non-loopback redirect" do
@@ -558,6 +723,35 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
   end
 
   private
+    def get_consent_screen(client: oauth_clients(:mcp_client), **params)
+      untenanted do
+        get new_oauth_authorization_path, params: consent_params(client, **params).compact
+      end
+    end
+
+    def post_consent(client: oauth_clients(:mcp_client), **params)
+      untenanted do
+        post oauth_authorization_path, params: consent_params(client, **params).compact
+      end
+    end
+
+    def consent_params(client, **overrides)
+      {
+        client_id: client.client_id,
+        redirect_uri: client.redirect_uris.first,
+        response_type: "code",
+        code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+        code_challenge_method: "S256",
+        scope: "read",
+        state: "xyz123"
+      }.merge(overrides)
+    end
+
+    def form_action_sources
+      response.headers["Content-Security-Policy"].split(";").map(&:strip) \
+        .find { |directive| directive.start_with?("form-action ") }.split.drop(1)
+    end
+
     def authorization_code_for(client, code_verifier:, identity: identities(:david), scope: "read")
       Oauth::AuthorizationCode.generate \
         client_id: client.client_id,

@@ -1,4 +1,14 @@
 class Oauth::AuthorizationsController < Oauth::BaseController
+  FORM_ACTION_ORIGIN = %r{\Ahttps?://[a-z0-9.-]+(:\d+)?\z}i
+  FORM_ACTION_SCHEME = /\A[a-z][a-z0-9+.-]*\z/i
+
+  # Browsers apply form-action to every hop of a form submission, redirects
+  # included, so the app-wide form-action 'self' would block the consent POST's
+  # redirect to the client. Allow just this request's validated redirect target.
+  content_security_policy if: -> { request.content_security_policy } do |policy|
+    policy.form_action :self, -> { validated_redirect_form_action_source }
+  end
+
   before_action :save_oauth_return_url
   before_action :require_authentication
 
@@ -10,7 +20,7 @@ class Oauth::AuthorizationsController < Oauth::BaseController
   before_action :validate_state
 
   def new
-    @scope = params[:scope].presence || "read"
+    @scope = Oauth.canonical_scope(params[:scope].presence || "read")
     @redirect_uri = params[:redirect_uri]
     @state = params[:state]
     @code_challenge = params[:code_challenge]
@@ -25,7 +35,7 @@ class Oauth::AuthorizationsController < Oauth::BaseController
         identity_id: Current.identity.id,
         code_challenge: params[:code_challenge],
         redirect_uri: params[:redirect_uri],
-        scope: params[:scope].presence || "read"
+        scope: Oauth.canonical_scope(params[:scope].presence || "read")
 
       redirect_to success_redirect_uri(code), allow_other_host: true
     end
@@ -88,14 +98,36 @@ class Oauth::AuthorizationsController < Oauth::BaseController
     def success_redirect_uri(code)
       build_redirect_uri params[:redirect_uri],
         code: code,
-        state: params[:state].presence
+        state: params[:state].presence,
+        iss: oauth_issuer
     end
 
     def error_redirect_uri(error, description)
       build_redirect_uri params[:redirect_uri],
         error: error,
         error_description: description,
-        state: params[:state].presence
+        state: params[:state].presence,
+        iss: oauth_issuer
+    end
+
+    # A CSP source naming the validated redirect origin, port included, since a
+    # loopback client may present any port (RFC 8252 §7.3). CSP host-sources
+    # can't express IPv6 literals, and a registered native redirect has no
+    # host, so those get their bare scheme. Nothing outside these shapes is
+    # written into the header.
+    def validated_redirect_form_action_source
+      if @client&.allows_redirect?(params[:redirect_uri])
+        uri = URI.parse(params[:redirect_uri])
+        origin = "#{uri.scheme}://#{uri.host}#{":#{uri.port}" unless uri.port == uri.default_port}"
+
+        if origin.match?(FORM_ACTION_ORIGIN)
+          origin
+        elsif uri.scheme.to_s.match?(FORM_ACTION_SCHEME)
+          "#{uri.scheme}:"
+        end
+      end
+    rescue URI::InvalidURIError
+      nil
     end
 
     def build_redirect_uri(base, **query_params)

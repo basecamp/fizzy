@@ -14,14 +14,14 @@ class Oauth::TokensController < Oauth::BaseController
   before_action :set_identity
 
   def create
-    granted = @auth_code.scope.to_s.split
-    permission = granted.include?("write") ? "write" : "read"
+    granted = Oauth.canonical_scope(@auth_code.scope)
+    permission = granted.split.include?("write") ? "write" : "read"
 
     if access_token = @identity.access_tokens.redeem(@auth_code, oauth_client: @client, permission: permission)
       render json: {
         access_token: access_token.token,
         token_type: "Bearer",
-        scope: granted.join(" ")
+        scope: granted
       }
     else
       oauth_error "invalid_grant", "Authorization code already used"

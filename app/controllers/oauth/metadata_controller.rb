@@ -3,7 +3,7 @@ class Oauth::MetadataController < Oauth::BaseController
 
   def show
     render json: {
-      issuer: root_url(script_name: nil),
+      issuer: oauth_issuer,
       authorization_endpoint: new_oauth_authorization_url,
       token_endpoint: oauth_token_url,
       registration_endpoint: oauth_clients_url,
@@ -12,7 +12,8 @@ class Oauth::MetadataController < Oauth::BaseController
       grant_types_supported: %w[ authorization_code ],
       token_endpoint_auth_methods_supported: %w[ none ],
       code_challenge_methods_supported: %w[ S256 ],
-      scopes_supported: %w[ read write ]
+      scopes_supported: %w[ read write ],
+      authorization_response_iss_parameter_supported: true
     }
   end
 end

@@ -23,7 +23,7 @@
 
     <div class="flex flex-column gap-half">
       <strong><%= f.label :scope, "Permission" %></strong>
-      <% scope_options = @client.scopes.include?("write") ? { "Read" => "read", "Read + Write" => "write" } : { "Read" => "read" } %>
+      <% scope_options = @client.scopes.include?("write") ? { "Read" => "read", "Read + Write" => "read write" } : { "Read" => "read" } %>
       <%= f.select :scope, options_for_select(scope_options, @scope), {}, class: "input input--select" %>
     </div>
 
