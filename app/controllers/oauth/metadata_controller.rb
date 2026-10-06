@@ -1,6 +1,8 @@
 class Oauth::MetadataController < Oauth::BaseController
   allow_unauthenticated_access
 
+  before_action :require_acceptance_enabled
+
   def show
     render json: {
       issuer: oauth_issuer,

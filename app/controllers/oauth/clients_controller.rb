@@ -4,6 +4,7 @@ class Oauth::ClientsController < Oauth::BaseController
 
   rate_limit to: 10, within: 1.minute, only: :create, with: :oauth_rate_limit_exceeded
 
+  before_action :require_issuance_enabled
   before_action :validate_redirect_uris
   before_action :validate_loopback_uris
   before_action :validate_auth_method

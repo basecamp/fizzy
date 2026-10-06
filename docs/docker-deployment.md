@@ -153,6 +153,14 @@ This is for convenience: typically when you self-host you'll be running a single
 
 If you do want to allow multiple accounts to be created in your instance, set `MULTI_TENANT=true`
 
+#### OAuth (optional)
+
+Fizzy includes an OAuth 2.1 authorization server so that tools such as MCP clients can connect to your account without a personal access token. It is off by default: while it is off, the OAuth discovery, registration, authorization and token endpoints answer 404, and tokens issued through OAuth are not accepted. Personal access tokens work either way.
+
+To turn it on, set `OAUTH_ACCEPTANCE_ENABLED=true`.
+
+If you need to stop new connections without breaking existing ones, also set `OAUTH_ISSUANCE_ENABLED=false`: connected apps keep working, but nothing new can connect. People can always disconnect apps from their profile, whichever way these are set.
+
 ## Importing an existing Fizzy account
 
 You can move an account between Fizzy instances by exporting it on the old instance and uploading the export zip to the new one during signup.

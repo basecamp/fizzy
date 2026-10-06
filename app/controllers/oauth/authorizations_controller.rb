@@ -9,6 +9,9 @@ class Oauth::AuthorizationsController < Oauth::BaseController
     policy.form_action :self, -> { validated_redirect_form_action_source }
   end
 
+  # Gated ahead of sign-in so a dark server never asks anyone to sign in for
+  # it. A denial is never gated: it only tells the client no.
+  before_action :require_issuance_enabled, unless: :denial?
   before_action :save_oauth_return_url
   before_action :require_authentication
 
@@ -27,7 +30,7 @@ class Oauth::AuthorizationsController < Oauth::BaseController
   end
 
   def create
-    if params[:error] == "access_denied"
+    if denial?
       redirect_to error_redirect_uri("access_denied", "User denied the request"), allow_other_host: true
     else
       code = Oauth::AuthorizationCode.generate \
@@ -42,6 +45,10 @@ class Oauth::AuthorizationsController < Oauth::BaseController
   end
 
   private
+    def denial?
+      request.post? && params[:error] == "access_denied"
+    end
+
     def save_oauth_return_url
       session[:return_to_after_authenticating] = request.url if request.get? && !authenticated?
     end

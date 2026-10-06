@@ -4,6 +4,7 @@ class Oauth::TokensController < Oauth::BaseController
 
   rate_limit to: 20, within: 1.minute, only: :create, with: :oauth_rate_limit_exceeded
 
+  before_action :require_issuance_enabled
   before_action :validate_grant_type
   before_action :require_params
   before_action :set_auth_code

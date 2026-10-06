@@ -20,6 +20,13 @@ class Identity::AccessToken < ApplicationRecord
     end
   end
 
+  # OAuth tokens are honored only while OAuth acceptance is on (see
+  # Oauth::Availability); personal tokens always are. The client is loaded only
+  # when the server is dark and a pilot exemption might apply.
+  def honored?
+    oauth_client_id.nil? || Oauth::Availability.acceptance_enabled? || Oauth::Availability.acceptance_enabled?(oauth_client&.client_id)
+  end
+
   def allows?(method)
     method.in?(%w[ GET HEAD ]) || write?
   end

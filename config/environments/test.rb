@@ -68,6 +68,9 @@ Rails.application.configure do
   # Load test helpers
   config.autoload_paths += %w[ test/test_helpers ]
 
+  # OAuth is lit in tests; see OauthAvailabilityTestHelper to go dark.
+  config.x.oauth.acceptance_enabled = true
+
   # Enable multi-tenant mode for tests
   config.x.multi_tenant.enabled = true
 end
