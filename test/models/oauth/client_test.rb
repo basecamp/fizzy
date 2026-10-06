@@ -351,6 +351,17 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     end
   end
 
+  test "cleanup carries on past a client deleted after it was picked" do
+    gone, stale = travel_to(31.days.ago) { [ register_client, register_client ] }
+    picked = Oauth::Client.stale.find(gone.id)
+    gone.delete
+
+    assert_nothing_raised { assert_not picked.destroy_if_still_unused }
+
+    Oauth::Client.cleanup
+    assert_not Oauth::Client.exists?(stale.id)
+  end
+
   test "destroy_if_still_unused spares a client whose grant came and went after it was picked" do
     client = travel_to(31.days.ago) { register_client }
     picked = Oauth::Client.stale.find(client.id)

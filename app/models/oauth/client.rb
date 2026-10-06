@@ -46,6 +46,8 @@ class Oauth::Client < ApplicationRecord
     with_lock do
       destroy if self.class.stale.exists?(id)
     end
+  rescue ActiveRecord::RecordNotFound
+    # Already gone, deleted since the sweep picked it.
   end
 
   # Raises ActiveRecord::RecordNotFound if the client has been swept since it
