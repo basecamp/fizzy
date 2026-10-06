@@ -51,6 +51,7 @@ Status key:
 |---|---|
 | `response_type=code` only | **Conformant** |
 | PKCE required, `S256` only (OAuth 2.1 §4.1.1, RFC 7636) | **Conformant** |
+| `code_verifier` is 43–128 unreserved characters (RFC 7636 §4.1); a malformed one fails like a wrong one | **Fixed** #2296 `694eb8d7b` "Refuse a PKCE verifier outside 43 to 128 unreserved characters". Matches bc3's `Oauth::Pkce::VERIFIER_PATTERN` |
 | Exact `redirect_uri` match against the registered list; never redirect to an unregistered URI (§3.1.2, §4.1.2.1) | **Conformant** |
 | Loopback redirects: only the port may vary, host and query must match exactly, http only (RFC 8252 §7.3) | **Fixed** #2296 `51155c5e3` "…vary only the loopback port" (exact host and query; restores a fix a resolved Copilot thread had recorded as done but that was lost), `771ed906d` "Vary the port only for http loopback redirects"; #3080 `de31faa35` (no port variance onto a fragment), `89f511f16` |
 | `state` is required | **Deliberate**. Stricter than OAuth 2.1 with PKCE. Kept. |
@@ -80,6 +81,7 @@ Status key:
 | `client_secret_post` | **Conformant** (#3082) |
 | HTTP Basic (`client_secret_basic`) MUST be supported for clients issued a password; a failed Basic attempt gets 401 + `WWW-Authenticate` (§5.2) | **Fixed** #3082 `a520ea2df` "Accept client_secret_basic at the token endpoint". Either method authenticates any confidential client; both at once is `invalid_request`. DCR and metadata advertise it. bc3 closes the same gap in bc3#13678. |
 | Secrets stored in plaintext, as access tokens are | **Deliberate** (#3082 body) |
+| An OAuth grant can't create, list or revoke personal access tokens, so an app can't mint a credential that outlives disconnecting it | **Fixed** #2296 `d68462dff` "Refuse personal access token management to OAuth grants". Personal access tokens may still manage personal access tokens (fizzy-cli) |
 
 ## Refresh tokens (RFC 6749 §6, OAuth 2.1 §4.3, RFC 9700 §4.14)
 
