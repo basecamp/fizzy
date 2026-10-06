@@ -33,7 +33,11 @@ class Oauth::AuthorizationsController < Oauth::BaseController
   def create
     if denial?
       redirect_to error_redirect_uri("access_denied", "User denied the request"), allow_other_host: true
-    else
+    # Consent is use, so it restarts a self-registered client's retention
+    # period: the sweep (Oauth::Client.cleanup) mustn't remove the client while
+    # the code it is about to receive is still redeemable. A touch that finds no
+    # row means the sweep got there first, and a code would be dead on arrival.
+    elsif @client.touch
       code = Oauth::AuthorizationCode.generate \
         client_id: @client.client_id,
         identity_id: Current.identity.id,
@@ -42,6 +46,8 @@ class Oauth::AuthorizationsController < Oauth::BaseController
         scope: Oauth.canonical_scope(params[:scope].presence || "read")
 
       redirect_to success_redirect_uri(code), allow_other_host: true
+    else
+      oauth_error "invalid_request", "Unknown client"
     end
   end
 

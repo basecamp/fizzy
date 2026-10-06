@@ -4,9 +4,19 @@ class Oauth::Client < ApplicationRecord
   SECRET_AUTH_METHODS = %w[ client_secret_post client_secret_basic ]
   AUTH_METHODS = %w[ none ] + SECRET_AUTH_METHODS
 
-  has_many :access_tokens, class_name: "Identity::AccessToken", foreign_key: :oauth_client_id, inverse_of: :oauth_client
+  # Registration is open, and MCP clients often register afresh on every
+  # install or reconnect, so a self-registered client left without a grant
+  # this long is abandoned (RFC 7591 §5).
+  UNUSED_RETENTION = 30.days
+
+  has_many :access_tokens, class_name: "Identity::AccessToken", foreign_key: :oauth_client_id, inverse_of: :oauth_client, dependent: :destroy
 
   has_secure_token :client_id, length: 32
+
+  # A code exchange locks the client and then issues a grant (#redeem).
+  # Destroying a client takes the same lock before its grants cascade, in the
+  # same order, so no grant can land after the cascade and be stranded.
+  before_destroy :lock_client, prepend: true
 
   validates :name, presence: true, length: { maximum: 255 }
   validates :client_id, uniqueness: true, allow_nil: true
@@ -22,6 +32,36 @@ class Oauth::Client < ApplicationRecord
   scope :trusted, -> { where trusted: true }
   scope :dynamically_registered, -> { where dynamically_registered: true }
 
+  # A grant touches its client when it is created or destroyed, so updated_at
+  # is the last grant activity: an app the user disconnected yesterday is not
+  # swept for having registered long ago.
+  scope :stale, -> { dynamically_registered.where.missing(:access_tokens).where(updated_at: ...UNUSED_RETENTION.ago) }
+
+  def self.cleanup
+    stale.find_each(&:destroy_if_still_unused)
+  end
+
+  # The sweep and #redeem take the same row lock, so a grant either lands
+  # before the recheck, which then spares the client, or finds the client
+  # already gone and is never issued. There is no foreign key to refuse a
+  # token for a deleted client. The recheck is the whole stale test, not just
+  # the absence of tokens: a grant issued and revoked since the sweep picked
+  # this client has touched it, and restarted its retention period.
+  def destroy_if_still_unused
+    with_lock do
+      destroy if self.class.stale.exists?(id)
+    end
+  rescue ActiveRecord::RecordNotFound
+    # Already gone, deleted since the sweep picked it.
+  end
+
+  # Raises ActiveRecord::RecordNotFound if the client has been swept since it
+  # was read.
+  def redeem(authorization_code, identity:, permission:)
+    with_lock do
+      identity.access_tokens.redeem authorization_code, oauth_client: self, permission: permission
+    end
+  end
 
   def confidential?
     token_endpoint_auth_method.in?(SECRET_AUTH_METHODS)
@@ -49,6 +89,12 @@ class Oauth::Client < ApplicationRecord
   end
 
   private
+    # lock! reloads, which also drops any grants already loaded, so the cascade
+    # sees every grant committed before the lock.
+    def lock_client
+      lock!
+    end
+
     def generate_client_secret
       self.client_secret ||= self.class.generate_unique_secure_token
     end

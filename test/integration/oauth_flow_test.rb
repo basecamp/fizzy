@@ -157,6 +157,39 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_select "strong", text: "connector.example.com:8443"
   end
 
+  test "consent restarts a self-registered client's retention period, so the sweep spares it while the code is live" do
+    sign_in_as :david
+    client = travel_to(31.days.ago) { Oauth::Client.create!(name: "Returning", redirect_uris: %w[ http://127.0.0.1:8888/callback ], dynamically_registered: true) }
+    assert_includes Oauth::Client.stale, client
+
+    post_consent client: client
+
+    assert_response :redirect
+    assert_not_includes Oauth::Client.stale, client
+  end
+
+  test "consent issues no code for a client swept while consent was submitted" do
+    sign_in_as :david
+    client = Oauth::Client.create!(name: "Swept", redirect_uris: %w[ http://127.0.0.1:8888/callback ], dynamically_registered: true)
+
+    # The sweep deletes the client between consent reading it and touching it.
+    Oauth::Client.any_instance.stubs(:allows_redirect?).with { client.delete }.returns(true)
+    Oauth::AuthorizationCode.expects(:generate).never
+
+    post_consent client: client
+
+    assert_response :bad_request
+  end
+
+  test "denying consent leaves a self-registered client's retention period alone" do
+    sign_in_as :david
+    client = travel_to(31.days.ago) { Oauth::Client.create!(name: "Returning", redirect_uris: %w[ http://127.0.0.1:8888/callback ], dynamically_registered: true) }
+
+    post_consent client: client, error: "access_denied"
+
+    assert_includes Oauth::Client.stale, client
+  end
+
   test "denying a self-registered https client still redirects, after the consent screen named its host" do
     sign_in_as :david
     client = Oauth::Client.create!(name: "Hosted", redirect_uris: %w[ https://connector.example.com/callback ], dynamically_registered: true)
@@ -387,6 +420,30 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_equal "read write", response.parsed_body["scope"]
+  end
+
+  test "token exchange issues nothing for a client swept after the exchange read it" do
+    code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+    client = oauth_clients(:mcp_client)
+    code = authorization_code_for(client, code_verifier: code_verifier)
+
+    # The sweep deletes the client between the exchange's lookup and its issuance.
+    Oauth::AuthorizationCode.stubs(:valid_pkce?).with { client.delete }.returns(true)
+
+    assert_no_difference "Identity::AccessToken.count" do
+      untenanted do
+        post oauth_token_path, params: {
+          grant_type: "authorization_code",
+          client_id: client.client_id,
+          code: code,
+          redirect_uri: "http://127.0.0.1:8888/callback",
+          code_verifier: code_verifier
+        }, as: :json
+      end
+    end
+
+    assert_response :bad_request
+    assert_equal "invalid_grant", response.parsed_body["error"]
   end
 
   test "token exchange rejects invalid code" do
@@ -975,6 +1032,23 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_operator body["expires_in"], :>, 0
     assert_not_equal old_access_token, body["access_token"]
     assert_not_equal old_refresh_token, body["refresh_token"]
+  end
+
+  test "refresh grant for a token whose client is gone fails as invalid_grant" do
+    client = oauth_clients(:mcp_client)
+    token = identities(:david).access_tokens.create!(oauth_client: client)
+    client.delete
+
+    untenanted do
+      post oauth_token_path, params: {
+        grant_type: "refresh_token",
+        refresh_token: token.refresh_token,
+        client_id: client.client_id
+      }, as: :json
+    end
+
+    assert_response :bad_request
+    assert_equal "invalid_grant", response.parsed_body["error"]
   end
 
   test "refresh grant requires refresh_token and client_id" do

@@ -301,4 +301,144 @@ class Oauth::ClientTest < ActiveSupport::TestCase
 
     assert_equal [ token ], client.access_tokens.to_a
   end
+
+  test "cleanup destroys dynamically registered clients left without a grant for the retention period" do
+    stale = travel_to(31.days.ago) { register_client }
+
+    Oauth::Client.cleanup
+
+    assert_not Oauth::Client.exists?(stale.id)
+  end
+
+  test "cleanup keeps recent, granted and operator-provisioned clients" do
+    recent = travel_to(29.days.ago) { register_client }
+    granted = travel_to(31.days.ago) { register_client.tap { identities(:david).access_tokens.create!(oauth_client: it) } }
+    provisioned = travel_to(31.days.ago) { register_client(dynamically_registered: false, redirect_uris: %w[ https://app.example.com/cb ]) }
+
+    Oauth::Client.cleanup
+
+    assert Oauth::Client.exists?(recent.id)
+    assert Oauth::Client.exists?(granted.id)
+    assert Oauth::Client.exists?(provisioned.id)
+  end
+
+  test "cleanup counts the retention period from the client's last grant, not its registration" do
+    client = travel_to(60.days.ago) { register_client }
+    token = travel_to(40.days.ago) { identities(:david).access_tokens.create!(oauth_client: client) }
+    travel_to(1.day.ago) { token.destroy }
+
+    Oauth::Client.cleanup
+    assert Oauth::Client.exists?(client.id), "a client disconnected yesterday is not abandoned"
+
+    travel 30.days do
+      Oauth::Client.cleanup
+      assert_not Oauth::Client.exists?(client.id)
+    end
+  end
+
+  test "a grant that lapses restarts its client's retention period, like one the user disconnects" do
+    client = travel_to(200.days.ago) { register_client }
+    travel_to(100.days.ago) { identities(:david).access_tokens.create!(oauth_client: client) }
+
+    Identity::AccessToken.cleanup
+    Oauth::Client.cleanup
+    assert Oauth::Client.exists?(client.id), "swept the day its last grant lapsed"
+    assert_not client.access_tokens.exists?
+
+    travel 31.days do
+      Oauth::Client.cleanup
+      assert_not Oauth::Client.exists?(client.id)
+    end
+  end
+
+  test "cleanup carries on past a client deleted after it was picked" do
+    gone, stale = travel_to(31.days.ago) { [ register_client, register_client ] }
+    picked = Oauth::Client.stale.find(gone.id)
+    gone.delete
+
+    assert_nothing_raised { assert_not picked.destroy_if_still_unused }
+
+    Oauth::Client.cleanup
+    assert_not Oauth::Client.exists?(stale.id)
+  end
+
+  test "destroy_if_still_unused spares a client whose grant came and went after it was picked" do
+    client = travel_to(31.days.ago) { register_client }
+    picked = Oauth::Client.stale.find(client.id)
+    identities(:david).access_tokens.create!(oauth_client: client).destroy
+
+    assert_not picked.destroy_if_still_unused
+    assert Oauth::Client.exists?(client.id)
+  end
+
+  test "destroy_if_still_unused spares a client that got a grant after it was picked" do
+    client = travel_to(31.days.ago) { register_client }
+    picked = Oauth::Client.stale.find(client.id)
+    identities(:david).access_tokens.create!(oauth_client: client)
+
+    assert_not picked.destroy_if_still_unused
+    assert Oauth::Client.exists?(client.id)
+  end
+
+  # Revoking a grant locks it, and touching the client inside that transaction
+  # would then wait on the client's lock. A replayed code exchange holds the
+  # client's lock and waits on the grant, so the two would deadlock.
+  test "a grant touches its client outside its own transaction" do
+    client = register_client
+    grant = identities(:david).access_tokens.create!(oauth_client: client)
+    transactions = {}
+    record = ->(*, payload) do
+      if table = payload[:sql][/\A(?:UPDATE|DELETE FROM) [`"]?(oauth_clients|identity_access_tokens)\b/, 1]
+        transactions[table] ||= Identity::AccessToken.connection.current_transaction
+      end
+    end
+
+    ActiveSupport::Notifications.subscribed(record, "sql.active_record") { grant.destroy }
+
+    assert transactions.key?("oauth_clients"), "the client was never touched"
+    assert_not transactions["identity_access_tokens"].equal?(transactions["oauth_clients"]), "the client was touched inside the grant's transaction"
+  end
+
+  # A code exchange locks the client, then issues a grant. Destroying a client
+  # takes the client's lock first too, so no grant can land after the cascade
+  # has run and be stranded by the client's deletion.
+  test "destroying a client locks it before destroying its grants" do
+    client = register_client
+    identities(:david).access_tokens.create!(oauth_client: client)
+    statements = []
+    record = ->(*, payload) { statements << payload[:sql] }
+
+    ActiveSupport::Notifications.subscribed(record, "sql.active_record") { client.destroy }
+
+    lock = statements.index { it.match?(/\ASELECT .*FROM [`"]?oauth_clients\b/) }
+    cascade = statements.index { it.match?(/\ADELETE FROM [`"]?identity_access_tokens\b/) }
+    assert lock, "the client was never locked"
+    assert_operator lock, :<, cascade
+  end
+
+  test "destroying a client takes a grant issued after its grants were loaded" do
+    client = register_client
+    client.access_tokens.load
+    late = identities(:david).access_tokens.create!(oauth_client: Oauth::Client.find(client.id))
+
+    client.destroy
+
+    assert_not Identity::AccessToken.exists?(late.id)
+  end
+
+  test "destroying a client takes its grants' retired refresh tokens too" do
+    client = register_client
+    grant = identities(:david).access_tokens.create!(oauth_client: client)
+    assert grant.refresh
+
+    assert_difference -> { Oauth::RetiredRefreshToken.count }, -1 do
+      client.destroy
+    end
+    assert_not Identity::AccessToken.exists?(grant.id)
+  end
+
+  private
+    def register_client(**attributes)
+      Oauth::Client.create! name: "Abandoned", redirect_uris: %w[ http://127.0.0.1:8888/callback ], dynamically_registered: true, **attributes
+    end
 end
