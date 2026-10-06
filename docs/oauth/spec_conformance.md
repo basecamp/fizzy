@@ -40,7 +40,7 @@ Status key:
 | Requirement | Status |
 |---|---|
 | The AS merges dark: discovery, DCR, authorize and token answer 404 unless `OAUTH_ACCEPTANCE_ENABLED=true`; OAuth bearer tokens are refused while dark; personal access tokens are unaffected (hosted plan, Phase A and Decision 6) | **Fixed** #2296 `1183b2bee` "Ship the OAuth authorization server dark behind availability switches". Port of bc3's `Oauth::Availability`. |
-| Issuance can be paused (`OAUTH_ISSUANCE_ENABLED=false`) while existing tokens are still honored; minting and refresh answer 503 | **Fixed** #2296 `1183b2bee`; refresh covered in #3081 `34ed3b580` |
+| Issuance can be paused (`OAUTH_ISSUANCE_ENABLED=false`) while existing tokens are still honored; minting and refresh answer 503 | **Fixed** #2296 `1183b2bee`; refresh covered in #3081 `67b7a618d` |
 | Pilot client ids are exempt by exact `client_id`; registration can't be used to claim a pilot id | **Fixed** #2296 `1183b2bee`, `9a9d3ce7a` "Keep registration dark when a request names a pilot client" |
 | Revocation, Connected Apps and consent denial are never gated, so people can always shed access | **Conformant** (by design in `Oauth::Availability`) |
 | Unset means dark, which differs from bc3's dev default; dark answers 404 where bc3 answers 503; protected-resource metadata is also 404 while dark | **Deliberate**. Fizzy has no other AS to name, and OSS installs that never mention OAuth must look like they have none. |
@@ -57,20 +57,20 @@ Status key:
 | Consent is CSRF-protected (§10.12) | **Conformant**. The app-wide Origin check (`forgery_protection_origin_check`) refuses same-site sibling origins as well as cross-site ones. A finding that it didn't was refuted. |
 | Consent is always shown; `trusted` doesn't skip it | **Deliberate** (#2296 body) |
 | CSP `form-action` lets the consent POST redirect to the validated redirect origin; Chrome had been stranding the flow | **Fixed** #2296 `d468283d7` "Let consent redirect past CSP…". Ported from bc3. Covered by a Chrome system test (`test/system/oauth_consent_test.rb`). |
-| Canonical scope: "Read + Write" is `read write`; a `read write` request preselects it instead of silently downgrading to read | **Fixed** #2296 `d468283d7`; refresh reports the same string in #3081 `1649f431a` |
+| Canonical scope: "Read + Write" is `read write`; a `read write` request preselects it instead of silently downgrading to read | **Fixed** #2296 `d468283d7`; refresh reports the same string in #3081 `721eb9698` |
 
 ## RFC 6749 / OAuth 2.1: token endpoint
 
 | Requirement | Status |
 |---|---|
 | Authorization codes are single-use; reuse is refused and the grant minted from that code is revoked (§4.1.2, §10.5; OAuth 2.1 §4.1.3) | **Fixed** #2296 `bd447dd7a` "Redeem each authorization code once…". A `jti` in the code plus a unique `identity_access_tokens.authorization_code_jti`. Reuse is checked only after PKCE, `redirect_uri` and `client_id` pass, so a leaked code without its verifier can't revoke the grant. Limit: if the grant is revoked within the code's 60s life, the row is gone and one more redemption is possible. No tombstones were added. |
-| `client_id` required and matched to the code for public clients (§4.1.3) | **Fixed** #2296 `bd447dd7a`; one check shared by both grants in #3081 `ef68e02e9` |
-| Missing or malformed parameters answer `invalid_request`, not `invalid_grant` or `unsupported_grant_type` (§5.2) | **Fixed** #2296 `bd447dd7a`, `ac884df5f` "Reject non-string token request parameters as malformed" (an array `refresh_token` had been accepted as an `IN` list; a hash had raised a 500); #3081 `ef68e02e9`, `2adf1c1ac` |
+| `client_id` required and matched to the code for public clients (§4.1.3) | **Fixed** #2296 `bd447dd7a`; one check shared by both grants in #3081 `180c44a02` |
+| Missing or malformed parameters answer `invalid_request`, not `invalid_grant` or `unsupported_grant_type` (§5.2) | **Fixed** #2296 `bd447dd7a`, `ac884df5f` "Reject non-string token request parameters as malformed" (an array `refresh_token` had been accepted as an `IN` list; a hash had raised a 500); #3081 `180c44a02`, `85b3127e1` |
 | Exact `redirect_uri` equality with the code (§4.1.3) | **Conformant** |
-| Responses, errors included, carry `Cache-Control: no-store` (§5.1) | **Fixed** #3082 `d757ad472`, `4ef4072aa` (`prevent_caching` is now a before_action, so halted chains are covered too) |
-| A confidential client authenticates before anything about the grant is looked up, so a wrong secret reveals nothing about whether a code or refresh token is live | **Fixed** #3082 `17555fe19`, `4ef4072aa` "Authenticate the named client before resolving the grant…" |
-| A client that fails authentication gets 401 `invalid_client`, with `WWW-Authenticate: Basic` only when the request carried an Authorization header (§5.2) | **Fixed** #3082 `3ab7d9fa0` "Name the Basic scheme only to a client that tried the Authorization header". The same at the token endpoint and revocation, and the same as bc3 (bc3#13678). A body-only failure gets no challenge. |
-| Client credentials are read from the request body only, never the query string | **Conformant** (#3082 `2fcc742d7`) |
+| Responses, errors included, carry `Cache-Control: no-store` (§5.1) | **Fixed** #3082 `253d2c839`, `fbff83e64` (`prevent_caching` is now a before_action, so halted chains are covered too) |
+| A confidential client authenticates before anything about the grant is looked up, so a wrong secret reveals nothing about whether a code or refresh token is live | **Fixed** #3082 `98160edb4`, `fbff83e64` "Authenticate the named client before resolving the grant…" |
+| A client that fails authentication gets 401 `invalid_client`, with `WWW-Authenticate: Basic` only when the request carried an Authorization header (§5.2) | **Fixed** #3082 `337d420ba` "Name the Basic scheme only to a client that tried the Authorization header". The same at the token endpoint and revocation, and the same as bc3 (bc3#13678). A body-only failure gets no challenge. |
+| Client credentials are read from the request body only, never the query string | **Conformant** (#3082 `cbfb79723`) |
 | Per-IP rate limit of 20/min on the token endpoint | **Conformant**. A per-client budget after confidential authentication is **Planned** (Phase C); the per-IP limit blocks hosted use. |
 
 ## RFC 6749 §2.3.1: client authentication
@@ -78,7 +78,7 @@ Status key:
 | Requirement | Status |
 |---|---|
 | `client_secret_post` | **Conformant** (#3082) |
-| HTTP Basic (`client_secret_basic`) MUST be supported for clients issued a password; a failed Basic attempt gets 401 + `WWW-Authenticate` (§5.2) | **Fixed** #3082 `a8b635fa4` "Accept client_secret_basic at the token endpoint". Either method authenticates any confidential client; both at once is `invalid_request`. DCR and metadata advertise it. bc3 closes the same gap in bc3#13678. |
+| HTTP Basic (`client_secret_basic`) MUST be supported for clients issued a password; a failed Basic attempt gets 401 + `WWW-Authenticate` (§5.2) | **Fixed** #3082 `fc3474b28` "Accept client_secret_basic at the token endpoint". Either method authenticates any confidential client; both at once is `invalid_request`. DCR and metadata advertise it. bc3 closes the same gap in bc3#13678. |
 | Secrets stored in plaintext, as access tokens are | **Deliberate** (#3082 body) |
 
 ## Refresh tokens (RFC 6749 §6, OAuth 2.1 §4.3, RFC 9700 §4.14)
@@ -86,10 +86,10 @@ Status key:
 | Requirement | Status |
 |---|---|
 | Rotation on every refresh, atomic (compare-and-swap); a concurrent loser gets `invalid_grant` | **Conformant** (#3081) |
-| Refresh may narrow scope, never widen it; blank or `null` scope is refused | **Conformant** (#3081 `b3edc8dc8`, `7da895620`, `a45190e93`) |
-| `client_id` required and must match the grant | **Conformant** (#3081 `ef68e02e9`) |
-| Public clients' refresh tokens MUST be sender-constrained, or rotated **with replay detection**: presenting a rotated-out token revokes the live one (OAuth 2.1 §4.3.1, RFC 9700 §4.14.2) | **Fixed** #3160 `2b3061158` "Revoke the grant when a rotated refresh token is replayed, with a retry grace". A replay revokes the grant. A retry within 60s, while the successor is still current, gets that successor, as in bc3. |
-| Refresh tokens SHOULD expire after client inactivity (RFC 9700 §4.14.2) | **Fixed** #3161 `3d624cda8` "Lapse OAuth grants left idle for 90 days", `5e40b3d10`. This matches bc3's 90-day `refresh_token_ttl`. A grant that lapses restarts its client's 30-day sweep clock (#3159). |
+| Refresh may narrow scope, never widen it; blank or `null` scope is refused | **Conformant** (#3081 `82bd5d02e`, `fea8ec4ff`, `a428e5518`) |
+| `client_id` required and must match the grant | **Conformant** (#3081 `180c44a02`) |
+| Public clients' refresh tokens MUST be sender-constrained, or rotated **with replay detection**: presenting a rotated-out token revokes the live one (OAuth 2.1 §4.3.1, RFC 9700 §4.14.2) | **Fixed** #3160 `6113dfced` "Revoke the grant when a rotated refresh token is replayed, with a retry grace". A replay revokes the grant. A retry within 60s, while the successor is still current, gets that successor, as in bc3. |
+| Refresh tokens SHOULD expire after client inactivity (RFC 9700 §4.14.2) | **Fixed** #3161 `07b297fae` "Lapse OAuth grants left idle for 90 days", `cf6a2083c`. This matches bc3's 90-day `refresh_token_ttl`. A grant that lapses restarts its client's 30-day sweep clock (#3159). |
 
 ## RFC 7009: revocation
 
@@ -97,9 +97,9 @@ Status key:
 |---|---|
 | Revokes an access or refresh token, destroying the whole grant; always 200 for unknown tokens (§2.2) | **Conformant** |
 | Missing token answers `invalid_request` JSON (§2.2.1) | **Fixed** #2296 `51155c5e3` |
-| Confidential clients authenticate, and the token must have been issued to the requesting client (§2.1) | **Fixed** #3082 `6ddebd19f` "Authenticate clients at revocation and revoke only their own tokens". A public client names its `client_id`. Unknown tokens, and tokens belonging to another client, get 200 and nothing is revoked. |
-| A presented client secret that authenticates no client is refused with 401, whatever the token | **Deliberate**, and stricter than bc3: #3082 `4ca622d24`, `b57456501`. A 200 would tell a client with a mistyped `client_id` that a live grant was dead. bc3 is being aligned to this. |
-| A personal access token can be revoked here by whoever holds it. It has no client, so holding it is the credential; client credentials sent alongside must still authenticate | **Fixed** #3082 `8947b420a` "Revoke personal access tokens at the revocation endpoint again". Revocation works the same for every kind of token, which helps incident response such as revoking a leaked token. It also keeps the endpoint ready if personal access tokens become OAuth tokens, as in bc3. |
+| Confidential clients authenticate, and the token must have been issued to the requesting client (§2.1) | **Fixed** #3082 `6f49a0bb9` "Authenticate clients at revocation and revoke only their own tokens". A public client names its `client_id`. Unknown tokens, and tokens belonging to another client, get 200 and nothing is revoked. |
+| A presented client secret that authenticates no client is refused with 401, whatever the token | **Deliberate**, and stricter than bc3: #3082 `b3fbd3dbf`, `834ec7ab3`. A 200 would tell a client with a mistyped `client_id` that a live grant was dead. bc3 is being aligned to this. |
+| A personal access token can be revoked here by whoever holds it. It has no client, so holding it is the credential; client credentials sent alongside must still authenticate | **Fixed** #3082 `bd3a9e94b` "Revoke personal access tokens at the revocation endpoint again". Revocation works the same for every kind of token, which helps incident response such as revoking a leaked token. It also keeps the endpoint ready if personal access tokens become OAuth tokens, as in bc3. |
 | No rate limit | **Deliberate**. The endpoint isn't an oracle and the token space can't be guessed. |
 
 ## RFC 8414 / RFC 9728: metadata
@@ -107,7 +107,7 @@ Status key:
 | Requirement | Status |
 |---|---|
 | Issuer, endpoints, grant types, PKCE methods and scopes advertised | **Conformant** |
-| `revocation_endpoint_auth_methods_supported` matches behaviour (`["none", "client_secret_post", "client_secret_basic"]`; an omitted value would mean `client_secret_basic` alone) | **Fixed** #2296 `51155c5e3`; #3082 `6ddebd19f` |
+| `revocation_endpoint_auth_methods_supported` matches behaviour (`["none", "client_secret_post", "client_secret_basic"]`; an omitted value would mean `client_secret_basic` alone) | **Fixed** #2296 `51155c5e3`; #3082 `6f49a0bb9` |
 | `response_modes_supported: ["query"]` (an omitted value implies fragment, which is unsupported) | **Fixed** #2296 `51155c5e3`. Unknown `response_mode` is ignored, per RFC 6749 §3.1, not rejected. |
 | `token_endpoint_auth_methods_supported` matches behaviour | **Conformant** (`none`, `client_secret_post`, `client_secret_basic`) |
 | RFC 9728 protected-resource metadata | **Conformant** (#2296). It has one app-wide resource; MCP resources come in Phase B. |
@@ -132,19 +132,19 @@ Status key:
 | A self-registered redirect names its authority plainly: no userinfo, no percent-encoded host, a port from 1 to 65535. Consent names a non-default port, and loopback port variation keeps userinfo fixed | **Fixed** #3080 `64cb8a019` "Register only redirects whose authority is plain, and show their port on consent". One rule at registration, in place of canonicalizing wherever the URI is shown or compared |
 | Errors answer `invalid_client_metadata` or `invalid_redirect_uri`, never 500 (§3.2.2). An over-long or non-String `client_name` had raised a 500 on both databases | **Fixed** #2296 `51155c5e3` |
 | Open, unauthenticated registration of any https host (no initial access token, no host vetting) | **Deliberate** (#3080, hosted plan): Cursor and other generic MCP clients need it. bc3 vets hosts; Fizzy will cover the recognized-host tier with CIMD (Phase C′). Impersonating names on consent go to the consent design pass (D5). |
-| Abandoned registrations are reclaimed (§5 abuse mitigation) | **Fixed** #3159 `f8c1a552d`, `ba2142af4`. A daily sweep removes self-registered clients with no grant activity for 30 days, matching bc3's retention. It row-locks and shares that lock with issuance, so it can't race a code exchange. Under the lock it rechecks the whole stale test, and consent touches the client, so a client isn't swept between consent and its code exchange (`14a777ce2`). A refresh whose client row is gone gets a 400, not a 500. Groundwork in #2296 `65e4d3e7c` fixed the `access_tokens` association and a schema-only foreign key that migrated databases never had. |
+| Abandoned registrations are reclaimed (§5 abuse mitigation) | **Fixed** #3159 `3b3ac5869`, `5eebbd7fc`. A daily sweep removes self-registered clients with no grant activity for 30 days, matching bc3's retention. It row-locks and shares that lock with issuance, so it can't race a code exchange. Under the lock it rechecks the whole stale test, and consent touches the client, so a client isn't swept between consent and its code exchange (`21a4e2146`). A refresh whose client row is gone gets a 400, not a 500. Groundwork in #2296 `65e4d3e7c` fixed the `access_tokens` association and a schema-only foreign key that migrated databases never had. |
 | RFC 7592 management endpoint, initial access token, global registration cap | **Deliberate**: not built. RFC 7592 is optional. A global cap would turn one actor's abuse into an outage for everyone. |
 
 ## RFC 6750 / RFC 9110: resource-server challenge
 
 | Requirement | Status |
 |---|---|
-| Challenges use the `Bearer` scheme (§3). Rails' default was `Token realm=` | **Fixed** #3158 `a40de58ed` "Answer API authentication failures with a Bearer challenge" |
-| A presented but invalid or expired token gets 401 `error="invalid_token"` (§3.1); clients refresh on this hourly since #3081 | **Fixed** #3158 `a40de58ed` |
-| A valid read token on a write gets 403 `error="insufficient_scope", scope="write"`, so clients stop refreshing in a loop | **Fixed** #3158 `a40de58ed` |
+| Challenges use the `Bearer` scheme (§3). Rails' default was `Token realm=` | **Fixed** #3158 `0d8a0d4e9` "Answer API authentication failures with a Bearer challenge" |
+| A presented but invalid or expired token gets 401 `error="invalid_token"` (§3.1); clients refresh on this hourly since #3081 | **Fixed** #3158 `0d8a0d4e9` |
+| A valid read token on a write gets 403 `error="insufficient_scope", scope="write"`, so clients stop refreshing in a loop | **Fixed** #3158 `0d8a0d4e9` |
 | A JSON request with no credentials gets 401 plus a challenge instead of a 302 to sign-in (§3) | **Fixed** #3158, except for requests carrying a session cookie or `X-Requested-With`, which keep the 302 so in-app autosave and uploads don't break. **Open decision**: D6. |
-| The scheme is matched case-insensitively (RFC 9110 §11.1) | **Fixed** #3158 `a40de58ed` |
-| `resource_metadata` in the challenge (RFC 9728 §5.1), omitted while dark | **Fixed** #3158 `a40de58ed` |
+| The scheme is matched case-insensitively (RFC 9110 §11.1) | **Fixed** #3158 `0d8a0d4e9` |
+| `resource_metadata` in the challenge (RFC 9728 §5.1), omitted while dark | **Fixed** #3158 `0d8a0d4e9` |
 | A Bearer header on an HTML request: 401, not the SHOULD-level 400 for `invalid_request` | **Deliberate** (#3158 summary); preserves the existing refusal. |
 
 ## Parity with bc3 not yet built
