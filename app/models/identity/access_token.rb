@@ -15,7 +15,7 @@ class Identity::AccessToken < ApplicationRecord
   REFRESH_IDLE_LIMIT = 90.days.in_seconds.seconds
 
   belongs_to :identity
-  belongs_to :oauth_client, class_name: "Oauth::Client", optional: true
+  belongs_to :oauth_client, class_name: "Oauth::Client", optional: true, touch: true
   has_many :retired_refresh_tokens, class_name: "Oauth::RetiredRefreshToken", dependent: :delete_all
 
   # Rotation locks the grant and then adds a retired token. Destroying takes

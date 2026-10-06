@@ -301,4 +301,64 @@ class Oauth::ClientTest < ActiveSupport::TestCase
 
     assert_equal [ token ], client.access_tokens.to_a
   end
+
+  test "cleanup destroys dynamically registered clients left without a grant for the retention period" do
+    stale = travel_to(31.days.ago) { register_client }
+
+    Oauth::Client.cleanup
+
+    assert_not Oauth::Client.exists?(stale.id)
+  end
+
+  test "cleanup keeps recent, granted and operator-provisioned clients" do
+    recent = travel_to(29.days.ago) { register_client }
+    granted = travel_to(31.days.ago) { register_client.tap { identities(:david).access_tokens.create!(oauth_client: it) } }
+    provisioned = travel_to(31.days.ago) { register_client(dynamically_registered: false, redirect_uris: %w[ https://app.example.com/cb ]) }
+
+    Oauth::Client.cleanup
+
+    assert Oauth::Client.exists?(recent.id)
+    assert Oauth::Client.exists?(granted.id)
+    assert Oauth::Client.exists?(provisioned.id)
+  end
+
+  test "cleanup counts the retention period from the client's last grant, not its registration" do
+    client = travel_to(60.days.ago) { register_client }
+    token = travel_to(40.days.ago) { identities(:david).access_tokens.create!(oauth_client: client) }
+    travel_to(1.day.ago) { token.destroy }
+
+    Oauth::Client.cleanup
+    assert Oauth::Client.exists?(client.id), "a client disconnected yesterday is not abandoned"
+
+    travel 30.days do
+      Oauth::Client.cleanup
+      assert_not Oauth::Client.exists?(client.id)
+    end
+  end
+
+  test "destroy_if_still_unused spares a client that got a grant after it was picked" do
+    client = travel_to(31.days.ago) { register_client }
+    picked = Oauth::Client.stale.find(client.id)
+    identities(:david).access_tokens.create!(oauth_client: client)
+
+    assert_not picked.destroy_if_still_unused
+    assert Oauth::Client.exists?(client.id)
+  end
+
+  test "cleanup removes OAuth tokens whose client is gone" do
+    client = register_client
+    orphan = identities(:david).access_tokens.create!(oauth_client: client)
+    personal = identities(:david).access_tokens.create!
+    client.delete
+
+    Oauth::Client.cleanup
+
+    assert_not Identity::AccessToken.exists?(orphan.id)
+    assert Identity::AccessToken.exists?(personal.id)
+  end
+
+  private
+    def register_client(**attributes)
+      Oauth::Client.create! name: "Abandoned", redirect_uris: %w[ http://127.0.0.1:8888/callback ], dynamically_registered: true, **attributes
+    end
 end

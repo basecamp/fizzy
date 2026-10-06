@@ -4,7 +4,12 @@ class Oauth::Client < ApplicationRecord
   SECRET_AUTH_METHODS = %w[ client_secret_post client_secret_basic ]
   AUTH_METHODS = %w[ none ] + SECRET_AUTH_METHODS
 
-  has_many :access_tokens, class_name: "Identity::AccessToken", foreign_key: :oauth_client_id, inverse_of: :oauth_client
+  # Registration is open, and MCP clients often register afresh on every
+  # install or reconnect, so a self-registered client left without a grant
+  # this long is abandoned (RFC 7591 §5).
+  UNUSED_RETENTION = 30.days
+
+  has_many :access_tokens, class_name: "Identity::AccessToken", foreign_key: :oauth_client_id, inverse_of: :oauth_client, dependent: :delete_all
 
   has_secure_token :client_id, length: 32
 
@@ -22,6 +27,28 @@ class Oauth::Client < ApplicationRecord
   scope :trusted, -> { where trusted: true }
   scope :dynamically_registered, -> { where dynamically_registered: true }
 
+  # A grant touches its client when it is created or destroyed, so updated_at
+  # is the last grant activity: an app the user disconnected yesterday is not
+  # swept for having registered long ago.
+  scope :stale, -> { dynamically_registered.where.missing(:access_tokens).where(updated_at: ...UNUSED_RETENTION.ago) }
+
+  # The tokens are swept after the clients: an exchange that read its client
+  # before a sweep deleted it can still commit a token for it, and an orphan
+  # would break its owner's Connected Apps until removed. The token endpoint
+  # already refuses to refresh one.
+  def self.cleanup
+    stale.find_each(&:destroy_if_still_unused)
+    Identity::AccessToken.oauth.where.missing(:oauth_client).delete_all
+  end
+
+  # Locks and rechecks: a grant may have landed since the sweep picked this
+  # client, and deleting it then would orphan the grant.
+  def destroy_if_still_unused
+    transaction do
+      lock!
+      destroy unless access_tokens.exists?
+    end
+  end
 
   def confidential?
     token_endpoint_auth_method.in?(SECRET_AUTH_METHODS)

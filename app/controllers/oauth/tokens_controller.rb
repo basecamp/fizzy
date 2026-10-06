@@ -139,11 +139,12 @@ class Oauth::TokensController < Oauth::BaseController
     end
 
     # The code or refresh token must have been issued to the client_id in the
-    # request (RFC 6749 §4.1.3, §6).
+    # request (RFC 6749 §4.1.3, §6). A grant whose client has been swept away
+    # (Oauth::Client.cleanup) was issued to no client that still exists.
     # One issued to another client gets the same answer as a dead one, so
     # naming a public client tells nobody whether someone else's grant is live.
     def validate_client_id
-      unless oauth_client_id == (@client || @access_token.oauth_client).client_id
+      unless oauth_client_id == (@client || @access_token.oauth_client)&.client_id
         oauth_error "invalid_grant", authorization_code_grant? ? "Invalid or expired authorization code" : "Invalid refresh token"
       end
     end

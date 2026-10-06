@@ -977,6 +977,23 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_not_equal old_refresh_token, body["refresh_token"]
   end
 
+  test "refresh grant for a token whose client is gone fails as invalid_grant" do
+    client = oauth_clients(:mcp_client)
+    token = identities(:david).access_tokens.create!(oauth_client: client)
+    client.delete
+
+    untenanted do
+      post oauth_token_path, params: {
+        grant_type: "refresh_token",
+        refresh_token: token.refresh_token,
+        client_id: client.client_id
+      }, as: :json
+    end
+
+    assert_response :bad_request
+    assert_equal "invalid_grant", response.parsed_body["error"]
+  end
+
   test "refresh grant requires refresh_token and client_id" do
     client = oauth_clients(:mcp_client)
     token = identities(:david).access_tokens.create!(oauth_client: client)
