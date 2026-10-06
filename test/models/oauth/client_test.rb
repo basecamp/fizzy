@@ -162,4 +162,11 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     dcr_clients = Oauth::Client.dynamically_registered
     assert dcr_clients.all?(&:dynamically_registered?)
   end
+
+  test "access_tokens are the tokens issued to the client" do
+    client = oauth_clients(:mcp_client)
+    token = identities(:david).access_tokens.create!(oauth_client: client)
+
+    assert_equal [ token ], client.access_tokens.to_a
+  end
 end

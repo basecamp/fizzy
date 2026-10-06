@@ -1,5 +1,5 @@
 class Oauth::Client < ApplicationRecord
-  has_many :access_tokens, class_name: "Identity::AccessToken"
+  has_many :access_tokens, class_name: "Identity::AccessToken", foreign_key: :oauth_client_id, inverse_of: :oauth_client
 
   has_secure_token :client_id, length: 32
 
