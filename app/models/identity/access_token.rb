@@ -18,8 +18,10 @@ class Identity::AccessToken < ApplicationRecord
   scope :personal, -> { where oauth_client_id: nil }
   scope :oauth, -> { where.not oauth_client_id: nil }
   scope :active, -> { where(expires_at: nil).or(where(expires_at: Time.current..)) }
-  scope :lapsed, -> { oauth.where(refresh_token_expires_at: ...Time.current) }
-  scope :unlapsed, -> { where(refresh_token_expires_at: Time.current..) }
+  # A grant written without an expiry (by code from before idle expiry, while
+  # a deploy rolls) is idle since its last write.
+  scope :unlapsed, -> { where(refresh_token_expires_at: Time.current..).or(where(refresh_token_expires_at: nil, updated_at: REFRESH_IDLE_LIMIT.ago..)) }
+  scope :lapsed, -> { oauth.where(refresh_token_expires_at: ...Time.current).or(oauth.where(refresh_token_expires_at: nil, updated_at: ...REFRESH_IDLE_LIMIT.ago)) }
 
   has_secure_token
   enum :permission, %w[ read write ].index_by(&:itself), default: :read
@@ -72,11 +74,13 @@ class Identity::AccessToken < ApplicationRecord
   end
 
   def lapsed?
-    refresh_token_expires_at? && refresh_token_expires_at.past?
+    oauth_client_id? && (refresh_token_expires_at || updated_at + REFRESH_IDLE_LIMIT).past?
   end
 
   # Rotates atomically on the presented refresh token, so a concurrent
-  # rotation wins the row and the loser comes up empty-handed. The presented
+  # rotation wins the row and the loser comes up empty-handed. A grant that
+  # lapses mid-request doesn't rotate either, so a sweep that found it lapsed
+  # never deletes a grant that was just renewed. The presented
   # token is retired, not forgotten, so presenting it again is recognized as
   # a retry or a replay (see Oauth::RetiredRefreshToken).
   def refresh(permission: self.permission)
@@ -86,7 +90,7 @@ class Identity::AccessToken < ApplicationRecord
       permission: permission, updated_at: Time.current }
 
     transaction do
-      if self.class.where(id: id, refresh_token: refresh_token).update_all(rotated) == 1
+      if self.class.unlapsed.where(id: id, refresh_token: refresh_token).update_all(rotated) == 1
         retired_refresh_tokens.create! refresh_token: refresh_token, successor_refresh_token: rotated[:refresh_token]
         assign_attributes rotated
         true

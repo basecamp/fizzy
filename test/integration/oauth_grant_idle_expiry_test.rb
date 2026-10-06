@@ -61,6 +61,38 @@ class OauthGrantIdleExpiryTest < ActionDispatch::IntegrationTest
     assert Identity::AccessToken.exists?(personal.id)
   end
 
+  test "rotation itself refuses a lapsed grant, so one racing the deadline can't renew it" do
+    later_by Identity::AccessToken::REFRESH_IDLE_LIMIT + 1.second
+    presented = @grant.refresh_token
+
+    assert_nil @grant.refresh
+    assert_equal presented, @grant.reload.refresh_token
+  end
+
+  test "a grant written without an expiry, as by old code mid-deploy, lapses from its last rotation" do
+    Identity::AccessToken.where(id: @grant.id).update_all(refresh_token_expires_at: nil)
+
+    later_by Identity::AccessToken::REFRESH_IDLE_LIMIT + 1.second
+    refresh @grant.refresh_token
+
+    assert_response :bad_request
+    assert_equal "invalid_grant", response.parsed_body["error"]
+  end
+
+  test "a grant written without an expiry still refreshes inside the window, gains an expiry, and shows in Connected Apps" do
+    Identity::AccessToken.where(id: @grant.id).update_all(refresh_token_expires_at: nil)
+    sign_in_as :david
+
+    get my_connected_apps_path
+    assert_match @client.name, response.body
+
+    later_by 1.day
+    refresh @grant.refresh_token
+
+    assert_response :success
+    assert_not_nil @grant.reload.read_attribute(:refresh_token_expires_at)
+  end
+
   private
     # Elapsed time in the app's zone, as the model counts it: travel would add
     # calendar days in the local zone, an hour off across a DST change.
