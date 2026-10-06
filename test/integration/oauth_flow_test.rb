@@ -835,6 +835,21 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "code grant for confidential client authenticates before checking the verifier or redirect_uri" do
+    code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+    client = oauth_clients(:confidential_client)
+    exchange = { grant_type: "authorization_code", client_id: client.client_id, client_secret: "wrong",
+      code: authorization_code_for(client, code_verifier: code_verifier),
+      redirect_uri: "http://127.0.0.1:8888/callback", code_verifier: code_verifier }
+
+    [ { code_verifier: "not-the-verifier" }, { redirect_uri: "http://127.0.0.1:8888/elsewhere" } ].each do |mismatch|
+      untenanted { post oauth_token_path, params: exchange.merge(mismatch), as: :json }
+
+      assert_response :bad_request
+      assert_equal "invalid_client", response.parsed_body["error"]
+    end
+  end
+
   test "refresh grant for confidential client omitting client_id fails as invalid_client" do
     client = oauth_clients(:confidential_client)
     token = identities(:david).access_tokens.create!(oauth_client: client)

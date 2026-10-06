@@ -13,19 +13,24 @@ class Oauth::TokensController < Oauth::BaseController
   with_options if: :authorization_code_grant? do
     before_action :set_auth_code
     before_action :set_client
+  end
+
+  before_action :set_refreshable_access_token, unless: :authorization_code_grant?
+
+  # Authenticate the posted client before validating anything about the grant:
+  # a confidential client that fails auth must see invalid_client, not an
+  # invalid_grant from a client_id, verifier or redirect_uri mismatch — which a
+  # client could misread as a revoked grant and discard, and which would answer
+  # grant checks for whoever holds a code but not the secret.
+  before_action :authenticate_client
+  before_action :validate_client_id
+
+  with_options if: :authorization_code_grant? do
     before_action :validate_pkce
     before_action :validate_redirect_uri
     before_action :set_identity
   end
 
-  before_action :set_refreshable_access_token, unless: :authorization_code_grant?
-
-  # Authenticate the posted client before validating that the code or refresh
-  # token was issued to it: a confidential client that fails auth must see
-  # invalid_client, not the invalid_grant that a client_id mismatch would raise
-  # first — which a client could misread as a revoked grant and discard.
-  before_action :authenticate_client
-  before_action :validate_client_id
   before_action :set_refresh_scope, unless: :authorization_code_grant?
 
   def create
