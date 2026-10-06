@@ -106,7 +106,8 @@ class OauthRevocationTest < ActionDispatch::IntegrationTest
   test "a body client_secret that authenticates no client is refused, whatever the token" do
     token = grant_for(@client)
 
-    [ { client_secret: @secret }, { client_id: "no-such-client", client_secret: @secret } ].each do |params|
+    [ { client_secret: @secret }, { client_id: "no-such-client", client_secret: @secret },
+      { client_id: oauth_clients(:mcp_client).client_id, client_secret: "anything" } ].each do |params|
       [ token.token, "not-a-token" ].each do |presented|
         revoke presented, params: params
 

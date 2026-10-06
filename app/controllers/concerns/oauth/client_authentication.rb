@@ -29,11 +29,11 @@ module Oauth::ClientAuthentication
 
     # The client the request authenticates as, or nil. A confidential client
     # authenticates with its secret. A public client identifies by client_id
-    # alone, but never through Basic: it holds no password, so a Basic header
-    # naming one is refused rather than downgraded to identification.
+    # alone, but never alongside a secret: it holds no password, so Basic or a
+    # body client_secret naming one is a failed attempt, not identification.
     def authenticated_client
       if client = requesting_client
-        client if client.confidential? ? client_secret_authenticates?(client) : !client_secret_basic?
+        client if client.confidential? ? client_secret_authenticates?(client) : !client_secret_basic? && oauth_client_secret.blank?
       end
     end
 
