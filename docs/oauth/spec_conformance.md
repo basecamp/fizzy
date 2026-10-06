@@ -90,8 +90,8 @@ Status key:
 | Rotation on every refresh, atomic (compare-and-swap); a concurrent loser gets `invalid_grant` | **Conformant** (#3081) |
 | Refresh may narrow scope, never widen it; blank or `null` scope is refused | **Conformant** (#3081 `379893613`, `cc1a01a41`, `0fb095f04`) |
 | `client_id` required and must match the grant | **Conformant** (#3081 `fc3d0c152`) |
-| Public clients' refresh tokens MUST be sender-constrained, or rotated **with replay detection**: presenting a rotated-out token revokes the live one (OAuth 2.1 §4.3.1, RFC 9700 §4.14.2) | **Fixed** #3160 `bc7e2e48f` "Revoke the grant when a rotated refresh token is replayed, with a retry grace". A replay revokes the grant. A retry within 60s, while the successor is still current, gets that successor, as in bc3. |
-| Refresh tokens SHOULD expire after client inactivity (RFC 9700 §4.14.2) | **Fixed** #3161 `5ae667e47` "Lapse OAuth grants left idle for 90 days", `efddf1f5b`. This matches bc3's 90-day `refresh_token_ttl`. A grant that lapses restarts its client's 30-day sweep clock (#3159). |
+| Public clients' refresh tokens MUST be sender-constrained, or rotated **with replay detection**: presenting a rotated-out token revokes the live one (OAuth 2.1 §4.3.1, RFC 9700 §4.14.2) | **Fixed** #3160 `6c2e34760` "Revoke the grant when a rotated refresh token is replayed, with a retry grace". A replay revokes the grant. A retry within 60s, while the successor is still current, gets that successor, as in bc3. |
+| Refresh tokens SHOULD expire after client inactivity (RFC 9700 §4.14.2) | **Fixed** #3161 `7f370e583` "Lapse OAuth grants left idle for 90 days", `2479cf5f3`. This matches bc3's 90-day `refresh_token_ttl`. A grant that lapses restarts its client's 30-day sweep clock (#3159). |
 
 ## RFC 7009: revocation
 
@@ -134,19 +134,19 @@ Status key:
 | A self-registered redirect names its authority plainly: no userinfo, no percent-encoded host, a port from 1 to 65535. Consent names a non-default port, and loopback port variation keeps userinfo fixed | **Fixed** #3080 `be895123b` "Register only redirects whose authority is plain, and show their port on consent". One rule at registration, in place of canonicalizing wherever the URI is shown or compared |
 | Errors answer `invalid_client_metadata` or `invalid_redirect_uri`, never 500 (§3.2.2). An over-long or non-String `client_name` had raised a 500 on both databases | **Fixed** #2296 `51155c5e3` |
 | Open, unauthenticated registration of any https host (no initial access token, no host vetting) | **Deliberate** (#3080, hosted plan): Cursor and other generic MCP clients need it. bc3 vets hosts; Fizzy will cover the recognized-host tier with CIMD (Phase C′). Impersonating names on consent go to the consent design pass (D5). |
-| Abandoned registrations are reclaimed (§5 abuse mitigation) | **Fixed** #3159 `588c104bb`, `ef75cf9e5`. A daily sweep removes self-registered clients with no grant activity for 30 days, matching bc3's retention. It row-locks and shares that lock with issuance, so it can't race a code exchange. Under the lock it rechecks the whole stale test, and consent touches the client, so a client isn't swept between consent and its code exchange (`26aba21a0`). A refresh whose client row is gone gets a 400, not a 500. Groundwork in #2296 `65e4d3e7c` fixed the `access_tokens` association and a schema-only foreign key that migrated databases never had. |
+| Abandoned registrations are reclaimed (§5 abuse mitigation) | **Fixed** #3159 `aa1ab6901`, `1a20811ab`. A daily sweep removes self-registered clients with no grant activity for 30 days, matching bc3's retention. It row-locks and shares that lock with issuance, so it can't race a code exchange. Under the lock it rechecks the whole stale test, and consent touches the client, so a client isn't swept between consent and its code exchange (`6d43a3a71`). A refresh whose client row is gone gets a 400, not a 500. Groundwork in #2296 `65e4d3e7c` fixed the `access_tokens` association and a schema-only foreign key that migrated databases never had. |
 | RFC 7592 management endpoint, initial access token, global registration cap | **Deliberate**: not built. RFC 7592 is optional. A global cap would turn one actor's abuse into an outage for everyone. |
 
 ## RFC 6750 / RFC 9110: resource-server challenge
 
 | Requirement | Status |
 |---|---|
-| Challenges use the `Bearer` scheme (§3). Rails' default was `Token realm=` | **Fixed** #3158 `60660ee22` "Answer API authentication failures with a Bearer challenge" |
-| A presented but invalid or expired token gets 401 `error="invalid_token"` (§3.1); clients refresh on this hourly since #3081 | **Fixed** #3158 `60660ee22` |
-| A valid read token on a write gets 403 `error="insufficient_scope", scope="write"`, so clients stop refreshing in a loop | **Fixed** #3158 `60660ee22` |
+| Challenges use the `Bearer` scheme (§3). Rails' default was `Token realm=` | **Fixed** #3158 `4e2529dbf` "Answer API authentication failures with a Bearer challenge" |
+| A presented but invalid or expired token gets 401 `error="invalid_token"` (§3.1); clients refresh on this hourly since #3081 | **Fixed** #3158 `4e2529dbf` |
+| A valid read token on a write gets 403 `error="insufficient_scope", scope="write"`, so clients stop refreshing in a loop | **Fixed** #3158 `4e2529dbf` |
 | A JSON request with no credentials gets 401 plus a challenge instead of a 302 to sign-in (§3) | **Fixed** #3158, except for requests carrying a session cookie or `X-Requested-With`, which keep the 302 so in-app autosave and uploads don't break. **Open decision**: D6. |
-| The scheme is matched case-insensitively (RFC 9110 §11.1) | **Fixed** #3158 `60660ee22` |
-| `resource_metadata` in the challenge (RFC 9728 §5.1), omitted while dark | **Fixed** #3158 `60660ee22` |
+| The scheme is matched case-insensitively (RFC 9110 §11.1) | **Fixed** #3158 `4e2529dbf` |
+| `resource_metadata` in the challenge (RFC 9728 §5.1), omitted while dark | **Fixed** #3158 `4e2529dbf` |
 | A Bearer header on an HTML request: 401, not the SHOULD-level 400 for `invalid_request` | **Deliberate** (#3158 summary); preserves the existing refusal. |
 
 ## Parity with bc3 not yet built
