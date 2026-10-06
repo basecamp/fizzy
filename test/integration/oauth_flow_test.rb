@@ -649,6 +649,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     untenanted do
       post oauth_token_path, params: {
         grant_type: "authorization_code",
+        client_id: client.client_id,
         code: code,
         redirect_uri: "https://connector.example.com/callback",
         code_verifier: code_verifier
@@ -657,6 +658,19 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
 
     assert_response :bad_request
     assert_equal "invalid_client", response.parsed_body["error"]
+
+    # Naming no client at all is a malformed request, whatever the code.
+    untenanted do
+      post oauth_token_path, params: {
+        grant_type: "authorization_code",
+        code: code,
+        redirect_uri: "https://connector.example.com/callback",
+        code_verifier: code_verifier
+      }, as: :json
+    end
+
+    assert_response :bad_request
+    assert_equal "invalid_request", response.parsed_body["error"]
   end
 
   test "token exchange for confidential client rejects a wrong client secret" do
@@ -846,6 +860,60 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
       untenanted { post oauth_token_path, params: exchange.merge(mismatch), as: :json }
 
       assert_response :bad_request
+      assert_equal "invalid_client", response.parsed_body["error"]
+    end
+  end
+
+  test "token errors are never cached" do
+    client = oauth_clients(:confidential_client)
+    token = identities(:david).access_tokens.create!(oauth_client: client)
+
+    [ { grant_type: "password" },
+      { grant_type: "refresh_token", refresh_token: token.refresh_token, client_id: client.client_id, client_secret: "wrong" },
+      { grant_type: "refresh_token", refresh_token: "bogus", client_id: oauth_clients(:mcp_client).client_id } ].each do |request|
+      untenanted { post oauth_token_path, params: request, as: :json }
+
+      assert_response :bad_request
+      assert_equal "no-store", response.headers["Cache-Control"], request.inspect
+      assert_equal "no-cache", response.headers["Pragma"]
+    end
+  end
+
+  test "registration errors are never cached" do
+    untenanted { post oauth_clients_path, params: { redirect_uris: [] }, as: :json }
+
+    assert_response :bad_request
+    assert_equal "no-store", response.headers["Cache-Control"]
+  end
+
+  test "confidential client authentication does not reveal whether a refresh token is live" do
+    client = oauth_clients(:confidential_client)
+    token = identities(:david).access_tokens.create!(oauth_client: client)
+
+    [ token.refresh_token, "not-a-refresh-token" ].each do |refresh_token|
+      untenanted { post oauth_token_path, params: { grant_type: "refresh_token", refresh_token: refresh_token, client_id: client.client_id, client_secret: "wrong" }, as: :json }
+      assert_equal "invalid_client", response.parsed_body["error"], "wrong secret"
+
+      untenanted { post oauth_token_path, params: { grant_type: "refresh_token", refresh_token: refresh_token, client_id: oauth_clients(:mcp_client).client_id }, as: :json }
+      assert_equal "invalid_grant", response.parsed_body["error"], "another client's id"
+
+      untenanted { post oauth_token_path, params: { grant_type: "refresh_token", refresh_token: refresh_token }, as: :json }
+      assert_equal "invalid_request", response.parsed_body["error"], "no client_id"
+    end
+
+    assert_equal token.refresh_token, token.reload.refresh_token
+  end
+
+  test "confidential client authentication does not reveal whether a code is valid" do
+    client = oauth_clients(:confidential_client)
+    code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+
+    [ authorization_code_for(client, code_verifier: code_verifier), "not-a-code" ].each do |code|
+      untenanted do
+        post oauth_token_path, params: { grant_type: "authorization_code", client_id: client.client_id, client_secret: "wrong",
+          code: code, redirect_uri: "http://127.0.0.1:8888/callback", code_verifier: code_verifier }, as: :json
+      end
+
       assert_equal "invalid_client", response.parsed_body["error"]
     end
   end
