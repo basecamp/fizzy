@@ -15,7 +15,7 @@ class My::ConnectedAppsController < ApplicationController
 
   private
     def set_connected_apps
-      tokens = oauth_tokens.includes(:oauth_client).order(:created_at)
+      tokens = oauth_tokens.unlapsed.includes(:oauth_client).order(:created_at)
       @connected_apps = tokens.group_by(&:oauth_client).sort_by { |client, _| client.name.downcase }
     end
 

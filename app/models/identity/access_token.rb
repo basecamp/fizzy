@@ -1,6 +1,11 @@
 class Identity::AccessToken < ApplicationRecord
   EXPIRES_IN = 1.hour
 
+  # A grant whose refresh token goes unused this long lapses, and the client
+  # must ask the user again. Each refresh restarts the clock, as each rotation
+  # in bc3 mints a refresh token good for its 90-day refresh_token_ttl.
+  REFRESH_IDLE_LIMIT = 90.days
+
   belongs_to :identity
   belongs_to :oauth_client, class_name: "Oauth::Client", optional: true
   has_many :retired_refresh_tokens, class_name: "Oauth::RetiredRefreshToken", dependent: :delete_all
@@ -13,6 +18,8 @@ class Identity::AccessToken < ApplicationRecord
   scope :personal, -> { where oauth_client_id: nil }
   scope :oauth, -> { where.not oauth_client_id: nil }
   scope :active, -> { where(expires_at: nil).or(where(expires_at: Time.current..)) }
+  scope :lapsed, -> { oauth.where(refresh_token_expires_at: ...Time.current) }
+  scope :unlapsed, -> { where(refresh_token_expires_at: Time.current..) }
 
   has_secure_token
   enum :permission, %w[ read write ].index_by(&:itself), default: :read
@@ -24,6 +31,10 @@ class Identity::AccessToken < ApplicationRecord
       if (access_token = active.find_by(token: token)) && access_token.honored? && access_token.allows?(method)
         access_token
       end
+    end
+
+    def cleanup
+      lapsed.find_each(&:destroy)
     end
 
     def find_by_refresh_token(refresh_token)
@@ -60,6 +71,10 @@ class Identity::AccessToken < ApplicationRecord
     (expires_at - Time.current).to_i if expires_at?
   end
 
+  def lapsed?
+    refresh_token_expires_at? && refresh_token_expires_at.past?
+  end
+
   # Rotates atomically on the presented refresh token, so a concurrent
   # rotation wins the row and the loser comes up empty-handed. The presented
   # token is retired, not forgotten, so presenting it again is recognized as
@@ -67,7 +82,8 @@ class Identity::AccessToken < ApplicationRecord
   def refresh(permission: self.permission)
     rotated = { token: self.class.generate_unique_secure_token,
       refresh_token: self.class.generate_unique_secure_token,
-      expires_at: EXPIRES_IN.from_now, permission: permission, updated_at: Time.current }
+      expires_at: EXPIRES_IN.from_now, refresh_token_expires_at: REFRESH_IDLE_LIMIT.from_now,
+      permission: permission, updated_at: Time.current }
 
     transaction do
       if self.class.where(id: id, refresh_token: refresh_token).update_all(rotated) == 1
@@ -86,5 +102,6 @@ class Identity::AccessToken < ApplicationRecord
     def set_expiry_and_refresh_token
       self.expires_at ||= EXPIRES_IN.from_now
       self.refresh_token ||= self.class.generate_unique_secure_token
+      self.refresh_token_expires_at ||= REFRESH_IDLE_LIMIT.from_now
     end
 end

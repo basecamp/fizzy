@@ -28,6 +28,7 @@ class Oauth::TokensController < Oauth::BaseController
 
   before_action :set_refreshable_access_token, unless: :authorization_code_grant?
   before_action :validate_client_id
+  before_action :reject_lapsed_grant, unless: -> { authorization_code_grant? || @retired_refresh_token }
 
   with_options if: :authorization_code_grant? do
     before_action :validate_pkce
@@ -149,6 +150,12 @@ class Oauth::TokensController < Oauth::BaseController
 
     def revocable_replay?
       @retired_refresh_token && !@retired_refresh_token.within_grace?
+    end
+
+    def reject_lapsed_grant
+      if @access_token.lapsed?
+        oauth_error "invalid_grant", "Refresh token expired"
+      end
     end
 
     # A refresh request may narrow scope but never widen it (RFC 6749 §6). An

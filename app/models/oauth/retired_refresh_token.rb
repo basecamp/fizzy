@@ -8,9 +8,9 @@ class Oauth::RetiredRefreshToken < ApplicationRecord
   # bc3's refresh_replay_grace default (Oauth::RefreshToken::Rotation).
   GRACE = 60.seconds
 
-  # As long as a replay can still be recognized. It matches bc3's 90-day
-  # refresh_token_ttl, after which a rotated token there has expired too.
-  RETENTION = 90.days
+  # As long as a replay can still be recognized: past the idle limit, the
+  # grant a retired token came from has lapsed unless it rotated since.
+  RETENTION = Identity::AccessToken::REFRESH_IDLE_LIMIT
 
   belongs_to :access_token, class_name: "Identity::AccessToken"
 
