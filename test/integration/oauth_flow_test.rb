@@ -1226,11 +1226,11 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
   # Token Revocation (RFC 7009)
 
   test "revocation deletes access token" do
-    token = identity_access_tokens(:davids_api_token)
+    token = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client))
 
     assert_difference "Identity::AccessToken.count", -1 do
       untenanted do
-        post oauth_revocation_path, params: { token: token.token }, as: :json
+        post oauth_revocation_path, params: { token: token.token, client_id: token.oauth_client.client_id }, as: :json
       end
     end
 
@@ -1242,7 +1242,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
 
     assert_difference "Identity::AccessToken.count", -1 do
       untenanted do
-        post oauth_revocation_path, params: { token: token.refresh_token }, as: :json
+        post oauth_revocation_path, params: { token: token.refresh_token, client_id: token.oauth_client.client_id }, as: :json
       end
     end
 
@@ -1278,18 +1278,6 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_equal "invalid_request", response.parsed_body["error"]
   end
 
-  test "revocation ignores client credentials and revokes on the token alone" do
-    access_token = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client), permission: :read)
-
-    untenanted do
-      post oauth_revocation_path, params: { token: access_token.token },
-        headers: { "Authorization" => ActionController::HttpAuthentication::Basic.encode_credentials("someone", "anything") }
-    end
-
-    assert_response :success
-    assert_not Identity::AccessToken.exists?(access_token.id)
-  end
-
 
   # Discovery Metadata (RFC 8414)
 
@@ -1310,7 +1298,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_equal true, body["authorization_response_iss_parameter_supported"]
     assert_equal %w[ query ], body["response_modes_supported"]
     assert_match %r{/oauth/revocation$}, body["revocation_endpoint"]
-    assert_equal %w[ none ], body["revocation_endpoint_auth_methods_supported"]
+    assert_equal %w[ none client_secret_post client_secret_basic ], body["revocation_endpoint_auth_methods_supported"]
     assert_includes body["grant_types_supported"], "authorization_code"
     assert_includes body["grant_types_supported"], "refresh_token"
     assert_equal %w[ none client_secret_post client_secret_basic ], body["token_endpoint_auth_methods_supported"]

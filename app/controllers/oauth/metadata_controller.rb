@@ -10,7 +10,7 @@ class Oauth::MetadataController < Oauth::BaseController
       token_endpoint: oauth_token_url,
       registration_endpoint: oauth_clients_url,
       revocation_endpoint: oauth_revocation_url,
-      revocation_endpoint_auth_methods_supported: %w[ none ],
+      revocation_endpoint_auth_methods_supported: Oauth::Client::AUTH_METHODS,
       response_types_supported: %w[ code ],
       response_modes_supported: %w[ query ],
       grant_types_supported: %w[ authorization_code refresh_token ],

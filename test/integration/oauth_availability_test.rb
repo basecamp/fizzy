@@ -262,7 +262,7 @@ class OauthAvailabilityTest < ActionDispatch::IntegrationTest
 
     with_oauth_availability acceptance: false, issuance: false do
       assert_difference "Identity::AccessToken.count", -1 do
-        untenanted { post oauth_revocation_path, params: { token: token.token } }
+        untenanted { post oauth_revocation_path, params: { token: token.token, client_id: token.oauth_client.client_id } }
       end
     end
 
