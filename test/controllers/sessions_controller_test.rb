@@ -7,6 +7,43 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :success
+    assert_select "form[action='/session/single_sign_on']", count: 0
+  end
+
+  test "new shows only single sign-on when it is configured" do
+    with_single_sign_on provider_name: "Acme SSO" do
+      untenanted do
+        get new_session_path
+      end
+    end
+
+    assert_select "form[action='/session/single_sign_on'][data-turbo='false'] button", text: /Sign in with Acme SSO/
+    assert_select "input[name=email_address]", count: 0
+    assert_select "form[action='/session/passkey']", count: 0
+  end
+
+  test "create is not available with single sign-on" do
+    with_single_sign_on do
+      untenanted do
+        assert_no_difference -> { MagicLink.count } do
+          post session_path, params: { email_address: identities(:kevin).email_address }
+        end
+      end
+    end
+
+    assert_redirected_to new_session_url(script_name: nil)
+    assert_equal "Sign in with SSO.", flash[:alert]
+  end
+
+  test "create as JSON is not available with single sign-on" do
+    with_single_sign_on do
+      untenanted do
+        post session_path, params: { email_address: identities(:kevin).email_address }, as: :json
+      end
+    end
+
+    assert_response :forbidden
+    assert_equal "single_sign_on_required", response.parsed_body["error"]
   end
 
   test "new redirects authenticated users" do

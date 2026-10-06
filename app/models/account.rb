@@ -1,5 +1,6 @@
 class Account < ApplicationRecord
-  include Account::Storage, Cancellable, Entropic, Incineratable, MultiTenantable, Searchable, Seedeable
+  include Account::Storage, Cancellable, Entropic, Incineratable, MultiTenantable, Searchable, Seedeable,
+    SingleSignOnEnforceable
 
   has_one :join_code, dependent: :destroy
   has_many :users, dependent: :destroy

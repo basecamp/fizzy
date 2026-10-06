@@ -79,8 +79,9 @@ Rails.application.config.to_prepare do
 
     included do
       # Ensure require_authentication runs after set_blob.
-      skip_before_action :require_authentication
-      before_action :require_authentication, :ensure_accessible, unless: :publicly_accessible_blob?
+      skip_before_action :require_authentication, :require_single_sign_on_session
+      before_action :require_authentication, :require_single_sign_on_session, :ensure_accessible,
+        unless: :publicly_accessible_blob?
     end
 
     private
@@ -93,9 +94,13 @@ Rails.application.config.to_prepare do
       end
 
       def ensure_accessible
-        unless @blob.accessible_to?(Current.user)
+        unless @blob.accessible_to?(Current.user) && accessible_with_current_session?
           head :forbidden
         end
+      end
+
+      def accessible_with_current_session?
+        Current.account.nil? || Current.account.accessible_with?(Current.session)
       end
 
       def http_cache_forever(public: false, **options, &block)

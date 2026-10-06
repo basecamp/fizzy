@@ -5,6 +5,17 @@ class Account::JoinCodesControllerTest < ActionDispatch::IntegrationTest
     sign_in_as :kevin
   end
 
+  test "show is not found with single sign-on" do
+    current_session.update!(single_sign_on_authenticated_at: Time.current)
+
+    with_single_sign_on do
+      get account_join_code_path
+    end
+
+    assert_response :not_found
+  end
+
+
   test "reset" do
     get account_join_code_path
     assert_response :success

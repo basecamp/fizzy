@@ -18,9 +18,11 @@
       </ul>
     </div>
 
-    <%= link_to account_join_code_path, class: "btn btn--link center" do %>
-      <%= icon_tag "add" %>
-      <span>Invite people</span>
+    <% unless SingleSignOn.configured? %>
+      <%= link_to account_join_code_path, class: "btn btn--link center" do %>
+        <%= icon_tag "add" %>
+        <span>Invite people</span>
+      <% end %>
     <% end %>
   <% end %>
 </section>

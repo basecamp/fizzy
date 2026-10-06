@@ -2,6 +2,7 @@ class My::AccessTokensController < ApplicationController
   wrap_parameters :access_token, include: %i[ description permission ]
 
   skip_before_action :require_account
+  before_action -> { head :not_found if SingleSignOn.configured? }
 
   def index
     @access_tokens = my_access_tokens.order(created_at: :desc)

@@ -5,6 +5,18 @@ class My::AccessTokensControllerTest < ActionDispatch::IntegrationTest
     sign_in_as :kevin
   end
 
+  test "not found with single sign-on" do
+    current_session.update!(single_sign_on_authenticated_at: Time.current)
+
+    with_single_sign_on do
+      untenanted do
+        get my_access_tokens_path
+      end
+    end
+
+    assert_response :not_found
+  end
+
   test "index renders untenanted" do
     identities(:kevin).access_tokens.create!(description: "Fizzy CLI", permission: "read")
 

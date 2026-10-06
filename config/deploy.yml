@@ -27,12 +27,18 @@ env:
     - VAPID_PRIVATE_KEY
     - SMTP_USERNAME
     - SMTP_PASSWORD
+    # - SINGLE_SIGN_ON_CLIENT_SECRET # See docs/single-sign-on.md
   clear:
     BASE_URL: https://fizzy.example.com # The public URL of your Fizzy instance
     MAILER_FROM_ADDRESS: support@example.com # The email "from" address that Fizzy sends email from
     SMTP_ADDRESS: mail.example.com # The SMTP server you'll use to send email
     MULTI_TENANT: false # Set to true to allow multiple accounts to sign up
     SOLID_QUEUE_IN_PUMA: true # Run background jobs in the app container
+    # SINGLE_SIGN_ON_ISSUER: https://id.example.com # Optional single sign-on
+    # SINGLE_SIGN_ON_CLIENT_ID: fizzy
+    # SINGLE_SIGN_ON_PROVIDER_NAME: Acme SSO
+    # SINGLE_SIGN_ON_ADMIN_GROUP: /fizzy/admins
+    # SINGLE_SIGN_ON_ACCOUNT_ADMIN_SUBGROUP: admins
 
 
 #-- General configuration --#

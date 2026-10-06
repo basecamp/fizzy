@@ -2,6 +2,7 @@ class Account::ImportsController < ApplicationController
   layout "public"
 
   disallow_account_scope only: %i[ new create ]
+  before_action :ensure_account_creation_allowed_by_single_sign_on, only: %i[ new create ]
   allow_unauthorized_access only: :show
   before_action :set_import, only: %i[ show ]
   before_action :ensure_accessed_by_owner, only: %i[ show ]

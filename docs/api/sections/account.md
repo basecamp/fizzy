@@ -12,7 +12,8 @@ __Response:__
   "name": "37signals",
   "cards_count": 5,
   "created_at": "2025-12-05T19:36:35.401Z",
-  "auto_postpone_period_in_days": 30
+  "auto_postpone_period_in_days": 30,
+  "single_sign_on_group": null
 }
 ```
 
@@ -90,7 +91,39 @@ Returns the account object:
   "name": "37signals",
   "cards_count": 5,
   "created_at": "2025-12-05T19:36:35.401Z",
-  "auto_postpone_period_in_days": 30
+  "auto_postpone_period_in_days": 30,
+  "single_sign_on_group": null
+}
+```
+
+## `PATCH /:account_slug/account/single_sign_on`
+
+Sets the single sign-on (SSO) group of the account. Requires a session in the admin group of the server, which `SINGLE_SIGN_ON_ADMIN_GROUP` names. Other requests get `403 Forbidden`. Personal access tokens get `403 Forbidden` on servers with SSO, so only a browser session can set the group. If the server does not have SSO configured, the response is `404 Not Found`.
+
+__Request:__
+
+```json
+{
+  "account": {
+    "single_sign_on_group": "/sales"
+  }
+}
+```
+
+`single_sign_on_group` is the full path of a group in the identity provider. Only members of that group and of the admin group can open the account. A path without a leading `/` gets `422 Unprocessable Entity`. An empty string removes the group.
+
+__Response:__
+
+Returns the account object:
+
+```json
+{
+  "id": "03f5v9zjvypwh0t0e2rfh0h7k",
+  "name": "37signals",
+  "cards_count": 5,
+  "created_at": "2025-12-05T19:36:35.401Z",
+  "auto_postpone_period_in_days": 30,
+  "single_sign_on_group": "/sales"
 }
 ```
 

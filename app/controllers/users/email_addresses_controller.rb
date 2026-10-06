@@ -1,5 +1,6 @@
 class Users::EmailAddressesController < ApplicationController
   before_action :set_user
+  before_action :ensure_email_address_changeable
   before_action :ensure_valid_email_address, only: :create
   rate_limit to: 5, within: 1.hour, only: :create
 
@@ -18,6 +19,17 @@ class Users::EmailAddressesController < ApplicationController
   private
     def set_user
       @user = Current.identity.users.find(params[:user_id])
+    end
+
+    def ensure_email_address_changeable
+      unless @user.email_address_changeable?
+        error = "Your email address is linked to #{SingleSignOn.provider_name} and cannot change here"
+
+        respond_to do |format|
+          format.html { redirect_to edit_user_path(@user), alert: error }
+          format.json { render json: { error: error }, status: :forbidden }
+        end
+      end
     end
 
     def ensure_valid_email_address

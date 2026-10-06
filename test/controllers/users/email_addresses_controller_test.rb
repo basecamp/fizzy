@@ -28,6 +28,26 @@ class Users::EmailAddressesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Please enter a valid email address", flash[:alert]
   end
 
+  test "new with a single sign-on link" do
+    @user.identity.link_single_sign_on(single_sign_on_claims(subject: "david-subject"))
+
+    get new_user_email_address_path(@user, script_name: @user.account.slug)
+
+    assert_redirected_to edit_user_path(@user)
+    assert_equal "Your email address is linked to SSO and cannot change here", flash[:alert]
+  end
+
+  test "create as JSON with a single sign-on link" do
+    @user.identity.link_single_sign_on(single_sign_on_claims(subject: "david-subject"))
+
+    assert_no_emails do
+      post user_email_addresses_path(@user, script_name: @user.account.slug), params: { email_address: "newemail@example.com" }, as: :json
+    end
+
+    assert_response :forbidden
+    assert_equal "Your email address is linked to SSO and cannot change here", @response.parsed_body["error"]
+  end
+
   test "create with same email as current" do
     assert_no_emails do
       post user_email_addresses_path(@user, script_name: @user.account.slug), params: { email_address: @user.identity.email_address }

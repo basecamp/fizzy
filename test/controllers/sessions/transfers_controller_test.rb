@@ -20,6 +20,17 @@ class Sessions::TransfersControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "update is not available with single sign-on" do
+    untenanted do
+      with_single_sign_on do
+        put session_transfer_path(identities(:david).transfer_id)
+      end
+
+      assert_redirected_to new_session_url(script_name: nil)
+      assert_nil parsed_cookies.signed[:session_token]
+    end
+  end
+
   test "a transfer token is single-use: a zero-cookie replay is rejected" do
     token = identities(:david).transfer_id
 

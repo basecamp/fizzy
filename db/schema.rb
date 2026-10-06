@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_08_28_120000) do
+ActiveRecord::Schema[8.2].define(version: 2026_10_06_130000) do
   create_table "accesses", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -66,6 +66,7 @@ ActiveRecord::Schema[8.2].define(version: 2026_08_28_120000) do
     t.bigint "external_account_id"
     t.string "name", null: false
     t.datetime "updated_at", null: false
+    t.string "single_sign_on_group"
     t.index ["external_account_id"], name: "index_accounts_on_external_account_id", unique: true
   end
 
@@ -359,6 +360,16 @@ ActiveRecord::Schema[8.2].define(version: 2026_08_28_120000) do
     t.string "token"
     t.datetime "updated_at", null: false
     t.index ["identity_id"], name: "index_access_token_on_identity_id"
+  end
+
+  create_table "identity_single_sign_on_links", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.uuid "identity_id", null: false
+    t.string "issuer", null: false
+    t.string "subject", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["identity_id", "issuer"], name: "index_identity_single_sign_on_links_on_identity_id_and_issuer", unique: true
+    t.index ["issuer", "subject"], name: "index_identity_single_sign_on_links_on_issuer_and_subject", unique: true
   end
 
   create_table "identity_transfers", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -725,6 +736,8 @@ ActiveRecord::Schema[8.2].define(version: 2026_08_28_120000) do
     t.string "ip_address"
     t.datetime "updated_at", null: false
     t.string "user_agent", limit: 4096
+    t.datetime "single_sign_on_authenticated_at"
+    t.text "single_sign_on_groups"
     t.index ["identity_id"], name: "index_sessions_on_identity_id"
   end
 

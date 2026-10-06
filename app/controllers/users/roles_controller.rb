@@ -1,6 +1,7 @@
 class Users::RolesController < ApplicationController
   wrap_parameters :user, include: %i[ role ]
 
+  before_action -> { head :forbidden if SingleSignOn.configured? }
   before_action :set_user
   before_action :ensure_permission_to_administer_user
 

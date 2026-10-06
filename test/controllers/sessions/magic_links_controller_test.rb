@@ -1,6 +1,19 @@
 require "test_helper"
 
 class Sessions::MagicLinksControllerTest < ActionDispatch::IntegrationTest
+  test "create is not available with single sign-on" do
+    magic_link = MagicLink.create!(identity: identities(:kevin))
+
+    with_single_sign_on do
+      untenanted do
+        post session_magic_link_path, params: { code: magic_link.code }
+      end
+    end
+
+    assert_redirected_to new_session_url(script_name: nil)
+    assert_nil parsed_cookies.signed[:session_token]
+  end
+
   test "show" do
     untenanted do
       get session_magic_link_url

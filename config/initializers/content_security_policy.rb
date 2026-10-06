@@ -44,6 +44,13 @@ Rails.application.configure do
       config.x.content_security_policy.report_only
     end
 
+  # Chrome applies `form-action` to the redirect after a form POST, and the
+  # single sign-on form redirects to the provider. This initializer loads
+  # before `single_sign_on.rb` to read the environment directly.
+  single_sign_on_origin = ENV["SINGLE_SIGN_ON_ISSUER"].presence&.then do |issuer|
+    URI.join(issuer, "/").to_s.chomp("/")
+  end
+
   # Generate nonces for importmap and inline scripts
   config.content_security_policy_nonce_generator = ->(request) { SecureRandom.base64(16) }
   config.content_security_policy_nonce_directives = %w[ script-src ]
@@ -66,7 +73,7 @@ Rails.application.configure do
     policy.object_src :none
     policy.base_uri :none
 
-    policy.form_action :self, *sources.(:form_action)
+    policy.form_action :self, *sources.(:form_action), *single_sign_on_origin
     policy.frame_ancestors :self, *sources.(:frame_ancestors)
 
     # Specify URI for violation reports (e.g., Sentry CSP endpoint)
