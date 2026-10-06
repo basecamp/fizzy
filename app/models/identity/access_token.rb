@@ -1,6 +1,19 @@
 class Identity::AccessToken < ApplicationRecord
   EXPIRES_IN = 1.hour
 
+  # A grant whose refresh token goes unused this long lapses, and the client
+  # must ask the user again. Each refresh restarts the clock, as each rotation
+  # in bc3 mints a refresh token good for its 90-day refresh_token_ttl.
+  #
+  # The clock is updated_at. Only issuance and rotation write a grant, and
+  # every rotation (this code's or any earlier version's) sets updated_at, so
+  # no stored deadline can fall out of step with the token it governs.
+  #
+  # Fixed seconds, not calendar days: requests run in the browser's time zone,
+  # where 90.days would shift by an hour across a daylight-saving change, and
+  # the UTC sweep would then disagree with the token endpoint.
+  REFRESH_IDLE_LIMIT = 90.days.in_seconds.seconds
+
   belongs_to :identity
   belongs_to :oauth_client, class_name: "Oauth::Client", optional: true
   has_many :retired_refresh_tokens, class_name: "Oauth::RetiredRefreshToken", dependent: :delete_all
@@ -13,6 +26,8 @@ class Identity::AccessToken < ApplicationRecord
   scope :personal, -> { where oauth_client_id: nil }
   scope :oauth, -> { where.not oauth_client_id: nil }
   scope :active, -> { where(expires_at: nil).or(where(expires_at: Time.current..)) }
+  scope :unlapsed, -> { where(updated_at: REFRESH_IDLE_LIMIT.ago..) }
+  scope :lapsed, -> { oauth.where(updated_at: ...REFRESH_IDLE_LIMIT.ago) }
 
   has_secure_token
   enum :permission, %w[ read write ].index_by(&:itself), default: :read
@@ -23,6 +38,17 @@ class Identity::AccessToken < ApplicationRecord
     def find_permissable(token, method:)
       if (access_token = active.find_by(token: token)) && access_token.honored? && access_token.allows?(method)
         access_token
+      end
+    end
+
+    # Each grant is rechecked under its lock, so one renewed after it was
+    # selected (by code from before idle expiry, mid-deploy, whose rotation
+    # doesn't check for lapse) is spared.
+    def cleanup
+      lapsed.find_each do |grant|
+        grant.with_lock { grant.destroy if grant.lapsed? }
+      rescue ActiveRecord::RecordNotFound
+        # Already gone.
       end
     end
 
@@ -60,8 +86,14 @@ class Identity::AccessToken < ApplicationRecord
     (expires_at - Time.current).to_i if expires_at?
   end
 
+  def lapsed?
+    oauth_client_id? && (updated_at + REFRESH_IDLE_LIMIT).past?
+  end
+
   # Rotates atomically on the presented refresh token, so a concurrent
-  # rotation wins the row and the loser comes up empty-handed. The presented
+  # rotation wins the row and the loser comes up empty-handed. A grant that
+  # lapses mid-request doesn't rotate either, so a sweep that found it lapsed
+  # never deletes a grant that was just renewed. The presented
   # token is retired, not forgotten, so presenting it again is recognized as
   # a retry or a replay (see Oauth::RetiredRefreshToken).
   def refresh(permission: self.permission)
@@ -70,7 +102,7 @@ class Identity::AccessToken < ApplicationRecord
       expires_at: EXPIRES_IN.from_now, permission: permission, updated_at: Time.current }
 
     transaction do
-      if self.class.where(id: id, refresh_token: refresh_token).update_all(rotated) == 1
+      if self.class.unlapsed.where(id: id, refresh_token: refresh_token).update_all(rotated) == 1
         retired_refresh_tokens.create! refresh_token: refresh_token, successor_refresh_token: rotated[:refresh_token]
         assign_attributes rotated
         true

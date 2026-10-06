@@ -65,4 +65,18 @@ class Identity::AccessTokenTest < ActiveSupport::TestCase
       assert_nil Identity::AccessToken.find_permissable(token.token, method: "GET")
     end
   end
+
+  test "the idle limit is a fixed span of seconds, whatever the zone's daylight saving" do
+    travel_to Time.utc(2026, 12, 1, 12) do
+      cutoff = Time.current - Identity::AccessToken::REFRESH_IDLE_LIMIT.to_i
+      grant = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client))
+      grant.update_columns updated_at: cutoff - 30.minutes
+
+      Time.use_zone("America/New_York") do
+        assert grant.lapsed?
+        assert_includes Identity::AccessToken.lapsed, grant
+        assert_not_includes Identity::AccessToken.unlapsed, grant
+      end
+    end
+  end
 end
