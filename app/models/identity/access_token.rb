@@ -8,7 +8,11 @@ class Identity::AccessToken < ApplicationRecord
   # The clock is updated_at. Only issuance and rotation write a grant, and
   # every rotation (this code's or any earlier version's) sets updated_at, so
   # no stored deadline can fall out of step with the token it governs.
-  REFRESH_IDLE_LIMIT = 90.days
+  #
+  # Fixed seconds, not calendar days: requests run in the browser's time zone,
+  # where 90.days would shift by an hour across a daylight-saving change, and
+  # the UTC sweep would then disagree with the token endpoint.
+  REFRESH_IDLE_LIMIT = 90.days.in_seconds.seconds
 
   belongs_to :identity
   belongs_to :oauth_client, class_name: "Oauth::Client", optional: true
