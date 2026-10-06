@@ -721,6 +721,26 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_equal "read write", response.parsed_body["scope"]
   end
 
+  test "code exchange and refresh report a write grant the same way" do
+    client = oauth_clients(:mcp_client)
+    code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+
+    untenanted do
+      post oauth_token_path, params: { grant_type: "authorization_code", client_id: client.client_id,
+        code: authorization_code_for(client, code_verifier: code_verifier, scope: "read write"),
+        redirect_uri: "http://127.0.0.1:8888/callback", code_verifier: code_verifier }, as: :json
+    end
+    assert_response :success
+    assert_equal "read write", response.parsed_body["scope"]
+
+    untenanted do
+      post oauth_token_path, params: { grant_type: "refresh_token",
+        refresh_token: response.parsed_body["refresh_token"], client_id: client.client_id }, as: :json
+    end
+    assert_response :success
+    assert_equal "read write", response.parsed_body["scope"]
+  end
+
   test "refresh grant narrows the token to a requested subset scope" do
     client = oauth_clients(:mcp_client)
     token = identities(:david).access_tokens.create!(oauth_client: client, permission: :write)

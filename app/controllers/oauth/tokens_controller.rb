@@ -32,7 +32,7 @@ class Oauth::TokensController < Oauth::BaseController
       end
     else
       if @access_token.refresh(permission: @refresh_permission)
-        render json: token_response(@access_token, scope: scope_for(@access_token.permission))
+        render json: token_response(@access_token, scope: Oauth.canonical_scope(@access_token.permission))
       else
         oauth_error "invalid_grant", "Invalid refresh token"
       end
@@ -133,11 +133,7 @@ class Oauth::TokensController < Oauth::BaseController
     end
 
     def granted_scopes(permission)
-      permission == "write" ? %w[ read write ] : %w[ read ]
-    end
-
-    def scope_for(permission)
-      granted_scopes(permission).join(" ")
+      Oauth.canonical_scope(permission).split
     end
 
     def token_response(access_token, scope: nil)
