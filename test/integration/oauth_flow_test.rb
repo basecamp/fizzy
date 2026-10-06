@@ -918,6 +918,28 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "a grant issued to another client answers exactly as a dead one does" do
+    live = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:confidential_client))
+    answers = [ live.refresh_token, "no-such-refresh-token" ].map do |refresh_token|
+      untenanted do
+        post oauth_token_path, params: { grant_type: "refresh_token", refresh_token: refresh_token, client_id: oauth_clients(:mcp_client).client_id }
+      end
+      [ response.status, response.parsed_body ]
+    end
+    assert_equal answers.first, answers.last
+
+    code = Oauth::AuthorizationCode.generate client_id: oauth_clients(:confidential_client).client_id, identity_id: identities(:david).id,
+      code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM", redirect_uri: "https://connector.example.com/callback", scope: "read"
+    answers = [ code, "no-such-code" ].map do |presented|
+      untenanted do
+        post oauth_token_path, params: { grant_type: "authorization_code", code: presented, client_id: oauth_clients(:mcp_client).client_id,
+          redirect_uri: "https://connector.example.com/callback", code_verifier: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk" }
+      end
+      [ response.status, response.parsed_body ]
+    end
+    assert_equal answers.first, answers.last
+  end
+
   test "refresh grant for confidential client omitting client_id fails as invalid_client" do
     client = oauth_clients(:confidential_client)
     token = identities(:david).access_tokens.create!(oauth_client: client)
