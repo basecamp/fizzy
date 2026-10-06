@@ -157,6 +157,26 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_select "strong", text: "connector.example.com:8443"
   end
 
+  test "consent restarts a self-registered client's retention period, so the sweep spares it while the code is live" do
+    sign_in_as :david
+    client = travel_to(31.days.ago) { Oauth::Client.create!(name: "Returning", redirect_uris: %w[ http://127.0.0.1:8888/callback ], dynamically_registered: true) }
+    assert_includes Oauth::Client.stale, client
+
+    post_consent client: client
+
+    assert_response :redirect
+    assert_not_includes Oauth::Client.stale, client
+  end
+
+  test "denying consent leaves a self-registered client's retention period alone" do
+    sign_in_as :david
+    client = travel_to(31.days.ago) { Oauth::Client.create!(name: "Returning", redirect_uris: %w[ http://127.0.0.1:8888/callback ], dynamically_registered: true) }
+
+    post_consent client: client, error: "access_denied"
+
+    assert_includes Oauth::Client.stale, client
+  end
+
   test "denying a self-registered https client still redirects, after the consent screen named its host" do
     sign_in_as :david
     client = Oauth::Client.create!(name: "Hosted", redirect_uris: %w[ https://connector.example.com/callback ], dynamically_registered: true)

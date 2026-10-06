@@ -39,10 +39,12 @@ class Oauth::Client < ApplicationRecord
   # The sweep and #redeem take the same row lock, so a grant either lands
   # before the recheck, which then spares the client, or finds the client
   # already gone and is never issued. There is no foreign key to refuse a
-  # token for a deleted client.
+  # token for a deleted client. The recheck is the whole stale test, not just
+  # the absence of tokens: a grant issued and revoked since the sweep picked
+  # this client has touched it, and restarted its retention period.
   def destroy_if_still_unused
     with_lock do
-      destroy unless access_tokens.exists?
+      destroy if self.class.stale.exists?(id)
     end
   end
 

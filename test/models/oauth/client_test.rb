@@ -351,6 +351,15 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     end
   end
 
+  test "destroy_if_still_unused spares a client whose grant came and went after it was picked" do
+    client = travel_to(31.days.ago) { register_client }
+    picked = Oauth::Client.stale.find(client.id)
+    identities(:david).access_tokens.create!(oauth_client: client).destroy
+
+    assert_not picked.destroy_if_still_unused
+    assert Oauth::Client.exists?(client.id)
+  end
+
   test "destroy_if_still_unused spares a client that got a grant after it was picked" do
     client = travel_to(31.days.ago) { register_client }
     picked = Oauth::Client.stale.find(client.id)

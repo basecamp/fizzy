@@ -34,6 +34,11 @@ class Oauth::AuthorizationsController < Oauth::BaseController
     if denial?
       redirect_to error_redirect_uri("access_denied", "User denied the request"), allow_other_host: true
     else
+      # Consent is use, so it restarts a self-registered client's retention
+      # period: the sweep (Oauth::Client.cleanup) mustn't remove the client
+      # while the code it is about to receive is still redeemable.
+      @client.touch
+
       code = Oauth::AuthorizationCode.generate \
         client_id: @client.client_id,
         identity_id: Current.identity.id,
