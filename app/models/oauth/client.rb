@@ -9,7 +9,7 @@ class Oauth::Client < ApplicationRecord
   # this long is abandoned (RFC 7591 §5).
   UNUSED_RETENTION = 30.days
 
-  has_many :access_tokens, class_name: "Identity::AccessToken", foreign_key: :oauth_client_id, inverse_of: :oauth_client, dependent: :delete_all
+  has_many :access_tokens, class_name: "Identity::AccessToken", foreign_key: :oauth_client_id, inverse_of: :oauth_client, dependent: :destroy
 
   has_secure_token :client_id, length: 32
 

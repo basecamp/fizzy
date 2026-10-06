@@ -369,6 +369,36 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     assert Oauth::Client.exists?(client.id)
   end
 
+  # Revoking a grant locks it, and touching the client inside that transaction
+  # would then wait on the client's lock. A replayed code exchange holds the
+  # client's lock and waits on the grant, so the two would deadlock.
+  test "a grant touches its client outside its own transaction" do
+    client = register_client
+    grant = identities(:david).access_tokens.create!(oauth_client: client)
+    transactions = {}
+    record = ->(*, payload) do
+      if table = payload[:sql][/\A(?:UPDATE|DELETE FROM) [`"]?(oauth_clients|identity_access_tokens)\b/, 1]
+        transactions[table] ||= Identity::AccessToken.connection.current_transaction
+      end
+    end
+
+    ActiveSupport::Notifications.subscribed(record, "sql.active_record") { grant.destroy }
+
+    assert transactions.key?("oauth_clients"), "the client was never touched"
+    assert_not transactions["identity_access_tokens"].equal?(transactions["oauth_clients"]), "the client was touched inside the grant's transaction"
+  end
+
+  test "destroying a client takes its grants' retired refresh tokens too" do
+    client = register_client
+    grant = identities(:david).access_tokens.create!(oauth_client: client)
+    assert grant.refresh
+
+    assert_difference -> { Oauth::RetiredRefreshToken.count }, -1 do
+      client.destroy
+    end
+    assert_not Identity::AccessToken.exists?(grant.id)
+  end
+
   private
     def register_client(**attributes)
       Oauth::Client.create! name: "Abandoned", redirect_uris: %w[ http://127.0.0.1:8888/callback ], dynamically_registered: true, **attributes

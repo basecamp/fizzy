@@ -15,7 +15,7 @@ class Identity::AccessToken < ApplicationRecord
   REFRESH_IDLE_LIMIT = 90.days.in_seconds.seconds
 
   belongs_to :identity
-  belongs_to :oauth_client, class_name: "Oauth::Client", optional: true, touch: true
+  belongs_to :oauth_client, class_name: "Oauth::Client", optional: true
   has_many :retired_refresh_tokens, class_name: "Oauth::RetiredRefreshToken", dependent: :delete_all
 
   # Rotation locks the grant and then adds a retired token. Destroying takes
@@ -33,6 +33,13 @@ class Identity::AccessToken < ApplicationRecord
   enum :permission, %w[ read write ].index_by(&:itself), default: :read
 
   before_create :set_expiry_and_refresh_token, if: :oauth_client_id?
+
+  # Issuing or destroying a grant restarts its client's retention period
+  # (Oauth::Client.cleanup). The touch waits until the grant's own transaction
+  # commits. A revocation locks the grant, and touching the client in the same
+  # transaction would then wait on the client's lock. A replayed code exchange
+  # holds that lock while it waits on the grant, so the two would deadlock.
+  after_commit :touch_oauth_client, on: %i[ create destroy ]
 
   class << self
     def find_permissable(token, method:)
@@ -111,6 +118,10 @@ class Identity::AccessToken < ApplicationRecord
   end
 
   private
+    def touch_oauth_client
+      Oauth::Client.where(id: oauth_client_id).touch_all if oauth_client_id?
+    end
+
     def lock_grant
       self.class.lock.where(id: id).pluck(:id)
     end
