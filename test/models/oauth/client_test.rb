@@ -336,6 +336,21 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     end
   end
 
+  test "a grant that lapses restarts its client's retention period, like one the user disconnects" do
+    client = travel_to(200.days.ago) { register_client }
+    travel_to(100.days.ago) { identities(:david).access_tokens.create!(oauth_client: client) }
+
+    Identity::AccessToken.cleanup
+    Oauth::Client.cleanup
+    assert Oauth::Client.exists?(client.id), "swept the day its last grant lapsed"
+    assert_not client.access_tokens.exists?
+
+    travel 31.days do
+      Oauth::Client.cleanup
+      assert_not Oauth::Client.exists?(client.id)
+    end
+  end
+
   test "destroy_if_still_unused spares a client that got a grant after it was picked" do
     client = travel_to(31.days.ago) { register_client }
     picked = Oauth::Client.stale.find(client.id)
