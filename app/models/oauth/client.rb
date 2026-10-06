@@ -19,6 +19,13 @@ class Oauth::Client < ApplicationRecord
     redirect_uris.include?(uri) || (loopback_uri?(uri) && matching_loopback?(uri))
   end
 
+  # Whether we may send the browser to this redirect before the user has seen
+  # the consent screen. A self-registered https host is one nobody vetted, so
+  # bouncing to it unprompted would make us an open redirector (RFC 9700 §4.11.2).
+  def vetted_redirect?(uri)
+    !dynamically_registered? || loopback_uri?(uri)
+  end
+
   def allows_scope?(requested_scope)
     requested = requested_scope.to_s.split
     requested.present? && requested.all? { |s| scopes.include?(s) }
@@ -71,7 +78,8 @@ class Oauth::Client < ApplicationRecord
           Oauth.loopback_host?(redirect.host) &&
           redirect.host.casecmp?(parsed.host.to_s) &&
           redirect.path == parsed.path &&
-          redirect.query == parsed.query
+          redirect.query == parsed.query &&
+          parsed.fragment.nil?
       end
     rescue URI::InvalidURIError
       false

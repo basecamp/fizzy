@@ -177,6 +177,12 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     assert_not client.allows_redirect?("http://127.0.0.1:9999/other")
   end
 
+  test "allows_redirect? never varies a loopback port onto a fragment" do
+    client = oauth_clients(:mcp_client)
+    assert_not client.allows_redirect?("http://127.0.0.1:9999/callback#fragment")
+    assert_not client.allows_redirect?("http://127.0.0.1:9999/callback#")
+  end
+
   test "allows_redirect? keeps loopback flexibility for mixed registrations" do
     client = Oauth::Client.new(redirect_uris: %w[ http://127.0.0.1:8888/callback https://connector.example.com/callback ])
     assert client.allows_redirect?("http://127.0.0.1:9999/callback")
