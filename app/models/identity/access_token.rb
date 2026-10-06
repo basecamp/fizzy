@@ -34,6 +34,11 @@ class Identity::AccessToken < ApplicationRecord
   # and keep working: every lookup matches the whole string.
   PREFIXES = { personal: "fizzy_pat_", access: "fizzy_at_", refresh: "fizzy_rt_" }
 
+  # The base58 alphabet has_secure_token uses: no 0, O, I or l. Drawn through
+  # Ruby's own SecureRandom, so it doesn't depend on ActiveSupport's base58
+  # extension, which only has_secure_token loads.
+  BASE58 = [ *"1".."9", *"A".."H", *"J".."N", *"P".."Z", *"a".."k", *"m".."z" ]
+
   enum :permission, %w[ read write ].index_by(&:itself), default: :read
 
   before_create :set_token
@@ -54,7 +59,7 @@ class Identity::AccessToken < ApplicationRecord
     end
 
     def generate_token(kind)
-      PREFIXES.fetch(kind) + generate_unique_secure_token
+      PREFIXES.fetch(kind) + SecureRandom.alphanumeric(24, chars: BASE58)
     end
 
     # Each grant is rechecked under its lock, so one renewed after it was
