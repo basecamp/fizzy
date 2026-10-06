@@ -39,6 +39,14 @@ class OauthGrantReachTest < ActionDispatch::IntegrationTest
     assert_response :forbidden
   end
 
+  test "an OAuth grant can't change the user's email address" do
+    assert_no_emails do
+      post user_email_addresses_path(users(:david)), params: { email_address: "app-controlled@example.com" }, env: @bearer, as: :json
+    end
+
+    assert_response :forbidden
+  end
+
   test "a personal access token still manages personal access tokens" do
     pat = { "HTTP_AUTHORIZATION" => "Bearer #{identity_access_tokens(:davids_api_token).token}" }
 

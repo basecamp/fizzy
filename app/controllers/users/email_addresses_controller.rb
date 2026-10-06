@@ -1,4 +1,6 @@
 class Users::EmailAddressesController < ApplicationController
+  disallow_oauth_grants
+
   before_action :set_user
   before_action :ensure_valid_email_address, only: :create
   rate_limit to: 5, within: 1.hour, only: :create

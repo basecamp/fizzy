@@ -27,7 +27,9 @@ module Authentication
     # An OAuth grant acts for an app on the user's data. It may not manage the
     # user's credentials or consent to apps: anything it minted there would
     # outlive disconnecting the app, and anything it removed would be another
-    # app's. Declared on every controller that does either.
+    # app's. Declared on every controller that does either: personal access
+    # tokens, Connected Apps, passkeys, transfer links, email changes and OAuth
+    # consent.
     def disallow_oauth_grants(**options)
       before_action :forbid_oauth_grant, **options
     end
