@@ -8,6 +8,18 @@ class Identity::AccessToken < ApplicationRecord
   has_secure_token
   enum :permission, %w[ read write ].index_by(&:itself), default: :read
 
+  class << self
+    # An authorization code redeems at most once (RFC 6749 §4.1.2): the grant it
+    # mints is stamped with the code's jti, and the unique index refuses a second
+    # stamp. A replay also revokes the grant the first redemption issued.
+    def redeem(authorization_code, **attributes)
+      create! authorization_code_jti: authorization_code.jti, **attributes
+    rescue ActiveRecord::RecordNotUnique
+      where(authorization_code_jti: authorization_code.jti).destroy_all
+      nil
+    end
+  end
+
   def allows?(method)
     method.in?(%w[ GET HEAD ]) || write?
   end

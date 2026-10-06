@@ -146,6 +146,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
       untenanted do
         post oauth_token_path, params: {
           grant_type: "authorization_code",
+          client_id: oauth_clients(:mcp_client).client_id,
           code: code,
           redirect_uri: "http://127.0.0.1:8888/callback",
           code_verifier: code_verifier
@@ -170,6 +171,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     untenanted do
       post oauth_token_path, params: {
         grant_type: "authorization_code",
+        client_id: oauth_clients(:mcp_client).client_id,
         code: "invalid_code",
         redirect_uri: "http://127.0.0.1/cb",
         code_verifier: "verifier"
@@ -196,6 +198,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     untenanted do
       post oauth_token_path, params: {
         grant_type: "authorization_code",
+        client_id: oauth_clients(:mcp_client).client_id,
         code: code,
         redirect_uri: "http://127.0.0.1:8888/callback",
         code_verifier: "wrong_verifier"
@@ -222,6 +225,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     untenanted do
       post oauth_token_path, params: {
         grant_type: "authorization_code",
+        client_id: oauth_clients(:mcp_client).client_id,
         code: code,
         redirect_uri: "http://127.0.0.1:9999/different",
         code_verifier: code_verifier
@@ -249,6 +253,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
       untenanted do
         post oauth_token_path, params: {
           grant_type: "authorization_code",
+          client_id: oauth_clients(:mcp_client).client_id,
           code: code,
           redirect_uri: "http://127.0.0.1:8888/callback",
           code_verifier: code_verifier
@@ -269,6 +274,94 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_equal "unsupported_grant_type", response.parsed_body["error"]
   end
 
+  test "token exchange requires grant_type" do
+    untenanted do
+      post oauth_token_path, params: { code: "code" }, as: :json
+    end
+
+    assert_response :bad_request
+    assert_equal "invalid_request", response.parsed_body["error"]
+  end
+
+  test "token exchange requires code, code_verifier, redirect_uri and client_id" do
+    code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+    client = oauth_clients(:mcp_client)
+    code = authorization_code_for(client, code_verifier: code_verifier)
+    complete = { grant_type: "authorization_code", code: code, code_verifier: code_verifier,
+      redirect_uri: "http://127.0.0.1:8888/callback", client_id: client.client_id }
+
+    %i[ code code_verifier redirect_uri client_id ].each do |name|
+      assert_no_difference "Identity::AccessToken.count" do
+        untenanted { post oauth_token_path, params: complete.except(name), as: :json }
+      end
+
+      assert_response :bad_request
+      assert_equal "invalid_request", response.parsed_body["error"], "missing #{name}"
+      assert_match name.to_s, response.parsed_body["error_description"]
+    end
+  end
+
+  test "token exchange rejects a code issued to another client" do
+    code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+    code = authorization_code_for(oauth_clients(:mcp_client), code_verifier: code_verifier)
+
+    assert_no_difference "Identity::AccessToken.count" do
+      untenanted do
+        post oauth_token_path, params: {
+          grant_type: "authorization_code",
+          client_id: oauth_clients(:trusted_client).client_id,
+          code: code,
+          redirect_uri: "http://127.0.0.1:8888/callback",
+          code_verifier: code_verifier
+        }, as: :json
+      end
+    end
+
+    assert_response :bad_request
+    assert_equal "invalid_grant", response.parsed_body["error"]
+  end
+
+  test "token exchange rejects a reused code and revokes the grant it issued" do
+    code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+    client = oauth_clients(:mcp_client)
+    code = authorization_code_for(client, code_verifier: code_verifier)
+    exchange = { grant_type: "authorization_code", client_id: client.client_id, code: code,
+      redirect_uri: "http://127.0.0.1:8888/callback", code_verifier: code_verifier }
+
+    untenanted { post oauth_token_path, params: exchange, as: :json }
+    assert_response :success
+    first_token = response.parsed_body["access_token"]
+    assert Identity::AccessToken.exists?(token: first_token)
+
+    assert_difference "Identity::AccessToken.count", -1 do
+      untenanted { post oauth_token_path, params: exchange, as: :json }
+    end
+
+    assert_response :bad_request
+    assert_equal "invalid_grant", response.parsed_body["error"]
+    assert_not Identity::AccessToken.exists?(token: first_token)
+
+    fresh_code = authorization_code_for(client, code_verifier: code_verifier)
+    untenanted { post oauth_token_path, params: exchange.merge(code: fresh_code), as: :json }
+    assert_response :success
+  end
+
+  test "a replayed code that fails PKCE does not revoke the grant" do
+    code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+    client = oauth_clients(:mcp_client)
+    code = authorization_code_for(client, code_verifier: code_verifier)
+    exchange = { grant_type: "authorization_code", client_id: client.client_id, code: code,
+      redirect_uri: "http://127.0.0.1:8888/callback", code_verifier: code_verifier }
+
+    untenanted { post oauth_token_path, params: exchange, as: :json }
+    assert_response :success
+    first_token = response.parsed_body["access_token"]
+
+    untenanted { post oauth_token_path, params: exchange.merge(code_verifier: "wrong_verifier"), as: :json }
+    assert_response :bad_request
+    assert Identity::AccessToken.exists?(token: first_token)
+  end
+
 
   test "token endpoint accepts form-encoded requests with forgery protection active" do
     code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
@@ -285,6 +378,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
       untenanted do
         post oauth_token_path, params: {
           grant_type: "authorization_code",
+          client_id: oauth_clients(:mcp_client).client_id,
           code: code,
           redirect_uri: "http://127.0.0.1:8888/callback",
           code_verifier: code_verifier
@@ -449,6 +543,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
       untenanted do
         post oauth_token_path, params: {
           grant_type: "authorization_code",
+          client_id: oauth_clients(:mcp_client).client_id,
           code: code,
           redirect_uri: "http://127.0.0.1:8888/callback",
           code_verifier: code_verifier
@@ -463,6 +558,15 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
   end
 
   private
+    def authorization_code_for(client, code_verifier:, identity: identities(:david), scope: "read")
+      Oauth::AuthorizationCode.generate \
+        client_id: client.client_id,
+        identity_id: identity.id,
+        code_challenge: Base64.urlsafe_encode64(Digest::SHA256.digest(code_verifier), padding: false),
+        redirect_uri: "http://127.0.0.1:8888/callback",
+        scope: scope
+    end
+
     def with_forgery_protection
       ActionController::Base.allow_forgery_protection = true
       yield

@@ -352,6 +352,7 @@ ActiveRecord::Schema[8.2].define(version: 2026_08_28_120000) do
   end
 
   create_table "identity_access_tokens", id: :uuid, force: :cascade do |t|
+    t.string "authorization_code_jti", limit: 255
     t.datetime "created_at", null: false
     t.text "description", limit: 65535
     t.uuid "identity_id", null: false
@@ -359,6 +360,7 @@ ActiveRecord::Schema[8.2].define(version: 2026_08_28_120000) do
     t.string "permission", limit: 255
     t.string "token", limit: 255
     t.datetime "updated_at", null: false
+    t.index ["authorization_code_jti"], name: "index_identity_access_tokens_on_authorization_code_jti", unique: true
     t.index ["identity_id"], name: "index_access_token_on_identity_id"
     t.index ["oauth_client_id"], name: "index_identity_access_tokens_on_oauth_client_id"
   end

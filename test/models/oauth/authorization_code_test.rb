@@ -31,6 +31,30 @@ class Oauth::AuthorizationCodeTest < ActiveSupport::TestCase
     assert_equal "read write", parsed.scope
   end
 
+  test "each code carries its own jti" do
+    codes = 2.times.map do
+      Oauth::AuthorizationCode.generate \
+        client_id: "test_client",
+        identity_id: 456,
+        code_challenge: "challenge_hash",
+        redirect_uri: "http://127.0.0.1:8888/callback",
+        scope: "read"
+    end
+
+    jtis = codes.map { |code| Oauth::AuthorizationCode.parse(code).jti }
+    assert jtis.all?(&:present?)
+    assert_not_equal jtis.first, jtis.last
+  end
+
+  test "parse returns nil for a code without a jti" do
+    encryptor = ActiveSupport::MessageEncryptor.new \
+      Rails.application.key_generator.generate_key("oauth/authorization_codes", 32)
+    code = encryptor.encrypt_and_sign({ client_id: "test_client", identity_id: 456, code_challenge: "challenge_hash",
+      redirect_uri: "http://127.0.0.1:8888/callback", scope: "read" }, expires_in: 60.seconds)
+
+    assert_nil Oauth::AuthorizationCode.parse(code)
+  end
+
   test "parse returns nil for blank code" do
     assert_nil Oauth::AuthorizationCode.parse("")
     assert_nil Oauth::AuthorizationCode.parse(nil)
@@ -89,7 +113,8 @@ class Oauth::AuthorizationCodeTest < ActiveSupport::TestCase
       identity_id: 1,
       code_challenge: code_challenge,
       redirect_uri: "http://127.0.0.1/cb",
-      scope: "read"
+      scope: "read",
+      jti: "test-jti"
 
     assert Oauth::AuthorizationCode.valid_pkce?(details, code_verifier)
   end
@@ -103,7 +128,8 @@ class Oauth::AuthorizationCodeTest < ActiveSupport::TestCase
       identity_id: 1,
       code_challenge: code_challenge,
       redirect_uri: "http://127.0.0.1/cb",
-      scope: "read"
+      scope: "read",
+      jti: "test-jti"
 
     assert_not Oauth::AuthorizationCode.valid_pkce?(details, "wrong_verifier")
   end
@@ -118,7 +144,8 @@ class Oauth::AuthorizationCodeTest < ActiveSupport::TestCase
       identity_id: 1,
       code_challenge: "challenge",
       redirect_uri: "http://127.0.0.1/cb",
-      scope: "read"
+      scope: "read",
+      jti: "test-jti"
 
     assert_not Oauth::AuthorizationCode.valid_pkce?(details, "")
     assert_not Oauth::AuthorizationCode.valid_pkce?(details, nil)
@@ -130,7 +157,8 @@ class Oauth::AuthorizationCodeTest < ActiveSupport::TestCase
       identity_id: 1,
       code_challenge: "challenge",
       redirect_uri: "http://127.0.0.1/cb",
-      scope: "read"
+      scope: "read",
+      jti: "test-jti"
 
     assert_raises(FrozenError) { details.instance_variable_set(:@client_id, "hacked") }
   end
