@@ -14,11 +14,16 @@ class Oauth::BaseController < ApplicationController
     # before the client authenticates: this only decides whether the endpoint
     # answers at all.
     def require_issuance_enabled
-      if !Oauth::Availability.acceptance_enabled?(params[:client_id])
+      if !Oauth::Availability.acceptance_enabled?(piloting_client_id)
         head :not_found
-      elsif !Oauth::Availability.issuance_enabled?(params[:client_id])
+      elsif !Oauth::Availability.issuance_enabled?(piloting_client_id)
         head :service_unavailable
       end
+    end
+
+    # The client a request acts for, if it names one.
+    def piloting_client_id
+      params[:client_id]
     end
 
     # The metadata issuer and the iss authorization response parameter must be

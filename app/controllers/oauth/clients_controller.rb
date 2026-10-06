@@ -22,6 +22,12 @@ class Oauth::ClientsController < Oauth::BaseController
   end
 
   private
+    # A registration creates a client rather than acting for one, so a
+    # client_id it carries earns no pilot exemption: registration stays dark.
+    def piloting_client_id
+      nil
+    end
+
     def validate_redirect_uris
       unless performed? || params[:redirect_uris].present?
         oauth_error "invalid_client_metadata", "redirect_uris is required"

@@ -46,6 +46,16 @@ class OauthAvailabilityTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
+  test "naming a pilot client does not open registration on a dark server" do
+    with_oauth_availability acceptance: false, issuance: false, pilot_client_ids: [ oauth_clients(:mcp_client).client_id ] do
+      assert_no_difference "Oauth::Client.count" do
+        untenanted { post oauth_clients_path, params: { client_id: oauth_clients(:mcp_client).client_id, redirect_uris: [ "http://127.0.0.1:9999/callback" ] }, as: :json }
+      end
+    end
+
+    assert_response :not_found
+  end
+
   test "pausing issuance refuses registration with 503" do
     with_oauth_availability acceptance: true, issuance: false do
       assert_no_difference "Oauth::Client.count" do
