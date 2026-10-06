@@ -392,8 +392,8 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_response :success
     body = response.parsed_body
 
-    assert_not_nil body["access_token"]
-    assert_not_nil body["refresh_token"]
+    assert body["access_token"].start_with?("fizzy_at_")
+    assert body["refresh_token"].start_with?("fizzy_rt_")
     assert_operator body["expires_in"], :>, 0
     assert_equal "Bearer", body["token_type"]
     assert_equal "read", body["scope"]
@@ -1032,6 +1032,29 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_operator body["expires_in"], :>, 0
     assert_not_equal old_access_token, body["access_token"]
     assert_not_equal old_refresh_token, body["refresh_token"]
+  end
+
+  test "a grant issued before prefixes still authenticates, and refreshes into prefixed tokens" do
+    client = oauth_clients(:mcp_client)
+    grant = identities(:david).access_tokens.create!(oauth_client: client,
+      token: "legacyAccessToken0123456789", refresh_token: "legacyRefreshToken0123456789")
+
+    get user_path(users(:david)), env: { "HTTP_AUTHORIZATION" => "Bearer #{grant.token}" }, as: :json
+    assert_response :success
+
+    untenanted do
+      post oauth_token_path, params: { grant_type: "refresh_token", refresh_token: grant.refresh_token, client_id: client.client_id }, as: :json
+    end
+
+    assert_response :success
+    assert response.parsed_body["access_token"].start_with?("fizzy_at_")
+    assert response.parsed_body["refresh_token"].start_with?("fizzy_rt_")
+  end
+
+  test "a personal access token issued before prefixes still authenticates" do
+    get user_path(users(:david)), env: { "HTTP_AUTHORIZATION" => "Bearer #{identity_access_tokens(:davids_api_token).token}" }, as: :json
+
+    assert_response :success
   end
 
   test "refresh grant for a token whose client is gone fails as invalid_grant" do
