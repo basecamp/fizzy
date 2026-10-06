@@ -108,6 +108,34 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_select "code", text: "invalid_request"
   end
 
+  test "no pre-consent error redirects to a self-registered https host" do
+    sign_in_as :david
+    client = Oauth::Client.create!(name: "Hosted", redirect_uris: %w[ https://connector.example.com/callback ], dynamically_registered: true)
+
+    {
+      { scope: "admin" } => "invalid_scope",
+      { state: nil } => "invalid_request",
+      { response_type: "token" } => "unsupported_response_type",
+      { code_challenge_method: "plain" } => "invalid_request"
+    }.each do |overrides, error|
+      get_consent_screen client: client, **overrides
+
+      assert_response :bad_request, "#{overrides} should not redirect"
+      assert_nil response.location
+      assert_select "code", text: error
+    end
+  end
+
+  test "pre-consent errors still redirect to an operator-provisioned https client" do
+    sign_in_as :david
+
+    get_consent_screen client: oauth_clients(:trusted_client), scope: "admin"
+
+    assert_response :redirect
+    assert_match %r{\Ahttps://app\.example\.com/oauth/callback\?}, response.location
+    assert_equal "invalid_scope", Rack::Utils.parse_query(URI.parse(response.location).query)["error"]
+  end
+
   test "authorization errors for a self-registered loopback client still redirect" do
     sign_in_as :david
 
