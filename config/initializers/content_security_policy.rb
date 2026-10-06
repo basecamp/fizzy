@@ -45,10 +45,10 @@ class TrustedTypesReportOnly
 
     # Only documents run script, so only they can trip a Trusted Types sink.
     # Stack as an additional report-only policy rather than overwriting: when the
-    # app policy is itself report-only, both headers ride together, each
-    # reporting independently.
+    # app policy is itself report-only, both go out as separate header fields
+    # (a Rack 3 array), each reporting independently.
     if headers[Rack::CONTENT_TYPE].to_s.start_with?("text/html")
-      headers[HEADER] = [ headers[HEADER], @policy ].compact.join("\n")
+      headers[HEADER] = headers[HEADER] ? [ *headers[HEADER], @policy ] : @policy
     end
 
     [ status, headers, body ]
