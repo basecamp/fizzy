@@ -567,6 +567,33 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
       post oauth_revocation_path, params: { token: "" }, as: :json
     end
     assert_response :bad_request
+    assert_equal "invalid_request", response.parsed_body["error"]
+  end
+
+  test "revocation without a token answers invalid_request, form-encoded or JSON" do
+    untenanted do
+      post oauth_revocation_path, params: { token_type_hint: "access_token" }
+    end
+    assert_response :bad_request
+    assert_equal "invalid_request", response.parsed_body["error"]
+
+    untenanted do
+      post oauth_revocation_path, params: {}, as: :json
+    end
+    assert_response :bad_request
+    assert_equal "invalid_request", response.parsed_body["error"]
+  end
+
+  test "revocation ignores client credentials and revokes on the token alone" do
+    access_token = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client), permission: :read)
+
+    untenanted do
+      post oauth_revocation_path, params: { token: access_token.token },
+        headers: { "Authorization" => ActionController::HttpAuthentication::Basic.encode_credentials("someone", "anything") }
+    end
+
+    assert_response :success
+    assert_not Identity::AccessToken.exists?(access_token.id)
   end
 
 
@@ -587,6 +614,9 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_includes body["response_types_supported"], "code"
     assert_includes body["code_challenge_methods_supported"], "S256"
     assert_equal true, body["authorization_response_iss_parameter_supported"]
+    assert_equal %w[ query ], body["response_modes_supported"]
+    assert_match %r{/oauth/revocation$}, body["revocation_endpoint"]
+    assert_equal %w[ none ], body["revocation_endpoint_auth_methods_supported"]
   end
 
   test "protected resource metadata includes authorization server" do
@@ -648,6 +678,44 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
 
     assert_response :bad_request
     assert_equal "invalid_redirect_uri", response.parsed_body["error"]
+  end
+
+  test "DCR rejects a client_name longer than 255 characters" do
+    assert_no_difference "Oauth::Client.count" do
+      untenanted do
+        post oauth_clients_path, params: {
+          client_name: "a" * 256,
+          redirect_uris: [ "http://127.0.0.1:8888/callback" ]
+        }, as: :json
+      end
+    end
+
+    assert_response :bad_request
+    assert_equal "invalid_client_metadata", response.parsed_body["error"]
+  end
+
+  test "DCR accepts a 255-character client_name" do
+    untenanted do
+      post oauth_clients_path, params: {
+        client_name: "a" * 255,
+        redirect_uris: [ "http://127.0.0.1:8888/callback" ]
+      }, as: :json
+    end
+
+    assert_response :created
+    assert_equal "a" * 255, response.parsed_body["client_name"]
+  end
+
+  test "DCR falls back to the default name for a non-string client_name" do
+    untenanted do
+      post oauth_clients_path, params: {
+        client_name: { "en" => "Sneaky" },
+        redirect_uris: [ "http://127.0.0.1:8888/callback" ]
+      }, as: :json
+    end
+
+    assert_response :created
+    assert_equal "MCP Client", response.parsed_body["client_name"]
   end
 
   test "DCR requires redirect_uris" do

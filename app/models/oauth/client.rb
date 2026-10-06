@@ -3,7 +3,7 @@ class Oauth::Client < ApplicationRecord
 
   has_secure_token :client_id, length: 32
 
-  validates :name, presence: true
+  validates :name, presence: true, length: { maximum: 255 }
   validates :client_id, uniqueness: true, allow_nil: true
   validates :redirect_uris, presence: true
   validate :redirect_uris_are_valid
@@ -57,6 +57,9 @@ class Oauth::Client < ApplicationRecord
       parsed.scheme == "http" && parsed.host.in?(Oauth::LOOPBACK_HOSTS)
     end
 
+    # Only the port may vary (RFC 8252 §7.3). The host must match too:
+    # 127.0.0.1, localhost and ::1 are not interchangeable, and localhost
+    # may not even resolve to loopback (RFC 8252 §8.3).
     def matching_loopback?(uri)
       parsed = URI.parse(uri)
 
@@ -65,8 +68,9 @@ class Oauth::Client < ApplicationRecord
 
         redirect.scheme == parsed.scheme &&
           redirect.host.in?(Oauth::LOOPBACK_HOSTS) &&
-          parsed.host.in?(Oauth::LOOPBACK_HOSTS) &&
-          redirect.path == parsed.path
+          redirect.host.casecmp?(parsed.host.to_s) &&
+          redirect.path == parsed.path &&
+          redirect.query == parsed.query
       end
     rescue URI::InvalidURIError
       false

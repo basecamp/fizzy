@@ -102,7 +102,29 @@ class Oauth::ClientTest < ActiveSupport::TestCase
   test "allows_redirect? allows different ports for loopback clients" do
     client = Oauth::Client.new(redirect_uris: %w[ http://127.0.0.1:8888/callback ])
     assert client.allows_redirect?("http://127.0.0.1:9999/callback")
-    assert client.allows_redirect?("http://localhost:7777/callback")
+  end
+
+  test "allows_redirect? lets only the port vary for loopback clients" do
+    client = Oauth::Client.new(redirect_uris: %w[ http://127.0.0.1:8888/callback ])
+    assert_not client.allows_redirect?("http://localhost:7777/callback")
+    assert_not client.allows_redirect?("http://[::1]:7777/callback")
+    assert_not client.allows_redirect?("http://127.0.0.1:9999/callback?x=1")
+
+    localhost = Oauth::Client.new(redirect_uris: %w[ http://localhost:8888/callback ])
+    assert localhost.allows_redirect?("http://localhost:9999/callback")
+
+    with_query = Oauth::Client.new(redirect_uris: %w[ http://127.0.0.1:8888/callback?app=cli ])
+    assert with_query.allows_redirect?("http://127.0.0.1:9999/callback?app=cli")
+    assert_not with_query.allows_redirect?("http://127.0.0.1:9999/callback")
+    assert_not with_query.allows_redirect?("http://127.0.0.1:9999/callback?app=cli&code=injected")
+  end
+
+  test "name is limited to 255 characters" do
+    assert Oauth::Client.new(name: "a" * 255, redirect_uris: %w[ http://127.0.0.1/cb ]).valid?
+
+    client = Oauth::Client.new(name: "a" * 256, redirect_uris: %w[ http://127.0.0.1/cb ])
+    assert_not client.valid?
+    assert client.errors[:name].any?
   end
 
   test "allows_redirect? requires matching path for loopback flexibility" do

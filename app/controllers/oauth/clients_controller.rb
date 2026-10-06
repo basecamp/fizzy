@@ -10,7 +10,7 @@ class Oauth::ClientsController < Oauth::BaseController
 
   def create
     client = Oauth::Client.create! \
-      name: params[:client_name] || "MCP Client",
+      name: registered_client_name,
       redirect_uris: Array(params[:redirect_uris]),
       scopes: validated_scopes,
       dynamically_registered: true
@@ -51,6 +51,10 @@ class Oauth::ClientsController < Oauth::BaseController
         parsed.fragment.nil?
     rescue URI::InvalidURIError
       false
+    end
+
+    def registered_client_name
+      (params[:client_name] if params[:client_name].is_a?(String)).presence || "MCP Client"
     end
 
     def validated_scopes
