@@ -83,6 +83,12 @@ Status key:
 | Secrets stored in plaintext, as access tokens are | **Deliberate** (#3082 body) |
 | An OAuth grant can't reach a credential or consent surface: personal access tokens, Connected Apps, passkey registration, transfer links, email changes or OAuth consent. Anything it minted there would outlive disconnecting the app, and anything it removed would belong to another app | **Fixed** #2296 `196b9b0b3` "Keep OAuth grants out of every credential and consent surface" (`Authentication.disallow_oauth_grants`, declared on each such controller). Personal access tokens may still manage personal access tokens (fizzy-cli) |
 
+## Token format
+
+| Requirement | Status |
+|---|---|
+| Newly issued tokens carry a distinctive prefix naming their kind: `fizzy_pat_` (personal access token), `fizzy_at_` (OAuth access token), `fizzy_rt_` (OAuth refresh token). Tokens issued earlier have no prefix and still work | **Fixed** #3163. bc3 prefixes similarly (`bc_at_`, `bc_rt_`, and PATs as `bc_at_`). Client secrets are not prefixed yet; bc3 uses `bc_cs_` for the ones its rake task issues. Nobody has registered with GitHub's secret-scanning partner program, either here or in bc3. |
+
 ## Refresh tokens (RFC 6749 §6, OAuth 2.1 §4.3, RFC 9700 §4.14)
 
 | Requirement | Status |

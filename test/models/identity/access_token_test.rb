@@ -16,6 +16,25 @@ class Identity::AccessTokenTest < ActiveSupport::TestCase
     assert_not token.expired?
   end
 
+  test "new tokens carry a prefix naming their kind" do
+    personal = identities(:david).access_tokens.create!(description: "Personal")
+    grant = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client))
+
+    assert_match(/\Afizzy_pat_[1-9A-HJ-NP-Za-km-z]{24}\z/, personal.token)
+    assert_match(/\Afizzy_at_[1-9A-HJ-NP-Za-km-z]{24}\z/, grant.token)
+    assert_match(/\Afizzy_rt_[1-9A-HJ-NP-Za-km-z]{24}\z/, grant.refresh_token)
+  end
+
+  test "a rotation issues prefixed tokens, even for a grant issued before prefixes" do
+    grant = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client),
+      token: "legacyAccessToken0123456789", refresh_token: "legacyRefreshToken0123456789")
+
+    assert grant.refresh
+
+    assert grant.token.start_with?("fizzy_at_")
+    assert grant.refresh_token.start_with?("fizzy_rt_")
+  end
+
   test "expired?" do
     token = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client))
 
