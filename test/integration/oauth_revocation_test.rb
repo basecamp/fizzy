@@ -18,7 +18,7 @@ class OauthRevocationTest < ActionDispatch::IntegrationTest
     [ { client_id: @client.client_id }, { client_id: @client.client_id, client_secret: "wrong" } ].each do |credentials|
       revoke token.token, params: credentials
 
-      assert_client_authentication_failed credentials.inspect
+      assert_client_authentication_failed credentials.inspect, challenged: false
     end
 
     assert Identity::AccessToken.exists?(token.id)
@@ -111,7 +111,7 @@ class OauthRevocationTest < ActionDispatch::IntegrationTest
       [ token.token, "not-a-token" ].each do |presented|
         revoke presented, params: params
 
-        assert_client_authentication_failed params.inspect
+        assert_client_authentication_failed params.inspect, challenged: false
       end
     end
 

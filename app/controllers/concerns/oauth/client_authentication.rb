@@ -56,13 +56,16 @@ module Oauth::ClientAuthentication
         client.authenticate_secret(oauth_client_secret)
     end
 
-    # RFC 6749 §5.2: invalid_client may answer 401 to name the schemes the
-    # server supports, and must when the client tried the Authorization
-    # header. Basic is the one we support, so every failure names it, and
-    # the answer is the same for an unknown client and a wrong secret.
-    # RFC 7617 defines no error parameter for Basic, only realm.
+    # RFC 6749 §5.2: invalid_client is a 401, and a client that tried the
+    # Authorization header gets a WWW-Authenticate naming the scheme. Basic is
+    # the only header-borne client authentication, so the challenge turns on
+    # the request's own header alone: identical for an unknown client and a
+    # wrong secret, and absent for a client that authenticated in the body.
+    # Any scheme counts, not just Basic: a 401 must carry a challenge that
+    # applies (RFC 9110 §15.5.2), and Basic is the only one here. RFC 7617
+    # defines no error parameter for Basic, only realm. Mirrors basecamp/bc3.
     def client_authentication_failed
-      response.headers["WWW-Authenticate"] = %(Basic realm="#{oauth_issuer}")
+      response.headers["WWW-Authenticate"] = %(Basic realm="#{oauth_issuer}") if request.authorization.present?
       oauth_error "invalid_client", "Client authentication failed", status: :unauthorized
     end
 
