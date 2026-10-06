@@ -656,7 +656,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
       }, as: :json
     end
 
-    assert_response :bad_request
+    assert_response :unauthorized
     assert_equal "invalid_client", response.parsed_body["error"]
 
     # Naming no client at all is a malformed request, whatever the code.
@@ -695,7 +695,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
       }, as: :json
     end
 
-    assert_response :bad_request
+    assert_response :unauthorized
     assert_equal "invalid_client", response.parsed_body["error"]
   end
 
@@ -721,7 +721,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
       }, as: :json
     end
 
-    assert_response :bad_request
+    assert_response :unauthorized
     assert_equal "invalid_client", response.parsed_body["error"]
   end
 
@@ -775,7 +775,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
       }, as: :json
     end
 
-    assert_response :bad_request
+    assert_response :unauthorized
     assert_equal "invalid_client", response.parsed_body["error"]
   end
 
@@ -801,7 +801,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
       }, as: :json
     end
 
-    assert_response :bad_request
+    assert_response :unauthorized
     assert_equal "invalid_client", response.parsed_body["error"]
   end
 
@@ -817,7 +817,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
       }, as: :json
     end
 
-    assert_response :bad_request
+    assert_response :unauthorized
     assert_equal "invalid_client", response.parsed_body["error"]
 
     untenanted do
@@ -844,7 +844,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
         untenanted { post oauth_token_path, params: exchange.merge(client_id), as: :json }
       end
 
-      assert_response :bad_request
+      assert_response :unauthorized
       assert_equal "invalid_client", response.parsed_body["error"]
     end
   end
@@ -859,7 +859,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     [ { code_verifier: "not-the-verifier" }, { redirect_uri: "http://127.0.0.1:8888/elsewhere" } ].each do |mismatch|
       untenanted { post oauth_token_path, params: exchange.merge(mismatch), as: :json }
 
-      assert_response :bad_request
+      assert_response :unauthorized
       assert_equal "invalid_client", response.parsed_body["error"]
     end
   end
@@ -868,12 +868,12 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     client = oauth_clients(:confidential_client)
     token = identities(:david).access_tokens.create!(oauth_client: client)
 
-    [ { grant_type: "password" },
-      { grant_type: "refresh_token", refresh_token: token.refresh_token, client_id: client.client_id, client_secret: "wrong" },
-      { grant_type: "refresh_token", refresh_token: "bogus", client_id: oauth_clients(:mcp_client).client_id } ].each do |request|
+    { { grant_type: "password" } => :bad_request,
+      { grant_type: "refresh_token", refresh_token: token.refresh_token, client_id: client.client_id, client_secret: "wrong" } => :unauthorized,
+      { grant_type: "refresh_token", refresh_token: "bogus", client_id: oauth_clients(:mcp_client).client_id } => :bad_request }.each do |request, status|
       untenanted { post oauth_token_path, params: request, as: :json }
 
-      assert_response :bad_request
+      assert_response status
       assert_equal "no-store", response.headers["Cache-Control"], request.inspect
       assert_equal "no-cache", response.headers["Pragma"]
     end
@@ -930,7 +930,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
       }, as: :json
     end
 
-    assert_response :bad_request
+    assert_response :unauthorized
     assert_equal "invalid_client", response.parsed_body["error"]
   end
 
@@ -1313,8 +1313,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_equal %w[ none ], body["revocation_endpoint_auth_methods_supported"]
     assert_includes body["grant_types_supported"], "authorization_code"
     assert_includes body["grant_types_supported"], "refresh_token"
-    assert_includes body["token_endpoint_auth_methods_supported"], "none"
-    assert_includes body["token_endpoint_auth_methods_supported"], "client_secret_post"
+    assert_equal %w[ none client_secret_post client_secret_basic ], body["token_endpoint_auth_methods_supported"]
   end
 
   test "protected resource metadata includes authorization server" do
@@ -1594,9 +1593,9 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_no_difference "Oauth::Client.count" do
       untenanted do
         post oauth_clients_path, params: {
-          client_name: "Basic Client",
+          client_name: "JWT Client",
           redirect_uris: [ "https://connector.example.com/callback" ],
-          token_endpoint_auth_method: "client_secret_basic"
+          token_endpoint_auth_method: "private_key_jwt"
         }, as: :json
       end
     end

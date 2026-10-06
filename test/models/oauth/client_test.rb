@@ -255,11 +255,21 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     assert_nil client.client_secret
   end
 
+  test "client_secret_basic clients are confidential" do
+    client = Oauth::Client.create!(
+      name: "Basic",
+      redirect_uris: %w[ https://connector.example.com/callback ],
+      token_endpoint_auth_method: "client_secret_basic"
+    )
+    assert client.confidential?
+    assert_not_nil client.client_secret
+  end
+
   test "token_endpoint_auth_method must be supported" do
     client = Oauth::Client.new(
-      name: "Basic",
+      name: "JWT",
       redirect_uris: %w[ http://127.0.0.1/cb ],
-      token_endpoint_auth_method: "client_secret_basic"
+      token_endpoint_auth_method: "private_key_jwt"
     )
     assert_not client.valid?
     assert_includes client.errors[:token_endpoint_auth_method], "is not included in the list"

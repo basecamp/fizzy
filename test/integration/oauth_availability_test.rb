@@ -220,7 +220,7 @@ class OauthAvailabilityTest < ActionDispatch::IntegrationTest
       untenanted { post oauth_token_path, params: refresh_params(token).merge(client_secret: "wrong") }
     end
 
-    assert_response :bad_request
+    assert_response :unauthorized
     assert_equal "invalid_client", response.parsed_body["error"]
     assert_equal token.refresh_token, token.reload.refresh_token
   end

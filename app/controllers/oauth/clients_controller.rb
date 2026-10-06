@@ -45,8 +45,8 @@ class Oauth::ClientsController < Oauth::BaseController
     end
 
     def validate_auth_method
-      unless performed? || registered_auth_method.in?(%w[ none client_secret_post ])
-        oauth_error "invalid_client_metadata", "Only 'none' and 'client_secret_post' token_endpoint_auth_methods are supported"
+      unless performed? || registered_auth_method.in?(Oauth::Client::AUTH_METHODS)
+        oauth_error "invalid_client_metadata", "token_endpoint_auth_method must be one of #{Oauth::Client::AUTH_METHODS.join(", ")}"
       end
     end
 

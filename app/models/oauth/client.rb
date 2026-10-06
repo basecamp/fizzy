@@ -1,4 +1,9 @@
 class Oauth::Client < ApplicationRecord
+  # The secret transports a confidential client may register. Either verifies
+  # the secret, however it arrives: the registered method is advisory.
+  SECRET_AUTH_METHODS = %w[ client_secret_post client_secret_basic ]
+  AUTH_METHODS = %w[ none ] + SECRET_AUTH_METHODS
+
   has_many :access_tokens, class_name: "Identity::AccessToken", foreign_key: :oauth_client_id, inverse_of: :oauth_client
 
   has_secure_token :client_id, length: 32
@@ -6,7 +11,7 @@ class Oauth::Client < ApplicationRecord
   validates :name, presence: true, length: { maximum: 255 }
   validates :client_id, uniqueness: true, allow_nil: true
   validates :redirect_uris, presence: true
-  validates :token_endpoint_auth_method, inclusion: { in: %w[ none client_secret_post ] }
+  validates :token_endpoint_auth_method, inclusion: { in: AUTH_METHODS }
   validate :redirect_uris_are_valid
 
   before_create :generate_client_secret, if: :confidential?
@@ -19,7 +24,7 @@ class Oauth::Client < ApplicationRecord
 
 
   def confidential?
-    token_endpoint_auth_method == "client_secret_post"
+    token_endpoint_auth_method.in?(SECRET_AUTH_METHODS)
   end
 
   def authenticate_secret(secret)

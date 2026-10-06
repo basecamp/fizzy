@@ -1,4 +1,6 @@
 class Oauth::TokensController < Oauth::BaseController
+  include Oauth::ClientAuthentication
+
   allow_unauthenticated_access
   skip_forgery_protection
 
@@ -69,7 +71,8 @@ class Oauth::TokensController < Oauth::BaseController
 
     # A missing parameter is a malformed request (invalid_request), not a dead
     # grant (invalid_grant), which a client would act on by discarding it.
-    # client_id is required of every client: none authenticates by header.
+    # client_id is required of every client, in the body unless a Basic
+    # header carries it.
     # Each is a single string; an array or object from a JSON body or a
     # name[] form field is just as malformed, and must not reach a lookup.
     def require_params
@@ -79,7 +82,7 @@ class Oauth::TokensController < Oauth::BaseController
     end
 
     def required_params
-      (authorization_code_grant? ? %w[ code code_verifier redirect_uri ] : %w[ refresh_token ]) + %w[ client_id ]
+      (authorization_code_grant? ? %w[ code code_verifier redirect_uri ] : %w[ refresh_token ]) + (client_secret_basic? ? [] : %w[ client_id ])
     end
 
     def string_param?(name)
@@ -125,7 +128,7 @@ class Oauth::TokensController < Oauth::BaseController
     # The code or refresh token must have been issued to the client_id in the
     # request (RFC 6749 §4.1.3, §6).
     def validate_client_id
-      unless params[:client_id] == (@client || @access_token.oauth_client).client_id
+      unless oauth_client_id == (@client || @access_token.oauth_client).client_id
         oauth_error "invalid_grant", "Grant was not issued to this client"
       end
     end
@@ -151,29 +154,24 @@ class Oauth::TokensController < Oauth::BaseController
       Oauth.canonical_scope(permission).split
     end
 
-    # client_secret_post authenticates with client_id and client_secret in
-    # the request body, per RFC 6749 §2.3.1 — never the query string, where
-    # secrets leak into proxy and access logs. A failure is a 400 invalid_client
-    # (RFC 6749 §5.2): 401 is reserved for header-based schemes and would owe a
-    # WWW-Authenticate challenge we have no scheme to fill.
-    #
-    # A request attempts authentication when it names a confidential client or
-    # carries a client secret, and then it must succeed whatever the grant. A
-    # request naming a public client attempts none; if its grant belongs to a
-    # confidential client, validate_client_id refuses it as issued to another
-    # client, the same answer as for a dead grant. So a confidential grant is
-    # only ever redeemed by the client it names, authenticated.
+    # A request attempts client authentication when it uses Basic, names a
+    # confidential client, or carries a client secret, and then it must
+    # authenticate a confidential client whatever the grant (see
+    # Oauth::ClientAuthentication). A request naming a public client attempts
+    # none; if its grant belongs to a confidential client, validate_client_id
+    # refuses it as issued to another client, the same answer as for a dead
+    # grant. So a confidential grant is only ever redeemed by the client it
+    # names, authenticated.
     def authenticate_client
-      client = Oauth::Client.find_by(client_id: params[:client_id]) if params[:client_id].is_a?(String)
-      secret = request.request_parameters["client_secret"]
+      reject_ambiguous_client_credentials
 
-      if (client&.confidential? || secret.present?) && !client_secret_post_authenticated?(client, secret)
-        oauth_error "invalid_client", "Client authentication failed"
+      unless performed? || !attempts_client_authentication? || authenticated_client&.confidential?
+        client_authentication_failed
       end
     end
 
-    def client_secret_post_authenticated?(client, secret)
-      client&.confidential? && request.request_parameters["client_id"] == client.client_id && client.authenticate_secret(secret)
+    def attempts_client_authentication?
+      client_secret_basic? || requesting_client&.confidential? || oauth_client_secret.present?
     end
 
     def token_response(access_token, scope: nil)
