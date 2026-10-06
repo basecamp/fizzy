@@ -2,6 +2,7 @@ require "test_helper"
 
 class OauthAvailabilityTest < ActionDispatch::IntegrationTest
   include OauthAvailabilityTestHelper
+  include OauthClientCredentialsTestHelper
 
   CODE_VERIFIER = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
 
@@ -220,8 +221,7 @@ class OauthAvailabilityTest < ActionDispatch::IntegrationTest
       untenanted { post oauth_token_path, params: refresh_params(token).merge(client_secret: "wrong") }
     end
 
-    assert_response :unauthorized
-    assert_equal "invalid_client", response.parsed_body["error"]
+    assert_client_authentication_failed basic: false
     assert_equal token.refresh_token, token.reload.refresh_token
   end
 

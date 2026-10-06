@@ -125,23 +125,23 @@ class OauthClientSecretBasicTest < ActionDispatch::IntegrationTest
     assert_equal token.refresh_token, token.reload.refresh_token
   end
 
-  test "a failed client_secret_post authentication is a 401 with no challenge, since the client never tried the header" do
+  test "a failed client_secret_post authentication is a 400 with no challenge, since the client never tried the header" do
     token = grant_for(@client)
 
     [ { client_id: @client.client_id, client_secret: "wrong" }, { client_id: @client.client_id } ].each do |params|
       refresh token, params: params
 
-      assert_client_authentication_failed params.inspect, challenged: false
+      assert_client_authentication_failed params.inspect, basic: false
       assert_equal "no-store", response.headers["Cache-Control"]
     end
   end
 
-  test "a failed client_secret_post beside an Authorization header of another scheme names Basic" do
+  test "a failed client_secret_post beside an Authorization header of another scheme is a 400: Basic was never evaluated" do
     token = grant_for(@client)
 
     refresh token, params: { client_id: @client.client_id, client_secret: "wrong" }, headers: { "Authorization" => "Bearer #{token.token}" }
 
-    assert_client_authentication_failed
+    assert_client_authentication_failed basic: false
   end
 
   test "the pilot gate reads the client a Basic header names" do

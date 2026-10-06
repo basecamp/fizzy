@@ -6,13 +6,14 @@ module OauthClientCredentialsTestHelper
     { "Authorization" => "Basic #{Base64.strict_encode64(encoded)}" }
   end
 
-  # RFC 6749 §5.2: invalid_client is a 401, and it names the Basic scheme
-  # only to a client that tried the Authorization header.
-  def assert_client_authentication_failed(message = nil, challenged: true)
-    assert_response :unauthorized, message
+  # A failed Basic authentication is a 401 challenging Basic (RFC 6749 §5.2,
+  # RFC 9110 §15.5.2). Any other failure is a 400 with no challenge: there is
+  # no header-borne scheme it could have tried and should retry.
+  def assert_client_authentication_failed(message = nil, basic: true)
+    assert_response basic ? :unauthorized : :bad_request, message
     assert_equal "invalid_client", response.parsed_body["error"], message
 
-    if challenged
+    if basic
       assert_equal %(Basic realm="http://www.example.com/"), response.headers["WWW-Authenticate"], message
     else
       assert_nil response.headers["WWW-Authenticate"], message

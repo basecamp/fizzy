@@ -18,7 +18,7 @@ class OauthRevocationTest < ActionDispatch::IntegrationTest
     [ { client_id: @client.client_id }, { client_id: @client.client_id, client_secret: "wrong" } ].each do |credentials|
       revoke token.token, params: credentials
 
-      assert_client_authentication_failed credentials.inspect, challenged: false
+      assert_client_authentication_failed credentials.inspect, basic: false
     end
 
     assert Identity::AccessToken.exists?(token.id)
@@ -110,10 +110,10 @@ class OauthRevocationTest < ActionDispatch::IntegrationTest
 
     [ [ { client_id: @client.client_id }, {}, false ], [ { client_id: @client.client_id, client_secret: "wrong" }, {}, false ],
       [ { client_secret: @secret }, {}, false ], [ { client_id: oauth_clients(:mcp_client).client_id, client_secret: "anything" }, {}, false ],
-      [ {}, basic(@client.client_id, "wrong"), true ], [ {}, basic("no-such-client", "x"), true ] ].each do |params, headers, challenged|
+      [ {}, basic(@client.client_id, "wrong"), true ], [ {}, basic("no-such-client", "x"), true ] ].each do |params, headers, via_basic|
       revoke token.token, params: params, headers: headers
 
-      assert_client_authentication_failed [ params, headers ].inspect, challenged: challenged
+      assert_client_authentication_failed [ params, headers ].inspect, basic: via_basic
     end
 
     assert Identity::AccessToken.exists?(token.id)
@@ -161,10 +161,19 @@ class OauthRevocationTest < ActionDispatch::IntegrationTest
       [ token.token, "not-a-token" ].each do |presented|
         revoke presented, params: params
 
-        assert_client_authentication_failed params.inspect, challenged: false
+        assert_client_authentication_failed params.inspect, basic: false
       end
     end
 
+    assert Identity::AccessToken.exists?(token.id)
+  end
+
+  test "a failed body authentication beside an Authorization header of another scheme is a 400: Basic was never evaluated" do
+    token = grant_for(@client)
+
+    revoke token.token, params: { client_id: @client.client_id, client_secret: "wrong" }, headers: { "Authorization" => "Bearer #{token.token}" }
+
+    assert_client_authentication_failed basic: false
     assert Identity::AccessToken.exists?(token.id)
   end
 

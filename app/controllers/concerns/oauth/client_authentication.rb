@@ -56,17 +56,24 @@ module Oauth::ClientAuthentication
         client.authenticate_secret(oauth_client_secret)
     end
 
-    # RFC 6749 §5.2: invalid_client is a 401, and a client that tried the
-    # Authorization header gets a WWW-Authenticate naming the scheme. Basic is
-    # the only header-borne client authentication, so the challenge turns on
-    # the request's own header alone: identical for an unknown client and a
-    # wrong secret, and absent for a client that authenticated in the body.
-    # Any scheme counts, not just Basic: a 401 must carry a challenge that
-    # applies (RFC 9110 §15.5.2), and Basic is the only one here. RFC 7617
-    # defines no error parameter for Basic, only realm. Mirrors basecamp/bc3.
+    # A failed Basic authentication is a 401 challenging Basic (RFC 6749 §5.2):
+    # the endpoint evaluated the Authorization header, so the challenge applies
+    # (RFC 9110 §15.5.2). Every other failure is a 400 with no challenge: a
+    # body credential, a public client presenting a secret, or a secret that
+    # authenticates no client. A bare 401 would break RFC 9110, a challenge for
+    # a scheme the client never tried applies to nothing, oauth4webapi and
+    # openid-client surface a challenged 401 as a WWWAuthenticateChallengeError
+    # rather than invalid_client, and a Basic challenge on a form POST can pop
+    # a browser's password dialog. Either way the answer turns on the request's
+    # own header alone, so an unknown client and a wrong secret look the same.
+    # RFC 7617 defines no error parameter for Basic, only realm.
     def client_authentication_failed
-      response.headers["WWW-Authenticate"] = %(Basic realm="#{oauth_issuer}") if request.authorization.present?
-      oauth_error "invalid_client", "Client authentication failed", status: :unauthorized
+      if client_secret_basic?
+        response.headers["WWW-Authenticate"] = %(Basic realm="#{oauth_issuer}")
+        oauth_error "invalid_client", "Client authentication failed", status: :unauthorized
+      else
+        oauth_error "invalid_client", "Client authentication failed"
+      end
     end
 
     # Whether the request used the Basic scheme, well-formed or not.

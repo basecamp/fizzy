@@ -1,6 +1,8 @@
 require "test_helper"
 
 class OauthFlowTest < ActionDispatch::IntegrationTest
+  include OauthClientCredentialsTestHelper
+
   # Authorization Endpoint
 
   test "authorization requires authentication" do
@@ -656,8 +658,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
       }, as: :json
     end
 
-    assert_response :unauthorized
-    assert_equal "invalid_client", response.parsed_body["error"]
+    assert_client_authentication_failed basic: false
 
     # Naming no client at all is a malformed request, whatever the code.
     untenanted do
@@ -695,8 +696,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
       }, as: :json
     end
 
-    assert_response :unauthorized
-    assert_equal "invalid_client", response.parsed_body["error"]
+    assert_client_authentication_failed basic: false
   end
 
   test "token exchange for confidential client rejects a non-string client secret" do
@@ -721,8 +721,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
       }, as: :json
     end
 
-    assert_response :unauthorized
-    assert_equal "invalid_client", response.parsed_body["error"]
+    assert_client_authentication_failed basic: false
   end
 
   test "token exchange for confidential client succeeds with the client secret" do
@@ -775,8 +774,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
       }, as: :json
     end
 
-    assert_response :unauthorized
-    assert_equal "invalid_client", response.parsed_body["error"]
+    assert_client_authentication_failed basic: false
   end
 
   test "token exchange for confidential client requires a matching client_id" do
@@ -801,8 +799,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
       }, as: :json
     end
 
-    assert_response :unauthorized
-    assert_equal "invalid_client", response.parsed_body["error"]
+    assert_client_authentication_failed basic: false
   end
 
   test "refresh grant for confidential client requires the client secret" do
@@ -817,8 +814,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
       }, as: :json
     end
 
-    assert_response :unauthorized
-    assert_equal "invalid_client", response.parsed_body["error"]
+    assert_client_authentication_failed basic: false
 
     untenanted do
       post oauth_token_path, params: {
@@ -844,8 +840,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
         untenanted { post oauth_token_path, params: exchange.merge(client_id), as: :json }
       end
 
-      assert_response :unauthorized
-      assert_equal "invalid_client", response.parsed_body["error"]
+      assert_client_authentication_failed basic: false
     end
   end
 
@@ -859,8 +854,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     [ { code_verifier: "not-the-verifier" }, { redirect_uri: "http://127.0.0.1:8888/elsewhere" } ].each do |mismatch|
       untenanted { post oauth_token_path, params: exchange.merge(mismatch), as: :json }
 
-      assert_response :unauthorized
-      assert_equal "invalid_client", response.parsed_body["error"]
+      assert_client_authentication_failed basic: false
     end
   end
 
@@ -869,7 +863,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     token = identities(:david).access_tokens.create!(oauth_client: client)
 
     { { grant_type: "password" } => :bad_request,
-      { grant_type: "refresh_token", refresh_token: token.refresh_token, client_id: client.client_id, client_secret: "wrong" } => :unauthorized,
+      { grant_type: "refresh_token", refresh_token: token.refresh_token, client_id: client.client_id, client_secret: "wrong" } => :bad_request,
       { grant_type: "refresh_token", refresh_token: "bogus", client_id: oauth_clients(:mcp_client).client_id } => :bad_request }.each do |request, status|
       untenanted { post oauth_token_path, params: request, as: :json }
 
@@ -952,8 +946,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
       }, as: :json
     end
 
-    assert_response :unauthorized
-    assert_equal "invalid_client", response.parsed_body["error"]
+    assert_client_authentication_failed basic: false
   end
 
 
