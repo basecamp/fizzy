@@ -47,8 +47,8 @@ module Account::SingleSignOnEnforceable
   private
     # Provider groups can be nested, so only a full path names one group.
     def single_sign_on_group_is_a_full_path
-      if single_sign_on_group.present? && !single_sign_on_group.start_with?("/")
-        errors.add :base, "Enter the full group path, such as /engineering/fizzy"
+      if single_sign_on_group.present? && !SingleSignOn.full_group_path?(single_sign_on_group)
+        errors.add :base, "Enter the full group path, such as /sales"
       end
     end
 

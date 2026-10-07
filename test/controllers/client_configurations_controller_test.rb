@@ -9,6 +9,12 @@ class ClientConfigurationsControllerTest < ActionDispatch::IntegrationTest
     assert_ok "/client_configurations/ios_v1.json"
   end
 
+  test "with single sign-on" do
+    with_single_sign_on do
+      assert_ok "/client_configurations/ios_v1.json"
+    end
+  end
+
   test "bad platform" do
     assert_no_route "/client_configurations/blackberry_v1.json"
   end

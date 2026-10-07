@@ -31,9 +31,9 @@ class SingleSignOn::Provider
     @signing_keys ||= fetch_keys(refresh: refresh).select { |key| signing_key?(key) }
   end
 
+  # Keys can leave out `alg`, and the jwt gem checks the algorithm before it fetches new keys.
   def signing_algorithms
-    algorithms = signing_keys.filter_map { |key| key["alg"] }.presence ||
-      Array(discovery["id_token_signing_alg_values_supported"])
+    algorithms = signing_keys.filter_map { |key| key["alg"] } | Array(discovery["id_token_signing_alg_values_supported"])
 
     if (supported_algorithms = algorithms & SIGNING_ALGORITHMS).any?
       supported_algorithms

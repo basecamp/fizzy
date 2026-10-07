@@ -1,6 +1,7 @@
 module SingleSignOn
   DEFAULT_PROVIDER_NAME = "SSO"
   DEFAULT_REAUTHENTICATION_HOURS = 12
+  FULL_GROUP_PATH = %r{\A(/[^/]+)+\z}
 
   class ConfigurationError < StandardError; end
 
@@ -54,6 +55,10 @@ module SingleSignOn
       groups_with_parents(groups).include?(group)
     end
 
+    def full_group_path?(group)
+      FULL_GROUP_PATH.match?(group)
+    end
+
     # Providers can list only direct memberships, so a member of a subgroup also counts as a member of its parents.
     def groups_with_parents(groups)
       groups.flat_map do |group|
@@ -105,15 +110,14 @@ module SingleSignOn
       end
 
       def ensure_full_admin_group_path
-        if admin_group && !admin_group.start_with?("/")
+        if admin_group && !full_group_path?(admin_group)
           raise ConfigurationError, "SINGLE_SIGN_ON_ADMIN_GROUP must be a full group path, such as /fizzy/admin"
         end
       end
 
       def ensure_relative_account_admin_subgroup
-        if account_admin_subgroup&.start_with?("/") || account_admin_subgroup&.end_with?("/")
-          raise ConfigurationError, "SINGLE_SIGN_ON_ACCOUNT_ADMIN_SUBGROUP must not start or end with /. " \
-            "Use a name such as admin"
+        if account_admin_subgroup && !full_group_path?("/#{account_admin_subgroup}")
+          raise ConfigurationError, "SINGLE_SIGN_ON_ACCOUNT_ADMIN_SUBGROUP must be a relative group path, such as admin"
         end
       end
   end

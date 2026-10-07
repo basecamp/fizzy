@@ -53,13 +53,17 @@ class SingleSignOnTest < ActiveSupport::TestCase
   end
 
   test "admin group must be a full path" do
-    enable_single_sign_on admin_group: "fizzy/admin"
+    [ "fizzy/admin", "/", "/fizzy/admin/", "/fizzy//admin" ].each do |group|
+      enable_single_sign_on admin_group: group
+      assert_raises(SingleSignOn::ConfigurationError, group) { SingleSignOn.ensure_valid_configuration }
+    end
 
-    assert_raises(SingleSignOn::ConfigurationError) { SingleSignOn.ensure_valid_configuration }
+    enable_single_sign_on admin_group: "/fizzy/admin"
+    assert_nothing_raised { SingleSignOn.ensure_valid_configuration }
   end
 
-  test "account admin subgroup must not start or end with a slash" do
-    [ "/admin", "admin/" ].each do |subgroup|
+  test "account admin subgroup must be a relative path" do
+    [ "/admin", "admin/", "admin//owners" ].each do |subgroup|
       enable_single_sign_on account_admin_subgroup: subgroup
       assert_raises(SingleSignOn::ConfigurationError, subgroup) { SingleSignOn.ensure_valid_configuration }
     end

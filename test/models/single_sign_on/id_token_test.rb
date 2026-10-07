@@ -86,6 +86,16 @@ class SingleSignOn::IdTokenTest < ActiveSupport::TestCase
     assert_requested :get, SINGLE_SIGN_ON_KEYS_ENDPOINT, times: 2
   end
 
+  test "keys rotated to a new algorithm" do
+    rotated_key = OpenSSL::PKey::EC.generate("prime256v1")
+    stub_single_sign_on_discovery id_token_signing_alg_values_supported: %w[ RS256 ES256 ]
+    stub_request(:get, SINGLE_SIGN_ON_KEYS_ENDPOINT).to_return_json(
+      { body: { keys: [ single_sign_on_public_key ] } },
+      { body: { keys: [ single_sign_on_public_key(rotated_key, kid: "rotated-key", alg: "ES256") ] } })
+
+    assert verify(single_sign_on_id_token(key: rotated_key, kid: "rotated-key", algorithm: "ES256"))
+  end
+
   test "unknown key ID after the keys are fetched again" do
     assert_invalid single_sign_on_id_token(key: OpenSSL::PKey::RSA.generate(2048), kid: "unknown-key")
     assert_requested :get, SINGLE_SIGN_ON_KEYS_ENDPOINT, times: 2

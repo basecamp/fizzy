@@ -148,6 +148,14 @@ class SingleSignOn::ProviderTest < ActiveSupport::TestCase
     assert_equal [ "ES256" ], @provider.signing_algorithms
   end
 
+  test "signing algorithms include the discovery document when only some keys have an algorithm" do
+    key_without_algorithm = single_sign_on_public_key(OpenSSL::PKey::EC.generate("prime256v1"), kid: "ec-key").except(:alg)
+    stub_single_sign_on_keys single_sign_on_public_key, key_without_algorithm
+    stub_single_sign_on_discovery id_token_signing_alg_values_supported: %w[ ES256 ]
+
+    assert_equal %w[ RS256 ES256 ], @provider.signing_algorithms
+  end
+
   test "signing algorithms never include none or HMAC" do
     stub_single_sign_on_keys single_sign_on_public_key.except(:alg)
     stub_single_sign_on_discovery id_token_signing_alg_values_supported: %w[ none HS256 ]

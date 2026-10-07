@@ -110,7 +110,7 @@ __Request:__
 }
 ```
 
-`single_sign_on_group` is the full path of a group in the identity provider. Only members of that group and of the admin group can open the account. A path without a leading `/` gets `422 Unprocessable Entity`. An empty string removes the group.
+`single_sign_on_group` is the full path of a group in the identity provider. Only members of that group and of the admin group can open the account. A path that does not start with `/`, ends with `/`, or has an empty part gets `422 Unprocessable Entity`. An empty string removes the group.
 
 __Response:__
 

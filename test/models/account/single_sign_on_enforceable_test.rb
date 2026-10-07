@@ -66,8 +66,10 @@ class Account::SingleSignOnEnforceableTest < ActiveSupport::TestCase
   end
 
   test "group must be a full path" do
-    assert_not @account.update(single_sign_on_group: "fizzy")
-    assert_equal [ "Enter the full group path, such as /engineering/fizzy" ], @account.errors.full_messages
+    [ "fizzy", "/", "/fizzy/", "//fizzy", "/fizzy//engineering" ].each do |group|
+      assert_not @account.update(single_sign_on_group: group), group
+      assert_equal [ "Enter the full group path, such as /sales" ], @account.errors.full_messages
+    end
   end
 
   test "admin group of the account" do

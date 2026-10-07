@@ -1,5 +1,5 @@
 class ClientConfigurationsController < ApplicationController
-  skip_before_action :require_account, :require_authentication
+  skip_before_action :require_account, :require_authentication, :require_single_sign_on_session
   allow_unauthorized_access
 
   def show

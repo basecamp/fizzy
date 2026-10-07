@@ -29,7 +29,7 @@ class Account::SingleSignOnsControllerTest < ActionDispatch::IntegrationTest
     patch account_single_sign_on_path, params: { account: { single_sign_on_group: "sales" } }
 
     assert_redirected_to account_settings_path
-    assert_equal "Enter the full group path, such as /engineering/fizzy", flash[:alert]
+    assert_equal "Enter the full group path, such as /sales", flash[:alert]
     assert_nil accounts("37s").reload.single_sign_on_group
   end
 
@@ -37,7 +37,7 @@ class Account::SingleSignOnsControllerTest < ActionDispatch::IntegrationTest
     patch account_single_sign_on_path, params: { account: { single_sign_on_group: "sales" } }, as: :json
 
     assert_response :unprocessable_entity
-    assert_equal "Enter the full group path, such as /engineering/fizzy", @response.parsed_body["error"]
+    assert_equal "Enter the full group path, such as /sales", @response.parsed_body["error"]
   end
 
   test "remove the group" do
