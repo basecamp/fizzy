@@ -19,6 +19,9 @@
   <header>
     <h1 class="txt-x-large margin-none"><%= @webhook.name %></h1>
     <span class="txt-medium txt-break"><%= @webhook.url %></span>
+    <% if attribution = webhook_attribution(@webhook) %>
+      <p class="txt-small txt-subtle margin-none"><%= attribution %></p>
+    <% end %>
   </header>
   <% unless @webhook.active? %>
     <div>

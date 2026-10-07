@@ -6,12 +6,15 @@ class Account::DataTransfer::RecordSet
   INTERNAL_RECORD_TYPES = %w[Export Account::Import].freeze
 
   attr_accessor :importable_model_names
-  attr_reader :account, :model, :attributes, :unique_keys
+  attr_reader :account, :model, :attributes, :optional_attributes, :unique_keys
 
-  def initialize(account:, model:, attributes: nil, importable_model_names: nil, unique_keys: nil)
+  # Optional attributes are columns added after exports already existed: an
+  # export from before them lacks them, and imports them as null.
+  def initialize(account:, model:, attributes: nil, optional_attributes: nil, importable_model_names: nil, unique_keys: nil)
     @account = account
     @model = model
     @attributes = (attributes || model.column_names).map(&:to_s)
+    @optional_attributes = (optional_attributes || []).map(&:to_s)
     @importable_model_names = importable_model_names || [ model.name ]
     @unique_keys = (unique_keys || []).map(&:to_s)
   end
@@ -78,7 +81,7 @@ class Account::DataTransfer::RecordSet
     def import_batch(files)
       batch_data = files.map do |file|
         data = load(file)
-        data.slice(*attributes).merge("account_id" => account.id).tap do |record_data|
+        optional_attributes.index_with(nil).merge(data.slice(*attributes)).merge("account_id" => account.id).tap do |record_data|
           record_data["updated_at"] = Time.current if record_data.key?("updated_at")
         end
       end
@@ -94,7 +97,7 @@ class Account::DataTransfer::RecordSet
         raise IntegrityError, "#{model} record ID mismatch: expected #{expected_id}, got #{data['id']}"
       end
 
-      missing = attributes - data.keys
+      missing = attributes - optional_attributes - data.keys
       if missing.any?
         raise IntegrityError, "#{file_path} is missing required fields: #{missing.join(', ')}"
       end

@@ -8,6 +8,7 @@ class Users::PushSubscriptionsController < ApplicationController
 
   def create
     subscription = @push_subscriptions.create_with(user_agent: request.user_agent).create_or_find_by!(push_subscription_params)
+    subscription.claim_for Current.access_token&.oauth_client
 
     respond_to do |format|
       format.html { head :no_content }

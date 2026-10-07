@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_10_06_120000) do
+ActiveRecord::Schema[8.2].define(version: 2026_10_06_130100) do
   create_table "accesses", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -477,11 +477,13 @@ ActiveRecord::Schema[8.2].define(version: 2026_10_06_120000) do
     t.string "auth_key"
     t.datetime "created_at", null: false
     t.text "endpoint"
+    t.uuid "oauth_client_id"
     t.string "p256dh_key"
     t.datetime "updated_at", null: false
     t.string "user_agent", limit: 4096
     t.uuid "user_id", null: false
     t.index ["account_id"], name: "index_push_subscriptions_on_account_id"
+    t.index ["oauth_client_id"], name: "index_push_subscriptions_on_oauth_client_id"
     t.index ["user_id", "endpoint"], name: "index_push_subscriptions_on_user_id_and_endpoint", unique: true, length: { endpoint: 255 }
   end
 
@@ -889,6 +891,8 @@ ActiveRecord::Schema[8.2].define(version: 2026_10_06_120000) do
     t.boolean "active", default: true, null: false
     t.uuid "board_id", null: false
     t.datetime "created_at", null: false
+    t.uuid "created_via_id"
+    t.uuid "creator_id"
     t.string "name"
     t.string "signing_secret", null: false
     t.text "subscribed_actions"
@@ -896,5 +900,7 @@ ActiveRecord::Schema[8.2].define(version: 2026_10_06_120000) do
     t.text "url", null: false
     t.index ["account_id"], name: "index_webhooks_on_account_id"
     t.index ["board_id", "subscribed_actions"], name: "index_webhooks_on_board_id_and_subscribed_actions", length: { subscribed_actions: 255 }
+    t.index ["created_via_id"], name: "index_webhooks_on_created_via_id"
+    t.index ["creator_id"], name: "index_webhooks_on_creator_id"
   end
 end
