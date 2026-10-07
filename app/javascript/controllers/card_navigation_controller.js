@@ -44,7 +44,7 @@ export default class extends Controller {
     this.snapshot ||= {
       numbers, columnId: column_id, board: this.boardValue,
       current: this.numberValue, returnUrl: this.#returnUrl,
-      returnLabel: this.element.querySelector("a.btn--back strong").textContent
+      returnLabel: this.#backLink.querySelector("strong").textContent
     }
     this.#saveSnapshot()
     this.#updateButton(this.previousTarget, -1, name)
@@ -53,7 +53,7 @@ export default class extends Controller {
     // Run after turbo-navigation restores its one-hop referrer so Esc still returns to the board.
     requestAnimationFrame(() => {
       if (this.element.isConnected) {
-        const link = this.element.querySelector("a.btn--back")
+        const link = this.#backLink
         link.href = this.snapshot.returnUrl
         link.querySelector("strong").textContent = this.snapshot.returnLabel
       }
@@ -69,6 +69,10 @@ export default class extends Controller {
       }
     } catch { }
     return null
+  }
+
+  get #backLink() {
+    return document.querySelector("#header a.btn--back")
   }
 
   get #storageKey() {

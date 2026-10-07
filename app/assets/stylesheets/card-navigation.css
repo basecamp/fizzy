@@ -1,4 +1,28 @@
 @layer components {
+  .card-navigation {
+    display: grid;
+    gap: var(--block-space-half);
+  }
+
+  @media (max-width: 799px) {
+    .card-perma__actions--right:has(.card-navigation) {
+      flex-wrap: wrap;
+      translate: 0 calc(-0.5 * var(--btn-size));
+    }
+
+    .card-navigation {
+      display: flex;
+      flex-basis: 100%;
+      justify-content: flex-end;
+    }
+  }
+
+  @media (max-width: 639px) {
+    .card-perma__actions--right:has(.card-navigation) {
+      translate: 0 -1.5em;
+    }
+  }
+
   .card-navigation__down {
     rotate: 180deg;
   }

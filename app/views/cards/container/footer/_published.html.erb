@@ -10,6 +10,7 @@
       <%= icon_tag "unpinned" %> <span class="for-screen-reader">Pin this card</span>
     <% end %>
   <% end %>
+  <%= render "cards/navigation", card: card %>
 </div>
 
 <%= render "cards/container/closure", card: card %>
