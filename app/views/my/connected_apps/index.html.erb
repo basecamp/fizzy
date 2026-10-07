@@ -22,7 +22,7 @@
       </thead>
       <tbody>
         <% @connected_apps.each do |client, tokens| %>
-          <%= render "my/connected_apps/connected_app", client: client, tokens: tokens %>
+          <%= render "my/connected_apps/connected_app", client: client, tokens: tokens, webhooks: @webhooks_by_client.fetch(client.id, []) %>
         <% end %>
       </tbody>
     </table>

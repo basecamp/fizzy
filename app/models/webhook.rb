@@ -28,10 +28,21 @@ class Webhook < ApplicationRecord
   belongs_to :account, default: -> { board.account }
   belongs_to :board
 
+  # Who set the webhook up, and through which app if an OAuth grant did it for
+  # them. A webhook is an account resource whoever creates it, so one an app
+  # creates outlives the app's grant: it stays, attributed, and the person may
+  # remove it when they disconnect the app (My::ConnectedAppsController).
+  belongs_to :creator, class_name: "User", optional: true, default: -> { Current.user }
+  belongs_to :created_via, class_name: "Oauth::Client", optional: true, default: -> { Current.access_token&.oauth_client }
+
   serialize :subscribed_actions, type: Array, coder: JSON
 
   scope :ordered, -> { order(name: :asc, id: :desc) }
   scope :active, -> { where(active: true) }
+
+  # Webhooks an app set up for this identity, in any account where the person
+  # can still manage webhooks.
+  scope :set_up_through, ->(client, identity:) { where(created_via: client, creator: identity.users.admin) }
 
   after_create :create_delinquency_tracker!
 

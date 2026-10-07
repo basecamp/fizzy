@@ -10,6 +10,12 @@ class Push::Subscription < ApplicationRecord
   belongs_to :account, default: -> { user.account }
   belongs_to :user
 
+  # The OAuth client whose grant registered this subscription. It delivers to
+  # the app's own device or install, so it is the app's plumbing and ends with
+  # the identity's last grant to that client (Identity::AccessToken). Sessions
+  # and personal access tokens register none.
+  belongs_to :oauth_client, class_name: "Oauth::Client", optional: true
+
   validates :endpoint, presence: true
   validate :validate_endpoint_url
 

@@ -51,6 +51,18 @@ class Identity::AccessToken < ApplicationRecord
   # holds that lock while it waits on the grant, so the two would deadlock.
   after_commit :touch_oauth_client, on: %i[ create destroy ]
 
+  # Every way a grant ends destroys it: disconnecting the app, revocation, the
+  # idle-lapse sweep, a replayed refresh token or authorization code, and
+  # deleting the client. So this is where the app's own plumbing ends
+  # with it: push subscriptions its grants registered, which deliver to the
+  # app's device or install, go once the identity holds no grant to the client.
+  # Resources a grant set up for the account, like webhooks, are not plumbing,
+  # and stay.
+  #
+  # Checked after commit, so when two grants to one client end at once,
+  # whichever commits second finds none left.
+  after_destroy_commit :end_app_plumbing, if: :oauth_client_id?
+
   class << self
     def find_permissable(token, method:)
       if (access_token = active.find_by(token: token)) && access_token.honored? && access_token.allows?(method)
@@ -132,6 +144,12 @@ class Identity::AccessToken < ApplicationRecord
   end
 
   private
+    def end_app_plumbing
+      unless self.class.exists?(identity_id: identity_id, oauth_client_id: oauth_client_id)
+        Push::Subscription.where(oauth_client_id: oauth_client_id, user: User.where(identity_id: identity_id)).delete_all
+      end
+    end
+
     def touch_oauth_client
       Oauth::Client.where(id: oauth_client_id).touch_all if oauth_client_id?
     end

@@ -3,11 +3,42 @@
   <td><%= tokens.map { |t| t.permission.humanize }.uniq.sort.join(", ") %></td>
   <td><%= local_datetime_tag tokens.map(&:created_at).min, style: :datetime %></td>
   <td>
-    <%= button_to my_connected_app_path(client), method: :delete,
-          class: "btn txt-negative btn--circle txt-x-small borderless fill-transparent",
-          data: { turbo_confirm: "Disconnect #{client.name}? This will revoke all access." } do %>
-      <%= icon_tag "trash" %>
-      <span class="for-screen-reader">Disconnect this app</span>
-    <% end %>
+    <div data-controller="dialog" data-dialog-modal-value="true" data-action="keydown.esc->dialog#close:stop">
+      <button type="button" class="btn txt-negative btn--circle txt-x-small borderless fill-transparent" data-action="dialog#open">
+        <%= icon_tag "trash" %>
+        <span class="for-screen-reader">Disconnect this app</span>
+      </button>
+
+      <dialog class="dialog panel fill-white shadow gap flex-column" style="--panel-size: 44ch" data-dialog-target="dialog">
+        <h3 class="txt-large txt-bold margin-none">Disconnect <%= client.name %>?</h3>
+        <p class="txt-medium margin-none">This will revoke all of its access.</p>
+
+        <%= form_with url: my_connected_app_path(client), method: :delete, class: "flex flex-column gap" do |form| %>
+          <% if webhooks.any? %>
+            <div class="txt-align-start">
+              <p class="margin-none">It set up <%= webhooks.one? ? "this webhook" : "these webhooks" %>, which will keep running unless you remove <%= webhooks.one? ? "it" : "them" %>:</p>
+              <ul class="margin-block-half">
+                <% webhooks.each do |webhook| %>
+                  <li>
+                    <strong><%= webhook.name %></strong> on <%= webhook.board.name %><%= " in #{webhook.account.name}" unless webhook.account == Current.account %>
+                    <%= hidden_field_tag "webhook_ids[]", webhook.id, id: nil %>
+                  </li>
+                <% end %>
+              </ul>
+
+              <label class="flex gap-half align-center justify-start">
+                <%= check_box_tag :remove_webhooks, "1", false, class: "checkbox", id: dom_id(client, :remove_webhooks) %>
+                Also remove <%= webhooks.one? ? "it" : "these" %>
+              </label>
+            </div>
+          <% end %>
+
+          <div class="flex gap-half justify-center">
+            <button type="button" class="btn" data-action="dialog#close">Cancel</button>
+            <%= form.button "Disconnect", class: "btn txt-negative" %>
+          </div>
+        <% end %>
+      </dialog>
+    </div>
   </td>
 </tr>
