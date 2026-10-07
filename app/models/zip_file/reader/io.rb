@@ -30,6 +30,7 @@ class ZipFile::Reader::IO
     @extractor = @entry.extractor_from(@io)
     @buffer = "".b
     @consumed = 0
+    @produced = 0
     @drained = false
     0
   end
@@ -48,9 +49,20 @@ class ZipFile::Reader::IO
         if chunk.nil?
           @drained = true
         else
-          @reader.count_expanded chunk.bytesize
+          count_produced chunk.bytesize
           @buffer << chunk
         end
+      end
+    end
+
+    # The size an entry declares is what S3 sizes its upload from, so the entry
+    # is held to it.
+    def count_produced(bytes)
+      @produced += bytes
+      @reader.count_expanded bytes
+
+      if @produced > size
+        @reader.exceeded! ZipFile::EntryTooLargeError.new("#{@entry.filename} expands past the #{size} bytes it declares")
       end
     end
 

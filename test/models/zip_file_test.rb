@@ -224,6 +224,43 @@ class ZipFileTest < ActiveSupport::TestCase
     tempfile&.unlink
   end
 
+  test "reader raises ArchiveTooLargeError before streaming an entry that declares more than the archive can account for" do
+    tempfile = create_test_zip("storage/blob_key" => "a" * 1024)
+    tempfile = understate_declared_size(tempfile, "storage/blob_key", 1.gigabyte)
+
+    reader = ZipFile::Reader.new(tempfile)
+
+    assert_raises(ZipFile::ArchiveTooLargeError) do
+      reader.read("storage/blob_key") { flunk "streamed an entry over the budget" }
+    end
+  end
+
+  test "reader io raises EntryTooLargeError when a streamed entry expands past its declared size" do
+    tempfile = understate_declared_size(create_test_zip("storage/blob_key" => "a" * 64.kilobytes), "storage/blob_key", 1024)
+
+    reader = ZipFile::Reader.new(tempfile)
+
+    assert_raises(ZipFile::EntryTooLargeError) do
+      reader.read("storage/blob_key") do |io|
+        nil while io.read(4096)
+      end
+    end
+  end
+
+  test "reader raises a busted limit even when the stream's consumer wraps it" do
+    tempfile = understate_declared_size(create_test_zip("storage/blob_key" => "a" * 64.kilobytes), "storage/blob_key", 1024)
+
+    reader = ZipFile::Reader.new(tempfile)
+
+    assert_raises(ZipFile::EntryTooLargeError) do
+      reader.read("storage/blob_key") do |io|
+        nil while io.read(4096)
+      rescue => error
+        raise RuntimeError, "upload failed: #{error.message}"
+      end
+    end
+  end
+
   test "reader raises InvalidFileError for non-zip file" do
     tempfile = Tempfile.new([ "not_a_zip", ".zip" ])
     tempfile.write("this is not a zip file at all")

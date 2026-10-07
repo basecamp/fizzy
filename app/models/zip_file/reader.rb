@@ -37,7 +37,7 @@ class ZipFile::Reader
     raise ArgumentError, "Cannot read directory entry: #{file_path}" if entry.filename.end_with?("/")
 
     if block_given?
-      yield ZipFile::Reader::IO.new(entry, @io, self)
+      stream(entry) { |io| yield io }
     else
       extract_within(entry, max_bytes)
     end
@@ -56,12 +56,40 @@ class ZipFile::Reader
     @expanded += bytes
 
     if @expanded > @budget
-      raise ZipFile::ArchiveTooLargeError,
-        "archive has produced #{@expanded} bytes, over the #{@budget} byte limit for its size"
+      exceeded! ZipFile::ArchiveTooLargeError.new("archive has produced #{@expanded} bytes, over the #{@budget} byte limit for its size")
     end
   end
 
+  def exceeded!(error)
+    @exceeded = error
+    raise error
+  end
+
   private
+    # S3's multipart upload wraps whatever the stream raises in an error of its
+    # own, which would hide a busted limit from the import and from the job's
+    # list of errors not worth resuming.
+    def stream(entry)
+      @exceeded = nil
+      ensure_declared_within_budget entry
+
+      yield ZipFile::Reader::IO.new(entry, @io, self)
+    rescue StandardError => error
+      raise @exceeded || error
+    end
+
+    # Active Storage sizes S3 multipart parts from the size a stream declares,
+    # and the S3 client holds each part in memory, so an entry may declare no
+    # more than its archive has left to give.
+    def ensure_declared_within_budget(entry)
+      left = @budget - @expanded
+
+      if entry.uncompressed_size > left
+        raise ZipFile::ArchiveTooLargeError,
+          "#{entry.filename} declares #{entry.uncompressed_size} bytes, over the #{left} byte limit left for its archive"
+      end
+    end
+
     def extract_within(entry, max_bytes)
       ensure_within entry, entry.uncompressed_size, max_bytes
 
