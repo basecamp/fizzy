@@ -1,1 +1,3 @@
-<%= turbo_frame_tag card, :columns, src: edit_card_column_path(card), target: "_top", refresh: "morph" %>
+<%= turbo_frame_tag card, :columns, target: "_top", refresh: "morph" do %>
+  <%= render "cards/columns/stages", card: card, columns: card.board.columns.sorted %>
+<% end %>

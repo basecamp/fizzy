@@ -66,4 +66,30 @@ class CardNavigationTest < ApplicationSystemTestCase
     assert_current_path card_path(@cards.second)
     assert_selector "button[aria-label='Previous card in column'][disabled]"
   end
+
+  test "returning to a visited card renders once without a cached preview" do
+    visit card_url(@cards.first)
+    find("button[aria-label='Next card in column']:not([disabled])").click
+    assert_current_path card_path(@cards.second)
+    assert_selector "button[aria-label='Previous card in column']:not([disabled])"
+
+    page.execute_script <<~JS
+      window.cardNavigationRenders = []
+      document.addEventListener("turbo:render", () => {
+        window.cardNavigationRenders.push({
+          preview: document.documentElement.hasAttribute("data-turbo-preview"),
+          columns: !!document.querySelector(".card__stages"),
+          watch: !!document.querySelector("[id^='watch_button_card_']"),
+          pin: !!document.querySelector("[id^='pin_button_card_']")
+        })
+      })
+    JS
+
+    find("button[aria-label='Previous card in column']").click
+    assert_current_path card_path(@cards.first)
+    assert_no_selector "html[data-turbo-preview]"
+    assert_selector "button[aria-label='Next card in column']:not([disabled])"
+    renders = page.evaluate_script("window.cardNavigationRenders")
+    assert_equal [ { "preview" => false, "columns" => true, "watch" => true, "pin" => true } ], renders
+  end
 end
