@@ -79,6 +79,31 @@ class OauthDelegateResourcesTest < ActionDispatch::IntegrationTest
     assert_not Push::Subscription.exists?(endpoint: ENDPOINT)
   end
 
+  test "registering an endpoint again hands it to whoever registered it last" do
+    subscribe_push bearer(@grant)
+
+    reregistered = Oauth::Client.create!(name: "Test MCP Client", redirect_uris: %w[ http://127.0.0.1:8888/callback ], dynamically_registered: true)
+    subscribe_push bearer(identities(:kevin).access_tokens.create!(oauth_client: reregistered, permission: :write))
+    assert_equal reregistered, app_subscription.oauth_client
+
+    @grant.destroy
+    assert Push::Subscription.exists?(endpoint: ENDPOINT)
+
+    sign_in_as :kevin
+    post user_push_subscriptions_path(users(:kevin)), params: { push_subscription: push_params(ENDPOINT) }
+    assert_nil app_subscription.oauth_client
+  end
+
+  test "a user leaving the account takes the app's push subscriptions with it, and not the browser's" do
+    subscribe_push bearer(@grant)
+    browser = users(:kevin).push_subscriptions.create!(push_params("https://fcm.googleapis.com/fcm/send/browser"))
+
+    users(:kevin).deactivate
+
+    assert_not Push::Subscription.exists?(endpoint: ENDPOINT)
+    assert Push::Subscription.exists?(browser.id)
+  end
+
   test "push subscriptions made by a session or a personal access token survive disconnecting" do
     pat = identities(:kevin).access_tokens.create!(permission: :write)
     subscribe_push bearer(pat), endpoint: "https://fcm.googleapis.com/fcm/send/pat-device"

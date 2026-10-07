@@ -16,8 +16,17 @@ class Push::Subscription < ApplicationRecord
   # and personal access tokens register none.
   belongs_to :oauth_client, class_name: "Oauth::Client", optional: true
 
+  scope :owned_by_apps, -> { where.not(oauth_client_id: nil) }
+
   validates :endpoint, presence: true
   validate :validate_endpoint_url
+
+  # Whoever registers an endpoint last owns it. An app that registers a fresh
+  # OAuth client on reconnect keeps a device subscription it registered under
+  # the old one, so it doesn't go when the old client's grant ends.
+  def claim_for(oauth_client)
+    update_column :oauth_client_id, oauth_client&.id unless oauth_client_id == oauth_client&.id
+  end
 
   def notification(**params)
     WebPush::Notification.new(
