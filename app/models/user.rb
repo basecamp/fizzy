@@ -19,10 +19,6 @@ class User < ApplicationRecord
   def deactivate
     transaction do
       accesses.destroy_all
-      # Once detached from the identity, the user is out of reach of its OAuth
-      # grants, so the apps' own push subscriptions end here. The grant-side
-      # cleanup can't find this user after the identity is cleared.
-      push_subscriptions.owned_by_apps.delete_all
       update! active: false, identity: nil
       close_remote_connections
     end

@@ -9,6 +9,7 @@ require "test_helper"
 # person may choose to remove them when they disconnect the app.
 class OauthDelegateResourcesTest < ActionDispatch::IntegrationTest
   ENDPOINT = "https://fcm.googleapis.com/fcm/send/app-device"
+  BROWSER = "https://fcm.googleapis.com/fcm/send/browser"
 
   setup do
     stub_web_push_dns_resolution
@@ -94,14 +95,51 @@ class OauthDelegateResourcesTest < ActionDispatch::IntegrationTest
     assert_nil app_subscription.oauth_client
   end
 
-  test "a user leaving the account takes the app's push subscriptions with it, and not the browser's" do
+  # Delivery is where the leak would be, so the guarantee lives there: an app's
+  # subscription delivers only while the user's identity holds a live grant to
+  # that app. Cleanup on grant destroy keeps the table tidy; whatever it can't
+  # see goes inert rather than delivering.
+  test "an app's push subscription delivers while its grant is live, alongside the browser's" do
     subscribe_push bearer(@grant)
-    browser = users(:kevin).push_subscriptions.create!(push_params("https://fcm.googleapis.com/fcm/send/browser"))
+    users(:kevin).push_subscriptions.create!(push_params(BROWSER))
+
+    assert_equal [ BROWSER, ENDPOINT ].sort, delivered_endpoints.sort
+  end
+
+  test "an app's push subscription stops delivering when the user leaves the account" do
+    subscribe_push bearer(@grant)
+    users(:kevin).push_subscriptions.create!(push_params(BROWSER))
 
     users(:kevin).deactivate
 
-    assert_not Push::Subscription.exists?(endpoint: ENDPOINT)
-    assert Push::Subscription.exists?(browser.id)
+    assert_equal [ BROWSER ], delivered_endpoints
+  end
+
+  test "an app's push subscription stops delivering when the user moves to another identity" do
+    subscribe_push bearer(@grant)
+
+    users(:kevin).change_email_address("kevin.elsewhere@example.com")
+
+    assert Identity::AccessToken.exists?(@grant.id)
+    assert_empty delivered_endpoints
+  end
+
+  test "an app's push subscription stops delivering once its grant lapses, before the sweep" do
+    subscribe_push bearer(@grant)
+
+    travel Identity::AccessToken::REFRESH_IDLE_LIMIT + 1.second
+
+    assert Identity::AccessToken.exists?(@grant.id)
+    assert_empty delivered_endpoints
+  end
+
+  test "a subscription claimed for an app with no grant left never delivers" do
+    subscription = users(:kevin).push_subscriptions.create!(push_params(ENDPOINT))
+    @grant.destroy
+
+    subscription.claim_for @client
+
+    assert_empty delivered_endpoints
   end
 
   test "push subscriptions made by a session or a personal access token survive disconnecting" do
@@ -217,6 +255,21 @@ class OauthDelegateResourcesTest < ActionDispatch::IntegrationTest
     assert Webhook.exists?(added_since.id)
   end
 
+  test "a cancelled account's webhooks are neither listed nor removed at revoke time" do
+    elsewhere = User.create!(name: "Kevin", identity: identities(:kevin), account: accounts(:initech), role: :admin)
+    webhook = Current.set(user: elsewhere) do
+      boards(:miltons_wish_list).webhooks.create!(name: "Cancelled feed", url: "https://app.example.com/hooks", created_via: @client)
+    end
+    accounts(:initech).create_cancellation!(initiated_by: users(:mike))
+
+    sign_in_as :kevin
+    get my_connected_apps_path
+    assert_select "dialog li", text: /Cancelled feed/, count: 0
+
+    delete my_connected_app_path(@client), params: { remove_webhooks: "1", webhook_ids: [ webhook.id ] }
+    assert Webhook.exists?(webhook.id)
+  end
+
   test "disconnecting without also-remove keeps the app's webhooks" do
     webhook = create_webhook bearer(@grant)
 
@@ -242,6 +295,17 @@ class OauthDelegateResourcesTest < ActionDispatch::IntegrationTest
 
     def subscribe_push(env, endpoint: ENDPOINT)
       post user_push_subscriptions_path(users(:kevin)), params: { push_subscription: push_params(endpoint) }, env: env, as: :json
+    end
+
+    def delivered_endpoints
+      delivered = []
+      pool = mock("web_push_pool")
+      pool.stubs(:queue).with { |_payload, subscriptions| delivered = subscriptions.map(&:endpoint) }
+      Rails.configuration.x.stubs(:web_push_pool).returns(pool)
+
+      notification = stub(user: users(:kevin).reload, payload: stub(to_h: {}))
+      Notification::PushTarget::Web.new(notification).process
+      delivered
     end
 
     def app_subscription

@@ -40,9 +40,11 @@ class Webhook < ApplicationRecord
   scope :ordered, -> { order(name: :asc, id: :desc) }
   scope :active, -> { where(active: true) }
 
-  # Webhooks an app set up for this identity, in any account where the person
-  # can still manage webhooks.
-  scope :set_up_through, ->(client, identity:) { where(created_via: client, creator: identity.users.admin) }
+  # Webhooks an app set up for this identity, in any active account where the
+  # person can still manage webhooks.
+  scope :set_up_through, ->(client, identity:) do
+    where(created_via: client, creator: identity.users.admin.joins(:account).merge(Account.active))
+  end
 
   after_create :create_delinquency_tracker!
 
