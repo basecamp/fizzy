@@ -9,8 +9,9 @@
 # asked in order: has the pinned image been published at all, and is the accessory running it.
 #
 # --version=SHA reads the pin from that commit rather than the working tree, which is what makes a
-# rollback land on the cell that version was deployed with. A version that is not a commit (kamal's
-# <sha>_uncommitted_<hex> for a dirty tree) falls back to the tree.
+# rollback land on the cell that version was deployed with. The reboot reads the working tree's
+# saas/config/deploy.yml, so it gets that pin through HOTCELL_IMAGE. A version that is not a commit
+# (kamal's <sha>_uncommitted_<hex> for a dirty tree) falls back to the tree.
 #
 # Asks one randomly chosen host out of the accessory's roles: the pin drifts per destination rather than
 # per host, and sshing all of production costs a minute. A destination that missed a single host's reboot
@@ -119,6 +120,9 @@ if [ -n "$version" ]; then
     echo "Commit $version is not in this repository; using the working tree's pin. git fetch and rerun to use that commit's." >&2
   fi
 fi
+
+reboot_env=""
+[ "$pinned" = "$(tree_pin)" ] || reboot_env="HOTCELL_IMAGE=$pinned "
 
 # Which hosts to ask. A --hosts list narrower than the accessory's is asked in full and rebooted in full,
 # and nothing else is; anything else samples one host and reboots them all.
@@ -291,7 +295,7 @@ deploy.
 The pinned image is in the registry, so there is nothing to build or push. A deploy never boots an
 accessory, so boot it by hand:
 
-    bin/kamal accessory reboot hotcell -d $destination $reboot_hosts
+    ${reboot_env}bin/kamal accessory reboot hotcell -d $destination $reboot_hosts
 
 Then deploy again.
 MSG
@@ -308,7 +312,7 @@ than to reason about the gap.
 The pinned image is in the registry, so there is nothing to build or push. Tags are immutable and there
 is no latest, so the accessory goes on running what it booted with until it is rebooted:
 
-    bin/kamal accessory reboot hotcell -d $destination $reboot_hosts
+    ${reboot_env}bin/kamal accessory reboot hotcell -d $destination $reboot_hosts
 
 Then deploy again.
 MSG
@@ -322,7 +326,7 @@ if [ "${#absent[@]}" -gt 0 ] || [ "${#stale[@]}" -gt 0 ]; then
   [ -n "$reboot" ] || accessory_wrong
   echo
   echo "$destination is not running the pinned cell image. Rebooting the cell."
-  bin/kamal accessory reboot hotcell -d "$destination" --skip-hooks $reboot_hosts || exit 1
+  HOTCELL_IMAGE="$pinned" bin/kamal accessory reboot hotcell -d "$destination" --skip-hooks $reboot_hosts || exit 1
   inspect_hosts
   if [ "${#absent[@]}" -gt 0 ] || [ "${#stale[@]}" -gt 0 ]; then
     accessory_wrong

@@ -39,7 +39,7 @@ case "$name" in
         [ -n "${STUB_REBOOT_NOOP:-}" ] && exit 0
         hosts="$(printf '%s\n' "$@" | sed -n 's/^--hosts=//p' | tr ',' ' ')"
         [ -n "$hosts" ] || hosts="$(cat "$STUB_SANDBOX/state/all-hosts")"
-        for h in $hosts; do echo "$(pin)" > "$STUB_SANDBOX/state/running/$h"; done ;;
+        for h in $hosts; do echo "${HOTCELL_IMAGE:-$(pin)}" > "$STUB_SANDBOX/state/running/$h"; done ;;
     esac ;;
   docker)
     case "$1 $2" in
@@ -232,6 +232,23 @@ run_scenario "--version reads the pin from that commit, not the tree" \
 $MANIFEST
 $SSH_H1
 exit: 0" REGISTRY=aaa RUNNING=h1:aaa
+
+run_scenario "--version names the commit's pin in the reboot it asks for" \
+  "sed -i 's/fizzy-hotcell:aaa/fizzy-hotcell:bbb/' saas/config/deploy.yml && saas/hotcell/bin/check staging --version=\$(git rev-parse HEAD)" \
+"$CONFIG
+$MANIFEST
+$SSH_H1
+exit: 3" REGISTRY=aaa RUNNING=h1:bbb
+expect_output "HOTCELL_IMAGE=registry.example/fizzy-hotcell:aaa bin/kamal accessory reboot hotcell -d staging"
+
+run_scenario "--reboot with --version boots the commit's pin, not the tree's" \
+  "sed -i 's/fizzy-hotcell:aaa/fizzy-hotcell:bbb/' saas/config/deploy.yml && saas/hotcell/bin/check staging --reboot --version=\$(git rev-parse HEAD)" \
+"$CONFIG
+$MANIFEST
+$SSH_H1
+$REBOOT
+$SSH_H1
+exit: 0" REGISTRY=aaa RUNNING=h1:bbb
 
 run_scenario "--version that is not a commit falls back to the tree" \
   "sed -i 's/fizzy-hotcell:aaa/fizzy-hotcell:bbb/' saas/config/deploy.yml && saas/hotcell/bin/check staging --version=abc123_uncommitted_9f" \
