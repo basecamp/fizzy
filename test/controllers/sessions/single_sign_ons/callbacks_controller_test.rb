@@ -136,6 +136,8 @@ class Sessions::SingleSignOns::CallbacksControllerTest < ActionDispatch::Integra
 
     assert_response :unauthorized
     assert_select "p", text: /did not work/
+    assert_select "button", text: "Try SSO again"
+    assert_select "a[href$=?]", "/session/new", count: 0
   end
 
   test "expired sign-in request" do

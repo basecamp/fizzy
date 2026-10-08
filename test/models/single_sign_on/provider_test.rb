@@ -55,6 +55,13 @@ class SingleSignOn::ProviderTest < ActiveSupport::TestCase
     assert_raises(SingleSignOn::ProviderError) { SingleSignOn.provider.authorization_url(**authorization_url_parameters) }
   end
 
+  test "discovery endpoints must be URLs with a host" do
+    [ "https:", "https://id example.com/token" ].each do |endpoint|
+      stub_single_sign_on_discovery token_endpoint: endpoint
+      assert_raises(SingleSignOn::ProviderError, endpoint) { SingleSignOn.provider.authorization_url(**authorization_url_parameters) }
+    end
+  end
+
   test "unreachable provider" do
     stub_request(:get, "#{SINGLE_SIGN_ON_ISSUER}/.well-known/openid-configuration").to_timeout
 

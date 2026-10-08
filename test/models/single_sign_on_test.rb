@@ -31,6 +31,13 @@ class SingleSignOnTest < ActiveSupport::TestCase
     assert_raises(SingleSignOn::ConfigurationError) { SingleSignOn.ensure_valid_configuration }
   end
 
+  test "issuer must be a URL with a host" do
+    [ "https:", "https:///realms/acme", "https://id example.com", "id.example.com" ].each do |issuer|
+      enable_single_sign_on issuer: issuer
+      assert_raises(SingleSignOn::ConfigurationError, issuer) { SingleSignOn.ensure_valid_configuration }
+    end
+  end
+
   test "reauthentication period" do
     assert_equal 12.hours, SingleSignOn.reauthentication_period
 

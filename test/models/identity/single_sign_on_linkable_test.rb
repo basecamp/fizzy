@@ -11,6 +11,14 @@ class Identity::SingleSignOnLinkableTest < ActiveSupport::TestCase
     assert_nil Identity.find_by_single_sign_on(single_sign_on_claims(issuer: "https://other.example.com", subject: "jz-subject"))
   end
 
+  test "find by single sign-on compares the issuer and the subject exactly" do
+    assert_nil Identity.find_by_single_sign_on(single_sign_on_claims(subject: "JZ-subject"))
+    assert_nil Identity.find_by_single_sign_on(single_sign_on_claims(subject: "jz-subjéct"))
+    assert_nil Identity.find_by_single_sign_on(single_sign_on_claims(issuer: "https://ID.example.com", subject: "jz-subject"))
+
+    assert_nothing_raised { identities(:kevin).link_single_sign_on(single_sign_on_claims(subject: "JZ-subject")) }
+  end
+
   test "link single sign-on" do
     identity = identities(:kevin)
     identity.link_single_sign_on(single_sign_on_claims(subject: "kevin-subject"))

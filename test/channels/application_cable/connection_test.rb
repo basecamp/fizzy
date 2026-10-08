@@ -38,6 +38,24 @@ module ApplicationCable
       assert_equal users(:mike), connection.current_user
     end
 
+    test "closes a single sign-on connection when its sign-in expires" do
+      cookies.signed[:session_token] = @session.signed_id
+      @session.update!(single_sign_on_authenticated_at: Time.current)
+
+      with_single_sign_on do
+        connect "/cable", env: { "fizzy.external_account_id" => @account.external_account_id }
+
+        connection.beat
+        assert_not socket.closed
+        assert_equal "ping", socket.transmissions.last["type"]
+
+        travel SingleSignOn.reauthentication_period + 1.minute
+        connection.beat
+        assert socket.closed
+        assert_equal({ "type" => "disconnect", "reason" => "unauthorized", "reconnect" => true }, socket.transmissions.last)
+      end
+    end
+
     test "rejects a recent single sign-on session outside the account group" do
       cookies.signed[:session_token] = @session.signed_id
       @session.update!(single_sign_on_authenticated_at: Time.current, single_sign_on_groups: [ "/sales" ])

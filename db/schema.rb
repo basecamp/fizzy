@@ -66,7 +66,7 @@ ActiveRecord::Schema[8.2].define(version: 2026_10_06_130000) do
     t.bigint "external_account_id"
     t.string "name", null: false
     t.datetime "updated_at", null: false
-    t.string "single_sign_on_group"
+    t.string "single_sign_on_group", collation: "utf8mb4_0900_bin"
     t.index ["external_account_id"], name: "index_accounts_on_external_account_id", unique: true
   end
 
@@ -364,8 +364,8 @@ ActiveRecord::Schema[8.2].define(version: 2026_10_06_130000) do
 
   create_table "identity_single_sign_on_links", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.uuid "identity_id", null: false
-    t.string "issuer", null: false
-    t.string "subject", null: false
+    t.string "issuer", null: false, collation: "utf8mb4_0900_bin"
+    t.string "subject", null: false, collation: "utf8mb4_0900_bin"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["identity_id", "issuer"], name: "index_identity_single_sign_on_links_on_identity_id_and_issuer", unique: true

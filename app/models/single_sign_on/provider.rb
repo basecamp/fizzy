@@ -85,13 +85,9 @@ class SingleSignOn::Provider
           "Discovery issuer #{document["issuer"].inspect} does not match #{issuer}"
       elsif endpoints.any?(&:blank?)
         raise SingleSignOn::ProviderError, "Discovery document for #{issuer} is missing an endpoint"
-      elsif endpoints.any? { |endpoint| !secure_url?(endpoint) }
-        raise SingleSignOn::ProviderError, "Discovery document for #{issuer} lists an endpoint without https"
+      elsif endpoints.any? { |endpoint| !SingleSignOn.secure_url?(endpoint) }
+        raise SingleSignOn::ProviderError, "Discovery document for #{issuer} lists an endpoint that is not an https URL"
       end
-    end
-
-    def secure_url?(url)
-      URI(url).scheme == "https" || Rails.env.local?
     end
 
     def exchange_code(code:, redirect_uri:, code_verifier:)

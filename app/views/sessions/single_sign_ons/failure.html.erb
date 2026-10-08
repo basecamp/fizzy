@@ -12,8 +12,6 @@
 
   <% if authenticated? %>
     <%= link_to "Choose another account", session_menu_path, class: "btn btn--plain txt-link center txt-small" %>
-  <% else %>
-    <%= link_to "Sign in another way", new_session_path, class: "btn btn--plain txt-link center txt-small" %>
   <% end %>
 </div>
 

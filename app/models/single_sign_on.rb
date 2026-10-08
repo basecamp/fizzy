@@ -59,6 +59,13 @@ module SingleSignOn
       FULL_GROUP_PATH.match?(group)
     end
 
+    def secure_url?(url)
+      uri = URI.parse(url.to_s)
+      uri.host.present? && (uri.scheme == "https" || (uri.scheme == "http" && Rails.env.local?))
+    rescue URI::InvalidURIError
+      false
+    end
+
     # Providers can list only direct memberships, so a member of a subgroup also counts as a member of its parents.
     def groups_with_parents(groups)
       groups.flat_map do |group|
@@ -104,8 +111,8 @@ module SingleSignOn
       end
 
       def ensure_secure_issuer
-        if configured? && URI(settings.issuer).scheme != "https" && !Rails.env.local?
-          raise ConfigurationError, "SINGLE_SIGN_ON_ISSUER must use https"
+        if configured? && !secure_url?(settings.issuer)
+          raise ConfigurationError, "SINGLE_SIGN_ON_ISSUER must be an https URL, such as https://id.example.com"
         end
       end
 

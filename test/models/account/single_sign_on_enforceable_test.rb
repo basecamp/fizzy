@@ -110,6 +110,13 @@ class Account::SingleSignOnEnforceableTest < ActiveSupport::TestCase
     end
   end
 
+  test "joinable by single sign-on compares groups exactly" do
+    @account.update!(single_sign_on_group: "/Sales")
+
+    assert_includes Account.joinable_by_single_sign_on([ "/Sales" ]), @account
+    assert_not_includes Account.joinable_by_single_sign_on([ "/sales" ]), @account
+  end
+
   test "every account is joinable by a member of the admin group" do
     enable_single_sign_on admin_group: "/fizzy/admin"
 
