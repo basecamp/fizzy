@@ -8,7 +8,7 @@ class My::PasskeysControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "not found with single sign-on" do
-    current_session.update!(single_sign_on_authenticated_at: Time.current)
+    current_session.update!(single_sign_on_authenticated_at: Time.current, single_sign_on_issuer: SINGLE_SIGN_ON_ISSUER)
 
     with_single_sign_on do
       get my_passkeys_path

@@ -9,7 +9,6 @@ module Authorization
   class_methods do
     def allow_unauthorized_access(**options)
       skip_before_action :ensure_can_access_account, **options
-      skip_before_action :ensure_single_sign_on_group, **options
     end
 
     def require_access_without_a_user(**options)

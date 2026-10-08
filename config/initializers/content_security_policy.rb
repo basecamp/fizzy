@@ -49,7 +49,7 @@ Rails.application.configure do
   # before `single_sign_on.rb` to read the environment directly.
   single_sign_on_origin = ENV["SINGLE_SIGN_ON_ISSUER"].presence&.then do |issuer|
     URI.join(issuer, "/").to_s.chomp("/")
-  rescue URI::InvalidURIError
+  rescue URI::Error
     # `SingleSignOn.ensure_valid_configuration` will stop the boot.
   end
 

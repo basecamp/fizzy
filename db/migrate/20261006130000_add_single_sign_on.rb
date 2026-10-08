@@ -14,6 +14,7 @@ class AddSingleSignOn < ActiveRecord::Migration[8.2]
     add_column :sessions, :single_sign_on_authenticated_at, :datetime
     # SQLite rejects `size:`, and this limit gives a MySQL `MEDIUMTEXT` column.
     add_column :sessions, :single_sign_on_groups, :text, limit: 16.megabytes - 1
+    add_column :sessions, :single_sign_on_issuer, :string, collation: exact_collation
     add_column :accounts, :single_sign_on_group, :string, collation: exact_collation
   end
 

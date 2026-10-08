@@ -18,7 +18,7 @@ class Signup::CompletionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "new for a member of the admin group with single sign-on" do
-    current_session.update!(single_sign_on_authenticated_at: Time.current, single_sign_on_groups: [ "/fizzy/admin" ])
+    current_session.update!(single_sign_on_authenticated_at: Time.current, single_sign_on_issuer: SINGLE_SIGN_ON_ISSUER, single_sign_on_groups: [ "/fizzy/admin" ])
 
     with_single_sign_on admin_group: "/fizzy/admin" do
       untenanted do
@@ -30,7 +30,7 @@ class Signup::CompletionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "create outside the admin group with single sign-on" do
-    current_session.update!(single_sign_on_authenticated_at: Time.current, single_sign_on_groups: [ "/sales" ])
+    current_session.update!(single_sign_on_authenticated_at: Time.current, single_sign_on_issuer: SINGLE_SIGN_ON_ISSUER, single_sign_on_groups: [ "/sales" ])
 
     with_single_sign_on admin_group: "/fizzy/admin" do
       untenanted do
@@ -46,7 +46,7 @@ class Signup::CompletionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "create via JSON without an admin group with single sign-on" do
-    current_session.update!(single_sign_on_authenticated_at: Time.current)
+    current_session.update!(single_sign_on_authenticated_at: Time.current, single_sign_on_issuer: SINGLE_SIGN_ON_ISSUER)
 
     with_single_sign_on do
       untenanted do

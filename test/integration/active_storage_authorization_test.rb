@@ -33,7 +33,7 @@ class ActiveStorageAuthorizationTest < ActionDispatch::IntegrationTest
       get rails_blob_path(@blob, disposition: :inline)
       assert_response :forbidden
 
-      current_session.update!(single_sign_on_authenticated_at: Time.current)
+      current_session.update!(single_sign_on_authenticated_at: Time.current, single_sign_on_issuer: SINGLE_SIGN_ON_ISSUER)
 
       get rails_blob_path(@blob, disposition: :inline)
       assert_match %r{rails/active_storage}, response.location
@@ -61,7 +61,7 @@ class ActiveStorageAuthorizationTest < ActionDispatch::IntegrationTest
 
   test "session outside the account group cannot view blob" do
     sign_in_as :david
-    current_session.update!(single_sign_on_authenticated_at: Time.current, single_sign_on_groups: [ "/sales" ])
+    current_session.update!(single_sign_on_authenticated_at: Time.current, single_sign_on_issuer: SINGLE_SIGN_ON_ISSUER, single_sign_on_groups: [ "/sales" ])
 
     with_single_sign_on do
       @account.update!(single_sign_on_group: "/engineering/fizzy")

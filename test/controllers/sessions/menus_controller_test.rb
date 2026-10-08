@@ -19,7 +19,7 @@ class Sessions::MenusControllerTest < ActionDispatch::IntegrationTest
 
   test "show offers the signup link to the admin group" do
     sign_in_as @identity
-    current_session.update!(single_sign_on_authenticated_at: Time.current, single_sign_on_groups: [ "/fizzy/admin" ])
+    current_session.update!(single_sign_on_authenticated_at: Time.current, single_sign_on_issuer: SINGLE_SIGN_ON_ISSUER, single_sign_on_groups: [ "/fizzy/admin" ])
     @identity.users.delete_all
 
     with_single_sign_on admin_group: "/fizzy/admin" do
@@ -34,7 +34,7 @@ class Sessions::MenusControllerTest < ActionDispatch::IntegrationTest
 
   test "show hides the signup link outside the admin group" do
     sign_in_as @identity
-    current_session.update!(single_sign_on_authenticated_at: Time.current, single_sign_on_groups: [ "/sales" ])
+    current_session.update!(single_sign_on_authenticated_at: Time.current, single_sign_on_issuer: SINGLE_SIGN_ON_ISSUER, single_sign_on_groups: [ "/sales" ])
     @identity.users.delete_all
 
     with_single_sign_on admin_group: "/fizzy/admin" do

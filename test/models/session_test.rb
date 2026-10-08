@@ -19,6 +19,15 @@ class SessionTest < ActiveSupport::TestCase
     assert_not @session.recently_authenticated_by_single_sign_on?
   end
 
+  test "recently authenticated by single sign-on needs the current issuer" do
+    enable_single_sign_on
+    @session.update!(single_sign_on_authenticated_at: 1.hour.ago, single_sign_on_issuer: SINGLE_SIGN_ON_ISSUER)
+    assert @session.recently_authenticated_by_single_sign_on?
+
+    enable_single_sign_on issuer: "https://other.example.com"
+    assert_not @session.recently_authenticated_by_single_sign_on?
+  end
+
   test "single sign-on groups" do
     assert_equal [], @session.single_sign_on_groups
     assert_not @session.single_sign_on_group?("/engineering/fizzy")
@@ -49,6 +58,7 @@ class SessionTest < ActiveSupport::TestCase
 
   test "recently authenticated by single sign-on follows the configured period" do
     enable_single_sign_on reauthentication_hours: "2"
+    @session.single_sign_on_issuer = SINGLE_SIGN_ON_ISSUER
 
     @session.single_sign_on_authenticated_at = 1.hour.ago
     assert @session.recently_authenticated_by_single_sign_on?

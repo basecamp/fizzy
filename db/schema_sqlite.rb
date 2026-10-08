@@ -511,6 +511,7 @@ ActiveRecord::Schema[8.2].define(version: 2026_10_06_130000) do
     t.string "user_agent", limit: 4096
     t.datetime "single_sign_on_authenticated_at"
     t.text "single_sign_on_groups", limit: 16777215
+    t.string "single_sign_on_issuer"
     t.index ["identity_id"], name: "index_sessions_on_identity_id"
   end
 

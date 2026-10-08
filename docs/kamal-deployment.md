@@ -74,7 +74,7 @@ The values you enter here will be specific to you, and you can get or create the
   puts "VAPID_PUBLIC_KEY=#{vapid_key.public_key}"
   ```
 
-To sign people in through an OpenID Connect identity provider, add `SINGLE_SIGN_ON_CLIENT_SECRET` to `.kamal/secrets` and to `env/secret`. (This combination tells Kamal to pass the variable into the Fizzy container.) Also, add `SINGLE_SIGN_ON_ISSUER` and `SINGLE_SIGN_ON_CLIENT_ID` to `env/clear`. For all the steps, refer to the [Single sign-on with OpenID Connect](single-sign-on.md) documentation.
+To sign people in through an OpenID Connect identity provider, add `SINGLE_SIGN_ON_CLIENT_SECRET` to `.kamal/secrets` and to `env/secret`. (This combination tells Kamal to pass the variable into the Fizzy container.) Also, add `SINGLE_SIGN_ON_ISSUER`, `SINGLE_SIGN_ON_CLIENT_ID`, and `SINGLE_SIGN_ON_ADMIN_GROUP` to `env/clear`. For all the steps, refer to the [Single sign-on with OpenID Connect](single-sign-on.md) documentation.
 
 Once you've made all those changes, commit them to your fork so they're saved.
 

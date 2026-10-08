@@ -105,7 +105,8 @@ module Authentication::ViaSingleSignOn
   # A new session keeps an older session from gaining single sign-on access.
   def start_single_sign_on_session_for(identity, groups: [])
     terminate_session if Current.session
-    start_new_session_for identity, single_sign_on_authenticated_at: Time.current, single_sign_on_groups: groups
+    start_new_session_for identity, single_sign_on_authenticated_at: Time.current, single_sign_on_issuer: SingleSignOn.issuer,
+      single_sign_on_groups: groups
   end
 
   # A recent sign-in carries the current groups, so another sign-in cannot help and would loop.

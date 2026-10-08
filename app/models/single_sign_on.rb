@@ -16,9 +16,13 @@ module SingleSignOn
       credentials.all?(&:present?)
     end
 
+    def issuer
+      settings.issuer
+    end
+
     def provider
       Provider.new \
-        issuer: settings.issuer,
+        issuer: issuer,
         client_id: settings.client_id,
         client_secret: settings.client_secret
     end

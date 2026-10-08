@@ -23,10 +23,10 @@ class Account::SingleSignOnEnforceableTest < ActiveSupport::TestCase
     assert_not @account.accessible_with?(nil)
     assert_not @account.accessible_with?(@session)
 
-    @session.update!(single_sign_on_authenticated_at: 1.hour.ago)
+    @session.update!(single_sign_on_authenticated_at: 1.hour.ago, single_sign_on_issuer: SINGLE_SIGN_ON_ISSUER)
     assert @account.accessible_with?(@session)
 
-    @session.update!(single_sign_on_authenticated_at: 13.hours.ago)
+    @session.update!(single_sign_on_authenticated_at: 13.hours.ago, single_sign_on_issuer: SINGLE_SIGN_ON_ISSUER)
     assert_not @account.accessible_with?(@session)
   end
 
@@ -34,7 +34,7 @@ class Account::SingleSignOnEnforceableTest < ActiveSupport::TestCase
     enable_single_sign_on
     @account.update!(single_sign_on_group: "/engineering/fizzy")
 
-    @session.update!(single_sign_on_authenticated_at: 1.hour.ago, single_sign_on_groups: [ "/engineering" ])
+    @session.update!(single_sign_on_authenticated_at: 1.hour.ago, single_sign_on_issuer: SINGLE_SIGN_ON_ISSUER, single_sign_on_groups: [ "/engineering" ])
     assert_not @account.accessible_with?(@session)
 
     @session.update!(single_sign_on_groups: [ "/engineering", "/engineering/fizzy" ])
@@ -45,7 +45,7 @@ class Account::SingleSignOnEnforceableTest < ActiveSupport::TestCase
     enable_single_sign_on
     @account.update!(single_sign_on_group: "/engineering")
 
-    @session.update!(single_sign_on_authenticated_at: 1.hour.ago, single_sign_on_groups: [ "/engineering/fizzy" ])
+    @session.update!(single_sign_on_authenticated_at: 1.hour.ago, single_sign_on_issuer: SINGLE_SIGN_ON_ISSUER, single_sign_on_groups: [ "/engineering/fizzy" ])
     assert @account.accessible_with?(@session)
   end
 
@@ -53,7 +53,7 @@ class Account::SingleSignOnEnforceableTest < ActiveSupport::TestCase
     enable_single_sign_on admin_group: "/fizzy/admin"
     @account.update!(single_sign_on_group: "/engineering/fizzy")
 
-    @session.update!(single_sign_on_authenticated_at: 1.hour.ago, single_sign_on_groups: [ "/fizzy/admin" ])
+    @session.update!(single_sign_on_authenticated_at: 1.hour.ago, single_sign_on_issuer: SINGLE_SIGN_ON_ISSUER, single_sign_on_groups: [ "/fizzy/admin" ])
     assert @account.accessible_with?(@session)
   end
 
@@ -94,10 +94,10 @@ class Account::SingleSignOnEnforceableTest < ActiveSupport::TestCase
 
   test "a new group sets roles from the newest single sign-on groups" do
     enable_single_sign_on admin_group: "/fizzy/admin", account_admin_subgroup: "admin"
-    identities(:kevin).sessions.create!(single_sign_on_authenticated_at: 1.hour.ago, single_sign_on_groups: [ "/sales/admin" ])
-    sessions(:kevin).update!(single_sign_on_authenticated_at: Time.current, single_sign_on_groups: [ "/engineering/admin", "/sales" ])
-    sessions(:jz).update!(single_sign_on_authenticated_at: Time.current, single_sign_on_groups: [ "/sales/admin" ])
-    sessions(:david).update!(single_sign_on_authenticated_at: Time.current, single_sign_on_groups: [ "/fizzy/admin" ])
+    identities(:kevin).sessions.create!(single_sign_on_authenticated_at: 1.hour.ago, single_sign_on_issuer: SINGLE_SIGN_ON_ISSUER, single_sign_on_groups: [ "/sales/admin" ])
+    sessions(:kevin).update!(single_sign_on_authenticated_at: Time.current, single_sign_on_issuer: SINGLE_SIGN_ON_ISSUER, single_sign_on_groups: [ "/engineering/admin", "/sales" ])
+    sessions(:jz).update!(single_sign_on_authenticated_at: Time.current, single_sign_on_issuer: SINGLE_SIGN_ON_ISSUER, single_sign_on_groups: [ "/sales/admin" ])
+    sessions(:david).update!(single_sign_on_authenticated_at: Time.current, single_sign_on_issuer: SINGLE_SIGN_ON_ISSUER, single_sign_on_groups: [ "/fizzy/admin" ])
 
     @account.update!(single_sign_on_group: "/engineering")
     assert_equal "admin", users(:kevin).reload.role

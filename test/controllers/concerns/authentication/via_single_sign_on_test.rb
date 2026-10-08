@@ -27,7 +27,7 @@ class Authentication::ViaSingleSignOnTest < ActionDispatch::IntegrationTest
   end
 
   test "a recent single sign-on session opens the account" do
-    current_session.update!(single_sign_on_authenticated_at: 1.hour.ago)
+    current_session.update!(single_sign_on_authenticated_at: 1.hour.ago, single_sign_on_issuer: SINGLE_SIGN_ON_ISSUER)
 
     get cards_path
 
@@ -35,7 +35,7 @@ class Authentication::ViaSingleSignOnTest < ActionDispatch::IntegrationTest
   end
 
   test "a single sign-on session older than the reauthentication period goes to single sign-on" do
-    current_session.update!(single_sign_on_authenticated_at: 13.hours.ago)
+    current_session.update!(single_sign_on_authenticated_at: 13.hours.ago, single_sign_on_issuer: SINGLE_SIGN_ON_ISSUER)
 
     get cards_path
 
@@ -86,7 +86,7 @@ class Authentication::ViaSingleSignOnTest < ActionDispatch::IntegrationTest
 
   test "a session in the account group opens the account" do
     accounts("37s").update!(single_sign_on_group: "/engineering/fizzy")
-    current_session.update!(single_sign_on_authenticated_at: 1.hour.ago, single_sign_on_groups: [ "/engineering/fizzy" ])
+    current_session.update!(single_sign_on_authenticated_at: 1.hour.ago, single_sign_on_issuer: SINGLE_SIGN_ON_ISSUER, single_sign_on_groups: [ "/engineering/fizzy" ])
 
     get cards_path
 
@@ -95,7 +95,7 @@ class Authentication::ViaSingleSignOnTest < ActionDispatch::IntegrationTest
 
   test "a session outside the account group gets the group page" do
     accounts("37s").update!(single_sign_on_group: "/engineering/fizzy")
-    current_session.update!(single_sign_on_authenticated_at: 1.hour.ago, single_sign_on_groups: [ "/sales" ])
+    current_session.update!(single_sign_on_authenticated_at: 1.hour.ago, single_sign_on_issuer: SINGLE_SIGN_ON_ISSUER, single_sign_on_groups: [ "/sales" ])
 
     get cards_path
 
@@ -107,7 +107,7 @@ class Authentication::ViaSingleSignOnTest < ActionDispatch::IntegrationTest
 
   test "a JSON request outside the account group gets forbidden" do
     accounts("37s").update!(single_sign_on_group: "/engineering/fizzy")
-    current_session.update!(single_sign_on_authenticated_at: 1.hour.ago, single_sign_on_groups: [ "/sales" ])
+    current_session.update!(single_sign_on_authenticated_at: 1.hour.ago, single_sign_on_issuer: SINGLE_SIGN_ON_ISSUER, single_sign_on_groups: [ "/sales" ])
 
     get cards_path, as: :json
 

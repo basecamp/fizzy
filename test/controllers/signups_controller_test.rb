@@ -32,7 +32,7 @@ class SignupsControllerTest < ActionDispatch::IntegrationTest
 
   test "new for an authenticated user with single sign-on" do
     sign_in_as :kevin
-    current_session.update!(single_sign_on_authenticated_at: Time.current)
+    current_session.update!(single_sign_on_authenticated_at: Time.current, single_sign_on_issuer: SINGLE_SIGN_ON_ISSUER)
 
     untenanted do
       with_single_sign_on do

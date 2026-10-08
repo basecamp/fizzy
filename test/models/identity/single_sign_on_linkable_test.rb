@@ -11,6 +11,15 @@ class Identity::SingleSignOnLinkableTest < ActiveSupport::TestCase
     assert_nil Identity.find_by_single_sign_on(single_sign_on_claims(issuer: "https://other.example.com", subject: "jz-subject"))
   end
 
+  test "latest single sign-on groups come from the current issuer" do
+    enable_single_sign_on
+    identity = identities(:kevin)
+    identity.sessions.create!(single_sign_on_authenticated_at: 1.hour.ago, single_sign_on_issuer: SINGLE_SIGN_ON_ISSUER, single_sign_on_groups: [ "/sales" ])
+    identity.sessions.create!(single_sign_on_authenticated_at: Time.current, single_sign_on_issuer: "https://other.example.com", single_sign_on_groups: [ "/fizzy/admin" ])
+
+    assert_equal [ "/sales" ], identity.latest_single_sign_on_groups
+  end
+
   test "find by single sign-on compares the issuer and the subject exactly" do
     assert_nil Identity.find_by_single_sign_on(single_sign_on_claims(subject: "JZ-subject"))
     assert_nil Identity.find_by_single_sign_on(single_sign_on_claims(subject: "jz-subjéct"))

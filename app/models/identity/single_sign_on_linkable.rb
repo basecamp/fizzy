@@ -20,7 +20,7 @@ module Identity::SingleSignOnLinkable
   end
 
   def latest_single_sign_on_groups
-    Array(sessions.where.not(single_sign_on_authenticated_at: nil).order(single_sign_on_authenticated_at: :desc).first&.single_sign_on_groups)
+    Array(sessions.where(single_sign_on_issuer: SingleSignOn.issuer).order(single_sign_on_authenticated_at: :desc).first&.single_sign_on_groups)
   end
 
   def link_single_sign_on(claims)

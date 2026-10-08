@@ -15,6 +15,7 @@ class Sessions::SingleSignOns::CallbacksControllerTest < ActionDispatch::Integra
 
     assert_redirected_to landing_url(script_name: nil)
     assert_equal identities(:jz), current_session.identity
+    assert_equal SINGLE_SIGN_ON_ISSUER, current_session.single_sign_on_issuer
     assert current_session.recently_authenticated_by_single_sign_on?
   end
 

@@ -23,6 +23,8 @@ module Authentication
     def allow_unauthenticated_access(**options)
       skip_before_action :require_authentication, **options
       skip_before_action :require_single_sign_on_session, **options
+      # Public pages are open to everyone, so the account group does not limit them.
+      skip_before_action :ensure_single_sign_on_group, **options
       before_action :resume_session, **options
       allow_unauthorized_access **options
     end

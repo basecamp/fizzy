@@ -15,7 +15,7 @@ class Users::RolesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "update is forbidden with single sign-on" do
-    current_session.update!(single_sign_on_authenticated_at: Time.current)
+    current_session.update!(single_sign_on_authenticated_at: Time.current, single_sign_on_issuer: SINGLE_SIGN_ON_ISSUER)
 
     with_single_sign_on do
       put user_role_path(users(:david)), params: { user: { role: "admin" } }

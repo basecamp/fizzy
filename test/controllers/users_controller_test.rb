@@ -20,7 +20,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
 
   test "show hides passkeys, access tokens, and auto-login links with single sign-on" do
     sign_in_as :kevin
-    current_session.update!(single_sign_on_authenticated_at: Time.current)
+    current_session.update!(single_sign_on_authenticated_at: Time.current, single_sign_on_issuer: SINGLE_SIGN_ON_ISSUER)
 
     with_single_sign_on do
       get user_path(users(:kevin))

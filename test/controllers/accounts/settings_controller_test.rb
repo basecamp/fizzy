@@ -13,7 +13,7 @@ class Account::SettingsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "show the group field to members of the admin group" do
-    current_session.update!(single_sign_on_authenticated_at: Time.current, single_sign_on_groups: [ "/fizzy/admin" ])
+    current_session.update!(single_sign_on_authenticated_at: Time.current, single_sign_on_issuer: SINGLE_SIGN_ON_ISSUER, single_sign_on_groups: [ "/fizzy/admin" ])
 
     with_single_sign_on admin_group: "/fizzy/admin" do
       get account_settings_path
@@ -27,7 +27,7 @@ class Account::SettingsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "show account admins a read-only group field" do
-    current_session.update!(single_sign_on_authenticated_at: Time.current)
+    current_session.update!(single_sign_on_authenticated_at: Time.current, single_sign_on_issuer: SINGLE_SIGN_ON_ISSUER)
 
     with_single_sign_on do
       get account_settings_path

@@ -155,7 +155,7 @@ If you do want to allow multiple accounts to be created in your instance, set `M
 
 #### Single sign-on (optional)
 
-Fizzy can sign people in through an OpenID Connect identity provider. To do so, set `SINGLE_SIGN_ON_ISSUER`, `SINGLE_SIGN_ON_CLIENT_ID`, and `SINGLE_SIGN_ON_CLIENT_SECRET`. For all the steps, refer to the [Single sign-on with OpenID Connect](single-sign-on.md) documentation.
+Fizzy can sign people in through an OpenID Connect identity provider. To do so, set `SINGLE_SIGN_ON_ISSUER`, `SINGLE_SIGN_ON_CLIENT_ID`, `SINGLE_SIGN_ON_CLIENT_SECRET`, and `SINGLE_SIGN_ON_ADMIN_GROUP`. For all the steps, refer to the [Single sign-on with OpenID Connect](single-sign-on.md) documentation.
 
 ## Importing an existing Fizzy account
 
