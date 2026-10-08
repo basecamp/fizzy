@@ -124,6 +124,22 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "destroy after the single sign-on expires" do
+    with_single_sign_on do
+      sign_in_with_single_sign_on_as :kevin
+      session = current_session
+
+      travel SingleSignOn.reauthentication_period + 1.minute do
+        untenanted do
+          delete session_path
+          assert_redirected_to new_session_path
+        end
+      end
+
+      assert_not Session.exists?(session.id)
+    end
+  end
+
   test "destroy closes every remote connection for the signed-out identity and lets valid sessions reconnect" do
     kevin = users(:kevin)
     other_account_user = User.create!(identity: kevin.identity, account: accounts(:initech), role: "member", name: "Kevin Elsewhere")

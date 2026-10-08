@@ -75,6 +75,14 @@ class SingleSignOn::ProviderTest < ActiveSupport::TestCase
     assert_raises(SingleSignOn::ProviderError) { authorization_url }
   end
 
+  test "malformed provider response" do
+    [ Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Zlib::DataError ].each do |error|
+      stub_request(:get, "#{SINGLE_SIGN_ON_ISSUER}/.well-known/openid-configuration").to_raise(error)
+
+      assert_raises(SingleSignOn::ProviderError, error.name) { SingleSignOn.provider.authorization_url(**authorization_url_parameters) }
+    end
+  end
+
   test "provider error response" do
     stub_request(:get, "#{SINGLE_SIGN_ON_ISSUER}/.well-known/openid-configuration").to_return(status: 503, body: "")
 

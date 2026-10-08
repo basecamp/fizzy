@@ -6,9 +6,11 @@ class SingleSignOn::Authentication
   end
 
   def sign_in
-    sign_in_within_transaction
-  rescue ActiveRecord::RecordNotUnique
-    sign_in_within_transaction
+    begin
+      sign_in_within_transaction
+    rescue ActiveRecord::RecordNotUnique
+      sign_in_within_transaction
+    end
   rescue ActiveRecord::RecordInvalid
     @identity = nil
     @failure_message = "#{SingleSignOn.provider_name} sent an email address that is not valid."

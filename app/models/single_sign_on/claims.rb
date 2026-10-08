@@ -22,7 +22,7 @@ class SingleSignOn::Claims < Data.define(:issuer, :subject, :email_address, :ema
       end
 
       # Providers without nested groups send plain names, so a name without a leading slash is a top-level group.
-      # A path over the length limit can never match an account group, and dropping it bounds the work for parent groups.
+      # Dropping paths over the length limit bounds the work for parent groups, but membership in their parents is lost too.
       def groups_from(payload)
         Array(payload["groups"]).grep(String).compact_blank
           .map { |group| group.start_with?("/") ? group : "/#{group}" }

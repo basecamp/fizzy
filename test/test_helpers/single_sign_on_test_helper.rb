@@ -109,7 +109,7 @@ module SingleSignOnTestHelper
 
     stub_single_sign_on_provider
     sign_in_with_single_sign_on sub: subject, email: identity.email_address, groups: groups
-    assert_response :redirect, "Signing in with single sign-on should grant access"
+    assert_response :redirect, "Single sign-on as #{identity.email_address} did not redirect"
   end
 
   def complete_single_sign_on(authorization, **claims)

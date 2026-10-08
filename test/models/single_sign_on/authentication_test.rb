@@ -205,6 +205,16 @@ class SingleSignOn::AuthenticationTest < ActiveSupport::TestCase
     assert_equal identities(:kevin), authentication.identity
   end
 
+  test "a record that is not valid during the retry fails the sign-in" do
+    Identity.any_instance.expects(:link_single_sign_on).twice
+      .raises(ActiveRecord::RecordNotUnique).then.raises(ActiveRecord::RecordInvalid.new)
+
+    authentication = authenticate(email_address: "kevin@37signals.com")
+
+    assert_not authentication.sign_in
+    assert_nil authentication.identity
+  end
+
   private
     def authenticate(**claims)
       SingleSignOn::Authentication.new(single_sign_on_claims(**claims))

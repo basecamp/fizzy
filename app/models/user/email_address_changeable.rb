@@ -19,7 +19,7 @@ module User::EmailAddressChangeable
 
   # A change moves the user to another identity, which drops the single sign-on link.
   def email_address_changeable?
-    identity.present? && !identity.single_sign_on_linked?
+    identity.present? && !(SingleSignOn.configured? && identity.single_sign_on_linked?)
   end
 
   def send_email_address_change_confirmation(new_email_address)

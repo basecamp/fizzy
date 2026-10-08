@@ -95,7 +95,7 @@ module SingleSignOn
       def reauthentication_hours
         hours = settings.reauthentication_hours || DEFAULT_REAUTHENTICATION_HOURS
 
-        if (hours = Integer(hours, exception: false)) && hours >= 1
+        if (hours = Integer(hours.to_s, 10, exception: false)) && hours >= 1
           hours
         else
           raise ConfigurationError,
@@ -118,7 +118,7 @@ module SingleSignOn
         end
       end
 
-      # OpenID Connect issuers have no query or fragment, and credentials in the URL would reach the CSP header.
+      # OpenID Connect issuers have no query or fragment, and the CSP header copies any credentials in the URL.
       def issuer_url?(url)
         secure_url?(url) && URI.parse(url).then { |uri| uri.query.nil? && uri.fragment.nil? && uri.userinfo.nil? }
       end

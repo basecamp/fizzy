@@ -53,10 +53,13 @@ class SingleSignOnTest < ActiveSupport::TestCase
 
     enable_single_sign_on reauthentication_hours: "3"
     assert_equal 3.hours, SingleSignOn.reauthentication_period
+
+    enable_single_sign_on reauthentication_hours: "010"
+    assert_equal 10.hours, SingleSignOn.reauthentication_period
   end
 
   test "reauthentication hours must be a whole number of 1 or more" do
-    [ "0", "-2", "abc", "1.5" ].each do |hours|
+    [ "0", "-2", "abc", "1.5", "0x18" ].each do |hours|
       enable_single_sign_on reauthentication_hours: hours
       assert_raises(SingleSignOn::ConfigurationError, hours) { SingleSignOn.ensure_valid_configuration }
     end

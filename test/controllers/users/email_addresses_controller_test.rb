@@ -29,19 +29,31 @@ class Users::EmailAddressesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "new with a single sign-on link" do
-    @user.identity.link_single_sign_on(single_sign_on_claims(subject: "david-subject"))
+    with_single_sign_on do
+      sign_in_with_single_sign_on_as :david
 
-    get new_user_email_address_path(@user, script_name: @user.account.slug)
+      get new_user_email_address_path(@user, script_name: @user.account.slug)
+    end
 
     assert_redirected_to edit_user_path(@user)
     assert_equal "Your email address is linked to SSO and cannot change here", flash[:alert]
   end
 
-  test "create as JSON with a single sign-on link" do
+  test "new with a single sign-on link while single sign-on is off" do
     @user.identity.link_single_sign_on(single_sign_on_claims(subject: "david-subject"))
 
-    assert_no_emails do
-      post user_email_addresses_path(@user, script_name: @user.account.slug), params: { email_address: "newemail@example.com" }, as: :json
+    get new_user_email_address_path(@user, script_name: @user.account.slug)
+
+    assert_response :success
+  end
+
+  test "create as JSON with a single sign-on link" do
+    with_single_sign_on do
+      sign_in_with_single_sign_on_as :david
+
+      assert_no_emails do
+        post user_email_addresses_path(@user, script_name: @user.account.slug), params: { email_address: "newemail@example.com" }, as: :json
+      end
     end
 
     assert_response :forbidden

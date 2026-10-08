@@ -172,6 +172,7 @@ class SingleSignOn::Provider
 
       parse_json(response, body, uri)
     rescue Timeout::Error, SocketError, SystemCallError, IOError, OpenSSL::SSL::SSLError,
+      Net::ProtocolError, Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Zlib::Error,
       Surfguard::Unresolvable, Resolv::ResolvError => error
       raise SingleSignOn::ProviderError, "Cannot connect to #{uri.host}: #{error.message}"
     end

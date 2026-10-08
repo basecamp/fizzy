@@ -3,6 +3,7 @@ class SessionsController < ApplicationController
 
   disallow_account_scope
   require_unauthenticated_access except: :destroy
+  skip_before_action :require_single_sign_on_session, only: :destroy
   before_action :ensure_sign_in_without_single_sign_on_allowed, only: :create
   rate_limit to: 10, within: 3.minutes, only: :create, with: :rate_limit_exceeded
 

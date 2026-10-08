@@ -14,15 +14,29 @@ class User::EmailAddressChangeableTest < ActiveSupport::TestCase
     assert @user.email_address_changeable?
 
     @identity.link_single_sign_on(single_sign_on_claims(subject: "kevin-subject"))
-    assert_not @user.reload.email_address_changeable?
+    assert @user.reload.email_address_changeable?
+
+    with_single_sign_on do
+      assert_not @user.reload.email_address_changeable?
+    end
   end
 
   test "change_email_address_using_token refuses identities with a single sign-on link" do
     token = @user.send(:generate_email_address_change_token, to: @new_email)
     @identity.link_single_sign_on(single_sign_on_claims(subject: "kevin-subject"))
 
-    assert_not @user.reload.change_email_address_using_token(token)
+    with_single_sign_on do
+      assert_not @user.reload.change_email_address_using_token(token)
+    end
     assert_equal @old_email, @user.reload.identity.email_address
+  end
+
+  test "change_email_address_using_token accepts a single sign-on link while single sign-on is off" do
+    token = @user.send(:generate_email_address_change_token, to: @new_email)
+    @identity.link_single_sign_on(single_sign_on_claims(subject: "kevin-subject"))
+
+    assert @user.reload.change_email_address_using_token(token)
+    assert_equal @new_email, @user.reload.identity.email_address
   end
 
   test "send_email_address_change_confirmation" do
