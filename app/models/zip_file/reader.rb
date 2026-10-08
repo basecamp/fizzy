@@ -1,20 +1,48 @@
 class ZipFile::Reader
+  # Entries read into memory hold one database record each, and the largest
+  # column any of them can fill is a rich text body; every other text column the
+  # export writes tops out at 64KB. Reading them with no ceiling let a
+  # two-megabyte upload inflate to gigabytes inside a jobs worker. Importing a
+  # rich text body costs about 35 times its size once the HTML is parsed, so this
+  # holds one body to roughly 140MB of memory while still fitting every body real
+  # accounts hold today.
+  MAX_BUFFERED_ENTRY_SIZE = 4.megabytes
+
+  # The extractor is fed compressed bytes, so how much it hands back in one call
+  # is the archive author's choice: a maximally compressible slice expands about
+  # a thousandfold. Slicing here keeps every real record a single read of the
+  # archive, which matters on S3 where each read is its own range request, while
+  # capping what one call can return at tens of megabytes.
+  EXTRACT_SLICE_SIZE = 64.kilobytes
+
+  # Deflating each entry on its own is what makes an archive's total expansion a
+  # usable signal: a real export barely shrinks, since records are small and per
+  # entry overhead eats the savings, while a crafted one expands a thousandfold.
+  # Budgeting everything read out of an archive against what was actually
+  # uploaded bounds the streaming path too, where an entry's own declared size is
+  # the archive author's word. The floor keeps a small archive holding one large
+  # rich text body importable.
+  MAX_TOTAL_EXPANSION = 100
+  MIN_EXPANSION_BUDGET = 64.megabytes
+
   def initialize(io)
     @io = io
     @reader = ZipKit::FileReader.read_zip_structure(io: io)
+    @expanded = 0
+    @budget = [ io.size * MAX_TOTAL_EXPANSION, MIN_EXPANSION_BUDGET ].max
   rescue ZipKit::FileReader::ReadError, ZipKit::FileReader::MissingEOCD, ZipKit::FileReader::UnsupportedFeature => e
     raise ZipFile::InvalidFileError, e.message
   end
 
-  def read(file_path)
+  def read(file_path, max_bytes: MAX_BUFFERED_ENTRY_SIZE)
     entry = @reader.find { |e| e.filename == file_path }
     raise ArgumentError, "File not found in zip: #{file_path}" unless entry
     raise ArgumentError, "Cannot read directory entry: #{file_path}" if entry.filename.end_with?("/")
 
     if block_given?
-      yield ZipFile::Reader::IO.new(entry, @io)
+      stream(entry) { |io| yield io }
     else
-      entry.extractor_from(@io).extract
+      extract_within(entry, max_bytes)
     end
   end
 
@@ -25,4 +53,79 @@ class ZipFile::Reader
   def exists?(file_path)
     @reader.any? { |e| e.filename == file_path }
   end
+
+  # The size an entry declares. Reading an entry never produces more than this.
+  def size(file_path)
+    entry = @reader.find { |e| e.filename == file_path }
+    raise ArgumentError, "File not found in zip: #{file_path}" unless entry
+
+    entry.uncompressed_size
+  end
+
+  # Called for every byte handed out, buffered or streamed.
+  def count_expanded(bytes)
+    @expanded += bytes
+
+    if @expanded > @budget
+      exceeded! ZipFile::ArchiveTooLargeError.new("archive has produced #{@expanded} bytes, over the #{@budget} byte limit for its size")
+    end
+  end
+
+  def exceeded!(error)
+    @exceeded = error
+    raise error
+  end
+
+  private
+    # S3's multipart upload wraps whatever the stream raises in an error of its
+    # own, which would hide a busted limit from the import and from the job's
+    # list of errors not worth resuming.
+    def stream(entry)
+      @exceeded = nil
+      ensure_declared_within_budget entry
+
+      yield ZipFile::Reader::IO.new(entry, @io, self)
+    rescue StandardError => error
+      raise @exceeded || error
+    end
+
+    # Active Storage sizes S3 multipart parts from the size a stream declares,
+    # and the S3 client holds each part in memory, so an entry may declare no
+    # more than its archive has left to give.
+    def ensure_declared_within_budget(entry)
+      left = @budget - @expanded
+
+      if entry.uncompressed_size > left
+        raise ZipFile::ArchiveTooLargeError,
+          "#{entry.filename} declares #{entry.uncompressed_size} bytes, over the #{left} byte limit left for its archive"
+      end
+    end
+
+    def extract_within(entry, max_bytes)
+      ensure_within entry, entry.uncompressed_size, max_bytes
+
+      extractor = entry.extractor_from(@io)
+      content = "".b
+
+      until extractor.eof?
+        chunk = extractor.extract(EXTRACT_SLICE_SIZE)
+        break if chunk.nil?
+
+        count_expanded chunk.bytesize
+        content << chunk
+        ensure_within entry, content.bytesize, max_bytes
+        ensure_within entry, content.bytesize, entry.uncompressed_size
+      end
+
+      content
+    end
+
+    # The size an entry declares is the archive author's word, so the bytes that
+    # come out of the extractor are counted as well.
+    def ensure_within(entry, bytes, max_bytes)
+      if bytes > max_bytes
+        raise ZipFile::EntryTooLargeError,
+          "#{entry.filename} expands to at least #{bytes} bytes, over the #{max_bytes} byte limit"
+      end
+    end
 end
