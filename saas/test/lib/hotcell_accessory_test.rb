@@ -82,6 +82,17 @@ class HotcellAccessoryTest < ActiveSupport::TestCase
       "saas/hotcell's contents changed since the accessory was pinned — run saas/hotcell/bin/build and re-pin"
   end
 
+  # saas/hotcell/bin/check reboots a rollback onto the old commit's pin through it.
+  test "HOTCELL_IMAGE overrides the pinned image" do
+    override = "registry.37signals.com/basecamp/fizzy-hotcell:000000000000"
+    configuration = with_env("HOTCELL_IMAGE" => override) do
+      Kamal::Configuration.create_from(
+        config_file: Rails.root.join("saas/config/deploy.yml"), destination: DESTINATIONS.first, version: "test")
+    end
+
+    assert_equal override, configuration.accessory(:hotcell).image
+  end
+
   test "the app mounts the same volume the cell writes its sockets to" do
     app_mount = deploy_configuration["volumes"].find { it.start_with?("#{socket_volume}:") }
 
@@ -119,7 +130,7 @@ class HotcellAccessoryTest < ActiveSupport::TestCase
     end
 
     def deploy_configuration
-      @deploy_configuration ||= YAML.load(ERB.new(Rails.root.join("saas/config/deploy.yml").read).result)
+      @deploy_configuration ||= YAML.load(ERB.new(Rails.root.join("saas/config/deploy.yml").read, trim_mode: "-").result)
     end
 
     def accessory
@@ -144,5 +155,13 @@ class HotcellAccessoryTest < ActiveSupport::TestCase
       when /\A(\d+)m\z/i then $1.to_i
       else raise ArgumentError, "cannot read #{size.inspect} as a size"
       end
+    end
+
+    def with_env(vars)
+      originals = vars.keys.index_with { |key| ENV[key] }
+      vars.each { |key, value| ENV[key] = value }
+      yield
+    ensure
+      originals.each { |key, value| ENV[key] = value }
     end
 end
