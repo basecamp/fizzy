@@ -246,14 +246,16 @@ fi
 # The image is published, so anything wrong from here is a reboot and never a build or a push.
 # Keep ssh's own chatter out of the captured image: a banner or a "Permanently added ... to the list of
 # known hosts" warning folded into the image name compares unequal against a pin it prints identically to.
+# A stopped container still names its image, so its state is asked too.
 absent=() stale=()
 inspect_hosts() {
   absent=() stale=()
-  local host running errors
+  local host inspected state running errors
   for host in "${checked[@]}"; do
     errors=$(mktemp)
-    running=$(ssh "app@$host" "docker inspect --format '{{.Config.Image}}' $service-hotcell" 2>"$errors") || running=""
-    if [ -z "$running" ]; then
+    inspected=$(ssh "app@$host" "docker inspect --format '{{.State.Status}} {{.Config.Image}}' $service-hotcell" 2>"$errors") || inspected=""
+    read -r state running <<< "$inspected"
+    if [ -z "$inspected" ]; then
       if grep -qiE 'no such object|no such container' "$errors"; then
         echo "  running:   nothing (on $host)"
         absent+=("$host")
@@ -272,6 +274,9 @@ MSG
         skip_note
         exit 1
       fi
+    elif [ "$state" != running ]; then
+      echo "  running:   nothing, the container is $state (on $host)"
+      absent+=("$host")
     elif [ "$running" != "$pinned" ]; then
       echo "  running:   $running (on $host)"
       stale+=("$host")

@@ -16,10 +16,11 @@ git_q() { env GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null git -c use
 
 # The sandbox is a repo pinning registry.example/fizzy-hotcell:aaa, with staging hosts h1 (and h2 when
 # STUB_HOSTS says so). State lives in files the stubs read and write: registry/<tag> exists when the
-# tag has been pushed, running/<host> holds the image that host's cell runs.
+# tag has been pushed, running/<host> holds the image that host's cell runs, and stopped/<host> exists
+# when that cell's container is not running.
 build_sandbox() { # build_sandbox <dir> <hosts...>
   local sb="$1"; shift
-  mkdir -p "$sb/bin" "$sb/saas/hotcell/bin" "$sb/saas/config" "$sb/saas/.kamal/hooks" "$sb/stubbin" "$sb/state/registry" "$sb/state/running"
+  mkdir -p "$sb/bin" "$sb/saas/hotcell/bin" "$sb/saas/config" "$sb/saas/.kamal/hooks" "$sb/stubbin" "$sb/state/registry" "$sb/state/running" "$sb/state/stopped"
   cp "$ROOT/saas/hotcell/bin/check" "$ROOT/saas/hotcell/bin/image" "$sb/saas/hotcell/bin/"
   cp "$ROOT/saas/.kamal/hooks/pre-build" "$ROOT/saas/.kamal/hooks/pre-deploy" "$sb/saas/.kamal/hooks/"
   printf 'service: fizzy\naccessories:\n  hotcell:\n    image: registry.example/fizzy-hotcell:aaa\n    roles: [ web ]\n' > "$sb/saas/config/deploy.yml"
@@ -39,7 +40,7 @@ case "$name" in
         [ -n "${STUB_REBOOT_NOOP:-}" ] && exit 0
         hosts="$(printf '%s\n' "$@" | sed -n 's/^--hosts=//p' | tr ',' ' ')"
         [ -n "$hosts" ] || hosts="$(cat "$STUB_SANDBOX/state/all-hosts")"
-        for h in $hosts; do echo "${HOTCELL_IMAGE:-$(pin)}" > "$STUB_SANDBOX/state/running/$h"; done ;;
+        for h in $hosts; do echo "${HOTCELL_IMAGE:-$(pin)}" > "$STUB_SANDBOX/state/running/$h"; rm -f "$STUB_SANDBOX/state/stopped/$h"; done ;;
     esac ;;
   docker)
     case "$1 $2" in
@@ -50,7 +51,7 @@ case "$name" in
     for a in "$@"; do case $a in app@*) host="${a#app@}";; esac; done
     f="$STUB_SANDBOX/state/running/$host"
     [ -e "$f" ] || { echo "Error: No such object: fizzy-hotcell" >&2; exit 1; }
-    cat "$f" ;;
+    if [ -e "$STUB_SANDBOX/state/stopped/$host" ]; then echo "exited $(cat "$f")"; else echo "running $(cat "$f")"; fi ;;
   build)
     [ -n "${STUB_BUILD_MOVES_PIN:-}" ] && sed -i 's/fizzy-hotcell:[a-z0-9]*/fizzy-hotcell:moved/' "$STUB_SANDBOX/saas/config/deploy.yml"
     exit 0 ;;
@@ -64,7 +65,7 @@ STUB
   printf '%s\n' "$@" > "$sb/state/all-hosts"
 }
 
-# run_scenario <name> <command> <expected> [VAR=value | REGISTRY=tag | RUNNING=host:tag | HOSTS="h1 h2"]...
+# run_scenario <name> <command> <expected> [VAR=value | REGISTRY=tag | RUNNING=host:tag | STOPPED=host | HOSTS="h1 h2"]...
 # The command runs from the sandbox root with the stubs first on PATH. Expected is the recorded command
 # list plus the exit line; a line in it may be a regex when it starts with "~".
 run_scenario() {
@@ -77,6 +78,7 @@ run_scenario() {
     case $setting in
       REGISTRY=*) touch "$sb/state/registry/${setting#REGISTRY=}" ;;
       RUNNING=*)  local pair="${setting#RUNNING=}"; echo "registry.example/fizzy-hotcell:${pair#*:}" > "$sb/state/running/${pair%%:*}" ;;
+      STOPPED=*)  touch "$sb/state/stopped/${setting#STOPPED=}" ;;
       HOSTS=*) ;;
       *) vars+=("$setting") ;;
     esac
@@ -120,7 +122,7 @@ reject_output() { # reject_output <pattern>
 
 CONFIG="bundle exec ruby"
 MANIFEST="docker manifest inspect registry.example/fizzy-hotcell:aaa"
-SSH_H1="ssh app@h1 docker inspect --format '{{.Config.Image}}' fizzy-hotcell"
+SSH_H1="ssh app@h1 docker inspect --format '{{.State.Status}} {{.Config.Image}}' fizzy-hotcell"
 REBOOT="kamal accessory reboot hotcell -d staging --skip-hooks"
 
 run_scenario "bare check, cell is fine" "saas/hotcell/bin/check staging" \
@@ -147,6 +149,14 @@ run_scenario "bare check, nothing running" "saas/hotcell/bin/check staging" \
 $MANIFEST
 $SSH_H1
 exit: 3" REGISTRY=aaa
+expect_output "STOP. No hotcell accessory is running on h1"
+
+run_scenario "bare check, cell stopped" "saas/hotcell/bin/check staging" \
+"$CONFIG
+$MANIFEST
+$SSH_H1
+exit: 3" REGISTRY=aaa RUNNING=h1:aaa STOPPED=h1
+expect_output "running:   nothing, the container is exited \(on h1\)"
 expect_output "STOP. No hotcell accessory is running on h1"
 
 run_scenario "--publish builds and pushes a missing image, and never sshes" "saas/hotcell/bin/check staging --publish" \
@@ -181,6 +191,14 @@ exit: 0" REGISTRY=aaa RUNNING=h1:old
 expect_output "staging is not running the pinned cell image. Rebooting the cell"
 reject_output "STOP"
 
+run_scenario "--reboot boots a stopped cell" "saas/hotcell/bin/check staging --reboot" \
+"$CONFIG
+$MANIFEST
+$SSH_H1
+$REBOOT
+$SSH_H1
+exit: 0" REGISTRY=aaa RUNNING=h1:aaa STOPPED=h1
+
 run_scenario "--reboot does not publish" "saas/hotcell/bin/check staging --reboot" \
 "$CONFIG
 $MANIFEST
@@ -209,9 +227,9 @@ exit: 0"
 run_scenario "--hosts checks and reboots only those hosts" "saas/hotcell/bin/check staging --reboot --hosts=h2,h9" \
 "$CONFIG
 $MANIFEST
-ssh app@h2 docker inspect --format '{{.Config.Image}}' fizzy-hotcell
+ssh app@h2 docker inspect --format '{{.State.Status}} {{.Config.Image}}' fizzy-hotcell
 $REBOOT --hosts=h2
-ssh app@h2 docker inspect --format '{{.Config.Image}}' fizzy-hotcell
+ssh app@h2 docker inspect --format '{{.State.Status}} {{.Config.Image}}' fizzy-hotcell
 exit: 0" HOSTS="h1 h2" REGISTRY=aaa RUNNING=h1:old RUNNING=h2:old
 
 run_scenario "--hosts naming every cell host samples one and reboots them all" "saas/hotcell/bin/check staging --reboot --hosts=h1,h2" \
