@@ -34,6 +34,12 @@ class SingleSignOn::ClaimsTest < ActiveSupport::TestCase
       claims_from("groups" => [ "fizzy-admins", "parent/child", "/sales", "sales", "" ]).groups
   end
 
+  test "groups over 255 characters are dropped" do
+    group = "/#{"a" * 254}"
+
+    assert_equal [ group ], claims_from("groups" => [ group, "#{group}a", "a" * 255, "/a" * 500_000 ]).groups
+  end
+
   test "groups default to none" do
     assert_equal [], SingleSignOn::Claims.new(issuer: "issuer", subject: "subject", email_address: nil, email_verified: nil, name: nil).groups
   end

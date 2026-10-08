@@ -38,6 +38,16 @@ class SingleSignOnTest < ActiveSupport::TestCase
     end
   end
 
+  test "issuer must have no query, fragment, or credentials" do
+    [ "https://id.example.com?realm=acme", "https://id.example.com#acme", "https://user:secret@id.example.com" ].each do |issuer|
+      enable_single_sign_on issuer: issuer
+      assert_raises(SingleSignOn::ConfigurationError, issuer) { SingleSignOn.ensure_valid_configuration }
+    end
+
+    enable_single_sign_on issuer: "https://id.example.com/realms/acme"
+    assert_nothing_raised { SingleSignOn.ensure_valid_configuration }
+  end
+
   test "reauthentication period" do
     assert_equal 12.hours, SingleSignOn.reauthentication_period
 
@@ -60,7 +70,7 @@ class SingleSignOnTest < ActiveSupport::TestCase
   end
 
   test "admin group must be a full path" do
-    [ "fizzy/admin", "/", "/fizzy/admin/", "/fizzy//admin" ].each do |group|
+    [ "fizzy/admin", "/", "/fizzy/admin/", "/fizzy//admin", "/#{"a" * 255}" ].each do |group|
       enable_single_sign_on admin_group: group
       assert_raises(SingleSignOn::ConfigurationError, group) { SingleSignOn.ensure_valid_configuration }
     end

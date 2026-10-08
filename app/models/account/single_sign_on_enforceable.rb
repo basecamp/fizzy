@@ -1,8 +1,6 @@
 module Account::SingleSignOnEnforceable
   extend ActiveSupport::Concern
 
-  GROUP_LENGTH_LIMIT = 255
-
   included do
     normalizes :single_sign_on_group, with: ->(group) { group.strip.presence }
 
@@ -56,8 +54,8 @@ module Account::SingleSignOnEnforceable
     end
 
     def single_sign_on_group_fits_its_column
-      if single_sign_on_group.to_s.length > GROUP_LENGTH_LIMIT
-        errors.add :base, "Enter a group path of #{GROUP_LENGTH_LIMIT} characters or fewer"
+      if single_sign_on_group.to_s.length > SingleSignOn::GROUP_LENGTH_LIMIT
+        errors.add :base, "Enter a group path of #{SingleSignOn::GROUP_LENGTH_LIMIT} characters or fewer"
       end
     end
 

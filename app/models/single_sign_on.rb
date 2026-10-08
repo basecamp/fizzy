@@ -2,6 +2,7 @@ module SingleSignOn
   DEFAULT_PROVIDER_NAME = "SSO"
   DEFAULT_REAUTHENTICATION_HOURS = 12
   FULL_GROUP_PATH = %r{\A(/[^/]+)+\z}
+  GROUP_LENGTH_LIMIT = 255
 
   class ConfigurationError < StandardError; end
 
@@ -51,8 +52,9 @@ module SingleSignOn
       end
     end
 
+    # Providers can list only direct memberships, so a member of a subgroup also counts as a member of its parents.
     def member?(groups, group)
-      groups_with_parents(groups).include?(group)
+      groups.any? { |candidate| candidate == group || candidate.start_with?("#{group}/") }
     end
 
     def full_group_path?(group)
@@ -66,7 +68,6 @@ module SingleSignOn
       false
     end
 
-    # Providers can list only direct memberships, so a member of a subgroup also counts as a member of its parents.
     def groups_with_parents(groups)
       groups.flat_map do |group|
         names = group.split("/").drop(1)
@@ -111,14 +112,21 @@ module SingleSignOn
       end
 
       def ensure_secure_issuer
-        if configured? && !secure_url?(settings.issuer)
-          raise ConfigurationError, "SINGLE_SIGN_ON_ISSUER must be an https URL, such as https://id.example.com"
+        if configured? && !issuer_url?(settings.issuer)
+          raise ConfigurationError, "SINGLE_SIGN_ON_ISSUER must be an https URL with no query, fragment, or credentials, " \
+            "such as https://id.example.com"
         end
       end
 
+      # OpenID Connect issuers have no query or fragment, and credentials in the URL would reach the CSP header.
+      def issuer_url?(url)
+        secure_url?(url) && URI.parse(url).then { |uri| uri.query.nil? && uri.fragment.nil? && uri.userinfo.nil? }
+      end
+
       def ensure_full_admin_group_path
-        if admin_group && !full_group_path?(admin_group)
-          raise ConfigurationError, "SINGLE_SIGN_ON_ADMIN_GROUP must be a full group path, such as /fizzy/admin"
+        if admin_group && !(full_group_path?(admin_group) && admin_group.length <= GROUP_LENGTH_LIMIT)
+          raise ConfigurationError, "SINGLE_SIGN_ON_ADMIN_GROUP must be a full group path of #{GROUP_LENGTH_LIMIT} characters or fewer, " \
+            "such as /fizzy/admin"
         end
       end
 
