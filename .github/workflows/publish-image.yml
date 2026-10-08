@@ -38,8 +38,7 @@ jobs:
             arch: arm64
     env:
       REGISTRY: ghcr.io
-      # Per-arch images always go to <repo>-edge, with this repository's own token;
-      # the release package receives them only through the manifest job below.
+      # Everything goes to <repo>-edge, with this repository's own token.
       IMAGE_NAME: ${{ github.repository }}-edge
     steps:
       - name: Checkout
@@ -75,9 +74,6 @@ jobs:
             type=ref,event=branch
             type=ref,event=tag
             type=sha,format=short,prefix=sha-
-            type=semver,pattern={{version}},enable=${{ startsWith(github.ref, 'refs/tags/v') }}
-            type=semver,pattern={{major}}.{{minor}},enable=${{ startsWith(github.ref, 'refs/tags/v') }}
-            type=semver,pattern={{major}},enable=${{ startsWith(github.ref, 'refs/tags/v') }}
           flavor: |
             latest=false
             suffix=-${{ matrix.arch }}
@@ -114,9 +110,8 @@ jobs:
     name: Create multi-arch manifest and sign
     needs: build
     if: github.event_name != 'pull_request'
-    # Releases are v* tags: only they publish :latest and the version tags, after a
-    # reviewer approves in `release`. main and dispatches publish to fizzy-edge only.
-    environment: ${{ startsWith(github.ref, 'refs/tags/v') && 'release' || 'edge' }}
+    # Multi-platform tags, signed, in <repo>-edge only. basecamp/release-images
+    # promotes v* tags from there into the release package after a reviewer approves.
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -124,8 +119,7 @@ jobs:
       id-token: write
     env:
       REGISTRY: ghcr.io
-      IMAGE_NAME: ${{ startsWith(github.ref, 'refs/tags/v') && github.repository || format('{0}-edge', github.repository) }}
-      EDGE_IMAGE_NAME: ${{ github.repository }}-edge
+      IMAGE_NAME: ${{ github.repository }}-edge
     steps:
       - name: Set up Docker Buildx (for imagetools)
         uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
@@ -134,12 +128,8 @@ jobs:
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
           registry: ${{ env.REGISTRY }}
-          # GHCR_PUBLISH_TOKEN (classic PAT, write:packages, machine user) exists only in
-          # the `release` environment. Once the release package's Actions access is locked
-          # to read, this repository's GITHUB_TOKEN cannot push to it; until then the
-          # fallback keeps releases working.
-          username: ${{ secrets.GHCR_PUBLISH_TOKEN && vars.GHCR_PUBLISH_USER || github.actor }}
-          password: ${{ secrets.GHCR_PUBLISH_TOKEN || secrets.GITHUB_TOKEN }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Compute canonical image name (lowercase)
         id: vars
@@ -159,10 +149,6 @@ jobs:
             type=ref,event=branch
             type=ref,event=tag
             type=sha,format=short,prefix=sha-
-            type=semver,pattern={{version}},enable=${{ startsWith(github.ref, 'refs/tags/v') }}
-            type=semver,pattern={{major}}.{{minor}},enable=${{ startsWith(github.ref, 'refs/tags/v') }}
-            type=semver,pattern={{major}},enable=${{ startsWith(github.ref, 'refs/tags/v') }}
-            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') }}
           flavor: |
             latest=false
           labels: |
@@ -181,16 +167,6 @@ jobs:
             [ -z "$tag" ] && continue
             echo "Creating manifest for $tag"
             src_tag="$tag"
-            if [[ "$tag" == *:latest ]]; then
-              if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
-                ref="${GITHUB_REF#refs/tags/}"
-              else
-                ref="${GITHUB_REF#refs/heads/}"
-              fi
-              src_tag="${tag%:latest}:$ref"
-            fi
-            # The per-arch sources always live in the edge package.
-            src_tag="${REGISTRY}/${EDGE_IMAGE_NAME,,}:${src_tag##*:}"
             if [ -n "${IMAGE_DESCRIPTION:-}" ]; then
               docker buildx imagetools create \
                 --tag "$tag" \
