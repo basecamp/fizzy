@@ -2,7 +2,7 @@ class Sessions::SingleSignOns::CallbacksController < ApplicationController
   disallow_account_scope
   allow_unauthenticated_access
   before_action :ensure_single_sign_on_configured
-  rate_limit to: 60, within: 1.minute, only: :show, with: -> { head :too_many_requests }
+  rate_limit to: 300, within: 1.minute, only: :show, with: :single_sign_on_rate_limited
 
   layout "public"
 

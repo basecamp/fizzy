@@ -1,5 +1,6 @@
 module Authentication::ViaSingleSignOn
-  AUTHORIZATION_REQUEST_LIMIT = 3
+  AUTHORIZATION_REQUEST_COOKIE_PREFIX = "single_sign_on_"
+  STATE_FORMAT = /\A[A-Za-z0-9_-]{1,64}\z/
 
   private
 
@@ -43,11 +44,7 @@ module Authentication::ViaSingleSignOn
   end
 
   def account_creation_refused_message
-    if group = SingleSignOn.admin_group
-      "Only members of the #{SingleSignOn.provider_name} group #{group} can create accounts."
-    else
-      "This server does not allow new accounts."
-    end
+    "Only members of the #{SingleSignOn.provider_name} group #{SingleSignOn.admin_group} can create accounts."
   end
 
   def request_single_sign_on
@@ -82,25 +79,27 @@ module Authentication::ViaSingleSignOn
     main_app.session_single_sign_on_callback_url(script_name: nil)
   end
 
-  # Requests are keyed by `state`, so several tabs can sign in at the same time.
+  # Each request has its own cookie, because tabs that share one session cookie overwrite each other's requests.
   def remember_single_sign_on_authorization_request(authorization_request)
-    requests = single_sign_on_authorization_requests
-    requests[authorization_request.state] = authorization_request.to_session
-
-    session[:single_sign_on_authorization_requests] = requests.to_a.last(AUTHORIZATION_REQUEST_LIMIT).to_h
+    cookies.encrypted[single_sign_on_authorization_cookie(authorization_request.state)] = {
+      value: authorization_request.to_h, expires: SingleSignOn::AuthorizationRequest::EXPIRATION_TIME,
+      path: single_sign_on_authorization_cookie_path, httponly: true, same_site: :lax
+    }
   end
 
   def consume_single_sign_on_authorization_request(state)
-    requests = single_sign_on_authorization_requests
-
-    if (attributes = requests.delete(state.to_s))
-      session[:single_sign_on_authorization_requests] = requests
-      SingleSignOn::AuthorizationRequest.from_session(attributes)
+    if STATE_FORMAT.match?(state.to_s) && (attributes = cookies.encrypted[single_sign_on_authorization_cookie(state)])
+      cookies.delete single_sign_on_authorization_cookie(state), path: single_sign_on_authorization_cookie_path
+      SingleSignOn::AuthorizationRequest.from_h(attributes)
     end
   end
 
-  def single_sign_on_authorization_requests
-    session[:single_sign_on_authorization_requests].to_h.dup
+  def single_sign_on_authorization_cookie(state)
+    "#{AUTHORIZATION_REQUEST_COOKIE_PREFIX}#{state}"
+  end
+
+  def single_sign_on_authorization_cookie_path
+    main_app.session_single_sign_on_path(script_name: nil)
   end
 
   # A new session keeps an older session from gaining single sign-on access.
@@ -130,10 +129,15 @@ module Authentication::ViaSingleSignOn
     "This account requires the #{SingleSignOn.provider_name} group #{Current.account.single_sign_on_group}."
   end
 
-  def single_sign_on_failed(message, error: nil)
+  def single_sign_on_failed(message, error: nil, status: :unauthorized)
     Rails.error.report(error, handled: true, severity: :warning) if error
 
     @single_sign_on_failure_message = message
-    render "sessions/single_sign_ons/failure", status: :unauthorized
+    render "sessions/single_sign_ons/failure", status: status
+  end
+
+  def single_sign_on_rate_limited
+    single_sign_on_failed "There are too many sign-in attempts from your network. Wait a minute, then try again.",
+      status: :too_many_requests
   end
 end

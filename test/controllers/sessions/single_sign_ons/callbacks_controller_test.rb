@@ -52,8 +52,9 @@ class Sessions::SingleSignOns::CallbacksControllerTest < ActionDispatch::Integra
 
   test "first sign-in on a new server goes to signup completion" do
     Account.stubs(:none?).returns(true)
+    Account.stubs(:joinable_by_single_sign_on).returns(Account.none)
 
-    sign_in_with_single_sign_on sub: "newcomer-subject", email: "newcomer@example.com"
+    sign_in_with_single_sign_on sub: "newcomer-subject", email: "newcomer@example.com", groups: [ "/fizzy/admin" ]
 
     assert_redirected_to new_signup_completion_url(script_name: nil)
     assert_equal "newcomer@example.com", current_session.identity.email_address
@@ -125,6 +126,34 @@ class Sessions::SingleSignOns::CallbacksControllerTest < ActionDispatch::Integra
 
     assert_response :redirect
     assert_equal identities(:jz), current_session.identity
+  end
+
+  test "sign-in requests that start at the same moment keep each other" do
+    untenanted do
+      session_cookie = cookies["_fizzy_session"]
+      post session_single_sign_on_path
+      first_authorization = single_sign_on_authorization_parameters
+
+      # The second tab sends the session cookie from before the first request.
+      cookies["_fizzy_session"] = session_cookie
+      post session_single_sign_on_path
+
+      complete_single_sign_on first_authorization, sub: "jz-subject"
+    end
+
+    assert_response :redirect
+    assert_equal identities(:jz), current_session.identity
+  end
+
+  test "callback is rate limited" do
+    Rails.cache.stubs(:increment).returns(301)
+
+    untenanted do
+      get session_single_sign_on_callback_path, params: { code: "fizzy-code", state: "fizzy-state" }
+    end
+
+    assert_response :too_many_requests
+    assert_select "p", text: /too many sign-in attempts/
   end
 
   test "error from the provider" do

@@ -67,6 +67,27 @@ class Sessions::SingleSignOnsControllerTest < ActionDispatch::IntegrationTest
     assert parameters["nonce"].present?
   end
 
+  test "create with a long return address" do
+    untenanted do
+      post session_single_sign_on_path, params: { return_to: "http://www.example.com/1/boards?#{"a" * 3.kilobytes}" }
+    end
+
+    assert_response :redirect
+    assert response.location.start_with?("#{SINGLE_SIGN_ON_AUTHORIZATION_ENDPOINT}?")
+  end
+
+  test "create is rate limited" do
+    Rails.cache.stubs(:increment).returns(301)
+
+    untenanted do
+      post session_single_sign_on_path
+    end
+
+    assert_response :too_many_requests
+    assert_select "p", text: /too many sign-in attempts/
+    assert_select "button", text: "Try Acme SSO again"
+  end
+
   test "create when the provider cannot be reached" do
     stub_request(:get, "#{SINGLE_SIGN_ON_ISSUER}/.well-known/openid-configuration").to_timeout
 

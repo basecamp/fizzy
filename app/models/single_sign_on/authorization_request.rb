@@ -1,6 +1,8 @@
 class SingleSignOn::AuthorizationRequest
   EXPIRATION_TIME = 10.minutes
   ATTRIBUTES = %i[ state nonce code_verifier return_to created_at ]
+  # The request lives in a cookie of about 4 KB, so a longer address falls back to the landing page.
+  RETURN_TO_LIMIT = 2.kilobytes
 
   attr_reader(*ATTRIBUTES)
 
@@ -10,11 +12,11 @@ class SingleSignOn::AuthorizationRequest
         state: SecureRandom.urlsafe_base64(32),
         nonce: SecureRandom.urlsafe_base64(32),
         code_verifier: SecureRandom.urlsafe_base64(48),
-        return_to: return_to,
+        return_to: (return_to if return_to.to_s.bytesize <= RETURN_TO_LIMIT),
         created_at: Time.current.to_i
     end
 
-    def from_session(attributes)
+    def from_h(attributes)
       new(**attributes.to_h.symbolize_keys.slice(*ATTRIBUTES))
     end
   end
@@ -27,7 +29,7 @@ class SingleSignOn::AuthorizationRequest
     @created_at = created_at
   end
 
-  def to_session
+  def to_h
     ATTRIBUTES.index_with { |attribute| public_send(attribute) }.stringify_keys
   end
 

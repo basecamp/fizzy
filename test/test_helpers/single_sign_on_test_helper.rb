@@ -15,6 +15,7 @@ module SingleSignOnTestHelper
       issuer: SINGLE_SIGN_ON_ISSUER,
       client_id: SINGLE_SIGN_ON_CLIENT_ID,
       client_secret: "fizzy-secret",
+      admin_group: "/fizzy/admin",
       **settings
   end
 

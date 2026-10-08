@@ -120,13 +120,10 @@ class SingleSignOnTest < ActiveSupport::TestCase
     assert_not SingleSignOn.account_creator?([ "/sales" ])
   end
 
-  test "without an admin group only the first account can be created" do
-    enable_single_sign_on
+  test "admin group is required" do
+    enable_single_sign_on admin_group: nil
 
-    assert_not SingleSignOn.account_creator?([ "/fizzy/admin" ])
-
-    Account.stubs(:none?).returns(true)
-    assert SingleSignOn.account_creator?([])
+    assert_raises(SingleSignOn::ConfigurationError) { SingleSignOn.ensure_valid_configuration }
   end
 
   test "provider name" do

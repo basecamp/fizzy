@@ -21,11 +21,17 @@ class SingleSignOn::AuthorizationRequestTest < ActiveSupport::TestCase
     assert_not @request.expired?
   end
 
-  test "session round trip" do
-    restored = SingleSignOn::AuthorizationRequest.from_session(JSON.parse(@request.to_session.to_json))
+  test "round trip" do
+    restored = SingleSignOn::AuthorizationRequest.from_h(JSON.parse(@request.to_h.to_json))
 
-    assert_equal @request.to_session, restored.to_session
+    assert_equal @request.to_h, restored.to_h
     assert_equal "https://fizzy.example.com/1/boards", restored.return_to
+  end
+
+  test "a return address over 2 KB is dropped" do
+    return_to = "https://fizzy.example.com/1/boards?#{"a" * 2.kilobytes}"
+
+    assert_nil SingleSignOn::AuthorizationRequest.start(return_to: return_to).return_to
   end
 
   test "URL carries the state, the nonce, and an S256 code challenge" do

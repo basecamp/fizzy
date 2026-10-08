@@ -43,13 +43,8 @@ module SingleSignOn
       admin_group.present? && member?(groups, admin_group)
     end
 
-    # Without an admin group, nobody can create an account after the first one.
     def account_creator?(groups)
-      if admin_group
-        admin?(groups)
-      else
-        Account.none?
-      end
+      admin?(groups)
     end
 
     # Providers can list only direct memberships, so a member of a subgroup also counts as a member of its parents.
@@ -78,7 +73,7 @@ module SingleSignOn
     def ensure_valid_configuration
       ensure_complete_credentials
       ensure_secure_issuer
-      ensure_full_admin_group_path
+      ensure_valid_admin_group
       ensure_relative_account_admin_subgroup
       reauthentication_hours
     end
@@ -123,8 +118,11 @@ module SingleSignOn
         secure_url?(url) && URI.parse(url).then { |uri| uri.query.nil? && uri.fragment.nil? && uri.userinfo.nil? }
       end
 
-      def ensure_full_admin_group_path
-        if admin_group && !(full_group_path?(admin_group) && admin_group.length <= GROUP_LENGTH_LIMIT)
+      # Groups decide every role and every join, so a server without an admin group cannot add anyone.
+      def ensure_valid_admin_group
+        if configured? && admin_group.nil?
+          raise ConfigurationError, "SINGLE_SIGN_ON_ADMIN_GROUP is missing. Set it to a full group path, such as /fizzy/admin"
+        elsif admin_group && !(full_group_path?(admin_group) && admin_group.length <= GROUP_LENGTH_LIMIT)
           raise ConfigurationError, "SINGLE_SIGN_ON_ADMIN_GROUP must be a full group path of #{GROUP_LENGTH_LIMIT} characters or fewer, " \
             "such as /fizzy/admin"
         end

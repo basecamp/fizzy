@@ -61,10 +61,13 @@ class SingleSignOn::AuthenticationTest < ActiveSupport::TestCase
     assert authentication.identity.single_sign_on_linked?
   end
 
-  test "create an identity for the first person on a new server" do
+  test "create an identity for the first member of the admin group on a new server" do
+    enable_single_sign_on
     Account.stubs(:none?).returns(true)
-    authentication = authenticate(email_address: "newcomer@example.com")
+    Account.stubs(:joinable_by_single_sign_on).returns(Account.none)
+    assert_not authenticate(email_address: "outsider@example.com").sign_in
 
+    authentication = authenticate(email_address: "newcomer@example.com", groups: [ "/fizzy/admin" ])
     assert authentication.sign_in
     assert authentication.requires_signup_completion?
   end
