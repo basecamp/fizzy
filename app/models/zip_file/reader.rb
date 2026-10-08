@@ -54,6 +54,14 @@ class ZipFile::Reader
     @reader.any? { |e| e.filename == file_path }
   end
 
+  # The size an entry declares. Reading an entry never produces more than this.
+  def size(file_path)
+    entry = @reader.find { |e| e.filename == file_path }
+    raise ArgumentError, "File not found in zip: #{file_path}" unless entry
+
+    entry.uncompressed_size
+  end
+
   # Called for every byte handed out, buffered or streamed.
   def count_expanded(bytes)
     @expanded += bytes
@@ -106,6 +114,7 @@ class ZipFile::Reader
         count_expanded chunk.bytesize
         content << chunk
         ensure_within entry, content.bytesize, max_bytes
+        ensure_within entry, content.bytesize, entry.uncompressed_size
       end
 
       content

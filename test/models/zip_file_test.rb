@@ -147,6 +147,15 @@ class ZipFileTest < ActiveSupport::TestCase
     assert_raises(ZipFile::EntryTooLargeError) { reader.read("data/tags/bomb.json") }
   end
 
+  test "reader raises EntryTooLargeError when an entry expands past its declared size" do
+    tempfile = understate_declared_size(create_test_zip("data/tags/tag.json" => "a" * 64.kilobytes), "data/tags/tag.json", 1024)
+
+    reader = ZipFile::Reader.new(tempfile)
+
+    assert_equal 1024, reader.size("data/tags/tag.json")
+    assert_raises(ZipFile::EntryTooLargeError) { reader.read("data/tags/tag.json") }
+  end
+
   test "reader streams an entry over the size limit when given a block" do
     content = "a" * (2 * ZipFile::Reader::MAX_BUFFERED_ENTRY_SIZE)
     tempfile = create_test_zip("storage/blob_key" => content)

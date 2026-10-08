@@ -10,11 +10,6 @@ class Account::DataTransfer::ActionText::RichTextRecordSet < Account::DataTransf
     updated_at
   ].freeze
 
-  # Every body in a batch is held until it's inserted, so a batch goes in as
-  # several inserts once its bodies add up to this many bytes, inside one
-  # transaction so a resumed import never finds half a batch already there.
-  MAX_INSERT_BYTES = 16.megabytes
-
   def initialize(account)
     super(account: account, model: ::ActionText::RichText)
   end
@@ -34,25 +29,13 @@ class Account::DataTransfer::ActionText::RichTextRecordSet < Account::DataTransf
     end
 
     def import_batch(files)
-      rows = []
-      bytes = 0
-
-      ::ActionText::RichText.transaction do
-        files.each do |file|
-          data = load(file)
-          data["body"] = transform_body_for_import(data["body"])
-          rows << data.slice(*ATTRIBUTES).merge("account_id" => account.id)
-          bytes += data["body"].to_s.bytesize
-
-          if bytes >= MAX_INSERT_BYTES
-            ::ActionText::RichText.insert_all!(rows)
-            rows = []
-            bytes = 0
-          end
-        end
-
-        ::ActionText::RichText.insert_all!(rows) if rows.any?
+      batch_data = files.map do |file|
+        data = load(file)
+        data["body"] = transform_body_for_import(data["body"])
+        data.slice(*ATTRIBUTES).merge("account_id" => account.id)
       end
+
+      ::ActionText::RichText.insert_all!(batch_data)
     end
 
     def check_record(file_path)
