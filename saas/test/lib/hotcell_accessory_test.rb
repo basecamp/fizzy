@@ -130,7 +130,7 @@ class HotcellAccessoryTest < ActiveSupport::TestCase
     end
 
     def deploy_configuration
-      @deploy_configuration ||= YAML.load(ERB.new(Rails.root.join("saas/config/deploy.yml").read).result)
+      @deploy_configuration ||= YAML.load(ERB.new(Rails.root.join("saas/config/deploy.yml").read, trim_mode: "-").result)
     end
 
     def accessory

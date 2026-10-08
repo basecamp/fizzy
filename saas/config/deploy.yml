@@ -83,11 +83,11 @@ accessories:
     # tag; saas/hotcell/bin/push publishes it. Until push has run the pull fails loudly, which is the right
     # way for an unbuilt image to fail. HOTCELL_IMAGE is how saas/hotcell/bin/check reboots onto another
     # commit's pin, for a rollback.
-<% if ENV.fetch("HOTCELL_IMAGE", "") != "" %>
+<%- if ENV.fetch("HOTCELL_IMAGE", "") != "" -%>
     image: <%= ENV["HOTCELL_IMAGE"] %>
-<% else %>
+<%- else -%>
     image: registry.37signals.com/basecamp/fizzy-hotcell:d8c4c8004de0
-<% end %>
+<%- end -%>
     roles: [ web, jobs ]  # a descriptor cannot cross machines, so a cell lives on its caller's host
     # An accessory's own key, not one of the options below. Kamal always emits a --network of its own,
     # defaulting to `kamal`, so the same setting under `options:` is a second --network flag and Docker
