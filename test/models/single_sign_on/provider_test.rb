@@ -96,6 +96,41 @@ class SingleSignOn::ProviderTest < ActiveSupport::TestCase
     }
   end
 
+  test "endpoints on the issuer host can have private addresses" do
+    stub_dns_resolution "10.0.0.5"
+    stub_single_sign_on_token_exchange single_sign_on_id_token
+
+    assert_equal "kevin-subject", claims_for.subject
+  end
+
+  test "a token endpoint on another host must have a public address" do
+    stub_single_sign_on_discovery token_endpoint: "https://token.example.net/token"
+    stub_dns_resolution "10.0.0.5"
+    stub_request(:post, "https://token.example.net/token").to_return_json(body: { id_token: single_sign_on_id_token })
+
+    assert_raises(SingleSignOn::ProviderError) { claims_for }
+    assert_not_requested :post, "https://token.example.net/token"
+  end
+
+  test "a token endpoint on another public host gets the checked address" do
+    stub_single_sign_on_discovery token_endpoint: "https://token.example.net/token"
+    stub_dns_resolution "10.0.0.5", "142.250.185.206"
+    stub_request(:post, "https://token.example.net/token").to_return_json(body: { id_token: single_sign_on_id_token })
+    Net::HTTP.any_instance.stubs(:ipaddr=)
+    Net::HTTP.any_instance.expects(:ipaddr=).with("142.250.185.206")
+
+    assert_equal "kevin-subject", claims_for.subject
+  end
+
+  test "an endpoint host that does not resolve" do
+    stub_single_sign_on_discovery jwks_uri: "https://keys.example.net/keys"
+    stub_dns_failure
+    stub_request(:get, "https://keys.example.net/keys").to_return_json(body: { keys: [ single_sign_on_public_key ] })
+
+    assert_raises(SingleSignOn::ProviderError) { @provider.signing_keys }
+    assert_not_requested :get, "https://keys.example.net/keys"
+  end
+
   test "token request uses basic authentication when the provider lists only client_secret_basic" do
     stub_single_sign_on_discovery token_endpoint_auth_methods_supported: %w[ client_secret_basic ]
     stub_single_sign_on_token_exchange single_sign_on_id_token

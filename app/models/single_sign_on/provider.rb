@@ -165,14 +165,27 @@ class SingleSignOn::Provider
       request["Accept"] = "application/json"
       body = nil
 
-      response = Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == "https",
+      response = Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == "https", ipaddr: address_for(uri.host),
         open_timeout: TIMEOUT, read_timeout: TIMEOUT, write_timeout: TIMEOUT) do |http|
         http.request(request) { |http_response| body = read_body_with_limit(http_response, uri) }
       end
 
       parse_json(response, body, uri)
-    rescue Timeout::Error, SocketError, SystemCallError, IOError, OpenSSL::SSL::SSLError => error
+    rescue Timeout::Error, SocketError, SystemCallError, IOError, OpenSSL::SSL::SSLError,
+      Surfguard::Unresolvable, Resolv::ResolvError => error
       raise SingleSignOn::ProviderError, "Cannot connect to #{uri.host}: #{error.message}"
+    end
+
+    # The issuer can be private, but other hosts in the discovery document must be public, because the token request carries the client secret.
+    def address_for(host)
+      unless host.casecmp?(issuer_host)
+        Surfguard.resolve_public_ips(host).first or
+          raise SingleSignOn::ProviderError, "#{host} has no public address"
+      end
+    end
+
+    def issuer_host
+      @issuer_host ||= URI(issuer).host
     end
 
     def read_body_with_limit(response, uri)

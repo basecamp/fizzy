@@ -16,6 +16,7 @@ Fizzy works with an OpenID Connect provider which meets these requirements:
 - The token endpoint can take the client secret in the request body (`client_secret_post`) or in the `Authorization` header (`client_secret_basic`). If the discovery document lists `client_secret_post`, Fizzy will use the request body.
 - The provider signs ID tokens with an RSA or EC key. ID tokens that use an HMAC algorithm, such as HS256, will not work with Fizzy.
 - The ID token contains `email` and `email_verified`. Fizzy will read only the ID token. It will not call the userinfo endpoint.
+- If the token or key endpoint is on a host other than the issuer host, that host must resolve to a public address.
 
 The first time a person signs in, Fizzy will link them to the Fizzy identity with the same email address. For this first sign-in, `email_verified` must be `true`. After that, Fizzy will find the person by the `sub` claim, which is their user ID in the provider. If your provider does not send `email_verified`, nobody will be able to sign in.
 
