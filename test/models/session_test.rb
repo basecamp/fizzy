@@ -30,6 +30,13 @@ class SessionTest < ActiveSupport::TestCase
     assert_not @session.single_sign_on_group?("/sales")
   end
 
+  test "single sign-on groups over 64 KB" do
+    groups = SingleSignOn::Claims::GROUPS_LIMIT.times.map { |index| "/#{index}-#{"a" * 300}" }
+
+    @session.update!(single_sign_on_groups: groups)
+    assert_equal groups, @session.reload.single_sign_on_groups
+  end
+
   test "single sign-on admin and account creator" do
     enable_single_sign_on admin_group: "/fizzy/admin"
     assert_not @session.single_sign_on_admin?

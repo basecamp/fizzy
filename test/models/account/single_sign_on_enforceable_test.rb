@@ -135,6 +135,14 @@ class Account::SingleSignOnEnforceableTest < ActiveSupport::TestCase
     end
   end
 
+  test "group must fit in 255 characters" do
+    group = "/#{"a" * 254}"
+    assert @account.update(single_sign_on_group: group)
+
+    assert_not @account.update(single_sign_on_group: "#{group}a")
+    assert_equal [ "Enter a group path of 255 characters or fewer" ], @account.errors.full_messages
+  end
+
   test "joinable by single sign-on compares groups exactly" do
     @account.update!(single_sign_on_group: "/Sales")
 

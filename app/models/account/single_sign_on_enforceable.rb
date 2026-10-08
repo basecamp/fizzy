@@ -1,10 +1,12 @@
 module Account::SingleSignOnEnforceable
   extend ActiveSupport::Concern
 
+  GROUP_LENGTH_LIMIT = 255
+
   included do
     normalizes :single_sign_on_group, with: ->(group) { group.strip.presence }
 
-    validate :single_sign_on_group_is_a_full_path
+    validate :single_sign_on_group_is_a_full_path, :single_sign_on_group_fits_its_column
 
     scope :joinable_by_single_sign_on, ->(groups) do
       if SingleSignOn.admin?(groups)
@@ -50,6 +52,12 @@ module Account::SingleSignOnEnforceable
     def single_sign_on_group_is_a_full_path
       if single_sign_on_group.present? && !SingleSignOn.full_group_path?(single_sign_on_group)
         errors.add :base, "Enter the full group path, such as /sales"
+      end
+    end
+
+    def single_sign_on_group_fits_its_column
+      if single_sign_on_group.to_s.length > GROUP_LENGTH_LIMIT
+        errors.add :base, "Enter a group path of #{GROUP_LENGTH_LIMIT} characters or fewer"
       end
     end
 

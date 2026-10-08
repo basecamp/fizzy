@@ -510,7 +510,7 @@ ActiveRecord::Schema[8.2].define(version: 2026_10_06_130000) do
     t.datetime "updated_at", null: false
     t.string "user_agent", limit: 4096
     t.datetime "single_sign_on_authenticated_at"
-    t.text "single_sign_on_groups"
+    t.text "single_sign_on_groups", limit: 16777215
     t.index ["identity_id"], name: "index_sessions_on_identity_id"
   end
 
