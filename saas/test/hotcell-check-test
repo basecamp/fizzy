@@ -222,9 +222,10 @@ $REBOOT
 ~ssh app@h[12] docker inspect
 exit: 0" HOSTS="h1 h2" REGISTRY=aaa RUNNING=h1:old RUNNING=h2:old
 
-run_scenario "--hosts naming no cell host is an error" "saas/hotcell/bin/check staging --hosts=h9" \
+run_scenario "--hosts naming no cell host has nothing to check" "saas/hotcell/bin/check staging --reboot --hosts=h9" \
 "$CONFIG
-exit: 1" REGISTRY=aaa RUNNING=h1:aaa
+exit: 0" REGISTRY=aaa RUNNING=h1:old
+expect_output "None of --hosts=h9 runs the hotcell cell on staging"
 
 run_scenario "--version reads the pin from that commit, not the tree" \
   "sed -i 's/fizzy-hotcell:aaa/fizzy-hotcell:bbb/' saas/config/deploy.yml && saas/hotcell/bin/check staging --version=\$(git rev-parse HEAD)" \

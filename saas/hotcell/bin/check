@@ -16,7 +16,7 @@
 # Asks one randomly chosen host out of the accessory's roles: the pin drifts per destination rather than
 # per host, and sshing all of production costs a minute. A destination that missed a single host's reboot
 # is /hotcellz's job. --hosts=a,b narrows a deploy to those hosts, and then every one of them is asked and
-# rebooted, and none of the others.
+# rebooted, and none of the others; when none of them runs a cell, there is nothing to check.
 #
 # The exit status names the fix: 2 when the pinned image has to be built and pushed, 3 when the accessory
 # only has to be rebooted, 1 when the check itself could not tell. -q keeps the verdict and drops the
@@ -135,8 +135,8 @@ if [ -n "$hosts" ]; then
     done
   done
   if [ "${#checked[@]}" -eq 0 ]; then
-    echo "None of --hosts=$hosts runs the hotcell cell on $destination, aborting" >&2
-    exit 1
+    echo "None of --hosts=$hosts runs the hotcell cell on $destination, so there is nothing to check."
+    exit 0
   fi
   if [ "${#checked[@]}" -lt "${#all_hosts[@]}" ]; then
     reboot_hosts="--hosts=$(IFS=,; echo "${checked[*]}")"
