@@ -2,8 +2,11 @@ class ZipFile::Reader
   # Entries read into memory hold one database record each, and the largest
   # column any of them can fill is a rich text body; every other text column the
   # export writes tops out at 64KB. Reading them with no ceiling let a
-  # two-megabyte upload inflate to gigabytes inside a jobs worker.
-  MAX_BUFFERED_ENTRY_SIZE = 2.megabytes
+  # two-megabyte upload inflate to gigabytes inside a jobs worker. Importing a
+  # rich text body costs about 35 times its size once the HTML is parsed, so this
+  # holds one body to roughly 140MB of memory while still fitting every body real
+  # accounts hold today.
+  MAX_BUFFERED_ENTRY_SIZE = 4.megabytes
 
   # The extractor is fed compressed bytes, so how much it hands back in one call
   # is the archive author's choice: a maximally compressible slice expands about
