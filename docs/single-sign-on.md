@@ -64,7 +64,7 @@ Set these environment variables:
 - `SINGLE_SIGN_ON_CLIENT_ID`: the client ID, for example `fizzy`.
 - `SINGLE_SIGN_ON_CLIENT_SECRET`: the client secret.
 - `SINGLE_SIGN_ON_PROVIDER_NAME` (optional): the name of the identity provider, which will be shown in some places around Fizzy, for example `Acme SSO`. The default value is `SSO`.
-- `SINGLE_SIGN_ON_REAUTHENTICATION_HOURS` (optional): how often a session must sign in through the provider again. The default value is `12`.
+- `SINGLE_SIGN_ON_REAUTHENTICATION_HOURS` (optional): how often a session must sign in through the provider again. The default value is `12`. If the user still has an active session with the provider, they will not have to enter their password again in the SSO login page. To configure how often users must enter their password, change the session configuration of the provider.
 - `SINGLE_SIGN_ON_ADMIN_GROUP` (optional): the full path of the group whose members are admins of every account, for example `/fizzy/admin`.
 - `SINGLE_SIGN_ON_ACCOUNT_ADMIN_SUBGROUP` (optional): the name of the subgroup whose members are admins of one account, for example `admin`.
 
