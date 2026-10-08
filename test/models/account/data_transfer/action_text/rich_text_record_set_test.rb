@@ -43,6 +43,40 @@ class Account::DataTransfer::ActionText::RichTextRecordSetTest < ActiveSupport::
     importing_account&.destroy
   end
 
+  test "import inserts a batch in several statements once its bodies pass the byte limit" do
+    importing_account = Account.create!(name: "Importing Account", external_account_id: 99999998)
+    ids = 3.times.map { ActiveRecord::Type::Uuid.generate }
+
+    tempfile = Tempfile.new([ "rich_texts", ".zip" ])
+    tempfile.binmode
+    writer = ZipFile::Writer.new(tempfile)
+    ids.each do |id|
+      writer.add_file "data/action_text_rich_texts/#{id}.json", {
+        "id" => id, "account_id" => importing_account.id, "record_type" => "Card", "record_id" => id,
+        "name" => "description", "body" => "<p>#{"a" * 100}</p>",
+        "created_at" => Time.current.iso8601, "updated_at" => Time.current.iso8601
+      }.to_json
+    end
+    writer.close
+    tempfile.rewind
+
+    record_set = Account::DataTransfer::ActionText::RichTextRecordSet.new(importing_account)
+    inserts = 0
+    count_inserts = ->(*, payload) { inserts += 1 if payload[:sql].match?(/\AINSERT INTO .action_text_rich_texts./) }
+
+    stub_const(Account::DataTransfer::ActionText::RichTextRecordSet, :MAX_INSERT_BYTES, 150) do
+      ActiveSupport::Notifications.subscribed(count_inserts, "sql.active_record") do
+        record_set.import(from: ZipFile::Reader.new(tempfile))
+      end
+    end
+
+    assert_equal 2, inserts
+    assert_equal ids.sort, ActionText::RichText.where(id: ids).pluck(:id).sort
+  ensure
+    tempfile&.close
+    tempfile&.unlink
+  end
+
   test "transform_body_for_import skips GIDs belonging to another account" do
     victim_user = users(:david)
     attacker_account = accounts(:initech)
