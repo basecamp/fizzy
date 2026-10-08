@@ -491,7 +491,8 @@ class Webhook::DeliveryTest < ActiveSupport::TestCase
     )
     delivery = Webhook::Delivery.create!(webhook: webhook, event: events(:layout_commented))
 
-    saved = ENV.slice("http_proxy", "HTTP_PROXY")
+    saved = ENV.slice("http_proxy", "HTTP_PROXY", "no_proxy", "NO_PROXY")
+    %w[ no_proxy NO_PROXY ].each { |key| ENV.delete(key) }
     %w[ http_proxy HTTP_PROXY ].each { |key| ENV[key] = "http://proxy.internal:3128" }
 
     TCPSocket.expects(:open).with { |*args, **| args.first == "proxy.internal" }.never
@@ -501,7 +502,7 @@ class Webhook::DeliveryTest < ActiveSupport::TestCase
       delivery.deliver
     end
   ensure
-    %w[ http_proxy HTTP_PROXY ].each { |key| ENV.delete(key) }
+    %w[ http_proxy HTTP_PROXY no_proxy NO_PROXY ].each { |key| ENV.delete(key) }
     saved.each { |key, value| ENV[key] = value }
   end
 

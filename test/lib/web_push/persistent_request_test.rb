@@ -14,7 +14,8 @@ class WebPush::PersistentRequestTest < ActiveSupport::TestCase
   end
 
   test "connects to endpoint_ip even when a proxy is configured" do
-    saved = ENV.slice("http_proxy", "https_proxy", "HTTP_PROXY", "HTTPS_PROXY")
+    saved = ENV.slice("http_proxy", "https_proxy", "HTTP_PROXY", "HTTPS_PROXY", "no_proxy", "NO_PROXY")
+    %w[ no_proxy NO_PROXY ].each { |key| ENV.delete(key) }
     %w[ http_proxy https_proxy HTTP_PROXY HTTPS_PROXY ].each { |key| ENV[key] = "http://proxy.internal:3128" }
 
     TCPSocket.expects(:open).with { |*args, **| args.first == "proxy.internal" }.never
@@ -24,7 +25,7 @@ class WebPush::PersistentRequestTest < ActiveSupport::TestCase
       pinned_notification.deliver
     end
   ensure
-    %w[ http_proxy https_proxy HTTP_PROXY HTTPS_PROXY ].each { |key| ENV.delete(key) }
+    %w[ http_proxy https_proxy HTTP_PROXY HTTPS_PROXY no_proxy NO_PROXY ].each { |key| ENV.delete(key) }
     saved.each { |key, value| ENV[key] = value }
   end
 
