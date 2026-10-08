@@ -4,6 +4,8 @@ class SingleSignOn::Provider
   SCOPES = %w[ openid email profile ]
   CACHE_DURATION = 1.hour
   TIMEOUT = 5.seconds
+  # A token response also carries the access token, and both tokens grow with the number of groups.
+  MAX_RESPONSE_SIZE = 1.megabyte
 
   attr_reader :issuer, :client_id
 
@@ -161,19 +163,33 @@ class SingleSignOn::Provider
 
     def perform(uri, request)
       request["Accept"] = "application/json"
+      body = nil
 
       response = Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == "https",
         open_timeout: TIMEOUT, read_timeout: TIMEOUT, write_timeout: TIMEOUT) do |http|
-        http.request(request)
+        http.request(request) { |http_response| body = read_body_with_limit(http_response, uri) }
       end
 
-      parse_json(response, uri)
+      parse_json(response, body, uri)
     rescue Timeout::Error, SocketError, SystemCallError, IOError, OpenSSL::SSL::SSLError => error
       raise SingleSignOn::ProviderError, "Cannot connect to #{uri.host}: #{error.message}"
     end
 
-    def parse_json(response, uri)
-      if response.is_a?(Net::HTTPSuccess) && (document = JSON.parse(response.body)).is_a?(Hash)
+    def read_body_with_limit(response, uri)
+      (+"").tap do |body|
+        response.read_body do |chunk|
+          body << chunk
+
+          if body.bytesize > MAX_RESPONSE_SIZE
+            raise SingleSignOn::ProviderError,
+              "#{uri.host} returned more than #{MAX_RESPONSE_SIZE.to_fs(:human_size)} for #{uri.path}"
+          end
+        end
+      end
+    end
+
+    def parse_json(response, body, uri)
+      if response.is_a?(Net::HTTPSuccess) && (document = JSON.parse(body)).is_a?(Hash)
         document
       else
         raise SingleSignOn::ProviderError, "#{uri.host} returned HTTP #{response.code} for #{uri.path}"

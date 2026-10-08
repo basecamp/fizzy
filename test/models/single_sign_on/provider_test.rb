@@ -62,6 +62,13 @@ class SingleSignOn::ProviderTest < ActiveSupport::TestCase
     end
   end
 
+  test "response over the size limit" do
+    stub_single_sign_on_discovery padding: "x" * SingleSignOn::Provider::MAX_RESPONSE_SIZE
+
+    error = assert_raises(SingleSignOn::ProviderError) { authorization_url }
+    assert_match "more than 1 MB", error.message
+  end
+
   test "unreachable provider" do
     stub_request(:get, "#{SINGLE_SIGN_ON_ISSUER}/.well-known/openid-configuration").to_timeout
 

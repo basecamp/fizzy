@@ -92,6 +92,31 @@ class Account::SingleSignOnEnforceableTest < ActiveSupport::TestCase
     assert_equal "member", @account.single_sign_on_role_for([ "/sales/admin" ])
   end
 
+  test "a new group sets roles from the newest single sign-on groups" do
+    enable_single_sign_on admin_group: "/fizzy/admin", account_admin_subgroup: "admin"
+    identities(:kevin).sessions.create!(single_sign_on_authenticated_at: 1.hour.ago, single_sign_on_groups: [ "/sales/admin" ])
+    sessions(:kevin).update!(single_sign_on_authenticated_at: Time.current, single_sign_on_groups: [ "/engineering/admin", "/sales" ])
+    sessions(:jz).update!(single_sign_on_authenticated_at: Time.current, single_sign_on_groups: [ "/sales/admin" ])
+    sessions(:david).update!(single_sign_on_authenticated_at: Time.current, single_sign_on_groups: [ "/fizzy/admin" ])
+
+    @account.update!(single_sign_on_group: "/engineering")
+    assert_equal "admin", users(:kevin).reload.role
+    assert_equal "member", users(:jz).reload.role
+
+    @account.update!(single_sign_on_group: "/sales")
+    assert_equal "member", users(:kevin).reload.role
+    assert_equal "admin", users(:jz).reload.role
+    assert_equal "admin", users(:david).reload.role
+    assert_equal "owner", users(:jason).reload.role
+  end
+
+  test "a new group keeps roles without single sign-on" do
+    @account.update!(single_sign_on_group: "/sales")
+
+    assert_equal "admin", users(:kevin).reload.role
+    assert_equal "member", users(:jz).reload.role
+  end
+
   test "joinable by single sign-on with the account group" do
     @account.update!(single_sign_on_group: "/engineering/fizzy")
 

@@ -14,6 +14,7 @@ module Account::SingleSignOnEnforceable
       end
     end
 
+    after_update :update_roles_from_single_sign_on, if: -> { saved_change_to_single_sign_on_group? && SingleSignOn.configured? }
     after_update_commit :reconnect_users, if: :saved_change_to_single_sign_on_group?
   end
 
@@ -49,6 +50,13 @@ module Account::SingleSignOnEnforceable
     def single_sign_on_group_is_a_full_path
       if single_sign_on_group.present? && !SingleSignOn.full_group_path?(single_sign_on_group)
         errors.add :base, "Enter the full group path, such as /sales"
+      end
+    end
+
+    # Sign-in sets roles from groups, so a new group sets them again from the newest sign-in of each person.
+    def update_roles_from_single_sign_on
+      users.active.where.not(role: :owner).includes(:identity).find_each do |user|
+        user.update!(role: single_sign_on_role_for(user.identity.latest_single_sign_on_groups))
       end
     end
 
