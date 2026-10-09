@@ -1,7 +1,6 @@
 class Signup
   include ActiveModel::Model
   include ActiveModel::Attributes
-  include ActiveModel::Validations
 
   attr_accessor :full_name, :email_address, :identity, :skip_account_seeding
   attr_reader :account, :user
