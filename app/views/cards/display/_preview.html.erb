@@ -54,7 +54,7 @@
     <%= render "cards/display/common/background", card: card %>
   </footer>
 
-  <% if card.entropic? %>
+  <% if card.entropic? || card.bubble_up? %>
     <%= render "cards/display/preview/bubble", card: card %>
   <% end %>
 <% end %>
