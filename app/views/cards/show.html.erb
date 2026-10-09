@@ -2,6 +2,7 @@
 <% @header_class = "header--card" %>
 
 <% content_for :head do %>
+  <%= tag.meta name: "turbo-cache-control", content: "no-preview" %>
   <%= card_social_tags(@card) %>
 <% end %>
 
