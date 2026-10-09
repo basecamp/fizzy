@@ -29,15 +29,27 @@ class WebPush::PersistentRequestTest < ActiveSupport::TestCase
     saved.each { |key, value| ENV[key] = value }
   end
 
+  test "sends nothing when there is no checked endpoint IP" do
+    request = stub_request(:post, ENDPOINT).to_return(status: 201)
+
+    notification(endpoint_ip: nil).deliver(connection: Net::HTTP::Persistent.new(name: "web_push_test"))
+
+    assert_not_requested request
+  end
+
   private
     def pinned_notification
+      notification(endpoint_ip: DnsTestHelper::WEB_PUSH_PUBLIC_TEST_IP)
+    end
+
+    def notification(endpoint_ip:)
       WebPush::Notification.new(
         title: "Test",
         body: "Test notification",
         url: "/test",
         badge: 0,
         endpoint: ENDPOINT,
-        endpoint_ip: DnsTestHelper::WEB_PUSH_PUBLIC_TEST_IP,
+        endpoint_ip: endpoint_ip,
         p256dh_key: "BNcRdreALRFXTkOOUHK1EtK2wtaz5Ry4YfYCA_0QTpQtUbVlUls0VJXg7A8u-Ts1XbjhazAkj7I99e8QcYP7DkM",
         auth_key: "tBHItJI5svbpez7KI4CCXg"
       )

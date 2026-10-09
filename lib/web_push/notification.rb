@@ -4,13 +4,16 @@ class WebPush::Notification
     @endpoint, @endpoint_ip, @p256dh_key, @auth_key = endpoint, endpoint_ip, p256dh_key, auth_key
   end
 
+  # Without a checked public IP to connect to, skip the push rather than let the connection look the host up itself.
   def deliver(connection: nil)
-    WebPush.payload_send \
-      message: encoded_message,
-      endpoint: @endpoint, endpoint_ip: @endpoint_ip, p256dh: @p256dh_key, auth: @auth_key,
-      vapid: vapid_identification,
-      connection: connection,
-      urgency: "high"
+    if @endpoint_ip
+      WebPush.payload_send \
+        message: encoded_message,
+        endpoint: @endpoint, endpoint_ip: @endpoint_ip, p256dh: @p256dh_key, auth: @auth_key,
+        vapid: vapid_identification,
+        connection: connection,
+        urgency: "high"
+    end
   end
 
   private
