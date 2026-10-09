@@ -140,6 +140,10 @@
       display: none;
     }
 
+    &.hidden {
+      display: none;
+    }
+
     &[aria-checked="true"] .checked {
       display: block;
     }
