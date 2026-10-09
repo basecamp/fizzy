@@ -725,7 +725,7 @@ GEM
       railties
       yabeda (~> 0.8)
     zeitwerk (2.8.3)
-    zip_kit (6.3.4)
+    zip_kit (6.3.6)
 
 PLATFORMS
   aarch64-linux
@@ -1065,7 +1065,7 @@ CHECKSUMS
   yabeda-puma-plugin (0.9.0) sha256=b78673ecc7ee30bc50691ddc41b7022c1c1801843900d5101418f4a14b550bc8
   yabeda-rails (0.10.0) sha256=0a85bd829961494f66241d20192368e5d042f836f91986a1eac02f8dcb04237c
   zeitwerk (2.8.3) sha256=2c85125a8467ce069e20123d1e709a08955c9d29c118c25b46b7b7fafdbb92e5
-  zip_kit (6.3.4) sha256=407c6d39feef818678fae2d129077bd2f920c9806072af3482e671eeae3c48ea
+  zip_kit (6.3.6) sha256=648866d9a1f18df420f9fdba18e310e76115a17a575a80f8537d97670c520c04
 
 RUBY VERSION
   ruby 3.4.8
