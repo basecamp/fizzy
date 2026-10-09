@@ -1,6 +1,8 @@
 require "test_helper"
 
 class OauthFlowTest < ActionDispatch::IntegrationTest
+  include OauthClientCredentialsTestHelper
+
   # Authorization Endpoint
 
   test "authorization requires authentication" do
@@ -632,6 +634,322 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
   end
 
 
+  # Confidential Clients (client_secret_post)
+
+  test "token exchange for confidential client requires client secret" do
+    client = oauth_clients(:confidential_client)
+    code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+    code_challenge = Base64.urlsafe_encode64(Digest::SHA256.digest(code_verifier), padding: false)
+
+    code = Oauth::AuthorizationCode.generate \
+      client_id: client.client_id,
+      identity_id: identities(:david).id,
+      code_challenge: code_challenge,
+      redirect_uri: "https://connector.example.com/callback",
+      scope: "read"
+
+    untenanted do
+      post oauth_token_path, params: {
+        grant_type: "authorization_code",
+        client_id: client.client_id,
+        code: code,
+        redirect_uri: "https://connector.example.com/callback",
+        code_verifier: code_verifier
+      }, as: :json
+    end
+
+    assert_client_authentication_failed basic: false
+
+    # Naming no client at all is a malformed request, whatever the code.
+    untenanted do
+      post oauth_token_path, params: {
+        grant_type: "authorization_code",
+        code: code,
+        redirect_uri: "https://connector.example.com/callback",
+        code_verifier: code_verifier
+      }, as: :json
+    end
+
+    assert_response :bad_request
+    assert_equal "invalid_request", response.parsed_body["error"]
+  end
+
+  test "token exchange for confidential client rejects a wrong client secret" do
+    client = oauth_clients(:confidential_client)
+    code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+    code_challenge = Base64.urlsafe_encode64(Digest::SHA256.digest(code_verifier), padding: false)
+
+    code = Oauth::AuthorizationCode.generate \
+      client_id: client.client_id,
+      identity_id: identities(:david).id,
+      code_challenge: code_challenge,
+      redirect_uri: "https://connector.example.com/callback",
+      scope: "read"
+
+    untenanted do
+      post oauth_token_path, params: {
+        grant_type: "authorization_code",
+        code: code,
+        redirect_uri: "https://connector.example.com/callback",
+        code_verifier: code_verifier,
+        client_secret: "wrong"
+      }, as: :json
+    end
+
+    assert_client_authentication_failed basic: false
+  end
+
+  test "token exchange for confidential client rejects a non-string client secret" do
+    client = oauth_clients(:confidential_client)
+    code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+    code_challenge = Base64.urlsafe_encode64(Digest::SHA256.digest(code_verifier), padding: false)
+
+    code = Oauth::AuthorizationCode.generate \
+      client_id: client.client_id,
+      identity_id: identities(:david).id,
+      code_challenge: code_challenge,
+      redirect_uri: "https://connector.example.com/callback",
+      scope: "read"
+
+    untenanted do
+      post oauth_token_path, params: {
+        grant_type: "authorization_code",
+        code: code,
+        redirect_uri: "https://connector.example.com/callback",
+        code_verifier: code_verifier,
+        client_secret: [ "confidential_secret_789" ]
+      }, as: :json
+    end
+
+    assert_client_authentication_failed basic: false
+  end
+
+  test "token exchange for confidential client succeeds with the client secret" do
+    client = oauth_clients(:confidential_client)
+    code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+    code_challenge = Base64.urlsafe_encode64(Digest::SHA256.digest(code_verifier), padding: false)
+
+    code = Oauth::AuthorizationCode.generate \
+      client_id: client.client_id,
+      identity_id: identities(:david).id,
+      code_challenge: code_challenge,
+      redirect_uri: "https://connector.example.com/callback",
+      scope: "read"
+
+    assert_difference "Identity::AccessToken.count", 1 do
+      untenanted do
+        post oauth_token_path, params: {
+          grant_type: "authorization_code",
+          code: code,
+          redirect_uri: "https://connector.example.com/callback",
+          code_verifier: code_verifier,
+          client_id: client.client_id,
+          client_secret: "confidential_secret_789"
+        }, as: :json
+      end
+    end
+
+    assert_response :success
+    assert_not_nil response.parsed_body["access_token"]
+  end
+
+  test "token exchange for confidential client rejects credentials in the query string" do
+    client = oauth_clients(:confidential_client)
+    code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+    code_challenge = Base64.urlsafe_encode64(Digest::SHA256.digest(code_verifier), padding: false)
+
+    code = Oauth::AuthorizationCode.generate \
+      client_id: client.client_id,
+      identity_id: identities(:david).id,
+      code_challenge: code_challenge,
+      redirect_uri: "https://connector.example.com/callback",
+      scope: "read"
+
+    untenanted do
+      post oauth_token_path(client_id: client.client_id, client_secret: "confidential_secret_789"), params: {
+        grant_type: "authorization_code",
+        code: code,
+        redirect_uri: "https://connector.example.com/callback",
+        code_verifier: code_verifier
+      }, as: :json
+    end
+
+    assert_client_authentication_failed basic: false
+  end
+
+  test "token exchange for confidential client requires a matching client_id" do
+    client = oauth_clients(:confidential_client)
+    code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+    code_challenge = Base64.urlsafe_encode64(Digest::SHA256.digest(code_verifier), padding: false)
+
+    code = Oauth::AuthorizationCode.generate \
+      client_id: client.client_id,
+      identity_id: identities(:david).id,
+      code_challenge: code_challenge,
+      redirect_uri: "https://connector.example.com/callback",
+      scope: "read"
+
+    untenanted do
+      post oauth_token_path, params: {
+        grant_type: "authorization_code",
+        code: code,
+        redirect_uri: "https://connector.example.com/callback",
+        code_verifier: code_verifier,
+        client_secret: "confidential_secret_789"
+      }, as: :json
+    end
+
+    assert_client_authentication_failed basic: false
+  end
+
+  test "refresh grant for confidential client requires the client secret" do
+    client = oauth_clients(:confidential_client)
+    token = identities(:david).access_tokens.create!(oauth_client: client)
+
+    untenanted do
+      post oauth_token_path, params: {
+        grant_type: "refresh_token",
+        refresh_token: token.refresh_token,
+        client_id: client.client_id
+      }, as: :json
+    end
+
+    assert_client_authentication_failed basic: false
+
+    untenanted do
+      post oauth_token_path, params: {
+        grant_type: "refresh_token",
+        refresh_token: token.refresh_token,
+        client_id: client.client_id,
+        client_secret: "confidential_secret_789"
+      }, as: :json
+    end
+
+    assert_response :success
+  end
+
+  test "code grant for confidential client with a missing or wrong client_id fails as invalid_client" do
+    code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+    client = oauth_clients(:confidential_client)
+    exchange = { grant_type: "authorization_code", client_secret: "confidential_secret_789",
+      code: authorization_code_for(client, code_verifier: code_verifier),
+      redirect_uri: "http://127.0.0.1:8888/callback", code_verifier: code_verifier }
+
+    [ {}, { client_id: oauth_clients(:mcp_client).client_id } ].each do |client_id|
+      assert_no_difference "Identity::AccessToken.count" do
+        untenanted { post oauth_token_path, params: exchange.merge(client_id), as: :json }
+      end
+
+      assert_client_authentication_failed basic: false
+    end
+  end
+
+  test "code grant for confidential client authenticates before checking the verifier or redirect_uri" do
+    code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+    client = oauth_clients(:confidential_client)
+    exchange = { grant_type: "authorization_code", client_id: client.client_id, client_secret: "wrong",
+      code: authorization_code_for(client, code_verifier: code_verifier),
+      redirect_uri: "http://127.0.0.1:8888/callback", code_verifier: code_verifier }
+
+    [ { code_verifier: "not-the-verifier" }, { redirect_uri: "http://127.0.0.1:8888/elsewhere" } ].each do |mismatch|
+      untenanted { post oauth_token_path, params: exchange.merge(mismatch), as: :json }
+
+      assert_client_authentication_failed basic: false
+    end
+  end
+
+  test "token errors are never cached" do
+    client = oauth_clients(:confidential_client)
+    token = identities(:david).access_tokens.create!(oauth_client: client)
+
+    { { grant_type: "password" } => :bad_request,
+      { grant_type: "refresh_token", refresh_token: token.refresh_token, client_id: client.client_id, client_secret: "wrong" } => :bad_request,
+      { grant_type: "refresh_token", refresh_token: "bogus", client_id: oauth_clients(:mcp_client).client_id } => :bad_request }.each do |request, status|
+      untenanted { post oauth_token_path, params: request, as: :json }
+
+      assert_response status
+      assert_equal "no-store", response.headers["Cache-Control"], request.inspect
+      assert_equal "no-cache", response.headers["Pragma"]
+    end
+  end
+
+  test "registration errors are never cached" do
+    untenanted { post oauth_clients_path, params: { redirect_uris: [] }, as: :json }
+
+    assert_response :bad_request
+    assert_equal "no-store", response.headers["Cache-Control"]
+  end
+
+  test "confidential client authentication does not reveal whether a refresh token is live" do
+    client = oauth_clients(:confidential_client)
+    token = identities(:david).access_tokens.create!(oauth_client: client)
+
+    [ token.refresh_token, "not-a-refresh-token" ].each do |refresh_token|
+      untenanted { post oauth_token_path, params: { grant_type: "refresh_token", refresh_token: refresh_token, client_id: client.client_id, client_secret: "wrong" }, as: :json }
+      assert_equal "invalid_client", response.parsed_body["error"], "wrong secret"
+
+      untenanted { post oauth_token_path, params: { grant_type: "refresh_token", refresh_token: refresh_token, client_id: oauth_clients(:mcp_client).client_id }, as: :json }
+      assert_equal "invalid_grant", response.parsed_body["error"], "another client's id"
+
+      untenanted { post oauth_token_path, params: { grant_type: "refresh_token", refresh_token: refresh_token }, as: :json }
+      assert_equal "invalid_request", response.parsed_body["error"], "no client_id"
+    end
+
+    assert_equal token.refresh_token, token.reload.refresh_token
+  end
+
+  test "confidential client authentication does not reveal whether a code is valid" do
+    client = oauth_clients(:confidential_client)
+    code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+
+    [ authorization_code_for(client, code_verifier: code_verifier), "not-a-code" ].each do |code|
+      untenanted do
+        post oauth_token_path, params: { grant_type: "authorization_code", client_id: client.client_id, client_secret: "wrong",
+          code: code, redirect_uri: "http://127.0.0.1:8888/callback", code_verifier: code_verifier }, as: :json
+      end
+
+      assert_equal "invalid_client", response.parsed_body["error"]
+    end
+  end
+
+  test "a grant issued to another client answers exactly as a dead one does" do
+    live = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:confidential_client))
+    answers = [ live.refresh_token, "no-such-refresh-token" ].map do |refresh_token|
+      untenanted do
+        post oauth_token_path, params: { grant_type: "refresh_token", refresh_token: refresh_token, client_id: oauth_clients(:mcp_client).client_id }
+      end
+      [ response.status, response.parsed_body ]
+    end
+    assert_equal answers.first, answers.last
+
+    code = Oauth::AuthorizationCode.generate client_id: oauth_clients(:confidential_client).client_id, identity_id: identities(:david).id,
+      code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM", redirect_uri: "https://connector.example.com/callback", scope: "read"
+    answers = [ code, "no-such-code" ].map do |presented|
+      untenanted do
+        post oauth_token_path, params: { grant_type: "authorization_code", code: presented, client_id: oauth_clients(:mcp_client).client_id,
+          redirect_uri: "https://connector.example.com/callback", code_verifier: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk" }
+      end
+      [ response.status, response.parsed_body ]
+    end
+    assert_equal answers.first, answers.last
+  end
+
+  test "refresh grant for confidential client omitting client_id fails as invalid_client" do
+    client = oauth_clients(:confidential_client)
+    token = identities(:david).access_tokens.create!(oauth_client: client)
+
+    untenanted do
+      post oauth_token_path, params: {
+        grant_type: "refresh_token",
+        refresh_token: token.refresh_token,
+        client_secret: "confidential_secret_789"
+      }, as: :json
+    end
+
+    assert_client_authentication_failed basic: false
+  end
+
+
   # Refresh Grant
 
   test "refresh grant rotates access and refresh tokens" do
@@ -923,11 +1241,11 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
   # Token Revocation (RFC 7009)
 
   test "revocation deletes access token" do
-    token = identity_access_tokens(:davids_api_token)
+    token = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client))
 
     assert_difference "Identity::AccessToken.count", -1 do
       untenanted do
-        post oauth_revocation_path, params: { token: token.token }, as: :json
+        post oauth_revocation_path, params: { token: token.token, client_id: token.oauth_client.client_id }, as: :json
       end
     end
 
@@ -939,7 +1257,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
 
     assert_difference "Identity::AccessToken.count", -1 do
       untenanted do
-        post oauth_revocation_path, params: { token: token.refresh_token }, as: :json
+        post oauth_revocation_path, params: { token: token.refresh_token, client_id: token.oauth_client.client_id }, as: :json
       end
     end
 
@@ -975,18 +1293,6 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_equal "invalid_request", response.parsed_body["error"]
   end
 
-  test "revocation ignores client credentials and revokes on the token alone" do
-    access_token = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client), permission: :read)
-
-    untenanted do
-      post oauth_revocation_path, params: { token: access_token.token },
-        headers: { "Authorization" => ActionController::HttpAuthentication::Basic.encode_credentials("someone", "anything") }
-    end
-
-    assert_response :success
-    assert_not Identity::AccessToken.exists?(access_token.id)
-  end
-
 
   # Discovery Metadata (RFC 8414)
 
@@ -1007,9 +1313,10 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_equal true, body["authorization_response_iss_parameter_supported"]
     assert_equal %w[ query ], body["response_modes_supported"]
     assert_match %r{/oauth/revocation$}, body["revocation_endpoint"]
-    assert_equal %w[ none ], body["revocation_endpoint_auth_methods_supported"]
+    assert_equal %w[ none client_secret_post client_secret_basic ], body["revocation_endpoint_auth_methods_supported"]
     assert_includes body["grant_types_supported"], "authorization_code"
     assert_includes body["grant_types_supported"], "refresh_token"
+    assert_equal %w[ none client_secret_post client_secret_basic ], body["token_endpoint_auth_methods_supported"]
   end
 
   test "protected resource metadata includes authorization server" do
@@ -1248,6 +1555,56 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
       }
     end
     assert_response :bad_request
+  end
+
+  test "DCR registers a confidential client with client_secret_post" do
+    untenanted do
+      post oauth_clients_path, params: {
+        client_name: "Hosted Connector",
+        redirect_uris: [ "https://connector.example.com/callback" ],
+        token_endpoint_auth_method: "client_secret_post"
+      }, as: :json
+    end
+
+    assert_response :created
+    body = response.parsed_body
+
+    assert_equal "client_secret_post", body["token_endpoint_auth_method"]
+    assert_not_nil body["client_secret"]
+    assert_equal 0, body["client_secret_expires_at"]
+    assert_equal "no-store", response.headers["Cache-Control"]
+    assert Oauth::Client.find_by(client_id: body["client_id"]).confidential?
+  end
+
+  test "DCR omits client_secret for public clients" do
+    untenanted do
+      post oauth_clients_path, params: {
+        client_name: "Public Client",
+        redirect_uris: [ "http://127.0.0.1:8888/callback" ]
+      }, as: :json
+    end
+
+    assert_response :created
+    body = response.parsed_body
+
+    assert_equal "none", body["token_endpoint_auth_method"]
+    assert_not body.key?("client_secret")
+    assert_not body.key?("client_secret_expires_at")
+  end
+
+  test "DCR rejects unsupported token_endpoint_auth_method" do
+    assert_no_difference "Oauth::Client.count" do
+      untenanted do
+        post oauth_clients_path, params: {
+          client_name: "JWT Client",
+          redirect_uris: [ "https://connector.example.com/callback" ],
+          token_endpoint_auth_method: "private_key_jwt"
+        }, as: :json
+      end
+    end
+
+    assert_response :bad_request
+    assert_equal "invalid_client_metadata", response.parsed_body["error"]
   end
 
   test "DCR requires redirect_uris" do

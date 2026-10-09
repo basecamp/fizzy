@@ -2,6 +2,7 @@ require "test_helper"
 
 class OauthAvailabilityTest < ActionDispatch::IntegrationTest
   include OauthAvailabilityTestHelper
+  include OauthClientCredentialsTestHelper
 
   CODE_VERIFIER = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
 
@@ -200,6 +201,30 @@ class OauthAvailabilityTest < ActionDispatch::IntegrationTest
     assert_not_equal token.refresh_token, token.reload.refresh_token
   end
 
+  test "a dark server refreshes no confidential grants, even with the right secret" do
+    client = oauth_clients(:confidential_client)
+    token = identities(:david).access_tokens.create!(oauth_client: client, permission: :read)
+
+    with_oauth_availability acceptance: false do
+      untenanted { post oauth_token_path, params: refresh_params(token).merge(client_secret: client.client_secret) }
+    end
+
+    assert_response :not_found
+    assert_equal token.refresh_token, token.reload.refresh_token
+  end
+
+  test "a confidential pilot client still authenticates against a dark server" do
+    client = oauth_clients(:confidential_client)
+    token = identities(:david).access_tokens.create!(oauth_client: client, permission: :read)
+
+    with_oauth_availability acceptance: false, issuance: false, pilot_client_ids: [ client.client_id ] do
+      untenanted { post oauth_token_path, params: refresh_params(token).merge(client_secret: "wrong") }
+    end
+
+    assert_client_authentication_failed basic: false
+    assert_equal token.refresh_token, token.reload.refresh_token
+  end
+
   # Acceptance
 
   test "OAuth bearer tokens are refused while acceptance is off" do
@@ -237,7 +262,7 @@ class OauthAvailabilityTest < ActionDispatch::IntegrationTest
 
     with_oauth_availability acceptance: false, issuance: false do
       assert_difference "Identity::AccessToken.count", -1 do
-        untenanted { post oauth_revocation_path, params: { token: token.token } }
+        untenanted { post oauth_revocation_path, params: { token: token.token, client_id: token.oauth_client.client_id } }
       end
     end
 

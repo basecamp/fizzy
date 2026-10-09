@@ -1,23 +1,40 @@
 class Oauth::TokensController < Oauth::BaseController
+  include Oauth::ClientAuthentication
+
   allow_unauthenticated_access
   skip_forgery_protection
+
+  # A before_action, not after: a halted callback chain skips after_actions,
+  # and error responses must not be cached either (RFC 6749 §5.1, §5.2).
+  before_action :prevent_caching
 
   rate_limit to: 20, within: 1.minute, only: :create, with: :oauth_rate_limit_exceeded
 
   before_action :require_issuance_enabled
   before_action :validate_grant_type
+
+  # Authenticate the client the request names before looking anything up about
+  # the grant: a confidential client that fails auth must see invalid_client,
+  # not an invalid_grant it could misread as a revoked grant and discard, and
+  # the answer must not depend on whether the code or refresh token is live,
+  # or it tells whoever holds one without the secret.
+  before_action :authenticate_client
   before_action :require_params
 
   with_options if: :authorization_code_grant? do
     before_action :set_auth_code
     before_action :set_client
+  end
+
+  before_action :set_refreshable_access_token, unless: :authorization_code_grant?
+  before_action :validate_client_id
+
+  with_options if: :authorization_code_grant? do
     before_action :validate_pkce
     before_action :validate_redirect_uri
     before_action :set_identity
   end
 
-  before_action :set_refreshable_access_token, unless: :authorization_code_grant?
-  before_action :validate_client_id
   before_action :set_refresh_scope, unless: :authorization_code_grant?
 
   def create
@@ -54,7 +71,8 @@ class Oauth::TokensController < Oauth::BaseController
 
     # A missing parameter is a malformed request (invalid_request), not a dead
     # grant (invalid_grant), which a client would act on by discarding it.
-    # client_id is required of every client: none authenticates by header.
+    # client_id is required of every client, in the body unless a Basic
+    # header carries it.
     # Each is a single string; an array or object from a JSON body or a
     # name[] form field is just as malformed, and must not reach a lookup.
     def require_params
@@ -64,7 +82,7 @@ class Oauth::TokensController < Oauth::BaseController
     end
 
     def required_params
-      authorization_code_grant? ? %w[ code code_verifier redirect_uri client_id ] : %w[ refresh_token client_id ]
+      (authorization_code_grant? ? %w[ code code_verifier redirect_uri ] : %w[ refresh_token ]) + (client_secret_basic? ? [] : %w[ client_id ])
     end
 
     def string_param?(name)
@@ -109,9 +127,11 @@ class Oauth::TokensController < Oauth::BaseController
 
     # The code or refresh token must have been issued to the client_id in the
     # request (RFC 6749 §4.1.3, §6).
+    # One issued to another client gets the same answer as a dead one, so
+    # naming a public client tells nobody whether someone else's grant is live.
     def validate_client_id
-      unless params[:client_id] == (@client || @access_token.oauth_client).client_id
-        oauth_error "invalid_grant", "Grant was not issued to this client"
+      unless oauth_client_id == (@client || @access_token.oauth_client).client_id
+        oauth_error "invalid_grant", authorization_code_grant? ? "Invalid or expired authorization code" : "Invalid refresh token"
       end
     end
 
@@ -134,6 +154,22 @@ class Oauth::TokensController < Oauth::BaseController
 
     def granted_scopes(permission)
       Oauth.canonical_scope(permission).split
+    end
+
+    # A request attempts client authentication when it uses Basic, names a
+    # confidential client, or carries a client secret, and then it must
+    # authenticate a confidential client whatever the grant (see
+    # Oauth::ClientAuthentication). A request naming a public client attempts
+    # none; if its grant belongs to a confidential client, validate_client_id
+    # refuses it as issued to another client, the same answer as for a dead
+    # grant. So a confidential grant is only ever redeemed by the client it
+    # names, authenticated.
+    def authenticate_client
+      reject_ambiguous_client_credentials
+
+      unless performed? || !attempts_client_authentication? || authenticated_client&.confidential?
+        client_authentication_failed
+      end
     end
 
     def token_response(access_token, scope: nil)

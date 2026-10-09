@@ -1,4 +1,9 @@
 class Oauth::Client < ApplicationRecord
+  # The secret transports a confidential client may register. Either verifies
+  # the secret, however it arrives: the registered method is advisory.
+  SECRET_AUTH_METHODS = %w[ client_secret_post client_secret_basic ]
+  AUTH_METHODS = %w[ none ] + SECRET_AUTH_METHODS
+
   has_many :access_tokens, class_name: "Identity::AccessToken", foreign_key: :oauth_client_id, inverse_of: :oauth_client
 
   has_secure_token :client_id, length: 32
@@ -6,7 +11,10 @@ class Oauth::Client < ApplicationRecord
   validates :name, presence: true, length: { maximum: 255 }
   validates :client_id, uniqueness: true, allow_nil: true
   validates :redirect_uris, presence: true
+  validates :token_endpoint_auth_method, inclusion: { in: AUTH_METHODS }
   validate :redirect_uris_are_valid
+
+  before_create :generate_client_secret, if: :confidential?
 
   attribute :redirect_uris, default: -> { [] }
   attribute :scopes, default: -> { %w[ read ] }
@@ -14,6 +22,15 @@ class Oauth::Client < ApplicationRecord
   scope :trusted, -> { where trusted: true }
   scope :dynamically_registered, -> { where dynamically_registered: true }
 
+
+  def confidential?
+    token_endpoint_auth_method.in?(SECRET_AUTH_METHODS)
+  end
+
+  def authenticate_secret(secret)
+    confidential? && client_secret.present? && secret.is_a?(String) && secret.present? &&
+      ActiveSupport::SecurityUtils.secure_compare(client_secret, secret)
+  end
 
   def allows_redirect?(uri)
     redirect_uris.include?(uri) || (loopback_uri?(uri) && matching_loopback?(uri))
@@ -32,6 +49,10 @@ class Oauth::Client < ApplicationRecord
   end
 
   private
+    def generate_client_secret
+      self.client_secret ||= self.class.generate_unique_secure_token
+    end
+
     def redirect_uris_are_valid
       redirect_uris.each { |uri| validate_redirect_uri(uri) }
     end
