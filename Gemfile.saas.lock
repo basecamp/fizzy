@@ -669,7 +669,7 @@ GEM
     thruster (0.1.26-x86_64-darwin)
     thruster (0.1.26-x86_64-linux)
     timeout (0.6.1)
-    trilogy (2.13.0)
+    trilogy (2.13.1)
       bigdecimal
     tsort (0.2.0)
     tzinfo (2.0.6)
@@ -1038,7 +1038,7 @@ CHECKSUMS
   thruster (0.1.26-x86_64-darwin) sha256=c7f7f0cbefd8030ea03bf88f6a988f595a0618a35a1a0d358e729c6898eb5b6a
   thruster (0.1.26-x86_64-linux) sha256=3117a6ee430663f845a0457699fe9a05232dcc6c396e2cc83504de5a223c60e8
   timeout (0.6.1) sha256=78f57368a7e7bbadec56971f78a3f5ecbcfb59b7fcbb0a3ed6ddc08a5094accb
-  trilogy (2.13.0) sha256=b817a5854e8bd59e7929de58771941b22a30345ad741b458802189592583f244
+  trilogy (2.13.1) sha256=fbfb17c439b347e4240be70b80facf0f6f9c417b34c528179ff065b3d53635c9
   tsort (0.2.0) sha256=9650a793f6859a43b6641671278f79cfead60ac714148aabe4e3f0060480089f
   turbo-rails (2.0.23)
   tzinfo (2.0.6) sha256=8daf828cc77bcf7d63b0e3bdb6caa47e2272dcfaf4fbfe46f8c3a9df087a829b
