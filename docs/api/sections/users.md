@@ -143,8 +143,15 @@ __Error responses:__
 
 ## `DELETE /:account_slug/users/:user_id`
 
-Deactivates a user. You can only deactivate users you have permission to change.
+Deactivates a user. You can only deactivate users you have permission to change. An account's only owner can't be deactivated.
 
 __Response:__
 
 Returns `204 No Content` on success.
+
+__Error responses:__
+
+| Status Code | Description |
+|--------|-------------|
+| `403 Forbidden` | You don't have permission to deactivate this user |
+| `422 Unprocessable Entity` | The user is the account's only owner |
