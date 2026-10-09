@@ -1,0 +1,13 @@
+<tr>
+  <td><strong><%= client.name %></strong></td>
+  <td><%= tokens.map { |t| t.permission.humanize }.uniq.sort.join(", ") %></td>
+  <td><%= local_datetime_tag tokens.map(&:created_at).min, style: :datetime %></td>
+  <td>
+    <%= button_to my_connected_app_path(client), method: :delete,
+          class: "btn txt-negative btn--circle txt-x-small borderless fill-transparent",
+          data: { turbo_confirm: "Disconnect #{client.name}? This will revoke all access." } do %>
+      <%= icon_tag "trash" %>
+      <span class="for-screen-reader">Disconnect this app</span>
+    <% end %>
+  </td>
+</tr>

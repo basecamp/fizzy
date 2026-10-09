@@ -1,4 +1,6 @@
 class My::PasskeysController < ApplicationController
+  disallow_oauth_grants
+
   include ActionPack::Passkey::Request
 
   before_action :set_passkey, only: %i[ edit update destroy ]

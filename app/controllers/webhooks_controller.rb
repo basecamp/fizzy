@@ -23,7 +23,10 @@ class WebhooksController < ApplicationController
     if @webhook.save
       respond_to do |format|
         format.html { redirect_to @webhook }
-        format.json { render :show, status: :created, location: board_webhook_url(@webhook.board, @webhook, format: :json) }
+        format.json do
+          render partial: "webhooks/webhook", locals: { webhook: @webhook, reveal_credentials: true },
+            status: :created, location: board_webhook_url(@webhook.board, @webhook, format: :json)
+        end
       end
     else
       respond_to do |format|

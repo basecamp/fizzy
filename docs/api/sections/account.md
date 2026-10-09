@@ -36,6 +36,8 @@ __Response:__
 
 A join code is `active` when `usage_count` is less than `usage_limit`.
 
+Anyone with the join code can add themselves to the account, so apps connected with OAuth can't read, change or reset it. These endpoints respond `403 Forbidden` to them.
+
 ## `PUT /:account_slug/account/join_code`
 
 Updates the join code's usage limit. Requires admin role.
