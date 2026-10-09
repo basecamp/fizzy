@@ -7,8 +7,17 @@
 
 # For a containerized dev environment, see Dev Containers: https://guides.rubyonrails.org/getting_started_with_devcontainer.html
 
-# Make sure RUBY_VERSION matches the Ruby version in .ruby-version
+# Make sure RUBY_VERSION matches the Ruby version in .ruby-version.
+# Declared before the first stage: ARGs between stages are stage-scoped.
 ARG RUBY_VERSION=3.4.8
+
+# Build the native board planner in a matching Rust toolchain, then ship the
+# artifact into the runtime image instead of compiling it at boot.
+FROM docker.io/library/rust:1.98-slim-bookworm AS planner-build
+WORKDIR /planner
+COPY tools/solverforge-board-planner ./
+RUN cargo build --locked --release
+
 FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
 
 # Rails app lives here
@@ -45,6 +54,9 @@ RUN bundle install && \
 
 # Copy application code
 COPY . .
+
+# Ship the matching-architecture native planner instead of building it at runtime.
+COPY --from=planner-build /planner/target/release/solverforge-board-planner vendor/bin/solverforge-board-planner
 
 # Precompile bootsnap code for faster boot times.
 # -j 1 disable parallel compilation to avoid a QEMU bug: https://github.com/rails/bootsnap/issues/495

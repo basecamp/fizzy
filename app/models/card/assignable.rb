@@ -11,7 +11,7 @@ module Card::Assignable
   end
 
   def toggle_assignment(user)
-    assigned_to?(user) ? unassign(user) : assign(user)
+    assigned_to?(user) ? unassign(user) : assign_to(user)
   end
 
   def assigned_to?(user)
@@ -22,14 +22,23 @@ module Card::Assignable
     assignments.any?
   end
 
+  def assign_to(user, assigner: Current.user)
+    assignment = assignments.create assignee: user, assigner: assigner
+
+    if assignment.persisted?
+      watch_by user
+      track_event :assigned, assignee_ids: [ user.id ]
+      true
+    else
+      false
+    end
+  rescue ActiveRecord::RecordNotUnique
+    false
+  end
+
   private
     def assign(user)
-      assignment = assignments.create assignee: user, assigner: Current.user
-
-      if assignment.persisted?
-        watch_by user
-        track_event :assigned, assignee_ids: [ user.id ]
-      end
+      assign_to(user)
     rescue ActiveRecord::RecordNotUnique
       # Already assigned
     end
