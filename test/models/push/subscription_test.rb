@@ -108,6 +108,23 @@ class Push::SubscriptionTest < ActiveSupport::TestCase
     assert_equal DnsTestHelper::WEB_PUSH_PUBLIC_TEST_IP, subscription.resolved_endpoint_ip
   end
 
+  test "sends nothing when a saved endpoint's host now resolves to a private IP" do
+    subscription = Push::Subscription.create!(
+      user: users(:david),
+      endpoint: "https://fcm.googleapis.com/fcm/send/abc123",
+      p256dh_key: "BNcRdreALRFXTkOOUHK1EtK2wtaz5Ry4YfYCA_0QTpQtUbVlUls0VJXg7A8u-Ts1XbjhazAkj7I99e8QcYP7DkM",
+      auth_key: "tBHItJI5svbpez7KI4CCXg"
+    )
+    request = stub_request(:post, subscription.endpoint).to_return(status: 201)
+    stub_dns_resolution("10.0.0.1")
+
+    Push::Subscription.find(subscription.id)
+      .notification(title: "Test", body: "Test", url: "/test")
+      .deliver(connection: Net::HTTP::Persistent.new(name: "web_push_test"))
+
+    assert_not_requested request
+  end
+
   test "accepts all permitted push service domains" do
     permitted_endpoints = [
       "https://fcm.googleapis.com/fcm/send/token123",

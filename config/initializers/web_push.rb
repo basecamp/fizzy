@@ -20,7 +20,9 @@ module WebPush::PersistentRequest
     endpoint_ip = @options[:endpoint_ip]
 
     if endpoint_ip
-      http = Net::HTTP.new(uri.host, uri.port)
+      # The nil proxy address ignores http_proxy and https_proxy, so a proxy can't look the host up again
+      # and send the delivery somewhere other than endpoint_ip.
+      http = Net::HTTP.new(uri.host, uri.port, nil)
       http.ipaddr = endpoint_ip
       http.use_ssl = true
       http.ssl_timeout = @options[:ssl_timeout] unless @options[:ssl_timeout].nil?
