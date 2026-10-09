@@ -1,0 +1,11 @@
+<section class="settings__section">
+  <header>
+    <h2 class="divider">Archived boards</h2>
+    <div>Archived boards are hidden and read-only until they’re unarchived.</div>
+  </header>
+
+  <%= link_to account_archived_boards_path, class: "btn" do %>
+    <%= icon_tag "history" %>
+    <span>View archived boards</span>
+  <% end %>
+</section>

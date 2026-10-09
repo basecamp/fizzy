@@ -6,6 +6,7 @@ Rails.application.routes.draw do
     resource :entropy
     resource :join_code
     resource :settings
+    resources :archived_boards, only: :index
     resources :exports, only: [ :create, :show ]
     resources :imports, only: [ :new, :create, :show ]
   end
@@ -33,6 +34,7 @@ Rails.application.routes.draw do
       resource :subscriptions
       resource :involvement
       resource :publication
+      resource :archival
       resource :entropy
 
       namespace :columns do

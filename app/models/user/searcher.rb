@@ -29,10 +29,10 @@ module User::Searcher
   private
     def build_search_relation(terms)
       query = Search::Query.wrap(terms)
-      boards = query.valid? ? board_ids : []
+      board_ids = query.valid? ? boards.active.ids : []
 
       ActiveSearch.index(:searchable)
         .search(query.to_s)
-        .filter(account_id: account_id, board_id: boards)
+        .filter(account_id: account_id, board_id: board_ids)
     end
 end

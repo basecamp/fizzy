@@ -1,8 +1,10 @@
 module BoardScoped
   extend ActiveSupport::Concern
 
+  include ArchivedBoardGuard
+
   included do
-    before_action :set_board
+    before_action :set_board, :ensure_board_is_active
   end
 
   private

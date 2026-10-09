@@ -33,8 +33,8 @@
           <%= form.rich_textarea :public_description, class: "lexxy-content txt-small",
             placeholder: "Add a public note about this board…",
             data: { action: "keydown.ctrl+enter->form#submit:prevent keydown.meta+enter->form#submit:prevent keydown.esc->form#cancel:stop" },
-            readonly: !Current.user.can_administer_board?(@board) %>
-          <%= form.button "Save changes", type: :submit, class: "btn txt-small", title: "Save changes (#{ hotkey_label(["ctrl", "enter"]) })" %>
+            readonly: !board_editable?(board) %>
+          <%= form.button "Save changes", type: :submit, class: "btn txt-small", title: "Save changes (#{ hotkey_label(["ctrl", "enter"]) })", disabled: !board_editable?(board) %>
         <% end %>
       </div>
     </div>

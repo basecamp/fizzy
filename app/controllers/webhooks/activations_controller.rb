@@ -1,6 +1,7 @@
 class Webhooks::ActivationsController < ApplicationController
   include BoardScoped
 
+  skip_before_action :ensure_board_is_active
   before_action :ensure_admin
 
   def create

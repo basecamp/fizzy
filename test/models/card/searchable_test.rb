@@ -34,9 +34,10 @@ class Card::SearchableTest < ActiveSupport::TestCase
     assert_empty Card.mentioning("\"", user: @user)
 
     # Filtering by board_ids
-    other_board = Board.create!(name: "Other Board", account: @account, creator: @user)
+    other_user = User.create!(name: "Other User", account: @account)
+    other_board = Board.create!(name: "Other Board", account: @account, creator: other_user)
     card_in_board = @board.cards.create!(title: "searchable content", status: "published", creator: @user)
-    card_in_other_board = other_board.cards.create!(title: "searchable content", status: "published", creator: @user)
+    card_in_other_board = other_board.cards.create!(title: "searchable content", status: "published", creator: other_user)
     results = Card.mentioning("searchable", user: @user)
     assert_includes results, card_in_board
     assert_not_includes results, card_in_other_board

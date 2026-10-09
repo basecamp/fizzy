@@ -7,8 +7,10 @@
 
   <h1 class="header__title" data-bridge--title-target="header">
     <div><%= @page_title %></div>
-    <% unless Current.user.can_administer_board?(@board) %>
+    <% if !Current.user.can_administer_board?(@board) %>
       <div class="txt-normal font-weight-normal">Only admins can change these settings</div>
+    <% elsif @board.archived? %>
+      <div class="txt-normal font-weight-normal">Unarchive this board to change its settings</div>
     <% end %>
   </h1>
 <% end %>
@@ -22,7 +24,7 @@
       <%= render "boards/edit/name", form: form, board: @board %>
       <%= render "boards/edit/users", board: @board, selected_users: @selected_users, unselected_users: @unselected_users, form: form %>
 
-      <button type="submit" id="log_in" class="btn btn--link center txt-normal" data-bridge--form-target="submit" <%= "disabled" unless Current.user.can_administer_board?(@board) %>>
+      <button type="submit" id="log_in" class="btn btn--link center txt-normal" data-bridge--form-target="submit" <%= "disabled" unless board_editable?(@board) %>>
         <span>Save changes</span>
       </button>
 
@@ -33,6 +35,11 @@
   <div class="settings__panel panel shadow">
     <%= render "boards/edit/auto_close", board: @board %>
     <%= render "boards/edit/publication", board: @board %>
-    <%= render "boards/edit/delete", board: @board if Current.user.can_administer_board?(@board) %>
+    <% if Current.user.can_administer_board?(@board) %>
+      <div class="flex gap justify-center margin-block-start-auto">
+        <%= render "boards/edit/archival", board: @board %>
+        <%= render "boards/edit/delete", board: @board %>
+      </div>
+    <% end %>
   </div>
 </section>

@@ -1,10 +1,10 @@
 <% if card.image.attached? %>
-  <%= button_to card_image_path(card), method: :delete, class: "btn hide-on-native",
+  <%= button_to card_image_path(card), method: :delete, class: "btn hide-on-native", disabled: card.board_archived?,
         data: { controller: "tooltip" } do %>
     <%= icon_tag "picture-remove" %>
     <span class="for-screen-reader">Remove background image</span>
   <% end %>
-<% elsif !card.closed? %>
+<% elsif !card.closed? && !card.board_archived? %>
   <%= form_with model: card, data: { controller: "form" } do |form| %>
     <label class="card-perma__image-btn btn input--file btn--circle-mobile hide-on-native" data-controller="tooltip">
       <%= icon_tag "picture-add" %>
