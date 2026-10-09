@@ -111,10 +111,10 @@ class ActiveSearch::StoreAdapters::MysqlShardedTest < ActiveSupport::TestCase
     assert_equal "Implement #{mark('authentication')} now", result
   end
 
-  test "highlight marks an accented word the sanitizer truncated" do
-    assert_equal "caf ", Search::Query.new(terms: "café").tap(&:valid?).terms
+  test "highlight preserves an accented query and word" do
+    assert_equal "café", Search::Query.new(terms: "café").tap(&:valid?).terms
 
-    result = @adapter.send(:highlight_text, "a naive café here", "caf")
+    result = @adapter.send(:highlight_text, "a naive café here", "café")
 
     assert_equal "a naive #{mark('café')} here", result
   end
