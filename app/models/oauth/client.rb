@@ -15,12 +15,15 @@ class Oauth::Client < ApplicationRecord
   scope :dynamically_registered, -> { where dynamically_registered: true }
 
 
-  def loopback?
-    redirect_uris.all? { |uri| loopback_uri?(uri) }
+  def allows_redirect?(uri)
+    redirect_uris.include?(uri) || (loopback_uri?(uri) && matching_loopback?(uri))
   end
 
-  def allows_redirect?(uri)
-    redirect_uris.include?(uri) || (loopback? && loopback_uri?(uri) && matching_loopback?(uri))
+  # Whether we may send the browser to this redirect before the user has seen
+  # the consent screen. A self-registered https host is one nobody vetted, so
+  # bouncing to it unprompted would make us an open redirector (RFC 9700 §4.11.2).
+  def vetted_redirect?(uri)
+    !dynamically_registered? || loopback_uri?(uri)
   end
 
   def allows_scope?(requested_scope)
@@ -36,42 +39,49 @@ class Oauth::Client < ApplicationRecord
     def validate_redirect_uri(uri)
       parsed = URI.parse(uri)
 
-      if parsed.fragment.present?
+      unless parsed.fragment.nil?
         errors.add :redirect_uris, "must not contain fragments"
       end
 
-      if dynamically_registered? && !valid_loopback_uri?(parsed)
-        errors.add :redirect_uris, "must be a local loopback URI for dynamically registered clients"
+      if dynamically_registered? && !valid_loopback_uri?(parsed) && !valid_https_uri?(parsed)
+        errors.add :redirect_uris, "must be an https or local loopback URI for dynamically registered clients"
       end
     rescue URI::InvalidURIError
       errors.add :redirect_uris, "includes an invalid URI"
     end
 
     def loopback_uri?(uri)
-      Oauth::LOOPBACK_HOSTS.include?(URI.parse(uri).host)
+      Oauth.loopback_host?(URI.parse(uri).host)
     rescue URI::InvalidURIError
       false
     end
 
     def valid_loopback_uri?(parsed)
-      parsed.scheme == "http" && parsed.host.in?(Oauth::LOOPBACK_HOSTS)
+      parsed.scheme == "http" && Oauth.plain_authority?(parsed) && Oauth.loopback_host?(parsed.host)
+    end
+
+    def valid_https_uri?(parsed)
+      parsed.scheme == "https" && Oauth.plain_authority?(parsed) && !Oauth.loopback_host?(parsed.host)
     end
 
     # Only the port may vary, and only for an http loopback redirect (RFC 8252
-    # §7.3): https or a native scheme on loopback stays exact. The host must match too:
+    # §7.3): https or a native scheme on loopback stays exact. The host and any
+    # userinfo must match too:
     # 127.0.0.1, localhost and ::1 are not interchangeable, and localhost
     # may not even resolve to loopback (RFC 8252 §8.3).
     def matching_loopback?(uri)
       parsed = URI.parse(uri)
 
-      redirect_uris.any? do |redirect_uri|
+      Oauth.plain_authority?(parsed) && redirect_uris.any? do |redirect_uri|
         redirect = URI.parse(redirect_uri)
 
         redirect.scheme == "http" && parsed.scheme == "http" &&
-          redirect.host.in?(Oauth::LOOPBACK_HOSTS) &&
+          Oauth.loopback_host?(redirect.host) &&
           redirect.host.casecmp?(parsed.host.to_s) &&
+          redirect.userinfo == parsed.userinfo &&
           redirect.path == parsed.path &&
-          redirect.query == parsed.query
+          redirect.query == parsed.query &&
+          parsed.fragment.nil?
       end
     rescue URI::InvalidURIError
       false
