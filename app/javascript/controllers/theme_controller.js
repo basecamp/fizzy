@@ -3,8 +3,18 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = ["lightButton", "darkButton", "autoButton"]
 
+  #mediaQuery
+  #handleSystemThemeChange
+
   connect() {
+    this.#mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
+    this.#handleSystemThemeChange = () => this.#applyStoredTheme()
+    this.#mediaQuery.addEventListener("change", this.#handleSystemThemeChange)
     this.#applyStoredTheme()
+  }
+
+  disconnect() {
+    this.#mediaQuery.removeEventListener("change", this.#handleSystemThemeChange)
   }
 
   setLight() {
@@ -23,22 +33,24 @@ export default class extends Controller {
     return localStorage.getItem("theme") || "auto"
   }
 
+  get #resolvedTheme() {
+    const stored = this.#storedTheme
+    if (stored === "light" || stored === "dark") return stored
+    return this.#mediaQuery.matches ? "dark" : "light"
+  }
+
   set #theme(theme) {
     localStorage.setItem("theme", theme)
 
-    const currentTheme = document.documentElement.getAttribute("data-theme") || "auto"
-    const hasChanged = currentTheme !== theme
+    const resolved = this.#resolvedTheme
+    const currentTheme = document.documentElement.dataset.theme
+    const hasChanged = currentTheme !== resolved
 
     const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches
     const animate = hasChanged && !prefersReducedMotion
 
     const applyTheme = () => {
-      if (theme === "auto") {
-        document.documentElement.removeAttribute("data-theme")
-      } else {
-        document.documentElement.setAttribute("data-theme", theme)
-      }
-
+      document.documentElement.dataset.theme = resolved
       this.#updateButtons()
     }
 
