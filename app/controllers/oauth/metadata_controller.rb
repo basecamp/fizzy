@@ -13,7 +13,7 @@ class Oauth::MetadataController < Oauth::BaseController
       revocation_endpoint_auth_methods_supported: %w[ none ],
       response_types_supported: %w[ code ],
       response_modes_supported: %w[ query ],
-      grant_types_supported: %w[ authorization_code ],
+      grant_types_supported: %w[ authorization_code refresh_token ],
       token_endpoint_auth_methods_supported: %w[ none ],
       code_challenge_methods_supported: %w[ S256 ],
       scopes_supported: %w[ read write ],
