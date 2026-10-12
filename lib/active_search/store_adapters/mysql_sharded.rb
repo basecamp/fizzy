@@ -5,7 +5,7 @@ module ActiveSearch
     class MysqlSharded < Mysql
       SHARD_COUNT = 16
 
-      include Stemming, Highlighting
+      include SourceHighlighting, Stemming, Highlighting
 
       # Absent fields are written as NULL: upsert leaves columns it is not given untouched.
       def write(index, document, routing: nil)

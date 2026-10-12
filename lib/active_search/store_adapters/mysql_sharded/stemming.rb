@@ -34,7 +34,7 @@ module ActiveSearch
           # The one definition of an index token: documents, queries and highlighting
           # must all tokenise the same way or a mark lands where MySQL did not match.
           def stem_tokens(value)
-            value.to_s.gsub(/[^\w\s]/, " ").split(/\s+/).map { |word| STEMMER.stem(word.downcase) }
+            value.to_s.unicode_normalize(:nfc).gsub(/[^\p{L}\p{M}\p{N}_\s]/, " ").split(/\s+/).map { |word| STEMMER.stem(word.downcase) }
           end
       end
     end
