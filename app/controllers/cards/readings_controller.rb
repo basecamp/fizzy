@@ -1,6 +1,8 @@
 class Cards::ReadingsController < ApplicationController
   include CardScoped
 
+  skip_before_action :ensure_board_is_active
+
   def create
     @notification = @card.read_by(Current.user)
     record_board_access

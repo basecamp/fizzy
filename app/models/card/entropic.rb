@@ -25,7 +25,7 @@ module Card::Entropic
       failures = {}
 
       Account.find_each do |account|
-        account.boards.includes(:entropy).group_by(&:auto_postpone_period).each do |period, boards|
+        account.boards.active.includes(:entropy).group_by(&:auto_postpone_period).each do |period, boards|
           account.cards.active
             .where(board_id: boards.map(&:id))
             .where(last_active_at: ..(as_of - period))

@@ -25,10 +25,12 @@
             <span>Full history</span>
           </button>
 
-          <%= link_to edit_card_comment_path(comment.card, comment),
-                class: "comment__edit btn btn--circle borderless translucent", data: { only_visible_to_you: true } do %>
-            <%= icon_tag "menu-dots-horizontal" %>
-            <span class="for-screen-reader">Edit this comment</span>
+          <% unless comment.card.board_archived? %>
+            <%= link_to edit_card_comment_path(comment.card, comment),
+                  class: "comment__edit btn btn--circle borderless translucent", data: { only_visible_to_you: true } do %>
+              <%= icon_tag "menu-dots-horizontal" %>
+              <span class="for-screen-reader">Edit this comment</span>
+            <% end %>
           <% end %>
         </div>
 

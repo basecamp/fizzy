@@ -1,13 +1,14 @@
 class BoardsController < ApplicationController
   wrap_parameters :board, include: %i[ name all_access auto_postpone_period_in_days public_description ]
 
-  include FilterScoped
+  include ArchivedBoardGuard, FilterScoped
 
   before_action :set_board, except: %i[ index new create ]
   before_action :ensure_permission_to_admin_board, only: %i[ update destroy ]
+  before_action :ensure_board_is_active, only: %i[ update ]
 
   def index
-    set_page_and_extract_portion_from Current.user.boards.ordered_by_recently_accessed.includes(creator: :identity)
+    set_page_and_extract_portion_from listed_boards.ordered_by_recently_accessed.includes(:archival, creator: :identity)
     fresh_when etag: @page.records
   end
 
@@ -72,6 +73,14 @@ class BoardsController < ApplicationController
   private
     def set_board
       @board = Current.user.boards.find params[:id]
+    end
+
+    def listed_boards
+      if params[:archived] == "true"
+        Current.user.boards.archived
+      else
+        Current.user.boards.active
+      end
     end
 
     def ensure_permission_to_admin_board

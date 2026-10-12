@@ -1,4 +1,4 @@
-<% disabled = !Current.user.can_administer_board?(board) %>
+<% disabled = !board_editable?(board) %>
 <header>
   <h2 class="divider txt-medium margin-block-start">Who can access this board?</h2>
 </header>

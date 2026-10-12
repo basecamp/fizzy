@@ -35,6 +35,7 @@ class Account::DataTransfer::Manifest
         Account::DataTransfer::EntropyRecordSet.new(account),
         record_set_for(::Board::Publication, unique_keys: %w[ key ]),
         *record_sets_for(
+          ::Board::Archival,
           ::Webhook,
           ::Access,
           ::Card,

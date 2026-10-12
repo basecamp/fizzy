@@ -1,0 +1,23 @@
+<% if board.archived? %>
+  <%= button_to board_archival_path(board), method: :delete, class: "btn borderless txt-small", data: { turbo_frame: "_top" } do %>
+    <%= icon_tag "refresh" %>
+    <span>Unarchive this board</span>
+  <% end %>
+<% else %>
+  <div data-controller="dialog" data-dialog-modal-value="true" data-action="keydown.esc->dialog#close:stop">
+    <button type="button" class="btn borderless txt-small" data-action="dialog#open">
+      <%= icon_tag "history" %>
+      <span>Archive this board</span>
+    </button>
+    <dialog class="dialog panel fill-white shadow gap flex-column" style="--panel-size: 40ch" data-dialog-target="dialog">
+      <h3 class="txt-large txt-bold">Archive this board?</h3>
+      <p class="txt-medium margin-block-half">The board and its cards will be hidden from menus, activity, and search, and nothing on it can be changed. You can unarchive it at any time from Account Settings.</p>
+      <div class="flex gap-half justify-center margin-block-start">
+        <button type="button" class="btn" data-action="dialog#close">Cancel</button>
+        <%= button_to board_archival_path(board), method: :post, class: "btn", data: { turbo_frame: "_top" } do %>
+          <span>Archive board</span>
+        <% end %>
+      </div>
+    </dialog>
+  </div>
+<% end %>

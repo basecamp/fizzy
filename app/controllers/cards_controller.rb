@@ -1,10 +1,11 @@
 class CardsController < ApplicationController
   wrap_parameters :card, include: %i[ title description image created_at last_active_at ]
 
-  include FilterScoped
+  include ArchivedBoardGuard, FilterScoped
 
   before_action :set_board, only: %i[ create ]
   before_action :set_card, only: %i[ show edit update destroy ]
+  before_action :ensure_board_is_active, only: %i[ create update destroy ]
   before_action :redirect_if_drafted, only: :show
   before_action :ensure_permission_to_administer_card, only: %i[ destroy ]
 
@@ -57,6 +58,10 @@ class CardsController < ApplicationController
 
     def set_card
       @card = Current.user.accessible_cards.find_by!(number: params[:id])
+    end
+
+    def guarded_board
+      @board || @card.board
     end
 
     def redirect_if_drafted

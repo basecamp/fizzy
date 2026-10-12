@@ -8,7 +8,7 @@
     action: "turbo:before-stream-render@document->collapsible-columns#restoreState focus->collapsible-columns#focusOnColumn dialog:show->collapsible-columns#frameColumnOnMobile"
   } do %>
   <header class="cards__header">
-    <%= render "boards/show/menu/column", column: column %>
+    <%= render "boards/show/menu/column", column: column unless column.board.archived? %>
     <%= render "boards/show/expander", title: column.name, count: column.cards.active.count, column_id: dom_id(column) %>
 
     <%= link_to board_column_path(column.board, column), class: "cards__maximize-button btn btn--circle txt-x-small borderless", data: { turbo_frame: "_top" } do %>

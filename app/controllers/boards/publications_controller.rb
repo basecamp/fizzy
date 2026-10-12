@@ -1,6 +1,7 @@
 class Boards::PublicationsController < ApplicationController
   include BoardScoped
 
+  skip_before_action :ensure_board_is_active
   before_action :ensure_permission_to_admin_board
 
   def create

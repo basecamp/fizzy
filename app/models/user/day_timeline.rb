@@ -77,7 +77,7 @@ class User::DayTimeline
     end
 
     def boards
-      filter.boards.presence || user.boards
+      filter.boards.presence || user.boards.active
     end
 
     def latest_event_before

@@ -1,6 +1,8 @@
 class Cards::PinsController < ApplicationController
   include CardScoped
 
+  skip_before_action :ensure_board_is_active
+
   def show
     fresh_when etag: @card.pin_for(Current.user) || "none"
   end

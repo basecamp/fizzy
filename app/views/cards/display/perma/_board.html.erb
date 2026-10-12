@@ -1,8 +1,8 @@
 <div class="card__board" data-controller="dialog" data-action="keydown.esc->dialog#close:stop click@document->dialog#closeOnClickOutside mouseenter->dialog#loadLazyFrames">
   <%= render "cards/display/common/board", card: card do %>
-    <%= icon_tag "caret-down", class: "txt-xx-small", hidden: card.closed? %>
+    <%= icon_tag "caret-down", class: "txt-xx-small", hidden: card.closed? || card.board_archived? %>
   <% end %>
-  <button class="card__board-picker-button btn btn--plain" data-action="click->dialog#open:stop" aria-label="Choose a board for this card" <%= "hidden" if card.closed? %>></button>
+  <button class="card__board-picker-button btn btn--plain" data-action="click->dialog#open:stop" aria-label="Choose a board for this card" <%= "hidden" if card.closed? %> <%= "disabled" if card.board_archived? %>></button>
   <dialog class="popup popup--align-right panel flex-column align-start gap-half fill-white shadow" data-dialog-target="dialog" data-action="turbo:before-morph-attribute->dialog#preventCloseOnMorphing turbo:submit-end->dialog#close">
     <%= turbo_frame_tag "board_picker", src: edit_card_board_path(card), target: "_top", loading: :lazy, refresh: "morph" %>
   </dialog>

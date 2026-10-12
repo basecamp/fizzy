@@ -1,18 +1,25 @@
 <div class="flex gap-half">
-  <%= link_to edit_card_path(card), class: "btn btn--circle-mobile borderless",
-        data: {
-          controller: "hotkey",
-          action: "keydown.e@document->hotkey#click",
-          bridge__overflow_menu_target: "item",
-          bridge_title: "Edit",
-          turbo_frame: dom_id(card, :edit)
-        } do %>
-    <%= icon_tag "pencil", class: "icon--mobile-only" %>
-    <span>Edit</span>
-    <kbd class="txt-x-small hide-on-touch">e</kbd>
+  <% if card.board_archived? %>
+    <button type="button" class="btn btn--circle-mobile borderless" disabled>
+      <%= icon_tag "pencil", class: "icon--mobile-only" %>
+      <span>Edit</span>
+    </button>
+  <% else %>
+    <%= link_to edit_card_path(card), class: "btn btn--circle-mobile borderless",
+          data: {
+            controller: "hotkey",
+            action: "keydown.e@document->hotkey#click",
+            bridge__overflow_menu_target: "item",
+            bridge_title: "Edit",
+            turbo_frame: dom_id(card, :edit)
+          } do %>
+      <%= icon_tag "pencil", class: "icon--mobile-only" %>
+      <span>Edit</span>
+      <kbd class="txt-x-small hide-on-touch">e</kbd>
+    <% end %>
   <% end %>
 
-  <%= button_to card_closure_path(card), class: "btn btn--circle-mobile borderless hide-on-native",
+  <%= button_to card_closure_path(card), class: "btn btn--circle-mobile borderless hide-on-native", disabled: card.board_archived?,
         data: {
           controller: "hotkey",
           form_target: "submit",

@@ -9,7 +9,7 @@ class User::Filtering
   end
 
   def boards
-    @boards ||= user.boards.ordered_by_recently_accessed
+    @boards ||= user.boards.active.ordered_by_recently_accessed
   end
 
   def selected_board_titles

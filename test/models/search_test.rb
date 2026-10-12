@@ -85,4 +85,13 @@ class SearchTest < ActiveSupport::TestCase
                  .merge(relation.except(:select, :order))
     assert_includes merged, card
   end
+
+  test "cards on archived boards are left out of search" do
+    card = @board.cards.create!(title: "shelved quillword", creator: @user, status: "published")
+    assert_equal 1, @user.search("quillword").results.to_a.size, "precondition: card is searchable"
+
+    @board.archive
+
+    assert_empty @user.reload.search("quillword").results.to_a
+  end
 end

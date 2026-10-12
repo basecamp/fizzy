@@ -20,6 +20,6 @@ class Public::BaseController < ApplicationController
     end
 
     def ensure_board_accessible
-      raise ActionController::RoutingError, "Not Found" if @board&.account&.cancelled?
+      raise ActionController::RoutingError, "Not Found" if @board&.account&.cancelled? || @board&.archived?
     end
 end

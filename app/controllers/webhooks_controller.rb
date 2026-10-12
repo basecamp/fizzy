@@ -3,6 +3,7 @@ class WebhooksController < ApplicationController
 
   include BoardScoped
 
+  skip_before_action :ensure_board_is_active
   before_action :ensure_admin
   before_action :set_webhook, except: %i[ index new create ]
 
