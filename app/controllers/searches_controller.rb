@@ -1,5 +1,7 @@
 class SearchesController < ApplicationController
-  include Turbo::DriveHelper
+  include Turbo::DriveHelper, SearchRateLimiting
+
+  limit_searches only: :show
 
   # geared_pagination's own ratios, so the JSON arm and this one page alike.
   SEARCH_PAGE_SIZES = [ 15, 30, 50, 100 ].freeze
@@ -31,6 +33,10 @@ class SearchesController < ApplicationController
   end
 
   private
+    def searching?
+      params[:q].present?
+    end
+
     def windowed_page_param
       current_page_param.to_i > MAX_SEARCH_PAGE ? MAX_SEARCH_PAGE : current_page_param
     end
