@@ -37,13 +37,16 @@ class SearchRateLimitingTest < ActionDispatch::IntegrationTest
     assert_equal "60", response.headers["Retry-After"]
   end
 
-  test "card lists and searches count against one hourly budget per user" do
-    Rails.cache.expects(:increment).with("rate-limit:searches:#{users(:david).cache_key}", 1, expires_in: 1.hour).twice.returns(1)
+  test "card lists, searches and boards count against one hourly budget per user" do
+    Rails.cache.expects(:increment).with("rate-limit:searches:#{users(:david).cache_key}", 1, expires_in: 1.hour).times(3).returns(1)
 
     get cards_path(format: :json), params: { terms: [ "haggis" ] }, headers: bearer_token_header(:davids_api_token)
     assert_response :success
 
     get search_path(format: :json), params: { q: "haggis" }, headers: bearer_token_header(:davids_api_token)
+    assert_response :success
+
+    get board_path(boards(:writebook), format: :json), params: { terms: [ "haggis" ] }, headers: bearer_token_header(:davids_api_token)
     assert_response :success
   end
 
