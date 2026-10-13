@@ -85,6 +85,9 @@ class Account::Import < ApplicationRecord
   end
 
   private
+    # Only the Disk service stages the archive on local disk. On S3 the reader
+    # range-requests it and blob contents upload straight back, so there is no
+    # local free space to preflight.
     def ensure_sufficient_storage_space
       return unless path = ZipFile.path_on_disk(file.blob)
 

@@ -3,6 +3,10 @@ class Account::DataTransfer::RecordSet
   class ConflictError < IntegrityError; end
 
   IMPORT_BATCH_SIZE = 100
+
+  # A batch holds every record it reads until it inserts them, so a batch also
+  # ends once its entries add up to this many bytes.
+  IMPORT_BATCH_BYTES = 16.megabytes
   INTERNAL_RECORD_TYPES = %w[Export Account::Import].freeze
 
   attr_accessor :importable_model_names
@@ -31,7 +35,7 @@ class Account::DataTransfer::RecordSet
       file_list = files
       file_list = skip_to(file_list, start) if start
 
-      file_list.each_slice(IMPORT_BATCH_SIZE) do |file_batch|
+      batches_of(file_list).each do |file_batch|
         import_batch(file_batch)
         callback&.call(record_set: self, files: file_batch)
       end
@@ -73,6 +77,26 @@ class Account::DataTransfer::RecordSet
 
     def files
       zip.glob("data/#{model_dir}/*.json")
+    end
+
+    def batches_of(files)
+      Enumerator.new do |batches|
+        batch = []
+        bytes = 0
+
+        files.each do |file|
+          batch << file
+          bytes += zip.size(file)
+
+          if batch.size == IMPORT_BATCH_SIZE || bytes >= IMPORT_BATCH_BYTES
+            batches << batch
+            batch = []
+            bytes = 0
+          end
+        end
+
+        batches << batch if batch.any?
+      end
     end
 
     def import_batch(files)

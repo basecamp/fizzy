@@ -9,9 +9,9 @@ if [[ $CURRENT_BRANCH == "main" && $KAMAL_DESTINATION == "production" ]]; then
   gh release create $KAMAL_SERVICE_VERSION --target $KAMAL_VERSION --generate-notes 2> /dev/null || true
 
   RELEASE_URL=$(gh release view $KAMAL_SERVICE_VERSION --json url,body --jq .url)
-  RELEASE_BODY=$(gh release view $KAMAL_SERVICE_VERSION --json url,body --jq .body)
+  RELEASE_HTML=$(gh release view $KAMAL_SERVICE_VERSION --json body --jq .body | gh api markdown -f mode=gfm -f context=basecamp/fizzy -F text=@-)
 
-  saas/bin/broadcast_to_bc "$MESSAGE "$'\n'"$RELEASE_URL "$'\n'"$RELEASE_BODY"
+  saas/bin/broadcast_to_bc "$MESSAGE<br><a href=\"$RELEASE_URL\">$RELEASE_URL</a>$RELEASE_HTML"
 else
   saas/bin/broadcast_to_bc "$MESSAGE"
 fi

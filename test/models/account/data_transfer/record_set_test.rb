@@ -5,6 +5,21 @@ class Account::DataTransfer::RecordSetTest < ActiveSupport::TestCase
     @importable_model_names = %w[ Card Board Event ]
   end
 
+  test "import ends a batch once its entries add up to the byte limit" do
+    tags = 5.times.map { |i| { "id" => "tag#{i}", "title" => "a" * 100 } }
+    entry_size = tags.first.to_json.bytesize
+
+    record_set = Account::DataTransfer::RecordSet.new(account: importing_account, model: Tag)
+    record_set.stubs(:import_batch)
+    batches = []
+
+    stub_const(Account::DataTransfer::RecordSet, :IMPORT_BATCH_BYTES, entry_size * 3) do
+      record_set.import(from: build_reader(dir: "tags", data: tags), callback: ->(record_set:, files:) { batches << files.size })
+    end
+
+    assert_equal [ 3, 2 ], batches
+  end
+
   test "check rejects polymorphic type not in the importable models allowlist" do
     event_data = build_event_data(eventable_type: "Identity")
 

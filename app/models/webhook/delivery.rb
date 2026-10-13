@@ -106,8 +106,10 @@ class Webhook::Delivery < ApplicationRecord
       @uri ||= URI(webhook.url)
     end
 
+    # The nil proxy address ignores http_proxy: a proxy would look the host up again, and the connection
+    # would no longer go to resolved_ip.
     def http
-      Net::HTTP.new(uri.host, uri.port).tap do |http|
+      Net::HTTP.new(uri.host, uri.port, nil).tap do |http|
         http.ipaddr = resolved_ip
         http.use_ssl = (uri.scheme == "https")
         http.open_timeout = ENDPOINT_TIMEOUT
