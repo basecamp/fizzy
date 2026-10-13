@@ -38,7 +38,7 @@ class Search::Query < ApplicationRecord
     end
 
     def quote_joined_words(terms)
-      terms.gsub(/"[^"]*"|\w+(?:[^\w\s"]+\w+)+/) { |match| match.start_with?("\"") ? match : "\"#{match}\"" }
+      terms.gsub(/"[^"]*"|\w+(?:[^\w[:space:]"]+\w+)+/) { |match| match.start_with?("\"") ? match : "\"#{match}\"" }
     end
 
     def remove_unbalanced_quotes(terms)
