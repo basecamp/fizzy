@@ -24,8 +24,9 @@ class Search::Query < ApplicationRecord
 
     def sanitize(terms)
       if terms.present?
-        terms = remove_invalid_search_characters(self.terms)
-        terms = remove_unbalanced_quotes(terms)
+        terms = remove_unbalanced_quotes(self.terms)
+        terms = quote_joined_words(terms)
+        terms = remove_invalid_search_characters(terms)
         terms.presence
       else
         terms
@@ -34,6 +35,10 @@ class Search::Query < ApplicationRecord
 
     def remove_invalid_search_characters(terms)
       terms.gsub(/[^\w"]/, " ")
+    end
+
+    def quote_joined_words(terms)
+      terms.gsub(/"[^"]*"|\w+(?:[^\w\s"]+\w+)+/) { |match| match.start_with?("\"") ? match : "\"#{match}\"" }
     end
 
     def remove_unbalanced_quotes(terms)

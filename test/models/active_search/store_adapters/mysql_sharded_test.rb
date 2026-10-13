@@ -27,6 +27,11 @@ class ActiveSearch::StoreAdapters::MysqlShardedTest < ActiveSupport::TestCase
     assert_equal "foo bar", @adapter.send(:stem, "foo---bar")
   end
 
+  test "stem a query keeps each quoted phrase together" do
+    assert_equal %(say "bc3 io 1d8b" now), @adapter.send(:stem_query, %(say "BC3 IOS 1D8B" now))
+    assert_equal "run", @adapter.send(:stem_query, %(running ""))
+  end
+
   test "the shard comes from the routing value, not from anything held on the adapter" do
     index = ActiveSearch.index(:searchable)
 

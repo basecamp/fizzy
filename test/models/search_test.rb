@@ -64,6 +64,22 @@ class SearchTest < ActiveSupport::TestCase
     assert results.find { |it| it.is_a?(Card) && it.id == card.id }
   end
 
+  test "a hyphenated term matches its parts together, not each part alone" do
+    card = @board.cards.create!(title: "BC3-IOS-1D8B", creator: @user, status: "published")
+    @board.cards.create!(title: "BC3-ANDROID-77XQ", creator: @user, status: "published")
+    @board.cards.create!(title: "1D8B seen on IOS in BC3", creator: @user, status: "published")
+
+    assert_equal [ card ], @user.search("BC3-IOS-1D8B").results.to_a
+    assert_equal [ card ], Card.mentioning("BC3-IOS-1D8B", user: @user).to_a
+  end
+
+  test "a quoted phrase matches its words together" do
+    card = @board.cards.create!(title: "release notes draft", creator: @user, status: "published")
+    @board.cards.create!(title: "notes on the release", creator: @user, status: "published")
+
+    assert_equal [ card ], @user.search(%("release notes")).results.to_a
+  end
+
   test "mentioning is not capped by the default search limit" do
     30.times { |i| @board.cards.create!(title: "capped card #{i}", creator: @user, status: "published") }
 
