@@ -72,6 +72,10 @@ class BoardsController < ApplicationController
   end
 
   private
+    def searching?
+      @filter.terms.present?
+    end
+
     def set_board
       @board = Current.user.boards.find params[:id]
     end
@@ -84,10 +88,6 @@ class BoardsController < ApplicationController
 
     def grantees_changed?
       params.key?(:user_ids)
-    end
-
-    def searching?
-      @filter.terms.present?
     end
 
     def show_filtered_cards
