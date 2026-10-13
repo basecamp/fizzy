@@ -33,19 +33,19 @@ class Search::Query < ApplicationRecord
       end
     end
 
-    def remove_invalid_search_characters(terms)
-      terms.gsub(/[^\w"]/, " ")
-    end
-
-    def quote_joined_words(terms)
-      terms.gsub(/"[^"]*"|\w+(?:[^\w[:space:]"]+\w+)+/) { |match| match.start_with?("\"") ? match : "\"#{match}\"" }
-    end
-
     def remove_unbalanced_quotes(terms)
       if terms.count("\"").even?
         terms
       else
         terms.gsub("\"", " ")
       end
+    end
+
+    def quote_joined_words(terms)
+      terms.gsub(/"[^"]*"|\w+(?:[^\w[:space:]"]+\w+)+/) { |match| match.start_with?("\"") ? match : "\"#{match}\"" }
+    end
+
+    def remove_invalid_search_characters(terms)
+      terms.gsub(/[^\w"]/, " ")
     end
 end
