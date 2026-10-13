@@ -86,6 +86,12 @@ class SearchTest < ActiveSupport::TestCase
     assert_equal [ card ], @user.search("release\u00A0notes").results.to_a
   end
 
+  test "words split by a zero-width space stay separate words" do
+    card = @board.cards.create!(title: "release draft notes", creator: @user, status: "published")
+
+    assert_equal [ card ], @user.search("release\u200Bnotes").results.to_a
+  end
+
   test "mentioning is not capped by the default search limit" do
     30.times { |i| @board.cards.create!(title: "capped card #{i}", creator: @user, status: "published") }
 
