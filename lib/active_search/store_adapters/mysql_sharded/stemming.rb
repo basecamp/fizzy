@@ -18,9 +18,23 @@ module ActiveSearch
 
           def stem_query_context(query_context, routing)
             return query_context unless query_context.query.present?
-            stemmed = stem(query_context.query)
+            stemmed = stem_query(query_context.query)
             full_query = "+account#{routing} +(#{stemmed})"
             query_context.with(query: full_query)
+          end
+
+          def stem_query(query)
+            query.scan(/"([^"]*)"|([^\s"]+)/).filter_map do |phrase, word|
+              if phrase
+                quote_phrase(stem(phrase))
+              else
+                stem(word).presence
+              end
+            end.join(" ")
+          end
+
+          def quote_phrase(words)
+            "\"#{words}\"" if words.present?
           end
 
           def stem(value)

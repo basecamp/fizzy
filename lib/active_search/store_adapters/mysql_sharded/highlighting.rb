@@ -146,8 +146,6 @@ module ActiveSearch
             end
           end
 
-          # Quotes carry no phrase meaning: stem strips them before MATCH, so mark the
-          # words of a quoted pair separately.
           def query_stems(query)
             highlight_terms(query).flat_map { |term| stem_tokens(term) }.reject(&:blank?).uniq
           end
