@@ -3,7 +3,7 @@
 </h1>
 
 <% unless card.description.blank? %>
-  <div class="card__description lexxy-content" data-controller="syntax-highlight retarget-links">
+  <div class="card__description lexxy-content" data-controller="syntax-highlight retarget-links" data-action="turbo:morph-element->syntax-highlight#highlight:self">
     <%= card.description %>
   </div>
 <% end %>

@@ -1,0 +1,54 @@
+@layer components {
+  /* Hidden until the syntax-highlight controller draws the diagram, or shown as source if it fails */
+  [data-controller~="syntax-highlight"] pre[data-language="mermaid"]:not([data-mermaid-failed]) {
+    visibility: hidden;
+  }
+
+  .mermaid-diagram {
+    margin: 0.4em 0;
+    position: relative;
+  }
+
+  .mermaid-diagram__inline {
+    overflow-x: auto;
+  }
+
+  .mermaid-diagram__expand {
+    inset-block-start: 0;
+    inset-inline-end: 0;
+    position: absolute;
+  }
+
+  .mermaid-diagram__dialog {
+    background-color: var(--color-canvas);
+    block-size: 100dvh;
+    border: 0;
+    inline-size: 100dvw;
+    margin: 0;
+    max-block-size: none;
+    max-inline-size: none;
+    padding: 0;
+
+    &::backdrop {
+      background-color: var(--color-canvas);
+    }
+  }
+
+  .mermaid-diagram__close {
+    inset-block-start: calc(var(--custom-safe-inset-top) + 0.5rem);
+    inset-inline-end: calc(var(--custom-safe-inset-right) + 0.5rem);
+    position: absolute;
+    z-index: 1;
+  }
+
+  .mermaid-diagram__expanded {
+    block-size: 100%;
+    padding: calc(var(--custom-safe-inset-top) + 3rem) 1rem calc(var(--custom-safe-inset-bottom) + 1rem);
+
+    svg {
+      block-size: 100%;
+      inline-size: 100%;
+      max-inline-size: none !important; /* Mermaid sets max-width inline */
+    }
+  }
+}
