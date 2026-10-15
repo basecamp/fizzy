@@ -33,6 +33,13 @@ export default class extends Controller {
     diagram.querySelector(".mermaid-diagram__inline").innerHTML = svg
     diagram.querySelector(".mermaid-diagram__expanded").innerHTML = svg
 
+    // Some diagrams, such as "info", have no viewBox; the dialog then fits them to the screen.
+    const { width, height } = diagram.querySelector(".mermaid-diagram__expanded svg").viewBox.baseVal
+    if (width > 0 && height > 0) {
+      diagram.style.setProperty("--diagram-width", width)
+      diagram.style.setProperty("--diagram-height", height)
+    }
+
     return diagram
   }
 }

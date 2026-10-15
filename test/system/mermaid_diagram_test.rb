@@ -118,10 +118,41 @@ class MermaidDiagramTest < ApplicationSystemTestCase
     within_comment { click_on "Expand diagram" }
 
     assert_selector "dialog[open] svg text", text: "Ship"
+    assert_selector ".mermaid-diagram[style*='--diagram-width:'][style*='--diagram-height:']"
 
     send_keys :escape
 
     assert_no_selector "dialog[open]"
+  end
+
+  test "the dialog shows a wide diagram at its natural size and scrolls" do
+    @comment.update! body: mermaid_block("graph LR\n  " + (1..30).map { |n| "Node#{n}" }.join(" --> "))
+
+    visit card_url(@card)
+    # The wide inline diagram sits under the comment's hover controls, which intercept a real click.
+    within_comment { find(".mermaid-diagram__expand").execute_script("this.click()") }
+
+    assert_selector "dialog[open] svg text", text: "Node30"
+    natural_width, shown_width, scrolls = page.evaluate_script(<<~JS)
+      (() => {
+        const container = document.querySelector("dialog[open] .mermaid-diagram__expanded")
+        const svg = container.querySelector("svg")
+        return [ svg.viewBox.baseVal.width, svg.getBoundingClientRect().width, container.scrollWidth > container.clientWidth ]
+      })()
+    JS
+    assert_in_delta natural_width, shown_width, 1
+    assert scrolls
+  end
+
+  test "the dialog fits a diagram without a viewBox to the screen" do
+    @comment.update! body: mermaid_block("info")
+
+    visit card_url(@card)
+    within_comment { click_on "Expand diagram" }
+
+    assert_selector "dialog[open] svg", visible: :all
+    assert_no_selector ".mermaid-diagram[style*='--diagram-width:']"
+    assert_operator page.evaluate_script("document.querySelector('dialog[open] svg').getBoundingClientRect().width"), :>, 100
   end
 
   test "a broadcast refresh keeps the diagram in a card description" do
