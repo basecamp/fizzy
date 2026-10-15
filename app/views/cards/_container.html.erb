@@ -2,6 +2,7 @@
   <% cache card do %>
     <div class="card-perma__actions card-perma__actions--left">
       <%= render "cards/container/gild", card: card if card.published? && !card.closed? %>
+      <%= render "cards/container/bubble_up", card: card if card.published? && !card.closed? %>
       <%= render "cards/container/image", card: card %>
     </div>
 
@@ -32,7 +33,7 @@
         </footer>
       <% end %>
 
-      <% if card.entropic? %>
+      <% if card.entropic? || card.bubble_up? %>
         <%= render "cards/display/preview/bubble", card: card %>
       <% end %>
     </div>
