@@ -98,4 +98,18 @@ class Sessions::SingleSignOnsControllerTest < ActionDispatch::IntegrationTest
     assert_response :unauthorized
     assert_select "p", text: "Fizzy cannot connect to Acme SSO. Try again later."
   end
+
+  test "create when the provider cannot be reached hides the other accounts from an expired session" do
+    disable_single_sign_on
+    sign_in_as :kevin
+    enable_single_sign_on provider_name: "Acme SSO"
+    stub_request(:get, "#{SINGLE_SIGN_ON_ISSUER}/.well-known/openid-configuration").to_timeout
+
+    untenanted do
+      post session_single_sign_on_path
+    end
+
+    assert_response :unauthorized
+    assert_select "a", text: "Choose another account", count: 0
+  end
 end

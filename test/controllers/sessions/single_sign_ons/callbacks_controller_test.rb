@@ -170,6 +170,21 @@ class Sessions::SingleSignOns::CallbacksControllerTest < ActionDispatch::Integra
     assert_select "a[href$=?]", "/session/new", count: 0
   end
 
+  test "error from the provider with a recent session offers the other accounts" do
+    sign_in_with_single_sign_on sub: "jz-subject"
+    fail_single_sign_on
+
+    assert_select "a[href=?]", session_menu_path(script_name: nil), text: "Choose another account"
+  end
+
+  test "error from the provider with an expired session hides the other accounts" do
+    sign_in_with_single_sign_on sub: "jz-subject"
+    current_session.update!(single_sign_on_authenticated_at: 13.hours.ago)
+    fail_single_sign_on
+
+    assert_select "a", text: "Choose another account", count: 0
+  end
+
   test "expired sign-in request" do
     untenanted do
       post session_single_sign_on_path
@@ -199,4 +214,15 @@ class Sessions::SingleSignOns::CallbacksControllerTest < ActionDispatch::Integra
 
     assert_response :not_found
   end
+
+  private
+    def fail_single_sign_on
+      untenanted do
+        post session_single_sign_on_path
+        authorization = single_sign_on_authorization_parameters
+        get session_single_sign_on_callback_path, params: { error: "access_denied", state: authorization["state"] }
+      end
+
+      assert_response :unauthorized
+    end
 end
