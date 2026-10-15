@@ -73,5 +73,5 @@ Rails.application.configure do
 
   # Serve the Trusted Types report-only policy so system tests can inventory
   # the DOM sinks that would violate it. See TrustedTypesViolationsTestHelper.
-  config.x.content_security_policy.trusted_types_report_only = true
+  config.x.content_security_policy.trusted_types_sample_rate = 1
 end

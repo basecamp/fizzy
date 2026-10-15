@@ -10,15 +10,22 @@
 # ENV vars (space-separated sources):
 #   CSP_DEFAULT_SRC, CSP_SCRIPT_SRC, CSP_STYLE_SRC, CSP_CONNECT_SRC, CSP_FRAME_SRC,
 #   CSP_IMG_SRC, CSP_FONT_SRC, CSP_MEDIA_SRC, CSP_WORKER_SRC, CSP_FRAME_ANCESTORS,
-#   CSP_FORM_ACTION, CSP_REPORT_URI, CSP_REPORT_ONLY, DISABLE_CSP
+#   CSP_FORM_ACTION, CSP_REPORT_URI, CSP_REPORT_ONLY, DISABLE_CSP,
+#   CSP_TRUSTED_TYPES_SAMPLE_RATE
 #
 # config.x.content_security_policy.* (string, space-separated string, or array):
 #   script_src, style_src, connect_src, frame_src, img_src, font_src, media_src,
 #   worker_src, frame_ancestors, form_action, report_uri, report_only
 #
-# config.x.content_security_policy.trusted_types_report_only (boolean): adds
-# the Trusted Types report-only policy below, with no report URI, so nothing
-# leaves the browser. On in the test environment only.
+# config.x.content_security_policy.trusted_types_sample_rate (0 to 1): the share
+# of HTML responses that carry the Trusted Types report-only policy below.
+# Unset or 0 leaves it off.
+#
+# config.x.content_security_policy.trusted_types_report_uri: where its reports
+# go. Without one, violations stay in the browser (the test environment).
+# Point it only at TrustedTypesReportsController, never at a third party: every
+# report carries the first 40 characters written to the sink, which can be a
+# user's own content, and only that controller drops them.
 
 # Trusted Types report-only policy.
 #
@@ -40,9 +47,10 @@ class TrustedTypesReportOnly
   DIRECTIVE = "require-trusted-types-for 'script'"
   HEADER = ActionDispatch::Constants::CONTENT_SECURITY_POLICY_REPORT_ONLY.downcase # Rack 3 header names are lowercase
 
-  def initialize(app, report_uri = nil)
+  def initialize(app, report_uri: nil, sample_rate: 1.0)
     @app = app
     @policy = report_uri ? "#{DIRECTIVE}; report-uri #{report_uri}" : DIRECTIVE
+    @sample_rate = sample_rate
   end
 
   def call(env)
@@ -51,12 +59,19 @@ class TrustedTypesReportOnly
     # Only documents run script, so only they can write to a sink. When the app
     # policy is itself report-only, both go out as separate header fields (a
     # Rack 3 array), each reporting independently.
-    if headers[Rack::CONTENT_TYPE].to_s.start_with?("text/html")
+    if headers[Rack::CONTENT_TYPE].to_s.start_with?("text/html") && sampled?
       headers[HEADER] = headers[HEADER] ? [ *headers[HEADER], @policy ] : @policy
     end
 
     [ status, headers, body ]
   end
+
+  private
+    # A document keeps the policy it loaded with across Turbo Drive visits, so
+    # this samples page loads, and each sampled one reports for its lifetime.
+    def sampled?
+      Random.rand < @sample_rate
+    end
 end
 
 Rails.application.configure do
@@ -121,8 +136,15 @@ Rails.application.configure do
 
   # Inserted outside the Rails CSP middleware so it runs after that header is
   # written, stacking beside an app policy that is itself report-only.
-  if config.x.content_security_policy.trusted_types_report_only
-    config.middleware.insert_before ActionDispatch::ContentSecurityPolicy::Middleware, TrustedTypesReportOnly
+  trusted_types_sample_rate = Float(ENV.fetch("CSP_TRUSTED_TYPES_SAMPLE_RATE") { config.x.content_security_policy.trusted_types_sample_rate || 0 })
+
+  unless trusted_types_sample_rate.between?(0, 1)
+    raise ArgumentError, "Trusted Types sample rate must be between 0 and 1, not #{trusted_types_sample_rate}"
+  end
+
+  if trusted_types_sample_rate > 0
+    config.middleware.insert_before ActionDispatch::ContentSecurityPolicy::Middleware, TrustedTypesReportOnly,
+      report_uri: config.x.content_security_policy.trusted_types_report_uri, sample_rate: trusted_types_sample_rate
   end
 
   # Locked-down policy for the static pages served from public/ (error pages).
