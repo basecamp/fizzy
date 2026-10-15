@@ -15,28 +15,19 @@
   .attachment__caption {
     color: color-mix(in oklch, var(--color-ink) 66%, transparent);
     font-size: var(--text-small);
+  }
 
-    textarea {
-      --input-border-radius: 0.3em;
-      --input-border-size: 0;
-      --input-padding: 0;
+  .lexxy-caption-editor {
+    --input-border-radius: 0.3em;
+    --input-border-size: 0;
+    --input-padding: 0;
 
-      background-color: var(--input-background, transparent);
-      border: none;
-      color: inherit;
-      inline-size: 100%;
-      max-inline-size: 100%;
-      resize: none;
-      text-align: center;
+    background-color: var(--input-background, transparent);
+    border: none;
+    resize: none;
 
-      &:focus {
-        --focus-ring-size: 0;
-      }
-
-      @supports (field-sizing: content) {
-        field-sizing: content;
-        inline-size: 100%;
-      }
+    &:focus {
+      --focus-ring-size: 0;
     }
   }
 
