@@ -1,8 +1,8 @@
-# OAuth: Fizzy against the 37signals OAuth Standard
+# OAuth: where Fizzy stands against our OAuth rubric
 
-The standard is bc3's [`doc/oauth/standard.md`](https://github.com/basecamp/bc3/blob/master/doc/oauth/standard.md), drafted in basecamp/bc3#13882. It is one bar for every 37signals authorization server. Each app meets it natively, and the shared checker (`basecamp-mcp-server` `cmd/mcp-authserver-verify`) proves it. This file records where Fizzy stands, by requirement id.
+The bar is described in bc3's [`doc/oauth/rubric.md`](https://github.com/basecamp/bc3/blob/master/doc/oauth/rubric.md), drafted in basecamp/bc3#13882: one design and conformance rubric for OAuth across our apps' authorization servers. Each app builds to it natively, and the conformance suite (`basecamp-mcp-server` `cmd/mcp-authserver-verify`) shows where it stands. This file records where Fizzy stands, by check id.
 
-Fizzy is becoming a full OAuth authorization server. Legacy personal access tokens become a degenerate case: one-off OAuth access tokens (LG-1). Fizzy is an existing app, and its shipped clients' PATs and session cookies keep working (#3191), so it migrates at their pace. A ✗ here is migration debt, not a violation.
+Fizzy is becoming a full OAuth authorization server. Legacy personal access tokens become a degenerate case: one-off OAuth access tokens (LG-1). Fizzy is an existing app, and its shipped clients' PATs and session cookies keep working (#3191), so it migrates at their pace. A ✗ here is migration debt, not a failure.
 
 Status is `main` as of 2026-10-15:
 - ✓ met
