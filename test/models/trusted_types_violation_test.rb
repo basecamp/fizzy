@@ -18,6 +18,18 @@ class TrustedTypesViolationTest < ActiveSupport::TestCase
     assert_equal "unknown", violation.route
   end
 
+  test "keeps what's injected or mistyped out of the log line" do
+    violation = TrustedTypesViolation.parse(report(
+      "script-sample" => "Element innerHTML\nforged=line|text",
+      "source-file" => "https://app.fizzy.do/assets/app.js?token=private",
+      "line-number" => {},
+      "column-number" => [ 1 ]
+    ))
+
+    assert_equal "Element innerHTMLforgedline", violation.sink
+    assert_equal "/assets/app.js:0:0", violation.source
+  end
+
   test "ignores reports for other directives" do
     assert_nil TrustedTypesViolation.parse(report("effective-directive" => "script-src-elem"))
   end

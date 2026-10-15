@@ -31,7 +31,7 @@ class TrustedTypesViolation
   end
 
   def source
-    [ path_of(@report["source-file"]).presence || "(inline)", @report["line-number"].to_i, @report["column-number"].to_i ].join(":")
+    [ path_of(@report["source-file"]).presence || "(inline)", number(@report["line-number"]), number(@report["column-number"]) ].join(":")
   end
 
   def route
@@ -47,6 +47,11 @@ class TrustedTypesViolation
   end
 
   private
+    # Reports come from anyone, so a field may be any JSON type.
+    def number(value)
+      value.is_a?(Integer) ? value : 0
+    end
+
     def path_of(url)
       URI.parse(url.to_s).path.to_s.gsub(/[^\w\/.\-]/, "").first(256)
     rescue URI::InvalidURIError
