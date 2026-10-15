@@ -252,6 +252,11 @@ Rails.application.routes.draw do
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   get "service-worker" => "pwa#service_worker"
 
+  # Trusted Types report-only pilot (config/initializers/content_security_policy.rb).
+  # Only the CSP report type browsers send: a body Rails parses into params
+  # would be logged before the controller could drop its content sample.
+  resources :trusted_types_reports, only: :create, constraints: ->(request) { request.media_type == "application/csp-report" }
+
   # Mobile clients
   get "client_configurations/(:platform)_v(:version)" => "client_configurations#show",
     platform: /android|ios/, version: /\d+/
