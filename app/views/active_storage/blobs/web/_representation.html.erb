@@ -16,10 +16,10 @@
   </audio>
 <% elsif blob.variable? %>
   <%= link_to rails_representation_path(blob.variant(variant)), data: { lightbox_target: "image", lightbox_caption_value: blob.filename.to_s } do %>
-    <%= image_tag rails_representation_path(blob.variant(variant)), width: width, height: height %>
+    <%= image_tag rails_representation_path(blob.variant(variant)), alt: blob.try(:alt), width: width, height: height %>
   <% end %>
 <% elsif blob.previewable? %>
-  <%= image_tag rails_representation_path(blob.preview(variant)), width: width, height: height %>
+  <%= image_tag rails_representation_path(blob.preview(variant)), alt: blob.try(:alt), width: width, height: height %>
 <% else %>
   <span class="attachment__icon"><%= blob.filename.extension&.downcase.presence || "unknown" %></span>
 <% end %>

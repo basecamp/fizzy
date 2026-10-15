@@ -36,4 +36,30 @@ class Card::ExportableTest < ActiveSupport::TestCase
     assert_equal file_fixture("moon.jpg").binread, attachments.first[:blob].download
     assert attachments.first[:path].start_with?("#{card.number}/")
   end
+
+  test "export_json keeps the alt text of image attachments" do
+    card = cards(:logo)
+    blob = ActiveStorage::Blob.create_and_upload!(io: file_fixture("moon.jpg").open, filename: "moon.jpg")
+    card.update! description: <<~HTML
+      <action-text-attachment sgid="#{blob.attachable_sgid}" alt="A full moon"></action-text-attachment>
+      <action-text-attachment url="https://example.com/sun.jpg" content-type="image/jpeg" alt="A bright sun"></action-text-attachment>
+    HTML
+
+    description = Nokogiri::HTML5.fragment(JSON.parse(card.export_json)["description"])
+
+    assert_equal [ "A full moon", "A bright sun" ], description.css("img").pluck("alt")
+  end
+
+  test "export_json falls back to a default alt text for image attachments without one" do
+    card = cards(:logo)
+    blob = ActiveStorage::Blob.create_and_upload!(io: file_fixture("moon.jpg").open, filename: "moon.jpg")
+    card.update! description: <<~HTML
+      <action-text-attachment sgid="#{blob.attachable_sgid}"></action-text-attachment>
+      <action-text-attachment url="https://example.com/sun.jpg" content-type="image/jpeg"></action-text-attachment>
+    HTML
+
+    description = Nokogiri::HTML5.fragment(JSON.parse(card.export_json)["description"])
+
+    assert_equal [ "moon.jpg", "Remote image" ], description.css("img").pluck("alt")
+  end
 end
