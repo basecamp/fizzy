@@ -8,7 +8,8 @@ class TrustedTypesReportsController < ApplicationController
   allow_unauthenticated_access
   skip_forgery_protection
 
-  rate_limit to: 60, within: 1.minute, with: -> { head :too_many_requests }
+  # A page load with an editor sends a few dozen reports in its first seconds.
+  rate_limit to: 120, within: 1.minute, with: -> { head :too_many_requests }
 
   def create
     if violation = TrustedTypesViolation.parse(request.body.read(MAX_REPORT_SIZE))
