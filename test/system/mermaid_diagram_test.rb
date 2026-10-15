@@ -46,6 +46,60 @@ class MermaidDiagramTest < ApplicationSystemTestCase
     end
   end
 
+  test "a directive with a malformed theme colour does not break the diagrams after it" do
+    @comment.update! body: mermaid_block(<<~MERMAID) + mermaid_block("graph TD\n  Write --> Ship")
+      %%{init: {"theme": "dark", "themeVariables": {"mainBkg": "}"}}}%%
+      graph TD
+        Poison --> Pill
+    MERMAID
+
+    visit card_url(@card)
+
+    within_comment do
+      assert_selector "pre[data-mermaid-failed]", text: "Poison"
+      assert_selector ".mermaid-diagram svg text", text: "Ship"
+    end
+  end
+
+  test "a directive cannot add CSS through the font family" do
+    @comment.update! body: mermaid_block(<<~MERMAID)
+      %%{init: {"fontFamily": "serif; & .planted { display: none }"}}%%
+      graph TD
+        Write --> Ship
+    MERMAID
+
+    visit card_url(@card)
+
+    within_comment do
+      assert_selector ".mermaid-diagram svg text", text: "Ship"
+      styles = all(".mermaid-diagram svg style", visible: :all)
+      assert_not_empty styles
+      styles.each { |style| assert_no_match(/planted/, style.text(:all)) }
+    end
+  end
+
+  test "a drawn diagram has no data attributes" do
+    @comment.update! body: mermaid_block("graph TD\n  Write --> Ship")
+
+    visit card_url(@card)
+
+    within_comment do
+      assert_selector ".mermaid-diagram svg text", text: "Ship"
+      assert_no_selector ".mermaid-diagram [data-id], .mermaid-diagram [data-look]", visible: :all
+    end
+  end
+
+  test "a drawn journey diagram has no HTML labels" do
+    @comment.update! body: mermaid_block("journey\n  title Ship it\n  section Build\n    Write: 5: Me")
+
+    visit card_url(@card)
+
+    within_comment do
+      assert_selector ".mermaid-diagram svg", visible: :all
+      assert_no_selector ".mermaid-diagram foreignObject", visible: :all
+    end
+  end
+
   test "diagram SVG loses HTML labels and data attributes" do
     visit card_url(@card)
 

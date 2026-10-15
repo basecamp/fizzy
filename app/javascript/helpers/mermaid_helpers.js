@@ -5,7 +5,9 @@ import { getMetaContent } from "helpers/meta_helpers"
 // directives for the options listed in `secure`, so these stay as set here. Without
 // htmlLabels and flowchart in the list, a directive turns HTML labels back on and
 // user-written class and data-* attributes reach the page after the server's sanitizer.
-const LOCKED_OPTIONS = [ "secure", "securityLevel", "startOnLoad", "maxTextSize", "suppressErrorRendering", "maxEdges", "htmlLabels", "flowchart", "themeCSS" ]
+// Without fontFamily and altFontFamily, a directive puts CSS of its own into the SVG's
+// <style>: Mermaid only checks those for balanced braces.
+const LOCKED_OPTIONS = [ "secure", "securityLevel", "startOnLoad", "maxTextSize", "suppressErrorRendering", "maxEdges", "htmlLabels", "flowchart", "themeCSS", "fontFamily", "altFontFamily" ]
 
 let drawingFrame = null
 let mermaidLoading = null
@@ -24,6 +26,9 @@ export function drawMermaid(source, width) {
 async function draw(source, width) {
   const mermaid = await loadMermaid()
   drawingFrame.style.width = `${width}px`
+  // A directive that fails to apply, such as a malformed theme colour, stays in Mermaid's
+  // directive list and makes every later initialize throw. Only a render or a reset clears it.
+  mermaid.mermaidAPI.reset()
   mermaid.initialize({ startOnLoad: false, securityLevel: "strict", secure: LOCKED_OPTIONS, suppressErrorRendering: true, htmlLabels: false, look: "classic", sequence: { wrap: true }, ...fizzyTheme() })
 
   const { svg } = await mermaid.render(`mermaid-diagram-${++diagramCount}`, source)
