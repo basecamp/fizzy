@@ -56,7 +56,7 @@ class MermaidDiagramTest < ApplicationSystemTestCase
     visit card_url(@card)
 
     within_comment do
-      assert_selector "pre[data-mermaid-failed]", text: "Poison"
+      assert_selector ".mermaid-diagram svg text", text: "Pill"
       assert_selector ".mermaid-diagram svg text", text: "Ship"
     end
   end
@@ -72,6 +72,24 @@ class MermaidDiagramTest < ApplicationSystemTestCase
 
     within_comment do
       assert_selector ".mermaid-diagram svg text", text: "Ship"
+      styles = all(".mermaid-diagram svg style", visible: :all)
+      assert_not_empty styles
+      styles.each { |style| assert_no_match(/planted/, style.text(:all)) }
+    end
+  end
+
+  test "a directive cannot add CSS through a nested theme variable" do
+    @comment.update! body: mermaid_block(<<~MERMAID)
+      %%{init: {"themeVariables": {"radar": {"axisColor": "red; } .planted { display: none } .x { color: red"}}}}%%
+      radar-beta
+        axis A, B, C
+        curve Ship{1, 2, 3}
+    MERMAID
+
+    visit card_url(@card)
+
+    within_comment do
+      assert_selector ".mermaid-diagram svg", visible: :all
       styles = all(".mermaid-diagram svg style", visible: :all)
       assert_not_empty styles
       styles.each { |style| assert_no_match(/planted/, style.text(:all)) }
