@@ -20,10 +20,11 @@ Main has no OAuth yet. The train is #2296 → #3080 → #3081 → #3082 → #316
 | SE-1, SE-2 | ? | Sessions and magic links. Whether sign-out-everywhere ends native app sessions has not been assessed. |
 | SE-3 | ◐ | OAuth grants are separate from sessions (#2296). |
 | SE-4 / SE-4t | — | No passwords (magic links). |
-| GP-1, GP-2, GP-6, GP-7 | ◐ | #2296: code only, S256 only, `iss`, `state` optional. |
+| GP-1, GP-2, GP-6 | ◐ | #2296: code only, S256 only, `iss`. |
+| GP-7 | ✗ | The train requires `state` (`Oauth::AuthorizationsController#validate_state`); the bar makes it optional. |
 | GP-3 | ◐ | #2296. |
 | GP-4 | ◐ | Stateless codes with a jti; a revoke inside the 60s doesn't stop redemption (no tombstone). |
-| GP-5 | ✗ | No revocation on code replay. |
+| GP-5 | ◐ | In the train, a replayed code destroys the grant its first redemption made (`Identity::AccessToken.redeem`), after client, redirect URI and PKCE are checked. |
 | GP-8 | — | Declined: no consumer. |
 | GP-9 | ✗ | PAR. |
 | GP-10 | ✗ | Token exchange (Phase C). |
@@ -53,7 +54,7 @@ Main has no OAuth yet. The train is #2296 → #3080 → #3081 → #3082 → #316
 | CX-2, CX-3 | ◐ | #2296 |
 | CX-4 | ◐ | #3169 |
 | CX-5, DX-1..2 | ✗ | |
-| LG-1 | ✗ | PATs live in their own table (`identity_access_tokens`). |
+| LG-1 | ◐ | In the train, PATs and OAuth tokens share `Identity::AccessToken` (`personal` and `oauth` scopes, by `oauth_client_id`). What's left: PATs as grant records, listed with connected apps. |
 | LG-2 | ✗ | Migrate them in place, keeping reach, non-expiry and the token string. Pinned by #3191. |
 | SC-1 | ◐ | Per-IP limits only: token 20/min, revocation 20/min, registration 10/min. |
 | SC-2, SC-3 | ✗ | Per-client limits after authentication, and platform pacing (Phase C). |
