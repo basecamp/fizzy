@@ -1,6 +1,27 @@
 require "test_helper"
 
 class Card::AssignableTest < ActiveSupport::TestCase
+  test "assign_to is idempotent for duplicate assignments" do
+    card = cards(:logo)
+    card.assignments.delete_all
+
+    result = nil
+    with_current_user(:jz) do
+      result = card.assign_to(users(:kevin))
+    end
+
+    assert result
+    assert card.reload.assigned_to?(users(:kevin))
+
+    duplicate = nil
+    with_current_user(:jz) do
+      duplicate = card.assign_to(users(:kevin))
+    end
+
+    assert_not duplicate
+    assert_equal 1, card.assignments.where(assignee: users(:kevin)).count
+  end
+
   test "assigning a user makes them watch the card" do
     assert_not cards(:layout).assigned_to?(users(:kevin))
     cards(:layout).unwatch_by users(:kevin)

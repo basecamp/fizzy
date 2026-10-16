@@ -40,6 +40,7 @@
 
 # Ignore assets.
 /node_modules/
+/tools/solverforge-board-planner/target/
 /app/assets/builds/*
 !/app/assets/builds/.keep
 /public/assets

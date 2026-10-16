@@ -34,6 +34,10 @@ Rails.application.routes.draw do
       resource :involvement
       resource :publication
       resource :entropy
+      resource :work_plan, only: :show do
+        resource :proposal, only: :create, module: :work_plans
+        resource :approval, only: :create, module: :work_plans
+      end
 
       namespace :columns do
         resource :not_now
