@@ -83,6 +83,7 @@ Rails.application.routes.draw do
   resources :cards do
     scope module: :cards do
       resource :draft, only: :show
+      resource :navigation, only: :show
       resource :board
       resource :closure
       resource :column
