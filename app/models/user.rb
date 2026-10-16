@@ -25,7 +25,7 @@ class User < ApplicationRecord
   end
 
   def setup?
-    name != identity.email_address
+    bot? || name != identity&.email_address
   end
 
   def verified?
