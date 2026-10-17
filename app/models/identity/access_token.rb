@@ -119,11 +119,16 @@ class Identity::AccessToken < ApplicationRecord
       end
     end
 
-    # An authorization code redeems at most once (RFC 6749 §4.1.2): the grant it
-    # mints is stamped with the code's jti, and the unique index refuses a second
-    # stamp. A replay also revokes the grant the first redemption issued.
+    # An authorization code redeems at most once (RFC 6749 §4.1.2). Redeeming
+    # records its jti (Oauth::RedeemedAuthorizationCode) in the same transaction
+    # as the grant it mints, and the unique index refuses a second record. A
+    # replay also revokes the grant the first redemption issued, and the record
+    # outlives that grant, so a third attempt mints nothing either.
     def redeem(authorization_code, **attributes)
-      create! authorization_code_jti: authorization_code.jti, **attributes
+      transaction do
+        Oauth::RedeemedAuthorizationCode.create! jti: authorization_code.jti
+        create! authorization_code_jti: authorization_code.jti, **attributes
+      end
     rescue ActiveRecord::RecordNotUnique
       where(authorization_code_jti: authorization_code.jti).destroy_all
       nil
