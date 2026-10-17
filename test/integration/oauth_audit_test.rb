@@ -137,6 +137,22 @@ class OauthAuditTest < ActionDispatch::IntegrationTest
     assert_equal "successor_gone", oauth_event(events, "oauth.token.grace_replay")[:reason]
   end
 
+  test "a retry within the grace window asking for more than the grant is a replay, and refused" do
+    freeze_time
+    grant = @identity.access_tokens.create!(oauth_client: @client, permission: :read)
+    presented = grant.raw_refresh_token
+    refresh presented
+
+    [ "read write", "", "admin" ].each do |scope|
+      events = capture_oauth_events { refresh presented, scope: scope }
+
+      assert_response :bad_request
+      assert_equal "invalid_scope", response.parsed_body["error"]
+      assert_equal %w[ oauth.token.grace_replay ], oauth_event_names(events), "scope #{scope.inspect}"
+      assert_equal "scope_mismatch", oauth_event(events, "oauth.token.grace_replay")[:reason]
+    end
+  end
+
   test "a retry within the grace window after its successor has rotated is superseded" do
     freeze_time
     grant = @identity.access_tokens.create!(oauth_client: @client, permission: :read)

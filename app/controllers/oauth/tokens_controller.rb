@@ -186,6 +186,9 @@ class Oauth::TokensController < Oauth::BaseController
       if requested.present? && requested.all? { |scope| granted.include?(scope) }
         @refresh_permission = requested.include?("write") ? "write" : "read"
       else
+        # A retry within the grace window is a replay even when its scope is
+        # refused here, before it reaches answer_refresh_replay.
+        record_grace_replay @access_token, "scope_mismatch" if @retired_refresh_token
         oauth_error "invalid_scope", "Requested scope exceeds the original grant"
       end
     end
