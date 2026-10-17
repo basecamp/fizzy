@@ -9,6 +9,6 @@ repo = "builtin"
 hooks = [
   { id = "check-merge-conflict" },
   { id = "check-case-conflict" },
-  { id = "check-added-large-files", exclude = "^vendor/javascript/mermaid\\.tiny\\.js$" },
+  { id = "check-added-large-files", exclude = "^vendor/javascript/pele\\.js$" },
   { id = "detect-private-key" },
 ]

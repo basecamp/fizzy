@@ -16,8 +16,9 @@ export default class extends Controller {
     const source = pre.textContent
 
     try {
-      const svg = await drawMermaid(source, pre.clientWidth)
-      if (this.#stillMermaid(pre, source)) pre.replaceWith(this.#diagramWith(svg))
+      const inline = await drawMermaid(source, { maxWidth: pre.clientWidth })
+      const expanded = await drawMermaid(source)
+      if (this.#stillMermaid(pre, source)) pre.replaceWith(this.#diagramWith(inline, expanded))
     } catch {
       pre.toggleAttribute("data-mermaid-failed", true)
     }
@@ -28,17 +29,14 @@ export default class extends Controller {
     return pre.isConnected && pre.dataset.language === "mermaid" && pre.textContent === source
   }
 
-  #diagramWith(svg) {
+  #diagramWith(inline, expanded) {
     const diagram = document.getElementById("mermaid-diagram-template").content.firstElementChild.cloneNode(true)
-    diagram.querySelector(".mermaid-diagram__inline").innerHTML = svg
-    diagram.querySelector(".mermaid-diagram__expanded").innerHTML = svg
+    diagram.querySelector(".mermaid-diagram__inline").innerHTML = inline
+    diagram.querySelector(".mermaid-diagram__expanded").innerHTML = expanded
 
-    // Some diagrams, such as "info", have no viewBox; the dialog then fits them to the screen.
     const { width, height } = diagram.querySelector(".mermaid-diagram__expanded svg").viewBox.baseVal
-    if (width > 0 && height > 0) {
-      diagram.style.setProperty("--diagram-width", width)
-      diagram.style.setProperty("--diagram-height", height)
-    }
+    diagram.style.setProperty("--diagram-width", width)
+    diagram.style.setProperty("--diagram-height", height)
 
     return diagram
   }
