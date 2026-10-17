@@ -16,24 +16,17 @@ named for the PR:
 | #3080 | `oauth-dcr-https` | `5d74b5309ec2` |
 | #3081 | `oauth-refresh-tokens` | `017291f81210` |
 | #3082 | `oauth-confidential-clients` | `274c56688b18` |
-| #3158 | `oauth-bearer-challenge` | `dd2b951f18af` |
-| #3160 | `oauth-refresh-replay` | `2cf65f62363c` |
-| #3161 | `oauth-grant-idle-expiry` | `5d8dbbac996a` |
-| #3159 | `oauth-client-sweep` | `29c0e05b8bbc` |
-| #3163 | `oauth-token-prefixes` | `f3114a767a91` |
-| #3169 | `oauth-delegate-resources` | `898baf5b03e9` |
-| #3192 | `oauth-token-digests` | `2bf7e87ea884` |
+| #3158 | `oauth-bearer-challenge` | `600d34776249` |
+| #3160 | `oauth-refresh-replay` | `0956b57aafc7` |
+| #3161 | `oauth-grant-idle-expiry` | `9bf097414cdb` |
+| #3159 | `oauth-client-sweep` | `1daa910d1d93` |
+| #3163 | `oauth-token-prefixes` | `859f558d43e9` |
+| #3169 | `oauth-delegate-resources` | `7bf26ec9d5db` |
+| #3192 | `oauth-token-digests` | `dcb914cebf66` |
 | #3191 | `test/pin-shipped-client-auth` | `98572aaaf` |
 
-One textual conflict, merging #3161 after its sibling #3158, both appending
-tests to the end of `test/models/identity/access_token_test.rb`: kept both
-sides (#3158's `find_honored` tests, then #3161's daylight-saving idle-limit
-test). Merging #3192 after #3158 conflicted in `app/models/identity/access_token.rb`
-and its test: #3158 replaced `find_permissable` with `find_honored` beside
-#3160, so #3192 never saw it. The merge keeps `find_honored` and has it find by
-digest (`active.find_by_raw_token(token)`), and #3192's tests call it. The same
-resolution is needed wherever #3158 and #3192 first meet on `main`.
-Nothing else conflicted.
+The train is linear since 2026-10-17 (#3160 restacked onto #3158), so the merges
+don't conflict.
 
 Beyond the merges, one commit of the branch's own, `saas/config/deploy.beta.yml`
 setting the web role's `cmd` so a beta boot does not migrate (see "Deploying
