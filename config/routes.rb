@@ -190,7 +190,7 @@ Rails.application.routes.draw do
   namespace :my do
     resource :passkey_challenge, only: :create
     resource :identity, only: :show
-    resources :access_tokens
+    resources :access_tokens, except: %i[ show edit update ]
     resources :connected_apps, only: %i[ index destroy ]
     resources :passkeys, except: %i[ show new ]
     resources :pins

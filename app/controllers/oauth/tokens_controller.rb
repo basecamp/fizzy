@@ -53,7 +53,7 @@ class Oauth::TokensController < Oauth::BaseController
       answer_refresh_replay @retired_refresh_token
     elsif @access_token.refresh(permission: @refresh_permission)
       render json: refresh_response(@access_token)
-    elsif retired_refresh_token = Oauth::RetiredRefreshToken.find_by(refresh_token: params[:refresh_token])
+    elsif retired_refresh_token = Oauth::RetiredRefreshToken.find_by_raw_token(params[:refresh_token])
       # A concurrent refresh won the rotation: this is the same retry.
       answer_refresh_replay retired_refresh_token
     else
@@ -131,7 +131,7 @@ class Oauth::TokensController < Oauth::BaseController
     # known to be the grant's own.
     def set_refreshable_access_token
       @access_token = Identity::AccessToken.find_by_refresh_token(params[:refresh_token]) ||
-        (@retired_refresh_token = Oauth::RetiredRefreshToken.find_by(refresh_token: params[:refresh_token]))&.access_token
+        (@retired_refresh_token = Oauth::RetiredRefreshToken.find_by_raw_token(params[:refresh_token]))&.access_token
 
       unless @access_token
         oauth_error "invalid_grant", "Invalid refresh token"
@@ -211,7 +211,7 @@ class Oauth::TokensController < Oauth::BaseController
     def answer_refresh_replay(retired_refresh_token)
       if grant = Identity::AccessToken.find_by(id: retired_refresh_token.access_token_id)
         if retired_refresh_token.retryable?(grant)
-          answer_refresh_retry grant
+          answer_refresh_retry grant, retired_refresh_token.successor
         elsif retired_refresh_token.within_grace?
           oauth_error "invalid_grant", "Refresh token superseded"
         else
@@ -225,12 +225,18 @@ class Oauth::TokensController < Oauth::BaseController
 
     # A retry repeats the rotation it lost the response to, so it must ask for
     # what that rotation produced. One asking for less can't be handed the
-    # wider successor that already exists.
-    def answer_refresh_retry(grant)
-      if @refresh_permission == grant.permission
+    # wider successor that already exists. The answer is the very pair that
+    # rotation issued, kept encrypted for the grace window, since only its
+    # digests are stored. Once that's gone there's nothing to repeat, and the
+    # client, which holds no live token, is refused without revoking.
+    def answer_refresh_retry(grant, successor)
+      if @refresh_permission != grant.permission
+        oauth_error "invalid_scope", "Requested scope differs from the rotation being retried"
+      elsif successor
+        grant.assign_attributes raw_token: successor[:access_token], raw_refresh_token: successor[:refresh_token]
         render json: refresh_response(grant)
       else
-        oauth_error "invalid_scope", "Requested scope differs from the rotation being retried"
+        oauth_error "invalid_grant", "Refresh token no longer retryable"
       end
     end
 
@@ -240,10 +246,10 @@ class Oauth::TokensController < Oauth::BaseController
 
     def token_response(access_token, scope: nil)
       {
-        access_token: access_token.token,
+        access_token: access_token.raw_token,
         token_type: "Bearer",
         expires_in: access_token.expires_in,
-        refresh_token: access_token.refresh_token,
+        refresh_token: access_token.raw_refresh_token,
         scope: scope
       }.compact
     end

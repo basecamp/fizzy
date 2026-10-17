@@ -14,7 +14,7 @@ module OauthClientCredentialsTestHelper
     assert_equal "invalid_client", response.parsed_body["error"], message
 
     if basic
-      assert_equal %(Basic realm="http://www.example.com/"), response.headers["WWW-Authenticate"], message
+      assert_equal %(Basic realm="http://www.example.com"), response.headers["WWW-Authenticate"], message
     else
       assert_nil response.headers["WWW-Authenticate"], message
     end
