@@ -103,7 +103,7 @@ class Oauth::Client < ApplicationRecord
     end
 
     def generate_client_secret
-      self.client_secret ||= self.class.generate_unique_secure_token
+      self.client_secret ||= Identity::AccessToken.generate_token(:client_secret)
     end
 
     def redirect_uris_are_valid
