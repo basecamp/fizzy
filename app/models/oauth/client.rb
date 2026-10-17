@@ -76,8 +76,14 @@ class Oauth::Client < ApplicationRecord
 
     # A fresh install loads the schema rather than running migrations, so the
     # issuer may not exist yet when the first personal access token is made.
+    # Two first uses can race: the loser either hits the unique index, which
+    # create_or_find_by! answers by finding on client_id alone, or, when the
+    # winner committed before its uniqueness validation ran, fails that
+    # validation, and then finds the winner's row the same way.
     def personal_access_issuer
-      personal_access.take || create_or_find_by!(PERSONAL_ACCESS_ATTRIBUTES)
+      personal_access.take || create_or_find_by!(client_id: PERSONAL_ACCESS_CLIENT_ID) { it.assign_attributes PERSONAL_ACCESS_ATTRIBUTES }
+    rescue ActiveRecord::RecordInvalid
+      personal_access.take or raise
     end
   end
 

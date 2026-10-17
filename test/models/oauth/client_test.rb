@@ -463,6 +463,27 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     assert_equal issuer, Oauth::Client.personal_access_issuer
   end
 
+  # Another first use committed the issuer after this one looked and before its
+  # uniqueness validation ran.
+  test "the personal access token issuer is found when a concurrent first use provisioned it" do
+    issuer = oauth_clients(:personal_access)
+    Oauth::Client.stubs(:personal_access).returns(Oauth::Client.none).then.returns(Oauth::Client.where(id: issuer.id))
+
+    assert_no_difference("Oauth::Client.count") do
+      assert_equal issuer, Oauth::Client.personal_access_issuer
+    end
+  end
+
+  test "the personal access token issuer is found when a concurrent first use won the unique index" do
+    issuer = oauth_clients(:personal_access)
+    Oauth::Client.stubs(:personal_access).returns(Oauth::Client.none)
+    Oauth::Client.any_instance.stubs(:valid?).returns(true)
+
+    assert_no_difference("Oauth::Client.count") do
+      assert_equal issuer, Oauth::Client.personal_access_issuer
+    end
+  end
+
   test "the personal access token issuer may obtain no grant, and every other client the code and refresh grants" do
     assert_empty oauth_clients(:personal_access).grant_types
     assert_not oauth_clients(:personal_access).allows_grant_type?("authorization_code")
