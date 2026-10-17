@@ -107,7 +107,7 @@ class Account::ExportsControllerTest < ActionDispatch::IntegrationTest
     export = Account::Export.create!(account: Current.account, user: users(:jason))
     export.build
     sign_out
-    bearer_token = { "HTTP_AUTHORIZATION" => "Bearer #{identity_access_tokens(:jasons_api_token).token}" }
+    bearer_token = { "HTTP_AUTHORIZATION" => "Bearer #{identity_access_tokens(:jasons_api_token).raw_token}" }
 
     get account_export_path(export), as: :json, env: bearer_token
     assert_response :success
