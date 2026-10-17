@@ -43,12 +43,12 @@ module Card::Exportable
       when ActiveStorage::Blob
         path = export_attachment_path(attachable)
         if attachable.image?
-          tag.img(src: path, alt: attachable.filename)
+          tag.img(src: path, alt: attachment.alt || attachable.filename)
         else
           tag.a(attachable.filename, href: path)
         end
       when ActionText::Attachables::RemoteImage
-        tag.img(src: attachable.url, alt: "Remote image")
+        tag.img(src: attachable.url, alt: attachment.alt || "Remote image")
       else
         attachment.to_html
       end

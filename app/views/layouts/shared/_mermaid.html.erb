@@ -1,0 +1,21 @@
+<%= tag.meta name: "mermaid-script-url", content: asset_path("mermaid.tiny.js") %>
+
+<template id="mermaid-diagram-template">
+  <figure class="mermaid-diagram" data-controller="dialog" data-dialog-modal-value="true">
+    <div class="mermaid-diagram__inline"></div>
+
+    <button type="button" class="mermaid-diagram__expand btn btn--circle borderless" data-action="dialog#open" aria-haspopup="dialog">
+      <%= icon_tag "expand" %>
+      <span class="for-screen-reader">Expand diagram</span>
+    </button>
+
+    <dialog class="mermaid-diagram__dialog" aria-label="Diagram" data-dialog-target="dialog" data-action="keydown.esc->dialog#close:stop">
+      <button type="button" class="mermaid-diagram__close btn btn--circle borderless" data-action="dialog#close">
+        <%= icon_tag "close" %>
+        <span class="for-screen-reader">Close</span>
+      </button>
+
+      <div class="mermaid-diagram__expanded"></div>
+    </dialog>
+  </figure>
+</template>

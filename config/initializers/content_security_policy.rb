@@ -15,6 +15,49 @@
 # config.x.content_security_policy.* (string, space-separated string, or array):
 #   script_src, style_src, connect_src, frame_src, img_src, font_src, media_src,
 #   worker_src, frame_ancestors, form_action, report_uri, report_only
+#
+# config.x.content_security_policy.trusted_types_report_only (boolean): adds
+# the Trusted Types report-only policy below, with no report URI, so nothing
+# leaves the browser. On in the test environment only.
+
+# Trusted Types report-only policy.
+#
+# Marks every raw-string write to a DOM sink (innerHTML, outerHTML,
+# insertAdjacentHTML, DOMParser#parseFromString, document.write, ...) as a
+# violation without blocking it, so we can inventory the sinks fizzy and its
+# libraries write to before designing enforcement. Chromium, Safari and Firefox
+# all support Trusted Types.
+#
+# It rides a separate Content-Security-Policy-Report-Only header, so the policy
+# below is untouched whether it enforces or reports. Report-only can only
+# report, never block.
+#
+# Only `require-trusted-types-for 'script'` is emitted. A `trusted-types`
+# allowlist restricts which policy names may be created, which would only add
+# policy-creation noise (lexxy creates its own DOMPurify policy) to a pilot that
+# registers no policy of its own.
+class TrustedTypesReportOnly
+  DIRECTIVE = "require-trusted-types-for 'script'"
+  HEADER = ActionDispatch::Constants::CONTENT_SECURITY_POLICY_REPORT_ONLY.downcase # Rack 3 header names are lowercase
+
+  def initialize(app, report_uri = nil)
+    @app = app
+    @policy = report_uri ? "#{DIRECTIVE}; report-uri #{report_uri}" : DIRECTIVE
+  end
+
+  def call(env)
+    status, headers, body = @app.call(env)
+
+    # Only documents run script, so only they can write to a sink. When the app
+    # policy is itself report-only, both go out as separate header fields (a
+    # Rack 3 array), each reporting independently.
+    if headers[Rack::CONTENT_TYPE].to_s.start_with?("text/html")
+      headers[HEADER] = headers[HEADER] ? [ *headers[HEADER], @policy ] : @policy
+    end
+
+    [ status, headers, body ]
+  end
+end
 
 Rails.application.configure do
   # Helper to get additional CSP sources from ENV or config.x.
@@ -84,6 +127,12 @@ Rails.application.configure do
 
   # Report violations without enforcing the policy.
   config.content_security_policy_report_only = report_only
+
+  # Inserted outside the Rails CSP middleware so it runs after that header is
+  # written, stacking beside an app policy that is itself report-only.
+  if config.x.content_security_policy.trusted_types_report_only
+    config.middleware.insert_before ActionDispatch::ContentSecurityPolicy::Middleware, TrustedTypesReportOnly
+  end
 
   # Locked-down policy for the static pages served from public/ (error pages).
   # They carry no script or inline styles at all, so everything falls back to

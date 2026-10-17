@@ -35,6 +35,14 @@ class StaticCspTest < ActionDispatch::IntegrationTest
     assert_not_equal STATIC_POLICY, csp
   end
 
+  test "the Trusted Types policy rides a report-only header and never the app policy" do
+    sign_in_as identities(:david)
+    get root_url
+
+    assert_not_includes response.headers[ActionDispatch::Constants::CONTENT_SECURITY_POLICY].to_s, "trusted-types"
+    assert_equal "require-trusted-types-for 'script'", response.headers[ActionDispatch::Constants::CONTENT_SECURITY_POLICY_REPORT_ONLY]
+  end
+
   private
     # Suppress the diagnostics page the test environment would otherwise
     # render, so the request falls through to the exceptions app like in

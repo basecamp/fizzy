@@ -1,6 +1,8 @@
 require "test_helper"
 
 class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
+  include TrustedTypesViolationsTestHelper
+
   browser_options = Selenium::WebDriver::Chrome::Options.new.tap do |opts|
     opts.add_argument("--window-size=1200,800")
     opts.add_argument("--disable-extensions")

@@ -45,7 +45,7 @@ class SmokeTest < ApplicationSystemTestCase
 
     within("form lexxy-editor figure.attachment[data-content-type='image/jpeg']") do
       assert_selector "img[src*='/rails/active_storage']"
-      assert_selector "figcaption textarea[placeholder='moon.jpg']"
+      assert_selector "figcaption .attachment__caption-text", text: "moon.jpg"
     end
 
     click_on "Post"
@@ -62,6 +62,19 @@ class SmokeTest < ApplicationSystemTestCase
     within("dialog.lightbox") do
       assert_selector "img.lightbox__image[src*='/rails/active_storage']"
     end
+  end
+
+  test "lightbox shows the alt text of the image" do
+    blob = ActiveStorage::Blob.create_and_upload!(io: file_fixture("moon.jpg").open, filename: "moon.jpg")
+    cards(:layout).comments.create! \
+      creator: users(:kevin),
+      body: %(<action-text-attachment sgid="#{blob.attachable_sgid}" alt="A full moon"></action-text-attachment>)
+
+    sign_in_as(users(:david))
+    visit card_url(cards(:layout))
+    find("action-text-attachment figure.attachment a:has(img)").click
+
+    assert_selector "dialog.lightbox[open] img.lightbox__image[alt='A full moon']"
   end
 
   test "dismissing notifications" do

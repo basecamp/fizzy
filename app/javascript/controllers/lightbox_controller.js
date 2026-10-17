@@ -30,6 +30,7 @@ export default class extends Controller {
 
   reset() {
     this.zoomedImageTarget.src = ""
+    this.zoomedImageTarget.alt = ""
     this.captionTarget.innerHTML = "&nbsp;"
     this.dispatch('closed')
   }
@@ -39,6 +40,7 @@ export default class extends Controller {
     const caption = target.dataset.lightboxCaptionValue
 
     this.zoomedImageTarget.src = imageSrc
+    this.zoomedImageTarget.alt = target.querySelector("img")?.alt ?? ""
 
     if (caption) {
       this.captionTarget.innerText = caption

@@ -225,14 +225,20 @@
     }
   }
 
-  action-text-attachment[content-type^='application/vnd.actiontext'] {
-    lexxy-node-delete-button {
-      inset-inline-start: -0.25ch;
+  lexxy-attachment-toolbar[data-presentation="inline"][data-content-type^='application/vnd.actiontext'] {
+    --button-size: var(--lexxy-anchor-height);
 
-      .lexxy-floating-controls__group {
-        background-color: oklch(var(--lch-blue-dark));
-        border-radius: 50%;
-      }
+    left: var(--lexxy-anchor-left);
+    transform: translate(-0.25ch, -50%);
+
+    .lexxy-floating-controls__group {
+      background-color: oklch(var(--lch-blue-dark));
+      border-radius: 50%;
+      padding: 0;
+    }
+
+    button {
+      border-radius: 50%;
     }
   }
 }

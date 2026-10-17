@@ -1,0 +1,66 @@
+@layer components {
+  /* Hidden until the syntax-highlight controller draws the diagram, or shown as source if it fails */
+  [data-controller~="syntax-highlight"] pre[data-language="mermaid"]:not([data-mermaid-failed]) {
+    visibility: hidden;
+  }
+
+  .mermaid-diagram {
+    margin: 0.4em 0;
+    position: relative;
+  }
+
+  .mermaid-diagram__inline {
+    overflow-x: auto;
+  }
+
+  .mermaid-diagram__expand {
+    inset-block-start: 0;
+    inset-inline-end: 0;
+    position: absolute;
+  }
+
+  .mermaid-diagram__dialog {
+    /* The injected insets can be stale after a rotation, so the larger of injected and env() wins */
+    --diagram-inset-top: max(var(--custom-safe-inset-top), env(safe-area-inset-top, 0px));
+    --diagram-inset-right: max(var(--custom-safe-inset-right), env(safe-area-inset-right, 0px));
+    --diagram-inset-bottom: max(var(--custom-safe-inset-bottom), env(safe-area-inset-bottom, 0px));
+    --diagram-inset-left: max(var(--custom-safe-inset-left), env(safe-area-inset-left, 0px));
+
+    background-color: var(--color-canvas);
+    block-size: 100dvh;
+    border: 0;
+    inline-size: 100dvw;
+    margin: 0;
+    max-block-size: none;
+    max-inline-size: none;
+    padding: 0;
+
+    &::backdrop {
+      background-color: var(--color-canvas);
+    }
+  }
+
+  .mermaid-diagram__close {
+    inset-block-start: calc(var(--diagram-inset-top) + 0.5rem);
+    inset-inline-end: calc(var(--diagram-inset-right) + 0.5rem);
+    position: absolute;
+    z-index: 1;
+  }
+
+  .mermaid-diagram__expanded {
+    block-size: 100%;
+    container-type: size;
+    display: flex;
+    overflow: auto;
+    padding: calc(var(--diagram-inset-top) + 3rem) calc(var(--diagram-inset-right) + 1rem) calc(var(--diagram-inset-bottom) + 1rem) calc(var(--diagram-inset-left) + 1rem);
+
+    /* Fits the screen, or at its natural size when that is larger so labels stay readable */
+    svg {
+      block-size: auto;
+      flex-shrink: 0;
+      inline-size: max(var(--diagram-width, 0) * 1px, min(100cqi, 100cqb * var(--diagram-width, 1) / var(--diagram-height, 1)));
+      margin: auto;
+      max-inline-size: none !important; /* Mermaid sets max-width inline */
+    }
+  }
+}
