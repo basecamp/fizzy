@@ -19,3 +19,16 @@ trusted_client:
     - write
   dynamically_registered: false
   trusted: true
+
+confidential_client:
+  client_id: confidential_client_789
+  client_secret: confidential_secret_789
+  name: Confidential Connector
+  redirect_uris:
+    - https://connector.example.com/callback
+  scopes:
+    - read
+    - write
+  token_endpoint_auth_method: client_secret_post
+  dynamically_registered: true
+  trusted: false
