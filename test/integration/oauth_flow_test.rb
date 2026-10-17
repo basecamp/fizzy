@@ -1184,7 +1184,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
   end
 
   test "a personal access token issued before prefixes still authenticates" do
-    get user_path(users(:david)), env: { "HTTP_AUTHORIZATION" => "Bearer #{identity_access_tokens(:davids_api_token).token}" }, as: :json
+    get user_path(users(:david)), env: { "HTTP_AUTHORIZATION" => "Bearer #{identity_access_tokens(:davids_api_token).raw_token}" }, as: :json
 
     assert_response :success
   end

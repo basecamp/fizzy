@@ -77,7 +77,7 @@ class My::AccessTokensControllerTest < ActionDispatch::IntegrationTest
 
   test "create new token via JSON with bearer token" do
     sign_out
-    bearer_token = { "HTTP_AUTHORIZATION" => "Bearer #{identity_access_tokens(:davids_api_token).token}" }
+    bearer_token = { "HTTP_AUTHORIZATION" => "Bearer #{identity_access_tokens(:davids_api_token).raw_token}" }
 
     assert_difference -> { identities(:david).access_tokens.count }, +1 do
       post my_access_tokens_path, params: { access_token: { description: "Fizzy CLI", permission: "read" } }, env: bearer_token, as: :json
@@ -113,7 +113,7 @@ class My::AccessTokensControllerTest < ActionDispatch::IntegrationTest
 
   test "cannot create new token via JSON with read-only bearer token" do
     sign_out
-    bearer_token = { "HTTP_AUTHORIZATION" => "Bearer #{identity_access_tokens(:jasons_api_token).token}" }
+    bearer_token = { "HTTP_AUTHORIZATION" => "Bearer #{identity_access_tokens(:jasons_api_token).raw_token}" }
 
     assert_no_difference -> { identities(:jason).access_tokens.count } do
       post my_access_tokens_path, params: { access_token: { description: "Fizzy CLI", permission: "read" } }, env: bearer_token, as: :json
@@ -131,7 +131,7 @@ class My::AccessTokensControllerTest < ActionDispatch::IntegrationTest
 
   test "index as JSON with bearer token and no account scope" do
     sign_out
-    bearer_token = { "HTTP_AUTHORIZATION" => "Bearer #{identity_access_tokens(:davids_api_token).token}" }
+    bearer_token = { "HTTP_AUTHORIZATION" => "Bearer #{identity_access_tokens(:davids_api_token).raw_token}" }
 
     untenanted do
       get my_access_tokens_path, as: :json, env: bearer_token
