@@ -25,8 +25,7 @@ class BackfillRemainingTokenDigestsTest < ActiveSupport::TestCase
   end
 
   test "keeps the plaintext of a token issued by the personal access client" do
-    # The personal access client may not exist yet, so the grant's client stands in for it.
-    oauth_clients(:mcp_client).update_columns client_id: BackfillRemainingTokenDigests::PERSONAL_ACCESS_CLIENT_ID
+    store_plaintext_only @grant, "legacyAccessToken0123456789", oauth_client_id: personal_access_client.id
 
     backfill
 
@@ -86,6 +85,12 @@ class BackfillRemainingTokenDigestsTest < ActiveSupport::TestCase
     # read through the migration's own model.
     def store_plaintext_only(access_token, raw, **attributes)
       BackfillRemainingTokenDigests::AccessToken.where(id: access_token.id).update_all token: raw, token_digest: nil, **attributes
+    end
+
+    # The personal access client may not exist yet, so the grant's client stands in for it.
+    def personal_access_client
+      Oauth::Client.find_by(client_id: BackfillRemainingTokenDigests::PERSONAL_ACCESS_CLIENT_ID) ||
+        oauth_clients(:mcp_client).tap { |client| client.update_columns client_id: BackfillRemainingTokenDigests::PERSONAL_ACCESS_CLIENT_ID }
     end
 
     def stored_plaintext(access_token)
