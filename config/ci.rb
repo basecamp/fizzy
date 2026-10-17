@@ -2,6 +2,11 @@
 
 require_relative "../lib/fizzy"
 
+# Booting bin/ci exports BUNDLE_LOCKFILE for the bundle it booted with (Bundler 4), and that outranks the
+# BUNDLE_GEMFILE each step sets: a SaaS step resolves Gemfile.saas against Gemfile.lock, then either can't
+# find a git source or, with auto_install, rewrites Gemfile.lock. Each step derives its own instead.
+ENV.delete("BUNDLE_LOCKFILE")
+
 OSS_ENV = "SAAS=false BUNDLE_GEMFILE=Gemfile"
 SAAS_ENV = "SAAS=true BUNDLE_GEMFILE=Gemfile.saas"
 SYSTEM_TEST_ENV = "PARALLEL_WORKERS=1" # system tests can't run reliably in parallel

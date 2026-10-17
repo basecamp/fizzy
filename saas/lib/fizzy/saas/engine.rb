@@ -5,6 +5,7 @@ require_relative "authorization"
 require_relative "gvl_instrumentation"
 require_relative "cell"
 require_relative "unprocessable_attachments"
+require_relative "sentry_sql_redaction"
 require_relative "../../rails_ext/active_record_tasks_database_tasks.rb"
 
 module Fizzy
@@ -109,6 +110,8 @@ module Fizzy
             config.send_default_pii = false
             config.release = ENV["KAMAL_VERSION"]
             config.excluded_exceptions += [ "ActiveRecord::ConcurrentMigrationError" ]
+
+            SentrySqlRedaction.install(config)
 
             # Receive Rails.error.report and retry_on/discard_on report: true
             config.rails.register_error_subscriber = true
