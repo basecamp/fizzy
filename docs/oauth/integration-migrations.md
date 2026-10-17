@@ -1,7 +1,7 @@
 # OAuth stack: migrations for the manual beta run
 
-Integration branch `oauth-integration-2026-10-15`, cut from `main` at
-`2568389d9` on 2026-10-15. Throwaway: it exists to put every migration in the
+Integration branch `oauth-integration-2026-10-15`, rebuilt from `main` at
+`27d0d2e6b` on 2026-10-17 (first cut from `2568389d9` on 2026-10-15). Throwaway: it exists to put every migration in the
 OAuth stack on a beta host so they can be run by hand before any of the PRs
 land. Nothing here merges to `main`.
 
@@ -12,22 +12,28 @@ named for the PR:
 
 | PR | Branch | Head |
 |---|---|---|
-| #2296 | `oauth` | `ba3751d4d946` |
-| #3080 | `oauth-dcr-https` | `8511ba5aa3de` |
-| #3081 | `oauth-refresh-tokens` | `0ae793ade605` |
-| #3082 | `oauth-confidential-clients` | `b6b83296aeea` |
-| #3158 | `oauth-bearer-challenge` | `84955539f58b` |
-| #3160 | `oauth-refresh-replay` | `8410f25f522e` |
-| #3161 | `oauth-grant-idle-expiry` | `caee37c360fb` |
-| #3159 | `oauth-client-sweep` | `355d4d6f68bb` |
-| #3163 | `oauth-token-prefixes` | `edbb322d87e0` |
-| #3169 | `oauth-delegate-resources` | `ec809fecd779` |
-| #3191 | `test/pin-shipped-client-auth` | `48f58c2ffedd` |
+| #2296 | `oauth` | `76024c1e2f37` |
+| #3080 | `oauth-dcr-https` | `13b082285071` |
+| #3081 | `oauth-refresh-tokens` | `243fd48a6045` |
+| #3082 | `oauth-confidential-clients` | `dc2d791ecc29` |
+| #3158 | `oauth-bearer-challenge` | `cb10c0cf62c7` |
+| #3160 | `oauth-refresh-replay` | `3a6626e95a57` |
+| #3161 | `oauth-grant-idle-expiry` | `7e4072cc3f76` |
+| #3159 | `oauth-client-sweep` | `6ff3be4b0fbc` |
+| #3163 | `oauth-token-prefixes` | `313046c981c4` |
+| #3169 | `oauth-delegate-resources` | `aef9fb5fb895` |
+| #3192 | `oauth-token-digests` | `1ef16f3d245e` |
+| #3191 | `test/pin-shipped-client-auth` | `98572aaaf` |
 
 One textual conflict, merging #3161 after its sibling #3158, both appending
 tests to the end of `test/models/identity/access_token_test.rb`: kept both
 sides (#3158's `find_honored` tests, then #3161's daylight-saving idle-limit
-test). Nothing else conflicted.
+test). Merging #3192 after #3158 conflicted in `app/models/identity/access_token.rb`
+and its test: #3158 replaced `find_permissable` with `find_honored` beside
+#3160, so #3192 never saw it. The merge keeps `find_honored` and has it find by
+digest (`active.find_by_raw_token(token)`), and #3192's tests call it. The same
+resolution is needed wherever #3158 and #3192 first meet on `main`.
+Nothing else conflicted.
 
 Beyond the merges, one commit of the branch's own, `saas/config/deploy.beta.yml`
 setting the web role's `cmd` so a beta boot does not migrate (see "Deploying
@@ -49,9 +55,10 @@ OAuth sweeps (`Oauth::Client.cleanup`, `Identity::AccessToken.cleanup`,
 
 ## The migrations, in the order Rails runs them
 
-All seven are on the primary database (`fizzy_production`). None touch
+All ten are on the primary database (`fizzy_production`). None touch
 `fizzy_saas_production`, the solid databases, or `saas/db/migrate`. None
-backfill data: existing rows keep NULL in every new column, and the code reads
+backfill data except #9, which digests every existing token in place (`updated_at`
+unmoved); otherwise existing rows keep NULL in every new column, and the code reads
 NULL as "not from an OAuth grant" (a personal access token, a session-made
 webhook, a session-registered push subscription).
 
@@ -69,9 +76,12 @@ production yet, so none of these has been applied there.
 | 5 | `20261006120000_create_oauth_retired_refresh_tokens.rb` | #3160 | `CREATE TABLE oauth_retired_refresh_tokens` (uuid id, `access_token_id` NOT NULL, `refresh_token` unique, `successor_refresh_token`, `created_at`; indexes on `access_token_id` and `created_at`) | new | New table |
 | 6 | `20261006130000_add_oauth_client_to_push_subscriptions.rb` | #3169 | `add_reference :push_subscriptions, :oauth_client` (uuid, nullable, indexed, no FK) | `push_subscriptions`: ~1,400 rows, 1.6 MB data + 0.6 MB index | INSTANT add + online index, sub-second |
 | 7 | `20261006130100_add_attribution_to_webhooks.rb` | #3169 | `add_reference :webhooks, :creator` and `add_reference :webhooks, :created_via` (uuid, nullable, indexed, no FK) | `webhooks`: ~1,500 rows, 0.5 MB data + 0.4 MB index | Two INSTANT adds + two online indexes, sub-second |
+| 8 | `20261015120000_add_token_digests.rb` | #3192 | `change_table :identity_access_tokens, bulk: true`: `token_digest`, `refresh_token_digest` (string 80), a unique index on each. `add_column :oauth_clients, :client_secret_digest` (string 80) | `identity_access_tokens`: ~3,500 rows | One ALTER, INPLACE LOCK=NONE. Every row starts NULL, so neither unique index can fail |
+| 9 | `20261015120100_backfill_token_digests.rb` | #3192 | **Data only, no DDL.** Refuses duplicate `token`s first. Then one `UPDATE … WHERE id = ?` per row: `token_digest` for every token (OAuth rows also get `token` NULLed), `refresh_token_digest` and `client_secret_digest` where those columns still exist. `updated_at` doesn't move. `disable_ddl_transaction!`, batches of 500. `down` is a no-op | `identity_access_tokens` | Row locks only, ~3,500 single-row updates on the primary key, a few seconds |
+| 10 | `20261015120200_drop_plaintext_oauth_credentials.rb` | #3192 | Drop `identity_access_tokens.refresh_token` and its unique index. Drop `oauth_clients.client_secret`. Drop and recreate `oauth_retired_refresh_tokens` keyed by digest, with `successor_payload` text | `identity_access_tokens`, plus the empty `oauth_*` tables | DROP INDEX and DROP COLUMN are online. The `oauth_*` tables are empty in production |
 
-All seven are `def change` with only reversible operations, so each has a
-working `down`. All seven are portable: they ran up, down and up again on
+#1 to #8 and #10 are reversible, so each has a working `down`; #9's `down` is a
+no-op. All ten are portable: they ran up, down and up again on
 SQLite and on MySQL 8.4 (see "Verification").
 
 ### The lock that matters
@@ -178,9 +188,12 @@ bin/kamal app exec 'bin/rails db:migrate:up:primary VERSION=20260827110000' -d b
 bin/kamal app exec 'bin/rails db:migrate:up:primary VERSION=20261006120000' -d beta1 -p -r web -e MIGRATE:1
 bin/kamal app exec 'bin/rails db:migrate:up:primary VERSION=20261006130000' -d beta1 -p -r web -e MIGRATE:1
 bin/kamal app exec 'bin/rails db:migrate:up:primary VERSION=20261006130100' -d beta1 -p -r web -e MIGRATE:1
+bin/kamal app exec 'bin/rails db:migrate:up:primary VERSION=20261015120000' -d beta1 -p -r web -e MIGRATE:1
+bin/kamal app exec 'bin/rails db:migrate:up:primary VERSION=20261015120100' -d beta1 -p -r web -e MIGRATE:1
+bin/kamal app exec 'bin/rails db:migrate:up:primary VERSION=20261015120200' -d beta1 -p -r web -e MIGRATE:1
 ```
 
-Or all seven at once: `bin/kamal app exec 'bin/rails db:migrate:primary' -d beta1 -p -r web -e MIGRATE:1`.
+Or all ten at once: `bin/kamal app exec 'bin/rails db:migrate:primary' -d beta1 -p -r web -e MIGRATE:1`.
 Then restart the app so every process reloads its column information:
 `bin/kamal app boot -d beta1`. The web container keeps the non-migrating
 command; nothing is pending anyway.
@@ -202,13 +215,14 @@ deploy's `pre-deploy` hook reboots hotcell onto it.
 By version, newest first, never `db:rollback`:
 
 ```sh
-for v in 20261006130100 20261006130000 20261006120000 20260827110000 20260827100000 20260827090000 20251231163456; do
+for v in 20261015120200 20261015120100 20261015120000 20261006130100 20261006130000 20261006120000 20260827110000 20260827100000 20260827090000 20251231163456; do
   bin/kamal app exec "bin/rails db:migrate:down:primary VERSION=$v" -d beta1 -p -r web -e MIGRATE:1
 done
 ```
 
 This drops `oauth_clients`, `oauth_retired_refresh_tokens` and the new columns,
-along with anything beta wrote to them. Undo only once nothing is running this
+along with anything beta wrote to them. Personal access tokens keep their
+plaintext throughout, so `main` keeps authenticating them. Undo only once nothing is running this
 branch's code: `main` doesn't care either way.
 
 ### When the PRs land
@@ -275,3 +289,23 @@ Both are #3191's pins, failing against #3158's deliberate changes:
 deliberately and say so". Whether shipped clients (the CLI, the native apps)
 tolerate these two changes is a decision for the stack, not this branch. The
 branch leaves both tests failing as they are.
+
+## Re-verification, 2026-10-17 rebuild
+
+On thelio against a dedicated MySQL 8.4 container, at the merge of #3191:
+
+- Migration round trip on MySQL (OSS), from `main`'s schema loaded by `main`'s
+  code: all ten up, all ten down newest first, all ten up. The dump differs
+  from the committed `db/schema.rb` in column order only.
+- SaaS (MySQL) 2299 tests, OSS (SQLite) 2129, OSS (MySQL) 2129: the same **2
+  failures** in each, #3191's two pins against #3158 (decision D6 below), and
+  nothing else.
+
+## Before beta boots #3192
+
+`TOKEN_DIGEST_PEPPER` must exist in 1Password, Deploy/Fizzy vault, on the
+**Production** item (beta's `saas/.kamal/secrets.beta` reads it from there) and
+on the **Staging** item. Without it `kamal secrets fetch` fails and the app
+refuses to boot. It must never change afterwards. Run #8 to #10 in the same
+session as #1 to #7, and run them from this branch (which carries #3192), so no
+prefixed personal access token is written without a digest.
