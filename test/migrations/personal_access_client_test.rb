@@ -78,6 +78,28 @@ class PersonalAccessClientMigrationTest < ActiveSupport::TestCase
   # BackfillTokenDigests is rerun to digest tokens production writes in
   # plaintext only. Once those have the issuer, the rerun must still treat them
   # as personal and keep the plaintext production reads.
+  # Code that knows the issuer may still be serving a request that looked it
+  # up just before down removed it.
+  test "down leaves no token naming the removed issuer, even one issued as it went" do
+    migrate CreatePersonalAccessClient, :up
+    migrate BackfillPersonalAccessClient, :up
+    in_flight = nil
+    # Mocha stubs take no implementation, so the matcher both deletes the
+    # issuer and issues the in-flight token, then matches.
+    CreatePersonalAccessClient::Client.any_instance.stubs(:delete).with do
+      client = CreatePersonalAccessClient::Client.find_by!(client_id: Oauth::Client::PERSONAL_ACCESS_CLIENT_ID)
+      CreatePersonalAccessClient::Client.where(id: client.id).delete_all
+      in_flight = identities(:david).access_tokens.create!(oauth_client_id: client.id)
+    end
+
+    migrate CreatePersonalAccessClient, :down
+
+    assert_not Oauth::Client.personal_access.exists?
+    assert_nil @personal.reload.oauth_client_id
+    assert_nil in_flight.reload.oauth_client_id
+    assert in_flight.personal?
+  end
+
   test "rerunning the digest backfill keeps a client-backed personal token's plaintext" do
     migrate CreatePersonalAccessClient, :up
     migrate BackfillPersonalAccessClient, :up
