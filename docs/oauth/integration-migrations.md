@@ -22,7 +22,7 @@ named for the PR:
 | #3159 | `oauth-client-sweep` | `eac532ca82a4` |
 | #3163 | `oauth-token-prefixes` | `918f2566ddca` |
 | #3169 | `oauth-delegate-resources` | `d0b4a26f7872` |
-| #3192 | `oauth-token-digests` | `4cfbbd2ec21b` |
+| #3192 | `oauth-token-digests` | `09523ade5f33` |
 | #3191 | `test/pin-shipped-client-auth` | `98572aaaf` |
 
 The train is linear since 2026-10-17 (#3160 restacked onto #3158), so the merges
@@ -305,6 +305,15 @@ thelio against a dedicated MySQL 8.4 container, at the merge of #3191 on the
 rebuilt branch (`7a4b990bd`): SaaS (MySQL) 2309 tests, OSS (SQLite) 2139, OSS
 (MySQL) 2139, **0 failures, 0 errors**; rubocop clean. The one new test pins
 the variable's name.
+
+## Re-verification, issuer without a trailing slash
+
+#3192 (head `09523ade5f33`) now advertises the issuer as the bare origin
+(`https://app.fizzy.do`, as bc3), in the metadata, the `iss` redirect
+parameter and the protected resource's `authorization_servers`; it changes no
+migration. On thelio against a dedicated MySQL 8.4 container, at the merge of
+#3191 (`e391528fe`): SaaS (MySQL) 2310 tests, OSS (SQLite) 2140, OSS (MySQL)
+2140, **0 failures, 0 errors**; rubocop clean.
 
 ## Before beta boots #3192
 
