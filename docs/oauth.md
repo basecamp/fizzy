@@ -21,7 +21,7 @@ Main has no OAuth yet. The train is #2296 → #3080 → #3081 → #3082 → #316
 | SE-3 | ◐ | OAuth grants are separate from sessions (#2296). |
 | SE-4 / SE-4t | — | No passwords (magic links). |
 | GP-1, GP-2, GP-6 | ◐ | #2296: code only, S256 only, `iss`. |
-| GP-7 | ✗ | The train requires `state` (`Oauth::AuthorizationsController#validate_state`); the bar makes it optional. |
+| GP-7 | ◐ | #2296: `state` is optional; when sent it's one string of at most 2048 characters, echoed exactly (`Oauth::AuthorizationsController#validate_state`). |
 | GP-3 | ◐ | #2296. |
 | GP-4 | ◐ | Stateless codes with a jti; a revoke inside the 60s doesn't stop redemption (no tombstone). |
 | GP-5 | ◐ | In the train, a replayed code destroys the grant its first redemption made (`Identity::AccessToken.redeem`), after client, redirect URI and PKCE are checked. |
@@ -42,7 +42,7 @@ Main has no OAuth yet. The train is #2296 → #3080 → #3081 → #3082 → #316
 | DS-1, DS-2 | ◐ | #2296 |
 | DS-3 | ◐ | #3158 (decision D6 open). |
 | DS-4 | ✗ | |
-| TK-1 | ◐ | #3163: `fizzy_pat_`, `fizzy_at_`, `fizzy_rt_`. No `fizzy_cs_`, and not registered with GitHub secret scanning. |
+| TK-1 | ◐ | #3163: `fizzy_pat_`, `fizzy_at_`, `fizzy_rt_`, `fizzy_cs_`, each with 44 base58 characters (257 bits). Codes are stateless and unprefixed (GP-4). Not registered with GitHub secret scanning. |
 | TK-2 | ◐ | #3192 is step 1 of 3 (read by digest, plaintext fallback). Storing plaintext was an oversight; the conformance ledger's "Deliberate" entry is withdrawn. Steps 2 and 3 remove the fallback and the plaintext columns. The token-column index comes with step 1. |
 | TK-3 | ✗ | Pepper keyring. |
 | TK-4 | ◐ | #3081 |
@@ -59,8 +59,8 @@ Main has no OAuth yet. The train is #2296 → #3080 → #3081 → #3082 → #316
 | SC-1 | ◐ | Per-IP limits only: token 20/min, revocation 20/min, registration 10/min. |
 | SC-2, SC-3 | ✗ | Per-client limits after authentication, and platform pacing (Phase C). |
 | SC-4 | ✗ | |
-| SC-5 | ◐ | |
-| SC-6 | ◐ | |
+| SC-5 | ◐ | #3082: every OAuth response carries `Cache-Control: no-store` and `Referrer-Policy: no-referrer` (`Oauth::BaseController`). Consent has CSRF protection and a `form-action` limited to the validated redirect. |
+| SC-6 | ◐ | #2296 filters `code`, `code_verifier`, `device_code`, `client_assertion` and `dpop` beside the existing `token` and `secret` matches, the logged redirect included. SQL and slow-query logs are separate work. |
 | SC-7 | ◐ | Switches are off by default (#2296). |
 | AU-1..3, OB-1..2 | ✗ | No events or metrics in the OAuth code. |
 | OP-1 | ◐ | #2296: `OAUTH_ACCEPTANCE_ENABLED`, `OAUTH_ISSUANCE_ENABLED`, `OAUTH_PILOT_CLIENT_IDS`. |
