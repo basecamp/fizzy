@@ -72,4 +72,25 @@ class Admin::AuditsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :forbidden
   end
+
+  # The auditor bearer token path lives only in Admin::AuditsController#require_authentication;
+  # Authentication#authenticate_by_bearer_token knows nothing of auditor tokens.
+  test "auditor bearer token does not authenticate outside the audits console" do
+    token = Audits1984::AuditorToken.generate_for(identities(:david))
+
+    get boards_path(format: :json), headers: { "Authorization" => "Bearer #{token}" }
+    assert_response :unauthorized
+
+    untenanted { get my_identity_path(format: :json), headers: { "Authorization" => "Bearer #{token}" } }
+    assert_response :unauthorized
+  end
+
+  # Personal access tokens authenticate JSON requests only, and the console is HTML.
+  test "personal access token does not authenticate the audits console" do
+    untenanted do
+      get saas.admin_audits1984_path, headers: { "Authorization" => "Bearer #{identity_access_tokens(:davids_api_token).token}" }
+    end
+
+    assert_response :unauthorized
+  end
 end
