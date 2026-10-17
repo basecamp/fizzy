@@ -22,7 +22,7 @@ named for the PR:
 | #3159 | `oauth-client-sweep` | `a26edcdc8c3d` |
 | #3163 | `oauth-token-prefixes` | `7e22445e1135` |
 | #3169 | `oauth-delegate-resources` | `ec7441a2114e` |
-| #3192 | `oauth-token-digests` | `3a2bb7953336` |
+| #3192 | `oauth-token-digests` | `82cdd19c3b72` |
 | #3191 | `test/pin-shipped-client-auth` | `98572aaaf` |
 
 The train is linear since 2026-10-17 (#3160 restacked onto #3158), so the merges
