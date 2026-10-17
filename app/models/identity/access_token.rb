@@ -125,16 +125,24 @@ class Identity::AccessToken < ApplicationRecord
     # replay also revokes the grant the first redemption issued, and the record
     # outlives that grant, so a third attempt mints nothing either.
     def redeem(authorization_code, **attributes)
-      transaction do
+      transaction requires_new: true do
         Oauth::RedeemedAuthorizationCode.create! jti: authorization_code.jti
         create! authorization_code_jti: authorization_code.jti, **attributes
       end
     rescue ActiveRecord::RecordNotUnique
       where(authorization_code_jti: authorization_code.jti).destroy_all
+      remember_redeemed authorization_code
       nil
     end
 
     private
+      # A code redeemed before redemptions were recorded has a grant but no
+      # record, and the failed transaction above rolled back the one it tried
+      # to write. Write it now, so the code mints nothing once that grant is gone.
+      def remember_redeemed(authorization_code)
+        Oauth::RedeemedAuthorizationCode.create_or_find_by!(jti: authorization_code.jti)
+      end
+
       # MySQL compares `token` case-insensitively, so a match is confirmed
       # byte for byte: a differently cased token neither authenticates nor
       # installs a digest that the real token would then never match.
