@@ -44,6 +44,20 @@ class OauthInstrumentationTest < ActionDispatch::IntegrationTest
     assert_equal [ { endpoint: "tokens", error_code: "invalid_client", client_type: "confidential" } ], payloads
   end
 
+  test "an error is labeled with the client that asked, not the one the code was issued to" do
+    code = Oauth::AuthorizationCode.generate client_id: oauth_clients(:confidential_client).client_id, identity_id: identities(:david).id,
+      code_challenge: "challenge", redirect_uri: "https://connector.example.com/callback", scope: "read"
+
+    payloads = notifications("error.oauth") do
+      untenanted do
+        post oauth_token_path, params: { grant_type: "authorization_code", code: code, code_verifier: "v" * 43,
+          redirect_uri: "https://connector.example.com/callback", client_id: @client.client_id }
+      end
+    end
+
+    assert_equal [ { endpoint: "tokens", error_code: "invalid_grant", client_type: "public" } ], payloads
+  end
+
   test "an error for a client that doesn't exist is labeled unknown" do
     payloads = notifications("error.oauth") { refresh "fizzy_rt_unknown", client_id: "nobody_#{SecureRandom.hex}" }
 

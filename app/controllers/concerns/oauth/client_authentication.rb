@@ -128,9 +128,10 @@ module Oauth::ClientAuthentication
     end
 
     # An error is labeled with the client the request names, authenticated or
-    # not: its type is all a metric takes from it.
+    # not, rather than the one a presented code or token was issued to: the
+    # metric describes who asked. Its type is all a metric takes from it.
     def oauth_error_client
-      super || requesting_client
+      requesting_client || super
     end
 
     # The pilot exemption keys on the client that authenticates, header or body.
