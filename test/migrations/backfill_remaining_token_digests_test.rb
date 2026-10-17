@@ -1,5 +1,5 @@
 require "test_helper"
-require Rails.root.join("db/migrate/20261016120000_backfill_remaining_token_digests")
+require Rails.root.join("db/migrate/20261017120000_backfill_remaining_token_digests")
 
 class BackfillRemainingTokenDigestsTest < ActiveSupport::TestCase
   # Production code that stores only plaintext kept writing personal access
@@ -22,6 +22,16 @@ class BackfillRemainingTokenDigestsTest < ActiveSupport::TestCase
     @grant.reload
     assert_equal TokenDigester.digest("legacyAccessToken0123456789"), @grant.token_digest
     assert_nil stored_plaintext(@grant)
+  end
+
+  test "keeps the plaintext of a token issued by the personal access client" do
+    # The personal access client may not exist yet, so the grant's client stands in for it.
+    oauth_clients(:mcp_client).update_columns client_id: BackfillRemainingTokenDigests::PERSONAL_ACCESS_CLIENT_ID
+
+    backfill
+
+    assert_equal TokenDigester.digest("legacyAccessToken0123456789"), @grant.reload.token_digest
+    assert_equal "legacyAccessToken0123456789", stored_plaintext(@grant)
   end
 
   # A grant's updated_at is its idle-lapse clock.
