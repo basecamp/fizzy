@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_10_17_120000) do
+ActiveRecord::Schema[8.2].define(version: 2026_10_17_130000) do
   create_table "accesses", id: :uuid, force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -360,7 +360,6 @@ ActiveRecord::Schema[8.2].define(version: 2026_10_17_120000) do
     t.uuid "oauth_client_id"
     t.string "permission", limit: 255
     t.string "refresh_token_digest", limit: 80
-    t.string "token", limit: 255
     t.string "token_digest", limit: 80
     t.datetime "updated_at", null: false
     t.index ["authorization_code_jti"], name: "index_identity_access_tokens_on_authorization_code_jti", unique: true

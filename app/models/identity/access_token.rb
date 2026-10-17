@@ -51,12 +51,6 @@ class Identity::AccessToken < ApplicationRecord
   # Tokens are stored only as digests (TokenDigester). The raw values exist
   # only in memory, on the record that issued or rotated them, to be handed to
   # their holder once.
-  #
-  # The plaintext `token` column is ignored until it's dropped. Without
-  # partial_inserts, a model that knows a column names it on every INSERT, so
-  # only code that ignores it can keep creating tokens once it's gone.
-  self.ignored_columns += %w[ token ]
-
   attribute :raw_token, :string
   attribute :raw_refresh_token, :string
 
