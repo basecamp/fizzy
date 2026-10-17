@@ -96,6 +96,17 @@ class Yabeda::OauthTest < ActionDispatch::IntegrationTest
     assert_equal 1, count(:family_revocations_total, reason: "lapsed")
   end
 
+  test "deleting an identity counts its grants as family revocations, and not its personal access tokens" do
+    grant
+    @identity.access_tokens.create!(permission: :read)
+    grants = @identity.access_tokens.oauth.count
+
+    @identity.destroy!
+
+    assert_equal grants, count(:family_revocations_total, reason: "identity_deleted")
+    assert_equal 0, Yabeda::TestAdapter.instance.counters.fetch(Yabeda.oauth.revocations_total).values.sum
+  end
+
   test "registrations and rejections" do
     untenanted { post oauth_clients_path, as: :json, params: { redirect_uris: [ REDIRECT_URI ] } }
     untenanted { post oauth_clients_path, as: :json, params: { redirect_uris: %w[ http://example.com/callback ] } }

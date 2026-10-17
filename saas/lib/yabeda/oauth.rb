@@ -104,10 +104,12 @@ module Yabeda
         # A person or client revoking is revocations_total, labeled as bc3
         # labels it: the token presented at the revocation endpoint, "grant"
         # for an app disconnected, "access" for a personal access token.
-        # Anything the server ends on its own is family_revocations_total.
+        # A grant the server ends on its own is family_revocations_total. A
+        # personal access token has no refresh family, so one deleted with its
+        # identity counts in neither.
         def count_revocation(payload)
           if payload[:actor] == "system"
-            Yabeda.oauth.family_revocations_total.increment({ reason: payload[:reason] })
+            Yabeda.oauth.family_revocations_total.increment({ reason: payload[:reason] }) unless payload[:client_class] == "pat"
           else
             token_type = payload[:presented] || (payload[:client_class] == "pat" ? "access" : "grant")
             Yabeda.oauth.revocations_total.increment({ token_type: token_type, initiator: payload[:actor] })
