@@ -119,7 +119,6 @@ class Identity::AccessTokenTest < ActiveSupport::TestCase
 
     assert_equal TokenDigester.digest(raw_token), token.token_digest
     assert_nil token.refresh_token_digest
-    assert_nil stored_plaintext(token)
   end
 
   test "an OAuth grant stores only digests of its tokens" do
@@ -127,7 +126,6 @@ class Identity::AccessTokenTest < ActiveSupport::TestCase
     raw_token, raw_refresh_token = grant.raw_token, grant.raw_refresh_token
     grant.reload
 
-    assert_nil stored_plaintext(grant)
     assert_equal TokenDigester.digest(raw_token), grant.token_digest
     assert_equal TokenDigester.digest(raw_refresh_token), grant.refresh_token_digest
     assert_nil grant.raw_token
@@ -139,7 +137,6 @@ class Identity::AccessTokenTest < ActiveSupport::TestCase
     raw_token, raw_refresh_token = grant.raw_token, grant.raw_refresh_token
     grant.reload
 
-    assert_nil stored_plaintext(grant)
     assert_equal TokenDigester.digest(raw_token), grant.token_digest
     assert_equal TokenDigester.digest(raw_refresh_token), grant.refresh_token_digest
   end
@@ -166,22 +163,8 @@ class Identity::AccessTokenTest < ActiveSupport::TestCase
     assert statements.none? { |sql| sql.match?(/\Wtoken\W*=/) }, statements.join("\n")
   end
 
-  # BackfillRemainingTokenDigests digests any token stored only in plaintext
-  # before this code reads by digest alone.
-  test "a token stored only in plaintext doesn't authenticate" do
-    token = identities(:david).access_tokens.create!(description: "Before digests")
-    Identity::AccessToken.where(id: token.id).update_all token: "legacyPersonalToken0123456789", token_digest: nil
-
-    statements = capture_sql do
-      assert_nil Identity::AccessToken.find_honored("legacyPersonalToken0123456789")
-    end
-    assert statements.none? { |sql| sql.match?(/\Wtoken\W*=/) }, statements.join("\n")
-    assert_nil token.reload.token_digest
-  end
-
-  test "the plaintext column is ignored" do
+  test "no token is stored in plaintext" do
     assert_not_includes Identity::AccessToken.column_names, "token"
-    assert_not Identity::AccessToken.new.respond_to?(:token)
   end
 
   test "two tokens can't share a digest" do
@@ -198,10 +181,6 @@ class Identity::AccessTokenTest < ActiveSupport::TestCase
   end
 
   private
-    def stored_plaintext(access_token)
-      Identity::AccessToken.where(id: access_token.id).pick(Arel.sql("token"))
-    end
-
     def capture_sql(&block)
       statements = []
       subscriber = ActiveSupport::Notifications.subscribe("sql.active_record") { |*, payload| statements << payload[:sql] }
