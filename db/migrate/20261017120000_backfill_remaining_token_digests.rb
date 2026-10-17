@@ -11,12 +11,14 @@
 #
 # Personal access tokens keep their plaintext, as BackfillTokenDigests left
 # it, until the column is dropped, so rolling back to code that reads only
-# plaintext still finds them. OAuth access tokens are digest-only, so any
-# plaintext one is cleared once digested.
+# plaintext still finds them. A personal access token is one without a
+# client, or one issued by the personal access client where that client
+# exists. OAuth access tokens are digest-only, so any plaintext one is
+# cleared once digested.
 #
 # Rerunnable: it only touches rows without a digest, and does nothing once the
 # plaintext column is gone. Its down is a no-op, so
-# `db:migrate:redo:primary VERSION=20261016120000` runs it again.
+# `db:migrate:redo:primary VERSION=20261017120000` runs it again.
 class BackfillRemainingTokenDigests < ActiveRecord::Migration[8.2]
   disable_ddl_transaction!
 
@@ -28,14 +30,21 @@ class BackfillRemainingTokenDigests < ActiveRecord::Migration[8.2]
     self.table_name = "identity_access_tokens"
   end
 
+  class Client < ActiveRecord::Base
+    self.table_name = "oauth_clients"
+  end
+
+  PERSONAL_ACCESS_CLIENT_ID = "fizzy-personal-access"
+
   def up
     if column_exists?(:identity_access_tokens, :token)
       refuse_duplicate_tokens
+      personal_client_ids = [ nil, *Client.where(client_id: PERSONAL_ACCESS_CLIENT_ID).pluck(:id) ]
 
       undigested.in_batches(of: BATCH_SIZE) do |batch|
         batch.select(:id, :token, :oauth_client_id).each do |row|
           AccessToken.where(id: row.id, token_digest: nil).update_all \
-            token_digest: TokenDigester.digest(row.token), token: (row.oauth_client_id ? nil : row.token)
+            token_digest: TokenDigester.digest(row.token), token: (row.oauth_client_id.in?(personal_client_ids) ? row.token : nil)
         end
       end
     end
