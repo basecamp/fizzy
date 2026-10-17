@@ -154,8 +154,10 @@ class Oauth::Client < ApplicationRecord
       access_tokens.reset
     end
 
+    # Reads the stored client_id: lock_client no longer reloads the row, so an
+    # unsaved change to the issuer's client_id mustn't let it cascade.
     def refuse_to_destroy_personal_access
-      if personal_access?
+      if client_id_in_database == PERSONAL_ACCESS_CLIENT_ID
         errors.add :base, "The personal access token issuer can't be deleted"
         throw :abort
       end

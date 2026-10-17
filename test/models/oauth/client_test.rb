@@ -513,6 +513,16 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     assert Identity::AccessToken.exists?(token.id)
   end
 
+  test "the personal access token issuer can't be destroyed with unsaved changes either" do
+    issuer = oauth_clients(:personal_access)
+    token = identities(:david).access_tokens.create!(oauth_client: issuer)
+    issuer.assign_attributes client_id: "renamed", name: "Renamed"
+
+    assert_not issuer.destroy
+    assert Oauth::Client.exists?(issuer.id)
+    assert Identity::AccessToken.exists?(token.id)
+  end
+
   test "cleanup never sweeps the personal access token issuer, however long it goes unused" do
     oauth_clients(:personal_access).update_columns updated_at: 1.year.ago
 
