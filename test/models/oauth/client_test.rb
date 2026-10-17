@@ -246,7 +246,7 @@ class Oauth::ClientTest < ActiveSupport::TestCase
       token_endpoint_auth_method: "client_secret_post"
     )
     assert client.confidential?
-    assert_not_nil client.client_secret
+    assert_match(/\Afizzy_cs_[1-9A-HJ-NP-Za-km-z]{44}\z/, client.client_secret)
   end
 
   test "public clients get no client secret" do

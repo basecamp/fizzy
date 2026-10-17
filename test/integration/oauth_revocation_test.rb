@@ -128,6 +128,18 @@ class OauthRevocationTest < ActionDispatch::IntegrationTest
     assert Identity::AccessToken.exists?(token.id)
   end
 
+  test "tokens issued before prefixes revoke as before" do
+    personal = identities(:david).access_tokens.create!(permission: :read, token: "legacyPersonalToken0123456789")
+    grant = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client),
+      token: "legacyAccessToken0123456789", refresh_token: "legacyRefreshToken0123456789")
+
+    revoke personal.token
+    revoke grant.refresh_token, params: { client_id: oauth_clients(:mcp_client).client_id }
+
+    assert_not Identity::AccessToken.exists?(personal.id)
+    assert_not Identity::AccessToken.exists?(grant.id)
+  end
+
   test "a revoked personal access token no longer authenticates" do
     token = personal_token
     get user_path(users(:david)), env: { "HTTP_AUTHORIZATION" => "Bearer #{token.token}" }, as: :json
