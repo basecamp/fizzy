@@ -4,8 +4,8 @@ class ApiTest < ActionDispatch::IntegrationTest
   include OauthAvailabilityTestHelper
 
   setup do
-    @davids_bearer_token = bearer_token_env(identity_access_tokens(:davids_api_token).token)
-    @jasons_bearer_token = bearer_token_env(identity_access_tokens(:jasons_api_token).token)
+    @davids_bearer_token = bearer_token_env(identity_access_tokens(:davids_api_token).raw_token)
+    @jasons_bearer_token = bearer_token_env(identity_access_tokens(:jasons_api_token).raw_token)
   end
 
   test "authenticate with user credentials" do

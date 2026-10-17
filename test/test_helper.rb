@@ -50,7 +50,7 @@ module ActiveSupport
     fixtures :all
 
     include ActiveJob::TestHelper
-    include ActionTextTestHelper, CachingTestHelper, CardTestHelper, ChangeTestHelper, DnsTestHelper,
+    include AccessTokenTestHelper, ActionTextTestHelper, CachingTestHelper, CardTestHelper, ChangeTestHelper, DnsTestHelper,
       SearchIndexTestHelper, SessionTestHelper
     include Turbo::Broadcastable::TestHelper
 
