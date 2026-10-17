@@ -1,6 +1,9 @@
 <li class="list-style-none margin-none flex align-center gap full-width">
   <%= link_to webhook, class: "txt-ink flex gap-half align-center min-width txt-medium" do %>
     <strong class="overflow-ellipsis"><%= webhook.name %></strong>
+    <% if webhook.created_via_id? %>
+      <span class="txt-small txt-subtle flex-item-no-shrink">via <%= webhook_app_name(webhook) %></span>
+    <% end %>
   <% end %>
 
   <hr class="separator--horizontal flex-item-grow" style="--border-color: var(--color-ink-medium); --border-style: dashed" aria-hidden="true">
