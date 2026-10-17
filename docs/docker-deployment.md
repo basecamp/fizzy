@@ -49,6 +49,7 @@ docker run --env SECRET_KEY_BASE=abcdefabcdef ...
 ```
 
 Personal access tokens and OAuth credentials are stored only as a keyed digest (HMAC-SHA256), and looked up by it: the tokens themselves aren't kept.
+The one exception is the token pair an OAuth refresh issues, which is kept encrypted, readable only for the 60 seconds in which a client may retry that refresh, and cleared within minutes after.
 By default the key is derived from `SECRET_KEY_BASE`, so **changing `SECRET_KEY_BASE` invalidates every personal access token and every connected OAuth app**: people have to generate new tokens and reconnect their apps.
 To keep tokens working across a change of `SECRET_KEY_BASE`, set the key separately in `OAUTH_TOKEN_PEPPER` (at least 32 characters, for example from `bin/rails secret`).
 Set it before upgrading to a version that digests tokens, or before anyone creates one, and then keep it: changing, adding or removing it later invalidates tokens in the same way.
