@@ -46,6 +46,12 @@ module Oauth::Availability
     acceptance_enabled?(client_id) && (issuing? || piloted?(client_id))
   end
 
+  # The clients whose tokens are honored, as a relation, for code that weighs
+  # many grants at once rather than one presented token.
+  def accepted_clients
+    accepting? ? Oauth::Client.all : Oauth::Client.where(client_id: pilot_client_ids)
+  end
+
   private
     def accepting?
       config.acceptance_enabled == true

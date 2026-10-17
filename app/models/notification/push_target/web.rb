@@ -7,6 +7,6 @@ class Notification::PushTarget::Web < Notification::PushTarget
 
   private
     def subscriptions
-      @subscriptions ||= notification.user.push_subscriptions
+      @subscriptions ||= notification.user.push_subscriptions.deliverable_to(notification.user)
     end
 end

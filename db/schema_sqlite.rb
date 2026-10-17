@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_10_06_120000) do
+ActiveRecord::Schema[8.2].define(version: 2026_10_06_130100) do
   create_table "accesses", id: :uuid, force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -477,11 +477,13 @@ ActiveRecord::Schema[8.2].define(version: 2026_10_06_120000) do
     t.string "auth_key", limit: 255
     t.datetime "created_at", null: false
     t.text "endpoint", limit: 65535
+    t.uuid "oauth_client_id"
     t.string "p256dh_key", limit: 255
     t.datetime "updated_at", null: false
     t.string "user_agent", limit: 4096
     t.uuid "user_id", null: false
     t.index ["account_id"], name: "index_push_subscriptions_on_account_id"
+    t.index ["oauth_client_id"], name: "index_push_subscriptions_on_oauth_client_id"
     t.index ["user_id", "endpoint"], name: "index_push_subscriptions_on_user_id_and_endpoint", unique: true
   end
 
@@ -662,6 +664,8 @@ ActiveRecord::Schema[8.2].define(version: 2026_10_06_120000) do
     t.boolean "active", default: true, null: false
     t.uuid "board_id", null: false
     t.datetime "created_at", null: false
+    t.uuid "created_via_id"
+    t.uuid "creator_id"
     t.string "name", limit: 255
     t.string "signing_secret", limit: 255, null: false
     t.text "subscribed_actions", limit: 65535
@@ -669,6 +673,8 @@ ActiveRecord::Schema[8.2].define(version: 2026_10_06_120000) do
     t.text "url", limit: 65535, null: false
     t.index ["account_id"], name: "index_webhooks_on_account_id"
     t.index ["board_id", "subscribed_actions"], name: "index_webhooks_on_board_id_and_subscribed_actions"
+    t.index ["created_via_id"], name: "index_webhooks_on_created_via_id"
+    t.index ["creator_id"], name: "index_webhooks_on_creator_id"
   end
   execute "CREATE VIRTUAL TABLE search_records_fts USING fts5(\n        title,\n        content,\n        tokenize='porter'\n      )"
 
