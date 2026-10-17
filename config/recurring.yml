@@ -30,6 +30,9 @@ production: &production
   cleanup_oauth_retired_refresh_tokens:
     command: "Oauth::RetiredRefreshToken.cleanup"
     schedule: every day at 04:22
+  cleanup_lapsed_oauth_grants:
+    command: "Identity::AccessToken.cleanup"
+    schedule: every day at 04:32
   cleanup_exports:
     command: "Export.cleanup"
     schedule: every hour at minute 20
