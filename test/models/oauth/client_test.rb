@@ -445,6 +445,60 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     assert_not Identity::AccessToken.exists?(grant.id)
   end
 
+  test "the personal access token issuer is the provisioned client" do
+    assert_equal oauth_clients(:personal_access), Oauth::Client.personal_access_issuer
+  end
+
+  # A fresh install loads the schema instead of migrating.
+  test "the personal access token issuer is provisioned on first use where it's missing" do
+    Oauth::Client.personal_access.delete_all
+
+    issuer = assert_difference("Oauth::Client.count", +1) { Oauth::Client.personal_access_issuer }
+
+    assert issuer.personal_access?
+    assert issuer.trusted?
+    assert_not issuer.dynamically_registered?
+    assert_not issuer.confidential?
+    assert_empty issuer.redirect_uris
+    assert_equal issuer, Oauth::Client.personal_access_issuer
+  end
+
+  test "the personal access token issuer may obtain no grant, and every other client the code and refresh grants" do
+    assert_empty oauth_clients(:personal_access).grant_types
+    assert_not oauth_clients(:personal_access).allows_grant_type?("authorization_code")
+    assert_not oauth_clients(:personal_access).allows_grant_type?("refresh_token")
+
+    assert oauth_clients(:mcp_client).allows_grant_type?("authorization_code")
+    assert oauth_clients(:mcp_client).allows_grant_type?("refresh_token")
+    assert_not oauth_clients(:mcp_client).allows_grant_type?("client_credentials")
+  end
+
+  test "the personal access token issuer has no redirect to send a code to" do
+    assert_not oauth_clients(:personal_access).allows_redirect?("http://127.0.0.1:8888/callback")
+  end
+
+  test "only the personal access token issuer goes without redirect URIs" do
+    client = Oauth::Client.new(name: "Unregistered", client_id: "fizzy-personal-access-impostor", redirect_uris: [])
+
+    assert_not client.valid?
+    assert client.errors[:redirect_uris].any?
+  end
+
+  test "the personal access token issuer can't be destroyed, so its tokens can't cascade away with it" do
+    token = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:personal_access))
+
+    assert_not oauth_clients(:personal_access).destroy
+    assert Oauth::Client.exists?(oauth_clients(:personal_access).id)
+    assert Identity::AccessToken.exists?(token.id)
+  end
+
+  test "cleanup never sweeps the personal access token issuer, however long it goes unused" do
+    oauth_clients(:personal_access).update_columns updated_at: 1.year.ago
+
+    Oauth::Client.cleanup
+
+    assert Oauth::Client.exists?(oauth_clients(:personal_access).id)
+  end
 
   test "destroying a client with unsaved changes still destroys it and its grants" do
     client = Oauth::Client.create!(name: "Dirty", redirect_uris: %w[ http://127.0.0.1:8888/callback ])

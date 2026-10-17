@@ -32,3 +32,13 @@ confidential_client:
   token_endpoint_auth_method: client_secret_post
   dynamically_registered: true
   trusted: false
+
+personal_access:
+  client_id: fizzy-personal-access
+  name: Personal Access Tokens
+  redirect_uris: []
+  scopes:
+    - read
+    - write
+  dynamically_registered: false
+  trusted: true

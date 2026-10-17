@@ -49,7 +49,7 @@ module Authentication
     end
 
     def oauth_grant?
-      Current.access_token&.oauth_client_id?
+      Current.access_token&.oauth? || false
     end
 
     def forbid_oauth_grant

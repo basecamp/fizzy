@@ -15,6 +15,7 @@ class Oauth::TokensController < Oauth::BaseController
   # the answer must not depend on whether the code or refresh token is live,
   # or it tells whoever holds one without the secret.
   before_action :authenticate_client
+  before_action :validate_client_grant_type
   before_action :require_params
 
   with_options if: :authorization_code_grant? do
@@ -73,6 +74,15 @@ class Oauth::TokensController < Oauth::BaseController
         oauth_error "invalid_request", "Missing required parameter: grant_type"
       elsif !params[:grant_type].in?(%w[ authorization_code refresh_token ])
         oauth_error "unsupported_grant_type", "Only authorization_code and refresh_token grants are supported"
+      end
+    end
+
+    # A client is refused a grant type it isn't registered for (RFC 6749 §5.2),
+    # so the personal access token issuer, registered for none, can never
+    # mint, refresh or exchange a token here.
+    def validate_client_grant_type
+      if requesting_client && !requesting_client.allows_grant_type?(params[:grant_type])
+        oauth_error "unauthorized_client", "Client may not use the #{params[:grant_type]} grant"
       end
     end
 
