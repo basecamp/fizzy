@@ -49,7 +49,7 @@ class OauthDelegateResourcesTest < ActionDispatch::IntegrationTest
   test "revoking the grant removes the app's push subscriptions" do
     subscribe_push bearer(@grant)
 
-    untenanted { post oauth_revocation_path, params: { token: @grant.token, client_id: @client.client_id } }
+    untenanted { post oauth_revocation_path, params: { token: @grant.raw_token, client_id: @client.client_id } }
 
     assert_response :success
     assert_not Identity::AccessToken.exists?(@grant.id)
@@ -68,7 +68,7 @@ class OauthDelegateResourcesTest < ActionDispatch::IntegrationTest
 
   test "a replayed refresh token revoking the grant removes the app's push subscriptions" do
     subscribe_push bearer(@grant)
-    presented = @grant.refresh_token
+    presented = @grant.raw_refresh_token
     refresh presented
     assert_response :success
 
@@ -184,7 +184,7 @@ class OauthDelegateResourcesTest < ActionDispatch::IntegrationTest
     subscribe_push bearer(@grant)
     webhook = create_webhook bearer(@grant)
 
-    untenanted { post oauth_revocation_path, params: { token: other_grant.token, client_id: other.client_id } }
+    untenanted { post oauth_revocation_path, params: { token: other_grant.raw_token, client_id: other.client_id } }
 
     assert_not Identity::AccessToken.exists?(other_grant.id)
     assert Push::Subscription.exists?(endpoint: ENDPOINT)
@@ -329,7 +329,7 @@ class OauthDelegateResourcesTest < ActionDispatch::IntegrationTest
 
   private
     def bearer(token)
-      { "HTTP_AUTHORIZATION" => "Bearer #{token.token}" }
+      { "HTTP_AUTHORIZATION" => "Bearer #{token.raw_token}" }
     end
 
     def another_admins_grant

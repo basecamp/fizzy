@@ -1,0 +1,17 @@
+<%# Temporary, so Turbo's snapshot cache doesn't keep the token for Back to restore. %>
+<article id="new_access_token" class="panel panel--wide shadow center txt-align-start" style="view-transition-name: <%= dom_id(access_token) %>" data-turbo-temporary>
+  <div class="flex flex-column gap">
+    <label class="flex flex-column gap-half txt-align-start">
+      <strong><%= access_token.description %> (<%= access_token.permission == "write" ? "Read + Write" : "Read" %>)</strong>
+      <input type="text" value="<%= access_token.raw_token %>" class="input" readonly>
+    </label>
+    <p class="margin-none txt-small">Be sure to save this access token now because you won’t be able to see it again.</p>
+
+    <%= tag.button class: "btn btn--link center", data: {
+      controller: "copy-to-clipboard", action: "copy-to-clipboard#copy",
+          copy_to_clipboard_success_class: "btn--success", copy_to_clipboard_content_value: access_token.raw_token } do %>
+      <%= icon_tag "copy-paste" %>
+      <span>Copy access token</span>
+    <% end %>
+  </div>
+</article>

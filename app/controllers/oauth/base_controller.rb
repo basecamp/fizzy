@@ -35,9 +35,12 @@ class Oauth::BaseController < ApplicationController
     end
 
     # The metadata issuer and the iss authorization response parameter must be
-    # identical (RFC 9207 §2). script_name: nil keeps an account prefix out of it.
+    # identical (RFC 9207 §2), and clients compare them to the issuer they were
+    # configured with as exact strings (RFC 8414 §3.3). Like bc3's
+    # canonical_issuer_url, it's the origin with no trailing slash:
+    # https://app.fizzy.do. script_name: nil keeps an account prefix out of it.
     def oauth_issuer
-      root_url(script_name: nil)
+      root_url(script_name: nil).delete_suffix("/")
     end
 
     def prevent_caching

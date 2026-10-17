@@ -6,7 +6,7 @@ require "test_helper"
 class OauthGrantReachTest < ActionDispatch::IntegrationTest
   setup do
     @grant = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client), permission: :write)
-    @bearer = { "HTTP_AUTHORIZATION" => "Bearer #{@grant.token}" }
+    @bearer = { "HTTP_AUTHORIZATION" => "Bearer #{@grant.raw_token}" }
   end
 
   test "an OAuth grant can't consent to an app" do
@@ -105,7 +105,7 @@ class OauthGrantReachTest < ActionDispatch::IntegrationTest
 
   test "a personal access token still reads the join code and webhook credentials" do
     webhook = webhooks(:active)
-    pat = { "HTTP_AUTHORIZATION" => "Bearer #{identities(:kevin).access_tokens.create!(permission: :read).token}" }
+    pat = { "HTTP_AUTHORIZATION" => "Bearer #{identities(:kevin).access_tokens.create!(permission: :read).raw_token}" }
 
     get account_join_code_path, env: pat, as: :json
     assert_response :success
@@ -127,7 +127,7 @@ class OauthGrantReachTest < ActionDispatch::IntegrationTest
 
   private
     def admin_grant
-      token = identities(:kevin).access_tokens.create!(oauth_client: oauth_clients(:mcp_client), permission: :write).token
+      token = identities(:kevin).access_tokens.create!(oauth_client: oauth_clients(:mcp_client), permission: :write).raw_token
       { "HTTP_AUTHORIZATION" => "Bearer #{token}" }
     end
 

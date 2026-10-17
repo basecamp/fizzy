@@ -99,8 +99,8 @@ class Oauth::ClientsController < Oauth::BaseController
     def dynamic_client_registration_response(client)
       {
         client_id: client.client_id,
-        client_secret: client.client_secret,
-        client_secret_expires_at: (0 if client.client_secret),
+        client_secret: client.raw_client_secret,
+        client_secret_expires_at: (0 if client.raw_client_secret),
         client_name: client.name,
         redirect_uris: client.redirect_uris,
         token_endpoint_auth_method: client.token_endpoint_auth_method,
