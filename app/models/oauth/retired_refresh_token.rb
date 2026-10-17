@@ -31,11 +31,13 @@ class Oauth::RetiredRefreshToken < ApplicationRecord
     end
 
     def cleanup
-      stale.in_batches.delete_all
+      Oauth.cleanup_step(:retired_refresh_tokens) { stale.in_batches.delete_all }
     end
 
     def forget_successors
-      where(created_at: SUCCESSOR_SWEEP_WINDOW.ago...GRACE.ago).where.not(successor_payload: nil).update_all(successor_payload: nil)
+      Oauth.cleanup_step :refresh_successors do
+        where(created_at: SUCCESSOR_SWEEP_WINDOW.ago...GRACE.ago).where.not(successor_payload: nil).update_all(successor_payload: nil)
+      end
     end
 
     def successor_encryptor

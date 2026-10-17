@@ -44,6 +44,17 @@ module Oauth
     end
   end
 
+  # Each OAuth sweep runs as its own recurring job, and a failure still fails
+  # that job. It's also announced, as cleanup_failure.oauth, so a sweep that
+  # keeps failing can be counted and alerted on (SaaS counts it in Yabeda)
+  # rather than found later as the rows it left behind.
+  def self.cleanup_step(step)
+    yield
+  rescue => error
+    ActiveSupport::Notifications.instrument "cleanup_failure.oauth", step: step, error_class: error.class.name
+    raise
+  end
+
   def self.table_name_prefix
     "oauth_"
   end

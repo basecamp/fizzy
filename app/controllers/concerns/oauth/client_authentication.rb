@@ -127,6 +127,12 @@ module Oauth::ClientAuthentication
       nil
     end
 
+    # An error is labeled with the client the request names, authenticated or
+    # not: its type is all a metric takes from it.
+    def oauth_error_client
+      super || requesting_client
+    end
+
     # The pilot exemption keys on the client that authenticates, header or body.
     def piloting_client_id
       oauth_client_id
