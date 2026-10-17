@@ -159,6 +159,9 @@ class PersonalAccessTokenFormsTest < ActionDispatch::IntegrationTest
       subscription = Push::Subscription.find_by!(endpoint: ENDPOINT)
       assert_nil subscription.oauth_client
       assert_includes Push::Subscription.deliverable_to(users(:kevin)), subscription
+      with_oauth_availability acceptance: false do
+        assert_includes Push::Subscription.deliverable_to(users(:kevin)), subscription
+      end
 
       token.destroy
       assert Push::Subscription.exists?(subscription.id)
@@ -182,6 +185,15 @@ class PersonalAccessTokenFormsTest < ActionDispatch::IntegrationTest
 
       assert_equal token, Identity::AccessToken.find_honored(token.raw_token)
       assert_equal TokenDigester.digest(token.raw_token), token.reload.token_digest
+    end
+
+    test "a #{form} personal access token without a digest authenticates outside the primary datacenter, undigested" do
+      token = personal_token(issuer)
+      token.update_columns token_digest: nil
+      Deployment::DatabaseResolver.stubs(:in_primary_datacenter?).returns(false)
+
+      assert_equal token, Identity::AccessToken.find_honored(token.raw_token)
+      assert_nil token.reload.token_digest
     end
 
     test "issuing or revoking a #{form} personal access token leaves the issuer's retention clock alone" do
