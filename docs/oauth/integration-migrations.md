@@ -286,12 +286,12 @@ branch leaves both tests failing as they are.
 ## Re-verification, 2026-10-17 rebuild
 
 On thelio against a dedicated MySQL 8.4 container, at the merge of #3191 on the
-linear train (`fdf5d15d9`):
+linear train (`39d566a1d`):
 
 - Migration round trip on MySQL (OSS), from `main`'s schema loaded by `main`'s
   code: all ten up, all ten down newest first, all ten up. The dump differs
   from the committed `db/schema.rb` in column order only.
-- SaaS (MySQL) 2305 tests, OSS (SQLite) 2135, OSS (MySQL) 2135: **0 failures,
+- SaaS (MySQL) 2306 tests, OSS (SQLite) 2136, OSS (MySQL) 2136: **0 failures,
   0 errors**. #3191's pins now pass: D6 kept shipped clients' answers in #3158
   (a read-only personal access token's write keeps its 401, and a JSON request
   with no credentials keeps its 302), which supersedes the "Verification" note
