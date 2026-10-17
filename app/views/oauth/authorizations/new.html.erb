@@ -17,7 +17,12 @@
       <strong>Application</strong>
       <p class="margin-none"><%= @client.name %></p>
       <% if @client.dynamically_registered? %>
-        <p class="txt-small txt-muted margin-none">Registered by a local tool. Only authorize if you trust it.</p>
+        <% redirect = URI.parse(@redirect_uri) %>
+        <% if Oauth.loopback_host?(redirect.host) %>
+          <p class="txt-small txt-muted margin-none">Registered by a local tool. Only authorize if you trust it.</p>
+        <% else %>
+          <p class="txt-small txt-muted margin-none">Self-registered app that will receive access at <strong><%= redirect.port == redirect.default_port ? redirect.host : "#{redirect.host}:#{redirect.port}" %></strong>. Only authorize if you trust it.</p>
+        <% end %>
       <% end %>
     </div>
 
