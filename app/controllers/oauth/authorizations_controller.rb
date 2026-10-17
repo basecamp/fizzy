@@ -53,7 +53,7 @@ class Oauth::AuthorizationsController < Oauth::BaseController
         scope: Oauth.canonical_scope(params[:scope].presence || "read")
 
       record_consent "approved"
-      Oauth::Audit.record "code.issued", client: @client, actor: "user"
+      Oauth::Audit.record "code.issued", client: @client, identity_id: Current.identity.id, actor: "user"
       redirect_to success_redirect_uri(code), allow_other_host: true
     else
       oauth_error "invalid_request", "Unknown client"
@@ -62,7 +62,7 @@ class Oauth::AuthorizationsController < Oauth::BaseController
 
   private
     def record_consent(outcome)
-      Oauth::Audit.record "consent.#{outcome}", client: @client, actor: "user"
+      Oauth::Audit.record "consent.#{outcome}", client: @client, identity_id: Current.identity.id, actor: "user"
     end
 
     def denial?

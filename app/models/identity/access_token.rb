@@ -141,7 +141,7 @@ class Identity::AccessToken < ApplicationRecord
       create! authorization_code_jti: authorization_code.jti, **attributes
     rescue ActiveRecord::RecordNotUnique
       replayed = where(authorization_code_jti: authorization_code.jti).each { |grant| grant.revoke(reason: "code_replayed", actor: "system") }
-      Oauth::Audit.record "code.replayed", grant: replayed.first, client: attributes[:oauth_client], identity_id: replayed.first&.identity_id, actor: "client"
+      Oauth::Audit.record "code.replayed", grant: replayed.first, client: attributes[:oauth_client], actor: "client"
       nil
     end
 

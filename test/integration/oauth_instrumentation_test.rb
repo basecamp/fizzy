@@ -45,15 +45,7 @@ class OauthInstrumentationTest < ActionDispatch::IntegrationTest
   end
 
   test "an error is labeled with the client that asked, not the one the code was issued to" do
-    code = Oauth::AuthorizationCode.generate client_id: oauth_clients(:confidential_client).client_id, identity_id: identities(:david).id,
-      code_challenge: "challenge", redirect_uri: "https://connector.example.com/callback", scope: "read"
-
-    payloads = notifications("error.oauth") do
-      untenanted do
-        post oauth_token_path, params: { grant_type: "authorization_code", code: code, code_verifier: "v" * 43,
-          redirect_uri: "https://connector.example.com/callback", client_id: @client.client_id }
-      end
-    end
+    payloads = notifications("error.oauth") { exchange code_for(oauth_clients(:confidential_client)), client_id: @client.client_id }
 
     assert_equal [ { endpoint: "tokens", error_code: "invalid_grant", client_type: "public" } ], payloads
   end
@@ -62,6 +54,12 @@ class OauthInstrumentationTest < ActionDispatch::IntegrationTest
     payloads = notifications("error.oauth") { refresh "fizzy_rt_unknown", client_id: "nobody_#{SecureRandom.hex}" }
 
     assert_equal "unknown", payloads.sole[:client_type]
+  end
+
+  test "an error for a client that doesn't exist is labeled unknown, whoever the presented code was issued to" do
+    payloads = notifications("error.oauth") { exchange code_for(oauth_clients(:confidential_client)), client_id: "nobody_#{SecureRandom.hex}" }
+
+    assert_equal [ { endpoint: "tokens", error_code: "invalid_grant", client_type: "unknown" } ], payloads
   end
 
   test "a rejected registration is a clients error" do
@@ -91,6 +89,18 @@ class OauthInstrumentationTest < ActionDispatch::IntegrationTest
       callback = ->(event) { payloads << event.payload.dup }
       ActiveSupport::Notifications.subscribed(callback, name) { yield }
       payloads
+    end
+
+    def code_for(client)
+      Oauth::AuthorizationCode.generate client_id: client.client_id, identity_id: identities(:david).id,
+        code_challenge: "challenge", redirect_uri: client.redirect_uris.first, scope: "read"
+    end
+
+    def exchange(code, client_id:)
+      untenanted do
+        post oauth_token_path, params: \
+          { grant_type: "authorization_code", code: code, code_verifier: "v" * 43, redirect_uri: "https://connector.example.com/callback", client_id: client_id }
+      end
     end
 
     def refresh(refresh_token, client_id: @client.client_id)

@@ -214,7 +214,9 @@ class OauthAuditTest < ActionDispatch::IntegrationTest
     assert_equal "user", revoked[:actor]
   end
 
-  test "registering a client" do
+  test "registering a client attributes it to no one signed in" do
+    sign_in_as :david
+
     events = capture_oauth_events do
       untenanted do
         post oauth_clients_path, as: :json, params: \
@@ -228,6 +230,7 @@ class OauthAuditTest < ActionDispatch::IntegrationTest
     assert_equal "dcr", registered[:client_class]
     assert_equal "confidential", registered[:client_type]
     assert_equal "client", registered[:actor]
+    assert_nil registered[:identity_id]
     assert_no_secrets_in events, response.parsed_body["client_secret"]
   end
 

@@ -70,7 +70,7 @@ class Oauth::Client < ApplicationRecord
       destroy if self.class.stale.exists?(id)
     end
 
-    Oauth::Audit.record "client.swept", client: self, actor: "system", reason: "unused", identity_id: nil if swept
+    Oauth::Audit.record "client.swept", client: self, actor: "system", reason: "unused" if swept
   rescue ActiveRecord::RecordNotFound
     # Already gone, deleted since the sweep picked it.
   end

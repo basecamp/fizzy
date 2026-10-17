@@ -19,7 +19,10 @@ module Oauth::Audit
 
   extend self
 
-  def record(event, grant: nil, client: grant&.oauth_client, identity_id: grant&.identity_id || Current.identity&.id, actor:, reason: nil, **details)
+  # The identity is the grant's, or one named explicitly, never whoever
+  # happens to be signed in: a browser with a session can register a client
+  # too, and that registration is no act of theirs.
+  def record(event, grant: nil, client: grant&.oauth_client, identity_id: grant&.identity_id, actor:, reason: nil, **details)
     raise ArgumentError, "unknown actor #{actor.inspect}" unless actor.in?(ACTORS)
 
     name = "oauth.#{event}"
