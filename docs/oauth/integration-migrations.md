@@ -22,7 +22,7 @@ named for the PR:
 | #3159 | `oauth-client-sweep` | `eac532ca82a4` |
 | #3163 | `oauth-token-prefixes` | `918f2566ddca` |
 | #3169 | `oauth-delegate-resources` | `d0b4a26f7872` |
-| #3192 | `oauth-token-digests` | `1b3ab1f17ed5` |
+| #3192 | `oauth-token-digests` | `4cfbbd2ec21b` |
 | #3191 | `test/pin-shipped-client-auth` | `98572aaaf` |
 
 The train is linear since 2026-10-17 (#3160 restacked onto #3158), so the merges
@@ -297,11 +297,29 @@ linear train (`79c0c1a08`):
   with no credentials keeps its 302), which supersedes the "Verification" note
   above about two failing pins.
 
+## Re-verification, pepper rename
+
+#3192 renamed its pepper variable from `TOKEN_DIGEST_PEPPER` to
+`OAUTH_TOKEN_PEPPER` (head `4cfbbd2ec21b`), which changes no migration. On
+thelio against a dedicated MySQL 8.4 container, at the merge of #3191 on the
+rebuilt branch (`7a4b990bd`): SaaS (MySQL) 2309 tests, OSS (SQLite) 2139, OSS
+(MySQL) 2139, **0 failures, 0 errors**; rubocop clean. The one new test pins
+the variable's name.
+
 ## Before beta boots #3192
 
-`TOKEN_DIGEST_PEPPER` must exist in 1Password, Deploy/Fizzy vault, on the
-**Production** item (beta's `saas/.kamal/secrets.beta` reads it from there) and
-on the **Staging** item. Without it `kamal secrets fetch` fails and the app
-refuses to boot. It must never change afterwards. Run #8 to #10 in the same
-session as #1 to #7, and run them from this branch (which carries #3192), so no
-prefixed personal access token is written without a digest.
+`OAUTH_TOKEN_PEPPER` must exist in 1Password (account
+`23QPQDKZC5BKBIIG7UGT5GR5RM`, vault **Deploy**, item **Fizzy**) as two fields:
+
+- `Production/OAUTH_TOKEN_PEPPER`, read by production and by beta
+  (`saas/.kamal/secrets.beta`, which `secrets.beta1`–`4` link to, fetches the
+  Production field), since beta writes digests into production's database.
+  There is no Beta field to keep in step.
+- `Staging/OAUTH_TOKEN_PEPPER`, staging's own (its own database).
+
+Each at least 32 characters (`bin/rails secret`). Without it `kamal secrets
+fetch` fails for that destination, and a container started without it refuses
+to boot (`TokenDigester::MissingPepper`). It must never change afterwards. Run
+#8 to #10 in the same session as #1 to #7, and run them from this branch (which
+carries #3192), so no prefixed personal access token is written without a
+digest.
