@@ -119,6 +119,16 @@ Rails.application.configure do
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
 
+  # The OAuth authorization server ships dark: unless OAUTH_ACCEPTANCE_ENABLED is
+  # "true" there is no discovery, registration, authorization or token endpoint,
+  # and OAuth-issued tokens are refused. OAUTH_ISSUANCE_ENABLED=false pauses
+  # minting while existing tokens keep working. OAUTH_PILOT_CLIENT_IDS
+  # (comma-separated client_ids) exempts named clients from both switches.
+  # See Oauth::Availability. Applies to beta and staging, which load this file.
+  config.x.oauth.acceptance_enabled = ENV["OAUTH_ACCEPTANCE_ENABLED"] == "true"
+  config.x.oauth.issuance_enabled = ENV["OAUTH_ISSUANCE_ENABLED"] != "false"
+  config.x.oauth.pilot_client_ids = ENV.fetch("OAUTH_PILOT_CLIENT_IDS", "").split(",").map(&:strip).compact_blank
+
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
 end
