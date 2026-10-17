@@ -19,10 +19,10 @@ named for the PR:
 | #3158 | `oauth-bearer-challenge` | `600d34776249` |
 | #3160 | `oauth-refresh-replay` | `0956b57aafc7` |
 | #3161 | `oauth-grant-idle-expiry` | `9bf097414cdb` |
-| #3159 | `oauth-client-sweep` | `a26edcdc8c3d` |
-| #3163 | `oauth-token-prefixes` | `7e22445e1135` |
-| #3169 | `oauth-delegate-resources` | `ec7441a2114e` |
-| #3192 | `oauth-token-digests` | `82cdd19c3b72` |
+| #3159 | `oauth-client-sweep` | `eac532ca82a4` |
+| #3163 | `oauth-token-prefixes` | `918f2566ddca` |
+| #3169 | `oauth-delegate-resources` | `5d419983471f` |
+| #3192 | `oauth-token-digests` | `73f186d5669f` |
 | #3191 | `test/pin-shipped-client-auth` | `98572aaaf` |
 
 The train is linear since 2026-10-17 (#3160 restacked onto #3158), so the merges
