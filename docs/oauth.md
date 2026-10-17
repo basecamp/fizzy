@@ -11,7 +11,7 @@ Status is `main` as of 2026-10-15:
 - ? not yet assessed
 - — doesn't apply
 
-Main has no OAuth yet. The train is #2296 → #3080 → #3081 → #3082 → #3160 → #3161 → #3159 → #3163 → #3169 → #3192, with #3158 beside #3160. `oauth-integration-2026-10-15` carries #2296 through #3169, #3158 and #3191 for the manual beta migrations; #3192 and its three digest migrations still have to be merged into it before they run on beta. Stacked on #3192: #3204 (AU-1, OB-1), #3205 (LG-1, LG-2), and the D2 and D3 drafts #3202 and #3203 (TK-2), gated on production running D1 and then D2. Fizzy's own RFC ledger is `docs/oauth/spec_conformance.md` on #3159.
+Main has no OAuth yet. The train is #2296 → #3080 → #3081 → #3082 → #3158 → #3160 → #3161 → #3159 → #3163 → #3169 → #3192. `oauth-integration-2026-10-15` carries #2296 through #3169, #3158 and #3191 for the manual beta migrations; #3192 and its three digest migrations still have to be merged into it before they run on beta. Stacked on #3192: #3204 (AU-1, OB-1), #3205 (LG-1, LG-2), #3206 (GP-4, GP-5), and the D2 and D3 drafts #3202 and #3203 (TK-2), gated on production running D1 and then D2. Fizzy's own RFC ledger is `docs/oauth/spec_conformance.md` on #3159.
 
 ## Status
 
@@ -23,8 +23,8 @@ Main has no OAuth yet. The train is #2296 → #3080 → #3081 → #3082 → #316
 | GP-1, GP-2, GP-6 | ◐ | #2296: code only, S256 only, `iss`. |
 | GP-7 | ◐ | #2296: `state` is optional; when sent it's one string of at most 2048 characters, echoed exactly (`Oauth::AuthorizationsController#validate_state`). |
 | GP-3 | ◐ | #2296. |
-| GP-4 | ◐ | Stateless codes with a jti; a revoke inside the 60s doesn't stop redemption (no tombstone). |
-| GP-5 | ◐ | In the train, a replayed code destroys the grant its first redemption made (`Identity::AccessToken.redeem`), after client, redirect URI and PKCE are checked. |
+| GP-4 | ◐ | Stateless codes with a jti, single-use by a unique record of each redeemed jti, kept 25 hours (#3206). Not yet bound to `resource` (Phase B). |
+| GP-5 | ◐ | A replayed code destroys the grant its first redemption made (`Identity::AccessToken.redeem`), after client, redirect URI and PKCE are checked; #3206 keeps the code on record, so it mints nothing after its grant is gone. |
 | GP-8 | — | Declined: no consumer. |
 | GP-9 | ✗ | PAR. |
 | GP-10 | ✗ | Token exchange (Phase C). |
@@ -33,14 +33,14 @@ Main has no OAuth yet. The train is #2296 → #3080 → #3081 → #3082 → #316
 | RT-2 | ◐ | #3160 |
 | RT-3 | ◐ | #3160 / #3161 |
 | RT-4 | ◐ | #3161 |
-| RT-5 | ◐ | #3081 |
+| RT-5 | ◐ | #3081: narrows, never widens. **Deviation:** a grant is one row, so narrowing on refresh narrows the grant for good, where RFC 6749 §6 would have the new refresh token keep its predecessor's scope. That's strictly more restrictive than the rubric (which forbids only widening), and authorizing the app again restores a broader scope. No column added. |
 | CR-1 | ◐ | DCR only, no registry or CIMD. |
 | CR-2 | ◐ | #3082 |
 | CR-3 | ◐ | #3080, #3159. No global registration cap. |
 | CR-4 | ✗ | CIMD (Phase C′). |
 | CR-5, CR-6 | ◐ | #2296, #3080 |
 | DS-1, DS-2 | ◐ | #2296 |
-| DS-3 | ◐ | #3158 (decision D6 open). |
+| DS-3 | ◐ | #3158: an invalid or expired Bearer token gets 401 `invalid_token`; an OAuth grant without write gets 403 `insufficient_scope`. **Deviations for shipped clients** (the native apps and fizzy-cli, pinned by #3191): a JSON request with no credentials keeps its 302 to sign in, since nothing in it tells a shipped client from an OAuth one; and a read-only personal access token writing keeps its 401, now with an `insufficient_scope` challenge. Hosted OAuth clients discover through fizzy-mcp-server's 401 + `resource_metadata` and Fizzy's `/.well-known` metadata, so this costs them little. **Exit:** once the oldest supported native app and fizzy-cli handle a 401 challenge there. |
 | DS-4 | ✗ | |
 | TK-1 | ◐ | #3163: `fizzy_pat_`, `fizzy_at_`, `fizzy_rt_`, `fizzy_cs_`, each with 44 base58 characters (257 bits). Codes are stateless and unprefixed (GP-4). Not registered with GitHub secret scanning. |
 | TK-2 | ◐ | #3192 is step 1 of 3 (read by digest, plaintext fallback). Storing plaintext was an oversight; the conformance ledger's "Deliberate" entry is withdrawn. Steps 2 and 3 (#3202, #3203, drafts) remove the fallback and the plaintext column. The token-column index comes with step 1. |
@@ -54,7 +54,7 @@ Main has no OAuth yet. The train is #2296 → #3080 → #3081 → #3082 → #316
 | CX-2, CX-3 | ◐ | #2296 |
 | CX-4 | ◐ | #3169 |
 | CX-5, DX-1..2 | ✗ | |
-| LG-1 | ◐ | #3205 issues PATs from a first-party `fizzy-personal-access` client in the same digest-stored table. Listing them in Connected Apps is an open product call. |
+| LG-1 | ◐ | #3205 issues PATs from a first-party `fizzy-personal-access` client in the same digest-stored table. They stay on `/my/access_tokens`, not in Connected Apps (LG-1 allows either), and keep the `fizzy_pat_` prefix for secret scanning (TK-1). |
 | LG-2 | ◐ | #3205 backfills existing PATs onto that client in place, keeping reach, non-expiry and the token string. Pinned by #3191. |
 | SC-1 | ◐ | Per-IP limits only: token 20/min, revocation 20/min, registration 10/min. |
 | SC-2, SC-3 | ✗ | Per-client limits after authentication, and platform pacing (Phase C). |
