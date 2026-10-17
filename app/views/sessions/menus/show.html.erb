@@ -1,6 +1,6 @@
 <% @page_title = "Choose an account" %>
 
-<% cache [ Current.identity, @accounts ] do %>
+<% cache [ Current.identity, @accounts, single_sign_on_allows_account_creation? ] do %>
   <section
     class="panel panel--centered flex flex-column gap"
     style="--popup-icon-size: 24px; --popup-item-padding-inline: 0.5rem;"
@@ -24,8 +24,10 @@
       <p class="margin-none-block-start">You don’t have any Fizzy accounts.</p>
     <% end %>
 
-    <%= link_to new_signup_path, class: "btn center txt-small margin-block-start", data: { turbo_prefetch: false } do %>
-      <span>Sign up for a new Fizzy account</span>
+    <% if single_sign_on_allows_account_creation? %>
+      <%= link_to new_signup_path, class: "btn center txt-small margin-block-start", data: { turbo_prefetch: false } do %>
+        <span>Sign up for a new Fizzy account</span>
+      <% end %>
     <% end %>
   </section>
 <% end %>

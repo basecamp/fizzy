@@ -1,6 +1,7 @@
 class My::PasskeysController < ApplicationController
   include ActionPack::Passkey::Request
 
+  before_action -> { head :not_found if SingleSignOn.configured? }
   before_action :set_passkey, only: %i[ edit update destroy ]
 
   def index

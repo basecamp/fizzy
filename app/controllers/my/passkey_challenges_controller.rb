@@ -4,4 +4,5 @@ class My::PasskeyChallengesController < ActionPack::Passkey::ChallengesControlle
 
   allow_unauthenticated_access
   disallow_account_scope
+  before_action -> { head :not_found if SingleSignOn.configured? }
 end

@@ -20,6 +20,23 @@
     }
   }
 
+  /* Stacks panels in one column, which takes the width of one panel */
+  .settings__column {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--settings-spacer) * 2);
+    inline-size: 100%;
+    min-inline-size: 0;
+
+    @media (min-width: 960px) {
+      max-inline-size: 50%;
+
+      .settings__panel {
+        max-inline-size: 100%;
+      }
+    }
+  }
+
   /* Sections & Panels
   /* -------------------------------------------------------------------------- */
 

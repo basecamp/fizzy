@@ -4,12 +4,14 @@ module Authentication
   included do
     before_action :require_account # Checking and setting account must happen first
     before_action :require_authentication
+    before_action :require_single_sign_on_session
     helper_method :authenticated?
     helper_method :email_address_pending_authentication
+    helper_method :single_sign_on_allows_account_creation?
 
     etag { Current.identity.id if authenticated? }
 
-    include Authentication::ViaMagicLink, LoginHelper
+    include Authentication::ViaMagicLink, Authentication::ViaSingleSignOn, LoginHelper
   end
 
   class_methods do
@@ -20,6 +22,9 @@ module Authentication
 
     def allow_unauthenticated_access(**options)
       skip_before_action :require_authentication, **options
+      skip_before_action :require_single_sign_on_session, **options
+      # Public pages are open to everyone, so the account group does not limit them.
+      skip_before_action :ensure_single_sign_on_group, **options
       before_action :resume_session, **options
       allow_unauthorized_access **options
     end
@@ -93,8 +98,8 @@ module Authentication
       redirect_to main_app.root_url if Current.account.present?
     end
 
-    def start_new_session_for(identity)
-      identity.sessions.create!(user_agent: request.user_agent, ip_address: request.remote_ip).tap do |session|
+    def start_new_session_for(identity, **attributes)
+      identity.sessions.create!(user_agent: request.user_agent, ip_address: request.remote_ip, **attributes).tap do |session|
         set_current_session session
       end
     end

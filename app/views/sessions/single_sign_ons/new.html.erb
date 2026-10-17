@@ -1,0 +1,36 @@
+<% content_for :head do %>
+  <meta name="turbo-visit-control" content="reload">
+<% end %>
+
+<% if platform.native? %>
+  <% @page_title = "Open Fizzy in your browser" %>
+
+  <div class="panel panel--centered flex flex-column gap-half">
+    <header>
+      <h1 class="txt-x-large font-weight-black margin-none"><%= @page_title %></h1>
+      <p class="margin-block-start-half margin-none-block-end txt-medium txt-balance">
+        This account requires <%= SingleSignOn.provider_name %> sign-in. The app cannot sign in with <%= SingleSignOn.provider_name %> yet.
+      </p>
+    </header>
+  </div>
+<% else %>
+  <% @page_title = "Signing in…" %>
+
+  <div class="panel panel--centered flex flex-column gap-half">
+    <header class="margin-block-end">
+      <h1 class="txt-x-large font-weight-black margin-none"><%= @page_title %></h1>
+      <p class="margin-block-start-half margin-none-block-end txt-medium txt-balance">Opening <%= SingleSignOn.provider_name %>.</p>
+    </header>
+
+    <%= form_with url: session_single_sign_on_path, method: :post,
+          data: { turbo: false, controller: "clear-offline-cache auto-submit", action: "submit->clear-offline-cache#clearCache" } do |form| %>
+      <%= form.button type: "submit", class: "btn btn--link center txt-medium" do %>
+        <span>Continue with <%= SingleSignOn.provider_name %></span>
+      <% end %>
+    <% end %>
+  </div>
+<% end %>
+
+<% content_for :footer do %>
+  <%= render "sessions/footer" %>
+<% end %>

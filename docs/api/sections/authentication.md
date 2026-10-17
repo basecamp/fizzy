@@ -38,6 +38,28 @@ To authenticate a request using your access token, include it in the `Authorizat
 curl -H "Authorization: Bearer put-your-access-token-here" -H "Accept: application/json" https://app.fizzy.do/my/identity
 ```
 
+## Servers with single sign-on
+
+A self-hosted server can use single sign-on (SSO) as the only way in. On such a server, personal access tokens and magic link sign-in are inaccessible (`403 Forbidden`), and sign-ins must be done through SSO in the browser.
+
+__Response:__
+
+```json
+{
+  "error": "single_sign_on_required",
+  "message": "Sign in with SSO."
+}
+```
+
+If an account is limited to a group and the session is in neither that group nor the admin group (`SINGLE_SIGN_ON_ADMIN_GROUP`), the response will also be `403 Forbidden`:
+
+```json
+{
+  "error": "single_sign_on_group_required",
+  "message": "This account requires the SSO group /sales."
+}
+```
+
 ## Magic Link Authentication
 
 For native apps, you can authenticate users via magic links. This is a two-step process:

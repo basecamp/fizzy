@@ -6,6 +6,7 @@ Rails.application.routes.draw do
     resource :entropy
     resource :join_code
     resource :settings
+    resource :single_sign_on, only: :update
     resources :exports, only: [ :create, :show ]
     resources :imports, only: [ :new, :create, :show ]
   end
@@ -162,6 +163,10 @@ Rails.application.routes.draw do
       resource :magic_link
       resource :menu
       resource :passkey, only: :create
+
+      resource :single_sign_on, only: %i[ new create ] do
+        resource :callback, only: :show, module: :single_sign_ons
+      end
     end
   end
 

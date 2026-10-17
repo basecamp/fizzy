@@ -38,6 +38,7 @@ gem "ruby-vips", require: false # image_processing 2 no longer depends on it; Ac
 gem "platform_agent"
 gem "aws-sdk-s3", require: false
 gem "web-push"
+gem "jwt", "~> 3.2" # Single sign-on ID token signatures
 gem "net-http-persistent"
 gem "surfguard", bc: "surfguard" # The SSRF address policy behind webhook and push delivery
 gem "zip_kit"

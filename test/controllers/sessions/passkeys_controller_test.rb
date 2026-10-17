@@ -1,6 +1,17 @@
 require "test_helper"
 
 class Sessions::PasskeysControllerTest < ActionDispatch::IntegrationTest
+  test "create is not available with single sign-on" do
+    with_single_sign_on do
+      untenanted do
+        post session_passkey_path, as: :json
+      end
+    end
+
+    assert_response :forbidden
+    assert_equal "single_sign_on_required", response.parsed_body["error"]
+  end
+
   include WebauthnTestHelper
 
   setup do

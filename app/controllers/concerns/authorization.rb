@@ -3,6 +3,7 @@ module Authorization
 
   included do
     before_action :ensure_can_access_account, if: :authenticated_account_access?
+    before_action :ensure_single_sign_on_group, if: :authenticated_account_access?
   end
 
   class_methods do
@@ -35,6 +36,12 @@ module Authorization
           format.html { redirect_to session_menu_path(script_name: nil) }
           format.json { head :forbidden }
         end
+      end
+    end
+
+    def ensure_single_sign_on_group
+      unless Current.account.accessible_with?(Current.session)
+        refuse_single_sign_on_group
       end
     end
 

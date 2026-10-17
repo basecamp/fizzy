@@ -544,6 +544,7 @@ DEPENDENCIES
   image_processing (~> 2.2)
   importmap-rails
   jbuilder
+  jwt (~> 3.2)
   kamal
   letter_opener
   lexxy (= 1.0.1)

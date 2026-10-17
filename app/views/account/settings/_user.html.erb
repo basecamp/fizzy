@@ -14,7 +14,7 @@
       <label class="btn btn--circle" for="<%= dom_id(user, :role) %>" aria-label="Role: <%= role_display_name(user) %>">
         <%= icon_tag "crown" %>
         <span class="for-screen-reader">Role: <%= role_display_name(user) %></span>
-        <%= form.check_box :role, { data: { action: "form#submit" }, disabled: !Current.user.can_administer?(user), checked: user.admin?, hidden: true, id: dom_id(user, :role) }, "admin", "member" %>
+        <%= form.check_box :role, { data: { action: "form#submit" }, disabled: SingleSignOn.configured? || !Current.user.can_administer?(user), checked: user.admin?, hidden: true, id: dom_id(user, :role) }, "admin", "member" %>
       </label>
     </span>
   <% end %>

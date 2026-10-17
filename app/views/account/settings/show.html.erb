@@ -10,14 +10,24 @@
 <% end %>
 
 <div class="settings margin-block-start-half">
-  <div class="settings__panel settings__panel--users panel shadow center">
-    <%= render "account/settings/name", account: @account %>
-    <%= render "account/settings/users", users: @users %>
+  <div class="settings__column">
+    <div class="settings__panel settings__panel--users panel shadow center">
+      <%= render "account/settings/name", account: @account %>
+      <%= render "account/settings/users", users: @users %>
+    </div>
+
+    <% if SingleSignOn.configured? %>
+      <div class="settings__panel panel shadow center">
+        <%= render "account/settings/single_sign_on", account: @account %>
+      </div>
+    <% end %>
   </div>
 
-  <div class="settings__panel settings__panel--entropy panel shadow center">
-    <%= render "account/settings/entropy", account: @account %>
-    <%= render "account/settings/export" if Current.user.admin? || Current.user.owner? %>
-    <%= render "account/settings/cancellation" %>
+  <div class="settings__column">
+    <div class="settings__panel settings__panel--entropy panel shadow center">
+      <%= render "account/settings/entropy", account: @account %>
+      <%= render "account/settings/export" if Current.user.admin? || Current.user.owner? %>
+      <%= render "account/settings/cancellation" %>
+    </div>
   </div>
 </div>

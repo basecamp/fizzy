@@ -4,6 +4,7 @@ class Signups::CompletionsController < ApplicationController
   layout "public"
 
   disallow_account_scope
+  before_action :ensure_account_creation_allowed_by_single_sign_on
 
   def new
     @signup = Signup.new(identity: Current.identity)

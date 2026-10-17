@@ -1,0 +1,20 @@
+<% @page_title = "Failed to sign in" %>
+
+<div class="panel panel--centered flex flex-column gap-half">
+  <header class="margin-block-end">
+    <h1 class="txt-x-large font-weight-black margin-none"><%= @page_title %></h1>
+    <p class="margin-block-start-half margin-none-block-end txt-medium txt-balance"><%= @single_sign_on_failure_message %></p>
+  </header>
+
+  <%= button_to "Try #{SingleSignOn.provider_name} again", session_single_sign_on_path,
+        class: "btn btn--link center txt-medium",
+        form: { data: { turbo: false, controller: "clear-offline-cache", action: "submit->clear-offline-cache#clearCache" } } %>
+
+  <% if Current.session&.recently_authenticated_by_single_sign_on? %>
+    <%= link_to "Choose another account", session_menu_path, class: "btn btn--plain txt-link center txt-small" %>
+  <% end %>
+</div>
+
+<% content_for :footer do %>
+  <%= render "sessions/footer" %>
+<% end %>

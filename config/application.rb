@@ -15,6 +15,8 @@ module Fizzy
     config.filter_parameters += %i[
       passw secret token _key crypt salt certificate otp ssn
     ]
+    # Exact match, so parameters such as `code_challenge` stay readable.
+    config.filter_parameters += [ /\Acode\z/ ]
 
     # Include the `lib` directory in autoload paths. Use the `ignore:` option
     # to list subdirectories that don't contain `.rb` files or that shouldn't

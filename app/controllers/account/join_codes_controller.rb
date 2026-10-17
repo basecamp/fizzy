@@ -3,6 +3,7 @@ class Account::JoinCodesController < ApplicationController
 
   before_action :set_join_code
   before_action :ensure_admin, only: %i[ update destroy ]
+  before_action -> { head :not_found if SingleSignOn.configured? }
 
   def show
   end

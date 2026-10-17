@@ -137,6 +137,29 @@
         470
       ],
       "note": ""
+    },
+    {
+      "warning_type": "Redirect",
+      "warning_code": 18,
+      "fingerprint": "4b604328fc6758b690ad8ff99cd529781767fac810e9315349f81e6ae67ab356",
+      "check_name": "Redirect",
+      "message": "Possible unprotected redirect",
+      "file": "app/controllers/sessions/single_sign_ons_controller.rb",
+      "line": 17,
+      "link": "https://brakemanscanner.org/docs/warning_types/redirect/",
+      "code": "redirect_to(SingleSignOn::AuthorizationRequest.start(:return_to => return_to).url(:redirect_uri => single_sign_on_redirect_uri), :allow_other_host => true)",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Sessions::SingleSignOnsController",
+        "method": "create"
+      },
+      "user_input": "SingleSignOn::AuthorizationRequest.start(:return_to => return_to).url(:redirect_uri => single_sign_on_redirect_uri)",
+      "confidence": "Weak",
+      "cwe_id": [
+        601
+      ],
+      "note": "The redirect goes to the authorization endpoint from the discovery document of the configured SINGLE_SIGN_ON_ISSUER. The return_to parameter is checked with url_from, stored in the session, and not part of the redirect target."
     }
   ],
   "brakeman_version": "8.0.1"

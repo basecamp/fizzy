@@ -1,0 +1,21 @@
+<% @page_title = "Account access denied" %>
+
+<div class="panel panel--centered flex flex-column gap-half">
+  <header class="margin-block-end">
+    <h1 class="txt-x-large font-weight-black margin-none"><%= @page_title %></h1>
+    <p class="margin-block-start-half margin-none-block-end txt-medium txt-balance">
+      <%= Current.account.name %> requires the <%= SingleSignOn.provider_name %> group
+      <strong><%= Current.account.single_sign_on_group %></strong>. Ask an admin to add you to the group, then sign in again.
+    </p>
+  </header>
+
+  <%= button_to "Sign in with #{SingleSignOn.provider_name} again", session_single_sign_on_path(script_name: nil),
+        params: { return_to: return_to }, class: "btn btn--link center txt-medium",
+        form: { data: { turbo: false, controller: "clear-offline-cache", action: "submit->clear-offline-cache#clearCache" } } %>
+
+  <%= link_to "Choose another account", session_menu_path(script_name: nil), class: "btn btn--plain txt-link center txt-small" %>
+</div>
+
+<% content_for :footer do %>
+  <%= render "sessions/footer" %>
+<% end %>

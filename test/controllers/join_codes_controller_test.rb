@@ -6,6 +6,27 @@ class JoinCodesControllerTest < ActionDispatch::IntegrationTest
     @join_code = account_join_codes(:"37s")
   end
 
+  test "new shows that join links are off with single sign-on" do
+    with_single_sign_on do
+      get join_path(code: @join_code.code, script_name: @account.slug)
+    end
+
+    assert_response :gone
+    assert_select "h1", text: "Join links are off"
+    assert_select "form[action='/session/single_sign_on']"
+  end
+
+  test "create joins nobody with single sign-on" do
+    with_single_sign_on do
+      assert_no_difference [ "Identity.count", "User.count" ] do
+        post join_path(code: @join_code.code, script_name: @account.slug), params: { email_address: "newcomer@example.com" }
+      end
+    end
+
+    assert_response :gone
+  end
+
+
   test "new" do
     get join_path(code: @join_code.code, script_name: @account.slug)
 
