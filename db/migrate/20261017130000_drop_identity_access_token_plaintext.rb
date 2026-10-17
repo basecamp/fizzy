@@ -1,7 +1,11 @@
 # Drops the plaintext personal access tokens that BackfillTokenDigests and
-# BackfillRemainingTokenDigests left beside their digests. Tokens are found
-# only by digest, and Identity::AccessToken has ignored this column since
-# those backfills, so no process running that code names it.
+# BackfillRemainingTokenDigests left beside their digests.
+#
+# Run it only once every process runs the code that shipped with
+# BackfillRemainingTokenDigests, or later. That code finds tokens only by
+# digest and ignores this column, so it never names it. Code from before it
+# still writes personal access tokens' plaintext, and falls back to reading
+# it, so it fails once the column is gone.
 #
 # Undoing this restores the column empty and nullable, as it was before any
 # token was written. The tokens it held can't be recovered from their
