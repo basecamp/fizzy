@@ -41,6 +41,18 @@ class PersonalAccessTokenFormsTest < ActionDispatch::IntegrationTest
       assert_response :success
     end
 
+    # Shipped clients (fizzy-cli, the native apps) have always had a 401 for a
+    # read-only personal token's write. Only an app's grant gets the 403.
+    test "a #{form} read-only personal access token's write is a 401, as shipped clients expect" do
+      token = personal_token(issuer)
+
+      post boards_path(format: :json), params: { board: { name: "Not made" } }, env: bearer(token)
+
+      assert_response :unauthorized
+      assert_match 'error="insufficient_scope"', response.headers["WWW-Authenticate"]
+      assert_match 'scope="write"', response.headers["WWW-Authenticate"]
+    end
+
     test "a #{form} personal access token never lapses, however long it sits idle" do
       token = personal_token(issuer)
 
