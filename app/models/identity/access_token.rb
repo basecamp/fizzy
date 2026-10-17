@@ -78,6 +78,19 @@ class Identity::AccessToken < ApplicationRecord
   # whichever commits second finds none left.
   after_destroy_commit :end_app_plumbing, if: :oauth_client_id?
 
+  # Audit events (Oauth::Audit) are reported once the change commits, so an
+  # event always describes a grant that was really issued or really ended.
+  # Every ending passes through here, so none goes unrecorded: a caller that
+  # knows why says so through #revoke, and a cascade from a deleted identity or
+  # client is named by the association that destroyed it.
+  after_create_commit :record_issuance
+  after_destroy_commit :record_revocation
+
+  # Why this grant is ending, and who ended it, for its audit event: a Hash
+  # with :reason and :actor, and optionally :presented (the kind of token
+  # that was presented to revoke it).
+  attr_accessor :revocation
+
   class << self
     # The token a bearer request may authenticate with: active and honored.
     # Whether it permits the request's method is the caller's question.
@@ -112,10 +125,12 @@ class Identity::AccessToken < ApplicationRecord
     # selected (by code from before idle expiry, mid-deploy, whose rotation
     # doesn't check for lapse) is spared.
     def cleanup
-      lapsed.find_each do |grant|
-        grant.with_lock { grant.destroy if grant.lapsed? }
-      rescue ActiveRecord::RecordNotFound
-        # Already gone.
+      Oauth.cleanup_step :lapsed_grants do
+        lapsed.find_each do |grant|
+          grant.with_lock { grant.revoke(reason: "lapsed", actor: "system") if grant.lapsed? }
+        rescue ActiveRecord::RecordNotFound
+          # Already gone.
+        end
       end
     end
 
@@ -125,7 +140,8 @@ class Identity::AccessToken < ApplicationRecord
     def redeem(authorization_code, **attributes)
       create! authorization_code_jti: authorization_code.jti, **attributes
     rescue ActiveRecord::RecordNotUnique
-      where(authorization_code_jti: authorization_code.jti).destroy_all
+      replayed = where(authorization_code_jti: authorization_code.jti).each { |grant| grant.revoke(reason: "code_replayed", actor: "system") }
+      Oauth::Audit.record "code.replayed", grant: replayed.first, client: attributes[:oauth_client], actor: "client"
       nil
     end
 
@@ -171,6 +187,12 @@ class Identity::AccessToken < ApplicationRecord
     oauth_client_id? && (updated_at + REFRESH_IDLE_LIMIT).past?
   end
 
+  # Ends the grant, recording why and who ended it (see #revocation).
+  def revoke(reason:, actor:, **details)
+    self.revocation = { reason: reason, actor: actor, **details }
+    destroy!
+  end
+
   # Rotates atomically on the presented refresh token, so a concurrent
   # rotation wins the row and the loser comes up empty-handed. A grant that
   # lapses mid-request doesn't rotate either, so a sweep that found it lapsed
@@ -180,12 +202,13 @@ class Identity::AccessToken < ApplicationRecord
   # carries the new pair, encrypted, so a retry within the grace window can be
   # answered with it.
   def refresh(permission: self.permission)
+    narrowed = permission.to_s != self.permission
     raw_token, raw_refresh_token = self.class.generate_token(:access), self.class.generate_token(:refresh)
     rotated = { token: nil, token_digest: TokenDigester.digest(raw_token),
       refresh_token_digest: TokenDigester.digest(raw_refresh_token),
       expires_at: EXPIRES_IN.from_now, permission: permission, updated_at: Time.current }
 
-    transaction do
+    rotated_now = transaction do
       if self.class.unlapsed.where(id: id, refresh_token_digest: refresh_token_digest).update_all(rotated) == 1
         retired_refresh_tokens.create! \
           refresh_token_digest: refresh_token_digest,
@@ -195,9 +218,42 @@ class Identity::AccessToken < ApplicationRecord
         true
       end
     end
+
+    if rotated_now
+      Oauth::Audit.record "token.refreshed", grant: self, actor: "client", grant_type: "refresh_token", permission: self.permission
+      # A refresh may only narrow (RFC 6749 §6), so a change is a narrowing.
+      Oauth::Audit.record "grant.narrowed", grant: self, actor: "client", permission: self.permission if narrowed
+    end
+
+    rotated_now
   end
 
   private
+    def record_issuance
+      if oauth_client_id?
+        Oauth::Audit.record "code.redeemed", grant: self, actor: "client" if authorization_code_jti?
+        Oauth::Audit.record "grant.created", grant: self, actor: "client", permission: permission
+        Oauth::Audit.record "token.issued", grant: self, actor: "client", grant_type: "authorization_code", permission: permission
+      else
+        Oauth::Audit.record "pat.created", grant: self, actor: "user", permission: permission
+      end
+    end
+
+    def record_revocation
+      ending = revocation || { reason: cascade_reason, actor: "system" }
+      Oauth::Audit.record oauth_client_id? ? "grant.revoked" : "pat.revoked", grant: self, **ending
+    end
+
+    # A grant destroyed along with its identity or its client, which only the
+    # console or account deletion does: "identity_deleted" or "client_deleted".
+    def cascade_reason
+      if destroyed_by_association
+        "#{destroyed_by_association.active_record.model_name.element}_deleted"
+      else
+        "deleted"
+      end
+    end
+
     def end_app_plumbing
       unless self.class.exists?(identity_id: identity_id, oauth_client_id: oauth_client_id)
         Push::Subscription.where(oauth_client_id: oauth_client_id, user: User.where(identity_id: identity_id)).delete_all

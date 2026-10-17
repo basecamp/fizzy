@@ -32,10 +32,13 @@ class Oauth::AuthorizationsController < Oauth::BaseController
     @redirect_uri = params[:redirect_uri]
     @state = params[:state]
     @code_challenge = params[:code_challenge]
+
+    record_consent "shown"
   end
 
   def create
     if denial?
+      record_consent "denied"
       redirect_to error_redirect_uri("access_denied", "User denied the request"), allow_other_host: true
     # Consent is use, so it restarts a self-registered client's retention
     # period: the sweep (Oauth::Client.cleanup) mustn't remove the client while
@@ -49,6 +52,8 @@ class Oauth::AuthorizationsController < Oauth::BaseController
         redirect_uri: params[:redirect_uri],
         scope: Oauth.canonical_scope(params[:scope].presence || "read")
 
+      record_consent "approved"
+      Oauth::Audit.record "code.issued", client: @client, identity_id: Current.identity.id, actor: "user"
       redirect_to success_redirect_uri(code), allow_other_host: true
     else
       oauth_error "invalid_request", "Unknown client"
@@ -56,6 +61,10 @@ class Oauth::AuthorizationsController < Oauth::BaseController
   end
 
   private
+    def record_consent(outcome)
+      Oauth::Audit.record "consent.#{outcome}", client: @client, identity_id: Current.identity.id, actor: "user"
+    end
+
     def denial?
       request.post? && params[:error] == "access_denied"
     end

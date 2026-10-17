@@ -22,7 +22,7 @@ class My::ConnectedAppsController < ApplicationController
       Webhook.set_up_through(@client, identity: Current.identity).where(id: params.expect(webhook_ids: [])).destroy_all
     end
 
-    @tokens.destroy_all
+    @tokens.each { |grant| grant.revoke reason: "disconnected", actor: "user" }
 
     redirect_to my_connected_apps_path, notice: "#{@client.name} has been disconnected"
   end
