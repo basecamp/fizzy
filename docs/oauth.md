@@ -11,7 +11,7 @@ Status is `main` as of 2026-10-15:
 - ? not yet assessed
 - — doesn't apply
 
-Main has no OAuth yet. The train is #2296 → #3080 → #3081 → #3082 → #3160 → #3161 → #3159 → #3163 → #3169 → #3192, with #3158 beside #3160, and it is integrated for beta on `oauth-integration-2026-10-15`. Fizzy's own RFC ledger is `docs/oauth/spec_conformance.md` on #3159.
+Main has no OAuth yet. The train is #2296 → #3080 → #3081 → #3082 → #3160 → #3161 → #3159 → #3163 → #3169 → #3192, with #3158 beside #3160. `oauth-integration-2026-10-15` carries #2296 through #3169, #3158 and #3191 for the manual beta migrations; #3192 and its three digest migrations still have to be merged into it before they run on beta. Stacked on #3192: #3204 (AU-1, OB-1), #3205 (LG-1, LG-2), and the D2 and D3 drafts (TK-2). Fizzy's own RFC ledger is `docs/oauth/spec_conformance.md` on #3159.
 
 ## Status
 
