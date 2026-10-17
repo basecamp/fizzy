@@ -18,6 +18,7 @@ Snapshot: 2026-10-06, at the heads of the OAuth train, rebased onto main:
 | [#3161](https://github.com/basecamp/fizzy/pull/3161) | `oauth-grant-idle-expiry` | 90-day idle expiry of grants (on #3160) |
 | [#3159](https://github.com/basecamp/fizzy/pull/3159) | `oauth-client-sweep` | Sweep of abandoned DCR clients (on #3161) |
 | [#3192](https://github.com/basecamp/fizzy/pull/3192) | `oauth-token-digests` | Tokens and client secrets stored as digests, step 1 of 3 (on #3169) |
+| D2 | `oauth-token-digests-d2` | Personal access tokens stored and found only by digest, step 2 of 3 (on #3192) |
 
 Commits are cited by subject, with the short SHA as of the snapshot. Rebases change
 the SHAs of #3080 and above; the subjects stay the same.
@@ -89,7 +90,7 @@ Status key:
 
 | Requirement | Status |
 |---|---|
-| Tokens are stored as HMAC-SHA256 digests under a server pepper, byte-compatible with bc3's `Oauth::TokenDigester`, and looked up by a unique index on the digest. Raw values are shown once: in the token response, the registration response, or the response that creates a personal access token | **Fixed** #3192 `oauth-token-digests`, step 1 of 3. OAuth access and refresh tokens and client secrets are digest-only, and a refresh retry within the grace window is answered from an encrypted copy of the successor pair that expires with the window. Personal access tokens are digested and, until step 3, still also kept in plaintext, because production code that reads only plaintext shares the database while beta runs this. One written without a digest is found by plaintext once and digested. Step 2 stops reading and writing plaintext; step 3 drops the column. |
+| Tokens are stored as HMAC-SHA256 digests under a server pepper, byte-compatible with bc3's `Oauth::TokenDigester`, and looked up by a unique index on the digest. Raw values are shown once: in the token response, the registration response, or the response that creates a personal access token | **Fixed** #3192 `oauth-token-digests`, step 1 of 3. OAuth access and refresh tokens and client secrets are digest-only, and a refresh retry within the grace window is answered from an encrypted copy of the successor pair that expires with the window. Step 2 (D2 `oauth-token-digests-d2`) makes personal access tokens digest-only too: they're written and found only by digest, after a rerun of the backfill digests any that production wrote in plaintext before step 1 reached it. The plaintext they held before then stays in a column the code ignores, until step 3 drops it. |
 | Newly issued tokens carry a distinctive prefix naming their kind: `fizzy_pat_` (personal access token), `fizzy_at_` (OAuth access token), `fizzy_rt_` (OAuth refresh token). Tokens issued earlier have no prefix and still work | **Fixed** #3163. bc3 prefixes similarly (`bc_at_`, `bc_rt_`, and PATs as `bc_at_`). Client secrets carry `fizzy_cs_`, as bc3's carry `bc_cs_`. New tokens and secrets carry 44 base58 characters after the prefix, 257 bits, at least bc3's 32 bytes (rubric TK-1); earlier ones are 24 characters and keep working. Nobody has registered with GitHub's secret-scanning partner program, either here or in bc3. |
 
 ## Refresh tokens (RFC 6749 §6, OAuth 2.1 §4.3, RFC 9700 §4.14)
