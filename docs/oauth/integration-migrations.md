@@ -12,17 +12,17 @@ named for the PR:
 
 | PR | Branch | Head |
 |---|---|---|
-| #2296 | `oauth` | `76024c1e2f37` |
-| #3080 | `oauth-dcr-https` | `13b082285071` |
-| #3081 | `oauth-refresh-tokens` | `243fd48a6045` |
-| #3082 | `oauth-confidential-clients` | `dc2d791ecc29` |
-| #3158 | `oauth-bearer-challenge` | `cb10c0cf62c7` |
-| #3160 | `oauth-refresh-replay` | `3a6626e95a57` |
-| #3161 | `oauth-grant-idle-expiry` | `7e4072cc3f76` |
-| #3159 | `oauth-client-sweep` | `6ff3be4b0fbc` |
-| #3163 | `oauth-token-prefixes` | `313046c981c4` |
-| #3169 | `oauth-delegate-resources` | `aef9fb5fb895` |
-| #3192 | `oauth-token-digests` | `1ef16f3d245e` |
+| #2296 | `oauth` | `f64ab634ab6e` |
+| #3080 | `oauth-dcr-https` | `5d74b5309ec2` |
+| #3081 | `oauth-refresh-tokens` | `017291f81210` |
+| #3082 | `oauth-confidential-clients` | `274c56688b18` |
+| #3158 | `oauth-bearer-challenge` | `dd2b951f18af` |
+| #3160 | `oauth-refresh-replay` | `2cf65f62363c` |
+| #3161 | `oauth-grant-idle-expiry` | `5d8dbbac996a` |
+| #3159 | `oauth-client-sweep` | `29c0e05b8bbc` |
+| #3163 | `oauth-token-prefixes` | `f3114a767a91` |
+| #3169 | `oauth-delegate-resources` | `898baf5b03e9` |
+| #3192 | `oauth-token-digests` | `2bf7e87ea884` |
 | #3191 | `test/pin-shipped-client-auth` | `98572aaaf` |
 
 One textual conflict, merging #3161 after its sibling #3158, both appending
