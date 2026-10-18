@@ -164,13 +164,8 @@ class Identity::AccessTokenTest < ActiveSupport::TestCase
   end
 
   test "no token is stored in plaintext" do
-    assert_not_includes Identity::AccessToken.column_names, "token"
-  end
-
-  # Dropped beside `token` only once every process runs code that ignores it.
-  test "the plaintext refresh token column is ignored" do
-    assert_not_includes Identity::AccessToken.column_names, "refresh_token"
-    assert_not Identity::AccessToken.new.respond_to?(:refresh_token)
+    assert_not Identity::AccessToken.connection.column_exists?(:identity_access_tokens, :token)
+    assert_not Identity::AccessToken.connection.column_exists?(:identity_access_tokens, :refresh_token)
   end
 
   test "two tokens can't share a digest" do
