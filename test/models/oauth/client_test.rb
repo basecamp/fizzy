@@ -246,13 +246,15 @@ class Oauth::ClientTest < ActiveSupport::TestCase
       token_endpoint_auth_method: "client_secret_post"
     )
     assert client.confidential?
-    assert_match(/\Afizzy_cs_[1-9A-HJ-NP-Za-km-z]{44}\z/, client.client_secret)
+    assert_match(/\Afizzy_cs_[1-9A-HJ-NP-Za-km-z]{44}\z/, client.raw_client_secret)
+    assert_equal TokenDigester.digest(client.raw_client_secret), client.reload.client_secret_digest
   end
 
   test "public clients get no client secret" do
     client = Oauth::Client.create!(name: "Public", redirect_uris: %w[ http://127.0.0.1:8888/callback ])
     assert_not client.confidential?
-    assert_nil client.client_secret
+    assert_nil client.raw_client_secret
+    assert_nil client.client_secret_digest
   end
 
   test "client_secret_basic clients are confidential" do
@@ -262,7 +264,7 @@ class Oauth::ClientTest < ActiveSupport::TestCase
       token_endpoint_auth_method: "client_secret_basic"
     )
     assert client.confidential?
-    assert_not_nil client.client_secret
+    assert_not_nil client.raw_client_secret
   end
 
   test "token_endpoint_auth_method must be supported" do

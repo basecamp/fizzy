@@ -60,7 +60,7 @@ class ApiTest < ActionDispatch::IntegrationTest
     token = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client), permission: :write)
 
     travel Identity::AccessToken::EXPIRES_IN + 1.second do
-      get boards_path(format: :json), env: bearer_token_env(token.token)
+      get boards_path(format: :json), env: bearer_token_env(token.raw_token)
     end
 
     assert_response :unauthorized
@@ -71,7 +71,7 @@ class ApiTest < ActionDispatch::IntegrationTest
     token = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client), permission: :write)
 
     with_oauth_availability acceptance: false do
-      get boards_path(format: :json), env: bearer_token_env(token.token)
+      get boards_path(format: :json), env: bearer_token_env(token.raw_token)
     end
 
     assert_response :unauthorized
@@ -92,7 +92,7 @@ class ApiTest < ActionDispatch::IntegrationTest
   test "a read-only grant changing data is forbidden, so the app asks for write" do
     token = identities(:jason).access_tokens.create!(oauth_client: oauth_clients(:mcp_client), permission: :read)
 
-    post boards_path(format: :json), params: { board: { name: "My new board" } }, env: bearer_token_env(token.token)
+    post boards_path(format: :json), params: { board: { name: "My new board" } }, env: bearer_token_env(token.raw_token)
 
     assert_response :forbidden
     assert_bearer_challenge error: "insufficient_scope"
@@ -108,7 +108,7 @@ class ApiTest < ActionDispatch::IntegrationTest
     token = identities(:jason).access_tokens.create!(oauth_client: oauth_clients(:mcp_client), permission: :read)
 
     travel Identity::AccessToken::EXPIRES_IN + 1.second do
-      post boards_path(format: :json), params: { board: { name: "My new board" } }, env: bearer_token_env(token.token)
+      post boards_path(format: :json), params: { board: { name: "My new board" } }, env: bearer_token_env(token.raw_token)
     end
 
     assert_response :unauthorized

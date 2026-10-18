@@ -173,18 +173,19 @@ class OauthAvailabilityTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :not_found
-    assert_equal token.refresh_token, token.reload.refresh_token
+    assert_equal token.refresh_token_digest, token.reload.refresh_token_digest
   end
 
   test "pausing issuance refuses refresh with 503 and leaves the grant untouched" do
     token = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client), permission: :read)
+    raw_token = token.raw_token
 
     with_oauth_availability acceptance: true, issuance: false do
       untenanted { post oauth_token_path, params: refresh_params(token), as: :json }
       assert_response :service_unavailable
-      assert_equal token.refresh_token, token.reload.refresh_token
+      assert_equal token.refresh_token_digest, token.reload.refresh_token_digest
 
-      get user_path(users(:david)), env: bearer(token.token), as: :json
+      get user_path(users(:david)), env: bearer(raw_token), as: :json
       assert_response :success
     end
   end
@@ -198,7 +199,7 @@ class OauthAvailabilityTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :success
-    assert_not_equal token.refresh_token, token.reload.refresh_token
+    assert_not_equal token.refresh_token_digest, token.reload.refresh_token_digest
   end
 
   test "a dark server refreshes no confidential grants, even with the right secret" do
@@ -206,11 +207,11 @@ class OauthAvailabilityTest < ActionDispatch::IntegrationTest
     token = identities(:david).access_tokens.create!(oauth_client: client, permission: :read)
 
     with_oauth_availability acceptance: false do
-      untenanted { post oauth_token_path, params: refresh_params(token).merge(client_secret: client.client_secret) }
+      untenanted { post oauth_token_path, params: refresh_params(token).merge(client_secret: "confidential_secret_789") }
     end
 
     assert_response :not_found
-    assert_equal token.refresh_token, token.reload.refresh_token
+    assert_equal token.refresh_token_digest, token.reload.refresh_token_digest
   end
 
   test "a confidential pilot client still authenticates against a dark server" do
@@ -222,7 +223,7 @@ class OauthAvailabilityTest < ActionDispatch::IntegrationTest
     end
 
     assert_client_authentication_failed basic: false
-    assert_equal token.refresh_token, token.reload.refresh_token
+    assert_equal token.refresh_token_digest, token.reload.refresh_token_digest
   end
 
   # Acceptance
@@ -231,7 +232,7 @@ class OauthAvailabilityTest < ActionDispatch::IntegrationTest
     token = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client), permission: :read)
 
     with_oauth_availability acceptance: false do
-      get user_path(users(:david)), env: bearer(token.token), as: :json
+      get user_path(users(:david)), env: bearer(token.raw_token), as: :json
     end
 
     assert_response :unauthorized
@@ -249,7 +250,7 @@ class OauthAvailabilityTest < ActionDispatch::IntegrationTest
     token = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client), permission: :read)
 
     with_oauth_availability acceptance: true, issuance: false do
-      get user_path(users(:david)), env: bearer(token.token), as: :json
+      get user_path(users(:david)), env: bearer(token.raw_token), as: :json
     end
 
     assert_response :success
@@ -262,7 +263,7 @@ class OauthAvailabilityTest < ActionDispatch::IntegrationTest
 
     with_oauth_availability acceptance: false, issuance: false do
       assert_difference "Identity::AccessToken.count", -1 do
-        untenanted { post oauth_revocation_path, params: { token: token.token, client_id: token.oauth_client.client_id } }
+        untenanted { post oauth_revocation_path, params: { token: token.raw_token, client_id: token.oauth_client.client_id } }
       end
     end
 
@@ -315,7 +316,7 @@ class OauthAvailabilityTest < ActionDispatch::IntegrationTest
     end
 
     def refresh_params(token)
-      { grant_type: "refresh_token", refresh_token: token.refresh_token, client_id: token.oauth_client.client_id }
+      { grant_type: "refresh_token", refresh_token: token.raw_refresh_token, client_id: token.oauth_client.client_id }
     end
 
     def bearer(token)

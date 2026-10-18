@@ -29,6 +29,11 @@ class Oauth::Client < ApplicationRecord
   validates :token_endpoint_auth_method, inclusion: { in: AUTH_METHODS }
   validate :redirect_uris_are_valid
 
+  # A confidential client's secret is stored as a digest (TokenDigester). The
+  # raw secret exists only in memory on the record that generated it, for the
+  # registration response, the one time it's shown.
+  attribute :raw_client_secret, :string
+
   before_create :generate_client_secret, if: :confidential?
 
   attribute :redirect_uris, default: -> { [] }
@@ -73,8 +78,7 @@ class Oauth::Client < ApplicationRecord
   end
 
   def authenticate_secret(secret)
-    confidential? && client_secret.present? && secret.is_a?(String) && secret.present? &&
-      ActiveSupport::SecurityUtils.secure_compare(client_secret, secret)
+    confidential? && client_secret_digest.present? && TokenDigester.verify(secret, client_secret_digest)
   end
 
   def allows_redirect?(uri)
@@ -103,7 +107,8 @@ class Oauth::Client < ApplicationRecord
     end
 
     def generate_client_secret
-      self.client_secret ||= Identity::AccessToken.generate_token(:client_secret)
+      self.raw_client_secret ||= Identity::AccessToken.generate_token(:client_secret)
+      self.client_secret_digest = TokenDigester.digest(raw_client_secret)
     end
 
     def redirect_uris_are_valid

@@ -11,7 +11,7 @@ class OauthRefreshReplayTest < ActionDispatch::IntegrationTest
   end
 
   test "a retry within the grace window gets the same successor, and rotates nothing" do
-    presented = @grant.refresh_token
+    presented = @grant.raw_refresh_token
     refresh presented
     first = response.parsed_body
 
@@ -20,11 +20,26 @@ class OauthRefreshReplayTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_equal first.slice("access_token", "refresh_token", "scope"), response.parsed_body.slice("access_token", "refresh_token", "scope")
-    assert_equal first["refresh_token"], @grant.reload.refresh_token
+    assert_equal TokenDigester.digest(first["refresh_token"]), @grant.reload.refresh_token_digest
+  end
+
+  test "a retry within the grace window whose successor pair is gone is refused, without revoking" do
+    presented = @grant.raw_refresh_token
+    refresh presented
+    successor = response.parsed_body
+    Oauth::RetiredRefreshToken.update_all successor_payload: nil
+
+    travel 1.second
+    refresh presented
+
+    assert_response :bad_request
+    assert_equal "invalid_grant", response.parsed_body["error"]
+    assert Identity::AccessToken.exists?(@grant.id)
+    assert_equal TokenDigester.digest(successor["refresh_token"]), @grant.reload.refresh_token_digest
   end
 
   test "a replay at the end of the grace window revokes the grant" do
-    presented = @grant.refresh_token
+    presented = @grant.raw_refresh_token
     refresh presented
     successor = response.parsed_body
 
@@ -37,7 +52,7 @@ class OauthRefreshReplayTest < ActionDispatch::IntegrationTest
   end
 
   test "a replay long after rotation revokes the grant" do
-    presented = @grant.refresh_token
+    presented = @grant.raw_refresh_token
     refresh presented
     successor = response.parsed_body
 
@@ -50,7 +65,7 @@ class OauthRefreshReplayTest < ActionDispatch::IntegrationTest
   end
 
   test "a replay of an older ancestor revokes the grant" do
-    ancestor = @grant.refresh_token
+    ancestor = @grant.raw_refresh_token
     refresh ancestor
     travel 1.hour
     refresh response.parsed_body["refresh_token"]
@@ -64,7 +79,7 @@ class OauthRefreshReplayTest < ActionDispatch::IntegrationTest
   end
 
   test "a retry within the grace window after the successor has itself rotated is refused, without revoking" do
-    ancestor = @grant.refresh_token
+    ancestor = @grant.raw_refresh_token
     refresh ancestor
     travel 1.second
     refresh response.parsed_body["refresh_token"]
@@ -76,11 +91,11 @@ class OauthRefreshReplayTest < ActionDispatch::IntegrationTest
     assert_response :bad_request
     assert_equal "invalid_grant", response.parsed_body["error"]
     assert Identity::AccessToken.exists?(@grant.id)
-    assert_equal successor["refresh_token"], @grant.reload.refresh_token
+    assert_equal TokenDigester.digest(successor["refresh_token"]), @grant.reload.refresh_token_digest
   end
 
   test "a superseded retry within the grace window is refused as superseded, whatever scope it asks for" do
-    ancestor = @grant.refresh_token
+    ancestor = @grant.raw_refresh_token
     refresh ancestor
     travel 1.second
     refresh response.parsed_body["refresh_token"]
@@ -99,7 +114,7 @@ class OauthRefreshReplayTest < ActionDispatch::IntegrationTest
   end
 
   test "a replay asking for a scope beyond the grant still revokes it" do
-    presented = @grant.refresh_token
+    presented = @grant.raw_refresh_token
     refresh presented
     successor = response.parsed_body
 
@@ -114,7 +129,7 @@ class OauthRefreshReplayTest < ActionDispatch::IntegrationTest
   end
 
   test "a retry within the grace window weighs its scope as a live refresh would" do
-    presented = @grant.refresh_token
+    presented = @grant.raw_refresh_token
     refresh presented
     successor = response.parsed_body
 
@@ -127,12 +142,12 @@ class OauthRefreshReplayTest < ActionDispatch::IntegrationTest
       assert_equal "invalid_scope", response.parsed_body["error"], scope.inspect
     end
 
-    assert_equal successor["refresh_token"], @grant.reload.refresh_token
+    assert_equal TokenDigester.digest(successor["refresh_token"]), @grant.reload.refresh_token_digest
   end
 
   test "a retry within the grace window must ask for the scope the rotation produced" do
     @grant.update! permission: :write
-    presented = @grant.refresh_token
+    presented = @grant.raw_refresh_token
     refresh presented
     successor = response.parsed_body
     assert_equal "read write", successor["scope"]
@@ -151,7 +166,7 @@ class OauthRefreshReplayTest < ActionDispatch::IntegrationTest
   end
 
   test "a successor rotated by a host whose clock runs behind still supersedes the retry" do
-    ancestor = @grant.refresh_token
+    ancestor = @grant.raw_refresh_token
     refresh ancestor
     travel(-5.seconds)
     refresh response.parsed_body["refresh_token"]
@@ -162,11 +177,11 @@ class OauthRefreshReplayTest < ActionDispatch::IntegrationTest
 
     assert_response :bad_request
     assert_equal "invalid_grant", response.parsed_body["error"]
-    assert_equal successor["refresh_token"], @grant.reload.refresh_token
+    assert_equal TokenDigester.digest(successor["refresh_token"]), @grant.reload.refresh_token_digest
   end
 
   test "a replay whose grant vanished mid-request is refused, not an error" do
-    presented = @grant.refresh_token
+    presented = @grant.raw_refresh_token
     loser = Identity::AccessToken.find(@grant.id)
     refresh presented
     Identity::AccessToken.where(id: @grant.id).delete_all
@@ -179,7 +194,7 @@ class OauthRefreshReplayTest < ActionDispatch::IntegrationTest
   end
 
   test "another client replaying a rotated token is refused, without revoking" do
-    presented = @grant.refresh_token
+    presented = @grant.raw_refresh_token
     refresh presented
 
     travel 1.day
@@ -191,7 +206,7 @@ class OauthRefreshReplayTest < ActionDispatch::IntegrationTest
   end
 
   test "a refresh that loses a concurrent rotation gets the winner's successor" do
-    presented = @grant.refresh_token
+    presented = @grant.raw_refresh_token
     loser = Identity::AccessToken.find(@grant.id)
 
     refresh presented
@@ -205,7 +220,7 @@ class OauthRefreshReplayTest < ActionDispatch::IntegrationTest
   end
 
   test "revoking a rotated refresh token revokes the grant" do
-    presented = @grant.refresh_token
+    presented = @grant.raw_refresh_token
     refresh presented
     successor = response.parsed_body
 
@@ -216,7 +231,7 @@ class OauthRefreshReplayTest < ActionDispatch::IntegrationTest
   end
 
   test "another client cannot revoke through a rotated refresh token" do
-    presented = @grant.refresh_token
+    presented = @grant.raw_refresh_token
     refresh presented
 
     untenanted { post oauth_revocation_path, params: { token: presented, client_id: oauth_clients(:trusted_client).client_id } }

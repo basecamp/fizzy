@@ -6,22 +6,22 @@ class Oauth::RetiredRefreshTokenTest < ActiveSupport::TestCase
   end
 
   test "rotation retires the presented refresh token" do
-    presented = @grant.refresh_token
+    presented = @grant.raw_refresh_token
 
     assert @grant.refresh
 
-    assert_equal [ presented ], @grant.retired_refresh_tokens.pluck(:refresh_token)
+    assert_equal [ TokenDigester.digest(presented) ], @grant.retired_refresh_tokens.pluck(:refresh_token_digest)
   end
 
   test "a rotation that loses the race retires nothing and leaves the winner's successor retryable" do
-    presented = @grant.refresh_token
+    presented = @grant.raw_refresh_token
     loser = Identity::AccessToken.find(@grant.id)
 
     assert @grant.refresh
     assert_nil loser.refresh
 
     assert_equal 1, Oauth::RetiredRefreshToken.count
-    assert Oauth::RetiredRefreshToken.find_by(refresh_token: presented).retryable?(@grant.reload)
+    assert Oauth::RetiredRefreshToken.find_by_raw_token(presented).retryable?(@grant.reload)
   end
 
   test "revoking a grant deletes its retired refresh tokens" do
@@ -55,5 +55,60 @@ class Oauth::RetiredRefreshTokenTest < ActiveSupport::TestCase
     assert_difference "Oauth::RetiredRefreshToken.count", -1 do
       Oauth::RetiredRefreshToken.cleanup
     end
+  end
+
+  test "a retired token keeps digests, and the successor pair only encrypted" do
+    presented = @grant.raw_refresh_token
+    @grant.refresh
+    retired = @grant.retired_refresh_tokens.sole
+
+    assert_equal TokenDigester.digest(presented), retired.refresh_token_digest
+    assert_equal TokenDigester.digest(@grant.raw_refresh_token), retired.successor_refresh_token_digest
+    assert_equal({ access_token: @grant.raw_token, refresh_token: @grant.raw_refresh_token }, retired.successor)
+
+    [ presented, @grant.raw_token, @grant.raw_refresh_token ].each do |raw|
+      assert_not_includes retired.successor_payload, raw
+    end
+  end
+
+  test "the successor pair can't be read once the grace window has passed" do
+    @grant.refresh
+    retired = @grant.retired_refresh_tokens.sole
+
+    travel Oauth::RetiredRefreshToken::GRACE - 1.second
+    assert_not_nil retired.successor
+
+    travel 2.seconds
+    assert_nil retired.successor
+  end
+
+  test "forget_successors blanks pairs whose grace window has passed" do
+    @grant.refresh
+    retired = @grant.retired_refresh_tokens.sole
+
+    Oauth::RetiredRefreshToken.forget_successors
+    assert_not_nil retired.reload.successor_payload
+
+    travel Oauth::RetiredRefreshToken::GRACE + 1.second
+    Oauth::RetiredRefreshToken.forget_successors
+    assert_nil retired.reload.successor_payload
+  end
+
+  test "superseded compares the grant's current refresh digest with the successor's" do
+    @grant.refresh
+    retired = @grant.retired_refresh_tokens.sole
+
+    assert_not retired.superseded?(Identity::AccessToken.find(@grant.id))
+
+    @grant.refresh
+    assert retired.superseded?(Identity::AccessToken.find(@grant.id))
+  end
+
+  test "a tampered successor payload reads as none" do
+    @grant.refresh
+    retired = @grant.retired_refresh_tokens.sole
+    retired.successor_payload = retired.successor_payload.reverse
+
+    assert_nil retired.successor
   end
 end

@@ -19,8 +19,8 @@ class OauthClientSecretBasicTest < ActionDispatch::IntegrationTest
     refresh token, headers: basic(@client.client_id, @secret)
 
     assert_response :success
-    assert_not_equal token.refresh_token, token.reload.refresh_token
-    assert_equal token.refresh_token, response.parsed_body["refresh_token"]
+    assert_not_equal token.refresh_token_digest, token.reload.refresh_token_digest
+    assert_equal token.refresh_token_digest, TokenDigester.digest(response.parsed_body["refresh_token"])
   end
 
   test "a confidential client redeems a code with HTTP Basic alone" do
@@ -39,7 +39,7 @@ class OauthClientSecretBasicTest < ActionDispatch::IntegrationTest
 
   test "Basic credentials are form-urlencoded before they are encoded, so %3A and + decode after the split" do
     client = Oauth::Client.create! name: "Colon", redirect_uris: %w[ https://connector.example.com/callback ],
-      token_endpoint_auth_method: "client_secret_basic", client_secret: "pa:ss word+"
+      token_endpoint_auth_method: "client_secret_basic", raw_client_secret: "pa:ss word+"
     token = grant_for(client)
 
     refresh token, headers: basic(client.client_id, "pa:ss word+")
@@ -73,7 +73,7 @@ class OauthClientSecretBasicTest < ActionDispatch::IntegrationTest
       assert_equal "invalid_request", response.parsed_body["error"]
     end
 
-    assert_equal token.refresh_token, token.reload.refresh_token
+    assert_equal token.refresh_token_digest, token.reload.refresh_token_digest
   end
 
   test "Basic naming one client while the body names another fails as invalid_client" do
@@ -82,7 +82,7 @@ class OauthClientSecretBasicTest < ActionDispatch::IntegrationTest
     refresh token, params: { client_id: oauth_clients(:mcp_client).client_id }, headers: basic(@client.client_id, @secret)
 
     assert_client_authentication_failed
-    assert_equal token.refresh_token, token.reload.refresh_token
+    assert_equal token.refresh_token_digest, token.reload.refresh_token_digest
   end
 
   test "a malformed Basic header fails as invalid_client" do
@@ -95,25 +95,25 @@ class OauthClientSecretBasicTest < ActionDispatch::IntegrationTest
       assert_client_authentication_failed header
     end
 
-    assert_equal token.refresh_token, token.reload.refresh_token
+    assert_equal token.refresh_token_digest, token.reload.refresh_token_digest
   end
 
   test "a bare Basic scheme is a failed attempt, not an absent one" do
     client = oauth_clients(:mcp_client)
     token = grant_for(client)
-    refresh_token = token.refresh_token
+    refresh_token_digest = token.refresh_token_digest
     personal = identities(:david).access_tokens.create!(description: "Personal")
 
     [ "Basic", "Basic ", "basic" ].each do |header|
       refresh token, params: { client_id: client.client_id }, headers: { "Authorization" => header }
       assert_client_authentication_failed header
 
-      untenanted { post oauth_revocation_path, params: { token: personal.token }, headers: { "Authorization" => header } }
+      untenanted { post oauth_revocation_path, params: { token: personal.raw_token }, headers: { "Authorization" => header } }
       assert_client_authentication_failed header
     end
 
     assert Identity::AccessToken.exists?(personal.id)
-    assert_equal refresh_token, token.reload.refresh_token
+    assert_equal refresh_token_digest, token.reload.refresh_token_digest
   end
 
   test "Basic naming a public client fails: a public client holds no password" do
@@ -126,7 +126,7 @@ class OauthClientSecretBasicTest < ActionDispatch::IntegrationTest
       assert_client_authentication_failed
     end
 
-    assert_equal token.refresh_token, token.reload.refresh_token
+    assert_equal token.refresh_token_digest, token.reload.refresh_token_digest
   end
 
   test "a wrong Basic secret and an unknown Basic client get the same 401 and Basic challenge" do
@@ -140,7 +140,7 @@ class OauthClientSecretBasicTest < ActionDispatch::IntegrationTest
 
     assert_client_authentication_failed
     assert_equal wrong_secret, unknown_client
-    assert_equal token.refresh_token, token.reload.refresh_token
+    assert_equal token.refresh_token_digest, token.reload.refresh_token_digest
   end
 
   test "a failed client_secret_post authentication is a 400 with no challenge, since the client never tried the header" do
@@ -157,7 +157,7 @@ class OauthClientSecretBasicTest < ActionDispatch::IntegrationTest
   test "a failed client_secret_post beside an Authorization header of another scheme is a 400: Basic was never evaluated" do
     token = grant_for(@client)
 
-    refresh token, params: { client_id: @client.client_id, client_secret: "wrong" }, headers: { "Authorization" => "Bearer #{token.token}" }
+    refresh token, params: { client_id: @client.client_id, client_secret: "wrong" }, headers: { "Authorization" => "Bearer #{token.raw_token}" }
 
     assert_client_authentication_failed basic: false
   end
@@ -206,7 +206,7 @@ class OauthClientSecretBasicTest < ActionDispatch::IntegrationTest
     def refresh(token, params: nil, headers: {})
       params ||= headers.key?("Authorization") ? {} : { client_id: token.oauth_client.client_id }
       untenanted do
-        post oauth_token_path, params: { grant_type: "refresh_token", refresh_token: token.refresh_token }.merge(params), headers: headers
+        post oauth_token_path, params: { grant_type: "refresh_token", refresh_token: token.raw_refresh_token }.merge(params), headers: headers
       end
     end
 

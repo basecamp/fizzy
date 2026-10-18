@@ -1,4 +1,6 @@
 <% @page_title = "Generate a personal access token" %>
+<%# Never snapshotted: once the form gives way to the revealed token, Back must fetch a fresh form, not restore a page holding neither. %>
+<% turbo_exempts_page_from_cache %>
 
 <% content_for :header do %>
   <div class="header__actions header__actions--start">
@@ -8,7 +10,7 @@
   <h1 class="header__title" data-bridge--title-target="header"><%= @page_title %></h1>
 <% end %>
 
-<article class="panel panel--wide shadow center txt-align-start" style="view-transition-name: <%= dom_id(@access_token) %>">
+<article id="new_access_token" class="panel panel--wide shadow center txt-align-start" style="view-transition-name: <%= dom_id(@access_token) %>">
   <%= form_with model: @access_token, url: my_access_tokens_path, scope: :access_token, data: { controller: "form" }, html: { class: "flex flex-column gap" } do |form| %>
     <div class="flex flex-column gap-half">
       <strong><%= form.label :description, "Access token description" %></strong>

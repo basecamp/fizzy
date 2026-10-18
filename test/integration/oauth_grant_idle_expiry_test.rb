@@ -12,14 +12,14 @@ class OauthGrantIdleExpiryTest < ActionDispatch::IntegrationTest
 
   test "a grant refreshes up to the end of the idle window" do
     later_by Identity::AccessToken::REFRESH_IDLE_LIMIT
-    refresh @grant.refresh_token
+    refresh @grant.raw_refresh_token
 
     assert_response :success
   end
 
   test "a grant idle past the window lapses" do
     later_by Identity::AccessToken::REFRESH_IDLE_LIMIT + 1.second
-    refresh @grant.refresh_token
+    refresh @grant.raw_refresh_token
 
     assert_response :bad_request
     assert_equal "invalid_grant", response.parsed_body["error"]
@@ -27,7 +27,7 @@ class OauthGrantIdleExpiryTest < ActionDispatch::IntegrationTest
 
   test "each refresh restarts the idle clock" do
     later_by Identity::AccessToken::REFRESH_IDLE_LIMIT - 1.day
-    refresh @grant.refresh_token
+    refresh @grant.raw_refresh_token
     assert_response :success
 
     later_by Identity::AccessToken::REFRESH_IDLE_LIMIT - 1.day
@@ -76,16 +76,16 @@ class OauthGrantIdleExpiryTest < ActionDispatch::IntegrationTest
 
   test "rotation itself refuses a lapsed grant, so one racing the deadline can't renew it" do
     later_by Identity::AccessToken::REFRESH_IDLE_LIMIT + 1.second
-    presented = @grant.refresh_token
+    presented = @grant.raw_refresh_token
 
     assert_nil @grant.refresh
-    assert_equal presented, @grant.reload.refresh_token
+    assert_equal TokenDigester.digest(presented), @grant.reload.refresh_token_digest
   end
 
   test "the idle clock is the grant's last rotation, so a rotation by older code mid-deploy restarts it too" do
     later_by Identity::AccessToken::REFRESH_IDLE_LIMIT - 1.day
     rotated_by_older_code = Identity::AccessToken.generate_unique_secure_token
-    Identity::AccessToken.where(id: @grant.id).update_all(refresh_token: rotated_by_older_code, updated_at: Time.current)
+    Identity::AccessToken.where(id: @grant.id).update_all(refresh_token_digest: TokenDigester.digest(rotated_by_older_code), updated_at: Time.current)
 
     later_by Identity::AccessToken::REFRESH_IDLE_LIMIT - 1.day
     refresh rotated_by_older_code

@@ -17,6 +17,7 @@ Snapshot: 2026-10-06, at the heads of the OAuth train, rebased onto main:
 | [#3160](https://github.com/basecamp/fizzy/pull/3160) | `oauth-refresh-replay` | Refresh-token replay detection (on #3082) |
 | [#3161](https://github.com/basecamp/fizzy/pull/3161) | `oauth-grant-idle-expiry` | 90-day idle expiry of grants (on #3160) |
 | [#3159](https://github.com/basecamp/fizzy/pull/3159) | `oauth-client-sweep` | Sweep of abandoned DCR clients (on #3161) |
+| [#3192](https://github.com/basecamp/fizzy/pull/3192) | `oauth-token-digests` | Tokens and client secrets stored as digests, step 1 of 3 (on #3169) |
 
 Commits are cited by subject, with the short SHA as of the snapshot. Rebases change
 the SHAs of #3080 and above; the subjects stay the same.
@@ -81,13 +82,14 @@ Status key:
 |---|---|
 | `client_secret_post` | **Conformant** (#3082) |
 | HTTP Basic (`client_secret_basic`) MUST be supported for clients issued a password; a failed Basic attempt gets 401 + `WWW-Authenticate` (§5.2) | **Fixed** #3082 `d65d0117c` "Accept client_secret_basic at the token endpoint". Either method authenticates any confidential client; both at once is `invalid_request`. DCR and metadata advertise it. bc3 closes the same gap in bc3#13678. |
-| Secrets stored in plaintext, as access tokens are | **Deliberate** (#3082 body) |
+| Client secrets are stored as digests, never in plaintext, and shown once, in the registration response | **Fixed** #3192 `oauth-token-digests` (was **Deliberate** plaintext, #3082 body). HMAC-SHA256 under a server pepper (`TokenDigester`), checked in constant time. **Deviation from bc3**, which stores client secrets with bcrypt (`has_secure_password :secret`): Fizzy only issues generated secrets, 257 bits of randomness (24-character secrets from before #3163, about 140), so a deliberately slow hash adds no guessing resistance that the entropy doesn't already give, and one keyed digest serves every credential. Without the pepper, a copy of the database gives nothing to test a guess against. |
 | An OAuth grant can't reach a credential or consent surface: personal access tokens, Connected Apps, passkey registration, transfer links, email changes or OAuth consent. Anything it minted there would outlive disconnecting the app, and anything it removed would belong to another app | **Fixed** #2296 `196b9b0b3` "Keep OAuth grants out of every credential and consent surface" (`Authentication.disallow_oauth_grants`, declared on each such controller). Personal access tokens may still manage personal access tokens (fizzy-cli) |
 
 ## Token format
 
 | Requirement | Status |
 |---|---|
+| Tokens are stored as HMAC-SHA256 digests under a server pepper, byte-compatible with bc3's `Oauth::TokenDigester`, and looked up by a unique index on the digest. Raw values are shown once: in the token response, the registration response, or the response that creates a personal access token | **Fixed** #3192 `oauth-token-digests`, step 1 of 3. OAuth access and refresh tokens and client secrets are digest-only, and a refresh retry within the grace window is answered from an encrypted copy of the successor pair that expires with the window. Personal access tokens are digested and, until step 3, still also kept in plaintext, because production code that reads only plaintext shares the database while beta runs this. One written without a digest is found by plaintext once and digested. Step 2 stops reading and writing plaintext; step 3 drops the column. |
 | Newly issued tokens carry a distinctive prefix naming their kind: `fizzy_pat_` (personal access token), `fizzy_at_` (OAuth access token), `fizzy_rt_` (OAuth refresh token). Tokens issued earlier have no prefix and still work | **Fixed** #3163. bc3 prefixes similarly (`bc_at_`, `bc_rt_`, and PATs as `bc_at_`). Client secrets carry `fizzy_cs_`, as bc3's carry `bc_cs_`. New tokens and secrets carry 44 base58 characters after the prefix, 257 bits, at least bc3's 32 bytes (rubric TK-1); earlier ones are 24 characters and keep working. Nobody has registered with GitHub's secret-scanning partner program, either here or in bc3. |
 
 ## Refresh tokens (RFC 6749 §6, OAuth 2.1 §4.3, RFC 9700 §4.14)
@@ -126,7 +128,7 @@ Status key:
 
 | Requirement | Status |
 |---|---|
-| `iss` on success and error redirects, equal to the metadata issuer; `authorization_response_iss_parameter_supported: true` (mix-up defense, RFC 9700 §4.4) | **Fixed** #2296 `d468283d7`. A single `Oauth::BaseController#oauth_issuer` feeds both the redirect and the metadata. |
+| `iss` on success and error redirects, equal to the metadata issuer; `authorization_response_iss_parameter_supported: true` (mix-up defense, RFC 9700 §4.4) | **Fixed** #2296 `d468283d7`. A single `Oauth::BaseController#oauth_issuer` feeds the redirect, the metadata and the protected resource's `authorization_servers`. It's the origin with no trailing slash (`https://app.fizzy.do`), as bc3's `canonical_issuer_url`, since clients compare issuers as exact strings (RFC 8414 §3.3); #3192 dropped the slash `root_url` gave it. |
 
 ## RFC 9700: open redirector
 
