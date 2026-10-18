@@ -22,7 +22,7 @@ named for the PR:
 | #3159 | `oauth-client-sweep` | `eac532ca82a4` |
 | #3163 | `oauth-token-prefixes` | `918f2566ddca` |
 | #3169 | `oauth-delegate-resources` | `d0b4a26f7872` |
-| #3192 | `oauth-token-digests` | `09523ade5f33` |
+| #3192 | `oauth-token-digests` | `617edb87b` |
 | #3191 | `test/pin-shipped-client-auth` | `98572aaaf` |
 
 The train is linear since 2026-10-17 (#3160 restacked onto #3158), so the merges
@@ -43,17 +43,17 @@ nullable columns, new indexes), so `main`, running in production, keeps working
 against the migrated schema: it never reads the new columns, and its inserts
 leave them NULL.
 
-With one exception: #10 drops a column, and so does every `down`. `main` runs
-with `partial_inserts` off (`load_defaults 8.1`), so each INSERT names every
-column the process has cached, and each process caches a table's columns the
-first time it uses the model (there is no schema cache dump). A production
-process that first touches `Identity::AccessToken` between #3 and #10 has
-cached `refresh_token`. Once #10 drops it, that process fails every personal
-access token it creates with `Unknown column 'refresh_token'` until it
-restarts; reads, updates and deletes are unaffected. So **restart production
-right after #10** (see "Pre-flight"), whether or not it restarted during the
-run. Undoing the stack has the same effect on the tables the `down`s drop
-columns from (see "Undoing it").
+No migration here drops a column of a table `main` uses, and that is
+deliberate. `main` runs with `partial_inserts` off (`load_defaults 8.1`), so
+each INSERT names every column the process has cached, and each process caches
+a table's columns the first time it uses the model (there is no schema cache
+dump). Dropping such a column would fail every insert from a process that had
+cached it, until that process restarted. So #10 drops only from
+`oauth_clients` and `oauth_retired_refresh_tokens`, which `main` doesn't have.
+`identity_access_tokens.refresh_token` stays: #3192's `Identity::AccessToken`
+ignores it, #9 empties it, and #3203 (D3) drops it beside `token`. D3 runs
+only once every process runs D2's code, which ignores both. No restart is
+needed. The `down`s do drop columns `main` has cached (see "Undoing it").
 
 Only the solid queue and solid cache databases are beta's own. Beta's
 `config/recurring.yml` section runs only Solid Queue maintenance, so the new
@@ -84,8 +84,8 @@ production yet, so none of these has been applied there.
 | 6 | `20261006130000_add_oauth_client_to_push_subscriptions.rb` | #3169 | `add_reference :push_subscriptions, :oauth_client` (uuid, nullable, indexed, no FK) | `push_subscriptions`: ~1,400 rows, 1.6 MB data + 0.6 MB index | INSTANT add + online index, sub-second |
 | 7 | `20261006130100_add_attribution_to_webhooks.rb` | #3169 | `add_reference :webhooks, :creator` and `add_reference :webhooks, :created_via` (uuid, nullable, indexed, no FK) | `webhooks`: ~1,500 rows, 0.5 MB data + 0.4 MB index | Two INSTANT adds + two online indexes, sub-second |
 | 8 | `20261015120000_add_token_digests.rb` | #3192 | `change_table :identity_access_tokens, bulk: true`: `token_digest`, `refresh_token_digest` (string 80), a unique index on each. `add_column :oauth_clients, :client_secret_digest` (string 80) | `identity_access_tokens`: ~3,500 rows | One ALTER, INPLACE LOCK=NONE. Every row starts NULL, so neither unique index can fail |
-| 9 | `20261015120100_backfill_token_digests.rb` | #3192 | **Data only, no DDL.** Refuses duplicate `token`s first. Then one `UPDATE … WHERE id = ?` per row: `token_digest` for every token (OAuth rows also get `token` NULLed), `refresh_token_digest` and `client_secret_digest` where those columns still exist. `updated_at` doesn't move. `disable_ddl_transaction!`, batches of 500. `down` is a no-op | `identity_access_tokens` | Row locks only, ~3,500 single-row updates on the primary key, a few seconds |
-| 10 | `20261015120200_drop_plaintext_oauth_credentials.rb` | #3192 | Drop `identity_access_tokens.refresh_token` and its unique index. Drop `oauth_clients.client_secret`. Drop and recreate `oauth_retired_refresh_tokens` keyed by digest, with `successor_payload` text | `identity_access_tokens`, plus the empty `oauth_*` tables | DROP INDEX and DROP COLUMN are online. The `oauth_*` tables are empty in production |
+| 9 | `20261015120100_backfill_token_digests.rb` | #3192 | **Data only, no DDL.** Refuses duplicate `token`s first. Then one `UPDATE … WHERE id = ?` per row: `token_digest` for every token (OAuth rows also get `token` NULLed), `refresh_token_digest` (and `refresh_token` NULLed) and `client_secret_digest` where those columns still exist. `updated_at` doesn't move. `disable_ddl_transaction!`, batches of 500. `down` is a no-op | `identity_access_tokens` | Row locks only, ~3,500 single-row updates on the primary key, a few seconds |
+| 10 | `20261015120200_drop_plaintext_oauth_credentials.rb` | #3192 | Drop `oauth_clients.client_secret`. Drop and recreate `oauth_retired_refresh_tokens` keyed by digest, with `successor_payload` text. Leaves `identity_access_tokens` alone: its `refresh_token` goes in D3 | the empty `oauth_*` tables only | DROP COLUMN is INSTANT. The `oauth_*` tables are empty in production, and `main` has no model for either |
 
 #1 to #8 and #10 are reversible, so each has a working `down`; #9's `down` is a
 no-op. All ten are portable: they ran up, down and up again on
@@ -185,17 +185,16 @@ Each line is checked in "Production safety" below.
 3. Just before, check `information_schema.innodb_trx` on the primary for
    long-running transactions. A blocked ALTER now gives up after 5 s on its
    own; if one does, see "The lock that matters" before rerunning.
-4. Run #1 to #10 in one session.
-5. **Right after #10, restart production:** `bin/kamal app boot -d production`.
-   Do this every time, not only when production deployed or restarted during the
-   run. Any process that loaded `identity_access_tokens`' columns between #3
-   and #10 can't create a personal access token until it restarts, and there's
-   no telling from outside which processes did. A production deploy in the
-   same window needs nothing beyond that restart: its `db:prepare` runs only
-   `main`'s migrations, which are all applied.
-6. Then restart beta1 as below.
-7. To undo, run every `down` in one loop and restart production at once (see
+4. Run #1 to #10 in one session. Production needs no restart: no step drops
+   a column `main` uses (see "Beta shares the production database"). A
+   production deploy or restart during the run needs nothing either.
+5. Then restart beta1 as below.
+6. To undo, run every `down` in one loop and restart production at once (see
    "Undoing it").
+
+Contingency: if a production process ever reports `Unknown column` on an
+insert after a migration here, `bin/kamal app boot -d production` reloads
+every process's columns.
 
 ## Running it
 
@@ -240,10 +239,9 @@ bin/kamal app exec 'bin/rails db:migrate:up:primary VERSION=20261015120200' -d b
 ```
 
 Or all ten at once: `bin/kamal app exec 'bin/rails db:migrate:primary' -d beta1 -p -r web -e MIGRATE:1`.
-Then restart production and beta1 so every process reloads its column
-information: `bin/kamal app boot -d production`, then `bin/kamal app boot -d
-beta1`. The production restart is not optional (see "Pre-flight"). The beta
-web container keeps the non-migrating command; nothing is pending anyway.
+Then restart beta1 so its processes load the new columns: `bin/kamal app
+boot -d beta1`. The web container keeps the non-migrating command; nothing is
+pending anyway. Production needs no restart.
 
 ### Option B: migrate with the new image, then deploy
 
@@ -251,7 +249,6 @@ web container keeps the non-migrating command; nothing is pending anyway.
 bin/kamal build push -d beta1
 bin/kamal app exec 'bin/rails db:migrate:status:primary' -d beta1 -p -r web --version=$(git rev-parse HEAD) -e MIGRATE:1
 # …the same db:migrate:up:primary steps, each with --version=$(git rev-parse HEAD)…
-bin/kamal app boot -d production
 bin/kamal deploy -d beta1 --skip-push
 ```
 
@@ -282,8 +279,9 @@ personal access token, push subscription and webhook they create (for example `U
 column 'oauth_client_id'`). Reads keep working. Hence one loop and the restart
 straight after.
 
-#9 and #10 don't fully undo: #10's `down` restores empty plaintext columns and
-an empty retired-token table, not their values. None of those hold anything in
+#9 and #10 don't fully undo. #9 empties any plaintext refresh token it
+digests, and #10's `down` restores an empty `client_secret` column and an
+empty retired-token table, not their values. None of those hold anything in
 production, where OAuth has never run.
 
 ### When the PRs land
@@ -386,9 +384,13 @@ migration. On thelio against a dedicated MySQL 8.4 container, at the merge of
 ## Production safety
 
 Does `main`, running in production, keep working while beta1 migrates
-`fizzy_production`, and after? Checked on thelio, 2026-10-17, against dedicated
-MySQL 8.4.11 containers. `main` is `27d0d2e6b`. The train is this branch at
-`06eb83531`; the timeout commit after it changes no migration or Ruby.
+`fizzy_production`, and after? Checked on thelio against dedicated MySQL 8.4.11
+containers, `main` at `27d0d2e6b`. First at `06eb83531`, where #10 still dropped
+`identity_access_tokens.refresh_token`. That run found the column-cache hazard
+in 2 below, and #3192 then moved the drop to D3 (`617edb87b`, "Keep
+identity_access_tokens.refresh_token until it can go with token"). Items 1, 2
+and 4 were rerun on this branch's rebuild, at the merge of #3191
+(`9ac2cb078`); the results below are from that rerun unless marked.
 
 1. **`main`'s suite on the migrated schema.** `main`'s code loaded `main`'s
    schema into `fizzy_test`, and this branch's code ran all ten migrations on
@@ -396,18 +398,28 @@ MySQL 8.4.11 containers. `main` is `27d0d2e6b`. The train is this branch at
    workers would load fresh databases from `schema.rb`). `schema_sha1` still
    matched `main`'s `schema.rb`, so the suite didn't reload the schema; a dump
    after the run matched the one before. Result: 1919 tests, **0 failures, 0
-   errors**, 1 skip, the same `bin/rails test` CI runs.
+   errors**, 1 skip, the same `bin/rails test` CI runs. (The same with #10 as
+   it was, and with only #1 to #9 applied.)
 2. **The column cache.** Each check is a `main` process that loads
    `Identity::AccessToken`'s columns at a chosen point, waits while the train
    migrates, then creates, finds, updates and deletes personal access tokens:
    - Loaded before #1, held through all ten: everything works.
-   - Loaded between #3 and #10, held past #10: **create fails** with `Unknown
-     column 'refresh_token' in 'field list'`; find, update and delete work.
+   - Loaded between #3 and #10, held past #10: everything works. At
+     `06eb83531`, before the split, create failed with `Unknown column
+     'refresh_token' in 'field list'`; find, update and delete worked.
    - A process started after #10: everything works.
    - Loaded on the fully migrated schema, held through every `down`: **create
      fails** (`Unknown column 'oauth_client_id'`). Find, update and delete
-     work, and a fresh process works.
-3. **Personal access tokens across the mixed period.** `main` made token A
+     work, and a fresh process works. Hence the restart after an undo.
+
+   #3192's `test/migrations/drop_plaintext_oauth_credentials_test.rb` holds
+   this in the suite. A model with no ignored columns, as `main`'s, caches
+   the table's columns before #10, then creates a token after it. Against the
+   old #10 it fails with that same `Unknown column 'refresh_token'`. D3's
+   `drop_identity_access_token_plaintext_test.rb` does the same for D3's drop,
+   with a model that ignores both columns, as D2's does.
+3. **Personal access tokens across the mixed period** (at `06eb83531`; the
+   split changes no lookup or write path). `main` made token A
    before #1 and B between #8 and #9. After #9 both have a digest and keep
    their plaintext, and so does every fixture token. `main` made C after #10;
    C has no digest. The train's `find_honored`, the Bearer path, finds A, B and
@@ -416,18 +428,21 @@ MySQL 8.4.11 containers. `main` is `27d0d2e6b`. The train is this branch at
    The train made D, which stores a `fizzy_pat_` token as plaintext and digest.
    `main`'s `Identity.find_by_permissable_access_token` authenticates A, B, C
    (after healing) and D, for GET and POST.
-4. **Online DDL.** The SQL log captured all 21 statements the ten migrations
-   issue. They ran again on `main`'s schema with the algorithm spelled out, so
-   MySQL refuses rather than falls back. Every column add and drop ran with
-   `ALGORITHM=INSTANT`. Every index ran with `ALGORITHM=INPLACE, LOCK=NONE`, and
-   so did the two bulk ALTERs that add columns and unique indexes together (#3,
-   #8). The rest create or drop the empty `oauth_*` tables. 21 of 21 ran as
-   specified. These were empty tables of `main`'s current definition;
+4. **Online DDL.** The SQL log captured all 19 statements the ten migrations
+   issue: the 21 of `06eb83531` less #10's `DROP INDEX` and `DROP COLUMN` on
+   `identity_access_tokens`. They ran again on `main`'s schema with the
+   algorithm spelled out, so MySQL refuses rather than falls back. Every
+   column add and drop ran with `ALGORITHM=INSTANT`. Every index ran with
+   `ALGORITHM=INPLACE, LOCK=NONE`, and so did the two bulk ALTERs that add
+   columns and unique indexes together (#3, #8). The rest create or drop the
+   empty `oauth_*` tables. 19 of 19 ran as specified. D3's statement then ran
+   on the result as written (`DROP INDEX …refresh_token, DROP COLUMN
+   refresh_token, DROP COLUMN token, ALGORITHM=INPLACE, LOCK=NONE`). These were empty tables of `main`'s current definition;
    production's are the same definition with rows. Neither INSTANT nor INPLACE
    depends on the row count. Where INSTANT isn't available (a compressed table,
    64 instant changes already made), MySQL falls back to INPLACE, which is
    still online.
-5. **The lock timeout.** A transaction held `identity_access_tokens` open for
+5. **The lock timeout** (at `06eb83531`). A transaction held `identity_access_tokens` open for
    20 s while an ALTER of it ran:
    - On the `MIGRATE=1` connection (`lock_wait_timeout` 5): the ALTER gave up
      after 5.0 s, and a SELECT queued behind it returned after 4.9 s.
@@ -439,6 +454,16 @@ MySQL 8.4.11 containers. `main` is `27d0d2e6b`. The train is this branch at
 Not checked here: a Bearer request end to end over HTTP (the checks call the
 lookups the Bearer path calls), and production's own table definitions (`SHOW
 CREATE TABLE` on the primary would confirm they match `main`'s `schema.rb`).
+
+## Re-verification, refresh_token kept until D3
+
+#3192 (head `617edb87b`) no longer drops `identity_access_tokens.refresh_token`
+in #10. It ignores the column, and #9 empties it; D3 (#3203) drops it beside
+`token`. On thelio against dedicated MySQL 8.4 containers, at the merge of
+#3191 (`9ac2cb078`): SaaS (MySQL) 2313 tests, OSS (SQLite) 2143, OSS (MySQL)
+2143, **0 failures, 0 errors**; rubocop clean. The migrated schema matches the
+committed `db/schema.rb` up to column order. The restacked #3206, #3204, #3205,
+D2 and D3 each pass all three suites, with 0 failures and 0 errors.
 
 ## Before beta boots #3192
 
