@@ -28,9 +28,11 @@ named for the PR:
 The train is linear since 2026-10-17 (#3160 restacked onto #3158), so the merges
 don't conflict.
 
-Beyond the merges, one commit of the branch's own, `saas/config/deploy.beta.yml`
-setting the web role's `cmd` so a beta boot does not migrate (see "Deploying
-without migrating" below), and this file.
+Beyond the merges, two commits of the branch's own and this file:
+`saas/config/deploy.beta.yml` sets the web role's `cmd` so a beta boot does not
+migrate (see "Deploying without migrating" below), and
+`saas/config/database.yml` gives the `MIGRATE=1` connection a 5 s
+`lock_wait_timeout` (see "The lock that matters").
 
 ## Beta shares the production database
 
@@ -40,6 +42,18 @@ beta at `fizzy-mysql-primary`. **Migrating on beta1 is migrating
 nullable columns, new indexes), so `main`, running in production, keeps working
 against the migrated schema: it never reads the new columns, and its inserts
 leave them NULL.
+
+With one exception: #10 drops a column, and so does every `down`. `main` runs
+with `partial_inserts` off (`load_defaults 8.1`), so each INSERT names every
+column the process has cached, and each process caches a table's columns the
+first time it uses the model (there is no schema cache dump). A production
+process that first touches `Identity::AccessToken` between #3 and #10 has
+cached `refresh_token`. Once #10 drops it, that process fails every personal
+access token it creates with `Unknown column 'refresh_token'` until it
+restarts; reads, updates and deletes are unaffected. So **restart production
+right after #10** (see "Pre-flight"), whether or not it restarted during the
+run. Undoing the stack has the same effect on the tables the `down`s drop
+columns from (see "Undoing it").
 
 Only the solid queue and solid cache databases are beta's own. Beta's
 `config/recurring.yml` section runs only Solid Queue maintenance, so the new
@@ -84,10 +98,21 @@ every ALTER briefly takes an exclusive MDL on its table, waits for open
 transactions on that table to finish first, and while it waits every new query
 on the table queues behind it. `identity_access_tokens` is read on every API
 request that sends a Bearer token. The `MIGRATE=1` connection has no
-`max_execution_time`, and nothing sets `lock_wait_timeout`, so a stuck ALTER
-waits for as long as the blocking transaction lives. Check for long-running
-transactions just before (`information_schema.innodb_trx`), and if a step sits
-for more than a few seconds, cancel it rather than let the queue build.
+`max_execution_time`, and the server's `lock_wait_timeout` is a year, so on
+its own a stuck ALTER waits for as long as the blocking transaction lives.
+
+This branch's `saas/config/database.yml` sets `lock_wait_timeout` to 5 s on the
+`MIGRATE=1` connection only (the app connection keeps the server's): a blocked
+ALTER gives up with `Lock wait timeout exceeded`, and the queries behind it run.
+Check for long-running transactions just before anyway
+(`information_schema.innodb_trx`), so a step doesn't have to fail first.
+
+A step that gives up partway leaves what it already did. MySQL DDL doesn't roll
+back, and #1, #2, #6, #7, #8 and #10 each run several statements, so rerunning
+the step can then fail on the part already done (`Table 'oauth_clients' already
+exists`, `Duplicate column name`). Its version is not in `schema_migrations`.
+Compare `SHOW CREATE TABLE` with the migration's file, undo what it did by hand,
+and rerun the step.
 
 ### Versions out of order with main
 
@@ -144,6 +169,34 @@ old schema, so anything that touches the new columns fails there (Bearer-token
 API requests, webhook creation, push delivery). To skip that window, migrate
 first with the new image (option B below).
 
+## Pre-flight
+
+Each line is checked in "Production safety" below.
+
+1. `Production/OAUTH_TOKEN_PEPPER` exists in 1Password (see "Before beta boots
+   #3192").
+2. Run each step with `db:migrate:up:primary VERSION=…`, or all ten with a bare
+   `db:migrate:primary`. Never `db:migrate:primary VERSION=…`: on a database
+   where `main`'s `20260828120000_create_identity_transfers` is applied, a
+   target older than it migrates *down*. `VERSION=20260827100000` reverts
+   `CreateIdentityTransfers`, dropping `identity_transfers` in production, and
+   runs none of this stack's. And never `db:rollback` (see "Versions out of
+   order with main").
+3. Just before, check `information_schema.innodb_trx` on the primary for
+   long-running transactions. A blocked ALTER now gives up after 5 s on its
+   own; if one does, see "The lock that matters" before rerunning.
+4. Run #1 to #10 in one session.
+5. **Right after #10, restart production:** `bin/kamal app boot -d production`.
+   Do this every time, not only when production deployed or restarted during the
+   run. Any process that loaded `identity_access_tokens`' columns between #3
+   and #10 can't create a personal access token until it restarts, and there's
+   no telling from outside which processes did. A production deploy in the
+   same window needs nothing beyond that restart: its `db:prepare` runs only
+   `main`'s migrations, which are all applied.
+6. Then restart beta1 as below.
+7. To undo, run every `down` in one loop and restart production at once (see
+   "Undoing it").
+
 ## Running it
 
 From a checkout of this branch, Tailscale up, SaaS mode on:
@@ -187,9 +240,10 @@ bin/kamal app exec 'bin/rails db:migrate:up:primary VERSION=20261015120200' -d b
 ```
 
 Or all ten at once: `bin/kamal app exec 'bin/rails db:migrate:primary' -d beta1 -p -r web -e MIGRATE:1`.
-Then restart the app so every process reloads its column information:
-`bin/kamal app boot -d beta1`. The web container keeps the non-migrating
-command; nothing is pending anyway.
+Then restart production and beta1 so every process reloads its column
+information: `bin/kamal app boot -d production`, then `bin/kamal app boot -d
+beta1`. The production restart is not optional (see "Pre-flight"). The beta
+web container keeps the non-migrating command; nothing is pending anyway.
 
 ### Option B: migrate with the new image, then deploy
 
@@ -197,6 +251,7 @@ command; nothing is pending anyway.
 bin/kamal build push -d beta1
 bin/kamal app exec 'bin/rails db:migrate:status:primary' -d beta1 -p -r web --version=$(git rev-parse HEAD) -e MIGRATE:1
 # …the same db:migrate:up:primary steps, each with --version=$(git rev-parse HEAD)…
+bin/kamal app boot -d production
 bin/kamal deploy -d beta1 --skip-push
 ```
 
@@ -211,12 +266,25 @@ By version, newest first, never `db:rollback`:
 for v in 20261015120200 20261015120100 20261015120000 20261006130100 20261006130000 20261006120000 20260827110000 20260827100000 20260827090000 20251231163456; do
   bin/kamal app exec "bin/rails db:migrate:down:primary VERSION=$v" -d beta1 -p -r web -e MIGRATE:1
 done
+bin/kamal app boot -d production
 ```
 
 This drops `oauth_clients`, `oauth_retired_refresh_tokens` and the new columns,
 along with anything beta wrote to them. Personal access tokens keep their
-plaintext throughout, so `main` keeps authenticating them. Undo only once nothing is running this
-branch's code: `main` doesn't care either way.
+plaintext throughout, so `main` keeps authenticating them. Undo only once
+nothing is running this branch's code; prefer redeploying `main` to beta1 and
+leaving the schema be, which `main` runs on.
+
+By the time of an undo, production's processes have cached the new columns of
+`identity_access_tokens`, `push_subscriptions` and `webhooks`. From the first
+`down` that drops one until production restarts, those processes fail every
+personal access token, push subscription and webhook they create (for example `Unknown
+column 'oauth_client_id'`). Reads keep working. Hence one loop and the restart
+straight after.
+
+#9 and #10 don't fully undo: #10's `down` restores empty plaintext columns and
+an empty retired-token table, not their values. None of those hold anything in
+production, where OAuth has never run.
 
 ### When the PRs land
 
@@ -314,6 +382,63 @@ parameter and the protected resource's `authorization_servers`; it changes no
 migration. On thelio against a dedicated MySQL 8.4 container, at the merge of
 #3191 (`e391528fe`): SaaS (MySQL) 2310 tests, OSS (SQLite) 2140, OSS (MySQL)
 2140, **0 failures, 0 errors**; rubocop clean.
+
+## Production safety
+
+Does `main`, running in production, keep working while beta1 migrates
+`fizzy_production`, and after? Checked on thelio, 2026-10-17, against dedicated
+MySQL 8.4.11 containers. `main` is `27d0d2e6b`. The train is this branch at
+`06eb83531`; the timeout commit after it changes no migration or Ruby.
+
+1. **`main`'s suite on the migrated schema.** `main`'s code loaded `main`'s
+   schema into `fizzy_test`, and this branch's code ran all ten migrations on
+   top. Then `main`'s SaaS suite ran serially (`PARALLEL_WORKERS=1`; parallel
+   workers would load fresh databases from `schema.rb`). `schema_sha1` still
+   matched `main`'s `schema.rb`, so the suite didn't reload the schema; a dump
+   after the run matched the one before. Result: 1919 tests, **0 failures, 0
+   errors**, 1 skip, the same `bin/rails test` CI runs.
+2. **The column cache.** Each check is a `main` process that loads
+   `Identity::AccessToken`'s columns at a chosen point, waits while the train
+   migrates, then creates, finds, updates and deletes personal access tokens:
+   - Loaded before #1, held through all ten: everything works.
+   - Loaded between #3 and #10, held past #10: **create fails** with `Unknown
+     column 'refresh_token' in 'field list'`; find, update and delete work.
+   - A process started after #10: everything works.
+   - Loaded on the fully migrated schema, held through every `down`: **create
+     fails** (`Unknown column 'oauth_client_id'`). Find, update and delete
+     work, and a fresh process works.
+3. **Personal access tokens across the mixed period.** `main` made token A
+   before #1 and B between #8 and #9. After #9 both have a digest and keep
+   their plaintext, and so does every fixture token. `main` made C after #10;
+   C has no digest. The train's `find_honored`, the Bearer path, finds A, B and
+   C. Finding C gives it its digest, on a primary-datacenter host (the test
+   environment counts as one). Every token with its case swapped is refused.
+   The train made D, which stores a `fizzy_pat_` token as plaintext and digest.
+   `main`'s `Identity.find_by_permissable_access_token` authenticates A, B, C
+   (after healing) and D, for GET and POST.
+4. **Online DDL.** The SQL log captured all 21 statements the ten migrations
+   issue. They ran again on `main`'s schema with the algorithm spelled out, so
+   MySQL refuses rather than falls back. Every column add and drop ran with
+   `ALGORITHM=INSTANT`. Every index ran with `ALGORITHM=INPLACE, LOCK=NONE`, and
+   so did the two bulk ALTERs that add columns and unique indexes together (#3,
+   #8). The rest create or drop the empty `oauth_*` tables. 21 of 21 ran as
+   specified. These were empty tables of `main`'s current definition;
+   production's are the same definition with rows. Neither INSTANT nor INPLACE
+   depends on the row count. Where INSTANT isn't available (a compressed table,
+   64 instant changes already made), MySQL falls back to INPLACE, which is
+   still online.
+5. **The lock timeout.** A transaction held `identity_access_tokens` open for
+   20 s while an ALTER of it ran:
+   - On the `MIGRATE=1` connection (`lock_wait_timeout` 5): the ALTER gave up
+     after 5.0 s, and a SELECT queued behind it returned after 4.9 s.
+   - With the server's default: the ALTER and the queued SELECT both waited
+     18 s, until the transaction ended.
+
+   The app connection still reports the server's 31536000.
+
+Not checked here: a Bearer request end to end over HTTP (the checks call the
+lookups the Bearer path calls), and production's own table definitions (`SHOW
+CREATE TABLE` on the primary would confirm they match `main`'s `schema.rb`).
 
 ## Before beta boots #3192
 
