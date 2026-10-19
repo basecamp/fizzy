@@ -164,6 +164,42 @@ class OauthAvailabilityTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
+  test "a dark server refreshes no grants" do
+    token = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client), permission: :read)
+
+    with_oauth_availability acceptance: false do
+      untenanted { post oauth_token_path, params: refresh_params(token), as: :json }
+    end
+
+    assert_response :not_found
+    assert_equal token.refresh_token, token.reload.refresh_token
+  end
+
+  test "pausing issuance refuses refresh with 503 and leaves the grant untouched" do
+    token = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client), permission: :read)
+
+    with_oauth_availability acceptance: true, issuance: false do
+      untenanted { post oauth_token_path, params: refresh_params(token), as: :json }
+      assert_response :service_unavailable
+      assert_equal token.refresh_token, token.reload.refresh_token
+
+      get user_path(users(:david)), env: bearer(token.token), as: :json
+      assert_response :success
+    end
+  end
+
+  test "a pilot client refreshes against a dark server" do
+    client = oauth_clients(:mcp_client)
+    token = identities(:david).access_tokens.create!(oauth_client: client, permission: :read)
+
+    with_oauth_availability acceptance: false, issuance: false, pilot_client_ids: [ client.client_id ] do
+      untenanted { post oauth_token_path, params: refresh_params(token), as: :json }
+    end
+
+    assert_response :success
+    assert_not_equal token.refresh_token, token.reload.refresh_token
+  end
+
   # Acceptance
 
   test "OAuth bearer tokens are refused while acceptance is off" do
@@ -251,6 +287,10 @@ class OauthAvailabilityTest < ActionDispatch::IntegrationTest
         redirect_uri: "http://127.0.0.1:8888/callback",
         code_verifier: CODE_VERIFIER
       }
+    end
+
+    def refresh_params(token)
+      { grant_type: "refresh_token", refresh_token: token.refresh_token, client_id: token.oauth_client.client_id }
     end
 
     def bearer(token)

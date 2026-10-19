@@ -15,7 +15,8 @@
 # config/environments/production.rb for the environment variables.
 #
 # Discovery follows acceptance: a server that honors tokens stays discoverable
-# while issuance is paused (minting endpoints answer 503); a dark server answers
+# while issuance is paused (minting endpoints, refresh included, answer 503, so
+# access tokens already issued work until they expire); a dark server answers
 # 404 to discovery and minting alike.
 #
 # Management is never gated: revocation, Connected Apps and authorization
