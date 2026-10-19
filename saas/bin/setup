@@ -101,9 +101,9 @@ fi
 
 step "Syncing docker-dev" env MISE_ENV=saas mise bootstrap --only repos --yes
 
-if [ -e tmp/minio-dev.txt ]; then
-  step "Starting Docker services" ~/Work/basecamp/docker-dev/setup minio
-  step "Configuring MinIO" bin/minio-setup
+if [ -e tmp/seaweedfs-dev.txt ]; then
+  step "Starting Docker services" ~/Work/basecamp/docker-dev/setup seaweedfs
+  step "Configuring SeaweedFS" bin/seaweedfs-setup
 fi
 
 step "Starting mysql" ~/Work/basecamp/docker-dev/setup mysql84

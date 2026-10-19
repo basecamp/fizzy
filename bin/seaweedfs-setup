@@ -1,0 +1,21 @@
+#!/usr/bin/env ruby
+#
+#  Make sure the bucket we rely upon in development exists.
+#  Configuration and credentials are in config/storage.yml
+#
+require_relative "../config/environment"
+
+bucket = ActiveStorage::Blob.services.fetch(:devseaweedfs).bucket
+
+begin
+  if bucket.exists?
+    puts "Bucket '#{bucket.name}' already exists"
+  else
+    puts "Creating bucket '#{bucket.name}'..."
+    bucket.create
+    puts "Successfully created bucket '#{bucket.name}'"
+  end
+rescue => e
+  puts "Error checking/creating bucket: #{e.message}"
+  exit 1
+end

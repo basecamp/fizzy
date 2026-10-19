@@ -29,8 +29,23 @@ mise trusted $APP
 env MISE_ENV=saas mise bootstrap --only repos --yes
 
 ▸ Starting Docker services
-$HOME/Work/basecamp/docker-dev/setup minio
+$HOME/Work/basecamp/docker-dev/setup seaweedfs
 
-▸ Configuring MinIO
-bin/minio-setup
-stub-fail: minio-setup [SAAS=1 BUNDLE_GEMFILE=Gemfile.saas]
+▸ Configuring SeaweedFS
+bin/seaweedfs-setup
+
+▸ Starting mysql
+$HOME/Work/basecamp/docker-dev/setup mysql84
+
+▸ Installing the cell's RubyGems
+env -u RUBYOPT -u RUBYLIB -u BUNDLER_SETUP -u BUNDLER_VERSION -u BUNDLE_BIN_PATH -u BUNDLE_LOCKFILE BUNDLE_GEMFILE=$APP/saas/hotcell/Gemfile bundle install
+
+▸ Skipping the cell's image (saas/hotcell/bin/build is not here)
+
+▸ Preparing the database
+rails db:prepare
+
+▸ Cleaning up logs and tempfiles
+rails log:clear tmp:clear
+
+✓ Done (N sec)

@@ -32,10 +32,10 @@ Rails.application.configure do
   end
 
   # Store uploaded files on the local file system (see config/storage.yml for options).
-  if Rails.root.join("tmp/minio-dev.txt").exist?
-    config.active_storage.service = :devminio
-    config.x.content_security_policy.connect_src = "http://minio.fizzy.localhost:39000"
-    config.x.content_security_policy.img_src = "http://minio.fizzy.localhost:39000"
+  if Rails.root.join("tmp/seaweedfs-dev.txt").exist?
+    config.active_storage.service = :devseaweedfs
+    config.x.content_security_policy.connect_src = "http://seaweedfs.fizzy.localhost:38333"
+    config.x.content_security_policy.img_src = "http://seaweedfs.fizzy.localhost:38333"
   else
     config.active_storage.service = :local
   end
@@ -87,7 +87,7 @@ Rails.application.configure do
 
   config.hosts = [
     "app.fizzy.localhost",
-    "fizzy.localhost", # here for backwards compat, but will have CORS errors when using minio
+    "fizzy.localhost", # here for backwards compat, but will have CORS errors when using SeaweedFS
     "localhost",
     "127.0.0.1",
     /fizzy-\d+/,   # review apps: fizzy-123, fizzy-456:3000
