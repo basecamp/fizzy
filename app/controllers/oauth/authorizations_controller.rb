@@ -115,8 +115,11 @@ class Oauth::AuthorizationsController < Oauth::BaseController
       params[:state].nil? || (params[:state].is_a?(String) && params[:state].length <= STATE_MAXIMUM_LENGTH)
     end
 
+    # Errors are found before the user sees the consent screen, so they only
+    # redirect to a vetted target; Deny redirects anywhere allowed, since the
+    # consent screen has named the host by then.
     def redirect_with_error(error, description)
-      if params[:redirect_uri].present? && @client&.allows_redirect?(params[:redirect_uri])
+      if params[:redirect_uri].present? && @client&.allows_redirect?(params[:redirect_uri]) && @client.vetted_redirect?(params[:redirect_uri])
         redirect_to error_redirect_uri(error, description), allow_other_host: true
       else
         @error = error
