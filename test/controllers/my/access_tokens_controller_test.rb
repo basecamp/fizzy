@@ -59,6 +59,28 @@ class My::AccessTokensControllerTest < ActionDispatch::IntegrationTest
     assert_equal "read", body["permission"]
   end
 
+  # A personal access token outlives the app that minted it: it isn't listed
+  # under Connected Apps and survives a disconnect. So an OAuth grant may not
+  # manage personal access tokens at all.
+  test "an OAuth grant can't create, list or revoke personal access tokens" do
+    sign_out
+    grant = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client), permission: :write)
+    bearer_token = { "HTTP_AUTHORIZATION" => "Bearer #{grant.token}" }
+
+    assert_no_difference -> { identities(:david).access_tokens.count } do
+      post my_access_tokens_path, params: { access_token: { description: "Escape hatch", permission: "write" } }, env: bearer_token, as: :json
+    end
+    assert_response :forbidden
+
+    get my_access_tokens_path, env: bearer_token, as: :json
+    assert_response :forbidden
+
+    assert_no_difference -> { identities(:david).access_tokens.count } do
+      delete my_access_token_path(identity_access_tokens(:davids_api_token)), env: bearer_token, as: :json
+    end
+    assert_response :forbidden
+  end
+
   test "cannot create new token via JSON with read-only bearer token" do
     sign_out
     bearer_token = { "HTTP_AUTHORIZATION" => "Bearer #{identity_access_tokens(:jasons_api_token).token}" }

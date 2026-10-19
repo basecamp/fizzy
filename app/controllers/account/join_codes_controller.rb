@@ -1,6 +1,8 @@
 class Account::JoinCodesController < ApplicationController
   wrap_parameters :account_join_code, include: %i[ usage_limit ]
 
+  disallow_oauth_grants
+
   before_action :set_join_code
   before_action :ensure_admin, only: %i[ update destroy ]
 

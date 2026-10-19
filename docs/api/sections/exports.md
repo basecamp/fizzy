@@ -10,6 +10,8 @@ Possible export statuses are:
 
 Completed export files expire after 24 hours. When that happens, request a new export.
 
+An account export includes the account's join code and webhook credentials, so apps connected with OAuth can't create or read account exports. Those endpoints respond `403 Forbidden` to them.
+
 ## `POST /:account_slug/account/exports`
 
 Starts an account export for the current account. Only account admins and owners can create account exports.

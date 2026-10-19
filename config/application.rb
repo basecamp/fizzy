@@ -23,6 +23,12 @@ module Fizzy
       /(?:\A|\.)url\z/
     ]
 
+    # OAuth credentials the list above doesn't reach by partial match: an
+    # authorization code and its PKCE verifier, client assertions and DPoP
+    # proofs. `code` is matched whole, so code_challenge, which is public, stays
+    # readable. This also filters the code from the logged redirect to the client.
+    config.filter_parameters += [ /\Acode\z/i, :code_verifier, :device_code, :client_assertion, :dpop ]
+
     # Include the `lib` directory in autoload paths. Use the `ignore:` option
     # to list subdirectories that don't contain `.rb` files or that shouldn't
     # be reloaded or eager loaded.
