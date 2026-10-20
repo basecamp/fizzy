@@ -53,6 +53,14 @@ env:
 
 proxy:
   ssl: true
+  # Path segments that carry a credential, filtered from kamal-proxy's logs the
+  # way filter_path_parameters filters them from the app's own (config/routes.rb).
+  # A signed token can hold a decoded %2F, so it's filtered to the end of the path
+  # or to the route's last fixed segment; a secure token is one segment.
+  logging:
+    filter_paths:
+      - '/+public/+boards/+([^/]+)'
+      - '(?s)/+(?:join|qr_codes|session/+transfers|my/+access_tokens|public/+collections|email_addresses)/+(.+)'
 
 registry:
   server: registry.37signals.com
