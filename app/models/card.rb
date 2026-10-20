@@ -25,8 +25,9 @@ class Card < ApplicationRecord
   before_save :set_default_title, if: :published?
   before_create :assign_number
 
-  after_save   -> { board.touch }, if: :published?
-  after_touch  -> { board.touch }, if: :published?
+  after_save    -> { board.touch }, if: :published?
+  after_touch   -> { board.touch }, if: :published?
+  after_destroy -> { board.touch }, if: :published?, unless: :destroyed_by_association
   after_update :handle_board_change, if: :saved_change_to_board_id?
 
   scope :reverse_chronologically, -> { order created_at:     :desc, id: :desc }
@@ -92,6 +93,7 @@ class Card < ApplicationRecord
       old_board = account.boards.find_by(id: board_id_before_last_save)
 
       transaction do
+        old_board.touch
         update! column: nil
         track_board_change_event(old_board.name)
         grant_access_to_assignees unless board.all_access?
