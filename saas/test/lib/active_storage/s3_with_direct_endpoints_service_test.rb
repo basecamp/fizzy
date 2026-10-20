@@ -50,7 +50,7 @@ class ActiveStorage::S3WithDirectEndpointsServiceTest < ActiveSupport::TestCase
 
   test "server-side operations are signed with the primary credential" do
     requests = []
-    stub_request(:any, /storage(-uploads)?\.(internal\.)?example\.com/).to_return do |request|
+    stub_request(:any, %r{\Ahttps://storage(-uploads)?\.(internal\.)?example\.com/}).to_return do |request|
       requests << request
       s3_response_for(request)
     end
