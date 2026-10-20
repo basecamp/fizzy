@@ -5,6 +5,17 @@
   }
 
   .mermaid-diagram {
+    --pele-bg: var(--color-canvas);
+    --pele-fg: var(--color-ink);
+    --pele-muted: var(--color-ink-dark);
+    --pele-line: var(--color-ink-medium);
+    --pele-surface: var(--color-ink-lightest);
+    --pele-surface-alt: var(--color-selected-light);
+    --pele-border: var(--color-ink-light);
+    --pele-accent: var(--color-link);
+    --pele-critical: var(--color-negative);
+    --pele-error: var(--color-negative);
+
     margin: 0.4em 0;
     position: relative;
   }
@@ -58,9 +69,9 @@
     svg {
       block-size: auto;
       flex-shrink: 0;
-      inline-size: max(var(--diagram-width, 0) * 1px, min(100cqi, 100cqb * var(--diagram-width, 1) / var(--diagram-height, 1)));
+      inline-size: max(var(--diagram-width) * 1px, min(100cqi, 100cqb * var(--diagram-width) / var(--diagram-height)));
       margin: auto;
-      max-inline-size: none !important; /* Mermaid sets max-width inline */
+      max-inline-size: none !important; /* Pele sets max-width inline */
     }
   }
 }

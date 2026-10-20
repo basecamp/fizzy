@@ -17,4 +17,10 @@ Rails.application.configure do
   config.x.content_security_policy.script_src = "https://challenges.cloudflare.com"
   config.x.content_security_policy.frame_src = "https://challenges.cloudflare.com"
   config.x.content_security_policy.connect_src = "https://storage.basecamp.com"
+
+  # Trusted Types report-only pilot: 1% of page loads report their DOM sink
+  # writes to our own collector, which logs the sink and script location and
+  # drops the content sample. CSP_TRUSTED_TYPES_SAMPLE_RATE=0 turns it off.
+  config.x.content_security_policy.trusted_types_sample_rate = 0.01
+  config.x.content_security_policy.trusted_types_report_uri = "/trusted_types_reports"
 end

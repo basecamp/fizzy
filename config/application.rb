@@ -12,8 +12,15 @@ module Fizzy
 
     # Set here rather than in an initializer: Active Record copies these into filter_attributes when it
     # loads, and config/initializers/extensions.rb loads it before later initializers run.
-    config.filter_parameters += %i[
-      passw secret token _key crypt salt certificate otp ssn
+    #
+    # `code` covers the sign-in code a magic link is redeemed with, and a join code's route parameter. A
+    # webhook's `url` can be a credential itself (a chat service's incoming webhook URL); it is matched
+    # whole, so a parameter that merely ends in "url" keeps its value. The pattern also matches a nested
+    # key's dotted path ("webhook.url"), which is what it is tested against once any dotted filter, such as
+    # those `encrypts` adds, is present.
+    config.filter_parameters += [
+      *%i[ passw secret token _key crypt salt certificate otp ssn code ],
+      /(?:\A|\.)url\z/
     ]
 
     # Include the `lib` directory in autoload paths. Use the `ignore:` option
