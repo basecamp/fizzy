@@ -66,6 +66,13 @@ jobs:
           ruby-version: .ruby-version
           bundler-cache: true
 
+      - name: Build and test board planner
+        run: |
+          rustup toolchain install 1.98.0 --profile minimal
+          rustup default 1.98.0
+          cargo test --locked --manifest-path tools/solverforge-board-planner/Cargo.toml
+          cargo build --locked --release --manifest-path tools/solverforge-board-planner/Cargo.toml --target-dir tmp/solverforge-board-planner-target
+
       - name: Run tests
         run: bin/rails db:setup test
 

@@ -257,6 +257,7 @@ echo
 
 bundle config set --local auto_install true
 step "Installing RubyGems" bundle install
+step "Building board planner" cargo build --locked --release --manifest-path tools/solverforge-board-planner/Cargo.toml --target-dir tmp/solverforge-board-planner-target
 
 if [ -n "$SAAS" ]; then
   source "$app_root/saas/bin/setup"
