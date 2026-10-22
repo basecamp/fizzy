@@ -186,7 +186,7 @@ PATH
     fizzy-saas (0.1.0)
       audits1984
       console1984
-      prometheus-client-mmap (~> 1.4.0)
+      prometheus-client-mmap (~> 1.7.2)
       queenbee
       rails (>= 8.1.0.beta1)
       rails_structured_logging
@@ -477,41 +477,41 @@ GEM
       prettyprint
     prettyprint (0.2.1)
     prism (1.9.0)
-    prometheus-client-mmap (1.4.0)
+    prometheus-client-mmap (1.7.2)
       base64
       bigdecimal
       logger
-      rb_sys (~> 0.9.117)
-    prometheus-client-mmap (1.4.0-aarch64-linux-gnu)
+      rb_sys (~> 0.9.130)
+    prometheus-client-mmap (1.7.2-aarch64-linux-gnu)
       base64
       bigdecimal
       logger
-      rb_sys (~> 0.9.117)
-    prometheus-client-mmap (1.4.0-aarch64-linux-musl)
+      rb_sys (~> 0.9.130)
+    prometheus-client-mmap (1.7.2-aarch64-linux-musl)
       base64
       bigdecimal
       logger
-      rb_sys (~> 0.9.117)
-    prometheus-client-mmap (1.4.0-arm64-darwin)
+      rb_sys (~> 0.9.130)
+    prometheus-client-mmap (1.7.2-arm64-darwin)
       base64
       bigdecimal
       logger
-      rb_sys (~> 0.9.117)
-    prometheus-client-mmap (1.4.0-x86_64-darwin)
+      rb_sys (~> 0.9.130)
+    prometheus-client-mmap (1.7.2-x86_64-darwin)
       base64
       bigdecimal
       logger
-      rb_sys (~> 0.9.117)
-    prometheus-client-mmap (1.4.0-x86_64-linux-gnu)
+      rb_sys (~> 0.9.130)
+    prometheus-client-mmap (1.7.2-x86_64-linux-gnu)
       base64
       bigdecimal
       logger
-      rb_sys (~> 0.9.117)
-    prometheus-client-mmap (1.4.0-x86_64-linux-musl)
+      rb_sys (~> 0.9.130)
+    prometheus-client-mmap (1.7.2-x86_64-linux-musl)
       base64
       bigdecimal
       logger
-      rb_sys (~> 0.9.117)
+      rb_sys (~> 0.9.130)
     propshaft (1.3.2)
       actionpack (>= 7.0.0)
       activesupport (>= 7.0.0)
@@ -546,9 +546,9 @@ GEM
       nokogiri (>= 1.15.7, != 1.16.7, != 1.16.6, != 1.16.5, != 1.16.4, != 1.16.3, != 1.16.2, != 1.16.1, != 1.16.0.rc1, != 1.16.0)
     rainbow (3.1.1)
     rake (13.4.2)
-    rake-compiler-dock (1.9.1)
-    rb_sys (0.9.117)
-      rake-compiler-dock (= 1.9.1)
+    rake-compiler-dock (1.12.0)
+    rb_sys (0.9.130)
+      rake-compiler-dock (= 1.12.0)
     rbs (4.2.0)
       logger
       prism (>= 1.6.0)
@@ -569,20 +569,20 @@ GEM
       chunky_png (~> 1.0)
       rqrcode_core (~> 2.0)
     rqrcode_core (2.1.0)
-    rubocop (1.81.7)
-      json (~> 2.3)
+    rubocop (1.92.1)
+      json (>= 2.3)
       language_server-protocol (~> 3.17.0.2)
       lint_roller (~> 1.1.0)
-      parallel (~> 1.10)
+      parallel (>= 1.10)
       parser (>= 3.3.0.2)
       rainbow (>= 2.2.2, < 4.0)
-      regexp_parser (>= 2.9.3, < 3.0)
-      rubocop-ast (>= 1.47.1, < 2.0)
+      regexp_parser (>= 2.11.3, < 3.0)
+      rubocop-ast (>= 1.49.0, < 2.0)
       ruby-progressbar (~> 1.7)
       unicode-display_width (>= 2.4.0, < 4.0)
-    rubocop-ast (1.48.0)
+    rubocop-ast (1.50.0)
       parser (>= 3.3.7.2)
-      prism (~> 1.4)
+      prism (~> 1.7)
     rubocop-performance (1.26.1)
       lint_roller (~> 1.1)
       rubocop (>= 1.75.0, < 2.0)
@@ -677,7 +677,7 @@ GEM
       tzinfo (>= 1.0.0)
     unicode-display_width (3.2.0)
       unicode-emoji (~> 4.1)
-    unicode-emoji (4.1.0)
+    unicode-emoji (4.3.0)
     uri (1.1.2)
     vcr (6.4.0)
     web-push (3.1.0)
@@ -961,13 +961,13 @@ CHECKSUMS
   pp (0.6.4) sha256=dfcb0fce700c41456265922884f9fe195d7fbb0674a3578e6c0f69588e82b570
   prettyprint (0.2.1) sha256=d555d57ea6d7cf001d4774b693546a6bd88bec1e778ddffb5c60b68ceec4b7d4
   prism (1.9.0) sha256=7b530c6a9f92c24300014919c9dcbc055bf4cdf51ec30aed099b06cd6674ef85
-  prometheus-client-mmap (1.4.0) sha256=b6c886d3fab189c654ea95ddedf682f8f680bf8a183d22d3f6f14239f2878e77
-  prometheus-client-mmap (1.4.0-aarch64-linux-gnu) sha256=76e2209f4d15ad30403871e1ea1dab5a298aff48733eb26b07f5c7102b6d2dc9
-  prometheus-client-mmap (1.4.0-aarch64-linux-musl) sha256=6955390bc7f56a71f12cbce223bfea57a5083b485d586deebbde094f090262db
-  prometheus-client-mmap (1.4.0-arm64-darwin) sha256=6637bc4b53e6d29c9ecfeb2f6ee89673d8ba9e78f943871e31ba278728106e7f
-  prometheus-client-mmap (1.4.0-x86_64-darwin) sha256=a46be7ac11f5d9271c67ceb4c1cf5c5216a4759b388a4b3c64c1dfa116f640d2
-  prometheus-client-mmap (1.4.0-x86_64-linux-gnu) sha256=a56eed51ac38f23d30c41ef6aa1c6c2c410c5f4b883eab223318667e671b47bf
-  prometheus-client-mmap (1.4.0-x86_64-linux-musl) sha256=b7d12efc7444957b69c636fd4cb0ec019b5829e0a49fe3744f59323a5103fc59
+  prometheus-client-mmap (1.7.2) sha256=88bfb6d2548297b31a97365b054b366805056bd76078f37b8b3c3013c3923e0a
+  prometheus-client-mmap (1.7.2-aarch64-linux-gnu) sha256=de25731ba85dc9089e1f2cd798431688e55302b4d76eb7d6ee90b3c490613468
+  prometheus-client-mmap (1.7.2-aarch64-linux-musl) sha256=5e522ce00a02955e3436ec96aa96405a39711782b4f113f37804825e1ece5d33
+  prometheus-client-mmap (1.7.2-arm64-darwin) sha256=ce5b76f2e84aab75baea1506a6bf05d2b87cdbe44bdfa2481f1fd9788dc9e48c
+  prometheus-client-mmap (1.7.2-x86_64-darwin) sha256=c1cf6e8ffcc1f1946023695e4025a03d9df56b1b25a03ef39261508ed4add54a
+  prometheus-client-mmap (1.7.2-x86_64-linux-gnu) sha256=4b487b412ab006140593412c5c55ca09349b6b0b84a4eb75b6d4119bf427b4bf
+  prometheus-client-mmap (1.7.2-x86_64-linux-musl) sha256=9f17a5b1bbac3ac7c6e431ab32e6e0bb91b2f9dbac1fa18deac84a11a48d8269
   propshaft (1.3.2) sha256=1d56a3e56a92c21bfc29caf07406b5386b00d4c47ddf357cf989a5a234b1389e
   psych (5.5.0) sha256=4b245bbbd0f3238df8ccee766ebc1a6b062b10e4ee1d3284eb588739ba156a0a
   public_suffix (7.0.5) sha256=1a8bb08f1bbea19228d3bed6e5ed908d1cb4f7c2726d18bd9cadf60bc676f623
@@ -989,8 +989,8 @@ CHECKSUMS
   railties (8.2.0.alpha)
   rainbow (3.1.1) sha256=039491aa3a89f42efa1d6dec2fc4e62ede96eb6acd95e52f1ad581182b79bc6a
   rake (13.4.2) sha256=cb825b2bd5f1f8e91ca37bddb4b9aaf345551b4731da62949be002fa89283701
-  rake-compiler-dock (1.9.1) sha256=e73720a29aba9c114728ce39cc0d8eef69ba61d88e7978c57bac171724cd4d53
-  rb_sys (0.9.117) sha256=755feaf6c640baceca7a9362dfb0ae87ff4ff16e3566d9ef86533896eb85cb59
+  rake-compiler-dock (1.12.0) sha256=f13205c2738f3d2053afcd03491a9e4541b22a59a0bfc53fc8bc883bd8188023
+  rb_sys (0.9.130) sha256=7d486d99c1da02635515deaf9860fc5aea90bb4ab2589b2deec7fdc7d3548615
   rbs (4.2.0) sha256=51f7b886dcc05bc09e10b901daa6a81829f6adc03101d6ca9ea4aac6103e0674
   rdoc (8.1.0) sha256=befc37880a5cfd36dcb176c748b5fd5ee39dd3536a75e81824e4972ce230f60a
   regexp_parser (2.11.3) sha256=ca13f381a173b7a93450e53459075c9b76a10433caadcb2f1180f2c741fc55a4
@@ -1000,8 +1000,8 @@ CHECKSUMS
   rouge (5.1.0) sha256=b77c632842ab7f5147940212f0345808cccfbce864fd5b631d7d12a35ac85452
   rqrcode (3.2.0) sha256=64c1494ca6bb67d731330f38b50e3fd09eeab4f5dcd04b608e21218d1d0b9542
   rqrcode_core (2.1.0) sha256=f303b85df89c1b8fc5ee8dc19808c9dc4330e6329b660d99d4a8cbb36ca13051
-  rubocop (1.81.7) sha256=6fb5cc298c731691e2a414fe0041a13eb1beed7bab23aec131da1bcc527af094
-  rubocop-ast (1.48.0) sha256=22df9bbf3f7a6eccde0fad54e68547ae1e2a704bf8719e7c83813a99c05d2e76
+  rubocop (1.92.1) sha256=a905381a5344215a79abcfe80f6c94366447e6a55347c9a525b5a24990e33f62
+  rubocop-ast (1.50.0) sha256=b9ca88300da0803ee222ad20cdb30494c0a784eed06fdc35d254b06d662788db
   rubocop-performance (1.26.1) sha256=cd19b936ff196df85829d264b522fd4f98b6c89ad271fa52744a8c11b8f71834
   rubocop-rails (2.34.0) sha256=d90eb95655bdb3a2276eff8daa8972b35d9b0fd0c0a71e812c714213a056d71e
   rubocop-rails-omakase (1.1.0) sha256=2af73ac8ee5852de2919abbd2618af9c15c19b512c4cfc1f9a5d3b6ef009109d
@@ -1046,7 +1046,7 @@ CHECKSUMS
   tzinfo (2.0.6) sha256=8daf828cc77bcf7d63b0e3bdb6caa47e2272dcfaf4fbfe46f8c3a9df087a829b
   tzinfo-data (1.2026.5) sha256=0bdc3c5a540b1704f73a7b5c9be5c90bd0a5866c8e9e8e8a7885977d23a81645
   unicode-display_width (3.2.0) sha256=0cdd96b5681a5949cdbc2c55e7b420facae74c4aaf9a9815eee1087cb1853c42
-  unicode-emoji (4.1.0) sha256=4997d2d5df1ed4252f4830a9b6e86f932e2013fbff2182a9ce9ccabda4f325a5
+  unicode-emoji (4.3.0) sha256=11c02fa73290378c066bb0562cd4c87d8e1b706fbbe0059ca12746a4244de8ce
   uri (1.1.2) sha256=89292e98eabbef6248b0a0ed5e7e398e152f83f17560023a6d94a7f492b169fb
   useragent (0.16.11)
   vcr (6.4.0) sha256=077ac92cc16efc5904eb90492a18153b5e6ca5398046d8a249a7c96a9ea24ae6
@@ -1071,7 +1071,7 @@ CHECKSUMS
   zip_kit (6.4.1) sha256=6cbc9362c2b7ca7827826c708fd6cc3ab2c2a61b8f07c4cd8e0c4182b30e7b01
 
 RUBY VERSION
-  ruby 3.4.8
+  ruby 4.0.8
 
 BUNDLED WITH
   4.0.18
