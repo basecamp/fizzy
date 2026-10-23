@@ -12,6 +12,8 @@ __Query Parameters:__
 |-----------|-------------|
 | `creator_ids[]` | Filter to activities created by specific user ID(s). Multiple values are ORed. |
 | `board_ids[]` | Filter to activities on specific board ID(s). Multiple values are ORed. |
+| `since` | Return activities created on or after this date (ISO 8601: `YYYY-MM-DD`). |
+| `until` | Return activities created on or before this date (ISO 8601: `YYYY-MM-DD`). |
 
 Different filter params are ANDed together: `creator_ids[]=A&board_ids[]=X` means activities created by A on board X.
 
