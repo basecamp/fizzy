@@ -2,7 +2,7 @@
 # than an inventory.
 
 # Make sure RUBY_VERSION matches the Ruby version in .ruby-version
-ARG RUBY_VERSION=4.0.8
+ARG RUBY_VERSION=4.0.9
 
 # The bundle is built in a stage of its own, because installing it needs a compiler for the native
 # extensions, which the image that runs untrusted bytes must not carry.
@@ -25,7 +25,7 @@ RUN bundle install && rm -rf "$BUNDLE_PATH"/ruby/*/cache
 FROM ruby:${RUBY_VERSION}-slim
 
 # The upgrade applies Debian's pending security patches. `docker build --pull` takes the newest
-# `ruby:4.0.8-slim` tag, but that tag can sit behind an advisory already in `trixie-security` until
+# `ruby:4.0.9-slim` tag, but that tag can sit behind an advisory already in `trixie-security` until
 # docker-library/ruby rebuilds it, so a clean build can ship a fixable High no rebuild of the cell would
 # clear. Upgrading here makes the patch level this image's own rather than upstream's release cadence.
 #

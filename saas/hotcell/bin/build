@@ -79,7 +79,7 @@ fi
 tag="$(hotcell_image_tag "$repo_root")"
 
 echo "Building $tag"
-# --pull because `ruby:4.0.8-slim` is a mutable tag: without it a laptop that built last month builds on
+# --pull because `ruby:4.0.9-slim` is a mutable tag: without it a laptop that built last month builds on
 # whatever base it cached then, and the apt-get upgrade in the Dockerfile is left doing the whole job.
 docker build \
   --pull \

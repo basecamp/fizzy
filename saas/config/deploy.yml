@@ -86,7 +86,7 @@ accessories:
 <%- if ENV.fetch("HOTCELL_IMAGE", "") != "" -%>
     image: <%= ENV["HOTCELL_IMAGE"] %>
 <%- else -%>
-    image: registry.37signals.com/basecamp/fizzy-hotcell:d31e806ff535
+    image: registry.37signals.com/basecamp/fizzy-hotcell:bb21fd4fefd5
 <%- end -%>
     roles: [ web, jobs ]  # a descriptor cannot cross machines, so a cell lives on its caller's host
     # An accessory's own key, not one of the options below. Kamal always emits a --network of its own,
