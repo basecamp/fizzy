@@ -48,11 +48,14 @@ COPY . .
 # Precompile bootsnap code for faster boot times
 RUN bundle exec bootsnap precompile app/ lib/
 
-# Precompiling assets for production
+# Precompiling assets for production. Booting builds the purestorage service, which refuses to build
+# without a direct-upload credential, so give it a placeholder that never leaves this step.
 RUN SECRET_KEY_BASE_DUMMY=1 \
     ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY=1 \
     ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY=1 \
     ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT=1 \
+    ACTIVE_STORAGE_DIRECT_UPLOAD_ACCESS_KEY_ID=placeholder \
+    ACTIVE_STORAGE_DIRECT_UPLOAD_SECRET_ACCESS_KEY=placeholder \
     ./bin/rails assets:precompile
 
 # Final stage for app image
