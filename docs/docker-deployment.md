@@ -4,7 +4,7 @@ We provide pre-built Docker images that can be used to run Fizzy on your own ser
 
 If you don't need to change the source code, and just want the out-of-the-box Fizzy experience, this can be a great way to get started.
 
-You'll find the latest version of Fizzy's Docker image at `ghcr.io/basecamp/fizzy:main`.
+You'll find the latest version of Fizzy's Docker image at `ghcr.io/basecamp/fizzy-edge:main`.
 To run it you'll need three things: a machine that runs Docker; a mounted volume (so that your database is stored somewhere that is kept around between restarts); and some environment variables for configuration.
 
 ### Mounting a storage volume
@@ -15,7 +15,7 @@ By default Docker containers don't persist storage between runs, so you'll want 
 The simplest way to do this is with the `--volume` flag with `docker run`. For example:
 
 ```sh
-docker run --volume fizzy:/rails/storage ghcr.io/basecamp/fizzy:main
+docker run --volume fizzy:/rails/storage ghcr.io/basecamp/fizzy-edge:main
 ```
 
 That will create a named volume (called `fizzy`) and mount it into the correct path.
@@ -171,7 +171,7 @@ Here's an example of a `docker-compose.yml` that you could use to run Fizzy via 
 ```yaml
 services:
   web:
-    image: ghcr.io/basecamp/fizzy:main
+    image: ghcr.io/basecamp/fizzy-edge:main
     restart: unless-stopped
     ports:
       - "80:80"
