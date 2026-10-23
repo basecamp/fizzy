@@ -17,11 +17,9 @@ class User < ApplicationRecord
   has_many :data_exports, class_name: "User::DataExport", dependent: :destroy
 
   def deactivate
-    transaction do
-      accesses.destroy_all
-      update! active: false, identity: nil
-      close_remote_connections
-    end
+    accesses.destroy_all
+    update! active: false
+    close_remote_connections
   end
 
   def setup?
