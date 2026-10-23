@@ -74,7 +74,12 @@ env:
 
 accessories:
   load-balancer:
-    image: basecamp/kamal-proxy:lb
+    # Was `:lb`, a moving tag from before the load-balancer features (read targets, writer
+    # affinity) reached a release. Pinned now for the same reason as hotcell's image in
+    # deploy.yml: a reboot pulls whatever the tag names at that moment, so a moving tag makes
+    # what a host runs depend on when it last rebooted. v0.10.0 is also the first release with
+    # --client-ip-header, which saas/script/configure-lb-*.sh passes.
+    image: basecamp/kamal-proxy:v0.10.0
     hosts:
       - fizzy-lb-101.df-iad-int.37signals.com
       - fizzy-lb-102.df-iad-int.37signals.com
