@@ -60,9 +60,25 @@ TurboOffline.addRule({
   })
 })
 
+// Every offline copy of a page was rendered under some ApplicationController::RENDERING_VERSION.
+// When a worker brings a new one, clear them all before taking over, so a page rendered under
+// the old version can't be replayed when the network fails.
+const RENDERING_VERSION = "<%= ApplicationController::RENDERING_VERSION %>"
+const RENDERING_VERSION_KEY = new Request("/__rendering-version")
+
 self.addEventListener("activate", (event) => {
-  event.waitUntil(self.clients.claim())
+  event.waitUntil(clearPagesRenderedUnderAnotherVersion().catch(console.error).then(() => self.clients.claim()))
 })
+
+async function clearPagesRenderedUnderAnotherVersion() {
+  const stored = await caches.match(RENDERING_VERSION_KEY)
+
+  if (!stored || await stored.text() !== RENDERING_VERSION) {
+    await TurboOffline.serviceWorker.clearCache()
+    const cache = await caches.open("rendering-version")
+    await cache.put(RENDERING_VERSION_KEY, new Response(RENDERING_VERSION))
+  }
+}
 
 TurboOffline.start()
 
