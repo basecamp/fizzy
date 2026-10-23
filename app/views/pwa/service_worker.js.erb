@@ -70,9 +70,13 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(clearPagesRenderedUnderAnotherVersion().catch(console.error).then(() => self.clients.claim()))
 })
 
-// The version is recorded only after the clear succeeds, so checking again whenever the worker
-// starts retries a clear that failed or was cut short during activation.
-clearPagesRenderedUnderAnotherVersion().catch(console.error)
+// The version is recorded only after the clear succeeds, so checking again whenever an active
+// worker starts retries a clear that failed or was cut short during activation. Not while this
+// worker is still installing: the previous one is still serving then, and a page it writes after
+// the clear would be recorded as current.
+if (self.serviceWorker?.state === "activated") {
+  clearPagesRenderedUnderAnotherVersion().catch(console.error)
+}
 
 async function clearPagesRenderedUnderAnotherVersion() {
   const stored = await caches.match(RENDERING_VERSION_KEY)
