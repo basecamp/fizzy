@@ -129,6 +129,12 @@ Rails.application.configure do
   config.x.oauth.issuance_enabled = ENV["OAUTH_ISSUANCE_ENABLED"] != "false"
   config.x.oauth.pilot_client_ids = ENV.fetch("OAUTH_PILOT_CLIENT_IDS", "").split(",").map(&:strip).compact_blank
 
+  # Dynamic client registration accepts https redirects only on these hosts
+  # (OAUTH_DCR_ALLOWED_HTTPS_HOSTS, separated by spaces or commas), beside
+  # loopback and the cursor:// and claude:// app schemes. Unset, it accepts
+  # no https redirect at all. See Oauth.dcr_redirect_shape?.
+  config.x.oauth.dcr_allowed_https_hosts = ENV.fetch("OAUTH_DCR_ALLOWED_HTTPS_HOSTS", "").split(/[\s,]+/).compact_blank
+
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
 end

@@ -50,6 +50,11 @@ env:
     # because development runs the app and its cell as one user, where it must stay unset.
     HOTCELL_ROOT: /run/hotcell
     HOTCELL_GROUP: 10001
+    # The vendor hosts whose https callbacks dynamic client registration accepts, beside loopback and the
+    # cursor:// and claude:// schemes: Claude's web and desktop connectors (claude.ai, claude.com), ChatGPT
+    # (chatgpt.com), Cursor and the Grok Bot (www.cursor.com), and Grok's own connector (grok.com). Add a host
+    # only when a real client is confirmed to need it.
+    OAUTH_DCR_ALLOWED_HTTPS_HOSTS: "claude.ai claude.com chatgpt.com www.cursor.com grok.com"
 
 proxy:
   ssl: true
