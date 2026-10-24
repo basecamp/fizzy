@@ -50,6 +50,10 @@ env:
     # because development runs the app and its cell as one user, where it must stay unset.
     HOTCELL_ROOT: /run/hotcell
     HOTCELL_GROUP: 10001
+    # The hosts a Client ID Metadata Document may be fetched from (Oauth::ClientMetadata).
+    # Configuration, not a credential, and inert on its own: nothing is fetched until
+    # OAUTH_CIMD_ENABLED is "true", which no destination sets.
+    OAUTH_CIMD_ALLOWED_HOSTS: "mcp.claude.ai claude.ai claude.com chatgpt.com"
 
 proxy:
   ssl: true

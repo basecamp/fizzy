@@ -89,16 +89,68 @@ class Oauth::AuthorizationsController < Oauth::BaseController
       end
     end
 
-    # A client not registered for the code grant, like the personal access
-    # token issuer, has nothing to authorize here.
+    # client_id is a single string by now (require_single_valued_parameters).
+    # A metadata document client is reached only through its URL, so the
+    # switch, the exact comparison and the refresh all apply to it. A client
+    # not registered for the code grant, like the personal access token
+    # issuer, has nothing to authorize here.
     def set_client
-      @client = Oauth::Client.find_by(client_id: params[:client_id])
-
-      if @client.nil?
-        oauth_error "invalid_request", "Unknown client"
-      elsif !@client.allows_grant_type?("authorization_code")
-        oauth_error "unauthorized_client", "Client may not use the authorization code grant"
+      @client = if Oauth::ClientMetadata::Url.url_shaped?(params[:client_id])
+        metadata_document_client
+      else
+        Oauth::Client.find_by(client_id: params[:client_id]).then { |client| client unless client&.metadata_document? }
       end
+
+      unless performed?
+        if @client.nil?
+          oauth_error "invalid_request", "Unknown client"
+        elsif !@client.allows_grant_type?("authorization_code")
+          oauth_error "unauthorized_client", "Client may not use the authorization code grant"
+        end
+      end
+    end
+
+    # A URL client_id names its metadata document (Oauth::ClientMetadata).
+    # Resolved without writing on GET, which reads from a replica, and persisted
+    # on the authorization POST, before a code is minted. Off, every URL client_id
+    # is an unknown client, provisioned or not.
+    def metadata_document_client
+      if denial?
+        metadata_document_client_for_denial
+      elsif Oauth::Availability.metadata_documents_enabled?(params[:client_id])
+        resolution = Oauth::ClientMetadata::Resolver.new(params[:client_id], requester: Current.identity).resolve(persist: request.post?)
+        resolution.client || refuse_metadata_document(resolution)
+      end
+    end
+
+    # A denial never registers a client, and stays reachable while metadata
+    # documents are off: the stored row answers when it allows the redirect.
+    # Otherwise (no row, or a stale one the consent screen saw past) the
+    # document is read again, without persisting it.
+    def metadata_document_client_for_denial
+      row = Oauth::Client.find_presented(params[:client_id])
+      row = nil unless row&.metadata_document?
+
+      if (row.nil? || !row.allows_redirect?(params[:redirect_uri])) && Oauth::Availability.metadata_documents_enabled?(params[:client_id])
+        Oauth::ClientMetadata::Resolver.resolve_for_read(params[:client_id], requester: Current.identity).client || row
+      else
+        row
+      end
+    end
+
+    # The draft's answer to a document that can't be fetched or doesn't validate:
+    # refuse, rather than authorize against a document we can't see. Server
+    # pressure is a 503 to retry; anything else reads like an unknown client.
+    def refuse_metadata_document(resolution)
+      case resolution.outcome
+      when :fetch_failed, :invalid_document, :throttled
+        oauth_error "invalid_client_metadata", resolution.error_description
+      when :overloaded
+        response.headers["Retry-After"] = "5"
+        oauth_error "temporarily_unavailable", resolution.error_description, status: :service_unavailable
+      end
+
+      nil
     end
 
     def validate_redirect_uri

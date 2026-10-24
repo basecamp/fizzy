@@ -318,6 +318,38 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     assert_not Oauth::Client.exists?(stale.id)
   end
 
+  test "cleanup destroys metadata document clients left without a grant for the retention period" do
+    stale = travel_to(31.days.ago) { register_metadata_document_client }
+    recent = travel_to(29.days.ago) { register_metadata_document_client(client_id: "https://claude.ai/recent") }
+
+    Oauth::Client.cleanup
+
+    assert_not Oauth::Client.exists?(stale.id)
+    assert Oauth::Client.exists?(recent.id)
+  end
+
+  test "a metadata document client is held to self-registered redirects, and none is vetted but loopback" do
+    client = Oauth::Client.new name: "Claude", client_id: "https://claude.ai/client.json", client_id_metadata_document: true, redirect_uris: %w[ http://claude.ai/callback ]
+    assert_not client.valid?
+
+    client.redirect_uris = %w[ https://claude.ai/callback http://127.0.0.1:9000/callback ]
+    assert client.valid?
+    assert_not client.vetted_redirect?("https://claude.ai/callback")
+    assert client.vetted_redirect?("http://127.0.0.1:9000/callback")
+  end
+
+  test "a provisioned client keeps the client_id it was given" do
+    assert_equal "https://claude.ai/client.json", register_metadata_document_client.client_id
+  end
+
+  test "find_presented compares the client_id exactly" do
+    client = register_metadata_document_client
+
+    assert_equal client, Oauth::Client.find_presented("https://claude.ai/client.json")
+    assert_nil Oauth::Client.find_presented("https://claude.ai/CLIENT.json")
+    assert_nil Oauth::Client.find_presented([ "https://claude.ai/client.json" ])
+  end
+
   test "cleanup keeps recent, granted and operator-provisioned clients" do
     recent = travel_to(29.days.ago) { register_client }
     granted = travel_to(31.days.ago) { register_client.tap { identities(:david).access_tokens.create!(oauth_client: it) } }
@@ -543,6 +575,10 @@ class Oauth::ClientTest < ActiveSupport::TestCase
   end
 
   private
+    def register_metadata_document_client(**attributes)
+      Oauth::Client.create! name: "Claude", client_id: "https://claude.ai/client.json", redirect_uris: %w[ https://claude.ai/callback ], client_id_metadata_document: true, **attributes
+    end
+
     def register_client(**attributes)
       Oauth::Client.create! name: "Abandoned", redirect_uris: %w[ http://127.0.0.1:8888/callback ], dynamically_registered: true, **attributes
     end

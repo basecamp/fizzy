@@ -46,6 +46,13 @@ module Oauth::Availability
     acceptance_enabled?(client_id) && (issuing? || piloted?(client_id))
   end
 
+  # Client ID Metadata Documents, fail-closed: only an explicit true turns them
+  # on, and they never outrun issuance. Intake only: a metadata document client
+  # already authorized keeps refreshing while this is off.
+  def metadata_documents_enabled?(client_id = nil)
+    issuance_enabled?(client_id) && config.cimd_enabled == true
+  end
+
   # The clients whose tokens are honored, as a relation, for code that weighs
   # many grants at once rather than one presented token.
   def accepted_clients
