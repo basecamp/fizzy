@@ -101,11 +101,29 @@ class Oauth::BaseController < ApplicationController
       response.headers["Referrer-Policy"] = "no-referrer"
     end
 
+    # Every error answer is announced as error.oauth, for metrics (SaaS counts
+    # them in Yabeda). The client is named by its type alone: a self-registered
+    # client's id is anyone's to mint, so it can't be a metric label.
     def oauth_error(error, description = nil, status: :bad_request)
+      ActiveSupport::Notifications.instrument "error.oauth",
+        endpoint: controller_name, error_code: error, client_type: oauth_error_client&.client_type || "unknown"
+
+      render_oauth_error error, description, status: status
+    end
+
+    # A throttled request is counted as a rate-limit hit and not as an error,
+    # so a burst of retries doesn't read as a spike of failures.
+    def oauth_rate_limit_exceeded
+      ActiveSupport::Notifications.instrument "rate_limit.oauth", endpoint: controller_name
+      render_oauth_error "slow_down", "Too many requests", status: :too_many_requests
+    end
+
+    def render_oauth_error(error, description, status:)
       render json: { error: error, error_description: description }.compact, status: status
     end
 
-    def oauth_rate_limit_exceeded
-      oauth_error "slow_down", "Too many requests", status: :too_many_requests
+    # The client an error answers, if the request got as far as finding one.
+    def oauth_error_client
+      @client
     end
 end

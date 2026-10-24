@@ -5,6 +5,7 @@ require_relative "authorization"
 require_relative "gvl_instrumentation"
 require_relative "cell"
 require_relative "unprocessable_attachments"
+require_relative "oauth_audit_log"
 require_relative "sentry_sql_redaction"
 require_relative "../../rails_ext/active_record_tasks_database_tasks.rb"
 
@@ -100,6 +101,12 @@ module Fizzy
         end
       end
 
+      # OAuth lifecycle events (Oauth::Audit) go to the structured log, which
+      # production writes to Loki.
+      initializer "fizzy_saas.logging.oauth_audit" do |app|
+        Rails.event.subscribe(OauthAuditLog.new(app.config.structured_logging.logger)) { |event| event[:name].start_with?("oauth.") }
+      end
+
       # Load test mocks automatically in test environment
       # The account slug is moved off PATH_INFO before routing (config/initializers/tenanting), so the
       # routes declared with filter_path_parameters are matched past it.
@@ -188,6 +195,9 @@ module Fizzy
 
         require "yabeda/hot_cell"
         Yabeda::HotCell.install!
+
+        require "yabeda/oauth"
+        Yabeda::Oauth.install!
 
         require_relative "metrics"
       end

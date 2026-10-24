@@ -31,7 +31,7 @@ class My::AccessTokensController < ApplicationController
   end
 
   def destroy
-    my_access_tokens.find(params[:id]).destroy!
+    my_access_tokens.find(params[:id]).revoke reason: "revoked", actor: "user"
 
     respond_to do |format|
       format.html { redirect_to my_access_tokens_path }
