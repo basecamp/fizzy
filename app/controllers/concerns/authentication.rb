@@ -2,6 +2,8 @@ module Authentication
   extend ActiveSupport::Concern
 
   included do
+    class_attribute :account_bound_grants_unscoped, instance_accessor: false, default: false
+
     before_action :require_account # Checking and setting account must happen first
     before_action :require_authentication
     helper_method :authenticated?, :oauth_grant?
@@ -35,6 +37,14 @@ module Authentication
     # readable but withhold their credentials (see webhooks/_webhook.json).
     def disallow_oauth_grants(**options)
       before_action :forbid_oauth_grant, **options
+    end
+
+    # An account-bound grant reaches its own account and no other, so a request
+    # outside any account refuses it, unless the controller answers it with
+    # that account alone (as /my/identity does). Opt-in, so an unscoped
+    # endpoint added later refuses it until someone decides otherwise.
+    def allow_account_bound_grants_unscoped
+      self.account_bound_grants_unscoped = true
     end
 
     def disallow_account_scope(**options)
@@ -98,10 +108,19 @@ module Authentication
     # the client must ask for write instead (RFC 6750 §3.1). That's a 403 for an
     # app's grant, but a personal access token keeps the 401 shipped clients
     # (fizzy-cli, the native apps) have always had for it.
+    #
+    # A token audienced to another resource (the hosted MCP server) is that
+    # resource's credential and never authenticates here, and an account-bound
+    # one only within its account. Both are invalid_token: to this API they
+    # are not tokens at all.
     def authenticate_with_bearer_token
       access_token = authenticate_with_http_token(scheme: "Bearer") { |token| Identity::AccessToken.find_honored(token) }
 
-      if access_token&.allows?(request.method)
+      if access_token&.audienced?
+        request_bearer_authentication error: "invalid_token", error_description: "The access token is for another resource"
+      elsif access_token && !reachable_by?(access_token)
+        request_bearer_authentication error: "invalid_token", error_description: "The access token is bound to another account"
+      elsif access_token&.allows?(request.method)
         Current.access_token = access_token
         Current.identity = access_token.identity
       elsif access_token
@@ -109,6 +128,16 @@ module Authentication
           error: "insufficient_scope", error_description: "The access token is read-only", scope: "write"
       else
         request_bearer_authentication error: "invalid_token", error_description: "The access token is expired, revoked, or invalid"
+      end
+    end
+
+    def reachable_by?(access_token)
+      if !access_token.account_bound?
+        true
+      elsif Current.account.present?
+        Current.account.id == access_token.account_id
+      else
+        self.class.account_bound_grants_unscoped
       end
     end
 

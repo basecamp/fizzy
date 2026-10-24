@@ -1,0 +1,6 @@
+<%# An audienced grant (the hosted MCP server) reaches one account: the one picked here. %>
+<div class="flex flex-column gap-half">
+  <strong><%= form.label :account_id, "Account" %></strong>
+  <%= form.select :account_id, options_from_collection_for_select(accounts, :id, :name, accounts.first&.id), {}, class: "input input--select" %>
+  <p class="txt-small txt-muted margin-none">The app can reach this account only.</p>
+</div>

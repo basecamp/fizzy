@@ -38,7 +38,11 @@ class Oauth::TokensController < Oauth::BaseController
     before_action :validate_pkce
     before_action :validate_redirect_uri
     before_action :set_identity
+    before_action :validate_code_resource
+    before_action :validate_bound_account
   end
+
+  before_action :validate_refresh_resource, unless: -> { authorization_code_grant? || unretryable_replay? }
 
   # A replay that can't be a retry is answered before any scope is weighed:
   # outside the grace window it's revoked, so no scope parameter can steer it
@@ -52,7 +56,7 @@ class Oauth::TokensController < Oauth::BaseController
       granted = Oauth.canonical_scope(@auth_code.scope)
       permission = granted.split.include?("write") ? "write" : "read"
 
-      if access_token = @client.redeem(@auth_code, identity: @identity, permission: permission)
+      if access_token = @client.redeem(@auth_code, identity: @identity, permission: permission, audience: @auth_code.audience, account_id: @auth_code.account_id)
         render json: token_response(access_token, scope: granted)
       else
         oauth_error "invalid_grant", "Authorization code already used"
@@ -146,6 +150,35 @@ class Oauth::TokensController < Oauth::BaseController
     def set_identity
       unless @identity = Identity.find_by(id: @auth_code.identity_id)
         oauth_error "invalid_grant", "Identity not found"
+      end
+    end
+
+    # RFC 8707 §2.2: a resource on redemption must name what the code was
+    # issued for. A code for the hosted MCP server answers to that resource
+    # alone; any other code, to Fizzy's own API. Neither is widened or moved
+    # by what the token request names.
+    def validate_code_resource
+      unless resource_matches?(@auth_code.audience)
+        oauth_error "invalid_target", "resource does not match the authorization"
+      end
+    end
+
+    # An audienced code is bound to the account picked at consent, and it is
+    # honored only while the person still belongs to that account and the
+    # account is active.
+    def validate_bound_account
+      if @auth_code.audience.present? || @auth_code.account_id.present?
+        unless @auth_code.audience.present? && @identity.users_with_active_accounts.exists?(account_id: @auth_code.account_id)
+          oauth_error "invalid_grant", "The authorized account is no longer available"
+        end
+      end
+    end
+
+    # A refresh may name a resource, but only the grant's own (RFC 8707 §2.2).
+    # The audience is the grant's, stamped at consent, never the request's.
+    def validate_refresh_resource
+      unless resource_matches?(@access_token.audience)
+        oauth_error "invalid_target", "resource does not match the grant"
       end
     end
 

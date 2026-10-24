@@ -7,6 +7,17 @@ module Oauth
     scope.to_s.split.include?("write") ? "read write" : "read"
   end
 
+  # The protected resources, other than Fizzy's own API, that an OAuth grant
+  # may be issued for (RFC 8707): the hosted MCP server's resource URL, by
+  # exact string, from FIZZY_OAUTH_MCP_RESOURCES. None unless configured.
+  def self.mcp_resources
+    Array(Rails.application.config.x.oauth.mcp_resources)
+  end
+
+  def self.mcp_resource?(resource)
+    resource.is_a?(String) && resource.present? && mcp_resources.include?(resource)
+  end
+
   def self.loopback_host?(host)
     LOOPBACK_HOSTS.include?(URI.decode_www_form_component(host.to_s).downcase)
   rescue ArgumentError

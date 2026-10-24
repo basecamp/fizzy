@@ -12,6 +12,7 @@
     <%= f.hidden_field :code_challenge, value: @code_challenge %>
     <%= f.hidden_field :code_challenge_method, value: "S256" %>
     <%= f.hidden_field :response_type, value: "code" %>
+    <%= f.hidden_field :resource, value: @resource if @resource %>
 
     <div class="flex flex-column gap-half">
       <strong>Application</strong>
@@ -25,6 +26,8 @@
         <% end %>
       <% end %>
     </div>
+
+    <%= render "oauth/authorizations/account_picker", form: f, accounts: @accounts if @accounts %>
 
     <div class="flex flex-column gap-half">
       <strong><%= f.label :scope, "Permission" %></strong>

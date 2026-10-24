@@ -6,6 +6,9 @@ Rails.application.routes.draw do
 
   namespace :oauth do
     resource :authorization, only: %i[ new create ]
+    # The delegation exchange shares the token endpoint, told apart by its grant type.
+    post "token", to: "token_exchanges#create", as: nil,
+      constraints: Oauth::TokenDelegation.method(:request?)
     resource :token, only: :create
     resource :revocation, only: :create
     resources :clients, only: :create

@@ -27,7 +27,7 @@ class Push::Subscription < ApplicationRecord
   # either.
   scope :deliverable_to, ->(user) do
     where(oauth_client_id: nil).or \
-      where(oauth_client_id: Identity::AccessToken.oauth.unlapsed.where(identity_id: user.identity_id, oauth_client: Oauth::Availability.accepted_clients).select(:oauth_client_id))
+      where(oauth_client_id: Identity::AccessToken.grants.unlapsed.where(identity_id: user.identity_id, oauth_client: Oauth::Availability.accepted_clients).select(:oauth_client_id))
   end
 
   validates :endpoint, presence: true

@@ -39,6 +39,9 @@ production: &production
   cleanup_oauth_redeemed_authorization_codes:
     command: "Oauth::RedeemedAuthorizationCode.cleanup"
     schedule: every day at 04:42
+  cleanup_delegated_oauth_tokens:
+    command: "Identity::AccessToken.cleanup_delegated"
+    schedule: every hour at minute 37
   cleanup_exports:
     command: "Export.cleanup"
     schedule: every hour at minute 20

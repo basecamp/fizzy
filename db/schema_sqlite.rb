@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_10_17_140000) do
+ActiveRecord::Schema[8.2].define(version: 2026_10_19_130000) do
   create_table "accesses", id: :uuid, force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -352,8 +352,11 @@ ActiveRecord::Schema[8.2].define(version: 2026_10_17_140000) do
   end
 
   create_table "identity_access_tokens", id: :uuid, force: :cascade do |t|
+    t.uuid "account_id"
+    t.string "audience", limit: 255
     t.string "authorization_code_jti", limit: 255
     t.datetime "created_at", null: false
+    t.uuid "delegated_from_id"
     t.text "description", limit: 65535
     t.datetime "expires_at"
     t.uuid "identity_id", null: false
@@ -364,7 +367,9 @@ ActiveRecord::Schema[8.2].define(version: 2026_10_17_140000) do
     t.string "token", limit: 255
     t.string "token_digest", limit: 80
     t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_identity_access_tokens_on_account_id"
     t.index ["authorization_code_jti"], name: "index_identity_access_tokens_on_authorization_code_jti", unique: true
+    t.index ["delegated_from_id"], name: "index_identity_access_tokens_on_delegated_from_id"
     t.index ["identity_id"], name: "index_access_token_on_identity_id"
     t.index ["oauth_client_id"], name: "index_identity_access_tokens_on_oauth_client_id"
     t.index ["refresh_token"], name: "index_identity_access_tokens_on_refresh_token", unique: true
@@ -446,6 +451,7 @@ ActiveRecord::Schema[8.2].define(version: 2026_10_17_140000) do
     t.datetime "created_at", null: false
     t.boolean "dynamically_registered", default: false
     t.string "name", limit: 255, null: false
+    t.string "protected_resource", limit: 255
     t.json "redirect_uris"
     t.json "scopes"
     t.string "token_endpoint_auth_method", limit: 255, default: "none", null: false

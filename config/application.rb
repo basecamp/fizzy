@@ -49,5 +49,18 @@ module Fizzy
     config.action_pack.passkey.challenge_url = -> { my_passkey_challenge_path(script_name: "") }
 
     config.mission_control.jobs.http_basic_auth_enabled = false
+
+    # The protected resources an OAuth grant may name as its audience (RFC 8707),
+    # besides Fizzy's own API: the hosted MCP server's resource URL, e.g.
+    # https://mcp.fizzy.do/mcp. Exact strings, separated by commas or spaces.
+    # None unless configured, so an install that never sets it issues no
+    # audienced grant (see Oauth.mcp_resources).
+    config.x.oauth.mcp_resources = ENV.fetch("FIZZY_OAUTH_MCP_RESOURCES", "").split(/[\s,]+/).compact_blank
+
+    # A grant stores its audience in a 255-character column, so a longer
+    # resource couldn't be issued. Refused at boot rather than at redemption.
+    if (too_long = config.x.oauth.mcp_resources.select { |resource| resource.length > 255 }).any?
+      raise ArgumentError, "FIZZY_OAUTH_MCP_RESOURCES entries must be at most 255 characters: #{too_long.join(", ")}"
+    end
   end
 end
