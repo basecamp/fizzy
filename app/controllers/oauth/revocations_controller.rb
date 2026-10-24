@@ -29,7 +29,9 @@ class Oauth::RevocationsController < Oauth::BaseController
     if attempts_client_authentication? && !authenticated_client
       client_authentication_failed
     else
-      revocable_token&.destroy
+      if grant = revocable_token
+        grant.revoke reason: "revocation_endpoint", actor: "client", presented: presented_kind(grant)
+      end
 
       head :ok
     end
@@ -44,6 +46,12 @@ class Oauth::RevocationsController < Oauth::BaseController
 
     def revocable_token
       Identity::AccessToken.personal.find_by_raw_token(params[:token]) || client_token
+    end
+
+    # Which of the grant's tokens the client presented, for metrics: its access
+    # token, or a refresh token, current or retired.
+    def presented_kind(grant)
+      grant.token_digest.in?(TokenDigester.digests(params[:token])) ? "access" : "refresh"
     end
 
     # Either token of a grant revokes the whole grant, and so does a refresh

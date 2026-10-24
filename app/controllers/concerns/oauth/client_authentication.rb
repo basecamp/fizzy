@@ -127,6 +127,14 @@ module Oauth::ClientAuthentication
       nil
     end
 
+    # An error is labeled with the client the request names, authenticated or
+    # not, and never the one a presented code or token was issued to: the
+    # metric describes who asked, and a request naming no client that exists
+    # is "unknown". Its type is all a metric takes from it.
+    def oauth_error_client
+      requesting_client
+    end
+
     # The pilot exemption keys on the client that authenticates, header or body.
     def piloting_client_id
       oauth_client_id
