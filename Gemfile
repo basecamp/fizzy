@@ -24,6 +24,7 @@ gem "solid_queue", "~> 1.7"
 gem "sqlite3", ">= 2.0"
 gem "thruster", require: false
 gem "trilogy", "~> 2.13"
+gem "tzinfo-data" # Bundled zone data; the base image's tzdata package lags IANA
 
 # Features
 gem "rails-active_search", "~> 0.1.0"

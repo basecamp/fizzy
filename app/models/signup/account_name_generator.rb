@@ -36,11 +36,11 @@ class Signup::AccountNameGenerator
     end
 
     def first_account_name_regex
-      @first_account_name_regex ||= /\A#{prefix}\s+#{SUFFIX}\Z/i
+      @first_account_name_regex ||= /\A#{Regexp.escape(prefix)}\s+#{SUFFIX}\Z/i
     end
 
     def nth_account_name_regex
-      @nth_account_name_regex ||= /\A#{prefix}\s+(1st|2nd|3rd|\d+th)\s+#{SUFFIX}/i
+      @nth_account_name_regex ||= /\A#{Regexp.escape(prefix)}\s+(1st|2nd|3rd|\d+th)\s+#{SUFFIX}/i
     end
 
     def prefix

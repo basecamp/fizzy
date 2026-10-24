@@ -72,9 +72,7 @@ class MermaidDiagramTest < ApplicationSystemTestCase
 
     within_comment do
       assert_selector ".mermaid-diagram svg text", text: "Ship"
-      styles = all(".mermaid-diagram svg style", visible: :all)
-      assert_not_empty styles
-      styles.each { |style| assert_no_match(/planted/, style.text(:all)) }
+      assert_no_match(/planted/, find(".mermaid-diagram__inline svg")["outerHTML"])
     end
   end
 
@@ -89,10 +87,8 @@ class MermaidDiagramTest < ApplicationSystemTestCase
     visit card_url(@card)
 
     within_comment do
-      assert_selector ".mermaid-diagram svg", visible: :all
-      styles = all(".mermaid-diagram svg style", visible: :all)
-      assert_not_empty styles
-      styles.each { |style| assert_no_match(/planted/, style.text(:all)) }
+      assert_selector ".mermaid-diagram svg text", text: "Ship"
+      assert_no_match(/planted/, find(".mermaid-diagram__inline svg")["outerHTML"])
     end
   end
 
@@ -104,6 +100,37 @@ class MermaidDiagramTest < ApplicationSystemTestCase
     within_comment do
       assert_selector ".mermaid-diagram svg text", text: "Ship"
       assert_no_selector ".mermaid-diagram [data-id], .mermaid-diagram [data-look]", visible: :all
+    end
+  end
+
+  test "a diagram does not load images from other sites" do
+    @comment.update! body: mermaid_block(<<~MERMAID)
+      flowchart TD
+        Photo@{ img: "https://example.com/photo.png", label: "Photo" }
+    MERMAID
+
+    visit card_url(@card)
+
+    within_comment do
+      assert_selector ".mermaid-diagram svg text", text: "Photo"
+      assert_no_selector ".mermaid-diagram svg image", visible: :all
+    end
+  end
+
+  test "on a phone, a wide flowchart is laid out top to bottom, and left to right when expanded" do
+    @comment.update! body: mermaid_block("flowchart LR\n  " + (1..6).map { "Step#{it}" }.join(" --> "))
+
+    with_window_resized_to(390, 844) do
+      visit card_url(@card)
+
+      within_comment do
+        assert_selector ".mermaid-diagram__inline svg text", text: "Step6"
+        inline_width, inline_height = view_box_size_of(".mermaid-diagram__inline svg")
+        expanded_width, expanded_height = view_box_size_of(".mermaid-diagram__expanded svg")
+
+        assert_operator inline_height, :>, inline_width
+        assert_operator expanded_width, :>, expanded_height
+      end
     end
   end
 
@@ -162,14 +189,13 @@ class MermaidDiagramTest < ApplicationSystemTestCase
     assert scrolls
   end
 
-  test "the dialog fits a diagram without a viewBox to the screen" do
+  test "the dialog fits a small diagram to the screen" do
     @comment.update! body: mermaid_block("info")
 
     visit card_url(@card)
     within_comment { click_on "Expand diagram" }
 
     assert_selector "dialog[open] svg", visible: :all
-    assert_no_selector ".mermaid-diagram[style*='--diagram-width:']"
     assert_operator page.evaluate_script("document.querySelector('dialog[open] svg').getBoundingClientRect().width"), :>, 100
   end
 
@@ -275,6 +301,19 @@ class MermaidDiagramTest < ApplicationSystemTestCase
       within "##{dom_id(@comment)}", &block
     end
 
+    def view_box_size_of(selector)
+      evaluate_script("(({ width, height }) => [ width, height ])(document.querySelector('#{selector}').viewBox.baseVal)")
+    end
+
+    def with_window_resized_to(width, height)
+      window = Capybara.current_session.current_window
+      original = window.size
+      window.resize_to(width, height)
+      yield
+    ensure
+      window.resize_to(*original)
+    end
+
     def paste_markdown(markdown)
       page.execute_script(<<~JS, markdown)
         const dt = new DataTransfer();
@@ -289,14 +328,11 @@ class MermaidDiagramTest < ApplicationSystemTestCase
       perform_enqueued_jobs only: Turbo::Streams::BroadcastStreamJob
     end
 
+    # Each draw waits for the page's fonts before measuring labels, so holding that promise holds the draw.
     def hold_diagram_drawing
       page.execute_script(<<~JS)
-        const mermaid = document.querySelector("iframe[aria-hidden]").contentWindow.mermaid
-        const render = mermaid.render.bind(mermaid)
-        const held = []
-        mermaid.render = (...args) => window.releaseDiagramDrawing ? render(...args) : new Promise(resolve => held.push(() => { const drawn = render(...args); resolve(drawn); return drawn }))
-        window.releaseDiagramDrawing = null
-        window.heldDiagramDrawing = held
+        const fontsLoaded = new Promise(resolve => window.releaseDiagramDrawing = resolve)
+        Object.defineProperty(document, "fonts", { configurable: true, value: { ready: fontsLoaded } })
       JS
     end
 
@@ -304,8 +340,9 @@ class MermaidDiagramTest < ApplicationSystemTestCase
     def release_diagram_drawing
       page.evaluate_async_script(<<~JS)
         const [ done ] = arguments
-        window.releaseDiagramDrawing = true
-        Promise.allSettled(window.heldDiagramDrawing.map(release => release())).then(() => setTimeout(done, 0))
+        delete document.fonts
+        window.releaseDiagramDrawing()
+        setTimeout(done, 0)
       JS
     end
 

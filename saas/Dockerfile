@@ -1,5 +1,5 @@
 # Make sure RUBY_VERSION matches the Ruby version in .ruby-version
-ARG RUBY_VERSION=3.4.8
+ARG RUBY_VERSION=4.0.9
 FROM registry.docker.com/library/ruby:$RUBY_VERSION-slim AS base
 
 # Rails app lives here
@@ -12,6 +12,12 @@ ENV RAILS_ENV="production" \
     BUNDLE_PATH="/usr/local/bundle" \
     BUNDLE_GEMFILE="Gemfile.saas" \
     BUNDLE_WITHOUT="development"
+
+# Take the distro's current ca-certificates rather than the one frozen into the base image, here in
+# base so the build stage's gem and git fetches verify against it too. See the root check below.
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y ca-certificates && \
+    rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 
 # Throw-away build stage to reduce size of final image
@@ -59,6 +65,14 @@ FROM base
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y libsqlite3-0 sqlite3 libjemalloc-dev && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
+
+# The eMudhra intermediate CAs' private keys leaked in October 2026, and they chain to these two roots.
+# OpenSSL checks no revocation, so Ruby trusts whatever they sign until the roots leave the bundle.
+# ca-certificates is named in an apt-get install above, so a rebuild takes the distro's fixed package
+# rather than the one frozen into the base image. Fail the build if either root is still installed.
+RUN test -e /etc/ssl/certs/ISRG_Root_X1.pem && \
+  test ! -e /etc/ssl/certs/emSign_ECC_Root_CA_-_G3.pem && \
+  test ! -e /etc/ssl/certs/Comodo_AAA_Services_root.pem
 
 # Copy built artifacts: gems, application
 COPY --from=build /usr/local/bundle /usr/local/bundle

@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+# Reboot the fizzy_mcp accessory one host at a time.
+#
+#   saas/bin/mcp-rolling-reboot <destination> [pause-seconds] [from-host]
+#
+# `kamal accessory reboot fizzy_mcp -d <destination>` stops and re-runs every
+# copy in parallel, which takes hosted MCP down everywhere at once. This walks
+# the accessory's hosts in order instead, in the shape of bc3's
+# bin/mcp-rolling-reboot. For each host it:
+#
+# 1. takes the host out of the load balancers' fizzy_mcp service
+#    (saas/script/configure-lb-mcp.sh --without), since their health check
+#    reaches the app's /up and can't see the MCP container go;
+# 2. waits out in-flight requests, then reboots the accessory there;
+# 3. checks that host itself: its container runs the configured image, and its
+#    kamal-proxy answers the MCP host's protected-resource metadata, which
+#    only this server serves (the app's catch-all route would not);
+# 4. puts the host back in the load balancers.
+#
+# The first failure stops the walk with that host still out of the load
+# balancers and the rest on the old container. Rerun with the failed host's
+# position (1-based) as from-host to pick up there. With one host (a beta)
+# there's nothing to drain to, so its reboot is a short outage.
+#
+# Run from the repo root with `bin/rails saas:enable` done, on Tailscale.
+set -euo pipefail
+
+destination=${1:?usage: saas/bin/mcp-rolling-reboot <destination> [pause-seconds] [from-host]}
+pause=${2:-20}
+from=${3:-1}
+for arg in "$pause" "$from"; do
+  [[ $arg =~ ^[0-9]+$ ]] || { echo "pause-seconds and from-host must be whole numbers, got '$arg'" >&2; exit 1; }
+done
+
+# The image, the proxy host, then one line per host.
+# shellcheck disable=SC2016 # Ruby, not shell, inside the quotes
+lines=$(bin/kamal config -d "$destination" | ruby -ryaml -e '
+  mcp = YAML.load($stdin.read, permitted_classes: [ Symbol ])[:accessories]&.fetch("fizzy_mcp", nil) or abort "no fizzy_mcp accessory"
+  puts mcp["image"], mcp.dig("proxy", "host"), *Array(mcp["hosts"] || mcp["host"])')
+{ read -r image; read -r mcp_host; } <<< "$lines"
+hosts=()
+while IFS= read -r host; do hosts+=("$host"); done < <(tail -n +3 <<< "$lines")
+[[ -n $image && -n $mcp_host ]] || { echo "no fizzy_mcp image and proxy host for ${destination}" >&2; exit 1; }
+(( ${#hosts[@]} > 0 && from >= 1 && from <= ${#hosts[@]} )) || { echo "no host ${from} among ${#hosts[@]} fizzy_mcp hosts" >&2; exit 1; }
+
+drain=60 # the accessory's response_timeout
+lb=saas/script/configure-lb-mcp.sh
+
+echo "==> ${#hosts[@]} hosts, one at a time: ${image} behind ${mcp_host}"
+for ((i = from - 1; i < ${#hosts[@]}; i++)); do
+  host=${hosts[i]}
+  echo "==> Host $((i + 1)): ${host}"
+  stop() { echo "${host}: $1; stopping with it out of the load balancers (resume with from-host $((i + 1)))" >&2; exit 1; }
+
+  if (( ${#hosts[@]} > 1 )); then
+    "$lb" "$destination" --without "$host"
+    sleep "$drain"
+  fi
+
+  bin/kamal accessory reboot fizzy_mcp -d "$destination" -h "$host"
+
+  running=$(ssh -o ConnectTimeout=10 "app@${host}" docker ps --filter "name=^fizzy-fizzy_mcp$" --filter status=running --format '{{.Image}}')
+  [[ $running == "$image" ]] || stop "running '${running:-nothing}', not ${image}"
+
+  prm=$(ssh -o ConnectTimeout=10 "app@${host}" curl --silent --max-time 10 -H "Host:${mcp_host}" \
+    "http://localhost/.well-known/oauth-protected-resource/mcp") || prm=""
+  [[ $prm == *"\"resource\":\"https://${mcp_host}/mcp\""* ]] || stop "its kamal-proxy doesn't serve ${mcp_host}'s metadata"
+
+  if (( ${#hosts[@]} > 1 )); then "$lb" "$destination"; fi
+  if (( i + 1 < ${#hosts[@]} )); then sleep "$pause"; fi
+done
+echo "==> Done"

@@ -20,4 +20,8 @@ class HotcellImageTest < ActiveSupport::TestCase
   test "the cell carries no setuid or setgid binary" do
     assert_match "find / -xdev -type f -perm /06000 -exec chmod a-s {} +", DOCKERFILE.read
   end
+
+  test "the cell runs the application's Ruby" do
+    assert_equal Rails.root.join(".ruby-version").read.strip, DOCKERFILE.read[/^ARG RUBY_VERSION=(.+)$/, 1]
+  end
 end

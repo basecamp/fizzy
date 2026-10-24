@@ -22,7 +22,7 @@ trusted_client:
 
 confidential_client:
   client_id: confidential_client_789
-  client_secret: confidential_secret_789
+  client_secret_digest: <%= TokenDigester.digest("confidential_secret_789") %>
   name: Confidential Connector
   redirect_uris:
     - https://connector.example.com/callback

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_10_06_130100) do
+ActiveRecord::Schema[8.2].define(version: 2026_10_15_120200) do
   create_table "accesses", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -360,12 +360,16 @@ ActiveRecord::Schema[8.2].define(version: 2026_10_06_130100) do
     t.uuid "oauth_client_id"
     t.string "permission"
     t.string "refresh_token"
+    t.string "refresh_token_digest", limit: 80
     t.string "token"
+    t.string "token_digest", limit: 80
     t.datetime "updated_at", null: false
     t.index ["authorization_code_jti"], name: "index_identity_access_tokens_on_authorization_code_jti", unique: true
     t.index ["identity_id"], name: "index_access_token_on_identity_id"
     t.index ["oauth_client_id"], name: "index_identity_access_tokens_on_oauth_client_id"
     t.index ["refresh_token"], name: "index_identity_access_tokens_on_refresh_token", unique: true
+    t.index ["refresh_token_digest"], name: "index_identity_access_tokens_on_refresh_token_digest", unique: true
+    t.index ["token_digest"], name: "index_identity_access_tokens_on_token_digest", unique: true
   end
 
   create_table "identity_transfers", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -438,7 +442,7 @@ ActiveRecord::Schema[8.2].define(version: 2026_10_06_130100) do
 
   create_table "oauth_clients", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "client_id", null: false
-    t.string "client_secret"
+    t.string "client_secret_digest", limit: 80
     t.datetime "created_at", null: false
     t.boolean "dynamically_registered", default: false
     t.string "name", null: false
@@ -453,11 +457,12 @@ ActiveRecord::Schema[8.2].define(version: 2026_10_06_130100) do
   create_table "oauth_retired_refresh_tokens", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.uuid "access_token_id", null: false
     t.datetime "created_at", null: false
-    t.string "refresh_token", null: false
-    t.string "successor_refresh_token", null: false
+    t.string "refresh_token_digest", limit: 80, null: false
+    t.text "successor_payload"
+    t.string "successor_refresh_token_digest", limit: 80, null: false
     t.index ["access_token_id"], name: "index_oauth_retired_refresh_tokens_on_access_token_id"
     t.index ["created_at"], name: "index_oauth_retired_refresh_tokens_on_created_at"
-    t.index ["refresh_token"], name: "index_oauth_retired_refresh_tokens_on_refresh_token", unique: true
+    t.index ["refresh_token_digest"], name: "index_oauth_retired_refresh_tokens_on_refresh_token_digest", unique: true
   end
 
   create_table "pins", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|

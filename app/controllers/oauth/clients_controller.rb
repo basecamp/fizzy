@@ -5,6 +5,7 @@ class Oauth::ClientsController < Oauth::BaseController
   rate_limit to: 10, within: 1.minute, only: :create, with: :oauth_rate_limit_exceeded
 
   before_action :require_issuance_enabled
+  before_action :require_single_valued_parameters
   before_action :validate_redirect_uris
   before_action :validate_redirect_uri_origins
   before_action :validate_auth_method
@@ -27,6 +28,16 @@ class Oauth::ClientsController < Oauth::BaseController
     # client_id it carries earns no pilot exemption: registration stays dark.
     def piloting_client_id
       nil
+    end
+
+    # Registration metadata may give scope as a list (validated_scopes), and
+    # its other lists, redirect_uris and grant_types, aren't single-valued names.
+    def list_valued_parameter_names
+      %w[ scope ]
+    end
+
+    def refuse_malformed_parameters(names)
+      oauth_error "invalid_client_metadata", malformed_parameters_description(names)
     end
 
     # Bounded before any URI is parsed, so an oversized list costs nothing more
@@ -99,8 +110,8 @@ class Oauth::ClientsController < Oauth::BaseController
     def dynamic_client_registration_response(client)
       {
         client_id: client.client_id,
-        client_secret: client.client_secret,
-        client_secret_expires_at: (0 if client.client_secret),
+        client_secret: client.raw_client_secret,
+        client_secret_expires_at: (0 if client.raw_client_secret),
         client_name: client.name,
         redirect_uris: client.redirect_uris,
         token_endpoint_auth_method: client.token_endpoint_auth_method,

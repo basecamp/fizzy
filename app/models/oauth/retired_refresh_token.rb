@@ -12,14 +12,51 @@ class Oauth::RetiredRefreshToken < ApplicationRecord
   # grant a retired token came from has lapsed unless it rotated since.
   RETENTION = Identity::AccessToken::REFRESH_IDLE_LIMIT
 
+  # A retry is answered with the pair the rotation issued, which is stored
+  # nowhere else in raw form. It's kept encrypted, sealed to expire with the
+  # grace window, and blanked by the sweep soon after. The sweep looks back
+  # this far, so it stays an index range over recent rows rather than a scan
+  # of every retired token; anything older has long been unreadable anyway.
+  SUCCESSOR_SWEEP_WINDOW = 1.day
+
   belongs_to :access_token, class_name: "Identity::AccessToken"
 
   scope :stale, -> { where(created_at: ...RETENTION.ago) }
 
   class << self
+    def find_by_raw_token(raw)
+      if raw.is_a?(String) && raw.present?
+        find_by(refresh_token_digest: TokenDigester.digests(raw))
+      end
+    end
+
     def cleanup
       stale.in_batches.delete_all
     end
+
+    def forget_successors
+      where(created_at: SUCCESSOR_SWEEP_WINDOW.ago...GRACE.ago).where.not(successor_payload: nil).update_all(successor_payload: nil)
+    end
+
+    def successor_encryptor
+      @successor_encryptor ||= ActiveSupport::MessageEncryptor.new \
+        Rails.application.key_generator.generate_key("oauth_refresh_token_successor", 32)
+    end
+  end
+
+  # The access and refresh token the rotation issued: { access_token:, refresh_token: }.
+  def successor=(pair)
+    self.successor_payload = self.class.successor_encryptor.encrypt_and_sign(pair.to_json, expires_in: GRACE, purpose: :oauth_refresh_token_successor)
+  end
+
+  # The pair, or nil once the grace window has passed or the sweep has
+  # blanked it.
+  def successor
+    if successor_payload.present? && (decrypted = self.class.successor_encryptor.decrypt_and_verify(successor_payload, purpose: :oauth_refresh_token_successor))
+      JSON.parse(decrypted).symbolize_keys.slice(:access_token, :refresh_token)
+    end
+  rescue ActiveSupport::MessageEncryptor::InvalidMessage, JSON::ParserError
+    nil
   end
 
   # Whether a replay now is a retry the grant can answer with the successor
@@ -39,6 +76,6 @@ class Oauth::RetiredRefreshToken < ApplicationRecord
   # grant's current token, never from timestamp order, which skewed host
   # clocks could invert.
   def superseded?(grant)
-    grant.refresh_token != successor_refresh_token
+    grant.refresh_token_digest != successor_refresh_token_digest
   end
 end

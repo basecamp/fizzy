@@ -16,7 +16,7 @@ class OauthRevocationTest < ActionDispatch::IntegrationTest
     token = grant_for(@client)
 
     [ { client_id: @client.client_id }, { client_id: @client.client_id, client_secret: "wrong" } ].each do |credentials|
-      revoke token.token, params: credentials
+      revoke token.raw_token, params: credentials
 
       assert_client_authentication_failed credentials.inspect, basic: false
     end
@@ -28,7 +28,7 @@ class OauthRevocationTest < ActionDispatch::IntegrationTest
     [ [ { client_id: @client.client_id, client_secret: @secret }, {} ], [ {}, basic(@client.client_id, @secret) ] ].each do |params, headers|
       token = grant_for(@client)
 
-      revoke token.refresh_token, params: params, headers: headers
+      revoke token.raw_refresh_token, params: params, headers: headers
 
       assert_response :success
       assert_not Identity::AccessToken.exists?(token.id)
@@ -38,7 +38,7 @@ class OauthRevocationTest < ActionDispatch::IntegrationTest
   test "an authenticated confidential client cannot revoke another client's token, and is told nothing" do
     token = grant_for(oauth_clients(:mcp_client))
 
-    [ token.token, token.refresh_token ].each do |presented|
+    [ token.raw_token, token.raw_refresh_token ].each do |presented|
       revoke presented, headers: basic(@client.client_id, @secret)
 
       assert_response :success
@@ -50,7 +50,7 @@ class OauthRevocationTest < ActionDispatch::IntegrationTest
   test "a public client revokes its own token by naming its client_id" do
     client = oauth_clients(:mcp_client)
 
-    [ :token, :refresh_token ].each do |kind|
+    [ :raw_token, :raw_refresh_token ].each do |kind|
       token = grant_for(client)
 
       revoke token.public_send(kind), params: { client_id: client.client_id }
@@ -64,7 +64,7 @@ class OauthRevocationTest < ActionDispatch::IntegrationTest
     token = grant_for(oauth_clients(:mcp_client))
 
     [ {}, { client_id: oauth_clients(:trusted_client).client_id }, { client_id: "no-such-client" } ].each do |params|
-      revoke token.token, params: params
+      revoke token.raw_token, params: params
 
       assert_response :success, params.inspect
     end
@@ -87,7 +87,7 @@ class OauthRevocationTest < ActionDispatch::IntegrationTest
     [ {}, { client_id: oauth_clients(:mcp_client).client_id }, { client_id: "no-such-client" } ].each do |params|
       token = personal_token
 
-      revoke token.token, params: params
+      revoke token.raw_token, params: params
 
       assert_response :success, params.inspect
       assert_not Identity::AccessToken.exists?(token.id), params.inspect
@@ -98,7 +98,7 @@ class OauthRevocationTest < ActionDispatch::IntegrationTest
     [ [ { client_id: @client.client_id, client_secret: @secret }, {} ], [ {}, basic(@client.client_id, @secret) ] ].each do |params, headers|
       token = personal_token
 
-      revoke token.token, params: params, headers: headers
+      revoke token.raw_token, params: params, headers: headers
 
       assert_response :success
       assert_not Identity::AccessToken.exists?(token.id)
@@ -111,7 +111,7 @@ class OauthRevocationTest < ActionDispatch::IntegrationTest
     [ [ { client_id: @client.client_id }, {}, false ], [ { client_id: @client.client_id, client_secret: "wrong" }, {}, false ],
       [ { client_secret: @secret }, {}, false ], [ { client_id: oauth_clients(:mcp_client).client_id, client_secret: "anything" }, {}, false ],
       [ {}, basic(@client.client_id, "wrong"), true ], [ {}, basic("no-such-client", "x"), true ] ].each do |params, headers, via_basic|
-      revoke token.token, params: params, headers: headers
+      revoke token.raw_token, params: params, headers: headers
 
       assert_client_authentication_failed [ params, headers ].inspect, basic: via_basic
     end
@@ -122,7 +122,7 @@ class OauthRevocationTest < ActionDispatch::IntegrationTest
   test "a personal access token is not revoked by two client authentication methods at once" do
     token = personal_token
 
-    revoke token.token, params: { client_secret: @secret }, headers: basic(@client.client_id, @secret)
+    revoke token.raw_token, params: { client_secret: @secret }, headers: basic(@client.client_id, @secret)
 
     assert_response :bad_request
     assert Identity::AccessToken.exists?(token.id)
@@ -131,10 +131,10 @@ class OauthRevocationTest < ActionDispatch::IntegrationTest
   test "tokens issued before prefixes revoke as before" do
     personal = identities(:david).access_tokens.create!(permission: :read, token: "legacyPersonalToken0123456789")
     grant = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client),
-      token: "legacyAccessToken0123456789", refresh_token: "legacyRefreshToken0123456789")
+      raw_token: "legacyAccessToken0123456789", raw_refresh_token: "legacyRefreshToken0123456789")
 
-    revoke personal.token
-    revoke grant.refresh_token, params: { client_id: oauth_clients(:mcp_client).client_id }
+    revoke personal.raw_token
+    revoke grant.raw_refresh_token, params: { client_id: oauth_clients(:mcp_client).client_id }
 
     assert_not Identity::AccessToken.exists?(personal.id)
     assert_not Identity::AccessToken.exists?(grant.id)
@@ -142,12 +142,12 @@ class OauthRevocationTest < ActionDispatch::IntegrationTest
 
   test "a revoked personal access token no longer authenticates" do
     token = personal_token
-    get user_path(users(:david)), env: { "HTTP_AUTHORIZATION" => "Bearer #{token.token}" }, as: :json
+    get user_path(users(:david)), env: { "HTTP_AUTHORIZATION" => "Bearer #{token.raw_token}" }, as: :json
     assert_response :success
 
-    revoke token.token
+    revoke token.raw_token
 
-    get user_path(users(:david)), env: { "HTTP_AUTHORIZATION" => "Bearer #{token.token}" }, as: :json
+    get user_path(users(:david)), env: { "HTTP_AUTHORIZATION" => "Bearer #{token.raw_token}" }, as: :json
     assert_response :unauthorized
   end
 
@@ -155,7 +155,7 @@ class OauthRevocationTest < ActionDispatch::IntegrationTest
     token = grant_for(oauth_clients(:mcp_client))
 
     [ basic("no-such-client", "x"), basic(@client.client_id, "wrong"), basic(oauth_clients(:mcp_client).client_id, "") ].each do |headers|
-      [ token.token, "not-a-token" ].each do |presented|
+      [ token.raw_token, "not-a-token" ].each do |presented|
         revoke presented, headers: headers
 
         assert_client_authentication_failed presented
@@ -170,7 +170,7 @@ class OauthRevocationTest < ActionDispatch::IntegrationTest
 
     [ { client_secret: @secret }, { client_id: "no-such-client", client_secret: @secret },
       { client_id: oauth_clients(:mcp_client).client_id, client_secret: "anything" } ].each do |params|
-      [ token.token, "not-a-token" ].each do |presented|
+      [ token.raw_token, "not-a-token" ].each do |presented|
         revoke presented, params: params
 
         assert_client_authentication_failed params.inspect, basic: false
@@ -183,7 +183,7 @@ class OauthRevocationTest < ActionDispatch::IntegrationTest
   test "a failed body authentication beside an Authorization header of another scheme is a 400: Basic was never evaluated" do
     token = grant_for(@client)
 
-    revoke token.token, params: { client_id: @client.client_id, client_secret: "wrong" }, headers: { "Authorization" => "Bearer #{token.token}" }
+    revoke token.raw_token, params: { client_id: @client.client_id, client_secret: "wrong" }, headers: { "Authorization" => "Bearer #{token.raw_token}" }
 
     assert_client_authentication_failed basic: false
     assert Identity::AccessToken.exists?(token.id)
@@ -192,7 +192,7 @@ class OauthRevocationTest < ActionDispatch::IntegrationTest
   test "revocation refuses Basic beside a body client_secret" do
     token = grant_for(@client)
 
-    revoke token.token, params: { client_secret: @secret }, headers: basic(@client.client_id, @secret)
+    revoke token.raw_token, params: { client_secret: @secret }, headers: basic(@client.client_id, @secret)
 
     assert_response :bad_request
     assert_equal "invalid_request", response.parsed_body["error"]

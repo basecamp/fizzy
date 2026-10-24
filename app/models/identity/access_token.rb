@@ -48,6 +48,21 @@ class Identity::AccessToken < ApplicationRecord
 
   enum :permission, %w[ read write ].index_by(&:itself), default: :read
 
+  # Tokens are stored as digests (TokenDigester). The raw values exist only in
+  # memory, on the record that issued or rotated them, to be handed to their
+  # holder once. Personal access tokens also keep their plaintext in `token`
+  # for now, because production code that reads only `token` shares this
+  # database until this code is deployed there. OAuth access tokens never do.
+  #
+  # The plaintext `refresh_token` column is ignored until it's dropped, beside
+  # `token`. Without partial_inserts, a model that knows a column names it on
+  # every INSERT, so only code that ignores it can keep creating tokens once
+  # it's gone.
+  self.ignored_columns += %w[ refresh_token ]
+
+  attribute :raw_token, :string
+  attribute :raw_refresh_token, :string
+
   before_create :set_token
   before_create :set_expiry_and_refresh_token, if: :oauth_client_id?
 
@@ -74,8 +89,25 @@ class Identity::AccessToken < ApplicationRecord
     # The token a bearer request may authenticate with: active and honored.
     # Whether it permits the request's method is the caller's question.
     def find_honored(token)
-      if (access_token = active.find_by(token: token)) && access_token.honored?
+      if (access_token = active.find_by_raw_token(token)) && access_token.honored?
         access_token
+      end
+    end
+
+    # Finds the token within the current scope by its digest. A personal
+    # access token written by code that stores only plaintext has no digest
+    # yet, so it's found by plaintext and given one: no lookup but the first
+    # ever matches on plaintext. Code that stores only plaintext issues
+    # prefixed tokens too, so a prefix doesn't exempt a token from this.
+    def find_by_raw_token(raw)
+      if raw.is_a?(String) && raw.present?
+        find_by(token_digest: TokenDigester.digests(raw)) || find_and_digest_undigested(raw)
+      end
+    end
+
+    def find_by_refresh_token(raw)
+      if raw.is_a?(String) && raw.present?
+        oauth.find_by(refresh_token_digest: TokenDigester.digests(raw))
       end
     end
 
@@ -94,10 +126,6 @@ class Identity::AccessToken < ApplicationRecord
       end
     end
 
-    def find_by_refresh_token(refresh_token)
-      oauth.find_by(refresh_token: refresh_token)
-    end
-
     # An authorization code redeems at most once (RFC 6749 §4.1.2): the grant it
     # mints is stamped with the code's jti, and the unique index refuses a second
     # stamp. A replay also revokes the grant the first redemption issued.
@@ -107,6 +135,24 @@ class Identity::AccessToken < ApplicationRecord
       where(authorization_code_jti: authorization_code.jti).destroy_all
       nil
     end
+
+    private
+      # MySQL compares `token` case-insensitively, so a match is confirmed
+      # byte for byte: a differently cased token neither authenticates nor
+      # installs a digest that the real token would then never match.
+      #
+      # The digest goes to the primary even when the token was found on the
+      # replica, as GET requests read. update_columns leaves updated_at alone.
+      # A datacenter that can't reach the primary (Deployment::DatabaseResolver)
+      # still authenticates the token and leaves the digest to one that can,
+      # or to the backfill rerun.
+      def find_and_digest_undigested(raw)
+        personal.where(token_digest: nil, token: raw).detect { |candidate| candidate.token == raw }&.tap do |access_token|
+          if Deployment::DatabaseResolver.in_primary_datacenter?
+            ApplicationRecord.with_writing_role { access_token.update_columns token_digest: TokenDigester.digest(raw) }
+          end
+        end
+      end
   end
 
   # OAuth tokens are honored only while OAuth acceptance is on (see
@@ -137,16 +183,22 @@ class Identity::AccessToken < ApplicationRecord
   # lapses mid-request doesn't rotate either, so a sweep that found it lapsed
   # never deletes a grant that was just renewed. The presented
   # token is retired, not forgotten, so presenting it again is recognized as
-  # a retry or a replay (see Oauth::RetiredRefreshToken).
+  # a retry or a replay (see Oauth::RetiredRefreshToken). The retired row
+  # carries the new pair, encrypted, so a retry within the grace window can be
+  # answered with it.
   def refresh(permission: self.permission)
-    rotated = { token: self.class.generate_token(:access),
-      refresh_token: self.class.generate_token(:refresh),
+    raw_token, raw_refresh_token = self.class.generate_token(:access), self.class.generate_token(:refresh)
+    rotated = { token: nil, token_digest: TokenDigester.digest(raw_token),
+      refresh_token_digest: TokenDigester.digest(raw_refresh_token),
       expires_at: EXPIRES_IN.from_now, permission: permission, updated_at: Time.current }
 
     transaction do
-      if self.class.unlapsed.where(id: id, refresh_token: refresh_token).update_all(rotated) == 1
-        retired_refresh_tokens.create! refresh_token: refresh_token, successor_refresh_token: rotated[:refresh_token]
-        assign_attributes rotated
+      if self.class.unlapsed.where(id: id, refresh_token_digest: refresh_token_digest).update_all(rotated) == 1
+        retired_refresh_tokens.create! \
+          refresh_token_digest: refresh_token_digest,
+          successor_refresh_token_digest: rotated[:refresh_token_digest],
+          successor: { access_token: raw_token, refresh_token: raw_refresh_token }
+        assign_attributes rotated.merge(raw_token: raw_token, raw_refresh_token: raw_refresh_token)
         true
       end
     end
@@ -167,12 +219,18 @@ class Identity::AccessToken < ApplicationRecord
       self.class.lock.where(id: id).pluck(:id)
     end
 
+    # Personal access tokens are written in plaintext as well as digested,
+    # for production code that reads only plaintext. An explicitly given
+    # token is digested like a generated one.
     def set_token
-      self.token ||= self.class.generate_token(oauth_client_id? ? :access : :personal)
+      self.raw_token ||= token.presence || self.class.generate_token(oauth_client_id? ? :access : :personal)
+      self.token_digest = TokenDigester.digest(raw_token)
+      self.token = oauth_client_id? ? nil : raw_token
     end
 
     def set_expiry_and_refresh_token
       self.expires_at ||= EXPIRES_IN.from_now
-      self.refresh_token ||= self.class.generate_token(:refresh)
+      self.raw_refresh_token ||= self.class.generate_token(:refresh)
+      self.refresh_token_digest = TokenDigester.digest(raw_refresh_token)
     end
 end
