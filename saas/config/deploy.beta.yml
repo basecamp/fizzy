@@ -25,13 +25,13 @@ retain_containers: 1
 
 servers:
   web:
-    # INTEGRATION BRANCH ONLY (oauth-integration-2026-10-15), never for main.
+    # INTEGRATION BRANCH ONLY (oauth-integration-2026-10-24), never for main.
     # beta shares fizzy_production (config: beta: *production), and
     # bin/docker-entrypoint runs `MIGRATE=1 bin/rails db:prepare` when, and only
     # when, the command is exactly `./bin/thrust ./bin/rails server`. Spelling
     # thrust's path without the leading ./ boots the same server but skips that
     # step, so this deploy (and any restart of its container) does not migrate.
-    # Migrations are run by hand: docs/oauth/integration-migrations.md.
+    # Migrations are run by hand: the 2026-10-24 revision of the runbook on #2296.
     cmd: bin/thrust ./bin/rails server
     hosts:
       - <%= @web_hosts[0] %>: df_iad
