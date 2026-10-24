@@ -1,0 +1,108 @@
+/* Authorizing an app (oauth/authorizations) and the apps you've connected (my/connected_apps) */
+
+@layer components {
+  .oauth-consent {
+    display: flex;
+    flex-direction: column;
+    gap: var(--block-space);
+  }
+
+  .oauth-client__name {
+    overflow-wrap: anywhere;
+  }
+
+  .oauth-client__self-name {
+    overflow-wrap: anywhere;
+  }
+
+  .oauth-client__warning {
+    background-color: var(--color-highlight);
+    border-radius: 0.5em;
+    padding: var(--block-space-half) var(--inline-space);
+  }
+
+  .oauth-access {
+    border: 0;
+    margin: 0;
+    padding: 0;
+  }
+
+  .oauth-access__legend {
+    margin-block-end: var(--block-space-half);
+    padding: 0;
+  }
+
+  .oauth-access__choice {
+    align-items: start;
+    border: var(--border);
+    border-radius: 0.5em;
+    cursor: pointer;
+    display: flex;
+    gap: var(--inline-space);
+    padding: var(--block-space-half) var(--inline-space);
+
+    &:has(:checked) {
+      border-color: var(--color-ink);
+    }
+
+    &:has(:focus-visible) {
+      outline: 2px solid var(--color-ink);
+      outline-offset: 2px;
+    }
+  }
+
+  .oauth-access__radio {
+    accent-color: var(--color-ink);
+    flex-shrink: 0;
+    margin-block-start: 0.2em;
+  }
+
+  .oauth-consent__actions {
+    flex-wrap: wrap;
+  }
+
+  .connected-apps {
+    display: flex;
+    flex-direction: column;
+    gap: var(--block-space);
+  }
+
+  .connected-apps__group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .connected-apps__empty {
+    border: 2px dashed var(--color-ink-lighter);
+    border-radius: 0.5em;
+    padding: var(--block-space) var(--inline-space-double);
+  }
+
+  .connected-app {
+    align-items: start;
+    border-block-end: var(--border);
+    display: flex;
+    gap: var(--inline-space);
+    justify-content: space-between;
+    padding-block: var(--block-space-half);
+
+    &:last-child {
+      border-block-end: 0;
+    }
+
+    /* Narrow screens: the disconnect button drops under the details */
+    @media (max-width: 480px) {
+      flex-direction: column;
+    }
+  }
+
+  .connected-app__disconnect {
+    flex-shrink: 0;
+  }
+
+  .connected-app__details {
+    gap: 0.15em;
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+  }
+}

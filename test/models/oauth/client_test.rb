@@ -626,6 +626,14 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     assert_not Oauth::Client.exists?(client.id)
   end
 
+  test "connection_kind tells our apps, tools on this device and web apps apart" do
+    assert_equal :fizzy, oauth_clients(:trusted_client).connection_kind
+    assert_equal :local, oauth_clients(:mcp_client).connection_kind
+    assert_equal :web, oauth_clients(:confidential_client).connection_kind
+    assert_equal :local, Oauth::Client.new(redirect_uris: %w[ com.example.app:/callback http://[::1]/cb ]).connection_kind
+    assert_equal :web, Oauth::Client.new(redirect_uris: %w[ http://127.0.0.1/cb https://example.com/cb ]).connection_kind
+  end
+
   private
     def register_metadata_document_client(**attributes)
       Oauth::Client.create! name: "Claude", client_id: "https://claude.ai/client.json", redirect_uris: %w[ https://claude.ai/callback ], client_id_metadata_document: true, **attributes

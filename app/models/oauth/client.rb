@@ -198,6 +198,21 @@ class Oauth::Client < ApplicationRecord
     dynamically_registered? || metadata_document?
   end
 
+  # What kind of app this is, as this server sees it rather than as it names
+  # itself: Connected Apps groups by it. Our own apps are the trusted ones. An
+  # app whose every callback stays on this device, a loopback address or an
+  # app's own URL scheme, is a tool running here, such as a CLI or a desktop
+  # assistant. Anything else receives its access somewhere on the web.
+  def connection_kind
+    if trusted?
+      :fizzy
+    elsif redirect_uris.all? { |uri| on_device_uri?(uri) }
+      :local
+    else
+      :web
+    end
+  end
+
   def confidential?
     token_endpoint_auth_method.in?(SECRET_AUTH_METHODS)
   end
@@ -297,6 +312,12 @@ class Oauth::Client < ApplicationRecord
       end
     rescue URI::InvalidURIError
       errors.add :redirect_uris, "includes an invalid URI"
+    end
+
+    def on_device_uri?(uri)
+      loopback_uri?(uri) || !URI.parse(uri).scheme.to_s.downcase.in?(%w[ http https ])
+    rescue URI::InvalidURIError
+      false
     end
 
     # http only: an app scheme naming a loopback host (cursor://localhost) is

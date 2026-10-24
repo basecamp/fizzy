@@ -1,15 +1,15 @@
-<article class="panel panel--wide shadow center txt-align-start">
+<%# Shown on Fizzy, never redirected: the request couldn't be trusted enough
+    to send the browser back to the app (see redirect_with_error) %>
+<% @page_title = "Can't authorize this app" %>
+
+<article class="oauth-consent panel panel--wide shadow center txt-align-start">
   <div class="flex flex-column gap">
-    <h2 class="margin-none">Authorization Error</h2>
+    <h2 class="txt-large margin-none"><%= @page_title %></h2>
 
-    <p class="txt-muted margin-none">
-      <%= @error_description %>
+    <p class="margin-none"><%= @error_description %></p>
+
+    <p class="txt-small txt-subtle margin-none">
+      Nothing was shared. Close this window and start again from the app. If it keeps happening, let whoever made the app know, and mention this error code: <code><%= @error %></code>
     </p>
-
-    <p class="txt-small txt-muted margin-none">
-      Error code: <code><%= @error %></code>
-    </p>
-
-    <%= link_to "Go back", request.referer || root_path, class: "btn btn--outline center txt-medium" %>
   </div>
 </article>

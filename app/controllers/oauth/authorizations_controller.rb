@@ -66,7 +66,7 @@ class Oauth::AuthorizationsController < Oauth::BaseController
       Oauth::Audit.record "code.issued", client: @client, identity_id: Current.identity.id, actor: "user"
       redirect_to success_redirect_uri(code), allow_other_host: true
     else
-      oauth_error "invalid_request", "Unknown client"
+      render_error "invalid_request", "Unknown client"
     end
   end
 
@@ -102,8 +102,9 @@ class Oauth::AuthorizationsController < Oauth::BaseController
       end
 
       unless performed?
+        # There's no client to send the browser back to, so the person is told here.
         if @client.nil?
-          oauth_error "invalid_request", "Unknown client"
+          render_error "invalid_request", "Unknown client"
         elsif !@client.allows_grant_type?("authorization_code")
           oauth_error "unauthorized_client", "Client may not use the authorization code grant"
         end
@@ -234,12 +235,6 @@ class Oauth::AuthorizationsController < Oauth::BaseController
           render_error "invalid_request", "Choose an account to connect"
         end
       end
-    end
-
-    def render_error(error, description)
-      @error = error
-      @error_description = description
-      render :error, status: :bad_request
     end
 
     def valid_state?

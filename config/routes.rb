@@ -5,7 +5,11 @@ Rails.application.routes.draw do
   get "/.well-known/oauth-protected-resource", to: "oauth/protected_resource_metadata#show"
 
   namespace :oauth do
-    resource :authorization, only: %i[ new create ]
+    resource :authorization, only: %i[ new create ] do
+      scope module: :authorizations do
+        resource :switch, only: :create
+      end
+    end
     # The delegation exchange shares the token endpoint, told apart by its grant type.
     post "token", to: "token_exchanges#create", as: nil,
       constraints: Oauth::TokenDelegation.method(:request?)
