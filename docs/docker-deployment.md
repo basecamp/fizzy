@@ -48,6 +48,11 @@ Once you have one, set it in the `SECRET_KEY_BASE` environment variable:
 docker run --env SECRET_KEY_BASE=abcdefabcdef ...
 ```
 
+Personal access tokens and OAuth credentials are looked up by a keyed digest (HMAC-SHA256) rather than by the token itself.
+By default the key is derived from `SECRET_KEY_BASE`, so **changing `SECRET_KEY_BASE` invalidates every personal access token and every connected OAuth app**: people have to generate new tokens and reconnect their apps.
+To keep tokens working across a change of `SECRET_KEY_BASE`, set the key separately in `OAUTH_TOKEN_PEPPER` (at least 32 characters, for example from `bin/rails secret`).
+Set it before upgrading to a version that digests tokens, or before anyone creates one, and then keep it: changing, adding or removing it later invalidates tokens in the same way.
+
 #### SSL
 
 If you want the Fizzy container to handle its own SSL automatically, you just need to specify the domain name that you're running it on.
@@ -152,6 +157,14 @@ By default, when you run the Fizzy Docker image you'll be limited to creating a 
 This is for convenience: typically when you self-host you'll be running a single account, so in this mode new account signups are automatically disabled as soon as you've created your first account.
 
 If you do want to allow multiple accounts to be created in your instance, set `MULTI_TENANT=true`
+
+#### OAuth (optional)
+
+Fizzy includes an OAuth 2.1 authorization server so that tools such as MCP clients can connect to your account without a personal access token. It is off by default: while it is off, the OAuth discovery, registration, authorization and token endpoints answer 404, and tokens issued through OAuth are not accepted. Personal access tokens work either way.
+
+To turn it on, set `OAUTH_ACCEPTANCE_ENABLED=true`.
+
+If you need to stop new connections in an emergency, also set `OAUTH_ISSUANCE_ENABLED=false`: nothing new can connect and no token is refreshed, while access tokens already issued keep working until they expire, an hour after issue. People can always disconnect apps from their profile, whichever way these are set.
 
 ## Importing an existing Fizzy account
 

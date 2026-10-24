@@ -2,6 +2,8 @@
 
 Webhooks notify another application when something happens on a board. Only account admins can list, view, create, update, delete, or reactivate webhooks.
 
+`signing_secret` and `payload_url` are credentials. Apps connected with OAuth receive them only in the response to the `POST` that creates the webhook; every other webhook response omits both for them. Store the signing secret when you create the webhook.
+
 ## `GET /:account_slug/boards/:board_id/webhooks`
 
 Returns a paginated list of webhooks for a board.

@@ -95,6 +95,10 @@ Rails.application.configure do
     /.*\.nip\.io/  # nip.io for mobile apps
   ]
 
+  # OAuth is lit in development; preview the dark posture with OAUTH_DARK=1.
+  # See Oauth::Availability.
+  config.x.oauth.acceptance_enabled = ENV["OAUTH_DARK"].blank?
+
   # Canonical host for mailer URLs (emails always link here, not personal Tailscale URLs)
   config.action_mailer.default_url_options = { host: "#{config.hosts.first}:3006" }
 end

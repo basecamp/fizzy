@@ -93,7 +93,7 @@ class Account::DataTransfer::RecordSetTest < ActiveSupport::TestCase
       "updated_at" => Time.current.iso8601
     }
 
-    record_set = Account::DataTransfer::RecordSet.new(account: importing_account, model: Webhook)
+    record_set = Account::DataTransfer::Manifest.new(importing_account).to_enum(:each_record_set).find { it.model == Webhook }
 
     error = assert_raises(Account::DataTransfer::RecordSet::ConflictError) do
       record_set.check(from: build_reader(dir: "webhooks", data: webhook_data))
@@ -183,6 +183,27 @@ class Account::DataTransfer::RecordSetTest < ActiveSupport::TestCase
     publication_record_set.import(from: build_reader(dir: "board_publications", data: publication_data))
 
     assert Board::Publication.exists?(id: publication_data["id"], key: publication_data["key"])
+  end
+
+  test "a webhook exported before attribution existed checks and imports without a creator" do
+    webhook_data = {
+      "id" => ActiveRecord::Type::Uuid.generate,
+      "account_id" => ActiveRecord::Type::Uuid.generate,
+      "board_id" => ActiveRecord::Type::Uuid.generate,
+      "name" => "Before attribution",
+      "url" => "https://example.com/hook",
+      "signing_secret" => "secret",
+      "subscribed_actions" => [ "card_published" ],
+      "active" => true,
+      "created_at" => Time.current.iso8601,
+      "updated_at" => Time.current.iso8601
+    }
+    record_set = Account::DataTransfer::Manifest.new(importing_account).to_enum(:each_record_set).find { it.model == Webhook }
+
+    record_set.check(from: build_reader(dir: "webhooks", data: webhook_data))
+    record_set.import(from: build_reader(dir: "webhooks", data: webhook_data))
+
+    assert_nil Webhook.find(webhook_data["id"]).creator_id
   end
 
   private

@@ -34,8 +34,11 @@ class Account::DataTransfer::Manifest
         ),
         Account::DataTransfer::EntropyRecordSet.new(account),
         record_set_for(::Board::Publication, unique_keys: %w[ key ]),
+        # The app a webhook was set up through is an OAuth client of this
+        # instance, not account data, so it stays behind. Its creator travels,
+        # and is absent from exports made before webhooks recorded one.
+        record_set_for(::Webhook, attributes: ::Webhook.column_names - %w[ created_via_id ], optional_attributes: %w[ creator_id ]),
         *record_sets_for(
-          ::Webhook,
           ::Access,
           ::Card,
           ::Comment,

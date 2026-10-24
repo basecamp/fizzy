@@ -8,6 +8,8 @@ class ActiveRecordSqlRedactionTest < ActiveSupport::TestCase
   TOKEN = "madeUpAccessToken0000000"
   TRANSFER_TOKEN = "madeUpTransferToken00000"
   SECRET = "madeUpSigningSecret00000"
+  RETIRED_DIGEST = "madeUpRetiredRefreshTokenDigest000000000"
+  SUCCESSOR_DIGEST = "madeUpSuccessorRefreshTokenDigest0000000"
   WEBHOOK_URL = "https://hooks.slack.com/services/T0000/B0000/madeUpWebhookPath0000"
 
   # Columns whose names look like a credential's but whose values aren't one. A secret-bearing column
@@ -21,6 +23,8 @@ class ActiveRecordSqlRedactionTest < ActiveSupport::TestCase
     "audits1984_auditor_tokens.token_digest" => "a digest; the token itself isn't stored",
     "board_publications.key" => "a published board's public link, which is in its URL path anyway",
     "filters.params_digest" => "a digest of the filter's parameters",
+    "oauth_clients.client_secret_digest" => "a digest; the secret itself isn't stored",
+    "oauth_clients.token_endpoint_auth_method" => "names how a client authenticates: none, client_secret_basic or client_secret_post",
     "push_subscriptions.auth_key" => "Web Push accepts a message only when it is signed with our VAPID key",
     "push_subscriptions.p256dh_key" => "a public key"
   }
@@ -46,10 +50,30 @@ class ActiveRecordSqlRedactionTest < ActiveSupport::TestCase
     assert_sent_to_database OTHER_CODE, executed
   end
 
+  # Encrypted at rest, but the payload decrypts to a live successor pair, so it stays out of logs too.
+  test "a retired refresh token's successor payload is absent from its logged insert, lookup and blanking" do
+    retired = nil
+    log, executed = capture do
+      access_token = identities(:kevin).access_tokens.create!(token: TOKEN, permission: "read")
+      retired = access_token.retired_refresh_tokens.create! \
+        refresh_token_digest: RETIRED_DIGEST, successor_refresh_token_digest: SUCCESSOR_DIGEST,
+        successor: { access_token: "madeUpSuccessorAccess000", refresh_token: "madeUpSuccessorRefresh00" }
+      assert_equal retired, Oauth::RetiredRefreshToken.find_by(refresh_token_digest: RETIRED_DIGEST)
+      retired.update!(successor_payload: nil)
+    end
+
+    assert_match(/INSERT INTO [`"]oauth_retired_refresh_tokens[`"]/, log)
+    assert_match(/UPDATE [`"]oauth_retired_refresh_tokens[`"]/, log)
+    [ retired.successor_payload_before_last_save, RETIRED_DIGEST, SUCCESSOR_DIGEST ].each do |secret|
+      assert_no_secret secret, log
+      assert_sent_to_database secret, executed
+    end
+  end
+
   test "an access token is absent from its logged insert and lookup" do
     log, executed = capture do
       access_token = identities(:kevin).access_tokens.create!(token: TOKEN, permission: "write")
-      assert_equal identities(:kevin), Identity.find_by_permissable_access_token(TOKEN, method: "POST")
+      assert_equal identities(:kevin), Identity::AccessToken.find_honored(TOKEN)&.identity
       access_token.update!(description: "Made-up script")
     end
 
@@ -139,7 +163,7 @@ class ActiveRecordSqlRedactionTest < ActiveSupport::TestCase
       ActiveSupport::Notifications.subscribe(/active_record/) { |_name, _start, _finish, _id, payload| seen << payload.dup }
     ]
 
-    assert_equal identities(:kevin), Identity.find_by_permissable_access_token(identities(:kevin).access_tokens.create!(token: TOKEN).token, method: "GET")
+    assert_equal identities(:kevin), Identity::AccessToken.find_honored(identities(:kevin).access_tokens.create!(token: TOKEN).token)&.identity
 
     redacted = seen.select { |payload| payload[:sql].to_s.include?("identity_access_tokens") }
     assert redacted.many?
