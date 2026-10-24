@@ -778,6 +778,59 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "a code replayed again after its grant was revoked mints nothing" do
+    code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+    client = oauth_clients(:mcp_client)
+    exchange = { grant_type: "authorization_code", client_id: client.client_id, code: authorization_code_for(client, code_verifier: code_verifier),
+      redirect_uri: "http://127.0.0.1:8888/callback", code_verifier: code_verifier }
+
+    untenanted { post oauth_token_path, params: exchange, as: :json }
+    assert_response :success
+
+    untenanted { post oauth_token_path, params: exchange, as: :json }
+    assert_equal "invalid_grant", response.parsed_body["error"]
+
+    assert_no_difference "Identity::AccessToken.count" do
+      untenanted { post oauth_token_path, params: exchange, as: :json }
+    end
+    assert_response :bad_request
+    assert_equal "invalid_grant", response.parsed_body["error"]
+  end
+
+  test "a code redeemed before redemptions were recorded is remembered when it's replayed" do
+    code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+    client = oauth_clients(:mcp_client)
+    code = authorization_code_for(client, code_verifier: code_verifier)
+    exchange = { grant_type: "authorization_code", client_id: client.client_id, code: code,
+      redirect_uri: "http://127.0.0.1:8888/callback", code_verifier: code_verifier }
+    identities(:david).access_tokens.create!(oauth_client: client, authorization_code_jti: Oauth::AuthorizationCode.parse(code).jti)
+
+    untenanted { post oauth_token_path, params: exchange, as: :json }
+    assert_equal "invalid_grant", response.parsed_body["error"]
+
+    assert_no_difference "Identity::AccessToken.count" do
+      untenanted { post oauth_token_path, params: exchange, as: :json }
+    end
+    assert_equal "invalid_grant", response.parsed_body["error"]
+  end
+
+  test "a code can't be redeemed again once the person disconnects the app" do
+    code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+    client = oauth_clients(:mcp_client)
+    exchange = { grant_type: "authorization_code", client_id: client.client_id, code: authorization_code_for(client, code_verifier: code_verifier),
+      redirect_uri: "http://127.0.0.1:8888/callback", code_verifier: code_verifier }
+
+    untenanted { post oauth_token_path, params: exchange, as: :json }
+    assert_response :success
+    identities(:david).access_tokens.oauth.where(oauth_client: client).destroy_all
+
+    assert_no_difference "Identity::AccessToken.count" do
+      untenanted { post oauth_token_path, params: exchange, as: :json }
+    end
+    assert_response :bad_request
+    assert_equal "invalid_grant", response.parsed_body["error"]
+  end
+
   test "a replayed code that fails PKCE does not revoke the grant" do
     code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
     client = oauth_clients(:mcp_client)
