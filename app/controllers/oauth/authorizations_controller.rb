@@ -74,9 +74,16 @@ class Oauth::AuthorizationsController < Oauth::BaseController
       end
     end
 
+    # A client not registered for the code grant, like the personal access
+    # token issuer, has nothing to authorize here.
     def set_client
       @client = Oauth::Client.find_by(client_id: params[:client_id])
-      oauth_error("invalid_request", "Unknown client") unless @client
+
+      if @client.nil?
+        oauth_error "invalid_request", "Unknown client"
+      elsif !@client.allows_grant_type?("authorization_code")
+        oauth_error "unauthorized_client", "Client may not use the authorization code grant"
+      end
     end
 
     def validate_redirect_uri

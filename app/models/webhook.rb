@@ -87,7 +87,7 @@ class Webhook < ApplicationRecord
   private
     def attribute_creation
       self.creator ||= Current.user
-      self.created_via ||= Current.access_token&.oauth_client
+      self.created_via ||= Current.access_token&.connected_app
     end
 
     def validate_url
