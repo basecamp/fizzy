@@ -41,6 +41,6 @@ module ActiveRecord
   end
 end
 
-# Register the UUID type for Trilogy (MySQL) and SQLite3 adapters
-ActiveRecord::Type.register(:uuid, ActiveRecord::Type::Uuid, adapter: :trilogy)
+# Register the UUID type for the Mysql2 and SQLite3 adapters
+ActiveRecord::Type.register(:uuid, ActiveRecord::Type::Uuid, adapter: :mysql2)
 ActiveRecord::Type.register(:uuid, ActiveRecord::Type::Uuid, adapter: :sqlite3)

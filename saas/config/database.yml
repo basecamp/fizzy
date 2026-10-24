@@ -33,7 +33,7 @@
 %>
 
 default: &default
-  adapter: trilogy
+  adapter: mysql2
   host: <%= ENV.fetch "FIZZY_DB_HOST", "127.0.0.1" %>
   port: <%= ENV.fetch "FIZZY_DB_PORT", 3306 %>
   pool: 50

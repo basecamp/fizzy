@@ -308,6 +308,8 @@ GEM
     mocha (3.1.0)
       ruby2_keywords (>= 0.0.5)
     msgpack (1.8.5)
+    mysql2 (0.5.7)
+      bigdecimal
     net-http-persistent (4.0.8)
       connection_pool (>= 2.2.4, < 4)
     net-imap (0.6.6)
@@ -491,8 +493,6 @@ GEM
     thruster (0.1.27-x86_64-darwin)
     thruster (0.1.27-x86_64-linux)
     timeout (0.6.1)
-    trilogy (2.13.1)
-      bigdecimal
     tsort (0.2.0)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
@@ -554,6 +554,7 @@ DEPENDENCIES
   mission_control-jobs
   mittens
   mocha
+  mysql2 (~> 0.5)
   net-http-persistent
   platform_agent
   propshaft
@@ -574,7 +575,6 @@ DEPENDENCIES
   stimulus-rails
   surfguard!
   thruster
-  trilogy (~> 2.13)
   turbo-rails!
   tzinfo-data
   useragent!
@@ -681,6 +681,7 @@ CHECKSUMS
   mittens (0.3.4) sha256=baa8e35c24bc06d6ed5c51633c800e8b6108ebcbd8efb1782d7146923797b383
   mocha (3.1.0) sha256=75f42d69ebfb1f10b32489dff8f8431d37a418120ecdfc07afe3bc183d4e1d56
   msgpack (1.8.5) sha256=97419eaa7b35dfe3e462c0e6c1a3dfdcbfc8756605c09e46e4c6daef127517ba
+  mysql2 (0.5.7) sha256=ba09ede515a0ae8a7192040a1b778c0fb0f025fa5877e9be895cd325fa5e9d7b
   net-http-persistent (4.0.8) sha256=ef3de8319d691537b329053fae3a33195f8b070bbbfae8bf1a58c796081960e6
   net-imap (0.6.6) sha256=96aa4ee50df3060203e649efc341f53480b791d49e150f2fdebf68beb141a8df
   net-pop (0.1.2) sha256=848b4e982013c15b2f0382792268763b748cce91c9e91e36b0f27ed26420dff3
@@ -768,7 +769,6 @@ CHECKSUMS
   thruster (0.1.27-x86_64-darwin) sha256=f389bdfccf332dabff8053194e64cd65d4ae247f1afd386624233a1dfaa41485
   thruster (0.1.27-x86_64-linux) sha256=7e0e6381011401810b047ff25506e0e38755b2430499ff5586f1a110086981c6
   timeout (0.6.1) sha256=78f57368a7e7bbadec56971f78a3f5ecbcfb59b7fcbb0a3ed6ddc08a5094accb
-  trilogy (2.13.1) sha256=fbfb17c439b347e4240be70b80facf0f6f9c417b34c528179ff065b3d53635c9
   tsort (0.2.0) sha256=9650a793f6859a43b6641671278f79cfead60ac714148aabe4e3f0060480089f
   turbo-rails (2.0.23)
   tzinfo (2.0.6) sha256=8daf828cc77bcf7d63b0e3bdb6caa47e2272dcfaf4fbfe46f8c3a9df087a829b

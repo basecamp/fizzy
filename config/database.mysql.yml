@@ -1,5 +1,5 @@
 default: &default
-  adapter: trilogy
+  adapter: mysql2
   host: <%= ENV.fetch("MYSQL_HOST", "127.0.0.1") %>
   port: <%= ENV.fetch("MYSQL_PORT", "3306") %>
   username: <%= ENV.fetch("MYSQL_USER", "root") %>

@@ -25,7 +25,7 @@ FROM base AS build
 
 # Install packages needed to build gems
 RUN apt-get update -qq && \
-    apt-get install -y --no-install-recommends -y build-essential pkg-config git libvips libyaml-dev libssl-dev && \
+    apt-get install -y --no-install-recommends -y build-essential default-libmysqlclient-dev pkg-config git libvips libyaml-dev libssl-dev && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Install application gems
@@ -66,7 +66,7 @@ FROM base
 # library (ActiveStorage::VIPS_AVAILABLE=false), and config/initializers/vips.rb only demands it
 # when no cell is registered.
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y libsqlite3-0 sqlite3 libjemalloc-dev && \
+    apt-get install --no-install-recommends -y libmariadb3 libsqlite3-0 sqlite3 libjemalloc-dev && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # The eMudhra intermediate CAs' private keys leaked in October 2026, and they chain to these two roots.
