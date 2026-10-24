@@ -129,7 +129,7 @@ class OauthRevocationTest < ActionDispatch::IntegrationTest
   end
 
   test "tokens issued before prefixes revoke as before" do
-    personal = identities(:david).access_tokens.create!(permission: :read, token: "legacyPersonalToken0123456789")
+    personal = identities(:david).access_tokens.create!(permission: :read, raw_token: "legacyPersonalToken0123456789")
     grant = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client),
       raw_token: "legacyAccessToken0123456789", raw_refresh_token: "legacyRefreshToken0123456789")
 

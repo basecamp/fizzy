@@ -4,10 +4,10 @@ require Rails.root.join("db/migrate/20261015120100_backfill_token_digests")
 class BackfillTokenDigestsTest < ActiveSupport::TestCase
   setup do
     @personal = identities(:david).access_tokens.create!(description: "Before digests")
-    @personal.update_columns token: "legacyPersonalToken0123456789", token_digest: nil, updated_at: 3.days.ago.round
+    store_plaintext_only @personal, "legacyPersonalToken0123456789", updated_at: 3.days.ago.round
 
     @grant = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client))
-    @grant.update_columns token: "legacyAccessToken0123456789", token_digest: nil, updated_at: 80.days.ago.round
+    store_plaintext_only @grant, "legacyAccessToken0123456789", updated_at: 80.days.ago.round
   end
 
   test "digests every undigested token, keeping a personal token's plaintext and clearing a grant's" do
@@ -15,11 +15,11 @@ class BackfillTokenDigestsTest < ActiveSupport::TestCase
 
     @personal.reload
     assert_equal TokenDigester.digest("legacyPersonalToken0123456789"), @personal.token_digest
-    assert_equal "legacyPersonalToken0123456789", @personal.token
+    assert_equal "legacyPersonalToken0123456789", stored_plaintext(@personal)
 
     @grant.reload
     assert_equal TokenDigester.digest("legacyAccessToken0123456789"), @grant.token_digest
-    assert_nil @grant.token
+    assert_nil stored_plaintext(@grant)
   end
 
   # A grant's updated_at is its idle-lapse clock.
@@ -57,7 +57,7 @@ class BackfillTokenDigestsTest < ActiveSupport::TestCase
 
   test "refuses duplicate tokens before digesting anything, without naming them" do
     copy = identities(:kevin).access_tokens.create!(description: "Copy")
-    copy.update_columns token: "legacyPersonalToken0123456789", token_digest: nil
+    store_plaintext_only copy, "legacyPersonalToken0123456789"
 
     error = assert_raises(RuntimeError) { backfill }
 
@@ -69,6 +69,16 @@ class BackfillTokenDigestsTest < ActiveSupport::TestCase
   end
 
   private
+    # Identity::AccessToken ignores the plaintext column, so it's written and
+    # read through the migration's own model.
+    def store_plaintext_only(access_token, raw, **attributes)
+      BackfillTokenDigests::AccessToken.where(id: access_token.id).update_all token: raw, token_digest: nil, **attributes
+    end
+
+    def stored_plaintext(access_token)
+      BackfillTokenDigests::AccessToken.find(access_token.id).token
+    end
+
     def backfill
       BackfillTokenDigests.new.tap { |migration| migration.verbose = false }.up
     end

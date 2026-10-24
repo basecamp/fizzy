@@ -17,7 +17,7 @@ class ActiveStorage::DirectUploadsControllerTest < ActionDispatch::IntegrationTe
 
     post rails_direct_uploads_path,
       params: @blob_params,
-      headers: bearer_token_header(identity_access_tokens(:davids_api_token).token),
+      headers: bearer_token_header(identity_access_tokens(:davids_api_token).raw_token),
       as: :json
 
     assert_response :success
@@ -27,7 +27,7 @@ class ActiveStorage::DirectUploadsControllerTest < ActionDispatch::IntegrationTe
   test "create with valid access token" do
     post rails_direct_uploads_path,
       params: @blob_params,
-      headers: bearer_token_header(identity_access_tokens(:davids_api_token).token),
+      headers: bearer_token_header(identity_access_tokens(:davids_api_token).raw_token),
       as: :json
 
     assert_response :success
@@ -74,7 +74,7 @@ class ActiveStorage::DirectUploadsControllerTest < ActionDispatch::IntegrationTe
   test "create with read-only access token" do
     post rails_direct_uploads_path,
       params: @blob_params,
-      headers: bearer_token_header(identity_access_tokens(:jasons_api_token).token),
+      headers: bearer_token_header(identity_access_tokens(:jasons_api_token).raw_token),
       as: :json
 
     assert_response :unauthorized
@@ -121,7 +121,7 @@ class ActiveStorage::DirectUploadsControllerTest < ActionDispatch::IntegrationTe
   test "create with valid access token in another account is forbidden" do
     post rails_direct_uploads_path(script_name: "/#{ActiveRecord::FixtureSet.identify("initech")}"),
       params: @blob_params,
-      headers: bearer_token_header(identity_access_tokens(:davids_api_token).token),
+      headers: bearer_token_header(identity_access_tokens(:davids_api_token).raw_token),
       as: :json
 
     assert_response :forbidden

@@ -82,6 +82,6 @@ class SearchRateLimitingTest < ActionDispatch::IntegrationTest
 
   private
     def bearer_token_header(fixture)
-      { "Authorization" => "Bearer #{identity_access_tokens(fixture).token}" }
+      { "Authorization" => "Bearer #{identity_access_tokens(fixture).raw_token}" }
     end
 end

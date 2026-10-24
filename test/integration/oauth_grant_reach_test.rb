@@ -118,7 +118,7 @@ class OauthGrantReachTest < ActionDispatch::IntegrationTest
   end
 
   test "a personal access token still manages personal access tokens" do
-    pat = { "HTTP_AUTHORIZATION" => "Bearer #{identity_access_tokens(:davids_api_token).token}" }
+    pat = { "HTTP_AUTHORIZATION" => "Bearer #{identity_access_tokens(:davids_api_token).raw_token}" }
 
     get my_access_tokens_path, env: pat, as: :json
 
