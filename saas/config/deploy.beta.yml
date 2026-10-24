@@ -35,6 +35,9 @@ servers:
       - <%= @job_hosts[0] %>: df_iad
     labels:
       otel_scrape_enabled: true
+    env:
+      clear:
+        LOG_JOB_MEMORY: "true"
 
 proxy:
   ssl: false
