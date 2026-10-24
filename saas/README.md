@@ -170,7 +170,7 @@ Staging is primarily intended for testing infrastructure changes. It uses produc
 
 Set `LOG_JOB_MEMORY=true` in a jobs role's deployment environment to add `performance.memory` and `performance.gc` to its structured job log lines. Beta jobs enable it. Changing it takes a deploy.
 
-Following bc3's `Memory::Stats`, each line carries totals and deltas for RSS in bytes, Ruby heap slots, allocated objects, collection counts, old-generation malloc growth and GC time in milliseconds, plus the last major collection's trigger. Correlate lines by process ID and job class to tell growth within a job from memory kept between jobs. RSS includes shared pages, so summing worker RSS overstates host memory use. These are samples at job boundaries, not peaks, and a process killed during a job logs nothing for it.
+Following bc3's `Memory::Stats`, each line carries totals and deltas for RSS in bytes, Ruby heap slots, allocated objects, collection counts, old-generation malloc growth and GC time in milliseconds, plus the last major collection's trigger. The counters are process-wide, and each jobs process runs several threads (`config/queue.yml`), so a delta covers every job that overlapped this one, not this job alone. Correlate lines by process ID to follow one process's growth over time. RSS includes shared pages, so summing worker RSS overstates host memory use. These are samples at job boundaries, not peaks, and a process killed during a job logs nothing for it.
 
 ## Maintenance mode
 
