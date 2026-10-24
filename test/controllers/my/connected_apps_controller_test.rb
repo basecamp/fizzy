@@ -75,4 +75,45 @@ class My::ConnectedAppsControllerTest < ActionDispatch::IntegrationTest
     delete my_connected_app_path(client)
     assert_response :not_found
   end
+
+  test "index groups apps by kind and says what each can do" do
+    @identity.access_tokens.create!(oauth_client: oauth_clients(:mcp_client), permission: :read)
+    @identity.access_tokens.create!(oauth_client: oauth_clients(:confidential_client), permission: :write)
+
+    get my_connected_apps_path
+
+    assert_response :success
+    assert_select ".connected-apps__group", count: 2
+    assert_select "#connected_apps_web + .connected-app, #connected_apps_web ~ .connected-app", text: /Confidential Connector.*Read and write/m
+    assert_select "#connected_apps_local ~ .connected-app", text: /Test MCP Client.*Name set by an app on your device.*Read only/m
+    assert_select "#connected_apps_fizzy", count: 0
+    assert_select ".connected-app", text: /access last renewed/
+  end
+
+  test "index names where a self-registered web app's access goes" do
+    @identity.access_tokens.create!(oauth_client: oauth_clients(:confidential_client), permission: :read)
+
+    get my_connected_apps_path
+
+    assert_select ".connected-app", text: /Name set by the app at connector.example.com/
+  end
+
+  test "index shows an empty state when nothing is connected" do
+    get my_connected_apps_path
+
+    assert_response :success
+    assert_select ".connected-apps__empty", text: /Nothing connected yet/
+    assert_select ".connected-app", count: 0
+  end
+
+  test "index names every remote host a self-registered app can send its access to, not just the first" do
+    client = Oauth::Client.create! name: "Two Homes", dynamically_registered: true,
+      redirect_uris: %w[ http://127.0.0.1:8888/callback https://one.example.com/cb https://two.example.com:8443/cb ]
+    @identity.access_tokens.create!(oauth_client: client, permission: :read)
+
+    get my_connected_apps_path
+
+    assert_select "#connected_apps_web ~ .connected-app", text: /Name set by the app at one.example.com or two.example.com:8443/
+    assert_no_match "Name set by an app on your device", response.body
+  end
 end

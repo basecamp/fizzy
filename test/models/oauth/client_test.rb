@@ -457,6 +457,14 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     assert_not Oauth::Client.exists?(client.id)
   end
 
+  test "connection_kind tells our apps, tools on this device and web apps apart" do
+    assert_equal :fizzy, oauth_clients(:trusted_client).connection_kind
+    assert_equal :local, oauth_clients(:mcp_client).connection_kind
+    assert_equal :web, oauth_clients(:confidential_client).connection_kind
+    assert_equal :local, Oauth::Client.new(redirect_uris: %w[ com.example.app:/callback http://[::1]/cb ]).connection_kind
+    assert_equal :web, Oauth::Client.new(redirect_uris: %w[ http://127.0.0.1/cb https://example.com/cb ]).connection_kind
+  end
+
   private
     def register_client(**attributes)
       Oauth::Client.create! name: "Abandoned", redirect_uris: %w[ http://127.0.0.1:8888/callback ], dynamically_registered: true, **attributes

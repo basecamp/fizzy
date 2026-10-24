@@ -55,7 +55,7 @@ class Oauth::AuthorizationsController < Oauth::BaseController
 
       redirect_to success_redirect_uri(code), allow_other_host: true
     else
-      oauth_error "invalid_request", "Unknown client"
+      render_error "invalid_request", "Unknown client"
     end
   end
 
@@ -74,9 +74,10 @@ class Oauth::AuthorizationsController < Oauth::BaseController
       end
     end
 
+    # There's no client to send the browser back to, so the person is told here
     def set_client
       @client = Oauth::Client.find_by(client_id: params[:client_id])
-      oauth_error("invalid_request", "Unknown client") unless @client
+      render_error("invalid_request", "Unknown client") unless @client
     end
 
     def validate_redirect_uri

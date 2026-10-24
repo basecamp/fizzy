@@ -5,7 +5,11 @@ Rails.application.routes.draw do
   get "/.well-known/oauth-protected-resource", to: "oauth/protected_resource_metadata#show"
 
   namespace :oauth do
-    resource :authorization, only: %i[ new create ]
+    resource :authorization, only: %i[ new create ] do
+      scope module: :authorizations do
+        resource :switch, only: :create
+      end
+    end
     resource :token, only: :create
     resource :revocation, only: :create
     resources :clients, only: :create

@@ -1,10 +1,23 @@
-<% @page_title = "Authorize #{@client.name}" %>
+<% identity = oauth_client_display_identity(@client, @redirect_uri) %>
+<% redirect_host = oauth_redirect_host(@redirect_uri) %>
+<% @page_title = "Authorize #{identity}" %>
 
 <% content_for :header do %>
   <h1 class="header__title"><%= @page_title %></h1>
 <% end %>
 
-<article class="panel panel--wide shadow center txt-align-start">
+<article class="oauth-consent panel panel--wide shadow center txt-align-start">
+  <%= render "oauth/authorizations/client", client: @client, identity: identity, redirect_host: redirect_host %>
+
+  <%# Not you? signs out and returns whoever signs in to this same request %>
+  <div class="oauth-consent__identity flex align-center gap-half txt-small txt-subtle">
+    <span>Signed in as <strong><%= Current.identity.email_address %></strong></span>
+    <%= button_to "Not you?", oauth_authorization_switch_path,
+          params: { client_id: @client.client_id, redirect_uri: @redirect_uri, response_type: "code", scope: @scope,
+            state: @state, code_challenge: @code_challenge, code_challenge_method: "S256" }.compact,
+          class: "btn btn--plain txt-link txt-small", form: { data: { turbo: false } } %>
+  </div>
+
   <%= form_with url: oauth_authorization_path, method: :post, data: { turbo: false }, html: { class: "flex flex-column gap" } do |f| %>
     <%= f.hidden_field :client_id, value: @client.client_id %>
     <%= f.hidden_field :redirect_uri, value: @redirect_uri %>
@@ -13,26 +26,23 @@
     <%= f.hidden_field :code_challenge_method, value: "S256" %>
     <%= f.hidden_field :response_type, value: "code" %>
 
-    <div class="flex flex-column gap-half">
-      <strong>Application</strong>
-      <p class="margin-none"><%= @client.name %></p>
-      <% if @client.dynamically_registered? %>
-        <% redirect = URI.parse(@redirect_uri) %>
-        <% if Oauth.loopback_host?(redirect.host) %>
-          <p class="txt-small txt-muted margin-none">Registered by a local tool. Only authorize if you trust it.</p>
-        <% else %>
-          <p class="txt-small txt-muted margin-none">Self-registered app that will receive access at <strong><%= redirect.port == redirect.default_port ? redirect.host : "#{redirect.host}:#{redirect.port}" %></strong>. Only authorize if you trust it.</p>
-        <% end %>
+    <%# Account binding sets @accounts: a connection then reaches the one account chosen here %>
+    <% if @accounts %>
+      <%= render "oauth/authorizations/account_picker", form: f, accounts: @accounts, selected_account_id: @account_id %>
+    <% end %>
+
+    <%= render "oauth/authorizations/access", form: f, client: @client, scope: @scope, one_account: @accounts.present? %>
+
+    <p class="oauth-consent__destination txt-small txt-subtle margin-none">
+      <% if redirect_host %>
+        Either way, you'll go back to <strong><%= redirect_host %></strong>.
+      <% else %>
+        Either way, you'll go back to the app on your device.
       <% end %>
-    </div>
+      You can disconnect it at any time in <%= link_to "Connected apps", my_connected_apps_path, class: "txt-link" %>.
+    </p>
 
-    <div class="flex flex-column gap-half">
-      <strong><%= f.label :scope, "Permission" %></strong>
-      <% scope_options = @client.scopes.include?("write") ? { "Read" => "read", "Read + Write" => "read write" } : { "Read" => "read" } %>
-      <%= f.select :scope, options_for_select(scope_options, @scope), {}, class: "input input--select" %>
-    </div>
-
-    <div class="flex gap">
+    <div class="oauth-consent__actions flex gap">
       <%= f.button type: :submit, class: "btn btn--link txt-medium" do %>
         <span>Authorize</span>
       <% end %>
