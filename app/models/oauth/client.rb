@@ -41,11 +41,16 @@ class Oauth::Client < ApplicationRecord
 
   scope :trusted, -> { where trusted: true }
   scope :dynamically_registered, -> { where dynamically_registered: true }
+  scope :metadata_documents, -> { where client_id_metadata_document: true }
+
+  # Registered by no one Fizzy vetted: by registration (RFC 7591), or from a
+  # metadata document. Either comes back on its own when it's used again.
+  scope :self_registered, -> { dynamically_registered.or(metadata_documents) }
 
   # A grant touches its client when it is created or destroyed, so updated_at
   # is the last grant activity: an app the user disconnected yesterday is not
   # swept for having registered long ago.
-  scope :stale, -> { dynamically_registered.where.missing(:access_tokens).where(updated_at: ...UNUSED_RETENTION.ago) }
+  scope :stale, -> { self_registered.where.missing(:access_tokens).where(updated_at: ...UNUSED_RETENTION.ago) }
 
   def self.cleanup
     stale.find_each(&:destroy_if_still_unused)
@@ -73,6 +78,24 @@ class Oauth::Client < ApplicationRecord
     end
   end
 
+  # The client a presented client_id names, compared as an exact string. The
+  # column's collation is case-insensitive, and a metadata document URL is an
+  # exact identifier, so a case variant of one names no client.
+  def self.find_presented(client_id)
+    if client_id.is_a?(String) && (client = find_by(client_id: client_id)) && client.client_id == client_id
+      client
+    end
+  end
+
+  # Provisioned from a Client ID Metadata Document (Oauth::ClientMetadata).
+  def metadata_document?
+    client_id_metadata_document?
+  end
+
+  def self_registered?
+    dynamically_registered? || metadata_document?
+  end
+
   def confidential?
     token_endpoint_auth_method.in?(SECRET_AUTH_METHODS)
   end
@@ -89,7 +112,7 @@ class Oauth::Client < ApplicationRecord
   # the consent screen. A self-registered https host is one nobody vetted, so
   # bouncing to it unprompted would make us an open redirector (RFC 9700 §4.11.2).
   def vetted_redirect?(uri)
-    !dynamically_registered? || loopback_uri?(uri)
+    !self_registered? || loopback_uri?(uri)
   end
 
   def allows_scope?(requested_scope)
@@ -126,7 +149,7 @@ class Oauth::Client < ApplicationRecord
         errors.add :redirect_uris, "must not contain fragments"
       end
 
-      if dynamically_registered? && !valid_loopback_uri?(parsed) && !valid_https_uri?(parsed)
+      if self_registered? && !valid_loopback_uri?(parsed) && !valid_https_uri?(parsed)
         errors.add :redirect_uris, "must be an https or local loopback URI for dynamically registered clients"
       end
     rescue URI::InvalidURIError

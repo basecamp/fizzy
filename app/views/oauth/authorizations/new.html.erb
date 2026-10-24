@@ -23,6 +23,8 @@
         <% else %>
           <p class="txt-small txt-muted margin-none">Self-registered app that will receive access at <strong><%= redirect.port == redirect.default_port ? redirect.host : "#{redirect.host}:#{redirect.port}" %></strong>. Only authorize if you trust it.</p>
         <% end %>
+      <% elsif @client.metadata_document? %>
+        <p class="txt-small txt-muted margin-none">Name set by the app at <strong><%= URI.parse(@client.client_id).host %></strong>.</p>
       <% end %>
     </div>
 

@@ -98,6 +98,8 @@ Rails.application.configure do
   # OAuth is lit in development; preview the dark posture with OAUTH_DARK=1.
   # See Oauth::Availability.
   config.x.oauth.acceptance_enabled = ENV["OAUTH_DARK"].blank?
+  config.x.oauth.cimd_enabled = true
+  config.x.oauth.cimd_allowed_hosts = %w[ mcp.claude.ai claude.ai claude.com chatgpt.com ]
 
   # Canonical host for mailer URLs (emails always link here, not personal Tailscale URLs)
   config.action_mailer.default_url_options = { host: "#{config.hosts.first}:3006" }
