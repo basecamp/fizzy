@@ -74,7 +74,7 @@ class OauthClientMetadataDocumentsTest < ActionDispatch::IntegrationTest
     untenanted { get new_oauth_authorization_path, params: authorization.merge(client_id: url, redirect_uri: "https://tools.example.com/cb") }
 
     assert_response :bad_request
-    assert_equal "Unknown client", response.parsed_body["error_description"]
+    assert_select "p", text: "Unknown client"
     assert_not_requested stub
   end
 
@@ -98,7 +98,7 @@ class OauthClientMetadataDocumentsTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :bad_request
-    assert_equal "Unknown client", response.parsed_body["error_description"]
+    assert_select "p", text: "Unknown client"
   end
 
   test "a client_id array never reaches a metadata document client" do
@@ -130,7 +130,7 @@ class OauthClientMetadataDocumentsTest < ActionDispatch::IntegrationTest
     untenanted { get new_oauth_authorization_path, params: authorization.merge(client_id: client.client_id) }
 
     assert_response :bad_request
-    assert_equal "Unknown client", response.parsed_body["error_description"]
+    assert_select "p", text: "Unknown client"
   end
 
   test "an unvetted redirect gets no error redirect before consent" do

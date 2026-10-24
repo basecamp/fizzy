@@ -25,9 +25,9 @@ class OauthAudienceTest < ActionDispatch::IntegrationTest
     get_consent resource: MCP_RESOURCE
 
     assert_response :success
-    assert_select "select[name=account_id] option", 2
-    assert_select "select[name=account_id] option[value=?]", accounts("37s").id
-    assert_select "select[name=account_id] option[value=?]", accounts(:initech).id
+    assert_select "input[type=radio][name=account_id]", 2
+    assert_select "input[type=radio][name=account_id][value=?]", accounts("37s").id
+    assert_select "input[type=radio][name=account_id][value=?]", accounts(:initech).id
     assert_select "input[type=hidden][name=resource][value=?]", MCP_RESOURCE
   end
 
