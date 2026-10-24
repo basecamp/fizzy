@@ -25,7 +25,10 @@ class Oauth::Client < ApplicationRecord
   MAXIMUM_REDIRECT_URIS = 10
   MAXIMUM_REDIRECT_URI_LENGTH = 2000
 
-  validates :redirect_uris, presence: true, length: { maximum: MAXIMUM_REDIRECT_URIS }
+  # A client that only fronts a protected resource exchanges tokens and never
+  # sends anyone through authorization, so it registers no redirect.
+  validates :redirect_uris, presence: true, unless: :protected_resource?
+  validates :redirect_uris, length: { maximum: MAXIMUM_REDIRECT_URIS }
   validates :token_endpoint_auth_method, inclusion: { in: AUTH_METHODS }
   validate :redirect_uris_are_valid
   validate :protected_resource_is_valid
@@ -52,6 +55,31 @@ class Oauth::Client < ApplicationRecord
     stale.find_each(&:destroy_if_still_unused)
   end
 
+  # The hosted MCP server's own client, by the id its deployment names
+  # (FIZZY_MCP_EXCHANGE_CLIENT_ID).
+  MCP_CLIENT_ID = "fizzy-mcp-server"
+
+  # Creates or converges an MCP server's client (bin/rails
+  # oauth:provision_mcp_client). A new one gets a secret nobody holds, so it
+  # can't authenticate until oauth:mint_client_secret gives it one; an
+  # existing one keeps the secret it has.
+  #
+  # Each client fronts one resource, so each configured resource needs a
+  # client of its own: one already fronting another resource that's still
+  # configured is refused rather than repointed, which would strand every
+  # grant audienced to that resource. One whose resource has been dropped
+  # from the configuration may move.
+  def self.provision_mcp_client!(protected_resource:, client_id: MCP_CLIENT_ID)
+    find_or_initialize_by(client_id: client_id).tap do |client|
+      if client.protected_resource != protected_resource && client.delegation_client?
+        raise ArgumentError, "#{client_id} already fronts #{client.protected_resource}; give #{protected_resource} a client of its own"
+      else
+        client.update! name: "Fizzy MCP server", protected_resource: protected_resource, scopes: %w[ read write ],
+          redirect_uris: [], token_endpoint_auth_method: "client_secret_post", dynamically_registered: false, trusted: false
+      end
+    end
+  end
+
   # The sweep and #redeem take the same row lock, so a grant either lands
   # before the recheck, which then spares the client, or finds the client
   # already gone and is never issued. There is no foreign key to refuse a
@@ -71,6 +99,19 @@ class Oauth::Client < ApplicationRecord
   def redeem(authorization_code, identity:, permission:, **attributes)
     with_lock do
       identity.access_tokens.redeem authorization_code, oauth_client: self, permission: permission, **attributes
+    end
+  end
+
+  # Replaces an operator-provisioned client's secret with a fresh one and
+  # returns it, the only time it's shown. The old secret stops authenticating
+  # as soon as this commits.
+  def rotate_secret!
+    if dynamically_registered? || !confidential?
+      raise ArgumentError, "only an operator-provisioned confidential client's secret can be minted"
+    end
+
+    Identity::AccessToken.generate_token(:client_secret).tap do |secret|
+      update! client_secret_digest: TokenDigester.digest(secret)
     end
   end
 
@@ -99,6 +140,13 @@ class Oauth::Client < ApplicationRecord
   # confidential client may front one, since the exchange authenticates it.
   def fronts?(resource)
     protected_resource.present? && protected_resource == resource
+  end
+
+  # Whether this client may use the delegation exchange: it fronts one of the
+  # protected resources Fizzy is configured to issue grants for. Removing the
+  # resource from FIZZY_OAUTH_MCP_RESOURCES turns its exchange off.
+  def delegation_client?
+    Oauth.mcp_resource?(protected_resource)
   end
 
   def allows_scope?(requested_scope)

@@ -9,8 +9,8 @@ class Users::PushSubscriptionsController < ApplicationController
   def create
     # A new subscription records its app as it's inserted, so no crash between
     # two writes can leave an app's endpoint looking like a browser's.
-    subscription = @push_subscriptions.create_with(user_agent: request.user_agent, oauth_client: Current.access_token&.oauth_client).create_or_find_by!(push_subscription_params)
-    subscription.claim_for Current.access_token&.oauth_client
+    subscription = @push_subscriptions.create_with(user_agent: request.user_agent, oauth_client: Current.access_token&.app).create_or_find_by!(push_subscription_params)
+    subscription.claim_for Current.access_token&.app
 
     respond_to do |format|
       format.html { head :no_content }

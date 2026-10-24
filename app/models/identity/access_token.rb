@@ -22,6 +22,12 @@ class Identity::AccessToken < ApplicationRecord
   belongs_to :account, optional: true
   has_many :retired_refresh_tokens, class_name: "Oauth::RetiredRefreshToken", dependent: :delete_all
 
+  # An API token the delegation exchange minted (Oauth::TokenDelegation)
+  # records the grant it acts under. Every way that grant ends sweeps them,
+  # after lock_grant, in the order the exchange takes its locks: grant first.
+  belongs_to :delegated_from, class_name: "Identity::AccessToken", optional: true
+  has_many :delegated_tokens, class_name: "Identity::AccessToken", foreign_key: :delegated_from_id, inverse_of: :delegated_from, dependent: :delete_all
+
   # Rotation locks the grant and then adds a retired token. Destroying takes
   # the same locks in the same order, grant first, so a refresh racing a
   # revocation waits rather than deadlocking against the retired-token delete.
@@ -29,16 +35,24 @@ class Identity::AccessToken < ApplicationRecord
 
   scope :personal, -> { where oauth_client_id: nil }
   scope :oauth, -> { where.not oauth_client_id: nil }
+  # What a person granted an app, as Connected Apps lists it: OAuth tokens,
+  # less the short-lived API tokens the delegation exchange mints under them.
+  scope :grants, -> { oauth.where delegated_from_id: nil }
+  scope :delegated, -> { where.not delegated_from_id: nil }
   scope :active, -> { where(expires_at: nil).or(where(expires_at: Time.current..)) }
   scope :unlapsed, -> { where(updated_at: REFRESH_IDLE_LIMIT.ago..) }
-  scope :lapsed, -> { oauth.where(updated_at: ...REFRESH_IDLE_LIMIT.ago) }
+  scope :lapsed, -> { grants.where(updated_at: ...REFRESH_IDLE_LIMIT.ago) }
 
   # A prefix makes a token recognizable on sight, in logs, pastes and
   # repositories, and names its kind. Tokens issued before prefixes carry none
   # and keep working: every lookup matches the whole string. OAuth client
   # secrets are drawn here too (Oauth::Client), so every credential Fizzy
   # issues has one shape.
-  PREFIXES = { personal: "fizzy_pat_", access: "fizzy_at_", refresh: "fizzy_rt_", client_secret: "fizzy_cs_" }
+  #
+  # Delegated tokens carry their own prefix so that a miss on the replica can
+  # be told apart from an unknown token before it costs a primary read (see
+  # find_honored).
+  PREFIXES = { personal: "fizzy_pat_", access: "fizzy_at_", refresh: "fizzy_rt_", client_secret: "fizzy_cs_", delegated: "fizzy_dt_" }
 
   # The base58 alphabet has_secure_token uses: no 0, O, I or l. Drawn through
   # Ruby's own SecureRandom, so it doesn't depend on ActiveSupport's base58
@@ -49,6 +63,10 @@ class Identity::AccessToken < ApplicationRecord
   # bc3's tokens have (32 bytes). Tokens issued earlier are shorter and keep
   # working.
   BODY_LENGTH = 44
+
+  # Exactly what generate_token(:delegated) mints. Only a token of this shape
+  # is worth a second look on the primary (see find_honored).
+  DELEGATED_TOKEN = /\A#{PREFIXES[:delegated]}[#{BASE58.join}]{#{BODY_LENGTH}}\z/
 
   enum :permission, %w[ read write ].index_by(&:itself), default: :read
 
@@ -68,14 +86,17 @@ class Identity::AccessToken < ApplicationRecord
   attribute :raw_refresh_token, :string
 
   before_create :set_token
-  before_create :set_expiry_and_refresh_token, if: :oauth_client_id?
+  before_create :set_expiry_and_refresh_token, if: :refreshable?
 
   # Issuing or destroying a grant restarts its client's retention period
   # (Oauth::Client.cleanup). The touch waits until the grant's own transaction
   # commits. A revocation locks the grant, and touching the client in the same
   # transaction would then wait on the client's lock. A replayed code exchange
   # holds that lock while it waits on the grant, so the two would deadlock.
-  after_commit :touch_oauth_client, on: %i[ create destroy ]
+  #
+  # Delegated tokens don't count: the exchange mints one every few minutes
+  # per connection, all to the MCP server's one client, which isn't swept.
+  after_commit :touch_oauth_client, on: %i[ create destroy ], unless: :delegated?
 
   # Every way a grant ends destroys it: disconnecting the app, revocation, the
   # idle-lapse sweep, a replayed refresh token or authorization code, and
@@ -87,15 +108,33 @@ class Identity::AccessToken < ApplicationRecord
   #
   # Checked after commit, so when two grants to one client end at once,
   # whichever commits second finds none left.
-  after_destroy_commit :end_app_plumbing, if: :oauth_client_id?
+  after_destroy_commit :end_app_plumbing, if: -> { oauth_client_id? && !delegated? }
 
   class << self
     # The token a bearer request may authenticate with: active and honored.
     # Whether it permits the request's method is the caller's question.
+    #
+    # The hosted MCP server uses a delegated token within milliseconds of the
+    # exchange writing it on the primary, and GET requests read from a
+    # replica, which may have neither the token nor, for a grant just
+    # issued, the grant it was delegated from. A bearer request has no
+    # session for a replication barrier to wait on, so a delegated token the
+    # replica doesn't honor is judged again on the primary, token and grant
+    # alike. Only a refusal costs that read, and only for a token of exactly
+    # the shape the exchange mints, so anything else, a made-up fizzy_dt_
+    # string included, never reaches the primary. One that is shaped right
+    # and refused costs one more indexed read there, as many as the replica
+    # just spent on it. A datacenter that can't reach the primary
+    # (Deployment::DatabaseResolver) keeps the replica's answer, which is why
+    # the MCP server reaches Fizzy's primary datacenter.
     def find_honored(token)
-      if (access_token = active.find_by_raw_token(token)) && access_token.honored?
-        access_token
-      end
+      find_honored_here(token) || find_honored_delegated_on_primary(token)
+    end
+
+    # Delegated tokens live minutes, so expired ones are deleted as they
+    # accumulate rather than waiting on any grant to end.
+    def cleanup_delegated
+      delegated.where(expires_at: ...1.hour.ago).in_batches(of: 1000).delete_all
     end
 
     # Finds the token within the current scope by its digest. A personal
@@ -141,6 +180,18 @@ class Identity::AccessToken < ApplicationRecord
     end
 
     private
+      def find_honored_here(token)
+        if (access_token = active.find_by_raw_token(token)) && access_token.honored?
+          access_token
+        end
+      end
+
+      def find_honored_delegated_on_primary(token)
+        if token.is_a?(String) && token.match?(DELEGATED_TOKEN) && Deployment::DatabaseResolver.in_primary_datacenter?
+          ApplicationRecord.with_writing_role { find_honored_here(token) }
+        end
+      end
+
       # MySQL compares `token` case-insensitively, so a match is confirmed
       # byte for byte: a differently cased token neither authenticates nor
       # installs a digest that the real token would then never match.
@@ -162,8 +213,27 @@ class Identity::AccessToken < ApplicationRecord
   # OAuth tokens are honored only while OAuth acceptance is on (see
   # Oauth::Availability); personal tokens always are. The client is loaded only
   # when the server is dark and a pilot exemption might apply.
+  #
+  # A delegated token is honored only while the grant it was delegated from
+  # still is, read afresh on every request: a revocation the sweep missed, or
+  # one that raced the exchange, refuses it at its next use. Nor may it
+  # write once that grant can't: a refresh that narrows the grant to read
+  # narrows the tokens delegated from it too.
   def honored?
-    oauth_client_id.nil? || Oauth::Availability.acceptance_enabled? || Oauth::Availability.acceptance_enabled?(oauth_client&.client_id)
+    honored_client? && (!delegated? || honored_delegation?)
+  end
+
+  def delegated?
+    delegated_from_id?
+  end
+
+  # The app this token acts for, the one a person connected and sees in
+  # Connected Apps. A delegated token is issued to the MCP server's client,
+  # but acts for the app whose grant it was delegated from, so what it sets
+  # up (webhooks, push subscriptions) is that app's, listed and removed with
+  # it when the person disconnects it.
+  def app
+    delegated? ? delegated_from&.oauth_client : oauth_client
   end
 
   # An audienced grant was issued for another protected resource (the hosted
@@ -220,7 +290,21 @@ class Identity::AccessToken < ApplicationRecord
     end
   end
 
+  protected
+    def honored_delegation?
+      grant = self.class.grants.unlapsed.find_by(id: delegated_from_id)
+      grant.present? && grant.honored_client? && (read? || grant.write?)
+    end
+
+    def honored_client?
+      oauth_client_id.nil? || Oauth::Availability.acceptance_enabled? || Oauth::Availability.acceptance_enabled?(oauth_client&.client_id)
+    end
+
   private
+    def refreshable?
+      oauth_client_id? && !delegated?
+    end
+
     def end_app_plumbing
       unless self.class.exists?(identity_id: identity_id, oauth_client_id: oauth_client_id)
         Push::Subscription.where(oauth_client_id: oauth_client_id, user: User.where(identity_id: identity_id)).delete_all
@@ -239,9 +323,19 @@ class Identity::AccessToken < ApplicationRecord
     # for production code that reads only plaintext. An explicitly given
     # token is digested like a generated one.
     def set_token
-      self.raw_token ||= token.presence || self.class.generate_token(oauth_client_id? ? :access : :personal)
+      self.raw_token ||= token.presence || self.class.generate_token(token_kind)
       self.token_digest = TokenDigester.digest(raw_token)
       self.token = oauth_client_id? ? nil : raw_token
+    end
+
+    def token_kind
+      if delegated?
+        :delegated
+      elsif oauth_client_id?
+        :access
+      else
+        :personal
+      end
     end
 
     def set_expiry_and_refresh_token

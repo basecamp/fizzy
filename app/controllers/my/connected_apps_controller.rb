@@ -39,7 +39,7 @@ class My::ConnectedAppsController < ApplicationController
     end
 
     def oauth_tokens
-      Current.identity.access_tokens.oauth
+      Current.identity.access_tokens.grants
     end
 
     def remove_webhooks?
