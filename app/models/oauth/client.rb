@@ -53,6 +53,7 @@ class Oauth::Client < ApplicationRecord
   validates :token_endpoint_auth_method, inclusion: { in: AUTH_METHODS }
   validate :redirect_uris_are_valid
   validate :protected_resource_is_valid
+  validate :added_https_hosts_are_vetted, if: -> { dynamically_registered? && (new_record? || redirect_uris_changed?) }
 
   # A confidential client's secret is stored as a digest (TokenDigester). The
   # raw secret exists only in memory on the record that generated it, for the
@@ -291,25 +292,41 @@ class Oauth::Client < ApplicationRecord
         errors.add :redirect_uris, "must not contain fragments"
       end
 
-      if self_registered? && !valid_loopback_uri?(parsed) && !valid_https_uri?(parsed)
-        errors.add :redirect_uris, "must be an https or local loopback URI for dynamically registered clients"
+      if self_registered? && !Oauth.dcr_redirect_shape?(parsed)
+        errors.add :redirect_uris, "must be a local loopback, https or allowed app-scheme URI for dynamically registered clients"
       end
     rescue URI::InvalidURIError
       errors.add :redirect_uris, "includes an invalid URI"
     end
 
+    # http only: an app scheme naming a loopback host (cursor://localhost) is
+    # dispatched to an app, not served on loopback (RFC 8252 §7.3).
     def loopback_uri?(uri)
-      Oauth.loopback_host?(URI.parse(uri).host)
+      parsed = URI.parse(uri)
+      parsed.scheme&.downcase == "http" && Oauth.loopback_host?(parsed.host)
     rescue URI::InvalidURIError
       false
     end
 
-    def valid_loopback_uri?(parsed)
-      parsed.scheme == "http" && Oauth.plain_authority?(parsed) && Oauth.loopback_host?(parsed.host)
+    # Judged only on the https hosts a write adds, never on those the client
+    # already holds, so taking a host off the list leaves every client that
+    # registered it working (Oauth.dcr_allowed_https_hosts).
+    def added_https_hosts_are_vetted
+      unvetted = https_hosts(redirect_uris) - https_hosts(new_record? ? [] : redirect_uris_was)
+      unvetted.reject! { |host| Oauth.dcr_allowed_https_host?(host) }
+
+      if unvetted.any?
+        errors.add :redirect_uris, "names an https host not allowed for dynamic registration: #{unvetted.join(", ")}"
+      end
     end
 
-    def valid_https_uri?(parsed)
-      parsed.scheme == "https" && Oauth.plain_authority?(parsed) && !Oauth.loopback_host?(parsed.host)
+    def https_hosts(uris)
+      Array(uris).filter_map do |uri|
+        parsed = URI.parse(uri.to_s)
+        parsed.host.to_s.downcase if parsed.scheme&.downcase == "https"
+      rescue URI::InvalidURIError
+        nil
+      end.uniq
     end
 
     # Only the port may vary, and only for an http loopback redirect (RFC 8252

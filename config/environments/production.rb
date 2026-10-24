@@ -136,6 +136,12 @@ Rails.application.configure do
   config.x.oauth.cimd_enabled = ENV["OAUTH_CIMD_ENABLED"] == "true"
   config.x.oauth.cimd_allowed_hosts = ENV.fetch("OAUTH_CIMD_ALLOWED_HOSTS", "").split
 
+  # Dynamic client registration accepts https redirects only on these hosts
+  # (OAUTH_DCR_ALLOWED_HTTPS_HOSTS, separated by spaces or commas), beside
+  # loopback and the cursor:// and claude:// app schemes. Unset, it accepts
+  # no https redirect at all. See Oauth.dcr_redirect_shape?.
+  config.x.oauth.dcr_allowed_https_hosts = ENV.fetch("OAUTH_DCR_ALLOWED_HTTPS_HOSTS", "").split(/[\s,]+/).compact_blank
+
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
 end
