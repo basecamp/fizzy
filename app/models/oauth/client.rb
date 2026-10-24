@@ -9,6 +9,22 @@ class Oauth::Client < ApplicationRecord
   # this long is abandoned (RFC 7591 §5).
   UNUSED_RETENTION = 30.days
 
+  # The grants a client may obtain at the authorization and token endpoints.
+  # An allowlist, so a client is refused any grant type it doesn't list.
+  GRANT_TYPES = %w[ authorization_code refresh_token ]
+
+  # Personal access tokens are issued by this first-party client, as bc3's are
+  # by bc-personal-access, so they're one-off access tokens of the same kind
+  # as every other. It is provisioned by a migration and on first use, never
+  # registered: the sweep, which takes only self-registered clients, leaves it
+  # alone. It is listed for no grant type, so the authorization and token
+  # endpoints never mint, refresh or exchange its tokens: only
+  # My::AccessTokensController issues them. Its client_id has a hyphen, which
+  # no generated client_id (base58) can, so no other client can ever claim it.
+  PERSONAL_ACCESS_CLIENT_ID = "fizzy-personal-access"
+  PERSONAL_ACCESS_ATTRIBUTES = { client_id: PERSONAL_ACCESS_CLIENT_ID, name: "Personal Access Tokens",
+    trusted: true, dynamically_registered: false, redirect_uris: [], scopes: %w[ read write ], token_endpoint_auth_method: "none" }
+
   has_many :access_tokens, class_name: "Identity::AccessToken", foreign_key: :oauth_client_id, inverse_of: :oauth_client, dependent: :destroy
 
   has_secure_token :client_id, length: 32
@@ -18,6 +34,10 @@ class Oauth::Client < ApplicationRecord
   # same order, so no grant can land after the cascade and be stranded.
   before_destroy :lock_client, prepend: true
 
+  # Destroying the issuer would cascade to every client-backed personal access
+  # token on the install.
+  before_destroy :refuse_to_destroy_personal_access, prepend: true
+
   validates :name, presence: true, length: { maximum: 255 }
   validates :client_id, uniqueness: true, allow_nil: true
   # Registration is open and unauthenticated, so what it stores is bounded:
@@ -25,7 +45,7 @@ class Oauth::Client < ApplicationRecord
   MAXIMUM_REDIRECT_URIS = 10
   MAXIMUM_REDIRECT_URI_LENGTH = 2000
 
-  validates :redirect_uris, presence: true, length: { maximum: MAXIMUM_REDIRECT_URIS }
+  validates :redirect_uris, presence: { unless: :personal_access? }, length: { maximum: MAXIMUM_REDIRECT_URIS }
   validates :token_endpoint_auth_method, inclusion: { in: AUTH_METHODS }
   validate :redirect_uris_are_valid
 
@@ -51,9 +71,25 @@ class Oauth::Client < ApplicationRecord
   # swept for having registered long ago.
   scope :stale, -> { dynamically_registered.where.missing(:access_tokens).where(updated_at: ...UNUSED_RETENTION.ago) }
 
-  def self.cleanup
-    Oauth.cleanup_step :stale_clients do
-      stale.find_each(&:destroy_if_still_unused)
+  scope :personal_access, -> { where client_id: PERSONAL_ACCESS_CLIENT_ID }
+
+  class << self
+    def cleanup
+      Oauth.cleanup_step :stale_clients do
+        stale.find_each(&:destroy_if_still_unused)
+      end
+    end
+
+    # A fresh install loads the schema rather than running migrations, so the
+    # issuer may not exist yet when the first personal access token is made.
+    # Two first uses can race: the loser either hits the unique index, which
+    # create_or_find_by! answers by finding on client_id alone, or, when the
+    # winner committed before its uniqueness validation ran, fails that
+    # validation, and then finds the winner's row the same way.
+    def personal_access_issuer
+      personal_access.take || create_or_find_by!(client_id: PERSONAL_ACCESS_CLIENT_ID) { it.assign_attributes PERSONAL_ACCESS_ATTRIBUTES }
+    rescue ActiveRecord::RecordInvalid
+      personal_access.take or raise
     end
   end
 
@@ -81,6 +117,18 @@ class Oauth::Client < ApplicationRecord
     with_lock do
       identity.access_tokens.redeem authorization_code, oauth_client: self, permission: permission
     end
+  end
+
+  def personal_access?
+    client_id == PERSONAL_ACCESS_CLIENT_ID
+  end
+
+  def grant_types
+    personal_access? ? [] : GRANT_TYPES
+  end
+
+  def allows_grant_type?(grant_type)
+    grant_type.in?(grant_types)
   end
 
   def confidential?
@@ -119,6 +167,15 @@ class Oauth::Client < ApplicationRecord
     def lock_client
       self.class.lock.where(id: id).pluck(:id)
       access_tokens.reset
+    end
+
+    # Reads the stored client_id: lock_client no longer reloads the row, so an
+    # unsaved change to the issuer's client_id mustn't let it cascade.
+    def refuse_to_destroy_personal_access
+      if client_id_in_database == PERSONAL_ACCESS_CLIENT_ID
+        errors.add :base, "The personal access token issuer can't be deleted"
+        throw :abort
+      end
     end
 
     def generate_client_secret

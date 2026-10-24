@@ -15,7 +15,7 @@ class My::AccessTokensController < ApplicationController
   # The raw token is shown in this response and on no page after it, so the
   # response must not be cached.
   def create
-    @access_token = my_access_tokens.create!(access_token_params)
+    @access_token = my_access_tokens.create!(access_token_params.merge(oauth_client: Oauth::Client.personal_access_issuer))
     no_store
 
     respond_to do |format|

@@ -8,9 +8,11 @@
 # with a missing or wrong secret, a Basic header that doesn't authenticate,
 # or a client secret that authenticates no client.
 #
-# A personal access token was issued to no client, so possession of it is the
-# credential: whoever presents one revokes it, client or not. Client
-# credentials presented beside it must still authenticate, by the same rules.
+# A personal access token is issued to no client that can authenticate here
+# (none at all, or the personal access token issuer, which has no secret and no
+# grant to revoke), so possession of it is the credential: whoever presents one
+# revokes it, client or not. Client credentials presented beside it must still
+# authenticate, by the same rules.
 class Oauth::RevocationsController < Oauth::BaseController
   include Oauth::ClientAuthentication
 

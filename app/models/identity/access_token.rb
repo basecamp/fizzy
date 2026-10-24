@@ -23,8 +23,15 @@ class Identity::AccessToken < ApplicationRecord
   # revocation waits rather than deadlocking against the retired-token delete.
   before_destroy :lock_grant, prepend: true
 
-  scope :personal, -> { where oauth_client_id: nil }
-  scope :oauth, -> { where.not oauth_client_id: nil }
+  # A personal access token is issued by the personal access client
+  # (Oauth::Client::PERSONAL_ACCESS_CLIENT_ID). Ones made before that client
+  # existed, and ones production code that predates it still makes, have no
+  # client, and are just as personal. Every rule that sets personal tokens
+  # apart (honoring while OAuth is dark, never lapsing, no expiry or refresh
+  # token, revocation by possession, Connected Apps) reads one of these, or
+  # #personal?, so it holds for both forms alike.
+  scope :personal, -> { where(oauth_client_id: nil).or(where(oauth_client_id: Oauth::Client.personal_access.select(:id))) }
+  scope :oauth, -> { where.not(oauth_client_id: nil).where.not(oauth_client_id: Oauth::Client.personal_access.select(:id)) }
   scope :active, -> { where(expires_at: nil).or(where(expires_at: Time.current..)) }
   scope :unlapsed, -> { where(updated_at: REFRESH_IDLE_LIMIT.ago..) }
   scope :lapsed, -> { oauth.where(updated_at: ...REFRESH_IDLE_LIMIT.ago) }
@@ -64,14 +71,14 @@ class Identity::AccessToken < ApplicationRecord
   attribute :raw_refresh_token, :string
 
   before_create :set_token
-  before_create :set_expiry_and_refresh_token, if: :oauth_client_id?
+  before_create :set_expiry_and_refresh_token, if: :oauth?
 
   # Issuing or destroying a grant restarts its client's retention period
   # (Oauth::Client.cleanup). The touch waits until the grant's own transaction
   # commits. A revocation locks the grant, and touching the client in the same
   # transaction would then wait on the client's lock. A replayed code exchange
   # holds that lock while it waits on the grant, so the two would deadlock.
-  after_commit :touch_oauth_client, on: %i[ create destroy ]
+  after_commit :touch_oauth_client, on: %i[ create destroy ], if: :oauth?
 
   # Every way a grant ends destroys it: disconnecting the app, revocation, the
   # idle-lapse sweep, a replayed refresh token or authorization code, and
@@ -83,7 +90,7 @@ class Identity::AccessToken < ApplicationRecord
   #
   # Checked after commit, so when two grants to one client end at once,
   # whichever commits second finds none left.
-  after_destroy_commit :end_app_plumbing, if: :oauth_client_id?
+  after_destroy_commit :end_app_plumbing, if: :oauth?
 
   # Audit events (Oauth::Audit) are reported once the change commits, so an
   # event always describes a grant that was really issued or really ended.
@@ -186,9 +193,24 @@ class Identity::AccessToken < ApplicationRecord
 
   # OAuth tokens are honored only while OAuth acceptance is on (see
   # Oauth::Availability); personal tokens always are. The client is loaded only
-  # when the server is dark and a pilot exemption might apply.
+  # when the server is dark, to tell a personal token from a grant and to see
+  # whether a pilot exemption applies.
   def honored?
-    oauth_client_id.nil? || Oauth::Availability.acceptance_enabled? || Oauth::Availability.acceptance_enabled?(oauth_client&.client_id)
+    oauth_client_id.nil? || Oauth::Availability.acceptance_enabled? || personal? || Oauth::Availability.acceptance_enabled?(oauth_client&.client_id)
+  end
+
+  def personal?
+    oauth_client_id.nil? || oauth_client&.personal_access? || false
+  end
+
+  def oauth?
+    !personal?
+  end
+
+  # The app this token acts through, if it is a grant. A personal access token
+  # acts for its holder alone, so what it sets up is attributed to no app.
+  def connected_app
+    oauth_client if oauth?
   end
 
   def allows?(method)
@@ -204,7 +226,7 @@ class Identity::AccessToken < ApplicationRecord
   end
 
   def lapsed?
-    oauth_client_id? && (updated_at + REFRESH_IDLE_LIMIT).past?
+    oauth? && (updated_at + REFRESH_IDLE_LIMIT).past?
   end
 
   # Ends the grant, recording why and who ended it (see #revocation).
@@ -281,7 +303,7 @@ class Identity::AccessToken < ApplicationRecord
     end
 
     def touch_oauth_client
-      Oauth::Client.where(id: oauth_client_id).touch_all if oauth_client_id?
+      Oauth::Client.where(id: oauth_client_id).touch_all
     end
 
     def lock_grant
@@ -292,9 +314,9 @@ class Identity::AccessToken < ApplicationRecord
     # for production code that reads only plaintext. An explicitly given
     # token is digested like a generated one.
     def set_token
-      self.raw_token ||= token.presence || self.class.generate_token(oauth_client_id? ? :access : :personal)
+      self.raw_token ||= token.presence || self.class.generate_token(personal? ? :personal : :access)
       self.token_digest = TokenDigester.digest(raw_token)
-      self.token = oauth_client_id? ? nil : raw_token
+      self.token = personal? ? raw_token : nil
     end
 
     def set_expiry_and_refresh_token
