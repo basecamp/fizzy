@@ -1,13 +1,23 @@
 # Codes are stateless, so single use is enforced where they are redeemed: each
 # carries a jti that the grant it mints is stamped with (Identity::AccessToken.redeem).
+#
+# A code for another protected resource carries that resource as its audience
+# and the account the person picked at consent (RFC 8707). Both are sealed in
+# the code at consent and copied onto the grant it mints, which keeps them
+# through every rotation: nothing re-reads them from the request or the client.
 module Oauth::AuthorizationCode
   # RFC 7636 §4.1: 43 to 128 unreserved characters.
   VERIFIER = /\A[A-Za-z0-9._~-]{43,128}\z/
-  Details = ::Data.define(:client_id, :identity_id, :code_challenge, :redirect_uri, :scope, :jti)
+  Details = ::Data.define(:client_id, :identity_id, :code_challenge, :redirect_uri, :scope, :jti, :audience, :account_id) do
+    # A code for Fizzy's own API carries neither.
+    def initialize(audience: nil, account_id: nil, **details)
+      super
+    end
+  end
 
   class << self
-    def generate(client_id:, identity_id:, code_challenge:, redirect_uri:, scope:)
-      payload = { client_id:, identity_id:, code_challenge:, redirect_uri:, scope:, jti: SecureRandom.uuid }
+    def generate(client_id:, identity_id:, code_challenge:, redirect_uri:, scope:, audience: nil, account_id: nil)
+      payload = { client_id:, identity_id:, code_challenge:, redirect_uri:, scope:, jti: SecureRandom.uuid, audience:, account_id: }.compact
       encryptor.encrypt_and_sign(payload, expires_in: 60.seconds)
     end
 
@@ -19,7 +29,9 @@ module Oauth::AuthorizationCode
           code_challenge: data["code_challenge"],
           redirect_uri: data["redirect_uri"],
           scope: data["scope"],
-          jti: data["jti"]
+          jti: data["jti"],
+          audience: data["audience"],
+          account_id: data["account_id"]
       end
     rescue ActiveSupport::MessageEncryptor::InvalidMessage, ActiveSupport::MessageVerifier::InvalidSignature
       nil

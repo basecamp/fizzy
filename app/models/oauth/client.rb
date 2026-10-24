@@ -28,6 +28,7 @@ class Oauth::Client < ApplicationRecord
   validates :redirect_uris, presence: true, length: { maximum: MAXIMUM_REDIRECT_URIS }
   validates :token_endpoint_auth_method, inclusion: { in: AUTH_METHODS }
   validate :redirect_uris_are_valid
+  validate :protected_resource_is_valid
 
   # A confidential client's secret is stored as a digest (TokenDigester). The
   # raw secret exists only in memory on the record that generated it, for the
@@ -67,9 +68,9 @@ class Oauth::Client < ApplicationRecord
 
   # Raises ActiveRecord::RecordNotFound if the client has been swept since it
   # was read.
-  def redeem(authorization_code, identity:, permission:)
+  def redeem(authorization_code, identity:, permission:, **attributes)
     with_lock do
-      identity.access_tokens.redeem authorization_code, oauth_client: self, permission: permission
+      identity.access_tokens.redeem authorization_code, oauth_client: self, permission: permission, **attributes
     end
   end
 
@@ -92,6 +93,14 @@ class Oauth::Client < ApplicationRecord
     !dynamically_registered? || loopback_uri?(uri)
   end
 
+  # The protected resource this client fronts, if any: the hosted MCP server's
+  # own client names its resource here, and the delegation exchange admits only
+  # a subject grant whose audience equals it. Only an operator-provisioned
+  # confidential client may front one, since the exchange authenticates it.
+  def fronts?(resource)
+    protected_resource.present? && protected_resource == resource
+  end
+
   def allows_scope?(requested_scope)
     requested = requested_scope.to_s.split
     requested.present? && requested.all? { |s| scopes.include?(s) }
@@ -109,6 +118,18 @@ class Oauth::Client < ApplicationRecord
     def generate_client_secret
       self.raw_client_secret ||= Identity::AccessToken.generate_token(:client_secret)
       self.client_secret_digest = TokenDigester.digest(raw_client_secret)
+    end
+
+    def protected_resource_is_valid
+      if protected_resource.present?
+        if dynamically_registered? || !confidential?
+          errors.add :protected_resource, "may only be set on an operator-provisioned confidential client"
+        end
+
+        if protected_resource.length > 255
+          errors.add :protected_resource, "is too long"
+        end
+      end
     end
 
     def redirect_uris_are_valid
