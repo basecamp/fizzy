@@ -3,12 +3,12 @@
     mysql_app_user_key = "MYSQL_ALTER_USER"
     mysql_app_password_key = "MYSQL_ALTER_PASSWORD"
     max_execution_time_ms = 0 # No limit
-    # INTEGRATION BRANCH ONLY (oauth-integration-2026-10-24), never for main.
+    # INTEGRATION BRANCH ONLY (oauth-integration-2026-10-15), never for main.
     # An ALTER waits for open transactions on its table to finish, and every
-    # later query on that table queues behind it. Give up after 2 s instead, so
+    # later query on that table queues behind it. Give up after 5 s instead, so
     # the queue drains; rerun once the blocking transaction is gone.
-    # See the 2026-10-24 revision of the runbook on #2296.
-    lock_wait_timeout_s = 2
+    # See docs/oauth/integration-migrations.md, "The lock that matters".
+    lock_wait_timeout_s = 5
   else
     mysql_app_user_key = "MYSQL_APP_USER"
     mysql_app_password_key = "MYSQL_APP_PASSWORD"
