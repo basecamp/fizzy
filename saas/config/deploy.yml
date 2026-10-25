@@ -144,10 +144,10 @@ accessories:
 # destination's file.
 <%- if %w[ production staging beta ].include?(ENV["KAMAL_DESTINATION"]) || ENV["KAMAL_DESTINATION"].to_s.match?(/\Abeta\d+\z/) -%>
   fizzy_mcp:
-    # The digest basecamp/fizzy-mcp-server's scripts/build-image.sh printed for v0.1.0, built from the
+    # The digest basecamp/fizzy-mcp-server's scripts/build-image.sh printed for v0.2.0, built from the
     # cosign-verified release archives. Hosts boot exactly this content or nothing; bump it only to
     # another digest that script prints.
-    image: registry.37signals.com/basecamp/fizzy-mcp-server:v0.1.0@sha256:e786ad234c6d74177f8ec71d7bbfbc11193a86060183d8925b1828097b853f0b
+    image: registry.37signals.com/basecamp/fizzy-mcp-server:v0.2.0@sha256:f16aa6bf410c04bb31d4b7f9c02869709caabc3e9cd41de942a08b6c91c4e848
     proxy:
       app_port: 8080
       # A request runs at most 45s (hosted.RequestBudget); the server's write timeout is 60s.

@@ -18,9 +18,10 @@ module Fizzy
     # can be a credential itself (a chat service's incoming webhook URL), are matched whole, so OAuth's
     # public code_challenge and a parameter that merely ends in "url" keep their values. Each pattern also
     # matches a nested key's dotted path ("webhook.url"), which is what it is tested against once any
-    # dotted filter, such as those `encrypts` adds, is present.
+    # dotted filter, such as those `encrypts` adds, is present. `signature` covers a presigned storage URL's
+    # X-Amz-Signature, which makes a redirect's logged location a working link to the file until it expires.
     config.filter_parameters += [
-      *%i[ passw secret token _key crypt salt certificate otp ssn ],
+      *%i[ passw secret token _key crypt salt certificate otp ssn signature ],
       /(?:\A|\.)code\z/i,
       /(?:\A|\.)url\z/
     ]

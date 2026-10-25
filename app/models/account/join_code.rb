@@ -10,9 +10,14 @@ class Account::JoinCode < ApplicationRecord
 
   before_create :generate_code, if: -> { code.blank? }
 
+  # with_lock reloads the row, so a reset that lands between finding this code
+  # and taking the lock shows up as a different code here, and the stale one
+  # is refused rather than redeemed against the reset's fresh usage count.
   def redeem_if(&block)
+    redeemed_code = code
+
     with_lock do
-      increment!(:usage_count) if active? && block.call(account)
+      increment!(:usage_count) if code == redeemed_code && active? && block.call(account)
     end
   end
 

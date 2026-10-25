@@ -56,6 +56,7 @@ class Identity::ReviewerSignInTest < ActiveSupport::TestCase
 
   test "signs the configured identity out everywhere, and no one else" do
     @identity.sessions.create!
+    @identity.transfer_id
     @identity.access_tokens.create!(description: "Reviewer", permission: :read)
     other_tokens = identities(:jason).access_tokens.count
     other_sessions = identities(:jason).sessions.count
@@ -65,8 +66,37 @@ class Identity::ReviewerSignInTest < ActiveSupport::TestCase
     assert_empty @identity.sessions.reload
     assert_empty @identity.access_tokens.reload
     assert_empty @identity.passkeys.reload
+    assert_empty @identity.transfers.reload
     assert_equal other_tokens, identities(:jason).access_tokens.count
     assert_equal other_sessions, identities(:jason).sessions.count
+  end
+
+  test "signing out resets the join codes of the reviewer's accounts, and no others" do
+    reviewer_codes = @identity.accounts.map { |account| account.join_code.code }
+    other = Account::JoinCode.where.not(account: @identity.accounts).first
+    other_code = other&.code
+
+    Identity::ReviewerSignIn.sign_out_everywhere
+
+    assert_empty @identity.accounts.map { |account| account.join_code.reload.code } & reviewer_codes
+    assert_equal other_code, other&.reload&.code
+  end
+
+  test "lists the active members of the reviewer's accounts, including one who joined during a review" do
+    account = @identity.accounts.first
+    joiner = account.users.create!(name: "Code holder", identity: Identity.create!(email_address: "code-holder@example.com"), role: :member)
+
+    members = Identity::ReviewerSignIn.members_of_reviewer_accounts
+
+    assert_equal @identity.accounts.sort_by(&:id), members.keys.sort_by(&:id)
+    assert_includes members[account], joiner
+    assert members.values.flatten.all?(&:active?)
+  end
+
+  test "lists no members when unconfigured" do
+    configure email_address: nil, code_digest: nil
+
+    assert_equal({}, Identity::ReviewerSignIn.members_of_reviewer_accounts)
   end
 
   test "signing out still works after the digest is cleared" do
