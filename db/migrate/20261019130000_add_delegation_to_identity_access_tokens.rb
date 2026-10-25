@@ -5,8 +5,11 @@
 #
 # A nullable column and its index, no foreign key: the add is INSTANT, the
 # index INPLACE, LOCK=NONE.
+#
+# Each step is skipped when it's already done, so a run that stopped partway
+# (MySQL commits each DDL statement on its own) can simply be run again.
 class AddDelegationToIdentityAccessTokens < ActiveRecord::Migration[8.2]
   def change
-    add_reference :identity_access_tokens, :delegated_from, type: :uuid, foreign_key: false
+    add_reference :identity_access_tokens, :delegated_from, type: :uuid, foreign_key: false, if_not_exists: true
   end
 end

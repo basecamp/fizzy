@@ -11,11 +11,14 @@
 #
 # Nullable columns only, and no foreign keys: every add is INSTANT, and the
 # index is INPLACE, LOCK=NONE.
+#
+# Each step is skipped when it's already done, so a run that stopped partway
+# (MySQL commits each DDL statement on its own) can simply be run again.
 class AddOauthAudienceAndAccountBinding < ActiveRecord::Migration[8.2]
   def change
-    add_column :identity_access_tokens, :audience, :string, limit: 255
-    add_reference :identity_access_tokens, :account, type: :uuid, foreign_key: false
+    add_column :identity_access_tokens, :audience, :string, limit: 255, if_not_exists: true
+    add_reference :identity_access_tokens, :account, type: :uuid, foreign_key: false, if_not_exists: true
 
-    add_column :oauth_clients, :protected_resource, :string, limit: 255
+    add_column :oauth_clients, :protected_resource, :string, limit: 255, if_not_exists: true
   end
 end
