@@ -32,10 +32,12 @@ class Oauth::TokensController < Oauth::BaseController
     before_action :validate_pkce
     before_action :validate_redirect_uri
     before_action :set_identity
+    before_action :require_admitted_identity
     before_action :validate_code_resource
     before_action :validate_bound_account
   end
 
+  before_action :require_admitted_grant_owner, unless: :authorization_code_grant?
   before_action :validate_refresh_resource, unless: -> { authorization_code_grant? || unretryable_replay? }
 
   # A replay that can't be a retry is answered before any scope is weighed:
@@ -129,6 +131,20 @@ class Oauth::TokensController < Oauth::BaseController
     def set_identity
       unless @identity = Identity.find_by(id: @auth_code.identity_id)
         oauth_error "invalid_grant", "Identity not found"
+      end
+    end
+
+    # While OAuth is staff only, a code or refresh token mints nothing for
+    # someone who isn't staff, even one issued while they were.
+    def require_admitted_identity
+      unless Oauth::Availability.admits?(@identity)
+        oauth_error "invalid_grant", "OAuth apps are limited to 37signals staff for now"
+      end
+    end
+
+    def require_admitted_grant_owner
+      unless @access_token.oauth_client_id.nil? || Oauth::Availability.admits?(@access_token.identity)
+        oauth_error "invalid_grant", "OAuth apps are limited to 37signals staff for now"
       end
     end
 

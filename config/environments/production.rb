@@ -128,6 +128,9 @@ Rails.application.configure do
   config.x.oauth.acceptance_enabled = ENV["OAUTH_ACCEPTANCE_ENABLED"] == "true"
   config.x.oauth.issuance_enabled = ENV["OAUTH_ISSUANCE_ENABLED"] != "false"
   config.x.oauth.pilot_client_ids = ENV.fetch("OAUTH_PILOT_CLIENT_IDS", "").split(",").map(&:strip).compact_blank
+  # OAUTH_STAFF_ONLY=true limits OAuth to 37signals staff, whichever client
+  # asks; personal access tokens are unaffected (Oauth::Availability).
+  config.x.oauth.staff_only = ENV["OAUTH_STAFF_ONLY"] == "true"
 
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
