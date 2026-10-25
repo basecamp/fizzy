@@ -4,9 +4,10 @@ class Oauth::TokensController < Oauth::BaseController
   allow_unauthenticated_access
   skip_forgery_protection
 
-  rate_limit to: 20, within: 1.minute, only: :create, with: :oauth_rate_limit_exceeded
-
+  # Availability first: rate_limit is a before_action too, so a dark endpoint
+  # that counted requests first would answer 429 to the eleventh, not 404.
   before_action :require_issuance_enabled
+  rate_limit to: 20, within: 1.minute, only: :create, with: :oauth_rate_limit_exceeded
   before_action :require_single_valued_parameters
   before_action :validate_grant_type
 
