@@ -26,6 +26,30 @@ class OauthDcrRedirectAllowlistTest < ActionDispatch::IntegrationTest
     end
   end
 
+  # Consent names a self-registered app by where its access returns, so a
+  # callback on a host we run would read as ours. The allowlist names only
+  # vendor hosts (production's, from saas/config/deploy.yml), so ours are
+  # refused, in any case or subdomain.
+  test "registration refuses https callbacks on hosts 37signals runs" do
+    with_dcr_allowed_https_hosts "claude.ai", "claude.com", "chatgpt.com", "www.cursor.com", "grok.com" do
+      %w[
+        https://app.fizzy.do/callback
+        https://FIZZY.do/callback
+        https://3.basecamp.com/callback
+        https://basecamp.com/callback
+        https://launchpad.37signals.com/callback
+        https://app.hey.com/callback
+      ].each do |uri|
+        assert_no_difference "Oauth::Client.count" do
+          register uri
+        end
+
+        assert_response :bad_request, uri
+        assert_equal "invalid_redirect_uri", response.parsed_body["error"], uri
+      end
+    end
+  end
+
   test "with no allowed hosts, registration takes loopback and app schemes but no https" do
     with_dcr_allowed_https_hosts do
       register "https://claude.ai/api/mcp/auth_callback"

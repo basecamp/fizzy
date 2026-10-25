@@ -166,6 +166,14 @@ To turn it on, set `OAUTH_ACCEPTANCE_ENABLED=true`.
 
 If you need to stop new connections in an emergency, also set `OAUTH_ISSUANCE_ENABLED=false`: nothing new can connect and no token is refreshed, while access tokens already issued keep working until they expire, an hour after issue. People can always disconnect apps from their profile, whichever way these are set.
 
+Apps that register themselves (dynamic client registration, which Cursor, Claude Desktop and most MCP clients use) may send people back only to a callback Fizzy accepts:
+
+- a callback on the person's own device: `http://127.0.0.1`, `http://[::1]` or `http://localhost`, on any port;
+- the `cursor://` and `claude://` desktop app schemes;
+- an `https` callback on a host listed in `OAUTH_DCR_ALLOWED_HTTPS_HOSTS`, separated by spaces or commas, for example `OAUTH_DCR_ALLOWED_HTTPS_HOSTS="claude.ai claude.com chatgpt.com www.cursor.com grok.com"`. Each entry matches that exact host only, not its subdomains.
+
+`OAUTH_DCR_ALLOWED_HTTPS_HOSTS` is empty unless you set it, so web-based clients such as claude.ai and ChatGPT can't register until you list their callback hosts. Apps registered before you change the list keep their callbacks; the list is checked only at registration.
+
 ## Importing an existing Fizzy account
 
 You can move an account between Fizzy instances by exporting it on the old instance and uploading the export zip to the new one during signup.
