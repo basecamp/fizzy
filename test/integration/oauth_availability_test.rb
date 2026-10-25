@@ -47,6 +47,18 @@ class OauthAvailabilityTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
+  test "a dark server answers 404 even past the rate limit" do
+    ActiveSupport::Cache::NullStore.any_instance.stubs(:increment).returns(1_000)
+
+    with_oauth_availability acceptance: false do
+      untenanted { post oauth_clients_path, params: { redirect_uris: [ "http://127.0.0.1:9999/callback" ] }, as: :json }
+      assert_response :not_found
+
+      untenanted { post oauth_token_path, params: { grant_type: "authorization_code", code: "x" } }
+      assert_response :not_found
+    end
+  end
+
   test "naming a pilot client does not open registration on a dark server" do
     with_oauth_availability acceptance: false, issuance: false, pilot_client_ids: [ oauth_clients(:mcp_client).client_id ] do
       assert_no_difference "Oauth::Client.count" do
