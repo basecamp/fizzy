@@ -8,7 +8,7 @@
 # For a containerized dev environment, see Dev Containers: https://guides.rubyonrails.org/getting_started_with_devcontainer.html
 
 # Make sure RUBY_VERSION matches the Ruby version in .ruby-version
-ARG RUBY_VERSION=3.4.8
+ARG RUBY_VERSION=4.0.9
 FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
 
 # Rails app lives here
@@ -16,7 +16,7 @@ WORKDIR /rails
 
 # Install base packages
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl libjemalloc2 libvips sqlite3 libssl-dev && \
+    apt-get install --no-install-recommends -y ca-certificates curl libjemalloc2 libvips sqlite3 libssl-dev && \
     ln -s /usr/lib/$(uname -m)-linux-gnu/libjemalloc.so.2 /usr/local/lib/libjemalloc.so && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
@@ -65,6 +65,14 @@ LABEL org.opencontainers.image.description="${OCI_DESCRIPTION}"
 ARG OCI_SOURCE
 LABEL org.opencontainers.image.source="${OCI_SOURCE}"
 LABEL org.opencontainers.image.licenses="O'Saasy"
+
+# The eMudhra intermediate CAs' private keys leaked in October 2026, and they chain to these two roots.
+# OpenSSL checks no revocation, so Ruby trusts whatever they sign until the roots leave the bundle.
+# ca-certificates is named in an apt-get install above, so a rebuild takes the distro's fixed package
+# rather than the one frozen into the base image. Fail the build if either root is still installed.
+RUN test -e /etc/ssl/certs/ISRG_Root_X1.pem && \
+  test ! -e /etc/ssl/certs/emSign_ECC_Root_CA_-_G3.pem && \
+  test ! -e /etc/ssl/certs/Comodo_AAA_Services_root.pem
 
 # Run and own only the runtime files as a non-root user for security
 RUN groupadd --system --gid 1000 rails && \

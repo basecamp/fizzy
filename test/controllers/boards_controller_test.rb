@@ -36,6 +36,19 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Remodel Punch List", board.name
   end
 
+  test "create with an auto-postpone period" do
+    assert_difference -> { Board.count }, +1 do
+      assert_no_changes -> { entropies("37s_account").reload.auto_postpone_period } do
+        post boards_path, params: { board: { name: "Remodel Punch List", auto_postpone_period_in_days: 7 } }
+      end
+    end
+
+    board = Board.last
+    assert_redirected_to board_path(board)
+    assert_equal 7.days, board.entropy.reload.auto_postpone_period
+    assert_equal board.account, board.entropy.account
+  end
+
   test "edit" do
     get edit_board_path(boards(:writebook))
     assert_response :success
@@ -337,6 +350,16 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
     assert_response :created
     assert_equal board_path(Board.last, format: :json), @response.headers["Location"]
     assert_equal "My new board", @response.parsed_body["name"]
+  end
+
+  test "create as JSON with an auto-postpone period" do
+    assert_difference -> { Board.count }, +1 do
+      post boards_path, params: { board: { name: "My new board", auto_postpone_period_in_days: 7 } }, as: :json
+    end
+
+    assert_response :created
+    assert_equal 7, @response.parsed_body["auto_postpone_period_in_days"]
+    assert_equal 7.days, Board.last.entropy.reload.auto_postpone_period
   end
 
   test "update as JSON" do

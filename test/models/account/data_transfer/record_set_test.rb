@@ -78,6 +78,31 @@ class Account::DataTransfer::RecordSetTest < ActiveSupport::TestCase
     assert_match(/creator .* not a user in the export/i, error.message)
   end
 
+  test "check rejects a webhook that points at an existing board in another account" do
+    victim_board = boards(:writebook)
+    webhook_data = {
+      "id" => ActiveRecord::Type::Uuid.generate,
+      "account_id" => ActiveRecord::Type::Uuid.generate,
+      "board_id" => victim_board.id,
+      "active" => true,
+      "name" => "Imported Webhook",
+      "url" => "https://example.com/webhook",
+      "signing_secret" => SecureRandom.base58(24),
+      "subscribed_actions" => %w[ card_published comment_created ].to_json,
+      "created_at" => Time.current.iso8601,
+      "updated_at" => Time.current.iso8601
+    }
+
+    record_set = Account::DataTransfer::Manifest.new(importing_account).to_enum(:each_record_set).find { it.model == Webhook }
+
+    error = assert_raises(Account::DataTransfer::RecordSet::ConflictError) do
+      record_set.check(from: build_reader(dir: "webhooks", data: webhook_data))
+    end
+
+    assert_match(/references existing board.*#{victim_board.id}/i, error.message)
+    assert_not Webhook.exists?(id: webhook_data["id"])
+  end
+
   test "check rejects a unique key that already exists in the destination database" do
     existing = boards(:writebook).create_publication!
     publication_data = build_publication_data(key: existing.key)

@@ -5,6 +5,8 @@ class Oauth::AuthorizationsController < Oauth::BaseController
   # An S256 challenge is the unpadded base64url SHA-256 of the verifier: 43 characters (RFC 7636 §4.2).
   S256_CODE_CHALLENGE = /\A[A-Za-z0-9_-]{43}\z/
   RETURN_URL_MAXIMUM_LENGTH = 2000
+  # Read to find the client and the redirect target, so refused before either.
+  LOOKUP_PARAMETERS = %w[ client_id redirect_uri ]
 
   # Browsers apply form-action to every hop of a form submission, redirects
   # included, so the app-wide form-action 'self' would block the consent POST's
@@ -16,12 +18,14 @@ class Oauth::AuthorizationsController < Oauth::BaseController
   # Gated ahead of sign-in so a dark server never asks anyone to sign in for
   # it. A denial is never gated: it only tells the client no.
   before_action :require_issuance_enabled, unless: :denial?
+  before_action :require_single_valued_parameters
   before_action :save_oauth_return_url
   before_action :require_authentication
   disallow_oauth_grants
 
   before_action :set_client
   before_action :validate_redirect_uri
+  before_action :validate_single_valued_parameters
   before_action :validate_response_type
   before_action :validate_pkce
   before_action :validate_scope
@@ -128,10 +132,14 @@ class Oauth::AuthorizationsController < Oauth::BaseController
       if params[:redirect_uri].present? && @client&.allows_redirect?(params[:redirect_uri]) && @client.vetted_redirect?(params[:redirect_uri])
         redirect_to error_redirect_uri(error, description), allow_other_host: true
       else
-        @error = error
-        @error_description = description
-        render :error, status: :bad_request
+        render_error error, description
       end
+    end
+
+    def render_error(error, description)
+      @error = error
+      @error_description = description
+      render :error, status: :bad_request
     end
 
     def success_redirect_uri(code)
@@ -167,6 +175,25 @@ class Oauth::AuthorizationsController < Oauth::BaseController
       end
     rescue URI::InvalidURIError
       nil
+    end
+
+    # client_id and redirect_uri are refused before the client is looked up,
+    # and shown here, never redirected: a malformed redirect_uri is exactly the
+    # one that can't be validated.
+    def require_single_valued_parameters
+      if (malformed = malformed_parameter_names & LOOKUP_PARAMETERS).any?
+        render_error "invalid_request", malformed_parameters_description(malformed)
+      end
+    end
+
+    # The rest are refused once the redirect target is known, so they go back
+    # to a vetted client like any other error.
+    def validate_single_valued_parameters
+      malformed = malformed_parameter_names
+
+      if !performed? && malformed.any?
+        redirect_with_error "invalid_request", malformed_parameters_description(malformed)
+      end
     end
 
     def build_redirect_uri(base, **query_params)

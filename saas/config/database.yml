@@ -13,6 +13,23 @@
   mysql_app_password = ENV[mysql_app_password_key]
 
   gem_path = Gem::Specification.find_by_name("fizzy-saas").gem_dir
+
+  # Development and test default to docker-dev's MySQL on 33384, and every
+  # checkout of this repo uses the same database names there. A git worktree
+  # (where .git is a file) defaulting to it would migrate, purge and reload
+  # the main checkout's fizzy_development and fizzy_test, and every other
+  # worktree's. So a worktree names its port. FIZZY_DB_PORT=33384 shares
+  # docker-dev's databases on purpose.
+  local_db_port = ENV.fetch("FIZZY_DB_PORT") do
+    if Rails.env.local? && Rails.root.join(".git").file?
+      raise "FIZZY_DB_PORT is not set in this git worktree (#{Rails.root}). " \
+        "The default, 33384, is docker-dev's MySQL, whose fizzy_development and fizzy_test " \
+        "the main checkout and every other worktree share; db:test:prepare here would reset them. " \
+        "Set FIZZY_DB_PORT to this worktree's own MySQL, or to 33384 to share docker-dev's on purpose."
+    else
+      33384
+    end
+  end
 %>
 
 default: &default
@@ -34,31 +51,31 @@ development:
   primary:
     <<: *default
     database: fizzy_development
-    port: <%= ENV.fetch "FIZZY_DB_PORT", 33384 %>
+    port: <%= local_db_port %>
   replica:
     <<: *default
     database: fizzy_development
-    port: <%= ENV.fetch "FIZZY_DB_PORT", 33384 %>
+    port: <%= local_db_port %>
     replica: true
   cable:
     <<: *default
     database: development_cable
-    port: <%= ENV.fetch "FIZZY_DB_PORT", 33384 %>
+    port: <%= local_db_port %>
     migrations_paths: db/cable_migrate
   cache:
     <<: *default
     database: development_cache
-    port: <%= ENV.fetch "FIZZY_DB_PORT", 33384 %>
+    port: <%= local_db_port %>
     migrations_paths: db/cache_migrate
   queue:
     <<: *default
     database: development_queue
-    port: <%= ENV.fetch "FIZZY_DB_PORT", 33384 %>
+    port: <%= local_db_port %>
     migrations_paths: db/queue_migrate
   saas:
     <<: *default
     database: fizzy_saas_development
-    port: <%= ENV.fetch "FIZZY_DB_PORT", 33384 %>
+    port: <%= local_db_port %>
     migrations_paths: <%= File.join(gem_path, "db", "migrate") %>
     schema_dump: <%= File.join(gem_path, "db", "saas_schema.rb") %>
 
@@ -69,16 +86,16 @@ test:
   primary:
     <<: *default
     database: fizzy_test
-    port: <%= ENV.fetch "FIZZY_DB_PORT", 33384 %>
+    port: <%= local_db_port %>
   replica:
     <<: *default
     database: fizzy_test
-    port: <%= ENV.fetch "FIZZY_DB_PORT", 33384 %>
+    port: <%= local_db_port %>
     replica: true
   saas:
     <<: *default
     database: fizzy_saas_test
-    port: <%= ENV.fetch "FIZZY_DB_PORT", 33384 %>
+    port: <%= local_db_port %>
     migrations_paths: <%= File.join(gem_path, "db", "migrate") %>
     schema_dump: <%= File.join(gem_path, "db", "saas_schema.rb") %>
 

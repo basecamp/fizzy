@@ -68,6 +68,7 @@ env:
     - ACTIVE_STORAGE_ACCESS_KEY_ID
     - ACTIVE_STORAGE_SECRET_ACCESS_KEY
     - QUEENBEE_API_TOKEN
+    - QUEENBEE_API_TOKEN_PREVIOUS
     - QUEENBEE_SECRET
     - SIGNAL_ID_SECRET
     - SENTRY_DSN
@@ -99,3 +100,15 @@ accessories:
         - 443:443
     volumes:
       - load-balancer:/home/kamal-proxy/.config/kamal-proxy
+
+  # Hosted Fizzy MCP (see saas/config/deploy.yml), on the beta's one web host. A beta shares production's
+  # database, so its exchange (once lit) uses production's fizzy-mcp-server client row and secret.
+  fizzy_mcp:
+    host: <%= @web_hosts[0] %>
+    proxy:
+      host: beta<%= @beta_number %>-mcp.fizzy-beta.com
+    env:
+      clear:
+        FIZZY_MCP_RESOURCE_URL: "https://beta<%= @beta_number %>-mcp.fizzy-beta.com/mcp"
+        FIZZY_MCP_AUTHORIZATION_SERVER: "https://beta<%= @beta_number %>.fizzy-beta.com"
+        FIZZY_MCP_ALLOWED_ORIGINS: "https://beta<%= @beta_number %>.fizzy-beta.com"
