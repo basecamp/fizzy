@@ -55,7 +55,7 @@ class OauthConsentScreenTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select ".oauth-access__choice", count: 2
-    assert_select ".oauth-access__choice", text: /Read only.*can't change anything/m
+    assert_select ".oauth-access__choice", text: /Read only.*the people in your accounts\. It can't change anything/m
     assert_select ".oauth-access__choice", text: /Read and write.*delete cards/m
     assert_select ".oauth-access__reach", text: /every account you belong to/
   end

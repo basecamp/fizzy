@@ -15,7 +15,7 @@ module OauthHelper
   ACCESS_LEVELS = {
     "read" => {
       label: "Read only",
-      description: "See your boards, cards, comments and the people in your accounts. It can't change anything."
+      description: "See your boards, cards, comments and the people in your %{accounts}. It can't change anything."
     },
     "read write" => {
       label: "Read and write",
@@ -39,13 +39,13 @@ module OauthHelper
     end
   end
 
-  # nil for a callback that stays on this device: loopback, or an app's own
-  # URL scheme.
+  # Lowercase, as a browser reads it. nil for a callback that stays on this
+  # device: loopback, or an app's own URL scheme.
   def oauth_redirect_host(redirect_uri)
     uri = URI.parse(redirect_uri.to_s)
 
     if uri.host.present? && !Oauth.loopback_host?(uri.host) && uri.scheme.to_s.downcase.in?(%w[ http https ])
-      uri.port == uri.default_port ? uri.host : "#{uri.host}:#{uri.port}"
+      uri.port == uri.default_port ? uri.host.downcase : "#{uri.host.downcase}:#{uri.port}"
     end
   rescue URI::InvalidURIError
     nil
@@ -59,10 +59,15 @@ module OauthHelper
   end
 
   # The access levels a client may be granted, weakest first, each with what
-  # it lets the app do in plain words.
-  def oauth_access_levels(client)
+  # it lets the app do in plain words. A grant reaches every account the
+  # person belongs to, unless it's bound to the one picked at consent.
+  def oauth_access_levels(client, one_account: false)
     levels = client.scopes.include?("write") ? ACCESS_LEVELS.keys : %w[ read ]
-    levels.map { |scope| [ scope, ACCESS_LEVELS.fetch(scope) ] }
+
+    levels.map do |scope|
+      level = ACCESS_LEVELS.fetch(scope)
+      [ scope, level.merge(description: format(level[:description], accounts: one_account ? "account" : "accounts")) ]
+    end
   end
 
   def oauth_access_label(permission)

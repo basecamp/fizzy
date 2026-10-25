@@ -4,7 +4,7 @@
 <fieldset class="oauth-access flex flex-column gap-half">
   <legend class="oauth-access__legend"><strong>Access</strong></legend>
 
-  <% oauth_access_levels(client).each do |value, level| %>
+  <% oauth_access_levels(client, one_account: local_assigns[:one_account]).each do |value, level| %>
     <label class="oauth-access__choice">
       <%= form.radio_button :scope, value, checked: value == scope, class: "oauth-access__radio" %>
       <span class="flex flex-column">

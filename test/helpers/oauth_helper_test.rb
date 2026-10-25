@@ -59,4 +59,15 @@ class OauthHelperTest < ActionView::TestCase
 
     assert_equal %w[ a.example.com b.example.com:8443 ], oauth_client_remote_hosts(client)
   end
+
+  test "read's description names the people in every account, or in the one account a bound grant reaches" do
+    client = oauth_clients(:mcp_client)
+
+    assert_match "the people in your accounts.", oauth_access_levels(client).to_h.fetch("read")[:description]
+    assert_match "the people in your account.", oauth_access_levels(client, one_account: true).to_h.fetch("read")[:description]
+  end
+
+  test "a redirect's host reads in lowercase, as a browser reads it" do
+    assert_equal "connector.example.com:8443", oauth_redirect_host("https://Connector.EXAMPLE.com:8443/cb")
+  end
 end
