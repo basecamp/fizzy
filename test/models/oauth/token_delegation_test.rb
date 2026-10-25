@@ -99,6 +99,15 @@ class Oauth::TokenDelegationTest < ActiveSupport::TestCase
     assert token.honored?
   end
 
+  test "a mint after a refresh rotated the subject token away is refused" do
+    delegation.validate!
+    assert @subject.refresh
+
+    error = assert_raises(Oauth::TokenDelegation::Refusal) { @delegation.mint! }
+    assert_equal "invalid_grant", error.error
+    assert_not @subject.reload.delegated_tokens.exists?
+  end
+
   test "a mint asking for write after a refresh narrowed the grant is refused" do
     delegation(requested_scope: "write").validate!
     @subject.update_columns permission: "read"

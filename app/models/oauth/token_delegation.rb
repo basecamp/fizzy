@@ -107,14 +107,17 @@ class Oauth::TokenDelegation
   # tokens, so an exchange racing a revocation is either refused or inserted
   # first and swept with it. Scope is resolved again too, so a refresh that
   # narrowed the grant meanwhile narrows the token, or refuses a request for
-  # what the grant no longer holds. Nothing takes the two in the other order.
+  # what the grant no longer holds. The subject is found again by the presented
+  # token, not its row: a refresh rotates the token in place, so a token
+  # rotated away meanwhile finds nothing and is refused. Nothing takes the two
+  # locks in the other order.
   def mint!
     Identity::AccessToken.transaction do
       unless Oauth::Client.lock.find_by(id: client.id)&.delegation_client?
         raise Refusal.new("unauthorized_client", "Client not configured for token delegation")
       end
 
-      @subject = Identity::AccessToken.lock.find_by(id: subject.id)
+      @subject = Identity::AccessToken.lock.oauth.find_by_raw_token(subject_token)
       judge_subject
       @permission = resolve_permission
 
