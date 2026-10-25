@@ -213,6 +213,14 @@ class OauthTokenExchangeTest < ActionDispatch::IntegrationTest
     assert_oauth_error "unsupported_grant_type", "Only authorization_code and refresh_token grants are supported"
   end
 
+  test "an exchange that isn't on answers the same past the rate limit" do
+    ActiveSupport::Cache::NullStore.any_instance.stubs(:increment).returns(1_000)
+    Rails.application.config.x.oauth.mcp_resources = []
+
+    exchange
+    assert_oauth_error "unsupported_grant_type", "Only authorization_code and refresh_token grants are supported"
+  end
+
   test "the exchange is dark while issuance is" do
     with_oauth_availability(acceptance: true, issuance: false) do
       exchange

@@ -15,12 +15,15 @@ class Oauth::TokenExchangesController < Oauth::BaseController
   allow_unauthenticated_access
   skip_forgery_protection
 
+  # Availability first: rate_limit is a before_action too, so an exchange that
+  # isn't on would answer 429 past the limit, rather than 404 every time.
+  before_action :require_delegation_enabled
+  before_action :require_issuance_enabled
+
   rate_limit to: 20, within: 1.minute, only: :create, with: :exchange_rate_limit_exceeded, unless: :authenticated_delegation_client?
   rate_limit to: CLIENT_BUDGET, within: 1.minute, only: :create, by: -> { requesting_client.client_id }, name: "client",
     with: :exchange_rate_limit_exceeded, if: :authenticated_delegation_client?
 
-  before_action :require_delegation_enabled
-  before_action :require_issuance_enabled
   before_action :require_single_valued_parameters
   before_action :require_form_body
   before_action :authenticate_client
