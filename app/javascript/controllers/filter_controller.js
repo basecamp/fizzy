@@ -18,7 +18,7 @@ export default class extends Controller {
       }
     })
 
-    this.dispatch("changed")
+    this.dispatch("changed", { detail: { value: this.inputTarget.value } })
   }
 
   clearInput() {

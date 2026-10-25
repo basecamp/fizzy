@@ -27,8 +27,10 @@ Rails.application.routes.draw do
       resource :events
       resources :push_subscriptions
 
-      resources :email_addresses, param: :token do
-        resource :confirmation, module: :email_addresses
+      filter_path_parameters :token, :email_address_token do
+        resources :email_addresses, param: :token do
+          resource :confirmation, module: :email_addresses
+        end
       end
 
       resources :data_exports, only: [ :create, :show ]
@@ -156,10 +158,14 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :qr_codes
+  filter_path_parameters :id do
+    resources :qr_codes
+  end
 
-  get "join/:code", to: "join_codes#new", as: :join
-  post "join/:code", to: "join_codes#create"
+  filter_path_parameters :code do
+    get "join/:code", to: "join_codes#new", as: :join
+    post "join/:code", to: "join_codes#create"
+  end
 
   namespace :users do
     resources :joins
@@ -168,7 +174,9 @@ Rails.application.routes.draw do
 
   resource :session do
     scope module: :sessions do
-      resources :transfers
+      filter_path_parameters :id do
+        resources :transfers
+      end
       resource :magic_link
       resource :menu
       resource :passkey, only: :create
@@ -190,7 +198,11 @@ Rails.application.routes.draw do
   namespace :my do
     resource :passkey_challenge, only: :create
     resource :identity, only: :show
-    resources :access_tokens, except: %i[ show edit update ]
+    # show, which revealed a new token by its signed id, is gone; the filter
+    # stays so an old reveal link in a log or Referer still reads [FILTERED].
+    filter_path_parameters :id do
+      resources :access_tokens, except: %i[ show edit update ]
+    end
     resources :connected_apps, only: %i[ index destroy ]
     resources :passkeys, except: %i[ show new ]
     resources :pins
@@ -209,19 +221,22 @@ Rails.application.routes.draw do
     end
   end
 
-  namespace :public do
-    resources :boards do
-      scope module: :boards do
-        namespace :columns do
-          resource :not_now, only: :show
-          resource :stream, only: :show
-          resource :closed, only: :show
+  # A public board is found by its publication key, in :id or :board_id.
+  filter_path_parameters :id, :board_id do
+    namespace :public do
+      resources :boards do
+        scope module: :boards do
+          namespace :columns do
+            resource :not_now, only: :show
+            resource :stream, only: :show
+            resource :closed, only: :show
+          end
+
+          resources :columns, only: :show
         end
 
-        resources :columns, only: :show
+        resources :cards, only: :show
       end
-
-      resources :cards, only: :show
     end
   end
 
@@ -257,11 +272,18 @@ Rails.application.routes.draw do
   # Support for legacy URLs
   get "/collections/:collection_id/cards/:id", to: redirect { |params, request| "#{request.script_name}/cards/#{params[:id]}" }
   get "/collections/:id", to: redirect { |params, request| "#{request.script_name}/boards/#{params[:id]}" }
-  get "/public/collections/:id", to: redirect { |params, request| "#{request.script_name}/public/boards/#{params[:id]}" }
+  filter_path_parameters :id do
+    get "/public/collections/:id", to: redirect { |params, request| "#{request.script_name}/public/boards/#{params[:id]}" }
+  end
 
   get "up", to: "rails/health#show", as: :rails_health_check
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   get "service-worker" => "pwa#service_worker"
+
+  # Trusted Types report-only pilot (config/initializers/content_security_policy.rb).
+  # Only the CSP report type browsers send: a body Rails parses into params
+  # would be logged before the controller could drop its content sample.
+  resources :trusted_types_reports, only: :create, constraints: ->(request) { request.media_type == "application/csp-report" }
 
   # Mobile clients
   get "client_configurations/(:platform)_v(:version)" => "client_configurations#show",

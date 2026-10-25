@@ -3,7 +3,7 @@ module Board::Entropic
 
   included do
     delegate :auto_postpone_period, :auto_postpone_period_in_days, to: :entropy
-    has_one :entropy, as: :container, dependent: :destroy
+    has_one :entropy, as: :container, dependent: :destroy, autosave: true
   end
 
   def entropy
@@ -11,8 +11,7 @@ module Board::Entropic
   end
 
   def auto_postpone_period=(new_value)
-    entropy ||= association(:entropy).reader || self.build_entropy
-    entropy.update! auto_postpone_period: new_value
+    (association(:entropy).reader || build_entropy).auto_postpone_period = new_value
   end
 
   def auto_postpone_period_in_days=(value)

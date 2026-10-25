@@ -58,4 +58,15 @@ class Signup::AccountNameGeneratorTest < ActiveSupport::TestCase
     account_name = @generator.generate
     assert_equal "Newart's 13th Fizzy", account_name
   end
+
+  test "generate treats regex metacharacters in the name literally" do
+    account = Account.create!(external_account_id: "ab", name: "AB's Fizzy")
+    Current.without_account do
+      @identity.users.create!(account: account, name: @name)
+      @identity.reload
+    end
+
+    generator = Signup::AccountNameGenerator.new(identity: @identity, name: "A. Smith")
+    assert_equal "A.'s Fizzy", generator.generate
+  end
 end

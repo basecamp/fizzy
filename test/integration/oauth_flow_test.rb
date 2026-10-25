@@ -95,9 +95,9 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
 
     # Per RFC 6749, redirect to client with error in query params
     assert_response :redirect
-    redirect_params = CGI.parse(URI.parse(response.location).query)
-    assert_equal "invalid_request", redirect_params["error"].first
-    assert_match "code_challenge", redirect_params["error_description"].first
+    redirect_params = URI.decode_www_form(URI.parse(response.location).query).to_h
+    assert_equal "invalid_request", redirect_params["error"]
+    assert_match "code_challenge", redirect_params["error_description"]
   end
 
   test "authorization errors for a self-registered https client render here instead of redirecting" do
@@ -223,9 +223,9 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_equal "127.0.0.1", redirect_uri.host
     assert_equal "/callback", redirect_uri.path
 
-    params = CGI.parse(redirect_uri.query)
-    assert_not_nil params["code"]&.first
-    assert_equal "xyz123", params["state"]&.first
+    params = URI.decode_www_form(redirect_uri.query).to_h
+    assert_not_nil params["code"]
+    assert_equal "xyz123", params["state"]
   end
 
 
@@ -259,8 +259,8 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :redirect
-    params = CGI.parse(URI.parse(response.location).query)
-    assert_not_nil params["code"]&.first
+    params = URI.decode_www_form(URI.parse(response.location).query).to_h
+    assert_not_nil params["code"]
     assert_not params.key?("state")
   end
 
@@ -287,15 +287,15 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :redirect
-    assert_equal "s" * 2048, CGI.parse(URI.parse(response.location).query)["state"].first
+    assert_equal "s" * 2048, URI.decode_www_form(URI.parse(response.location).query).to_h["state"]
 
     untenanted do
       get new_oauth_authorization_path, params: authorization.merge(state: "s" * 2049)
     end
 
     assert_response :redirect
-    params = CGI.parse(URI.parse(response.location).query)
-    assert_equal "invalid_request", params["error"].first
+    params = URI.decode_www_form(URI.parse(response.location).query).to_h
+    assert_equal "invalid_request", params["error"]
     assert_not params.key?("code")
   end
 
@@ -335,8 +335,8 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
       end
 
       assert_response :redirect
-      params = CGI.parse(URI.parse(response.location).query)
-      assert_equal "invalid_request", params["error"].first, code_challenge.inspect
+      params = URI.decode_www_form(URI.parse(response.location).query).to_h
+      assert_equal "invalid_request", params["error"], code_challenge.inspect
       assert_not params.key?("code")
     end
   end
@@ -358,7 +358,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :redirect
-    assert_equal "invalid_request", CGI.parse(URI.parse(response.location).query)["error"].first
+    assert_equal "invalid_request", URI.decode_www_form(URI.parse(response.location).query).to_h["error"]
   end
 
   test "authorization preselects Read + Write when the client requests read write" do
@@ -1938,10 +1938,10 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
 
     # Extract code from redirect
     redirect_uri = URI.parse(response.location)
-    params = CGI.parse(redirect_uri.query)
-    code = params["code"].first
+    params = URI.decode_www_form(redirect_uri.query).to_h
+    code = params["code"]
     assert_not_nil code
-    assert_equal "test_state", params["state"].first
+    assert_equal "test_state", params["state"]
 
     # Step 3: Exchange code for token
     assert_difference "Identity::AccessToken.count", 1 do

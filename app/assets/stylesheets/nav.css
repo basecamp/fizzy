@@ -228,6 +228,30 @@
     }
   }
 
+  .spin {
+    animation: spin 1.5s linear infinite;
+  }
+
+  @keyframes spin {
+    to { rotate: 1turn; }
+  }
+
+  .extras__flair {
+    animation: flash 0.99s ease-in-out infinite;
+    font-size: 30vmin;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    pointer-events: none;
+    position: fixed;
+    z-index: 9999;
+  }
+
+  @keyframes flash {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
   .nav__footer {
     background-color: var(--color-canvas);
     border-block-start: 1px solid var(--color-ink-lighter);

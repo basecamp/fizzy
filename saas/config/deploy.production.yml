@@ -49,6 +49,7 @@ env:
     - ACTIVE_STORAGE_ACCESS_KEY_ID
     - ACTIVE_STORAGE_SECRET_ACCESS_KEY
     - QUEENBEE_API_TOKEN
+    - QUEENBEE_API_TOKEN_PREVIOUS
     - QUEENBEE_SECRET
     - SIGNAL_ID_SECRET
     - SENTRY_DSN
@@ -62,6 +63,9 @@ env:
     - APNS_KEY_ID
     - APNS_ENCRYPTION_KEY_B64
     - FCM_ENCRYPTION_KEY_B64
+    # Directory reviewer sign-in (Identity::ReviewerSignIn). The email is a secret only to keep it out of this public repo.
+    - FIZZY_REVIEWER_SIGN_IN_EMAIL
+    - FIZZY_REVIEWER_SIGN_IN_CODE_DIGEST
   tags:
     sc_chi:
       MYSQL_SOLID_CACHE_HOST: fizzy-solidcache-db-01.sc-chi-int.37signals.com
@@ -98,3 +102,24 @@ accessories:
       mount: type=volume,src=certificates,dst=/certificates,volume-driver=local,volume-opt=type=nfs,volume-opt=device=:/fizzy-production-certificates,"volume-opt=o=addr=purestorage.sc-chi-int.37signals.com,nfsvers=3,rw,noatime,nconnect=8,soft,timeo=30,retrans=2"
     volumes:
       - load-balancer:/home/kamal-proxy/.config/kamal-proxy
+
+  # Hosted Fizzy MCP (see saas/config/deploy.yml). On iad's web hosts only, to start: the delegation
+  # exchange writes its token on the iad primary and the first API call reads it straight back, and a
+  # bearer request carries no session for TransactionPinning to wait on (hosted plan, C, read-after-mint).
+  fizzy_mcp:
+    hosts:
+      - fizzy-app-101.df-iad-int.37signals.com
+      - fizzy-app-102.df-iad-int.37signals.com
+    proxy:
+      host: mcp.fizzy.do
+    env:
+      clear:
+        FIZZY_MCP_RESOURCE_URL: "https://mcp.fizzy.do/mcp"
+        # No trailing slash: Fizzy's metadata issuer is the bare origin (#3192), and the server checks.
+        FIZZY_MCP_AUTHORIZATION_SERVER: "https://app.fizzy.do"
+        FIZZY_MCP_ALLOWED_ORIGINS: "https://app.fizzy.do"
+    # TODO: before lighting the exchange, send app.fizzy.do to iad's load balancers so the exchange and
+    # every API call stay in iad (iad's LB has write targets only: saas/script/configure-lb-production.sh).
+    # options:
+    #   add-host:
+    #     - "app.fizzy.do:<fizzy-lb-101 address>"

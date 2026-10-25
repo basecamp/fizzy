@@ -186,8 +186,8 @@ class Webhook::DeliveryTest < ActiveSupport::TestCase
 
     request_stub = stub_request(:post, webhook.url)
       .with do |request|
-        body = CGI.parse(request.body)
-        body.key?("content") && body["content"].first.present? &&
+        body = URI.decode_www_form(request.body).to_h
+        body.key?("content") && body["content"].present? &&
         request.headers["Content-Type"] == "application/x-www-form-urlencoded"
       end
       .to_return(status: 200)
@@ -291,7 +291,7 @@ class Webhook::DeliveryTest < ActiveSupport::TestCase
     Current.session = sessions(:david)
 
     request_stub = stub_request(:post, webhook.url)
-      .with { |request| CGI.parse(request.body)["content"].first.include?("David added") }
+      .with { |request| URI.decode_www_form(request.body).to_h["content"].include?("David added") }
       .to_return(status: 200)
 
     delivery.deliver
@@ -316,7 +316,7 @@ class Webhook::DeliveryTest < ActiveSupport::TestCase
 
     delivery.deliver
 
-    content = CGI.parse(captured_body)["content"].first
+    content = URI.decode_www_form(captured_body).to_h["content"]
 
     expected = <<~HTML.strip
       David added &quot;Tom &amp; Jerry&#39;s &lt;Great&gt; &quot;Adventure&quot;&quot;
@@ -407,7 +407,7 @@ class Webhook::DeliveryTest < ActiveSupport::TestCase
     Current.session = sessions(:kevin)
 
     request_stub = stub_request(:post, webhook.url)
-      .with { |request| CGI.parse(request.body)["content"].first.include?("David added") }
+      .with { |request| URI.decode_www_form(request.body).to_h["content"].include?("David added") }
       .to_return(status: 200)
 
     delivery.deliver
