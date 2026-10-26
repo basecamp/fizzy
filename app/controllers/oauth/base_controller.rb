@@ -168,10 +168,13 @@ class Oauth::BaseController < ApplicationController
     # them in Yabeda). The client is named by its type alone: a self-registered
     # client's id is anyone's to mint, so it can't be a metric label.
     def oauth_error(error, description = nil, status: :bad_request)
+      instrument_oauth_error error
+      render_oauth_error error, description, status: status
+    end
+
+    def instrument_oauth_error(error)
       ActiveSupport::Notifications.instrument "error.oauth",
         endpoint: controller_name, error_code: error, client_type: oauth_error_client&.client_type || "unknown"
-
-      render_oauth_error error, description, status: status
     end
 
     # A throttled request is counted as a rate-limit hit and not as an error,

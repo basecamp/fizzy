@@ -70,8 +70,32 @@ module OauthHelper
     end
   end
 
+  def oauth_strongest_permission(tokens)
+    if tokens.any?(&:write?)
+      "write"
+    elsif tokens.any?
+      "read"
+    end
+  end
+
   def oauth_access_label(permission)
     ACCESS_LEVELS.fetch(Oauth.canonical_scope(permission))[:label]
+  end
+
+  # What an app's grants together let it do, as [ permission, accounts ]
+  # pairs, accounts nil for every account the person belongs to. An unbound
+  # grant reaches every account; a bound one adds only its own, and only
+  # where it grants more, so no pair claims more than some grant gives.
+  def oauth_connected_app_reach(tokens)
+    unbound, bound = tokens.partition { |token| !token.account_bound? }
+    everywhere = oauth_strongest_permission(unbound)
+
+    reach = bound.group_by(&:account).filter_map do |account, account_tokens|
+      permission = oauth_strongest_permission(account_tokens)
+      [ permission, account ] if everywhere.nil? || (permission == "write" && everywhere == "read")
+    end
+
+    [ (everywhere && [ everywhere, nil ]), *reach.group_by(&:first).map { |permission, pairs| [ permission, pairs.map(&:last) ] } ].compact
   end
 
   def connected_app_groups(connected_apps)

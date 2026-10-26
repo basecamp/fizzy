@@ -1,8 +1,4 @@
 <% remote_hosts = oauth_client_remote_hosts(client) %>
-<% permission = tokens.any?(&:write?) ? "write" : "read" %>
-<%# Bound grants reach only the accounts picked at their consent; one unbound
-    grant reaches them all %>
-<% bound_accounts = tokens.all?(&:account_bound?) ? tokens.filter_map(&:account).uniq : [] %>
 
 <article class="connected-app" id="<%= dom_id(client, :connected_app) %>">
   <div class="connected-app__details flex flex-column">
@@ -24,9 +20,11 @@
       <p class="txt-x-small txt-subtle margin-none">Made by 37signals</p>
     <% end %>
 
-    <p class="connected-app__access txt-small margin-none">
-      <strong><%= oauth_access_label(permission) %></strong>, <%= bound_accounts.any? ? "in #{bound_accounts.map(&:name).to_sentence}" : "in every account you belong to" %>
-    </p>
+    <% oauth_connected_app_reach(tokens).each do |permission, accounts| %>
+      <p class="connected-app__access txt-small margin-none">
+        <strong><%= oauth_access_label(permission) %></strong>, <%= accounts ? "in #{accounts.map(&:name).to_sentence}" : "in every account you belong to" %>
+      </p>
+    <% end %>
 
     <%# updated_at moves each time the app renews its access %>
     <p class="txt-x-small txt-subtle margin-none">

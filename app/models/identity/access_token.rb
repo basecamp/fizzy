@@ -205,7 +205,8 @@ class Identity::AccessToken < ApplicationRecord
       end
     rescue ActiveRecord::RecordNotUnique
       replayed = where(authorization_code_jti: authorization_code.jti).each { |grant| grant.revoke(reason: "code_replayed", actor: "system") }
-      Oauth::Audit.record "code.replayed", grant: replayed.first, client: attributes[:oauth_client], actor: "client"
+      # The code names its identity even when no grant is left to.
+      Oauth::Audit.record "code.replayed", grant: replayed.first, client: attributes[:oauth_client], identity_id: authorization_code.identity_id, actor: "client"
       remember_redeemed authorization_code
       nil
     end
@@ -363,10 +364,11 @@ class Identity::AccessToken < ApplicationRecord
     # caller that refreshes inside a transaction of its own and rolls it back
     # reports no refresh.
     if rotated_now
+      rotated_permission = self.permission
       ActiveRecord.after_all_transactions_commit do
-        Oauth::Audit.record "token.refreshed", grant: self, actor: "client", grant_type: "refresh_token", permission: self.permission
+        Oauth::Audit.record "token.refreshed", grant: self, actor: "client", grant_type: "refresh_token", permission: rotated_permission
         # A refresh may only narrow (RFC 6749 §6), so a change is a narrowing.
-        Oauth::Audit.record "grant.narrowed", grant: self, actor: "client", permission: self.permission if narrowed
+        Oauth::Audit.record "grant.narrowed", grant: self, actor: "client", permission: rotated_permission if narrowed
       end
     end
 

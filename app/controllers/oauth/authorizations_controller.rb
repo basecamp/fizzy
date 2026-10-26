@@ -266,7 +266,10 @@ class Oauth::AuthorizationsController < Oauth::BaseController
       end
     end
 
+    # Shown here rather than sent back to the app, and counted like any OAuth
+    # error the app would have been sent.
     def render_error(error, description)
+      instrument_oauth_error error
       @error = error
       @error_description = description
       render :error, status: :bad_request

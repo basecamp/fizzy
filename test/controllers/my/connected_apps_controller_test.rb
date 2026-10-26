@@ -30,6 +30,21 @@ class My::ConnectedAppsControllerTest < ActionDispatch::IntegrationTest
     Rails.application.config.x.oauth.mcp_resources = saved
   end
 
+  test "an app's reach pairs each permission with the accounts it holds it in" do
+    resource = "https://mcp.example.com/mcp"
+    saved, Rails.application.config.x.oauth.mcp_resources = Rails.application.config.x.oauth.mcp_resources, [ resource ]
+    @identity.access_tokens.create! oauth_client: oauth_clients(:mcp_client), permission: :write, audience: resource, account: accounts("37s")
+    @identity.access_tokens.create! oauth_client: oauth_clients(:mcp_client), permission: :read, audience: resource, account: accounts(:initech)
+
+    get my_connected_apps_path
+
+    assert_select ".connected-app__access", count: 2
+    assert_select ".connected-app__access", text: /Read and write.*in #{accounts("37s").name}\z/m
+    assert_select ".connected-app__access", text: /\ARead only.*in #{accounts(:initech).name}\z/m
+  ensure
+    Rails.application.config.x.oauth.mcp_resources = saved
+  end
+
   test "index and destroy work untenanted, so an identity without an account can still disconnect apps" do
     client = oauth_clients(:mcp_client)
     @identity.access_tokens.create!(oauth_client: client, permission: :read)
