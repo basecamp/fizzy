@@ -141,6 +141,17 @@ class OauthDelegateResourcesTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "delivering push looks up no identity while OAuth isn't staff only" do
+    subscribe_push bearer(@grant)
+    user = User.find(users(:kevin).id)
+
+    with_oauth_availability staff_only: false do
+      Push::Subscription.deliverable_to(user).load
+    end
+
+    assert_not user.association(:identity).loaded?
+  end
+
   test "an app's push subscription stops delivering when the user leaves the account" do
     subscribe_push bearer(@grant)
     users(:kevin).push_subscriptions.create!(push_params(BROWSER))

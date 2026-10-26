@@ -44,7 +44,9 @@ class Oauth::TokensController < Oauth::BaseController
     before_action :validate_bound_account
   end
 
-  before_action :require_admitted_grant_owner, unless: :authorization_code_grant?
+  # A replay that can't be a retry earns its revocation whoever owns the grant,
+  # so it isn't stopped here: it issues nothing either way.
+  before_action :require_admitted_grant_owner, unless: -> { authorization_code_grant? || unretryable_replay? }
   before_action :validate_refresh_resource, unless: -> { authorization_code_grant? || unretryable_replay? }
   before_action :validate_refresh_bound_account, unless: -> { authorization_code_grant? || unretryable_replay? }
 

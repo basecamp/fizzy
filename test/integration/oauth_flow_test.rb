@@ -62,6 +62,23 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_select "code", text: "invalid_request"
   end
 
+  test "authorization answers an invalid client_id as JSON when JSON is asked for" do
+    sign_in_as :david
+
+    untenanted do
+      get new_oauth_authorization_path(format: :json), params: {
+        client_id: "nonexistent",
+        redirect_uri: "http://127.0.0.1/cb",
+        response_type: "code",
+        code_challenge: "test",
+        code_challenge_method: "S256"
+      }
+    end
+
+    assert_response :bad_request
+    assert_equal "invalid_request", response.parsed_body["error"]
+  end
+
   test "authorization rejects mismatched redirect_uri" do
     sign_in_as :david
     client = oauth_clients(:mcp_client)

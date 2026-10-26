@@ -632,6 +632,7 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     assert_equal :web, oauth_clients(:confidential_client).connection_kind
     assert_equal :local, Oauth::Client.new(redirect_uris: %w[ com.example.app:/callback http://[::1]/cb ]).connection_kind
     assert_equal :web, Oauth::Client.new(redirect_uris: %w[ http://127.0.0.1/cb https://example.com/cb ]).connection_kind
+    assert_equal :local, Oauth::Client.new(redirect_uris: %w[ https://127.0.0.1/cb https://localhost:8443/cb ]).connection_kind
   end
 
   private

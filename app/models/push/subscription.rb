@@ -34,7 +34,7 @@ class Push::Subscription < ApplicationRecord
     grants = Identity::AccessToken.grants.unlapsed.where(identity_id: user.identity_id, account_id: [ nil, user.account_id ], oauth_client: Oauth::Availability.accepted_clients)
 
     where(oauth_client_id: nil).or \
-      where(oauth_client_id: (Oauth::Availability.admits?(user.identity) ? grants : grants.none).select(:oauth_client_id))
+      where(oauth_client_id: (!Oauth::Availability.staff_only? || Oauth::Availability.admits?(user.identity) ? grants : grants.none).select(:oauth_client_id))
   end
 
   validates :endpoint, presence: true
