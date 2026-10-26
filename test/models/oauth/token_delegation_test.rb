@@ -129,6 +129,23 @@ class Oauth::TokenDelegationTest < ActiveSupport::TestCase
     assert_equal "invalid_scope", error.error
   end
 
+  test "a mint asking for write after the client was narrowed to read is refused" do
+    delegation(requested_scope: "write").validate!
+    Oauth::Client.find(@client.id).update_columns scopes: %w[ read ]
+
+    error = assert_raises(Oauth::TokenDelegation::Refusal) { @delegation.mint! }
+    assert_equal "invalid_scope", error.error
+    assert_not @subject.reload.delegated_tokens.exists?
+  end
+
+  test "a well-shaped but unknown fizzy_dt_ token never looks for an undigested personal token on the primary" do
+    on_the_primary -> { } do
+      Identity::AccessToken.expects(:find_and_digest_undigested).once.returns(nil)
+
+      assert_nil Identity::AccessToken.find_honored(Identity::AccessToken.generate_token(:delegated))
+    end
+  end
+
   test "a mint racing the client's deletion is refused" do
     delegation.validate!
     @client.delete

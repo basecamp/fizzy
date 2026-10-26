@@ -22,7 +22,7 @@
 
     <% oauth_connected_app_reach(tokens).each do |permission, accounts| %>
       <p class="connected-app__access txt-small margin-none">
-        <strong><%= oauth_access_label(permission) %></strong>, <%= accounts ? "in #{accounts.map(&:name).to_sentence}" : "in every account you belong to" %>
+        <strong><%= oauth_access_label(permission) %></strong>, <% if accounts %>in <%= to_sentence(accounts.map { |account| tag.bdi(account.name) }) %><% else %>in every account you belong to<% end %>
       </p>
     <% end %>
 

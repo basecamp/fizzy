@@ -150,6 +150,20 @@ class OauthDelegateResourcesTest < ActionDispatch::IntegrationTest
     assert_equal [ BROWSER ], delivered_endpoints
   end
 
+  test "an app's push subscription delivers through a grant bound to its own account" do
+    @grant.update!(account: accounts("37s"))
+    subscribe_push bearer(@grant)
+
+    assert_includes delivered_endpoints, ENDPOINT
+  end
+
+  test "an app's push subscription doesn't deliver through a grant bound to another account" do
+    subscribe_push bearer(@grant)
+    @grant.update!(account: accounts(:initech))
+
+    assert_not_includes delivered_endpoints, ENDPOINT
+  end
+
   test "an app's push subscription stops delivering when the user moves to another identity" do
     subscribe_push bearer(@grant)
 

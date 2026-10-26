@@ -25,6 +25,7 @@ class My::ConnectedAppsControllerTest < ActionDispatch::IntegrationTest
     get my_connected_apps_path
 
     assert_select ".connected-app__access", text: /in #{accounts("37s").name}\z/
+    assert_select ".connected-app__access bdi", text: accounts("37s").name
     assert_no_match "in every account you belong to", response.body
   ensure
     Rails.application.config.x.oauth.mcp_resources = saved

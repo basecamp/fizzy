@@ -313,7 +313,7 @@ class Oauth::ClientMetadata::Fetcher
       lifetime = if cache_control.key?("no-store") || cache_control.key?("no-cache")
         0
       elsif cache_control.key?("max-age")
-        cache_control["max-age"].to_i - response["Age"].to_i
+        cache_control["max-age"].to_s.delete_prefix('"').delete_suffix('"').to_i - response["Age"].to_i
       elsif response["Expires"].present?
         expires_lifetime(response)
       else

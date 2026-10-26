@@ -49,7 +49,7 @@ module Oauth::ClientAuthentication
 
     def requesting_client
       if oauth_client_id
-        @requesting_client ||= Oauth::Client.find_by(client_id: oauth_client_id)
+        @requesting_client ||= Oauth::Client.find_presented(oauth_client_id)
       end
     end
 

@@ -10,6 +10,8 @@ class Oauth::Authorizations::SwitchesController < Oauth::AuthorizationsControlle
   AUTHORIZATION_PARAMS = %i[ client_id redirect_uri response_type scope state code_challenge code_challenge_method resource ]
 
   skip_before_action :set_account
+  before_action :require_browser_session
+
 
   # A request too long to keep in the session can't be resumed, so the person
   # stays signed in rather than signing out to nowhere.
@@ -28,6 +30,12 @@ class Oauth::Authorizations::SwitchesController < Oauth::AuthorizationsControlle
   end
 
   private
+    # Switching signs a browser out. A request authenticated by a bearer token
+    # has no session to end, so it is refused rather than half-handled.
+    def require_browser_session
+      head :forbidden unless Current.session
+    end
+
     # Switching identity is a POST but authorizes nothing, so a metadata
     # document client is only read here, never registered.
     def persist_metadata_document?

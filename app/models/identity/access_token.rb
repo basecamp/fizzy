@@ -225,9 +225,16 @@ class Identity::AccessToken < ApplicationRecord
         end
       end
 
+      # Only a delegated token is looked for here, by its digest alone: the
+      # plaintext fallback heals legacy personal tokens, which never have this
+      # shape, so a forged one can't make the primary scan for them.
       def find_honored_delegated_on_primary(token)
         if token.is_a?(String) && token.match?(DELEGATED_TOKEN) && Deployment::DatabaseResolver.in_primary_datacenter?
-          ApplicationRecord.with_writing_role { find_honored_here(token) }
+          ApplicationRecord.with_writing_role do
+            if (access_token = active.delegated.find_by(token_digest: TokenDigester.digests(token))) && access_token.honored?
+              access_token
+            end
+          end
         end
       end
       # MySQL compares `token` case-insensitively, so a match is confirmed

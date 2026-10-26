@@ -1,6 +1,8 @@
 require "test_helper"
 
 class Oauth::ClientMetadata::ResolverTest < ActiveSupport::TestCase
+  include OauthAuditTestHelper
+
   URL = "https://claude.ai/oauth/mcp-oauth-client-metadata"
   CALLBACK = "https://claude.ai/api/mcp/auth_callback"
 
@@ -19,6 +21,14 @@ class Oauth::ClientMetadata::ResolverTest < ActiveSupport::TestCase
     assert resolution.client.metadata_document?
     assert_equal "Claude", resolution.client.name
     assert_nil Oauth::Client.find_presented(URL)
+  end
+
+  test "intake records the registration as the client's own act" do
+    stub_document
+
+    events = capture_oauth_events { resolve(persist: true) }
+
+    assert_equal "client", oauth_event(events, "oauth.client.registered")[:actor]
   end
 
   test "intake provisions a public, untrusted client from the document" do

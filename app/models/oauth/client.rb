@@ -62,9 +62,9 @@ class Oauth::Client < ApplicationRecord
 
   before_create :generate_client_secret, if: :confidential?
 
-  # Self-registration is the client's own act; any other client is
-  # provisioned by an operator.
-  after_create_commit -> { Oauth::Audit.record "client.registered", client: self, actor: dynamically_registered? ? "client" : "admin" }
+  # Self-registration is the client's own act, whether by registration or from
+  # a metadata document; any other client is provisioned by an operator.
+  after_create_commit -> { Oauth::Audit.record "client.registered", client: self, actor: self_registered? ? "client" : "admin" }
 
   attribute :redirect_uris, default: -> { [] }
   attribute :scopes, default: -> { %w[ read ] }
