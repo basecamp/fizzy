@@ -129,6 +129,18 @@ class OauthDelegateResourcesTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "an app's push subscription stops delivering while OAuth is staff only and the user isn't staff, alongside the browser's" do
+    subscribe_push bearer(@grant)
+    users(:kevin).push_subscriptions.create!(push_params(BROWSER))
+
+    with_oauth_availability staff_only: true do
+      assert_equal [ BROWSER, ENDPOINT ].sort, delivered_endpoints.sort
+
+      identities(:kevin).update!(staff: false)
+      assert_equal [ BROWSER ], delivered_endpoints
+    end
+  end
+
   test "an app's push subscription stops delivering when the user leaves the account" do
     subscribe_push bearer(@grant)
     users(:kevin).push_subscriptions.create!(push_params(BROWSER))

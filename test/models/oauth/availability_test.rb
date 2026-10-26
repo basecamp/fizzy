@@ -50,4 +50,21 @@ class Oauth::AvailabilityTest < ActiveSupport::TestCase
       assert_not Oauth::Availability.issuance_enabled?("")
     end
   end
+
+  test "admits everyone unless staff only" do
+    assert Oauth::Availability.admits?(identities(:jz))
+    assert Oauth::Availability.admits?(nil)
+
+    with_oauth_availability staff_only: true do
+      assert Oauth::Availability.admits?(identities(:david))
+      assert_not Oauth::Availability.admits?(identities(:jz))
+      assert_not Oauth::Availability.admits?(nil)
+    end
+  end
+
+  test "staff only must be exactly true" do
+    with_oauth_availability staff_only: "true" do
+      assert_not Oauth::Availability.staff_only?
+    end
+  end
 end

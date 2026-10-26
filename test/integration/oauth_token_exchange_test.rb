@@ -400,6 +400,22 @@ class OauthTokenExchangeTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "while OAuth is staff only, a grant whose owner isn't staff is not exchanged, and its delegated tokens stop working" do
+    with_oauth_availability staff_only: true do
+      exchange
+      assert_response :success
+      delegated = response.parsed_body["access_token"]
+
+      identities(:david).update!(staff: false)
+
+      get user_path(users(:david)), env: { "HTTP_AUTHORIZATION" => "Bearer #{delegated}" }, as: :json
+      assert_response :unauthorized
+
+      exchange
+      assert_invalid_grant "Subject token is not valid"
+    end
+  end
+
   private
     def audienced_grant(audience: RESOURCE)
       identities(:david).access_tokens.create! \

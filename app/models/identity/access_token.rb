@@ -258,7 +258,7 @@ class Identity::AccessToken < ApplicationRecord
   # write once that grant can't: a refresh that narrows the grant to read
   # narrows the tokens delegated from it too.
   def honored?
-    honored_client? && (!delegated? || honored_delegation?)
+    honored_client? && honored_identity? && (!delegated? || honored_delegation?)
   end
 
   def personal?
@@ -361,6 +361,13 @@ class Identity::AccessToken < ApplicationRecord
     def honored_delegation?
       grant = self.class.grants.unlapsed.find_by(id: delegated_from_id)
       grant.present? && grant.honored_client? && (read? || grant.write?)
+    end
+
+    # While OAuth is staff only, an OAuth token works only for staff, so a
+    # grant stops working once its owner isn't. A personal access token isn't
+    # OAuth and always works.
+    def honored_identity?
+      personal? || !Oauth::Availability.staff_only? || identity&.staff? == true
     end
 
     def honored_client?

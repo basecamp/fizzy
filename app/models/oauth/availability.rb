@@ -35,6 +35,15 @@
 #
 # An incident pause must therefore empty pilot_client_ids as well as throwing
 # the switch, or listed clients keep minting through it.
+#
+# == Staff only
+#
+# The switches above choose clients. staff_only chooses people: while it's on,
+# only 37signals staff (Identity#staff?) can connect an app, redeem a code,
+# refresh, or use an OAuth token, whichever client asks. Someone who stops
+# being staff loses the access they granted on their next request. Personal
+# access tokens are not OAuth credentials, so it doesn't touch them, and
+# management stays open to everyone, so anyone can still shed a grant.
 module Oauth::Availability
   extend self
 
@@ -51,6 +60,15 @@ module Oauth::Availability
   # already authorized keeps refreshing while this is off.
   def metadata_documents_enabled?(client_id = nil)
     issuance_enabled?(client_id) && config.cimd_enabled == true
+  end
+
+  def staff_only?
+    config.staff_only == true
+  end
+
+  # Whether OAuth is open to this person: everyone, unless staff_only.
+  def admits?(identity)
+    !staff_only? || identity&.staff? == true
   end
 
   # The clients whose tokens are honored, as a relation, for code that weighs

@@ -30,6 +30,7 @@ env:
   clear:
     RAILS_ENV: staging
     RAILS_LOG_LEVEL: fatal # suppress unstructured log lines
+    OAUTH_STAFF_ONLY: "true" # OAuth is for 37signals staff until we open it up
     MYSQL_DATABASE_HOST: fizzy-staging-mysql-primary
     MYSQL_DATABASE_REPLICA_HOST: fizzy-staging-mysql-replica
     MYSQL_SOLID_CABLE_HOST: fizzy-staging-mysql-primary
