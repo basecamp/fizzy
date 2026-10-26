@@ -381,9 +381,10 @@ class Identity::AccessToken < ApplicationRecord
 
     # While OAuth is staff only, an OAuth token works only for staff, so a
     # grant stops working once its owner isn't. A personal access token isn't
-    # OAuth and always works.
+    # OAuth and always works. The switch is checked first, so an install that
+    # isn't staff only doesn't load each token's client to tell.
     def honored_identity?
-      personal? || !Oauth::Availability.staff_only? || identity&.staff? == true
+      !Oauth::Availability.staff_only? || personal? || identity&.staff? == true
     end
 
     def honored_client?
