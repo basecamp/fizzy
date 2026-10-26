@@ -111,6 +111,17 @@ class OauthStaffOnlyTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "personal access tokens issued by the first-party client work for anyone" do
+    token = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:personal_access), permission: :read, description: "Script")
+    identities(:david).update!(staff: false)
+
+    with_oauth_availability staff_only: true do
+      get user_path(users(:david)), env: { "HTTP_AUTHORIZATION" => "Bearer #{token.raw_token}" }, as: :json
+    end
+
+    assert_response :success
+  end
+
   private
     def get_consent_screen(**params)
       untenanted { get new_oauth_authorization_path, params: consent_params(**params) }

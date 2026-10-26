@@ -165,7 +165,7 @@ class Oauth::TokensController < Oauth::BaseController
     end
 
     def require_admitted_grant_owner
-      unless @access_token.oauth_client_id.nil? || Oauth::Availability.admits?(@access_token.identity)
+      unless @access_token.personal? || Oauth::Availability.admits?(@access_token.identity)
         oauth_error "invalid_grant", "OAuth apps are limited to 37signals staff for now"
       end
     end

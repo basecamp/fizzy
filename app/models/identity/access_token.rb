@@ -367,7 +367,7 @@ class Identity::AccessToken < ApplicationRecord
     # grant stops working once its owner isn't. A personal access token isn't
     # OAuth and always works.
     def honored_identity?
-      oauth_client_id.nil? || !Oauth::Availability.staff_only? || identity&.staff? == true
+      personal? || !Oauth::Availability.staff_only? || identity&.staff? == true
     end
 
     def honored_client?
