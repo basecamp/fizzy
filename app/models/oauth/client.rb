@@ -319,8 +319,12 @@ class Oauth::Client < ApplicationRecord
       errors.add :redirect_uris, "includes an invalid URI"
     end
 
+    # As consent tells it (OauthHelper): a loopback host on http or https, or an
+    # app's own scheme. Redirect matching keeps its http-only loopback_uri?.
     def on_device_uri?(uri)
-      loopback_uri?(uri) || !URI.parse(uri).scheme.to_s.downcase.in?(%w[ http https ])
+      parsed = URI.parse(uri)
+      web = parsed.scheme.to_s.downcase.in?(%w[ http https ])
+      !web || Oauth.loopback_host?(parsed.host)
     rescue URI::InvalidURIError
       false
     end

@@ -275,7 +275,11 @@ class Oauth::AuthorizationsController < Oauth::BaseController
       instrument_oauth_error error
       @error = error
       @error_description = description
-      render :error, status: :bad_request
+
+      respond_to do |format|
+        format.html { render :error, status: :bad_request }
+        format.json { render_oauth_error error, description, status: :bad_request }
+      end
     end
 
     def success_redirect_uri(code)
