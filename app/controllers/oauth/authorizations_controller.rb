@@ -30,7 +30,10 @@ class Oauth::AuthorizationsController < Oauth::BaseController
   before_action :validate_single_valued_parameters
   before_action :validate_response_type
   before_action :validate_pkce
-  before_action :validate_scope
+  # A denial grants nothing, so it answers access_denied whatever scope the
+  # client's stored row allows, as when a stale row allows less than the
+  # document the consent screen read.
+  before_action :validate_scope, unless: :denial?
   before_action :validate_state
   before_action :set_audience
   before_action :set_accounts, if: :audienced?, unless: :denial?

@@ -98,6 +98,9 @@ class Oauth::ClientMetadata::Resolver
         Rails.logger.info "OAuth client metadata fetch: #{result.outcome}"
 
         if result.outcome == :overloaded
+          # Admission was lost inside the fetch, so nothing was fetched: the
+          # attempt is handed back rather than spent on server pressure.
+          refund_fetch_budget
           overloaded
         elsif result.failure?
           Resolution.failure(:fetch_failed, "Could not retrieve the client metadata document (#{result.outcome.to_s.humanize.downcase})")
@@ -224,8 +227,19 @@ class Oauth::ClientMetadata::Resolver
     end
 
     def fetch_budget_available?
-      within_budget?("oauth:client_metadata:#{requester_key}:url:#{Digest::SHA256.hexdigest(@client_id)}", URL_ATTEMPT_LIMIT, URL_ATTEMPT_WINDOW) && \
-        within_budget?("oauth:client_metadata:#{requester_key}:host:#{Oauth::ClientMetadata::Url.host(@client_id).downcase}", HOST_ATTEMPT_LIMIT, HOST_ATTEMPT_WINDOW)
+      within_budget?(url_budget_key, URL_ATTEMPT_LIMIT, URL_ATTEMPT_WINDOW) && within_budget?(host_budget_key, HOST_ATTEMPT_LIMIT, HOST_ATTEMPT_WINDOW)
+    end
+
+    def refund_fetch_budget
+      [ url_budget_key, host_budget_key ].each { |key| decrement_counter(key) }
+    end
+
+    def url_budget_key
+      "oauth:client_metadata:#{requester_key}:url:#{Digest::SHA256.hexdigest(@client_id)}"
+    end
+
+    def host_budget_key
+      "oauth:client_metadata:#{requester_key}:host:#{Oauth::ClientMetadata::Url.host(@client_id).downcase}"
     end
 
     def requester_key
@@ -239,6 +253,12 @@ class Oauth::ClientMetadata::Resolver
 
     def increment_counter(key, window)
       Rails.cache.increment(key, 1, expires_in: window)
+    rescue StandardError
+      nil
+    end
+
+    def decrement_counter(key)
+      Rails.cache.decrement(key, 1)
     rescue StandardError
       nil
     end
