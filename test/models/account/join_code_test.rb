@@ -26,6 +26,17 @@ class Account::JoinCodeTest < ActiveSupport::TestCase
     end
   end
 
+  test "redeem_if refuses a code reset after it was found" do
+    join_code = account_join_codes(:"37s")
+    Account::JoinCode.find(join_code.id).reset
+    joined = false
+
+    assert_no_difference -> { Account::JoinCode.find(join_code.id).usage_count } do
+      join_code.redeem_if { joined = true }
+    end
+    assert_not joined
+  end
+
   test "reset" do
     join_code = account_join_codes(:"37s")
     original_code = join_code.code

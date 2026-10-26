@@ -12,13 +12,15 @@ class Account::DataTransfer::RecordSet
   attr_accessor :importable_model_names
   attr_reader :account, :model, :attributes, :optional_attributes, :unique_keys
 
-  # Optional attributes are columns added after exports already existed: an
-  # export from before them lacks them, and imports them as null.
+  # Optional attributes are columns an export may lack: ones added after
+  # exports already existed, or ones this database doesn't have yet. Only those
+  # that are columns here count, so naming one before its migration has run
+  # changes nothing, and an export made before it imports it as null.
   def initialize(account:, model:, attributes: nil, optional_attributes: nil, importable_model_names: nil, unique_keys: nil)
     @account = account
     @model = model
     @attributes = (attributes || model.column_names).map(&:to_s)
-    @optional_attributes = (optional_attributes || []).map(&:to_s)
+    @optional_attributes = (optional_attributes || []).map(&:to_s) & @attributes
     @importable_model_names = importable_model_names || [ model.name ]
     @unique_keys = (unique_keys || []).map(&:to_s)
   end

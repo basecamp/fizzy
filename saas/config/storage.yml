@@ -21,9 +21,10 @@ devminio:
 # "beta" bucket. (As of 2025-06-01.)
 <% pure_env = Rails.env.beta? ? "production" : Rails.env %>
 purestorage:
-  service: S3
+  service: S3WithDirectEndpoints
   bucket: fizzy-<%= pure_env %>-activestorage
   endpoint: "https://storage.basecamp.com"
+  direct_upload_endpoint: "https://storage.basecamp.com"
   ssl_verify_peer: false # FIXME: using self-signed cert internally
   force_path_style: true
   request_checksum_calculation: when_required # default is when_supported with CRC64NVME checksum which FlashBlade doesn't support
@@ -31,3 +32,6 @@ purestorage:
   region: us-east-1 # default region required for signer
   access_key_id: <%= ENV["ACTIVE_STORAGE_ACCESS_KEY_ID"] %>
   secret_access_key: <%= ENV["ACTIVE_STORAGE_SECRET_ACCESS_KEY"] %>
+  # Write-only (s3:PutObject) user for presigning browser direct uploads.
+  direct_upload_access_key_id: <%= ENV["ACTIVE_STORAGE_DIRECT_UPLOAD_ACCESS_KEY_ID"] %>
+  direct_upload_secret_access_key: <%= ENV["ACTIVE_STORAGE_DIRECT_UPLOAD_SECRET_ACCESS_KEY"] %>

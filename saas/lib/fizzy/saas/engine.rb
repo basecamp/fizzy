@@ -6,6 +6,7 @@ require_relative "gvl_instrumentation"
 require_relative "cell"
 require_relative "unprocessable_attachments"
 require_relative "sentry_sql_redaction"
+require_relative "job_memory"
 require_relative "../../rails_ext/active_record_tasks_database_tasks.rb"
 
 module Fizzy
@@ -84,6 +85,10 @@ module Fizzy
           Process.warmup
           Yabeda::Prometheus::Exporter.start_metrics_server!
         end
+      end
+
+      initializer "fizzy_saas.logging.job_memory" do
+        ActiveSupport.on_load(:active_job) { include JobMemory }
       end
 
       initializer "fizzy_saas.logging.session" do |app|
@@ -215,6 +220,9 @@ module Fizzy
         ::Session.include Session::Devices
         ::Signup.prepend Signup
         Sessions::MagicLinksController.prepend Sessions::ReviewerSignIn
+        ::User.prepend User::ReviewerEmailAddressLock
+        Users::EmailAddressesController.include Users::ReviewerEmailAddressLock
+        UsersController.include Users::ReviewerMembershipLock
         ApplicationController.include Authorization::Controller
         CardsController.include(Card::StorageLimited::Creation)
         Cards::CommentsController.include(Card::StorageLimited::Commenting)

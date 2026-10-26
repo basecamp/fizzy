@@ -48,11 +48,14 @@ COPY . .
 # Precompile bootsnap code for faster boot times
 RUN bundle exec bootsnap precompile app/ lib/
 
-# Precompiling assets for production
+# Precompiling assets for production. Booting builds the purestorage service, which refuses to build
+# without a direct-upload credential, so give it a placeholder that never leaves this step.
 RUN SECRET_KEY_BASE_DUMMY=1 \
     ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY=1 \
     ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY=1 \
     ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT=1 \
+    ACTIVE_STORAGE_DIRECT_UPLOAD_ACCESS_KEY_ID=placeholder \
+    ACTIVE_STORAGE_DIRECT_UPLOAD_SECRET_ACCESS_KEY=placeholder \
     ./bin/rails assets:precompile
 
 # Final stage for app image
@@ -92,15 +95,7 @@ USER rails:rails
 # Entrypoint prepares the database.
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 
-# Ruby GC tuning values pulled from Autotuner recommendations
-ENV RUBY_GC_HEAP_0_INIT_SLOTS=692636 \
-    RUBY_GC_HEAP_1_INIT_SLOTS=175943 \
-    RUBY_GC_HEAP_2_INIT_SLOTS=148807 \
-    RUBY_GC_HEAP_3_INIT_SLOTS=9169 \
-    RUBY_GC_HEAP_4_INIT_SLOTS=3054 \
-    RUBY_GC_MALLOC_LIMIT=67108864 \
-    RUBY_GC_MALLOC_LIMIT_MAX=134217728 \
-    LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
 
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 80 443 9394

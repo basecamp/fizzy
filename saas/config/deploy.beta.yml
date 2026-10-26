@@ -35,6 +35,9 @@ servers:
       - <%= @job_hosts[0] %>: df_iad
     labels:
       otel_scrape_enabled: true
+    env:
+      clear:
+        LOG_JOB_MEMORY: "true"
 
 proxy:
   ssl: false
@@ -68,6 +71,8 @@ env:
     - VAPID_PRIVATE_KEY
     - ACTIVE_STORAGE_ACCESS_KEY_ID
     - ACTIVE_STORAGE_SECRET_ACCESS_KEY
+    - ACTIVE_STORAGE_DIRECT_UPLOAD_ACCESS_KEY_ID
+    - ACTIVE_STORAGE_DIRECT_UPLOAD_SECRET_ACCESS_KEY
     - QUEENBEE_API_TOKEN
     - QUEENBEE_API_TOKEN_PREVIOUS
     - QUEENBEE_SECRET

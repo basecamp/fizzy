@@ -93,14 +93,58 @@ class Account::DataTransfer::RecordSetTest < ActiveSupport::TestCase
       "updated_at" => Time.current.iso8601
     }
 
-    record_set = Account::DataTransfer::Manifest.new(importing_account).to_enum(:each_record_set).find { it.model == Webhook }
-
     error = assert_raises(Account::DataTransfer::RecordSet::ConflictError) do
-      record_set.check(from: build_reader(dir: "webhooks", data: webhook_data))
+      webhook_record_set.check(from: build_reader(dir: "webhooks", data: webhook_data))
     end
 
     assert_match(/references existing board.*#{victim_board.id}/i, error.message)
     assert_not Webhook.exists?(id: webhook_data["id"])
+  end
+
+  test "only optional attributes that are columns here count" do
+    record_set = Account::DataTransfer::RecordSet.new(account: importing_account, model: Tag, optional_attributes: %w[ title not_a_column ])
+
+    assert_equal %w[ title ], record_set.optional_attributes
+  end
+
+  test "check requires every attribute that isn't optional" do
+    tag_data = { "id" => ActiveRecord::Type::Uuid.generate, "account_id" => ActiveRecord::Type::Uuid.generate, "created_at" => Time.current.iso8601, "updated_at" => Time.current.iso8601 }
+
+    error = assert_raises(Account::DataTransfer::RecordSet::IntegrityError) do
+      Account::DataTransfer::RecordSet.new(account: importing_account, model: Tag).check(from: build_reader(dir: "tags", data: tag_data))
+    end
+
+    assert_match(/missing required fields: title/, error.message)
+  end
+
+  test "a record lacking an optional attribute checks and imports it as null" do
+    tag_data = { "id" => ActiveRecord::Type::Uuid.generate, "account_id" => ActiveRecord::Type::Uuid.generate, "created_at" => Time.current.iso8601, "updated_at" => Time.current.iso8601 }
+    record_set = Account::DataTransfer::RecordSet.new(account: importing_account, model: Tag, optional_attributes: %w[ title ])
+
+    assert_nothing_raised { record_set.check(from: build_reader(dir: "tags", data: tag_data)) }
+    record_set.import(from: build_reader(dir: "tags", data: tag_data))
+
+    assert_nil Tag.find(tag_data["id"]).title
+  end
+
+  test "a webhook exported before it had a creator or an app still imports" do
+    webhook_data = {
+      "id" => ActiveRecord::Type::Uuid.generate,
+      "account_id" => ActiveRecord::Type::Uuid.generate,
+      "board_id" => ActiveRecord::Type::Uuid.generate,
+      "active" => true,
+      "name" => "Imported Webhook",
+      "url" => "https://example.com/webhook",
+      "signing_secret" => SecureRandom.base58(24),
+      "subscribed_actions" => %w[ card_published comment_created ],
+      "created_at" => Time.current.iso8601,
+      "updated_at" => Time.current.iso8601
+    }
+
+    assert_nothing_raised { webhook_record_set.check(from: build_reader(dir: "webhooks", data: webhook_data)) }
+    webhook_record_set.import(from: build_reader(dir: "webhooks", data: webhook_data))
+
+    assert_equal importing_account, Webhook.find(webhook_data["id"]).account
   end
 
   test "check rejects a unique key that already exists in the destination database" do
@@ -224,6 +268,10 @@ class Account::DataTransfer::RecordSetTest < ActiveSupport::TestCase
         "created_at" => Time.current.iso8601,
         "updated_at" => Time.current.iso8601
       }
+    end
+
+    def webhook_record_set
+      Account::DataTransfer::Manifest.new(importing_account).to_enum(:each_record_set).find { |record_set| record_set.model == Webhook }
     end
 
     def publication_record_set
