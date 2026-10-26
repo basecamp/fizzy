@@ -34,6 +34,12 @@ env:
     MYSQL_DATABASE_REPLICA_HOST: fizzy-mysql-replica
     MYSQL_SOLID_CABLE_HOST: fizzy-mysql-primary
     MYSQL_SOLID_QUEUE_HOST: fizzy-mysql-primary
+    # OAuth lit for 37signals staff only (OAUTH_STAFF_ONLY): the authorization server answers, Client ID
+    # Metadata Documents are accepted from deploy.yml's allowlisted hosts, and grants can be audienced to
+    # the hosted MCP server, whose delegation exchange runs as the fizzy-mcp-server client.
+    OAUTH_ACCEPTANCE_ENABLED: "true"
+    OAUTH_CIMD_ENABLED: "true"
+    FIZZY_OAUTH_MCP_RESOURCES: "https://mcp.fizzy.do/mcp"
   secret:
     - RAILS_MASTER_KEY
     - MYSQL_ALTER_PASSWORD
@@ -125,8 +131,13 @@ accessories:
         # No trailing slash: Fizzy's metadata issuer is the bare origin (#3192), and the server checks.
         FIZZY_MCP_AUTHORIZATION_SERVER: "https://app.fizzy.do"
         FIZZY_MCP_ALLOWED_ORIGINS: "https://app.fizzy.do"
-    # TODO: before lighting the exchange, send app.fizzy.do to iad's load balancers so the exchange and
-    # every API call stay in iad (iad's LB has write targets only: saas/script/configure-lb-production.sh).
-    # options:
-    #   add-host:
-    #     - "app.fizzy.do:<fizzy-lb-101 address>"
+        FIZZY_MCP_EXCHANGE_TOKEN_URL: "https://app.fizzy.do/oauth/token"
+        FIZZY_MCP_EXCHANGE_CLIENT_ID: "fizzy-mcp-server"
+      secret:
+        - FIZZY_MCP_EXCHANGE_CLIENT_SECRET
+    # Send app.fizzy.do to iad's load balancer, so the exchange and every API call that follows stay in iad
+    # (iad's LB has write targets only: saas/script/configure-lb-production.sh). Resolved when the config is
+    # read, so no address is written here.
+    options:
+      add-host:
+        - "app.fizzy.do:<%= require "resolv"; Resolv.getaddress("fizzy-lb-101.df-iad-int.37signals.com") %>"
