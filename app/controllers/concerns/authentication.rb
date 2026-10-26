@@ -11,6 +11,10 @@ module Authentication
 
     etag { Current.identity.id if authenticated? }
 
+    rescue_from Identity::AccessToken::Disconnected do
+      request_bearer_authentication error: "invalid_token", error_description: "The access token is expired, revoked, or invalid"
+    end
+
     include Authentication::ViaMagicLink, LoginHelper
   end
 

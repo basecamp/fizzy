@@ -27,6 +27,19 @@ class Oauth::TokenDelegationTest < ActiveSupport::TestCase
     assert_equal @subject, @token.delegated_from
   end
 
+  test "a delegated token whose grant is deleted mid-request sets up nothing" do
+    in_flight = Identity::AccessToken.find(delegation.validate!.mint!.id)
+    @subject.destroy!
+
+    assert_raises(Identity::AccessToken::Disconnected) { in_flight.connected_app! }
+
+    Current.set(access_token: in_flight) do
+      assert_raises(Identity::AccessToken::Disconnected) do
+        Webhook.create!(board: boards(:writebook), name: "Late", url: "https://example.com/hook")
+      end
+    end
+  end
+
   test "the token lives at most five minutes" do
     token = delegation.validate!.mint!
 

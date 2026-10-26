@@ -10,6 +10,21 @@ class Oauth::AuditTest < ActiveSupport::TestCase
     @identity = identities(:david)
   end
 
+  test "a refresh rolled back by its caller reports nothing, and a committed one reports once" do
+    grant = @identity.access_tokens.create!(oauth_client: @client, permission: :write)
+
+    events = capture_oauth_events do
+      Identity::AccessToken.transaction do
+        assert grant.refresh(permission: "read")
+        raise ActiveRecord::Rollback
+      end
+    end
+    assert_empty events
+
+    events = capture_oauth_events { assert grant.reload.refresh(permission: "read") }
+    assert_equal %w[ oauth.token.refreshed oauth.grant.narrowed ], oauth_event_names(events)
+  end
+
   test "the idle sweep revokes a lapsed grant" do
     grant = @identity.access_tokens.create!(oauth_client: @client, permission: :read)
     grant.update_columns updated_at: (Identity::AccessToken::REFRESH_IDLE_LIMIT + 1.minute).ago

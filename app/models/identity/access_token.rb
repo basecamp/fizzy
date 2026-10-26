@@ -288,6 +288,17 @@ class Identity::AccessToken < ApplicationRecord
   end
   alias_method :app, :connected_app
 
+  # An app's token whose grant or client is deleted while its request is in
+  # flight, as when the person disconnects the app, has no app left to answer
+  # for what it sets up. Recorded without one, a webhook or push subscription
+  # would read as the person's own and outlive the disconnect, so it sets up
+  # nothing instead.
+  class Disconnected < StandardError; end
+
+  def connected_app!
+    connected_app || (raise Disconnected if oauth?)
+  end
+
   # An audienced grant was issued for another protected resource (the hosted
   # MCP server), named at consent by the RFC 8707 resource parameter. It's
   # that resource's credential, never Fizzy's API's: the API refuses it, and
@@ -348,10 +359,15 @@ class Identity::AccessToken < ApplicationRecord
       end
     end
 
+    # Recorded once the rotation commits, as issuance and revocation are, so a
+    # caller that refreshes inside a transaction of its own and rolls it back
+    # reports no refresh.
     if rotated_now
-      Oauth::Audit.record "token.refreshed", grant: self, actor: "client", grant_type: "refresh_token", permission: self.permission
-      # A refresh may only narrow (RFC 6749 §6), so a change is a narrowing.
-      Oauth::Audit.record "grant.narrowed", grant: self, actor: "client", permission: self.permission if narrowed
+      ActiveRecord.after_all_transactions_commit do
+        Oauth::Audit.record "token.refreshed", grant: self, actor: "client", grant_type: "refresh_token", permission: self.permission
+        # A refresh may only narrow (RFC 6749 §6), so a change is a narrowing.
+        Oauth::Audit.record "grant.narrowed", grant: self, actor: "client", permission: self.permission if narrowed
+      end
     end
 
     rotated_now
