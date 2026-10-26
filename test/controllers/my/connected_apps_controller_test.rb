@@ -45,6 +45,20 @@ class My::ConnectedAppsControllerTest < ActionDispatch::IntegrationTest
     Rails.application.config.x.oauth.mcp_resources = saved
   end
 
+  test "a grant bound to a deleted account reaches nothing, and the page still renders" do
+    resource = "https://mcp.example.com/mcp"
+    saved, Rails.application.config.x.oauth.mcp_resources = Rails.application.config.x.oauth.mcp_resources, [ resource ]
+    grant = @identity.access_tokens.create! oauth_client: oauth_clients(:mcp_client), permission: :read, audience: resource, account: accounts("37s")
+    grant.update_columns account_id: ActiveRecord::FixtureSet.identify("deleted", :uuid)
+
+    get my_connected_apps_path
+
+    assert_response :success
+    assert_select ".connected-app__access", count: 0
+  ensure
+    Rails.application.config.x.oauth.mcp_resources = saved
+  end
+
   test "index and destroy work untenanted, so an identity without an account can still disconnect apps" do
     client = oauth_clients(:mcp_client)
     @identity.access_tokens.create!(oauth_client: client, permission: :read)
