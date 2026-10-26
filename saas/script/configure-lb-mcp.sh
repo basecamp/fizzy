@@ -82,8 +82,9 @@ fi
 
 for balancer in "${balancers[@]}"; do
   echo "==> $balancer: $host -> ${target_flags[*]#--target=}"
-  # The balancers run basecamp/kamal-proxy:lb; refuse rather than route MCP
-  # without the client's address if that build predates --client-ip-header.
+  # Refuse rather than route MCP without the client's address on a balancer
+  # still running a kamal-proxy older than v0.10.0 (the old :lb build), i.e.
+  # one not yet rebooted onto the pin in saas/config/deploy.*.yml.
   help=$(ssh "app@$balancer" docker exec fizzy-load-balancer kamal-proxy deploy --help)
   if [[ $help != *--client-ip-header* ]]; then
     echo "$balancer: this kamal-proxy has no --client-ip-header; not routing $host" >&2
