@@ -32,7 +32,7 @@ class Oauth::TokenExchangesController < Oauth::BaseController
   def create
     delegation = Oauth::TokenDelegation.new \
       client: authenticated_client,
-      subject_token: params[:subject_token],
+      subject_token: request.request_parameters["subject_token"],
       api_resource: method(:service_resource?),
       requested_scope: params.key?(:scope) ? params[:scope].to_s : nil,
       resource: params[:resource].presence
@@ -78,8 +78,13 @@ class Oauth::TokenExchangesController < Oauth::BaseController
       end
     end
 
+    # The subject token is a bearer credential, so like a client secret it's
+    # read from the body alone: in the query it would be in every proxy's and
+    # access log's copy of the URL.
     def require_params
-      if !string_param?(:subject_token)
+      if request.query_parameters.key?("subject_token")
+        oauth_error "invalid_request", "subject_token must be sent in the request body"
+      elsif !string_param?(:subject_token)
         oauth_error "invalid_request", "subject_token required"
       elsif !string_param?(:subject_token_type)
         oauth_error "invalid_request", "subject_token_type required"

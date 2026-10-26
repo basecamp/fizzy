@@ -51,6 +51,21 @@ class Oauth::AuditTest < ActiveSupport::TestCase
     assert_equal "system", swept[:actor]
   end
 
+  test "a client sweep rolled back by its caller reports nothing" do
+    client = Oauth::Client.create!(name: "Abandoned", redirect_uris: %w[ http://127.0.0.1:9999/callback ], dynamically_registered: true)
+    client.update_columns updated_at: (Oauth::Client::UNUSED_RETENTION + 1.day).ago
+
+    events = capture_oauth_events do
+      Oauth::Client.transaction do
+        client.destroy_if_still_unused
+        raise ActiveRecord::Rollback
+      end
+    end
+
+    assert_empty events
+    assert Oauth::Client.exists?(client.id)
+  end
+
   test "a client the sweep spares reports nothing" do
     assert_empty capture_oauth_events { @client.destroy_if_still_unused }
   end
@@ -145,7 +160,8 @@ class Oauth::AuditTest < ActiveSupport::TestCase
     Oauth::Client.cleanup
     Oauth::RetiredRefreshToken.cleanup
     Oauth::RetiredRefreshToken.forget_successors
+    Oauth::RedeemedAuthorizationCode.cleanup
 
-    assert_equal %i[ lapsed_grants stale_clients retired_refresh_tokens refresh_successors ], steps
+    assert_equal %i[ lapsed_grants stale_clients retired_refresh_tokens refresh_successors redeemed_authorization_codes ], steps
   end
 end

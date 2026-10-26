@@ -12,6 +12,6 @@ class Oauth::RedeemedAuthorizationCode < ApplicationRecord
   scope :stale, -> { where(created_at: ...RETENTION.ago) }
 
   def self.cleanup
-    stale.in_batches.delete_all
+    Oauth.cleanup_step(:redeemed_authorization_codes) { stale.in_batches.delete_all }
   end
 end

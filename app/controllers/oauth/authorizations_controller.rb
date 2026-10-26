@@ -129,9 +129,13 @@ class Oauth::AuthorizationsController < Oauth::BaseController
       if denial?
         metadata_document_client_for_denial
       elsif Oauth::Availability.metadata_documents_enabled?(params[:client_id])
-        resolution = Oauth::ClientMetadata::Resolver.new(params[:client_id], requester: Current.identity).resolve(persist: request.post?)
+        resolution = Oauth::ClientMetadata::Resolver.new(params[:client_id], requester: Current.identity).resolve(persist: persist_metadata_document?)
         resolution.client || refuse_metadata_document(resolution)
       end
+    end
+
+    def persist_metadata_document?
+      request.post?
     end
 
     # A denial never registers a client, and stays reachable while metadata

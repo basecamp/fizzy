@@ -28,6 +28,12 @@ class Oauth::Authorizations::SwitchesController < Oauth::AuthorizationsControlle
   end
 
   private
+    # Switching identity is a POST but authorizes nothing, so a metadata
+    # document client is only read here, never registered.
+    def persist_metadata_document?
+      false
+    end
+
     def authorization_params
       params.permit(*AUTHORIZATION_PARAMS).to_h.symbolize_keys
     end

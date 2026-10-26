@@ -17,6 +17,19 @@ class My::ConnectedAppsControllerTest < ActionDispatch::IntegrationTest
     assert_match client.name, response.body
   end
 
+  test "an app whose grants are bound to accounts is shown reaching only those" do
+    resource = "https://mcp.example.com/mcp"
+    saved, Rails.application.config.x.oauth.mcp_resources = Rails.application.config.x.oauth.mcp_resources, [ resource ]
+    @identity.access_tokens.create! oauth_client: oauth_clients(:mcp_client), permission: :read, audience: resource, account: accounts("37s")
+
+    get my_connected_apps_path
+
+    assert_select ".connected-app__access", text: /in #{accounts("37s").name}\z/
+    assert_no_match "in every account you belong to", response.body
+  ensure
+    Rails.application.config.x.oauth.mcp_resources = saved
+  end
+
   test "index and destroy work untenanted, so an identity without an account can still disconnect apps" do
     client = oauth_clients(:mcp_client)
     @identity.access_tokens.create!(oauth_client: client, permission: :read)

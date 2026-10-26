@@ -252,6 +252,18 @@ class OauthTokenExchangeTest < ActionDispatch::IntegrationTest
     assert_oauth_error "invalid_target", "resource does not match the subject token's account"
   end
 
+  test "a subject token in the query string is refused, even with the body otherwise complete" do
+    body = { grant_type: GRANT_TYPE, subject_token_type: ACCESS_TOKEN_TYPE, client_id: @client.client_id, client_secret: @secret }
+
+    assert_no_difference -> { Identity::AccessToken.delegated.count } do
+      untenanted do
+        post oauth_token_path(subject_token: @subject.raw_token), params: body, headers: { "Content-Type" => "application/x-www-form-urlencoded" }
+      end
+    end
+
+    assert_oauth_error "invalid_request", "subject_token must be sent in the request body"
+  end
+
   test "several resources at once are invalid_target, even when the last names Fizzy's API" do
     body = URI.encode_www_form \
       grant_type: GRANT_TYPE, subject_token: @subject.raw_token, subject_token_type: ACCESS_TOKEN_TYPE,

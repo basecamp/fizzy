@@ -283,9 +283,11 @@ class Oauth::TokensController < Oauth::BaseController
     # deleted out from under it.
     #
     # The grant is read once, and the retry is judged against that same read,
-    # so a concurrent rotation can't let a newer pair out as the answer.
+    # so a concurrent rotation can't let a newer pair out as the answer. It's
+    # read past the query cache, which may hold this same lookup from earlier
+    # in the request, before a revocation deleted the grant.
     def answer_refresh_replay(retired_refresh_token)
-      if grant = Identity::AccessToken.find_by(id: retired_refresh_token.access_token_id)
+      if grant = Identity::AccessToken.uncached { Identity::AccessToken.find_by(id: retired_refresh_token.access_token_id) }
         if retired_refresh_token.retryable?(grant)
           answer_refresh_retry grant, retired_refresh_token.successor
         elsif retired_refresh_token.within_grace?
