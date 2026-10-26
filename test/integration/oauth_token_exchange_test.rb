@@ -4,7 +4,7 @@ require "test_helper"
 # endpoint. Its wire contract is bc3's (doc/oauth/mcp_token_delegation.md),
 # which fizzy-mcp-server's exchange client is built against.
 class OauthTokenExchangeTest < ActionDispatch::IntegrationTest
-  include OauthAvailabilityTestHelper, OauthClientCredentialsTestHelper, DnsTestHelper
+  include OauthAvailabilityTestHelper, OauthClientCredentialsTestHelper, DnsTestHelper, OauthAuditTestHelper
 
   RESOURCE = "https://mcp.example.com/mcp"
   GRANT_TYPE = "urn:ietf:params:oauth:grant-type:token-exchange"
@@ -219,6 +219,17 @@ class OauthTokenExchangeTest < ActionDispatch::IntegrationTest
 
     exchange
     assert_oauth_error "unsupported_grant_type", "Only authorization_code and refresh_token grants are supported"
+  end
+
+  test "a successful exchange is recorded under the grant it acts for" do
+    events = capture_oauth_events { exchange }
+
+    assert_response :success
+    exchanged = oauth_event(events, "oauth.token.exchanged")
+    assert_equal @subject.id, exchanged[:grant_id]
+    assert_equal @client.client_id, exchanged[:client_id]
+    assert_equal "token_exchange", exchanged.dig(:details, :grant_type) || exchanged[:grant_type]
+    assert_no_secrets_in events, response.parsed_body["access_token"]
   end
 
   test "the exchange is dark while issuance is" do

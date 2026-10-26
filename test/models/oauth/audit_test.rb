@@ -161,7 +161,8 @@ class Oauth::AuditTest < ActiveSupport::TestCase
     Oauth::RetiredRefreshToken.cleanup
     Oauth::RetiredRefreshToken.forget_successors
     Oauth::RedeemedAuthorizationCode.cleanup
+    Identity::AccessToken.cleanup_delegated
 
-    assert_equal %i[ lapsed_grants stale_clients retired_refresh_tokens refresh_successors redeemed_authorization_codes ], steps
+    assert_equal %i[ lapsed_grants stale_clients retired_refresh_tokens refresh_successors redeemed_authorization_codes delegated_tokens ], steps
   end
 end

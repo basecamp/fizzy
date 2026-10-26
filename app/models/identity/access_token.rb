@@ -156,7 +156,9 @@ class Identity::AccessToken < ApplicationRecord
     # Delegated tokens live minutes, so expired ones are deleted as they
     # accumulate rather than waiting on any grant to end.
     def cleanup_delegated
-      delegated.where(expires_at: ...1.hour.ago).in_batches(of: 1000).delete_all
+      Oauth.cleanup_step :delegated_tokens do
+        delegated.where(expires_at: ...1.hour.ago).in_batches(of: 1000).delete_all
+      end
     end
 
     # Finds the token within the current scope by its digest. A personal

@@ -46,7 +46,7 @@ class OauthAudienceTest < ActionDispatch::IntegrationTest
   test "an unknown resource is invalid_target" do
     sign_in_as :david
 
-    [ "https://evil.example.com/mcp", "#{MCP_RESOURCE}/" ].each do |resource|
+    [ "https://evil.example.com/mcp", "#{MCP_RESOURCE}/", " " ].each do |resource|
       get_consent resource: resource
 
       assert_response :redirect
@@ -129,6 +129,31 @@ class OauthAudienceTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :success
+  end
+
+  test "a refresh naming a whitespace resource is invalid_target, not taken as naming none" do
+    sign_in_as :david
+    connect(account: accounts("37s"))
+
+    untenanted do
+      post oauth_token_path, params: { grant_type: "refresh_token", client_id: @client.client_id, refresh_token: @token_response["refresh_token"], resource: " " }, as: :json
+    end
+
+    assert_response :bad_request
+    assert_equal "invalid_target", response.parsed_body["error"]
+  end
+
+  test "a grant for an account the person has since left doesn't refresh" do
+    sign_in_as :david
+    connect(account: accounts(:initech))
+    @david_at_initech.destroy
+
+    untenanted do
+      post oauth_token_path, params: { grant_type: "refresh_token", client_id: @client.client_id, refresh_token: @token_response["refresh_token"] }, as: :json
+    end
+
+    assert_response :bad_request
+    assert_equal "invalid_grant", response.parsed_body["error"]
   end
 
   test "an unaudienced grant can't be refreshed into an audienced one" do
