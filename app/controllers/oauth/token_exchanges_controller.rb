@@ -15,10 +15,14 @@ class Oauth::TokenExchangesController < Oauth::BaseController
   allow_unauthenticated_access
   skip_forgery_protection
 
+  # Timed with the token endpoint's other grants, under the grant it is.
+  around_action :instrument_token_request
+
   # Availability first: rate_limit is a before_action too, so an exchange that
-  # isn't on would answer 429 past the limit, rather than 404 every time.
-  before_action :require_delegation_enabled
+  # isn't on would answer 429 past the limit, rather than 404 every time. A
+  # dark server answers 404 before it says which grants it supports.
   before_action :require_issuance_enabled
+  before_action :require_delegation_enabled
 
   rate_limit to: 20, within: 1.minute, only: :create, with: :exchange_rate_limit_exceeded, unless: :authenticated_delegation_client?
   rate_limit to: CLIENT_BUDGET, within: 1.minute, only: :create, by: -> { requesting_client.client_id }, name: "client",
@@ -32,7 +36,7 @@ class Oauth::TokenExchangesController < Oauth::BaseController
   def create
     delegation = Oauth::TokenDelegation.new \
       client: authenticated_client,
-      subject_token: params[:subject_token],
+      subject_token: request.request_parameters["subject_token"],
       api_resource: method(:service_resource?),
       requested_scope: params.key?(:scope) ? params[:scope].to_s : nil,
       resource: params[:resource].presence
@@ -50,6 +54,10 @@ class Oauth::TokenExchangesController < Oauth::BaseController
   end
 
   private
+    def instrument_token_request(&)
+      ActiveSupport::Notifications.instrument "token_request.oauth", grant_type: "token_exchange", &
+    end
+
     # A server that isn't configured for delegation answers as one that never
     # heard of the grant, which is what its metadata says.
     def require_delegation_enabled
@@ -78,8 +86,13 @@ class Oauth::TokenExchangesController < Oauth::BaseController
       end
     end
 
+    # The subject token is a bearer credential, so like a client secret it's
+    # read from the body alone: in the query it would be in every proxy's and
+    # access log's copy of the URL.
     def require_params
-      if !string_param?(:subject_token)
+      if request.query_parameters.key?("subject_token")
+        oauth_error "invalid_request", "subject_token must be sent in the request body"
+      elsif !string_param?(:subject_token)
         oauth_error "invalid_request", "subject_token required"
       elsif !string_param?(:subject_token_type)
         oauth_error "invalid_request", "subject_token_type required"

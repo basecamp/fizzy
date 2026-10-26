@@ -229,6 +229,26 @@ class OauthTokenExchangeTest < ActionDispatch::IntegrationTest
     assert_response :service_unavailable
   end
 
+  test "a dark server answers 404 before saying whether it supports the exchange" do
+    Oauth::TokenDelegation.stubs(:enabled?).returns(false)
+
+    with_oauth_availability(acceptance: false) do
+      exchange
+    end
+
+    assert_response :not_found
+  end
+
+  test "an exchange is timed as a token request of its own grant type" do
+    timed = []
+    callback = ->(event) { timed << event.payload[:grant_type] }
+
+    ActiveSupport::Notifications.subscribed(callback, "token_request.oauth") { exchange }
+
+    assert_response :success
+    assert_equal %w[ token_exchange ], timed
+  end
+
   test "a malformed request is invalid_request" do
     exchange subject_token: ""
     assert_oauth_error "invalid_request", "subject_token required"
@@ -250,6 +270,18 @@ class OauthTokenExchangeTest < ActionDispatch::IntegrationTest
 
     exchange resource: RESOURCE
     assert_oauth_error "invalid_target", "resource does not match the subject token's account"
+  end
+
+  test "a subject token in the query string is refused, even with the body otherwise complete" do
+    body = { grant_type: GRANT_TYPE, subject_token_type: ACCESS_TOKEN_TYPE, client_id: @client.client_id, client_secret: @secret }
+
+    assert_no_difference -> { Identity::AccessToken.delegated.count } do
+      untenanted do
+        post oauth_token_path(subject_token: @subject.raw_token), params: body, headers: { "Content-Type" => "application/x-www-form-urlencoded" }
+      end
+    end
+
+    assert_oauth_error "invalid_request", "subject_token must be sent in the request body"
   end
 
   test "several resources at once are invalid_target, even when the last names Fizzy's API" do

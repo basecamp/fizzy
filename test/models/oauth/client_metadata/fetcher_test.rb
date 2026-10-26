@@ -142,7 +142,7 @@ class Oauth::ClientMetadata::FetcherTest < ActiveSupport::TestCase
   end
 
   test "freshness follows the document's caching headers, within bounds" do
-    { "max-age=600" => 10.minutes, "max-age=10" => 5.minutes, "max-age=999999" => 24.hours, "no-store" => 5.minutes }.each do |cache_control, expected|
+    { "max-age=600" => 10.minutes, %(max-age="86400") => 24.hours, "max-age=10" => 5.minutes, "max-age=999999" => 24.hours, "no-store" => 5.minutes }.each do |cache_control, expected|
       stub_request(:get, URL).to_return(status: 200, body: "{}", headers: { content_type: "application/json", cache_control: cache_control })
 
       assert_equal expected, @fetcher.fetch(URL).expires_in, cache_control

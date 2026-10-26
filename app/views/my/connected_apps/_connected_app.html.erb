@@ -1,5 +1,4 @@
 <% remote_hosts = oauth_client_remote_hosts(client) %>
-<% permission = tokens.any?(&:write?) ? "write" : "read" %>
 
 <article class="connected-app" id="<%= dom_id(client, :connected_app) %>">
   <div class="connected-app__details flex flex-column">
@@ -15,13 +14,17 @@
           Name set by an app on your device
         <% end %>
       </p>
+    <% elsif client.metadata_document? %>
+      <p class="txt-x-small txt-subtle margin-none">Name set by the app at <%= URI.parse(client.client_id).host %></p>
     <% elsif client.trusted? %>
       <p class="txt-x-small txt-subtle margin-none">Made by 37signals</p>
     <% end %>
 
-    <p class="connected-app__access txt-small margin-none">
-      <strong><%= oauth_access_label(permission) %></strong>, in every account you belong to
-    </p>
+    <% oauth_connected_app_reach(tokens).each do |permission, accounts| %>
+      <p class="connected-app__access txt-small margin-none">
+        <strong><%= oauth_access_label(permission) %></strong>, <% if accounts %>in <%= to_sentence(accounts.map { |account| tag.bdi(account.name) }) %><% else %>in every account you belong to<% end %>
+      </p>
+    <% end %>
 
     <%# updated_at moves each time the app renews its access %>
     <p class="txt-x-small txt-subtle margin-none">

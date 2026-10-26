@@ -22,6 +22,17 @@ class OauthAuthorizationSwitchTest < ActionDispatch::IntegrationTest
     assert_equal expected_return_url, session[:return_to_after_authenticating]
   end
 
+  test "switching with a bearer token and no browser session is refused, not half-handled" do
+    token = identities(:david).access_tokens.create!(permission: :write)
+    reset!
+
+    assert_no_difference -> { identities(:david).sessions.count } do
+      post_switch authorization_params, as: :json, headers: { "Authorization" => "Bearer #{token.raw_token}" }
+    end
+
+    assert_response :forbidden
+  end
+
   test "switching requires a same-origin request" do
     with_forgery_protection do
       assert_no_difference -> { identities(:david).sessions.count } do

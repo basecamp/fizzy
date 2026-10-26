@@ -1,6 +1,8 @@
 <% identity = oauth_client_display_identity(@client, @redirect_uri) %>
 <% redirect_host = oauth_redirect_host(@redirect_uri) %>
-<% @page_title = "Authorize #{identity}" %>
+<%# A self-registered web app is headed by where its access goes, as bc3's
+    consent reads: "Authorize the app at <host>". %>
+<% @page_title = "Authorize #{@client.dynamically_registered? && redirect_host ? "the app at #{redirect_host}" : identity}" %>
 
 <% content_for :header do %>
   <h1 class="header__title"><%= @page_title %></h1>

@@ -18,4 +18,11 @@ class ApplicationController < ActionController::Base
   etag { RENDERING_VERSION }
   stale_when_importmap_changes
   allow_browser versions: :modern
+
+  # Here rather than in Authentication: Active Storage's controllers include
+  # that too, and a handler declared there would shadow ones added to their
+  # base controller after.
+  rescue_from Identity::AccessToken::Disconnected do
+    request_bearer_authentication error: "invalid_token", error_description: "The access token is expired, revoked, or invalid"
+  end
 end

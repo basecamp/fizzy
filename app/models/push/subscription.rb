@@ -25,8 +25,13 @@ class Push::Subscription < ApplicationRecord
   # The grant must also be one Fizzy honors (Oauth::Availability): while
   # OAuth is dark, or staff only and the user isn't staff, an app whose tokens
   # are refused gets no notifications either.
+  #
+  # An account-bound grant reaches only its own account, so only it, or a grant
+  # bound to no account, keeps a subscription in that account delivering: once
+  # the app's grant for one account ends, a grant it holds for another account
+  # doesn't carry that account's notifications.
   scope :deliverable_to, ->(user) do
-    grants = Identity::AccessToken.grants.unlapsed.where(identity_id: user.identity_id, oauth_client: Oauth::Availability.accepted_clients)
+    grants = Identity::AccessToken.grants.unlapsed.where(identity_id: user.identity_id, account_id: [ nil, user.account_id ], oauth_client: Oauth::Availability.accepted_clients)
 
     where(oauth_client_id: nil).or \
       where(oauth_client_id: (Oauth::Availability.admits?(user.identity) ? grants : grants.none).select(:oauth_client_id))

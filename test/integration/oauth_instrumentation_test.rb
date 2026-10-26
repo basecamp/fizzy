@@ -62,6 +62,17 @@ class OauthInstrumentationTest < ActionDispatch::IntegrationTest
     assert_equal [ { endpoint: "tokens", error_code: "invalid_grant", client_type: "unknown" } ], payloads
   end
 
+  test "an authorization error shown on the error page is counted too" do
+    sign_in_as :david
+
+    payloads = notifications("error.oauth") do
+      untenanted { get new_oauth_authorization_path, params: { client_id: "nobody_#{SecureRandom.hex}", response_type: "code" } }
+    end
+
+    assert_response :bad_request
+    assert_equal [ { endpoint: "authorizations", error_code: "invalid_request", client_type: "unknown" } ], payloads
+  end
+
   test "a rejected registration is a clients error" do
     payloads = notifications("error.oauth") do
       untenanted { post oauth_clients_path, as: :json, params: { redirect_uris: %w[ http://example.com/callback ] } }

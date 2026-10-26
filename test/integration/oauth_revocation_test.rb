@@ -47,6 +47,15 @@ class OauthRevocationTest < ActionDispatch::IntegrationTest
     assert Identity::AccessToken.exists?(token.id)
   end
 
+  test "a case variant of a metadata document client's id names no client, and revokes nothing" do
+    client = Oauth::Client.create! name: "Claude", client_id: "https://claude.ai/client.json", redirect_uris: %w[ https://claude.ai/callback ], client_id_metadata_document: true
+    token = grant_for(client)
+
+    revoke token.raw_token, params: { client_id: "https://claude.ai/CLIENT.json" }
+
+    assert Identity::AccessToken.exists?(token.id)
+  end
+
   test "a public client revokes its own token by naming its client_id" do
     client = oauth_clients(:mcp_client)
 

@@ -113,7 +113,11 @@ class Oauth::TokenDelegation
   # locks in the other order.
   def mint!
     Identity::AccessToken.transaction do
-      unless Oauth::Client.lock.find_by(id: client.id)&.delegation_client?
+      # The locked row is the client judged from here on, so a change to its
+      # scopes or resource that committed while this waited for the lock
+      # governs the token it mints.
+      @client = Oauth::Client.lock.find_by(id: client.id)
+      unless client&.delegation_client?
         raise Refusal.new("unauthorized_client", "Client not configured for token delegation")
       end
 

@@ -83,6 +83,11 @@ class OauthAuditTest < ActionDispatch::IntegrationTest
     assert_equal grant_id, revoked[:grant_id]
     assert_equal "code_replayed", revoked[:reason]
     assert_equal "system", revoked[:actor]
+
+    events = capture_oauth_events { exchange code }
+    third = oauth_event(events, "oauth.code.replayed")
+    assert_nil third[:grant_id]
+    assert_equal @identity.id, third[:identity_id]
   end
 
   test "refreshing, a retry within the grace window, and reuse past it" do

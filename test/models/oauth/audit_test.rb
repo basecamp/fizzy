@@ -10,6 +10,21 @@ class Oauth::AuditTest < ActiveSupport::TestCase
     @identity = identities(:david)
   end
 
+  test "a refresh rolled back by its caller reports nothing, and a committed one reports once" do
+    grant = @identity.access_tokens.create!(oauth_client: @client, permission: :write)
+
+    events = capture_oauth_events do
+      Identity::AccessToken.transaction do
+        assert grant.refresh(permission: "read")
+        raise ActiveRecord::Rollback
+      end
+    end
+    assert_empty events
+
+    events = capture_oauth_events { assert grant.reload.refresh(permission: "read") }
+    assert_equal %w[ oauth.token.refreshed oauth.grant.narrowed ], oauth_event_names(events)
+  end
+
   test "the idle sweep revokes a lapsed grant" do
     grant = @identity.access_tokens.create!(oauth_client: @client, permission: :read)
     grant.update_columns updated_at: (Identity::AccessToken::REFRESH_IDLE_LIMIT + 1.minute).ago
@@ -34,6 +49,21 @@ class Oauth::AuditTest < ActiveSupport::TestCase
     assert_equal client.client_id, swept[:client_id]
     assert_equal "unused", swept[:reason]
     assert_equal "system", swept[:actor]
+  end
+
+  test "a client sweep rolled back by its caller reports nothing" do
+    client = Oauth::Client.create!(name: "Abandoned", redirect_uris: %w[ http://127.0.0.1:9999/callback ], dynamically_registered: true)
+    client.update_columns updated_at: (Oauth::Client::UNUSED_RETENTION + 1.day).ago
+
+    events = capture_oauth_events do
+      Oauth::Client.transaction do
+        client.destroy_if_still_unused
+        raise ActiveRecord::Rollback
+      end
+    end
+
+    assert_empty events
+    assert Oauth::Client.exists?(client.id)
   end
 
   test "a client the sweep spares reports nothing" do
@@ -130,7 +160,8 @@ class Oauth::AuditTest < ActiveSupport::TestCase
     Oauth::Client.cleanup
     Oauth::RetiredRefreshToken.cleanup
     Oauth::RetiredRefreshToken.forget_successors
+    Oauth::RedeemedAuthorizationCode.cleanup
 
-    assert_equal %i[ lapsed_grants stale_clients retired_refresh_tokens refresh_successors ], steps
+    assert_equal %i[ lapsed_grants stale_clients retired_refresh_tokens refresh_successors redeemed_authorization_codes ], steps
   end
 end

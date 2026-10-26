@@ -34,6 +34,12 @@ class Yabeda::OauthTest < ActionDispatch::IntegrationTest
     assert_equal 1, count(:token_errors_total, error_code: "invalid_client", client_type: "confidential")
   end
 
+  test "delegation exchange errors count as token errors" do
+    ActiveSupport::Notifications.instrument "error.oauth", endpoint: "token_exchanges", error_code: "invalid_grant", client_type: "confidential"
+
+    assert_equal 1, count(:token_errors_total, error_code: "invalid_grant", client_type: "confidential")
+  end
+
   test "consent approved and denied" do
     sign_in_as :david
     untenanted { post oauth_authorization_path, params: consent_params }

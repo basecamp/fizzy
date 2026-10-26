@@ -27,6 +27,19 @@ class Oauth::TokenDelegationTest < ActiveSupport::TestCase
     assert_equal @subject, @token.delegated_from
   end
 
+  test "a delegated token whose grant is deleted mid-request sets up nothing" do
+    in_flight = Identity::AccessToken.find(delegation.validate!.mint!.id)
+    @subject.destroy!
+
+    assert_raises(Identity::AccessToken::Disconnected) { in_flight.connected_app! }
+
+    Current.set(access_token: in_flight) do
+      assert_raises(Identity::AccessToken::Disconnected) do
+        Webhook.create!(board: boards(:writebook), name: "Late", url: "https://example.com/hook")
+      end
+    end
+  end
+
   test "the token lives at most five minutes" do
     token = delegation.validate!.mint!
 
@@ -114,6 +127,23 @@ class Oauth::TokenDelegationTest < ActiveSupport::TestCase
 
     error = assert_raises(Oauth::TokenDelegation::Refusal) { @delegation.mint! }
     assert_equal "invalid_scope", error.error
+  end
+
+  test "a mint asking for write after the client was narrowed to read is refused" do
+    delegation(requested_scope: "write").validate!
+    Oauth::Client.find(@client.id).update_columns scopes: %w[ read ]
+
+    error = assert_raises(Oauth::TokenDelegation::Refusal) { @delegation.mint! }
+    assert_equal "invalid_scope", error.error
+    assert_not @subject.reload.delegated_tokens.exists?
+  end
+
+  test "a well-shaped but unknown fizzy_dt_ token never looks for an undigested personal token on the primary" do
+    on_the_primary -> { } do
+      Identity::AccessToken.expects(:find_and_digest_undigested).once.returns(nil)
+
+      assert_nil Identity::AccessToken.find_honored(Identity::AccessToken.generate_token(:delegated))
+    end
   end
 
   test "a mint racing the client's deletion is refused" do

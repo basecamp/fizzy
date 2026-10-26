@@ -62,9 +62,9 @@ class Oauth::Client < ApplicationRecord
 
   before_create :generate_client_secret, if: :confidential?
 
-  # Self-registration is the client's own act; any other client is
-  # provisioned by an operator.
-  after_create_commit -> { Oauth::Audit.record "client.registered", client: self, actor: dynamically_registered? ? "client" : "admin" }
+  # Self-registration is the client's own act, whether by registration or from
+  # a metadata document; any other client is provisioned by an operator.
+  after_create_commit -> { Oauth::Audit.record "client.registered", client: self, actor: self_registered? ? "client" : "admin" }
 
   attribute :redirect_uris, default: -> { [] }
   attribute :scopes, default: -> { %w[ read ] }
@@ -136,13 +136,18 @@ class Oauth::Client < ApplicationRecord
   # the absence of tokens: a grant issued and revoked since the sweep picked
   # this client has touched it, and restarted its retention period.
   #
-  # The event follows the lock's commit, so it reports a sweep that happened.
+  # The event follows the commit, a caller's own transaction included, so it
+  # reports a sweep that happened.
   def destroy_if_still_unused
     swept = with_lock do
       destroy if self.class.stale.exists?(id)
     end
 
-    Oauth::Audit.record "client.swept", client: self, actor: "system", reason: "unused" if swept
+    if swept
+      ActiveRecord.after_all_transactions_commit do
+        Oauth::Audit.record "client.swept", client: self, actor: "system", reason: "unused"
+      end
+    end
   rescue ActiveRecord::RecordNotFound
     # Already gone, deleted since the sweep picked it.
   end

@@ -12,10 +12,11 @@ class OauthConsentScreenTest < ActionDispatch::IntegrationTest
     get_consent_screen client
 
     assert_response :success
-    assert_select "title", text: /Authorize connector.example.com/
+    assert_select "title", text: /Authorize the app at connector\.example\.com/
+    assert_select "h1", text: "Authorize the app at connector.example.com"
     assert_select ".oauth-client__name", text: "connector.example.com"
-    assert_select ".oauth-client__self-name", text: /“Totally Fizzy”\s+·\s+name set by the app at\s+connector.example.com/
-    assert_select ".oauth-client__warning", text: /Fizzy hasn't checked this app/
+    assert_select ".oauth-client__self-name", text: /\ASays it’s “Totally Fizzy”\z/
+    assert_select ".oauth-client__warning", text: /\AWe haven’t checked this app\. Anyone can run an app at any address, so only authorize it if you trust connector\.example\.com\.\z/
     assert_select ".oauth-consent__destination strong", text: "connector.example.com"
   end
 
@@ -24,8 +25,8 @@ class OauthConsentScreenTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select ".oauth-client__name", text: "An app on your device"
-    assert_select ".oauth-client__self-name", text: /“Test MCP Client”\s+·\s+name set by an app running on your device/
-    assert_select ".oauth-client__warning", text: /only authorize it if you started it/
+    assert_select ".oauth-client__self-name", text: /\ASays it’s “Test MCP Client”\z/
+    assert_select ".oauth-client__warning", text: /\AWe haven’t checked this app\. It runs on your device and will get this access, so only authorize it if you started it\.\z/
     assert_select ".oauth-consent__destination", text: /the app on your device/
   end
 

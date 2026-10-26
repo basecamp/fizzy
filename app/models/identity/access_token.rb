@@ -205,7 +205,8 @@ class Identity::AccessToken < ApplicationRecord
       end
     rescue ActiveRecord::RecordNotUnique
       replayed = where(authorization_code_jti: authorization_code.jti).each { |grant| grant.revoke(reason: "code_replayed", actor: "system") }
-      Oauth::Audit.record "code.replayed", grant: replayed.first, client: attributes[:oauth_client], actor: "client"
+      # The code names its identity even when no grant is left to.
+      Oauth::Audit.record "code.replayed", grant: replayed.first, client: attributes[:oauth_client], identity_id: authorization_code.identity_id, actor: "client"
       remember_redeemed authorization_code
       nil
     end
@@ -224,9 +225,16 @@ class Identity::AccessToken < ApplicationRecord
         end
       end
 
+      # Only a delegated token is looked for here, by its digest alone: the
+      # plaintext fallback heals legacy personal tokens, which never have this
+      # shape, so a forged one can't make the primary scan for them.
       def find_honored_delegated_on_primary(token)
         if token.is_a?(String) && token.match?(DELEGATED_TOKEN) && Deployment::DatabaseResolver.in_primary_datacenter?
-          ApplicationRecord.with_writing_role { find_honored_here(token) }
+          ApplicationRecord.with_writing_role do
+            if (access_token = active.delegated.find_by(token_digest: TokenDigester.digests(token))) && access_token.honored?
+              access_token
+            end
+          end
         end
       end
       # MySQL compares `token` case-insensitively, so a match is confirmed
@@ -288,6 +296,17 @@ class Identity::AccessToken < ApplicationRecord
   end
   alias_method :app, :connected_app
 
+  # An app's token whose grant or client is deleted while its request is in
+  # flight, as when the person disconnects the app, has no app left to answer
+  # for what it sets up. Recorded without one, a webhook or push subscription
+  # would read as the person's own and outlive the disconnect, so it sets up
+  # nothing instead.
+  class Disconnected < StandardError; end
+
+  def connected_app!
+    connected_app || (raise Disconnected if oauth?)
+  end
+
   # An audienced grant was issued for another protected resource (the hosted
   # MCP server), named at consent by the RFC 8707 resource parameter. It's
   # that resource's credential, never Fizzy's API's: the API refuses it, and
@@ -348,10 +367,16 @@ class Identity::AccessToken < ApplicationRecord
       end
     end
 
+    # Recorded once the rotation commits, as issuance and revocation are, so a
+    # caller that refreshes inside a transaction of its own and rolls it back
+    # reports no refresh.
     if rotated_now
-      Oauth::Audit.record "token.refreshed", grant: self, actor: "client", grant_type: "refresh_token", permission: self.permission
-      # A refresh may only narrow (RFC 6749 §6), so a change is a narrowing.
-      Oauth::Audit.record "grant.narrowed", grant: self, actor: "client", permission: self.permission if narrowed
+      rotated_permission = self.permission
+      ActiveRecord.after_all_transactions_commit do
+        Oauth::Audit.record "token.refreshed", grant: self, actor: "client", grant_type: "refresh_token", permission: rotated_permission
+        # A refresh may only narrow (RFC 6749 §6), so a change is a narrowing.
+        Oauth::Audit.record "grant.narrowed", grant: self, actor: "client", permission: rotated_permission if narrowed
+      end
     end
 
     rotated_now
@@ -365,9 +390,10 @@ class Identity::AccessToken < ApplicationRecord
 
     # While OAuth is staff only, an OAuth token works only for staff, so a
     # grant stops working once its owner isn't. A personal access token isn't
-    # OAuth and always works.
+    # OAuth and always works. The switch is checked first, so an install that
+    # isn't staff only doesn't load each token's client to tell.
     def honored_identity?
-      personal? || !Oauth::Availability.staff_only? || identity&.staff? == true
+      !Oauth::Availability.staff_only? || personal? || identity&.staff? == true
     end
 
     def honored_client?
