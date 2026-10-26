@@ -60,6 +60,13 @@ env:
     RAILS_ENV: beta
     RAILS_LOG_LEVEL: fatal # suppress unstructured log lines
     OAUTH_STAFF_ONLY: "true" # OAuth is for 37signals staff until we open it up
+<% if @beta_number == "1" %>
+    # beta1 is lit for staff (OAUTH_STAFF_ONLY above): OAuth answers, Client ID Metadata Documents are
+    # accepted from the allowlisted hosts in deploy.yml, and grants can be audienced to beta1's MCP server.
+    OAUTH_ACCEPTANCE_ENABLED: "true"
+    OAUTH_CIMD_ENABLED: "true"
+    FIZZY_OAUTH_MCP_RESOURCES: "https://beta1-mcp.fizzy-beta.com/mcp"
+<% end %>
     MYSQL_DATABASE_HOST: fizzy-mysql-primary
     MYSQL_DATABASE_REPLICA_HOST: fizzy-mysql-replica
     MYSQL_SOLID_CABLE_HOST: fizzy-mysql-primary
@@ -116,7 +123,8 @@ accessories:
       - load-balancer:/home/kamal-proxy/.config/kamal-proxy
 
   # Hosted Fizzy MCP (see saas/config/deploy.yml), on the beta's one web host. A beta shares production's
-  # database, so its exchange (once lit) uses production's fizzy-mcp-server client row and secret.
+  # database, and an MCP client fronts exactly one resource, so a beta's exchange needs a client row of its
+  # own (fizzy-mcp-server-beta<N>, oauth:provision_mcp_client CLIENT_ID=…), never production's.
   fizzy_mcp:
     host: <%= @web_hosts[0] %>
     proxy:
