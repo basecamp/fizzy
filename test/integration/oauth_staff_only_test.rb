@@ -62,6 +62,33 @@ class OauthStaffOnlyTest < ActionDispatch::IntegrationTest
     assert_equal "invalid_grant", response.parsed_body["error"]
   end
 
+  test "a code replayed once its owner isn't staff still revokes the grant it minted" do
+    code = authorization_code_for(identities(:david))
+
+    with_oauth_availability staff_only: true do
+      redeem code
+      assert_response :success
+      grant = Identity::AccessToken.find_by_raw_token(response.parsed_body["access_token"])
+
+      identities(:david).update!(staff: false)
+      redeem code
+
+      assert_response :bad_request
+      assert_equal "invalid_grant", response.parsed_body["error"]
+      assert_not Identity::AccessToken.exists?(grant.id), "a replay revokes the grant whoever owns it"
+    end
+  end
+
+  test "anyone else asking for consent as JSON is refused as JSON" do
+    with_oauth_availability staff_only: true do
+      sign_in_as :jz
+      untenanted { get new_oauth_authorization_path(format: :json), params: consent_params }
+
+      assert_response :forbidden
+      assert_equal "access_denied", response.parsed_body["error"]
+    end
+  end
+
   test "a staff code redeems" do
     with_oauth_availability staff_only: true do
       redeem authorization_code_for(identities(:david))
