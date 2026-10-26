@@ -91,6 +91,26 @@ class OauthStaffOnlyTest < ActionDispatch::IntegrationTest
     assert grant.reload.persisted?, "a refused refresh leaves the grant to its owner to revoke"
   end
 
+  test "a replayed refresh token still revokes the grant once its owner isn't staff" do
+    grant = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client))
+    presented = grant.raw_refresh_token
+
+    with_oauth_availability staff_only: true do
+      refresh grant
+      assert_response :success
+
+      identities(:david).update!(staff: false)
+      travel Oauth::RetiredRefreshToken::GRACE + 1.second
+
+      untenanted do
+        post oauth_token_path, params: { grant_type: "refresh_token", refresh_token: presented, client_id: oauth_clients(:mcp_client).client_id }, as: :json
+      end
+      assert_response :bad_request
+    end
+
+    assert_not Identity::AccessToken.exists?(grant.id), "a replay revokes the grant whoever owns it"
+  end
+
   test "a staff grant refreshes" do
     grant = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client))
 
