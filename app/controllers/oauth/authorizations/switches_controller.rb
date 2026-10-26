@@ -3,9 +3,13 @@
 # from its parameters once they have passed every check the consent screen's
 # did, never taken as a URL, so the only place this can return anyone to is
 # consent for that request. The account choice isn't carried: it was the
-# signed-out identity's.
+# signed-out identity's, so the account check that guards granting doesn't
+# apply here. The resource is carried, so an audienced request comes back as
+# one, and its consent asks the new identity to pick an account.
 class Oauth::Authorizations::SwitchesController < Oauth::AuthorizationsController
-  AUTHORIZATION_PARAMS = %i[ client_id redirect_uri response_type scope state code_challenge code_challenge_method ]
+  AUTHORIZATION_PARAMS = %i[ client_id redirect_uri response_type scope state code_challenge code_challenge_method resource ]
+
+  skip_before_action :set_account
 
   # A request too long to keep in the session can't be resumed, so the person
   # stays signed in rather than signing out to nowhere.

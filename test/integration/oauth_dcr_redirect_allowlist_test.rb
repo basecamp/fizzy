@@ -89,7 +89,7 @@ class OauthDcrRedirectAllowlistTest < ActionDispatch::IntegrationTest
     end
     assert_response :success
     assert_includes response.headers["Content-Security-Policy"], "cursor:"
-    assert_select "strong", text: "cursor://anysphere.cursor-mcp"
+    assert_select ".oauth-consent__destination", text: /the app on your device/
 
     untenanted do
       post oauth_authorization_path, params: {

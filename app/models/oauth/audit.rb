@@ -48,8 +48,12 @@ module Oauth::Audit
   end
 
   private
+    # A personal access token is a "pat" whether it predates the personal
+    # access client (no client) or was issued by it.
     def client_class(grant:, client:)
-      if client
+      if grant&.personal? || client&.personal_access?
+        "pat"
+      elsif client
         if client.dynamically_registered?
           "dcr"
         elsif client.trusted?
@@ -57,8 +61,6 @@ module Oauth::Audit
         else
           "partner"
         end
-      elsif grant && !grant.oauth_client_id?
-        "pat"
       end
     end
 end

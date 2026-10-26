@@ -1,6 +1,8 @@
 require "test_helper"
 
 class My::ConnectedAppsControllerTest < ActionDispatch::IntegrationTest
+  include OauthAvailabilityTestHelper
+
   setup do
     sign_in_as :david
     @identity = identities(:david)
@@ -107,8 +109,10 @@ class My::ConnectedAppsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "index names every remote host a self-registered app can send its access to, not just the first" do
-    client = Oauth::Client.create! name: "Two Homes", dynamically_registered: true,
-      redirect_uris: %w[ http://127.0.0.1:8888/callback https://one.example.com/cb https://two.example.com:8443/cb ]
+    client = with_dcr_allowed_https_hosts "one.example.com", "two.example.com" do
+      Oauth::Client.create! name: "Two Homes", dynamically_registered: true,
+        redirect_uris: %w[ http://127.0.0.1:8888/callback https://one.example.com/cb https://two.example.com:8443/cb ]
+    end
     @identity.access_tokens.create!(oauth_client: client, permission: :read)
 
     get my_connected_apps_path
