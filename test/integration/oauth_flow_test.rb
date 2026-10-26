@@ -57,7 +57,9 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :bad_request
-    assert_equal "invalid_request", response.parsed_body["error"]
+    assert_select "h2", text: "Can't authorize this app"
+    assert_select "p", text: "Unknown client"
+    assert_select "code", text: "invalid_request"
   end
 
   test "authorization rejects mismatched redirect_uri" do
@@ -367,8 +369,8 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     get_consent_screen scope: "read write"
 
     assert_response :success
-    assert_select "select[name=scope] option[selected]", count: 1
-    assert_select "select[name=scope] option[selected][value=?]", "read write"
+    assert_select "input[type=radio][name=scope][checked]", count: 1
+    assert_select "input[type=radio][name=scope][checked][value=?]", "read write"
   end
 
   test "authorization preselects Read + Write when the client requests write" do
@@ -377,7 +379,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     get_consent_screen scope: "write"
 
     assert_response :success
-    assert_select "select[name=scope] option[selected][value=?]", "read write"
+    assert_select "input[type=radio][name=scope][checked][value=?]", "read write"
   end
 
   test "authorization preselects Read for a read request" do
@@ -386,7 +388,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     get_consent_screen scope: "read"
 
     assert_response :success
-    assert_select "select[name=scope] option[selected][value=?]", "read"
+    assert_select "input[type=radio][name=scope][checked][value=?]", "read"
   end
 
   test "authorization offers no write option to a read-only client" do
@@ -396,8 +398,8 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     get_consent_screen client: client, scope: "read"
 
     assert_response :success
-    assert_select "select[name=scope] option", count: 1
-    assert_select "select[name=scope] option[value=?]", "read"
+    assert_select "input[type=radio][name=scope]", count: 1
+    assert_select "input[type=radio][name=scope][value=?]", "read"
   end
 
   test "consent grants the canonical read write scope" do
@@ -776,6 +778,59 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     fresh_code = authorization_code_for(client, code_verifier: code_verifier)
     untenanted { post oauth_token_path, params: exchange.merge(code: fresh_code), as: :json }
     assert_response :success
+  end
+
+  test "a code replayed again after its grant was revoked mints nothing" do
+    code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+    client = oauth_clients(:mcp_client)
+    exchange = { grant_type: "authorization_code", client_id: client.client_id, code: authorization_code_for(client, code_verifier: code_verifier),
+      redirect_uri: "http://127.0.0.1:8888/callback", code_verifier: code_verifier }
+
+    untenanted { post oauth_token_path, params: exchange, as: :json }
+    assert_response :success
+
+    untenanted { post oauth_token_path, params: exchange, as: :json }
+    assert_equal "invalid_grant", response.parsed_body["error"]
+
+    assert_no_difference "Identity::AccessToken.count" do
+      untenanted { post oauth_token_path, params: exchange, as: :json }
+    end
+    assert_response :bad_request
+    assert_equal "invalid_grant", response.parsed_body["error"]
+  end
+
+  test "a code redeemed before redemptions were recorded is remembered when it's replayed" do
+    code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+    client = oauth_clients(:mcp_client)
+    code = authorization_code_for(client, code_verifier: code_verifier)
+    exchange = { grant_type: "authorization_code", client_id: client.client_id, code: code,
+      redirect_uri: "http://127.0.0.1:8888/callback", code_verifier: code_verifier }
+    identities(:david).access_tokens.create!(oauth_client: client, authorization_code_jti: Oauth::AuthorizationCode.parse(code).jti)
+
+    untenanted { post oauth_token_path, params: exchange, as: :json }
+    assert_equal "invalid_grant", response.parsed_body["error"]
+
+    assert_no_difference "Identity::AccessToken.count" do
+      untenanted { post oauth_token_path, params: exchange, as: :json }
+    end
+    assert_equal "invalid_grant", response.parsed_body["error"]
+  end
+
+  test "a code can't be redeemed again once the person disconnects the app" do
+    code_verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+    client = oauth_clients(:mcp_client)
+    exchange = { grant_type: "authorization_code", client_id: client.client_id, code: authorization_code_for(client, code_verifier: code_verifier),
+      redirect_uri: "http://127.0.0.1:8888/callback", code_verifier: code_verifier }
+
+    untenanted { post oauth_token_path, params: exchange, as: :json }
+    assert_response :success
+    identities(:david).access_tokens.oauth.where(oauth_client: client).destroy_all
+
+    assert_no_difference "Identity::AccessToken.count" do
+      untenanted { post oauth_token_path, params: exchange, as: :json }
+    end
+    assert_response :bad_request
+    assert_equal "invalid_grant", response.parsed_body["error"]
   end
 
   test "a replayed code that fails PKCE does not revoke the grant" do

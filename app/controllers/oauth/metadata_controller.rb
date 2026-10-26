@@ -17,8 +17,9 @@ class Oauth::MetadataController < Oauth::BaseController
       token_endpoint_auth_methods_supported: Oauth::Client::AUTH_METHODS,
       code_challenge_methods_supported: %w[ S256 ],
       scopes_supported: %w[ read write ],
-      authorization_response_iss_parameter_supported: true
-    }
+      authorization_response_iss_parameter_supported: true,
+      client_id_metadata_document_supported: (true if Oauth::Availability.metadata_documents_enabled?)
+    }.compact
   end
 
   private

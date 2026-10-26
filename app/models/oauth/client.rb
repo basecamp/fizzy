@@ -9,6 +9,22 @@ class Oauth::Client < ApplicationRecord
   # this long is abandoned (RFC 7591 §5).
   UNUSED_RETENTION = 30.days
 
+  # The grants a client may obtain at the authorization and token endpoints.
+  # An allowlist, so a client is refused any grant type it doesn't list.
+  GRANT_TYPES = %w[ authorization_code refresh_token ]
+
+  # Personal access tokens are issued by this first-party client, as bc3's are
+  # by bc-personal-access, so they're one-off access tokens of the same kind
+  # as every other. It is provisioned by a migration and on first use, never
+  # registered: the sweep, which takes only self-registered clients, leaves it
+  # alone. It is listed for no grant type, so the authorization and token
+  # endpoints never mint, refresh or exchange its tokens: only
+  # My::AccessTokensController issues them. Its client_id has a hyphen, which
+  # no generated client_id (base58) can, so no other client can ever claim it.
+  PERSONAL_ACCESS_CLIENT_ID = "fizzy-personal-access"
+  PERSONAL_ACCESS_ATTRIBUTES = { client_id: PERSONAL_ACCESS_CLIENT_ID, name: "Personal Access Tokens",
+    trusted: true, dynamically_registered: false, redirect_uris: [], scopes: %w[ read write ], token_endpoint_auth_method: "none" }
+
   has_many :access_tokens, class_name: "Identity::AccessToken", foreign_key: :oauth_client_id, inverse_of: :oauth_client, dependent: :destroy
 
   has_secure_token :client_id, length: 32
@@ -18,6 +34,10 @@ class Oauth::Client < ApplicationRecord
   # same order, so no grant can land after the cascade and be stranded.
   before_destroy :lock_client, prepend: true
 
+  # Destroying the issuer would cascade to every client-backed personal access
+  # token on the install.
+  before_destroy :refuse_to_destroy_personal_access, prepend: true
+
   validates :name, presence: true, length: { maximum: 255 }
   validates :client_id, uniqueness: true, allow_nil: true
   # Registration is open and unauthenticated, so what it stores is bounded:
@@ -26,12 +46,14 @@ class Oauth::Client < ApplicationRecord
   MAXIMUM_REDIRECT_URI_LENGTH = 2000
 
   # A client that only fronts a protected resource exchanges tokens and never
-  # sends anyone through authorization, so it registers no redirect.
-  validates :redirect_uris, presence: true, unless: :protected_resource?
+  # sends anyone through authorization, and the personal access client issues
+  # personal access tokens without one, so neither registers a redirect.
+  validates :redirect_uris, presence: true, unless: -> { personal_access? || protected_resource? }
   validates :redirect_uris, length: { maximum: MAXIMUM_REDIRECT_URIS }
   validates :token_endpoint_auth_method, inclusion: { in: AUTH_METHODS }
   validate :redirect_uris_are_valid
   validate :protected_resource_is_valid
+  validate :added_https_hosts_are_vetted, if: -> { dynamically_registered? && (new_record? || redirect_uris_changed?) }
 
   # A confidential client's secret is stored as a digest (TokenDigester). The
   # raw secret exists only in memory on the record that generated it, for the
@@ -40,19 +62,46 @@ class Oauth::Client < ApplicationRecord
 
   before_create :generate_client_secret, if: :confidential?
 
+  # Self-registration is the client's own act; any other client is
+  # provisioned by an operator.
+  after_create_commit -> { Oauth::Audit.record "client.registered", client: self, actor: dynamically_registered? ? "client" : "admin" }
+
   attribute :redirect_uris, default: -> { [] }
   attribute :scopes, default: -> { %w[ read ] }
 
   scope :trusted, -> { where trusted: true }
   scope :dynamically_registered, -> { where dynamically_registered: true }
+  scope :metadata_documents, -> { where client_id_metadata_document: true }
+
+  # Registered by no one Fizzy vetted: by registration (RFC 7591), or from a
+  # metadata document. Either comes back on its own when it's used again.
+  scope :self_registered, -> { dynamically_registered.or(metadata_documents) }
 
   # A grant touches its client when it is created or destroyed, so updated_at
   # is the last grant activity: an app the user disconnected yesterday is not
   # swept for having registered long ago.
-  scope :stale, -> { dynamically_registered.where.missing(:access_tokens).where(updated_at: ...UNUSED_RETENTION.ago) }
+  scope :stale, -> { self_registered.where.missing(:access_tokens).where(updated_at: ...UNUSED_RETENTION.ago) }
 
-  def self.cleanup
-    stale.find_each(&:destroy_if_still_unused)
+  scope :personal_access, -> { where client_id: PERSONAL_ACCESS_CLIENT_ID }
+
+  class << self
+    def cleanup
+      Oauth.cleanup_step :stale_clients do
+        stale.find_each(&:destroy_if_still_unused)
+      end
+    end
+
+    # A fresh install loads the schema rather than running migrations, so the
+    # issuer may not exist yet when the first personal access token is made.
+    # Two first uses can race: the loser either hits the unique index, which
+    # create_or_find_by! answers by finding on client_id alone, or, when the
+    # winner committed before its uniqueness validation ran, fails that
+    # validation, and then finds the winner's row the same way.
+    def personal_access_issuer
+      personal_access.take || create_or_find_by!(client_id: PERSONAL_ACCESS_CLIENT_ID) { it.assign_attributes PERSONAL_ACCESS_ATTRIBUTES }
+    rescue ActiveRecord::RecordInvalid
+      personal_access.take or raise
+    end
   end
 
   # The hosted MCP server's own client, by the id its deployment names
@@ -86,10 +135,14 @@ class Oauth::Client < ApplicationRecord
   # token for a deleted client. The recheck is the whole stale test, not just
   # the absence of tokens: a grant issued and revoked since the sweep picked
   # this client has touched it, and restarted its retention period.
+  #
+  # The event follows the lock's commit, so it reports a sweep that happened.
   def destroy_if_still_unused
-    with_lock do
+    swept = with_lock do
       destroy if self.class.stale.exists?(id)
     end
+
+    Oauth::Audit.record "client.swept", client: self, actor: "system", reason: "unused" if swept
   rescue ActiveRecord::RecordNotFound
     # Already gone, deleted since the sweep picked it.
   end
@@ -115,8 +168,58 @@ class Oauth::Client < ApplicationRecord
     end
   end
 
+  def personal_access?
+    client_id == PERSONAL_ACCESS_CLIENT_ID
+  end
+
+  def grant_types
+    personal_access? ? [] : GRANT_TYPES
+  end
+
+  def allows_grant_type?(grant_type)
+    grant_type.in?(grant_types)
+  end
+
+  # The client a presented client_id names, compared as an exact string. The
+  # column's collation is case-insensitive, and a metadata document URL is an
+  # exact identifier, so a case variant of one names no client.
+  def self.find_presented(client_id)
+    if client_id.is_a?(String) && (client = find_by(client_id: client_id)) && client.client_id == client_id
+      client
+    end
+  end
+
+  # Provisioned from a Client ID Metadata Document (Oauth::ClientMetadata).
+  def metadata_document?
+    client_id_metadata_document?
+  end
+
+  def self_registered?
+    dynamically_registered? || metadata_document?
+  end
+
+  # What kind of app this is, as this server sees it rather than as it names
+  # itself: Connected Apps groups by it. Our own apps are the trusted ones. An
+  # app whose every callback stays on this device, a loopback address or an
+  # app's own URL scheme, is a tool running here, such as a CLI or a desktop
+  # assistant. Anything else receives its access somewhere on the web.
+  def connection_kind
+    if trusted?
+      :fizzy
+    elsif redirect_uris.all? { |uri| on_device_uri?(uri) }
+      :local
+    else
+      :web
+    end
+  end
+
   def confidential?
     token_endpoint_auth_method.in?(SECRET_AUTH_METHODS)
+  end
+
+  # RFC 6749 §2.1's client types, as bc3 labels its metrics.
+  def client_type
+    confidential? ? "confidential" : "public"
   end
 
   def authenticate_secret(secret)
@@ -131,7 +234,7 @@ class Oauth::Client < ApplicationRecord
   # the consent screen. A self-registered https host is one nobody vetted, so
   # bouncing to it unprompted would make us an open redirector (RFC 9700 §4.11.2).
   def vetted_redirect?(uri)
-    !dynamically_registered? || loopback_uri?(uri)
+    !self_registered? || loopback_uri?(uri)
   end
 
   # The protected resource this client fronts, if any: the hosted MCP server's
@@ -161,6 +264,15 @@ class Oauth::Client < ApplicationRecord
     def lock_client
       self.class.lock.where(id: id).pluck(:id)
       access_tokens.reset
+    end
+
+    # Reads the stored client_id: lock_client no longer reloads the row, so an
+    # unsaved change to the issuer's client_id mustn't let it cascade.
+    def refuse_to_destroy_personal_access
+      if client_id_in_database == PERSONAL_ACCESS_CLIENT_ID
+        errors.add :base, "The personal access token issuer can't be deleted"
+        throw :abort
+      end
     end
 
     def generate_client_secret
@@ -195,25 +307,47 @@ class Oauth::Client < ApplicationRecord
         errors.add :redirect_uris, "must not contain fragments"
       end
 
-      if dynamically_registered? && !valid_loopback_uri?(parsed) && !valid_https_uri?(parsed)
-        errors.add :redirect_uris, "must be an https or local loopback URI for dynamically registered clients"
+      if self_registered? && !Oauth.dcr_redirect_shape?(parsed)
+        errors.add :redirect_uris, "must be a local loopback, https or allowed app-scheme URI for dynamically registered clients"
       end
     rescue URI::InvalidURIError
       errors.add :redirect_uris, "includes an invalid URI"
     end
 
-    def loopback_uri?(uri)
-      Oauth.loopback_host?(URI.parse(uri).host)
+    def on_device_uri?(uri)
+      loopback_uri?(uri) || !URI.parse(uri).scheme.to_s.downcase.in?(%w[ http https ])
     rescue URI::InvalidURIError
       false
     end
 
-    def valid_loopback_uri?(parsed)
-      parsed.scheme == "http" && Oauth.plain_authority?(parsed) && Oauth.loopback_host?(parsed.host)
+    # http only: an app scheme naming a loopback host (cursor://localhost) is
+    # dispatched to an app, not served on loopback (RFC 8252 §7.3).
+    def loopback_uri?(uri)
+      parsed = URI.parse(uri)
+      parsed.scheme&.downcase == "http" && Oauth.loopback_host?(parsed.host)
+    rescue URI::InvalidURIError
+      false
     end
 
-    def valid_https_uri?(parsed)
-      parsed.scheme == "https" && Oauth.plain_authority?(parsed) && !Oauth.loopback_host?(parsed.host)
+    # Judged only on the https hosts a write adds, never on those the client
+    # already holds, so taking a host off the list leaves every client that
+    # registered it working (Oauth.dcr_allowed_https_hosts).
+    def added_https_hosts_are_vetted
+      unvetted = https_hosts(redirect_uris) - https_hosts(new_record? ? [] : redirect_uris_was)
+      unvetted.reject! { |host| Oauth.dcr_allowed_https_host?(host) }
+
+      if unvetted.any?
+        errors.add :redirect_uris, "names an https host not allowed for dynamic registration: #{unvetted.join(", ")}"
+      end
+    end
+
+    def https_hosts(uris)
+      Array(uris).filter_map do |uri|
+        parsed = URI.parse(uri.to_s)
+        parsed.host.to_s.downcase if parsed.scheme&.downcase == "https"
+      rescue URI::InvalidURIError
+        nil
+      end.uniq
     end
 
     # Only the port may vary, and only for an http loopback redirect (RFC 8252

@@ -132,6 +132,19 @@ Rails.application.configure do
   # asks; personal access tokens are unaffected (Oauth::Availability).
   config.x.oauth.staff_only = ENV["OAUTH_STAFF_ONLY"] == "true"
 
+  # Client ID Metadata Documents are off unless OAUTH_CIMD_ENABLED is "true",
+  # and then fetched only from the hosts OAUTH_CIMD_ALLOWED_HOSTS names
+  # (space-separated, exact hosts; e.g. "mcp.claude.ai claude.ai claude.com
+  # chatgpt.com"). See Oauth::ClientMetadata.
+  config.x.oauth.cimd_enabled = ENV["OAUTH_CIMD_ENABLED"] == "true"
+  config.x.oauth.cimd_allowed_hosts = ENV.fetch("OAUTH_CIMD_ALLOWED_HOSTS", "").split
+
+  # Dynamic client registration accepts https redirects only on these hosts
+  # (OAUTH_DCR_ALLOWED_HTTPS_HOSTS, separated by spaces or commas), beside
+  # loopback and the cursor:// and claude:// app schemes. Unset, it accepts
+  # no https redirect at all. See Oauth.dcr_redirect_shape?.
+  config.x.oauth.dcr_allowed_https_hosts = ENV.fetch("OAUTH_DCR_ALLOWED_HTTPS_HOSTS", "").split(/[\s,]+/).compact_blank
+
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
 end

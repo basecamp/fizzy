@@ -36,6 +36,9 @@ production: &production
   cleanup_lapsed_oauth_grants:
     command: "Identity::AccessToken.cleanup"
     schedule: every day at 04:32
+  cleanup_oauth_redeemed_authorization_codes:
+    command: "Oauth::RedeemedAuthorizationCode.cleanup"
+    schedule: every day at 04:42
   cleanup_delegated_oauth_tokens:
     command: "Identity::AccessToken.cleanup_delegated"
     schedule: every hour at minute 37

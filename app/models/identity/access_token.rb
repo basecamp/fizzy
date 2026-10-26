@@ -33,8 +33,15 @@ class Identity::AccessToken < ApplicationRecord
   # revocation waits rather than deadlocking against the retired-token delete.
   before_destroy :lock_grant, prepend: true
 
-  scope :personal, -> { where oauth_client_id: nil }
-  scope :oauth, -> { where.not oauth_client_id: nil }
+  # A personal access token is issued by the personal access client
+  # (Oauth::Client::PERSONAL_ACCESS_CLIENT_ID). Ones made before that client
+  # existed, and ones production code that predates it still makes, have no
+  # client, and are just as personal. Every rule that sets personal tokens
+  # apart (honoring while OAuth is dark, never lapsing, no expiry or refresh
+  # token, revocation by possession, Connected Apps) reads one of these, or
+  # #personal?, so it holds for both forms alike.
+  scope :personal, -> { where(oauth_client_id: nil).or(where(oauth_client_id: Oauth::Client.personal_access.select(:id))) }
+  scope :oauth, -> { where.not(oauth_client_id: nil).where.not(oauth_client_id: Oauth::Client.personal_access.select(:id)) }
   # What a person granted an app, as Connected Apps lists it: OAuth tokens,
   # less the short-lived API tokens the delegation exchange mints under them.
   scope :grants, -> { oauth.where delegated_from_id: nil }
@@ -96,7 +103,7 @@ class Identity::AccessToken < ApplicationRecord
   #
   # Delegated tokens don't count: the exchange mints one every few minutes
   # per connection, all to the MCP server's one client, which isn't swept.
-  after_commit :touch_oauth_client, on: %i[ create destroy ], unless: :delegated?
+  after_commit :touch_oauth_client, on: %i[ create destroy ], if: :refreshable?
 
   # Every way a grant ends destroys it: disconnecting the app, revocation, the
   # idle-lapse sweep, a replayed refresh token or authorization code, and
@@ -108,7 +115,22 @@ class Identity::AccessToken < ApplicationRecord
   #
   # Checked after commit, so when two grants to one client end at once,
   # whichever commits second finds none left.
-  after_destroy_commit :end_app_plumbing, if: -> { oauth_client_id? && !delegated? }
+  after_destroy_commit :end_app_plumbing, if: :refreshable?
+
+  # Audit events (Oauth::Audit) are reported once the change commits, so an
+  # event always describes a grant that was really issued or really ended.
+  # Every ending passes through here, so none goes unrecorded: a caller that
+  # knows why says so through #revoke, and a cascade from a deleted identity or
+  # client is named by the association that destroyed it. A delegated token
+  # is the exchange's short-lived copy of a grant, not a grant, and reports
+  # neither: the grant it acts for already has its events.
+  after_create_commit :record_issuance, unless: :delegated?
+  after_destroy_commit :record_revocation, unless: :delegated?
+
+  # Why this grant is ending, and who ended it, for its audit event: a Hash
+  # with :reason and :actor, and optionally :presented (the kind of token
+  # that was presented to revoke it).
+  attr_accessor :revocation
 
   class << self
     # The token a bearer request may authenticate with: active and honored.
@@ -162,24 +184,40 @@ class Identity::AccessToken < ApplicationRecord
     # selected (by code from before idle expiry, mid-deploy, whose rotation
     # doesn't check for lapse) is spared.
     def cleanup
-      lapsed.find_each do |grant|
-        grant.with_lock { grant.destroy if grant.lapsed? }
-      rescue ActiveRecord::RecordNotFound
-        # Already gone.
+      Oauth.cleanup_step :lapsed_grants do
+        lapsed.find_each do |grant|
+          grant.with_lock { grant.revoke(reason: "lapsed", actor: "system") if grant.lapsed? }
+        rescue ActiveRecord::RecordNotFound
+          # Already gone.
+        end
       end
     end
 
-    # An authorization code redeems at most once (RFC 6749 §4.1.2): the grant it
-    # mints is stamped with the code's jti, and the unique index refuses a second
-    # stamp. A replay also revokes the grant the first redemption issued.
+    # An authorization code redeems at most once (RFC 6749 §4.1.2). Redeeming
+    # records its jti (Oauth::RedeemedAuthorizationCode) in the same transaction
+    # as the grant it mints, and the unique index refuses a second record. A
+    # replay also revokes the grant the first redemption issued, and the record
+    # outlives that grant, so a third attempt mints nothing either.
     def redeem(authorization_code, **attributes)
-      create! authorization_code_jti: authorization_code.jti, **attributes
+      transaction requires_new: true do
+        Oauth::RedeemedAuthorizationCode.create! jti: authorization_code.jti
+        create! authorization_code_jti: authorization_code.jti, **attributes
+      end
     rescue ActiveRecord::RecordNotUnique
-      where(authorization_code_jti: authorization_code.jti).destroy_all
+      replayed = where(authorization_code_jti: authorization_code.jti).each { |grant| grant.revoke(reason: "code_replayed", actor: "system") }
+      Oauth::Audit.record "code.replayed", grant: replayed.first, client: attributes[:oauth_client], actor: "client"
+      remember_redeemed authorization_code
       nil
     end
 
     private
+      # A code redeemed before redemptions were recorded has a grant but no
+      # record, and the failed transaction above rolled back the one it tried
+      # to write. Write it now, so the code mints nothing once that grant is gone.
+      def remember_redeemed(authorization_code)
+        Oauth::RedeemedAuthorizationCode.create_or_find_by!(jti: authorization_code.jti)
+      end
+
       def find_honored_here(token)
         if (access_token = active.find_by_raw_token(token)) && access_token.honored?
           access_token
@@ -191,7 +229,6 @@ class Identity::AccessToken < ApplicationRecord
           ApplicationRecord.with_writing_role { find_honored_here(token) }
         end
       end
-
       # MySQL compares `token` case-insensitively, so a match is confirmed
       # byte for byte: a differently cased token neither authenticates nor
       # installs a digest that the real token would then never match.
@@ -212,7 +249,8 @@ class Identity::AccessToken < ApplicationRecord
 
   # OAuth tokens are honored only while OAuth acceptance is on (see
   # Oauth::Availability); personal tokens always are. The client is loaded only
-  # when the server is dark and a pilot exemption might apply.
+  # when the server is dark, to tell a personal token from a grant and to see
+  # whether a pilot exemption applies.
   #
   # A delegated token is honored only while the grant it was delegated from
   # still is, read afresh on every request: a revocation the sweep missed, or
@@ -223,18 +261,32 @@ class Identity::AccessToken < ApplicationRecord
     honored_client? && honored_identity? && (!delegated? || honored_delegation?)
   end
 
+  def personal?
+    oauth_client_id.nil? || oauth_client&.personal_access? || false
+  end
+
+  def oauth?
+    !personal?
+  end
+
   def delegated?
     delegated_from_id?
   end
 
   # The app this token acts for, the one a person connected and sees in
-  # Connected Apps. A delegated token is issued to the MCP server's client,
-  # but acts for the app whose grant it was delegated from, so what it sets
-  # up (webhooks, push subscriptions) is that app's, listed and removed with
-  # it when the person disconnects it.
-  def app
-    delegated? ? delegated_from&.oauth_client : oauth_client
+  # Connected Apps. A personal access token acts for its holder alone, so
+  # what it sets up is attributed to no app. A delegated token is issued to
+  # the MCP server's client, but acts for the app whose grant it was
+  # delegated from, so what it sets up (webhooks, push subscriptions) is that
+  # app's, listed and removed with it when the person disconnects it.
+  def connected_app
+    if delegated?
+      delegated_from&.connected_app
+    elsif oauth?
+      oauth_client
+    end
   end
+  alias_method :app, :connected_app
 
   # An audienced grant was issued for another protected resource (the hosted
   # MCP server), named at consent by the RFC 8707 resource parameter. It's
@@ -261,7 +313,13 @@ class Identity::AccessToken < ApplicationRecord
   end
 
   def lapsed?
-    oauth_client_id? && (updated_at + REFRESH_IDLE_LIMIT).past?
+    oauth? && (updated_at + REFRESH_IDLE_LIMIT).past?
+  end
+
+  # Ends the grant, recording why and who ended it (see #revocation).
+  def revoke(reason:, actor:, **details)
+    self.revocation = { reason: reason, actor: actor, **details }
+    destroy!
   end
 
   # Rotates atomically on the presented refresh token, so a concurrent
@@ -273,12 +331,13 @@ class Identity::AccessToken < ApplicationRecord
   # carries the new pair, encrypted, so a retry within the grace window can be
   # answered with it.
   def refresh(permission: self.permission)
+    narrowed = permission.to_s != self.permission
     raw_token, raw_refresh_token = self.class.generate_token(:access), self.class.generate_token(:refresh)
     rotated = { token: nil, token_digest: TokenDigester.digest(raw_token),
       refresh_token_digest: TokenDigester.digest(raw_refresh_token),
       expires_at: EXPIRES_IN.from_now, permission: permission, updated_at: Time.current }
 
-    transaction do
+    rotated_now = transaction do
       if self.class.unlapsed.where(id: id, refresh_token_digest: refresh_token_digest).update_all(rotated) == 1
         retired_refresh_tokens.create! \
           refresh_token_digest: refresh_token_digest,
@@ -288,6 +347,14 @@ class Identity::AccessToken < ApplicationRecord
         true
       end
     end
+
+    if rotated_now
+      Oauth::Audit.record "token.refreshed", grant: self, actor: "client", grant_type: "refresh_token", permission: self.permission
+      # A refresh may only narrow (RFC 6749 §6), so a change is a narrowing.
+      Oauth::Audit.record "grant.narrowed", grant: self, actor: "client", permission: self.permission if narrowed
+    end
+
+    rotated_now
   end
 
   protected
@@ -304,14 +371,38 @@ class Identity::AccessToken < ApplicationRecord
     end
 
     def honored_client?
-      oauth_client_id.nil? || Oauth::Availability.acceptance_enabled? || Oauth::Availability.acceptance_enabled?(oauth_client&.client_id)
+      oauth_client_id.nil? || Oauth::Availability.acceptance_enabled? || personal? || Oauth::Availability.acceptance_enabled?(oauth_client&.client_id)
     end
 
   private
-    def refreshable?
-      oauth_client_id? && !delegated?
+    def record_issuance
+      if oauth?
+        Oauth::Audit.record "code.redeemed", grant: self, actor: "client" if authorization_code_jti?
+        Oauth::Audit.record "grant.created", grant: self, actor: "client", permission: permission
+        Oauth::Audit.record "token.issued", grant: self, actor: "client", grant_type: "authorization_code", permission: permission
+      else
+        Oauth::Audit.record "pat.created", grant: self, actor: "user", permission: permission
+      end
     end
 
+    def record_revocation
+      ending = revocation || { reason: cascade_reason, actor: "system" }
+      Oauth::Audit.record oauth? ? "grant.revoked" : "pat.revoked", grant: self, **ending
+    end
+
+    # A grant destroyed along with its identity or its client, which only the
+    # console or account deletion does: "identity_deleted" or "client_deleted".
+    def cascade_reason
+      if destroyed_by_association
+        "#{destroyed_by_association.active_record.model_name.element}_deleted"
+      else
+        "deleted"
+      end
+    end
+
+    def refreshable?
+      oauth? && !delegated?
+    end
     def end_app_plumbing
       unless self.class.exists?(identity_id: identity_id, oauth_client_id: oauth_client_id)
         Push::Subscription.where(oauth_client_id: oauth_client_id, user: User.where(identity_id: identity_id)).delete_all
@@ -319,7 +410,7 @@ class Identity::AccessToken < ApplicationRecord
     end
 
     def touch_oauth_client
-      Oauth::Client.where(id: oauth_client_id).touch_all if oauth_client_id?
+      Oauth::Client.where(id: oauth_client_id).touch_all
     end
 
     def lock_grant
@@ -332,13 +423,13 @@ class Identity::AccessToken < ApplicationRecord
     def set_token
       self.raw_token ||= token.presence || self.class.generate_token(token_kind)
       self.token_digest = TokenDigester.digest(raw_token)
-      self.token = oauth_client_id? ? nil : raw_token
+      self.token = personal? ? raw_token : nil
     end
 
     def token_kind
       if delegated?
         :delegated
-      elsif oauth_client_id?
+      elsif oauth?
         :access
       else
         :personal

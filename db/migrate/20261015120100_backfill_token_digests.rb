@@ -6,8 +6,10 @@
 # restart it.
 #
 # Personal access tokens keep their plaintext: production still reads it until
-# this code reaches it. OAuth access tokens are digest-only, so any plaintext
-# one is cleared once digested. Refresh tokens and client secrets are moved
+# this code reaches it. That's any token without a client, or with the personal
+# access client (CreatePersonalAccessClient), since a rerun may come after
+# that client exists. OAuth access tokens are digest-only, so any plaintext one
+# is cleared once digested. Refresh tokens and client secrets are moved
 # wholesale: a refresh token's plaintext is cleared once digested, and the
 # client secret column is dropped by the next migration. The refresh token
 # column stays, empty, until it's dropped beside `token`.
@@ -31,10 +33,11 @@ class BackfillTokenDigests < ActiveRecord::Migration[8.2]
 
   def up
     refuse_duplicates AccessToken, :token
+    personal_client_ids = [ nil, *Client.where(client_id: "fizzy-personal-access").pluck(:id) ]
 
     each_undigested AccessToken, :token, :token_digest do |row, digest|
       AccessToken.where(id: row.id, token_digest: nil).update_all \
-        token_digest: digest, token: (row.oauth_client_id ? nil : row.token)
+        token_digest: digest, token: (row.oauth_client_id.in?(personal_client_ids) ? row.token : nil)
     end
 
     # Each is gone once dropped, so a rerun skips it.

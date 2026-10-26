@@ -12,25 +12,23 @@
   <h1 class="header__title"><%= @page_title %></h1>
 <% end %>
 
-<section class="panel panel--wide shadow center webhooks">
+<section class="connected-apps panel panel--wide shadow center txt-align-start">
   <% if @connected_apps.any? %>
-    <p class="margin-none-block-start">Apps you've authorized to access Fizzy on your behalf.</p>
-    <table class="access_tokens_table margin-block-end-double max-width txt-small">
-      <thead>
-        <tr>
-          <th>App</th>
-          <th>Permissions</th>
-          <th>Connected</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @connected_apps.each do |client, tokens| %>
+    <p class="margin-none-block-start">Apps you've authorized to use Fizzy as you. Each one can reach what you can, with the access shown. Don't recognize one? Disconnect it, and its access ends right away.</p>
+
+    <% connected_app_groups(@connected_apps).each do |kind, heading, apps| %>
+      <section class="connected-apps__group" aria-labelledby="<%= "connected_apps_#{kind}" %>">
+        <h2 id="<%= "connected_apps_#{kind}" %>" class="divider txt-medium margin-none"><%= heading %></h2>
+
+        <% apps.each do |client, tokens| %>
           <%= render "my/connected_apps/connected_app", client: client, tokens: tokens, webhooks: @webhooks_by_client.fetch(client.id, []) %>
         <% end %>
-      </tbody>
-    </table>
+      </section>
+    <% end %>
   <% else %>
-    <p class="margin-none-block-start">No apps are connected to your account. When you authorize an app to access Fizzy, it will appear here.</p>
+    <div class="connected-apps__empty flex flex-column gap-half">
+      <p class="margin-none"><strong>Nothing connected yet.</strong></p>
+      <p class="txt-small txt-subtle margin-none">AI assistants and other apps you connect to Fizzy show up here, so you can see what each one can do and disconnect it whenever you like.</p>
+    </div>
   <% end %>
 </section>

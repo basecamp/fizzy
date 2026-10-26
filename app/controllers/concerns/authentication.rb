@@ -59,7 +59,7 @@ module Authentication
     end
 
     def oauth_grant?
-      Current.access_token&.oauth_client_id?
+      Current.access_token&.oauth? || false
     end
 
     def forbid_oauth_grant
@@ -124,7 +124,7 @@ module Authentication
         Current.access_token = access_token
         Current.identity = access_token.identity
       elsif access_token
-        request_bearer_authentication status: access_token.oauth_client_id? ? :forbidden : :unauthorized,
+        request_bearer_authentication status: access_token.connected_app ? :forbidden : :unauthorized,
           error: "insufficient_scope", error_description: "The access token is read-only", scope: "write"
       else
         request_bearer_authentication error: "invalid_token", error_description: "The access token is expired, revoked, or invalid"

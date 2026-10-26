@@ -1,0 +1,24 @@
+<%# Who is asking, as far as Fizzy can vouch for it. A self-registered app's
+    name is only its claim, typed by whoever registered it, so it's shown as
+    exactly that: what the app says it is, quoted and subdued, under a heading
+    that names where the access goes (bc3 reads the same). bdi keeps any
+    right-to-left letters in the name from moving the quotes. %>
+<header class="oauth-client flex flex-column gap-half">
+  <h2 class="oauth-client__name txt-large margin-none"><bdi><%= client.dynamically_registered? && redirect_host.nil? ? identity.upcase_first : identity %></bdi></h2>
+
+  <% if client.dynamically_registered? %>
+    <p class="oauth-client__self-name txt-small txt-subtle margin-none">
+      Says it&rsquo;s &ldquo;<bdi><%= oauth_client_self_name(client) %></bdi>&rdquo;
+    </p>
+
+    <p class="oauth-client__warning txt-small margin-none" role="note">
+      <% if redirect_host %>
+        <strong>We haven&rsquo;t checked this app.</strong> Anyone can run an app at any address, so only authorize it if you trust <strong><%= redirect_host %></strong>.
+      <% else %>
+        <strong>We haven&rsquo;t checked this app.</strong> It runs on your device and will get this access, so only authorize it if you started it.
+      <% end %>
+    </p>
+  <% elsif client.trusted? %>
+    <p class="oauth-client__made-by txt-small txt-subtle margin-none">Made by 37signals</p>
+  <% end %>
+</header>

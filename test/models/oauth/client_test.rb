@@ -1,6 +1,7 @@
 require "test_helper"
 
 class Oauth::ClientTest < ActiveSupport::TestCase
+  include OauthAvailabilityTestHelper
   test "generates client_id on create" do
     client = Oauth::Client.create!(name: "Test", redirect_uris: %w[ http://127.0.0.1:8888/callback ])
     assert_equal 32, client.client_id.length
@@ -35,6 +36,55 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     assert client.valid?
   end
 
+  test "dynamically registered clients may add an https host only from the allowlist" do
+    with_dcr_allowed_https_hosts "connector.example.com" do
+      vetted = Oauth::Client.new(name: "Vetted", redirect_uris: %w[ https://CONNECTOR.example.com/callback ], dynamically_registered: true)
+      unvetted = Oauth::Client.new(name: "Unvetted", redirect_uris: %w[ https://elsewhere.example/callback ], dynamically_registered: true)
+
+      assert vetted.valid?
+      assert_not unvetted.valid?
+      assert_includes unvetted.errors[:redirect_uris], "names an https host not allowed for dynamic registration: elsewhere.example"
+    end
+  end
+
+  test "dynamically registered clients accept no https host when none is allowed" do
+    with_dcr_allowed_https_hosts do
+      client = Oauth::Client.new(name: "Hosted", redirect_uris: %w[ https://connector.example.com/callback ], dynamically_registered: true)
+
+      assert_not client.valid?
+    end
+  end
+
+  test "a client keeps an https host taken off the allowlist, but can't add another" do
+    client = Oauth::Client.create!(name: "Hosted", redirect_uris: %w[ https://connector.example.com/callback ], dynamically_registered: true)
+
+    with_dcr_allowed_https_hosts "other.example.com" do
+      assert client.reload.update(name: "Renamed")
+      assert client.update(redirect_uris: %w[ https://connector.example.com/callback http://127.0.0.1:8888/callback ])
+      assert_not client.update(redirect_uris: %w[ https://connector.example.com/callback https://elsewhere.example/callback ])
+    end
+  end
+
+  test "manually registered clients aren't held to the dynamic registration allowlist" do
+    with_dcr_allowed_https_hosts do
+      assert Oauth::Client.new(name: "First party", redirect_uris: %w[ https://partner.example.com/callback ]).valid?
+    end
+  end
+
+  test "dynamically registered clients may use the cursor and claude app schemes" do
+    %w[ cursor://anysphere.cursor-mcp/oauth/callback claude://claude.ai/mcp-auth-callback/sdk CURSOR://anysphere.cursor-mcp/oauth/callback ].each do |uri|
+      assert Oauth::Client.new(name: "App", redirect_uris: [ uri ], dynamically_registered: true).valid?, uri
+    end
+  end
+
+  test "dynamically registered clients reject other app schemes and malformed app redirects" do
+    %w[ com.example.app://callback z39.50r://host/db iris.beep://host/x javascript://x/%0aalert(1) vscode://callback
+        cursor:callback cursor:/callback cursor:///callback cursor://user@anysphere.cursor-mcp/oauth/callback cursor://anysphere.cursor-mcp/oauth/callback#frag cursor:
+        cursor://%65vil/callback ].each do |uri|
+      assert_not Oauth::Client.new(name: "App", redirect_uris: [ uri ], dynamically_registered: true).valid?, uri
+    end
+  end
+
   test "dynamically registered clients reject plain http for non-loopback hosts" do
     client = Oauth::Client.new(
       name: "External",
@@ -42,7 +92,7 @@ class Oauth::ClientTest < ActiveSupport::TestCase
       dynamically_registered: true
     )
     assert_not client.valid?
-    assert_includes client.errors[:redirect_uris], "must be an https or local loopback URI for dynamically registered clients"
+    assert_includes client.errors[:redirect_uris], "must be a local loopback, https or allowed app-scheme URI for dynamically registered clients"
   end
 
   test "dynamically registered clients reject https loopback regardless of host case" do
@@ -52,7 +102,7 @@ class Oauth::ClientTest < ActiveSupport::TestCase
       dynamically_registered: true
     )
     assert_not client.valid?
-    assert_includes client.errors[:redirect_uris], "must be an https or local loopback URI for dynamically registered clients"
+    assert_includes client.errors[:redirect_uris], "must be a local loopback, https or allowed app-scheme URI for dynamically registered clients"
   end
 
   test "dynamically registered clients reject percent-encoded https loopback" do
@@ -62,7 +112,7 @@ class Oauth::ClientTest < ActiveSupport::TestCase
       dynamically_registered: true
     )
     assert_not client.valid?
-    assert_includes client.errors[:redirect_uris], "must be an https or local loopback URI for dynamically registered clients"
+    assert_includes client.errors[:redirect_uris], "must be a local loopback, https or allowed app-scheme URI for dynamically registered clients"
   end
 
   test "dynamically registered clients name their redirect authority plainly" do
@@ -73,12 +123,14 @@ class Oauth::ClientTest < ActiveSupport::TestCase
       client = Oauth::Client.new(name: "Unplain", redirect_uris: [ uri ], dynamically_registered: true)
 
       assert_not client.valid?, uri
-      assert_includes client.errors[:redirect_uris], "must be an https or local loopback URI for dynamically registered clients", uri
+      assert_includes client.errors[:redirect_uris], "must be a local loopback, https or allowed app-scheme URI for dynamically registered clients", uri
     end
 
-    %w[ https://connector.example.com:8443/callback https://Connector.Example.com/callback http://[::1]:8888/callback http://localhost/callback
-        https://203.0.113.7/callback https://3com.example/callback https://10.0.0.1/callback ].each do |uri|
-      assert Oauth::Client.new(name: "Plain", redirect_uris: [ uri ], dynamically_registered: true).valid?, uri
+    with_dcr_allowed_https_hosts "connector.example.com", "203.0.113.7", "3com.example", "10.0.0.1" do
+      %w[ https://connector.example.com:8443/callback https://Connector.Example.com/callback http://[::1]:8888/callback http://localhost/callback
+          https://203.0.113.7/callback https://3com.example/callback https://10.0.0.1/callback ].each do |uri|
+        assert Oauth::Client.new(name: "Plain", redirect_uris: [ uri ], dynamically_registered: true).valid?, uri
+      end
     end
   end
 
@@ -89,7 +141,7 @@ class Oauth::ClientTest < ActiveSupport::TestCase
       dynamically_registered: true
     )
     assert_not client.valid?
-    assert_includes client.errors[:redirect_uris], "must be an https or local loopback URI for dynamically registered clients"
+    assert_includes client.errors[:redirect_uris], "must be a local loopback, https or allowed app-scheme URI for dynamically registered clients"
   end
 
   test "dynamically registered clients reject custom schemes" do
@@ -99,7 +151,7 @@ class Oauth::ClientTest < ActiveSupport::TestCase
       dynamically_registered: true
     )
     assert_not client.valid?
-    assert_includes client.errors[:redirect_uris], "must be an https or local loopback URI for dynamically registered clients"
+    assert_includes client.errors[:redirect_uris], "must be a local loopback, https or allowed app-scheme URI for dynamically registered clients"
   end
 
   test "redirect URIs must not contain fragments" do
@@ -318,6 +370,38 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     assert_not Oauth::Client.exists?(stale.id)
   end
 
+  test "cleanup destroys metadata document clients left without a grant for the retention period" do
+    stale = travel_to(31.days.ago) { register_metadata_document_client }
+    recent = travel_to(29.days.ago) { register_metadata_document_client(client_id: "https://claude.ai/recent") }
+
+    Oauth::Client.cleanup
+
+    assert_not Oauth::Client.exists?(stale.id)
+    assert Oauth::Client.exists?(recent.id)
+  end
+
+  test "a metadata document client is held to self-registered redirects, and none is vetted but loopback" do
+    client = Oauth::Client.new name: "Claude", client_id: "https://claude.ai/client.json", client_id_metadata_document: true, redirect_uris: %w[ http://claude.ai/callback ]
+    assert_not client.valid?
+
+    client.redirect_uris = %w[ https://claude.ai/callback http://127.0.0.1:9000/callback ]
+    assert client.valid?
+    assert_not client.vetted_redirect?("https://claude.ai/callback")
+    assert client.vetted_redirect?("http://127.0.0.1:9000/callback")
+  end
+
+  test "a provisioned client keeps the client_id it was given" do
+    assert_equal "https://claude.ai/client.json", register_metadata_document_client.client_id
+  end
+
+  test "find_presented compares the client_id exactly" do
+    client = register_metadata_document_client
+
+    assert_equal client, Oauth::Client.find_presented("https://claude.ai/client.json")
+    assert_nil Oauth::Client.find_presented("https://claude.ai/CLIENT.json")
+    assert_nil Oauth::Client.find_presented([ "https://claude.ai/client.json" ])
+  end
+
   test "cleanup keeps recent, granted and operator-provisioned clients" do
     recent = travel_to(29.days.ago) { register_client }
     granted = travel_to(31.days.ago) { register_client.tap { identities(:david).access_tokens.create!(oauth_client: it) } }
@@ -445,6 +529,91 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     assert_not Identity::AccessToken.exists?(grant.id)
   end
 
+  test "the personal access token issuer is the provisioned client" do
+    assert_equal oauth_clients(:personal_access), Oauth::Client.personal_access_issuer
+  end
+
+  # A fresh install loads the schema instead of migrating.
+  test "the personal access token issuer is provisioned on first use where it's missing" do
+    Oauth::Client.personal_access.delete_all
+
+    issuer = assert_difference("Oauth::Client.count", +1) { Oauth::Client.personal_access_issuer }
+
+    assert issuer.personal_access?
+    assert issuer.trusted?
+    assert_not issuer.dynamically_registered?
+    assert_not issuer.confidential?
+    assert_empty issuer.redirect_uris
+    assert_equal issuer, Oauth::Client.personal_access_issuer
+  end
+
+  # Another first use committed the issuer after this one looked and before its
+  # uniqueness validation ran.
+  test "the personal access token issuer is found when a concurrent first use provisioned it" do
+    issuer = oauth_clients(:personal_access)
+    Oauth::Client.stubs(:personal_access).returns(Oauth::Client.none).then.returns(Oauth::Client.where(id: issuer.id))
+
+    assert_no_difference("Oauth::Client.count") do
+      assert_equal issuer, Oauth::Client.personal_access_issuer
+    end
+  end
+
+  test "the personal access token issuer is found when a concurrent first use won the unique index" do
+    issuer = oauth_clients(:personal_access)
+    Oauth::Client.stubs(:personal_access).returns(Oauth::Client.none)
+    Oauth::Client.any_instance.stubs(:valid?).returns(true)
+
+    assert_no_difference("Oauth::Client.count") do
+      assert_equal issuer, Oauth::Client.personal_access_issuer
+    end
+  end
+
+  test "the personal access token issuer may obtain no grant, and every other client the code and refresh grants" do
+    assert_empty oauth_clients(:personal_access).grant_types
+    assert_not oauth_clients(:personal_access).allows_grant_type?("authorization_code")
+    assert_not oauth_clients(:personal_access).allows_grant_type?("refresh_token")
+
+    assert oauth_clients(:mcp_client).allows_grant_type?("authorization_code")
+    assert oauth_clients(:mcp_client).allows_grant_type?("refresh_token")
+    assert_not oauth_clients(:mcp_client).allows_grant_type?("client_credentials")
+  end
+
+  test "the personal access token issuer has no redirect to send a code to" do
+    assert_not oauth_clients(:personal_access).allows_redirect?("http://127.0.0.1:8888/callback")
+  end
+
+  test "only the personal access token issuer goes without redirect URIs" do
+    client = Oauth::Client.new(name: "Unregistered", client_id: "fizzy-personal-access-impostor", redirect_uris: [])
+
+    assert_not client.valid?
+    assert client.errors[:redirect_uris].any?
+  end
+
+  test "the personal access token issuer can't be destroyed, so its tokens can't cascade away with it" do
+    token = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:personal_access))
+
+    assert_not oauth_clients(:personal_access).destroy
+    assert Oauth::Client.exists?(oauth_clients(:personal_access).id)
+    assert Identity::AccessToken.exists?(token.id)
+  end
+
+  test "the personal access token issuer can't be destroyed with unsaved changes either" do
+    issuer = oauth_clients(:personal_access)
+    token = identities(:david).access_tokens.create!(oauth_client: issuer)
+    issuer.assign_attributes client_id: "renamed", name: "Renamed"
+
+    assert_not issuer.destroy
+    assert Oauth::Client.exists?(issuer.id)
+    assert Identity::AccessToken.exists?(token.id)
+  end
+
+  test "cleanup never sweeps the personal access token issuer, however long it goes unused" do
+    oauth_clients(:personal_access).update_columns updated_at: 1.year.ago
+
+    Oauth::Client.cleanup
+
+    assert Oauth::Client.exists?(oauth_clients(:personal_access).id)
+  end
 
   test "destroying a client with unsaved changes still destroys it and its grants" do
     client = Oauth::Client.create!(name: "Dirty", redirect_uris: %w[ http://127.0.0.1:8888/callback ])
@@ -457,7 +626,19 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     assert_not Oauth::Client.exists?(client.id)
   end
 
+  test "connection_kind tells our apps, tools on this device and web apps apart" do
+    assert_equal :fizzy, oauth_clients(:trusted_client).connection_kind
+    assert_equal :local, oauth_clients(:mcp_client).connection_kind
+    assert_equal :web, oauth_clients(:confidential_client).connection_kind
+    assert_equal :local, Oauth::Client.new(redirect_uris: %w[ com.example.app:/callback http://[::1]/cb ]).connection_kind
+    assert_equal :web, Oauth::Client.new(redirect_uris: %w[ http://127.0.0.1/cb https://example.com/cb ]).connection_kind
+  end
+
   private
+    def register_metadata_document_client(**attributes)
+      Oauth::Client.create! name: "Claude", client_id: "https://claude.ai/client.json", redirect_uris: %w[ https://claude.ai/callback ], client_id_metadata_document: true, **attributes
+    end
+
     def register_client(**attributes)
       Oauth::Client.create! name: "Abandoned", redirect_uris: %w[ http://127.0.0.1:8888/callback ], dynamically_registered: true, **attributes
     end
