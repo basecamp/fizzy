@@ -85,6 +85,17 @@ class OauthClientMetadataDocumentsTest < ActionDispatch::IntegrationTest
     assert_nil Oauth::Client.find_presented(URL)
   end
 
+  test "denying against a stale row that allows less than the document still answers access_denied" do
+    Oauth::Client.create! client_id: URL, name: "Claude", redirect_uris: [ CALLBACK ], scopes: %w[ read ], client_id_metadata_document: true,
+      metadata_fetched_at: 2.days.ago, metadata_expires_at: 1.day.ago
+    sign_in_as :david
+
+    untenanted { post oauth_authorization_path, params: authorization.merge(scope: "read write", error: "access_denied") }
+
+    assert_response :redirect
+    assert_equal "access_denied", Rack::Utils.parse_query(URI.parse(response.location).query)["error"]
+  end
+
   test "a host that isn't allowlisted is an unknown client, and never fetched" do
     sign_in_as :david
     url = "https://tools.example.com/client.json"

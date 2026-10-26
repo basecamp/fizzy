@@ -164,6 +164,16 @@ class Oauth::ClientMetadata::ResolverTest < ActiveSupport::TestCase
     WebMock.allow_net_connect!
   end
 
+  test "a fetch that loses admission to server pressure doesn't spend the budget" do
+    with_memory_cache do
+      Oauth::ClientMetadata::Fetcher.any_instance.stubs(:fetch).returns(Oauth::ClientMetadata::Fetcher::Result.failure(:overloaded))
+
+      outcomes = Array.new(Oauth::ClientMetadata::Resolver::URL_ATTEMPT_LIMIT + 1) { resolve(persist: false).outcome }
+
+      assert_equal [ :overloaded ] * (Oauth::ClientMetadata::Resolver::URL_ATTEMPT_LIMIT + 1), outcomes
+    end
+  end
+
   test "one person spending the fetch budget leaves everyone else's" do
     with_memory_cache do
       stub_request(:get, URL).to_return(status: 500)
