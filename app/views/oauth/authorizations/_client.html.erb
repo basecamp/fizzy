@@ -18,6 +18,10 @@
         <strong>We haven&rsquo;t checked this app.</strong> It runs on your device and will get this access, so only authorize it if you started it.
       <% end %>
     </p>
+  <% elsif client.metadata_document? %>
+    <p class="oauth-client__self-name txt-small txt-subtle margin-none">
+      Name set by the app at <strong><%= URI.parse(client.client_id).host %></strong>
+    </p>
   <% elsif client.trusted? %>
     <p class="oauth-client__made-by txt-small txt-subtle margin-none">Made by 37signals</p>
   <% end %>
