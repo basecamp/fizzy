@@ -84,7 +84,7 @@ module Yabeda
         payload = event[:payload]
 
         case event[:name]
-        when "oauth.token.issued", "oauth.token.refreshed"
+        when "oauth.token.issued", "oauth.token.refreshed", "oauth.token.exchanged"
           Yabeda.oauth.token_grants_total.increment({ grant_type: payload[:grant_type], client_type: payload[:client_type] })
         when "oauth.consent.approved"
           Yabeda.oauth.authorization_grants_total.increment({ client_type: payload[:client_type], account_scope: ACCOUNT_SCOPE })

@@ -22,6 +22,12 @@ class Yabeda::OauthTest < ActionDispatch::IntegrationTest
     assert_operator measured(:token_request_duration_seconds, grant_type: "refresh_token"), :>, 0
   end
 
+  test "a delegation exchange is a token grant" do
+    Oauth::Audit.record "token.exchanged", client: oauth_clients(:confidential_client), actor: "client", grant_type: "token_exchange"
+
+    assert_equal 1, count(:token_grants_total, grant_type: "token_exchange", client_type: "confidential")
+  end
+
   test "token endpoint errors, by code and client type" do
     refresh "fizzy_rt_unknown"
 

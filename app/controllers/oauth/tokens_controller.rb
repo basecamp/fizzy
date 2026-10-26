@@ -46,6 +46,7 @@ class Oauth::TokensController < Oauth::BaseController
 
   before_action :require_admitted_grant_owner, unless: :authorization_code_grant?
   before_action :validate_refresh_resource, unless: -> { authorization_code_grant? || unretryable_replay? }
+  before_action :validate_refresh_bound_account, unless: -> { authorization_code_grant? || unretryable_replay? }
 
   # A replay that can't be a retry is answered before any scope is weighed:
   # outside the grace window it's revoked, so no scope parameter can steer it
@@ -196,6 +197,15 @@ class Oauth::TokensController < Oauth::BaseController
     def validate_refresh_resource
       unless resource_matches?(@access_token.audience)
         oauth_error "invalid_target", "resource does not match the grant"
+      end
+    end
+
+    # A grant bound to an account lives only while the person still belongs to
+    # that account and it is active, as its code was redeemed: leaving the
+    # account ends what the grant can renew.
+    def validate_refresh_bound_account
+      if @access_token.account_bound? && !@access_token.identity.users_with_active_accounts.exists?(account_id: @access_token.account_id)
+        oauth_error "invalid_grant", "The authorized account is no longer available"
       end
     end
 

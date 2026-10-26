@@ -219,7 +219,7 @@ class Oauth::AuthorizationsController < Oauth::BaseController
           redirect_with_error "invalid_target", "Only one resource indicator is supported"
         elsif Oauth.mcp_resource?(resource_param)
           @audience = resource_param
-        elsif resource_param.present? && !service_resource?(resource_param)
+        elsif !resource_param.nil? && resource_param != "" && !service_resource?(resource_param)
           redirect_with_error "invalid_target", "Unknown resource"
         end
       end

@@ -146,7 +146,7 @@ class Oauth::BaseController < ApplicationController
     def resource_matches?(audience)
       if !single_resource?
         false
-      elsif resource_param.blank?
+      elsif resource_param.nil? || resource_param == ""
         true
       elsif audience.present?
         resource_param == audience

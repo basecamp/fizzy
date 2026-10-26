@@ -41,6 +41,10 @@ class Oauth::TokenExchangesController < Oauth::BaseController
       requested_scope: params.key?(:scope) ? params[:scope].to_s : nil,
       resource: params[:resource].presence
     delegated_token = delegation.validate!.mint!
+    # A delegated token reports no issuance of its own (Identity::AccessToken),
+    # so the exchange records its success, under the grant it acts for.
+    Oauth::Audit.record "token.exchanged", grant: delegated_token.delegated_from, client: authenticated_client, actor: "client",
+      grant_type: "token_exchange", permission: delegated_token.permission
 
     render json: {
       access_token: delegated_token.raw_token,
