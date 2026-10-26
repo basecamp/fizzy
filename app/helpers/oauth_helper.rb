@@ -23,8 +23,9 @@ module OauthHelper
     }
   }
 
+  # A name of nothing but direction controls is no name, so it reads as one.
   def oauth_client_self_name(client)
-    client.name.to_s.gsub(BIDI_CONTROLS, "")
+    client.name.to_s.gsub(BIDI_CONTROLS, "").presence || "Unnamed app"
   end
 
   # Who the person is dealing with, as far as we can vouch for it. A trusted or

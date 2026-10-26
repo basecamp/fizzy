@@ -1,6 +1,10 @@
 require "test_helper"
 
 class OauthHelperTest < ActionView::TestCase
+  test "a self name of nothing but direction controls reads as an unnamed app" do
+    assert_equal "Unnamed app", oauth_client_self_name(Oauth::Client.new(name: "\u202E\u2066\u2069"))
+  end
+
   test "a self-registered app is identified by its callback's host, port included when it isn't the default" do
     client = Oauth::Client.new name: "Hosted", dynamically_registered: true
 
