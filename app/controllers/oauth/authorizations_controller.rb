@@ -88,7 +88,10 @@ class Oauth::AuthorizationsController < Oauth::BaseController
     # why, rather than bounced back to an app that can't say.
     def require_admitted_identity
       unless Oauth::Availability.admits?(Current.identity)
-        render :staff_only, status: :forbidden
+        respond_to do |format|
+          format.html { render :staff_only, status: :forbidden }
+          format.json { render_oauth_error "access_denied", "OAuth apps are limited to 37signals staff for now", status: :forbidden }
+        end
       end
     end
 
