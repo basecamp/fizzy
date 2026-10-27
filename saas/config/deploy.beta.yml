@@ -140,3 +140,9 @@ accessories:
         FIZZY_MCP_RESOURCE_URL: "https://beta<%= @beta_number %>-mcp.fizzy-beta.com/mcp"
         FIZZY_MCP_AUTHORIZATION_SERVER: "https://beta<%= @beta_number %>.fizzy-beta.com"
         FIZZY_MCP_ALLOWED_ORIGINS: "https://beta<%= @beta_number %>.fizzy-beta.com"
+<% if @beta_number == "1" %>
+        FIZZY_MCP_EXCHANGE_TOKEN_URL: "https://beta1.fizzy-beta.com/oauth/token"
+        FIZZY_MCP_EXCHANGE_CLIENT_ID: "fizzy-mcp-server-beta1"
+      secret:
+        - FIZZY_MCP_EXCHANGE_CLIENT_SECRET
+<% end %>
