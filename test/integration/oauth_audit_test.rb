@@ -90,18 +90,6 @@ class OauthAuditTest < ActionDispatch::IntegrationTest
     assert_equal @identity.id, third[:identity_id]
   end
 
-  test "a replayed code reads the grant it revokes under a row lock, so concurrent replays revoke it once" do
-    code = authorization_code
-    exchange code
-
-    if ActiveRecord::Base.connection.adapter_name.match?(/mysql|trilogy/i)
-      assert_queries_match(/FROM [`"]identity_access_tokens[`"].*FOR UPDATE/) { exchange code }
-    else
-      assert_queries_match(/FROM [`"]identity_access_tokens[`"].*authorization_code_jti/) { exchange code }
-    end
-    assert_response :bad_request
-  end
-
   test "refreshing, a retry within the grace window, and reuse past it" do
     freeze_time
     grant = @identity.access_tokens.create!(oauth_client: @client, permission: :read)

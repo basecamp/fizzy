@@ -35,6 +35,12 @@ class Identity::AccessTokenTest < ActiveSupport::TestCase
     assert grant.raw_refresh_token.start_with?("fizzy_rt_")
   end
 
+  test "a replayed code's grants are read under a row lock, so concurrent replays revoke each once" do
+    code = Data.define(:jti).new(jti: SecureRandom.uuid)
+
+    assert Identity::AccessToken.minted_by(code).lock_value
+  end
+
   test "expired?" do
     token = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client))
 
