@@ -91,8 +91,7 @@ module OauthHelper
     # A grant bound to an account since deleted, cancelled, or left reaches
     # nothing: refreshing it would be refused, so it isn't shown as reach.
     unbound, bound = tokens.partition { |token| !token.account_bound? }
-    active_account_ids = Current.identity.users_with_active_accounts.pluck(:account_id).to_set
-    bound = bound.select { |token| token.account && active_account_ids.include?(token.account_id) }
+    bound = bound.select { |token| token.account && oauth_active_account_ids.include?(token.account_id) }
     everywhere = oauth_strongest_permission(unbound)
 
     reach = bound.group_by(&:account).filter_map do |account, account_tokens|
@@ -101,6 +100,12 @@ module OauthHelper
     end
 
     [ (everywhere && [ everywhere, nil ]), *reach.group_by(&:first).map { |permission, pairs| [ permission, pairs.map(&:last) ] } ].compact
+  end
+
+  # The accounts the signed-in person is still active in, read once per render
+  # however many apps the page lists.
+  def oauth_active_account_ids
+    @oauth_active_account_ids ||= Current.identity.users_with_active_accounts.pluck(:account_id).to_set
   end
 
   def connected_app_groups(connected_apps)

@@ -15,6 +15,16 @@
     overflow-wrap: anywhere;
   }
 
+  /* A long email still leaves room for "Not you?": the row wraps, and the address breaks */
+  .oauth-consent__identity {
+    flex-wrap: wrap;
+
+    > span {
+      min-inline-size: 0;
+      overflow-wrap: anywhere;
+    }
+  }
+
   .oauth-client__warning {
     background-color: var(--color-highlight);
     border-radius: 0.5em;
@@ -34,6 +44,13 @@
 
   .oauth-access__choice {
     align-items: start;
+
+    /* A long account name breaks inside its card rather than widening it */
+    > span {
+      min-inline-size: 0;
+      overflow-wrap: anywhere;
+    }
+
     border: var(--border);
     border-radius: 0.5em;
     cursor: pointer;
