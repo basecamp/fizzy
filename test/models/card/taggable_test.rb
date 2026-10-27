@@ -38,6 +38,20 @@ class Card::TaggableTest < ActiveSupport::TestCase
     end
   end
 
+  test "removing just tag_ids invalidates the card and board cache keys" do
+    board = @card.board
+    original_card_cache_key = @card.cache_key_with_version
+    original_board_cache_key = board.cache_key_with_version
+
+    travel 1.minute do
+      @card.update!(tag_ids: [])
+    end
+
+    assert_empty @card.reload.tags
+    assert_not_equal original_card_cache_key, @card.cache_key_with_version
+    assert_not_equal original_board_cache_key, board.reload.cache_key_with_version
+  end
+
   test "updating tag_ids with an empty array clears tags" do
     assert_equal [ tags(:web) ], @card.tags
 
@@ -49,6 +63,15 @@ class Card::TaggableTest < ActiveSupport::TestCase
   test "updating tag_ids raises when a tag does not exist" do
     assert_raises(ActiveRecord::RecordNotFound) do
       @card.update!(tag_ids: [ "does-not-exist" ])
+    end
+  end
+
+  test "validating unrelated card changes does not load tags" do
+    @card.reload
+    @card.title = "Updated title"
+
+    assert_no_queries_match(/FROM ["`]tags["`]/) do
+      assert_predicate @card, :valid?
     end
   end
 

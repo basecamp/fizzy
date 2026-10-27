@@ -3,11 +3,11 @@ module Card::Taggable
 
   included do
     has_many :taggings, dependent: :destroy
-    has_many :tags, through: :taggings
+    has_many :tags, through: :taggings, dependent: :destroy
 
     scope :tagged_with, ->(tags) { joins(:taggings).where(taggings: { tag: tags }) }
 
-    validate :tags_belong_to_account
+    validate :tags_belong_to_account, if: -> { association(:tags).loaded? }
   end
 
   def toggle_tag_with(title)
