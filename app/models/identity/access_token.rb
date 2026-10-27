@@ -219,9 +219,11 @@ class Identity::AccessToken < ApplicationRecord
     # A replayed code revokes the grant its first redemption issued, whoever
     # presents it and whatever has changed since, and mints nothing.
     # The revocations report as they commit, after the replay that caused them.
+    # The grant is read under a row lock, so two concurrent replays revoke it
+    # once: the second waits, then finds it gone.
     def answer_code_replay(authorization_code, client:)
       transaction do
-        replayed = unscoped.where(authorization_code_jti: authorization_code.jti).each { |grant| grant.revoke(reason: "code_replayed", actor: "system") }
+        replayed = unscoped.where(authorization_code_jti: authorization_code.jti).lock.each { |grant| grant.revoke(reason: "code_replayed", actor: "system") }
         # The code names its identity even when no grant is left to.
         Oauth::Audit.record "code.replayed", grant: replayed.first, client: client, identity_id: authorization_code.identity_id, actor: "client"
         remember_redeemed authorization_code

@@ -22,6 +22,20 @@ class OauthAuthorizationSwitchTest < ActionDispatch::IntegrationTest
     assert_equal expected_return_url, session[:return_to_after_authenticating]
   end
 
+  test "switching an audienced request signs out even when the signed-in identity has no account left" do
+    resource = "https://mcp.example.com/mcp"
+    saved, Rails.application.config.x.oauth.mcp_resources = Rails.application.config.x.oauth.mcp_resources, [ resource ]
+    identities(:david).users.each { |user| user.account.create_cancellation!(initiated_by: user) unless user.account.cancellation }
+
+    assert_difference -> { identities(:david).sessions.count }, -1 do
+      post_switch authorization_params.merge(resource: resource)
+    end
+
+    assert_redirected_to new_session_path(script_name: nil)
+  ensure
+    Rails.application.config.x.oauth.mcp_resources = saved
+  end
+
   test "switching with a bearer token and no browser session is refused, not half-handled" do
     token = identities(:david).access_tokens.create!(permission: :write)
     reset!

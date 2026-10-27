@@ -88,9 +88,11 @@ module OauthHelper
   # grant reaches every account; a bound one adds only its own, and only
   # where it grants more, so no pair claims more than some grant gives.
   def oauth_connected_app_reach(tokens)
-    # A grant bound to an account since deleted reaches nothing.
+    # A grant bound to an account since deleted, cancelled, or left reaches
+    # nothing: refreshing it would be refused, so it isn't shown as reach.
     unbound, bound = tokens.partition { |token| !token.account_bound? }
-    bound = bound.select(&:account)
+    active_account_ids = Current.identity.users_with_active_accounts.pluck(:account_id).to_set
+    bound = bound.select { |token| token.account && active_account_ids.include?(token.account_id) }
     everywhere = oauth_strongest_permission(unbound)
 
     reach = bound.group_by(&:account).filter_map do |account, account_tokens|

@@ -9,7 +9,9 @@
 class Oauth::Authorizations::SwitchesController < Oauth::AuthorizationsController
   AUTHORIZATION_PARAMS = %i[ client_id redirect_uri response_type scope state code_challenge code_challenge_method resource ]
 
-  skip_before_action :set_account
+  # Account eligibility belongs to the identity being signed out, so neither
+  # account check applies; the request-level audience check still does.
+  skip_before_action :set_account, :set_accounts
   before_action :require_browser_session
 
 

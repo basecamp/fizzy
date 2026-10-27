@@ -35,6 +35,7 @@ class My::ConnectedAppsControllerTest < ActionDispatch::IntegrationTest
     resource = "https://mcp.example.com/mcp"
     saved, Rails.application.config.x.oauth.mcp_resources = Rails.application.config.x.oauth.mcp_resources, [ resource ]
     @identity.access_tokens.create! oauth_client: oauth_clients(:mcp_client), permission: :write, audience: resource, account: accounts("37s")
+    accounts(:initech).users.create! identity: @identity, name: "David"
     @identity.access_tokens.create! oauth_client: oauth_clients(:mcp_client), permission: :read, audience: resource, account: accounts(:initech)
 
     get my_connected_apps_path
@@ -55,6 +56,23 @@ class My::ConnectedAppsControllerTest < ActionDispatch::IntegrationTest
     get my_connected_apps_path
 
     assert_response :success
+    assert_select ".connected-app__access", count: 0
+  ensure
+    Rails.application.config.x.oauth.mcp_resources = saved
+  end
+
+  test "a grant bound to an account that's since cancelled reaches nothing, and the app is still listed to disconnect" do
+    resource = "https://mcp.example.com/mcp"
+    saved, Rails.application.config.x.oauth.mcp_resources = Rails.application.config.x.oauth.mcp_resources, [ resource ]
+    client = oauth_clients(:mcp_client)
+    user = accounts(:initech).users.create! identity: @identity, name: "David"
+    @identity.access_tokens.create! oauth_client: client, permission: :read, audience: resource, account: accounts(:initech)
+    accounts(:initech).create_cancellation!(initiated_by: user)
+
+    get my_connected_apps_path
+
+    assert_response :success
+    assert_match client.name, response.body
     assert_select ".connected-app__access", count: 0
   ensure
     Rails.application.config.x.oauth.mcp_resources = saved
