@@ -18,7 +18,7 @@ class ActiveStorageAuthorizationTest < ActionDispatch::IntegrationTest
   end
 
   test "bearer token with board access can view blob" do
-    bearer_token = { "HTTP_AUTHORIZATION" => "Bearer #{identity_access_tokens(:davids_api_token).token}" }
+    bearer_token = { "HTTP_AUTHORIZATION" => "Bearer #{identity_access_tokens(:davids_api_token).raw_token}" }
 
     get rails_blob_path(@blob, disposition: :inline), env: bearer_token
 
@@ -48,7 +48,7 @@ class ActiveStorageAuthorizationTest < ActionDispatch::IntegrationTest
   end
 
   test "bearer token with board access can view representation" do
-    bearer_token = { "HTTP_AUTHORIZATION" => "Bearer #{identity_access_tokens(:davids_api_token).token}" }
+    bearer_token = { "HTTP_AUTHORIZATION" => "Bearer #{identity_access_tokens(:davids_api_token).raw_token}" }
 
     get rails_representation_path(@blob.representation(resize_to_limit: [ 100, 100 ])), env: bearer_token
 
@@ -247,7 +247,7 @@ class ActiveStorageAuthorizationTest < ActionDispatch::IntegrationTest
 
   test "export owner can download their export with bearer token" do
     blob = create_export_blob_for(users(:david))
-    bearer_token = { "HTTP_AUTHORIZATION" => "Bearer #{identity_access_tokens(:davids_api_token).token}" }
+    bearer_token = { "HTTP_AUTHORIZATION" => "Bearer #{identity_access_tokens(:davids_api_token).raw_token}" }
 
     get rails_blob_path(blob, disposition: :attachment), env: bearer_token
 

@@ -90,7 +90,7 @@ class Identity::AccessTokenTest < ActiveSupport::TestCase
   test "find_honored returns a read-only token and leaves the method check to the caller" do
     token = identity_access_tokens(:jasons_api_token)
 
-    assert_equal token, Identity::AccessToken.find_honored(token.token)
+    assert_equal token, Identity::AccessToken.find_honored(token.raw_token)
     assert_not token.allows?("POST")
   end
 
@@ -112,11 +112,14 @@ class Identity::AccessTokenTest < ActiveSupport::TestCase
     end
   end
 
-  test "a personal access token is stored digested and, for now, in plaintext" do
-    token = identities(:david).access_tokens.create!(description: "Personal").reload
+  test "a personal access token stores only its digest" do
+    token = identities(:david).access_tokens.create!(description: "Personal")
+    raw_token = token.raw_token
+    token.reload
 
-    assert_equal TokenDigester.digest(token.token), token.token_digest
+    assert_equal TokenDigester.digest(raw_token), token.token_digest
     assert_nil token.refresh_token_digest
+    assert_nil stored_plaintext(token)
   end
 
   test "an OAuth grant stores only digests of its tokens" do
@@ -124,7 +127,7 @@ class Identity::AccessTokenTest < ActiveSupport::TestCase
     raw_token, raw_refresh_token = grant.raw_token, grant.raw_refresh_token
     grant.reload
 
-    assert_nil grant.token
+    assert_nil stored_plaintext(grant)
     assert_equal TokenDigester.digest(raw_token), grant.token_digest
     assert_equal TokenDigester.digest(raw_refresh_token), grant.refresh_token_digest
     assert_nil grant.raw_token
@@ -136,7 +139,7 @@ class Identity::AccessTokenTest < ActiveSupport::TestCase
     raw_token, raw_refresh_token = grant.raw_token, grant.raw_refresh_token
     grant.reload
 
-    assert_nil grant.token
+    assert_nil stored_plaintext(grant)
     assert_equal TokenDigester.digest(raw_token), grant.token_digest
     assert_equal TokenDigester.digest(raw_refresh_token), grant.refresh_token_digest
   end
@@ -163,79 +166,22 @@ class Identity::AccessTokenTest < ActiveSupport::TestCase
     assert statements.none? { |sql| sql.match?(/\Wtoken\W*=/) }, statements.join("\n")
   end
 
-  # Production code that predates digests writes personal access tokens in
-  # plaintext only. Such a token still authenticates, and gets its digest the
-  # first time it's used, without moving its updated_at.
-  test "a personal access token without a digest is found by plaintext and digested" do
-    token = undigested_personal_token("legacyPersonalToken0123456789")
-    updated_at = token.updated_at
+  # BackfillRemainingTokenDigests digests any token stored only in plaintext
+  # before this code reads by digest alone.
+  test "a token stored only in plaintext doesn't authenticate" do
+    token = identities(:david).access_tokens.create!(description: "Before digests")
+    Identity::AccessToken.where(id: token.id).update_all token: "legacyPersonalToken0123456789", token_digest: nil
 
-    travel 1.day do
-      assert_equal token, Identity::AccessToken.find_honored("legacyPersonalToken0123456789")
+    statements = capture_sql do
+      assert_nil Identity::AccessToken.find_honored("legacyPersonalToken0123456789")
     end
-
-    token.reload
-    assert_equal TokenDigester.digest("legacyPersonalToken0123456789"), token.token_digest
-    assert_equal updated_at, token.updated_at
-
-    statements = capture_sql { Identity::AccessToken.find_honored("legacyPersonalToken0123456789") }
     assert statements.none? { |sql| sql.match?(/\Wtoken\W*=/) }, statements.join("\n")
-  end
-
-  # SaaS reads GET requests from the replica, where writes are refused.
-  test "a personal access token without a digest is digested when found from the replica" do
-    token = undigested_personal_token("legacyPersonalToken0123456789")
-
-    found = ApplicationRecord.with_reading_role do
-      Identity::AccessToken.find_honored("legacyPersonalToken0123456789")
-    end
-
-    assert_equal token, found
-    assert_equal TokenDigester.digest("legacyPersonalToken0123456789"), token.reload.token_digest
-  end
-
-  # Non-primary datacenters read local replicas and can't reach the primary.
-  test "a personal access token without a digest authenticates outside the primary datacenter, undigested" do
-    token = undigested_personal_token("legacyPersonalToken0123456789")
-    Deployment::DatabaseResolver.stubs(:in_primary_datacenter?).returns(false)
-
-    statements = capture_sql { assert_equal token, Identity::AccessToken.find_honored("legacyPersonalToken0123456789") }
-
-    assert statements.none? { |sql| sql.match?(/\AUPDATE/i) }, statements.join("\n")
     assert_nil token.reload.token_digest
   end
 
-  # Code that stores only plaintext issues prefixed personal access tokens too.
-  test "a prefixed personal access token without a digest is found by plaintext and digested" do
-    token = undigested_personal_token("fizzy_pat_#{"x" * 24}")
-
-    assert_equal token, Identity::AccessToken.find_honored("fizzy_pat_#{"x" * 24}")
-    assert_equal TokenDigester.digest("fizzy_pat_#{"x" * 24}"), token.reload.token_digest
-  end
-
-  # MySQL's collation matches `token` case-insensitively.
-  test "a differently cased token neither authenticates nor digests the one it resembles" do
-    token = undigested_personal_token("legacyPersonalToken0123456789")
-
-    assert_nil Identity::AccessToken.find_honored("LEGACYPERSONALTOKEN0123456789")
-    assert_nil token.reload.token_digest
-
-    assert_equal token, Identity::AccessToken.find_honored("legacyPersonalToken0123456789")
-    assert_equal TokenDigester.digest("legacyPersonalToken0123456789"), token.reload.token_digest
-  end
-
-  test "only personal access tokens fall back to plaintext" do
-    grant = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client))
-    grant.update_columns token: "legacyAccessToken0123456789", token_digest: nil
-
-    assert_nil Identity::AccessToken.find_by_raw_token("legacyAccessToken0123456789")
-  end
-
-  test "the fallback stays within the scope it's called on" do
-    undigested_personal_token("legacyPersonalToken0123456789")
-
-    assert_nil Identity::AccessToken.oauth.find_by_raw_token("legacyPersonalToken0123456789")
-    assert_nil Identity::AccessToken.where(identity: identities(:kevin)).find_by_raw_token("legacyPersonalToken0123456789")
+  test "the plaintext column is ignored" do
+    assert_not_includes Identity::AccessToken.column_names, "token"
+    assert_not Identity::AccessToken.new.respond_to?(:token)
   end
 
   # Dropped beside `token` only once every process runs code that ignores it.
@@ -258,10 +204,8 @@ class Identity::AccessTokenTest < ActiveSupport::TestCase
   end
 
   private
-    def undigested_personal_token(raw)
-      identities(:david).access_tokens.create!(description: "Before digests").tap do |token|
-        token.update_columns token: raw, token_digest: nil
-      end
+    def stored_plaintext(access_token)
+      Identity::AccessToken.where(id: access_token.id).pick(Arel.sql("token"))
     end
 
     def capture_sql(&block)

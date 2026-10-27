@@ -1,0 +1,103 @@
+require "test_helper"
+require Rails.root.join("db/migrate/20261017120000_backfill_remaining_token_digests")
+
+class BackfillRemainingTokenDigestsTest < ActiveSupport::TestCase
+  # Production code that stores only plaintext kept writing personal access
+  # tokens after the first backfill, and one not used since has no digest.
+  setup do
+    @personal = identities(:david).access_tokens.create!(description: "Before digests")
+    store_plaintext_only @personal, "legacyPersonalToken0123456789", updated_at: 3.days.ago.round
+
+    @grant = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client))
+    store_plaintext_only @grant, "legacyAccessToken0123456789", updated_at: 80.days.ago.round
+  end
+
+  test "digests every undigested token, keeping a personal token's plaintext and clearing a grant's" do
+    backfill
+
+    @personal.reload
+    assert_equal TokenDigester.digest("legacyPersonalToken0123456789"), @personal.token_digest
+    assert_equal "legacyPersonalToken0123456789", stored_plaintext(@personal)
+
+    @grant.reload
+    assert_equal TokenDigester.digest("legacyAccessToken0123456789"), @grant.token_digest
+    assert_nil stored_plaintext(@grant)
+  end
+
+  test "keeps the plaintext of a token issued by the personal access client" do
+    store_plaintext_only @grant, "legacyAccessToken0123456789", oauth_client_id: personal_access_client.id
+
+    backfill
+
+    assert_equal TokenDigester.digest("legacyAccessToken0123456789"), @grant.reload.token_digest
+    assert_equal "legacyAccessToken0123456789", stored_plaintext(@grant)
+  end
+
+  # A grant's updated_at is its idle-lapse clock.
+  test "leaves updated_at alone" do
+    assert_no_changes -> { [ @personal.reload.updated_at, @grant.reload.updated_at ] } do
+      backfill
+    end
+  end
+
+  test "leaves digested tokens alone, so it can run again" do
+    digested = identity_access_tokens(:davids_api_token)
+
+    assert_no_changes -> { digested.reload.attributes } do
+      backfill
+      backfill
+    end
+  end
+
+  test "the backfilled token authenticates by digest" do
+    backfill
+
+    assert_equal @personal, Identity::AccessToken.find_honored("legacyPersonalToken0123456789")
+    assert_equal @grant, Identity::AccessToken.find_by_raw_token("legacyAccessToken0123456789")
+  end
+
+  # The first backfill kept personal access tokens' plaintext beside their
+  # digests, so a later token can duplicate one already digested.
+  test "refuses duplicate tokens before digesting anything, without naming them" do
+    copy = identities(:kevin).access_tokens.create!(description: "Digested", raw_token: "legacyPersonalToken0123456789")
+    BackfillRemainingTokenDigests::AccessToken.where(id: copy.id).update_all token: "legacyPersonalToken0123456789"
+
+    error = assert_raises(RuntimeError) { backfill }
+
+    assert_match @personal.id, error.message
+    assert_match copy.id, error.message
+    assert_no_match(/legacyPersonalToken/, error.message)
+    assert_nil @personal.reload.token_digest
+    assert_nil @grant.reload.token_digest
+  end
+
+  test "does nothing once the plaintext column is gone" do
+    migration = BackfillRemainingTokenDigests.new.tap { |migration| migration.verbose = false }
+    migration.stubs(:column_exists?).with(:identity_access_tokens, :token).returns(false)
+
+    migration.up
+
+    assert_nil @personal.reload.token_digest
+  end
+
+  private
+    # Identity::AccessToken ignores the plaintext column, so it's written and
+    # read through the migration's own model.
+    def store_plaintext_only(access_token, raw, **attributes)
+      BackfillRemainingTokenDigests::AccessToken.where(id: access_token.id).update_all token: raw, token_digest: nil, **attributes
+    end
+
+    # The personal access client may not exist yet, so the grant's client stands in for it.
+    def personal_access_client
+      Oauth::Client.find_by(client_id: BackfillRemainingTokenDigests::PERSONAL_ACCESS_CLIENT_ID) ||
+        oauth_clients(:mcp_client).tap { |client| client.update_columns client_id: BackfillRemainingTokenDigests::PERSONAL_ACCESS_CLIENT_ID }
+    end
+
+    def stored_plaintext(access_token)
+      BackfillRemainingTokenDigests::AccessToken.find(access_token.id).token
+    end
+
+    def backfill
+      BackfillRemainingTokenDigests.new.tap { |migration| migration.verbose = false }.up
+    end
+end

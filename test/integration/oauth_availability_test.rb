@@ -252,7 +252,7 @@ class OauthAvailabilityTest < ActionDispatch::IntegrationTest
 
   test "personal access tokens still work while OAuth is dark" do
     with_oauth_availability acceptance: false do
-      get user_path(users(:jason)), env: bearer(identity_access_tokens(:jasons_api_token).token), as: :json
+      get user_path(users(:jason)), env: bearer(identity_access_tokens(:jasons_api_token).raw_token), as: :json
     end
 
     assert_response :success

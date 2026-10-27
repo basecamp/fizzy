@@ -4,8 +4,8 @@ class ApiTest < ActionDispatch::IntegrationTest
   include OauthAvailabilityTestHelper
 
   setup do
-    @davids_bearer_token = bearer_token_env(identity_access_tokens(:davids_api_token).token)
-    @jasons_bearer_token = bearer_token_env(identity_access_tokens(:jasons_api_token).token)
+    @davids_bearer_token = bearer_token_env(identity_access_tokens(:davids_api_token).raw_token)
+    @jasons_bearer_token = bearer_token_env(identity_access_tokens(:jasons_api_token).raw_token)
   end
 
   test "authenticate with user credentials" do
@@ -155,7 +155,7 @@ class ApiTest < ActionDispatch::IntegrationTest
   end
 
   test "the bearer scheme is matched case-insensitively" do
-    get boards_path(format: :json), env: { "HTTP_AUTHORIZATION" => "bearer #{identity_access_tokens(:davids_api_token).token}" }
+    get boards_path(format: :json), env: { "HTTP_AUTHORIZATION" => "bearer #{identity_access_tokens(:davids_api_token).raw_token}" }
     assert_response :success
 
     get boards_path(format: :json), env: { "HTTP_AUTHORIZATION" => "BEARER nonsense" }
@@ -164,7 +164,7 @@ class ApiTest < ActionDispatch::IntegrationTest
   end
 
   test "Bearer elsewhere in another scheme's credentials is not bearer authentication" do
-    get boards_path(format: :json), env: { "HTTP_AUTHORIZATION" => "Basic Bearer #{identity_access_tokens(:davids_api_token).token}" }
+    get boards_path(format: :json), env: { "HTTP_AUTHORIZATION" => "Basic Bearer #{identity_access_tokens(:davids_api_token).raw_token}" }
 
     assert_response :redirect
   end
