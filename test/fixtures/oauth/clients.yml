@@ -1,0 +1,44 @@
+mcp_client:
+  client_id: mcp_test_client_123
+  name: Test MCP Client
+  redirect_uris:
+    - http://127.0.0.1:8888/callback
+  scopes:
+    - read
+    - write
+  dynamically_registered: true
+  trusted: false
+
+trusted_client:
+  client_id: trusted_client_456
+  name: Trusted First-Party App
+  redirect_uris:
+    - https://app.example.com/oauth/callback
+  scopes:
+    - read
+    - write
+  dynamically_registered: false
+  trusted: true
+
+confidential_client:
+  client_id: confidential_client_789
+  client_secret_digest: <%= TokenDigester.digest("confidential_secret_789") %>
+  name: Confidential Connector
+  redirect_uris:
+    - https://connector.example.com/callback
+  scopes:
+    - read
+    - write
+  token_endpoint_auth_method: client_secret_post
+  dynamically_registered: true
+  trusted: false
+
+personal_access:
+  client_id: fizzy-personal-access
+  name: Personal Access Tokens
+  redirect_uris: []
+  scopes:
+    - read
+    - write
+  dynamically_registered: false
+  trusted: true

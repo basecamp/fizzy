@@ -1,0 +1,74 @@
+<% remote_hosts = oauth_client_remote_hosts(client) %>
+
+<article class="connected-app" id="<%= dom_id(client, :connected_app) %>">
+  <div class="connected-app__details flex flex-column">
+    <%# A self-registered app goes by the name it gave itself, since that's the
+        name people know it by, but never without where its access goes %>
+    <h3 class="connected-app__name txt-medium margin-none" id="<%= dom_id(client, :connected_app_name) %>"><bdi><%= oauth_client_self_name(client) %></bdi></h3>
+
+    <% if client.dynamically_registered? %>
+      <p class="txt-x-small txt-subtle margin-none">
+        <% if remote_hosts.any? %>
+          Name set by the app at <%= remote_hosts.to_sentence(two_words_connector: " or ", last_word_connector: " or ") %>
+        <% else %>
+          Name set by an app on your device
+        <% end %>
+      </p>
+    <% elsif client.metadata_document? %>
+      <p class="txt-x-small txt-subtle margin-none">Name set by the app at <%= URI.parse(client.client_id).host %></p>
+    <% elsif client.trusted? %>
+      <p class="txt-x-small txt-subtle margin-none">Made by 37signals</p>
+    <% end %>
+
+    <% oauth_connected_app_reach(tokens).each do |permission, accounts| %>
+      <p class="connected-app__access txt-small margin-none">
+        <strong><%= oauth_access_label(permission) %></strong>, <% if accounts %>in <%= to_sentence(accounts.map { |account| tag.bdi(account.name) }) %><% else %>in every account you belong to<% end %>
+      </p>
+    <% end %>
+
+    <%# updated_at moves each time the app renews its access %>
+    <p class="txt-x-small txt-subtle margin-none">
+      Connected <%= local_datetime_tag tokens.map(&:created_at).min, style: :date %>
+      &middot; access last renewed <%= local_datetime_tag tokens.map(&:updated_at).max, style: :daysago %>
+      <% if tokens.many? %>&middot; <%= pluralize(tokens.size, "connection") %><% end %>
+    </p>
+  </div>
+
+  <div class="connected-app__disconnect" data-controller="dialog" data-dialog-modal-value="true" data-action="keydown.esc->dialog#close:stop">
+    <button type="button" class="btn txt-negative borderless txt-small" data-action="dialog#open" aria-describedby="<%= dom_id(client, :connected_app_name) %>">
+      <%= icon_tag "trash" %>
+      <span>Disconnect</span>
+    </button>
+
+    <dialog class="dialog panel fill-white shadow gap flex-column" style="--panel-size: 44ch" data-dialog-target="dialog" aria-labelledby="<%= dom_id(client, :disconnect_title) %>">
+      <h3 class="txt-large txt-bold margin-none" id="<%= dom_id(client, :disconnect_title) %>">Disconnect <bdi><%= oauth_client_self_name(client) %></bdi>?</h3>
+      <p class="txt-medium margin-none">It loses its access to Fizzy right away. To use it again, you'd connect it again.</p>
+
+      <%= form_with url: my_connected_app_path(client), method: :delete, class: "flex flex-column gap" do |form| %>
+        <% if webhooks.any? %>
+          <div class="txt-align-start">
+            <p class="margin-none">It set up <%= webhooks.one? ? "this webhook" : "these webhooks" %>, which will keep running unless you remove <%= webhooks.one? ? "it" : "them" %>:</p>
+            <ul class="margin-block-half">
+              <% webhooks.each do |webhook| %>
+                <li>
+                  <strong><%= webhook.name %></strong> on <%= webhook.board.name %><%= " in #{webhook.account.name}" unless webhook.account == Current.account %>
+                  <%= hidden_field_tag "webhook_ids[]", webhook.id, id: nil %>
+                </li>
+              <% end %>
+            </ul>
+
+            <label class="flex gap-half align-center justify-start">
+              <%= check_box_tag :remove_webhooks, "1", false, class: "checkbox", id: dom_id(client, :remove_webhooks) %>
+              Also remove <%= webhooks.one? ? "it" : "these" %>
+            </label>
+          </div>
+        <% end %>
+
+        <div class="flex gap-half justify-center">
+          <button type="button" class="btn" data-action="dialog#close">Cancel</button>
+          <%= form.button "Disconnect", class: "btn txt-negative" %>
+        </div>
+      <% end %>
+    </dialog>
+  </div>
+</article>

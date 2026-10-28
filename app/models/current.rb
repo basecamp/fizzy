@@ -1,5 +1,5 @@
 class Current < ActiveSupport::CurrentAttributes
-  attribute :session, :user, :identity, :account
+  attribute :session, :user, :identity, :account, :access_token
   attribute :http_method, :request_id, :user_agent, :ip_address, :referrer
 
   def session=(value)

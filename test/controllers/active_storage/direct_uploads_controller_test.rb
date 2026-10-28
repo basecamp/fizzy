@@ -78,6 +78,7 @@ class ActiveStorage::DirectUploadsControllerTest < ActionDispatch::IntegrationTe
       as: :json
 
     assert_response :unauthorized
+    assert_match 'error="insufficient_scope"', response.headers["WWW-Authenticate"]
   end
 
   test "create with invalid access token" do
@@ -87,11 +88,21 @@ class ActiveStorage::DirectUploadsControllerTest < ActionDispatch::IntegrationTe
       as: :json
 
     assert_response :unauthorized
+    assert_match 'error="invalid_token"', response.headers["WWW-Authenticate"]
   end
 
   test "create unauthenticated" do
     post rails_direct_uploads_path,
       params: @blob_params,
+      as: :json
+
+    assert_response :redirect
+  end
+
+  test "create unauthenticated from the uploader in our own pages goes to sign in" do
+    post rails_direct_uploads_path,
+      params: @blob_params,
+      xhr: true,
       as: :json
 
     assert_response :redirect

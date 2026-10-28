@@ -27,12 +27,30 @@ production: &production
   cleanup_transfers:
     command: "Identity::Transfer.cleanup"
     schedule: every 4 hours
+  cleanup_oauth_retired_refresh_tokens:
+    command: "Oauth::RetiredRefreshToken.cleanup"
+    schedule: every day at 04:22
+  forget_oauth_refresh_successors:
+    command: "Oauth::RetiredRefreshToken.forget_successors"
+    schedule: every 5 minutes
+  cleanup_lapsed_oauth_grants:
+    command: "Identity::AccessToken.cleanup"
+    schedule: every day at 04:32
+  cleanup_oauth_redeemed_authorization_codes:
+    command: "Oauth::RedeemedAuthorizationCode.cleanup"
+    schedule: every day at 04:42
+  cleanup_delegated_oauth_tokens:
+    command: "Identity::AccessToken.cleanup_delegated"
+    schedule: every hour at minute 37
   cleanup_exports:
     command: "Export.cleanup"
     schedule: every hour at minute 20
   cleanup_imports:
     command: "Account::Import.cleanup"
     schedule: every hour at minute 25
+  cleanup_oauth_clients:
+    command: "Oauth::Client.cleanup"
+    schedule: every day at 04:12
   incineration:
     class: "Account::IncinerateDueJob"
     schedule: every 8 hours at minute 16

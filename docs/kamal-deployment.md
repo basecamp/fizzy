@@ -57,7 +57,7 @@ SMTP_PASSWORD=email-provider-password
 
 The values you enter here will be specific to you, and you can get or create them as follows:
 
-- `SECRET_KEY_BASE` should be a long, random secret. You can run `bin/rails secret` to create a suitable value for this.
+- `SECRET_KEY_BASE` should be a long, random secret. You can run `bin/rails secret` to create a suitable value for this. Keep it: changing it invalidates every personal access token and connected OAuth app, unless you set `OAUTH_TOKEN_PEPPER` separately (see [Docker deployment](docker-deployment.md#secret-key-base)). To set it, add `OAUTH_TOKEN_PEPPER` (at least 32 characters, e.g. from `bin/rails secret`) to `.kamal/secrets` **and** to the `env.secret` list in `config/deploy.yml`: Kamal passes a container only the secrets that list names. Set it before the first deploy that digests tokens, or keep the derived one: changing the pepper later invalidates every token too.
 - `SMTP_USERNAME` & `SMTP_PASSWORD` should be valid credentials for your SMTP server. If you're using a 3rd-party service here, consult their documentation for what to use.
 - `VAPID_PUBLIC_KEY` & `VAPID_PRIVATE_KEY` are a pair of credentials that are used for sending notifications. You can create your own keys by starting a development console with:
 

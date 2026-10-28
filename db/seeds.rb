@@ -52,6 +52,10 @@ else
     board.cards.create!(title:, description:, creator:, status:)
   end
 
+  # First-party OAuth clients, from the registry operators provision with
+  # bin/rails oauth:provision_first_party_clients
+  Oauth::FirstPartyClients.provision!
+
   # Seed accounts
   seed_account "cleanslate"
   seed_account "37signals"

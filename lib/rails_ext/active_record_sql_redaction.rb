@@ -11,6 +11,7 @@
 #   identity_access_tokens.token    API bearer token
 #   identity_transfers.token        signs its holder in as the identity
 #   magic_links.code                signs its holder in as the identity
+#   oauth_retired_refresh_tokens    successor_payload holds a live successor token pair, encrypted
 #   webhooks.signing_secret, .url   signs payloads; a chat webhook URL is itself a credential
 #
 # Filtering by table rather than column keeps INSERT ... VALUES, multi-row inserts and IN lists covered
@@ -21,7 +22,7 @@
 # test/lib/rails_ext/active_record_sql_redaction_test.rb until its table is listed here or the column is
 # declared not secret there. A credential in a column named otherwise has to be listed by hand.
 module ActiveRecordSqlRedaction
-  TABLES = %w[ account_join_codes identity_access_tokens identity_transfers magic_links webhooks ].freeze
+  TABLES = %w[ account_join_codes identity_access_tokens identity_transfers magic_links oauth_retired_refresh_tokens webhooks ].freeze
 
   # Names a table however the statement spells it: `magic_links` on MySQL, "magic_links" on SQLite, or bare
   # in hand-written SQL, in any case. Over-matching only filters more.

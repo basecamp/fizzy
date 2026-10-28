@@ -1,0 +1,24 @@
+<%# Fizzy's two access levels, each in plain words. Write includes read, so
+    the choice is one or the other; a client registered for read alone gets
+    the single option, shown so the person still sees what they're granting. %>
+<fieldset class="oauth-access flex flex-column gap-half">
+  <legend class="oauth-access__legend"><strong>Access</strong></legend>
+
+  <% oauth_access_levels(client, one_account: local_assigns[:one_account]).each do |value, level| %>
+    <label class="oauth-access__choice">
+      <%= form.radio_button :scope, value, checked: value == scope, class: "oauth-access__radio" %>
+      <span class="flex flex-column">
+        <strong><%= level[:label] %></strong>
+        <span class="txt-small txt-subtle"><%= level[:description] %></span>
+      </span>
+    </label>
+  <% end %>
+
+  <p class="oauth-access__reach txt-x-small txt-subtle margin-none">
+    <% if local_assigns[:one_account] %>
+      It works as you, so it can only reach what you can, in the account above.
+    <% else %>
+      It works as you, so it can only reach what you can, in every account you belong to.
+    <% end %>
+  </p>
+</fieldset>

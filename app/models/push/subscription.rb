@@ -10,8 +10,42 @@ class Push::Subscription < ApplicationRecord
   belongs_to :account, default: -> { user.account }
   belongs_to :user
 
+  # The OAuth client whose grant registered this subscription. It delivers to
+  # the app's own device or install, so it is the app's plumbing and ends with
+  # the identity's last grant to that client (Identity::AccessToken). Sessions
+  # and personal access tokens register none.
+  belongs_to :oauth_client, class_name: "Oauth::Client", optional: true
+
+  # Delivery is where an app's subscription could outlive the app, so this is
+  # the guarantee: one delivers only while the user's identity holds an
+  # unlapsed grant to its app. That covers every way the two come apart (the
+  # grant ending, lapsing before the sweep, the user leaving the account or
+  # moving to another identity, a claim racing the last grant's end), where
+  # the cleanup on grant destroy only finds what the identity still reaches.
+  # The grant must also be one Fizzy honors (Oauth::Availability): while
+  # OAuth is dark, or staff only and the user isn't staff, an app whose tokens
+  # are refused gets no notifications either.
+  #
+  # An account-bound grant reaches only its own account, so only it, or a grant
+  # bound to no account, keeps a subscription in that account delivering: once
+  # the app's grant for one account ends, a grant it holds for another account
+  # doesn't carry that account's notifications.
+  scope :deliverable_to, ->(user) do
+    grants = Identity::AccessToken.grants.unlapsed.where(identity_id: user.identity_id, account_id: [ nil, user.account_id ], oauth_client: Oauth::Availability.accepted_clients)
+
+    where(oauth_client_id: nil).or \
+      where(oauth_client_id: (!Oauth::Availability.staff_only? || Oauth::Availability.admits?(user.identity) ? grants : grants.none).select(:oauth_client_id))
+  end
+
   validates :endpoint, presence: true
   validate :validate_endpoint_url
+
+  # Whoever registers an endpoint last owns it. An app that registers a fresh
+  # OAuth client on reconnect keeps a device subscription it registered under
+  # the old one, so it doesn't go when the old client's grant ends.
+  def claim_for(oauth_client)
+    update_column :oauth_client_id, oauth_client&.id unless oauth_client_id == oauth_client&.id
+  end
 
   def notification(**params)
     WebPush::Notification.new(

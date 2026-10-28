@@ -1,4 +1,6 @@
 class Account::ExportsController < ApplicationController
+  disallow_oauth_grants
+
   before_action :ensure_admin_or_owner
   before_action :ensure_export_limit_not_exceeded, only: :create
   before_action :set_export, only: :show

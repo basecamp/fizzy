@@ -1,0 +1,34 @@
+<% @page_title = "Connected apps" %>
+
+<% content_for :header do %>
+  <div class="header__actions header__actions--start">
+    <% if Current.user %>
+      <%= back_link_to "My profile", user_path(Current.user), "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+    <% else %>
+      <%= back_link_to "Menu", session_menu_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+    <% end %>
+  </div>
+
+  <h1 class="header__title"><%= @page_title %></h1>
+<% end %>
+
+<section class="connected-apps panel panel--wide shadow center txt-align-start">
+  <% if @connected_apps.any? %>
+    <p class="margin-none-block-start">Apps you've authorized to use Fizzy as you. Each one can reach what you can, with the access shown. Don't recognize one? Disconnect it, and its access ends right away.</p>
+
+    <% connected_app_groups(@connected_apps).each do |kind, heading, apps| %>
+      <section class="connected-apps__group" aria-labelledby="<%= "connected_apps_#{kind}" %>">
+        <h2 id="<%= "connected_apps_#{kind}" %>" class="divider txt-medium margin-none"><%= heading %></h2>
+
+        <% apps.each do |client, tokens| %>
+          <%= render "my/connected_apps/connected_app", client: client, tokens: tokens, webhooks: @webhooks_by_client.fetch(client.id, []) %>
+        <% end %>
+      </section>
+    <% end %>
+  <% else %>
+    <div class="connected-apps__empty flex flex-column gap-half">
+      <p class="margin-none"><strong>Nothing connected yet.</strong></p>
+      <p class="txt-small txt-subtle margin-none">AI assistants and other apps you connect to Fizzy show up here, so you can see what each one can do and disconnect it whenever you like.</p>
+    </div>
+  <% end %>
+</section>

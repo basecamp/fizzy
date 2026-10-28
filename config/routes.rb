@@ -1,6 +1,23 @@
 Rails.application.routes.draw do
   root "events#index"
 
+  get "/.well-known/oauth-authorization-server", to: "oauth/metadata#show"
+  get "/.well-known/oauth-protected-resource", to: "oauth/protected_resource_metadata#show"
+
+  namespace :oauth do
+    resource :authorization, only: %i[ new create ] do
+      scope module: :authorizations do
+        resource :switch, only: :create
+      end
+    end
+    # The delegation exchange shares the token endpoint, told apart by its grant type.
+    post "token", to: "token_exchanges#create", as: nil,
+      constraints: Oauth::TokenDelegation.method(:request?)
+    resource :token, only: :create
+    resource :revocation, only: :create
+    resources :clients, only: :create
+  end
+
   namespace :account do
     resource :cancellation, only: [ :create ]
     resource :entropy
@@ -188,10 +205,12 @@ Rails.application.routes.draw do
   namespace :my do
     resource :passkey_challenge, only: :create
     resource :identity, only: :show
-    # show is reached by a signed id that reveals the new token for a few seconds
+    # show, which revealed a new token by its signed id, is gone; the filter
+    # stays so an old reveal link in a log or Referer still reads [FILTERED].
     filter_path_parameters :id do
-      resources :access_tokens
+      resources :access_tokens, except: %i[ show edit update ]
     end
+    resources :connected_apps, only: %i[ index destroy ]
     resources :passkeys, except: %i[ show new ]
     resources :pins
     resource :timezone

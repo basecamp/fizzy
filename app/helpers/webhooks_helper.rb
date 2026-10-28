@@ -22,6 +22,22 @@ module WebhooksHelper
     ACTION_LABELS[action] || action.to_s.humanize
   end
 
+  # A client swept after its last grant ended (Oauth::Client.cleanup) leaves
+  # no name behind, but the webhook it set up still came from an app.
+  def webhook_attribution(webhook)
+    if webhook.creator
+      if webhook.created_via_id?
+        "Created by #{webhook.creator.name} via #{webhook_app_name(webhook)}"
+      else
+        "Created by #{webhook.creator.name}"
+      end
+    end
+  end
+
+  def webhook_app_name(webhook)
+    webhook.created_via&.name || "an app that’s since been removed"
+  end
+
   def link_to_webhooks(board, &)
     link_to board_webhooks_path(board_id: board),
         class: [ "btn btn--circle-mobile", { "btn--reversed": board.webhooks.any? } ],

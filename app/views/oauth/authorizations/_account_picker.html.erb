@@ -1,0 +1,22 @@
+<%# Which account this connection reaches. The controller sets accounts (the
+    identity's accounts) and the preselected one; the choice posts as
+    account_id. With one account there is nothing to choose, so it's named,
+    and carried in a hidden field. %>
+<fieldset class="oauth-access flex flex-column gap-half">
+  <legend class="oauth-access__legend"><strong>Account</strong></legend>
+
+  <% if accounts.one? %>
+    <% account = accounts.first %>
+    <%= form.hidden_field :account_id, value: account.id %>
+    <p class="margin-none"><bdi><%= account.name %></bdi></p>
+  <% else %>
+    <% accounts.each_with_index do |account, index| %>
+      <label class="oauth-access__choice">
+        <%= form.radio_button :account_id, account.id, checked: selected_account_id.present? ? account.id == selected_account_id : index.zero?, required: true, class: "oauth-access__radio" %>
+        <span><bdi><%= account.name %></bdi></span>
+      </label>
+    <% end %>
+  <% end %>
+
+  <p class="txt-x-small txt-subtle margin-none">The app reaches this account only. Connect it again to add another.</p>
+</fieldset>

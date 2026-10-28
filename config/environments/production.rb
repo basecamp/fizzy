@@ -119,6 +119,32 @@ Rails.application.configure do
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
 
+  # The OAuth authorization server ships dark: unless OAUTH_ACCEPTANCE_ENABLED is
+  # "true" there is no discovery, registration, authorization or token endpoint,
+  # and OAuth-issued tokens are refused. OAUTH_ISSUANCE_ENABLED=false pauses
+  # minting while existing tokens keep working. OAUTH_PILOT_CLIENT_IDS
+  # (comma-separated client_ids) exempts named clients from both switches.
+  # See Oauth::Availability. Applies to beta and staging, which load this file.
+  config.x.oauth.acceptance_enabled = ENV["OAUTH_ACCEPTANCE_ENABLED"] == "true"
+  config.x.oauth.issuance_enabled = ENV["OAUTH_ISSUANCE_ENABLED"] != "false"
+  config.x.oauth.pilot_client_ids = ENV.fetch("OAUTH_PILOT_CLIENT_IDS", "").split(",").map(&:strip).compact_blank
+  # OAUTH_STAFF_ONLY=true limits OAuth to 37signals staff, whichever client
+  # asks; personal access tokens are unaffected (Oauth::Availability).
+  config.x.oauth.staff_only = ENV["OAUTH_STAFF_ONLY"] == "true"
+
+  # Client ID Metadata Documents are off unless OAUTH_CIMD_ENABLED is "true",
+  # and then fetched only from the hosts OAUTH_CIMD_ALLOWED_HOSTS names
+  # (space-separated, exact hosts; e.g. "mcp.claude.ai claude.ai claude.com
+  # chatgpt.com"). See Oauth::ClientMetadata.
+  config.x.oauth.cimd_enabled = ENV["OAUTH_CIMD_ENABLED"] == "true"
+  config.x.oauth.cimd_allowed_hosts = ENV.fetch("OAUTH_CIMD_ALLOWED_HOSTS", "").split
+
+  # Dynamic client registration accepts https redirects only on these hosts
+  # (OAUTH_DCR_ALLOWED_HTTPS_HOSTS, separated by spaces or commas), beside
+  # loopback and the cursor:// and claude:// app schemes. Unset, it accepts
+  # no https redirect at all. See Oauth.dcr_redirect_shape?.
+  config.x.oauth.dcr_allowed_https_hosts = ENV.fetch("OAUTH_DCR_ALLOWED_HTTPS_HOSTS", "").split(/[\s,]+/).compact_blank
+
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
 end
