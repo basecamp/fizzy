@@ -199,6 +199,18 @@ class ActiveRecordSqlRedactionTest < ActiveSupport::TestCase
     assert_no_secret CODE, seen.join("\n")
   end
 
+  unless Fizzy.db_adapter.sqlite?
+    test "a MySQL server error keeps only its code" do
+      identities(:kevin).magic_links.create!(code: CODE)
+
+      error = assert_raises ActiveRecord::RecordNotUnique do
+        identities(:kevin).magic_links.new(code: CODE, expires_at: 1.minute.from_now).save!(validate: false)
+      end
+
+      assert_equal "1062: #{ActiveRecordSqlRedaction::FILTERED_ERROR}", error.cause.message
+    end
+  end
+
   test "an invalid statement's error, which can quote the statement, carries no value" do
     error = assert_raises ActiveRecord::StatementInvalid do
       MagicLink.connection.select_all("SELECT * FROM magic_links WHERE code = '#{CODE}' INVALID")

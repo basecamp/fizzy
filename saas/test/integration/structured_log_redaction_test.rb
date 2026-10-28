@@ -118,7 +118,7 @@ class Fizzy::Saas::StructuredLogRedactionTest < ActionDispatch::IntegrationTest
       ActiveRecord::Base.cache { 2.times { assert MagicLink.find_by(code: CODE) } }
       assert_raises(ActiveRecord::RecordNotUnique) { identities(:kevin).magic_links.new(code: CODE, expires_at: 1.minute.from_now).save!(validate: false) }
       transaction.finish
-      Sentry.capture_exception(ActiveRecord::RecordNotUnique.new("Trilogy::ProtocolError: 1062: Duplicate entry '#{CODE}' for key 'magic_links.index_magic_links_on_code'"))
+      Sentry.capture_exception(ActiveRecord::RecordNotUnique.new("Mysql2::Error: Duplicate entry '#{CODE}' for key 'magic_links.index_magic_links_on_code'"))
 
       assert sentry_events.many?
       assert_no_secret CODE, sentry_events.map { |event| event.to_h.to_json }
@@ -139,7 +139,7 @@ class Fizzy::Saas::StructuredLogRedactionTest < ActionDispatch::IntegrationTest
     unclosed = Sentry::Breadcrumb.new(category: "sql.active_record", data: { sql: "SELECT * FROM magic_links WHERE purpose = '0' AND code = '#{CODE}" })
     assert_no_secret CODE, [ config.before_breadcrumb.call(unclosed, {}).data[:sql] ]
 
-    error = ActiveRecord::RecordNotUnique.new("Trilogy::ProtocolError: 1062: Duplicate entry '#{CODE}' for key 'magic_links.index_magic_links_on_code'")
+    error = ActiveRecord::RecordNotUnique.new("Mysql2::Error: Duplicate entry '#{CODE}' for key 'magic_links.index_magic_links_on_code'")
     event = Sentry::ErrorEvent.new(configuration: config).tap { |event| event.add_exception_interface(error, mechanism: Sentry::Mechanism.new) }
     assert_no_secret CODE, [ config.before_send.call(event, {}).exception.values.map(&:value).inspect ]
 

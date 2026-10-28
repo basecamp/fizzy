@@ -55,7 +55,7 @@ jobs:
     steps:
       - name: Install system packages
         timeout-minutes: 10
-        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libsqlite3-0 libvips curl ffmpeg
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libmysqlclient-dev libsqlite3-0 libvips curl ffmpeg
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
