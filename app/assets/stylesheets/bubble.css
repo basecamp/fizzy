@@ -43,6 +43,18 @@
     }
   }
 
+  .bubble--golden {
+    &:before {
+      box-shadow:
+        0 0 0 1px color-mix(in oklch, var(--color-golden) 100%, transparent),
+        0 0 0.2em 0.2em color-mix(in oklch, var(--color-golden) 25%, transparent);
+      background: radial-gradient(
+        color-mix(in srgb, var(--color-golden) 8%, var(--color-canvas)) 50%,
+        color-mix(in srgb, var(--color-golden) 48%, var(--color-canvas)) 100%
+      );
+    }
+  }
+
   .bubble__number {
     display: grid;
     font-size: clamp(10px, 50cqi, var(--bubble-number-max)); /* FF bug: https://app.fizzy.do/5986089/boards/2/cards/1373 */

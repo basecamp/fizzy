@@ -59,4 +59,16 @@ class Card::CloseableTest < ActiveSupport::TestCase
     assert card.closed?
     assert_nil card.reload.not_now
   end
+
+  test "close card with bubble up" do
+    card = cards(:logo)
+    card.bubble_up_at(1.hour.from_now)
+
+    assert card.bubbling?
+    assert card.bubble_up.present?
+
+    card.close
+    assert card.closed?
+    assert_nil card.reload.bubble_up
+  end
 end
