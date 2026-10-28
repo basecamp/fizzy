@@ -135,6 +135,16 @@ accessories:
 <% if @beta_number == "1" %>
         FIZZY_MCP_EXCHANGE_TOKEN_URL: "https://beta1.fizzy-beta.com/oauth/token"
         FIZZY_MCP_EXCHANGE_CLIENT_ID: "fizzy-mcp-server-beta1"
+        # The exchange and the API calls after it go to the app on this same host, through its kamal-proxy,
+        # over the plain http the beta's load balancer uses to reach it (proxy.ssl is false). The URLs above
+        # are unchanged; only the connection moves (fizzy-mcp-server#19, which the pinned image must carry).
+        FIZZY_MCP_UPSTREAM: "http://host.docker.internal"
       secret:
         - FIZZY_MCP_EXCHANGE_CLIENT_SECRET
+    options:
+      add-host:
+        - "host.docker.internal:host-gateway"
+        # Also the issuer's name, so an image that ignores FIZZY_MCP_UPSTREAM fails its startup metadata
+        # check (the host serves no TLS) instead of going around the app beside it.
+        - "beta1.fizzy-beta.com:host-gateway"
 <% end %>
