@@ -65,10 +65,10 @@ export default class extends Controller {
     this.selectItem(currentTarget)
   }
 
-  selectCurrentOrReset(event) {
-    const fallbackIndex = this.reverseOrderValue ? -1 : 0;
-    const item = this.currentItem || this.#visibleItems.at(fallbackIndex);
-    this.#setCurrentFrom(item, false);
+  selectCurrentOrReset(event, autoScroll = false) {
+    const fallbackIndex = this.reverseOrderValue ? -1 : 0
+    const item = this.currentItem || this.#visibleItems.at(fallbackIndex)
+    this.#setCurrentFrom(item, autoScroll && this.autoScrollValue)
   }
 
   selectFirst() {
@@ -93,7 +93,7 @@ export default class extends Controller {
     if (!this.rememberedItemId || item.id !== this.rememberedItemId) { return }
 
     this.forgetSelection()
-    if (this.#visibleItems.includes(item)) { this.selectItem(item) }
+    this.#setCurrentFrom(item)
   }
 
   deselectWhenClickingOutside(event) {
@@ -106,7 +106,7 @@ export default class extends Controller {
 
   // Public
 
-  async selectItem(item, skipFocus = false) {
+  async selectItem(item, skipFocus = false, scrollNested = false) {
     await this.#selectCurrentElementInParent()
 
     this.#clearSelection()
@@ -116,7 +116,7 @@ export default class extends Controller {
 
     await nextFrame()
 
-    if (this.hasNestedNavigationValue) { this.#activateNestedNavigableList() }
+    if (this.hasNestedNavigationValue) { this.#activateNestedNavigableList(scrollNested) }
 
     if (!skipFocus && this.focusOnSelectionValue) { this.currentItem.focus({ preventScroll: true }) }
   }
@@ -127,11 +127,11 @@ export default class extends Controller {
 
   // Private
 
-  async #setCurrentFrom(element, autoScroll = this.autoScrollValue) {
+  async #setCurrentFrom(element, autoScroll = this.autoScrollValue, scrollNested = false) {
     const selectedItem = this.#visibleItems.find(item => item.contains(element))
 
     if (selectedItem) {
-      await this.selectItem(selectedItem)
+      await this.selectItem(selectedItem, false, scrollNested)
       if (autoScroll) { selectedItem.scrollIntoView({ block: "nearest", inline: "nearest" }) }
     }
   }
@@ -176,10 +176,10 @@ export default class extends Controller {
     }
   }
 
-  #activateNestedNavigableList() {
+  #activateNestedNavigableList(autoScroll) {
     const nestedController = this.#nestedNavigableListController()
     if (nestedController) {
-      nestedController.selectCurrentOrReset()
+      nestedController.selectCurrentOrReset(null, autoScroll)
       return true
     }
     return false
@@ -212,14 +212,14 @@ export default class extends Controller {
   #selectPrevious() {
     const index = this.#visibleItems.indexOf(this.currentItem)
     if (index > 0) {
-      this.#setCurrentFrom(this.#visibleItems[index - 1])
+      this.#setCurrentFrom(this.#visibleItems[index - 1], this.autoScrollValue, true)
     }
   }
 
   #selectNext() {
     const index = this.#visibleItems.indexOf(this.currentItem)
     if (index >= 0 && index < this.#visibleItems.length - 1) {
-      this.#setCurrentFrom(this.#visibleItems[index + 1])
+      this.#setCurrentFrom(this.#visibleItems[index + 1], this.autoScrollValue, true)
     }
   }
 
