@@ -43,12 +43,13 @@ class BoardScrollTest < ApplicationSystemTestCase
     card = all("#maybe .card", minimum: 15)[8]
     page.execute_script(<<~JS, card)
       const card = arguments[0].getBoundingClientRect()
-      window.scrollBy(0, card.bottom - window.innerHeight + card.height / 4)
+      window.scrollBy(0, card.bottom - window.innerHeight - card.height / 4)
     JS
     scroll_y = board_scroll_y
-    assert scroll_y > 0, "The card should be cut off by the bottom of the window"
+    assert scroll_y > 0
+    assert page.evaluate_script("arguments[0].getBoundingClientRect().bottom > window.innerHeight", card), "The card should be cut off by the bottom of the window"
 
-    card.hover
+    hover_top_of(card)
     assert_selector "##{card[:id]}:focus"
     assert_equal scroll_y, board_scroll_y
   end
@@ -56,6 +57,12 @@ class BoardScrollTest < ApplicationSystemTestCase
   private
     def park_mouse
       page.driver.browser.action.move_to_location(1, 1).perform
+    end
+
+    # The bottom of the window is under the fixed bar, so point at the visible top of the card.
+    def hover_top_of(element)
+      x, y = page.evaluate_script("(rect => [ rect.left + rect.width / 2, rect.top + 10 ])(arguments[0].getBoundingClientRect())", element)
+      page.driver.browser.action.move_to_location(x.round, y.round).perform
     end
 
     # Selenium refuses to click a disabled button, but a mouse can.
