@@ -57,8 +57,9 @@ export default class extends Controller {
     this.#relayNavigationToParentNavigableList(event)
   }
 
+  // Only keyboard focus scrolls the nested list: clicking a column shouldn't jump to its selected card.
   select({ target }) {
-    this.selectItem(target, true)
+    this.selectItem(target, true, target.matches(":focus-visible"))
   }
 
   hoverSelect({ currentTarget }) {
