@@ -23,7 +23,7 @@ gem "solid_cache", "~> 1.0"
 gem "solid_queue", "~> 1.7"
 gem "sqlite3", ">= 2.0"
 gem "thruster", require: false
-gem "trilogy", "~> 2.13"
+gem "mysql2", "~> 0.5"
 gem "tzinfo-data" # Bundled zone data; the base image's tzdata package lags IANA
 
 # Features

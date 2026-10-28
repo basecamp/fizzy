@@ -1,4 +1,4 @@
-# Trilogy runs without prepared statements, so a value reaches the SQL text as a quoted literal. The
+# MySQL runs without prepared statements, so a value reaches the SQL text as a quoted literal. The
 # sql.active_record notification carries that text to every consumer, and with Rails.event in debug mode
 # (config/application.rb) it reaches the log: in SaaS mode, the structured log line for the request or
 # job, and from there Loki. Sentry breadcrumbs and spans read it too, and a database error can quote a
@@ -73,7 +73,7 @@ module ActiveRecordSqlRedaction
     def filter_error(error)
       filtered = \
         if server_error_code(error)
-          [ error.error_code, FILTERED_ERROR ].join(": ")
+          [ error.error_number, FILTERED_ERROR ].join(": ")
         else
           redact_error_message(error.message)
         end
@@ -90,7 +90,7 @@ module ActiveRecordSqlRedaction
 
     private
       def server_error_code(error)
-        error.respond_to?(:error_code) && error.error_code
+        error.respond_to?(:error_number) && error.error_number
       end
 
       def reference_to(table)
@@ -124,7 +124,7 @@ module ActiveRecordSqlRedaction::ErrorTranslation
   private
     def translate_exception_class(native_error, sql, binds)
       if ActiveRecordSqlRedaction.redacted_statement?(sql) && \
-          ActiveRecordSqlRedaction::UNFILTERED_ERROR_CODES.exclude?(native_error.try(:error_code))
+          ActiveRecordSqlRedaction::UNFILTERED_ERROR_CODES.exclude?(native_error.try(:error_number))
         ActiveRecordSqlRedaction.filter_error(native_error)
       end
 

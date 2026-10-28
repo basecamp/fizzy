@@ -1,4 +1,5 @@
 brew "imagemagick"
+brew "mysql-client"
 brew "openslide"
 brew "vips"
 brew "gitleaks"
