@@ -121,6 +121,7 @@ accessories:
   # Hosted Fizzy MCP (see saas/config/deploy.yml). On iad's web hosts only, to start: the delegation
   # exchange writes its token on the iad primary and the first API call reads it straight back, and a
   # bearer request carries no session for TransactionPinning to wait on (hosted plan, C, read-after-mint).
+  # Each copy calls the app beside it (FIZZY_MCP_UPSTREAM), so its hosts must be iad web hosts.
   fizzy_mcp:
     hosts:
       - fizzy-app-101.df-iad-int.37signals.com
@@ -135,11 +136,17 @@ accessories:
         FIZZY_MCP_ALLOWED_ORIGINS: "https://app.fizzy.do"
         FIZZY_MCP_EXCHANGE_TOKEN_URL: "https://app.fizzy.do/oauth/token"
         FIZZY_MCP_EXCHANGE_CLIENT_ID: "fizzy-mcp-server"
+        # The exchange and every API call that follows go to the app on this same host, through its
+        # kamal-proxy, so they stay in iad without depending on one load balancer. Plain http, as the load
+        # balancer itself reaches that proxy (proxy.ssl is false here, and the app assumes TLS ended in front
+        # of it), so Fizzy still answers in its https URLs; the URLs above are unchanged and only the
+        # connection moves (fizzy-mcp-server#19, which the pinned image must carry).
+        FIZZY_MCP_UPSTREAM: "http://host.docker.internal"
       secret:
         - FIZZY_MCP_EXCHANGE_CLIENT_SECRET
-    # Send app.fizzy.do to iad's load balancer, so the exchange and every API call that follows stay in iad
-    # (iad's LB has write targets only: saas/script/configure-lb-production.sh). Resolved when the config is
-    # read, so no address is written here.
     options:
       add-host:
-        - "app.fizzy.do:<%= require "resolv"; Resolv.getaddress("fizzy-lb-101.df-iad-int.37signals.com") %>"
+        - "host.docker.internal:host-gateway"
+        # Also the issuer's name, so an image that ignores FIZZY_MCP_UPSTREAM fails its startup metadata
+        # check (the host serves no TLS) instead of reaching Fizzy outside iad.
+        - "app.fizzy.do:host-gateway"
