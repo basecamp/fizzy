@@ -59,7 +59,7 @@ for ((i = from - 1; i < ${#hosts[@]}; i++)); do
 
   bin/kamal accessory reboot fizzy_mcp -d "$destination" -h "$host"
 
-  running=$(ssh -o ConnectTimeout=10 "app@${host}" docker ps --filter "name=^fizzy-fizzy_mcp$" --filter status=running --format '{{.Image}}')
+  running=$(ssh -o ConnectTimeout=10 "app@${host}" "docker inspect --format '{{if .State.Running}}{{.Config.Image}}{{end}}' fizzy-fizzy_mcp" 2>/dev/null) || running=""
   [[ $running == "$image" ]] || stop "running '${running:-nothing}', not ${image}"
 
   prm=$(ssh -o ConnectTimeout=10 "app@${host}" curl --silent --max-time 10 -H "Host:${mcp_host}" \
