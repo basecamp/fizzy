@@ -51,6 +51,7 @@ module Fizzy
       initializer "fizzy_saas.reviewer_sign_in" do |app|
         app.config.x.reviewer_sign_in.email_address = ENV["FIZZY_REVIEWER_SIGN_IN_EMAIL"]
         app.config.x.reviewer_sign_in.code_digest = ENV["FIZZY_REVIEWER_SIGN_IN_CODE_DIGEST"]
+        app.config.x.reviewer_sign_in.code_digests = ENV["FIZZY_REVIEWER_SIGN_IN_CODES"]
       end
 
       initializer "fizzy_saas.gvl_instrumentation" do |app|
@@ -231,6 +232,7 @@ module Fizzy
         ::Signup.prepend Signup
         Sessions::MagicLinksController.prepend Sessions::ReviewerSignIn
         ::User.prepend User::ReviewerEmailAddressLock
+        ::Oauth::Availability.admit_beyond_staff Identity::ReviewerSignIn.method(:reviewer?)
         Users::EmailAddressesController.include Users::ReviewerEmailAddressLock
         UsersController.include Users::ReviewerMembershipLock
         ApplicationController.include Authorization::Controller

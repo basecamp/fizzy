@@ -44,8 +44,17 @@
 # being staff loses the access they granted on their next request. Personal
 # access tokens are not OAuth credentials, so it doesn't touch them, and
 # management stays open to everyone, so anyone can still shed a grant.
+#
+# An extension can admit named people beyond staff with admit_beyond_staff,
+# a predicate on the identity, asked only while staff_only is on and the
+# identity isn't staff. The SaaS engine admits the directory reviewers it
+# signs in (Identity::ReviewerSignIn), whose apps must connect while OAuth is
+# otherwise staff only; making them staff would open /admin to them. Fizzy
+# itself registers none, so an install without extensions admits only staff.
 module Oauth::Availability
   extend self
+
+  mattr_accessor :staff_only_exemptions, default: []
 
   def acceptance_enabled?(client_id = nil)
     accepting? || piloted?(client_id)
@@ -68,7 +77,11 @@ module Oauth::Availability
 
   # Whether OAuth is open to this person: everyone, unless staff_only.
   def admits?(identity)
-    !staff_only? || identity&.staff? == true
+    !staff_only? || identity&.staff? == true || exempt_from_staff_only?(identity)
+  end
+
+  def admit_beyond_staff(predicate)
+    staff_only_exemptions << predicate unless staff_only_exemptions.include?(predicate)
   end
 
   # The clients whose tokens are honored, as a relation, for code that weighs
@@ -88,6 +101,10 @@ module Oauth::Availability
 
     def piloted?(client_id)
       client_id.is_a?(String) && client_id.present? && pilot_client_ids.include?(client_id)
+    end
+
+    def exempt_from_staff_only?(identity)
+      identity.present? && staff_only_exemptions.any? { |predicate| predicate.call(identity) == true }
     end
 
     def pilot_client_ids
