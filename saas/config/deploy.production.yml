@@ -35,6 +35,12 @@ env:
     MYSQL_DATABASE_REPLICA_HOST: fizzy-mysql-replica
     MYSQL_SOLID_CABLE_HOST: fizzy-mysql-primary
     MYSQL_SOLID_QUEUE_HOST: fizzy-mysql-primary
+    # OAuth lit for 37signals staff only (OAUTH_STAFF_ONLY): the authorization server answers, Client ID
+    # Metadata Documents are accepted from deploy.yml's allowlisted hosts, and grants can be audienced to
+    # the hosted MCP server, whose delegation exchange runs as the fizzy-mcp-server client.
+    OAUTH_ACCEPTANCE_ENABLED: "true"
+    OAUTH_CIMD_ENABLED: "true"
+    FIZZY_OAUTH_MCP_RESOURCES: "https://mcp.fizzy.do/mcp"
   secret:
     - RAILS_MASTER_KEY
     - MYSQL_ALTER_PASSWORD
@@ -115,6 +121,7 @@ accessories:
   # Hosted Fizzy MCP (see saas/config/deploy.yml). On iad's web hosts only, to start: the delegation
   # exchange writes its token on the iad primary and the first API call reads it straight back, and a
   # bearer request carries no session for TransactionPinning to wait on (hosted plan, C, read-after-mint).
+  # Each copy calls the app beside it (FIZZY_MCP_UPSTREAM), so its hosts must be iad web hosts.
   fizzy_mcp:
     hosts:
       - fizzy-app-101.df-iad-int.37signals.com
@@ -127,8 +134,19 @@ accessories:
         # No trailing slash: Fizzy's metadata issuer is the bare origin (#3192), and the server checks.
         FIZZY_MCP_AUTHORIZATION_SERVER: "https://app.fizzy.do"
         FIZZY_MCP_ALLOWED_ORIGINS: "https://app.fizzy.do"
-    # TODO: before lighting the exchange, send app.fizzy.do to iad's load balancers so the exchange and
-    # every API call stay in iad (iad's LB has write targets only: saas/script/configure-lb-production.sh).
-    # options:
-    #   add-host:
-    #     - "app.fizzy.do:<fizzy-lb-101 address>"
+        FIZZY_MCP_EXCHANGE_TOKEN_URL: "https://app.fizzy.do/oauth/token"
+        FIZZY_MCP_EXCHANGE_CLIENT_ID: "fizzy-mcp-server"
+        # The exchange and every API call that follows go to the app on this same host, through its
+        # kamal-proxy, so they stay in iad without depending on one load balancer. Plain http, as the load
+        # balancer itself reaches that proxy (proxy.ssl is false here, and the app assumes TLS ended in front
+        # of it), so Fizzy still answers in its https URLs; the URLs above are unchanged and only the
+        # connection moves (fizzy-mcp-server#19, which the pinned image must carry).
+        FIZZY_MCP_UPSTREAM: "http://host.docker.internal"
+      secret:
+        - FIZZY_MCP_EXCHANGE_CLIENT_SECRET
+    options:
+      add-host:
+        - "host.docker.internal:host-gateway"
+        # Also the issuer's name, so an image that ignores FIZZY_MCP_UPSTREAM fails its startup metadata
+        # check (the host serves no TLS) instead of reaching Fizzy outside iad.
+        - "app.fizzy.do:host-gateway"
