@@ -3,9 +3,11 @@ module Card::Taggable
 
   included do
     has_many :taggings, dependent: :destroy
-    has_many :tags, through: :taggings
+    has_many :tags, through: :taggings, dependent: :destroy
 
     scope :tagged_with, ->(tags) { joins(:taggings).where(taggings: { tag: tags }) }
+
+    validate :tags_belong_to_account, if: -> { association(:tags).loaded? }
   end
 
   def toggle_tag_with(title)
@@ -23,4 +25,11 @@ module Card::Taggable
   def tagged_with?(tag)
     tags.include? tag
   end
+
+  private
+    def tags_belong_to_account
+      if tags.any? { it.account_id != account_id }
+        errors.add(:tags, "must belong to the card account")
+      end
+    end
 end
