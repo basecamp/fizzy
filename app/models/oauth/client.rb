@@ -9,6 +9,13 @@ class Oauth::Client < ApplicationRecord
   # this long is abandoned (RFC 7591 §5).
   UNUSED_RETENTION = 30.days
 
+  # Registration is unauthenticated and limited only per address, so a
+  # registration nobody ever authorized is kept just long enough for its user
+  # to finish consent. Its rows are then bounded by the registration rate over
+  # this period rather than over UNUSED_RETENTION. A user still on the consent
+  # screen when it lapses gets "Unknown client" and their app registers again.
+  UNAUTHORIZED_REGISTRATION_RETENTION = 24.hours
+
   # The grants a client may obtain at the authorization and token endpoints.
   # An allowlist, so a client is refused any grant type it doesn't list.
   GRANT_TYPES = %w[ authorization_code refresh_token ]
@@ -76,10 +83,20 @@ class Oauth::Client < ApplicationRecord
   # metadata document. Either comes back on its own when it's used again.
   scope :self_registered, -> { dynamically_registered.or(metadata_documents) }
 
-  # A grant touches its client when it is created or destroyed, so updated_at
-  # is the last grant activity: an app the user disconnected yesterday is not
-  # swept for having registered long ago.
-  scope :stale, -> { self_registered.where.missing(:access_tokens).where(updated_at: ...UNUSED_RETENTION.ago) }
+  # A grant touches its client when it is created or destroyed, and so does
+  # consent, so updated_at is the last grant activity: an app the user
+  # disconnected yesterday is not swept for having registered long ago.
+  scope :stale, -> { self_registered.where.missing(:access_tokens).merge(unused_beyond_retention) }
+
+  scope :unused_beyond_retention, -> do
+    where(updated_at: ...UNUSED_RETENTION.ago).or(never_authorized.where(created_at: ...UNAUTHORIZED_REGISTRATION_RETENTION.ago))
+  end
+
+  # A registration whose row nothing has touched since it was written: no
+  # consent approved, no grant issued or ended. Only dynamic registration
+  # takes the short retention; a metadata document client keeps
+  # UNUSED_RETENTION. A grant it still holds keeps it regardless (stale).
+  scope :never_authorized, -> { dynamically_registered.where(arel_table[:updated_at].eq(arel_table[:created_at])) }
 
   scope :personal_access, -> { where client_id: PERSONAL_ACCESS_CLIENT_ID }
 
