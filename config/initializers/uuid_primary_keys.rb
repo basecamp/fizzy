@@ -35,7 +35,7 @@ module MysqlUuidAdapter
   # Override lookup_cast_type to recognize binary(16) as UUID type
   def lookup_cast_type(sql_type)
     if sql_type == "binary(16)"
-      ActiveRecord::Type.lookup(:uuid, adapter: :trilogy)
+      ActiveRecord::Type.lookup(:uuid, adapter: :mysql2)
     else
       super
     end
@@ -116,7 +116,7 @@ ActiveSupport.on_load(:active_record) do
   ActiveRecord::ConnectionAdapters::TableDefinition.prepend(TableDefinitionUuidSupport)
 end
 
-ActiveSupport.on_load(:active_record_trilogyadapter) do
+ActiveSupport.on_load(:active_record_mysql2adapter) do
   ActiveRecord::ConnectionAdapters::AbstractMysqlAdapter.prepend(MysqlUuidAdapter)
   ActiveRecord::ConnectionAdapters::MySQL::SchemaDumper.prepend(SchemaDumperUuidType)
 end

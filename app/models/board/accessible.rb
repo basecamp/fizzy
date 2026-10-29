@@ -85,7 +85,7 @@ module Board::Accessible
       #
       # Notification->Event->Mention->Card and Notification->Event->Mention->Comment->Card are
       # handled by destroying mentions_for_user.
-      uuid_type = ActiveRecord::Type.lookup(:uuid, adapter: :trilogy)
+      uuid_type = ActiveRecord::Type.lookup(:uuid, adapter: :mysql2)
       board_id_binary = uuid_type.serialize(id)
 
       user.notifications
