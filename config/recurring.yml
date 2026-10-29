@@ -50,7 +50,7 @@ production: &production
     schedule: every hour at minute 25
   cleanup_oauth_clients:
     command: "Oauth::Client.cleanup"
-    schedule: every day at 04:12
+    schedule: every hour at minute 14
   incineration:
     class: "Account::IncinerateDueJob"
     schedule: every 8 hours at minute 16

@@ -187,6 +187,17 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_not_includes Oauth::Client.stale, client
   end
 
+  test "consent takes a dynamic registration off the one-day retention for registrations nobody authorized" do
+    sign_in_as :david
+    client = travel_to(25.hours.ago) { Oauth::Client.create!(name: "Fresh", redirect_uris: %w[ http://127.0.0.1:8888/callback ], dynamically_registered: true) }
+    assert_includes Oauth::Client.stale, client
+
+    post_consent client: client
+
+    assert_response :redirect
+    assert_not_includes Oauth::Client.stale, client
+  end
+
   test "consent issues no code for a client swept while consent was submitted" do
     sign_in_as :david
     client = Oauth::Client.create!(name: "Swept", redirect_uris: %w[ http://127.0.0.1:8888/callback ], dynamically_registered: true)
