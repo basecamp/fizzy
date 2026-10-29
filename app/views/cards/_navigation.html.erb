@@ -1,0 +1,19 @@
+<%= tag.div id: dom_id(card, :navigation), class: "card-navigation", data: {
+      turbo_permanent: true,
+      controller: "card-navigation",
+      action: "turbo:before-visit@document->card-navigation#leaving",
+      card_navigation_url_value: card_navigation_path(card),
+      card_navigation_number_value: card.number,
+      card_navigation_board_value: board_path(card.board),
+      card_navigation_path_value: card_path("__number__") } do %>
+  <%= button_tag type: :button, class: "btn btn--circle btn--circle-mobile btn--ensure-tap-target-size", disabled: true,
+          aria: { label: "Previous card in column" },
+          data: { card_navigation_target: "previous", action: "card-navigation#previous keydown.shift+up@document->card-navigation#previous" } do %>
+    <%= icon_tag "arrow-up-light" %>
+  <% end %>
+  <%= button_tag type: :button, class: "btn btn--circle btn--circle-mobile btn--ensure-tap-target-size", disabled: true,
+          aria: { label: "Next card in column" },
+          data: { card_navigation_target: "next", action: "card-navigation#next keydown.shift+down@document->card-navigation#next" } do %>
+    <%= icon_tag "arrow-up-light", class: "card-navigation__down" %>
+  <% end %>
+<% end %>
