@@ -403,7 +403,8 @@ class Oauth::ClientTest < ActiveSupport::TestCase
   end
 
   test "cleanup keeps recent, granted and operator-provisioned clients" do
-    recent = travel_to(29.days.ago) { register_client }
+    recent = travel_to(30.days.ago) { register_client }
+    travel_to(29.days.ago) { recent.touch }
     granted = travel_to(31.days.ago) { register_client.tap { identities(:david).access_tokens.create!(oauth_client: it) } }
     provisioned = travel_to(31.days.ago) { register_client(dynamically_registered: false, redirect_uris: %w[ https://app.example.com/cb ]) }
 
@@ -412,6 +413,49 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     assert Oauth::Client.exists?(recent.id)
     assert Oauth::Client.exists?(granted.id)
     assert Oauth::Client.exists?(provisioned.id)
+  end
+
+  test "cleanup destroys a dynamic registration nobody authorized within a day" do
+    lapsed = travel_to(25.hours.ago) { register_client }
+    pending = travel_to(23.hours.ago) { register_client }
+
+    Oauth::Client.cleanup
+
+    assert_not Oauth::Client.exists?(lapsed.id)
+    assert Oauth::Client.exists?(pending.id)
+  end
+
+  test "cleanup keeps a dynamic registration past a day once it has been authorized" do
+    granted = travel_to(2.days.ago) { register_client }
+    travel_to(47.hours.ago) { identities(:david).access_tokens.create!(oauth_client: granted) }
+
+    disconnected = travel_to(2.days.ago) { register_client }
+    travel_to(47.hours.ago) { identities(:david).access_tokens.create!(oauth_client: disconnected) }
+    travel_to(46.hours.ago) { disconnected.access_tokens.each(&:destroy) }
+
+    consented = travel_to(2.days.ago) { register_client }
+    travel_to(47.hours.ago) { consented.touch }
+
+    Oauth::Client.cleanup
+
+    assert Oauth::Client.exists?(granted.id)
+    assert Oauth::Client.exists?(disconnected.id), "a client that ever held a grant keeps the full retention period"
+    assert Oauth::Client.exists?(consented.id), "a client whose code is out keeps the full retention period"
+  end
+
+  test "cleanup keeps unauthorized clients that weren't dynamically registered past a day" do
+    trusted = travel_to(2.days.ago) { register_client(dynamically_registered: false, trusted: true, redirect_uris: %w[ https://app.example.com/cb ]) }
+    provisioned = travel_to(2.days.ago) { register_client(dynamically_registered: false, redirect_uris: %w[ https://app.example.com/cb ]) }
+    metadata_document = travel_to(2.days.ago) { register_metadata_document_client }
+    oauth_clients(:trusted_client, :personal_access).each { it.update_columns created_at: 2.days.ago, updated_at: 2.days.ago }
+
+    Oauth::Client.cleanup
+
+    assert Oauth::Client.exists?(trusted.id)
+    assert Oauth::Client.exists?(provisioned.id)
+    assert Oauth::Client.exists?(metadata_document.id)
+    assert Oauth::Client.exists?(oauth_clients(:trusted_client).id)
+    assert Oauth::Client.exists?(oauth_clients(:personal_access).id)
   end
 
   test "cleanup counts the retention period from the client's last grant, not its registration" do
