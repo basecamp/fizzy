@@ -8,7 +8,7 @@ class OauthReviewerStaffOnlyTest < ActionDispatch::IntegrationTest
   CODE_VERIFIER = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
 
   setup do
-    @reviewer = identities(:mike)
+    @reviewer = identities(:jz)
     assert_not @reviewer.staff?, "the reviewer under test must not be staff"
     configure code_digests: "#{@reviewer.email_address}=#{Identity::ReviewerSignIn.digest(Identity::ReviewerSignIn.generate_code)}"
   end
@@ -19,7 +19,7 @@ class OauthReviewerStaffOnlyTest < ActionDispatch::IntegrationTest
     with_oauth_availability staff_only: true do
       assert Oauth::Availability.admits?(@reviewer)
       assert Oauth::Availability.admits?(identities(:david))
-      assert_not Oauth::Availability.admits?(identities(:jz))
+      assert_not Oauth::Availability.admits?(identities(:mike))
       assert_not Oauth::Availability.admits?(nil)
     end
   end
@@ -57,9 +57,10 @@ class OauthReviewerStaffOnlyTest < ActionDispatch::IntegrationTest
 
   test "anyone else is still told OAuth is staff only" do
     with_oauth_availability staff_only: true do
-      sign_in_as :jz
+      sign_in_as :mike
       get_consent_screen
       assert_response :forbidden
+      assert_match "Only 37signals staff can connect apps", response.body
     end
   end
 
@@ -67,7 +68,7 @@ class OauthReviewerStaffOnlyTest < ActionDispatch::IntegrationTest
     grant = @reviewer.access_tokens.create!(oauth_client: oauth_clients(:mcp_client))
 
     with_oauth_availability staff_only: true do
-      get user_path(users(:mike)), env: { "HTTP_AUTHORIZATION" => "Bearer #{grant.raw_token}" }, as: :json
+      get user_path(users(:jz)), env: { "HTTP_AUTHORIZATION" => "Bearer #{grant.raw_token}" }, as: :json
       assert_response :success
 
       refresh grant
@@ -75,13 +76,14 @@ class OauthReviewerStaffOnlyTest < ActionDispatch::IntegrationTest
       grant = Identity::AccessToken.find_by_raw_token(response.parsed_body["access_token"])
 
       configure code_digests: nil
-      get user_path(users(:mike)), env: { "HTTP_AUTHORIZATION" => "Bearer #{grant.raw_token}" }, as: :json
+      get user_path(users(:jz)), env: { "HTTP_AUTHORIZATION" => "Bearer #{grant.raw_token}" }, as: :json
       assert_response :unauthorized
     end
   end
 
   test "a non-reviewer's grant is still refused" do
-    grant = identities(:jz).access_tokens.create!(oauth_client: oauth_clients(:mcp_client))
+    grant = @reviewer.access_tokens.create!(oauth_client: oauth_clients(:mcp_client))
+    configure code_digests: nil
 
     with_oauth_availability staff_only: true do
       get user_path(users(:jz)), env: { "HTTP_AUTHORIZATION" => "Bearer #{grant.raw_token}" }, as: :json
