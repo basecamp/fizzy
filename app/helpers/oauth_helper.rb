@@ -23,6 +23,26 @@ module OauthHelper
     }
   }
 
+  # What went wrong, in plain words, for the person on the authorization error
+  # page, by OAuth error code. A caller with more to say about its case passes
+  # its own. The code and its developer description are shown beneath, so
+  # whoever made the app can tell exactly which check refused it.
+  OAUTH_ERROR_MESSAGES = {
+    "invalid_request" => "The app sent a request to connect that Fizzy can't accept.",
+    "unauthorized_client" => "This app isn't set up to connect to Fizzy this way.",
+    "invalid_client_metadata" => "Fizzy couldn't read the details this app publishes about itself.",
+    "temporarily_unavailable" => "Fizzy is too busy to connect this app right now. Wait a moment, then try again.",
+    "unsupported_response_type" => "The app asked to connect in a way Fizzy doesn't support.",
+    "invalid_scope" => "The app asked for more access than it's allowed.",
+    "invalid_target" => "The app asked to connect to something Fizzy doesn't recognize.",
+    "access_denied" => "This app can't be connected to your Fizzy account.",
+    "slow_down" => "There have been too many attempts. Wait a minute, then try again."
+  }
+
+  def oauth_error_message(error, message = nil)
+    message.presence || OAUTH_ERROR_MESSAGES.fetch(error.to_s, "Something went wrong connecting this app.")
+  end
+
   # A name of nothing but direction controls is no name, so it reads as one.
   def oauth_client_self_name(client)
     client.name.to_s.gsub(BIDI_CONTROLS, "").presence || "Unnamed app"
