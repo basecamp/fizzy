@@ -7,6 +7,9 @@ class Oauth::TokensController < Oauth::BaseController
   # one or two, a retry storm a few more.
   GRANT_BUDGET = 20
 
+  # Every request an address sends a minute, whatever it names.
+  ADDRESS_CEILING = 3_000
+
   allow_unauthenticated_access
   skip_forgery_protection
 
@@ -27,6 +30,12 @@ class Oauth::TokensController < Oauth::BaseController
   # never its neighbors' (bc3#13466's outage). Anything else, a token that
   # resolves to no grant, a grant presented by another client, or a client
   # that fails to authenticate, is held to 20 a minute per address.
+  #
+  # Naming the grant costs a client lookup, a digest and up to two indexed
+  # reads, so a coarse ceiling per address runs first and is charged for every
+  # request: past it, a flood of made-up tokens is refused before any of that
+  # work. It sits far above what one platform's egress sends.
+  rate_limit to: ADDRESS_CEILING, within: 1.minute, only: :create, name: "ceiling", with: :oauth_rate_limit_exceeded
   rate_limit to: 20, within: 1.minute, only: :create, with: :oauth_rate_limit_exceeded, unless: :grant_rate_limit_key
   rate_limit to: GRANT_BUDGET, within: 1.minute, only: :create, by: -> { grant_rate_limit_key }, name: "grant",
     with: :oauth_rate_limit_exceeded, if: :grant_rate_limit_key

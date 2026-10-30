@@ -6,6 +6,7 @@ require "test_helper"
 class OauthPlatformClientsTest < ActionDispatch::IntegrationTest
   CODE_VERIFIER = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
   ADDRESS_BUCKET = "rate-limit:oauth/tokens:127.0.0.1"
+  CEILING_BUCKET = "rate-limit:oauth/tokens:ceiling:127.0.0.1"
 
   setup do
     @client = oauth_clients(:mcp_client)
@@ -52,6 +53,7 @@ class OauthPlatformClientsTest < ActionDispatch::IntegrationTest
   end
 
   test "a refresh is charged to its grant, so a full address doesn't stop it" do
+    Rails.cache.stubs(:increment).returns(1)
     Rails.cache.stubs(:increment).with { |key, *| key == ADDRESS_BUCKET }.returns(1_000)
     Rails.cache.stubs(:increment).with { |key, *| key == grant_bucket(@grant) }.returns(1)
 
@@ -60,6 +62,7 @@ class OauthPlatformClientsTest < ActionDispatch::IntegrationTest
   end
 
   test "a grant's own budget holds it" do
+    Rails.cache.stubs(:increment).returns(1)
     Rails.cache.stubs(:increment).with { |key, *| key == ADDRESS_BUCKET }.returns(1)
     Rails.cache.stubs(:increment).with { |key, *| key == grant_bucket(@grant) }.returns(Oauth::TokensController::GRANT_BUDGET + 1)
 
@@ -72,6 +75,7 @@ class OauthPlatformClientsTest < ActionDispatch::IntegrationTest
     refresh presented
     assert_response :success
 
+    Rails.cache.stubs(:increment).returns(1)
     Rails.cache.stubs(:increment).with { |key, *| key == ADDRESS_BUCKET }.returns(1_000)
     Rails.cache.stubs(:increment).with { |key, *| key == grant_bucket(@grant) }.returns(1)
 
@@ -82,6 +86,7 @@ class OauthPlatformClientsTest < ActionDispatch::IntegrationTest
   end
 
   test "a code is charged to its client and person, not the address" do
+    Rails.cache.stubs(:increment).returns(1)
     Rails.cache.stubs(:increment).with { |key, *| key == ADDRESS_BUCKET }.returns(1_000)
     Rails.cache.stubs(:increment).with { |key, *| key == "rate-limit:oauth/tokens:grant:code/#{@client.id}/#{identities(:david).id}" }.returns(1)
 
@@ -104,7 +109,18 @@ class OauthPlatformClientsTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "past the address ceiling, nothing is looked up" do
+    Rails.cache.stubs(:increment).returns(1)
+    Rails.cache.stubs(:increment).with { |key, *| key == CEILING_BUCKET }.returns(Oauth::TokensController::ADDRESS_CEILING + 1)
+    Identity::AccessToken.expects(:find_by_refresh_token).never
+    Oauth::Client.expects(:find_presented).never
+
+    refresh @grant.raw_refresh_token
+    assert_response :too_many_requests
+  end
+
   test "the address limit counts only what it holds" do
+    Rails.cache.stubs(:increment).returns(1)
     Rails.cache.stubs(:increment).with { |key, *| key == ADDRESS_BUCKET }.returns(21)
     Rails.cache.stubs(:increment).with { |key, *| key != ADDRESS_BUCKET }.returns(1)
 
