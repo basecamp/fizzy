@@ -36,6 +36,10 @@
 # Rails boot opens log/development.log relative to the working directory.
 Dir.chdir File.expand_path("../..", __dir__)
 
+# As bin/rails does, so a SaaS checkout boots with Gemfile.saas.
+require_relative "../../lib/fizzy"
+Fizzy.configure_bundle
+
 require_relative "../../config/environment"
 require "optparse"
 
@@ -132,8 +136,11 @@ module OauthStates
       designer_accounts.first
     end
 
+    # Another account, one with a board where it can, so a webhook there
+    # shows the disconnect dialog naming an account other than this one.
     def secondary_account
-      designer_accounts.second
+      others = designer_accounts.drop(1)
+      others.find { |account| designer_board(account) } || others.first
     end
 
     def persona(key)
@@ -350,15 +357,20 @@ module OauthStates
       end
 
       def ensure_webhook(client, account, name)
-        user = designer.users.find_by!(account: account)
-        board = Board.joins(:accesses).where(account: account, accesses: { user_id: user.id }).order(:created_at).first
+        board = designer_board(account)
 
         if board.nil? || Webhook.exists?(created_via: client, board: board, name: name)
           false
         else
-          Webhook.create! board: board, name: name, creator: user, created_via: client,
+          Webhook.create! board: board, name: name, creator: designer.users.find_by!(account: account), created_via: client,
             url: "https://hooks.example.com/#{MARKER}/#{SecureRandom.hex(4)}", subscribed_actions: %w[ card_published comment_created ]
           true
+        end
+      end
+
+      def designer_board(account)
+        if user = designer.users.find_by(account: account)
+          Board.joins(:accesses).where(account: account, accesses: { user_id: user.id }).order(:created_at).first
         end
       end
 
