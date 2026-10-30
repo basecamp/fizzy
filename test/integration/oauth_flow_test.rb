@@ -58,7 +58,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
 
     assert_response :bad_request
     assert_select "h2", text: "Can't authorize this app"
-    assert_select "p", text: "Unknown client"
+    assert_select "p", text: Oauth::AuthorizationsController::UNKNOWN_CLIENT_MESSAGE
     assert_select "code", text: "invalid_request"
   end
 

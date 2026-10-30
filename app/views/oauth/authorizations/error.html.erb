@@ -1,15 +1,21 @@
 <%# Shown on Fizzy, never redirected: the request couldn't be trusted enough
-    to send the browser back to the app (see redirect_with_error) %>
+    to send the browser back to the app (see redirect_with_error). The person
+    reads what went wrong in plain words; the precise error stays beneath, for
+    whoever made the app. %>
 <% @page_title = "Can't authorize this app" %>
 
 <article class="oauth-consent panel panel--wide shadow center txt-align-start">
   <div class="flex flex-column gap">
     <h2 class="txt-large margin-none"><%= @page_title %></h2>
 
-    <p class="margin-none"><%= @error_description %></p>
+    <p class="margin-none"><%= oauth_error_message(@error, @error_message) %></p>
 
     <p class="txt-small txt-subtle margin-none">
-      Nothing was shared. Close this window and start again from the app. If it keeps happening, let whoever made the app know, and mention this error code: <code><%= @error %></code>
+      Nothing was shared. Close this window and start again from the app. If it keeps happening, let whoever made the app know, and pass on the details below.
+    </p>
+
+    <p class="oauth-error__detail txt-x-small txt-subtle margin-none">
+      For the app&rsquo;s developer: <code><%= @error %></code><% if @error_description.present? %> &middot; <%= @error_description %><% end %>
     </p>
   </div>
 </article>

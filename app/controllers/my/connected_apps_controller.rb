@@ -24,7 +24,7 @@ class My::ConnectedAppsController < ApplicationController
 
     @tokens.each { |grant| grant.revoke reason: "disconnected", actor: "user" }
 
-    redirect_to my_connected_apps_path, notice: "#{@client.name} has been disconnected"
+    redirect_to my_connected_apps_path, notice: "#{helpers.oauth_client_self_name(@client)} has been disconnected"
   end
 
   private

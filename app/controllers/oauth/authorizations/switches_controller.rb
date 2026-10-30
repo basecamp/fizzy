@@ -27,7 +27,8 @@ class Oauth::Authorizations::SwitchesController < Oauth::AuthorizationsControlle
 
       redirect_to_login_url
     else
-      render_error "invalid_request", "This request is too long to pick up again after switching. Sign out, sign in as the right person, then connect from the app again."
+      render_error "invalid_request", "Authorization request too long to resume after switching",
+        message: "This request is too long to pick up again after switching. Sign out, sign in as the right person, then connect from the app again."
     end
   end
 
@@ -35,7 +36,10 @@ class Oauth::Authorizations::SwitchesController < Oauth::AuthorizationsControlle
     # Switching signs a browser out. A request authenticated by a bearer token
     # has no session to end, so it is refused rather than half-handled.
     def require_browser_session
-      head :forbidden unless Current.session
+      unless Current.session
+        render_error "access_denied", "Switching requires a browser session", status: :forbidden,
+          message: "Switching to someone else works only in a browser where you've signed in to Fizzy."
+      end
     end
 
     # Switching identity is a POST but authorizes nothing, so a metadata

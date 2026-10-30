@@ -1,0 +1,465 @@
+#!/usr/bin/env ruby
+
+# Seeds demo OAuth data and prints a directory of every person-facing OAuth
+# screen in every state, so one design review covers them all with no live
+# clients: consent, Connected apps, the error page, the staff-only page and the
+# reviewer sign-in code field. Development runs the OAuth server lit, so the
+# missing pieces are clients, grants and webhooks shaped to reach each branch.
+# This script converges them and prints a URL, or a click path, for each.
+# Ported from bc3's script/dev/oauth_states.
+#
+# Usage:
+#   script/dev/oauth_states                  # seed everything and print the directory
+#   script/dev/oauth_states --print          # print the directory without writing anything
+#   script/dev/oauth_states --reset          # remove the demo clients, with their grants and webhooks
+#   script/dev/oauth_states --list           # describe the screens and states this covers
+#   script/dev/oauth_states --base-url URL   # default http://app.fizzy.localhost:$PORT (PORT defaults to 3006)
+#
+# Personas (sign in with the email address; development shows the code on the
+# page). Run bin/rails db:seed first for david@example.com.
+#   david@example.com                    staff, several accounts: every populated state
+#   devoauth-one@example.com             one account, one connected app
+#   devoauth-empty@example.com           one account, nothing connected, not staff
+#   devoauth-no-account@example.com      no account at all
+#   devoauth-reviewer@example.com        the directory reviewer, for the code field
+#
+# Caveats:
+#   - Consent URLs are stable across runs (fixed PKCE challenge and state), so
+#     they can be bookmarked. Loading one never mints a code; Authorize does,
+#     and sends the browser to the demo app's callback, which doesn't exist.
+#   - The account picker needs the server to know an MCP resource, and the
+#     reviewer code needs SaaS mode and the reviewer's digest: start the
+#     server with the line the directory prints.
+#   - Self-registered clients nobody authorizes are swept after a day
+#     (Oauth::Client.cleanup). Run this again to bring them back.
+
+# Rails boot opens log/development.log relative to the working directory.
+Dir.chdir File.expand_path("../..", __dir__)
+
+# As bin/rails does, so a SaaS checkout boots with Gemfile.saas.
+require_relative "../../lib/fizzy"
+Fizzy.configure_bundle
+
+require_relative "../../config/environment"
+require "optparse"
+
+abort "oauth_states is only usable in development or test" unless Rails.env.local?
+
+module OauthStates
+  MARKER = "devoauth"
+  PKCE_VERIFIER = "devoauth-fixed-verifier-for-stable-bookmarkable-urls"
+  STATE = "devoauth-state"
+
+  # A fixed, dev-only reviewer code: its digest is printed for the server's
+  # environment, never stored.
+  REVIEWER_CODE = "DEVREVIEWCODE234"
+
+  WEB_HOST = "tools.example.com"
+  METADATA_DOCUMENT_URL = "https://claude.ai/#{MARKER}/client-metadata.json"
+  MISSING_METADATA_DOCUMENT_URL = "https://claude.ai/#{MARKER}/missing-client-metadata.json"
+
+  LONG_NAME = "Quarterly Planning, Retrospectives and Roadmap Assistant for Distributed Product Teams (Enterprise Edition)"
+  RTL_NAME = "مساعد المهام الذكي"
+
+  CLIENTS = {
+    "#{MARKER}-web" => {
+      name: "Board Sync",
+      redirect_uris: [ "https://#{WEB_HOST}/oauth/callback" ],
+      scopes: %w[ read write ],
+      dynamically_registered: true
+    },
+    "#{MARKER}-device" => {
+      name: "Acme CLI",
+      redirect_uris: [ "http://127.0.0.1/callback", "cursor://acme.example/oauth/callback" ],
+      scopes: %w[ read write ],
+      dynamically_registered: true
+    },
+    "#{MARKER}-read-only" => {
+      name: "Weekly Digest",
+      redirect_uris: [ "http://127.0.0.1/digest/callback" ],
+      scopes: %w[ read ],
+      dynamically_registered: true
+    },
+    "#{MARKER}-rtl-web" => {
+      name: RTL_NAME,
+      redirect_uris: [ "https://#{WEB_HOST}/rtl/callback" ],
+      scopes: %w[ read write ],
+      dynamically_registered: true
+    },
+    "#{MARKER}-long" => {
+      name: LONG_NAME,
+      redirect_uris: [ "https://planning.example.com/oauth/callback" ],
+      scopes: %w[ read write ]
+    },
+    "#{MARKER}-rtl" => {
+      name: RTL_NAME,
+      redirect_uris: [ "https://rtl.example.com/oauth/callback" ],
+      scopes: %w[ read write ]
+    },
+    "#{MARKER}-ios" => {
+      name: "Fizzy for iPhone (demo)",
+      redirect_uris: [ "fizzy-demo://oauth/callback" ],
+      scopes: %w[ read write ],
+      trusted: true
+    },
+    METADATA_DOCUMENT_URL => {
+      name: "Demo Assistant",
+      redirect_uris: [ "https://claude.ai/api/mcp/auth_callback" ],
+      scopes: %w[ read write ],
+      client_id_metadata_document: true
+    }
+  }.freeze
+
+  PERSONAS = {
+    one: { email_address: "#{MARKER}-one@example.com", name: "Olive One" },
+    empty: { email_address: "#{MARKER}-empty@example.com", name: "Emmett Empty" },
+    reviewer: { email_address: "#{MARKER}-reviewer@example.com", name: "Directory Reviewer" }
+  }.freeze
+
+  NO_ACCOUNT_EMAIL_ADDRESS = "#{MARKER}-no-account@example.com"
+
+  class << self
+    attr_accessor :base_url
+
+    # ---- Personas -----------------------------------------------------------
+
+    def designer
+      @designer ||= Identity.find_by(email_address: "david@example.com") || \
+        abort("No david@example.com. Run bin/rails db:seed first.")
+    end
+
+    def designer_accounts
+      @designer_accounts ||= designer.users_with_active_accounts.map(&:account).sort_by { |account| account.name.to_s.downcase }
+    end
+
+    def primary_account
+      designer_accounts.first
+    end
+
+    # Another account, one with a board where it can, so a webhook there
+    # shows the disconnect dialog naming an account other than this one.
+    def secondary_account
+      others = designer_accounts.drop(1)
+      others.find { |account| designer_board(account) } || others.first
+    end
+
+    def persona(key)
+      Identity.find_by(email_address: PERSONAS.fetch(key)[:email_address])
+    end
+
+    def check_prerequisites
+      designer
+
+      if designer_accounts.many?
+        true
+      else
+        warn "WARNING: #{designer.email_address} has fewer than two active accounts, so the"
+        warn "account picker shows a single account. Run bin/rails db:seed."
+      end
+    end
+
+    # ---- Demo data ----------------------------------------------------------
+
+    def ensure_personas
+      PERSONAS.each_value do |definition|
+        identity = Identity.find_or_create_by!(email_address: definition[:email_address])
+
+        if identity.users.none?
+          Current.set(account: primary_account) do
+            User.create! name: definition[:name], identity: identity, account: primary_account, verified_at: Time.current
+          end
+        end
+      end
+
+      Identity.find_or_create_by!(email_address: NO_ACCOUNT_EMAIL_ADDRESS)
+
+      puts "Personas: #{PERSONAS.size + 1} converged (#{MARKER}-*@example.com)."
+    end
+
+    # A self-registered client may only hold an https callback on a vetted
+    # host, from OAUTH_DCR_ALLOWED_HTTPS_HOSTS. The demo's is vetted in this
+    # process alone, so the server's own list is untouched.
+    def ensure_demo_clients
+      Rails.configuration.x.oauth.dcr_allowed_https_hosts = Oauth.dcr_allowed_https_hosts | [ WEB_HOST ]
+
+      CLIENTS.each do |client_id, definition|
+        attributes = definition.merge(
+          definition[:client_id_metadata_document] ? { metadata_fetched_at: Time.current, metadata_expires_at: 1.year.from_now } : {})
+
+        Oauth::Client.find_or_initialize_by(client_id: client_id).update!(attributes)
+      end
+
+      puts "Clients:  #{CLIENTS.size} demo clients converged (#{MARKER}-*, and a metadata document on claude.ai)."
+    end
+
+    # david gets several apps across the Connected apps groups, a long and a
+    # right-to-left name among them, and webhooks to show the disconnect
+    # dialog with none, one and several. devoauth-one gets a single app.
+    def ensure_grants
+      created = [
+        ensure_grant(designer, client("#{MARKER}-web"), permission: :write),
+        ensure_grant(designer, client("#{MARKER}-device"), permission: :read),
+        ensure_grant(designer, client("#{MARKER}-ios"), permission: :write),
+        ensure_grant(designer, client("#{MARKER}-long"), permission: :read),
+        ensure_grant(designer, client("#{MARKER}-rtl-web"), permission: :read),
+        ensure_grant(designer, client(METADATA_DOCUMENT_URL), permission: :write, account: primary_account),
+        (ensure_grant(designer, client(METADATA_DOCUMENT_URL), permission: :read, account: secondary_account) if secondary_account),
+        (ensure_grant(persona(:one), client("#{MARKER}-web"), permission: :read) if persona(:one))
+      ].count(true)
+
+      puts "Grants:   #{created} created for Connected apps."
+    end
+
+    def ensure_webhooks
+      created = [
+        ensure_webhook(client("#{MARKER}-device"), primary_account, "Acme CLI notifications"),
+        ensure_webhook(client(METADATA_DOCUMENT_URL), primary_account, "Assistant: new cards"),
+        ensure_webhook(client(METADATA_DOCUMENT_URL), primary_account, "Assistant: comments"),
+        (ensure_webhook(client(METADATA_DOCUMENT_URL), secondary_account, "Assistant: closed cards") if secondary_account)
+      ].count(true)
+
+      puts "Webhooks: #{created} created (none for Board Sync, one for Acme CLI, several for Demo Assistant)."
+    end
+
+    def reset
+      clients = Oauth::Client.where("client_id LIKE ?", "#{MARKER}-%").or(Oauth::Client.where(client_id: METADATA_DOCUMENT_URL))
+      webhooks = Webhook.where(created_via: clients).destroy_all.size
+      count = clients.destroy_all.size
+
+      puts "Removed #{count} demo client(s) with their grants, and #{webhooks} webhook(s) they set up."
+      puts "The #{MARKER}-*@example.com personas stay; they hold nothing once their apps are gone."
+    end
+
+    # ---- Directory ----------------------------------------------------------
+
+    def print_directory
+      section "Start the server for the review"
+      puts "  #{server_command}"
+      puts
+      puts "  FIZZY_OAUTH_MCP_RESOURCES makes an MCP resource known, for the account picker."
+      puts "  The reviewer variables turn on the fixed reviewer code (SaaS mode only)."
+
+      section "Sign in as (email only; development shows the code on the page)"
+      print_row "#{designer.email_address}", "staff, #{designer_accounts.size} accounts: the main persona"
+      print_row PERSONAS[:one][:email_address], "one account, one connected app"
+      print_row PERSONAS[:empty][:email_address], "one account, nothing connected, not staff"
+      print_row NO_ACCOUNT_EMAIL_ADDRESS, "no account"
+      print_row PERSONAS[:reviewer][:email_address], "the directory reviewer"
+
+      section "Consent, as #{designer.email_address}"
+      print_row "Self-registered web app", consent_url("#{MARKER}-web", "https://#{WEB_HOST}/oauth/callback", scope: "read write")
+      print_row "App on your device: loopback", consent_url("#{MARKER}-device", "http://127.0.0.1:53682/callback", scope: "read write")
+      print_row "App on your device: app scheme", consent_url("#{MARKER}-device", "cursor://acme.example/oauth/callback", scope: "read write")
+      print_row "App named by a metadata document", consent_url(METADATA_DOCUMENT_URL, CLIENTS[METADATA_DOCUMENT_URL][:redirect_uris].first, scope: "read write")
+      print_row "Made by 37signals", consent_url("#{MARKER}-ios", "fizzy-demo://oauth/callback", scope: "read write")
+      print_row "Read-only request (both offered)", consent_url("#{MARKER}-web", "https://#{WEB_HOST}/oauth/callback", scope: "read")
+      print_row "Read-only app (one option)", consent_url("#{MARKER}-read-only", "http://127.0.0.1/digest/callback", scope: "read")
+      print_row "Many accounts (picker)", consent_url(METADATA_DOCUMENT_URL, CLIENTS[METADATA_DOCUMENT_URL][:redirect_uris].first, scope: "read write", resource: mcp_resource)
+      print_row "Long name", consent_url("#{MARKER}-long", "https://planning.example.com/oauth/callback", scope: "read write")
+      print_row "Right-to-left name", consent_url("#{MARKER}-rtl", "https://rtl.example.com/oauth/callback", scope: "read write")
+      print_row "Right-to-left self-registered name", consent_url("#{MARKER}-rtl-web", "https://#{WEB_HOST}/rtl/callback", scope: "read write")
+      puts
+      puts "  One account: sign in as #{PERSONAS[:one][:email_address]}, then open"
+      print_row "  One account (named, no picker)", consent_url(METADATA_DOCUMENT_URL, CLIENTS[METADATA_DOCUMENT_URL][:redirect_uris].first, scope: "read write", resource: mcp_resource)
+      puts "  \"Not you?\" signs out and returns whoever signs in next to the same request."
+
+      section "Connected apps"
+      print_row "Many apps, as #{designer.email_address}", "#{base_url}#{primary_account.slug}/my/connected_apps"
+      print_row "One app, as #{PERSONAS[:one][:email_address]}", "#{base_url}#{primary_account.slug}/my/connected_apps"
+      print_row "Empty, as #{PERSONAS[:empty][:email_address]}", "#{base_url}#{primary_account.slug}/my/connected_apps"
+      print_row "Profile entry, as #{designer.email_address}", profile_url(designer)
+      print_row "No entry yet, as #{PERSONAS[:empty][:email_address]}", profile_url(persona(:empty))
+      puts
+      puts "  Disconnect dialog: click Disconnect on Board Sync (no webhooks), Acme CLI (one)"
+      puts "  or Demo Assistant (several, one in another account). Disconnecting is real: run"
+      puts "  this script again to put the app back. The notice after it names the app."
+
+      section "Error page, as #{designer.email_address}"
+      print_row "invalid_request: unknown app", consent_url("#{MARKER}-nope", "https://#{WEB_HOST}/oauth/callback")
+      print_row "invalid_request: unregistered callback", consent_url("#{MARKER}-web", "https://elsewhere.example.com/callback")
+      print_row "invalid_request: no PKCE challenge", consent_url("#{MARKER}-web", "https://#{WEB_HOST}/oauth/callback", code_challenge: nil)
+      print_row "unsupported_response_type", consent_url("#{MARKER}-web", "https://#{WEB_HOST}/oauth/callback", response_type: "token")
+      print_row "invalid_scope", consent_url("#{MARKER}-web", "https://#{WEB_HOST}/oauth/callback", scope: "admin")
+      print_row "invalid_target", consent_url("#{MARKER}-web", "https://#{WEB_HOST}/oauth/callback", resource: "https://unknown.example.com/mcp")
+      print_row "unauthorized_client", consent_url(Oauth::Client::PERSONAL_ACCESS_CLIENT_ID, "https://#{WEB_HOST}/oauth/callback")
+      print_row "invalid_client_metadata [1]", consent_url(MISSING_METADATA_DOCUMENT_URL, "https://claude.ai/api/mcp/auth_callback")
+      print_row "access_denied, as #{NO_ACCOUNT_EMAIL_ADDRESS}", consent_url(METADATA_DOCUMENT_URL, CLIENTS[METADATA_DOCUMENT_URL][:redirect_uris].first, resource: mcp_resource)
+      puts
+      puts "  [1] Fetches a document claude.ai doesn't have, so it needs a network connection."
+      puts "  temporarily_unavailable (Fizzy too busy to fetch a metadata document) and"
+      puts "  slow_down have no URL; they are this same page with their own sentence."
+
+      section "Server postures (restart the server for each)"
+      print_row "Staff only", "OAUTH_STAFF_ONLY=true bin/dev, sign in as #{PERSONAS[:empty][:email_address]}, open any consent URL"
+      print_row "Paused (\"Connecting apps is paused\")", "OAUTH_PAUSED=1 bin/dev, open any consent URL"
+      print_row "Dark (the app's 404 page)", "OAUTH_DARK=1 bin/dev, open any consent URL"
+
+      section "Reviewer sign-in"
+      puts "  With the server started as above, sign out, enter #{PERSONAS[:reviewer][:email_address]}"
+      puts "  at #{base_url}/session/new, then type #{REVIEWER_CODE} into the code field in place of"
+      puts "  the emailed code. Any other email shows the same field with its emailed code."
+
+      section "Elsewhere (click paths)"
+      puts "  Token reveal (\"Read and write\")  #{base_url}#{primary_account.slug}/my/access_tokens/new -> Generate"
+
+      section "Dark mode"
+      puts "  Profile -> Appearance -> Always dark (Always light, Same as OS to go back), or in"
+      puts "  the browser console on any page:"
+      puts "    localStorage.setItem(\"theme\", \"dark\"); location.reload()"
+      puts "    localStorage.setItem(\"theme\", \"auto\"); location.reload()"
+    end
+
+    def print_states
+      puts <<~STATES
+        Screens and states this script covers:
+
+        Consent        self-registered web app (unchecked-app warning), app on your device
+                       (loopback and app scheme), app named by a metadata document, made by
+                       37signals, read-only request, read-only app, one account, many
+                       accounts (picker), long name, right-to-left names
+        Connected apps empty, one app, many apps in every group, disconnect dialog with no,
+                       one and several app-created webhooks, the notice after, profile entry
+                       (and its absence before a first grant)
+        Error page     invalid_request (unknown app, unregistered callback, no PKCE),
+                       unsupported_response_type, invalid_scope, invalid_target,
+                       unauthorized_client, invalid_client_metadata, access_denied
+        Postures       staff only, paused, dark
+        Sign-in        the reviewer code in the magic-link code field
+        Also           how to toggle dark mode
+      STATES
+    end
+
+    private
+      def section(title)
+        puts
+        puts "=" * 100
+        puts title
+        puts "=" * 100
+      end
+
+      def print_row(label, value)
+        puts format("  %-44s %s", label, value)
+      end
+
+      def client(client_id)
+        @clients ||= {}
+        @clients[client_id] ||= Oauth::Client.find_by!(client_id: client_id)
+      end
+
+      # Several grants of one app reach the same account at most once each.
+      def ensure_grant(identity, client, permission:, account: nil)
+        if identity.access_tokens.grants.unlapsed.exists?(oauth_client: client, account: account)
+          false
+        else
+          identity.access_tokens.create! oauth_client: client, permission: permission, account: account, audience: (mcp_resource if account)
+          true
+        end
+      end
+
+      def ensure_webhook(client, account, name)
+        board = designer_board(account)
+
+        if board.nil? || Webhook.exists?(created_via: client, board: board, name: name)
+          false
+        else
+          Webhook.create! board: board, name: name, creator: designer.users.find_by!(account: account), created_via: client,
+            url: "https://hooks.example.com/#{MARKER}/#{SecureRandom.hex(4)}", subscribed_actions: %w[ card_published comment_created ]
+          true
+        end
+      end
+
+      def designer_board(account)
+        if user = designer.users.find_by(account: account)
+          Board.joins(:accesses).where(account: account, accesses: { user_id: user.id }).order(:created_at).first
+        end
+      end
+
+      def mcp_resource
+        Oauth.mcp_resources.first || "#{base_url}/mcp"
+      end
+
+      def server_command
+        reviewer = if defined?(Identity::ReviewerSignIn)
+          "FIZZY_REVIEWER_SIGN_IN_EMAIL=#{PERSONAS[:reviewer][:email_address]} FIZZY_REVIEWER_SIGN_IN_CODE_DIGEST=#{Identity::ReviewerSignIn.digest(REVIEWER_CODE)} "
+        end
+
+        "FIZZY_OAUTH_MCP_RESOURCES=#{mcp_resource} #{reviewer}bin/dev"
+      end
+
+      def profile_url(identity)
+        if identity && (user = identity.users.find_by(account: primary_account))
+          "#{base_url}#{primary_account.slug}/users/#{user.id}"
+        else
+          "(run this script without --print first)"
+        end
+      end
+
+      def pkce_challenge
+        Base64.urlsafe_encode64(OpenSSL::Digest::SHA256.digest(PKCE_VERIFIER), padding: false)
+      end
+
+      def consent_url(client_id, redirect_uri, scope: nil, resource: nil, response_type: "code", code_challenge: pkce_challenge)
+        params = {
+          client_id: client_id,
+          redirect_uri: redirect_uri,
+          response_type: response_type,
+          code_challenge: code_challenge,
+          code_challenge_method: "S256",
+          state: STATE,
+          scope: scope,
+          resource: resource
+        }.compact
+
+        "#{base_url}/oauth/authorization/new?#{params.to_query}"
+      end
+  end
+end
+
+# ---- CLI ---------------------------------------------------------------------
+
+options = { mode: :seed, base_url: "http://app.fizzy.localhost:#{ENV.fetch("PORT", 3006)}" }
+
+OptionParser.new do |opts|
+  opts.banner = "USAGE: #{$0} [options]"
+
+  opts.on("--print", "Print the directory without writing anything") do
+    options[:mode] = :print
+  end
+
+  opts.on("--reset", "Remove the demo clients, with their grants and webhooks") do
+    options[:mode] = :reset
+  end
+
+  opts.on("--list", "Describe the screens and states this script covers") do
+    options[:mode] = :list
+  end
+
+  opts.on("--base-url URL", "Base URL for printed links (default #{options[:base_url]})") do |url|
+    options[:base_url] = url.chomp("/")
+  end
+
+  opts.on("-h", "--help", "Show this help") do
+    puts opts
+    exit
+  end
+end.parse!
+
+OauthStates.base_url = options[:base_url]
+
+case options[:mode]
+when :list
+  OauthStates.print_states
+when :reset
+  OauthStates.reset
+when :print
+  OauthStates.check_prerequisites
+  OauthStates.print_directory
+when :seed
+  OauthStates.check_prerequisites
+  Oauth::FirstPartyClients.provision!
+  OauthStates.ensure_personas
+  OauthStates.ensure_demo_clients
+  OauthStates.ensure_grants
+  OauthStates.ensure_webhooks
+  OauthStates.print_directory
+end
