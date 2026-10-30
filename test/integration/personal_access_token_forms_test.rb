@@ -216,10 +216,15 @@ class PersonalAccessTokenFormsTest < ActionDispatch::IntegrationTest
   test "the authorization endpoint refuses the personal access client" do
     sign_in_as :david
 
-    untenanted do
-      get new_oauth_authorization_path, params: { client_id: Oauth::Client::PERSONAL_ACCESS_CLIENT_ID, response_type: "code",
-        redirect_uri: "http://127.0.0.1:8888/callback", code_challenge: "challenge", code_challenge_method: "S256", state: "state" }
-    end
+    params = { client_id: Oauth::Client::PERSONAL_ACCESS_CLIENT_ID, response_type: "code",
+      redirect_uri: "http://127.0.0.1:8888/callback", code_challenge: "challenge", code_challenge_method: "S256", state: "state" }
+
+    untenanted { get new_oauth_authorization_path, params: params }
+
+    assert_response :bad_request
+    assert_select "code", text: "unauthorized_client"
+
+    untenanted { get new_oauth_authorization_path(format: :json), params: params }
 
     assert_response :bad_request
     assert_equal "unauthorized_client", response.parsed_body["error"]
