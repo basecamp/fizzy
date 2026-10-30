@@ -62,6 +62,22 @@ class Oauth::AvailabilityTest < ActiveSupport::TestCase
     end
   end
 
+  test "admits whoever an extension admits beyond staff, only while staff only" do
+    saved = Oauth::Availability.staff_only_exemptions.dup
+    Oauth::Availability.staff_only_exemptions = []
+    Oauth::Availability.admit_beyond_staff ->(identity) { identity == identities(:jz) }
+    Oauth::Availability.admit_beyond_staff ->(identity) { "truthy, not true" }
+
+    with_oauth_availability staff_only: true do
+      assert Oauth::Availability.admits?(identities(:jz))
+      assert Oauth::Availability.admits?(identities(:david))
+      assert_not Oauth::Availability.admits?(identities(:mike))
+      assert_not Oauth::Availability.admits?(nil)
+    end
+  ensure
+    Oauth::Availability.staff_only_exemptions = saved
+  end
+
   test "staff only must be exactly true" do
     with_oauth_availability staff_only: "true" do
       assert_not Oauth::Availability.staff_only?
