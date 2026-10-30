@@ -7,6 +7,18 @@ module Oauth
     scope.to_s.split.include?("write") ? "read write" : "read"
   end
 
+  # offline_access asks for a refresh token (OpenID Connect Core §11). It
+  # names no access, and every grant Fizzy issues carries a refresh token
+  # anyway, so a request that names it is weighed without it, as bc3 accepts
+  # and drops it: Claude, Cursor and Muse send it beside the scopes they want.
+  REFRESH_ONLY_SCOPES = %w[ offline_access ]
+
+  # The scopes a request names, less the refresh-only ones. A request naming
+  # nothing else names no scope at all.
+  def self.requested_scopes(scope)
+    scope.to_s.split - REFRESH_ONLY_SCOPES
+  end
+
   # The protected resources, other than Fizzy's own API, that an OAuth grant
   # may be issued for (RFC 8707): the hosted MCP server's resource URL, by
   # exact string, from FIZZY_OAUTH_MCP_RESOURCES. None unless configured.

@@ -56,9 +56,12 @@ env:
     OAUTH_CIMD_ALLOWED_HOSTS: "mcp.claude.ai claude.ai claude.com chatgpt.com"
     # The vendor hosts whose https callbacks dynamic client registration accepts, beside loopback and the
     # cursor:// and claude:// schemes: Claude's web and desktop connectors (claude.ai, claude.com), ChatGPT
-    # (chatgpt.com), Cursor and the Grok Bot (www.cursor.com), and Grok's own connector (grok.com). Add a host
-    # only when a real client is confirmed to need it.
-    OAUTH_DCR_ALLOWED_HTTPS_HOSTS: "claude.ai claude.com chatgpt.com www.cursor.com grok.com"
+    # (chatgpt.com), Cursor and the Grok Bot (www.cursor.com), Grok's own connector (grok.com), and Meta's
+    # Muse (muse.ai and agent.meta.ai, whose callbacks are https://muse.ai/connect/oauth-callback,
+    # https://muse.ai/api/hatch/oauth/callback and https://agent.meta.ai/api/hatch/oauth/callback; Basecamp
+    # admits the same two hosts for Muse's custom connectors). Add a host only when a real client is
+    # confirmed to need it.
+    OAUTH_DCR_ALLOWED_HTTPS_HOSTS: "claude.ai claude.com chatgpt.com www.cursor.com grok.com muse.ai agent.meta.ai"
 
 proxy:
   ssl: true

@@ -3,6 +3,10 @@ class Oauth::TokensController < Oauth::BaseController
 
   GRANT_TYPES = %w[ authorization_code refresh_token ]
 
+  # A grant's own requests a minute: a client refreshing on schedule spends
+  # one or two, a retry storm a few more.
+  GRANT_BUDGET = 20
+
   allow_unauthenticated_access
   skip_forgery_protection
 
@@ -13,7 +17,19 @@ class Oauth::TokensController < Oauth::BaseController
   # Availability first: rate_limit is a before_action too, so a dark endpoint
   # that counted requests first would answer 429 to the eleventh, not 404.
   before_action :require_issuance_enabled
-  rate_limit to: 20, within: 1.minute, only: :create, with: :oauth_rate_limit_exceeded
+
+  # Rate limits. Claude's and ChatGPT's users all redeem codes and refresh
+  # from their platform's egress, so a budget per address would let one busy
+  # platform throttle every person behind it. A request that names its own
+  # grant, a code or refresh token issued to the client that presents it, is
+  # charged to that grant instead (grant_rate_limit_key), stale or replayed
+  # tokens included, so a dead token spends only its own lineage's budget,
+  # never its neighbors' (bc3#13466's outage). Anything else, a token that
+  # resolves to no grant, a grant presented by another client, or a client
+  # that fails to authenticate, is held to 20 a minute per address.
+  rate_limit to: 20, within: 1.minute, only: :create, with: :oauth_rate_limit_exceeded, unless: :grant_rate_limit_key
+  rate_limit to: GRANT_BUDGET, within: 1.minute, only: :create, by: -> { grant_rate_limit_key }, name: "grant",
+    with: :oauth_rate_limit_exceeded, if: :grant_rate_limit_key
   before_action :require_single_valued_parameters
   before_action :validate_grant_type
 
@@ -91,6 +107,44 @@ class Oauth::TokensController < Oauth::BaseController
 
     def authorization_code_grant?
       params[:grant_type] == "authorization_code"
+    end
+
+    # The limiter key of the grant a request names, or nil to charge its
+    # address. Only a client that authenticates, or a public one presenting
+    # no secret, names one, and only with a code or refresh token issued to
+    # it: a code names its client and person, a refresh token its grant,
+    # rotated or not. Nothing here answers the request; the callbacks after
+    # judge the code or token as before. Reading a refresh token's grant is
+    # the digest lookup set_refreshable_access_token repeats from the query
+    # cache.
+    def grant_rate_limit_key
+      if defined?(@grant_rate_limit_key)
+        @grant_rate_limit_key
+      else
+        @grant_rate_limit_key = if client = rate_limited_client
+          authorization_code_grant? ? code_rate_limit_key(client) : refresh_rate_limit_key(client)
+        end
+      end
+    end
+
+    # Basic beside a body secret is refused as ambiguous (authenticate_client),
+    # so it names no client here either.
+    def rate_limited_client
+      unless client_secret_basic? && request.request_parameters["client_secret"].present?
+        authenticated_client
+      end
+    end
+
+    def code_rate_limit_key(client)
+      code = Oauth::AuthorizationCode.parse(params[:code]) if params[:code].is_a?(String)
+      "code/#{client.id}/#{code.identity_id}" if code&.client_id == client.client_id
+    end
+
+    def refresh_rate_limit_key(client)
+      if (token = params[:refresh_token]).is_a?(String)
+        grant = Identity::AccessToken.find_by_refresh_token(token) || Oauth::RetiredRefreshToken.find_by_raw_token(token)&.access_token
+        "grant/#{grant.id}" if grant && grant.oauth_client_id == client.id
+      end
     end
 
     def validate_grant_type
@@ -263,9 +317,11 @@ class Oauth::TokensController < Oauth::BaseController
     # parameter means "keep the grant" — a blank one, or a JSON null, names no
     # scope, and the empty scope list below rejects it, since no scope-token is
     # a malformed scope (RFC 6749 §3.3), not a request for the full grant.
+    # offline_access is weighed out first (Oauth.requested_scopes): it asks
+    # for the refresh token this grant already has.
     def set_refresh_scope
       granted = granted_scopes(@access_token.permission)
-      requested = params.key?(:scope) ? params[:scope].to_s.split : granted
+      requested = params.key?(:scope) ? Oauth.requested_scopes(params[:scope]) : granted
 
       if requested.present? && requested.all? { |scope| granted.include?(scope) }
         @refresh_permission = requested.include?("write") ? "write" : "read"

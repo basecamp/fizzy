@@ -255,8 +255,10 @@ class Oauth::Client < ApplicationRecord
     Oauth.mcp_resource?(protected_resource)
   end
 
+  # offline_access rides along unweighed (Oauth::REFRESH_ONLY_SCOPES), but
+  # it can't stand in for a scope: alone, it asks for nothing.
   def allows_scope?(requested_scope)
-    requested = requested_scope.to_s.split
+    requested = Oauth.requested_scopes(requested_scope)
     requested.present? && requested.all? { |s| scopes.include?(s) }
   end
 
