@@ -286,6 +286,14 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     assert_not client.allows_scope?("")
   end
 
+  test "allows_scope? weighs a request without offline_access, which can't stand alone" do
+    client = Oauth::Client.new(scopes: %w[ read ])
+    assert client.allows_scope?("read offline_access")
+    assert_not client.allows_scope?("write offline_access")
+    assert_not client.allows_scope?("offline_access")
+    assert_not client.allows_scope?("admin offline_access")
+  end
+
   test "default scopes are set" do
     client = Oauth::Client.new(name: "Test", redirect_uris: %w[ http://127.0.0.1/cb ])
     assert_equal %w[ read ], client.scopes
