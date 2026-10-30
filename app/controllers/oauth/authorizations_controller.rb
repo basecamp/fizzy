@@ -7,6 +7,7 @@ class Oauth::AuthorizationsController < Oauth::BaseController
   RETURN_URL_MAXIMUM_LENGTH = 2000
   # Read to find the client and the redirect target, so refused before either.
   LOOKUP_PARAMETERS = %w[ client_id redirect_uri ]
+  UNKNOWN_CLIENT_MESSAGE = "Fizzy doesn't recognize this app. It may have been removed since you started. Start again from the app."
 
   # Browsers apply form-action to every hop of a form submission, redirects
   # included, so the app-wide form-action 'self' would block the consent POST's
@@ -71,7 +72,7 @@ class Oauth::AuthorizationsController < Oauth::BaseController
       Oauth::Audit.record "code.issued", client: @client, identity_id: Current.identity.id, actor: "user"
       redirect_to success_redirect_uri(code), allow_other_host: true
     else
-      render_error "invalid_request", "Unknown client"
+      render_error "invalid_request", "Unknown client", message: UNKNOWN_CLIENT_MESSAGE
     end
   end
 
@@ -120,7 +121,7 @@ class Oauth::AuthorizationsController < Oauth::BaseController
       unless performed?
         # There's no client to send the browser back to, so the person is told here.
         if @client.nil?
-          render_error "invalid_request", "Unknown client"
+          render_error "invalid_request", "Unknown client", message: UNKNOWN_CLIENT_MESSAGE
         elsif !@client.allows_grant_type?("authorization_code")
           oauth_error "unauthorized_client", "Client may not use the authorization code grant"
         end
@@ -176,7 +177,8 @@ class Oauth::AuthorizationsController < Oauth::BaseController
 
     def validate_redirect_uri
       unless performed? || @client.allows_redirect?(params[:redirect_uri])
-        redirect_with_error "invalid_request", "Invalid redirect_uri"
+        redirect_with_error "invalid_request", "Invalid redirect_uri",
+          message: "The app asked to send you back to an address it never registered with Fizzy."
       end
     end
 
@@ -242,7 +244,8 @@ class Oauth::AuthorizationsController < Oauth::BaseController
         @accounts = Current.identity.users_with_active_accounts.map(&:account).sort_by { |account| account.name.to_s.downcase }
 
         if @accounts.empty?
-          redirect_with_error "access_denied", "You have no account to connect"
+          redirect_with_error "access_denied", "You have no account to connect",
+            message: "You aren't in any Fizzy account this app could connect to."
         end
       end
     end
@@ -252,7 +255,8 @@ class Oauth::AuthorizationsController < Oauth::BaseController
         @account = @accounts.find { |account| account.id == params[:account_id] }
 
         unless @account
-          render_error "invalid_request", "Choose an account to connect"
+          render_error "invalid_request", "Choose an account to connect",
+            message: "Choose which account the app should connect to, then try again from the app."
         end
       end
     end
@@ -264,24 +268,49 @@ class Oauth::AuthorizationsController < Oauth::BaseController
     # Errors are found before the user sees the consent screen, so they only
     # redirect to a vetted target; Deny redirects anywhere allowed, since the
     # consent screen has named the host by then.
-    def redirect_with_error(error, description)
+    def redirect_with_error(error, description, message: nil)
       if params[:redirect_uri].present? && @client&.allows_redirect?(params[:redirect_uri]) && @client.vetted_redirect?(params[:redirect_uri])
         redirect_to error_redirect_uri(error, description), allow_other_host: true
       else
-        render_error error, description
+        render_error error, description, message: message
       end
     end
 
     # Shown here rather than sent back to the app, and counted like any OAuth
     # error the app would have been sent.
-    def render_error(error, description)
+    def render_error(error, description, message: nil, status: :bad_request)
       instrument_oauth_error error
-      @error = error
-      @error_description = description
+      render_oauth_error error, description, status: status, message: message
+    end
 
+    # A person in a browser is told in plain words (message, or the error's
+    # own, OauthHelper#oauth_error_message), with the precise error beneath for
+    # the app's developer. Anything else asked for gets the OAuth JSON body.
+    # Every error this endpoint answers comes through here, oauth_error's
+    # included, so none reaches a person as JSON.
+    def render_oauth_error(error, description, status:, message: nil)
       respond_to do |format|
-        format.html { render :error, status: :bad_request }
-        format.json { render_oauth_error error, description, status: :bad_request }
+        format.html do
+          @error, @error_description, @error_message = error, description, message
+          render :error, status: status
+        end
+        format.any { super(error, description, status: status) }
+      end
+    end
+
+    # A dark server is as absent to a person as to an app: they get the page
+    # for anything Fizzy doesn't have. A paused one says so.
+    def render_dark
+      respond_to do |format|
+        format.html { render file: Rails.public_path.join("404.html"), status: :not_found, layout: false }
+        format.any { super() }
+      end
+    end
+
+    def render_paused
+      respond_to do |format|
+        format.html { render "oauth/unavailable", status: :service_unavailable }
+        format.any { super() }
       end
     end
 

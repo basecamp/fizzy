@@ -1,0 +1,16 @@
+<%# Issuance is paused (Oauth::Availability): no app can connect, and access
+    tokens already issued work until they expire. Shown to people on the
+    browser authorization flow; apps get a bare 503. %>
+<% @page_title = "Connecting apps is paused" %>
+
+<article class="panel panel--wide shadow center txt-align-start">
+  <div class="flex flex-column gap">
+    <h2 class="margin-none"><%= @page_title %></h2>
+
+    <p class="txt-muted margin-none">
+      Fizzy isn&rsquo;t connecting new apps for the moment. Nothing was shared. Try again from the app in a little while.
+    </p>
+
+    <%= link_to "Go back", root_path, class: "btn btn--outline center txt-medium" %>
+  </div>
+</article>

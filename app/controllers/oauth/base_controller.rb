@@ -72,10 +72,20 @@ class Oauth::BaseController < ApplicationController
     # answers at all.
     def require_issuance_enabled
       if !Oauth::Availability.acceptance_enabled?(piloting_client_id)
-        head :not_found
+        render_dark
       elsif !Oauth::Availability.issuance_enabled?(piloting_client_id)
-        head :service_unavailable
+        render_paused
       end
+    end
+
+    # Bare statuses for apps. The browser authorization flow answers people
+    # with a page instead (Oauth::AuthorizationsController).
+    def render_dark
+      head :not_found
+    end
+
+    def render_paused
+      head :service_unavailable
     end
 
     # The client a request acts for, if it names one.

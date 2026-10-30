@@ -117,6 +117,31 @@ class My::ConnectedAppsControllerTest < ActionDispatch::IntegrationTest
     assert_match "disconnected", flash[:notice]
   end
 
+  test "the notice names the app as the list does, and a name of nothing but direction controls as an unnamed app" do
+    client = Oauth::Client.create!(name: "\u202E\u2066\u2069", redirect_uris: %w[ http://127.0.0.1/cb ], dynamically_registered: true)
+    @identity.access_tokens.create!(oauth_client: client, permission: :read)
+
+    delete my_connected_app_path(client)
+
+    assert_equal "Unnamed app has been disconnected", flash[:notice]
+
+    named = Oauth::Client.create!(name: "\u202EBoard Sync", redirect_uris: %w[ http://127.0.0.1/cb ], dynamically_registered: true)
+    @identity.access_tokens.create!(oauth_client: named, permission: :read)
+
+    delete my_connected_app_path(named)
+
+    assert_equal "Board Sync has been disconnected", flash[:notice]
+  end
+
+  test "the profile entry reads Connected apps" do
+    @identity.access_tokens.create!(oauth_client: oauth_clients(:mcp_client), permission: :read)
+
+    get user_path(users(:david))
+
+    assert_select "h2", text: "Connected apps"
+    assert_select "h2", text: "Connected Apps", count: 0
+  end
+
   test "destroy only revokes tokens for the specified client" do
     client1 = oauth_clients(:mcp_client)
     client2 = Oauth::Client.create!(name: "Other App", redirect_uris: %w[ http://127.0.0.1/cb ])

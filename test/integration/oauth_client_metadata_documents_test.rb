@@ -104,7 +104,7 @@ class OauthClientMetadataDocumentsTest < ActionDispatch::IntegrationTest
     untenanted { get new_oauth_authorization_path, params: authorization.merge(client_id: url, redirect_uri: "https://tools.example.com/cb") }
 
     assert_response :bad_request
-    assert_select "p", text: "Unknown client"
+    assert_select "p", text: Oauth::AuthorizationsController::UNKNOWN_CLIENT_MESSAGE
     assert_not_requested stub
   end
 
@@ -113,6 +113,12 @@ class OauthClientMetadataDocumentsTest < ActionDispatch::IntegrationTest
     stub_request(:get, URL).to_return(status: 404)
 
     untenanted { get new_oauth_authorization_path, params: authorization }
+
+    assert_response :bad_request
+    assert_select "h2", text: "Can't authorize this app"
+    assert_select "code", text: "invalid_client_metadata"
+
+    untenanted { get new_oauth_authorization_path(format: :json), params: authorization }
 
     assert_response :bad_request
     assert_equal "invalid_client_metadata", response.parsed_body["error"]
@@ -128,7 +134,7 @@ class OauthClientMetadataDocumentsTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :bad_request
-    assert_select "p", text: "Unknown client"
+    assert_select "p", text: Oauth::AuthorizationsController::UNKNOWN_CLIENT_MESSAGE
   end
 
   test "a client_id array never reaches a metadata document client" do
@@ -160,7 +166,7 @@ class OauthClientMetadataDocumentsTest < ActionDispatch::IntegrationTest
     untenanted { get new_oauth_authorization_path, params: authorization.merge(client_id: client.client_id) }
 
     assert_response :bad_request
-    assert_select "p", text: "Unknown client"
+    assert_select "p", text: Oauth::AuthorizationsController::UNKNOWN_CLIENT_MESSAGE
   end
 
   test "an unvetted redirect gets no error redirect before consent" do
