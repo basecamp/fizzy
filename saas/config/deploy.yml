@@ -3,11 +3,12 @@
 # env -i) leaves a bare "CONSOLE_USER:" that breaks this file's YAML, so fall back to the login name.
 # CONSOLE_REASON, the link that authorized a query, is free text bound for a single-quoted YAML scalar
 # and then Kamal's Shellwords.split, so it's flattened to one line and escaped for both; Thor splits
-# each -e pair at its first colon, so a URL arrives whole. coworker's bin/failed-jobs renders both by
-# these names.
+# each -e pair at its first colon, so a URL arrives whole. Kamal leaves a ${...} in an env value for
+# the remote shell to expand, so every $ is percent-encoded. coworker's bin/failed-jobs renders both
+# by these names.
 require "etc"
 console_user = ENV["USER"].presence || ENV["LOGNAME"].presence || (Etc.getpwuid.name rescue nil) || "uid-#{Process.uid}"
-console_reason = ENV["CONSOLE_REASON"].to_s.scrub("").gsub(/[[:cntrl:]]/, " ").strip.shellescape.gsub("'", "''")
+console_reason = ENV["CONSOLE_REASON"].to_s.scrub("").gsub(/[[:cntrl:]]/, " ").strip.gsub("$", "%24").shellescape.gsub("'", "''")
 -%>
 service: fizzy
 image: basecamp/fizzy
