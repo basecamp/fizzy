@@ -1,13 +1,15 @@
 <%
 # What the aliases pass to the console with `app exec -e`. A blank USER (a sandbox, cron, launchd,
-# env -i) leaves a bare "CONSOLE_USER:" that breaks this file's YAML, so fall back to the login name.
+# env -i) leaves a bare "CONSOLE_USER:" that breaks this file's YAML, so fall back to LOGNAME, then
+# the login name. A name is used only if it's a plain login name, safe in every alias's quoting.
 # CONSOLE_REASON, the link that authorized a query, is free text bound for a single-quoted YAML scalar
 # and then Kamal's Shellwords.split, so it's flattened to one line and escaped for both; Thor splits
 # each -e pair at its first colon, so a URL arrives whole. Kamal leaves a ${...} in an env value for
 # the remote shell to expand, so every $ is percent-encoded. coworker's bin/failed-jobs renders both
 # by these names.
 require "etc"
-console_user = ENV["USER"].presence || ENV["LOGNAME"].presence || (Etc.getpwuid.name rescue nil) || "uid-#{Process.uid}"
+console_user = [ ENV["USER"], ENV["LOGNAME"], (Etc.getpwuid.name rescue nil) ] \
+  .find { |name| name.to_s.match?(/\A[\w.@-]+\z/) } || "uid-#{Process.uid}"
 console_reason = ENV["CONSOLE_REASON"].to_s.scrub("").gsub(/[[:cntrl:]]/, " ").strip.gsub("$", "%24").shellescape.gsub("'", "''")
 -%>
 service: fizzy
