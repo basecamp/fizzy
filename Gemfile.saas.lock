@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/basecamp/audits1984
-  revision: 4271a8e1f02f0f35d749c938bf4dcccf902b4190
+  revision: f99fc642c200ce5996c82968cb36b9ce1c16474f
   specs:
     audits1984 (0.1.7)
       console1984
