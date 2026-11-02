@@ -393,9 +393,9 @@ GEM
       railties (>= 8.0.2)
     lint_roller (1.1.0)
     logger (1.7.0)
-    loofah (2.25.2)
+    loofah (2.25.3)
       crass (~> 1.0.2)
-      nokogiri (>= 1.12.0)
+      nokogiri (>= 1.19.5)
     mail (2.9.1)
       logger
       mini_mime (>= 0.1.1)
@@ -450,21 +450,21 @@ GEM
     net-ssh (7.3.8)
       logger
     nio4r (2.7.5)
-    nokogiri (1.19.4-aarch64-linux-gnu)
+    nokogiri (1.19.5-aarch64-linux-gnu)
       racc (~> 1.4)
-    nokogiri (1.19.4-aarch64-linux-musl)
+    nokogiri (1.19.5-aarch64-linux-musl)
       racc (~> 1.4)
-    nokogiri (1.19.4-arm-linux-gnu)
+    nokogiri (1.19.5-arm-linux-gnu)
       racc (~> 1.4)
-    nokogiri (1.19.4-arm-linux-musl)
+    nokogiri (1.19.5-arm-linux-musl)
       racc (~> 1.4)
-    nokogiri (1.19.4-arm64-darwin)
+    nokogiri (1.19.5-arm64-darwin)
       racc (~> 1.4)
-    nokogiri (1.19.4-x86_64-darwin)
+    nokogiri (1.19.5-x86_64-darwin)
       racc (~> 1.4)
-    nokogiri (1.19.4-x86_64-linux-gnu)
+    nokogiri (1.19.5-x86_64-linux-gnu)
       racc (~> 1.4)
-    nokogiri (1.19.4-x86_64-linux-musl)
+    nokogiri (1.19.5-x86_64-linux-musl)
       racc (~> 1.4)
     openssl (4.0.0)
     os (1.1.4)
@@ -544,8 +544,8 @@ GEM
       activesupport (>= 5.0.0)
       minitest
       nokogiri (>= 1.6)
-    rails-html-sanitizer (1.7.1)
-      loofah (~> 2.25, >= 2.25.2)
+    rails-html-sanitizer (1.7.2)
+      loofah (~> 2.25, >= 2.25.3)
       nokogiri (>= 1.15.7, != 1.16.7, != 1.16.6, != 1.16.5, != 1.16.4, != 1.16.3, != 1.16.2, != 1.16.1, != 1.16.0.rc1, != 1.16.0)
     rainbow (3.1.1)
     rake (13.4.2)
@@ -923,7 +923,7 @@ CHECKSUMS
   lexxy (1.0.1) sha256=927a3e592f9d2a989fe5fb7c0c527be62950e593483188940cd98d8a9a004926
   lint_roller (1.1.0) sha256=2c0c845b632a7d172cb849cc90c1bce937a28c5c8ccccb50dfd46a485003cc87
   logger (1.7.0) sha256=196edec7cc44b66cfb40f9755ce11b392f21f7967696af15d274dde7edff0203
-  loofah (2.25.2) sha256=2007f746959ac65552456e04b433e83deb22759ab38c838b4445c70e43425918
+  loofah (2.25.3) sha256=545f14eef0cc2a7de80df560530d593232b7c07e515c5c4e37532d9cb5b0185c
   mail (2.9.1) sha256=06574eca475253d6c18145dd70af80d0eb970182d55053497c5f4d797ea160e8
   marcel (2.1.0) sha256=f8b0327111dc7e516331eeefe052e981ce50e2bd826c1042a53cdf047fcc3512
   matrix (0.4.3) sha256=a0d5ab7ddcc1973ff690ab361b67f359acbb16958d1dc072b8b956a286564c5b
@@ -946,14 +946,14 @@ CHECKSUMS
   net-smtp (0.5.1) sha256=ed96a0af63c524fceb4b29b0d352195c30d82dd916a42f03c62a3a70e5b70736
   net-ssh (7.3.8) sha256=16bb1fccc4d9a580decdeea8ddb98e8544df29b7e6ac8cb94d4b379cfe4bee9f
   nio4r (2.7.5) sha256=6c90168e48fb5f8e768419c93abb94ba2b892a1d0602cb06eef16d8b7df1dca1
-  nokogiri (1.19.4-aarch64-linux-gnu) sha256=1269fb644a6de405057a53dd5c762b1209b43ca7424f839454d3dbc677c31a8f
-  nokogiri (1.19.4-aarch64-linux-musl) sha256=35c65b9ce72b3bb03207bdbe7067915019dc18c1b9b59139684bd6690fdd01af
-  nokogiri (1.19.4-arm-linux-gnu) sha256=a301313e38bb065d68239e79734bcd6f56fb6efaacebde29e9abf2a4735340ca
-  nokogiri (1.19.4-arm-linux-musl) sha256=588923c101bcfa78869734d247d25b598674323e7f22474fc468f6e5647311eb
-  nokogiri (1.19.4-arm64-darwin) sha256=a46db9853286e6597b36ebc6953817d15acf3a299583eb3f89fdc6f91dd63527
-  nokogiri (1.19.4-x86_64-darwin) sha256=7fd17057d3e1f00e9954a74b3cd76595d3d4a5ef233b7ed9599047c204f70551
-  nokogiri (1.19.4-x86_64-linux-gnu) sha256=379fae440b28915e3f19d752ce2dcf8465ed2b2fbefd2a7ca0dd497bc981a06a
-  nokogiri (1.19.4-x86_64-linux-musl) sha256=17dfb7c1fa194ae02fbf7c51a7afc8d278045ab3fdacfd86f91d02d7b274470b
+  nokogiri (1.19.5-aarch64-linux-gnu) sha256=c3d2685cc9788549cdfb23edc4684cfcc2dd390ddebf7a0170ba891445f8d3bd
+  nokogiri (1.19.5-aarch64-linux-musl) sha256=2aab3d04c430c9b9f6c46f7eddc1e341d1eb78f9070604505452092c237e7eee
+  nokogiri (1.19.5-arm-linux-gnu) sha256=a106d91b32a20142934b21e717060b8dbd10629fa0a41f15d153e89f58abf27f
+  nokogiri (1.19.5-arm-linux-musl) sha256=3445a8932e5c6bbb5f2caf7995be1c899e8b83cdfd51e79ae9e1c89f8606d967
+  nokogiri (1.19.5-arm64-darwin) sha256=2d0baa8f8234c442f0190133da87c9a2a89d48ec0b5e0c986d6047255d63a2f5
+  nokogiri (1.19.5-x86_64-darwin) sha256=90ff70e6145f4cc4b6faec427a01ef744783ba4aafa9b41e11e45a2660ba5257
+  nokogiri (1.19.5-x86_64-linux-gnu) sha256=2a32516e91fd53aa32bb281a1edbbd1b9b8440a14f43b1f22035ca504ad46091
+  nokogiri (1.19.5-x86_64-linux-musl) sha256=6c55a0c8ecb376ed19f248cf248841cc5bf41d94b3256a45af8da80fb1b24114
   openssl (4.0.0) sha256=185711ed93d4e9c9a9db6efea7edb202dfe04f7d3692fbab988e3d84e498ee91
   os (1.1.4) sha256=57816d6a334e7bd6aed048f4b0308226c5fb027433b67d90a9ab435f35108d3f
   ostruct (0.6.3) sha256=95a2ed4a4bd1d190784e666b47b2d3f078e4a9efda2fccf18f84ddc6538ed912
@@ -986,7 +986,7 @@ CHECKSUMS
   rails (8.2.0.alpha)
   rails-active_search (0.1.0) sha256=e79b5d206f4d35a2c1b418f20974d64fd0f0eeff002063b9d503ccf41cf88d76
   rails-dom-testing (2.3.0) sha256=8acc7953a7b911ca44588bf08737bc16719f431a1cc3091a292bca7317925c1d
-  rails-html-sanitizer (1.7.1) sha256=e797a7c9b01e567307e317c576b49ab4168017e63eea4dba9ce3cb587e2f22c2
+  rails-html-sanitizer (1.7.2) sha256=a21ef45b7a6639fc8e2282473c547514cb86ae271616162a946bf89148fa2424
   rails_structured_logging (0.3.0)
   railties (8.2.0.alpha)
   rainbow (3.1.1) sha256=039491aa3a89f42efa1d6dec2fc4e62ede96eb6acd95e52f1ad581182b79bc6a
