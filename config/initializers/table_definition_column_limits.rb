@@ -46,13 +46,14 @@ module SQLiteColumnLimitCheckConstraints
     super
 
     column = options[:column]
-    if column && column.limit && %i[string text].include?(column.type)
+    limit = options[:limit]
+    if column && limit && %i[string text].include?(column.type)
       check_expr = if column.type == :string
         # VARCHAR limits are in characters
-        %(length("#{column.name}") <= #{column.limit})
+        %(length("#{column.name}") <= #{limit})
       else
         # TEXT limits are in bytes
-        %(length(CAST("#{column.name}" AS BLOB)) <= #{column.limit})
+        %(length(CAST("#{column.name}" AS BLOB)) <= #{limit})
       end
       sql << " CHECK(#{check_expr})"
     end
