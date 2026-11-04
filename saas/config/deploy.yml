@@ -1,3 +1,20 @@
+<%
+# What the aliases pass to the console with `app exec -e`. A blank USER (a sandbox, cron, launchd,
+# env -i) leaves a bare "CONSOLE_USER:" that breaks this file's YAML, so fall back to LOGNAME, then
+# the login name, taking only a plain login name, which is safe in every alias's quoting.
+# CONSOLE_REASON is the link that authorized a query. On its way to the console it passes through a
+# single-quoted YAML scalar, Shellwords.split, Thor's -e hash (split at the first colon, so a URL
+# arrives whole), Ruby's String#dump and the remote shell, which expands any ${...} Kamal leaves in.
+# Rather than escape for all five, percent-encode every byte outside a URL's own characters: a link
+# arrives unchanged, and anything else arrives as inert ASCII. coworker's bin/failed-jobs renders
+# both values by these names.
+require "etc"
+console_user = [ ENV["USER"], ENV["LOGNAME"], (Etc.getpwuid.name rescue nil) ] \
+  .find { |name| name.to_s.b.match?(/\A[\w.@-]+\z/) } || "uid-#{Process.uid}"
+console_reason = ENV["CONSOLE_REASON"].to_s.b.strip \
+  .gsub(%r{[^A-Za-z0-9 ._~:/?#\[\]!&()*+,;=%-]}) { |byte| format("%%%02X", byte.ord) } \
+  .shellescape.gsub("'", "''")
+-%>
 service: fizzy
 image: basecamp/fizzy
 asset_path: /rails/public/assets
@@ -174,6 +191,6 @@ accessories:
 <%- end -%>
 
 aliases:
-  console: app exec -i --reuse -e CONSOLE_USER:<%= ENV["USER"] %> "bin/rails console"
-  query: 'app exec -q --reuse -p -e CONSOLE_USER:<%= ENV["USER"] %> CLAUDECODE:<%= ENV["CLAUDECODE"] %> CODEX_THREAD_ID:<%= ENV["CODEX_THREAD_ID"] %> "bin/rails query"'
-  ssh: app exec -i --reuse -e CONSOLE_USER:<%= ENV["USER"] %> /bin/bash
+  console: app exec -i --reuse -e CONSOLE_USER:<%= console_user %> "bin/rails console"
+  query: 'app exec -q --reuse -p -e CONSOLE_USER:<%= console_user %> CLAUDECODE:<%= ENV["CLAUDECODE"] %> CODEX_THREAD_ID:<%= ENV["CODEX_THREAD_ID"] %> CONSOLE_REASON:<%= console_reason %> "bin/rails query"'
+  ssh: app exec -i --reuse -e CONSOLE_USER:<%= console_user %> /bin/bash
