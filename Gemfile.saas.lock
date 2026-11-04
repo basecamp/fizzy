@@ -70,7 +70,7 @@ GIT
 
 GIT
   remote: https://github.com/rails/rails.git
-  revision: 4658033fa3b391ab8a928994e12a30257a0afa22
+  revision: 8b06b0eb98315cbbd6d7f526112cd8d909ff787c
   branch: main
   specs:
     actioncable (8.2.0.alpha)
@@ -117,7 +117,7 @@ GIT
       erubi (~> 1.11)
       herb (>= 0.10)
       rails-dom-testing (~> 2.2)
-      rails-html-sanitizer (~> 1.7)
+      rails-html-sanitizer (~> 1.7, >= 1.7.2)
     activejob (8.2.0.alpha)
       activesupport (= 8.2.0.alpha)
       globalid (>= 1.4.0)

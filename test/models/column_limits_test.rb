@@ -48,6 +48,14 @@ class ColumnLimitsTest < ActiveSupport::TestCase
     assert_raises(*COLUMN_LIMIT_ERRORS) { rich_text.save! }
   end
 
+  test "SQLite limit constraints are added without deprecation warnings" do
+    skip unless Fizzy.db_adapter.sqlite?
+
+    assert_not_deprecated(ActiveRecord.deprecator) do
+      ActiveRecord::Base.connection.create_table(:widgets, temporary: true) { |t| t.string :name, limit: 10 }
+    end
+  end
+
   test "ActiveStorage::Blob filename rejects strings over 255 characters" do
     Current.account = accounts(:"37s")
     blob = ActiveStorage::Blob.new(filename: "a" * 256, key: "test-key", byte_size: 0, checksum: "test", service_name: "local")

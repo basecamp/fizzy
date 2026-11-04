@@ -23,12 +23,13 @@ module Fizzy
               next unless named_variant.process(record) == :immediately
 
               begin
-                blob.variant(named_variant.transformations).process_from_io(io)
+                blob.variant(named_variant.transformations).processed
               rescue Cell::UnprocessableAttachment => error
                 Rails.error.report error, handled: true, severity: :info
               end
-              io.rewind if io.respond_to?(:rewind)
             end
+
+            io.rewind if io.respond_to?(:rewind)
 
             self.immediate_variants_processed = true
           end
