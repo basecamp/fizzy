@@ -2,14 +2,37 @@ namespace :oauth do
   # The registry (Oauth::FirstPartyClients): the personal access client, and
   # each hosted MCP server whose resource FIZZY_OAUTH_MCP_RESOURCES names here.
   # A secret is never minted or rotated; a client without one is named, for
-  # oauth:mint_client_secret.
-  desc "Create or converge Fizzy's first-party OAuth clients, all in one transaction"
+  # oauth:mint_client_secret. DRY_RUN=1 prints what each client would change
+  # and writes nothing.
+  desc "Create or converge Fizzy's first-party OAuth clients, all in one transaction (DRY_RUN=1 to print the changes and write nothing)"
   task provision_first_party_clients: :environment do
-    Oauth::FirstPartyClients.provision!.each do |client|
-      puts "#{client.client_id}: #{client.previously_new_record? ? "created" : "converged"}"
+    if ActiveModel::Type::Boolean.new.cast(ENV["DRY_RUN"].presence)
+      puts "Dry run: nothing is written."
 
-      if Oauth::FirstPartyClients.awaiting_secret?(client)
-        puts "  #{client.client_id} has no secret yet. Give it one with: bin/rails \"oauth:mint_client_secret[#{client.client_id}]\""
+      Oauth::FirstPartyClients.plan.each do |client|
+        changes = client.changes.except("client_id")
+        puts "#{client.client_id}: #{client.new_record? ? "would be created" : changes.any? ? "would converge" : "unchanged"}"
+
+        changes.each do |attribute, (from, to)|
+          from, to = [ from, to ].map { it && "[digest]" } if attribute == "client_secret_digest"
+          puts "  #{attribute}: #{from.inspect} -> #{to.inspect}"
+        end
+
+        if client.invalid?
+          puts "  #{client.client_id} wouldn't save: #{client.errors.full_messages.to_sentence}"
+        end
+
+        if Oauth::FirstPartyClients.awaiting_secret?(client)
+          puts "  #{client.client_id} would have no secret yet, for oauth:mint_client_secret[#{client.client_id}]"
+        end
+      end
+    else
+      Oauth::FirstPartyClients.provision!.each do |client|
+        puts "#{client.client_id}: #{client.previously_new_record? ? "created" : "converged"}"
+
+        if Oauth::FirstPartyClients.awaiting_secret?(client)
+          puts "  #{client.client_id} has no secret yet. Give it one with: bin/rails \"oauth:mint_client_secret[#{client.client_id}]\""
+        end
       end
     end
   rescue ArgumentError => error
