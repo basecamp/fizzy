@@ -7,7 +7,7 @@ gem "activeresource", require: "active_resource"
 gem "actionpack-xml_parser" # needed by queenbee for XML request body parsing
 gem "queenbee", bc: "queenbee-plugin"
 gem "fizzy-saas", path: "saas"
-gem "console1984", bc: "console1984"
+gem "console1984", bc: "console1984", tag: "v0.2.5"
 gem "audits1984", bc: "audits1984"
 
 # Attachment processing in an unprivileged sibling container
