@@ -8,11 +8,12 @@ class OauthProvisionFirstPartyClientsTaskTest < ActiveSupport::TestCase
 
     @saved_resources = Rails.application.config.x.oauth.mcp_resources
     Rails.application.config.x.oauth.mcp_resources = [ "https://mcp.fizzy.do/mcp" ]
+    @saved_dry_run = ENV.delete("DRY_RUN")
   end
 
   teardown do
     Rails.application.config.x.oauth.mcp_resources = @saved_resources
-    ENV.delete("DRY_RUN")
+    ENV["DRY_RUN"] = @saved_dry_run
   end
 
   test "names each client it converges, and each one still awaiting a secret" do
