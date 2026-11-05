@@ -102,6 +102,39 @@ class Account::ImportTest < ActiveSupport::TestCase
     stripped_tempfile&.unlink
   end
 
+  test "import caps a join code usage limit saved before the cap existed" do
+    source_account = accounts("37s")
+    exporter = users(:david)
+    identity = exporter.identity
+    source_account.join_code.update_columns(usage_count: 3, usage_limit: Account::JoinCode::USAGE_LIMIT_MAX + 1)
+    code = source_account.join_code.code
+
+    export = Account::Export.create!(account: source_account, user: exporter)
+    export.build
+
+    export_tempfile = Tempfile.new([ "export", ".zip" ])
+    export.file.open { |f| FileUtils.cp(f.path, export_tempfile.path) }
+
+    source_account.destroy!
+
+    target_account = Account.create_with_owner(account: { name: "Import Test" }, owner: { identity: identity, name: exporter.name })
+    import = Account::Import.create!(identity: identity, account: target_account)
+    Current.set(account: target_account) do
+      import.file.attach(io: File.open(export_tempfile.path), filename: "export.zip", content_type: "application/zip")
+    end
+
+    import.check
+    import.process
+
+    assert import.completed?
+    assert_equal Account::JoinCode::USAGE_LIMIT_MAX, target_account.join_code.reload.usage_limit
+    assert_equal 3, target_account.join_code.usage_count
+    assert_equal code, target_account.join_code.code
+  ensure
+    export_tempfile&.close
+    export_tempfile&.unlink
+  end
+
   test "import reconciles cards count so new cards get correct numbers" do
     source_account = accounts("37s")
     exporter = users(:david)
