@@ -23,8 +23,8 @@ class Push::Subscription < ApplicationRecord
   # moving to another identity, a claim racing the last grant's end), where
   # the cleanup on grant destroy only finds what the identity still reaches.
   # The grant must also be one Fizzy honors (Oauth::Availability): while
-  # OAuth is dark, or staff only and the user isn't staff, an app whose tokens
-  # are refused gets no notifications either.
+  # OAuth is dark, or connecting apps is in preview and the user isn't a
+  # previewer, an app whose tokens are refused gets no notifications either.
   #
   # An account-bound grant reaches only its own account, so only it, or a grant
   # bound to no account, keeps a subscription in that account delivering: once
@@ -34,7 +34,7 @@ class Push::Subscription < ApplicationRecord
     grants = Identity::AccessToken.grants.unlapsed.where(identity_id: user.identity_id, account_id: [ nil, user.account_id ], oauth_client: Oauth::Availability.accepted_clients)
 
     where(oauth_client_id: nil).or \
-      where(oauth_client_id: (!Oauth::Availability.staff_only? || Oauth::Availability.admits?(user.identity) ? grants : grants.none).select(:oauth_client_id))
+      where(oauth_client_id: (!Oauth::Availability.connected_apps_preview? || Oauth::Availability.admits?(user.identity) ? grants : grants.none).select(:oauth_client_id))
   end
 
   validates :endpoint, presence: true

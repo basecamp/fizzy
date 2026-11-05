@@ -36,25 +36,31 @@
 # An incident pause must therefore empty pilot_client_ids as well as throwing
 # the switch, or listed clients keep minting through it.
 #
-# == Staff only
+# == Connected apps preview
 #
-# The switches above choose clients. staff_only chooses people: while it's on,
-# only 37signals staff (Identity#staff?) can connect an app, redeem a code,
-# refresh, or use an OAuth token, whichever client asks. Someone who stops
-# being staff loses the access they granted on their next request. Personal
-# access tokens are not OAuth credentials, so it doesn't touch them, and
-# management stays open to everyone, so anyone can still shed a grant.
+# The switches above choose clients. The connected apps preview chooses
+# people: while it's on, only previewers can connect an app, redeem a code,
+# refresh, or use an OAuth token, whichever client asks. Previewers are
+# 37signals staff (Identity#staff?) and reviewers: the identities whose ids
+# config.x.oauth.connected_apps_preview_reviewer_ids lists, and anyone an
+# extension admits with admit_as_reviewer, a predicate on the identity. A
+# reviewer gets exactly what staff get here, and nothing beyond it: reviewers
+# aren't staff, so /admin stays closed to them. Someone who stops being a
+# previewer loses the access they granted on their next request. Personal
+# access tokens are not OAuth credentials, so the preview doesn't touch them,
+# and management stays open to everyone, so anyone can still shed a grant.
 #
-# An extension can admit named people beyond staff with admit_beyond_staff,
-# a predicate on the identity, asked only while staff_only is on and the
-# identity isn't staff. The SaaS engine admits the directory reviewers it
-# signs in (Identity::ReviewerSignIn), whose apps must connect while OAuth is
-# otherwise staff only; making them staff would open /admin to them. Fizzy
-# itself registers none, so an install without extensions admits only staff.
+# The SaaS engine admits the directory reviewers it signs in
+# (Identity::ReviewerSignIn). Fizzy itself registers no extension and lists no
+# reviewer ids, so an install that configures neither previews to staff alone.
+# See config/environments/production.rb for the environment variables.
 module Oauth::Availability
   extend self
 
-  mattr_accessor :staff_only_exemptions, default: []
+  # An identity id is a UUID written in base36 (ActiveRecord::Type::Uuid).
+  IDENTITY_ID = /\A[0-9a-z]{#{ActiveRecord::Type::Uuid::BASE36_LENGTH}}\z/
+
+  mattr_accessor :reviewer_predicates, default: []
 
   def acceptance_enabled?(client_id = nil)
     accepting? || piloted?(client_id)
@@ -71,17 +77,52 @@ module Oauth::Availability
     issuance_enabled?(client_id) && config.cimd_enabled == true
   end
 
-  def staff_only?
-    config.staff_only == true
+  def connected_apps_preview?
+    config.connected_apps_preview == true
   end
 
-  # Whether OAuth is open to this person: everyone, unless staff_only.
+  # Whether OAuth is open to this person: everyone, unless connecting apps is
+  # in preview, and then previewers alone.
   def admits?(identity)
-    !staff_only? || identity&.staff? == true || exempt_from_staff_only?(identity)
+    !connected_apps_preview? || previewer?(identity)
   end
 
-  def admit_beyond_staff(predicate)
-    staff_only_exemptions << predicate unless staff_only_exemptions.include?(predicate)
+  def previewer?(identity)
+    identity.present? && (identity.staff? == true || reviewer?(identity))
+  end
+
+  def admit_as_reviewer(predicate)
+    reviewer_predicates << predicate unless reviewer_predicates.include?(predicate)
+  end
+
+  # Whether the preview is on, from CONNECTED_APPS_PREVIEW, or from its old
+  # name, OAUTH_STAFF_ONLY, while the new one is unset or blank, so a
+  # destination still deployed with the old name stays in preview rather than
+  # opening. Neither set means off, as OAUTH_STAFF_ONLY unset always did.
+  # The deploy configs set both, so an image from before the rename, which
+  # reads only OAUTH_STAFF_ONLY, stays in preview when rolled back to.
+  # TODO: drop OAUTH_STAFF_ONLY, here and there, once no such image can be
+  # deployed.
+  def connected_apps_preview_from(env)
+    (env["CONNECTED_APPS_PREVIEW"].presence || env["OAUTH_STAFF_ONLY"]) == "true"
+  end
+
+  # The reviewer identity ids in CONNECTED_APPS_PREVIEW_REVIEWERS, separated by
+  # commas or spaces. Unset or empty lists none. An entry that isn't an
+  # identity id (an email address, say) is skipped rather than failing the
+  # boot, and reported as oauth.preview.reviewers_skipped (Oauth::Audit), which
+  # the SaaS engine writes to the structured log whatever RAILS_LOG_LEVEL is.
+  # Both the report and the log warning count entries and never echo them.
+  def reviewer_ids_from(value)
+    entries = value.to_s.split(/[\s,]+/).compact_blank.map(&:downcase)
+    ids, rejected = entries.partition { |entry| entry.match?(IDENTITY_ID) }
+
+    if rejected.any?
+      Rails.logger.warn "CONNECTED_APPS_PREVIEW_REVIEWERS: skipping entries that aren't identity ids (#{rejected.size})"
+      Oauth::Audit.record "preview.reviewers_skipped", actor: "system", reason: "not_an_identity_id", skipped: rejected.size
+    end
+
+    ids.uniq.freeze
   end
 
   # The clients whose tokens are honored, as a relation, for code that weighs
@@ -103,8 +144,12 @@ module Oauth::Availability
       client_id.is_a?(String) && client_id.present? && pilot_client_ids.include?(client_id)
     end
 
-    def exempt_from_staff_only?(identity)
-      identity.present? && staff_only_exemptions.any? { |predicate| predicate.call(identity) == true }
+    def reviewer?(identity)
+      reviewer_ids.include?(identity.id) || reviewer_predicates.any? { |predicate| predicate.call(identity) == true }
+    end
+
+    def reviewer_ids
+      Array(config.connected_apps_preview_reviewer_ids)
     end
 
     def pilot_client_ids

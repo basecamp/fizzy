@@ -19,11 +19,11 @@
 # prints a random 16-character code (80 bits). Rotate a code after each review.
 #
 # An address listed with an empty digest is still a reviewer, for the locks,
-# the staff-only OAuth exemption and sign-out, but no code signs it in.
+# the connected apps preview and sign-out, but no code signs it in.
 #
-# Reviewers pass the staff-only OAuth gate (Oauth::Availability.admits?) so
-# their apps connect while OAuth is otherwise limited to staff. They are not
-# staff, so /admin stays closed to them.
+# Reviewers are previewers of connected apps (Oauth::Availability.admits?), so
+# their apps connect while connecting apps is otherwise in preview. They are
+# not staff, so /admin stays closed to them.
 #
 # For a reviewer the code is the only gate, so its security is exactly the
 # code's. Keep each reviewer in its own comped, internal account. Rotate by

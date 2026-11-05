@@ -443,8 +443,20 @@ class OauthTokenExchangeTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "while OAuth is staff only, a grant whose owner isn't staff is not exchanged, and its delegated tokens stop working" do
-    with_oauth_availability staff_only: true do
+  test "while connecting apps is in preview, a grant whose owner is a listed reviewer, not staff, is exchanged" do
+    identities(:david).update!(staff: false)
+
+    with_oauth_availability preview: true, reviewer_ids: [ identities(:david).id ] do
+      exchange
+      assert_response :success
+
+      get user_path(users(:david)), env: { "HTTP_AUTHORIZATION" => "Bearer #{response.parsed_body["access_token"]}" }, as: :json
+      assert_response :success
+    end
+  end
+
+  test "while connecting apps is in preview, a grant whose owner isn't a previewer is not exchanged, and its delegated tokens stop working" do
+    with_oauth_availability preview: true do
       exchange
       assert_response :success
       delegated = response.parsed_body["access_token"]

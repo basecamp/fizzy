@@ -223,8 +223,8 @@ class Oauth::TokensController < Oauth::BaseController
       end
     end
 
-    # While OAuth is staff only, a code or refresh token mints nothing for
-    # someone who isn't staff, even one issued while they were.
+    # While connecting apps is in preview, a code or refresh token mints nothing
+    # for someone who isn't a previewer, even one issued while they were.
     # A code presented again, by the client it was issued to with its verifier,
     # is answered as a replay before anything about the person or account is
     # weighed: the revocation it earns can't hinge on what has changed since.
@@ -237,13 +237,13 @@ class Oauth::TokensController < Oauth::BaseController
 
     def require_admitted_identity
       unless Oauth::Availability.admits?(@identity)
-        oauth_error "invalid_grant", "OAuth apps are limited to 37signals staff for now"
+        oauth_error "invalid_grant", "Connecting apps to Fizzy is in preview for now"
       end
     end
 
     def require_admitted_grant_owner
       unless @access_token.personal? || Oauth::Availability.admits?(@access_token.identity)
-        oauth_error "invalid_grant", "OAuth apps are limited to 37signals staff for now"
+        oauth_error "invalid_grant", "Connecting apps to Fizzy is in preview for now"
       end
     end
 
