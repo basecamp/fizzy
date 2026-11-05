@@ -15,14 +15,6 @@ class Fizzy::Saas::UnprocessableRepresentationTest < ActionDispatch::Integration
     assert_response :unprocessable_entity
   end
 
-  test "the proxy route answers 422 too" do
-    transforms_raise Fizzy::Saas::Cell::UnprocessableAttachment.new("unreadable")
-
-    get rails_storage_proxy_path(@blob.representation(resize_to_limit: [ 100, 100 ]))
-
-    assert_response :unprocessable_entity
-  end
-
   test "a permanent verdict is reported once, as handled" do
     transforms_raise Fizzy::Saas::Cell::UnprocessableAttachment.new("killed: fsize")
     Rails.error.expects(:report)

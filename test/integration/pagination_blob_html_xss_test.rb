@@ -6,7 +6,7 @@ require "test_helper"
 # content type is "text/html;charset=utf-8" (the parameterized MIME slips past
 # Active Storage's exact-string binary list), then poisons a public board's
 # automatic-pagination link so a signed-in victim's browser fetches the blob
-# through the same-origin Active Storage proxy. Turbo renders the response as a
+# through Active Storage. Turbo renders the response as a
 # live frame and executes the inline <script>, which mints and exfiltrates a
 # victim Identity access token.
 #
@@ -31,21 +31,20 @@ class PaginationBlobHtmlXssTest < ActionDispatch::IntegrationTest
 
     sign_in_as :mike
 
-    get rails_storage_proxy_path(blob)
+    get rails_blob_path(blob)
     assert_response :forbidden
   end
 
   # Link 4 (parameterized-MIME inline serving): even the blob's own-account
   # owner must never receive an unattached HTML blob as executable text/html.
-  # The proxy boundary must normalize it to application/octet-stream.
+  # Serving must normalize it to application/octet-stream.
   test "unattached html blob is served as octet-stream, never executable html" do
     blob = create_unattached_html_blob
 
     sign_in_as :david
 
-    get rails_storage_proxy_path(blob)
+    serve blob
 
-    assert_response :success
     assert_equal "application/octet-stream", response.media_type,
       "unattached/text-html blob must not be served as executable text/html"
     assert_match %r{attachment}, response.headers["Content-Disposition"].to_s
@@ -61,9 +60,8 @@ class PaginationBlobHtmlXssTest < ActionDispatch::IntegrationTest
 
     sign_in_as :david
 
-    get rails_storage_proxy_path(blob)
+    serve blob
 
-    assert_response :success
     assert_equal "application/octet-stream", response.media_type,
       "a malformed text/html type must not be served as executable html"
     assert_match %r{attachment}, response.headers["Content-Disposition"].to_s
@@ -86,9 +84,8 @@ class PaginationBlobHtmlXssTest < ActionDispatch::IntegrationTest
 
       sign_in_as :david
 
-      get rails_storage_proxy_path(blob)
+      serve blob
 
-      assert_response :success
       assert_equal "application/octet-stream", response.media_type,
         "#{declared_type} is rendered as HTML by Turbo's frame matcher and must not be served inline"
       assert_match %r{attachment}, response.headers["Content-Disposition"].to_s
@@ -112,6 +109,14 @@ class PaginationBlobHtmlXssTest < ActionDispatch::IntegrationTest
   end
 
   private
+    def serve(blob)
+      get rails_blob_path(blob)
+      assert_response :redirect
+
+      follow_redirect!
+      assert_response :success
+    end
+
     # Mirrors Fizzy's S3 direct-upload path: create_before_direct_upload! stores
     # the client-supplied content type verbatim (no re-identification), then the
     # bytes are written straight to the service. The blob is left UNATTACHED.
