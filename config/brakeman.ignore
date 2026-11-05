@@ -93,29 +93,6 @@
       "note": "Required for internal PureStorage self-signed certificates. Only used for trusted internal storage URLs."
     },
     {
-      "warning_type": "Mass Assignment",
-      "warning_code": 70,
-      "fingerprint": "f63a332310781db971eb712cfca9fb4769ddaeab13f22697d7fa59d9365bec7f",
-      "check_name": "MassAssignment",
-      "message": "Specify exact keys allowed for mass assignment instead of using `permit!` which allows any keys",
-      "file": "app/helpers/pagination_helper.rb",
-      "line": 84,
-      "link": "https://brakemanscanner.org/docs/warning_types/mass_assignment/",
-      "code": "params.permit!",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "PaginationHelper",
-        "method": "forwardable_request_params"
-      },
-      "user_input": null,
-      "confidence": "Medium",
-      "cwe_id": [
-        915
-      ],
-      "note": "Params are forwarded to url_for, not mass-assigned to a model; url_for control options are stripped"
-    },
-    {
       "warning_type": "Remote Code Execution",
       "warning_code": 24,
       "fingerprint": "f13f9f972c3f026ab4509a66ac284b8b7c1ba6191a3c4c89d2e9fb4584478f6d",
