@@ -52,6 +52,7 @@ env:
     RAILS_ENV: beta
     RAILS_LOG_LEVEL: fatal # suppress unstructured log lines
     CONNECTED_APPS_PREVIEW: "true" # Connecting apps is for 37signals staff and invited reviewers until we open it up
+    OAUTH_STAFF_ONLY: "true" # CONNECTED_APPS_PREVIEW's old name, for images from before the rename (a rollback, an older branch). Remove once none can be deployed.
 <% if @beta_number == "1" %>
     # beta1 is lit for previewers (CONNECTED_APPS_PREVIEW above): OAuth answers, Client ID Metadata Documents are
     # accepted from the allowlisted hosts in deploy.yml, and grants can be audienced to beta1's MCP server.

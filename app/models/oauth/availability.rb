@@ -99,8 +99,10 @@ module Oauth::Availability
   # name, OAUTH_STAFF_ONLY, while the new one is unset or blank, so a
   # destination still deployed with the old name stays in preview rather than
   # opening. Neither set means off, as OAUTH_STAFF_ONLY unset always did.
-  # TODO: drop OAUTH_STAFF_ONLY once every destination has deployed with
-  # CONNECTED_APPS_PREVIEW.
+  # The deploy configs set both, so an image from before the rename, which
+  # reads only OAUTH_STAFF_ONLY, stays in preview when rolled back to.
+  # TODO: drop OAUTH_STAFF_ONLY, here and there, once no such image can be
+  # deployed.
   def connected_apps_preview_from(env)
     (env["CONNECTED_APPS_PREVIEW"].presence || env["OAUTH_STAFF_ONLY"]) == "true"
   end
