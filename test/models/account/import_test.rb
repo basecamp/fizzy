@@ -252,6 +252,31 @@ class Account::ImportTest < ActiveSupport::TestCase
     tempfile&.unlink
   end
 
+  test "check sets failure_reason to invalid_export when a join code limit is not an integer" do
+    target_account = Account.create!(name: "Import Test")
+    import = Account::Import.create!(identity: identities(:david), account: target_account)
+
+    # A hand-built export: Fizzy can't export a null limit, since the column is NOT NULL.
+    tempfile = Tempfile.new([ "null_limit_export", ".zip" ])
+    tempfile.binmode
+    writer = ZipFile::Writer.new(tempfile)
+    writer.add_file("data/account.json", { name: "Hand-built", join_code: { code: "abcd-efgh-ijkl", usage_count: 0, usage_limit: nil } }.to_json)
+    writer.close
+    tempfile.rewind
+
+    Current.set(account: target_account) do
+      import.file.attach(io: tempfile, filename: "export.zip", content_type: "application/zip")
+    end
+
+    error = assert_raises(Account::DataTransfer::RecordSet::IntegrityError) { import.check }
+    assert_match(/usage_limit/, error.message)
+
+    assert import.reload.failed_due_to_invalid_export?
+  ensure
+    tempfile&.close
+    tempfile&.unlink
+  end
+
   test "check sets failure_reason to invalid_export when a record entry inflates past the size limit" do
     source_account = accounts("37s")
     exporter = users(:david)

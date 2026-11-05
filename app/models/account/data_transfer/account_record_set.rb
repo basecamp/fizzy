@@ -53,5 +53,9 @@ class Account::DataTransfer::AccountRecordSet < Account::DataTransfer::RecordSet
       unless (JOIN_CODE_ATTRIBUTES - data["join_code"].keys).empty?
         raise IntegrityError, "'join_code' field missing required keys"
       end
+
+      unless data["join_code"].values_at("usage_count", "usage_limit").all?(Integer)
+        raise IntegrityError, "'join_code' usage_count and usage_limit must be integers"
+      end
     end
 end
