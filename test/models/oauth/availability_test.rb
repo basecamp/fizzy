@@ -51,36 +51,97 @@ class Oauth::AvailabilityTest < ActiveSupport::TestCase
     end
   end
 
-  test "admits everyone unless staff only" do
+  test "admits everyone unless connecting apps is in preview" do
     assert Oauth::Availability.admits?(identities(:jz))
     assert Oauth::Availability.admits?(nil)
 
-    with_oauth_availability staff_only: true do
+    with_oauth_availability preview: true do
       assert Oauth::Availability.admits?(identities(:david))
       assert_not Oauth::Availability.admits?(identities(:jz))
       assert_not Oauth::Availability.admits?(nil)
     end
   end
 
-  test "admits whoever an extension admits beyond staff, only while staff only" do
-    saved = Oauth::Availability.staff_only_exemptions.dup
-    Oauth::Availability.staff_only_exemptions = []
-    Oauth::Availability.admit_beyond_staff ->(identity) { identity == identities(:jz) }
-    Oauth::Availability.admit_beyond_staff ->(identity) { "truthy, not true" }
+  test "admits the reviewers listed by identity id, only while in preview" do
+    with_oauth_availability preview: true, reviewer_ids: [ identities(:jz).id ] do
+      assert Oauth::Availability.admits?(identities(:jz))
+      assert Oauth::Availability.admits?(identities(:david))
+      assert_not Oauth::Availability.admits?(identities(:mike))
+      assert_not Oauth::Availability.admits?(nil)
+    end
 
-    with_oauth_availability staff_only: true do
+    with_oauth_availability preview: false, reviewer_ids: [] do
+      assert Oauth::Availability.admits?(identities(:mike))
+    end
+  end
+
+  test "no reviewer ids admits staff alone" do
+    with_oauth_availability preview: true, reviewer_ids: nil do
+      assert Oauth::Availability.admits?(identities(:david))
+      assert_not Oauth::Availability.admits?(identities(:jz))
+    end
+  end
+
+  test "admits whoever an extension admits as a reviewer, only while in preview" do
+    saved = Oauth::Availability.reviewer_predicates.dup
+    Oauth::Availability.reviewer_predicates = []
+    Oauth::Availability.admit_as_reviewer ->(identity) { identity == identities(:jz) }
+    Oauth::Availability.admit_as_reviewer ->(identity) { "truthy, not true" }
+
+    with_oauth_availability preview: true do
       assert Oauth::Availability.admits?(identities(:jz))
       assert Oauth::Availability.admits?(identities(:david))
       assert_not Oauth::Availability.admits?(identities(:mike))
       assert_not Oauth::Availability.admits?(nil)
     end
   ensure
-    Oauth::Availability.staff_only_exemptions = saved
+    Oauth::Availability.reviewer_predicates = saved
   end
 
-  test "staff only must be exactly true" do
-    with_oauth_availability staff_only: "true" do
-      assert_not Oauth::Availability.staff_only?
+  test "the preview must be exactly true" do
+    with_oauth_availability preview: "true" do
+      assert_not Oauth::Availability.connected_apps_preview?
     end
+  end
+
+  test "the preview is on from CONNECTED_APPS_PREVIEW, or its old name while the new one is unset" do
+    assert Oauth::Availability.connected_apps_preview_from("CONNECTED_APPS_PREVIEW" => "true")
+    assert Oauth::Availability.connected_apps_preview_from("OAUTH_STAFF_ONLY" => "true")
+    assert Oauth::Availability.connected_apps_preview_from("CONNECTED_APPS_PREVIEW" => "", "OAUTH_STAFF_ONLY" => "true")
+    assert Oauth::Availability.connected_apps_preview_from("CONNECTED_APPS_PREVIEW" => "true", "OAUTH_STAFF_ONLY" => "false")
+
+    assert_not Oauth::Availability.connected_apps_preview_from({})
+    assert_not Oauth::Availability.connected_apps_preview_from("CONNECTED_APPS_PREVIEW" => "false", "OAUTH_STAFF_ONLY" => "true")
+    assert_not Oauth::Availability.connected_apps_preview_from("CONNECTED_APPS_PREVIEW" => "1")
+    assert_not Oauth::Availability.connected_apps_preview_from("OAUTH_STAFF_ONLY" => "yes")
+  end
+
+  test "reviewer ids are parsed from a list separated by commas or spaces" do
+    one, two = identities(:jz).id, identities(:mike).id
+
+    assert_equal [ one, two ], Oauth::Availability.reviewer_ids_from(" #{one} ,#{two.upcase}\n#{one}, ")
+    assert_equal [], Oauth::Availability.reviewer_ids_from(nil)
+    assert_equal [], Oauth::Availability.reviewer_ids_from("")
+    assert_equal [], Oauth::Availability.reviewer_ids_from(" , ")
+  end
+
+  test "reviewer entries that aren't identity ids are skipped with a warning that doesn't repeat them" do
+    logged = StringIO.new
+    Rails.stubs(:logger).returns(ActiveSupport::Logger.new(logged))
+
+    ids = Oauth::Availability.reviewer_ids_from("reviewer@example.com, 42, #{identities(:jz).id}, #{identities(:jz).id}x")
+
+    assert_equal [ identities(:jz).id ], ids
+    assert_match "skipping 3 entries that aren't identity ids", logged.string
+    assert_no_match "reviewer@example.com", logged.string
+  end
+
+  test "a clean reviewer list logs nothing" do
+    logged = StringIO.new
+    Rails.stubs(:logger).returns(ActiveSupport::Logger.new(logged))
+
+    Oauth::Availability.reviewer_ids_from(identities(:jz).id)
+
+    assert_empty logged.string
   end
 end

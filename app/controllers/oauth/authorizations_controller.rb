@@ -84,13 +84,13 @@ class Oauth::AuthorizationsController < Oauth::BaseController
       request.post? && params[:error] == "access_denied"
     end
 
-    # While OAuth is staff only, nobody else is asked to consent. They're told
+    # While connecting apps is in preview, nobody but previewers is asked to consent. They're told
     # why, rather than bounced back to an app that can't say.
     def require_admitted_identity
       unless Oauth::Availability.admits?(Current.identity)
         respond_to do |format|
-          format.html { render :staff_only, status: :forbidden }
-          format.json { render_oauth_error "access_denied", "OAuth apps are limited to 37signals staff for now", status: :forbidden }
+          format.html { render :preview, status: :forbidden }
+          format.json { render_oauth_error "access_denied", "Connecting apps to Fizzy is in preview for now", status: :forbidden }
         end
       end
     end

@@ -1,8 +1,8 @@
 require "test_helper"
 
-# Directory reviewers (Identity::ReviewerSignIn) connect apps while OAuth is
-# staff only, without being staff; everyone else is still refused.
-class OauthReviewerStaffOnlyTest < ActionDispatch::IntegrationTest
+# Directory reviewers (Identity::ReviewerSignIn) connect apps while connecting
+# apps is in preview, without being staff; everyone else is still refused.
+class OauthReviewerConnectedAppsPreviewTest < ActionDispatch::IntegrationTest
   include OauthAvailabilityTestHelper
 
   CODE_VERIFIER = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
@@ -15,8 +15,8 @@ class OauthReviewerStaffOnlyTest < ActionDispatch::IntegrationTest
 
   teardown { configure code_digests: nil }
 
-  test "the staff gate admits a reviewer, staff, and no one else" do
-    with_oauth_availability staff_only: true do
+  test "the preview admits a reviewer, staff, and no one else" do
+    with_oauth_availability preview: true do
       assert Oauth::Availability.admits?(@reviewer)
       assert Oauth::Availability.admits?(identities(:david))
       assert_not Oauth::Availability.admits?(identities(:mike))
@@ -25,7 +25,7 @@ class OauthReviewerStaffOnlyTest < ActionDispatch::IntegrationTest
   end
 
   test "a reviewer stays out of admin" do
-    with_oauth_availability staff_only: true do
+    with_oauth_availability preview: true do
       sign_in_as @reviewer
       untenanted { get saas.admin_stats_path }
     end
@@ -34,7 +34,7 @@ class OauthReviewerStaffOnlyTest < ActionDispatch::IntegrationTest
   end
 
   test "a reviewer whose code is turned off still passes, and one taken off the list doesn't" do
-    with_oauth_availability staff_only: true do
+    with_oauth_availability preview: true do
       configure code_digests: "#{@reviewer.email_address}="
       assert Oauth::Availability.admits?(@reviewer)
 
@@ -44,7 +44,7 @@ class OauthReviewerStaffOnlyTest < ActionDispatch::IntegrationTest
   end
 
   test "a reviewer sees the consent screen and connects" do
-    with_oauth_availability staff_only: true do
+    with_oauth_availability preview: true do
       sign_in_as @reviewer
       get_consent_screen
       assert_response :success
@@ -55,19 +55,19 @@ class OauthReviewerStaffOnlyTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "anyone else is still told OAuth is staff only" do
-    with_oauth_availability staff_only: true do
+  test "anyone else is still told connecting apps is in preview" do
+    with_oauth_availability preview: true do
       sign_in_as :mike
       get_consent_screen
       assert_response :forbidden
-      assert_match "Only 37signals staff can connect apps", response.body
+      assert_match "Connecting apps to Fizzy is in preview", response.body
     end
   end
 
   test "a reviewer's grant works and refreshes, and stops once they're off the list" do
     grant = @reviewer.access_tokens.create!(oauth_client: oauth_clients(:mcp_client))
 
-    with_oauth_availability staff_only: true do
+    with_oauth_availability preview: true do
       get user_path(users(:jz)), env: { "HTTP_AUTHORIZATION" => "Bearer #{grant.raw_token}" }, as: :json
       assert_response :success
 
@@ -85,7 +85,7 @@ class OauthReviewerStaffOnlyTest < ActionDispatch::IntegrationTest
     grant = @reviewer.access_tokens.create!(oauth_client: oauth_clients(:mcp_client))
     configure code_digests: nil
 
-    with_oauth_availability staff_only: true do
+    with_oauth_availability preview: true do
       get user_path(users(:jz)), env: { "HTTP_AUTHORIZATION" => "Bearer #{grant.raw_token}" }, as: :json
     end
 

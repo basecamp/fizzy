@@ -1,14 +1,15 @@
 require "test_helper"
 
-# While OAuth is staff only (Oauth::Availability), only 37signals staff can
-# connect an app or use what they connected, whichever client asks.
-class OauthStaffOnlyTest < ActionDispatch::IntegrationTest
+# While connecting apps is in preview (Oauth::Availability), only previewers,
+# 37signals staff and the reviewers listed by identity id, can connect an app
+# or use what they connected, whichever client asks.
+class OauthConnectedAppsPreviewTest < ActionDispatch::IntegrationTest
   include OauthAvailabilityTestHelper
 
   CODE_VERIFIER = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
 
   test "staff see the consent screen and connect" do
-    with_oauth_availability staff_only: true do
+    with_oauth_availability preview: true do
       sign_in_as :david
       get_consent_screen
       assert_response :success
@@ -20,12 +21,12 @@ class OauthStaffOnlyTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "anyone else is told OAuth is staff only, and gets no code" do
-    with_oauth_availability staff_only: true do
+  test "anyone else is told connecting apps is in preview, and gets no code" do
+    with_oauth_availability preview: true do
       sign_in_as :jz
       get_consent_screen
       assert_response :forbidden
-      assert_match "Only 37signals staff can connect apps", response.body
+      assert_match "Connecting apps to Fizzy is in preview", response.body
 
       post_consent
       assert_response :forbidden
@@ -34,7 +35,7 @@ class OauthStaffOnlyTest < ActionDispatch::IntegrationTest
   end
 
   test "anyone else can still decline" do
-    with_oauth_availability staff_only: true do
+    with_oauth_availability preview: true do
       sign_in_as :jz
       post_consent error: "access_denied"
 
@@ -54,7 +55,7 @@ class OauthStaffOnlyTest < ActionDispatch::IntegrationTest
     code = authorization_code_for(identities(:david))
     identities(:david).update!(staff: false)
 
-    with_oauth_availability staff_only: true do
+    with_oauth_availability preview: true do
       redeem code
     end
 
@@ -65,7 +66,7 @@ class OauthStaffOnlyTest < ActionDispatch::IntegrationTest
   test "a code replayed once its owner isn't staff still revokes the grant it minted" do
     code = authorization_code_for(identities(:david))
 
-    with_oauth_availability staff_only: true do
+    with_oauth_availability preview: true do
       redeem code
       assert_response :success
       grant = Identity::AccessToken.find_by_raw_token(response.parsed_body["access_token"])
@@ -80,17 +81,18 @@ class OauthStaffOnlyTest < ActionDispatch::IntegrationTest
   end
 
   test "anyone else asking for consent as JSON is refused as JSON" do
-    with_oauth_availability staff_only: true do
+    with_oauth_availability preview: true do
       sign_in_as :jz
       untenanted { get new_oauth_authorization_path(format: :json), params: consent_params }
 
       assert_response :forbidden
       assert_equal "access_denied", response.parsed_body["error"]
+      assert_equal "Connecting apps to Fizzy is in preview for now", response.parsed_body["error_description"]
     end
   end
 
   test "a staff code redeems" do
-    with_oauth_availability staff_only: true do
+    with_oauth_availability preview: true do
       redeem authorization_code_for(identities(:david))
     end
 
@@ -100,7 +102,7 @@ class OauthStaffOnlyTest < ActionDispatch::IntegrationTest
   test "a grant stops working, and refreshing, once its owner isn't staff" do
     grant = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client))
 
-    with_oauth_availability staff_only: true do
+    with_oauth_availability preview: true do
       get user_path(users(:david)), env: { "HTTP_AUTHORIZATION" => "Bearer #{grant.raw_token}" }, as: :json
       assert_response :success
 
@@ -122,7 +124,7 @@ class OauthStaffOnlyTest < ActionDispatch::IntegrationTest
     grant = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client))
     presented = grant.raw_refresh_token
 
-    with_oauth_availability staff_only: true do
+    with_oauth_availability preview: true do
       refresh grant
       assert_response :success
 
@@ -141,17 +143,74 @@ class OauthStaffOnlyTest < ActionDispatch::IntegrationTest
   test "a staff grant refreshes" do
     grant = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client))
 
-    with_oauth_availability staff_only: true do
+    with_oauth_availability preview: true do
       refresh grant
     end
 
     assert_response :success
   end
 
+  test "a listed reviewer sees the consent screen and connects, like staff" do
+    with_oauth_availability preview: true, reviewer_ids: [ identities(:jz).id ] do
+      sign_in_as :jz
+      get_consent_screen
+      assert_response :success
+
+      post_consent
+      assert_response :redirect
+      assert_match %r{\Ahttp://127\.0\.0\.1:8888/callback\?code=}, response.location
+    end
+  end
+
+  test "a listed reviewer's code redeems, and the grant works and refreshes, until they're delisted" do
+    code = authorization_code_for(identities(:jz))
+
+    with_oauth_availability preview: true, reviewer_ids: [ identities(:jz).id ] do
+      redeem code
+      assert_response :success
+      access_token, refresh_token = response.parsed_body.values_at("access_token", "refresh_token")
+
+      get user_path(users(:jz)), env: { "HTTP_AUTHORIZATION" => "Bearer #{access_token}" }, as: :json
+      assert_response :success
+
+      untenanted do
+        post oauth_token_path, params: { grant_type: "refresh_token", refresh_token: refresh_token, client_id: oauth_clients(:mcp_client).client_id }, as: :json
+      end
+      assert_response :success
+    end
+
+    grant = identities(:jz).access_tokens.create!(oauth_client: oauth_clients(:mcp_client))
+
+    with_oauth_availability preview: true, reviewer_ids: [ identities(:mike).id ] do
+      get user_path(users(:jz)), env: { "HTTP_AUTHORIZATION" => "Bearer #{grant.raw_token}" }, as: :json
+      assert_response :unauthorized
+
+      refresh grant
+      assert_response :bad_request
+      assert_equal "invalid_grant", response.parsed_body["error"]
+
+      redeem authorization_code_for(identities(:jz))
+      assert_response :bad_request
+      assert_equal "invalid_grant", response.parsed_body["error"]
+
+      sign_in_as :jz
+      get_consent_screen
+      assert_response :forbidden
+    end
+  end
+
+  test "a reviewer list naming someone else admits no one beyond staff" do
+    with_oauth_availability preview: true, reviewer_ids: [ identities(:mike).id ] do
+      sign_in_as :jz
+      get_consent_screen
+      assert_response :forbidden
+    end
+  end
+
   test "personal access tokens work for anyone" do
     identities(:david).update!(staff: false)
 
-    with_oauth_availability staff_only: true do
+    with_oauth_availability preview: true do
       get user_path(users(:david)), env: { "HTTP_AUTHORIZATION" => "Bearer #{identity_access_tokens(:davids_api_token).token}" }, as: :json
     end
 
@@ -162,7 +221,7 @@ class OauthStaffOnlyTest < ActionDispatch::IntegrationTest
     token = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:personal_access), permission: :read, description: "Script")
     identities(:david).update!(staff: false)
 
-    with_oauth_availability staff_only: true do
+    with_oauth_availability preview: true do
       get user_path(users(:david)), env: { "HTTP_AUTHORIZATION" => "Bearer #{token.raw_token}" }, as: :json
     end
 

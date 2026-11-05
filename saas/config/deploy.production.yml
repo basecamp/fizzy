@@ -30,12 +30,12 @@ env:
   clear:
     RAILS_ENV: production
     RAILS_LOG_LEVEL: fatal # suppress unstructured log lines
-    OAUTH_STAFF_ONLY: "true" # OAuth is for 37signals staff until we open it up
+    CONNECTED_APPS_PREVIEW: "true" # Connecting apps is for 37signals staff and invited reviewers until we open it up
     MYSQL_DATABASE_HOST: fizzy-mysql-primary
     MYSQL_DATABASE_REPLICA_HOST: fizzy-mysql-replica
     MYSQL_SOLID_CABLE_HOST: fizzy-mysql-primary
     MYSQL_SOLID_QUEUE_HOST: fizzy-mysql-primary
-    # OAuth lit for 37signals staff only (OAUTH_STAFF_ONLY): the authorization server answers, Client ID
+    # OAuth lit for previewers only (CONNECTED_APPS_PREVIEW): the authorization server answers, Client ID
     # Metadata Documents are accepted from deploy.yml's allowlisted hosts, and grants can be audienced to
     # the hosted MCP server, whose delegation exchange runs as the fizzy-mcp-server client.
     OAUTH_ACCEPTANCE_ENABLED: "true"
@@ -75,6 +75,8 @@ env:
     # Directory reviewer sign-in (Identity::ReviewerSignIn). The email is a secret only to keep it out of this public repo.
     - FIZZY_REVIEWER_SIGN_IN_EMAIL
     - FIZZY_REVIEWER_SIGN_IN_CODE_DIGEST
+    # Identity ids of the connected apps preview's reviewers (Oauth::Availability).
+    - CONNECTED_APPS_PREVIEW_REVIEWERS
   tags:
     sc_chi:
       MYSQL_SOLID_CACHE_HOST: fizzy-solidcache-db-01.sc-chi-int.37signals.com

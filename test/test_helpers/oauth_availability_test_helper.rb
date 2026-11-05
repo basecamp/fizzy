@@ -1,15 +1,18 @@
 module OauthAvailabilityTestHelper
-  def with_oauth_availability(acceptance: true, issuance: true, pilot_client_ids: [], staff_only: false)
+  AVAILABILITY_KEYS = %i[ acceptance_enabled issuance_enabled pilot_client_ids connected_apps_preview connected_apps_preview_reviewer_ids ]
+
+  def with_oauth_availability(acceptance: true, issuance: true, pilot_client_ids: [], preview: false, reviewer_ids: [])
     config = Rails.application.config.x.oauth
-    saved = config.to_h.slice(:acceptance_enabled, :issuance_enabled, :pilot_client_ids, :staff_only)
+    saved = config.to_h.slice(*AVAILABILITY_KEYS)
 
     config.acceptance_enabled = acceptance
     config.issuance_enabled = issuance
     config.pilot_client_ids = pilot_client_ids
-    config.staff_only = staff_only
+    config.connected_apps_preview = preview
+    config.connected_apps_preview_reviewer_ids = reviewer_ids
     yield
   ensure
-    %i[ acceptance_enabled issuance_enabled pilot_client_ids staff_only ].each { |key| config[key] = saved[key] }
+    AVAILABILITY_KEYS.each { |key| config[key] = saved[key] }
   end
 
   def with_dcr_allowed_https_hosts(*hosts)

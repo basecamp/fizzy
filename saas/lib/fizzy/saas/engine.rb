@@ -232,7 +232,7 @@ module Fizzy
         ::Signup.prepend Signup
         Sessions::MagicLinksController.prepend Sessions::ReviewerSignIn
         ::User.prepend User::ReviewerEmailAddressLock
-        ::Oauth::Availability.admit_beyond_staff Identity::ReviewerSignIn.method(:reviewer?)
+        ::Oauth::Availability.admit_as_reviewer Identity::ReviewerSignIn.method(:reviewer?)
         Users::EmailAddressesController.include Users::ReviewerEmailAddressLock
         UsersController.include Users::ReviewerMembershipLock
         ApplicationController.include Authorization::Controller

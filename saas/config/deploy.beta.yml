@@ -51,9 +51,9 @@ env:
     CACHE_NAMESPACE: <%= @beta_number %>
     RAILS_ENV: beta
     RAILS_LOG_LEVEL: fatal # suppress unstructured log lines
-    OAUTH_STAFF_ONLY: "true" # OAuth is for 37signals staff until we open it up
+    CONNECTED_APPS_PREVIEW: "true" # Connecting apps is for 37signals staff and invited reviewers until we open it up
 <% if @beta_number == "1" %>
-    # beta1 is lit for staff (OAUTH_STAFF_ONLY above): OAuth answers, Client ID Metadata Documents are
+    # beta1 is lit for previewers (CONNECTED_APPS_PREVIEW above): OAuth answers, Client ID Metadata Documents are
     # accepted from the allowlisted hosts in deploy.yml, and grants can be audienced to beta1's MCP server.
     OAUTH_ACCEPTANCE_ENABLED: "true"
     OAUTH_CIMD_ENABLED: "true"
@@ -95,6 +95,8 @@ env:
     - APNS_KEY_ID
     - APNS_ENCRYPTION_KEY_B64
     - FCM_ENCRYPTION_KEY_B64
+    # Identity ids of the connected apps preview's reviewers (Oauth::Availability).
+    - CONNECTED_APPS_PREVIEW_REVIEWERS
   tags:
     df_iad:
       PRIMARY_DATACENTER: true
