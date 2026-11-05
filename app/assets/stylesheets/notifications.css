@@ -20,7 +20,7 @@
     }
 
     .card {
-      @media (prefers-color-scheme: dark) {
+      html[data-theme="dark"] & {
         box-shadow: 0 0 0 1px var(--color-ink-lighter);
       }
     }
