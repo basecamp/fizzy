@@ -155,6 +155,19 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
     assert_select "a#filtered_search_results-pagination-link-3", count: 0
   end
 
+  test "the next-page link stays on the search route and keeps the search" do
+    20.times { |i| @board.cards.create!(title: "paginated card #{i}", status: "published", creator: @user) }
+
+    [ {}, { use_route: "root" }, { use_route: "card", id: "1" } ].each do |query|
+      get search_path(q: "paginated", script_name: "/#{@account.external_account_id}", **query)
+      assert_response :success
+
+      uri = URI(css_select("a#filtered_search_results-pagination-link-2").first["href"])
+      assert_equal request.path, uri.path
+      assert_equal "paginated", Rack::Utils.parse_nested_query(uri.query)["q"]
+    end
+  end
+
   test "a junk page param falls back to the first page" do
     20.times { |i| @board.cards.create!(title: "paginated card #{i}", status: "published", creator: @user) }
 

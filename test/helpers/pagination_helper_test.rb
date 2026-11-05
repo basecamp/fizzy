@@ -1,67 +1,68 @@
 require "test_helper"
 
-# Regression coverage for HackerOne #3943339, link 1 (parameter injection).
-#
-# pagination_link builds the "next page" URL by feeding every request parameter
-# to url_for. url_for interprets reserved keys such as `script_name`, `host`,
-# and `only_path` as URL-generation control options, so an attacker who slips
-# `script_name` into the request query can rewrite the beginning of the
-# generated path onto an arbitrary same-origin route (e.g. an Active Storage
-# blob-proxy path). The helper must forward only ordinary filter params, never
-# url_for control options.
+# pagination_link builds the "next page" URL from the request. url_for reads
+# reserved keys such as `script_name`, `host`, `only_path` and `use_route` as
+# URL-generation options, and any other key as a possible path segment, so a query
+# must never reach it as options: only as the link's own query string.
 class PaginationHelperTest < ActionView::TestCase
   include Turbo::FramesHelper
 
-  test "next-page link does not honor an attacker-supplied script_name" do
-    with_request_params controller: "public/boards/columns/streams", action: "show",
-      board_id: "the-board", script_name: "/rails/active_storage/blobs/proxy/SIGNED/x.html%23" do
-      href = pagination_href(:stream_column, 2)
+  OWN_PATH = "/public/boards/the-board/columns/stream"
+  OWN_ROUTE = { controller: "public/boards/columns/streams", action: "show", board_id: "the-board" }
 
-      assert_no_match %r{active_storage}, href,
-        "script_name must not be able to rewrite the pagination path onto a blob-proxy route"
-      assert_match %r{\A/public/boards/the-board/columns/stream}, href,
-        "the link should still point at the real next-page route"
+  {
+    script_name: "/elsewhere",
+    original_script_name: "/elsewhere",
+    relative_url_root: "/elsewhere",
+    host: "elsewhere.example",
+    protocol: "ftp",
+    port: "8080",
+    subdomain: "elsewhere",
+    domain: "elsewhere.example",
+    tld_length: "0",
+    only_path: "false",
+    trailing_slash: "true",
+    anchor: "elsewhere",
+    user: "someone",
+    password: "secret",
+    use_route: "root",
+    path_params: { format: "xml" },
+    params: { elsewhere: "true" },
+    _recall: { controller: "cards", action: "index" },
+    format: "xml",
+    controller: "cards",
+    action: "index",
+    id: "elsewhere",
+    board_id: "elsewhere"
+  }.each do |option, value|
+    test "next-page link keeps to its own route when the query names #{option}" do
+      with_request query: { option => value } do
+        assert_equal OWN_PATH, pagination_uri.path
+        assert_nil pagination_uri.host
+        assert_nil pagination_uri.fragment
+        assert_equal "2", pagination_query["page"]
+      end
     end
   end
 
-  test "next-page link does not honor other url_for control options" do
-    # No only_path here: with host present and only_path absent, pre-patch
-    # url_for emits an absolute https://attacker.example/... URL, so this
-    # genuinely fails without the filter rather than passing for the wrong
-    # reason.
-    with_request_params controller: "public/boards/columns/streams", action: "show",
-      board_id: "the-board", host: "attacker.example", protocol: "https" do
-      href = pagination_href(:stream_column, 2)
-
-      assert_no_match %r{attacker\.example}, href,
-        "host/protocol must not turn the link into an absolute cross-origin URL"
-      assert_match %r{\A/public/boards/the-board/columns/stream}, href,
-        "the link must stay a relative path on the real next-page route"
+  test "next-page link keeps the query" do
+    with_request query: { tag: "urgent", terms: [ "one", "two" ], nested: { key: "value" } } do
+      assert_equal OWN_PATH, pagination_uri.path
+      assert_equal "urgent", pagination_query["tag"]
+      assert_equal [ "one", "two" ], pagination_query["terms"]
+      assert_equal({ "key" => "value" }, pagination_query["nested"])
     end
   end
 
-  # original_script_name is prepended to script_name by url_for exactly as
-  # script_name is (RouteSet#url_for), so it opens the same path-rewrite vector.
-  test "next-page link does not honor an attacker-supplied original_script_name" do
-    with_request_params controller: "public/boards/columns/streams", action: "show",
-      board_id: "the-board",
-      original_script_name: "/rails/active_storage/blobs/proxy/SIGNED/x.html%23" do
-      href = pagination_href(:stream_column, 2)
-
-      assert_no_match %r{active_storage}, href,
-        "original_script_name must not be able to rewrite the pagination path onto a blob-proxy route"
-      assert_match %r{\A/public/boards/the-board/columns/stream}, href,
-        "the link should still point at the real next-page route"
+  test "next-page link replaces the query's page" do
+    with_request query: { page: "7" } do
+      assert_equal "2", pagination_query["page"]
     end
   end
 
-  test "next-page link preserves ordinary filter params" do
-    with_request_params controller: "public/boards/columns/streams", action: "show",
-      board_id: "the-board", previous: "true", tag: "urgent" do
-      href = pagination_href(:stream_column, 2)
-
-      assert_match %r{tag=urgent}, href, "legitimate filter params must survive"
-      assert_match %r{page=2}, href
+  test "next-page link leaves out form params" do
+    with_request form: { authenticity_token: "secret" } do
+      assert_nil pagination_query["authenticity_token"]
     end
   end
 
@@ -72,7 +73,7 @@ class PaginationHelperTest < ActionView::TestCase
   # false; the auto-activated link is loaded by the IntersectionObserver with no
   # user click. This pins the rendered markup that selects that branch.
   test "automatic pagination selects the script-executing native Turbo frame branch" do
-    with_request_params controller: "public/boards/columns/streams", action: "show", board_id: "the-board" do
+    with_request do
       frag = Nokogiri::HTML::DocumentFragment.parse(with_automatic_pagination(:stream_column, FakePage.new) { "" })
 
       list = frag.at_css("[data-controller='pagination']")
@@ -93,13 +94,19 @@ class PaginationHelperTest < ActionView::TestCase
       def records = []
     end
 
-    def with_request_params(**params)
-      controller.params = ActionController::Parameters.new(params)
+    def with_request(query: {}, form: {})
+      request.path_parameters = OWN_ROUTE
+      request.set_header "QUERY_STRING", query.to_query
+      request.request_parameters = form
+      controller.params = ActionController::Parameters.new(query.merge(form).merge(OWN_ROUTE))
       yield
     end
 
-    def pagination_href(namespace, page_number)
-      html = pagination_link(namespace, page_number)
-      Nokogiri::HTML::DocumentFragment.parse(html).at_css("a")["href"]
+    def pagination_uri
+      URI(Nokogiri::HTML::DocumentFragment.parse(pagination_link(:stream_column, 2)).at_css("a")["href"])
+    end
+
+    def pagination_query
+      Rack::Utils.parse_nested_query(pagination_uri.query)
     end
 end
