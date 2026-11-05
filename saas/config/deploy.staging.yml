@@ -103,6 +103,7 @@ accessories:
       - load-balancer:/home/kamal-proxy/.config/kamal-proxy
 
   # Hosted Fizzy MCP (see saas/config/deploy.yml), on iad's web hosts, as in production.
+  # Its exchange client, once lit, is fizzy-mcp-server-staging (Oauth::FirstPartyClients).
   fizzy_mcp:
     hosts:
       - fizzy-staging-app-101.df-iad-int.37signals.com

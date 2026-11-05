@@ -3,6 +3,7 @@ require "test_helper"
 class Oauth::FirstPartyClientsTest < ActiveSupport::TestCase
   PRODUCTION = "https://mcp.fizzy.do/mcp"
   BETA1 = "https://beta1-mcp.fizzy-beta.com/mcp"
+  STAGING = "https://mcp.fizzy-staging.com/mcp"
 
   setup do
     @saved_resources = Rails.application.config.x.oauth.mcp_resources
@@ -124,6 +125,69 @@ class Oauth::FirstPartyClientsTest < ActiveSupport::TestCase
       Oauth::FirstPartyClients.provision!
     end
     assert_not beta1.delegation_client?
+  end
+
+  test "staging's converge creates its own MCP client, and again changes nothing" do
+    serve STAGING
+
+    created = Oauth::FirstPartyClients.provision!.map(&:client_id)
+    before = client("fizzy-mcp-server-staging").attributes
+
+    assert_equal %w[ fizzy-personal-access fizzy-mcp-server-staging ], created
+    assert_equal STAGING, client("fizzy-mcp-server-staging").protected_resource
+    assert client("fizzy-mcp-server-staging").delegation_client?
+    assert_not Oauth::Client.exists?(client_id: "fizzy-mcp-server")
+
+    travel 1.minute do
+      assert Oauth::FirstPartyClients.provision!.none?(&:previously_new_record?)
+    end
+    assert_equal before, client("fizzy-mcp-server-staging").reload.attributes
+  end
+
+  test "staging's MCP client drifts back" do
+    serve STAGING
+    Oauth::FirstPartyClients.provision!
+    client("fizzy-mcp-server-staging").update_columns token_endpoint_auth_method: "none", trusted: true,
+      redirect_uris: [ "https://evil.example.com/callback" ], scopes: %w[ read ], dynamically_registered: true
+
+    Oauth::FirstPartyClients.provision!
+
+    expected = Oauth::FirstPartyClients.attributes_for("fizzy-mcp-server-staging").except(:client_secret_digest)
+    assert_equal expected, client("fizzy-mcp-server-staging").attributes.symbolize_keys.slice(*expected.keys)
+  end
+
+  test "each hosted client_id names one resource" do
+    client_ids = Oauth::FirstPartyClients::HOSTED_MCP_SERVERS.values
+
+    assert_equal client_ids.uniq, client_ids
+    assert_not_includes client_ids, Oauth::Client::PERSONAL_ACCESS_CLIENT_ID
+  end
+
+  test "a plan shows what a converge would change, and writes nothing" do
+    serve PRODUCTION
+    Oauth::FirstPartyClients.provision!
+    client("fizzy-personal-access").update_columns trusted: false
+    serve PRODUCTION, BETA1
+
+    assert_no_changes -> { Oauth::Client.order(:client_id).map(&:attributes) } do
+      planned = Oauth::FirstPartyClients.plan.index_by(&:client_id)
+
+      assert_equal({ "trusted" => [ false, true ] }, planned["fizzy-personal-access"].changes)
+      assert planned["fizzy-mcp-server"].changes.empty?
+      assert planned["fizzy-mcp-server-beta1"].new_record?
+      assert_equal BETA1, planned["fizzy-mcp-server-beta1"].protected_resource
+    end
+  end
+
+  test "a plan refuses what a converge would refuse" do
+    serve PRODUCTION
+    Oauth::FirstPartyClients.provision!
+    serve "https://other.example.com/mcp"
+
+    assert_raises(ArgumentError) do
+      Oauth::FirstPartyClients.plan "fizzy-mcp-server" => { name: "Fizzy MCP server", protected_resource: "https://other.example.com/mcp" }
+    end
+    assert_equal PRODUCTION, client("fizzy-mcp-server").protected_resource
   end
 
   test "a production converge creates no beta client" do

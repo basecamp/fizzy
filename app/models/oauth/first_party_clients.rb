@@ -8,7 +8,8 @@
 # explicit security-policy BASELINE, so drift in any policy attribute a
 # definition doesn't name (a hand-flipped trusted, a stray redirect, a secret
 # on a public row) is reset on every converge. The batch runs in one
-# transaction: either every client converges or none does.
+# transaction: either every client converges or none does. DRY_RUN=1 shows
+# what a converge would change, client by client, and writes nothing.
 #
 # Two things a converge never does. It never mints or rotates a secret: a
 # confidential client's secret comes only from oauth:mint_client_secret, and
@@ -48,7 +49,9 @@ module Oauth::FirstPartyClients
   # The MCP servers 37signals hosts, by the resource each fronts, with the
   # client its deployment exchanges tokens through (FIZZY_MCP_EXCHANGE_CLIENT_ID).
   # Production and the betas share one database, so each MCP server has a
-  # client of its own.
+  # client of its own. Staging's database is its own, but its server takes a
+  # client_id of its own all the same, so that each client_id here names one
+  # resource and provision_mcp_server! can pair them both ways.
   #
   # Each converges only where FIZZY_OAUTH_MCP_RESOURCES names its resource,
   # which is also the only place its client can exchange tokens
@@ -59,6 +62,7 @@ module Oauth::FirstPartyClients
   # oauth:provision_mcp_client.
   HOSTED_MCP_SERVERS = {
     "https://mcp.fizzy.do/mcp" => Oauth::Client::MCP_CLIENT_ID,
+    "https://mcp.fizzy-staging.com/mcp" => "fizzy-mcp-server-staging",
     "https://beta1-mcp.fizzy-beta.com/mcp" => "fizzy-mcp-server-beta1"
   }.freeze
 
@@ -117,25 +121,37 @@ module Oauth::FirstPartyClients
     def converge!(definitions)
       Oauth::Client.transaction do
         definitions.map do |client_id, definition|
-          client = Oauth::Client.find_or_initialize_by(client_id: client_id)
-          attributes = BASELINE.merge(definition)
-
-          if attributes[:token_endpoint_auth_method].in?(Oauth::Client::SECRET_AUTH_METHODS)
-            attributes.delete(:client_secret_digest)
-          end
-
-          if attributes[:protected_resource] && client.protected_resource != attributes[:protected_resource] && fronting_for_good?(client)
-            raise ArgumentError, "#{client_id} already fronts #{client.protected_resource}; give #{attributes[:protected_resource]} a client of its own"
-          else
-            client.update! attributes
+          converging(client_id, definition).tap do |client|
+            client.save!
             client.update_columns client_secret_digest: nil if client.previously_new_record? && client.confidential?
-            client
           end
         end
       end
     end
 
+    # The clients a converge would write, each with the definition's
+    # attributes assigned and nothing saved, so their changes say what it
+    # would do. A client a converge would refuse to repoint raises here too.
+    def plan(definitions = self.definitions)
+      definitions.map { |client_id, definition| converging(client_id, definition) }
+    end
+
     private
+      def converging(client_id, definition)
+        client = Oauth::Client.find_or_initialize_by(client_id: client_id)
+        attributes = BASELINE.merge(definition)
+
+        if attributes[:token_endpoint_auth_method].in?(Oauth::Client::SECRET_AUTH_METHODS)
+          attributes.delete(:client_secret_digest)
+        end
+
+        if attributes[:protected_resource] && client.protected_resource != attributes[:protected_resource] && fronting_for_good?(client)
+          raise ArgumentError, "#{client_id} already fronts #{client.protected_resource}; give #{attributes[:protected_resource]} a client of its own"
+        else
+          client.tap { it.assign_attributes attributes }
+        end
+      end
+
       def fronting_for_good?(client)
         client.delegation_client? || HOSTED_MCP_SERVERS.key?(client.protected_resource)
       end
