@@ -114,7 +114,7 @@ module Oauth::Availability
     ids, rejected = entries.partition { |entry| entry.match?(IDENTITY_ID) }
 
     if rejected.any?
-      Rails.logger.warn "CONNECTED_APPS_PREVIEW_REVIEWERS: skipping #{rejected.size} #{"entry".pluralize(rejected.size)} that aren't identity ids"
+      Rails.logger.warn "CONNECTED_APPS_PREVIEW_REVIEWERS: skipping entries that aren't identity ids (#{rejected.size})"
     end
 
     ids.uniq.freeze

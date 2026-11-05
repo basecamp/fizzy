@@ -117,7 +117,7 @@ class Oauth::AvailabilityTest < ActiveSupport::TestCase
   end
 
   test "reviewer ids are parsed from a list separated by commas or spaces" do
-    one, two = identities(:jz).id, identities(:mike).id
+    one, two = identities(:jz).id, "03f5h2k9xq7m1b8n4c6d0e2gz"
 
     assert_equal [ one, two ], Oauth::Availability.reviewer_ids_from(" #{one} ,#{two.upcase}\n#{one}, ")
     assert_equal [], Oauth::Availability.reviewer_ids_from(nil)
@@ -132,7 +132,7 @@ class Oauth::AvailabilityTest < ActiveSupport::TestCase
     ids = Oauth::Availability.reviewer_ids_from("reviewer@example.com, 42, #{identities(:jz).id}, #{identities(:jz).id}x")
 
     assert_equal [ identities(:jz).id ], ids
-    assert_match "skipping 3 entries that aren't identity ids", logged.string
+    assert_match "skipping entries that aren't identity ids (3)", logged.string
     assert_no_match "reviewer@example.com", logged.string
   end
 

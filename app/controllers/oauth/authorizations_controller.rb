@@ -84,8 +84,8 @@ class Oauth::AuthorizationsController < Oauth::BaseController
       request.post? && params[:error] == "access_denied"
     end
 
-    # While connecting apps is in preview, nobody but previewers is asked to consent. They're told
-    # why, rather than bounced back to an app that can't say.
+    # While connecting apps is in preview, nobody but previewers is asked to
+    # consent. They're told why, rather than bounced back to an app that can't say.
     def require_admitted_identity
       unless Oauth::Availability.admits?(Current.identity)
         respond_to do |format|
