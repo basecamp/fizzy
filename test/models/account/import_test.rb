@@ -107,6 +107,7 @@ class Account::ImportTest < ActiveSupport::TestCase
     exporter = users(:david)
     identity = exporter.identity
     source_account.join_code.update_columns(usage_count: 3, usage_limit: Account::JoinCode::USAGE_LIMIT_MAX + 1)
+    code = source_account.join_code.code
 
     export = Account::Export.create!(account: source_account, user: exporter)
     export.build
@@ -128,6 +129,7 @@ class Account::ImportTest < ActiveSupport::TestCase
     assert import.completed?
     assert_equal Account::JoinCode::USAGE_LIMIT_MAX, target_account.join_code.reload.usage_limit
     assert_equal 3, target_account.join_code.usage_count
+    assert_equal code, target_account.join_code.code
   ensure
     export_tempfile&.close
     export_tempfile&.unlink

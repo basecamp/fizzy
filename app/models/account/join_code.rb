@@ -32,10 +32,10 @@ class Account::JoinCode < ApplicationRecord
     save!
   end
 
-  # Limits saved before the cap was added can sit above it, and would fail
-  # validation the next time the row is saved.
-  def cap_usage_limit
-    self.usage_limit = USAGE_LIMIT_MAX if usage_limit.to_i > USAGE_LIMIT_MAX
+  def import(attributes)
+    assign_attributes(attributes)
+    cap_usage_limit
+    save!
   end
 
   private
@@ -44,5 +44,11 @@ class Account::JoinCode < ApplicationRecord
         candidate = SecureRandom.base58(CODE_LENGTH).scan(/.{4}/).join("-")
         break candidate unless self.class.exists?(code: candidate)
       end
+    end
+
+    # Limits saved before the cap was added can sit above it, and would fail
+    # validation the next time the row is saved.
+    def cap_usage_limit
+      self.usage_limit = USAGE_LIMIT_MAX if usage_limit > USAGE_LIMIT_MAX
     end
 end
