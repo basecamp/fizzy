@@ -1,6 +1,6 @@
 module OauthAuditTestHelper
   FIELDS = %i[ app event client_id client_class client_type grant_id family_id identity_id tenant_id actor reason request_id ]
-  DETAILS = %i[ grant_type permission presented ]
+  DETAILS = %i[ grant_type permission presented skipped ]
 
   # A token or client secret carries its prefix, and a digest is 64 hex digits,
   # optionally versioned (TokenDigester).

@@ -1,7 +1,7 @@
 require "test_helper"
 
 class Oauth::AvailabilityTest < ActiveSupport::TestCase
-  include OauthAvailabilityTestHelper
+  include OauthAvailabilityTestHelper, OauthAuditTestHelper
 
   test "lit in test" do
     assert Oauth::Availability.acceptance_enabled?
@@ -129,9 +129,16 @@ class Oauth::AvailabilityTest < ActiveSupport::TestCase
     logged = StringIO.new
     Rails.stubs(:logger).returns(ActiveSupport::Logger.new(logged))
 
-    ids = Oauth::Availability.reviewer_ids_from("reviewer@example.com, 42, #{identities(:jz).id}, #{identities(:jz).id}x")
+    ids = nil
+    events = capture_oauth_events do
+      ids = Oauth::Availability.reviewer_ids_from("reviewer@example.com, 42, #{identities(:jz).id}, #{identities(:jz).id}x")
+    end
 
     assert_equal [ identities(:jz).id ], ids
+    skipped = oauth_event(events, "oauth.preview.reviewers_skipped")
+    assert_equal 3, skipped[:skipped]
+    assert_equal "system", skipped[:actor]
+    assert_no_match "reviewer@example.com", skipped.values.join(" ")
     assert_match "skipping entries that aren't identity ids (3)", logged.string
     assert_no_match "reviewer@example.com", logged.string
   end
@@ -140,8 +147,9 @@ class Oauth::AvailabilityTest < ActiveSupport::TestCase
     logged = StringIO.new
     Rails.stubs(:logger).returns(ActiveSupport::Logger.new(logged))
 
-    Oauth::Availability.reviewer_ids_from(identities(:jz).id)
+    events = capture_oauth_events { Oauth::Availability.reviewer_ids_from(identities(:jz).id) }
 
     assert_empty logged.string
+    assert_empty events
   end
 end

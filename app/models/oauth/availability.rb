@@ -107,14 +107,17 @@ module Oauth::Availability
 
   # The reviewer identity ids in CONNECTED_APPS_PREVIEW_REVIEWERS, separated by
   # commas or spaces. Unset or empty lists none. An entry that isn't an
-  # identity id (an email address, say) is skipped with a warning rather than
-  # failing the boot; the warning counts entries and never echoes them.
+  # identity id (an email address, say) is skipped rather than failing the
+  # boot, and reported as oauth.preview.reviewers_skipped (Oauth::Audit), which
+  # the SaaS engine writes to the structured log whatever RAILS_LOG_LEVEL is.
+  # Both the report and the log warning count entries and never echo them.
   def reviewer_ids_from(value)
     entries = value.to_s.split(/[\s,]+/).compact_blank.map(&:downcase)
     ids, rejected = entries.partition { |entry| entry.match?(IDENTITY_ID) }
 
     if rejected.any?
       Rails.logger.warn "CONNECTED_APPS_PREVIEW_REVIEWERS: skipping entries that aren't identity ids (#{rejected.size})"
+      Oauth::Audit.record "preview.reviewers_skipped", actor: "system", reason: "not_an_identity_id", skipped: rejected.size
     end
 
     ids.uniq.freeze
