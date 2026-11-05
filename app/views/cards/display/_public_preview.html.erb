@@ -36,7 +36,7 @@
     <span class="for-screen-reader"><%= card.title %></span>
   <% end %>
 
-  <% if card.entropic? %>
+  <% if card.entropic? || card.bubble_up? %>
     <%= render "cards/display/preview/bubble", card: card %>
     <span class="card__board-name"></span>
   <% end %>
