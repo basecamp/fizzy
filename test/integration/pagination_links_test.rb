@@ -1,9 +1,10 @@
 require "test_helper"
 
 # A next-page link is built from the request's query string, so what a query says
-# must only ever end up back in a query string. These tests render every page that
-# paginates with url_for, through real routing, because url_for reads its recalled
-# route from the request and a helper test can't vouch for that.
+# must only ever end up back in a query string. These tests render the pages that
+# paginate, through real routing, because url_for reads its recalled route from the
+# request and a helper test can't vouch for that. Search needs committed records,
+# so its page is covered in SearchesControllerTest.
 class PaginationLinksTest < ActionDispatch::IntegrationTest
   QUERIES_NAMING_URL_FOR_OPTIONS = [
     { use_route: "root" },
@@ -40,37 +41,30 @@ class PaginationLinksTest < ActionDispatch::IntegrationTest
 
     [ {}, *QUERIES_NAMING_URL_FOR_OPTIONS ].each do |query|
       assert_next_page_stays_on board_path(@board), **query
+      assert_select "a#maybe-pagination-link-2"
     end
   end
 
-  test "board page's next-page link stays on its own route and keeps the filter" do
-    paginate :stream, title: "needle"
+  test "board page's filtered next-page link stays on its own route and keeps the filter" do
+    paginate :stream
     sign_in_as :david
 
     [ {}, *QUERIES_NAMING_URL_FOR_OPTIONS ].each do |query|
-      assert_next_page_stays_on board_path(@board), terms: [ "needle" ], **query
-      assert_equal [ "needle" ], next_page_query["terms"]
+      assert_next_page_stays_on board_path(@board), creator_ids: [ users(:david).id ], **query
+      assert_select "a#filtered_cards_paginated_container-pagination-link-2"
+      assert_equal [ users(:david).id ], next_page_query["creator_ids"]
     end
   end
 
   test "cards page's next-page link stays on its own route and keeps the filter" do
-    paginate :stream, title: "needle"
+    paginate :stream
     sign_in_as :david
 
     [ {}, *QUERIES_NAMING_URL_FOR_OPTIONS ].each do |query|
-      assert_next_page_stays_on cards_path, terms: [ "needle" ], sorted_by: "newest", **query
-      assert_equal [ "needle" ], next_page_query["terms"]
+      assert_next_page_stays_on cards_path, creator_ids: [ users(:david).id ], sorted_by: "newest", **query
+      assert_select "a#cards_paginated_container-pagination-link-2"
+      assert_equal [ users(:david).id ], next_page_query["creator_ids"]
       assert_equal "newest", next_page_query["sorted_by"]
-    end
-  end
-
-  test "search page's next-page link stays on its own route and keeps the search" do
-    paginate :stream, title: "needle"
-    sign_in_as :david
-
-    [ {}, *QUERIES_NAMING_URL_FOR_OPTIONS ].each do |query|
-      assert_next_page_stays_on search_path, q: "needle", **query
-      assert_equal "needle", next_page_query["q"]
     end
   end
 
@@ -85,10 +79,10 @@ class PaginationLinksTest < ActionDispatch::IntegrationTest
   end
 
   private
-    def paginate(kind, title: "Paginated")
+    def paginate(kind)
       Current.with(account: @board.account, session: sessions(:david)) do
         16.times do |index|
-          card = @board.cards.create!(title: "#{title} #{index}", creator: users(:david), status: :published)
+          card = @board.cards.create!(title: "Paginated #{index}", creator: users(:david), status: :published)
 
           case kind
           when :column then card.triage_into(@column)
