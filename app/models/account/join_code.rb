@@ -28,7 +28,14 @@ class Account::JoinCode < ApplicationRecord
   def reset
     generate_code
     self.usage_count = 0
+    cap_usage_limit
     save!
+  end
+
+  # Limits saved before the cap was added can sit above it, and would fail
+  # validation the next time the row is saved.
+  def cap_usage_limit
+    self.usage_limit = USAGE_LIMIT_MAX if usage_limit.to_i > USAGE_LIMIT_MAX
   end
 
   private

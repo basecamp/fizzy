@@ -46,4 +46,13 @@ class Account::JoinCodeTest < ActiveSupport::TestCase
     assert_not_equal original_code, join_code.code
     assert_equal 0, join_code.usage_count
   end
+
+  test "reset caps a usage limit saved before the cap existed" do
+    join_code = account_join_codes(:"37s")
+    join_code.update_columns(usage_limit: Account::JoinCode::USAGE_LIMIT_MAX + 1)
+
+    join_code.reset
+
+    assert_equal Account::JoinCode::USAGE_LIMIT_MAX, join_code.reload.usage_limit
+  end
 end
