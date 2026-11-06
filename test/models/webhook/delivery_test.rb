@@ -154,6 +154,21 @@ class Webhook::DeliveryTest < ActiveSupport::TestCase
     assert_equal "destination_unreachable", delivery.response[:error]
   end
 
+  test "deliver when the network can't reach the destination" do
+    [ Errno::ENETUNREACH, Errno::EADDRNOTAVAIL, Errno::EAFNOSUPPORT ].each do |error|
+      delivery = Webhook::Delivery.create!(webhook: webhooks(:active), event: events(:layout_commented))
+      stub_request(:post, delivery.webhook.url).to_raise(error)
+
+      tracker = delivery.webhook.delinquency_tracker
+      assert_difference -> { tracker.reload.consecutive_failures_count }, 1, error.name do
+        delivery.deliver
+      end
+
+      assert_equal "completed", delivery.state, error.name
+      assert_equal "destination_unreachable", delivery.response[:error], error.name
+    end
+  end
+
   test "deliver when an SSL error occurs" do
     delivery = webhook_deliveries(:pending)
     stub_request(:post, delivery.webhook.url).to_raise(OpenSSL::SSL::SSLError)
