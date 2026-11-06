@@ -229,6 +229,62 @@ class Account::DataTransfer::RecordSetTest < ActiveSupport::TestCase
     assert Board::Publication.exists?(id: publication_data["id"], key: publication_data["key"])
   end
 
+  test "import fails as invalid when a crafted export's value doesn't fit its serialized column" do
+    webhook_data = {
+      "id" => ActiveRecord::Type::Uuid.generate,
+      "account_id" => ActiveRecord::Type::Uuid.generate,
+      "board_id" => ActiveRecord::Type::Uuid.generate,
+      "name" => "Pre-encoded actions",
+      "url" => "https://example.com/hook",
+      "signing_secret" => "secret",
+      "subscribed_actions" => [ "card_published" ].to_json,
+      "active" => true,
+      "created_at" => Time.current.iso8601,
+      "updated_at" => Time.current.iso8601
+    }
+
+    error = assert_raises(Account::DataTransfer::RecordSet::IntegrityError) do
+      webhook_record_set.import(from: build_reader(dir: "webhooks", data: webhook_data))
+    end
+
+    assert_match(/value its column can't hold/i, error.message)
+    assert_not Webhook.exists?(id: webhook_data["id"])
+  end
+
+  test "import fails as invalid when the database rejects a value as too long" do
+    Board::Publication.stubs(:insert_all!).raises(ActiveRecord::ValueTooLong, "Data too long for column 'id' at row 1")
+
+    error = assert_raises(Account::DataTransfer::RecordSet::IntegrityError) do
+      publication_record_set.import(from: build_reader(dir: "board_publications", data: build_publication_data(key: SecureRandom.base58(24))))
+    end
+
+    assert_match(/Data too long for column 'id'/, error.message)
+  end
+
+  test "import leaves transient database errors to retry" do
+    Board::Publication.stubs(:insert_all!).raises(ActiveRecord::Deadlocked)
+
+    assert_raises(ActiveRecord::Deadlocked) do
+      publication_record_set.import(from: build_reader(dir: "board_publications", data: build_publication_data(key: SecureRandom.base58(24))))
+    end
+  end
+
+  test "check fails as invalid on a record that isn't JSON" do
+    tempfile = Tempfile.new([ "import_test", ".zip" ])
+    tempfile.binmode
+    writer = ZipFile::Writer.new(tempfile)
+    writer.add_file("data/board_publications/#{ActiveRecord::Type::Uuid.generate}.json", "/etc/passwd")
+    writer.close
+    tempfile.rewind
+
+    assert_raises(Account::DataTransfer::RecordSet::IntegrityError) do
+      publication_record_set.check(from: ZipFile::Reader.new(tempfile))
+    end
+  ensure
+    tempfile&.close
+    tempfile&.unlink
+  end
+
   test "a webhook exported before attribution existed checks and imports without a creator" do
     webhook_data = {
       "id" => ActiveRecord::Type::Uuid.generate,
