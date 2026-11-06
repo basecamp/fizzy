@@ -17,7 +17,7 @@ class OauthConsentScreenTest < ActionDispatch::IntegrationTest
     assert_select ".oauth-client__self-name", text: /\ASays it’s “Totally Fizzy”\z/
     assert_select ".oauth-client__warning", text: /\AWe haven’t checked this app\. Only authorize it if you trust that address\.\z/
     assert_equal 1, response.parsed_body.at("body").text.scan("connector.example.com").size
-    assert_select ".oauth-consent__fine-print", text: /\AIf you change your mind, you can disconnect this at any time in Connected apps\.\z/
+    assert_select ".oauth-consent__fine-print", text: /\AIf you change your mind, you can revoke its access at any time in Connected apps\.\z/
   end
 
   test "a self-registered app on this device is named as one" do
@@ -58,7 +58,7 @@ class OauthConsentScreenTest < ActionDispatch::IntegrationTest
     assert_select ".oauth-access__choice", text: /Read only.*It can't change anything/m
     assert_select ".oauth-access__choice", text: /Read and write.*delete cards/m
     assert_select ".oauth-access__reach", text: /\AIt acts as you, so it reaches only what you can, in every account you belong to\.\z/
-    assert_select ".oauth-consent__fine-print", text: /\AIf you change your mind, you can disconnect this at any time in Connected apps\.\z/
+    assert_select ".oauth-consent__fine-print", text: /\AIf you change your mind, you can revoke its access at any time in Connected apps\.\z/
   end
 
   test "the person sees who they're signed in as" do

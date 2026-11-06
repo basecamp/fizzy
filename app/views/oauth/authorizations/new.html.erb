@@ -39,7 +39,7 @@
     <%= render "oauth/authorizations/access", form: f, client: @client, scope: @scope, one_account: @accounts.present? %>
 
     <p class="oauth-consent__fine-print txt-x-small txt-subtle margin-none">
-      If you change your mind, you can disconnect this at any time in <%= link_to "Connected apps", my_connected_apps_path, class: "txt-link" %>.
+      If you change your mind, you can revoke its access at any time in <%= link_to "Connected apps", my_connected_apps_path, class: "txt-link" %>.
     </p>
 
     <div class="oauth-consent__actions flex gap">
