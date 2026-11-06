@@ -84,16 +84,16 @@ class Oauth::AuthorizationsController < Oauth::BaseController
       request.post? && params[:error] == "access_denied"
     end
 
-    # The pages a GET renders, consent above all, hold forms that post back
-    # to us, and a browser posting from a no-referrer page sends Origin: null,
-    # which Rails' origin check refuses (InvalidCrossOriginRequest, a 422)
-    # before anything else is weighed. same-origin keeps our own origin on
+    # The pages a GET or HEAD renders, consent above all, hold forms that
+    # post back to us, and a browser posting from a no-referrer page sends
+    # Origin: null, which Rails' origin check refuses (InvalidCrossOriginRequest,
+    # a 422) before anything else is weighed. same-origin keeps our own origin on
     # those posts and still sends nothing to any other site, so the request's
     # parameters stay here. A POST's answer, the redirect carrying the code
     # among them, keeps no-referrer: a redirect's policy is the one the next
     # hop is sent under.
     def referrer_policy
-      request.get? ? "same-origin" : super
+      request.post? ? super : "same-origin"
     end
 
     # While connecting apps is in preview, nobody but previewers is asked to
