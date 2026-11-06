@@ -8,9 +8,6 @@ class Account::DataImportJob < ApplicationJob
     Account::Import::InsufficientStorageSpaceError ].freeze
 
   queue_as :backend
-
-  # Report each discard so a genuine export that fails this way still reaches
-  # Sentry, once, without a retry or a failed job.
   discard_on(*TERMINAL_ERRORS, report: true)
 
   def perform(import)

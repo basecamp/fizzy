@@ -2,14 +2,8 @@ class Account::DataTransfer::RecordSet
   class IntegrityError < StandardError; end
   class ConflictError < IntegrityError; end
 
-  # Errors raised when an export carries a value we can't store. A real export
-  # can't produce these, so they fail the import as invalid rather than reading
-  # as transient database trouble and retrying.
-  #
-  # Named on purpose rather than rescuing StatementInvalid: a failover's
-  # read-only error is a bare StatementInvalid too, and those imports should
-  # retry. So a crafted value MySQL rejects without a subclass, such as
-  # "Incorrect datetime value", still retries until it's added here.
+  # Values a real export can't produce. Named rather than rescuing StatementInvalid,
+  # which a failover raises too, and those imports should retry.
   INVALID_DATA_ERRORS = [ ActiveRecord::ValueTooLong, ActiveRecord::RangeError, ActiveModel::RangeError,
     ActiveRecord::NotNullViolation, ActiveRecord::CheckViolation, ActiveRecord::RecordInvalid,
     ActiveRecord::SerializationTypeMismatch ].freeze
@@ -231,8 +225,9 @@ class Account::DataTransfer::RecordSet
     end
 
     def load(file_path)
-      data = JSON.parse(zip.read(file_path))
-      data.is_a?(Hash) ? data : raise(IntegrityError, "#{file_path} isn't a JSON object")
+      JSON.parse(zip.read(file_path)).tap do |data|
+        raise IntegrityError, "#{file_path} isn't a JSON object" unless data.is_a?(Hash)
+      end
     rescue ArgumentError, JSON::ParserError => e
       raise IntegrityError, e.message
     end
