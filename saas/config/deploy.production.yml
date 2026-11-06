@@ -76,6 +76,7 @@ env:
     # Directory reviewer sign-in (Identity::ReviewerSignIn). The email is a secret only to keep it out of this public repo.
     - FIZZY_REVIEWER_SIGN_IN_EMAIL
     - FIZZY_REVIEWER_SIGN_IN_CODE_DIGEST
+    - FIZZY_REVIEWER_SIGN_IN_CODES
     # Identity ids of the connected apps preview's reviewers (Oauth::Availability).
     - CONNECTED_APPS_PREVIEW_REVIEWERS
   tags:
