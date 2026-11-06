@@ -17,7 +17,7 @@ class OauthConsentScreenTest < ActionDispatch::IntegrationTest
     assert_select ".oauth-client__name", text: "connector.example.com"
     assert_select ".oauth-client__self-name", text: /\ASays it’s “Totally Fizzy”\z/
     assert_select ".oauth-client__warning", text: /\AWe haven’t checked this app\. Anyone can run an app at any address, so only authorize it if you trust connector\.example\.com\.\z/
-    assert_select ".oauth-consent__destination strong", text: "connector.example.com"
+    assert_select ".oauth-consent__destination", text: /\AIf you change your mind, you can disconnect this at any time in Connected apps\.\z/
   end
 
   test "a self-registered app on this device is named as one" do
@@ -27,7 +27,6 @@ class OauthConsentScreenTest < ActionDispatch::IntegrationTest
     assert_select ".oauth-client__name", text: "An app on your device"
     assert_select ".oauth-client__self-name", text: /\ASays it’s “Test MCP Client”\z/
     assert_select ".oauth-client__warning", text: /\AWe haven’t checked this app\. It runs on your device and will get this access, so only authorize it if you started it\.\z/
-    assert_select ".oauth-consent__destination", text: /the app on your device/
   end
 
   test "a trusted app is known by its name and carries no warning" do

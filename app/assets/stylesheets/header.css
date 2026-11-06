@@ -89,7 +89,8 @@
     color: var(--color-ink);
     font-size: 1.2rem;
     inline-size: auto;
-    margin-block-start: 0.1em;
+    /* As far from the title as the account menu's button sits */
+    margin-block: 0.1em 0.3em;
 
     span {
       background: var(--color-ink-lightest);

@@ -6,19 +6,19 @@
 
 <% content_for :header do %>
   <h1 class="header__title"><%= @page_title %></h1>
-<% end %>
 
-<article class="oauth-consent panel panel--wide shadow center txt-align-start">
-  <%= render "oauth/authorizations/client", client: @client, identity: identity, redirect_host: redirect_host %>
-
-  <%# Not you? signs out and returns whoever signs in to this same request %>
-  <div class="oauth-consent__identity flex align-center gap-half txt-small txt-subtle">
+  <%# "Use a different account?" signs out and returns whoever signs in to this same request %>
+  <div class="oauth-consent__identity flex align-center justify-center gap-half txt-small txt-subtle">
     <span>Signed in as <strong><%= Current.identity.email_address %></strong></span>
-    <%= button_to "Not you?", oauth_authorization_switch_path,
+    <%= button_to "Use a different account?", oauth_authorization_switch_path,
           params: { client_id: @client.client_id, redirect_uri: @redirect_uri, response_type: "code", scope: @scope,
             state: @state, code_challenge: @code_challenge, code_challenge_method: "S256", resource: @resource }.compact,
           class: "btn btn--plain txt-link txt-small", form: { data: { turbo: false } } %>
   </div>
+<% end %>
+
+<article class="oauth-consent panel panel--wide shadow center txt-align-start margin-block-start-half">
+  <%= render "oauth/authorizations/client", client: @client, identity: identity, redirect_host: redirect_host %>
 
   <%= form_with url: oauth_authorization_path, method: :post, data: { turbo: false }, html: { class: "flex flex-column gap" } do |f| %>
     <%= f.hidden_field :client_id, value: @client.client_id %>
@@ -37,12 +37,7 @@
     <%= render "oauth/authorizations/access", form: f, client: @client, scope: @scope, one_account: @accounts.present? %>
 
     <p class="oauth-consent__destination txt-small txt-subtle margin-none">
-      <% if redirect_host %>
-        Either way, you'll go back to <strong><%= redirect_host %></strong>.
-      <% else %>
-        Either way, you'll go back to the app on your device.
-      <% end %>
-      You can disconnect it at any time in <%= link_to "Connected apps", my_connected_apps_path, class: "txt-link" %>.
+      If you change your mind, you can disconnect this at any time in <%= link_to "Connected apps", my_connected_apps_path, class: "txt-link" %>.
     </p>
 
     <div class="oauth-consent__actions flex gap">

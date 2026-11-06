@@ -9,6 +9,10 @@ class Oauth::AuthorizationsController < Oauth::BaseController
   LOOKUP_PARAMETERS = %w[ client_id redirect_uri ]
   UNKNOWN_CLIENT_MESSAGE = "Fizzy doesn't recognize this app. It may have been removed since you started. Start again from the app."
 
+  # The sign-in pages' layout: the Fizzy logo heads every page, with no account
+  # menu, since authorizing happens outside any one account.
+  layout "public"
+
   # Browsers apply form-action to every hop of a form submission, redirects
   # included, so the app-wide form-action 'self' would block the consent POST's
   # redirect to the client. Allow just this request's validated redirect target.
