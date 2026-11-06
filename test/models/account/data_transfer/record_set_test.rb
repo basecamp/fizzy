@@ -251,25 +251,20 @@ class Account::DataTransfer::RecordSetTest < ActiveSupport::TestCase
     assert_not Webhook.exists?(id: webhook_data["id"])
   end
 
-  test "import fails as invalid when a count is out of range for its column" do
-    account_data = { "name" => "Overflow", "cards_count" => 2**63,
-      "join_code" => { "code" => "ABCD-EFGH-IJKL", "usage_count" => 0, "usage_limit" => 10 } }
-
-    tempfile = Tempfile.new([ "import_test", ".zip" ])
-    tempfile.binmode
-    writer = ZipFile::Writer.new(tempfile)
-    writer.add_file("data/account.json", account_data.to_json)
-    writer.close
-    tempfile.rewind
-
+  test "import fails as invalid when a value is too long for its column" do
     error = assert_raises(Account::DataTransfer::RecordSet::IntegrityError) do
-      Account::DataTransfer::AccountRecordSet.new(importing_account).import(from: ZipFile::Reader.new(tempfile))
+      import_account(build_account_data("name" => "a" * 256))
     end
 
     assert_match(/invalid data/i, error.message)
-  ensure
-    tempfile&.close
-    tempfile&.unlink
+  end
+
+  test "import fails as invalid when a count is out of range for its column" do
+    error = assert_raises(Account::DataTransfer::RecordSet::IntegrityError) do
+      import_account(build_account_data("cards_count" => 2**63))
+    end
+
+    assert_match(/invalid data/i, error.message)
   end
 
   test "import fails as invalid when a user's email address doesn't validate" do
@@ -390,6 +385,24 @@ class Account::DataTransfer::RecordSetTest < ActiveSupport::TestCase
         "id" => ActiveRecord::Type::Uuid.generate,
         "name" => "Exported User"
       }
+    end
+
+    def build_account_data(overrides)
+      { "name" => "Imported", "join_code" => { "code" => "ABCD-EFGH-IJKL", "usage_count" => 0, "usage_limit" => 10 } }.merge(overrides)
+    end
+
+    def import_account(account_data)
+      tempfile = Tempfile.new([ "import_test", ".zip" ])
+      tempfile.binmode
+      writer = ZipFile::Writer.new(tempfile)
+      writer.add_file("data/account.json", account_data.to_json)
+      writer.close
+      tempfile.rewind
+
+      Account::DataTransfer::AccountRecordSet.new(importing_account).import(from: ZipFile::Reader.new(tempfile))
+    ensure
+      tempfile&.close
+      tempfile&.unlink
     end
 
     def build_reader(dir:, data:, users: [])
