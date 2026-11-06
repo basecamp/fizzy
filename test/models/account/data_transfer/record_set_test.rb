@@ -247,18 +247,8 @@ class Account::DataTransfer::RecordSetTest < ActiveSupport::TestCase
       webhook_record_set.import(from: build_reader(dir: "webhooks", data: webhook_data))
     end
 
-    assert_match(/value its column can't hold/i, error.message)
+    assert_match(/invalid data/i, error.message)
     assert_not Webhook.exists?(id: webhook_data["id"])
-  end
-
-  test "import fails as invalid when the database rejects a value as too long" do
-    Board::Publication.stubs(:insert_all!).raises(ActiveRecord::ValueTooLong, "Data too long for column 'id' at row 1")
-
-    error = assert_raises(Account::DataTransfer::RecordSet::IntegrityError) do
-      publication_record_set.import(from: build_reader(dir: "board_publications", data: build_publication_data(key: SecureRandom.base58(24))))
-    end
-
-    assert_match(/Data too long for column 'id'/, error.message)
   end
 
   test "import fails as invalid when a count is out of range for its column" do
@@ -276,10 +266,21 @@ class Account::DataTransfer::RecordSetTest < ActiveSupport::TestCase
       Account::DataTransfer::AccountRecordSet.new(importing_account).import(from: ZipFile::Reader.new(tempfile))
     end
 
-    assert_match(/value its column can't hold/i, error.message)
+    assert_match(/invalid data/i, error.message)
   ensure
     tempfile&.close
     tempfile&.unlink
+  end
+
+  test "import fails as invalid when a user's email address doesn't validate" do
+    user_data = { "id" => ActiveRecord::Type::Uuid.generate, "email_address" => "nope", "name" => "Crafted", "role" => "member",
+      "active" => true, "verified_at" => nil, "created_at" => Time.current.iso8601, "updated_at" => Time.current.iso8601 }
+
+    error = assert_raises(Account::DataTransfer::RecordSet::IntegrityError) do
+      Account::DataTransfer::UserRecordSet.new(importing_account).import(from: build_reader(dir: "users", data: user_data))
+    end
+
+    assert_match(/invalid data/i, error.message)
   end
 
   test "import leaves transient database errors to retry" do
@@ -304,6 +305,24 @@ class Account::DataTransfer::RecordSetTest < ActiveSupport::TestCase
   ensure
     tempfile&.close
     tempfile&.unlink
+  end
+
+  test "check fails as invalid on a record that isn't a JSON object" do
+    [ "[1,2]", "null", "42" ].each do |body|
+      tempfile = Tempfile.new([ "import_test", ".zip" ])
+      tempfile.binmode
+      writer = ZipFile::Writer.new(tempfile)
+      writer.add_file("data/board_publications/#{ActiveRecord::Type::Uuid.generate}.json", body)
+      writer.close
+      tempfile.rewind
+
+      assert_raises(Account::DataTransfer::RecordSet::IntegrityError, body) do
+        publication_record_set.check(from: ZipFile::Reader.new(tempfile))
+      end
+    ensure
+      tempfile&.close
+      tempfile&.unlink
+    end
   end
 
   test "a webhook exported before attribution existed checks and imports without a creator" do

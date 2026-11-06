@@ -10,12 +10,8 @@ class Account::DataImportJob < ApplicationJob
   queue_as :backend
 
   # Report each discard so a genuine export that fails this way still reaches
-  # Sentry, once, without a retry or a failed job. A crafted archive almost
-  # always comes from a fresh signup, so the identity's age tells the two apart.
-  discard_on(*TERMINAL_ERRORS) do |job, error|
-    import = job.arguments.first
-    Rails.error.report error, context: { import_id: import.id, identity_created_at: import.identity.created_at }
-  end
+  # Sentry, once, without a retry or a failed job.
+  discard_on(*TERMINAL_ERRORS, report: true)
 
   def perform(import)
     step :check do |step|
