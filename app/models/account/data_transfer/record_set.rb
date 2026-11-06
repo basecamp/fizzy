@@ -5,7 +5,7 @@ class Account::DataTransfer::RecordSet
   # Errors the database raises when an export carries a value its column can't
   # hold. A real export can't produce these, so they fail the import as
   # invalid rather than reading as transient database trouble and retrying.
-  INVALID_DATA_ERRORS = [ ActiveRecord::ValueTooLong, ActiveRecord::RangeError,
+  INVALID_DATA_ERRORS = [ ActiveRecord::ValueTooLong, ActiveRecord::RangeError, ActiveModel::RangeError,
     ActiveRecord::NotNullViolation, ActiveRecord::SerializationTypeMismatch ].freeze
 
   IMPORT_BATCH_SIZE = 100

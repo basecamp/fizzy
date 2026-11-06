@@ -261,6 +261,27 @@ class Account::DataTransfer::RecordSetTest < ActiveSupport::TestCase
     assert_match(/Data too long for column 'id'/, error.message)
   end
 
+  test "import fails as invalid when a count is out of range for its column" do
+    account_data = { "name" => "Overflow", "cards_count" => 2**63,
+      "join_code" => { "code" => "ABCD-EFGH-IJKL", "usage_count" => 0, "usage_limit" => 10 } }
+
+    tempfile = Tempfile.new([ "import_test", ".zip" ])
+    tempfile.binmode
+    writer = ZipFile::Writer.new(tempfile)
+    writer.add_file("data/account.json", account_data.to_json)
+    writer.close
+    tempfile.rewind
+
+    error = assert_raises(Account::DataTransfer::RecordSet::IntegrityError) do
+      Account::DataTransfer::AccountRecordSet.new(importing_account).import(from: ZipFile::Reader.new(tempfile))
+    end
+
+    assert_match(/value its column can't hold/i, error.message)
+  ensure
+    tempfile&.close
+    tempfile&.unlink
+  end
+
   test "import leaves transient database errors to retry" do
     Board::Publication.stubs(:insert_all!).raises(ActiveRecord::Deadlocked)
 
