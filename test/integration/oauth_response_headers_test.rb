@@ -1,7 +1,9 @@
 require "test_helper"
 
-# Every authorization server response is uncacheable and sends no Referer,
-# whether it succeeds, fails, or never reaches its action.
+# Every authorization server response is uncacheable and sends no Referer to
+# another site, whether it succeeds, fails, or never reaches its action. The
+# pages a GET renders send ours to us alone (same-origin), so a browser keeps
+# its Origin on the forms they post back; every other answer sends none.
 class OauthResponseHeadersTest < ActionDispatch::IntegrationTest
   include OauthAvailabilityTestHelper
 
@@ -32,7 +34,7 @@ class OauthResponseHeadersTest < ActionDispatch::IntegrationTest
 
     assert_response :redirect
     assert_match %r{/session/new}, response.location
-    assert_uncached_without_referrer
+    assert_uncached_without_cross_site_referrer
   end
 
   test "the consent screen and its redirect to the client" do
@@ -40,9 +42,27 @@ class OauthResponseHeadersTest < ActionDispatch::IntegrationTest
 
     untenanted { get new_oauth_authorization_path, params: authorization_params }
     assert_response :success
-    assert_uncached_without_referrer
+    assert_uncached_without_cross_site_referrer
 
     untenanted { post oauth_authorization_path, params: authorization_params }
+    assert_response :redirect
+    assert_match %r{\Ahttp://127\.0\.0\.1:8888/callback\?.*code=}, response.location
+    assert_uncached_without_referrer
+  end
+
+  test "an error a GET redirects to the client" do
+    sign_in_as :david
+
+    untenanted { get new_oauth_authorization_path, params: authorization_params.merge(response_type: "token") }
+    assert_response :redirect
+    assert_match %r{\Ahttp://127\.0\.0\.1:8888/callback\?.*error=unsupported_response_type}, response.location
+    assert_uncached_without_cross_site_referrer
+  end
+
+  test "the not-you switch" do
+    sign_in_as :david
+
+    untenanted { post oauth_authorization_switch_path, params: authorization_params }
     assert_response :redirect
     assert_uncached_without_referrer
   end
@@ -77,5 +97,10 @@ class OauthResponseHeadersTest < ActionDispatch::IntegrationTest
     def assert_uncached_without_referrer
       assert_equal "no-store", response.headers["Cache-Control"]
       assert_equal "no-referrer", response.headers["Referrer-Policy"]
+    end
+
+    def assert_uncached_without_cross_site_referrer
+      assert_equal "no-store", response.headers["Cache-Control"]
+      assert_equal "same-origin", response.headers["Referrer-Policy"]
     end
 end

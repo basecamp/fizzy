@@ -2,11 +2,12 @@ class Oauth::BaseController < ApplicationController
   disallow_account_scope
 
   # Every authorization server response, errors, consent and sign-in
-  # redirects included, is uncacheable and sends no Referer, so a code, a
-  # token, a secret or an authorization request's parameters reach neither a
-  # shared cache nor the page a browser goes to next. Prepended, so it runs
-  # ahead of every callback that can halt, the app's authentication included:
-  # a halted chain skips after_actions (RFC 6749 §5.1, §5.2).
+  # redirects included, is uncacheable and sends no Referer to another site,
+  # so a code, a token, a secret or an authorization request's parameters
+  # reach neither a shared cache nor the page a browser goes to next.
+  # Prepended, so it runs ahead of every callback that can halt, the app's
+  # authentication included: a halted chain skips after_actions (RFC 6749
+  # §5.1, §5.2).
   prepend_before_action :prevent_caching, :prevent_referrer
 
   # OAuth parameters are top-level names. Rails' JSON parameter wrapping would
@@ -161,7 +162,11 @@ class Oauth::BaseController < ApplicationController
     end
 
     def prevent_referrer
-      response.headers["Referrer-Policy"] = "no-referrer"
+      response.headers["Referrer-Policy"] = referrer_policy
+    end
+
+    def referrer_policy
+      "no-referrer"
     end
 
     # Every error answer is announced as error.oauth, for metrics (SaaS counts

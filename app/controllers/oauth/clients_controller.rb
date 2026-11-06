@@ -1,4 +1,6 @@
 class Oauth::ClientsController < Oauth::BaseController
+  allow_any_user_agent
+
   allow_unauthenticated_access
   skip_forgery_protection
 
