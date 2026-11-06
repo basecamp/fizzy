@@ -1,15 +1,17 @@
 <% identity = oauth_client_display_identity(@client, @redirect_uri) %>
 <% redirect_host = oauth_redirect_host(@redirect_uri) %>
-<%# A self-registered web app is headed by where its access goes, as bc3's
-    consent reads: "Authorize the app at <host>". %>
-<% @page_title = "Authorize #{@client.dynamically_registered? && redirect_host ? "the app at #{redirect_host}" : identity}" %>
+<%# A self-registered app is headed by where its access goes, the one thing
+    about it Fizzy can vouch for: "the app at <host>", or an app on this
+    device. Any other app is known by its name. %>
+<% heading_identity = @client.dynamically_registered? && redirect_host ? "the app at #{redirect_host}" : identity %>
+<% @page_title = "Connect #{heading_identity} to Fizzy" %>
 
 <% content_for :header do %>
-  <h1 class="header__title"><%= @page_title %></h1>
+  <h1 class="header__title oauth-consent__title">Connect <bdi><%= heading_identity %></bdi> to Fizzy?</h1>
 <% end %>
 
 <article class="oauth-consent panel panel--wide shadow center txt-align-start">
-  <%= render "oauth/authorizations/client", client: @client, identity: identity, redirect_host: redirect_host %>
+  <%= render "oauth/authorizations/client", client: @client, redirect_uri: @redirect_uri %>
 
   <%# Not you? signs out and returns whoever signs in to this same request %>
   <div class="oauth-consent__identity flex align-center gap-half txt-small txt-subtle">
@@ -36,13 +38,8 @@
 
     <%= render "oauth/authorizations/access", form: f, client: @client, scope: @scope, one_account: @accounts.present? %>
 
-    <p class="oauth-consent__destination txt-small txt-subtle margin-none">
-      <% if redirect_host %>
-        Either way, you'll go back to <strong><%= redirect_host %></strong>.
-      <% else %>
-        Either way, you'll go back to the app on your device.
-      <% end %>
-      You can disconnect it at any time in <%= link_to "Connected apps", my_connected_apps_path, class: "txt-link" %>.
+    <p class="oauth-consent__fine-print txt-x-small txt-subtle margin-none">
+      You can disconnect it anytime in <%= link_to "Connected apps", my_connected_apps_path, class: "txt-link" %>.
     </p>
 
     <div class="oauth-consent__actions flex gap">

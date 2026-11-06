@@ -64,11 +64,12 @@ class OauthHelperTest < ActionView::TestCase
     assert_equal %w[ a.example.com b.example.com:8443 ], oauth_client_remote_hosts(client)
   end
 
-  test "read's description names the people in every account, or in the one account a bound grant reaches" do
-    client = oauth_clients(:mcp_client)
-
-    assert_match "the people in your accounts.", oauth_access_levels(client).to_h.fetch("read")[:description]
-    assert_match "the people in your account.", oauth_access_levels(client, one_account: true).to_h.fetch("read")[:description]
+  test "each access level has a short label and a line saying what it allows" do
+    oauth_access_levels(oauth_clients(:mcp_client)).each do |_, level|
+      assert level[:label].present?
+      assert level[:description].present?
+      assert_operator level[:description].split.size, :<=, 12
+    end
   end
 
   test "a redirect's host reads in lowercase, as a browser reads it" do

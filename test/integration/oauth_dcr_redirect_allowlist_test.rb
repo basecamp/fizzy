@@ -89,7 +89,7 @@ class OauthDcrRedirectAllowlistTest < ActionDispatch::IntegrationTest
     end
     assert_response :success
     assert_includes response.headers["Content-Security-Policy"], "cursor:"
-    assert_select ".oauth-consent__destination", text: /the app on your device/
+    assert_select "h1", text: "Connect an app on your device to Fizzy?"
 
     untenanted do
       post oauth_authorization_path, params: {
