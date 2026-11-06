@@ -110,11 +110,14 @@ class Account::DataImportJobTest < ActiveJob::TestCase
     Account::Import.any_instance.stubs(:process).raises(Account::DataTransfer::RecordSet::IntegrityError, "users import has a value its column can't hold")
     Account::Import.any_instance.stubs(:check)
 
-    assert_error_reported(Account::DataTransfer::RecordSet::IntegrityError) do
+    report = assert_error_reported(Account::DataTransfer::RecordSet::IntegrityError) do
       assert_no_enqueued_jobs only: Account::DataImportJob do
         Account::DataImportJob.perform_now(import)
       end
     end
+
+    assert_equal import.id, report.context[:import_id]
+    assert_equal identities(:david).created_at, report.context[:identity_created_at]
   end
 
   private
