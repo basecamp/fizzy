@@ -1,4 +1,6 @@
 class Oauth::MetadataController < Oauth::BaseController
+  allow_any_user_agent
+
   allow_unauthenticated_access
 
   before_action :require_acceptance_enabled

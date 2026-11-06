@@ -21,7 +21,17 @@ class ApplicationController < ActionController::Base
   fragment_cache_key RENDERING_VERSION
   etag { RENDERING_VERSION }
   stale_when_importmap_changes
-  allow_browser versions: :modern
+  # People's browsers, that is: see allow_any_user_agent.
+  class_attribute :browser_versions_enforced, instance_accessor: false, default: true
+  allow_browser versions: :modern, if: -> { self.class.browser_versions_enforced }
+
+  # For endpoints software calls rather than people visit: OAuth's token,
+  # registration, revocation and discovery. Their callers send whatever
+  # user agent their platform does, an old browser's included, and a 406 page
+  # is no answer a client can act on.
+  def self.allow_any_user_agent
+    self.browser_versions_enforced = false
+  end
 
   # Here rather than in Authentication: Active Storage's controllers include
   # that too, and a handler declared there would shadow ones added to their

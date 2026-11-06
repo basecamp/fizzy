@@ -16,6 +16,8 @@
 class Oauth::RevocationsController < Oauth::BaseController
   include Oauth::ClientAuthentication
 
+  allow_any_user_agent
+
   allow_unauthenticated_access
   skip_forgery_protection
 

@@ -1,6 +1,8 @@
 class Oauth::TokensController < Oauth::BaseController
   include Oauth::ClientAuthentication
 
+  allow_any_user_agent
+
   GRANT_TYPES = %w[ authorization_code refresh_token ]
 
   # A grant's own requests a minute: a client refreshing on schedule spends

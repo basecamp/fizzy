@@ -10,6 +10,8 @@
 class Oauth::TokenExchangesController < Oauth::BaseController
   include Oauth::ClientAuthentication
 
+  allow_any_user_agent
+
   CLIENT_BUDGET = 600
 
   allow_unauthenticated_access
