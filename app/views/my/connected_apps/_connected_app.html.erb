@@ -37,29 +37,27 @@
   <div class="connected-app__disconnect" data-controller="dialog" data-dialog-modal-value="true" data-action="keydown.esc->dialog#close:stop">
     <button type="button" class="btn txt-negative borderless txt-small" data-action="dialog#open" aria-describedby="<%= dom_id(client, :connected_app_name) %>">
       <%= icon_tag "trash" %>
-      <span>Disconnect</span>
+      <span>Revoke access</span>
     </button>
 
     <dialog class="dialog panel fill-white shadow gap flex-column txt-align-center" style="--panel-size: 44ch" data-dialog-target="dialog" aria-labelledby="<%= dom_id(client, :disconnect_title) %>">
-      <h3 class="txt-large txt-bold margin-none" id="<%= dom_id(client, :disconnect_title) %>">Disconnect <bdi><%= oauth_client_self_name(client) %></bdi>?</h3>
+      <h3 class="txt-large txt-bold margin-none" id="<%= dom_id(client, :disconnect_title) %>">Revoke access for <bdi><%= oauth_client_self_name(client) %></bdi>?</h3>
       <p class="txt-medium margin-none">It loses its access to Fizzy right away. To use it again, reconnect it.</p>
 
       <%= form_with url: my_connected_app_path(client), method: :delete, class: "flex flex-column" do |form| %>
         <% if webhooks.any? %>
-          <div class="flex flex-column gap margin-block-start">
-            <div class="connected-app__webhooks txt-align-start" role="note">
-              <p class="margin-none">It set up <%= webhooks.one? ? "this webhook" : "these webhooks" %>, which will keep running unless you remove <%= webhooks.one? ? "it" : "them" %>:</p>
-              <ul class="margin-block-start-half margin-none-block-end">
-                <% webhooks.each do |webhook| %>
-                  <li>
-                    <strong><%= webhook.name %></strong> on <%= webhook.board.name %><%= " in #{webhook.account.name}" unless webhook.account == Current.account %>
-                    <%= hidden_field_tag "webhook_ids[]", webhook.id, id: nil %>
-                  </li>
-                <% end %>
-              </ul>
-            </div>
+          <div class="connected-app__webhooks flex flex-column gap-half margin-block-start txt-align-start">
+            <p class="margin-none">It set up <%= webhooks.one? ? "this webhook" : "these webhooks" %>, which will keep running unless you remove <%= webhooks.one? ? "it" : "them" %>:</p>
+            <ul class="margin-none">
+              <% webhooks.each do |webhook| %>
+                <li>
+                  <strong><%= webhook.name %></strong> on <%= webhook.board.name %><%= " in #{webhook.account.name}" unless webhook.account == Current.account %>
+                  <%= hidden_field_tag "webhook_ids[]", webhook.id, id: nil %>
+                </li>
+              <% end %>
+            </ul>
 
-            <label class="flex gap-half align-center justify-center">
+            <label class="flex gap-half align-center justify-start margin-block-start-half">
               <%= check_box_tag :remove_webhooks, "1", false, class: "checkbox", id: dom_id(client, :remove_webhooks) %>
               Also remove <%= webhooks.one? ? "this webhook" : "these webhooks" %>
             </label>
@@ -68,7 +66,7 @@
 
         <div class="flex gap-half justify-center margin-block-start">
           <button type="button" class="btn" data-action="dialog#close">Cancel</button>
-          <%= form.button "Disconnect", class: "btn txt-negative" %>
+          <%= form.button "Revoke access", class: "btn txt-negative" %>
         </div>
       <% end %>
     </dialog>

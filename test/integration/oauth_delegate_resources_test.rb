@@ -293,7 +293,7 @@ class OauthDelegateResourcesTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "dialog li", text: /#{Regexp.escape(webhook.name)}/
-    assert_select "dialog[aria-labelledby=?] ##{ActionView::RecordIdentifier.dom_id(@client, :disconnect_title)}", ActionView::RecordIdentifier.dom_id(@client, :disconnect_title), text: "Disconnect #{@client.name}?"
+    assert_select "dialog[aria-labelledby=?] ##{ActionView::RecordIdentifier.dom_id(@client, :disconnect_title)}", ActionView::RecordIdentifier.dom_id(@client, :disconnect_title), text: "Revoke access for #{@client.name}?"
     assert_select "input[type=checkbox][name=remove_webhooks]:not([checked])"
   end
 
