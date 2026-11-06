@@ -114,7 +114,7 @@ class My::ConnectedAppsControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_redirected_to my_connected_apps_path
-    assert_match "disconnected", flash[:notice]
+    assert_match "Access revoked", flash[:notice]
   end
 
   test "the notice names the app as the list does, and a name of nothing but direction controls as an unnamed app" do
@@ -123,14 +123,14 @@ class My::ConnectedAppsControllerTest < ActionDispatch::IntegrationTest
 
     delete my_connected_app_path(client)
 
-    assert_equal "Unnamed app has been disconnected", flash[:notice]
+    assert_equal "Access revoked for Unnamed app", flash[:notice]
 
     named = Oauth::Client.create!(name: "\u202EBoard Sync", redirect_uris: %w[ http://127.0.0.1/cb ], dynamically_registered: true)
     @identity.access_tokens.create!(oauth_client: named, permission: :read)
 
     delete my_connected_app_path(named)
 
-    assert_equal "Board Sync has been disconnected", flash[:notice]
+    assert_equal "Access revoked for Board Sync", flash[:notice]
   end
 
   test "the profile entry reads Connected apps" do

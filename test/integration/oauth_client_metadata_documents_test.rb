@@ -116,7 +116,7 @@ class OauthClientMetadataDocumentsTest < ActionDispatch::IntegrationTest
 
     assert_response :bad_request
     assert_select "h2", text: "Can't authorize this app"
-    assert_select "code", text: "invalid_client_metadata"
+    assert_select "[data-oauth-error=?]", "invalid_client_metadata"
 
     untenanted { get new_oauth_authorization_path(format: :json), params: authorization }
 
@@ -152,8 +152,8 @@ class OauthClientMetadataDocumentsTest < ActionDispatch::IntegrationTest
       end
 
       assert_response :bad_request
-      assert_select "code", text: "invalid_request"
-      assert_match "client_id", response.body
+      assert_select "[data-oauth-error=?]", "invalid_request"
+      assert_select "p", text: OauthHelper::OAUTH_ERROR_MESSAGES["invalid_request"]
     end
   end
 
@@ -175,7 +175,7 @@ class OauthClientMetadataDocumentsTest < ActionDispatch::IntegrationTest
     untenanted { get new_oauth_authorization_path, params: authorization.merge(code_challenge_method: "plain") }
 
     assert_response :bad_request
-    assert_select "code", text: "invalid_request"
+    assert_select "[data-oauth-error=?]", "invalid_request"
   end
 
   teardown do

@@ -7,7 +7,7 @@
     <h3 class="connected-app__name txt-medium margin-none" id="<%= dom_id(client, :connected_app_name) %>"><bdi><%= oauth_client_self_name(client) %></bdi></h3>
 
     <% if client.dynamically_registered? %>
-      <p class="txt-x-small txt-subtle margin-none">
+      <p class="connected-app__byline txt-x-small txt-subtle margin-none">
         <% if remote_hosts.any? %>
           Name set by the app at <%= remote_hosts.to_sentence(two_words_connector: " or ", last_word_connector: " or ") %>
         <% else %>
@@ -15,9 +15,9 @@
         <% end %>
       </p>
     <% elsif client.metadata_document? %>
-      <p class="txt-x-small txt-subtle margin-none">Name set by the app at <%= URI.parse(client.client_id).host %></p>
+      <p class="connected-app__byline txt-x-small txt-subtle margin-none">Name set by the app at <%= URI.parse(client.client_id).host %></p>
     <% elsif client.trusted? %>
-      <p class="txt-x-small txt-subtle margin-none">Made by 37signals</p>
+      <p class="connected-app__byline txt-x-small txt-subtle margin-none">Made by 37signals</p>
     <% end %>
 
     <% oauth_connected_app_reach(tokens).each do |permission, accounts| %>
@@ -37,18 +37,18 @@
   <div class="connected-app__disconnect" data-controller="dialog" data-dialog-modal-value="true" data-action="keydown.esc->dialog#close:stop">
     <button type="button" class="btn txt-negative borderless txt-small" data-action="dialog#open" aria-describedby="<%= dom_id(client, :connected_app_name) %>">
       <%= icon_tag "trash" %>
-      <span>Disconnect</span>
+      <span>Revoke access</span>
     </button>
 
-    <dialog class="dialog panel fill-white shadow gap flex-column" style="--panel-size: 44ch" data-dialog-target="dialog" aria-labelledby="<%= dom_id(client, :disconnect_title) %>">
-      <h3 class="txt-large txt-bold margin-none" id="<%= dom_id(client, :disconnect_title) %>">Disconnect <bdi><%= oauth_client_self_name(client) %></bdi>?</h3>
-      <p class="txt-medium margin-none">It loses its access to Fizzy right away. To use it again, you'd connect it again.</p>
+    <dialog class="dialog panel fill-white shadow gap flex-column txt-align-center" style="--panel-size: 44ch" data-dialog-target="dialog" aria-labelledby="<%= dom_id(client, :disconnect_title) %>">
+      <h3 class="txt-large txt-bold margin-none" id="<%= dom_id(client, :disconnect_title) %>">Revoke access for <bdi><%= oauth_client_self_name(client) %></bdi>?</h3>
+      <p class="txt-medium margin-none">It loses its access to Fizzy right away. To use it again, reconnect it.</p>
 
-      <%= form_with url: my_connected_app_path(client), method: :delete, class: "flex flex-column gap" do |form| %>
+      <%= form_with url: my_connected_app_path(client), method: :delete, class: "flex flex-column" do |form| %>
         <% if webhooks.any? %>
-          <div class="txt-align-start">
+          <div class="connected-app__webhooks flex flex-column gap-half margin-block-start txt-align-start">
             <p class="margin-none">It set up <%= webhooks.one? ? "this webhook" : "these webhooks" %>, which will keep running unless you remove <%= webhooks.one? ? "it" : "them" %>:</p>
-            <ul class="margin-block-half">
+            <ul class="margin-none">
               <% webhooks.each do |webhook| %>
                 <li>
                   <strong><%= webhook.name %></strong> on <%= webhook.board.name %><%= " in #{webhook.account.name}" unless webhook.account == Current.account %>
@@ -57,16 +57,16 @@
               <% end %>
             </ul>
 
-            <label class="flex gap-half align-center justify-start">
+            <label class="flex gap-half align-center justify-start margin-block-start-half">
               <%= check_box_tag :remove_webhooks, "1", false, class: "checkbox", id: dom_id(client, :remove_webhooks) %>
-              Also remove <%= webhooks.one? ? "it" : "these" %>
+              Also remove <%= webhooks.one? ? "this webhook" : "these webhooks" %>
             </label>
           </div>
         <% end %>
 
-        <div class="flex gap-half justify-center">
+        <div class="flex gap-half justify-center margin-block-start">
           <button type="button" class="btn" data-action="dialog#close">Cancel</button>
-          <%= form.button "Disconnect", class: "btn txt-negative" %>
+          <%= form.button "Revoke access", class: "btn txt-negative" %>
         </div>
       <% end %>
     </dialog>

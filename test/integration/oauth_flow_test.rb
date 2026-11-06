@@ -59,7 +59,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_response :bad_request
     assert_select "h2", text: "Can't authorize this app"
     assert_select "p", text: Oauth::AuthorizationsController::UNKNOWN_CLIENT_MESSAGE
-    assert_select "code", text: "invalid_request"
+    assert_select "[data-oauth-error=?]", "invalid_request"
   end
 
   test "authorization answers an invalid client_id as JSON when JSON is asked for" do
@@ -96,7 +96,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
 
     # Can't redirect to untrusted URI, so render HTML error page
     assert_response :bad_request
-    assert_select "code", text: "invalid_request"
+    assert_select "[data-oauth-error=?]", "invalid_request"
   end
 
   test "authorization requires PKCE" do
@@ -126,7 +126,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     get_consent_screen client: client, code_challenge: nil
 
     assert_response :bad_request
-    assert_select "code", text: "invalid_request"
+    assert_select "[data-oauth-error=?]", "invalid_request"
   end
 
   test "no pre-consent error redirects to a self-registered https host" do
@@ -143,7 +143,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
 
       assert_response :bad_request, "#{overrides} should not redirect"
       assert_nil response.location
-      assert_select "code", text: error
+      assert_select "[data-oauth-error=?]", error
     end
   end
 

@@ -222,7 +222,7 @@ class PersonalAccessTokenFormsTest < ActionDispatch::IntegrationTest
     untenanted { get new_oauth_authorization_path, params: params }
 
     assert_response :bad_request
-    assert_select "code", text: "unauthorized_client"
+    assert_select "[data-oauth-error=?]", "unauthorized_client"
 
     untenanted { get new_oauth_authorization_path(format: :json), params: params }
 
