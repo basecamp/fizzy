@@ -14,13 +14,24 @@
       <input placeholder="Filter…" class="input input--transparent full-width txt-small" type="search" autocorrect="off" autocomplete="off" data-1p-ignore="true" data-filter-target="input" data-action="input->filter#filter">
 
       <ul class="settings__scrollable-list margin-block-half" data-filter-target="list" role="listbox">
-        <%= render partial: "account/settings/user", collection: users %>
+        <% users.each do |user| %>
+          <%= render "account/settings/#{user.bot? ? 'bot_user' : 'user'}", user.bot? ? { bot_user: user } : { user: user } %>
+        <% end %>
       </ul>
     </div>
 
-    <%= link_to account_join_code_path, class: "btn btn--link center" do %>
-      <%= icon_tag "add" %>
-      <span>Invite people</span>
-    <% end %>
+    <div class="flex justify-center gap">
+      <%= link_to account_join_code_path, class: "btn btn--link" do %>
+        <%= icon_tag "add" %>
+        <span>Invite people</span>
+      <% end %>
+
+      <% if Current.user.admin? %>
+        <%= link_to new_account_bot_path, class: "btn btn--link" do %>
+          <%= icon_tag "add" %>
+          <span>Create bot</span>
+        <% end %>
+      <% end %>
+    </div>
   <% end %>
 </section>
