@@ -16,7 +16,6 @@ class OauthErrorPagesTest < ActionDispatch::IntegrationTest
     get_authorization client_id: Oauth::Client::PERSONAL_ACCESS_CLIENT_ID
 
     assert_error_page "unauthorized_client", OauthHelper::OAUTH_ERROR_MESSAGES["unauthorized_client"]
-    assert_select ".oauth-error__detail", text: /Client may not use the authorization code grant/
 
     get_authorization client_id: Oauth::Client::PERSONAL_ACCESS_CLIENT_ID, format: :json
 
@@ -37,12 +36,11 @@ class OauthErrorPagesTest < ActionDispatch::IntegrationTest
     assert_oauth_json "invalid_client_metadata", :bad_request
   end
 
-  test "a developer's description is shown beneath the plain words, never in their place" do
+  test "a person reads the plain words, never the developer's description" do
     get_authorization redirect_uri: "http://evil.example.com/steal"
 
     assert_error_page "invalid_request", "The app asked to send you back to an address it never registered with Fizzy."
-    assert_select ".oauth-error__detail", text: /Invalid redirect_uri/
-    assert_select "p.margin-none:not(.oauth-error__detail)", text: "Invalid redirect_uri", count: 0
+    assert_no_match "Invalid redirect_uri", response.body
   end
 
   test "an error with nothing particular to say reads as its code's sentence" do
@@ -57,7 +55,7 @@ class OauthErrorPagesTest < ActionDispatch::IntegrationTest
       get_authorization client_id: client.client_id, redirect_uri: client.redirect_uris.first, **overrides
 
       assert_error_page error, OauthHelper::OAUTH_ERROR_MESSAGES.fetch(error)
-      assert_select ".oauth-error__detail", text: /#{Regexp.escape(description)}/
+      assert_no_match description, response.body
     end
   end
 
@@ -75,13 +73,12 @@ class OauthErrorPagesTest < ActionDispatch::IntegrationTest
     assert_oauth_json "invalid_request", :bad_request
   end
 
-  test "a dark server shows a person the page for anything Fizzy doesn't have, and an app a bare 404" do
+  test "a dark server tells a person it's not available yet, and gives an app a bare 404" do
     with_oauth_availability acceptance: false do
       get_authorization
       assert_response :not_found
       assert_equal "text/html", response.media_type
-      assert_equal File.read(Rails.public_path.join("404.html")), response.body
-      assert_no_match "oauth", response.body.downcase
+      assert_select "h2", text: "Not available yet"
 
       get_authorization format: :json
       assert_response :not_found
@@ -152,7 +149,7 @@ class OauthErrorPagesTest < ActionDispatch::IntegrationTest
       assert_equal "text/html", response.media_type
       assert_select "h2", text: "Can't authorize this app"
       assert_select "p", text: message
-      assert_select ".oauth-error__detail code", text: error
+      assert_select "[data-oauth-error=?]", error
     end
 
     def assert_oauth_json(error, status)

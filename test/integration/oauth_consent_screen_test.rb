@@ -73,7 +73,7 @@ class OauthConsentScreenTest < ActionDispatch::IntegrationTest
     assert_response :bad_request
     assert_select "h2", text: "Can't authorize this app"
     assert_select "p", text: /Nothing was shared/
-    assert_select "code", text: "invalid_request"
+    assert_select "[data-oauth-error=?]", "invalid_request"
   end
 
   private

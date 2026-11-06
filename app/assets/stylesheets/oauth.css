@@ -31,7 +31,9 @@
     }
   }
 
-  .oauth-client__warning {
+  /* The unchecked-app warning, and the webhooks an app leaves running */
+  .oauth-client__warning,
+  .connected-app__webhooks {
     background-color: var(--color-highlight);
     border-radius: 0.5em;
     padding: var(--block-space-half) var(--inline-space);
@@ -129,8 +131,6 @@
   }
 
   .connected-apps__empty {
-    border: 2px dashed var(--color-ink-lighter);
-    border-radius: 0.5em;
     padding: var(--block-space) var(--inline-space-double);
   }
 
@@ -154,6 +154,10 @@
 
   .connected-app__disconnect {
     flex-shrink: 0;
+  }
+
+  .connected-app__byline {
+    margin-block-end: 0.3em;
   }
 
   .connected-app__details {

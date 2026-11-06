@@ -73,7 +73,7 @@ class OauthAuthorizationSwitchTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :bad_request
-    assert_select "code", text: "invalid_request"
+    assert_select "[data-oauth-error=?]", "invalid_request"
     assert_nil session[:return_to_after_authenticating]
   end
 

@@ -300,25 +300,25 @@ class Oauth::AuthorizationsController < Oauth::BaseController
     end
 
     # A person in a browser is told in plain words (message, or the error's
-    # own, OauthHelper#oauth_error_message), with the precise error beneath for
-    # the app's developer. Anything else asked for gets the OAuth JSON body.
+    # own, OauthHelper#oauth_error_message). Anything else asked for gets the
+    # OAuth JSON body, with the precise error.
     # Every error this endpoint answers comes through here, oauth_error's
     # included, so none reaches a person as JSON.
     def render_oauth_error(error, description, status:, message: nil)
       respond_to do |format|
         format.html do
-          @error, @error_description, @error_message = error, description, message
+          @error, @error_message = error, message
           render :error, status: status
         end
         format.any { super(error, description, status: status) }
       end
     end
 
-    # A dark server is as absent to a person as to an app: they get the page
-    # for anything Fizzy doesn't have. A paused one says so.
+    # A dark server is still a 404, but a person is told it's not available
+    # yet, as bc3 and HEY tell them. A paused one says so.
     def render_dark
       respond_to do |format|
-        format.html { render file: Rails.public_path.join("404.html"), status: :not_found, layout: false }
+        format.html { render "oauth/not_available", status: :not_found }
         format.any { super() }
       end
     end
