@@ -15,11 +15,11 @@ module OauthHelper
   ACCESS_LEVELS = {
     "read" => {
       label: "Read only",
-      description: "See your boards, cards, comments and the people in your %{accounts}. It can't change anything."
+      description: "See boards, cards, comments and people. It can't change anything."
     },
     "read write" => {
       label: "Read and write",
-      description: "See everything you can, and act as you: create, edit, move, close and delete cards, comments and boards."
+      description: "Also create, edit, move, close and delete cards, comments and boards."
     }
   }
 
@@ -60,15 +60,11 @@ module OauthHelper
   end
 
   # The access levels a client may be granted, weakest first, each with what
-  # it lets the app do in plain words. A grant reaches every account the
-  # person belongs to, unless it's bound to the one picked at consent.
-  def oauth_access_levels(client, one_account: false)
+  # it lets the app do in a few words. Which accounts it reaches is said once,
+  # under the choices (oauth/authorizations/access).
+  def oauth_access_levels(client)
     levels = client.scopes.include?("write") ? ACCESS_LEVELS.keys : %w[ read ]
-
-    levels.map do |scope|
-      level = ACCESS_LEVELS.fetch(scope)
-      [ scope, level.merge(description: format(level[:description], accounts: one_account ? "account" : "accounts")) ]
-    end
+    ACCESS_LEVELS.slice(*levels).to_a
   end
 
   def oauth_strongest_permission(tokens)

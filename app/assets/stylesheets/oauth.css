@@ -7,8 +7,9 @@
     gap: var(--block-space);
   }
 
-  .oauth-client__name {
-    overflow-wrap: anywhere;
+  /* The heading wraps between words; only a host too long for the line breaks inside it */
+  .oauth-consent__title {
+    overflow-wrap: break-word;
   }
 
   .oauth-client__self-name {

@@ -173,7 +173,8 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     get_consent_screen client: client
 
     assert_response :success
-    assert_select "strong", text: "connector.example.com:8443"
+    assert_select "h1", text: "Connect the app at connector.example.com:8443 to Fizzy?"
+    assert_equal 1, response.parsed_body.at("body").text.scan("connector.example.com:8443").size
   end
 
   test "consent restarts a self-registered client's retention period, so the sweep spares it while the code is live" do
