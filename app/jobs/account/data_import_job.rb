@@ -8,7 +8,7 @@ class Account::DataImportJob < ApplicationJob
     Account::Import::InsufficientStorageSpaceError ].freeze
 
   queue_as :backend
-  discard_on(*TERMINAL_ERRORS)
+  discard_on(*TERMINAL_ERRORS, report: true)
 
   def perform(import)
     step :check do |step|

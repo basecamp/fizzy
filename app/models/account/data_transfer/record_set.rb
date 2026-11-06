@@ -2,6 +2,12 @@ class Account::DataTransfer::RecordSet
   class IntegrityError < StandardError; end
   class ConflictError < IntegrityError; end
 
+  # Values a real export can't produce. Named rather than rescuing StatementInvalid,
+  # which a failover raises too, and those imports should retry.
+  INVALID_DATA_ERRORS = [ ActiveRecord::ValueTooLong, ActiveRecord::RangeError, ActiveModel::RangeError,
+    ActiveRecord::NotNullViolation, ActiveRecord::CheckViolation, ActiveRecord::RecordInvalid,
+    ActiveRecord::SerializationTypeMismatch ].freeze
+
   IMPORT_BATCH_SIZE = 100
 
   # A batch holds every record it reads until it inserts them, so a batch also
@@ -47,6 +53,8 @@ class Account::DataTransfer::RecordSet
     end
   rescue ActiveRecord::RecordNotUnique => e
     raise ConflictError, "#{model} import violated a uniqueness constraint: #{e.message}"
+  rescue *INVALID_DATA_ERRORS => e
+    raise IntegrityError, "#{model} import has invalid data: #{e.message}"
   end
 
   def check(from:, start: nil, callback: nil)
@@ -217,8 +225,10 @@ class Account::DataTransfer::RecordSet
     end
 
     def load(file_path)
-      JSON.parse(zip.read(file_path))
-    rescue ArgumentError => e
+      JSON.parse(zip.read(file_path)).tap do |data|
+        raise IntegrityError, "#{file_path} isn't a JSON object" unless data.is_a?(Hash)
+      end
+    rescue ArgumentError, JSON::ParserError => e
       raise IntegrityError, e.message
     end
 
