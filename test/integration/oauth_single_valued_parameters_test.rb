@@ -20,8 +20,8 @@ class OauthSingleValuedParametersTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :bad_request
-    assert_select "code", text: "invalid_request"
-    assert_match "client_id", response.body
+    assert_select "[data-oauth-error=?]", "invalid_request"
+    assert_select "p", text: OauthHelper::OAUTH_ERROR_MESSAGES["invalid_request"]
   end
 
   test "an array redirect_uri is shown an error, never redirected to" do
@@ -30,7 +30,7 @@ class OauthSingleValuedParametersTest < ActionDispatch::IntegrationTest
     untenanted { get new_oauth_authorization_path, params: authorize_params(redirect_uri: [ "http://127.0.0.1:8888/callback" ]) }
 
     assert_response :bad_request
-    assert_select "code", text: "invalid_request"
+    assert_select "[data-oauth-error=?]", "invalid_request"
     assert_nil response.location
   end
 
@@ -55,7 +55,7 @@ class OauthSingleValuedParametersTest < ActionDispatch::IntegrationTest
     untenanted { get new_oauth_authorization_path, params: authorize_params(redirect_uri: "https://connector.example.com/callback", scope: [ "read" ]) }
 
     assert_response :bad_request
-    assert_select "code", text: "invalid_request"
+    assert_select "[data-oauth-error=?]", "invalid_request"
   end
 
   test "the consent POST refuses an array client_id" do
@@ -66,7 +66,7 @@ class OauthSingleValuedParametersTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :bad_request
-    assert_select "code", text: "invalid_request"
+    assert_select "[data-oauth-error=?]", "invalid_request"
   end
 
   test "a dark server still answers 404 to a malformed request" do
