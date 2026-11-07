@@ -1,6 +1,17 @@
 #!/usr/bin/env ruby
 require_relative "../config/boot"
 require "bundler/audit/cli"
+require "fileutils"
 
 ARGV.concat %w[ --config config/bundler-audit.yml ] if ARGV.empty? || ARGV.include?("check")
-Bundler::Audit::CLI.start
+
+# Every checkout on a machine shares one advisory database, and git refuses a
+# second pull into it while one is under way, failing whichever bin/ci run came
+# second. Take turns.
+database = Bundler::Audit::Database.path
+lock = File.join(File.dirname(database), "#{File.basename(database)}.lock")
+FileUtils.mkdir_p File.dirname(lock)
+File.open(lock, File::RDWR | File::CREAT) do |file|
+  file.flock File::LOCK_EX
+  Bundler::Audit::CLI.start
+end
