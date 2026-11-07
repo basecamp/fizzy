@@ -24,12 +24,15 @@
       <% end %>
 
       <ul class="popup__list" data-filter-target="list" role="listbox">
-        <% user_filtering.users.each do |user| %>
+        <% ([ Current.user ] + user_filtering.users.to_a).uniq.each do |user| %>
           <%= tag.li class: "popup__item", data: {
                 filter_target: "item", navigable_list_target: "item", multi_selection_combobox_target: "item", multi_selection_combobox_value: user.id, multi_selection_combobox_label: user.familiar_name },
                 role: "checkbox", aria: { checked: filter.closers.include?(user) } do %>
             <button type="button" class="btn popup__btn" data-action="dialog#close multi-selection-combobox#change filter-settings#change form#submit">
-              <span class="overflow-ellipsis flex-item-grow"><%= user.name %></span>
+              <span class="overflow-ellipsis flex-item-grow"><%= user == Current.user ? "Me" : user.name %></span>
+              <% if user == Current.user %>
+                <span class="visually-hidden"><%= user.name %></span>
+              <% end %>
               <%= icon_tag "check", class: "checked flex-item-justify-end" %>
             </button>
           <% end %>
