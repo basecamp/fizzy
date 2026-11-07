@@ -63,6 +63,40 @@ class Identity::AccessTokenTest < ActiveSupport::TestCase
     end
   end
 
+  test "a fresh token reports its whole lifetime with the clock frozen" do
+    freeze_time
+    token = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client))
+
+    assert_equal 3600, token.expires_in
+  end
+
+  test "a fresh token reports its whole lifetime when the request runs on after the mint" do
+    token = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client))
+
+    travel_to token.issued_at + 0.4.seconds, with_usec: true
+    assert_equal 3600, token.expires_in, "a 1-hour token told it has 3599s fails clients that require an hour"
+
+    travel_to token.issued_at + 2.seconds, with_usec: true
+    assert_equal 3600, token.expires_in
+  end
+
+  test "a refreshed token reports its whole lifetime when the request runs on after the rotation" do
+    token = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client))
+
+    travel 10.minutes
+    assert token.refresh
+
+    travel_to token.issued_at + 0.4.seconds, with_usec: true
+    assert_equal 3600, token.expires_in
+  end
+
+  test "a token loaded later reports what it has left" do
+    token = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client))
+
+    travel_to token.issued_at + 10.minutes + 0.4.seconds, with_usec: true
+    assert_equal 3000, Identity::AccessToken.find(token.id).expires_in
+  end
+
   test "refresh fails when the presented refresh token was already rotated" do
     token = identities(:david).access_tokens.create!(oauth_client: oauth_clients(:mcp_client))
     stale = Identity::AccessToken.find(token.id)

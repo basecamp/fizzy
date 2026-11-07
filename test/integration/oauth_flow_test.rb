@@ -557,7 +557,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
 
     assert body["access_token"].start_with?("fizzy_at_")
     assert body["refresh_token"].start_with?("fizzy_rt_")
-    assert_operator body["expires_in"], :>, 0
+    assert_equal 3600, body["expires_in"], "a fresh 1-hour token reports the whole hour"
     assert_equal "Bearer", body["token_type"]
     assert_equal "read", body["scope"]
 
@@ -1245,7 +1245,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
 
     assert_not_nil body["access_token"]
     assert_not_nil body["refresh_token"]
-    assert_operator body["expires_in"], :>, 0
+    assert_equal 3600, body["expires_in"], "a fresh 1-hour token reports the whole hour"
     assert_not_equal old_access_token, body["access_token"]
     assert_not_equal old_refresh_token, body["refresh_token"]
   end

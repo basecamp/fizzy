@@ -92,7 +92,11 @@ class Identity::AccessToken < ApplicationRecord
   attribute :raw_token, :string
   attribute :raw_refresh_token, :string
 
-  before_create :set_token
+  # When this instance minted the access token it holds, by issuance or
+  # rotation. Never stored: a token loaded later has none (see #expires_in).
+  attr_accessor :issued_at
+
+  before_create :set_issued_at, :set_token
   before_create :set_expiry_and_refresh_token, if: :refreshable?
 
   # Issuing or destroying a grant restarts its client's retention period
@@ -352,8 +356,15 @@ class Identity::AccessToken < ApplicationRecord
     expires_at? && expires_at.past?
   end
 
+  # RFC 6749 §5.1: the token's lifetime in seconds. A token this instance
+  # just minted reports its whole lifetime, measured from issuance rather than
+  # from the clock now: the request runs on after the mint, and counting those
+  # milliseconds against a one-hour token reports 3599, under the hour some
+  # clients require. A token loaded later, such as a refresh retried within
+  # the grace window, reports what it has left. Rounded up so a fraction of a
+  # second never costs a whole one.
   def expires_in
-    (expires_at - Time.current).to_i if expires_at?
+    (expires_at - (issued_at || Time.current)).ceil if expires_at?
   end
 
   def lapsed?
@@ -377,9 +388,10 @@ class Identity::AccessToken < ApplicationRecord
   def refresh(permission: self.permission)
     narrowed = permission.to_s != self.permission
     raw_token, raw_refresh_token = self.class.generate_token(:access), self.class.generate_token(:refresh)
+    now = Time.current
     rotated = { token: nil, token_digest: TokenDigester.digest(raw_token),
       refresh_token_digest: TokenDigester.digest(raw_refresh_token),
-      expires_at: EXPIRES_IN.from_now, permission: permission, updated_at: Time.current }
+      expires_at: EXPIRES_IN.since(now), permission: permission, updated_at: now }
 
     rotated_now = transaction do
       if self.class.unlapsed.where(id: id, refresh_token_digest: refresh_token_digest).update_all(rotated) == 1
@@ -387,7 +399,7 @@ class Identity::AccessToken < ApplicationRecord
           refresh_token_digest: refresh_token_digest,
           successor_refresh_token_digest: rotated[:refresh_token_digest],
           successor: { access_token: raw_token, refresh_token: raw_refresh_token }
-        assign_attributes rotated.merge(raw_token: raw_token, raw_refresh_token: raw_refresh_token)
+        assign_attributes rotated.merge(raw_token: raw_token, raw_refresh_token: raw_refresh_token, issued_at: now)
         true
       end
     end
@@ -469,6 +481,10 @@ class Identity::AccessToken < ApplicationRecord
       self.class.lock.where(id: id).pluck(:id)
     end
 
+    def set_issued_at
+      self.issued_at = Time.current
+    end
+
     # Personal access tokens are written in plaintext as well as digested,
     # for production code that reads only plaintext. An explicitly given
     # token is digested like a generated one.
@@ -489,7 +505,7 @@ class Identity::AccessToken < ApplicationRecord
     end
 
     def set_expiry_and_refresh_token
-      self.expires_at ||= EXPIRES_IN.from_now
+      self.expires_at ||= EXPIRES_IN.since(issued_at)
       self.raw_refresh_token ||= self.class.generate_token(:refresh)
       self.refresh_token_digest = TokenDigester.digest(raw_refresh_token)
     end
