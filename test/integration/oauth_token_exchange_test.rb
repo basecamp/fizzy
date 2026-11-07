@@ -34,8 +34,7 @@ class OauthTokenExchangeTest < ActionDispatch::IntegrationTest
     assert_equal "Bearer", body["token_type"]
     assert_equal ACCESS_TOKEN_TYPE, body["issued_token_type"]
     assert_equal "read write", body["scope"]
-    assert_operator body["expires_in"], :>, 0
-    assert_operator body["expires_in"], :<=, 300
+    assert_equal Oauth::TokenDelegation::TTL_CAP.to_i, body["expires_in"], "a fresh delegated token reports its whole capped lifetime"
     assert_not body.key?("refresh_token")
 
     delegated = Identity::AccessToken.find_by_raw_token(body["access_token"])
