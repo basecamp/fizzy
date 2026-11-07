@@ -75,6 +75,9 @@ export default class extends Controller {
   }
 
   async disableSubmitWhenInvalid(event) {
+    // Lexxy refreshes its validity in the frame after lexxy:change.
+    // Wait one more frame so we read the updated validity in Safari too.
+    await nextFrame()
     await nextFrame()
 
     if (this.element.checkValidity()) {
