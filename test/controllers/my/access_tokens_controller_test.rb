@@ -46,6 +46,15 @@ class My::AccessTokensControllerTest < ActionDispatch::IntegrationTest
     assert_revealed identities(:kevin).access_tokens.order(:created_at).last
   end
 
+  test "access is named Read and write, as consent and Connected apps name it" do
+    get new_my_access_token_path
+    assert_select "option[value=write]", text: "Read and write"
+
+    post my_access_tokens_path, params: { access_token: { description: "GitHub", permission: "write" } }, as: :turbo_stream
+    assert_match "GitHub (Read and write)", response.body
+    assert_no_match "Read + Write", response.body
+  end
+
   # Only the token's digest is ever looked up, so the response that created it
   # is the one place it's shown. No page can show it again.
   test "a created token is revealed once, and no page shows it again" do

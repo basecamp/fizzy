@@ -1,6 +1,19 @@
 require "test_helper"
 
 class OauthHelperTest < ActionView::TestCase
+  test "an authorization error reads in plain words: the caller's own, its code's, or a general one" do
+    assert_equal "Choose an account.", oauth_error_message("invalid_request", "Choose an account.")
+    assert_equal OAUTH_ERROR_MESSAGES["invalid_scope"], oauth_error_message("invalid_scope")
+    assert_equal OAUTH_ERROR_MESSAGES["invalid_scope"], oauth_error_message(:invalid_scope, "")
+    assert_equal "Something went wrong connecting this app.", oauth_error_message("server_error")
+  end
+
+  test "no plain-words message is a developer's string" do
+    OAUTH_ERROR_MESSAGES.each_value do |message|
+      assert_no_match(/_|redirect_uri|code_challenge|\bscope\b|S256/, message)
+    end
+  end
+
   test "a self name of nothing but direction controls reads as an unnamed app" do
     assert_equal "Unnamed app", oauth_client_self_name(Oauth::Client.new(name: "\u202E\u2066\u2069"))
   end

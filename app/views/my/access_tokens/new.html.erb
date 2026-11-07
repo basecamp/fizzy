@@ -19,7 +19,7 @@
 
     <div class="flex flex-column gap-half">
       <strong><%= form.label :permission %></strong>
-      <%= form.select :permission, options_for_select({ "Read" => "read", "Read + Write" => "write"}), {}, class: "input input--select" %>
+      <%= form.select :permission, options_for_select({ "Read" => "read", "Read and write" => "write"}), {}, class: "input input--select" %>
     </div>
 
     <%= form.button type: :submit, class: "btn btn--link center txt-medium" do %>
