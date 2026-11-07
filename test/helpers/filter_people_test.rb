@@ -5,7 +5,7 @@ class FilterPeopleTest < ActionView::TestCase
 
   %w[ assignees creators closers ].each do |people|
     test "#{people} offers the current user once with a searchable Me label" do
-      Current.with(account: accounts(:37s), user: users(:david)) do
+      Current.with(account: accounts("37s"), user: users(:david)) do
         filter = Filter.new
         filter.public_send(people) << Current.user
         filtering = User::Filtering.new(Current.user, filter)
