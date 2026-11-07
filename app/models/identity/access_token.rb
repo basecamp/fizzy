@@ -93,8 +93,9 @@ class Identity::AccessToken < ApplicationRecord
   attribute :raw_refresh_token, :string
 
   # When this instance minted the access token it holds, by issuance or
-  # rotation. Never stored: a token loaded later has none (see #expires_in).
-  attr_accessor :issued_at
+  # rotation. Never stored: a token loaded or reloaded later has none (see
+  # #expires_in).
+  attribute :issued_at, :datetime
 
   before_create :set_issued_at, :set_token
   before_create :set_expiry_and_refresh_token, if: :refreshable?

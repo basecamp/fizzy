@@ -95,6 +95,7 @@ class Identity::AccessTokenTest < ActiveSupport::TestCase
 
     travel_to token.issued_at + 10.minutes + 0.4.seconds, with_usec: true
     assert_equal 3000, Identity::AccessToken.find(token.id).expires_in
+    assert_equal 3000, token.reload.expires_in
   end
 
   test "refresh fails when the presented refresh token was already rotated" do
