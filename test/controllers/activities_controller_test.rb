@@ -264,9 +264,87 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
     assert_equal total, all_ids.uniq.count
   end
 
+  test "index serves a repeat request from the activity cache" do
+    with_actionview_partial_caching do
+      get activities_path, as: :json
+      first_response = @response.parsed_body
+
+      assert_equal first_response.size, activity_cache_hits { get activities_path, as: :json }
+      assert_equal first_response, @response.parsed_body
+    end
+  end
+
+  test "a cached activity shows its card as it is now" do
+    with_actionview_partial_caching do
+      cached_activity(events(:logo_published))
+
+      with_current_user(:david) { cards(:logo).update!(title: "Renamed logo") }
+
+      activity = cached_activity(events(:logo_published))
+      assert_equal "Renamed logo", activity["eventable"]["title"]
+      assert_includes activity["description"], "Renamed logo"
+    end
+  end
+
+  test "a cached comment activity shows its comment and card as they are now" do
+    with_actionview_partial_caching do
+      cached_activity(events(:layout_commented))
+
+      comments(:layout_overflowing_david).update!(body: "Edited comment")
+      assert_equal "Edited comment", cached_activity(events(:layout_commented))["eventable"]["body"]["plain_text"]
+
+      with_current_user(:david) { cards(:layout).update!(title: "Renamed layout") }
+      assert_includes cached_activity(events(:layout_commented))["description"], "Renamed layout"
+    end
+  end
+
+  test "a cached activity shows its board and creator as they are now" do
+    with_actionview_partial_caching do
+      cached_activity(events(:logo_published))
+
+      boards(:writebook).publish
+      assert cached_activity(events(:logo_published))["board"]["public_url"]
+
+      users(:david).update!(name: "Renamed David")
+      assert_equal "Renamed David", cached_activity(events(:logo_published))["creator"]["name"]
+    end
+  end
+
+  test "a cached assignment activity names its assignees as they are now" do
+    with_actionview_partial_caching do
+      cached_activity(events(:logo_assignment_jz))
+
+      users(:jz).update!(name: "Renamed JZ")
+
+      assert_includes cached_activity(events(:logo_assignment_jz))["description"], "Renamed JZ"
+    end
+  end
+
+  test "a cached assignment activity is worded for whoever reads it" do
+    with_actionview_partial_caching do
+      assert_includes cached_activity(events(:logo_assignment_jz))["description"], "assigned JZ"
+
+      logout_and_sign_in_as :jz
+      assert_includes cached_activity(events(:logo_assignment_jz))["description"], "will handle"
+    end
+  end
+
   private
     def next_page_from_link_header(link_header)
       url = link_header&.match(/<([^>]+)>;\s*rel="next"/)&.captures&.first
       URI.parse(url).request_uri if url
+    end
+
+    def cached_activity(event)
+      get activities_path, as: :json
+      assert_response :success
+      @response.parsed_body.find { |activity| activity["id"] == event.id }.tap { |activity| assert activity, "#{event.action} isn't on the first page" }
+    end
+
+    def activity_cache_hits(&block)
+      hits = nil
+      callback = ->(event) { hits = event.payload[:cache_hits] if event.payload[:identifier].to_s.end_with?("activities/_activity.json.jbuilder") }
+      ActiveSupport::Notifications.subscribed(callback, "render_collection.action_view", &block)
+      hits
     end
 end
