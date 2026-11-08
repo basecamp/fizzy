@@ -203,4 +203,13 @@ class FilterTest < ActiveSupport::TestCase
     assert_not_includes filter.board_titles, "Writebook"
     assert_not_includes filter.board_titles, "Private board"
   end
+
+  test "apply_to narrows cards whatever their column or state" do
+    cards(:shipping).taggings.create!(tag: tags(:web))
+    filter = users(:david).filters.new tag_ids: [ tags(:web).id ]
+
+    assert_equal cards(:logo, :layout).to_set, filter.apply_to(boards(:writebook).cards.active).to_set
+    assert_equal [ cards(:shipping) ], filter.apply_to(boards(:writebook).cards.closed).to_a
+    assert_empty filter.apply_to(boards(:writebook).cards.awaiting_triage)
+  end
 end

@@ -53,4 +53,12 @@ module ColumnsHelper
     options[:refresh] = :morph if src.present?
     turbo_frame_tag(id, src: src, data: data, **options, &block)
   end
+
+  def filter_cards(cards, filter)
+    filter ? filter.apply_to(cards) : cards
+  end
+
+  def column_filter_params(filter)
+    filter ? filter.as_params.except(:board_ids) : {}
+  end
 end

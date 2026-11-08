@@ -24,21 +24,17 @@ class Filter < ApplicationRecord
       result = result.where(id: card_ids) if card_ids.present?
       result = result.where.missing(:not_now) unless include_not_now_cards?
       result = result.open unless include_closed_cards?
-      result = result.unassigned if assignment_status.unassigned?
-      result = result.assigned_to(assignees.ids) if assignees.present?
-      result = result.where(creator_id: creators.ids) if creators.present?
       result = filter_boards(result) if boards.present?
-      result = result.tagged_with(tags.ids) if tags.present?
-      result = result.where(cards: { created_at: creation_window }) if creation_window
-      result = result.closed_at_window(closure_window) if closure_window
-      result = result.closed_by(closers) if closers.present?
-      result = terms.reduce(result) do |result, term|
-        result.mentioning(term, user: creator)
-      end
-      result = result.where(column_id: column_ids) if column_ids.present?
+      result = narrow(result)
 
       result.distinct
     end
+  end
+
+  # Narrows +cards+ to those this filter matches, whatever their column or state,
+  # so a board can keep laying them out across its own columns.
+  def apply_to(cards)
+    cards.where(id: matching_cards.select(:id))
   end
 
   def empty?
@@ -66,6 +62,27 @@ class Filter < ApplicationRecord
   end
 
   private
+    def narrow(relation)
+      relation = relation.unassigned if assignment_status.unassigned?
+      relation = relation.assigned_to(assignees.ids) if assignees.present?
+      relation = relation.where(creator_id: creators.ids) if creators.present?
+      relation = relation.tagged_with(tags.ids) if tags.present?
+      relation = relation.where(cards: { created_at: creation_window }) if creation_window
+      relation = relation.closed_at_window(closure_window) if closure_window
+      relation = relation.closed_by(closers) if closers.present?
+      relation = terms.reduce(relation) do |relation, term|
+        relation.mentioning(term, user: creator)
+      end
+      relation = relation.where(column_id: column_ids) if column_ids.present?
+      relation
+    end
+
+    def matching_cards
+      result = Card.indexed_by(indexed_by).unscope(:order)
+      result = result.where(id: card_ids) if card_ids.present?
+      narrow(result)
+    end
+
     def filter_boards(relation)
       relation = relation.where(cards: { account_id: creator.account_id }).where(board: boards.ids)
       if joins_has_many?
