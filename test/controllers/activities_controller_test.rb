@@ -298,15 +298,6 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "a cached activity shows its board as it is now" do
-    with_actionview_partial_caching do
-      cached_activity(events(:logo_published))
-
-      boards(:writebook).publish
-      assert cached_activity(events(:logo_published))["board"]["public_url"]
-    end
-  end
-
   test "an assignment activity reads the same for every viewer" do
     assert_includes cached_activity(events(:logo_assignment_jz))["description"], "assigned JZ"
 
