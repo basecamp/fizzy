@@ -85,32 +85,58 @@ module Oauth
   # - an http loopback redirect (RFC 8252 §7.3), served on the user's device;
   # - a private-use scheme from DCR_CUSTOM_SCHEMES (RFC 8252 §7.1), dispatched
   #   by the operating system to an app on the user's device;
-  # - an https redirect on a vetted vendor host (dcr_allowed_https_hosts).
+  # - an https redirect on any plain host but this install's own
+  #   (dcr_own_redirect_host?).
+  #
+  # https is accepted on any other host because hosted MCP clients (VS Code's
+  # vscode.dev, per-tenant hosts like Glean's, Cursor's cloud agents) call
+  # back over https, and a client registers its redirects as a set that's
+  # refused whole, so a host allowlist refused every client nobody had listed.
+  # The backstop is consent: a self-registered client is never trusted, the
+  # consent screen names it by the host its code goes to, an error is never
+  # bounced to that host unprompted (Oauth::Client#vetted_redirect?), and
+  # registration is rate limited.
   #
   # Only cursor and claude are accepted as schemes: they are the desktop MCP
   # clients confirmed to send one. Dotted reverse-DNS schemes get no pass on
   # shape, since some dotted schemes route to a remote handler (z39.50r,
-  # iris.beep). Add a scheme or a host only when a real client is confirmed
-  # to need it. The consent screen, which always shows where the code goes,
-  # stays the backstop.
+  # iris.beep). Add a scheme only when a real client is confirmed to need it.
   DCR_CUSTOM_SCHEMES = %w[ cursor claude ]
 
-  # The vetted https callback hosts, from OAUTH_DCR_ALLOWED_HTTPS_HOSTS in
-  # production. None by default, so an install that never names one accepts
-  # only on-device redirects.
-  def self.dcr_allowed_https_hosts
-    Array(Rails.configuration.x.oauth.dcr_allowed_https_hosts).map(&:downcase)
+  # Domains 37signals runs, refused with every host under them. Consent names
+  # a self-registered client by the host its code goes to, so one returning to
+  # any of these would read as ours.
+  DCR_OWN_REDIRECT_DOMAINS = %w[ fizzy.do fizzy-staging.com fizzy-beta.com 37signals.com basecamp.com basecampapi.com hey.com ]
+
+  # This install's own host, the domains above, and the host a request is
+  # serving (serving_host:), which is the install's own even when BASE_URL is
+  # unset. Case-insensitive; a plain host has no trailing dot to ignore.
+  def self.dcr_own_redirect_host?(host, serving_host: nil)
+    host = host.to_s.downcase
+
+    host.in?(dcr_install_hosts(serving_host)) || DCR_OWN_REDIRECT_DOMAINS.any? { |domain| host == domain || host.end_with?(".#{domain}") }
   end
 
-  def self.dcr_allowed_https_host?(host)
-    dcr_allowed_https_hosts.include?(host.to_s.downcase)
+  # From the URL options BASE_URL sets, read as a URI reads a host, so a
+  # configured port (app.fizzy.localhost:3006) or an IPv6 literal's brackets
+  # compare like a callback's host.
+  def self.dcr_install_hosts(serving_host = nil)
+    configured = [ Rails.application.routes.default_url_options[:host], Rails.application.config.action_mailer.default_url_options&.dig(:host) ]
+
+    [ *configured, serving_host ].compact_blank.filter_map { |authority| authority_host(authority) }
+  end
+
+  def self.authority_host(authority)
+    URI.parse("https://#{authority}").host&.downcase
+  rescue URI::InvalidURIError
+    nil
   end
 
   # Whether a redirect has the shape a self-registered client may hold: no
   # fragment, and http loopback, https on a plain host, or an allowlisted
-  # private-use scheme with a target. Whether its https host is vetted is
-  # judged only when a registration adds it (Oauth::Client), so a client
-  # stays valid after its host leaves the list.
+  # private-use scheme with a target. Whether its https host is one of ours
+  # is judged only when a registration adds it (Oauth::Client), so a client
+  # registered before that rule stays valid.
   def self.dcr_redirect_shape?(uri)
     uri.fragment.nil? && \
       case uri.scheme&.downcase
@@ -128,9 +154,9 @@ module Oauth
     uri.opaque.nil? && uri.userinfo.nil? && plain_host?(uri.host.to_s)
   end
 
-  # A remote https redirect a registration may add: an allowlisted host.
-  def self.dcr_vetted_https_redirect?(uri)
-    uri.scheme&.downcase != "https" || dcr_allowed_https_host?(uri.host)
+  # A remote https redirect a registration may add: on any host but ours.
+  def self.dcr_admissible_https_redirect?(uri, serving_host: nil)
+    uri.scheme&.downcase != "https" || !dcr_own_redirect_host?(uri.host, serving_host: serving_host)
   end
 
   def self.table_name_prefix
