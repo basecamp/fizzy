@@ -2,7 +2,7 @@
 
 # Seeds demo OAuth data and prints a directory of every person-facing OAuth
 # screen in every state, so one design review covers them all with no live
-# clients: consent, Connected apps, the error page, the staff-only page and the
+# clients: consent, Connected apps, the error page, the preview page and the
 # reviewer sign-in code field. Development runs the OAuth server lit, so the
 # missing pieces are clients, grants and webhooks shaped to reach each branch.
 # This script converges them and prints a URL, or a click path, for each.
@@ -290,7 +290,7 @@ module OauthStates
       puts "  slow_down have no URL; they are this same page with their own sentence."
 
       section "Server postures (restart the server for each)"
-      print_row "Staff only", "OAUTH_STAFF_ONLY=true bin/dev, sign in as #{PERSONAS[:empty][:email_address]}, open any consent URL"
+      print_row "Preview (\"Not available yet\")", "CONNECTED_APPS_PREVIEW=true bin/dev, sign in as #{PERSONAS[:empty][:email_address]}, open any consent URL"
       print_row "Paused (\"Connecting apps is paused\")", "OAUTH_PAUSED=1 bin/dev, open any consent URL"
       print_row "Dark (the app's 404 page)", "OAUTH_DARK=1 bin/dev, open any consent URL"
 
@@ -323,7 +323,7 @@ module OauthStates
         Error page     invalid_request (unknown app, unregistered callback, no PKCE),
                        unsupported_response_type, invalid_scope, invalid_target,
                        unauthorized_client, invalid_client_metadata, access_denied
-        Postures       staff only, paused, dark
+        Postures       preview, paused, dark
         Sign-in        the reviewer code in the magic-link code field
         Also           how to toggle dark mode
       STATES
