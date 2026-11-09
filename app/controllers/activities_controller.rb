@@ -15,13 +15,20 @@ class ActivitiesController < ApplicationController
   ].freeze
 
   def index
-    set_page_and_extract_portion_from(activities)
+    @activities = Event.where(id: page_of_activity_ids).preloaded.reverse_chronologically
   end
 
   private
+    # A reader's activities span all their boards, so the database sorts every match to keep
+    # one page. Sorting whole rows means fetching each one first, which is most of this
+    # request's time for a reader with a long history. Ids sort straight from the board,
+    # action and created_at index, so page through ids, then load only that page's rows.
+    def page_of_activity_ids
+      @activity_ids = set_page_and_extract_portion_from(activities).ids
+    end
+
     def activities
       Current.user.accessible_events
-        .preloaded
         .where(action: ACTIONS)
         .for_creators(params[:creator_ids])
         .for_boards(params[:board_ids])
@@ -34,7 +41,7 @@ class ActivitiesController < ApplicationController
     # full page links on, at worst to one empty page. Query pairs stay pairs, so repeated
     # filters like creator_ids[] survive into the link.
     def set_paginated_headers
-      if request.format.json? && @page.records.size == @page.records.limit_value
+      if request.format.json? && @activity_ids.size == @page.records.limit_value
         uri = Addressable::URI.parse(request.url)
         uri.query_values = uri.query_values(Array).to_a.reject { |name, _| name == "page" } + [ [ "page", @page.next_param.to_s ] ]
         headers["Link"] = %(<#{uri}>; rel="next")

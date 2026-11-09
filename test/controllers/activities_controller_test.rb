@@ -265,6 +265,19 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "2", next_query["page"]
   end
 
+  test "index pages through event ids before loading a page of events" do
+    publish_activities 30
+
+    paged_selects = []
+    record_paged_selects = ->(*, payload) { paged_selects << payload[:sql] if payload[:sql].match?(/\bFROM\W+events\b.*\bLIMIT\b/im) }
+    ActiveSupport::Notifications.subscribed(record_paged_selects, "sql.active_record") { get activities_path, as: :json }
+
+    assert_response :success
+    assert_equal 15, @response.parsed_body.size
+    assert_equal 1, paged_selects.size
+    assert_match(/\ASELECT\W+events\W+\.\W+id\W+FROM/i, paged_selects.first)
+  end
+
   test "index sends no Link header on a page that isn't full" do
     get activities_path, as: :json
     assert_response :success
