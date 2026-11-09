@@ -338,13 +338,20 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
     def cached_activity(event)
       get activities_path, as: :json
       assert_response :success
-      @response.parsed_body.find { |activity| activity["id"] == event.id }.tap { |activity| assert activity, "#{event.action} isn't on the first page" }
+
+      activity = @response.parsed_body.find { it["id"] == event.id }
+      assert activity, "#{event.action} isn't on the first page"
+      activity
     end
 
     def activity_cache_hits(&block)
       hits = nil
-      callback = ->(event) { hits = event.payload[:cache_hits] if event.payload[:identifier].to_s.end_with?("activities/_activity.json.jbuilder") }
-      ActiveSupport::Notifications.subscribed(callback, "render_collection.action_view", &block)
+      record_hits = ->(render) { hits = render.payload[:cache_hits] if rendered_activities?(render) }
+      ActiveSupport::Notifications.subscribed(record_hits, "render_collection.action_view", &block)
       hits
+    end
+
+    def rendered_activities?(render)
+      render.payload[:identifier].to_s.end_with?("activities/_activity.json.jbuilder")
     end
 end

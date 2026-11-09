@@ -1,7 +1,5 @@
-# Jbuilder ships a dependency tracker but doesn't register it, so without this
-# a cached JSON fragment's digest covers its own template and none of the
-# partials it renders: editing cards/_card.json.jbuilder wouldn't expire the
-# cached activities that embed a card.
+# Jbuilder doesn't register its dependency tracker, so cached JSON wouldn't
+# expire when a partial it renders changes.
 ActiveSupport.on_load :action_view do
   require "jbuilder/jbuilder_dependency_tracker"
   ActionView::DependencyTracker.register_tracker :jbuilder, Jbuilder::DependencyTracker
