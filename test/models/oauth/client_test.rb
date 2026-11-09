@@ -54,6 +54,19 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     assert_not client.update(redirect_uris: %w[ https://app.fizzy.do/callback https://3.basecamp.com/callback ])
   end
 
+  test "this install's own host is ours as a callback reads it, whatever port its URL options carry" do
+    mailer = Rails.application.config.action_mailer
+    saved = mailer.default_url_options
+    mailer.default_url_options = { host: "App.Fizzy.localhost:3006" }
+
+    assert Oauth.dcr_own_redirect_host?("app.fizzy.localhost")
+    assert Oauth.dcr_own_redirect_host?("served.example", serving_host: "served.example")
+    assert_not Oauth.dcr_own_redirect_host?("fizzy.localhost")
+    assert_not Oauth.dcr_own_redirect_host?("connector.example.com")
+  ensure
+    mailer.default_url_options = saved
+  end
+
   test "manually registered clients may use our hosts" do
     assert Oauth::Client.new(name: "First party", redirect_uris: %w[ https://app.fizzy.do/callback ]).valid?
   end

@@ -108,17 +108,28 @@ module Oauth
   # any of these would read as ours.
   DCR_OWN_REDIRECT_DOMAINS = %w[ fizzy.do fizzy-staging.com fizzy-beta.com 37signals.com basecamp.com basecampapi.com hey.com ]
 
-  # This install's own host, from its URL options (BASE_URL), and the domains
-  # above. Case-insensitive; a plain host has no trailing dot to ignore.
-  def self.dcr_own_redirect_host?(host)
+  # This install's own host, the domains above, and the host a request is
+  # serving (serving_host:), which is the install's own even when BASE_URL is
+  # unset. Case-insensitive; a plain host has no trailing dot to ignore.
+  def self.dcr_own_redirect_host?(host, serving_host: nil)
     host = host.to_s.downcase
 
-    host.in?(dcr_install_hosts) || DCR_OWN_REDIRECT_DOMAINS.any? { |domain| host == domain || host.end_with?(".#{domain}") }
+    host.in?(dcr_install_hosts(serving_host)) || DCR_OWN_REDIRECT_DOMAINS.any? { |domain| host == domain || host.end_with?(".#{domain}") }
   end
 
-  def self.dcr_install_hosts
-    [ Rails.application.routes.default_url_options[:host], Rails.application.config.action_mailer.default_url_options&.dig(:host) ] \
-      .compact_blank.map(&:downcase)
+  # From the URL options BASE_URL sets, read as a URI reads a host, so a
+  # configured port (app.fizzy.localhost:3006) or an IPv6 literal's brackets
+  # compare like a callback's host.
+  def self.dcr_install_hosts(serving_host = nil)
+    configured = [ Rails.application.routes.default_url_options[:host], Rails.application.config.action_mailer.default_url_options&.dig(:host) ]
+
+    [ *configured, serving_host ].compact_blank.filter_map { |authority| authority_host(authority) }
+  end
+
+  def self.authority_host(authority)
+    URI.parse("https://#{authority}").host&.downcase
+  rescue URI::InvalidURIError
+    nil
   end
 
   # Whether a redirect has the shape a self-registered client may hold: no
@@ -144,8 +155,8 @@ module Oauth
   end
 
   # A remote https redirect a registration may add: on any host but ours.
-  def self.dcr_admissible_https_redirect?(uri)
-    uri.scheme&.downcase != "https" || !dcr_own_redirect_host?(uri.host)
+  def self.dcr_admissible_https_redirect?(uri, serving_host: nil)
+    uri.scheme&.downcase != "https" || !dcr_own_redirect_host?(uri.host, serving_host: serving_host)
   end
 
   def self.table_name_prefix

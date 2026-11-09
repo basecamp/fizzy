@@ -40,7 +40,8 @@ class OauthDcrRedirectsTest < ActionDispatch::IntegrationTest
 
   # Consent names a self-registered app by where its access returns, so a
   # callback on a host we run would read as ours: this install's own host,
-  # and 37signals' domains, in any case or subdomain.
+  # as configured (example.com in tests) and as served (www.example.com, with
+  # or without BASE_URL), and 37signals' domains, in any case or subdomain.
   test "registration refuses https callbacks on hosts we run" do
     %w[
       https://example.com/callback
@@ -52,6 +53,7 @@ class OauthDcrRedirectsTest < ActionDispatch::IntegrationTest
       https://basecamp.com/callback
       https://launchpad.37signals.com/callback
       https://app.hey.com/callback
+      https://www.example.com/callback
     ].each do |uri|
       assert_no_difference "Oauth::Client.count" do
         register uri

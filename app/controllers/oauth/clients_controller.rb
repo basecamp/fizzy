@@ -84,7 +84,7 @@ class Oauth::ClientsController < Oauth::BaseController
 
     def registrable_uri?(uri)
       parsed = URI.parse(uri)
-      Oauth.dcr_redirect_shape?(parsed) && Oauth.dcr_admissible_https_redirect?(parsed)
+      Oauth.dcr_redirect_shape?(parsed) && Oauth.dcr_admissible_https_redirect?(parsed, serving_host: request.host)
     rescue URI::InvalidURIError
       false
     end

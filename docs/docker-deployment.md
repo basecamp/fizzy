@@ -170,7 +170,7 @@ Apps that register themselves (dynamic client registration, which Cursor, Claude
 
 - a callback on the person's own device: `http://127.0.0.1`, `http://[::1]` or `http://localhost`, on any port;
 - the `cursor://` and `claude://` desktop app schemes;
-- an `https` callback on any host but your Fizzy's own (the host in `BASE_URL`), with no username, password or `#fragment` in it.
+- an `https` callback on any host but your Fizzy's own (the host in `BASE_URL`, and the one the registration reached it at), with no username, password or `#fragment` in it.
 
 Plain `http` is refused for anything but those device addresses. Hosted clients, such as VS Code's, call back over `https`, so there's no list of hosts to keep. Because anyone can register an app, the consent screen names the app by the host it sends people back to and says the app hasn't been checked.
 
