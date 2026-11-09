@@ -283,7 +283,7 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
     move_newest = ->(*, payload) do
       if moved.nil? && payload[:sql].match?(/\ASELECT\W+events\W+\.\W+id\W+FROM.*\bLIMIT\b/im)
         moved = Event.where(board: users(:kevin).boards, action: ActivitiesController::ACTIONS).order(created_at: :desc, id: :desc).first
-        moved.update_columns(board_id: boards(:miltons_wish_list).id)
+        ApplicationRecord.connected_to(role: :writing) { moved.update_columns(board_id: boards(:miltons_wish_list).id) }
       end
     end
 
