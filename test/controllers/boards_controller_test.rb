@@ -35,6 +35,15 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
     assert_select "#maybe .cards__expander-count", text: "0"
   end
 
+  test "show with a column filter in columns view passes it on to each column" do
+    get board_path(boards(:writebook), tag_ids: [ tags(:mobile).id ], column_ids: [ columns(:writebook_in_progress).id ], view: "columns")
+
+    assert_response :success
+    assert_select "turbo-frame##{dom_id(columns(:writebook_triage), :cards)}[src*=?]", "column_ids"
+    assert_select "##{dom_id(columns(:writebook_triage))} .cards__expander-count", text: "0"
+    assert_select "##{dom_id(columns(:writebook_in_progress))} .cards__expander-count", text: "1"
+  end
+
   test "invalidates page title cache when account updates" do
     get board_path(boards(:writebook))
     etag = response.headers["ETag"]

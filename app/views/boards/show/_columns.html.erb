@@ -1,5 +1,5 @@
 <%= tag.div class: "card-columns hide-scrollbar", data: {
-      controller: "collapsible-columns drag-and-drop drag-and-strum navigable-list card-hotkeys",
+      controller: token_list("collapsible-columns drag-and-drop drag-and-strum navigable-list card-hotkeys", "filtered-columns": filter),
       drag_and_drop_dragged_item_class: "drag-and-drop__dragged-item",
       drag_and_drop_hover_container_class: "drag-and-drop__hover-container",
       collapsible_columns_board_value: board.id,
@@ -23,7 +23,8 @@
         dragenter->drag-and-strum#dragEnter
         drop->drag-and-drop#drop
         dragend->drag-and-drop#dragEnd
-        click@document->navigable-list#deselectWhenClickingOutside" } do %>
+        click@document->navigable-list#deselectWhenClickingOutside
+        #{"turbo:before-stream-render@document->filtered-columns#refreshAfterColumnStream" if filter}" } do %>
   <div class="card-columns__left">
     <%= render "boards/show/not_now", board: board, filter: filter %>
   </div>
@@ -32,7 +33,7 @@
 
   <div class="card-columns__right">
     <%= render partial: "boards/show/column", collection: board.columns.sorted, locals: { filter: filter },
-          cached: ->(column){ [ column, column.leftmost?, column.rightmost?, filter&.cache_key ] } %>
+          cached: (->(column){ [ column, column.leftmost?, column.rightmost? ] } unless filter) %>
     <%= render "boards/show/closed", board: board, filter: filter %>
 
     <%= render "boards/show/menu/columns", board: board %>

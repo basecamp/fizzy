@@ -2,7 +2,10 @@ module ColumnFiltering
   extend ActiveSupport::Concern
 
   included do
+    include SearchRateLimiting
+
     before_action :set_column_filter
+    limit_searches
   end
 
   private
@@ -11,6 +14,10 @@ module ColumnFiltering
         filter = Current.user.filters.from_params(filter_params)
         @column_filter = filter if filter.used?(ignore_boards: true)
       end
+    end
+
+    def searching?
+      @column_filter&.terms.present?
     end
 
     def filtered(cards)

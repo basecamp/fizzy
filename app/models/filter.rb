@@ -34,7 +34,7 @@ class Filter < ApplicationRecord
   # Narrows +cards+ to those this filter matches, whatever their column or state,
   # so a board can keep laying them out across its own columns.
   def apply_to(cards)
-    cards.where(id: matching_cards.select(:id))
+    cards.where(id: matching(cards).select(:id))
   end
 
   def empty?
@@ -77,8 +77,8 @@ class Filter < ApplicationRecord
       relation
     end
 
-    def matching_cards
-      result = Card.indexed_by(indexed_by).unscope(:order)
+    def matching(cards)
+      result = cards.indexed_by(indexed_by).unscope(:order)
       result = result.where(id: card_ids) if card_ids.present?
       narrow(result)
     end

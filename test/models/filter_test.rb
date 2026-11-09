@@ -204,6 +204,12 @@ class FilterTest < ActiveSupport::TestCase
     assert_not_includes filter.board_titles, "Private board"
   end
 
+  test "as_params keeps column ids" do
+    filter = users(:david).filters.new column_ids: [ columns(:writebook_triage).id ]
+
+    assert_equal [ columns(:writebook_triage).id ], filter.as_params[:column_ids]
+  end
+
   test "apply_to narrows cards whatever their column or state" do
     cards(:shipping).taggings.create!(tag: tags(:web))
     filter = users(:david).filters.new tag_ids: [ tags(:web).id ]
