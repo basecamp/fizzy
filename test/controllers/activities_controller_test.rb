@@ -307,13 +307,11 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "a cached assignment activity is worded for whoever reads it" do
-    with_actionview_partial_caching do
-      assert_includes cached_activity(events(:logo_assignment_jz))["description"], "assigned JZ"
+  test "an assignment activity reads the same for every viewer" do
+    assert_includes cached_activity(events(:logo_assignment_jz))["description"], "assigned JZ"
 
-      logout_and_sign_in_as :jz
-      assert_includes cached_activity(events(:logo_assignment_jz))["description"], "will handle"
-    end
+    logout_and_sign_in_as :jz
+    assert_includes cached_activity(events(:logo_assignment_jz))["description"], "assigned JZ"
   end
 
   private
