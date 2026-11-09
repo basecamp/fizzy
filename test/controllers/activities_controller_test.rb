@@ -239,6 +239,25 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
     assert_match(/rel="next"/, link_header)
   end
 
+  test "index doesn't count the reader's whole activity history" do
+    event_counts = []
+    record_counts = ->(*, payload) { event_counts << payload[:sql] if payload[:sql].match?(/COUNT\(.*\bFROM\W+events\b/i) }
+
+    ActiveSupport::Notifications.subscribed(record_counts, "sql.active_record") { get activities_path, as: :json }
+
+    assert_response :success
+    assert_empty event_counts
+    assert_nil @response.headers["X-Total-Count"]
+  end
+
+  test "index sends no Link header on a page that isn't full" do
+    get activities_path, as: :json
+    assert_response :success
+
+    assert_operator @response.parsed_body.size, :<, 15
+    assert_nil @response.headers["Link"]
+  end
+
   test "index follows pagination to retrieve all events" do
     board = boards(:writebook)
     30.times do
