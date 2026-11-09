@@ -15,14 +15,16 @@ class ActivitiesController < ApplicationController
   ].freeze
 
   def index
-    @activities = Event.where(id: page_of_activity_ids).preloaded.reverse_chronologically
+    @activities = activities.where(id: page_of_activity_ids).preloaded
   end
 
   private
     # A reader's activities span all their boards, so the database sorts every match to keep
     # one page. Sorting whole rows means fetching each one first, which is most of this
     # request's time for a reader with a long history. Ids sort straight from the board,
-    # action and created_at index, so page through ids, then load only that page's rows.
+    # action and created_at index, so page through ids, then load only that page's rows,
+    # through the same scope, so an event whose card moved off the reader's boards in
+    # between doesn't come back.
     def page_of_activity_ids
       @activity_ids = set_page_and_extract_portion_from(activities).ids
     end

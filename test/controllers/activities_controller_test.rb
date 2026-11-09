@@ -278,6 +278,22 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
     assert_match(/\ASELECT\W+events\W+\.\W+id\W+FROM/i, paged_selects.first)
   end
 
+  test "index leaves out an event that moved off the reader's boards after its page was picked" do
+    moved = nil
+    move_newest = ->(*, payload) do
+      if moved.nil? && payload[:sql].match?(/\ASELECT\W+events\W+\.\W+id\W+FROM.*\bLIMIT\b/im)
+        moved = Event.where(board: users(:kevin).boards, action: ActivitiesController::ACTIONS).order(created_at: :desc, id: :desc).first
+        moved.update_columns(board_id: boards(:miltons_wish_list).id)
+      end
+    end
+
+    ActiveSupport::Notifications.subscribed(move_newest, "sql.active_record") { get activities_path, as: :json }
+
+    assert_response :success
+    assert moved, "the page's ids were never selected on their own"
+    assert_not_includes @response.parsed_body.map { |activity| activity["id"] }, moved.id
+  end
+
   test "index sends no Link header on a page that isn't full" do
     get activities_path, as: :json
     assert_response :success
