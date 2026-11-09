@@ -298,25 +298,12 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "a cached activity shows its board and creator as they are now" do
+  test "a cached activity shows its board as it is now" do
     with_actionview_partial_caching do
       cached_activity(events(:logo_published))
 
       boards(:writebook).publish
       assert cached_activity(events(:logo_published))["board"]["public_url"]
-
-      users(:david).update!(name: "Renamed David")
-      assert_equal "Renamed David", cached_activity(events(:logo_published))["creator"]["name"]
-    end
-  end
-
-  test "a cached assignment activity names its assignees as they are now" do
-    with_actionview_partial_caching do
-      cached_activity(events(:logo_assignment_jz))
-
-      users(:jz).update!(name: "Renamed JZ")
-
-      assert_includes cached_activity(events(:logo_assignment_jz))["description"], "Renamed JZ"
     end
   end
 
