@@ -30,13 +30,13 @@ env:
   clear:
     RAILS_ENV: production
     RAILS_LOG_LEVEL: fatal # suppress unstructured log lines
-    CONNECTED_APPS_PREVIEW: "true" # Connecting apps is for 37signals staff and invited reviewers until we open it up
-    OAUTH_STAFF_ONLY: "true" # CONNECTED_APPS_PREVIEW's old name, for images from before the rename (a rollback, an older branch). Remove once none can be deployed.
+    CONNECTED_APPS_PREVIEW: "false" # Connecting apps is open to everyone here; staging and the betas keep the preview. "true" puts it back.
+    OAUTH_STAFF_ONLY: "false" # CONNECTED_APPS_PREVIEW's old name, kept in step so an image from before the rename (a rollback) stays open too. Remove once none can be deployed.
     MYSQL_DATABASE_HOST: fizzy-mysql-primary
     MYSQL_DATABASE_REPLICA_HOST: fizzy-mysql-replica
     MYSQL_SOLID_CABLE_HOST: fizzy-mysql-primary
     MYSQL_SOLID_QUEUE_HOST: fizzy-mysql-primary
-    # OAuth lit for previewers only (CONNECTED_APPS_PREVIEW): the authorization server answers, Client ID
+    # OAuth lit for everyone (CONNECTED_APPS_PREVIEW above is off): the authorization server answers, Client ID
     # Metadata Documents are accepted from deploy.yml's allowlisted hosts, and grants can be audienced to
     # the hosted MCP server, whose delegation exchange runs as the fizzy-mcp-server client.
     OAUTH_ACCEPTANCE_ENABLED: "true"
