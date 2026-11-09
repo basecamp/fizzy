@@ -23,6 +23,20 @@ class FilteredBoardColumnsTest < ApplicationSystemTestCase
     assert_current_path(/view=columns/)
   end
 
+  test "moving a column keeps it filtered" do
+    triage = columns(:writebook_triage)
+    visit board_url(boards(:writebook), tag_ids: [ tags(:mobile).id ], view: "columns")
+    assert_selector "##{dom_id(triage, :cards)} ##{dom_id(cards(:layout), :article)}", visible: :all
+
+    page.execute_script("document.querySelector('##{dom_id(triage, :menu)} form[action$=\"right_position\"] button').click()")
+    assert_selector "##{dom_id(columns(:writebook_in_progress))} ~ ##{dom_id(triage)}", visible: :all, wait: 5
+
+    assert_selector "##{dom_id(triage, :cards)}[src*='tag_ids']", visible: :all, wait: 5
+    assert_selector "##{dom_id(triage, :cards)} ##{dom_id(cards(:layout), :article)}", visible: :all
+    assert_no_selector "##{dom_id(triage, :cards)} ##{dom_id(cards(:logo), :article)}", visible: :all
+    assert_selector "##{dom_id(triage)} .cards__expander-count", text: "1"
+  end
+
   private
     def close_card_like_a_hotkey(card)
       page.execute_script(<<~JS, dom_id(card, :article))
