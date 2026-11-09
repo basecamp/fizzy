@@ -240,6 +240,8 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "index doesn't count the reader's whole activity history" do
+    publish_activities 30
+
     event_counts = []
     record_counts = ->(*, payload) { event_counts << payload[:sql] if payload[:sql].match?(/COUNT\(.*\bFROM\W+events\b/i) }
 
@@ -248,6 +250,19 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_empty event_counts
     assert_nil @response.headers["X-Total-Count"]
+    assert_match(/rel="next"/, @response.headers["Link"])
+  end
+
+  test "index keeps every repeated filter in the next-page link" do
+    publish_activities 30
+    creator_ids = [ users(:kevin).id, users(:david).id ]
+
+    get activities_path(creator_ids: creator_ids), as: :json
+    assert_response :success
+
+    next_query = Rack::Utils.parse_query(URI.parse(next_page_from_link_header(@response.headers["Link"])).query)
+    assert_equal creator_ids, next_query["creator_ids[]"]
+    assert_equal "2", next_query["page"]
   end
 
   test "index sends no Link header on a page that isn't full" do
@@ -325,6 +340,12 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
   end
 
   private
+    def publish_activities(count)
+      count.times do
+        boards(:writebook).events.create!(action: "card_published", creator: users(:kevin), eventable: cards(:logo), account: accounts("37s"))
+      end
+    end
+
     def next_page_from_link_header(link_header)
       url = link_header&.match(/<([^>]+)>;\s*rel="next"/)&.captures&.first
       URI.parse(url).request_uri if url

@@ -31,11 +31,12 @@ class ActivitiesController < ApplicationController
     # geared_pagination's X-Total-Count, and its check for the last page, count every event
     # the reader can see, on every request. Pollers re-read the first page all day, and the
     # API documents only the Link header, so send that alone and judge it from the page: a
-    # full page links on, at worst to one empty page.
+    # full page links on, at worst to one empty page. Query pairs stay pairs, so repeated
+    # filters like creator_ids[] survive into the link.
     def set_paginated_headers
       if request.format.json? && @page.records.size == @page.records.limit_value
         uri = Addressable::URI.parse(request.url)
-        uri.query_values = (uri.query_values || {}).merge("page" => @page.next_param.to_s)
+        uri.query_values = uri.query_values(Array).to_a.reject { |name, _| name == "page" } + [ [ "page", @page.next_param.to_s ] ]
         headers["Link"] = %(<#{uri}>; rel="next")
       end
     end
