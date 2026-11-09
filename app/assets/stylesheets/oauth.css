@@ -99,12 +99,14 @@
     }
   }
 
-  /* Drawn rather than native, so it follows Fizzy's theme, not the OS's */
+  /* Drawn rather than native, so it follows Fizzy's theme, not the OS's. The
+     unchecked ring is the lightest ink that keeps 3:1 against the canvas in
+     both themes, as a control's edge needs */
   .oauth-access__radio {
     appearance: none;
     background-color: var(--color-canvas);
     block-size: 1.15em;
-    border: 2px solid var(--color-ink-light);
+    border: 2px solid var(--color-ink-medium);
     border-radius: 50%;
     flex-shrink: 0;
     inline-size: 1.15em;
