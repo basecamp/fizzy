@@ -158,8 +158,9 @@
     flex-shrink: 0;
   }
 
+  /* Padding, since the bylines' margin-none utility outranks a component's margin */
   .connected-app__byline {
-    margin-block-end: 0.3em;
+    padding-block-end: 0.3em;
   }
 
   .connected-app__details {
