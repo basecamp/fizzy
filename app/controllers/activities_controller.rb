@@ -15,7 +15,8 @@ class ActivitiesController < ApplicationController
   ].freeze
 
   def index
-    @activities = activities.where(id: page_of_activity_ids).preloaded
+    @activity_ids = page_of_activity_ids
+    @activities = activities.where(id: @activity_ids).preloaded
   end
 
   private
@@ -26,7 +27,7 @@ class ActivitiesController < ApplicationController
     # through the same scope, so an event whose card moved off the reader's boards in
     # between doesn't come back.
     def page_of_activity_ids
-      @activity_ids = set_page_and_extract_portion_from(activities).ids
+      set_page_and_extract_portion_from(activities).ids
     end
 
     def activities
@@ -43,7 +44,7 @@ class ActivitiesController < ApplicationController
     # full page links on, at worst to one empty page. Query pairs stay pairs, so repeated
     # filters like creator_ids[] survive into the link.
     def set_paginated_headers
-      if request.format.json? && @activity_ids.size == @page.records.limit_value
+      if geared_page? && request.format.json? && @activity_ids.size == @page.records.limit_value
         uri = Addressable::URI.parse(request.url)
         uri.query_values = uri.query_values(Array).to_a.reject { |name, _| name == "page" } + [ [ "page", @page.next_param.to_s ] ]
         headers["Link"] = %(<#{uri}>; rel="next")
