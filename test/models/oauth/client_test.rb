@@ -1,7 +1,6 @@
 require "test_helper"
 
 class Oauth::ClientTest < ActiveSupport::TestCase
-  include OauthAvailabilityTestHelper
   test "generates client_id on create" do
     client = Oauth::Client.create!(name: "Test", redirect_uris: %w[ http://127.0.0.1:8888/callback ])
     assert_equal 32, client.client_id.length
@@ -36,39 +35,27 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     assert client.valid?
   end
 
-  test "dynamically registered clients may add an https host only from the allowlist" do
-    with_dcr_allowed_https_hosts "connector.example.com" do
-      vetted = Oauth::Client.new(name: "Vetted", redirect_uris: %w[ https://CONNECTOR.example.com/callback ], dynamically_registered: true)
-      unvetted = Oauth::Client.new(name: "Unvetted", redirect_uris: %w[ https://elsewhere.example/callback ], dynamically_registered: true)
-
-      assert vetted.valid?
-      assert_not unvetted.valid?
-      assert_includes unvetted.errors[:redirect_uris], "names an https host not allowed for dynamic registration: elsewhere.example"
+  test "dynamically registered clients may add an https host on any plain host we don't run" do
+    %w[ https://vscode.dev/redirect https://CONNECTOR.example.com/callback https://elsewhere.example/callback ].each do |uri|
+      assert Oauth::Client.new(name: "Hosted", redirect_uris: [ uri ], dynamically_registered: true).valid?, uri
     end
+
+    ours = Oauth::Client.new(name: "Ours", redirect_uris: %w[ https://app.fizzy.do/callback ], dynamically_registered: true)
+    assert_not ours.valid?
+    assert_includes ours.errors[:redirect_uris], "names an https host this server runs, which dynamic registration can't use: app.fizzy.do"
   end
 
-  test "dynamically registered clients accept no https host when none is allowed" do
-    with_dcr_allowed_https_hosts do
-      client = Oauth::Client.new(name: "Hosted", redirect_uris: %w[ https://connector.example.com/callback ], dynamically_registered: true)
-
-      assert_not client.valid?
-    end
-  end
-
-  test "a client keeps an https host taken off the allowlist, but can't add another" do
+  test "a client keeps an https host of ours stored before the rule, but can't add another" do
     client = Oauth::Client.create!(name: "Hosted", redirect_uris: %w[ https://connector.example.com/callback ], dynamically_registered: true)
+    client.update_column :redirect_uris, %w[ https://connector.example.com/callback https://app.fizzy.do/callback ]
 
-    with_dcr_allowed_https_hosts "other.example.com" do
-      assert client.reload.update(name: "Renamed")
-      assert client.update(redirect_uris: %w[ https://connector.example.com/callback http://127.0.0.1:8888/callback ])
-      assert_not client.update(redirect_uris: %w[ https://connector.example.com/callback https://elsewhere.example/callback ])
-    end
+    assert client.reload.update(name: "Renamed")
+    assert client.update(redirect_uris: %w[ https://app.fizzy.do/callback http://127.0.0.1:8888/callback ])
+    assert_not client.update(redirect_uris: %w[ https://app.fizzy.do/callback https://3.basecamp.com/callback ])
   end
 
-  test "manually registered clients aren't held to the dynamic registration allowlist" do
-    with_dcr_allowed_https_hosts do
-      assert Oauth::Client.new(name: "First party", redirect_uris: %w[ https://partner.example.com/callback ]).valid?
-    end
+  test "manually registered clients may use our hosts" do
+    assert Oauth::Client.new(name: "First party", redirect_uris: %w[ https://app.fizzy.do/callback ]).valid?
   end
 
   test "dynamically registered clients may use the cursor and claude app schemes" do
@@ -126,11 +113,9 @@ class Oauth::ClientTest < ActiveSupport::TestCase
       assert_includes client.errors[:redirect_uris], "must be a local loopback, https or allowed app-scheme URI for dynamically registered clients", uri
     end
 
-    with_dcr_allowed_https_hosts "connector.example.com", "203.0.113.7", "3com.example", "10.0.0.1" do
-      %w[ https://connector.example.com:8443/callback https://Connector.Example.com/callback http://[::1]:8888/callback http://localhost/callback
-          https://203.0.113.7/callback https://3com.example/callback https://10.0.0.1/callback ].each do |uri|
-        assert Oauth::Client.new(name: "Plain", redirect_uris: [ uri ], dynamically_registered: true).valid?, uri
-      end
+    %w[ https://connector.example.com:8443/callback https://Connector.Example.com/callback http://[::1]:8888/callback http://localhost/callback
+        https://203.0.113.7/callback https://3com.example/callback https://10.0.0.1/callback ].each do |uri|
+      assert Oauth::Client.new(name: "Plain", redirect_uris: [ uri ], dynamically_registered: true).valid?, uri
     end
   end
 
