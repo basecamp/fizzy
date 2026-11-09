@@ -19,4 +19,16 @@ module EventsHelper
   def events_at_hour_container(column, hour, &block)
     tag.div class: "events__time-block", style: "grid-area: #{25 - hour}/#{column.index}", &block
   end
+
+  def event_cache_key(event)
+    [ event, event.eventable, event.card, event.board, event.creator, *assignment_cache_key(event) ]
+  end
+
+  private
+    # Assignments are worded for the viewer: "will handle", "yourself".
+    def assignment_cache_key(event)
+      if event.action.card_assigned? || event.action.card_unassigned?
+        [ Current.user, *event.assignees ]
+      end
+    end
 end

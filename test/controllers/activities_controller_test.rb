@@ -339,7 +339,7 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
       get activities_path, as: :json
       assert_response :success
 
-      activity = @response.parsed_body.find { it["id"] == event.id }
+      activity = @response.parsed_body.find { |activity| activity["id"] == event.id }
       assert activity, "#{event.action} isn't on the first page"
       activity
     end

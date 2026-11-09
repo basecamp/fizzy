@@ -1,1 +1,1 @@
-json.array! @page.records, partial: "activities/activity", as: :event, cached: ->(event) { activity_cache_key(event) }
+json.array! @page.records, partial: "activities/activity", as: :event, cached: ->(event) { event_cache_key(event) }
