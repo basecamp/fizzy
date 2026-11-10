@@ -48,18 +48,6 @@ module OauthHelper
     client.name.to_s.gsub(BIDI_CONTROLS, "").presence || "Unnamed app"
   end
 
-  # Who the person is dealing with, as far as we can vouch for it. A trusted or
-  # operator-registered app is known by its name. A self-registered app's name
-  # is only its claim, so it goes by where its access goes: the callback's
-  # host, port included when it isn't the default, or this device.
-  def oauth_client_display_identity(client, redirect_uri)
-    if client.dynamically_registered?
-      oauth_redirect_host(redirect_uri) || "an app on your device"
-    else
-      oauth_client_self_name(client)
-    end
-  end
-
   # Lowercase, as a browser reads it. nil for a callback that stays on this
   # device: loopback, or an app's own URL scheme.
   def oauth_redirect_host(redirect_uri)
@@ -77,6 +65,17 @@ module OauthHelper
   # have come through any of them, so none speaks for the rest.
   def oauth_client_remote_hosts(client)
     client.redirect_uris.filter_map { |uri| oauth_redirect_host(uri) }.uniq
+  end
+
+  # Where a self-registered app's access can go, as its Connected apps byline
+  # names it: every remote host, and this device too where any callback stays
+  # on it, since its grants may have come through either.
+  def oauth_client_destinations(client)
+    hosts = oauth_client_remote_hosts(client)
+    on_device = hosts.empty? || client.redirect_uris.any? { |uri| oauth_redirect_host(uri).nil? }
+
+    [ ("the app at #{hosts.to_sentence(two_words_connector: " or ", last_word_connector: " or ")}" if hosts.any?),
+      ("an app on your device" if on_device) ].compact.join(", or ")
   end
 
   # The access levels a client may be granted, weakest first, each with what

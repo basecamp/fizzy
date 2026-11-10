@@ -30,8 +30,10 @@ class OauthClientMetadataDocumentsTest < ActionDispatch::IntegrationTest
     untenanted { get new_oauth_authorization_path, params: authorization }
 
     assert_response :success
-    assert_match "Claude", response.body
-    assert_match "Name set by the app at", response.body
+    assert_select "h1", text: "Connect this app to Fizzy?"
+    assert_select ".oauth-client__name bdi", text: "Claude"
+    assert_select ".oauth-client__byline", text: "Name set by the app at claude.ai"
+    assert_select ".oauth-client__warning", count: 0
     assert_nil Oauth::Client.find_presented(URL)
   end
 
@@ -116,7 +118,7 @@ class OauthClientMetadataDocumentsTest < ActionDispatch::IntegrationTest
 
     assert_response :bad_request
     assert_select "h2", text: "Can't authorize this app"
-    assert_select "code", text: "invalid_client_metadata"
+    assert_select "[data-oauth-error=?]", "invalid_client_metadata"
 
     untenanted { get new_oauth_authorization_path(format: :json), params: authorization }
 
@@ -152,8 +154,8 @@ class OauthClientMetadataDocumentsTest < ActionDispatch::IntegrationTest
       end
 
       assert_response :bad_request
-      assert_select "code", text: "invalid_request"
-      assert_match "client_id", response.body
+      assert_select "[data-oauth-error=?]", "invalid_request"
+      assert_select "p", text: OauthHelper::OAUTH_ERROR_MESSAGES["invalid_request"]
     end
   end
 
@@ -175,7 +177,7 @@ class OauthClientMetadataDocumentsTest < ActionDispatch::IntegrationTest
     untenanted { get new_oauth_authorization_path, params: authorization.merge(code_challenge_method: "plain") }
 
     assert_response :bad_request
-    assert_select "code", text: "invalid_request"
+    assert_select "[data-oauth-error=?]", "invalid_request"
   end
 
   teardown do
