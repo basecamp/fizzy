@@ -16,7 +16,7 @@ class Public::BaseController < ApplicationController
     end
 
     def set_public_cache_expiration
-      expires_in 30.seconds, public: true
+      expires_in 30.seconds, public: true unless authenticated?
     end
 
     def ensure_board_accessible
