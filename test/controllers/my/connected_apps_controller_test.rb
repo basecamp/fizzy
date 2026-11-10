@@ -112,7 +112,32 @@ class My::ConnectedAppsControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_redirected_to my_connected_apps_path
-    assert_match "disconnected", flash[:notice]
+    assert_match "Access revoked", flash[:notice]
+  end
+
+  test "the notice names the app as the list does, and a name of nothing but direction controls as an unnamed app" do
+    client = Oauth::Client.create!(name: "\u202E\u2066\u2069", redirect_uris: %w[ http://127.0.0.1/cb ], dynamically_registered: true)
+    @identity.access_tokens.create!(oauth_client: client, permission: :read)
+
+    delete my_connected_app_path(client)
+
+    assert_equal "Access revoked for Unnamed app", flash[:notice]
+
+    named = Oauth::Client.create!(name: "\u202EBoard Sync", redirect_uris: %w[ http://127.0.0.1/cb ], dynamically_registered: true)
+    @identity.access_tokens.create!(oauth_client: named, permission: :read)
+
+    delete my_connected_app_path(named)
+
+    assert_equal "Access revoked for Board Sync", flash[:notice]
+  end
+
+  test "the profile entry reads Connected apps" do
+    @identity.access_tokens.create!(oauth_client: oauth_clients(:mcp_client), permission: :read)
+
+    get user_path(users(:david))
+
+    assert_select "h2", text: "Connected apps"
+    assert_select "h2", text: "Connected Apps", count: 0
   end
 
   test "destroy only revokes tokens for the specified client" do
@@ -167,14 +192,14 @@ class My::ConnectedAppsControllerTest < ActionDispatch::IntegrationTest
     assert_select ".connected-app", count: 0
   end
 
-  test "index names every remote host a self-registered app can send its access to, not just the first" do
+  test "index names every remote host a self-registered app can send its access to, and this device beside them" do
     client = Oauth::Client.create! name: "Two Homes", dynamically_registered: true,
       redirect_uris: %w[ http://127.0.0.1:8888/callback https://one.example.com/cb https://two.example.com:8443/cb ]
     @identity.access_tokens.create!(oauth_client: client, permission: :read)
 
     get my_connected_apps_path
 
-    assert_select "#connected_apps_web ~ .connected-app", text: /Name set by the app at one.example.com or two.example.com:8443/
-    assert_no_match "Name set by an app on your device", response.body
+    assert_select "#connected_apps_web ~ .connected-app .connected-app__byline",
+      text: /\A\s*Name set by the app at one\.example\.com or two\.example\.com:8443, or an app on your device\s*\z/
   end
 end

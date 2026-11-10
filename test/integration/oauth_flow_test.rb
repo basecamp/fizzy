@@ -58,8 +58,8 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
 
     assert_response :bad_request
     assert_select "h2", text: "Can't authorize this app"
-    assert_select "p", text: "Unknown client"
-    assert_select "code", text: "invalid_request"
+    assert_select "p", text: Oauth::AuthorizationsController::UNKNOWN_CLIENT_MESSAGE
+    assert_select "[data-oauth-error=?]", "invalid_request"
   end
 
   test "authorization answers an invalid client_id as JSON when JSON is asked for" do
@@ -96,7 +96,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
 
     # Can't redirect to untrusted URI, so render HTML error page
     assert_response :bad_request
-    assert_select "code", text: "invalid_request"
+    assert_select "[data-oauth-error=?]", "invalid_request"
   end
 
   test "authorization requires PKCE" do
@@ -126,7 +126,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     get_consent_screen client: client, code_challenge: nil
 
     assert_response :bad_request
-    assert_select "code", text: "invalid_request"
+    assert_select "[data-oauth-error=?]", "invalid_request"
   end
 
   test "no pre-consent error redirects to a self-registered https host" do
@@ -143,7 +143,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
 
       assert_response :bad_request, "#{overrides} should not redirect"
       assert_nil response.location
-      assert_select "code", text: error
+      assert_select "[data-oauth-error=?]", error
     end
   end
 
@@ -166,14 +166,14 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_equal "invalid_request", Rack::Utils.parse_query(URI.parse(response.location).query)["error"]
   end
 
-  test "consent names a self-registered redirect's port when it isn't the default" do
+  test "consent names a self-registered redirect's port, when it isn't the default, as where the name was set" do
     sign_in_as :david
     client = Oauth::Client.create!(name: "Hosted", redirect_uris: %w[ https://connector.example.com:8443/callback ], dynamically_registered: true)
 
     get_consent_screen client: client
 
     assert_response :success
-    assert_select "h1", text: "Connect the app at connector.example.com:8443 to Fizzy?"
+    assert_select ".oauth-client__byline", text: /\AName set by the app at connector\.example\.com:8443\z/
     assert_equal 1, response.parsed_body.at("body").text.scan("connector.example.com:8443").size
   end
 

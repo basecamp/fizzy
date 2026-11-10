@@ -1,0 +1,16 @@
+<%# Connecting apps is dark (Oauth::Availability): Fizzy acts as if it had no
+    authorization server, so apps get a bare 404. People on the browser
+    authorization flow are told it isn't here yet, as bc3 and HEY tell them. %>
+<% @page_title = "Not available yet" %>
+
+<article class="panel panel--wide shadow center txt-align-start margin-block-start-half">
+  <div class="flex flex-column gap">
+    <h2 class="margin-none"><%= @page_title %></h2>
+
+    <p class="txt-muted margin-none">
+      Connecting apps to Fizzy isn&rsquo;t available yet. Nothing was shared. Try again later.
+    </p>
+
+    <%= link_to "Go back", root_path, class: "btn btn--outline center txt-medium" %>
+  </div>
+</article>

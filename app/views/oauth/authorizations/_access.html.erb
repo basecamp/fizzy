@@ -4,21 +4,23 @@
 <fieldset class="oauth-access flex flex-column gap-half">
   <legend class="oauth-access__legend"><strong>Access</strong></legend>
 
-  <% oauth_access_levels(client).each do |value, level| %>
-    <label class="oauth-access__choice">
-      <%= form.radio_button :scope, value, checked: value == scope, class: "oauth-access__radio" %>
-      <span class="flex flex-column">
-        <strong><%= level[:label] %></strong>
-        <span class="txt-small txt-subtle"><%= level[:description] %></span>
-      </span>
-    </label>
-  <% end %>
-
-  <p class="oauth-access__reach txt-x-small txt-subtle margin-none">
+  <p class="oauth-access__reach txt-small txt-subtle margin-none">
     <% if local_assigns[:one_account] %>
       It acts as you, so it reaches only what you can, in that account.
     <% else %>
       It acts as you, so it reaches only what you can, in every account you belong to.
     <% end %>
   </p>
+
+  <div class="oauth-access__choices">
+    <% oauth_access_levels(client).each do |value, level| %>
+      <label class="oauth-access__choice">
+        <%= form.radio_button :scope, value, checked: value == scope, class: "oauth-access__radio" %>
+        <span class="flex flex-column">
+          <strong><%= level[:label] %></strong>
+          <span class="txt-small txt-subtle"><%= level[:description] %></span>
+        </span>
+      </label>
+    <% end %>
+  </div>
 </fieldset>

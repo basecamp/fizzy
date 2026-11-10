@@ -92,7 +92,7 @@ class OauthDcrRedirectsTest < ActionDispatch::IntegrationTest
     end
     assert_response :success
     assert_includes response.headers["Content-Security-Policy"], "cursor:"
-    assert_select "h1", text: "Connect an app on your device to Fizzy?"
+    assert_select "h1", text: "Connect this app to Fizzy?"
 
     untenanted do
       post oauth_authorization_path, params: {

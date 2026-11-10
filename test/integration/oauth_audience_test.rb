@@ -208,7 +208,7 @@ class OauthAudienceTest < ActionDispatch::IntegrationTest
     post_consent resource: MCP_RESOURCE, account_id: accounts(:acme).id
 
     assert_response :bad_request
-    assert_select "code", text: "invalid_request"
+    assert_select "[data-oauth-error=?]", "invalid_request"
   end
 
   test "consent for the MCP resource tells the client no for someone with no account to connect" do
@@ -227,7 +227,7 @@ class OauthAudienceTest < ActionDispatch::IntegrationTest
     get_consent resource: MCP_RESOURCE
 
     assert_response :bad_request
-    assert_select "code", text: "access_denied"
+    assert_select "[data-oauth-error=?]", "access_denied"
   end
 
   test "a resource repeated as a bare key is invalid_target, not the last one named" do

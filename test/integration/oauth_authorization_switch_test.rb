@@ -9,7 +9,7 @@ class OauthAuthorizationSwitchTest < ActionDispatch::IntegrationTest
   test "the consent screen offers to switch who is signed in" do
     untenanted { get new_oauth_authorization_path, params: authorization_params }
 
-    assert_select "form[action=?] button", oauth_authorization_switch_path(script_name: nil), text: "Not you?"
+    assert_select "form[action=?] button", oauth_authorization_switch_path(script_name: nil), text: "Use a different account?"
   end
 
   test "switching signs out and saves the authorization request, rebuilt from its checked parameters" do
@@ -73,7 +73,7 @@ class OauthAuthorizationSwitchTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :bad_request
-    assert_select "code", text: "invalid_request"
+    assert_select "[data-oauth-error=?]", "invalid_request"
     assert_nil session[:return_to_after_authenticating]
   end
 
