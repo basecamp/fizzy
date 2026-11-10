@@ -67,6 +67,17 @@ module OauthHelper
     client.redirect_uris.filter_map { |uri| oauth_redirect_host(uri) }.uniq
   end
 
+  # Where a self-registered app's access can go, as its Connected apps byline
+  # names it: every remote host, and this device too where any callback stays
+  # on it, since its grants may have come through either.
+  def oauth_client_destinations(client)
+    hosts = oauth_client_remote_hosts(client)
+    on_device = hosts.empty? || client.redirect_uris.any? { |uri| oauth_redirect_host(uri).nil? }
+
+    [ ("the app at #{hosts.to_sentence(two_words_connector: " or ", last_word_connector: " or ")}" if hosts.any?),
+      ("an app on your device" if on_device) ].compact.join(", or ")
+  end
+
   # The access levels a client may be granted, weakest first, each with what
   # it lets the app do in a few words. Which accounts it reaches is said once,
   # under the choices (oauth/authorizations/access).

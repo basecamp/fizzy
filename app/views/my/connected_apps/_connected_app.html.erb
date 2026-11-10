@@ -1,5 +1,3 @@
-<% remote_hosts = oauth_client_remote_hosts(client) %>
-
 <article class="connected-app" id="<%= dom_id(client, :connected_app) %>">
   <div class="connected-app__details flex flex-column">
     <%# A self-registered app goes by the name it gave itself, since that's the
@@ -10,13 +8,7 @@
       <h3 class="connected-app__name txt-medium margin-none" id="<%= dom_id(client, :connected_app_name) %>"><bdi><%= oauth_client_self_name(client) %></bdi></h3>
 
       <% if client.dynamically_registered? %>
-        <p class="connected-app__byline txt-x-small txt-subtle margin-none">
-          <% if remote_hosts.any? %>
-            Name set by the app at <%= remote_hosts.to_sentence(two_words_connector: " or ", last_word_connector: " or ") %>
-          <% else %>
-            Name set by an app on your device
-          <% end %>
-        </p>
+        <p class="connected-app__byline txt-x-small txt-subtle margin-none">Name set by <%= oauth_client_destinations(client) %></p>
       <% elsif client.metadata_document? %>
         <p class="connected-app__byline txt-x-small txt-subtle margin-none">Name set by the app at <%= URI.parse(client.client_id).host %></p>
       <% elsif client.trusted? %>

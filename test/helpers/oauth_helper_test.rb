@@ -71,6 +71,15 @@ class OauthHelperTest < ActionView::TestCase
     assert_equal %w[ a.example.com b.example.com:8443 ], oauth_client_remote_hosts(client)
   end
 
+  test "a client's destinations name its remote hosts, this device, or both" do
+    assert_equal "the app at a.example.com or b.example.com:8443",
+      oauth_client_destinations(Oauth::Client.new(redirect_uris: %w[ https://a.example.com/cb https://b.example.com:8443/cb ]))
+    assert_equal "an app on your device",
+      oauth_client_destinations(Oauth::Client.new(redirect_uris: %w[ http://127.0.0.1/cb com.example.app:/cb ]))
+    assert_equal "the app at a.example.com, or an app on your device",
+      oauth_client_destinations(Oauth::Client.new(redirect_uris: %w[ https://a.example.com/cb http://127.0.0.1/cb ]))
+  end
+
   test "each access level has a short label and a line saying what it allows" do
     oauth_access_levels(oauth_clients(:mcp_client)).each do |_, level|
       assert level[:label].present?

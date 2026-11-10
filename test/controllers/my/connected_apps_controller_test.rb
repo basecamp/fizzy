@@ -194,7 +194,7 @@ class My::ConnectedAppsControllerTest < ActionDispatch::IntegrationTest
     assert_select ".connected-app", count: 0
   end
 
-  test "index names every remote host a self-registered app can send its access to, not just the first" do
+  test "index names every remote host a self-registered app can send its access to, and this device beside them" do
     client = with_dcr_allowed_https_hosts "one.example.com", "two.example.com" do
       Oauth::Client.create! name: "Two Homes", dynamically_registered: true,
         redirect_uris: %w[ http://127.0.0.1:8888/callback https://one.example.com/cb https://two.example.com:8443/cb ]
@@ -203,7 +203,7 @@ class My::ConnectedAppsControllerTest < ActionDispatch::IntegrationTest
 
     get my_connected_apps_path
 
-    assert_select "#connected_apps_web ~ .connected-app", text: /Name set by the app at one.example.com or two.example.com:8443/
-    assert_no_match "Name set by an app on your device", response.body
+    assert_select "#connected_apps_web ~ .connected-app .connected-app__byline",
+      text: /\A\s*Name set by the app at one\.example\.com or two\.example\.com:8443, or an app on your device\s*\z/
   end
 end
