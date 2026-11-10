@@ -6,7 +6,7 @@ class ActionTextContentUnrecognizedAttachmentsTest < ActiveSupport::TestCase
   end
 
   test "renders attachments without recognized attributes" do
-    assert_match "<p>Hello</p>", content.to_rendered_html_with_layout
+    assert_match "<p>Hello</p><action-text-attachment>☒</action-text-attachment>", content.to_rendered_html_with_layout
   end
 
   test "the upstream implementation this patch replaces still needs replacing" do
