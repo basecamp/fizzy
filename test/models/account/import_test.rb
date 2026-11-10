@@ -102,6 +102,41 @@ class Account::ImportTest < ActiveSupport::TestCase
     stripped_tempfile&.unlink
   end
 
+  test "import creates delinquency trackers for webhooks whose export carried none" do
+    source_account = accounts("37s")
+    exporter = users(:david)
+    identity = exporter.identity
+    webhook_ids = source_account.webhooks.ids
+
+    export = Account::Export.create!(account: source_account, user: exporter)
+    export.build
+
+    export_tempfile = Tempfile.new([ "export", ".zip" ])
+    export.file.open { |f| FileUtils.cp(f.path, export_tempfile.path) }
+
+    stripped_tempfile = zip_without(export_tempfile.path, "data/webhook_delinquency_trackers/*")
+
+    source_account.destroy!
+
+    target_account = Account.create_with_owner(account: { name: "Import Test" }, owner: { identity: identity, name: exporter.name })
+    import = Account::Import.create!(identity: identity, account: target_account)
+    Current.set(account: target_account) do
+      import.file.attach(io: File.open(stripped_tempfile.path), filename: "export.zip", content_type: "application/zip")
+    end
+
+    import.check
+    import.process
+
+    assert import.completed?
+    assert_not_empty webhook_ids
+    assert_equal webhook_ids.sort, Webhook::DelinquencyTracker.where(account: target_account).pluck(:webhook_id).sort
+  ensure
+    export_tempfile&.close
+    export_tempfile&.unlink
+    stripped_tempfile&.close
+    stripped_tempfile&.unlink
+  end
+
   test "import caps a join code usage limit saved before the cap existed" do
     source_account = accounts("37s")
     exporter = users(:david)
