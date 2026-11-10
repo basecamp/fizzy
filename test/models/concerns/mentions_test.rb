@@ -101,6 +101,16 @@ class MentionsTest < ActiveSupport::TestCase
     end
   end
 
+  test "ignore attachments without recognized attributes" do
+    perform_enqueued_jobs only: Mention::CreateJob do
+      card = boards(:writebook).cards.create title: "Cleanup", description: "<action-text-attachment gid=\"#{cards(:logo).to_global_id}\"></action-text-attachment> #{mention_html_for(users(:kevin))}"
+
+      assert_difference -> { Mention.count }, +1 do
+        card.published!
+      end
+    end
+  end
+
   private
     def mention_html_for(user)
       ActionText::Attachment.from_attachable(user).to_html
