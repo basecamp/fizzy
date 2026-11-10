@@ -59,7 +59,7 @@ class Oauth::Client < ApplicationRecord
   validates :token_endpoint_auth_method, inclusion: { in: AUTH_METHODS }
   validate :redirect_uris_are_valid
   validate :protected_resource_is_valid
-  validate :added_https_hosts_are_vetted, if: -> { dynamically_registered? && (new_record? || redirect_uris_changed?) }
+  validate :added_https_hosts_are_not_ours, if: -> { dynamically_registered? && (new_record? || redirect_uris_changed?) }
 
   # A confidential client's secret is stored as a digest (TokenDigester). The
   # raw secret exists only in memory on the record that generated it, for the
@@ -339,14 +339,14 @@ class Oauth::Client < ApplicationRecord
     end
 
     # Judged only on the https hosts a write adds, never on those the client
-    # already holds, so taking a host off the list leaves every client that
-    # registered it working (Oauth.dcr_allowed_https_hosts).
-    def added_https_hosts_are_vetted
-      unvetted = https_hosts(redirect_uris) - https_hosts(new_record? ? [] : redirect_uris_was)
-      unvetted.reject! { |host| Oauth.dcr_allowed_https_host?(host) }
+    # already holds, so a client registered before the rule keeps working
+    # (Oauth.dcr_own_redirect_host?).
+    def added_https_hosts_are_not_ours
+      ours = https_hosts(redirect_uris) - https_hosts(new_record? ? [] : redirect_uris_was)
+      ours.select! { |host| Oauth.dcr_own_redirect_host?(host) }
 
-      if unvetted.any?
-        errors.add :redirect_uris, "names an https host not allowed for dynamic registration: #{unvetted.join(", ")}"
+      if ours.any?
+        errors.add :redirect_uris, "names an https host this server runs, which dynamic registration can't use: #{ours.join(", ")}"
       end
     end
 

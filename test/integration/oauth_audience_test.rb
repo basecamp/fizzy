@@ -429,9 +429,10 @@ class OauthAudienceTest < ActionDispatch::IntegrationTest
     assert_not public_client.valid?
     assert public_client.errors.added?(:protected_resource, "may only be set on an operator-provisioned confidential client")
 
-    registered = Oauth::Client.new(name: "Registered", redirect_uris: %w[ https://example.com/cb ], dynamically_registered: true,
+    registered = Oauth::Client.new(name: "Registered", redirect_uris: %w[ https://connector.example.com/cb ], dynamically_registered: true,
       token_endpoint_auth_method: "client_secret_post", protected_resource: MCP_RESOURCE)
     assert_not registered.valid?
+    assert registered.errors.include?(:protected_resource)
 
     provisioned = Oauth::Client.create!(name: "fizzy-mcp-server", redirect_uris: %w[ https://mcp.example.com/cb ],
       token_endpoint_auth_method: "client_secret_post", protected_resource: MCP_RESOURCE)

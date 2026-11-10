@@ -176,12 +176,7 @@ module OauthStates
       puts "Personas: #{PERSONAS.size + 1} converged (#{MARKER}-*@example.com)."
     end
 
-    # A self-registered client may only hold an https callback on a vetted
-    # host, from OAUTH_DCR_ALLOWED_HTTPS_HOSTS. The demo's is vetted in this
-    # process alone, so the server's own list is untouched.
     def ensure_demo_clients
-      Rails.configuration.x.oauth.dcr_allowed_https_hosts = Oauth.dcr_allowed_https_hosts | [ WEB_HOST ]
-
       CLIENTS.each do |client_id, definition|
         attributes = definition.merge(
           definition[:client_id_metadata_document] ? { metadata_fetched_at: Time.current, metadata_expires_at: 1.year.from_now } : {})
