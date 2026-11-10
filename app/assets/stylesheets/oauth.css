@@ -7,12 +7,15 @@
     gap: var(--block-space);
   }
 
-  /* The heading wraps between words; only a host too long for the line breaks inside it */
-  .oauth-consent__title {
-    overflow-wrap: break-word;
-  }
-
-  .oauth-client__self-name {
+  /* An app's name with its byline tight beneath, on consent and in Connected
+     apps alike. A long name or host breaks inside itself rather than widening
+     the panel */
+  .oauth-client__identity,
+  .connected-app__identity {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1em;
+    min-inline-size: 0;
     overflow-wrap: anywhere;
   }
 
@@ -158,14 +161,18 @@
     flex-shrink: 0;
   }
 
-  /* Padding, since the bylines' margin-none utility outranks a component's margin */
-  .connected-app__byline {
-    padding-block-end: 0.3em;
-  }
-
+  /* Three blocks: the name and its byline, the access the app holds, and when
+     it connected. The access lines sit together, with a paragraph's space
+     between them and the grey lines either side */
   .connected-app__details {
-    gap: 0.15em;
+    gap: var(--block-space-half);
     min-inline-size: 0;
     overflow-wrap: anywhere;
+  }
+
+  .connected-app__reach {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15em;
   }
 }

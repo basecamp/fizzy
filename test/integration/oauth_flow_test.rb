@@ -166,14 +166,14 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_equal "invalid_request", Rack::Utils.parse_query(URI.parse(response.location).query)["error"]
   end
 
-  test "consent names a self-registered redirect's port when it isn't the default" do
+  test "consent names a self-registered redirect's port, when it isn't the default, as where the name was set" do
     sign_in_as :david
     client = Oauth::Client.create!(name: "Hosted", redirect_uris: %w[ https://connector.example.com:8443/callback ], dynamically_registered: true)
 
     get_consent_screen client: client
 
     assert_response :success
-    assert_select "h1", text: "Connect the app at connector.example.com:8443 to Fizzy?"
+    assert_select ".oauth-client__byline", text: /\AName set by the app at connector\.example\.com:8443\z/
     assert_equal 1, response.parsed_body.at("body").text.scan("connector.example.com:8443").size
   end
 

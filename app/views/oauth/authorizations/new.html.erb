@@ -1,13 +1,10 @@
-<% identity = oauth_client_display_identity(@client, @redirect_uri) %>
-<% redirect_host = oauth_redirect_host(@redirect_uri) %>
-<%# A self-registered app is headed by where its access goes, the one thing
-    about it Fizzy can vouch for: "the app at <host>", or an app on this
-    device. Any other app is known by its name. %>
-<% heading_identity = @client.dynamically_registered? && redirect_host ? "the app at #{redirect_host}" : identity %>
-<% @page_title = "Connect #{heading_identity} to Fizzy" %>
+<%# One heading for every app. Its name, which a self-registered app typed
+    itself, goes in the panel beside who set it (oauth/authorizations/client),
+    so the heading never repeats a claim Fizzy can't vouch for. %>
+<% @page_title = "Connect this app to Fizzy" %>
 
 <% content_for :header do %>
-  <h1 class="header__title oauth-consent__title">Connect <bdi><%= heading_identity %></bdi> to Fizzy?</h1>
+  <h1 class="header__title">Connect this app to Fizzy?</h1>
 
   <%# "Use a different account?" signs out and returns whoever signs in to this same request %>
   <div class="oauth-consent__identity flex align-center justify-center gap-half txt-small txt-subtle">

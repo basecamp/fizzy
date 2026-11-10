@@ -18,17 +18,11 @@ class OauthHelperTest < ActionView::TestCase
     assert_equal "Unnamed app", oauth_client_self_name(Oauth::Client.new(name: "\u202E\u2066\u2069"))
   end
 
-  test "a self-registered app is identified by its callback's host, port included when it isn't the default" do
-    client = Oauth::Client.new name: "Hosted", dynamically_registered: true
-
-    assert_equal "connector.example.com", oauth_client_display_identity(client, "https://connector.example.com/callback")
-    assert_equal "connector.example.com:8443", oauth_client_display_identity(client, "https://connector.example.com:8443/callback")
-    assert_equal "an app on your device", oauth_client_display_identity(client, "http://127.0.0.1:8888/callback")
-    assert_equal "an app on your device", oauth_client_display_identity(client, "com.example.app:/callback")
-  end
-
-  test "a registered app is identified by its name" do
-    assert_equal "Trusted First-Party App", oauth_client_display_identity(oauth_clients(:trusted_client), "https://app.example.com/oauth/callback")
+  test "a callback's host reads as a browser reads it, port included when it isn't the default, and nil on this device" do
+    assert_equal "connector.example.com", oauth_redirect_host("https://Connector.Example.com/callback")
+    assert_equal "connector.example.com:8443", oauth_redirect_host("https://connector.example.com:8443/callback")
+    assert_nil oauth_redirect_host("http://127.0.0.1:8888/callback")
+    assert_nil oauth_redirect_host("com.example.app:/callback")
   end
 
   test "a read-only client is offered read alone" do
@@ -83,9 +77,5 @@ class OauthHelperTest < ActionView::TestCase
       assert level[:description].present?
       assert_operator level[:description].split.size, :<=, 12
     end
-  end
-
-  test "a redirect's host reads in lowercase, as a browser reads it" do
-    assert_equal "connector.example.com:8443", oauth_redirect_host("https://Connector.EXAMPLE.com:8443/cb")
   end
 end
