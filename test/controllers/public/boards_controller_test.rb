@@ -36,4 +36,18 @@ class Public::BoardsControllerTest < ActionDispatch::IntegrationTest
     get published_board_path(boards(:writebook))
     assert_response :success
   end
+
+  test "extensionless public pages always render full HTML" do
+    sign_out
+
+    get published_board_path(boards(:writebook)), headers: { "Accept" => nil, "X-Requested-With" => "XMLHttpRequest" }
+    assert_response :success
+    assert_equal "text/html", response.media_type
+    assert_select "body.public"
+
+    get published_board_path(boards(:writebook)), headers: { "Accept" => "application/json" }
+    assert_response :success
+    assert_equal "text/html", response.media_type
+    assert_select "body.public"
+  end
 end

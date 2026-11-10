@@ -230,7 +230,7 @@ Rails.application.routes.draw do
 
   # A public board is found by its publication key, in :id or :board_id.
   filter_path_parameters :id, :board_id do
-    namespace :public do
+    namespace :public, defaults: { format: :html } do
       resources :boards do
         scope module: :boards do
           namespace :columns do
