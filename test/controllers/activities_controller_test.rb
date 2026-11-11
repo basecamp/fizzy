@@ -264,9 +264,70 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
     assert_equal total, all_ids.uniq.count
   end
 
+  test "index serves a repeat request from the activity cache" do
+    with_actionview_partial_caching do
+      get activities_path, as: :json
+      first_response = @response.parsed_body
+
+      assert_equal first_response.size, activity_cache_hits { get activities_path, as: :json }
+      assert_equal first_response, @response.parsed_body
+    end
+  end
+
+  test "a cached activity shows its card as it is now" do
+    with_actionview_partial_caching do
+      cached_activity(events(:logo_published))
+
+      with_current_user(:david) { cards(:logo).update!(title: "Renamed logo") }
+
+      activity = cached_activity(events(:logo_published))
+      assert_equal "Renamed logo", activity["eventable"]["title"]
+      assert_includes activity["description"], "Renamed logo"
+    end
+  end
+
+  test "a cached comment activity shows its comment and card as they are now" do
+    with_actionview_partial_caching do
+      cached_activity(events(:layout_commented))
+
+      comments(:layout_overflowing_david).update!(body: "Edited comment")
+      assert_equal "Edited comment", cached_activity(events(:layout_commented))["eventable"]["body"]["plain_text"]
+
+      with_current_user(:david) { cards(:layout).update!(title: "Renamed layout") }
+      assert_includes cached_activity(events(:layout_commented))["description"], "Renamed layout"
+    end
+  end
+
+  test "an assignment activity reads the same for every viewer" do
+    assert_includes cached_activity(events(:logo_assignment_jz))["description"], "assigned JZ"
+
+    logout_and_sign_in_as :jz
+    assert_includes cached_activity(events(:logo_assignment_jz))["description"], "assigned JZ"
+  end
+
   private
     def next_page_from_link_header(link_header)
       url = link_header&.match(/<([^>]+)>;\s*rel="next"/)&.captures&.first
       URI.parse(url).request_uri if url
+    end
+
+    def cached_activity(event)
+      get activities_path, as: :json
+      assert_response :success
+
+      activity = @response.parsed_body.find { |activity| activity["id"] == event.id }
+      assert activity, "#{event.action} isn't on the first page"
+      activity
+    end
+
+    def activity_cache_hits(&block)
+      hits = nil
+      record_hits = ->(render) { hits = render.payload[:cache_hits] if rendered_activities?(render) }
+      ActiveSupport::Notifications.subscribed(record_hits, "render_collection.action_view", &block)
+      hits
+    end
+
+    def rendered_activities?(render)
+      render.payload[:identifier].to_s.end_with?("activities/_activity.json.jbuilder")
     end
 end

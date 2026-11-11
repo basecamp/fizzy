@@ -95,12 +95,17 @@ Rails.application.configure do
     /.*\.nip\.io/  # nip.io for mobile apps
   ]
 
-  # OAuth is lit in development; preview the dark posture with OAUTH_DARK=1.
-  # See Oauth::Availability.
+  # OAuth is lit in development; preview the dark posture with OAUTH_DARK=1,
+  # paused issuance with OAUTH_PAUSED=1, and the preview gate with
+  # CONNECTED_APPS_PREVIEW=true, as production reads it. See Oauth::Availability
+  # and script/dev/oauth_states.
   config.x.oauth.acceptance_enabled = ENV["OAUTH_DARK"].blank?
+  config.x.oauth.issuance_enabled = ENV["OAUTH_PAUSED"].blank?
+  config.after_initialize do
+    config.x.oauth.connected_apps_preview = Oauth::Availability.connected_apps_preview_from(ENV)
+  end
   config.x.oauth.cimd_enabled = true
   config.x.oauth.cimd_allowed_hosts = %w[ mcp.claude.ai claude.ai claude.com chatgpt.com ]
-  config.x.oauth.dcr_allowed_https_hosts = ENV.fetch("OAUTH_DCR_ALLOWED_HTTPS_HOSTS", "").split(/[\s,]+/).compact_blank
 
   # Canonical host for mailer URLs (emails always link here, not personal Tailscale URLs)
   config.action_mailer.default_url_options = { host: "#{config.hosts.first}:3006" }

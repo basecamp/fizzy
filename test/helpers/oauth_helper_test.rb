@@ -1,21 +1,28 @@
 require "test_helper"
 
 class OauthHelperTest < ActionView::TestCase
+  test "an authorization error reads in plain words: the caller's own, its code's, or a general one" do
+    assert_equal "Choose an account.", oauth_error_message("invalid_request", "Choose an account.")
+    assert_equal OAUTH_ERROR_MESSAGES["invalid_scope"], oauth_error_message("invalid_scope")
+    assert_equal OAUTH_ERROR_MESSAGES["invalid_scope"], oauth_error_message(:invalid_scope, "")
+    assert_equal "Something went wrong connecting this app.", oauth_error_message("server_error")
+  end
+
+  test "no plain-words message is a developer's string" do
+    OAUTH_ERROR_MESSAGES.each_value do |message|
+      assert_no_match(/_|redirect_uri|code_challenge|\bscope\b|S256/, message)
+    end
+  end
+
   test "a self name of nothing but direction controls reads as an unnamed app" do
     assert_equal "Unnamed app", oauth_client_self_name(Oauth::Client.new(name: "\u202E\u2066\u2069"))
   end
 
-  test "a self-registered app is identified by its callback's host, port included when it isn't the default" do
-    client = Oauth::Client.new name: "Hosted", dynamically_registered: true
-
-    assert_equal "connector.example.com", oauth_client_display_identity(client, "https://connector.example.com/callback")
-    assert_equal "connector.example.com:8443", oauth_client_display_identity(client, "https://connector.example.com:8443/callback")
-    assert_equal "an app on your device", oauth_client_display_identity(client, "http://127.0.0.1:8888/callback")
-    assert_equal "an app on your device", oauth_client_display_identity(client, "com.example.app:/callback")
-  end
-
-  test "a registered app is identified by its name" do
-    assert_equal "Trusted First-Party App", oauth_client_display_identity(oauth_clients(:trusted_client), "https://app.example.com/oauth/callback")
+  test "a callback's host reads as a browser reads it, port included when it isn't the default, and nil on this device" do
+    assert_equal "connector.example.com", oauth_redirect_host("https://Connector.Example.com/callback")
+    assert_equal "connector.example.com:8443", oauth_redirect_host("https://connector.example.com:8443/callback")
+    assert_nil oauth_redirect_host("http://127.0.0.1:8888/callback")
+    assert_nil oauth_redirect_host("com.example.app:/callback")
   end
 
   test "a read-only client is offered read alone" do
@@ -64,15 +71,20 @@ class OauthHelperTest < ActionView::TestCase
     assert_equal %w[ a.example.com b.example.com:8443 ], oauth_client_remote_hosts(client)
   end
 
+  test "a client's destinations name its remote hosts, this device, or both" do
+    assert_equal "the app at a.example.com or b.example.com:8443",
+      oauth_client_destinations(Oauth::Client.new(redirect_uris: %w[ https://a.example.com/cb https://b.example.com:8443/cb ]))
+    assert_equal "an app on your device",
+      oauth_client_destinations(Oauth::Client.new(redirect_uris: %w[ http://127.0.0.1/cb com.example.app:/cb ]))
+    assert_equal "the app at a.example.com, or an app on your device",
+      oauth_client_destinations(Oauth::Client.new(redirect_uris: %w[ https://a.example.com/cb http://127.0.0.1/cb ]))
+  end
+
   test "each access level has a short label and a line saying what it allows" do
     oauth_access_levels(oauth_clients(:mcp_client)).each do |_, level|
       assert level[:label].present?
       assert level[:description].present?
       assert_operator level[:description].split.size, :<=, 12
     end
-  end
-
-  test "a redirect's host reads in lowercase, as a browser reads it" do
-    assert_equal "connector.example.com:8443", oauth_redirect_host("https://Connector.EXAMPLE.com:8443/cb")
   end
 end

@@ -84,18 +84,17 @@ class Oauth::ClientsController < Oauth::BaseController
 
     def registrable_uri?(uri)
       parsed = URI.parse(uri)
-      Oauth.dcr_redirect_shape?(parsed) && Oauth.dcr_vetted_https_redirect?(parsed)
+      Oauth.dcr_redirect_shape?(parsed) && Oauth.dcr_admissible_https_redirect?(parsed, serving_host: request.host)
     rescue URI::InvalidURIError
       false
     end
 
     def registrable_uris_description
       schemes = Oauth::DCR_CUSTOM_SCHEMES.map { |scheme| "#{scheme}://" }.join(" or ")
-      hosts = Oauth.dcr_allowed_https_hosts
 
       "Dynamic registration accepts local loopback redirect URIs (http://127.0.0.1, http://[::1] or http://localhost), " \
         "#{schemes} app redirects, " \
-        "#{hosts.any? ? "and https redirects on #{hosts.join(", ")}" : "and no https redirects on this server"}"
+        "and https redirects on a plain host this server doesn't run, with no userinfo or fragment"
     end
 
     def registered_client_name

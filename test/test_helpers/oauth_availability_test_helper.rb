@@ -14,14 +14,4 @@ module OauthAvailabilityTestHelper
   ensure
     AVAILABILITY_KEYS.each { |key| config[key] = saved[key] }
   end
-
-  def with_dcr_allowed_https_hosts(*hosts)
-    config = Rails.application.config.x.oauth
-    saved = config.dcr_allowed_https_hosts
-
-    config.dcr_allowed_https_hosts = hosts
-    yield
-  ensure
-    config.dcr_allowed_https_hosts = saved
-  end
 end

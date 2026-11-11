@@ -36,4 +36,19 @@ class Public::BoardsControllerTest < ActionDispatch::IntegrationTest
     get published_board_path(boards(:writebook))
     assert_response :success
   end
+
+  test "show is publicly cacheable without authentication" do
+    sign_out
+    get published_board_path(boards(:writebook))
+
+    assert response.cache_control[:public]
+    assert_equal 30.seconds.to_s, response.cache_control[:max_age]
+  end
+
+  test "show is not publicly cacheable when signed in" do
+    get published_board_path(boards(:writebook))
+
+    assert_not response.cache_control[:public]
+    assert response.cache_control[:private]
+  end
 end

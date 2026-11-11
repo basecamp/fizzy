@@ -8,13 +8,17 @@
   <% if accounts.one? %>
     <% account = accounts.first %>
     <%= form.hidden_field :account_id, value: account.id %>
-    <p class="margin-none"><bdi><%= account.name %></bdi></p>
+    <p class="txt-small txt-subtle margin-none">The app connects only to <strong><bdi><%= account.name %></bdi></strong>.</p>
   <% else %>
-    <% accounts.each_with_index do |account, index| %>
-      <label class="oauth-access__choice">
-        <%= form.radio_button :account_id, account.id, checked: selected_account_id.present? ? account.id == selected_account_id : index.zero?, required: true, class: "oauth-access__radio" %>
-        <span><bdi><%= account.name %></bdi></span>
-      </label>
-    <% end %>
+    <p class="txt-small txt-subtle margin-none">The app connects only to the account you choose.</p>
+
+    <div class="oauth-access__choices">
+      <% accounts.each_with_index do |account, index| %>
+        <label class="oauth-access__choice">
+          <%= form.radio_button :account_id, account.id, checked: selected_account_id.present? ? account.id == selected_account_id : index.zero?, required: true, class: "oauth-access__radio" %>
+          <strong><bdi><%= account.name %></bdi></strong>
+        </label>
+      <% end %>
+    </div>
   <% end %>
 </fieldset>

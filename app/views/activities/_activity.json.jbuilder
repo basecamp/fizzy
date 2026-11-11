@@ -1,6 +1,6 @@
 json.(event, :id, :action)
 json.created_at event.created_at.utc
-json.description event.description_for(Current.user).to_plain_text
+json.description event.description_for(nil).to_plain_text
 json.particulars event.api_particulars
 json.url(
   case event.eventable
