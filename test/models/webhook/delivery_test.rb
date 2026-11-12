@@ -155,7 +155,7 @@ class Webhook::DeliveryTest < ActiveSupport::TestCase
   end
 
   test "deliver when the network can't reach the destination" do
-    [ Errno::ENETUNREACH, Errno::EADDRNOTAVAIL, Errno::EAFNOSUPPORT ].each do |error|
+    [ Errno::ENETUNREACH, Errno::EADDRNOTAVAIL, Errno::EAFNOSUPPORT, Errno::EPIPE ].each do |error|
       delivery = Webhook::Delivery.create!(webhook: webhooks(:active), event: events(:layout_commented))
       stub_request(:post, delivery.webhook.url).to_raise(error)
 
@@ -192,6 +192,15 @@ class Webhook::DeliveryTest < ActiveSupport::TestCase
       assert_equal "completed", delivery.state, error.name
       assert_equal "invalid_response", delivery.response[:error], error.name
     end
+  end
+
+  test "deliver asks for an uncompressed response" do
+    delivery = webhook_deliveries(:pending)
+    stub_request(:post, delivery.webhook.url).to_return(status: 200)
+
+    delivery.deliver
+
+    assert_requested :post, delivery.webhook.url, headers: { "Accept-Encoding" => "identity" }
   end
 
   test "deliver refuses a port other than 80 or 443 without connecting" do

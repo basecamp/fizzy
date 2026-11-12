@@ -85,7 +85,7 @@ class Webhook::Delivery < ApplicationRecord
       { error: :dns_lookup_failed }
     rescue Net::OpenTimeout, Net::ReadTimeout, Errno::ETIMEDOUT
       { error: :connection_timeout }
-    rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Errno::EADDRNOTAVAIL, Errno::EAFNOSUPPORT, Errno::ECONNRESET
+    rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Errno::ENETUNREACH, Errno::EADDRNOTAVAIL, Errno::EAFNOSUPPORT, Errno::ECONNRESET, Errno::EPIPE
       { error: :destination_unreachable }
     rescue OpenSSL::SSL::SSLError
       { error: :failed_tls }
@@ -124,6 +124,7 @@ class Webhook::Delivery < ApplicationRecord
     def headers
       {
         "User-Agent" => USER_AGENT,
+        "Accept-Encoding" => "identity",
         "Content-Type" => content_type,
         "X-Webhook-Signature" => signature,
         "X-Webhook-Timestamp" => event.created_at.utc.iso8601
