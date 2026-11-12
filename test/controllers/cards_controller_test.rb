@@ -15,6 +15,24 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "index offers to add a card to the most recently accessed board" do
+    accesses(:private_kevin).accessed
+
+    get cards_path(assignee_ids: [ users(:kevin).id ])
+    assert_response :success
+
+    assert_select "form[action=?] button[data-action~='keydown.c@document->hotkey#click']", board_cards_path(boards(:private)), text: /Add a card/
+  end
+
+  test "index offers to add a card to the filtered board" do
+    accesses(:private_kevin).accessed
+
+    get cards_path(board_ids: [ boards(:writebook).id ])
+    assert_response :success
+
+    assert_select "form[action=?] button", board_cards_path(boards(:writebook)), text: /Add a card/
+  end
+
   test "index as JSON can filter by workflow column id" do
     get cards_path(format: :json), params: { column_ids: [ columns(:writebook_in_progress).id ] }
     assert_response :success
