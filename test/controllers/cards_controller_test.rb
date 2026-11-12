@@ -22,6 +22,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     assert_select "form[action=?] button[data-action~='keydown.c@document->hotkey#click']", board_cards_path(boards(:private)), text: /Add a card/
+    assert_select "header.header--events"
   end
 
   test "index offers to add a card to the filtered board" do

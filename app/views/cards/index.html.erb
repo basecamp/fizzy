@@ -1,5 +1,6 @@
 <% @page_title = @user_filtering.selected_boards_label %>
 <% turbo_exempts_page_from_cache %>
+<% @header_class = "header--events" %>
 
 <%= render "cards/broadcasts", filter: @filter %>
 
