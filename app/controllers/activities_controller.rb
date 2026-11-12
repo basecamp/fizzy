@@ -16,7 +16,7 @@ class ActivitiesController < ApplicationController
 
   def index
     set_page_and_extract_portion_from(activities)
-    @activities = Event.preloaded.where(id: @page.records.ids).reverse_chronologically
+    @activities = activities.preloaded.where(id: @page.records.ids)
   end
 
   private
