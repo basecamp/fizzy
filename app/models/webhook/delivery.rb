@@ -2,6 +2,7 @@ class Webhook::Delivery < ApplicationRecord
   include Rails.application.routes.url_helpers
 
   class ResponseTooLarge < StandardError; end
+  class InvalidResponse < StandardError; end
 
   STALE_TRESHOLD = 7.days
   USER_AGENT = "fizzy/1.0.0 Webhook"
@@ -73,11 +74,7 @@ class Webhook::Delivery < ApplicationRecord
       else
         request = Net::HTTP::Post.new(uri, headers).tap { |request| request.body = payload }
 
-        response = http.request(request) do |net_http_response|
-          stream_body_with_limit(net_http_response)
-        end
-
-        { code: response.code.to_i }
+        { code: post(request).code.to_i }
       end
     rescue ResponseTooLarge
       { error: :response_too_large }
@@ -89,8 +86,15 @@ class Webhook::Delivery < ApplicationRecord
       { error: :destination_unreachable }
     rescue OpenSSL::SSL::SSLError
       { error: :failed_tls }
-    rescue EOFError, Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError
+    rescue InvalidResponse, EOFError, Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError
       { error: :invalid_response }
+    end
+
+    # Net::HTTP raises ArgumentError for a response header value that holds a bare CR.
+    def post(request)
+      http.request(request) { |response| stream_body_with_limit(response) }
+    rescue ArgumentError
+      raise InvalidResponse
     end
 
     def stream_body_with_limit(response)

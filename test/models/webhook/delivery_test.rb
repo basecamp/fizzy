@@ -194,6 +194,27 @@ class Webhook::DeliveryTest < ActiveSupport::TestCase
     end
   end
 
+  test "deliver when the response has a malformed header" do
+    delivery = webhook_deliveries(:pending)
+    stub_request(:post, delivery.webhook.url).to_raise(ArgumentError.new("header field value cannot include CR/LF"))
+
+    tracker = delivery.webhook.delinquency_tracker
+    assert_difference -> { tracker.reload.consecutive_failures_count }, 1 do
+      delivery.deliver
+    end
+
+    assert_equal "completed", delivery.state
+    assert_equal "invalid_response", delivery.response[:error]
+  end
+
+  test "deliver still fails the job when the payload can't be built" do
+    delivery = webhook_deliveries(:pending)
+    delivery.webhook.renderer.stubs(:render).raises(ArgumentError)
+
+    assert_raises(ArgumentError) { delivery.deliver }
+    assert_equal "errored", delivery.state
+  end
+
   test "deliver asks for an uncompressed response" do
     delivery = webhook_deliveries(:pending)
     stub_request(:post, delivery.webhook.url).to_return(status: 200)
