@@ -279,7 +279,7 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
     move_event = ->(*, payload) do
       if !moved && payload[:sql].match?(/SELECT [`"]events[`"]\.[`"]id[`"] FROM/)
         moved = true
-        event.update_columns(board_id: boards(:miltons_wish_list).id)
+        ActiveRecord::Base.connected_to(role: :writing) { event.update_columns(board_id: boards(:miltons_wish_list).id) }
       end
     end
 
