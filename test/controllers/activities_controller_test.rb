@@ -264,6 +264,34 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
     assert_equal total, all_ids.uniq.count
   end
 
+  test "index pages through event ids and loads only the events on the page" do
+    assert_queries_match(/SELECT [`"]events[`"]\.[`"]id[`"] FROM [`"]events[`"].* LIMIT /m, count: 1) do
+      assert_no_queries_match(/SELECT [`"]events[`"]\.\* FROM [`"]events[`"].* LIMIT /m) do
+        get activities_path, as: :json
+      end
+    end
+    assert_response :success
+  end
+
+  test "index leaves out an event that moves to an inaccessible board while the page loads" do
+    event = events(:logo_published)
+    moved = false
+    move_event = ->(*, payload) do
+      if !moved && payload[:sql].match?(/SELECT [`"]events[`"]\.[`"]id[`"] FROM/)
+        moved = true
+        ActiveRecord::Base.connected_to(role: :writing) { event.update_columns(board_id: boards(:miltons_wish_list).id) }
+      end
+    end
+
+    ActiveSupport::Notifications.subscribed(move_event, "sql.active_record") do
+      get activities_path, as: :json
+    end
+
+    assert_response :success
+    assert moved
+    assert_not_includes @response.parsed_body.map { |activity| activity["id"] }, event.id
+  end
+
   test "index serves a repeat request from the activity cache" do
     with_actionview_partial_caching do
       get activities_path, as: :json

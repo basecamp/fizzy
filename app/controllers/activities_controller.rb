@@ -16,12 +16,12 @@ class ActivitiesController < ApplicationController
 
   def index
     set_page_and_extract_portion_from(activities)
+    @activities = activities.preloaded.where(id: @page.records.ids)
   end
 
   private
     def activities
       Current.user.accessible_events
-        .preloaded
         .where(action: ACTIONS)
         .for_creators(params[:creator_ids])
         .for_boards(params[:board_ids])
