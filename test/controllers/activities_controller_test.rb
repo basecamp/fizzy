@@ -264,6 +264,15 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
     assert_equal total, all_ids.uniq.count
   end
 
+  test "index pages through event ids and loads only the events on the page" do
+    assert_queries_match(/SELECT [`"]events[`"]\.[`"]id[`"] FROM [`"]events[`"].* LIMIT /m, count: 1) do
+      assert_no_queries_match(/SELECT [`"]events[`"]\.\* FROM [`"]events[`"].* LIMIT /m) do
+        get activities_path, as: :json
+      end
+    end
+    assert_response :success
+  end
+
   test "index serves a repeat request from the activity cache" do
     with_actionview_partial_caching do
       get activities_path, as: :json
