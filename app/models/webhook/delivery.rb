@@ -66,7 +66,9 @@ class Webhook::Delivery < ApplicationRecord
 
   private
     def perform_request
-      if resolved_ip.nil?
+      if Webhook::PERMITTED_PORTS.exclude?(uri.port)
+        { error: :forbidden_port }
+      elsif resolved_ip.nil?
         { error: :private_uri }
       else
         request = Net::HTTP::Post.new(uri, headers).tap { |request| request.body = payload }
@@ -87,6 +89,8 @@ class Webhook::Delivery < ApplicationRecord
       { error: :destination_unreachable }
     rescue OpenSSL::SSL::SSLError
       { error: :failed_tls }
+    rescue EOFError, Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError
+      { error: :invalid_response }
     end
 
     def stream_body_with_limit(response)

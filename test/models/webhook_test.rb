@@ -41,6 +41,29 @@ class WebhookTest < ActiveSupport::TestCase
     assert_equal "https://example.com/webhook", webhook.url
   end
 
+  test "validates the url port" do
+    webhook = Webhook.new name: "SMTP", board: boards(:writebook), url: "https://example.com:25/webhook"
+    assert_not webhook.valid?
+    assert_includes webhook.errors[:url], "must use port 80 or 443"
+
+    webhook = Webhook.new name: "SWAPPED", board: boards(:writebook), url: "http://example.com:443/webhook"
+    assert webhook.valid?
+
+    webhook = webhooks(:active)
+    webhook.url = "http://example.com:8080/webhook"
+    assert_not webhook.valid?
+    assert_includes webhook.errors[:url], "must use port 80 or 443"
+  end
+
+  test "a webhook saved with another port can still be deactivated" do
+    webhook = webhooks(:active)
+    webhook.update_column :url, "https://example.com:8443/webhook"
+
+    assert_changes -> { webhook.reload.active? }, from: true, to: false do
+      webhook.deactivate
+    end
+  end
+
   test "deactivate" do
     webhook = webhooks(:active)
 

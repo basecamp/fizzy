@@ -6,6 +6,7 @@ class Webhook < ApplicationRecord
   BASECAMP_CAMPFIRE_WEBHOOK_URL_REGEX = %r{/\d+/integrations/[^\/]+/buckets/\d+/chats/\d+/lines\Z}i
 
   PERMITTED_SCHEMES = %w[ http https ].freeze
+  PERMITTED_PORTS = [ 80, 443 ].freeze
   PERMITTED_ACTIONS = %w[
     card_assigned
     card_closed
@@ -95,6 +96,8 @@ class Webhook < ApplicationRecord
 
       if PERMITTED_SCHEMES.exclude?(uri.scheme)
         errors.add :url, "must use #{PERMITTED_SCHEMES.to_choice_sentence}"
+      elsif will_save_change_to_url? && PERMITTED_PORTS.exclude?(uri.port)
+        errors.add :url, "must use port #{PERMITTED_PORTS.to_choice_sentence}"
       end
     rescue URI::InvalidURIError
       errors.add :url, "not a URL"

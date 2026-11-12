@@ -179,6 +179,36 @@ class Webhook::DeliveryTest < ActiveSupport::TestCase
     assert_equal "failed_tls", delivery.response[:error]
   end
 
+  test "deliver when the destination answers with something other than HTTP" do
+    [ EOFError, Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError ].each do |error|
+      delivery = Webhook::Delivery.create!(webhook: webhooks(:active), event: events(:layout_commented))
+      stub_request(:post, delivery.webhook.url).to_raise(error)
+
+      tracker = delivery.webhook.delinquency_tracker
+      assert_difference -> { tracker.reload.consecutive_failures_count }, 1, error.name do
+        delivery.deliver
+      end
+
+      assert_equal "completed", delivery.state, error.name
+      assert_equal "invalid_response", delivery.response[:error], error.name
+    end
+  end
+
+  test "deliver refuses a port other than 80 or 443 without connecting" do
+    webhook = webhooks(:active)
+    webhook.update_column :url, "https://example.com:25/webhook"
+    delivery = Webhook::Delivery.create!(webhook: webhook, event: events(:layout_commented))
+
+    tracker = webhook.delinquency_tracker
+    assert_difference -> { tracker.reload.consecutive_failures_count }, 1 do
+      delivery.deliver
+    end
+
+    assert_not_requested :post, "https://example.com:25/webhook"
+    assert_equal "completed", delivery.state
+    assert_equal "forbidden_port", delivery.response[:error]
+  end
+
   test "deliver when an unexpected error occurs" do
     delivery = webhook_deliveries(:pending)
     stub_request(:post, delivery.webhook.url).to_raise(StandardError, "Unexpected error")
