@@ -18,9 +18,9 @@ class Notifications::BulkReadingsControllerTest < ActionDispatch::IntegrationTes
     assert_redirected_to notifications_path
   end
 
-  test "create returns ok when from tray" do
+  test "create redirects to the tray when from tray" do
     post bulk_reading_path, params: { from_tray: true }
-    assert_response :ok
+    assert_redirected_to tray_notifications_path
   end
 
   test "create as JSON" do
