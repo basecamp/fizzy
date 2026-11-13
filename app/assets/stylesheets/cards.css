@@ -31,12 +31,6 @@
       box-shadow: 0 0 0 1px var(--color-ink-lighter);
     }
 
-    @media (prefers-color-scheme: dark) {
-      html:not([data-theme]) & {
-        box-shadow: 0 0 0 1px var(--color-ink-lighter);
-      }
-    }
-
     .popup {
       inline-size: 260px;
     }
