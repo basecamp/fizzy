@@ -21,6 +21,7 @@ module Card::Triageable
 
     transaction do
       resume
+      pop if bubble_up?
       update! column: column
       track_event "triaged", particulars: { column: column.name }
     end
