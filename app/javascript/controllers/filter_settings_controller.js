@@ -34,6 +34,7 @@ export default class extends Controller {
   submitToGenericCardsView() {
     this.formTarget.action = this.cardsUrlValue
     this.formTarget.dataset.turboFrame = "top"
+    this.formTarget.dataset.turboAction = "replace"
     this.formTarget.requestSubmit()
   }
 
