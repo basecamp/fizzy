@@ -103,4 +103,17 @@ class Boards::ColumnsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :no_content
   end
+
+  test "show invalidates cache when a card moves to another board" do
+    column = columns(:writebook_in_progress)
+    card = create_full_page_of_cards(boards(:writebook), column: column).fifth
+
+    get board_column_path(boards(:writebook), column)
+    etag = response.headers["ETag"]
+
+    put card_board_path(card), params: { board_id: boards(:private).id }
+
+    get board_column_path(boards(:writebook), column), headers: { "If-None-Match" => etag }
+    assert_response :success
+  end
 end
