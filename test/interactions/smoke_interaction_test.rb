@@ -41,7 +41,9 @@ class SmokeInteractionTest < RailsJsdom::TestCase
 
     visit card_path(cards(:layout))
     fill_in_lexxy with: "Here is a comment"
-    attach_file "Upload file", file_fixture("moon.jpg")
+    attach_file file_fixture("moon.jpg") do
+      click_on "Upload file"
+    end
 
     within("form lexxy-editor figure.attachment[data-content-type='image/jpeg']") do
       assert_selector "img[src*='/rails/active_storage']"
