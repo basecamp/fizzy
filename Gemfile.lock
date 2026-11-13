@@ -21,7 +21,7 @@ GIT
 
 GIT
   remote: https://github.com/jakehow/rails-jsdom.git
-  revision: 42888e2810ca121d86d2eb93a67f76b1cb08d425
+  revision: 8369f4edf2ed27109d044e4c25e0088870b1acb6
   branch: fizzy-gaps
   specs:
     rails-jsdom (0.1.0)
