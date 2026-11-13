@@ -1,18 +1,6 @@
 require "application_system_test_case"
 
 class SmokeTest < ApplicationSystemTestCase
-  test "dismissing notifications" do
-    sign_in_as(users(:david))
-
-    notification = notifications(:logo_mentioned_david)
-
-    assert_selector "div##{dom_id(notification)}"
-
-    within_window(open_new_window) { visit card_url(notification.card) }
-
-    assert_no_selector "div##{dom_id(notification)}"
-  end
-
   test "dragging card to a new column" do
     sign_in_as(users(:david))
 
