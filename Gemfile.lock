@@ -21,7 +21,7 @@ GIT
 
 GIT
   remote: https://github.com/jakehow/rails-jsdom.git
-  revision: 41e6630d50dc132e80226b2cfd843460a116000f
+  revision: 761c6c096456d6e5c2bca7a80eb7ce53466a462a
   branch: load-app-entry
   specs:
     rails-jsdom (0.1.0)
