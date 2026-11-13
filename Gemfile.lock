@@ -20,6 +20,18 @@ GIT
       railties (>= 7.1.0)
 
 GIT
+  remote: https://github.com/jakehow/rails-jsdom.git
+  revision: cf4662d309e73f8f03988447d459af13b105c73b
+  specs:
+    rails-jsdom (0.1.0)
+      actioncable (>= 7.1)
+      actionpack (>= 7.1)
+      importmap-rails (>= 2.0)
+      nokogiri (>= 1.15)
+      propshaft (>= 1.0)
+      turbo-rails (>= 2.0)
+
+GIT
   remote: https://github.com/rails/rails.git
   revision: 8b06b0eb98315cbbd6d7f526112cd8d909ff787c
   branch: main
@@ -562,6 +574,7 @@ DEPENDENCIES
   rack-mini-profiler
   rails!
   rails-active_search (~> 0.1.0)
+  rails-jsdom!
   rouge
   rqrcode
   rubocop-rails-omakase
@@ -723,6 +736,7 @@ CHECKSUMS
   rails-active_search (0.1.0) sha256=e79b5d206f4d35a2c1b418f20974d64fd0f0eeff002063b9d503ccf41cf88d76
   rails-dom-testing (2.3.0) sha256=8acc7953a7b911ca44588bf08737bc16719f431a1cc3091a292bca7317925c1d
   rails-html-sanitizer (1.7.2) sha256=a21ef45b7a6639fc8e2282473c547514cb86ae271616162a946bf89148fa2424
+  rails-jsdom (0.1.0)
   railties (8.2.0.alpha)
   rainbow (3.1.1) sha256=039491aa3a89f42efa1d6dec2fc4e62ede96eb6acd95e52f1ad581182b79bc6a
   rake (13.4.2) sha256=cb825b2bd5f1f8e91ca37bddb4b9aaf345551b4731da62949be002fa89283701

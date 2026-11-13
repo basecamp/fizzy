@@ -69,6 +69,7 @@ group :test do
   gem "capybara"
   gem "minitest-reporters", require: false
   gem "mocha"
+  gem "rails-jsdom", github: "jakehow/rails-jsdom"
   gem "selenium-webdriver"
   gem "vcr"
   gem "webmock"
