@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # zizmor: ignore[artipacked] -- credentials needed for git push # v7.0.1
 
-      - uses: ruby/setup-ruby@26e5b7d197ebf60545ee9667bcbace0be11ccaec # v1.334.0
+      - uses: ruby/setup-ruby@a5612086821ed5ff914a94f49c9e4e6ee039fb72 # v1.337.0
         with:
           ruby-version: .ruby-version
 
