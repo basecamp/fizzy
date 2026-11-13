@@ -1,10 +1,10 @@
-require "application_system_test_case"
+require "test_helper"
 
-class MarkdownPasteTest < ApplicationSystemTestCase
+class MarkdownPasteInteractionTest < RailsJsdom::TestCase
   test "markdown paste adds block spacing" do
     sign_in_as(users(:david))
 
-    visit card_url(cards(:layout))
+    visit card_path(cards(:layout))
     find("lexxy-editor").click
     paste_markdown("Hello\n\nWorld")
 
@@ -18,11 +18,11 @@ class MarkdownPasteTest < ApplicationSystemTestCase
   test "markdown paste preserves line breaks" do
     sign_in_as(users(:david))
 
-    visit card_url(cards(:layout))
+    visit card_path(cards(:layout))
     find("lexxy-editor").click
     paste_markdown("Hello\nWorld")
 
-    inner_html = find("lexxy-editor p", text: "Hello").native.property("innerHTML")
+    inner_html = find("lexxy-editor p", text: "Hello").evaluate_script("this.innerHTML")
     children = Nokogiri::HTML5.fragment(inner_html).children
     assert_pattern do
       children => [
@@ -35,7 +35,7 @@ class MarkdownPasteTest < ApplicationSystemTestCase
 
   private
     def paste_markdown(markdown)
-      page.execute_script(<<~JS, markdown)
+      execute_script(<<~JS, markdown)
         const dt = new DataTransfer();
         dt.setData("text/plain", arguments[0]);
         document.activeElement.dispatchEvent(new ClipboardEvent("paste", { clipboardData: dt, bubbles: true }));
