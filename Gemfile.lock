@@ -21,8 +21,8 @@ GIT
 
 GIT
   remote: https://github.com/jakehow/rails-jsdom.git
-  revision: 8369f4edf2ed27109d044e4c25e0088870b1acb6
-  branch: fizzy-gaps
+  revision: 41e6630d50dc132e80226b2cfd843460a116000f
+  branch: load-app-entry
   specs:
     rails-jsdom (0.1.0)
       actioncable (>= 7.1)
