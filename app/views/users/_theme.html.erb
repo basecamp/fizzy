@@ -23,3 +23,29 @@
     </label>
   </div>
 </section>
+
+<section class="settings__section" data-controller="motion">
+  <header>
+    <h2 class="divider">Motion</h2>
+  </header>
+
+  <div class="theme-switcher flex gap max-width justify-center txt-small margin-block-start-half">
+    <label class="btn theme-switcher__btn">
+      <%= icon_tag "monitor" %>
+      <span class="overflow-ellipsis">Same as OS</span>
+      <input type="radio" name="motion" data-action="click->motion#setAuto" data-motion-target="autoButton">
+    </label>
+
+    <label class="btn theme-switcher__btn">
+      <%= icon_tag "minus" %>
+      <span class="overflow-ellipsis">Reduce motion</span>
+      <input type="radio" name="motion" data-action="click->motion#setReduce" data-motion-target="reduceButton">
+    </label>
+
+    <label class="btn theme-switcher__btn">
+      <%= icon_tag "bolt" %>
+      <span class="overflow-ellipsis">Always animate</span>
+      <input type="radio" name="motion" data-action="click->motion#setAnimate" data-motion-target="animateButton">
+    </label>
+  </div>
+</section>
