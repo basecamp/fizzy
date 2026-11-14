@@ -2,6 +2,7 @@ ENV["RAILS_ENV"] ||= "test"
 require_relative "../config/environment"
 
 require "rails/test_help"
+require "rails_jsdom"
 require "webmock/minitest"
 require_relative "webmock_ipaddr_extension"
 require "vcr"

@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "devDependencies": {
+    "jsdom": "^31.0.0",
+    "esbuild": "^0.28.2"
+  }
+}

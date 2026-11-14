@@ -1,6 +1,6 @@
-require "application_system_test_case"
+require "test_helper"
 
-class CardRefreshTest < ApplicationSystemTestCase
+class CardRefreshInteractionTest < RailsJsdom::TestCase
   include ActionView::RecordIdentifier
 
   setup do
@@ -10,17 +10,17 @@ class CardRefreshTest < ApplicationSystemTestCase
   end
 
   test "a broadcast refresh shows card changes made elsewhere" do
-    visit card_url(@card)
+    visit card_path(@card)
     assert_selector "h1", text: @card.title
 
     update_card_elsewhere
 
-    assert_selector "h1", text: "Retitled elsewhere", wait: 5
+    assert_selector "h1", text: "Retitled elsewhere"
     assert_text "Description updated elsewhere"
   end
 
   test "a broadcast refresh preserves an edit in progress" do
-    visit card_url(@card)
+    visit card_path(@card)
     click_on @card.title
 
     within_edit_frame do
@@ -29,8 +29,7 @@ class CardRefreshTest < ApplicationSystemTestCase
 
     update_card_elsewhere
 
-    # The title change's system comment appearing proves the refresh reached the page.
-    assert_text "changed the title", wait: 5
+    assert_text "changed the title"
     within_edit_frame do
       assert_selector "lexxy-editor", text: "Draft description in progress"
     end
@@ -38,12 +37,12 @@ class CardRefreshTest < ApplicationSystemTestCase
   end
 
   test "canceling an edit reveals card changes made elsewhere during the edit" do
-    visit card_url(@card)
+    visit card_path(@card)
     click_on @card.title
     within_edit_frame { assert_selector "form" }
 
     update_card_elsewhere
-    assert_text "changed the title", wait: 5
+    assert_text "changed the title"
 
     send_keys :escape
 
@@ -52,7 +51,7 @@ class CardRefreshTest < ApplicationSystemTestCase
   end
 
   test "a broadcast refresh shows card changes after an edit is canceled" do
-    visit card_url(@card)
+    visit card_path(@card)
     click_on @card.title
     within_edit_frame { assert_selector "form" }
 
@@ -61,24 +60,21 @@ class CardRefreshTest < ApplicationSystemTestCase
 
     update_card_elsewhere
 
-    assert_selector "h1", text: "Retitled elsewhere", wait: 5
+    assert_selector "h1", text: "Retitled elsewhere"
     assert_text "Description updated elsewhere"
   end
 
   private
     def update_card_elsewhere
-      wait_for_cable_subscriptions
       @card.update!(title: "Retitled elsewhere", description: "Description updated elsewhere")
       perform_enqueued_jobs only: Turbo::Streams::BroadcastStreamJob
     end
 
-    # A broadcast sent before the page's subscriptions are confirmed is lost.
-    def wait_for_cable_subscriptions
-      assert_selector "turbo-cable-stream-source[connected]", visible: :all
-      assert_no_selector "turbo-cable-stream-source:not([connected])", visible: :all
-    end
-
     def within_edit_frame(&block)
       within "##{dom_id(@card, :edit)}", &block
+    end
+
+    def fill_in_lexxy(selector = "lexxy-editor", with:)
+      execute_script("document.querySelector(#{selector.to_json}).value = #{with.to_json}")
     end
 end
