@@ -26,6 +26,7 @@ class BackLinkNavigationInteractionTest < RailsJsdom::TestCase
   end
 
   test "card back link returns to activity page when navigating from it" do
+    travel_to events(:layout_assignment_jz).created_at
     sign_in_as(users(:david))
     visit root_path
 
@@ -38,6 +39,7 @@ class BackLinkNavigationInteractionTest < RailsJsdom::TestCase
   end
 
   test "card back link returns to activity page when navigating from it without trailing slash" do
+    travel_to events(:layout_assignment_jz).created_at
     sign_in_as(users(:david))
 
     activity_path_without_trailing_slash = root_path.chomp("/")
