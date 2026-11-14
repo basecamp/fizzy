@@ -21,6 +21,9 @@ git config core.hooksPath .githooks
 ▸ Installing RubyGems
 bundle install
 
+▸ Installing npm packages
+npm ci
+
 ▸ Starting MySQL
 docker start fizzy-mysql
 

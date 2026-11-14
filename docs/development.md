@@ -43,6 +43,8 @@ For fast feedback loops, unit tests can be run with:
 bin/rails test
 ```
 
+The interaction tests in `test/interactions` run in jsdom on Node.js, which `bin/setup` installs with mise from `.node-version`, along with the npm packages in `package.json`. If you set up before they were added, run `mise install` and `npm ci`.
+
 The full continuous integration tests can be run with:
 
 ```sh

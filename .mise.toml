@@ -1,7 +1,7 @@
 min_version = "2026.8.10"
 
 [settings]
-idiomatic_version_file_enable_tools = ["ruby"]
+idiomatic_version_file_enable_tools = ["ruby", "node"]
 
 [tools]
 gum = "0.17.0"

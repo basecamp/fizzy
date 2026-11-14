@@ -21,6 +21,9 @@ git config core.hooksPath .githooks
 ▸ Installing RubyGems
 bundle install
 
+▸ Installing npm packages
+npm ci
+
 ▸ Setting up MySQL
 bash -c 
         docker pull mysql:8.4

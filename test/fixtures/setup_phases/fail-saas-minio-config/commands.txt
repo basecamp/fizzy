@@ -1,6 +1,7 @@
 brew bundle --file=$APP/Brewfile
 bundle config set --local auto_install true
 bundle install
+npm ci
 docker-dev/setup minio
 minio-setup [SAAS=1 BUNDLE_GEMFILE=Gemfile.saas]
 exit: 9
