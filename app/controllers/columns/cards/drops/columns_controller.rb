@@ -1,5 +1,5 @@
 class Columns::Cards::Drops::ColumnsController < ApplicationController
-  include CardScoped
+  include CardScoped, ColumnFiltering
 
   def create
     @column = @card.board.columns.find(params[:column_id])

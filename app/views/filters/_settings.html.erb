@@ -28,6 +28,7 @@
             <%= yield form if block_given? %>
           <% end %>
           <%= render "filters/settings/controls", user_filtering: user_filtering, form: form %>
+          <%= render "filters/settings/view", view: local_assigns[:view] if local_assigns.key?(:view) %>
 
           <%= render "filters/settings/toggle", user_filtering: user_filtering %>
       <% end %>

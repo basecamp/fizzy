@@ -1,7 +1,7 @@
 class Boards::ColumnsController < ApplicationController
   wrap_parameters :column, include: %i[ name color ]
 
-  include BoardScoped
+  include BoardScoped, ColumnFiltering
 
   before_action :set_column, only: %i[ show update destroy ]
 
@@ -11,7 +11,7 @@ class Boards::ColumnsController < ApplicationController
   end
 
   def show
-    set_page_and_extract_portion_from @column.cards.active.latest.with_golden_first.preloaded
+    set_page_and_extract_portion_from filtered(@column.cards.active.latest.with_golden_first.preloaded)
     fresh_when etag: @page.records
   end
 

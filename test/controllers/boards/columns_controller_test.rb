@@ -103,4 +103,12 @@ class Boards::ColumnsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :no_content
   end
+
+  test "show with a filter" do
+    get board_column_path(boards(:writebook), columns(:writebook_triage), tag_ids: [ tags(:mobile).id ])
+
+    assert_response :success
+    assert_includes response.body, ERB::Util.html_escape(cards(:layout).title)
+    assert_not_includes response.body, ERB::Util.html_escape(cards(:logo).title)
+  end
 end

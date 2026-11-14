@@ -15,6 +15,35 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "show with a filter lists matching cards" do
+    get board_path(boards(:writebook), tag_ids: [ tags(:mobile).id ])
+
+    assert_response :success
+    assert_select ".card-columns", count: 0
+    assert_select ".cards--grid", text: /#{cards(:layout).title}/
+  end
+
+  test "show with a filter in columns view keeps the columns and filters each one" do
+    get board_path(boards(:writebook), tag_ids: [ tags(:mobile).id ], view: "columns")
+
+    assert_response :success
+    assert_select ".card-columns"
+    assert_select "turbo-frame##{dom_id(columns(:writebook_triage), :cards)}[src*=?]", "tag_ids"
+    assert_select "##{dom_id(columns(:writebook_triage))} .cards__expander-count", text: "1"
+    assert_select "#closed_column[src*=?]", "tag_ids"
+    assert_select "#not_now_column[src*=?]", "tag_ids"
+    assert_select "#maybe .cards__expander-count", text: "0"
+  end
+
+  test "show with a column filter in columns view passes it on to each column" do
+    get board_path(boards(:writebook), tag_ids: [ tags(:mobile).id ], column_ids: [ columns(:writebook_in_progress).id ], view: "columns")
+
+    assert_response :success
+    assert_select "turbo-frame##{dom_id(columns(:writebook_triage), :cards)}[src*=?]", "column_ids"
+    assert_select "##{dom_id(columns(:writebook_triage))} .cards__expander-count", text: "0"
+    assert_select "##{dom_id(columns(:writebook_in_progress))} .cards__expander-count", text: "1"
+  end
+
   test "invalidates page title cache when account updates" do
     get board_path(boards(:writebook))
     etag = response.headers["ETag"]

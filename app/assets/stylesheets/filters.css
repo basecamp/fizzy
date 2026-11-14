@@ -174,6 +174,20 @@
     display: flex;
   }
 
+  /* Only offer the layout switch while filtering, which is when it applies */
+  .filters__view {
+    display: none;
+
+    .filters--has-filters-set & {
+      display: flex;
+    }
+
+    &:has(input:disabled) .filters__view-as-list,
+    &:has(input:not(:disabled)) .filters__view-as-columns {
+      display: none;
+    }
+  }
+
   .filters__show-when-expanded {
     .filters:not(.filters--expanded) & {
       display: none;

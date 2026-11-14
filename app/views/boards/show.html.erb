@@ -18,16 +18,16 @@
   </div>
 <% end %>
 
-<%= render "filters/settings", filter_url: board_path(@board), user_filtering: @user_filtering, no_filtering_url: board_path(@board) do |form| %>
+<%= render "filters/settings", filter_url: board_path(@board), user_filtering: @user_filtering, no_filtering_url: board_path(@board), view: params[:view] do |form| %>
   <%= hidden_field_tag "board_ids[]", @board.id %>
 <% end %>
 
 <%= turbo_frame_tag :cards_container do %>
-  <% if @filter.used?(ignore_boards: true) %>
+  <% if @filter.used?(ignore_boards: true) && params[:view] != "columns" %>
     <%= render "boards/show/filtered_cards", page: @page %>
   <% else %>
     <%= render "columns/show/add_card_button", board: @board %>
-    <%= render "boards/show/columns", page: @page, board: @board %>
+    <%= render "boards/show/columns", page: @page, board: @board, filter: (@filter if @filter.used?(ignore_boards: true)) %>
   <% end %>
 <% end %>
 

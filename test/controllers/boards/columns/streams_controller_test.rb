@@ -17,4 +17,12 @@ class Boards::Columns::StreamsControllerTest < ActionDispatch::IntegrationTest
     assert_kind_of Array, @response.parsed_body
     assert response.headers["X-Total-Count"].present?, "Expected X-Total-Count header"
   end
+
+  test "show with a filter" do
+    get board_columns_stream_path(boards(:writebook), tag_ids: [ tags(:web).id ]), as: :json
+    assert_empty @response.parsed_body
+
+    get board_columns_stream_path(boards(:writebook), creator_ids: [ cards(:buy_domain).creator.id ]), as: :json
+    assert_includes @response.parsed_body.pluck("id"), cards(:buy_domain).id
+  end
 end
