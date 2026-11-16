@@ -55,7 +55,11 @@ jobs:
     steps:
       - name: Install system packages
         timeout-minutes: 10
-        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libmysqlclient-dev libsqlite3-0 libvips curl ffmpeg
+        # The runner image ships a MySQL server the tests don't use (they use the mysql service above).
+        # Installing libmysqlclient-dev upgrades it, and its postinst fails on the runner (8.4.13), so drop it first.
+        run: |
+          sudo apt-get purge -y mysql-server mysql-server-core
+          sudo apt-get update && sudo apt-get install --no-install-recommends -y libmysqlclient-dev libsqlite3-0 libvips curl ffmpeg
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
