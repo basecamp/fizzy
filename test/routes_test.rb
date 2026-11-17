@@ -25,4 +25,11 @@ class RouteTest < ActionDispatch::IntegrationTest
   test "columns/cards/drops routes remain nested under cards" do
     assert_recognizes({ controller: "columns/cards/drops/columns", action: "create", card_id: "123" }, { path: "/columns/cards/123/drops/column", method: :post })
   end
+
+  test "every route has a controller" do
+    controllers = Rails.application.routes.routes.filter_map { |route| route.defaults[:controller] }.uniq
+
+    missing = controllers.reject { |controller| "#{controller.camelize}Controller".safe_constantize }
+    assert_empty missing
+  end
 end
