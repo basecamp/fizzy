@@ -32,7 +32,8 @@ module Fizzy
           latitude = Float(cloudflare_header("CF-IPLatitude"), exception: false)
           longitude = Float(cloudflare_header("CF-IPLongitude"), exception: false)
 
-          if latitude && longitude
+          # The range check also keeps out Infinity ("1e999"), which JSON can't generate.
+          if latitude&.between?(-90, 90) && longitude&.between?(-180, 180)
             { lat: latitude, lon: longitude }
           end
         end

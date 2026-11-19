@@ -25,6 +25,13 @@ class Fizzy::Saas::ClientGeoLoggingTest < ActionDispatch::IntegrationTest
     assert_nil logged_client_geo(headers: CLOUDFLARE_HEADERS.merge("CF-IPLatitude" => "nowhere"))["location"]
   end
 
+  test "leaves out a location that overflows or is out of range, and still logs the request" do
+    assert_nil logged_client_geo(headers: CLOUDFLARE_HEADERS.merge("CF-IPLatitude" => "1e999"))["location"]
+    assert_nil logged_client_geo(headers: CLOUDFLARE_HEADERS.merge("CF-IPLongitude" => "-1e999"))["location"]
+    assert_nil logged_client_geo(headers: CLOUDFLARE_HEADERS.merge("CF-IPLatitude" => "91"))["location"]
+    assert_nil logged_client_geo(headers: CLOUDFLARE_HEADERS.merge("CF-IPLongitude" => "180.5"))["location"]
+  end
+
   test "logs no geo without Cloudflare's headers" do
     assert_nil logged_client_geo(headers: {})
   end
