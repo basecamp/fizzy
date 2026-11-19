@@ -8,6 +8,7 @@ require_relative "unprocessable_attachments"
 require_relative "oauth_audit_log"
 require_relative "sentry_sql_redaction"
 require_relative "job_memory"
+require_relative "client_geo_logging"
 require_relative "../../rails_ext/active_record_tasks_database_tasks.rb"
 
 module Fizzy
@@ -105,6 +106,10 @@ module Fizzy
             end
           end
         end
+      end
+
+      initializer "fizzy_saas.logging.client_geo" do |app|
+        ActiveSupport.on_load(:action_controller_base) { include ClientGeoLogging }
       end
 
       # OAuth lifecycle events (Oauth::Audit) go to the structured log, which
