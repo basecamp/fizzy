@@ -101,13 +101,22 @@ class Oauth::ClientsController < Oauth::BaseController
       (params[:client_name] if params[:client_name].is_a?(String)).presence || "MCP Client"
     end
 
+    # A registration that names no scope (offline_access names none) gets both,
+    # as a client metadata document does, so the person picks on the consent
+    # screen. One naming only scopes Fizzy doesn't issue gets read.
     def validated_scopes
       requested = case params[:scope]
       when String then params[:scope].split
       when Array then params[:scope].select { |s| s.is_a?(String) }
       else []
       end
-      Oauth.canonical_scope(requested.join(" ")).split
+      requested = Oauth.requested_scopes(requested.join(" "))
+
+      if requested.empty?
+        Oauth::ClientMetadata::Document::DEFAULT_SCOPES
+      else
+        Oauth.canonical_scope(requested.join(" ")).split
+      end
     end
 
     def dynamic_client_registration_response(client)
