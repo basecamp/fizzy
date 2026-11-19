@@ -1689,6 +1689,45 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_equal %w[ read write ], Oauth::Client.find_by(client_id: response.parsed_body["client_id"]).scopes
   end
 
+  # As a client metadata document that names no scope is, so a client that
+  # registers before it knows what it will ask for can still ask for write, and
+  # the person picks on the consent screen.
+  test "DCR naming no scope registers read and write, and the consent screen offers both" do
+    [ {}, { scope: "" }, { scope: "offline_access" }, { scope: [] } ].each do |scope|
+      untenanted do
+        post oauth_clients_path, params: {
+          client_name: "Unscoped",
+          redirect_uris: [ "http://127.0.0.1:8888/callback" ]
+        }.merge(scope), as: :json
+      end
+
+      assert_response :created
+      assert_equal "read write", response.parsed_body["scope"], "registered with #{scope.inspect}"
+      client = Oauth::Client.find_by(client_id: response.parsed_body["client_id"])
+      assert_equal %w[ read write ], client.scopes
+
+      sign_in_as :david
+      get_consent_screen client: client, scope: "read write"
+
+      assert_response :success
+      assert_select "input[type=radio][name=scope][value=?]", "read"
+      assert_select "input[type=radio][name=scope][checked][value=?]", "read write"
+    end
+  end
+
+  test "DCR naming only scopes Fizzy doesn't issue still registers read alone" do
+    untenanted do
+      post oauth_clients_path, params: {
+        client_name: "Elsewhere",
+        redirect_uris: [ "http://127.0.0.1:8888/callback" ],
+        scope: "mcp full"
+      }, as: :json
+    end
+
+    assert_response :created
+    assert_equal "read", response.parsed_body["scope"]
+  end
+
   test "DCR refuses more redirect URIs, or longer ones, than a client needs" do
     many = (1..11).map { |port| "http://127.0.0.1:#{8000 + port}/callback" }
     long = "http://127.0.0.1:8888/#{"a" * 2000}"
