@@ -3,6 +3,11 @@
     so the heading never repeats a claim Fizzy can't vouch for. %>
 <% @page_title = "Connect this app to Fizzy" %>
 
+<%# Arriving by Turbo, as after signing in, would keep the previous page's
+    Content-Security-Policy, whose form-action 'self' blocks the Authorize
+    redirect to the app. A full load applies this page's own. %>
+<% content_for :head, turbo_page_requires_reload %>
+
 <% content_for :header do %>
   <h1 class="header__title">Connect this app to Fizzy?</h1>
 
