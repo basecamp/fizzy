@@ -39,12 +39,8 @@ unless Rails.env.local?
     Process.warmup
   end
 
-  # Defer major GC (full marking phase) until after request handling,
-  # and perform major GC deferred during request handling.
-  before_worker_boot do
-    GC.config(rgengc_allow_full_mark: false)
-  end
-
+  # Opportunistically run major GC between requests when the VM signals
+  # it's needed, preferring idle time over mid-request.
   out_of_band do
     GC.start if GC.latest_gc_info(:need_major_by)
   end
