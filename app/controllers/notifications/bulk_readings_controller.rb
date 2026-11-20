@@ -5,7 +5,7 @@ class Notifications::BulkReadingsController < ApplicationController
     respond_to do |format|
       format.html do
         if from_tray?
-          head :ok
+          redirect_to tray_notifications_path
         else
           redirect_to notifications_path
         end
