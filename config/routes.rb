@@ -49,7 +49,6 @@ Rails.application.routes.draw do
   resources :boards do
     scope module: :boards do
       resources :accesses, only: :index
-      resource :subscriptions
       resource :involvement
       resource :publication
       resource :entropy
@@ -221,7 +220,7 @@ Rails.application.routes.draw do
     resources :cards
     resources :users
 
-    resources :boards do
+    resources :boards, only: [] do
       scope module: :boards do
         resources :users
       end
