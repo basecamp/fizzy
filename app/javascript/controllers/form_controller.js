@@ -76,6 +76,7 @@ export default class extends Controller {
 
   async disableSubmitWhenInvalid(event) {
     await nextFrame()
+    await nextFrame()
 
     if (this.element.checkValidity()) {
       this.submitTarget.removeAttribute("disabled")
