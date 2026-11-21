@@ -37,6 +37,15 @@ class SearchRateLimitingTest < ActionDispatch::IntegrationTest
     assert_equal "60", response.headers["Retry-After"]
   end
 
+  test "a board column filtered by terms shares the same limit" do
+    Rails.cache.stubs(:increment).returns(SearchRateLimiting::SEARCHES_PER_HOUR + 1)
+
+    get board_columns_stream_path(boards(:writebook), format: :json), params: { terms: [ "haggis" ] }, headers: bearer_token_header(:davids_api_token)
+
+    assert_response :too_many_requests
+    assert_equal "60", response.headers["Retry-After"]
+  end
+
   test "card lists, searches and boards count against one hourly budget per user" do
     Rails.cache.expects(:increment).with("rate-limit:searches:#{users(:david).cache_key}", 1, expires_in: 1.hour).times(3).returns(1)
 

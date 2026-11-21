@@ -1,0 +1,9 @@
+<div class="filters__view" data-controller="toggle-enable">
+  <%= hidden_field_tag :view, "columns", id: nil, disabled: view != "columns", data: { toggle_enable_target: "element" } %>
+
+  <button type="button" class="btn txt-x-small" data-action="toggle-enable#toggle form#submit" data-controller="tooltip">
+    <%= icon_tag "board", class: "filters__view-as-columns" %>
+    <%= icon_tag "grid", class: "filters__view-as-list" %>
+    <span class="for-screen-reader">Switch between columns and a list</span>
+  </button>
+</div>

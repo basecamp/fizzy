@@ -16,4 +16,14 @@ class Boards::Columns::ClosedsControllerTest < ActionDispatch::IntegrationTest
 
     assert_kind_of Array, @response.parsed_body
   end
+
+  test "show with a filter" do
+    get board_columns_closed_path(boards(:writebook), tag_ids: [ tags(:web).id ]), as: :json
+    assert_empty @response.parsed_body
+
+    cards(:shipping).taggings.create!(tag: tags(:web))
+
+    get board_columns_closed_path(boards(:writebook), tag_ids: [ tags(:web).id ]), as: :json
+    assert_equal [ cards(:shipping).id ], @response.parsed_body.pluck("id")
+  end
 end

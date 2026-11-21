@@ -1,5 +1,5 @@
 class Columns::Cards::Drops::ClosuresController < ApplicationController
-  include CardScoped
+  include CardScoped, ColumnFiltering
 
   def create
     @card.close
