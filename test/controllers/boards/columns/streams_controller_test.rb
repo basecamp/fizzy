@@ -17,4 +17,17 @@ class Boards::Columns::StreamsControllerTest < ActionDispatch::IntegrationTest
     assert_kind_of Array, @response.parsed_body
     assert response.headers["X-Total-Count"].present?, "Expected X-Total-Count header"
   end
+
+  test "invalidates cache when a card is deleted" do
+    card = create_full_page_of_cards(boards(:writebook)).fifth
+
+    get board_columns_stream_path(boards(:writebook))
+    etag = response.headers["ETag"]
+
+    delete card_path(card)
+    follow_redirect!
+
+    get board_columns_stream_path(boards(:writebook)), headers: { "If-None-Match" => etag }
+    assert_response :success
+  end
 end

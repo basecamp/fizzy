@@ -25,6 +25,32 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "invalidates cache when a card moves to another board" do
+    card = create_full_page_of_cards(boards(:writebook)).fifth
+
+    get board_path(boards(:writebook))
+    etag = response.headers["ETag"]
+
+    put card_board_path(card), params: { board_id: boards(:private).id }
+    follow_redirect!
+
+    get board_path(boards(:writebook)), headers: { "If-None-Match" => etag }
+    assert_response :success
+  end
+
+  test "invalidates cache when a card is deleted" do
+    card = create_full_page_of_cards(boards(:writebook)).fifth
+
+    get board_path(boards(:writebook))
+    etag = response.headers["ETag"]
+
+    delete card_path(card)
+    follow_redirect!
+
+    get board_path(boards(:writebook)), headers: { "If-None-Match" => etag }
+    assert_response :success
+  end
+
   test "create" do
     assert_difference -> { Board.count }, +1 do
       post boards_path, params: { board: { name: "Remodel Punch List" } }
