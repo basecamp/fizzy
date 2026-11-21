@@ -1,5 +1,6 @@
 brew bundle --file=$APP/Brewfile
 bundle config set --local auto_install true
 bundle install
+npm ci
 rails db:prepare
 exit: 9
