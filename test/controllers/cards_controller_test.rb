@@ -82,6 +82,63 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "show renders card controls immediately and does not preview stale cards" do
+    card = cards(:logo)
+    card.pin_by users(:kevin)
+    card.watch_by users(:kevin)
+
+    get card_path(card)
+    assert_response :success
+    assert_select "meta[name='turbo-cache-control'][content='no-preview']"
+    assert_select "turbo-frame##{dom_id(card, :columns)}:not([src])" do
+      assert_select "button", text: columns(:writebook_triage).name
+    end
+    assert_select "turbo-frame##{dom_id(card, :watch)}:not([src])" do
+      assert_select "button", text: "Stop watching (shift+n)"
+    end
+    assert_select "turbo-frame##{dom_id(card, :pin)}:not([src])" do
+      assert_select "button", text: "Unpin this card (shift+p)"
+    end
+  end
+
+  test "cached card controls reflect changes to board columns" do
+    card = cards(:logo)
+    column = columns(:writebook_triage)
+    previous_cache_store = ApplicationController.cache_store
+    ApplicationController.cache_store = ActiveSupport::Cache::MemoryStore.new
+
+    with_actionview_partial_caching do
+      get card_path(card)
+      assert_select ".card__stages button", text: column.name
+
+      column.update! name: "Updated column"
+      get card_path(card)
+      assert_select ".card__stages button", text: "Updated column"
+    end
+  ensure
+    ApplicationController.cache_store = previous_cache_store
+  end
+
+  test "inline watch and pin buttons use the current user outside the card cache" do
+    card = cards(:logo)
+    card.unwatch_by users(:david)
+    previous_cache_store = ApplicationController.cache_store
+    ApplicationController.cache_store = ActiveSupport::Cache::MemoryStore.new
+
+    with_actionview_partial_caching do
+      get card_path(card)
+      assert_select "turbo-frame##{dom_id(card, :watch)} button", text: "Stop watching (shift+n)"
+      assert_select "turbo-frame##{dom_id(card, :pin)} button", text: "Unpin this card (shift+p)"
+
+      logout_and_sign_in_as :david
+      get card_path(card)
+      assert_select "turbo-frame##{dom_id(card, :watch)} button", text: "Watch this (shift+n)"
+      assert_select "turbo-frame##{dom_id(card, :pin)} button", text: "Pin this card (shift+p)"
+    end
+  ensure
+    ApplicationController.cache_store = previous_cache_store
+  end
+
   test "edit" do
     get edit_card_path(cards(:logo))
     assert_response :success
