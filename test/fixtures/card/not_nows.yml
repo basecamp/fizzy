@@ -1,0 +1,5 @@
+postponed_idea:
+  id: <%= ActiveRecord::FixtureSet.identify("postponed_idea_not_now", :uuid) %>
+  account: initech_uuid
+  card: postponed_idea_uuid
+

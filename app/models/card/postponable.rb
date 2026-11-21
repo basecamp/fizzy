@@ -34,6 +34,7 @@ module Card::Postponable
       reopen
       activity_spike&.destroy
       create_not_now!(user: user) unless postponed?
+      pop if bubble_up?
       track_event event_name, creator: user
     end
   end

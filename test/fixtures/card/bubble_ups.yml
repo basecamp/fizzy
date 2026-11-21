@@ -1,0 +1,5 @@
+postponed_idea:
+  id: <%= ActiveRecord::FixtureSet.identify("postponed_idea_bubble_up", :uuid) %>
+  account: initech_uuid
+  card: postponed_idea_uuid
+  resurface_at: <%= Time.zone.tomorrow.change(hour: 8) %>
