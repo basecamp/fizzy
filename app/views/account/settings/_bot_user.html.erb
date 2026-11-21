@@ -1,0 +1,18 @@
+<li class="flex align-center gap-half" data-filter-target="item" data-navigable-list-target="item" role="option">
+  <%= link_to account_bot_path(bot_user), class: "txt-ink flex gap-half align-center min-width" do %>
+    <%= avatar_preview_tag bot_user, hidden_for_screen_reader: true %>
+    <div class="txt-align-start overflow-ellipsis">
+      <strong><%= bot_user.name %></strong>
+      <div class="txt-x-small">Bot</div>
+    </div>
+  <% end %>
+
+  <hr class="separator--horizontal flex-item-grow" style="--border-color: var(--color-ink-medium); --border-style: dashed" aria-hidden="true">
+
+  <%= button_to account_bot_path(bot_user), method: :delete, class: "btn btn--circle btn--negative",
+        disabled: !Current.user.admin?,
+        data: { turbo_confirm: "Are you sure you want to remove #{bot_user.name}?" } do %>
+    <%= icon_tag "minus" %>
+    <span class="for-screen-reader">Remove <%= bot_user.name %></span>
+  <% end %>
+</li>
