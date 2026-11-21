@@ -20,6 +20,7 @@ export default class extends Controller {
     this.mediaQuery.addEventListener("change", this.handlePlatform)
 
     await this.#restoreColumnsDisablingTransitions()
+    this.dispatch("restored")
     this.#setupIntersectionObserver()
   }
 
@@ -45,6 +46,20 @@ export default class extends Controller {
   async restoreState(event) {
     await nextFrame()
     await this.#restoreColumnsDisablingTransitions()
+  }
+
+  async restoreExpandedColumns(ids) {
+    this.#disableTransitions()
+    this.columnTargets.forEach(column => {
+      if (ids.includes(column.id)) {
+        this.#expand({ column, saveState: false, scrollBehavior: "instant" })
+      } else {
+        this.#collapse(column, false)
+      }
+    })
+    this.#handlePlatform()
+    await nextFrame()
+    this.#enableTransitions()
   }
 
   focusOnColumn({ target }) {
@@ -101,13 +116,13 @@ export default class extends Controller {
     return column.classList.contains(this.collapsedClass)
   }
 
-  #collapse(column) {
+  #collapse(column, saveState = true) {
     const key = this.#localStorageKeyFor(column)
 
     this.#buttonFor(column)?.setAttribute("aria-expanded", "false")
     column.classList.remove(this.expandedClass)
     column.classList.add(this.collapsedClass)
-    localStorage.removeItem(key)
+    if (saveState) { localStorage.removeItem(key) }
   }
 
   #expand({ column, saveState = true, scrollBehavior = "smooth" }) {
