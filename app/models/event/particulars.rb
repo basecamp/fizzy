@@ -2,6 +2,9 @@ module Event::Particulars
   extend ActiveSupport::Concern
 
   included do
+    # MariaDB reports JSON columns as LONGTEXT, so declare the type store_accessor needs.
+    attribute :particulars, :json
+
     store_accessor :particulars, :assignee_ids
   end
 
