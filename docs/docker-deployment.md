@@ -57,7 +57,7 @@ Set it before upgrading to a version that digests tokens, or before anyone creat
 
 If you want the Fizzy container to handle its own SSL automatically, you just need to specify the domain name that you're running it on.
 You can do that with the `TLS_DOMAIN` environment variable.
-Note that if you're using SSL, you'll want to allow traffic on ports 80 and 443.
+Note that if you're using SSL, you'll want to allow traffic on ports 80 and 443 and allow access from the internet.
 So if you were running on `fizzy.example.com` you could enable SSL like this:
 
 ```sh
@@ -74,6 +74,8 @@ If you aren't using SSL at all (for example, if you want to run it locally on yo
 ```sh
 docker run --publish 80:80 --env DISABLE_SSL=true ...
 ```
+
+The TLS_DOMAIN setting uses Thruster and LetsEncrypt to automatically provide SSL/TLS access (https://github.com/basecamp/thruster)
 
 #### SMTP Email
 
