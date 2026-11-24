@@ -221,6 +221,8 @@ class Oauth::ClientMetadata::Resolver
       client = Oauth::Client.new \
         provisioning_defaults.merge(attributes).merge(metadata_fetched_at: Time.current, metadata_expires_at: result.expires_in.from_now, metadata_etag: result.etag)
 
+      Oauth::ClientMetadata::DomainQuota.prepare(registrable_domain) if tier == :open
+
       claim = nil
       Oauth::Client.transaction(requires_new: true) do
         claim = claim_open_domain_slot
@@ -253,7 +255,7 @@ class Oauth::ClientMetadata::Resolver
         invalid_document
       end
     rescue ActiveRecord::Deadlocked, ActiveRecord::LockWaitTimeout
-      # Concurrent first registrations from one domain (DomainQuota.acquire).
+      # Server pressure on the domain's quota row (DomainQuota.acquire).
       overloaded
     end
 

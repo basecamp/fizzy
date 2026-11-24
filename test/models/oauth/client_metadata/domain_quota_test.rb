@@ -96,7 +96,9 @@ class Oauth::ClientMetadata::DomainQuotaConcurrencyTest < ActiveSupport::TestCas
   setup { Oauth::ClientMetadata::DomainQuota.where(registrable_domain: DOMAIN).delete_all }
   teardown { Oauth::ClientMetadata::DomainQuota.where(registrable_domain: DOMAIN).delete_all }
 
-  test "concurrent reservations on a cold domain admit exactly the cap" do
+  # A deadlock would raise out of its thread's join and fail the test: with
+  # the row committed first, there's none to answer, on either isolation level.
+  test "concurrent reservations on a cold domain admit exactly the cap, without deadlocking" do
     workers, attempts_each = 8, 5
     assert_operator workers * attempts_each, :>, Oauth::ClientMetadata::DomainQuota::CAP
 
@@ -105,11 +107,8 @@ class Oauth::ClientMetadata::DomainQuotaConcurrencyTest < ActiveSupport::TestCas
       Thread.new do
         Oauth::ClientMetadata::DomainQuota.with_connection do
           attempts_each.times do
+            Oauth::ClientMetadata::DomainQuota.prepare(DOMAIN)
             results << Oauth::ClientMetadata::DomainQuota.transaction { Oauth::ClientMetadata::DomainQuota.acquire(DOMAIN).reserve }
-          rescue ActiveRecord::Deadlocked
-            # A deadlock rolls back and refunds; the resolver answers it as a
-            # retryable overload.
-            results << :deadlocked
           end
         end
       end
@@ -117,6 +116,7 @@ class Oauth::ClientMetadata::DomainQuotaConcurrencyTest < ActiveSupport::TestCas
 
     outcomes = Array.new(workers * attempts_each) { results.pop }
     assert_equal Oauth::ClientMetadata::DomainQuota::CAP, outcomes.count(true)
+    assert_equal workers * attempts_each - Oauth::ClientMetadata::DomainQuota::CAP, outcomes.count(false)
     assert_equal Oauth::ClientMetadata::DomainQuota::CAP, Oauth::ClientMetadata::DomainQuota.find_by!(registrable_domain: DOMAIN).created_count
   end
 end

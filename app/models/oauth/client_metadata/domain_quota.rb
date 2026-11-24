@@ -26,15 +26,28 @@ class Oauth::ClientMetadata::DomainQuota < ApplicationRecord
   scope :expired, -> { where(window_started_at: ..WINDOW.ago) }
 
   class << self
-    # The domain's row, locked, created if missing. Callers hold an open
-    # transaction, and the lock serializes every same-domain creation behind it.
+    # Makes sure the domain has a row, committed, before the transaction that
+    # charges it: call it outside any transaction. A row created here and never
+    # charged costs nothing, and the cleanup sweeps it once its window passes.
     #
-    # Locks an existing row before trying to create one. Creating first would
-    # leave every creator that lost to the unique index holding a shared lock
-    # on the winner's row, and two of them upgrading it deadlock. Locking first
-    # confines that to a domain's first registration, where a deadlock is a
-    # retryable overload (Resolver#create_client); a creator that loses the
-    # race reads the winner's row, locked.
+    # Locking a row that may not exist yet deadlocks. Under REPEATABLE READ a
+    # locking read of a missing row takes a gap lock every contender can hold
+    # and none can insert past. Under READ COMMITTED, each creator that loses
+    # to the unique index keeps a shared lock on the winner's row, and two of
+    # them upgrading it deadlock. Committing the row first leaves .acquire one
+    # lock to take, on a row that exists.
+    def prepare(domain)
+      create_or_find_by!(registrable_domain: domain) { |quota| quota.window_started_at = Time.current }
+    rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotFound
+      # A racing creator, or the cleanup, got there first; .acquire copes.
+      nil
+    end
+
+    # The domain's row, locked; callers hold an open transaction, and the lock
+    # serializes every same-domain creation behind it. Created here only when
+    # .prepare's row is gone, deleted by the cleanup since, which is rare
+    # enough to take the deadlock risk above, a retryable overload
+    # (Resolver#create_client).
     def acquire(domain)
       attempts = 0
 
