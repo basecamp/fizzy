@@ -310,6 +310,17 @@ class Oauth::ClientMetadata::ResolverTest < ActiveSupport::TestCase
     assert Oauth::ClientMetadata::Resolver.resolve_for_read(OPEN_URL, requester: identities(:david), consenting: false).success?
   end
 
+  test "a refusal is reported as an OAuth event with its domain, for the structured log" do
+    connect_open_tier_apps identities(:david), Oauth::ClientMetadata::GRANT_CAP
+
+    events = capture_oauth_events { resolve_open(persist: true) }
+
+    event = oauth_event(events, "oauth.client_metadata.refused")
+    assert_equal({ reason: "grant_cap", tier: "open", domain: "example.com", identity_id: identities(:david).id, actor: "system" },
+      event.slice(:reason, :tier, :domain, :identity_id, :actor))
+    assert_nil event[:client_id]
+  end
+
   test "a refusal is logged with its domain, and counted without it" do
     logged = StringIO.new
     original_logger = Rails.logger

@@ -365,12 +365,16 @@ class Oauth::ClientMetadata::Resolver
       end
     end
 
-    # Logs and counts a refusal (cimd_refusal.oauth), and answers resolution.
-    # The count is by reason and tier, never by domain, which only the log line
-    # names. Telemetry is best-effort: it never costs the request its answer.
+    # Logs, reports and counts a refusal, and answers resolution. The count
+    # (cimd_refusal.oauth) is by reason and tier, never by domain. The domain
+    # is in the log line, and in the oauth.client_metadata.refused event
+    # (Oauth::Audit), which reaches the structured log where plain log lines
+    # are turned off. Telemetry is best-effort: it never costs the request
+    # its answer.
     def refused(reason, resolution)
       begin
         Rails.logger.warn "[Oauth::ClientMetadata] refused reason=#{reason} tier=#{tier} domain=#{registrable_domain}#{" identity=#{@requester&.id}" if reason == :grant_cap}"
+        Oauth::Audit.record "client_metadata.refused", identity_id: @requester&.id, actor: "system", reason: reason.to_s, tier: tier.to_s, domain: registrable_domain
       rescue StandardError
         nil
       end
