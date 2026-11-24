@@ -84,6 +84,18 @@ class Oauth::ClientMetadata::FetchLeaseTest < ActiveSupport::TestCase
     assert_equal 1, calls
   end
 
+  test "a slot file whose flock raises is closed, not left for garbage collection" do
+    File.any_instance.stubs(:flock).raises(Errno::ENOLCK)
+    GC.disable
+
+    assert_raises(Errno::ENOLCK) { Oauth::ClientMetadata::FetchLease::FileSlots.acquire(@slots_directory) }
+
+    open_slot_files = ObjectSpace.each_object(File).count { |file| !file.closed? && file.path.to_s.start_with?(@slots_directory) }
+    assert_equal 0, open_slot_files
+  ensure
+    GC.enable
+  end
+
   test "an engine with no backend refuses" do
     Oauth::ClientMetadata::FetchLease.stubs(:adapter).returns("postgresql")
 

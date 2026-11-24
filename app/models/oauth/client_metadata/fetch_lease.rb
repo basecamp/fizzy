@@ -211,17 +211,24 @@ class Oauth::ClientMetadata::FetchLease
     def self.acquire(directory)
       FileUtils.mkdir_p(directory)
 
-      SLOTS.times do |index|
-        file = File.open(File.join(directory, "slot-#{index}.lock"), File::RDWR | File::CREAT, 0o644)
+      SLOTS.times.lazy.filter_map { |index| take(directory, index) }.first
+    end
 
-        if file.flock(File::LOCK_EX | File::LOCK_NB)
-          return Lease.new(file)
-        else
-          file.close
-        end
+    # The slot's lease, or nil when another holds it. A file that isn't
+    # returned in a lease is closed, flock raising (ENOLCK, say) included, so
+    # failed acquisitions don't pile up descriptors until garbage collection.
+    def self.take(directory, index)
+      file = File.open(File.join(directory, "slot-#{index}.lock"), File::RDWR | File::CREAT, 0o644)
+
+      if file.flock(File::LOCK_EX | File::LOCK_NB)
+        Lease.new(file)
+      else
+        file.close
+        nil
       end
-
-      nil
+    rescue StandardError
+      file&.close
+      raise
     end
 
     # Releases by closing, not by LOCK_UN, which would unlock the open file
