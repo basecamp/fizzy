@@ -1,10 +1,13 @@
 require "test_helper"
 
 class Oauth::ClientMetadata::ResolverTest < ActiveSupport::TestCase
-  include OauthAuditTestHelper
+  include OauthAuditTestHelper, OauthAvailabilityTestHelper
 
   URL = "https://claude.ai/oauth/mcp-oauth-client-metadata"
   CALLBACK = "https://claude.ai/api/mcp/auth_callback"
+
+  OPEN_URL = "https://tools.example.com/client.json"
+  OPEN_CALLBACK = "https://tools.example.com/callback"
 
   setup do
     WebMock.disable_net_connect!(allow_localhost: true)
@@ -81,15 +84,179 @@ class Oauth::ClientMetadata::ResolverTest < ActiveSupport::TestCase
     assert_equal fetched_at, client.metadata_fetched_at
   end
 
-  test "never fetches from a host that isn't allowlisted" do
-    url = "https://tools.example.com/client.json"
-    stub = stub_request(:get, url)
+  test "while open registration is off, never fetches from a host that isn't allowlisted" do
+    fetcher = Oauth::ClientMetadata::Fetcher.new
+    fetcher.expects(:fetch).never
 
-    resolution = Oauth::ClientMetadata::Resolver.resolve_for_intake(url, requester: identities(:david))
+    with_oauth_config(cimd_open_registration: false) do
+      [ true, false ].each do |persist|
+        resolution = Oauth::ClientMetadata::Resolver.new(OPEN_URL, requester: identities(:david), fetcher: fetcher).resolve(persist: persist)
 
-    assert_equal :unrecognized_host, resolution.outcome
+        assert_equal :unrecognized_host, resolution.outcome
+        assert_equal "Unknown client", resolution.error_description
+      end
+    end
+  end
+
+  test "while open registration is off, a client already provisioned from a host that isn't allowlisted is unknown" do
+    stub_open_document
+    assert resolve_open(persist: true).success?
+
+    with_oauth_config(cimd_open_registration: false) do
+      assert_equal :unrecognized_host, resolve_open(persist: true).outcome
+      assert_equal :unrecognized_host, resolve_open(persist: false).outcome
+    end
+  end
+
+  test "while open registration is off, allowlisted hosts resolve and spend the same budgets" do
+    with_memory_cache do
+      with_oauth_config(cimd_open_registration: false) do
+        stub_document
+
+        assert resolve(persist: true).success?
+        assert_equal 1, Rails.cache.read("oauth:client_metadata:#{identities(:david).id}:host:claude.ai", raw: true).to_i
+        assert_equal 1, Rails.cache.read("oauth:client_metadata:#{identities(:david).id}:url:#{Digest::SHA256.hexdigest(URL)}", raw: true).to_i
+      end
+    end
+  end
+
+  test "a host that isn't allowlisted, or only looks like one that is, is the open tier" do
+    [ "https://claude.ai.example.com/client.json", "https://evil-claude.ai/client.json", "https://CLAUDE.AI/client.json",
+      "https://Claude.ai/client.json", "https://www.claude.ai/client.json", OPEN_URL ].each do |url|
+      assert_equal :open, Oauth::ClientMetadata.tier(url), url
+    end
+
+    assert_equal :recognized, Oauth::ClientMetadata.tier(URL)
+  end
+
+  test "the open tier provisions a client, charged to its registrable domain" do
+    stub_open_document
+
+    events = []
+    ActiveSupport::Notifications.subscribed(->(event) { events << event.payload }, "cimd_client_created.oauth") do
+      assert resolve_open(persist: true).client.persisted?
+    end
+
+    assert_equal 1, Oauth::ClientMetadata::DomainQuota.find_by!(registrable_domain: "example.com").created_count
+    assert_equal [ { tier: :open } ], events
+  end
+
+  test "an allowlisted host is charged to no quota" do
+    stub_document
+
+    assert resolve(persist: true).success?
+    assert_equal 0, Oauth::ClientMetadata::DomainQuota.count
+  end
+
+  test "reading an open-tier document never charges the quota" do
+    stub_open_document
+
+    assert resolve_open(persist: false).client.new_record?
+    assert_equal 0, Oauth::ClientMetadata::DomainQuota.count
+  end
+
+  test "a spent domain quota refuses a new open-tier client before any fetch, across its subdomains" do
+    Oauth::ClientMetadata::DomainQuota.create! registrable_domain: "example.com", window_started_at: Time.current, created_count: Oauth::ClientMetadata::DomainQuota::CAP
+    fetcher = Oauth::ClientMetadata::Fetcher.new
+    fetcher.expects(:fetch).never
+
+    resolution = Oauth::ClientMetadata::Resolver.new("https://other.tools.example.com/client.json", requester: identities(:david), fetcher: fetcher).resolve(persist: true)
+
+    assert_equal :domain_cap, resolution.outcome
     assert_equal "Unknown client", resolution.error_description
-    assert_not_requested stub
+  end
+
+  test "the quota is held in the transaction that creates the client, so the cap refuses past the preflight" do
+    stub_open_document
+    Oauth::ClientMetadata::DomainQuota.create! registrable_domain: "example.com", window_started_at: Time.current, created_count: Oauth::ClientMetadata::DomainQuota::CAP
+    Oauth::ClientMetadata::DomainQuota.stubs(:exhausted?).returns(false)
+
+    assert_equal :domain_cap, resolve_open(persist: true).outcome
+    assert_nil Oauth::Client.find_presented(OPEN_URL)
+    assert_equal Oauth::ClientMetadata::DomainQuota::CAP, Oauth::ClientMetadata::DomainQuota.find_by!(registrable_domain: "example.com").created_count
+  end
+
+  test "a creation that fails refunds its charge" do
+    stub_open_document
+    Oauth::Client.any_instance.stubs(:save!).raises(ActiveRecord::RecordInvalid.new(Oauth::Client.new))
+
+    assert_equal :invalid_document, resolve_open(persist: true).outcome
+    assert_equal 0, Oauth::ClientMetadata::DomainQuota.sum(:created_count)
+  end
+
+  test "losing an open-tier creation race adopts the winner without charging" do
+    stub_open_document
+    winner = Oauth::Client.create!(client_id: OPEN_URL, name: "Tools", redirect_uris: [ OPEN_CALLBACK ], client_id_metadata_document: true)
+    Oauth::Client.stubs(:find_presented).returns(nil).then.returns(winner)
+
+    assert_equal winner, resolve_open(persist: true).client
+    assert_equal 0, Oauth::ClientMetadata::DomainQuota.sum(:created_count)
+  end
+
+  test "a deadlock creating an open-tier client is server pressure" do
+    stub_open_document
+    Oauth::ClientMetadata::DomainQuota.stubs(:acquire).raises(ActiveRecord::Deadlocked)
+
+    assert_equal :overloaded, resolve_open(persist: true).outcome
+  end
+
+  test "an established open-tier client resolves past a spent quota" do
+    stub_open_document
+    client = resolve_open(persist: true).client
+    Oauth::ClientMetadata::DomainQuota.update_all(created_count: Oauth::ClientMetadata::DomainQuota::CAP)
+
+    assert_equal client, resolve_open(persist: true).client
+
+    client.update!(metadata_expires_at: 1.minute.ago)
+    stub_open_document(client_name: "Tools (renamed)")
+    assert_equal "Tools (renamed)", resolve_open(persist: true).client.name
+  end
+
+  test "open-tier fetches are limited per registrable domain" do
+    with_memory_cache do
+      Oauth::ClientMetadata::Fetcher.any_instance.stubs(:fetch).returns(Oauth::ClientMetadata::Fetcher::Result.failure(:connection_failed))
+
+      outcomes = Array.new(Oauth::ClientMetadata::Resolver::DOMAIN_ATTEMPT_LIMIT + 1) do |index|
+        Oauth::ClientMetadata::Resolver.resolve_for_read("https://tools#{index}.example.com/client.json", requester: identities(:david)).outcome
+      end
+
+      assert_equal [ :fetch_failed ] * Oauth::ClientMetadata::Resolver::DOMAIN_ATTEMPT_LIMIT + [ :throttled ], outcomes
+      assert_equal Oauth::ClientMetadata::Resolver::DOMAIN_ATTEMPT_LIMIT + 1,
+        Rails.cache.read("oauth:client_metadata:#{identities(:david).id}:domain:example.com", raw: true).to_i
+    end
+  end
+
+  test "an open-tier URL is refused where the fetcher refuses it" do
+    [ "10.0.0.1", "127.0.0.1", "169.254.169.254", "192.168.1.1", "::1" ].each do |address|
+      stub_dns_resolution(address)
+      stub = stub_request(:get, OPEN_URL)
+
+      assert_equal :fetch_failed, resolve_open(persist: true).outcome, address
+      assert_not_requested stub
+    end
+
+    stub_dns_resolution("93.184.216.34")
+    stub_request(:get, OPEN_URL).to_return(status: 302, headers: { location: "https://169.254.169.254/latest/meta-data" })
+    assert_equal :fetch_failed, resolve_open(persist: true).outcome
+
+    assert_equal :invalid_url, Oauth::ClientMetadata::Resolver.resolve_for_intake("http://tools.example.com/client.json", requester: identities(:david)).outcome
+    assert_nil Oauth::Client.find_presented(OPEN_URL)
+    assert_equal 0, Oauth::ClientMetadata::DomainQuota.count
+  end
+
+  test "a fetch the lease refuses is server pressure, and spends no budget" do
+    with_memory_cache do
+      Oauth::ClientMetadata::FetchLease.stubs(:acquire).returns(nil)
+      fetcher = Oauth::ClientMetadata::Fetcher.new
+      fetcher.expects(:fetch).never
+
+      resolution = with_oauth_config(cimd_fetch_lease: true) do
+        Oauth::ClientMetadata::Resolver.new(OPEN_URL, requester: identities(:david), fetcher: fetcher).resolve(persist: true)
+      end
+
+      assert_equal :overloaded, resolution.outcome
+      assert_nil Rails.cache.read("oauth:client_metadata:#{identities(:david).id}:domain:example.com", raw: true)
+    end
   end
 
   test "an invalid identifier is an unknown client" do
@@ -210,6 +377,15 @@ class Oauth::ClientMetadata::ResolverTest < ActiveSupport::TestCase
     def stub_document(etag: nil, **members)
       stub_request(:get, URL).to_return \
         status: 200, body: document(**members).to_json, headers: { content_type: "application/json", etag: etag }.compact
+    end
+
+    def resolve_open(persist:)
+      Oauth::ClientMetadata::Resolver.new(OPEN_URL, requester: identities(:david)).resolve(persist: persist)
+    end
+
+    def stub_open_document(**members)
+      stub_request(:get, OPEN_URL).to_return status: 200, headers: { content_type: "application/json" },
+        body: { client_id: OPEN_URL, client_name: "Tools", redirect_uris: [ OPEN_CALLBACK ] }.merge(members).to_json
     end
 
     def with_memory_cache

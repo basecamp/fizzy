@@ -55,9 +55,11 @@ env:
     OAUTH_STAFF_ONLY: "true" # CONNECTED_APPS_PREVIEW's old name, for images from before the rename (a rollback, an older branch). Remove once none can be deployed.
 <% if @beta_number == "1" %>
     # beta1 is lit for previewers (CONNECTED_APPS_PREVIEW above): OAuth answers, Client ID Metadata Documents are
-    # accepted from the allowlisted hosts in deploy.yml, and grants can be audienced to beta1's MCP server.
+    # accepted from the allowlisted hosts in deploy.yml and, with OAUTH_CIMD_OPEN_REGISTRATION, from any other https
+    # host (with a warning on consent), and grants can be audienced to beta1's MCP server.
     OAUTH_ACCEPTANCE_ENABLED: "true"
     OAUTH_CIMD_ENABLED: "true"
+    OAUTH_CIMD_OPEN_REGISTRATION: "true"
     FIZZY_OAUTH_MCP_RESOURCES: "https://beta1-mcp.fizzy-beta.com/mcp"
 <% end %>
     MYSQL_DATABASE_HOST: fizzy-mysql-primary

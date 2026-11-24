@@ -47,6 +47,14 @@ module Yabeda
             tags: %i[ endpoint ]
           counter :cleanup_step_failures_total, comment: "OAuth cleanup job step failures",
             tags: %i[ step ]
+          counter :cimd_fetches_total, comment: "Client metadata document fetches, by outcome",
+            tags: %i[ outcome ]
+          counter :cimd_lease_admissions_total, comment: "Client metadata document fetch lease admissions, by outcome",
+            tags: %i[ outcome ]
+          counter :cimd_lease_errors_total, comment: "Client metadata document fetch lease backend failures, which refuse, by operation",
+            tags: %i[ operation ]
+          counter :cimd_clients_created_total, comment: "Clients provisioned from a client metadata document, by tier",
+            tags: %i[ tier ]
           histogram :token_request_duration_seconds, comment: "OAuth token request duration",
             tags: %i[ grant_type ],
             buckets: [ 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5 ]
@@ -74,6 +82,22 @@ module Yabeda
 
         ActiveSupport::Notifications.subscribe "cleanup_failure.oauth" do |event|
           oauth_cleanup_step_failures_total.increment({ step: event.payload[:step].to_s })
+        end
+
+        ActiveSupport::Notifications.subscribe "cimd_fetch.oauth" do |event|
+          oauth_cimd_fetches_total.increment({ outcome: event.payload[:outcome].to_s })
+        end
+
+        ActiveSupport::Notifications.subscribe "cimd_lease.oauth" do |event|
+          oauth_cimd_lease_admissions_total.increment({ outcome: event.payload[:outcome].to_s })
+        end
+
+        ActiveSupport::Notifications.subscribe "cimd_lease_error.oauth" do |event|
+          oauth_cimd_lease_errors_total.increment({ operation: event.payload[:operation].to_s })
+        end
+
+        ActiveSupport::Notifications.subscribe "cimd_client_created.oauth" do |event|
+          oauth_cimd_clients_created_total.increment({ tier: event.payload[:tier].to_s })
         end
       end
     end

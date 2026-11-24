@@ -146,6 +146,15 @@ Rails.application.configure do
   config.x.oauth.cimd_enabled = ENV["OAUTH_CIMD_ENABLED"] == "true"
   config.x.oauth.cimd_allowed_hosts = ENV.fetch("OAUTH_CIMD_ALLOWED_HOSTS", "").split
 
+  # The open tier of Client ID Metadata Documents, off unless
+  # OAUTH_CIMD_OPEN_REGISTRATION is "true": then any https host that publishes a
+  # valid document may request consent, with a warning that we don't know the
+  # app, a per-domain registration quota and a bound on concurrent fetches. See
+  # Oauth::ClientMetadata and Oauth::ClientMetadata::FetchLease. Turning it off
+  # refuses new authorizations for hosts that aren't allowlisted, clients
+  # already provisioned from one included; grants they hold keep working.
+  config.x.oauth.cimd_open_registration = ENV["OAUTH_CIMD_OPEN_REGISTRATION"] == "true"
+
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
 end

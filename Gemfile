@@ -41,6 +41,7 @@ gem "aws-sdk-s3", require: false
 gem "web-push"
 gem "net-http-persistent"
 gem "surfguard", bc: "surfguard" # The SSRF address policy behind webhook and push delivery
+gem "public_suffix" # Registrable domains, for the budgets of metadata document clients nobody allowlisted
 gem "zip_kit"
 gem "mittens"
 gem "useragent", bc: "useragent"

@@ -14,4 +14,14 @@ module OauthAvailabilityTestHelper
   ensure
     AVAILABILITY_KEYS.each { |key| config[key] = saved[key] }
   end
+
+  # Any other config.x.oauth settings, restored afterwards.
+  def with_oauth_config(**settings)
+    config = Rails.application.config.x.oauth
+    saved = settings.keys.index_with { |key| config[key] }
+    settings.each { |key, value| config[key] = value }
+    yield
+  ensure
+    saved&.each { |key, value| config[key] = value }
+  end
 end

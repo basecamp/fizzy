@@ -779,6 +779,7 @@ DEPENDENCIES
   platform_agent
   prometheus-client-mmap (~> 1.3)
   propshaft
+  public_suffix
   puma (~> 8.0)
   queenbee!
   rack-mini-profiler

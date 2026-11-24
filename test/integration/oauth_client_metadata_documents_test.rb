@@ -1,9 +1,14 @@
 require "test_helper"
 
 class OauthClientMetadataDocumentsTest < ActionDispatch::IntegrationTest
+  include OauthAvailabilityTestHelper
+
   URL = "https://claude.ai/oauth/mcp-oauth-client-metadata"
   CALLBACK = "https://claude.ai/api/mcp/auth_callback"
   CODE_VERIFIER = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+
+  OPEN_URL = "https://tools.example.com/client.json"
+  OPEN_CALLBACK = "https://tools.example.com/callback"
 
   setup do
     WebMock.disable_net_connect!(allow_localhost: true)
@@ -11,6 +16,10 @@ class OauthClientMetadataDocumentsTest < ActionDispatch::IntegrationTest
     stub_request(:get, URL).to_return \
       status: 200,
       body: { client_id: URL, client_name: "Claude", redirect_uris: [ CALLBACK ], scope: "read write" }.to_json,
+      headers: { content_type: "application/json" }
+    stub_request(:get, OPEN_URL).to_return \
+      status: 200,
+      body: { client_id: OPEN_URL, client_name: "Tools", redirect_uris: [ OPEN_CALLBACK ], scope: "read write" }.to_json,
       headers: { content_type: "application/json" }
   end
 
@@ -129,16 +138,85 @@ class OauthClientMetadataDocumentsTest < ActionDispatch::IntegrationTest
     assert_equal "access_denied", Rack::Utils.parse_query(URI.parse(response.location).query)["error"]
   end
 
-  test "a host that isn't allowlisted is an unknown client, and never fetched" do
+  test "while open registration is off, a host that isn't allowlisted is an unknown client, and never fetched" do
     sign_in_as :david
-    url = "https://tools.example.com/client.json"
-    stub = stub_request(:get, url)
+    stub = stub_request(:get, OPEN_URL)
 
-    untenanted { get new_oauth_authorization_path, params: authorization.merge(client_id: url, redirect_uri: "https://tools.example.com/cb") }
+    with_oauth_config(cimd_open_registration: false) do
+      untenanted { get new_oauth_authorization_path, params: open_authorization }
+    end
 
     assert_response :bad_request
     assert_select "p", text: Oauth::AuthorizationsController::UNKNOWN_CLIENT_MESSAGE
     assert_not_requested stub
+  end
+
+  test "while open registration is off, a client provisioned from a host that isn't allowlisted is unknown" do
+    sign_in_as :david
+    untenanted { post oauth_authorization_path, params: open_authorization }
+    assert Oauth::Client.find_presented(OPEN_URL)
+
+    with_oauth_config(cimd_open_registration: false) do
+      untenanted { get new_oauth_authorization_path, params: open_authorization }
+      assert_response :bad_request
+      assert_select "p", text: Oauth::AuthorizationsController::UNKNOWN_CLIENT_MESSAGE
+
+      untenanted { post oauth_authorization_path, params: open_authorization }
+      assert_response :bad_request
+    end
+  end
+
+  test "the consent screen warns that we don't know an app from a host that isn't allowlisted" do
+    sign_in_as :david
+
+    untenanted { get new_oauth_authorization_path, params: open_authorization }
+
+    assert_response :success
+    assert_select ".oauth-client__name bdi", text: "Tools"
+    assert_select ".oauth-client__warning", text: /We don.t know this app\. Only authorize it if you trust tools\.example\.com\./
+    assert_nil Oauth::Client.find_presented(OPEN_URL)
+  end
+
+  test "a lookalike of an allowlisted host is warned about" do
+    url = "https://claude.ai.example.com/client.json"
+    stub_request(:get, url).to_return status: 200, headers: { content_type: "application/json" },
+      body: { client_id: url, client_name: "Claude", redirect_uris: [ "https://claude.ai.example.com/callback" ] }.to_json
+    sign_in_as :david
+
+    untenanted { get new_oauth_authorization_path, params: authorization.merge(client_id: url, redirect_uri: "https://claude.ai.example.com/callback") }
+
+    assert_response :success
+    assert_select ".oauth-client__warning", text: /trust claude\.ai\.example\.com/
+  end
+
+  test "consenting to an app from a host that isn't allowlisted provisions it, and Connected apps says we don't know it" do
+    sign_in_as :david
+
+    untenanted { post oauth_authorization_path, params: open_authorization }
+
+    assert_response :redirect
+    assert response.location.start_with?("#{OPEN_CALLBACK}?")
+    client = Oauth::Client.find_presented(OPEN_URL)
+    assert client.metadata_document?
+
+    untenanted { get new_oauth_authorization_path, params: open_authorization }
+    assert_select ".oauth-client__warning", text: /trust tools\.example\.com/
+
+    identities(:david).access_tokens.create! oauth_client: client, permission: :read
+    untenanted { get my_connected_apps_path }
+    assert_select ".connected-app", text: /Name set by the app at tools\.example\.com/
+    assert_select ".connected-app__unrecognized", text: /Unrecognized developer/
+  end
+
+  test "Connected apps says nothing of the kind for an allowlisted host" do
+    sign_in_as :david
+    untenanted { post oauth_authorization_path, params: authorization }
+    identities(:david).access_tokens.create! oauth_client: Oauth::Client.find_presented(URL), permission: :read
+
+    untenanted { get my_connected_apps_path }
+
+    assert_select ".connected-app", text: /Name set by the app at claude\.ai/
+    assert_select ".connected-app__unrecognized", count: 0
   end
 
   test "a document that can't be fetched refuses the authorization" do
@@ -226,6 +304,10 @@ class OauthClientMetadataDocumentsTest < ActionDispatch::IntegrationTest
         scope: "read write",
         state: "xyz"
       }
+    end
+
+    def open_authorization
+      authorization.merge(client_id: OPEN_URL, redirect_uri: OPEN_CALLBACK)
     end
 
     def with_metadata_documents(enabled)

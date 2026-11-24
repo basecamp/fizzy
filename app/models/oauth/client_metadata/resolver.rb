@@ -14,15 +14,22 @@
 # outage at the client's site mustn't sign its users out, and the token
 # endpoint is the hot path.
 #
+# A host that isn't allowlisted is the open tier (Oauth::ClientMetadata), and
+# while open registration is off it's an unknown client before any lookup or
+# fetch, as if the tier didn't exist. On, a new open-tier client is refused
+# before any fetch when its domain's registration quota is spent, and charged
+# to that quota inside the transaction that creates it (DomainQuota).
+#
 # A failed fetch aborts the authorization (the draft's answer); no failure is
-# stored. Fetches are limited per person, per URL and per host, counted on
-# attempt in Rails.cache. The counters fail open, as a flushed cache only resets
-# them. Per person, because a shared budget is one anyone signed in can spend:
-# a consent GET fetches without provisioning, so a script reloading it would
-# refuse a client's first authorization to everyone. What bounds Fizzy's fetches
-# overall is the fetcher's bulkhead and deadline, which answer a retryable 503
-# rather than refusing the client. A provisioned client over budget keeps its
-# stored document (see #throttled).
+# stored. Fetches are limited per person, per URL and per host (per registrable
+# domain, for the open tier), counted on attempt in Rails.cache. The counters
+# fail open, as a flushed cache only resets them. Per person, because a shared
+# budget is one anyone signed in can spend: a consent GET fetches without
+# provisioning, so a script reloading it would refuse a client's first
+# authorization to everyone. What bounds Fizzy's fetches overall is the
+# fetcher's bulkhead and deadline, and the FetchLease across processes, which
+# answer a retryable 503 rather than refusing the client. A provisioned client
+# over budget keeps its stored document (see #throttled).
 class Oauth::ClientMetadata::Resolver
   # Allows the consent render and the authorization POST their two fetches,
   # with room for retries.
@@ -32,6 +39,12 @@ class Oauth::ClientMetadata::Resolver
   # Bounds one person rotating paths on an allowlisted host.
   HOST_ATTEMPT_LIMIT = 60
   HOST_ATTEMPT_WINDOW = 1.hour
+
+  # Bounds one person rotating paths, or subdomains, on a domain that isn't
+  # allowlisted. bc3's open tier limit, counted per person here as the others
+  # are.
+  DOMAIN_ATTEMPT_LIMIT = 60
+  DOMAIN_ATTEMPT_WINDOW = 1.hour
 
   Resolution = Data.define(:client, :outcome, :error_description) do
     def self.success(client) = new(client: client, outcome: :ok, error_description: nil)
@@ -59,9 +72,10 @@ class Oauth::ClientMetadata::Resolver
   def resolve(persist:)
     if !Oauth::ClientMetadata::Url.valid?(@client_id)
       unknown_client(:invalid_url)
-    elsif !Oauth::ClientMetadata.recognized?(@client_id)
-      # Only an allowlisted host is ever fetched from. Anything else reads like
-      # a typo: an unknown client.
+    elsif tier == :open && !Oauth::Availability.cimd_open_registration_enabled?(@client_id)
+      # Only an allowlisted host is fetched from while open registration is
+      # off, and anything else, provisioned or not, reads like a typo: an
+      # unknown client.
       unknown_client(:unrecognized_host)
     elsif (row = Oauth::Client.find_presented(@client_id)) && !row.metadata_document?
       # A URL-shaped id names only a metadata document client. Resolving any
@@ -69,6 +83,10 @@ class Oauth::ClientMetadata::Resolver
       unknown_client(:conflicting_client)
     elsif row && fresh?(row)
       Resolution.success(row)
+    elsif row.nil? && persist && tier == :open && Oauth::ClientMetadata::DomainQuota.exhausted?(registrable_domain)
+      # The quota is held when the client is created; this read, which fails
+      # open, only spares a fetch that couldn't register anything.
+      unknown_client(:domain_cap)
     elsif persist
       resolve_by_fetch(row) { |result| persist(row, result) }
     else
@@ -81,31 +99,39 @@ class Oauth::ClientMetadata::Resolver
       row.metadata_expires_at.present? && row.metadata_expires_at > Time.current
     end
 
-    # Admission first: a saturated bulkhead is server pressure, and mustn't spend
-    # the client's budgets.
+    # Admission first, the process's bulkhead then the lease across processes:
+    # either refusing is server pressure, and mustn't spend the client's
+    # budgets. A request over budget holds its lease only for the check.
     def resolve_by_fetch(row)
       if Oauth::ClientMetadata::Fetcher::Bulkhead.saturated?
         overloaded
-      elsif !fetch_budget_available?
-        throttled(row)
       else
-        # What the conditional GET was made with, and the content clock as it
-        # stood, for the compare-and-swap at persist time.
-        @sent_etag = row&.metadata_etag
-        @observed_fetched_at = row&.metadata_fetched_at
+        Oauth::ClientMetadata::FetchLease.admit do |admitted|
+          if !admitted
+            overloaded
+          elsif !fetch_budget_available?
+            throttled(row)
+          else
+            # What the conditional GET was made with, and the content clock as it
+            # stood, for the compare-and-swap at persist time.
+            @sent_etag = row&.metadata_etag
+            @observed_fetched_at = row&.metadata_fetched_at
 
-        result = @fetcher.fetch(@client_id, etag: @sent_etag)
-        Rails.logger.info "OAuth client metadata fetch: #{result.outcome}"
+            result = @fetcher.fetch(@client_id, etag: @sent_etag)
+            Rails.logger.info "OAuth client metadata fetch: #{result.outcome}"
+            ActiveSupport::Notifications.instrument "cimd_fetch.oauth", outcome: result.outcome
 
-        if result.outcome == :overloaded
-          # Admission was lost inside the fetch, so nothing was fetched: the
-          # attempt is handed back rather than spent on server pressure.
-          refund_fetch_budget
-          overloaded
-        elsif result.failure?
-          Resolution.failure(:fetch_failed, "Could not retrieve the client metadata document (#{result.outcome.to_s.humanize.downcase})")
-        else
-          yield result
+            if result.outcome == :overloaded
+              # Admission was lost inside the fetch, so nothing was fetched: the
+              # attempt is handed back rather than spent on server pressure.
+              refund_fetch_budget
+              overloaded
+            elsif result.failure?
+              Resolution.failure(:fetch_failed, "Could not retrieve the client metadata document (#{result.outcome.to_s.humanize.downcase})")
+            else
+              yield result
+            end
+          end
         end
       end
     end
@@ -182,13 +208,39 @@ class Oauth::ClientMetadata::Resolver
 
     def provision(result)
       if attributes = document_attributes_for(result)
-        client = Oauth::Client.create! \
-          provisioning_defaults.merge(attributes).merge(metadata_fetched_at: Time.current, metadata_expires_at: result.expires_in.from_now, metadata_etag: result.etag)
-
-        Rails.logger.info "OAuth client provisioned from its metadata document"
-        Resolution.success(client)
+        create_client(attributes, result)
       else
         invalid_document
+      end
+    end
+
+    # An open-tier client is charged to its domain's quota in the transaction
+    # that creates it, so any rollback refunds the charge: its own, inside any
+    # transaction a caller has open.
+    def create_client(attributes, result)
+      client = Oauth::Client.new \
+        provisioning_defaults.merge(attributes).merge(metadata_fetched_at: Time.current, metadata_expires_at: result.expires_in.from_now, metadata_etag: result.etag)
+
+      claim = nil
+      Oauth::Client.transaction(requires_new: true) do
+        claim = claim_open_domain_slot
+
+        if claim.nil?
+          client.save!
+        else
+          raise ActiveRecord::Rollback
+        end
+      end
+
+      case claim
+      when nil
+        Rails.logger.info "OAuth client provisioned from its metadata document"
+        ActiveSupport::Notifications.instrument "cimd_client_created.oauth", tier: tier
+        Resolution.success(client)
+      when :adopt_winner
+        adopt_creation_race_winner
+      else
+        claim
       end
     rescue ActiveRecord::RecordNotUnique
       adopt_creation_race_winner
@@ -199,6 +251,30 @@ class Oauth::ClientMetadata::Resolver
         adopt_creation_race_winner
       else
         invalid_document
+      end
+    rescue ActiveRecord::Deadlocked, ActiveRecord::LockWaitTimeout
+      # Concurrent first registrations from one domain (DomainQuota.acquire).
+      overloaded
+    end
+
+    # Nil when the client may be created: a recognized one, or an open-tier one
+    # whose domain had room, now charged. Holding the domain's lock, a racing
+    # creation of the same client that already committed is adopted, charging
+    # nothing. Open registration is checked again, since resolve's check came
+    # before a fetch that took time.
+    def claim_open_domain_slot
+      if tier == :open
+        if !Oauth::Availability.cimd_open_registration_enabled?(@client_id)
+          unknown_client(:unrecognized_host)
+        else
+          quota = Oauth::ClientMetadata::DomainQuota.acquire(registrable_domain)
+
+          if Oauth::Client.where(client_id: @client_id).exists?
+            :adopt_winner
+          elsif !quota.reserve
+            unknown_client(:domain_cap)
+          end
+        end
       end
     end
 
@@ -226,12 +302,32 @@ class Oauth::ClientMetadata::Resolver
       { client_id: @client_id, token_endpoint_auth_method: "none", trusted: false, dynamically_registered: false, client_id_metadata_document: true }
     end
 
+    def tier
+      @tier ||= Oauth::ClientMetadata.tier(@client_id)
+    end
+
+    def registrable_domain
+      @registrable_domain ||= Oauth::ClientMetadata.registrable_domain(Oauth::ClientMetadata::Url.host(@client_id))
+    end
+
     def fetch_budget_available?
-      within_budget?(url_budget_key, URL_ATTEMPT_LIMIT, URL_ATTEMPT_WINDOW) && within_budget?(host_budget_key, HOST_ATTEMPT_LIMIT, HOST_ATTEMPT_WINDOW)
+      within_budget?(url_budget_key, URL_ATTEMPT_LIMIT, URL_ATTEMPT_WINDOW) && within_site_budget?
+    end
+
+    def within_site_budget?
+      if tier == :recognized
+        within_budget?(host_budget_key, HOST_ATTEMPT_LIMIT, HOST_ATTEMPT_WINDOW)
+      else
+        within_budget?(domain_budget_key, DOMAIN_ATTEMPT_LIMIT, DOMAIN_ATTEMPT_WINDOW)
+      end
     end
 
     def refund_fetch_budget
-      [ url_budget_key, host_budget_key ].each { |key| decrement_counter(key) }
+      [ url_budget_key, site_budget_key ].each { |key| decrement_counter(key) }
+    end
+
+    def site_budget_key
+      tier == :recognized ? host_budget_key : domain_budget_key
     end
 
     def url_budget_key
@@ -240,6 +336,10 @@ class Oauth::ClientMetadata::Resolver
 
     def host_budget_key
       "oauth:client_metadata:#{requester_key}:host:#{Oauth::ClientMetadata::Url.host(@client_id).downcase}"
+    end
+
+    def domain_budget_key
+      "oauth:client_metadata:#{requester_key}:domain:#{registrable_domain}"
     end
 
     def requester_key

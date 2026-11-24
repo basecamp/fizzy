@@ -3,7 +3,8 @@
     claim, typed by whoever registered it, so the line beneath names where this
     request's access goes, the one thing about it Fizzy can vouch for, and a
     caution follows. bdi keeps any right-to-left letters in the name from
-    reordering the text around it. %>
+    reordering the text around it. A metadata document client from a host that
+    isn't allowlisted is warned about too: we don't know who made it. %>
 <% redirect_host = oauth_redirect_host(redirect_uri) %>
 
 <header class="oauth-client flex flex-column gap">
@@ -25,7 +26,11 @@
     <% end %>
   </div>
 
-  <% if client.dynamically_registered? %>
+  <% if oauth_client_unrecognized?(client) %>
+    <p class="oauth-client__warning txt-small margin-none" role="note">
+      <strong>We don&rsquo;t know this app.</strong> Only authorize it if you trust <%= Oauth::ClientMetadata::Url.host(client.client_id) %>.
+    </p>
+  <% elsif client.dynamically_registered? %>
     <p class="oauth-client__warning txt-small margin-none" role="note">
       <% if redirect_host %>
         <strong>We haven&rsquo;t checked this app.</strong> Only authorize it if you trust that address.
