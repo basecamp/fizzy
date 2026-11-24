@@ -464,6 +464,43 @@ class Oauth::ClientTest < ActiveSupport::TestCase
     assert Oauth::Client.exists?(oauth_clients(:personal_access).id)
   end
 
+  test "cleanup destroys an open-tier metadata document client no one has held a grant to, or used, for a day" do
+    untouched = travel_to(25.hours.ago) { register_open_tier_client("untouched") }
+    consented = travel_to(2.days.ago) { register_open_tier_client("consented") }
+    travel_to(25.hours.ago) { consented.touch }
+    disconnected = travel_to(2.days.ago) { register_open_tier_client("disconnected") }
+    travel_to(47.hours.ago) { identities(:david).access_tokens.create!(oauth_client: disconnected) }
+    travel_to(25.hours.ago) { disconnected.access_tokens.each(&:destroy) }
+
+    Oauth::Client.cleanup
+
+    assert_not Oauth::Client.exists?(untouched.id)
+    assert_not Oauth::Client.exists?(consented.id), "a code is out for a minute, not a day"
+    assert_not Oauth::Client.exists?(disconnected.id)
+  end
+
+  test "cleanup keeps an open-tier client used within a day, or still granted, and an allowlisted one" do
+    pending = travel_to(2.days.ago) { register_open_tier_client("pending") }
+    travel_to(23.hours.ago) { pending.touch }
+    granted = travel_to(2.days.ago) { register_open_tier_client("granted").tap { identities(:david).access_tokens.create!(oauth_client: it) } }
+    recognized = travel_to(2.days.ago) { register_metadata_document_client }
+
+    Oauth::Client.cleanup
+
+    assert Oauth::Client.exists?(pending.id)
+    assert Oauth::Client.exists?(granted.id)
+    assert Oauth::Client.exists?(recognized.id), "an allowlisted host's client keeps the full retention period"
+  end
+
+  test "destroy_if_still_unused spares an open-tier client that got a grant after it was picked" do
+    client = travel_to(2.days.ago) { register_open_tier_client("picked") }
+    picked = Oauth::Client.idle_metadata_documents.find(client.id)
+    identities(:david).access_tokens.create!(oauth_client: client)
+
+    assert_not picked.destroy_if_still_unused(Oauth::Client.idle_metadata_documents)
+    assert Oauth::Client.exists?(client.id)
+  end
+
   test "cleanup counts the retention period from the client's last grant, not its registration" do
     client = travel_to(60.days.ago) { register_client }
     token = travel_to(40.days.ago) { identities(:david).access_tokens.create!(oauth_client: client) }
@@ -688,6 +725,10 @@ class Oauth::ClientTest < ActiveSupport::TestCase
   private
     def register_metadata_document_client(**attributes)
       Oauth::Client.create! name: "Claude", client_id: "https://claude.ai/client.json", redirect_uris: %w[ https://claude.ai/callback ], client_id_metadata_document: true, **attributes
+    end
+
+    def register_open_tier_client(name)
+      register_metadata_document_client client_id: "https://#{name}.example.com/client.json", redirect_uris: [ "https://#{name}.example.com/callback" ]
     end
 
     def register_client(**attributes)

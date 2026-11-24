@@ -8,6 +8,7 @@ class Oauth::AuthorizationsController < Oauth::BaseController
   # Read to find the client and the redirect target, so refused before either.
   LOOKUP_PARAMETERS = %w[ client_id redirect_uri ]
   UNKNOWN_CLIENT_MESSAGE = "Fizzy doesn't recognize this app. It may have been removed since you started. Start again from the app."
+  GRANT_CAP_MESSAGE = "You've connected as many apps from developers Fizzy doesn't know as it allows. Disconnect one in Connected apps to connect another."
 
   # The sign-in pages' layout: the Fizzy logo heads every page, with no account
   # menu, since authorizing happens outside any one account.
@@ -170,7 +171,7 @@ class Oauth::AuthorizationsController < Oauth::BaseController
       row = nil unless row&.metadata_document?
 
       if (row.nil? || !row.allows_redirect?(params[:redirect_uri])) && Oauth::Availability.metadata_documents_enabled?(params[:client_id])
-        Oauth::ClientMetadata::Resolver.resolve_for_read(params[:client_id], requester: Current.identity).client || row
+        Oauth::ClientMetadata::Resolver.resolve_for_read(params[:client_id], requester: Current.identity, consenting: false).client || row
       else
         row
       end
@@ -178,11 +179,14 @@ class Oauth::AuthorizationsController < Oauth::BaseController
 
     # The draft's answer to a document that can't be fetched or doesn't validate:
     # refuse, rather than authorize against a document we can't see. Server
-    # pressure is a 503 to retry; anything else reads like an unknown client.
+    # pressure is a 503 to retry; a person at the open tier's grant cap is told
+    # what to do about it; anything else reads like an unknown client.
     def refuse_metadata_document(resolution)
       case resolution.outcome
       when :fetch_failed, :invalid_document, :throttled
         oauth_error "invalid_client_metadata", resolution.error_description
+      when :grant_cap
+        render_error "access_denied", resolution.error_description, message: GRANT_CAP_MESSAGE, status: :forbidden
       when :overloaded
         response.headers["Retry-After"] = "5"
         oauth_error "temporarily_unavailable", resolution.error_description, status: :service_unavailable

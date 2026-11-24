@@ -51,7 +51,7 @@ module OauthHelper
   # A metadata document client whose host isn't allowlisted: the open tier of
   # Oauth::ClientMetadata, whose developer we don't know.
   def oauth_client_unrecognized?(client)
-    client.metadata_document? && Oauth::ClientMetadata.tier(client.client_id) == :open
+    client.open_tier?
   end
 
   # Lowercase, as a browser reads it. nil for a callback that stays on this

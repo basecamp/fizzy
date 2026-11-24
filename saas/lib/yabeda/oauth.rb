@@ -55,6 +55,8 @@ module Yabeda
             tags: %i[ operation ]
           counter :cimd_clients_created_total, comment: "Clients provisioned from a client metadata document, by tier",
             tags: %i[ tier ]
+          counter :cimd_refusals_total, comment: "Client metadata document resolutions refused, by reason and tier (the domain is in the log line, never a tag)",
+            tags: %i[ reason tier ]
           histogram :token_request_duration_seconds, comment: "OAuth token request duration",
             tags: %i[ grant_type ],
             buckets: [ 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5 ]
@@ -98,6 +100,10 @@ module Yabeda
 
         ActiveSupport::Notifications.subscribe "cimd_client_created.oauth" do |event|
           oauth_cimd_clients_created_total.increment({ tier: event.payload[:tier].to_s })
+        end
+
+        ActiveSupport::Notifications.subscribe "cimd_refusal.oauth" do |event|
+          oauth_cimd_refusals_total.increment({ reason: event.payload[:reason].to_s, tier: event.payload[:tier].to_s })
         end
       end
     end

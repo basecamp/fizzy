@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_11_24_120000) do
+ActiveRecord::Schema[8.2].define(version: 2026_10_19_150000) do
   create_table "accesses", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -443,15 +443,6 @@ ActiveRecord::Schema[8.2].define(version: 2026_11_24_120000) do
     t.index ["user_id", "card_id"], name: "index_notifications_on_user_id_and_card_id", unique: true
     t.index ["user_id", "read_at", "updated_at"], name: "index_notifications_on_user_id_and_read_at_and_updated_at", order: { read_at: :desc, updated_at: :desc }
     t.index ["user_id"], name: "index_notifications_on_user_id"
-  end
-
-  create_table "oauth_cimd_domain_quotas", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.integer "created_count", default: 0, null: false
-    t.string "registrable_domain", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "window_started_at", null: false
-    t.index ["registrable_domain"], name: "index_oauth_cimd_domain_quotas_on_registrable_domain", unique: true
   end
 
   create_table "oauth_clients", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|

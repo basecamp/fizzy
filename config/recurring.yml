@@ -51,9 +51,6 @@ production: &production
   cleanup_oauth_clients:
     command: "Oauth::Client.cleanup"
     schedule: every hour at minute 14
-  cleanup_oauth_cimd_domain_quotas:
-    command: "Oauth::ClientMetadata::DomainQuota.cleanup"
-    schedule: every day at 04:52
   incineration:
     class: "Account::IncinerateDueJob"
     schedule: every 8 hours at minute 16

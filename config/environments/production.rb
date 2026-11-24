@@ -149,11 +149,22 @@ Rails.application.configure do
   # The open tier of Client ID Metadata Documents, off unless
   # OAUTH_CIMD_OPEN_REGISTRATION is "true": then any https host that publishes a
   # valid document may request consent, with a warning that we don't know the
-  # app, a per-domain registration quota and a bound on concurrent fetches. See
-  # Oauth::ClientMetadata and Oauth::ClientMetadata::FetchLease. Turning it off
-  # refuses new authorizations for hosts that aren't allowlisted, clients
-  # already provisioned from one included; grants they hold keep working.
+  # app, a fetch budget per registrable domain, a cap on the apps one person
+  # connects and a bound on concurrent fetches. See Oauth::ClientMetadata and
+  # Oauth::ClientMetadata::FetchLease. Turning it off refuses new
+  # authorizations for hosts that aren't allowlisted, clients already
+  # provisioned from one included; grants they hold keep working.
   config.x.oauth.cimd_open_registration = ENV["OAUTH_CIMD_OPEN_REGISTRATION"] == "true"
+
+  # Domains whose metadata documents are refused, for an incident:
+  # OAUTH_CIMD_BLOCKED_DOMAINS, space-separated, matched case-insensitively.
+  # An entry blocks its own host and every host under it, so a registrable
+  # domain ("example.com") blocks all of it and a narrower entry
+  # ("tools.example.com") only that part. Either tier, before any fetch, and
+  # clients already provisioned from a blocked domain stop resolving too, as
+  # unknown clients. Grants already issued keep working, since the token
+  # endpoint never resolves documents: revoking those is a separate step.
+  config.x.oauth.cimd_blocked_domains = ENV.fetch("OAUTH_CIMD_BLOCKED_DOMAINS", "").split
 
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }

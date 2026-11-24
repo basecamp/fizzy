@@ -171,6 +171,21 @@ class Yabeda::OauthTest < ActionDispatch::IntegrationTest
     WebMock.allow_net_connect!
   end
 
+  test "metadata document refusals, by reason and tier, never by domain" do
+    config = Rails.application.config.x.oauth
+    saved = config.cimd_blocked_domains
+    config.cimd_blocked_domains = %w[ example.com ]
+
+    assert_equal :blocked_domain, Oauth::ClientMetadata::Resolver.resolve_for_intake("https://tools.example.com/client.json", requester: @identity).outcome
+
+    assert_equal 1, count(:cimd_refusals_total, reason: "blocked_domain", tier: "open")
+    Yabeda::TestAdapter.instance.counters.fetch(Yabeda.oauth.cimd_refusals_total).each_key do |tags|
+      assert_equal %i[ reason tier ], tags.keys.sort
+    end
+  ensure
+    config.cimd_blocked_domains = saved
+  end
+
   test "fetch lease admissions, and the backend failures that refuse" do
     with_fetch_lease do
       Oauth::ClientMetadata::FetchLease.admit { }

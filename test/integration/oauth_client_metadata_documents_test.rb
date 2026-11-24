@@ -245,6 +245,86 @@ class OauthClientMetadataDocumentsTest < ActionDispatch::IntegrationTest
     assert_select ".connected-app__unrecognized", count: 0
   end
 
+  test "an open-tier client consented to and never redeemed is swept after a day, and comes back on the next consent" do
+    sign_in_as :david
+    untenanted { post oauth_authorization_path, params: open_authorization }
+    assert_response :redirect
+    client = Oauth::Client.find_presented(OPEN_URL)
+
+    travel 23.hours do
+      Oauth::Client.cleanup
+      assert Oauth::Client.exists?(client.id), "kept while consent may still be in flight"
+    end
+
+    travel 25.hours do
+      Oauth::Client.cleanup
+      assert_not Oauth::Client.exists?(client.id)
+
+      untenanted { post oauth_authorization_path, params: open_authorization }
+      assert_response :redirect
+      code = Rack::Utils.parse_query(URI.parse(response.location).query)["code"]
+      assert Oauth::Client.find_presented(OPEN_URL).metadata_document?
+
+      untenanted do
+        post oauth_token_path, params: {
+          grant_type: "authorization_code", client_id: OPEN_URL, code: code, redirect_uri: OPEN_CALLBACK, code_verifier: CODE_VERIFIER
+        }, as: :json
+      end
+      assert_response :success
+
+      Oauth::Client.cleanup
+    end
+
+    travel 3.days do
+      Oauth::Client.cleanup
+      assert Oauth::Client.find_presented(OPEN_URL), "a granted client is never swept"
+    end
+  end
+
+  test "someone at the cap on open-tier apps is told so, before any fetch, and can still deny" do
+    Oauth::ClientMetadata::GRANT_CAP.times do |index|
+      client = Oauth::Client.create! client_id: "https://app#{index}.example.org/client.json", name: "App #{index}",
+        redirect_uris: [ "https://app#{index}.example.org/callback" ], client_id_metadata_document: true
+      identities(:david).access_tokens.create! oauth_client: client
+    end
+    stub = stub_request(:get, OPEN_URL)
+    sign_in_as :david
+
+    untenanted { get new_oauth_authorization_path, params: open_authorization }
+    assert_response :forbidden
+    assert_select "[data-oauth-error=?]", "access_denied"
+    assert_select "p", text: Oauth::AuthorizationsController::GRANT_CAP_MESSAGE
+
+    untenanted { post oauth_authorization_path, params: open_authorization }
+    assert_response :forbidden
+    assert_nil Oauth::Client.find_presented(OPEN_URL)
+    assert_not_requested stub
+
+    stub_request(:get, OPEN_URL).to_return status: 200, headers: { content_type: "application/json" },
+      body: { client_id: OPEN_URL, client_name: "Tools", redirect_uris: [ OPEN_CALLBACK ] }.to_json
+    untenanted { post oauth_authorization_path, params: open_authorization.merge(error: "access_denied") }
+    assert_response :redirect
+    assert_equal "access_denied", Rack::Utils.parse_query(URI.parse(response.location).query)["error"]
+
+    untenanted { get new_oauth_authorization_path, params: authorization }
+    assert_response :success, "the cap leaves allowlisted apps alone"
+  end
+
+  test "a blocked domain is an unknown client, provisioned or not" do
+    sign_in_as :david
+    untenanted { post oauth_authorization_path, params: open_authorization }
+    assert Oauth::Client.find_presented(OPEN_URL)
+
+    with_oauth_config(cimd_blocked_domains: %w[ example.com ]) do
+      untenanted { get new_oauth_authorization_path, params: open_authorization }
+      assert_response :bad_request
+      assert_select "p", text: Oauth::AuthorizationsController::UNKNOWN_CLIENT_MESSAGE
+
+      untenanted { post oauth_authorization_path, params: open_authorization }
+      assert_response :bad_request
+    end
+  end
+
   test "a document that can't be fetched refuses the authorization" do
     sign_in_as :david
     stub_request(:get, URL).to_return(status: 404)
