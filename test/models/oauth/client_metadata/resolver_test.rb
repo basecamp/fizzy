@@ -1,7 +1,7 @@
 require "test_helper"
 
 class Oauth::ClientMetadata::ResolverTest < ActiveSupport::TestCase
-  include OauthAuditTestHelper, OauthAvailabilityTestHelper
+  include OauthAuditTestHelper, OauthAvailabilityTestHelper, FetchLeaseTestHelper
 
   URL = "https://claude.ai/oauth/mcp-oauth-client-metadata"
   CALLBACK = "https://claude.ai/api/mcp/auth_callback"
@@ -257,6 +257,32 @@ class Oauth::ClientMetadata::ResolverTest < ActiveSupport::TestCase
       assert_equal :overloaded, resolution.outcome
       assert_nil Rails.cache.read("oauth:client_metadata:#{identities(:david).id}:domain:example.com", raw: true)
     end
+  end
+
+  test "the lease is held for the fetch and released before the client is persisted" do
+    held_while_fetching = nil
+    stub_request(:get, OPEN_URL).to_return do
+      held_while_fetching = !slot_free?(0)
+      { status: 200, headers: { content_type: "application/json" }, body: { client_id: OPEN_URL, client_name: "Tools", redirect_uris: [ OPEN_CALLBACK ] }.to_json }
+    end
+
+    # Probed as the client's row is inserted, inside its creating transaction.
+    free_while_persisting = nil
+    persisting = ->(*, payload) do
+      if free_while_persisting.nil? && payload[:sql].match?(/\AINSERT INTO [`"]?oauth_clients\b/i)
+        free_while_persisting = :probing
+        free_while_persisting = slot_free?(0)
+      end
+    end
+
+    with_lease do
+      ActiveSupport::Notifications.subscribed(persisting, "sql.active_record") do
+        assert resolve_open(persist: true).client.persisted?
+      end
+    end
+
+    assert held_while_fetching, "the fetch runs holding a slot"
+    assert free_while_persisting, "the slot is released before the client is persisted"
   end
 
   test "an invalid identifier is an unknown client" do

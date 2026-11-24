@@ -99,10 +99,27 @@ class Oauth::ClientMetadata::Resolver
       row.metadata_expires_at.present? && row.metadata_expires_at > Time.current
     end
 
+    # Yields a fetched document's result to be handled, or answers why there
+    # isn't one. Handling it, persisting included, comes after the lease is
+    # released: the lease bounds fetches in flight, and a slot held through a
+    # row lock or a slow commit would refuse other clients' fetches for
+    # database waits, beyond the fetcher's deadline. (bc3 persists inside its
+    # lease.)
+    def resolve_by_fetch(row)
+      fetched = fetch_within_lease(row)
+
+      if fetched.is_a?(Resolution)
+        fetched
+      else
+        yield fetched
+      end
+    end
+
     # Admission first, the process's bulkhead then the lease across processes:
     # either refusing is server pressure, and mustn't spend the client's
-    # budgets. A request over budget holds its lease only for the check.
-    def resolve_by_fetch(row)
+    # budgets. A request over budget holds its lease only for the check. The
+    # fetch's result when it succeeded, or a failed Resolution.
+    def fetch_within_lease(row)
       if Oauth::ClientMetadata::Fetcher::Bulkhead.saturated?
         overloaded
       else
@@ -129,7 +146,7 @@ class Oauth::ClientMetadata::Resolver
             elsif result.failure?
               Resolution.failure(:fetch_failed, "Could not retrieve the client metadata document (#{result.outcome.to_s.humanize.downcase})")
             else
-              yield result
+              result
             end
           end
         end
