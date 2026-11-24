@@ -41,13 +41,13 @@ class Oauth::ClientMetadata::FetchLease
   class << self
     # Yields true holding a slot, released on every exit, or false when the
     # slots are spent or the backend failed. Yields true, holding nothing,
-    # while the lease is off.
+    # while the lease is off. Returns what the block returns, and lets what it
+    # raises through.
     def admit(&block)
       if !enabled?
         yield true
       elsif mysql?
-        # Held from acquisition to release; see NamedLocks.
-        Oauth::Client.with_connection { |connection| admit_on(connection, &block) }
+        admit_on_connection(&block)
       else
         admit_on(nil, &block)
       end
@@ -72,6 +72,28 @@ class Oauth::ClientMetadata::FetchLease
     end
 
     private
+      # Held from acquisition to release; see NamedLocks. Failing to get the
+      # connection (the pool spent, the server unreachable) is the backend
+      # failing, so it refuses, as a failed acquire does. Anything raised once
+      # the connection is ours is the caller's block, since acquire, release
+      # and record never raise, and goes through.
+      def admit_on_connection(&block)
+        connected = false
+
+        Oauth::Client.with_connection do |connection|
+          connected = true
+          admit_on(connection, &block)
+        end
+      rescue StandardError => error
+        if connected
+          raise
+        else
+          report_failure "acquire", error
+          record :refused
+          yield false
+        end
+      end
+
       def admit_on(connection)
         if lease = acquire(connection)
           begin
