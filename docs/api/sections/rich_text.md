@@ -54,7 +54,8 @@ __Response:__
       "Content-MD5": "GQ5SqLsM7ylnji0Wgd9wNA=="
     }
   },
-  "signed_id": "eyJfcmFpbHMi..."
+  "signed_id": "eyJfcmFpbHMi...",
+  "attachable_sgid": "BAh7CEkiCGdpZAY6..."
 }
 ```
 
@@ -72,15 +73,17 @@ curl -X PUT \
 
 ### 3. Reference the file in rich text
 
-Use the `signed_id` from step 1 to embed the file in your rich text using an `<action-text-attachment>` tag:
+Use the `attachable_sgid` from step 1 to embed the file in your rich text using an `<action-text-attachment>` tag:
 
 ```json
 {
   "card": {
     "title": "Card with image",
-    "description": "<p>Here's a screenshot:</p><action-text-attachment sgid=\"eyJfcmFpbHMi...\"></action-text-attachment>"
+    "description": "<p>Here's a screenshot:</p><action-text-attachment sgid=\"BAh7CEkiCGdpZAY6...\" caption=\"The new settings page\"></action-text-attachment>"
   }
 }
 ```
 
-The `sgid` attribute should contain the `signed_id` returned from the direct upload response.
+The `sgid` attribute should contain the `attachable_sgid` returned from the direct upload response. The `signed_id` doesn't work here: the request succeeds, but the attachment renders as a broken placeholder. The optional `caption` attribute is shown in place of the file's name.
+
+The `signed_id` is what a card's `image` takes, to set the card's header image from the same upload. A blob embedded in rich text can't also be used as a card's image, so upload the file again for that.
