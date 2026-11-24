@@ -66,9 +66,10 @@ module Oauth::ClientMetadata
   # A host an operator has blocked (config.x.oauth.cimd_blocked_domains), in
   # either tier: the entry itself, or any host under it at a label boundary.
   # So a registrable domain blocks every host under it, and a narrower entry
-  # only what's under that.
+  # only what's under that. Hosts compare as DNS names: case folded, and a
+  # trailing dot, naming the same host, ignored.
   def blocked?(client_id)
-    if host = Url.host(client_id)&.downcase
+    if host = dns_name(Url.host(client_id))
       blocked_domains.any? { |domain| host == domain || host.end_with?(".#{domain}") }
     else
       false
@@ -76,18 +77,21 @@ module Oauth::ClientMetadata
   end
 
   def blocked_domains
-    Array(Rails.application.config.x.oauth.cimd_blocked_domains).map(&:downcase)
+    Array(Rails.application.config.x.oauth.cimd_blocked_domains).filter_map { |domain| dns_name(domain) }
   end
 
   # Whether the identity already holds grants to as many open-tier apps as
   # GRANT_CAP allows, besides the client_id it's asking to authorize, so
   # authorizing an app again is never refused. Grants count while they're
   # live, as Connected Apps lists them: a revoked or lapsed one is gone.
+  #
+  # An app already connected is never refused, even past the cap, which
+  # concurrent consents can overshoot by a few.
   def grant_cap_reached?(identity, client_id)
     connected = identity.access_tokens.grants.unlapsed.joins(:oauth_client).merge(Oauth::Client.metadata_documents)
       .distinct.pluck("oauth_clients.client_id")
 
-    connected.count { |connected_id| connected_id != client_id && tier(connected_id) == :open } >= GRANT_CAP
+    !connected.include?(client_id) && connected.count { |connected_id| tier(connected_id) == :open } >= GRANT_CAP
   end
 
   # Where the open tier's fetch budget pools, wider than a host on purpose:
@@ -112,6 +116,10 @@ module Oauth::ClientMetadata
   end
 
   private
+    def dns_name(host)
+      host.to_s.downcase.sub(/\.+\z/, "").presence
+    end
+
     def ip_literal(host)
       IPAddr.new(host.to_s.delete_prefix("[").delete_suffix("]"))
     rescue IPAddr::InvalidAddressError

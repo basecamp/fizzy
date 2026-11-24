@@ -225,6 +225,12 @@ class Oauth::ClientMetadata::ResolverTest < ActiveSupport::TestCase
       assert_not Oauth::ClientMetadata.blocked?("https://other.example.com/client.json")
       assert_not Oauth::ClientMetadata.blocked?("https://mytools.example.com/client.json")
       assert_not Oauth::ClientMetadata.blocked?("https://tools.example.com.evil.test/client.json")
+      assert Oauth::ClientMetadata.blocked?("https://tools.example.com./client.json"), "a trailing dot names the same host"
+      assert Oauth::ClientMetadata.blocked?("https://eu.tools.example.com./client.json")
+    end
+
+    with_oauth_config(cimd_blocked_domains: %w[ example.com. ]) do
+      assert Oauth::ClientMetadata.blocked?("https://tools.example.com/client.json")
     end
 
     assert_not Oauth::ClientMetadata.blocked?(OPEN_URL), "nothing is blocked unless configured"
@@ -263,6 +269,16 @@ class Oauth::ClientMetadata::ResolverTest < ActiveSupport::TestCase
     connect_open_tier_apps identities(:david), Oauth::ClientMetadata::GRANT_CAP - 1
 
     assert_equal client, resolve_open(persist: true).client
+  end
+
+  test "an app already connected is authorized again even past the cap" do
+    stub_open_document
+    client = resolve_open(persist: true).client
+    identities(:david).access_tokens.create!(oauth_client: client)
+    connect_open_tier_apps identities(:david), Oauth::ClientMetadata::GRANT_CAP
+
+    assert_equal client, resolve_open(persist: true).client
+    assert_equal :grant_cap, Oauth::ClientMetadata::Resolver.resolve_for_intake("https://another.example.net/client.json", requester: identities(:david)).outcome
   end
 
   test "the grant cap counts live grants to open-tier apps, and nothing else" do
@@ -308,10 +324,30 @@ class Oauth::ClientMetadata::ResolverTest < ActiveSupport::TestCase
   end
 
   test "telemetry that raises never costs a refusal its answer" do
-    ActiveSupport::Notifications.stubs(:instrument).with("cimd_refusal.oauth", anything).raises(RuntimeError, "boom")
+    with_raising_subscriber("cimd_refusal.oauth") do
+      with_oauth_config(cimd_blocked_domains: %w[ example.com ]) do
+        assert_equal :blocked_domain, resolve_open(persist: true).outcome
+      end
+    end
+  end
 
-    with_oauth_config(cimd_blocked_domains: %w[ example.com ]) do
-      assert_equal :blocked_domain, resolve_open(persist: true).outcome
+  test "telemetry that raises never costs a fetch or a creation its answer" do
+    stub_open_document
+
+    with_raising_subscriber("cimd_fetch.oauth", "cimd_client_created.oauth") do
+      assert resolve_open(persist: true).client.persisted?
+    end
+  end
+
+  test "telemetry that raises never costs a lost admission its refund and its 503" do
+    with_memory_cache do
+      Oauth::ClientMetadata::Fetcher.any_instance.stubs(:fetch).returns(Oauth::ClientMetadata::Fetcher::Result.failure(:overloaded))
+
+      with_raising_subscriber("cimd_fetch.oauth") do
+        assert_equal :overloaded, resolve_open(persist: true).outcome
+      end
+
+      assert_equal 0, Rails.cache.read("oauth:client_metadata:domain:example.com", raw: true).to_i
     end
   end
 
@@ -521,6 +557,11 @@ class Oauth::ClientMetadata::ResolverTest < ActiveSupport::TestCase
         client = Oauth::Client.create!(client_id: "https://#{host}/client.json", name: "App #{index}", redirect_uris: [ "https://#{host}/callback" ], client_id_metadata_document: true)
         identity.access_tokens.create!(oauth_client: client)
       end
+    end
+
+    def with_raising_subscriber(*names, &block)
+      raising = ->(*) { raise "subscriber failed" }
+      names.reduce(block) { |inner, name| -> { ActiveSupport::Notifications.subscribed(raising, name, &inner) } }.call
     end
 
     def capture_refusals(&block)

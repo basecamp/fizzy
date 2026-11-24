@@ -151,7 +151,7 @@ class Oauth::ClientMetadata::Resolver
 
             result = @fetcher.fetch(@client_id, etag: @sent_etag)
             Rails.logger.info "OAuth client metadata fetch: #{result.outcome}"
-            ActiveSupport::Notifications.instrument "cimd_fetch.oauth", outcome: result.outcome
+            instrument "cimd_fetch.oauth", outcome: result.outcome
 
             if result.outcome == :overloaded
               # Admission was lost inside the fetch, so nothing was fetched: the
@@ -244,7 +244,7 @@ class Oauth::ClientMetadata::Resolver
           provisioning_defaults.merge(attributes).merge(metadata_fetched_at: Time.current, metadata_expires_at: result.expires_in.from_now, metadata_etag: result.etag)
 
         Rails.logger.info "OAuth client provisioned from its metadata document"
-        ActiveSupport::Notifications.instrument "cimd_client_created.oauth", tier: tier
+        instrument "cimd_client_created.oauth", tier: tier
         Resolution.success(client)
       else
         invalid_document
@@ -371,12 +371,20 @@ class Oauth::ClientMetadata::Resolver
     def refused(reason, resolution)
       begin
         Rails.logger.warn "[Oauth::ClientMetadata] refused reason=#{reason} tier=#{tier} domain=#{registrable_domain}#{" identity=#{@requester&.id}" if reason == :grant_cap}"
-        ActiveSupport::Notifications.instrument "cimd_refusal.oauth", reason: reason, tier: tier
       rescue StandardError
         nil
       end
 
+      instrument "cimd_refusal.oauth", reason: reason, tier: tier
       resolution
+    end
+
+    # A subscriber that raises mustn't cost the request its answer, nor skip
+    # what follows the event: a refund, a 503, a client already created.
+    def instrument(name, **payload)
+      ActiveSupport::Notifications.instrument name, **payload
+    rescue StandardError
+      nil
     end
 
     def unknown_client(outcome)
