@@ -139,6 +139,7 @@ class Oauth::ClientMetadata::FetchLeaseConcurrencyTest < ActiveSupport::TestCase
   test "admits at most SLOTS at once, refuses the next without waiting, and admits again once one is released" do
     slots = Oauth::ClientMetadata::FetchLease::SLOTS
     held, gate = Queue.new, Queue.new
+    holders = []
 
     with_lease do
       holders = slots.times.map do
@@ -162,8 +163,11 @@ class Oauth::ClientMetadata::FetchLeaseConcurrencyTest < ActiveSupport::TestCase
       sleep 0.01 until held.empty? && holders.count(&:alive?) < slots
 
       Thread.new { Oauth::ClientMetadata::FetchLease.admit { |admitted| assert admitted } }.join
-
-      (slots - 1).times { gate << :release }
+    ensure
+      # Released and joined even when an assertion above fails, so no holder
+      # keeps its connection, and its named lock, into the next test. A
+      # release beyond the holders still waiting is never popped.
+      holders.size.times { gate << :release }
       holders.each(&:join)
     end
 
