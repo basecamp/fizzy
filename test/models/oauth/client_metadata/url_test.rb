@@ -35,6 +35,10 @@ class Oauth::ClientMetadata::UrlTest < ActiveSupport::TestCase
   test "recognizes only the exact allowlisted hosts" do
     assert Oauth::ClientMetadata.recognized?("https://claude.ai/client.json")
     assert Oauth::ClientMetadata.recognized?("https://chatgpt.com/client.json")
+    assert Oauth::ClientMetadata.recognized?("https://www.perplexity.ai/.well-known/mcp-client.json")
+    assert_not Oauth::ClientMetadata.recognized?("https://perplexity.ai/.well-known/mcp-client.json")
+    assert_not Oauth::ClientMetadata.recognized?("https://evil.www.perplexity.ai/.well-known/mcp-client.json")
+    assert_not Oauth::ClientMetadata.recognized?("https://www.perplexity.ai.example.com/.well-known/mcp-client.json")
     assert_not Oauth::ClientMetadata.recognized?("https://evil.claude.ai/client.json")
     assert_not Oauth::ClientMetadata.recognized?("https://claude.ai.example.com/client.json")
     assert_not Oauth::ClientMetadata.recognized?("https://CLAUDE.AI/client.json")

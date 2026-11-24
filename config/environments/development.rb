@@ -105,7 +105,7 @@ Rails.application.configure do
     config.x.oauth.connected_apps_preview = Oauth::Availability.connected_apps_preview_from(ENV)
   end
   config.x.oauth.cimd_enabled = true
-  config.x.oauth.cimd_allowed_hosts = %w[ mcp.claude.ai claude.ai claude.com chatgpt.com ]
+  config.x.oauth.cimd_allowed_hosts = %w[ mcp.claude.ai claude.ai claude.com chatgpt.com www.perplexity.ai ]
 
   # Canonical host for mailer URLs (emails always link here, not personal Tailscale URLs)
   config.action_mailer.default_url_options = { host: "#{config.hosts.first}:3006" }

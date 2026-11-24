@@ -1,13 +1,13 @@
 # Client ID Metadata Documents (CIMD, draft-ietf-oauth-client-id-metadata-document):
 # a client identified by the https URL of a metadata document it hosts. Fizzy
 # fetches the URL, validates the JSON, and provisions an Oauth::Client row from
-# it, with no registration request and one stable identity per app. Claude and
-# ChatGPT connectors identify this way.
+# it, with no registration request and one stable identity per app. Claude,
+# ChatGPT and Perplexity connectors identify this way.
 #
 # Ported from bc3's Oauth::ClientMetadata, recognized tier only: a document is
 # fetched only from a host named exactly in config.x.oauth.cimd_allowed_hosts
 # (OAUTH_CIMD_ALLOWED_HOSTS, e.g. "mcp.claude.ai claude.ai claude.com
-# chatgpt.com"). Every other URL-shaped client_id is an unknown client, and is
+# chatgpt.com www.perplexity.ai"). Every other URL-shaped client_id is an unknown client, and is
 # never fetched. bc3's open tier, and the per-domain row quota it needs, aren't
 # ported.
 #

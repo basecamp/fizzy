@@ -1,0 +1,24 @@
+{
+  "client_id": "https://www.perplexity.ai/.well-known/mcp-client.json",
+  "client_name": "Perplexity",
+  "client_uri": "https://www.perplexity.ai",
+  "logo_uri": "https://r2cdn.perplexity.ai/Perplexity%20Logos/perplexity-logo-black-256.svg",
+  "redirect_uris": [
+    "https://www.perplexity.ai/rest/connections/oauth_callback",
+    "https://www.perplexity.com/rest/connections/oauth_callback",
+    "https://enterprise.perplexity.ai/rest/connections/oauth_callback",
+    "https://enterprise.perplexity.com/rest/connections/oauth_callback",
+    "https://staging.perplexity.ai/rest/connections/oauth_callback",
+    "https://staging.perplexity.com/rest/connections/oauth_callback",
+    "https://testing.perplexity.ai/rest/connections/oauth_callback",
+    "https://testing.perplexity.com/rest/connections/oauth_callback"
+  ],
+  "grant_types": [
+    "authorization_code",
+    "refresh_token"
+  ],
+  "response_types": [
+    "code"
+  ],
+  "token_endpoint_auth_method": "none"
+}
