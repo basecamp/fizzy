@@ -48,6 +48,15 @@ class Oauth::ClientMetadata::DomainQuota < ApplicationRecord
     # .prepare's row is gone, deleted by the cleanup since, which is rare
     # enough to take the deadlock risk above, a retryable overload
     # (Resolver#create_client).
+    #
+    # That deletion has a window: .prepare finds an existing row without
+    # touching it, so an expired one stays deletable until it's locked here.
+    # It can't raise RecordNotFound, which bc3 retries on, because the locking
+    # read is a find_by, and a row deleted before it reads nil and is created
+    # again. Once it's read, the cleanup's DELETE waits for our transaction:
+    # on our row lock on MySQL, on the writer lock our immediate transaction
+    # holds on SQLite. Only an expired row is deletable, and an expired row is
+    # no different from a missing one.
     def acquire(domain)
       attempts = 0
 
@@ -67,8 +76,14 @@ class Oauth::ClientMetadata::DomainQuota < ApplicationRecord
       false
     end
 
+    # Only while the open tier is on, so an install that keeps it dark never
+    # touches the table, from requests or from this job. Rows left from a time
+    # it was on are inert once expired (see above), and swept once it's on
+    # again.
     def cleanup
-      Oauth.cleanup_step(:cimd_domain_quotas) { expired.in_batches.delete_all }
+      if Oauth::Availability.cimd_open_registration_enabled?
+        Oauth.cleanup_step(:cimd_domain_quotas) { expired.in_batches.delete_all }
+      end
     end
   end
 

@@ -1,6 +1,8 @@
 require "test_helper"
 
 class Oauth::ClientMetadata::DomainQuotaTest < ActiveSupport::TestCase
+  include OauthAvailabilityTestHelper
+
   DOMAIN = "example.com"
   CAP = Oauth::ClientMetadata::DomainQuota::CAP
 
@@ -74,6 +76,28 @@ class Oauth::ClientMetadata::DomainQuotaTest < ActiveSupport::TestCase
     assert Oauth::ClientMetadata::DomainQuota.exists?(current.id)
     assert Oauth::ClientMetadata::DomainQuota.exists?(spent.id)
     assert Oauth::ClientMetadata::DomainQuota.exhausted?(DOMAIN)
+  end
+
+  test "an expired row the cleanup deletes between prepare and acquire is created again" do
+    Oauth::ClientMetadata::DomainQuota.create! registrable_domain: DOMAIN, window_started_at: 31.days.ago, created_count: CAP
+    Oauth::ClientMetadata::DomainQuota.prepare(DOMAIN)
+
+    Oauth::ClientMetadata::DomainQuota.cleanup
+    assert_not Oauth::ClientMetadata::DomainQuota.exists?(registrable_domain: DOMAIN)
+
+    assert reserve
+    assert_equal 1, quota.created_count
+  end
+
+  test "cleanup leaves the table alone while the open tier is off" do
+    expired = Oauth::ClientMetadata::DomainQuota.create! registrable_domain: "expired.example.com", window_started_at: 31.days.ago, created_count: CAP
+
+    with_oauth_config(cimd_open_registration: false) do
+      Oauth::ClientMetadata::DomainQuota.expects(:expired).never
+      Oauth::ClientMetadata::DomainQuota.cleanup
+    end
+
+    assert Oauth::ClientMetadata::DomainQuota.exists?(expired.id)
   end
 
   private
