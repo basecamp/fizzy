@@ -208,6 +208,32 @@ class OauthClientMetadataDocumentsTest < ActionDispatch::IntegrationTest
     assert_select ".connected-app__unrecognized", text: /Unrecognized developer/
   end
 
+  test "with the fetch lease on, consent reads and the authorization registers, holding no slot after" do
+    Dir.mktmpdir do |directory|
+      Oauth::ClientMetadata::FetchLease.stubs(:slots_directory).returns(directory)
+      sign_in_as :david
+
+      events = []
+      ActiveSupport::Notifications.subscribed(->(event) { events << [ event.name, event.payload ] }, /\Acimd_lease/) do
+        with_oauth_config(cimd_fetch_lease: true) do
+          untenanted { get new_oauth_authorization_path, params: open_authorization }
+          assert_response :success
+
+          untenanted { post oauth_authorization_path, params: open_authorization }
+          assert_response :redirect
+        end
+      end
+
+      assert Oauth::Client.find_presented(OPEN_URL)
+      assert_equal [ [ "cimd_lease.oauth", { outcome: :admitted } ] ] * 2, events
+      Oauth::ClientMetadata::FetchLease::SLOTS.times do |index|
+        assert lease_slot_free?(index, directory), "slot #{index} is released"
+      end
+    end
+  ensure
+    Oauth::Client.with_connection { |connection| connection.query_value("SELECT RELEASE_ALL_LOCKS()") if connection.adapter_name.match?(/mysql/i) }
+  end
+
   test "Connected apps says nothing of the kind for an allowlisted host" do
     sign_in_as :david
     untenanted { post oauth_authorization_path, params: authorization }
@@ -304,6 +330,18 @@ class OauthClientMetadataDocumentsTest < ActionDispatch::IntegrationTest
         scope: "read write",
         state: "xyz"
       }
+    end
+
+    def lease_slot_free?(index, directory)
+      Oauth::Client.with_connection do |connection|
+        if connection.adapter_name.match?(/mysql/i)
+          connection.query_value("SELECT IS_FREE_LOCK(#{connection.quote(Oauth::ClientMetadata::FetchLease::NamedLocks.lock_name(connection, index))})") == 1
+        else
+          File.open(File.join(directory, "slot-#{index}.lock"), File::RDWR | File::CREAT) do |file|
+            file.flock(File::LOCK_EX | File::LOCK_NB).tap { file.flock(File::LOCK_UN) }
+          end
+        end
+      end
     end
 
     def open_authorization

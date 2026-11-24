@@ -446,11 +446,11 @@ ActiveRecord::Schema[8.2].define(version: 2026_11_24_120000) do
   end
 
   create_table "oauth_cimd_domain_quotas", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.string "registrable_domain", null: false
-    t.datetime "window_started_at", null: false
-    t.integer "created_count", default: 0, null: false
     t.datetime "created_at", null: false
+    t.integer "created_count", default: 0, null: false
+    t.string "registrable_domain", null: false
     t.datetime "updated_at", null: false
+    t.datetime "window_started_at", null: false
     t.index ["registrable_domain"], name: "index_oauth_cimd_domain_quotas_on_registrable_domain", unique: true
   end
 
