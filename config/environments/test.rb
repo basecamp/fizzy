@@ -71,7 +71,7 @@ Rails.application.configure do
   # OAuth is lit in tests; see OauthAvailabilityTestHelper to go dark.
   config.x.oauth.acceptance_enabled = true
   config.x.oauth.cimd_enabled = true
-  config.x.oauth.cimd_allowed_hosts = %w[ mcp.claude.ai claude.ai claude.com chatgpt.com www.perplexity.ai ]
+  config.x.oauth.cimd_allowed_hosts = %w[ mcp.claude.ai claude.ai claude.com chatgpt.com www.perplexity.ai platform.muse.ai ]
 
   # Enable multi-tenant mode for tests
   config.x.multi_tenant.enabled = true

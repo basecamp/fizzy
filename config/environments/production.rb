@@ -142,7 +142,7 @@ Rails.application.configure do
   # Client ID Metadata Documents are off unless OAUTH_CIMD_ENABLED is "true",
   # and then fetched only from the hosts OAUTH_CIMD_ALLOWED_HOSTS names
   # (space-separated, exact hosts; e.g. "mcp.claude.ai claude.ai claude.com
-  # chatgpt.com www.perplexity.ai"). See Oauth::ClientMetadata.
+  # chatgpt.com www.perplexity.ai platform.muse.ai"). See Oauth::ClientMetadata.
   config.x.oauth.cimd_enabled = ENV["OAUTH_CIMD_ENABLED"] == "true"
   config.x.oauth.cimd_allowed_hosts = ENV.fetch("OAUTH_CIMD_ALLOWED_HOSTS", "").split
 

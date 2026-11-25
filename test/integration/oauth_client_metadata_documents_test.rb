@@ -98,6 +98,39 @@ class OauthClientMetadataDocumentsTest < ActionDispatch::IntegrationTest
     assert_equal "read write", response.parsed_body["scope"]
   end
 
+  test "Muse connects with its published document and callback, as a recognized app" do
+    url = "https://platform.muse.ai/oauth/client-metadata.json"
+    callback = "https://platform.muse.ai/oauth/credential-test/callback"
+    stub_request(:get, url).to_return \
+      status: 200, body: file_fixture("oauth/muse_client_metadata.json").read, headers: { content_type: "application/json" }
+    params = authorization.merge(client_id: url, redirect_uri: callback)
+    sign_in_as :david
+
+    untenanted { get new_oauth_authorization_path, params: params }
+
+    assert_response :success
+    assert_select ".oauth-client__name bdi", text: "Muse"
+    assert_select ".oauth-client__byline", text: "Name set by the app at platform.muse.ai"
+    assert_select ".oauth-client__warning", count: 0
+
+    untenanted { post oauth_authorization_path, params: params }
+
+    assert_response :redirect
+    assert response.location.start_with?("#{callback}?")
+    code = Rack::Utils.parse_query(URI.parse(response.location).query)["code"]
+    assert Oauth::Client.find_presented(url).metadata_document?
+    assert_not Oauth::Client.find_presented(url).open_tier?
+
+    untenanted do
+      post oauth_token_path, params: {
+        grant_type: "authorization_code", client_id: url, code: code, redirect_uri: callback, code_verifier: CODE_VERIFIER
+      }, as: :json
+    end
+
+    assert_response :success
+    assert_equal "read write", response.parsed_body["scope"]
+  end
+
   test "switching who is signed in registers nothing" do
     sign_in_as :david
 
