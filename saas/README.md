@@ -188,6 +188,47 @@ To lift maintenance mode:
 knife ssh 'hostname:fizzy-lb-*' 'sudo docker exec fizzy-load-balancer kamal-proxy resume fizzy'
 ```
 
+## Override record: CIMD open-tier light-up (2026-11-24)
+
+**Status:** `OAUTH_CIMD_OPEN_REGISTRATION: "true"` in `saas/config/deploy.production.yml` (fizzy#3336), on the dark code from fizzy#3335. Production is the only destination that sets it. Beta and staging don't.
+
+**The decision.** Jeremy Daer, operator, decided on 2026-11-24, in the session that directed this work:
+
+- Drop the per-domain registration quota table ("Drop table; sweep + blocklist").
+- Switch the open tier on in production under a dated override record in the same form as Basecamp's open-tier record.
+- Rely on the guards below in place of the quota.
+
+**Why there's no domain quota.** Basecamp caps new open-tier clients at 25 per registrable domain per 30 days. Three things argued against porting that cap:
+
+- **It doesn't stop a determined attacker.** The registrable domain comes from the Public Suffix List with its private section included. So every free project under a hosting suffix (`vercel.app`, `pages.dev`, `netlify.app`, `github.io`) counts as its own domain, with its own allowance.
+- **Its refusals were invisible.** A refusal answered as an unknown client and left no trace. A legitimate multi-tenant host's 26th app would fail without anyone noticing.
+- **It needed a new table and a migration.** What bounds rows without one is a short sweep and a block list.
+
+**What bounds the open tier instead** (fizzy#3335):
+
+- **FetchLease.** At most 6 fetches in flight per database server, held as MySQL named locks. It answers a retryable 503 when the slots are full or the lock fails.
+- **Fetch budgets.** 60 attempts an hour per registrable domain, site-wide. Per person, 6 a minute per URL. They're counted in `Rails.cache` and fail open.
+- **The sweep.** Every hour, `Oauth::Client.cleanup` deletes open-tier metadata document clients that hold no access token and haven't been touched in 24 hours. The next authorization provisions the row again from its document.
+- **The block list.** `OAUTH_CIMD_BLOCKED_DOMAINS` covers a domain and every host under it, in either tier. It refuses before any fetch, including clients already provisioned, and answers as an unknown client.
+- **The per-person cap.** 20 open-tier apps with live grants per identity. Reconnecting an app the person already has is never refused. No production identity holds more than a tenth of the cap.
+- **Refusal telemetry.** `oauth_cimd_refusals_total{reason,tier}` counts `blocked_domain`, `budget`, `grant_cap`, `lease` and `bulkhead`. Each refusal is also an `oauth.client_metadata.refused` audit event naming its registrable domain.
+- **The consent warning.** Consent and Connected apps say we don't know the developer.
+
+**What this record accepts without checking it.** None of these ran for Fizzy before this deploy:
+
+1. **Puma headroom.** No per-site read was taken of busy threads against workers. The open tier can add up to 6 concurrent fetches per database server it locks on (see 4). Each fetch holds a Puma thread for at most the fetcher's 3-second deadline.
+2. **Recovery of the lease backend across a failover.** For Fizzy that's the MySQL primary rather than a Redis Sentinel, and the lease was never exercised across a promotion. It fails closed: a lost lock connection refuses the fetch with a 503 and never allows an unbounded one.
+3. **One shared lease pool.** Lock names carry the environment and database, but whether pools are isolated was never checked against the live servers.
+4. **The lease against a replica.** `GET_LOCK` is a `SELECT`, so a consent page rendered on a replica takes its lock there, and the authorization POST takes its lock on the primary. That makes the bound 6 per database server rather than 6 per install. It's covered by tests on a single MySQL server and was never run against a real replica.
+
+**Still open.** Rows that people authorize are permanent, as in every tier. The cap bounds them per account, not per domain, and Fizzy accounts are cheap to make. There's no alert on the open-tier creation rate yet. For now, detection means watching `oauth_cimd_refusals_total` and `oauth_cimd_clients_created_total{tier="open"}`.
+
+**Rollback.**
+
+- **To stop one domain:** name it in `OAUTH_CIMD_BLOCKED_DOMAINS` in `saas/config/deploy.production.yml`, then deploy.
+- **To stop the whole tier:** delete `OAUTH_CIMD_OPEN_REGISTRATION` there, then deploy. Clients that aren't allowlisted are refused, including ones already provisioned. Grants already issued keep working.
+- **For a fetch or SSRF incident:** unset `OAUTH_CIMD_ENABLED`.
+
 ## License
 
 fizzy-saas is released under the [O'Saasy License](LICENSE.md).
