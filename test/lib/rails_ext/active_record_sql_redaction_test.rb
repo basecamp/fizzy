@@ -125,9 +125,9 @@ class ActiveRecordSqlRedactionTest < ActiveSupport::TestCase
   end
 
   test "statements against other tables keep their literals" do
-    log, _ = capture { Identity.find_by(email_address: "made-up@example.com") }
+    log, _ = capture { Card.where("status = 'made-up-status'").first } # a quoted literal on either adapter
 
-    assert_includes log, "made-up@example.com"
+    assert_includes log, "'made-up-status'"
   end
 
   test "the structured SQL event carries the redacted statement and binds" do

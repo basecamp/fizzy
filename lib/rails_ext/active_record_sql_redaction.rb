@@ -8,11 +8,15 @@
 # For the tables listed here every literal and every bind is secret enough to drop:
 #
 #   account_join_codes.code         joins whoever holds it to the account
+#   filters.fields                  a saved filter's search terms
 #   identity_access_tokens.token    API bearer token
 #   identity_transfers.token        signs its holder in as the identity
 #   magic_links.code                signs its holder in as the identity
 #   oauth_retired_refresh_tokens    successor_payload holds a live successor token pair, encrypted
 #   webhooks.signing_secret, .url   signs payloads; a chat webhook URL is itself a credential
+#   search_records                  the search index: every search's words, and the text of what it indexes
+#                                   (on MySQL its 16 shards, search_records_0 to _15; on SQLite its
+#                                   search_records_fts index too)
 #
 # Filtering by table rather than column keeps INSERT ... VALUES, multi-row inserts and IN lists covered
 # without parsing column positions. The statement sent to the database is never changed: only what is
@@ -22,11 +26,14 @@
 # test/lib/rails_ext/active_record_sql_redaction_test.rb until its table is listed here or the column is
 # declared not secret there. A credential in a column named otherwise has to be listed by hand.
 module ActiveRecordSqlRedaction
-  TABLES = %w[ account_join_codes identity_access_tokens identity_transfers magic_links oauth_retired_refresh_tokens webhooks ].freeze
+  TABLES = %w[ account_join_codes filters identity_access_tokens identity_transfers magic_links oauth_retired_refresh_tokens search_records webhooks ].freeze
+
+  # A table's shards and companion index: search_records_3, search_records_fts.
+  SUFFIX = /(?:_(?:\d+|fts))?/
 
   # Names a table however the statement spells it: `magic_links` on MySQL, "magic_links" on SQLite, or bare
-  # in hand-written SQL, in any case. Over-matching only filters more.
-  TABLE = /\b(?:#{TABLES.map { |table| Regexp.escape(table) }.join("|")})\b/i
+  # in hand-written SQL, in any case, with any SUFFIX. Over-matching only filters more.
+  TABLE = /\b(?:#{TABLES.map { |table| Regexp.escape(table) }.join("|")})#{SUFFIX}\b/i
 
   # Everything from the first quote on, so every literal goes however the adapter escapes quotes inside
   # one (MySQL with a backslash, SQLite by doubling, where a value ending in a backslash would make a
@@ -94,7 +101,7 @@ module ActiveRecordSqlRedaction
       end
 
       def reference_to(table)
-        name = Regexp.escape(table)
+        name = "#{Regexp.escape(table)}#{SUFFIX.source}"
         /`#{name}`|"#{name}"|\b#{name}\.(?:PRIMARY\b|index_)|\bindex_#{name}_/
       end
   end
