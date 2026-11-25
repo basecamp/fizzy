@@ -1,6 +1,7 @@
 brew bundle --file=$APP/Brewfile
 bundle config set --local auto_install true
 bundle install
+npm ci
 rails db:reset
 rails log:clear tmp:clear
 exit: 0

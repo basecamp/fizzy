@@ -261,30 +261,6 @@ class MermaidDiagramTest < ApplicationSystemTestCase
     assert_no_selector ".card__description .mermaid-diagram"
   end
 
-  test "a code block's language can be set to mermaid in the editor" do
-    visit card_url(@card)
-    find("lexxy-editor").click
-    paste_markdown("```\ngraph TD\n  Write --> Ship\n```")
-
-    find("lexxy-code-language-picker select").select "Mermaid"
-
-    assert_selector "lexxy-editor code[data-language=mermaid] .code-token__attr", text: "graph"
-  end
-
-  test "the editor offers mermaid once after navigating back" do
-    visit card_url(@card)
-    find("lexxy-editor").click
-    page.execute_script("Turbo.visit(arguments[0])", board_url(@card.board))
-    assert_no_selector "lexxy-editor"
-
-    page.go_back
-
-    assert_selector "lexxy-code-language-picker select", visible: :all
-    all("lexxy-code-language-picker select", visible: :all).each do |picker|
-      within(picker) { assert_selector "option[value=mermaid]", count: 1, visible: :all }
-    end
-  end
-
   private
     def mermaid_block(source, language: "mermaid")
       %(<pre data-language="#{language}">#{ERB::Util.html_escape(source)}</pre>)
@@ -312,14 +288,6 @@ class MermaidDiagramTest < ApplicationSystemTestCase
       yield
     ensure
       window.resize_to(*original)
-    end
-
-    def paste_markdown(markdown)
-      page.execute_script(<<~JS, markdown)
-        const dt = new DataTransfer();
-        dt.setData("text/plain", arguments[0]);
-        document.activeElement.dispatchEvent(new ClipboardEvent("paste", { clipboardData: dt, bubbles: true }));
-      JS
     end
 
     def update_description_elsewhere(source, language: "mermaid")

@@ -1,6 +1,7 @@
 brew bundle --file=$APP/Brewfile
 bundle config set --local auto_install true
 bundle install
+npm ci
 docker-dev/setup mysql84
 bundle install
 rails db:prepare

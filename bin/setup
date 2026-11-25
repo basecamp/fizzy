@@ -257,6 +257,7 @@ echo
 
 bundle config set --local auto_install true
 step "Installing RubyGems" bundle install
+step "Installing npm packages" npm ci
 
 if [ -n "$SAAS" ]; then
   source "$app_root/saas/bin/setup"

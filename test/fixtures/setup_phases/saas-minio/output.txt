@@ -21,6 +21,9 @@ git config core.hooksPath .githooks
 ▸ Installing RubyGems
 bundle install
 
+▸ Installing npm packages
+npm ci
+
 ▸ Trusting SaaS mise overlay
 mise trust --yes $APP/mise.saas.toml
 mise trusted $APP
