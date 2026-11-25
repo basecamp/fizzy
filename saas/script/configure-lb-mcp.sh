@@ -2,13 +2,11 @@
 # Route the hosted MCP's host name from a destination's load balancers to the
 # servers that run it.
 #
-#   saas/script/configure-lb-mcp.sh staging|production|beta1 [--accessory] [--without <host>]
+#   saas/script/configure-lb-mcp.sh staging|production|beta1 [--without <host>]
 #
 # Production and staging route to basecamp/fizzy-mcp-server's own Kamal app, on
-# its fizzy-mcp hosts (that repo's docs/operations/dedicated-deploy.md). Running
-# this for one of them is the cutover. --accessory routes to the fizzy_mcp
-# accessory on the iad web hosts instead (saas/config/deploy.yml), which is the
-# rollback until the accessory is removed. beta1 has only the accessory.
+# its fizzy-mcp hosts (that repo's docs/operations/dedicated-deploy.md). beta1
+# routes to the fizzy_mcp accessory on its web host (saas/config/deploy.yml).
 #
 # --without routes to every target but one, so saas/bin/mcp-rolling-reboot can
 # drain a host before rebooting its accessory, then rerun this without it to
@@ -40,14 +38,13 @@
 # DNS for the name reaches these balancers.
 set -euo pipefail
 
-usage="usage: saas/script/configure-lb-mcp.sh staging|production|beta1 [--accessory] [--without <host>]"
+usage="usage: saas/script/configure-lb-mcp.sh staging|production|beta1 [--without <host>]"
 destination=${1:?$usage}
 shift
 accessory=false
 without=""
 while (( $# > 0 )); do
   case "$1" in
-    --accessory) accessory=true; shift ;;
     --without) without=${2:?--without needs a host}; shift 2 ;;
     *) echo "unknown argument: $1" >&2; echo "$usage" >&2; exit 1 ;;
   esac
@@ -63,14 +60,10 @@ case "$destination" in
       fizzy-lb-401.df-ams-int.37signals.com fizzy-lb-402.df-ams-int.37signals.com
       fizzy-lb-501.sjc-int.37signals.com fizzy-lb-502.sjc-int.37signals.com
     )
-    if $accessory; then
-      targets=(fizzy-app-101.df-iad-int.37signals.com fizzy-app-102.df-iad-int.37signals.com)
-    else
-      targets=(
-        fizzy-mcp-101.df-iad-int.37signals.com fizzy-mcp-102.df-iad-int.37signals.com
-        fizzy-mcp-01.sc-chi-int.37signals.com fizzy-mcp-02.sc-chi-int.37signals.com
-      )
-    fi
+    targets=(
+      fizzy-mcp-101.df-iad-int.37signals.com fizzy-mcp-102.df-iad-int.37signals.com
+      fizzy-mcp-01.sc-chi-int.37signals.com fizzy-mcp-02.sc-chi-int.37signals.com
+    )
     ;;
   staging)
     host=mcp.fizzy-staging.com
@@ -79,11 +72,7 @@ case "$destination" in
       fizzy-staging-lb-01.sc-chi-int.37signals.com fizzy-staging-lb-101.df-iad-int.37signals.com
       fizzy-staging-lb-401.df-ams-int.37signals.com fizzy-staging-lb-501.sjc-int.37signals.com
     )
-    if $accessory; then
-      targets=(fizzy-staging-app-101.df-iad-int.37signals.com fizzy-staging-app-102.df-iad-int.37signals.com)
-    else
-      targets=(fizzy-staging-mcp-101.df-iad-int.37signals.com fizzy-staging-mcp-01.sc-chi-int.37signals.com)
-    fi
+    targets=(fizzy-staging-mcp-101.df-iad-int.37signals.com fizzy-staging-mcp-01.sc-chi-int.37signals.com)
     ;;
   beta1)
     host=beta1-mcp.fizzy-beta.com
