@@ -1,6 +1,4 @@
 class Oauth::AuthorizationsController < Oauth::BaseController
-  FORM_ACTION_ORIGIN = %r{\Ahttps?://[a-z0-9.-]+(:\d+)?\z}i
-  FORM_ACTION_SCHEME = /\A[a-z][a-z0-9+.-]*\z/i
   STATE_MAXIMUM_LENGTH = 2048
   # An S256 challenge is the unpadded base64url SHA-256 of the verifier: 43 characters (RFC 7636 §4.2).
   S256_CODE_CHALLENGE = /\A[A-Za-z0-9_-]{43}\z/
@@ -14,11 +12,13 @@ class Oauth::AuthorizationsController < Oauth::BaseController
   # menu, since authorizing happens outside any one account.
   layout "public"
 
-  # Browsers apply form-action to every hop of a form submission, redirects
-  # included, so the app-wide form-action 'self' would block the consent POST's
-  # redirect to the client. Allow just this request's validated redirect target.
+  # No form-action here. Browsers apply it to every hop of a form submission,
+  # redirects included, and the consent POST redirects to the client, whose
+  # redirect target may itself redirect anywhere: OpenAI's connector redirect
+  # on chatgpt.com sends a plugin dashboard's connect on to platform.openai.com.
+  # No list of origins can name every legitimate client's next hop.
   content_security_policy if: -> { request.content_security_policy } do |policy|
-    policy.form_action :self, -> { validated_redirect_form_action_source }
+    policy.form_action nil
   end
 
   # Gated ahead of sign-in so a dark server never asks anyone to sign in for
@@ -349,25 +349,6 @@ class Oauth::AuthorizationsController < Oauth::BaseController
         iss: oauth_issuer
     end
 
-    # A CSP source naming the validated redirect origin, port included, since a
-    # loopback client may present any port (RFC 8252 §7.3). CSP host-sources
-    # can't express IPv6 literals, and a registered native redirect has no
-    # host, so those get their bare scheme. Nothing outside these shapes is
-    # written into the header.
-    def validated_redirect_form_action_source
-      if @client&.allows_redirect?(params[:redirect_uri])
-        uri = URI.parse(params[:redirect_uri])
-        origin = "#{uri.scheme}://#{uri.host}#{":#{uri.port}" unless uri.port == uri.default_port}"
-
-        if origin.match?(FORM_ACTION_ORIGIN)
-          origin
-        elsif uri.scheme.to_s.match?(FORM_ACTION_SCHEME)
-          "#{uri.scheme}:"
-        end
-      end
-    rescue URI::InvalidURIError
-      nil
-    end
 
     # client_id and redirect_uri are refused before the client is looked up,
     # and shown here, never redirected: a malformed redirect_uri is exactly the
