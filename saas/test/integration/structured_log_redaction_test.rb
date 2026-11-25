@@ -162,14 +162,19 @@ class Fizzy::Saas::StructuredLogRedactionTest < ActionDispatch::IntegrationTest
   end
 
   test "a search's words are filtered from the structured request line's URL, query and referrer" do
-    lines = structured_log_lines do
-      get search_path(q: "allotment", script_name: accounts("37s").slug), headers: { "Referer" => "https://app.fizzy.do#{accounts("37s").slug}/search?q=allotment" }
-    end
-    line = JSON.parse(lines.find { |line| line.include?("SearchesController") })
+    sign_in_as :kevin
+    slug = accounts("37s").slug
 
-    assert_equal "q=[FILTERED]", line.dig("url", "query")
-    assert line.dig("url", "full").end_with?("/search?q=[FILTERED]"), line.dig("url", "full")
-    assert line.dig("http", "request", "referrer").end_with?("/search?q=[FILTERED]"), line.dig("http", "request", "referrer")
+    lines = structured_log_lines do
+      get search_path(q: "allotment", script_name: slug), headers: { "Referer" => "https://app.fizzy.do#{slug}/search?q=allotment" }
+    end
+
+    assert_response :success
+    line = JSON.parse(lines.find { |line| line.include?("SearchesController") })
+    filtered = { "q" => "[FILTERED]" }
+    assert_equal filtered, Rack::Utils.parse_query(line.dig("url", "query"))
+    assert_equal filtered, Rack::Utils.parse_query(URI(line.dig("url", "full")).query)
+    assert_equal filtered, Rack::Utils.parse_query(URI(line.dig("http", "request", "referrer")).query)
     assert_no_secret "allotment", lines
   end
 
