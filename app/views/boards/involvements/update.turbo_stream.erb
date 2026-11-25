@@ -1,0 +1,4 @@
+<%# The button is rendered twice on the board page (cards container and Maybe? column), so target by selector rather than by id %>
+<%= turbo_stream.replace_all "##{dom_id(@board, :involvement_button)}" do %>
+  <%= access_involvement_advance_button(@board, Current.user, show_watchers: params[:show_watchers] == "true", icon_only: params[:icon_only] == "true") %>
+<% end %>
