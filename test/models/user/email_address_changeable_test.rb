@@ -16,6 +16,21 @@ class User::EmailAddressChangeableTest < ActiveSupport::TestCase
     end
   end
 
+  test "send_email_address_change_confirmation keeps the token out of the job log" do
+    log = capture_job_log do
+      perform_enqueued_jobs only: ActionMailer::MailDeliveryJob do
+        @user.send_email_address_change_confirmation(@new_email)
+      end
+    end
+
+    token = CGI.unescape(ActionMailer::Base.deliveries.last.body.decoded[%r{/email_addresses/([^/"]+)/confirmation}, 1])
+
+    assert_match "Enqueued ActionMailer::MailDeliveryJob", log
+    assert_match "Performed ActionMailer::MailDeliveryJob", log
+    assert_no_match token, log
+    assert @user.change_email_address_using_token(token)
+  end
+
   test "change_email_address" do
     old_identity = @identity
     new_identity = identities(:mike)
@@ -54,4 +69,14 @@ class User::EmailAddressChangeableTest < ActiveSupport::TestCase
     assert_not @user.change_email_address_using_token(token)
     assert_equal old_email, @user.reload.identity.email_address
   end
+
+  private
+    def capture_job_log
+      log = StringIO.new
+      logger_was, ActiveJob::Base.logger = ActiveJob::Base.logger, ActiveSupport::TaggedLogging.new(ActiveSupport::Logger.new(log))
+      yield
+      log.string
+    ensure
+      ActiveJob::Base.logger = logger_was
+    end
 end
