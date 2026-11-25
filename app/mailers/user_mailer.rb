@@ -1,7 +1,7 @@
 class UserMailer < ApplicationMailer
-  def email_change_confirmation(email_address:, token:, user:)
-    @token = token
+  def email_change_confirmation(user:, from:, to:)
     @user = user
-    mail to: email_address, subject: "Confirm your new email address"
+    @token = user.email_address_change_token(from: from, to: to)
+    mail to: to, subject: "Confirm your new email address"
   end
 end
