@@ -159,6 +159,9 @@ accessories:
         # of it), so Fizzy still answers in its https URLs; the URLs above are unchanged and only the
         # connection moves (fizzy-mcp-server#19, which the pinned image must carry).
         FIZZY_MCP_UPSTREAM: "http://host.docker.internal"
+        # Muse's domain verification token, served at /.well-known/muse-challenge/<token>. Public by
+        # design. Muse issued it on 2026-11-24, and it expires on 2026-12-01.
+        FIZZY_MCP_MUSE_CHALLENGE: "5b3e3c1d908291909e7a79842cb654c85bfb01a108594c7383376581e25469b2"
       secret:
         - FIZZY_MCP_EXCHANGE_CLIENT_SECRET
     options:
