@@ -102,21 +102,3 @@ accessories:
       mount: type=volume,src=certificates,dst=/certificates,volume-driver=local,volume-opt=type=nfs,volume-opt=device=:/fizzy-staging-certificates,"volume-opt=o=addr=purestorage.sc-chi-int.37signals.com,nfsvers=3,rw,noatime,nconnect=8,soft,timeo=30,retrans=2"
     volumes:
       - load-balancer:/home/kamal-proxy/.config/kamal-proxy
-
-  # Hosted Fizzy MCP (see saas/config/deploy.yml), on iad's web hosts, as in production.
-  # Its exchange client, once lit, is fizzy-mcp-server-staging (Oauth::FirstPartyClients).
-  fizzy_mcp:
-    hosts:
-      - fizzy-staging-app-101.df-iad-int.37signals.com
-      - fizzy-staging-app-102.df-iad-int.37signals.com
-    proxy:
-      host: mcp.fizzy-staging.com
-    env:
-      clear:
-        FIZZY_MCP_RESOURCE_URL: "https://mcp.fizzy-staging.com/mcp"
-        FIZZY_MCP_AUTHORIZATION_SERVER: "https://app.fizzy-staging.com"
-        FIZZY_MCP_ALLOWED_ORIGINS: "https://app.fizzy-staging.com"
-    # TODO: before lighting the exchange, send app.fizzy-staging.com to iad's staging load balancer.
-    # options:
-    #   add-host:
-    #     - "app.fizzy-staging.com:<fizzy-staging-lb-101 address>"
