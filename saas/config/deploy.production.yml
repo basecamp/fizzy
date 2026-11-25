@@ -41,6 +41,19 @@ env:
     # the hosted MCP server, whose delegation exchange runs as the fizzy-mcp-server client.
     OAUTH_ACCEPTANCE_ENABLED: "true"
     OAUTH_CIMD_ENABLED: "true"
+    # The open tier of Client ID Metadata Documents (Oauth::ClientMetadata), lit 2026-11-24 under the override record
+    # in saas/README.md: any https host that publishes a valid document may request consent, with a warning that we
+    # don't know the app. Bounded by a fetch lease (FetchLease), a site-wide fetch budget per registrable domain, an
+    # hourly sweep of clients unused for 24 hours, a cap of 20 open-tier apps per person, and the block list below.
+    # Every refusal is counted in oauth_cimd_refusals_total{reason,tier}. Incident scope: unsetting this refuses new
+    # authorizations for hosts that aren't allowlisted, clients already provisioned from one included, while grants
+    # they already hold keep working. It's no knob for a fetch or SSRF incident, since allowlisted hosts keep
+    # fetching: that's OAUTH_CIMD_ENABLED.
+    OAUTH_CIMD_OPEN_REGISTRATION: "true"
+    # Domains whose metadata documents are refused before any fetch, in either tier, clients already provisioned
+    # included: space-separated, empty unless an incident names one. Grants already issued keep working; revoke
+    # those separately.
+    OAUTH_CIMD_BLOCKED_DOMAINS: ""
     FIZZY_OAUTH_MCP_RESOURCES: "https://mcp.fizzy.do/mcp"
   secret:
     - RAILS_MASTER_KEY
