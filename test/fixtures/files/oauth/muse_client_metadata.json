@@ -1,0 +1,17 @@
+{
+  "client_id": "https://platform.muse.ai/oauth/client-metadata.json",
+  "client_name": "Muse",
+  "client_uri": "https://muse.ai/",
+  "logo_uri": "https://muse.ai/images/pwa_icons/any/512.png",
+  "redirect_uris": [
+    "https://platform.muse.ai/oauth/credential-test/callback"
+  ],
+  "grant_types": [
+    "authorization_code",
+    "refresh_token"
+  ],
+  "response_types": [
+    "code"
+  ],
+  "token_endpoint_auth_method": "none"
+}

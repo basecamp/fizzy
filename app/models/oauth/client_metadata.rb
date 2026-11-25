@@ -2,12 +2,12 @@
 # a client identified by the https URL of a metadata document it hosts. Fizzy
 # fetches the URL, validates the JSON, and provisions an Oauth::Client row from
 # it, with no registration request and one stable identity per app. Claude,
-# ChatGPT and Perplexity connectors identify this way.
+# ChatGPT, Perplexity and Muse connectors identify this way.
 #
 # Ported from bc3's Oauth::ClientMetadata, with both its tiers. A document is
 # fetched only from a host named exactly in config.x.oauth.cimd_allowed_hosts
 # (OAUTH_CIMD_ALLOWED_HOSTS, e.g. "mcp.claude.ai claude.ai claude.com
-# chatgpt.com www.perplexity.ai"). Every other URL-shaped client_id is an unknown client, and is
+# chatgpt.com www.perplexity.ai platform.muse.ai"). Every other URL-shaped client_id is an unknown client, and is
 # never fetched, unless open registration is on
 # (Oauth::Availability.cimd_open_registration_enabled?). Then any other https
 # host is the open tier: its consent screen and Connected Apps entry say we

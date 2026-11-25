@@ -105,7 +105,7 @@ Rails.application.configure do
     config.x.oauth.connected_apps_preview = Oauth::Availability.connected_apps_preview_from(ENV)
   end
   config.x.oauth.cimd_enabled = true
-  config.x.oauth.cimd_allowed_hosts = %w[ mcp.claude.ai claude.ai claude.com chatgpt.com www.perplexity.ai ]
+  config.x.oauth.cimd_allowed_hosts = %w[ mcp.claude.ai claude.ai claude.com chatgpt.com www.perplexity.ai platform.muse.ai ]
 
   # The open tier of metadata documents is on in development, and with it the
   # fetch lease (Oauth::ClientMetadata::FetchLease).

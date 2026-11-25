@@ -8,6 +8,7 @@ class OauthCimdAllowedHostsTest < ActiveSupport::TestCase
   test "production recognizes the metadata document hosts the tests do" do
     assert_equal Rails.application.config.x.oauth.cimd_allowed_hosts, production_hosts
     assert_includes production_hosts, "www.perplexity.ai"
+    assert_includes production_hosts, "platform.muse.ai"
   end
 
   private
