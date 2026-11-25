@@ -33,8 +33,8 @@ module Fizzy
     # What people write and search for, as bc3 filters it, so a request's log line carries none of it.
     # These are the fields the API and the MCP server send it in:
     #
-    #   q              search words (search_cards), matched whole at any depth, so a key that merely
-    #                  contains a q stays visible
+    #   q              search words (search_cards), matched whole at any depth, as a parsed key (search.q)
+    #                  or a query's name as sent (search[q]), so a key that merely contains a q stays visible
     #   terms          list_cards' search words
     #   title          a card's title, and a tag's (tag_title)
     #   description    a card's description, and a board's public_description
@@ -43,7 +43,7 @@ module Fizzy
     #   email_address  an email address change
     #   timezone_name  a person's time zone
     config.filter_parameters += [
-      /(?:\A|\.)q\z/, :terms, :title, :description, :body, :content, :name, :email_address, :timezone_name
+      /(?:\A|[.\[])q\]?\z/, :terms, :title, :description, :body, :content, :name, :email_address, :timezone_name
     ]
 
     # Include the `lib` directory in autoload paths. Use the `ignore:` option

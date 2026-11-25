@@ -23,6 +23,25 @@ class ContentParameterLoggingTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "the structured request line carries the search's URL, query and referrer filtered" do
+    skip "structured logging is SaaS's" unless defined?(RailsStructuredLogging)
+
+    line = capturing_structured_log do
+      get search_path(q: "allotment", script_name: account_path), headers: { "Referer" => "https://app.fizzy.do#{account_path}/search?q=allotment" }
+    end
+
+    assert_response :success
+    assert_equal "q=%5BFILTERED%5D", line.dig("url", "query")
+    assert_no_match(/allot/i, line.to_json)
+  end
+
+  test "a q nested in another parameter is filtered from the Started line too" do
+    log = capturing_log { get search_path(script_name: account_path), params: { search: { q: "allotment" } } }
+
+    assert_match %r{Started GET "/\d+/search\?search%5Bq%5D=\[FILTERED\]"|Started GET "/\d+/search\?search\[q\]=\[FILTERED\]"}, log
+    assert_no_match(/allot/i, log)
+  end
+
   test "list_cards' terms are filtered from its log, its SQL included" do
     log = capturing_log { get cards_path(script_name: account_path, format: :json), params: { terms: [ "allotment" ] } }
 
@@ -88,16 +107,24 @@ class ContentParameterLoggingTest < ActionDispatch::IntegrationTest
       "/#{@account.external_account_id}"
     end
 
-    # Everything the request logs at debug, SQL included, as the structured request line records it.
+    # Everything the request logs at debug, SQL included, as the structured request line records it. The sink
+    # is at debug, and a broadcast logs at its lowest sink's level, so the other sinks keep theirs.
     def capturing_log
       log = StringIO.new
-      sink = ActiveSupport::Logger.new(log)
+      sink = ActiveSupport::Logger.new(log, level: :debug)
       Rails.logger.broadcast_to(sink)
-      level, Rails.logger.level = Rails.logger.level, :debug
       yield
       log.string
     ensure
-      Rails.logger.level = level
       Rails.logger.stop_broadcasting_to(sink)
+    end
+
+    def capturing_structured_log(&block)
+      log = StringIO.new
+      RailsStructuredLogging::Subscriber.subscribe_to "process_action.action_controller",
+        logger: ActiveSupport::Logger.new(log).tap { it.formatter = ->(*, message) { "#{message}\n" } },
+        serializer: RailsStructuredLogging::Serializers::Elastic::RequestSerializer, &block
+
+      JSON.parse(log.string.lines.last)
     end
 end
