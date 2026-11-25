@@ -161,6 +161,29 @@ class Fizzy::Saas::StructuredLogRedactionTest < ActionDispatch::IntegrationTest
     assert_equal "/1234567/join/[FILTERED]", event.transaction
   end
 
+  test "a search's words are filtered from the structured request line's URL, query and referrer" do
+    lines = structured_log_lines do
+      get search_path(q: "allotment", script_name: accounts("37s").slug), headers: { "Referer" => "https://app.fizzy.do#{accounts("37s").slug}/search?q=allotment" }
+    end
+    line = JSON.parse(lines.find { |line| line.include?("SearchesController") })
+
+    assert_equal "q=[FILTERED]", line.dig("url", "query")
+    assert line.dig("url", "full").end_with?("/search?q=[FILTERED]"), line.dig("url", "full")
+    assert line.dig("http", "request", "referrer").end_with?("/search?q=[FILTERED]"), line.dig("http", "request", "referrer")
+    assert_no_secret "allotment", lines
+  end
+
+  test "Sentry reports a search's Referer without its words" do
+    config = Sentry::Configuration.new
+    Fizzy::Saas::SentrySqlRedaction.install(config)
+
+    event = Sentry::ErrorEvent.new(configuration: config)
+    event.rack_env = Rack::MockRequest.env_for("https://app.fizzy.do/1234567/cards/1", "HTTP_REFERER" => "https://app.fizzy.do/1234567/search?q=allotment")
+    event = config.before_send.call(event, {})
+
+    assert_equal "https://app.fizzy.do/1234567/search?q=[FILTERED]", event.request.headers["Referer"]
+  end
+
   test "opening a join link logs no code in its path" do
     code = accounts("37s").join_code.code
 

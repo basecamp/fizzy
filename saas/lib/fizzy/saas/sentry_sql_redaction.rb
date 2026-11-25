@@ -53,7 +53,7 @@ module Fizzy
         def filter_request_paths(event)
           if event.respond_to?(:request) && event.request
             event.request.url = RailsStructuredLogging.path_filter.filter_url(event.request.url) if event.request.url
-            event.request.headers["Referer"] = RailsStructuredLogging.path_filter.filter_url(event.request.headers["Referer"]) if event.request.headers&.[]("Referer")
+            event.request.headers["Referer"] = RailsStructuredLogging.path_filter.filter_url(FilteredQuery.filter_url(event.request.headers["Referer"])) if event.request.headers&.[]("Referer")
           end
 
           if event.respond_to?(:transaction) && event.transaction.to_s.start_with?("/")

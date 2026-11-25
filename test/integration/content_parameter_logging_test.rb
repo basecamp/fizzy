@@ -23,22 +23,27 @@ class ContentParameterLoggingTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "the structured request line carries the search's URL, query and referrer filtered" do
-    skip "structured logging is SaaS's" unless defined?(RailsStructuredLogging)
-
-    line = capturing_structured_log do
-      get search_path(q: "allotment", script_name: account_path), headers: { "Referer" => "https://app.fizzy.do#{account_path}/search?q=allotment" }
-    end
-
-    assert_response :success
-    assert_equal "q=%5BFILTERED%5D", line.dig("url", "query")
-    assert_no_match(/allot/i, line.to_json)
-  end
-
   test "a q nested in another parameter is filtered from the Started line too" do
     log = capturing_log { get search_path(script_name: account_path), params: { search: { q: "allotment" } } }
 
     assert_match %r{Started GET "/\d+/search\?search%5Bq%5D=\[FILTERED\]"|Started GET "/\d+/search\?search\[q\]=\[FILTERED\]"}, log
+    assert_no_match(/allot/i, log)
+  end
+
+  test "a search with a semicolon in it is filtered whole from the Started line" do
+    log = capturing_log { get "#{account_path}/search?q=allotment;tiller" }
+
+    assert_response :success
+    assert_match %r{Started GET "/\d+/search\?q=\[FILTERED\]"}, log
+    assert_no_match(/tiller|allot/i, log)
+  end
+
+  test "what's typed after # in the editor is filtered from the card prompt's log, its SQL included" do
+    log = capturing_log { get prompts_cards_path(script_name: account_path), params: { filter: "allotment" } }
+
+    assert_response :success
+    assert_equal "[FILTERED]", @controller.request.filtered_parameters["filter"]
+    assert_match(/search_records/, log, "the prompt's search SQL is logged, so its absence below means something")
     assert_no_match(/allot/i, log)
   end
 
@@ -92,13 +97,14 @@ class ContentParameterLoggingTest < ActionDispatch::IntegrationTest
 
   test "every field the MCP server sends text in is filtered, and keys that merely contain q stay visible" do
     filter = ActiveSupport::ParameterFilter.new(Rails.application.env_config["action_dispatch.parameter_filter"])
-    fields = %w[ q terms title tag_title description public_description body content name email_address timezone_name ]
+    fields = %w[ q filter terms title tag_title description public_description body content name email_address timezone_name ]
 
-    filtered = filter.filter(fields.index_with { "raw-value" }.merge("faq" => "a", "qr" => "b", "search" => { "q" => "c" }))
+    filtered = filter.filter(fields.index_with { "raw-value" }.merge("faq" => "a", "qr" => "b", "filter_id" => "d", "search" => { "q" => "c" }))
 
     fields.each { |field| assert_equal "[FILTERED]", filtered[field], field }
     assert_equal "a", filtered["faq"]
     assert_equal "b", filtered["qr"]
+    assert_equal "d", filtered["filter_id"]
     assert_equal "[FILTERED]", filtered.dig("search", "q")
   end
 
@@ -117,14 +123,5 @@ class ContentParameterLoggingTest < ActionDispatch::IntegrationTest
       log.string
     ensure
       Rails.logger.stop_broadcasting_to(sink)
-    end
-
-    def capturing_structured_log(&block)
-      log = StringIO.new
-      RailsStructuredLogging::Subscriber.subscribe_to "process_action.action_controller",
-        logger: ActiveSupport::Logger.new(log).tap { it.formatter = ->(*, message) { "#{message}\n" } },
-        serializer: RailsStructuredLogging::Serializers::Elastic::RequestSerializer, &block
-
-      JSON.parse(log.string.lines.last)
     end
 end

@@ -36,6 +36,8 @@ module Fizzy
     #   q              search words (search_cards), matched whole at any depth, as a parsed key (search.q)
     #                  or a query's name as sent (search[q]), so a key that merely contains a q stays visible
     #   terms          list_cards' search words
+    #   filter         what's typed after # in the editor, which searches cards (Prompts::CardsController),
+    #                  matched whole, so filter_id stays visible
     #   title          a card's title, and a tag's (tag_title)
     #   description    a card's description, and a board's public_description
     #   body, content  a comment's body, a step's content, a reaction's content
@@ -43,7 +45,7 @@ module Fizzy
     #   email_address  an email address change
     #   timezone_name  a person's time zone
     config.filter_parameters += [
-      /(?:\A|[.\[])q\]?\z/, :terms, :title, :description, :body, :content, :name, :email_address, :timezone_name
+      /(?:\A|[.\[])q\]?\z/, /(?:\A|[.\[])filter\]?\z/, :terms, :title, :description, :body, :content, :name, :email_address, :timezone_name
     ]
 
     # Include the `lib` directory in autoload paths. Use the `ignore:` option
