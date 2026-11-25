@@ -59,6 +59,18 @@ class ContentParameterLoggingTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "a comment's text is kept out of the search index's statements, and is still found" do
+    log = capturing_log do
+      post card_comments_path(@card, script_name: account_path, format: :json), params: { comment: { body: "Hire an orchardist" } }, as: :json
+    end
+
+    assert_response :created
+    index_statements = log.lines.grep(/search_records/i)
+    assert index_statements.grep(/INSERT|UPDATE|REPLACE/i).any?, "the index write is logged, so its absence below means something"
+    assert_no_match(/orchard/i, index_statements.join, "neither the word nor its stem")
+    assert Card.mentioning("orchardist", user: @user).exists?(@card.id)
+  end
+
   test "every field the MCP server sends text in is filtered, and keys that merely contain q stay visible" do
     filter = ActiveSupport::ParameterFilter.new(Rails.application.env_config["action_dispatch.parameter_filter"])
     fields = %w[ q terms title tag_title description public_description body content name email_address timezone_name ]
