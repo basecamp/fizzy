@@ -30,6 +30,13 @@ class ContentParameterLoggingTest < ActionDispatch::IntegrationTest
     assert_no_match(/allot/i, log)
   end
 
+  test "a q nested as a list is filtered from the Started line too" do
+    log = capturing_log { get "#{account_path}/search?search%5Bq%5D%5B%5D=allotment" }
+
+    assert_match(/Started GET/, log)
+    assert_no_match(/allot/i, log)
+  end
+
   test "what's typed after # in the editor is filtered from the card prompt's log, its SQL included" do
     log = capturing_log { get prompts_cards_path(script_name: account_path), params: { filter: "allotment" } }
 
