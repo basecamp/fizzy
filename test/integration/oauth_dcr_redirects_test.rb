@@ -91,7 +91,7 @@ class OauthDcrRedirectsTest < ActionDispatch::IntegrationTest
       }
     end
     assert_response :success
-    assert_includes response.headers["Content-Security-Policy"], "cursor:"
+    assert_no_match(/form-action/, response.headers["Content-Security-Policy"])
     assert_select "h1", text: "Connect this app to Fizzy?"
 
     untenanted do

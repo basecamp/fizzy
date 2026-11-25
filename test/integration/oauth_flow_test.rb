@@ -486,41 +486,30 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
     assert_equal "http://www.example.com", query["iss"]
   end
 
-  test "consent screen lets the form redirect to the validated loopback origin" do
-    sign_in_as :david
-
-    get_consent_screen redirect_uri: "http://127.0.0.1:53682/callback"
-
-    assert_response :success
-    assert_equal [ "'self'", "http://127.0.0.1:53682" ], form_action_sources
-  end
-
-  test "consent screen lets the form redirect to the validated https origin" do
+  test "consent screen sets no form-action, so the redirect may hop on anywhere" do
     sign_in_as :david
 
     get_consent_screen client: oauth_clients(:trusted_client), redirect_uri: "https://app.example.com/oauth/callback"
 
     assert_response :success
-    assert_equal [ "'self'", "https://app.example.com" ], form_action_sources
+    assert_nil form_action_sources
   end
 
-  test "consent screen allows only the http scheme for an IPv6 loopback, which CSP cannot name" do
+  test "consent answers set no form-action" do
     sign_in_as :david
-    client = Oauth::Client.create!(name: "IPv6", redirect_uris: %w[ http://[::1]:8888/callback ], dynamically_registered: true)
 
-    get_consent_screen client: client, redirect_uri: "http://[::1]:9999/callback"
+    post_consent client: oauth_clients(:trusted_client), redirect_uri: "https://app.example.com/oauth/callback"
 
-    assert_response :success
-    assert_equal [ "'self'", "http:" ], form_action_sources
+    assert_response :redirect
+    assert_nil form_action_sources
   end
 
-  test "an unvalidated redirect_uri adds nothing to form-action" do
+  test "pages outside consent keep the app-wide form-action" do
     sign_in_as :david
 
-    get_consent_screen redirect_uri: "http://evil.com/steal"
+    untenanted { get new_session_path }
 
-    assert_response :bad_request
-    assert_equal [ "'self'" ], form_action_sources
+    assert_includes form_action_sources, "'self'"
   end
 
 
@@ -2112,7 +2101,7 @@ class OauthFlowTest < ActionDispatch::IntegrationTest
 
     def form_action_sources
       response.headers["Content-Security-Policy"].split(";").map(&:strip) \
-        .find { |directive| directive.start_with?("form-action ") }.split.drop(1)
+        .find { |directive| directive.start_with?("form-action ") }&.split&.drop(1)
     end
 
     def authorization_code_for(client, code_verifier:, identity: identities(:david), scope: "read")
