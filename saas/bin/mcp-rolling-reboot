@@ -28,6 +28,16 @@ set -euo pipefail
 destination=${1:?usage: saas/bin/mcp-rolling-reboot <destination> [pause-seconds] [from-host]}
 pause=${2:-20}
 from=${3:-1}
+# The load balancers route production and staging to basecamp/fizzy-mcp-server's
+# own Kamal app (saas/script/configure-lb-mcp.sh), so draining and restoring an
+# accessory host there would move traffic, not drain it. Those are deployed from
+# that repo; this walks the betas' accessory.
+case "$destination" in
+  production|staging)
+    echo "${destination}'s MCP traffic goes to basecamp/fizzy-mcp-server's Kamal app, not this accessory; deploy there" >&2
+    exit 1
+    ;;
+esac
 for arg in "$pause" "$from"; do
   [[ $arg =~ ^[0-9]+$ ]] || { echo "pause-seconds and from-host must be whole numbers, got '$arg'" >&2; exit 1; }
 done
