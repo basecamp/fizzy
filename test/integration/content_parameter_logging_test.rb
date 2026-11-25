@@ -19,7 +19,7 @@ class ContentParameterLoggingTest < ActionDispatch::IntegrationTest
       assert_equal "[FILTERED]", @controller.request.filtered_parameters["q"]
       assert_match %r{Started GET "/\d+/search(\.\w+)?\?q=\[FILTERED\]"}, log
       assert_match(/search_records/, log, "the search's SQL is logged, so its absence below means something")
-      assert_no_match "allotment", log
+      assert_no_match(/allot/i, log, "neither the word nor its stem, which is what MySQL's MATCH carries")
     end
   end
 
@@ -28,7 +28,16 @@ class ContentParameterLoggingTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_equal "[FILTERED]", @controller.request.filtered_parameters["terms"]
-    assert_no_match "allotment", log
+    assert_match(/search_records/, log, "the terms' search SQL is logged, so its absence below means something")
+    assert_no_match(/allot/i, log)
+  end
+
+  test "a saved filter's terms are kept out of its SQL" do
+    log = capturing_log { post filters_path(script_name: account_path), params: { terms: [ "allotment" ] } }
+
+    assert_match(/INSERT INTO [`"]filters[`"]/, log)
+    assert_no_match(/allot/i, log)
+    assert_equal [ "allotment" ], @user.filters.last.terms
   end
 
   test "the text the MCP server's writes send is filtered from their parameters and request lines" do

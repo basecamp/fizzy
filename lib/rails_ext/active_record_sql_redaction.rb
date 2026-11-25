@@ -8,6 +8,7 @@
 # For the tables listed here every literal and every bind is secret enough to drop:
 #
 #   account_join_codes.code         joins whoever holds it to the account
+#   filters.fields                  a saved filter's search terms
 #   identity_access_tokens.token    API bearer token
 #   identity_transfers.token        signs its holder in as the identity
 #   magic_links.code                signs its holder in as the identity
@@ -25,7 +26,7 @@
 # test/lib/rails_ext/active_record_sql_redaction_test.rb until its table is listed here or the column is
 # declared not secret there. A credential in a column named otherwise has to be listed by hand.
 module ActiveRecordSqlRedaction
-  TABLES = %w[ account_join_codes identity_access_tokens identity_transfers magic_links oauth_retired_refresh_tokens search_records webhooks ].freeze
+  TABLES = %w[ account_join_codes filters identity_access_tokens identity_transfers magic_links oauth_retired_refresh_tokens search_records webhooks ].freeze
 
   # A table's shards and companion index: search_records_3, search_records_fts.
   SUFFIX = /(?:_(?:\d+|fts))?/
