@@ -50,10 +50,18 @@ module Fizzy
       end
 
       private
+        # A referrer's query filtered as the structured request line filters it (a search's q, say).
+        def filter_query_of(url)
+          before_fragment, fragment_separator, fragment = url.partition("#")
+          location, query_separator, query = before_fragment.partition("?")
+          query_filter = RailsStructuredLogging::QueryFilter.new(Rails.application.config.filter_parameters)
+          "#{location}#{query_separator}#{query_filter.filter(query)}#{fragment_separator}#{fragment}"
+        end
+
         def filter_request_paths(event)
           if event.respond_to?(:request) && event.request
             event.request.url = RailsStructuredLogging.path_filter.filter_url(event.request.url) if event.request.url
-            event.request.headers["Referer"] = RailsStructuredLogging.path_filter.filter_url(FilteredQuery.filter_url(event.request.headers["Referer"])) if event.request.headers&.[]("Referer")
+            event.request.headers["Referer"] = RailsStructuredLogging.path_filter.filter_url(filter_query_of(event.request.headers["Referer"])) if event.request.headers&.[]("Referer")
           end
 
           if event.respond_to?(:transaction) && event.transaction.to_s.start_with?("/")

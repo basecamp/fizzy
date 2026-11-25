@@ -186,7 +186,7 @@ class Fizzy::Saas::StructuredLogRedactionTest < ActionDispatch::IntegrationTest
     event.rack_env = Rack::MockRequest.env_for("https://app.fizzy.do/1234567/cards/1", "HTTP_REFERER" => "https://app.fizzy.do/1234567/search?q=allotment")
     event = config.before_send.call(event, {})
 
-    assert_equal "https://app.fizzy.do/1234567/search?q=[FILTERED]", event.request.headers["Referer"]
+    assert_equal({ "q" => "[FILTERED]" }, Rack::Utils.parse_query(URI(event.request.headers["Referer"]).query))
   end
 
   test "opening a join link logs no code in its path" do

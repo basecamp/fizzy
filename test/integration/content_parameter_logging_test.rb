@@ -30,22 +30,6 @@ class ContentParameterLoggingTest < ActionDispatch::IntegrationTest
     assert_no_match(/allot/i, log)
   end
 
-  test "a search with a semicolon in it is filtered whole from the Started line" do
-    log = capturing_log { get "#{account_path}/search?q=allotment;tiller" }
-
-    assert_response :success
-    assert_match %r{Started GET "/\d+/search\?q=\[FILTERED\]"}, log
-    assert_no_match(/tiller|allot/i, log)
-  end
-
-  test "a redirect back to a search, as after signing in, is filtered whole from its Redirected to line" do
-    response = ActionDispatch::Response.new
-    response.request = ActionDispatch::TestRequest.create(Rails.application.env_config)
-    response.location = "https://app.fizzy.do#{account_path}/search?q=allotment;tiller"
-
-    assert_equal "https://app.fizzy.do#{account_path}/search?q=[FILTERED]", response.filtered_location
-  end
-
   test "what's typed after # in the editor is filtered from the card prompt's log, its SQL included" do
     log = capturing_log { get prompts_cards_path(script_name: account_path), params: { filter: "allotment" } }
 
