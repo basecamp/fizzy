@@ -190,7 +190,7 @@ knife ssh 'hostname:fizzy-lb-*' 'sudo docker exec fizzy-load-balancer kamal-prox
 
 ## Override record: CIMD open-tier light-up (2026-11-24)
 
-**Status:** `OAUTH_CIMD_OPEN_REGISTRATION: "true"` in `saas/config/deploy.production.yml` (fizzy#3336), on the dark code from fizzy#3335. Production is the only destination that sets it. Beta and staging don't.
+**Status:** `OAUTH_CIMD_OPEN_REGISTRATION: "true"` in `saas/config/deploy.production.yml` (fizzy#3336), on the dark code from fizzy#3335. beta1 already set it for previewers (`saas/config/deploy.beta.yml`), on production's database, behind `CONNECTED_APPS_PREVIEW`. Production now sets it for everyone. Staging and the other betas don't.
 
 **The decision.** Jeremy Daer, operator, decided on 2026-11-24, in the session that directed this work:
 
@@ -217,11 +217,11 @@ knife ssh 'hostname:fizzy-lb-*' 'sudo docker exec fizzy-load-balancer kamal-prox
 **What this record accepts without checking it.** None of these ran for Fizzy before this deploy:
 
 1. **Puma headroom.** No per-site read was taken of busy threads against workers. The open tier can add up to 6 concurrent fetches per database server it locks on (see 4). Each fetch holds a Puma thread for at most the fetcher's 3-second deadline.
-2. **Recovery of the lease backend across a failover.** For Fizzy that's the MySQL primary rather than a Redis Sentinel, and the lease was never exercised across a promotion. It fails closed: a lost lock connection refuses the fetch with a 503 and never allows an unbounded one.
+2. **Recovery of the lease backend across a failover.** For Fizzy that's the MySQL primary rather than a Redis Sentinel, and the lease was never exercised across a promotion. Acquisition fails closed: if the lock can't be taken, the fetch is refused with a 503. Losing the lock mid-fetch is different. A fetch already admitted runs to its 3-second deadline, while a failover that drops its lock lets new fetches be admitted alongside it. For the length of one deadline, in-flight fetches can exceed 6, by up to the number of holders that crossed the failover. That overlap is bounded, not unbounded.
 3. **One shared lease pool.** Lock names carry the environment and database, but whether pools are isolated was never checked against the live servers.
 4. **The lease against a replica.** `GET_LOCK` is a `SELECT`, so a consent page rendered on a replica takes its lock there, and the authorization POST takes its lock on the primary. That makes the bound 6 per database server rather than 6 per install. It's covered by tests on a single MySQL server and was never run against a real replica.
 
-**Still open.** Rows that people authorize are permanent, as in every tier. The cap bounds them per account, not per domain, and Fizzy accounts are cheap to make. There's no alert on the open-tier creation rate yet. For now, detection means watching `oauth_cimd_refusals_total` and `oauth_cimd_clients_created_total{tier="open"}`.
+**Still open.** A client kept by a live grant stays as long as the grant does, as in every tier. The sweep takes open-tier clients that hold no access token once they've been idle a day, which includes clients consented to but never redeemed, and disconnected ones. The cap counts live grants per identity, not per account or per domain, and identities are cheap to make, so an attacker with many identities can keep that many times 20 rows alive. There's no alert on the open-tier creation rate yet. For now, detection means watching `oauth_cimd_refusals_total` and `oauth_cimd_clients_created_total{tier="open"}`.
 
 **Rollback.**
 
