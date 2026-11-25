@@ -48,6 +48,12 @@ module OauthHelper
     client.name.to_s.gsub(BIDI_CONTROLS, "").presence || "Unnamed app"
   end
 
+  # A metadata document client whose host isn't allowlisted: the open tier of
+  # Oauth::ClientMetadata, whose developer we don't know.
+  def oauth_client_unrecognized?(client)
+    client.open_tier?
+  end
+
   # Lowercase, as a browser reads it. nil for a callback that stays on this
   # device: loopback, or an app's own URL scheme.
   def oauth_redirect_host(redirect_uri)

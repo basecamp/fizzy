@@ -34,8 +34,9 @@
     }
   }
 
-  /* The unchecked-app warning, and the webhooks an app leaves running */
+  /* The unchecked-app warnings, and the webhooks an app leaves running */
   .oauth-client__warning,
+  .connected-app__unrecognized,
   .connected-app__webhooks {
     background-color: var(--color-highlight);
     border-radius: 0.5em;

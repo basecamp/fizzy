@@ -94,9 +94,22 @@ class Oauth::Client < ApplicationRecord
 
   # A registration whose row nothing has touched since it was written: no
   # consent approved, no grant issued or ended. Only dynamic registration
-  # takes the short retention; a metadata document client keeps
-  # UNUSED_RETENTION. A grant it still holds keeps it regardless (stale).
+  # takes the short retention here; a metadata document client keeps
+  # UNUSED_RETENTION, unless it's from the open tier (idle_metadata_documents). A grant
+  # it still holds keeps it regardless (stale).
   scope :never_authorized, -> { dynamically_registered.where(arel_table[:updated_at].eq(arel_table[:created_at])) }
+
+  # Metadata document clients holding no grant and untouched for a day, the
+  # open tier's among them (#open_tier? picks those out: the tier depends on
+  # the allowlist, not on anything stored). An open-tier row is written only
+  # when someone consents, and consent touches it, so "never touched since
+  # written" would spare nearly every one, consented to and never redeemed
+  # included. A day without a grant or a touch means no code is outstanding
+  # either (codes live a minute), so the row serves no one. It comes back
+  # from its document the next time it's authorized.
+  scope :idle_metadata_documents, -> do
+    metadata_documents.where.missing(:access_tokens).where(updated_at: ...UNAUTHORIZED_REGISTRATION_RETENTION.ago)
+  end
 
   scope :personal_access, -> { where client_id: PERSONAL_ACCESS_CLIENT_ID }
 
@@ -104,6 +117,14 @@ class Oauth::Client < ApplicationRecord
     def cleanup
       Oauth.cleanup_step :stale_clients do
         stale.find_each(&:destroy_if_still_unused)
+      end
+
+      # Anyone can publish a document, so the open tier's rows are kept only
+      # while someone holds a grant, or for a day after they last did.
+      Oauth.cleanup_step :idle_open_tier_clients do
+        idle_metadata_documents.find_each do |client|
+          client.destroy_if_still_unused(idle_metadata_documents) if client.open_tier?
+        end
       end
     end
 
@@ -130,15 +151,16 @@ class Oauth::Client < ApplicationRecord
   # The sweep and #redeem take the same row lock, so a grant either lands
   # before the recheck, which then spares the client, or finds the client
   # already gone and is never issued. There is no foreign key to refuse a
-  # token for a deleted client. The recheck is the whole stale test, not just
-  # the absence of tokens: a grant issued and revoked since the sweep picked
-  # this client has touched it, and restarted its retention period.
+  # token for a deleted client. The recheck is the whole test that picked the
+  # client (unused), not just the absence of tokens: a grant issued and
+  # revoked since the sweep picked this client has touched it, and restarted
+  # its retention period.
   #
   # The event follows the commit, a caller's own transaction included, so it
   # reports a sweep that happened.
-  def destroy_if_still_unused
+  def destroy_if_still_unused(unused = self.class.stale)
     swept = with_lock do
-      destroy if self.class.stale.exists?(id)
+      destroy if unused.exists?(id)
     end
 
     if swept
@@ -195,6 +217,12 @@ class Oauth::Client < ApplicationRecord
   # Provisioned from a Client ID Metadata Document (Oauth::ClientMetadata).
   def metadata_document?
     client_id_metadata_document?
+  end
+
+  # A metadata document client whose host isn't allowlisted, whose developer
+  # we don't know (Oauth::ClientMetadata.tier).
+  def open_tier?
+    metadata_document? && Oauth::ClientMetadata.tier(client_id) == :open
   end
 
   def self_registered?

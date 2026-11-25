@@ -107,6 +107,10 @@ Rails.application.configure do
   config.x.oauth.cimd_enabled = true
   config.x.oauth.cimd_allowed_hosts = %w[ mcp.claude.ai claude.ai claude.com chatgpt.com www.perplexity.ai ]
 
+  # The open tier of metadata documents is on in development, and with it the
+  # fetch lease (Oauth::ClientMetadata::FetchLease).
+  config.x.oauth.cimd_open_registration = true
+
   # Canonical host for mailer URLs (emails always link here, not personal Tailscale URLs)
   config.action_mailer.default_url_options = { host: "#{config.hosts.first}:3006" }
 end

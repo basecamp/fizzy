@@ -77,6 +77,17 @@ module Oauth::Availability
     issuance_enabled?(client_id) && config.cimd_enabled == true
   end
 
+  # The open tier of Client ID Metadata Documents (Oauth::ClientMetadata):
+  # whether a host that isn't recognized may request consent. Fail-closed, and
+  # subordinate to metadata documents. Off, an open-tier client_id is an unknown
+  # client before any lookup or fetch, a client already provisioned from one
+  # included; grants it already holds keep refreshing, since the token endpoint
+  # never resolves documents. Turning this off is no fetch kill switch: the
+  # recognized tier keeps fetching, and cimd_enabled is the knob for that.
+  def cimd_open_registration_enabled?(client_id = nil)
+    metadata_documents_enabled?(client_id) && config.cimd_open_registration == true
+  end
+
   def connected_apps_preview?
     config.connected_apps_preview == true
   end

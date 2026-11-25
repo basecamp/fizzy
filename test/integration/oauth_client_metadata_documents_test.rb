@@ -1,9 +1,14 @@
 require "test_helper"
 
 class OauthClientMetadataDocumentsTest < ActionDispatch::IntegrationTest
+  include OauthAvailabilityTestHelper
+
   URL = "https://claude.ai/oauth/mcp-oauth-client-metadata"
   CALLBACK = "https://claude.ai/api/mcp/auth_callback"
   CODE_VERIFIER = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+
+  OPEN_URL = "https://tools.example.com/client.json"
+  OPEN_CALLBACK = "https://tools.example.com/callback"
 
   setup do
     WebMock.disable_net_connect!(allow_localhost: true)
@@ -11,6 +16,10 @@ class OauthClientMetadataDocumentsTest < ActionDispatch::IntegrationTest
     stub_request(:get, URL).to_return \
       status: 200,
       body: { client_id: URL, client_name: "Claude", redirect_uris: [ CALLBACK ], scope: "read write" }.to_json,
+      headers: { content_type: "application/json" }
+    stub_request(:get, OPEN_URL).to_return \
+      status: 200,
+      body: { client_id: OPEN_URL, client_name: "Tools", redirect_uris: [ OPEN_CALLBACK ], scope: "read write" }.to_json,
       headers: { content_type: "application/json" }
   end
 
@@ -129,16 +138,191 @@ class OauthClientMetadataDocumentsTest < ActionDispatch::IntegrationTest
     assert_equal "access_denied", Rack::Utils.parse_query(URI.parse(response.location).query)["error"]
   end
 
-  test "a host that isn't allowlisted is an unknown client, and never fetched" do
+  test "while open registration is off, a host that isn't allowlisted is an unknown client, and never fetched" do
     sign_in_as :david
-    url = "https://tools.example.com/client.json"
-    stub = stub_request(:get, url)
+    stub = stub_request(:get, OPEN_URL)
 
-    untenanted { get new_oauth_authorization_path, params: authorization.merge(client_id: url, redirect_uri: "https://tools.example.com/cb") }
+    with_oauth_config(cimd_open_registration: false) do
+      untenanted { get new_oauth_authorization_path, params: open_authorization }
+    end
 
     assert_response :bad_request
     assert_select "p", text: Oauth::AuthorizationsController::UNKNOWN_CLIENT_MESSAGE
     assert_not_requested stub
+  end
+
+  test "while open registration is off, a client provisioned from a host that isn't allowlisted is unknown" do
+    sign_in_as :david
+    untenanted { post oauth_authorization_path, params: open_authorization }
+    assert Oauth::Client.find_presented(OPEN_URL)
+
+    with_oauth_config(cimd_open_registration: false) do
+      untenanted { get new_oauth_authorization_path, params: open_authorization }
+      assert_response :bad_request
+      assert_select "p", text: Oauth::AuthorizationsController::UNKNOWN_CLIENT_MESSAGE
+
+      untenanted { post oauth_authorization_path, params: open_authorization }
+      assert_response :bad_request
+    end
+  end
+
+  test "the consent screen warns that we don't know an app from a host that isn't allowlisted" do
+    sign_in_as :david
+
+    untenanted { get new_oauth_authorization_path, params: open_authorization }
+
+    assert_response :success
+    assert_select ".oauth-client__name bdi", text: "Tools"
+    assert_select ".oauth-client__warning", text: /We don.t know this app\. Only authorize it if you trust tools\.example\.com\./
+    assert_nil Oauth::Client.find_presented(OPEN_URL)
+  end
+
+  test "a lookalike of an allowlisted host is warned about" do
+    url = "https://claude.ai.example.com/client.json"
+    stub_request(:get, url).to_return status: 200, headers: { content_type: "application/json" },
+      body: { client_id: url, client_name: "Claude", redirect_uris: [ "https://claude.ai.example.com/callback" ] }.to_json
+    sign_in_as :david
+
+    untenanted { get new_oauth_authorization_path, params: authorization.merge(client_id: url, redirect_uri: "https://claude.ai.example.com/callback") }
+
+    assert_response :success
+    assert_select ".oauth-client__warning", text: /trust claude\.ai\.example\.com/
+  end
+
+  test "consenting to an app from a host that isn't allowlisted provisions it, and Connected apps says we don't know it" do
+    sign_in_as :david
+
+    untenanted { post oauth_authorization_path, params: open_authorization }
+
+    assert_response :redirect
+    assert response.location.start_with?("#{OPEN_CALLBACK}?")
+    client = Oauth::Client.find_presented(OPEN_URL)
+    assert client.metadata_document?
+
+    untenanted { get new_oauth_authorization_path, params: open_authorization }
+    assert_select ".oauth-client__warning", text: /trust tools\.example\.com/
+
+    identities(:david).access_tokens.create! oauth_client: client, permission: :read
+    untenanted { get my_connected_apps_path }
+    assert_select ".connected-app", text: /Name set by the app at tools\.example\.com/
+    assert_select ".connected-app__unrecognized", text: /Unrecognized developer/
+  end
+
+  test "with the fetch lease on, consent reads and the authorization registers, holding no slot after" do
+    Dir.mktmpdir do |directory|
+      Oauth::ClientMetadata::FetchLease.stubs(:slots_directory).returns(directory)
+      sign_in_as :david
+
+      events = []
+      ActiveSupport::Notifications.subscribed(->(event) { events << [ event.name, event.payload ] }, /\Acimd_lease/) do
+        with_oauth_config(cimd_fetch_lease: true) do
+          untenanted { get new_oauth_authorization_path, params: open_authorization }
+          assert_response :success
+
+          untenanted { post oauth_authorization_path, params: open_authorization }
+          assert_response :redirect
+        end
+      end
+
+      assert Oauth::Client.find_presented(OPEN_URL)
+      assert_equal [ [ "cimd_lease.oauth", { outcome: :admitted } ] ] * 2, events
+      Oauth::ClientMetadata::FetchLease::SLOTS.times do |index|
+        assert lease_slot_free?(index, directory), "slot #{index} is released"
+      end
+    end
+  ensure
+    Oauth::Client.with_connection { |connection| connection.query_value("SELECT RELEASE_ALL_LOCKS()") if connection.adapter_name.match?(/mysql/i) }
+  end
+
+  test "Connected apps says nothing of the kind for an allowlisted host" do
+    sign_in_as :david
+    untenanted { post oauth_authorization_path, params: authorization }
+    identities(:david).access_tokens.create! oauth_client: Oauth::Client.find_presented(URL), permission: :read
+
+    untenanted { get my_connected_apps_path }
+
+    assert_select ".connected-app", text: /Name set by the app at claude\.ai/
+    assert_select ".connected-app__unrecognized", count: 0
+  end
+
+  test "an open-tier client consented to and never redeemed is swept after a day, and comes back on the next consent" do
+    sign_in_as :david
+    untenanted { post oauth_authorization_path, params: open_authorization }
+    assert_response :redirect
+    client = Oauth::Client.find_presented(OPEN_URL)
+
+    travel 23.hours do
+      Oauth::Client.cleanup
+      assert Oauth::Client.exists?(client.id), "kept while consent may still be in flight"
+    end
+
+    travel 25.hours do
+      Oauth::Client.cleanup
+      assert_not Oauth::Client.exists?(client.id)
+
+      untenanted { post oauth_authorization_path, params: open_authorization }
+      assert_response :redirect
+      code = Rack::Utils.parse_query(URI.parse(response.location).query)["code"]
+      assert Oauth::Client.find_presented(OPEN_URL).metadata_document?
+
+      untenanted do
+        post oauth_token_path, params: {
+          grant_type: "authorization_code", client_id: OPEN_URL, code: code, redirect_uri: OPEN_CALLBACK, code_verifier: CODE_VERIFIER
+        }, as: :json
+      end
+      assert_response :success
+
+      Oauth::Client.cleanup
+    end
+
+    travel 3.days do
+      Oauth::Client.cleanup
+      assert Oauth::Client.find_presented(OPEN_URL), "a granted client is never swept"
+    end
+  end
+
+  test "someone at the cap on open-tier apps is told so, before any fetch, and can still deny" do
+    Oauth::ClientMetadata::GRANT_CAP.times do |index|
+      client = Oauth::Client.create! client_id: "https://app#{index}.example.org/client.json", name: "App #{index}",
+        redirect_uris: [ "https://app#{index}.example.org/callback" ], client_id_metadata_document: true
+      identities(:david).access_tokens.create! oauth_client: client
+    end
+    stub = stub_request(:get, OPEN_URL)
+    sign_in_as :david
+
+    untenanted { get new_oauth_authorization_path, params: open_authorization }
+    assert_response :forbidden
+    assert_select "[data-oauth-error=?]", "access_denied"
+    assert_select "p", text: Oauth::AuthorizationsController::GRANT_CAP_MESSAGE
+
+    untenanted { post oauth_authorization_path, params: open_authorization }
+    assert_response :forbidden
+    assert_nil Oauth::Client.find_presented(OPEN_URL)
+    assert_not_requested stub
+
+    stub_request(:get, OPEN_URL).to_return status: 200, headers: { content_type: "application/json" },
+      body: { client_id: OPEN_URL, client_name: "Tools", redirect_uris: [ OPEN_CALLBACK ] }.to_json
+    untenanted { post oauth_authorization_path, params: open_authorization.merge(error: "access_denied") }
+    assert_response :redirect
+    assert_equal "access_denied", Rack::Utils.parse_query(URI.parse(response.location).query)["error"]
+
+    untenanted { get new_oauth_authorization_path, params: authorization }
+    assert_response :success, "the cap leaves allowlisted apps alone"
+  end
+
+  test "a blocked domain is an unknown client, provisioned or not" do
+    sign_in_as :david
+    untenanted { post oauth_authorization_path, params: open_authorization }
+    assert Oauth::Client.find_presented(OPEN_URL)
+
+    with_oauth_config(cimd_blocked_domains: %w[ example.com ]) do
+      untenanted { get new_oauth_authorization_path, params: open_authorization }
+      assert_response :bad_request
+      assert_select "p", text: Oauth::AuthorizationsController::UNKNOWN_CLIENT_MESSAGE
+
+      untenanted { post oauth_authorization_path, params: open_authorization }
+      assert_response :bad_request
+    end
   end
 
   test "a document that can't be fetched refuses the authorization" do
@@ -226,6 +410,22 @@ class OauthClientMetadataDocumentsTest < ActionDispatch::IntegrationTest
         scope: "read write",
         state: "xyz"
       }
+    end
+
+    def lease_slot_free?(index, directory)
+      Oauth::Client.with_connection do |connection|
+        if connection.adapter_name.match?(/mysql/i)
+          connection.query_value("SELECT IS_FREE_LOCK(#{connection.quote(Oauth::ClientMetadata::FetchLease::NamedLocks.lock_name(connection, index))})") == 1
+        else
+          File.open(File.join(directory, "slot-#{index}.lock"), File::RDWR | File::CREAT) do |file|
+            file.flock(File::LOCK_EX | File::LOCK_NB).tap { file.flock(File::LOCK_UN) }
+          end
+        end
+      end
+    end
+
+    def open_authorization
+      authorization.merge(client_id: OPEN_URL, redirect_uri: OPEN_CALLBACK)
     end
 
     def with_metadata_documents(enabled)

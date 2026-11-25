@@ -153,6 +153,51 @@ class Yabeda::OauthTest < ActionDispatch::IntegrationTest
     assert_equal 1, count(:cleanup_step_failures_total, step: "stale_clients")
   end
 
+  test "metadata document fetches and the clients they create, by outcome and tier" do
+    url = "https://tools.example.com/client.json"
+    WebMock.disable_net_connect!(allow_localhost: true)
+    stub_dns_resolution("93.184.216.34")
+    stub_request(:get, url).to_return status: 200, headers: { content_type: "application/json" },
+      body: { client_id: url, client_name: "Tools", redirect_uris: [ "https://tools.example.com/callback" ] }.to_json
+
+    assert Oauth::ClientMetadata::Resolver.resolve_for_intake(url, requester: @identity).success?
+
+    assert_equal 1, count(:cimd_fetches_total, outcome: "ok")
+    assert_equal 1, count(:cimd_clients_created_total, tier: "open")
+    Yabeda::TestAdapter.instance.counters.each_value do |series|
+      series.each_key { |tags| assert_not_includes tags.values.map(&:to_s), url }
+    end
+  ensure
+    WebMock.allow_net_connect!
+  end
+
+  test "metadata document refusals, by reason and tier, never by domain" do
+    config = Rails.application.config.x.oauth
+    saved = config.cimd_blocked_domains
+    config.cimd_blocked_domains = %w[ example.com ]
+
+    assert_equal :blocked_domain, Oauth::ClientMetadata::Resolver.resolve_for_intake("https://tools.example.com/client.json", requester: @identity).outcome
+
+    assert_equal 1, count(:cimd_refusals_total, reason: "blocked_domain", tier: "open")
+    Yabeda::TestAdapter.instance.counters.fetch(Yabeda.oauth.cimd_refusals_total).each_key do |tags|
+      assert_equal %i[ reason tier ], tags.keys.sort
+    end
+  ensure
+    config.cimd_blocked_domains = saved
+  end
+
+  test "fetch lease admissions, and the backend failures that refuse" do
+    with_fetch_lease do
+      Oauth::ClientMetadata::FetchLease.admit { }
+      Oauth::ClientMetadata::FetchLease::NamedLocks.stubs(:acquire).raises(ActiveRecord::StatementInvalid, "boom")
+      Oauth::ClientMetadata::FetchLease.admit { }
+    end
+
+    assert_equal 1, count(:cimd_lease_admissions_total, outcome: "admitted")
+    assert_equal 1, count(:cimd_lease_admissions_total, outcome: "refused")
+    assert_equal 1, count(:cimd_lease_errors_total, operation: "acquire")
+  end
+
   test "no metric is labeled with a client id" do
     exchange authorization_code
     refresh "fizzy_rt_unknown"
@@ -163,6 +208,15 @@ class Yabeda::OauthTest < ActionDispatch::IntegrationTest
   end
 
   private
+    def with_fetch_lease
+      config = Rails.application.config.x.oauth
+      saved = config.cimd_fetch_lease
+      config.cimd_fetch_lease = true
+      yield
+    ensure
+      config.cimd_fetch_lease = saved
+    end
+
     def count(metric, **tags)
       Yabeda::TestAdapter.instance.counters.fetch(Yabeda.oauth.public_send(metric))[tags]
     end

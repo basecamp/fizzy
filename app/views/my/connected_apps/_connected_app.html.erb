@@ -14,6 +14,10 @@
       <% elsif client.trusted? %>
         <p class="connected-app__byline txt-x-small txt-subtle margin-none">Made by 37signals</p>
       <% end %>
+
+      <% if oauth_client_unrecognized?(client) %>
+        <p class="connected-app__unrecognized txt-x-small margin-none" role="note"><strong>Unrecognized developer.</strong> We don&rsquo;t know who made this app.</p>
+      <% end %>
     </div>
 
     <div class="connected-app__reach">

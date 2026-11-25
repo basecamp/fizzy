@@ -3,6 +3,15 @@ require "test_helper"
 class Oauth::AvailabilityTest < ActiveSupport::TestCase
   include OauthAvailabilityTestHelper, OauthAuditTestHelper
 
+  test "open registration of metadata documents is fail-closed, and subordinate to them" do
+    assert Oauth::Availability.cimd_open_registration_enabled?
+
+    with_oauth_config(cimd_open_registration: nil) { assert_not Oauth::Availability.cimd_open_registration_enabled? }
+    with_oauth_config(cimd_open_registration: "true") { assert_not Oauth::Availability.cimd_open_registration_enabled? }
+    with_oauth_config(cimd_enabled: false) { assert_not Oauth::Availability.cimd_open_registration_enabled? }
+    with_oauth_availability(issuance: false) { assert_not Oauth::Availability.cimd_open_registration_enabled? }
+  end
+
   test "lit in test" do
     assert Oauth::Availability.acceptance_enabled?
     assert Oauth::Availability.issuance_enabled?

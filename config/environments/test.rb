@@ -76,6 +76,11 @@ Rails.application.configure do
   # Enable multi-tenant mode for tests
   config.x.multi_tenant.enabled = true
 
+  # The open tier of metadata documents is on in tests, but not the fetch lease,
+  # whose slots parallel workers would contend for; its own tests turn it on.
+  config.x.oauth.cimd_open_registration = true
+  config.x.oauth.cimd_fetch_lease = false
+
   # Serve the Trusted Types report-only policy so system tests can inventory
   # the DOM sinks that would violate it. See TrustedTypesViolationsTestHelper.
   config.x.content_security_policy.trusted_types_sample_rate = 1
