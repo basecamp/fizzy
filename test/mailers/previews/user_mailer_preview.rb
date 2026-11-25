@@ -3,6 +3,6 @@ class UserMailerPreview < ActionMailer::Preview
     user = User.active.sample
     Current.account = user.account
 
-    UserMailer.email_change_confirmation(user: user, email_address: "new.email@example.com")
+    UserMailer.email_change_confirmation(user: user, from: user.identity.email_address, to: "new.email@example.com")
   end
 end

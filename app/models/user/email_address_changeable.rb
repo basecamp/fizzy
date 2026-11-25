@@ -18,11 +18,11 @@ module User::EmailAddressChangeable
   end
 
   def send_email_address_change_confirmation(new_email_address)
-    UserMailer.email_change_confirmation(user: self, email_address: new_email_address).deliver_later
+    UserMailer.email_change_confirmation(user: self, from: identity.email_address, to: new_email_address).deliver_later
   end
 
-  def email_address_change_token(new_email_address)
-    generate_email_address_change_token(to: new_email_address, expires_in: EMAIL_CHANGE_TOKEN_EXPIRATION)
+  def email_address_change_token(from:, to:)
+    generate_email_address_change_token(from: from, to: to, expires_in: EMAIL_CHANGE_TOKEN_EXPIRATION)
   end
 
   def change_email_address(new_email_address)

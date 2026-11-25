@@ -23,12 +23,20 @@ class User::EmailAddressChangeableTest < ActiveSupport::TestCase
       end
     end
 
-    token = CGI.unescape(ActionMailer::Base.deliveries.last.body.decoded[%r{/email_addresses/([^/"]+)/confirmation}, 1])
+    token = delivered_email_address_change_token
 
     assert_match "Enqueued ActionMailer::MailDeliveryJob", log
     assert_match "Performed ActionMailer::MailDeliveryJob", log
     assert_no_match token, log
     assert @user.change_email_address_using_token(token)
+  end
+
+  test "send_email_address_change_confirmation binds the token to the address the change was requested from" do
+    @user.send_email_address_change_confirmation(@new_email)
+    @identity.update!(email_address: "#{SecureRandom.hex(16)}@example.com")
+    perform_enqueued_jobs only: ActionMailer::MailDeliveryJob
+
+    assert_not @user.reload.change_email_address_using_token(delivered_email_address_change_token)
   end
 
   test "change_email_address" do
@@ -71,6 +79,10 @@ class User::EmailAddressChangeableTest < ActiveSupport::TestCase
   end
 
   private
+    def delivered_email_address_change_token
+      CGI.unescape(ActionMailer::Base.deliveries.last.body.decoded[%r{/email_addresses/([^/"]+)/confirmation}, 1])
+    end
+
     def capture_job_log
       log = StringIO.new
       logger_was, ActiveJob::Base.logger = ActiveJob::Base.logger, ActiveSupport::TaggedLogging.new(ActiveSupport::Logger.new(log))
