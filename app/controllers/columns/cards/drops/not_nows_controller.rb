@@ -1,5 +1,5 @@
 class Columns::Cards::Drops::NotNowsController < ApplicationController
-  include CardScoped
+  include CardScoped, ColumnFiltering
 
   def create
     @card.postpone

@@ -14,7 +14,7 @@ class BoardsController < ApplicationController
   end
 
   def show
-    if @filter.used?(ignore_boards: true)
+    if @filter.used?(ignore_boards: true) && !columns_view?
       show_filtered_cards
     else
       show_columns
@@ -90,6 +90,10 @@ class BoardsController < ApplicationController
       params.key?(:user_ids)
     end
 
+    def columns_view?
+      params[:view] == "columns"
+    end
+
     def show_filtered_cards
       @filter.board_ids = [ @board.id ]
       set_page_and_extract_portion_from @filter.cards
@@ -97,6 +101,7 @@ class BoardsController < ApplicationController
 
     def show_columns
       cards = @board.cards.awaiting_triage.latest.with_golden_first.preloaded
+      cards = @filter.apply_to(cards) if @filter.used?(ignore_boards: true)
       set_page_and_extract_portion_from cards
       fresh_when etag: [ @board, @page.records, @user_filtering, Current.account ]
     end

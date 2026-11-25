@@ -63,6 +63,7 @@ module Filter::Params
       params[:assignee_ids]      = assignees.ids
       params[:creator_ids]       = creators.ids
       params[:closer_ids]        = closers.ids
+      params[:column_ids]        = column_ids
     end.compact_blank.reject(&method(:default_value?))
   end
 
