@@ -1,15 +1,11 @@
-<%# FIXME: Let's move this aside outside of the card container section so these frames don't reload/flicker when card is replaced %>
 <div class="card-perma__actions card-perma__actions--right">
-  <%= turbo_frame_tag card, :watch, src: card_watch_path(card), target: "_top", refresh: :morph do %>
-    <%= button_to card_watch_path(card), class: "btn", data: { controller: "tooltip" } do %>
-      <%= icon_tag "bell-off" %> <span class="for-screen-reader">Watch this</span>
-    <% end %>
+  <%= turbo_frame_tag card, :watch, target: "_top", refresh: :morph do %>
+    <%= render "cards/watches/watch_button", card: card %>
   <% end %>
-  <%= turbo_frame_tag card, :pin, src: card_pin_path(card), refresh: :morph do %>
-    <%= button_to card_pin_path(card), class: "btn", data: { controller: "tooltip" } do %>
-      <%= icon_tag "unpinned" %> <span class="for-screen-reader">Pin this card</span>
-    <% end %>
+  <%= turbo_frame_tag card, :pin, refresh: :morph do %>
+    <%= render "cards/pins/pin_button", card: card %>
   <% end %>
+  <%= render "cards/navigation", card: card %>
 </div>
 
 <%= render "cards/container/closure", card: card %>
