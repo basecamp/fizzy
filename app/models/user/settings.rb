@@ -21,7 +21,7 @@ class User::Settings < ApplicationRecord
   end
 
   def bundling_emails?
-    !bundle_email_never? && !user.system? && user.active? && user.verified?
+    !bundle_email_never? && !user.system? && !user.bot? && user.active? && user.verified?
   end
 
   def timezone

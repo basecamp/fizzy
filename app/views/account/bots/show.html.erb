@@ -1,0 +1,76 @@
+<% @page_title = @bot.name %>
+
+<% content_for :header do %>
+  <div class="header__actions header__actions--start">
+    <%= back_link_to "Account Settings", account_settings_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+  </div>
+
+  <h1 class="header__title" data-bridge--title-target="header"><%= @bot.name %> <span class="txt-normal font-weight-normal">Bot</span></h1>
+<% end %>
+
+<section class="panel panel--wide shadow center webhooks">
+  <% if @new_access_token %>
+    <article class="flex flex-column gap-half margin-block-end">
+      <label class="flex flex-column gap-half txt-align-start">
+        <strong><%= @new_access_token.description %> (<%= @new_access_token.permission == "write" ? "Read + Write" : "Read" %>)</strong>
+        <input type="text" value="<%= @new_access_token.token %>" class="input" readonly>
+      </label>
+      <p class="margin-none txt-small">Be sure to save this access token now because you won't be able to see it again.</p>
+
+      <%= tag.button class: "btn btn--link center", data: {
+        controller: "copy-to-clipboard", action: "copy-to-clipboard#copy",
+            copy_to_clipboard_success_class: "btn--success", copy_to_clipboard_content_value: @new_access_token.token } do %>
+        <%= icon_tag "copy-paste" %>
+        <span>Copy access token</span>
+      <% end %>
+
+      <hr class="separator--horizontal full-width" style="--border-color: var(--color-ink-lighter)">
+    </article>
+  <% end %>
+
+  <% if @access_tokens.any? %>
+    <p class="margin-none-block-start">Access tokens for this bot.</p>
+    <table class="access_tokens_table margin-block-end-double max-width txt-small">
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th>Permission</th>
+          <th>Created</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @access_tokens.each do |access_token| %>
+          <tr style="view-transition-name: <%= dom_id(access_token) %>">
+            <td><strong><%= access_token.description %></strong></td>
+            <td><%= access_token.permission.humanize %></td>
+            <td><%= local_datetime_tag access_token.created_at, style: :datetime %></td>
+            <td>
+              <%= button_to account_bot_access_token_path(@bot, access_token), method: :delete,
+                    class: "btn txt-negative btn--circle txt-x-small borderless fill-transparent",
+                    data: { turbo_confirm: "Are you sure you want to permanently revoke this access token?" } do %>
+                <%= icon_tag "trash" %>
+                <span class="for-screen-reader">Revoke this token</span>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <p class="margin-none-block-start">This bot has no access tokens. Generate one to allow API access.</p>
+  <% end %>
+
+  <%= link_to new_account_bot_access_token_path(@bot), class: "btn btn--link center" do %>
+    <%= icon_tag "add" %>
+    <span>Generate a new access token</span>
+  <% end %>
+
+  <hr class="separator--horizontal full-width margin-block" style="--border-color: var(--color-ink-lighter)">
+
+  <%= button_to account_bot_path(@bot), method: :delete, class: "btn btn--negative txt-small center",
+        data: { turbo_confirm: "Are you sure you want to remove #{@bot.name}?" } do %>
+    <%= icon_tag "minus" %>
+    <span>Remove bot</span>
+  <% end %>
+</section>
