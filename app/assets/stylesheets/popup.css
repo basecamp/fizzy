@@ -232,4 +232,28 @@
       }
     }
   }
+
+  /* Board menu column counts
+  /* -------------------------------------------------------------------------- */
+
+  .board-menu-counts {
+    display: inline-flex;
+    gap: 0.25ch;
+    margin-inline-start: auto;
+    padding-inline-start: 1ch;
+    flex-shrink: 0;
+  }
+
+  .board-menu-count {
+    --card-color: var(--color-ink-light);
+
+    background-color: color-mix(in srgb, var(--card-color) 20%, transparent);
+    border-radius: 0.3em;
+    color: color-mix(in srgb, var(--card-color) 90%, var(--color-ink));
+    font-size: var(--text-xx-small);
+    font-weight: 600;
+    min-inline-size: 1.8em;
+    padding: 0.1em 0.4em;
+    text-align: center;
+  }
 }
