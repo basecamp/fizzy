@@ -293,23 +293,11 @@
     html[data-theme="dark"] & {
       display: none;
     }
-
-    html:not([data-theme]) & {
-      @media (prefers-color-scheme: dark) {
-        display: none;
-      }
-    }
   }
 
   .hide-on-light-mode {
     html[data-theme="light"] & {
       display: none;
-    }
-
-    html:not([data-theme]) & {
-      @media (prefers-color-scheme: light) {
-        display: none;
-      }
     }
   }
 }

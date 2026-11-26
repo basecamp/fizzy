@@ -23,12 +23,6 @@
       border-block: 1px solid var(--color-ink-lighter);
     }
 
-    @media (prefers-color-scheme: dark) {
-      html:not([data-theme]) & {
-        border-block: 1px solid var(--color-ink-lighter);
-      }
-    }
-
     &:has(.bar__placeholder[hidden]) {
       padding-inline: 1ch;
     }
