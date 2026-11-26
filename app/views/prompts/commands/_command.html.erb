@@ -1,8 +1,8 @@
-<% command, description, editor_version = command %>
+<% command_name, description, editor_version = prompt_command %>
 
-<lexxy-prompt-item search="<%= description %> <%= command %>">
+<lexxy-prompt-item search="<%= description %> <%= command_name %>">
   <template type="menu">
-    <code><%= command %></code> <%= description %>
+    <code><%= command_name %></code> <%= description %>
   </template>
   <template type="editor">
     <%= editor_version.gsub(/ +$/, "&nbsp;").html_safe %>
