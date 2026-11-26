@@ -60,6 +60,8 @@ export default class extends Controller {
       this.#restoreOriginalDraggedItemCssVariable()
     }
 
+    this.element.scrollTop = 0 // .card-columns is overflow-y: hidden; reset any browser-internal vertical scroll so empty drop zones don't peek out (#2964)
+
     this.sourceContainer = null
     this.dragItem = null
     this.wasDropped = false
